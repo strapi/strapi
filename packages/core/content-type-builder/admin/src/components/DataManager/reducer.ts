@@ -4,6 +4,7 @@ import omit from 'lodash/omit';
 
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
+import { removeManagedIndexesForAttribute } from '../FormModal/utils/indexing';
 
 import { createUndoRedoSlice } from './undoRedo';
 
@@ -161,6 +162,11 @@ type UpdateSchemaPayload = {
     pluginOptions: Record<string, any>;
   };
   uid: string;
+};
+
+type SetContentTypeIndexesPayload = {
+  uid: string;
+  indexes?: unknown[];
 };
 
 type MoveAttributePayload = {
@@ -559,6 +565,13 @@ const slice = createUndoRedoSlice(
         });
 
         removeAttributeAt(type, attributeToRemoveIndex);
+
+        if (forTarget === 'contentType' && 'indexes' in type) {
+          (type as ContentType).indexes = removeManagedIndexesForAttribute({
+            indexes: ((type as ContentType).indexes as Record<string, unknown>[] | undefined) ?? [],
+            attributeName: attributeToRemoveName,
+          }) as unknown[] | undefined;
+        }
       },
       // only edits a component in practice
       updateComponentSchema: (state, action: PayloadAction<UpdateComponentSchemaPayload>) => {
@@ -646,6 +659,17 @@ const slice = createUndoRedoSlice(
           },
           pluginOptions,
         });
+      },
+      setContentTypeIndexes: (state, action: PayloadAction<SetContentTypeIndexesPayload>) => {
+        const { uid, indexes } = action.payload;
+        const contentType = state.contentTypes[uid];
+
+        if (!contentType) {
+          return;
+        }
+
+        contentType.indexes = indexes;
+        setStatus(contentType, 'CHANGED');
       },
       deleteComponent: (state, action: PayloadAction<Internal.UID.Component>) => {
         const uid = action.payload;

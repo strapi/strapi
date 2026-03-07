@@ -376,6 +376,10 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       dispatch(actions.updateSchema(args));
     },
 
+    setContentTypeIndexes({ uid, indexes }) {
+      dispatch(actions.setContentTypeIndexes({ uid, indexes }));
+    },
+
     moveAttribute(args) {
       dispatch(actions.moveAttribute(args));
     },

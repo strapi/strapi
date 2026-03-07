@@ -187,6 +187,7 @@ export default function createComponentBuilder() {
           draftAndPublish: infos.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
+        .set('indexes', infos.indexes)
         .set('config', infos.config);
 
       this.createContentTypeAttributes(uid, infos.attributes);
@@ -337,6 +338,7 @@ export default function createComponentBuilder() {
           draftAndPublish: infos.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
+        .set('indexes', infos.indexes)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;

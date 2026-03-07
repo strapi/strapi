@@ -90,4 +90,59 @@ export const attributeOptions = {
         "You won't be able to create an entry if there is an existing entry with identical content",
     },
   },
+  indexMode: {
+    name: 'indexMode',
+    type: 'radio-group',
+    size: 12,
+    intlLabel: {
+      id: getTrad('form.attribute.item.indexMode'),
+      defaultMessage: 'Indexing',
+    },
+    radios: [
+      {
+        value: 'none',
+        title: {
+          id: getTrad('form.attribute.item.indexMode.none'),
+          defaultMessage: 'No index',
+        },
+        description: {
+          id: getTrad('form.attribute.item.indexMode.none.description'),
+          defaultMessage: 'No uniqueness or explicit database index is created.',
+        },
+      },
+      {
+        value: 'unique-global',
+        title: {
+          id: getTrad('form.attribute.item.indexMode.uniqueGlobal'),
+          defaultMessage: 'Unique (global)',
+        },
+        description: {
+          id: getTrad('form.attribute.item.indexMode.uniqueGlobal.description'),
+          defaultMessage: 'Enforces uniqueness across all records.',
+        },
+      },
+      {
+        value: 'unique-variant',
+        title: {
+          id: getTrad('form.attribute.item.indexMode.uniqueVariant'),
+          defaultMessage: 'Unique (variant)',
+        },
+        description: {
+          id: getTrad('form.attribute.item.indexMode.uniqueVariant.description'),
+          defaultMessage: 'Enforces uniqueness per variant dimensions (for example locale).',
+        },
+      },
+      {
+        value: 'index',
+        title: {
+          id: getTrad('form.attribute.item.indexMode.index'),
+          defaultMessage: 'Index (non-unique)',
+        },
+        description: {
+          id: getTrad('form.attribute.item.indexMode.index.description'),
+          defaultMessage: 'Creates a regular index to speed up queries.',
+        },
+      },
+    ],
+  },
 };

@@ -342,9 +342,9 @@ const slice = createSlice({
           components: [],
         };
       } else if (attributeType === 'text') {
-        dataToSet = { ...options, type: 'string' };
+        dataToSet = { ...options, type: 'string', indexMode: 'none' };
       } else if (attributeType === 'number' || attributeType === 'date') {
-        dataToSet = options;
+        dataToSet = { ...options, indexMode: 'none' };
       } else if (attributeType === 'media') {
         dataToSet = {
           allowedTypes: ['images', 'files', 'videos', 'audios'],
@@ -353,7 +353,7 @@ const slice = createSlice({
           ...options,
         };
       } else if (attributeType === 'enumeration') {
-        dataToSet = { ...options, type: 'enumeration', enum: [] };
+        dataToSet = { ...options, type: 'enumeration', enum: [], indexMode: 'none' };
       } else if (attributeType === 'relation') {
         dataToSet = {
           name: snakeCase(nameToSetForRelation),
@@ -363,7 +363,7 @@ const slice = createSlice({
           type: 'relation',
         };
       } else {
-        dataToSet = { ...options, type: attributeType, default: null };
+        dataToSet = { ...options, type: attributeType, default: null, indexMode: 'none' };
       }
 
       state.modifiedData = dataToSet;

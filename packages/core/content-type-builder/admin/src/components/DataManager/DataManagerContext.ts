@@ -109,6 +109,7 @@ export interface DataManagerContextValue {
     };
     uid: Internal.UID.ContentType;
   }) => void;
+  setContentTypeIndexes: (opts: { uid: Internal.UID.ContentType; indexes?: unknown[] }) => void;
   initialComponents: Record<Internal.UID.Component, Component>;
   components: Record<Internal.UID.Component, Component>;
   componentsGroupedByCategory: Record<string, Component[]>;

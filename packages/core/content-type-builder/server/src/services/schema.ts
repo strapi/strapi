@@ -8,6 +8,38 @@ import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
 
+const enforceUniqueAttributesForUniqueIndexes = (contentType: any) => {
+  if (!Array.isArray(contentType?.indexes) || !Array.isArray(contentType?.attributes)) {
+    return;
+  }
+
+  const uniqueIndexedAttributes = new Set(
+    contentType.indexes
+      .filter((index: any) => index?.type === 'unique')
+      .flatMap((index: any) => {
+        if (!Array.isArray(index?.attributes) || index.attributes.length !== 1) {
+          return [];
+        }
+
+        return [index.attributes[0]];
+      })
+  );
+
+  if (uniqueIndexedAttributes.size === 0) {
+    return;
+  }
+
+  contentType.attributes.forEach((attribute: any) => {
+    if (
+      attribute?.action !== 'delete' &&
+      uniqueIndexedAttributes.has(attribute?.name) &&
+      attribute?.properties
+    ) {
+      attribute.properties.unique = true;
+    }
+  });
+};
+
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
   schema.components.forEach((component) => {
     if (component.action === 'delete') {
@@ -113,6 +145,7 @@ export const getSchema = async () => {
       info,
       modelType,
       attributes: formatAttributes(contentType),
+      indexes: (contentType as any).indexes,
       visible: isContentTypeVisible(contentType),
       restrictRelationsTo: getRestrictRelationsTo(contentType),
     };
@@ -171,6 +204,10 @@ export const updateSchema = async (schema: CTBSchema) => {
 
   for (const contentType of contentTypes) {
     const { action, uid } = contentType;
+
+    if (action === 'create' || action === 'update') {
+      enforceUniqueAttributesForUniqueIndexes(contentType);
+    }
 
     if (action === 'create') {
       builder.createContentTypeAttributes(

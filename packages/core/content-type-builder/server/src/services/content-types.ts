@@ -48,6 +48,7 @@ export const formatContentType = (contentType: any) => {
       pluginOptions: contentType.pluginOptions,
       kind: kind || 'collectionType',
       collectionName,
+      indexes: (contentType as any).indexes,
       attributes: formatAttributes(contentType),
       visible: isContentTypeVisible(contentType),
       restrictRelationsTo: getRestrictRelationsTo(contentType),

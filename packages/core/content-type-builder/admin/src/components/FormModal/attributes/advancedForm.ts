@@ -4,6 +4,23 @@ import { componentForm } from '../component/componentForm';
 import { attributeOptions } from './attributeOptions';
 
 type DataType = 'biginteger' | 'string' | 'integer' | 'float' | 'decimal';
+type IndexMode = 'none' | 'index' | 'unique-global' | 'unique-variant';
+
+const getUniqueOption = (data?: { indexMode?: IndexMode }) => {
+  const hasUniqueIndex =
+    data?.indexMode === 'unique-global' || data?.indexMode === 'unique-variant';
+
+  return {
+    ...attributeOptions.unique,
+    disabled: hasUniqueIndex,
+    description: hasUniqueIndex
+      ? {
+          id: getTrad('form.attribute.item.uniqueField.enforcedByIndex.description'),
+          defaultMessage: 'Automatically enabled because a unique database index is selected.',
+        }
+      : attributeOptions.unique.description,
+  };
+};
 
 const conditionSection = {
   sectionTitle: {
@@ -142,7 +159,7 @@ export const advancedForm = {
       ],
     };
   },
-  date({ type }: { type: string }) {
+  date({ type, indexMode }: { type: string; indexMode?: IndexMode }) {
     return {
       sections: [
         {
@@ -163,7 +180,12 @@ export const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [attributeOptions.required, attributeOptions.unique, attributeOptions.private],
+          items: [
+            attributeOptions.required,
+            getUniqueOption({ indexMode }),
+            attributeOptions.indexMode,
+            attributeOptions.private,
+          ],
         },
         conditionSection,
       ],
@@ -183,7 +205,7 @@ export const advancedForm = {
       ],
     };
   },
-  email() {
+  email(data?: { indexMode?: IndexMode }) {
     return {
       sections: [
         {
@@ -202,7 +224,8 @@ export const advancedForm = {
           },
           items: [
             attributeOptions.required,
-            attributeOptions.unique,
+            getUniqueOption(data),
+            attributeOptions.indexMode,
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,
@@ -320,7 +343,7 @@ export const advancedForm = {
       ],
     };
   },
-  number(data: { type: DataType }) {
+  number(data: { type: DataType; indexMode?: IndexMode }) {
     const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : 1;
 
     return {
@@ -348,7 +371,8 @@ export const advancedForm = {
           },
           items: [
             attributeOptions.required,
-            attributeOptions.unique,
+            getUniqueOption(data),
+            attributeOptions.indexMode,
             attributeOptions.max,
             attributeOptions.min,
             attributeOptions.private,
@@ -412,7 +436,7 @@ export const advancedForm = {
       ],
     };
   },
-  text() {
+  text(data?: { indexMode?: IndexMode }) {
     return {
       sections: [
         { sectionTitle: null, items: [attributeOptions.default, attributeOptions.regex] },
@@ -423,7 +447,8 @@ export const advancedForm = {
           },
           items: [
             attributeOptions.required,
-            attributeOptions.unique,
+            getUniqueOption(data),
+            attributeOptions.indexMode,
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,

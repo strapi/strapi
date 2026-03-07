@@ -63,6 +63,16 @@ export type LoadedContentTypeModel = Struct.ContentTypeSchema &
   Required<Pick<Struct.ContentTypeSchema, 'collectionName' | 'uid' | 'modelName'>> &
   Pick<Model, 'lifecycles'>;
 
+type Scope = 'global' | 'variant';
+type ModelIndex = NonNullable<Model['indexes']>[number];
+type IndexInput = {
+  name?: string;
+  columns?: string[];
+  type?: string | null;
+  attributes?: string[];
+  scope?: Scope;
+};
+
 // Transforms an attribute (particularly for relation types) into the format that strapi/database accepts
 export const transformAttribute = (
   name: string,
@@ -316,7 +326,7 @@ export const transformContentTypesToModels = (
         ...documentIdAttribute,
         ...transformAttributes(contentType, identifiers),
       },
-      indexes: contentType.indexes as Model['indexes'],
+      indexes: normalizeIndexes(contentType, identifiers),
       foreignKeys: contentType.foreignKeys as Model['foreignKeys'],
       lifecycles: contentType?.lifecycles ?? {},
     };
@@ -339,4 +349,118 @@ export const transformContentTypesToModels = (
   });
 
   return models;
+};
+
+const normalizeIndexType = (type: unknown): ModelIndex['type'] | string | undefined => {
+  if (type == null || type === 'index') {
+    return undefined;
+  }
+
+  if (typeof type !== 'string') {
+    return type as ModelIndex['type'];
+  }
+
+  const normalized = type.toLowerCase();
+  if (normalized === 'unique') {
+    return 'unique';
+  }
+  if (normalized === 'primary') {
+    return 'primary';
+  }
+  return type;
+};
+
+const resolveAttributeColumn = (
+  contentType: LoadedContentTypeModel,
+  attributeName: string,
+  identifiers: Identifiers
+) => {
+  const attribute = contentType.attributes?.[attributeName];
+
+  if (!attribute) {
+    throw new Error(`Index attribute "${attributeName}" not found in model "${contentType.uid}".`);
+  }
+
+  if (attribute.type === 'relation') {
+    throw new Error(
+      `Index attribute "${attributeName}" in model "${contentType.uid}" is relational and cannot be used as a scalar index column.`
+    );
+  }
+
+  return identifiers.getColumnName(_.snakeCase(attributeName));
+};
+
+const withVariantScopeColumns = (
+  contentType: LoadedContentTypeModel,
+  columns: string[],
+  identifiers: Identifiers,
+  scope?: Scope
+) => {
+  if (scope !== 'variant') {
+    return columns;
+  }
+
+  if (contentType.attributes?.locale) {
+    const localeColumn = identifiers.getColumnName('locale');
+    return Array.from(new Set([...columns, localeColumn]));
+  }
+
+  return columns;
+};
+
+const autoIndexName = (
+  tableName: string,
+  columns: string[],
+  type: ModelIndex['type'] | string | undefined,
+  identifiers: Identifiers
+) => {
+  if (type === 'unique') {
+    return identifiers.getUniqueIndexName([tableName, ...columns]);
+  }
+  if (type === 'primary') {
+    return identifiers.getPrimaryIndexName([tableName, ...columns]);
+  }
+  return identifiers.getIndexName([tableName, ...columns]);
+};
+
+const normalizeIndexes = (
+  contentType: LoadedContentTypeModel,
+  identifiers: Identifiers
+): Model['indexes'] | undefined => {
+  const rawIndexes = (contentType.indexes || []) as IndexInput[];
+  if (rawIndexes.length === 0) {
+    return undefined;
+  }
+
+  const normalized = rawIndexes
+    .map((index) => {
+      const columnsFromAttributes = Array.isArray(index.attributes)
+        ? index.attributes.map((attr) => resolveAttributeColumn(contentType, attr, identifiers))
+        : [];
+      const baseColumns = columnsFromAttributes.length > 0 ? columnsFromAttributes : index.columns;
+
+      if (!Array.isArray(baseColumns) || baseColumns.length === 0) {
+        return null;
+      }
+
+      const normalizedType = normalizeIndexType(index.type);
+      const columns = withVariantScopeColumns(
+        contentType,
+        [...baseColumns],
+        identifiers,
+        index.scope
+      );
+
+      return {
+        name:
+          typeof index.name === 'string' && index.name.length > 0
+            ? index.name
+            : autoIndexName(contentType.collectionName, columns, normalizedType, identifiers),
+        columns,
+        type: normalizedType as ModelIndex['type'],
+      };
+    })
+    .filter((index): index is NonNullable<typeof index> => index !== null);
+
+  return normalized.length > 0 ? normalized : undefined;
 };

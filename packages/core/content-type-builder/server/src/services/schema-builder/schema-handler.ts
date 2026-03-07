@@ -258,6 +258,7 @@ export default function createSchemaHandler(infos: Infos) {
             info: state.schema.info,
             options: state.schema.options,
             pluginOptions: state.schema.pluginOptions,
+            indexes: (state.schema as any).indexes,
             attributes: state.schema.attributes,
             config: (state.schema as any).config,
           },

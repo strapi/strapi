@@ -29,6 +29,7 @@ export type CreateContentTypeInput = {
   options?: Struct.SchemaOptions;
   draftAndPublish?: Struct.SchemaOptions['draftAndPublish'];
   pluginOptions?: Struct.ContentTypeSchema['pluginOptions'];
+  indexes?: Array<Record<string, unknown>>;
   config?: object;
 };
 
