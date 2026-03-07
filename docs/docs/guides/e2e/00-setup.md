@@ -31,14 +31,15 @@ If you need to clean the test-apps folder because they are not working as expect
 
 ### Running specific tests
 
-To run only one domain, meaning a top-level directory in e2e/tests such as "admin" or "content-manager", use the `--domains` option.
+To run only one domain, meaning a top-level directory in `tests/e2e/tests` such as "admin" or "content-manager", use the `--domains` option (short form: `-d`). Put script options **before** `--`; everything **after** `--` is passed through to Playwright.
 
 ```shell
+yarn test:e2e -d admin
 yarn test:e2e --domains=admin
 npm run test:e2e --domains=admin
 ```
 
-To run a specific file, you can pass arguments and options to playwright using `--` between the test:e2e options and the playwright options, such as:
+To run a specific file, pass the filename and any Playwright options after `--`:
 
 ```shell
 # to run just the login.spec.ts file in the admin domain
@@ -91,7 +92,7 @@ Some helpers have been added to allow you to modify the playwright configuration
 
 ## Strapi Templates
 
-The test-app you create uses a [template](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/installation/templates.html) found at `e2e/app-template` in this folder we can store our premade content schemas & any customisations we may need such as other plugins / custom fields / endpoints etc.
+The test-app you create uses a [template](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/installation/templates.html) found at `tests/app-template` in this repo, where we store our premade content schemas & any customisations we may need such as other plugins / custom fields / endpoints etc.
 
 If you add anything to the template, be sure to add this information to [the docs](/guides/e2e/app-template).
 

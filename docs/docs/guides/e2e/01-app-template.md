@@ -9,7 +9,7 @@ tags:
 
 ## Overview
 
-An app template has been created in `e2e/app-template` which provide some customizations and utilities to allow the tests to run. Note that if any changes are made to the app template, you will need to run `yarn test:e2e:clean` to update the test apps with the new template.
+An app template has been created in `tests/app-template` which provides customizations and utilities so the tests can run. Note that if any changes are made to the app template, you will need to run `yarn test:e2e:clean` to update the test apps with the new template.
 
 Here you can read about what content schemas the test instance has & the API customisations we've built (incl. why we built them).
 
