@@ -204,7 +204,7 @@ export const FormModal = () => {
       // then goes to step 1 (the modal is addComponentToDynamicZone) and finally reloads the app.
       // In this particular if the user tries to add components to the zone it will pop an error since the dz is unknown
       const foundDynamicZoneTarget =
-        findAttribute(get(type, 'schema.attributes', []), dynamicZoneTarget) || null;
+        findAttribute(get(type, 'attributes', []), dynamicZoneTarget) || null;
 
       // Create content type we need to add the default option draftAndPublish
       if (modalType === 'contentType' && actionType === 'create') {
