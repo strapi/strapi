@@ -31,7 +31,7 @@ jobs:
       - uses: actions/setup-node@v6
       - uses: ./.github/actions/security/lockfile
         with:
-          allowedHosts: 'yarn'
+          type: 'pnpm'
 
   check-package-versions:
     name: Package version alignment
@@ -40,6 +40,6 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
       - name: Install dependencies
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Check package versions
-        run: yarn version:check
+        run: pnpm version:check

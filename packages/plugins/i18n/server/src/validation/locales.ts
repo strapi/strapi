@@ -3,6 +3,8 @@ import { yup, validateYupSchema } from '@strapi/utils';
 
 import { isoLocales } from '../constants';
 
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const allowedLocaleCodes = isoLocales.map(prop('code'));
 
 const createLocaleSchema = yup
@@ -22,7 +24,7 @@ const updateLocaleSchema = yup
   })
   .noUnknown();
 
-const validateCreateLocaleInput = validateYupSchema(createLocaleSchema);
-const validateUpdateLocaleInput = validateYupSchema(updateLocaleSchema);
+const validateCreateLocaleInput: ValidatorFn = validateYupSchema(createLocaleSchema);
+const validateUpdateLocaleInput: ValidatorFn = validateYupSchema(updateLocaleSchema);
 
 export { validateCreateLocaleInput, validateUpdateLocaleInput };

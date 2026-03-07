@@ -157,7 +157,7 @@ export default {
 
     // Upload files first to get thumbnails
     const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
-    if (uploadedFiles.some((file) => file.mime?.startsWith('image/'))) {
+    if (uploadedFiles.some((file: { mime?: string }) => file.mime?.startsWith('image/'))) {
       await getService('metrics').trackUsage('didUploadImage');
     }
 

@@ -27,11 +27,19 @@ const getSanitizedUser = (user: any) => {
   };
 };
 
+/** Return type for audit logs service to avoid referencing @strapi/database in emitted .d.ts (pnpm portability) */
+interface AuditLogsService {
+  saveEvent(event: Event): Promise<AuditLogsService>;
+  findMany(query: unknown): Promise<unknown>;
+  findOne(id: unknown): Promise<unknown>;
+  deleteExpiredEvents(expirationDate: Date): Promise<unknown>;
+}
+
 /**
  * @description
  * Manages audit logs interaction with the database. Accessible via strapi.get('audit-logs')
  */
-const createAuditLogsService = (strapi: Core.Strapi) => {
+const createAuditLogsService = (strapi: Core.Strapi): AuditLogsService => {
   return {
     async saveEvent(event: Event) {
       const { userId, ...rest } = event;

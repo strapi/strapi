@@ -87,13 +87,17 @@ const validateUpdateAssigneeOnEntitySchema = yup
 
 const validateLocaleSchema = yup.string().nullable();
 
-export const validateWorkflowCreate = validateYupSchema(validateWorkflowCreateSchema);
-export const validateUpdateStageOnEntity = validateYupSchema(validateUpdateStageOnEntitySchema);
-export const validateUpdateAssigneeOnEntity = validateYupSchema(
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
+export const validateWorkflowCreate: ValidatorFn = validateYupSchema(validateWorkflowCreateSchema);
+export const validateUpdateStageOnEntity: ValidatorFn = validateYupSchema(
+  validateUpdateStageOnEntitySchema
+);
+export const validateUpdateAssigneeOnEntity: ValidatorFn = validateYupSchema(
   validateUpdateAssigneeOnEntitySchema
 );
-export const validateWorkflowUpdate = validateYupSchema(validateWorkflowUpdateSchema);
-export const validateLocale = validateYupSchema(validateLocaleSchema);
+export const validateWorkflowUpdate: ValidatorFn = validateYupSchema(validateWorkflowUpdateSchema);
+export const validateLocale: ValidatorFn = validateYupSchema(validateLocaleSchema);
 
 export default {
   validateWorkflowCreate,
@@ -101,4 +105,4 @@ export default {
   validateUpdateAssigneeOnEntity,
   validateWorkflowUpdate,
   validateLocale,
-};
+} as Record<string, ValidatorFn>;

@@ -73,7 +73,9 @@ const formatAttributes = (model: any) => {
   });
 };
 
-export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Record<string, any>) => {
+export const formatAttribute = (
+  attribute: Schema.Attribute.AnyAttribute & Record<string, any>
+): any => {
   if (attribute.type === 'relation') {
     return {
       ...attribute,
@@ -86,7 +88,7 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
   return attribute;
 };
 
-export const getSchema = async () => {
+export const getSchema = async (): Promise<any> => {
   const contentTypes = mapValues((contentType) => {
     const {
       uid,

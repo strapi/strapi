@@ -305,4 +305,4 @@ export default Object.freeze({
     get,
     isEnabled: (featureName: string) => get(featureName) !== undefined,
   }),
-});
+}) as any;

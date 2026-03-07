@@ -32,7 +32,7 @@ export const password = yup
   .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
   .matches(/\d/, '${path} must contain at least one number');
 
-export const roles = yup.array(yup.strapiID()).min(1);
+export const roles = yup.array(yup.strapiID()).min(1) as any;
 
 const isAPluginName = yup
   .string()
@@ -50,7 +50,7 @@ export const arrayOfConditionNames = yup
     return _.isUndefined(value) || _.difference(value, ids).length === 0
       ? true
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
-  });
+  }) as any;
 
 export const permissionsAreEquals = (a: any, b: any) =>
   a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
@@ -184,7 +184,7 @@ export const permission = yup
       ),
     conditions: yup.array().of(yup.string()),
   })
-  .noUnknown();
+  .noUnknown() as any;
 
 export const updatePermissions = yup
   .object()
@@ -213,4 +213,4 @@ export default {
   arrayOfConditionNames,
   permission,
   updatePermissions,
-};
+} as Record<string, any>;

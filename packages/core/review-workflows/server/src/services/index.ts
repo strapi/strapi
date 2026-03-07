@@ -18,4 +18,4 @@ export default {
   'workflow-metrics': reviewWorkflowsMetrics,
   'workflow-weekly-metrics': reviewWorkflowsWeeklyMetrics,
   ...homepage.services,
-};
+} as any;

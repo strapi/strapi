@@ -9,7 +9,7 @@ on:
 
       # Might be too broad, but it runs the action even if a
       # package.json wasn't changed, e.g. for non-pinned dependencies
-      - 'yarn.lock'
+      - 'pnpm-lock.yaml'
 
 jobs:
   admin_size:
@@ -28,7 +28,7 @@ jobs:
           node-version: 20
 
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
 
       - name: Monorepo build
         uses: ./.github/actions/run-build

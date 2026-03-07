@@ -2,17 +2,17 @@ name: 'Analyze lockfile dependencies'
 description: 'Parse dependencies from the yarn lockfile and run security tests on them'
 inputs:
   path:
-    description: 'Path to the yarn lockfile'
+    description: 'Path to the lockfile'
     required: false
-    default: 'yarn.lock'
+    default: 'pnpm-lock.yaml'
   type:
-    description: 'Lockfile type, either yarn or npm'
-    default: 'yarn'
+    description: 'Lockfile type: pnpm, yarn, or npm'
+    default: 'pnpm'
     required: false
   allowedHosts:
-    description: 'Allowed hosts for packages resolution'
+    description: 'Allowed hosts for packages resolution (used when type is yarn or npm)'
     required: false
-    default: 'https://registry.yarnpkg.com'
+    default: 'https://registry.npmjs.org'
   allowedURLs:
     description: 'Allowed URLs to enable certain specific resources'
     required: false

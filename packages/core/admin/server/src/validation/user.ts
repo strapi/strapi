@@ -2,6 +2,9 @@ import { isUndefined } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 import validators from './common-validators';
 
+/** Type for validators to avoid referencing yup internals in emitted .d.ts (pnpm portability) */
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const userCreationSchema = yup
   .object()
   .shape({
@@ -51,15 +54,15 @@ const usersDeleteSchema = yup
   })
   .noUnknown();
 
-export const validateUserCreationInput = validateYupSchema(userCreationSchema);
-export const validateProfileUpdateInput = validateYupSchema(profileUpdateSchema);
-export const validateUserUpdateInput = validateYupSchema(userUpdateSchema);
-export const validateUsersDeleteInput = validateYupSchema(usersDeleteSchema);
+export const validateUserCreationInput: ValidatorFn = validateYupSchema(userCreationSchema);
+export const validateProfileUpdateInput: ValidatorFn = validateYupSchema(profileUpdateSchema);
+export const validateUserUpdateInput: ValidatorFn = validateYupSchema(userUpdateSchema);
+export const validateUsersDeleteInput: ValidatorFn = validateYupSchema(usersDeleteSchema);
 export const schemas = {
   userCreationSchema,
   usersDeleteSchema,
   userUpdateSchema,
-};
+} as Record<string, any>;
 
 export default {
   validateUserCreationInput,
@@ -67,4 +70,4 @@ export default {
   validateUserUpdateInput,
   validateUsersDeleteInput,
   schemas,
-};
+} as Record<string, ValidatorFn | Record<string, unknown>>;

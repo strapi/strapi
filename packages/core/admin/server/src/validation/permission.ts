@@ -2,6 +2,9 @@ import { yup, validateYupSchema } from '@strapi/utils';
 import { getService } from '../utils';
 import validators from './common-validators';
 
+/** Type for validators to avoid referencing yup internals in emitted .d.ts (pnpm portability) */
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const checkPermissionsSchema = yup.object().shape({
   permissions: yup.array().of(
     yup
@@ -44,12 +47,14 @@ const actionsExistSchema = yup
   )
   .test('actions-exist', '', checkPermissionsExist);
 
-export const validatePermissionsExist = validateYupSchema(actionsExistSchema);
-export const validateCheckPermissionsInput = validateYupSchema(checkPermissionsSchema);
-export const validatedUpdatePermissionsInput = validateYupSchema(validators.updatePermissions);
+export const validatePermissionsExist: ValidatorFn = validateYupSchema(actionsExistSchema);
+export const validateCheckPermissionsInput: ValidatorFn = validateYupSchema(checkPermissionsSchema);
+export const validatedUpdatePermissionsInput: ValidatorFn = validateYupSchema(
+  validators.updatePermissions
+);
 
 export default {
   validatedUpdatePermissionsInput,
   validatePermissionsExist,
   validateCheckPermissionsInput,
-};
+} as Record<string, ValidatorFn>;

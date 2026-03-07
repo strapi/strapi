@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
 
+/** Type for validators to avoid referencing yup internals in emitted .d.ts (pnpm portability) */
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(
     // @ts-expect-error yup types
@@ -21,8 +24,8 @@ const hasPermissionsSchema = yup.object({
   ),
 });
 
-export const validateHasPermissionsInput = validateYupSchema(hasPermissionsSchema);
+export const validateHasPermissionsInput: ValidatorFn = validateYupSchema(hasPermissionsSchema);
 
 export default {
   validateHasPermissionsInput,
-};
+} as Record<string, ValidatorFn>;

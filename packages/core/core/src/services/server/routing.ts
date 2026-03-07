@@ -67,7 +67,7 @@ const routeSchema = yup.object({
     .notRequired(),
 });
 
-const validateRouteConfig = (routeConfig: Core.RouteInput) => {
+const validateRouteConfig = (routeConfig: Core.RouteInput): any => {
   try {
     return routeSchema.validateSync(routeConfig, {
       strict: true,

@@ -31,18 +31,18 @@
     "dist/"
   ],
   "scripts": {
-    "build": "run -T npm-run-all clean --parallel build:code build:types",
-    "build:code": "run -T  rollup -c",
-    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T tsc --noEmit && run -T eslint .",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
-    "watch": "run -T rollup -c -w"
+    "build": "pnpm exec npm-run-all clean --parallel build:code build:types",
+    "build:code": "pnpm exec  rollup -c",
+    "build:types": "pnpm exec tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "pnpm exec rimraf ./dist",
+    "lint": "pnpm exec tsc --noEmit && pnpm exec eslint .",
+    "test:unit": "pnpm exec jest",
+    "test:unit:watch": "pnpm exec jest --watch",
+    "watch": "pnpm exec rollup -c -w"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/utils": "5.38.0",
+    "@strapi/utils": "workspace:*",
     "ajv": "8.18.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
@@ -54,8 +54,8 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.38.0",
-    "tsconfig": "5.38.0"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

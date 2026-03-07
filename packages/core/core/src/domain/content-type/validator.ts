@@ -97,7 +97,7 @@ const contentTypeSchemaValidator = yup.object().shape({
   lifecycles: yup.object().shape(lifecyclesShape).noUnknown(),
 });
 
-const validateContentTypeDefinition = (data: unknown) => {
+const validateContentTypeDefinition = (data: unknown): unknown => {
   return contentTypeSchemaValidator.validateSync(data, { strict: true, abortEarly: false });
 };
 

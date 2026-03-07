@@ -89,7 +89,7 @@ class Router {
    * @internal This method is used internally by Strapi to create the router.
    * It should not be used by plugins, doing so will likely break the application.
    */
-  createRouter(strapi: StrapiApp, { memory, ...opts }: RouterOptions = {}) {
+  createRouter(strapi: StrapiApp, { memory, ...opts }: RouterOptions = {}): IRouter {
     const routes = [
       {
         path: '/*',

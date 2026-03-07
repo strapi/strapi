@@ -1,4 +1,5 @@
-import { yup, validateYupSchema } from '@strapi/utils';
+import yup from 'yup';
+import { validateYupSchema } from '@strapi/utils';
 
 const focalPointSchema = yup
   .object({

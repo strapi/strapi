@@ -36,4 +36,4 @@ git config --global user.name "${GITHUB_ACTOR}"
 git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
 # publish packages
-GITHUB_TOKEN=$GITHUB_TOKEN yarn release --version "$version" --tag "$distTag" --dry-run false $preid_arg "$@"
+GITHUB_TOKEN=$GITHUB_TOKEN pnpm release --version "$version" --tag "$distTag" --dry-run false $preid_arg "$@"

@@ -166,4 +166,4 @@ const blockNodeValidator: any = yup.lazy((value: { type: string }) => {
 
 const blocksValidatorSchema = yup.array().of(blockNodeValidator);
 
-export const blocksValidator = () => blocksValidatorSchema;
+export const blocksValidator = (): any => blocksValidatorSchema;

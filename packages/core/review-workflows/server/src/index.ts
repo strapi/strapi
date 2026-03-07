@@ -26,4 +26,4 @@ const getPlugin = () => {
   };
 };
 
-export default getPlugin();
+export default getPlugin() as any;

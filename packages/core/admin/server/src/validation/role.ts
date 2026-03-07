@@ -1,5 +1,8 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
+/** Type for validators to avoid referencing yup internals in emitted .d.ts (pnpm portability) */
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const roleCreateSchema = yup
   .object()
   .shape({
@@ -51,14 +54,14 @@ const roleUpdateSchema = yup
   })
   .noUnknown();
 
-export const validateRoleCreateInput = validateYupSchema(roleCreateSchema);
-export const validateRoleUpdateInput = validateYupSchema(roleUpdateSchema);
-export const validateRolesDeleteInput = validateYupSchema(rolesDeleteSchema);
-export const validateRoleDeleteInput = validateYupSchema(roleDeleteSchema);
+export const validateRoleCreateInput: ValidatorFn = validateYupSchema(roleCreateSchema);
+export const validateRoleUpdateInput: ValidatorFn = validateYupSchema(roleUpdateSchema);
+export const validateRolesDeleteInput: ValidatorFn = validateYupSchema(rolesDeleteSchema);
+export const validateRoleDeleteInput: ValidatorFn = validateYupSchema(roleDeleteSchema);
 
 export default {
   validateRoleUpdateInput,
   validateRoleCreateInput,
   validateRolesDeleteInput,
   validateRoleDeleteInput,
-};
+} as Record<string, ValidatorFn>;

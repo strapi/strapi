@@ -10,7 +10,7 @@ import extensions from './extensions';
 import { createAIMetadataService } from './ai-metadata';
 import { createAIMetadataJobsService } from './ai-metadata-jobs';
 
-export const services = {
+export const services: Record<string, unknown> = {
   provider,
   upload,
   folder,

@@ -37,17 +37,31 @@ const multiUploadSchema = yup.object({
   fileInfo: yup.array().of(fileInfoSchema),
 });
 
-const validateUploadBody = (data = {}, isMulti = false) => {
+const validateUploadBodyImpl = (data = {}, isMulti = false) => {
   const schema = isMulti ? multiUploadSchema : uploadSchema;
 
-  return validateYupSchema(schema, { strict: false })(data);
+  return validateYupSchema(schema as any, { strict: false })(data);
 };
 
-export { validateUploadBody };
+/** Portable type for upload body (no yup reference). */
+export type FileInfoInput = {
+  name?: string | null;
+  alternativeText?: string | null;
+  caption?: string | null;
+  focalPoint?: { x: number; y: number } | null;
+  folder?: string | number | null;
+};
 
-export type UploadBody =
-  | yup.InferType<typeof uploadSchema>
-  | yup.InferType<typeof multiUploadSchema>;
+export type UploadBody = { fileInfo: FileInfoInput } | { fileInfo: FileInfoInput[] };
+
+export type BulkUpdateBody = {
+  updates: Array<{ id: number; fileInfo: FileInfoInput }>;
+};
+
+export const validateUploadBody = validateUploadBodyImpl as (
+  data?: unknown,
+  isMulti?: boolean
+) => Promise<UploadBody>;
 
 const bulkUpdatesSchema = yup.object({
   updates: yup
@@ -62,4 +76,8 @@ const bulkUpdatesSchema = yup.object({
     .required(),
 });
 
-export const validateBulkUpdateBody = validateYupSchema(bulkUpdatesSchema);
+export const validateBulkUpdateBody = (
+  body: unknown,
+  errorMessage?: string
+): Promise<BulkUpdateBody> =>
+  validateYupSchema(bulkUpdatesSchema as any)(body, errorMessage) as Promise<BulkUpdateBody>;

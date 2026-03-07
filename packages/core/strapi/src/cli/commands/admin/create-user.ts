@@ -2,6 +2,7 @@ import { createCommand } from 'commander';
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
 import inquirer from 'inquirer';
+import type { QuestionCollection } from 'inquirer';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
@@ -52,7 +53,7 @@ interface Answers {
  * `ReadOnlyArray<inquirer.DistinctQuestion<Answers>>`
  * but then the logic of the validate function needs to change.
  */
-const promptQuestions: inquirer.QuestionCollection<Answers> = [
+const promptQuestions: QuestionCollection<Answers> = [
   {
     type: 'input',
     name: 'email',

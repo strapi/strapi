@@ -1,7 +1,11 @@
 import type { Core } from '@strapi/types';
 import type { Settings } from '../validation/settings';
 
-const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => {
+interface SettingsServiceReturn {
+  getSettings(): Promise<Settings | null>;
+  setSettings(value: Settings): unknown;
+}
+const createSettingsService = ({ strapi }: { strapi: Core.Strapi }): SettingsServiceReturn => {
   const settings = strapi.store!({ type: 'plugin', name: 'i18n', key: 'settings' });
 
   async function getSettings() {

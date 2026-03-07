@@ -1,6 +1,8 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 import constants from '../services/constants';
 
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const apiTokenCreationSchema = yup
   .object()
   .shape({
@@ -24,10 +26,10 @@ const apiTokenUpdateSchema = yup
   .noUnknown()
   .strict();
 
-export const validateApiTokenCreationInput = validateYupSchema(apiTokenCreationSchema);
-export const validateApiTokenUpdateInput = validateYupSchema(apiTokenUpdateSchema);
+export const validateApiTokenCreationInput: ValidatorFn = validateYupSchema(apiTokenCreationSchema);
+export const validateApiTokenUpdateInput: ValidatorFn = validateYupSchema(apiTokenUpdateSchema);
 
 export default {
   validateApiTokenCreationInput,
   validateApiTokenUpdateInput,
-};
+} as Record<string, ValidatorFn>;

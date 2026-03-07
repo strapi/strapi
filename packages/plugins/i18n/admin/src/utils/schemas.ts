@@ -20,7 +20,7 @@ const mutateCTBContentTypeSchema = (
     attributes: Schema.Attribute.AnyAttribute[];
     uid?: string;
   }
-) => {
+): any => {
   if (!prevSchema) {
     return nextSchema;
   }

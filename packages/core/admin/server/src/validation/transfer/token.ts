@@ -1,6 +1,9 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 import constants from '../../services/constants';
 
+/** Type for validators to avoid referencing yup internals in emitted .d.ts (pnpm portability) */
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const transferTokenCreationSchema = yup
   .object()
   .shape({
@@ -34,10 +37,13 @@ const transferTokenUpdateSchema = yup
   .noUnknown()
   .strict();
 
-export const validateTransferTokenCreationInput = validateYupSchema(transferTokenCreationSchema);
-export const validateTransferTokenUpdateInput = validateYupSchema(transferTokenUpdateSchema);
+export const validateTransferTokenCreationInput: ValidatorFn = validateYupSchema(
+  transferTokenCreationSchema
+);
+export const validateTransferTokenUpdateInput: ValidatorFn =
+  validateYupSchema(transferTokenUpdateSchema);
 
 export default {
   validateTransferTokenCreationInput,
   validateTransferTokenUpdateInput,
-};
+} as Record<string, ValidatorFn>;

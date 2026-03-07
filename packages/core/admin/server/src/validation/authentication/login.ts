@@ -1,5 +1,7 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 /**
  * Validates optional session-related fields for login requests.
  * Does not constrain credential fields (email/password) handled by passport.
@@ -13,4 +15,4 @@ const schema = yup
   // Allow other properties (like email/password) to be present
   .noUnknown(false);
 
-export default validateYupSchema(schema);
+export default validateYupSchema(schema) as ValidatorFn;

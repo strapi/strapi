@@ -92,7 +92,7 @@ export default {
       .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     // Load entity
-    const locale = await validateLocale(query?.locale);
+    const locale = (await validateLocale(query?.locale)) as string | null;
     const entity = await strapi.documents(modelUID).findOne({
       documentId,
       // @ts-expect-error - locale should be also null in the doc service types
@@ -107,17 +107,17 @@ export default {
     // Validate if entity stage can be updated
     const canTransition = stagePermissions.can(
       STAGE_TRANSITION_UID,
-      entity[ENTITY_STAGE_ATTRIBUTE]?.id
+      (entity as Record<string, { id?: string }>)[ENTITY_STAGE_ATTRIBUTE]?.id
     );
 
     if (!canTransition) {
       ctx.throw(403, 'Forbidden stage transition');
     }
 
-    const { id: stageId } = await validateUpdateStageOnEntity(
-      { id: Number(body?.data?.id) },
+    const { id: stageId } = (await validateUpdateStageOnEntity(
+      { id: Number((body?.data as { id?: unknown })?.id) },
       'You should pass an id to the body of the put request.'
-    );
+    )) as { id: number };
 
     const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
     workflowService.assertStageBelongsToWorkflow(stageId, workflow);
@@ -154,7 +154,7 @@ export default {
     }
 
     // Load entity
-    const locale = (await validateLocale(query?.locale)) ?? undefined;
+    const locale = ((await validateLocale(query?.locale)) ?? undefined) as string | undefined;
     const entity = await strapi.documents(modelUID).findOne({
       documentId,
       locale,

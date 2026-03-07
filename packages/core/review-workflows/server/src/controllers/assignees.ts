@@ -24,7 +24,9 @@ export default {
     const stagePermissions = getService('stage-permissions');
 
     const { model_uid: model, id: documentId } = ctx.params;
-    const locale = (await validateLocale(ctx.request.query?.locale)) ?? undefined;
+    const locale = ((await validateLocale(ctx.request.query?.locale)) ?? undefined) as
+      | string
+      | undefined;
 
     const { sanitizeOutput } = strapi
       .plugin('content-manager')
@@ -45,7 +47,7 @@ export default {
     // Only allow users who can update the current stage to change the assignee
     const canTransitionStage = stagePermissions.can(
       STAGE_TRANSITION_UID,
-      entity[ENTITY_STAGE_ATTRIBUTE]?.id
+      (entity as Record<string, { id?: string }>)[ENTITY_STAGE_ATTRIBUTE]?.id
     );
 
     if (!canTransitionStage) {
@@ -53,10 +55,10 @@ export default {
     }
 
     // TODO: check if user has update permission on the entity
-    const { id: assigneeId } = await validateUpdateAssigneeOnEntity(
+    const { id: assigneeId } = (await validateUpdateAssigneeOnEntity(
       ctx.request?.body?.data,
       'You should pass a valid id to the body of the put request.'
-    );
+    )) as { id: string };
 
     await workflowService.assertContentTypeBelongsToWorkflow(model);
 

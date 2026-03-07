@@ -33,10 +33,10 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: yarn install  --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Build website
-        run: yarn build
+        run: pnpm build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

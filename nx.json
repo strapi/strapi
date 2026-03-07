@@ -17,7 +17,7 @@
     ]
   },
   "cli": {
-    "packageManager": "yarn"
+    "packageManager": "pnpm"
   },
   "targetDefaults": {
     "build": {

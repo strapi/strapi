@@ -146,7 +146,7 @@ export const handlerControllerFactory =
   (options: HandlerOptions) => {
     const { verify, server: serverOptions } = options ?? {};
 
-    const wss = new WebSocket.Server({ ...serverOptions, noServer: true });
+    const wss = new WebSocketServer({ ...serverOptions, noServer: true });
 
     return async (ctx: Context) => {
       const cb: WSCallback = (ws) => {

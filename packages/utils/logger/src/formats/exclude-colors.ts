@@ -1,12 +1,13 @@
+import type { Format } from 'logform';
 import { format } from 'winston';
 
 /**
  * This will remove the chalk color codes from the message provided.
  * It's used to log plain text in the log file
  */
-export default format.printf(({ message }) => {
+const excludeColors: Format = format.printf(({ message }): string => {
   if (typeof message !== 'string') {
-    return message;
+    return String(message);
   }
 
   return message.replace(
@@ -15,3 +16,5 @@ export default format.printf(({ message }) => {
     ''
   );
 });
+
+export default excludeColors;

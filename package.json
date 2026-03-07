@@ -35,29 +35,29 @@
     "build:code": "nx run-many --target=build:code --nx-ignore-cycles",
     "build:types": "nx run-many --target=build:types --nx-ignore-cycles",
     "watch": "nx watch --all -- 'nx run-many --targets build:code,build:types --projects $NX_PROJECT_NAME'",
-    "build:size": "cd examples/getstarted && yarn build",
+    "build:size": "cd examples/getstarted && pnpm build",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "build:watch": "nx watch --all --nx-ignore-cycles -- nx run \\$NX_PROJECT_NAME:build --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
     "commit": "commit",
     "doc:api": "node scripts/open-api/serve.js",
-    "format": "yarn format:code && yarn format:other",
-    "format:code": "yarn prettier:code --write",
-    "format:other": "yarn prettier:other --write",
-    "lint": "nx run-many --target=lint --nx-ignore-cycles && yarn lint:other",
+    "format": "pnpm format:code && pnpm format:other",
+    "format:code": "pnpm prettier:code --write",
+    "format:other": "pnpm prettier:other --write",
+    "lint": "nx run-many --target=lint --nx-ignore-cycles && pnpm lint:other",
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
-    "lint:other": "npm run prettier:other -- --check",
+    "lint:other": "pnpm run prettier:other -- --check",
     "version:check": "node scripts/check-package-versions.mjs && syncpack lint",
     "version:fix": "node scripts/check-package-versions.mjs --fix --prompt && syncpack prompt && syncpack fix-mismatches",
     "postinstall": "husky",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
-    "prettier:check": "yarn prettier:code --check && yarn prettier:other --check",
+    "prettier:check": "pnpm prettier:code --check && pnpm prettier:other --check",
     "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts,jsx,tsx,json}\"",
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,mdx,css,scss,yaml,yml}\"",
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
     "release": "node scripts/release.js",
-    "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
+    "setup": "pnpm install && pnpm clean && pnpm build --skip-nx-cache",
     "test:api": "node tests/scripts/run-api-tests.js",
     "test:api:clean": "rimraf ./coverage",
     "test:clean": "run-s -c test:api:clean test:e2e:clean test:cli:clean",
@@ -71,12 +71,12 @@
     "test:front:all:ce": "cross-env IS_EE=false nx run-many --target=test:front:ce --nx-ignore-cycles",
     "test:front:ce": "cross-env IS_EE=false run test:front",
     "test:front:update": "run test:front -u",
-    "test:front:update:ce": "yarn test:front:ce -u",
+    "test:front:update:ce": "pnpm test:front:ce -u",
     "test:front:watch": "cross-env IS_EE=true run test:front --watch",
     "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
-    "test:generate-app": "yarn build:ts && node tests/scripts/generate-test-app.js",
+    "test:generate-app": "pnpm build:ts && node tests/scripts/generate-test-app.js",
     "test:generate-app:no-build": "node tests/scripts/generate-test-app.js",
-    "test:ts": "yarn test:ts:packages && yarn test:ts:front && yarn test:ts:back",
+    "test:ts": "pnpm test:ts:packages && pnpm test:ts:front && pnpm test:ts:back",
     "test:ts:back": "nx run-many --target=test:ts:back --nx-ignore-cycles",
     "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
     "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",
@@ -86,15 +86,17 @@
     "test:unit:watch": "run test:unit --watch",
     "test:unit:coverage": "jest --config jest.config.js --coverage",
     "test:front:coverage": "cross-env IS_EE=true jest --config jest.config.front.js --runInBand --coverage",
-    "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
+    "test:coverage": "pnpm test:unit:coverage && pnpm test:front:coverage",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch"
   },
-  "resolutions": {
-    "@types/koa": "2.13.4",
-    "@babel/core": "7.26.10",
-    "@babel/runtime": "7.26.10",
-    "@babel/runtime-corejs3": "7.26.10"
+  "pnpm": {
+    "overrides": {
+      "@types/koa": "2.13.4",
+      "@babel/core": "7.26.10",
+      "@babel/runtime": "7.26.10",
+      "@babel/runtime-corejs3": "7.26.10"
+    }
   },
   "devDependencies": {
     "@babel/core": "7.26.10",
@@ -185,10 +187,10 @@
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@4.12.0",
+  "packageManager": "pnpm@9.15.0",
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
-    "npm": ">=6.0.0"
+    "pnpm": ">=9.0.0"
   },
   "isStrapiMonorepo": true
 }

@@ -21,7 +21,7 @@ const strapiServerSchema = yup
   })
   .noUnknown();
 
-const validateModule = (data: unknown) => {
+const validateModule = (data: unknown): unknown => {
   return strapiServerSchema.validateSync(data, { strict: true, abortEarly: false });
 };
 

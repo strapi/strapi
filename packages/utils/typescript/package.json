@@ -30,9 +30,9 @@
     "lib": "./lib"
   },
   "scripts": {
-    "lint": "run -T eslint .",
-    "test": "run -T jest",
-    "test:watch": "run -T jest --watch"
+    "lint": "pnpm exec eslint .",
+    "test": "pnpm exec jest",
+    "test:watch": "pnpm exec jest --watch"
   },
   "dependencies": {
     "chalk": "4.1.2",

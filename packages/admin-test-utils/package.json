@@ -66,15 +66,15 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "run -T run-p build:code build:types",
-    "build:code": "run -T  rollup -c",
-    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "watch": "run -T run-p watch:code watch:types",
-    "watch:code": "run -T rollup -c -w",
-    "watch:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly -w",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit"
+    "build": "pnpm exec run-p build:code build:types",
+    "build:code": "pnpm exec  rollup -c",
+    "build:types": "pnpm exec tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "watch": "pnpm exec run-p watch:code watch:types",
+    "watch:code": "pnpm exec rollup -c -w",
+    "watch:types": "pnpm exec tsc -p tsconfig.build.json --emitDeclarationOnly -w",
+    "clean": "pnpm exec rimraf ./dist",
+    "lint": "pnpm exec eslint .",
+    "test:ts": "pnpm exec tsc --noEmit"
   },
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
@@ -86,10 +86,10 @@
   "devDependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@testing-library/jest-dom": "6.4.5",
-    "eslint-config-custom": "5.38.0",
+    "eslint-config-custom": "workspace:*",
     "jest-environment-jsdom": "29.6.1",
     "styled-components": "6.1.8",
-    "tsconfig": "5.38.0"
+    "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.9.7",

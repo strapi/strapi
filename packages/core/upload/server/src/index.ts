@@ -9,7 +9,7 @@ import { routes } from './routes';
 import { config } from './config';
 import { controllers } from './controllers';
 
-export default () => ({
+export default (): Record<string, unknown> => ({
   register,
   bootstrap,
   config,

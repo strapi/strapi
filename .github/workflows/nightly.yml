@@ -19,7 +19,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 20
-      - run: yarn
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
       - run: ./scripts/pre-publish.sh --yes
         env:
           VERSION: '0.0.0-next.${{ github.sha }}'

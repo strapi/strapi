@@ -1,6 +1,8 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 import validators from '../common-validators';
 
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const registrationSchema = yup
   .object()
   .shape({
@@ -40,12 +42,15 @@ const adminRegistrationSchema = yup
   .required()
   .noUnknown();
 
-export const validateRegistrationInput = validateYupSchema(registrationSchema);
-export const validateRegistrationInfoQuery = validateYupSchema(registrationInfoQuerySchema);
-export const validateAdminRegistrationInput = validateYupSchema(adminRegistrationSchema);
+export const validateRegistrationInput: ValidatorFn = validateYupSchema(registrationSchema);
+export const validateRegistrationInfoQuery: ValidatorFn = validateYupSchema(
+  registrationInfoQuerySchema
+);
+export const validateAdminRegistrationInput: ValidatorFn =
+  validateYupSchema(adminRegistrationSchema);
 
 export default {
   validateRegistrationInput,
   validateRegistrationInfoQuery,
   validateAdminRegistrationInput,
-};
+} as Record<string, ValidatorFn>;

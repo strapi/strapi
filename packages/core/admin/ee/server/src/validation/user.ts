@@ -9,7 +9,7 @@ const ssoUserCreationInputExtension = yup
   .noUnknown();
 
 export const validateUserCreationInput = (data: any) => {
-  let schema = schemas.userCreationSchema;
+  let schema = (schemas as any).userCreationSchema;
 
   if (strapi.ee.features.isEnabled('sso')) {
     schema = schema.concat(ssoUserCreationInputExtension);
@@ -18,6 +18,7 @@ export const validateUserCreationInput = (data: any) => {
   return validateYupSchema(schema)(data);
 };
 
+type ValidatorFn = (data: any) => Promise<unknown>;
 export default {
   validateUserCreationInput,
-};
+} as Record<string, ValidatorFn>;

@@ -45,7 +45,7 @@ const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }): any => {
   const fileService = getService('file');
 
   const sendMediaMetrics = async (data: Pick<File, 'caption' | 'alternativeText'>) => {

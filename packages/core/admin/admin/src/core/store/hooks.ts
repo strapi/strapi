@@ -9,7 +9,9 @@ const useTypedDispatch: () => AppDispatch = useDispatch;
 const useTypedStore = useStore as () => Store;
 const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-const createTypedSelector = <TResult>(selector: Selector<RootState, TResult>) =>
-  createSelector((state: RootState) => state, selector);
+/** Typed selector factory to avoid referencing reselect in emitted .d.ts (pnpm portability) */
+const createTypedSelector = <TResult>(
+  selector: Selector<RootState, TResult>
+): ((state: RootState) => TResult) => createSelector((state: RootState) => state, selector);
 
 export { useTypedDispatch, useTypedStore, useTypedSelector, createTypedSelector };

@@ -504,7 +504,7 @@ export const floatValidator = (
 export const bigintegerValidator = (
   metas: ValidatorMetas<Schema.Attribute.BigInteger>,
   options: ValidatorOptions
-) => {
+): any => {
   const schema = yup.mixed();
   return addUniqueValidator(schema, metas, options);
 };
@@ -517,12 +517,12 @@ export const datesValidator = (
     | Schema.Attribute.Timestamp
   >,
   options: ValidatorOptions
-) => {
+): any => {
   const schema = yup.mixed();
   return addUniqueValidator(schema, metas, options);
 };
 
-export const Validators = {
+export const Validators: Record<string, any> = {
   string: stringValidator,
   text: stringValidator,
   richtext: stringValidator,

@@ -20,4 +20,4 @@ export default {
   'ai-localizations': createAILocalizationsService,
   'ai-localization-jobs': createAILocalizationJobsService,
   settings: createSettingsService,
-};
+} as Record<string, unknown>;

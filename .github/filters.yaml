@@ -35,8 +35,8 @@ docs:
 # TODO: this needs a lot more in it
 global:
   - 'packages/**/package.json'
-  - '.github/actions/yarn-nm-install/*.yml'
+  - '.github/actions/pnpm-install/*.yml'
   - '.github/workflows/**'
-  - 'yarn.lock'
+  - 'pnpm-lock.yaml'
   - 'jest.config.js'
   - 'package.json'

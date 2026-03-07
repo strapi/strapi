@@ -31,21 +31,22 @@
     "dist/"
   ],
   "scripts": {
-    "build": "run -T npm-run-all clean --parallel build:code build:types",
-    "build:code": "run -T  rollup -c",
-    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
-    "watch": "run -T rollup -c -w"
+    "build": "pnpm exec npm-run-all clean --parallel build:code build:types",
+    "build:code": "pnpm exec  rollup -c",
+    "build:types": "pnpm exec tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "pnpm exec rimraf ./dist",
+    "lint": "pnpm exec eslint .",
+    "test:ts": "pnpm exec tsc --noEmit",
+    "watch": "pnpm exec rollup -c -w"
   },
   "dependencies": {
     "lodash": "4.17.23",
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.38.0",
-    "tsconfig": "5.38.0"
+    "eslint-config-custom": "workspace:*",
+    "logform": "^2.4.0",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

@@ -23,7 +23,7 @@ This action checks a PR labels, milestone and status to validate it is ready for
 
 ### Dependencies
 
-- Run `yarn` to install the dependencies
+- Run `pnpm install` to install the dependencies
 
 ### Development
 
@@ -31,5 +31,5 @@ In order for the action to run on github all the code needs to be bundled and co
 
 ### Commands
 
-- `yarn build`: Build the code the must be committed
-- `yarn watch`: Build in watch mode
+- `pnpm build`: Build the code the must be committed
+- `pnpm watch`: Build in watch mode

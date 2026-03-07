@@ -42,16 +42,16 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "run -T npm-run-all clean --parallel build:code build:types",
-    "build:code": "run -T rollup -c",
-    "build:types": "run -T run-p build:types:server build:types:admin",
-    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
-    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:unit": "run -T jest --passWithNoTests",
-    "test:unit:watch": "run -T jest --watch",
-    "watch": "run -T rollup -c -w"
+    "build": "pnpm exec npm-run-all clean --parallel build:code build:types",
+    "build:code": "pnpm exec rollup -c",
+    "build:types": "pnpm exec run-p build:types:server build:types:admin",
+    "build:types:server": "pnpm exec tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "pnpm exec tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
+    "clean": "pnpm exec rimraf ./dist",
+    "lint": "pnpm exec eslint .",
+    "test:unit": "pnpm exec jest --passWithNoTests",
+    "test:unit:watch": "pnpm exec jest --watch",
+    "watch": "pnpm exec rollup -c -w"
   },
   "dependencies": {
     "@apollo/server": "4.13.0",
@@ -61,7 +61,7 @@
     "@koa/cors": "5.0.0",
     "@strapi/design-system": "2.2.0",
     "@strapi/icons": "2.2.0",
-    "@strapi/utils": "5.38.0",
+    "@strapi/utils": "workspace:*",
     "graphql": "^16.8.1",
     "graphql-depth-limit": "^1.1.0",
     "graphql-playground-middleware-koa": "^1.6.21",
@@ -73,19 +73,19 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.38.0",
-    "@strapi/types": "5.38.0",
+    "@strapi/strapi": "workspace:*",
+    "@strapi/types": "workspace:*",
     "@types/graphql-depth-limit": "1.1.5",
     "@types/koa-bodyparser": "4.3.12",
     "@types/koa__cors": "5.0.0",
     "cross-env": "^7.0.3",
-    "eslint-config-custom": "5.38.0",
+    "eslint-config-custom": "workspace:*",
     "koa": "2.16.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
     "styled-components": "6.1.8",
-    "tsconfig": "5.38.0",
+    "tsconfig": "workspace:*",
     "typescript": "5.4.4"
   },
   "peerDependencies": {

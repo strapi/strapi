@@ -1,5 +1,7 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
+type ValidatorFn = (body: unknown, errorMessage?: string) => Promise<unknown>;
+
 const providerOptionsUpdateSchema = yup.object().shape({
   autoRegister: yup.boolean().required(),
   defaultRole: yup
@@ -29,8 +31,10 @@ const providerOptionsUpdateSchema = yup.object().shape({
     ),
 });
 
-export const validateProviderOptionsUpdate = validateYupSchema(providerOptionsUpdateSchema);
+export const validateProviderOptionsUpdate: ValidatorFn = validateYupSchema(
+  providerOptionsUpdateSchema
+);
 
 export default {
   validateProviderOptionsUpdate,
-};
+} as Record<string, ValidatorFn>;
