@@ -4,6 +4,11 @@ const serverConfig = ({ env }) => ({
   app: {
     keys: env.array('APP_KEYS', ['toBeModified1', 'toBeModified2']),
   },
+  transfer: {
+    remote: {
+      enabled: true,
+    },
+  },
 });
 
 export default serverConfig;
