@@ -63,19 +63,27 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
     <Flex direction="column" alignItems="stretch" gap={6}>
       {layout.map((panel, index) => {
         if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
-          const [row] = panel;
-          const [field] = row;
-
           return (
-            <Grid.Root key={field.name} gap={4}>
-              <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                <InputRenderer
-                  {...field}
-                  label={getLabel(field.name, field.label)}
-                  document={document}
-                />
-              </Grid.Item>
-            </Grid.Root>
+            <ResponsiveGridRoot key={`dz-panel-${index}`} gap={{ initial: 6, medium: 4 }}>
+              {panel.flatMap((row) =>
+                row.map(({ size, ...field }) => (
+                  <ResponsiveGridItem
+                    col={size}
+                    key={field.name}
+                    s={12}
+                    xs={12}
+                    direction="column"
+                    alignItems="stretch"
+                  >
+                    <InputRenderer
+                      {...field}
+                      label={getLabel(field.name, field.label)}
+                      document={document}
+                    />
+                  </ResponsiveGridItem>
+                ))
+              )}
+            </ResponsiveGridRoot>
           );
         }
 

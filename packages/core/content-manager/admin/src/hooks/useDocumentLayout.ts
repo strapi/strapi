@@ -246,9 +246,18 @@ const formatEditLayout = (
     { configurations: data.components, schemas: components },
     schemas
   ).reduce<Array<EditFieldLayout[][]>>((panels, row) => {
-    if (row.some((field) => field.type === 'dynamiczone')) {
-      panels.push([row]);
-      currentPanelIndex += 2;
+    const hasDZ = row.some((field) => field.type === 'dynamiczone');
+    if (hasDZ) {
+      // If the previous panel is also a DZ panel, merge into it for side-by-side rendering
+      const prevPanelIdx = currentPanelIndex - 1;
+      const prevPanel = panels[prevPanelIdx];
+      const prevIsDZPanel = prevPanel?.some((r) => r.some((f) => f.type === 'dynamiczone'));
+      if (prevIsDZPanel) {
+        prevPanel.push(row);
+      } else {
+        panels.push([row]);
+        currentPanelIndex += 2;
+      }
     } else {
       if (!panels[currentPanelIndex]) {
         panels.push([row]);
