@@ -34,13 +34,14 @@ import { useDocumentActions } from '../../../../hooks/useDocumentActions';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import { contentManagerApi } from '../../../../services/api';
 import {
-  useGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   usePublishManyDocumentsMutation,
 } from '../../../../services/documents';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
 import { DocumentStatus } from '../../../EditView/components/DocumentStatus';
+import { transformDocument } from '../../../EditView/utils/data';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
@@ -413,60 +414,46 @@ const SelectedEntriesModalContent = ({
   const [{ query }] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
-  // Fetch the documents based on the selected entries and update the modal table
-  const { data, isLoading, isFetching, refetch } = useGetAllDocumentsQuery(
+  // Fetch via findOne (same as edit view) so we get the exact same data structure.
+  // The list API returns a different structure that causes false validation errors.
+  const {
+    data: documents = [],
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetDocumentsForValidationQuery(
     {
+      collectionType: 'collection-types',
       model,
-      params: {
-        page: '1',
-        pageSize: documentIds.length.toString(),
-        sort: query.sort,
-        filters: {
-          documentId: {
-            $in: documentIds,
-          },
-        },
-        locale: query.plugins?.i18n?.locale,
-      },
+      documentIds,
+      params: { locale: query.plugins?.i18n?.locale },
     },
-    {
-      selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
-    }
+    { skip: documentIds.length === 0 }
   );
 
-  // Validate the entries based on the schema to show errors if any
+  // Transform and validate like the edit view - transformDocument prepares data
+  // for validation (relations, temp keys, etc.)
   const { rows, validationErrors } = React.useMemo(() => {
-    if (data.length > 0 && schema) {
-      const validate = createYupSchema(
-        schema.attributes,
-        components,
-        // Since this is the "Publish" action, the validation
-        // schema must enforce the rules for published entities
-        { status: 'published' }
-      );
+    if (documents.length > 0 && schema) {
+      const validate = createYupSchema(schema.attributes, components, { status: 'published' });
+      const transform = transformDocument(schema, components);
       const validationErrors: Record<TableRow['documentId'], FormErrors> = {};
-      const rows = data.map((entry: Document) => {
+      const rows = documents.map((entry: Document) => {
+        const transformed = transform(entry);
         try {
-          validate.validateSync(entry, { abortEarly: false });
-
+          validate.validateSync(transformed, { abortEarly: false });
           return entry;
         } catch (e) {
           if (e instanceof ValidationError) {
             validationErrors[entry.documentId] = getYupValidationErrors(e);
           }
-
           return entry;
         }
       });
-
       return { rows, validationErrors };
     }
-
-    return {
-      rows: [],
-      validationErrors: {},
-    };
-  }, [components, data, schema]);
+    return { rows: [], validationErrors: {} };
+  }, [components, documents, schema]);
 
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 

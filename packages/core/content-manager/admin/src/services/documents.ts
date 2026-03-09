@@ -256,6 +256,50 @@ const documentApi = contentManagerApi.injectEndpoints({
         },
       }),
     }),
+    /**
+     * Fetches documents via the existing findOne endpoint (same as edit view).
+     * Reuses the edit view's data structure for validation.
+     */
+    getDocumentsForValidation: builder.query<
+      FindOne.Response['data'][],
+      {
+        collectionType: string;
+        model: string;
+        documentIds: string[];
+        params?: FindOne.Request['query'];
+      }
+    >({
+      queryFn: async (
+        { collectionType, model, documentIds, params },
+        _api,
+        _extraOpts,
+        baseQuery
+      ) => {
+        const results = await Promise.all(
+          documentIds.map(async (documentId) => {
+            const res = await baseQuery({
+              url: `/content-manager/${collectionType}/${model}/${documentId}`,
+              method: 'GET',
+              config: { params },
+            });
+            if (res.error) return null;
+            return (res.data as FindOne.Response)?.data ?? null;
+          })
+        );
+        const documents = results.filter((doc): doc is FindOne.Response['data'] => doc != null);
+        return { data: documents };
+      },
+      providesTags: (result, _error, { model }) =>
+        result
+          ? [
+              ...result.map((doc) => ({
+                type: 'Document' as const,
+                id: `${model}_${doc.documentId}`,
+              })),
+              { type: 'Document', id: `${model}_LIST` },
+            ]
+          : [],
+    }),
     getDocument: builder.query<
       FindOne.Response,
       Pick<FindOne.Params, 'model'> &
@@ -515,6 +559,7 @@ const {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery,
@@ -534,6 +579,7 @@ export {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery as useGetDraftRelationCountQuery,
