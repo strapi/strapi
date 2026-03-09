@@ -2,9 +2,14 @@
   "name": "@strapi/admin",
   "version": "5.38.0",
   "description": "Strapi Admin",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/core/admin"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {

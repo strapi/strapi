@@ -11,7 +11,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/core/types"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
