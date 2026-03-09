@@ -13,6 +13,66 @@ import { indexByDocumentId } from './utils/document-status';
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
 /**
+ * Extracts the sort direction for the 'status' field from a sort parameter.
+ * Returns 'ASC', 'DESC', or null if status is not being sorted.
+ *
+ * The sort param can be a string ('status:ASC'), an array (['status:ASC']),
+ * or an object ({ status: 'ASC' }).
+ */
+const extractStatusSortOrder = (sort: unknown): 'ASC' | 'DESC' | null => {
+  if (!sort) return null;
+
+  if (typeof sort === 'string') {
+    const match = sort.match(/(?:^|,)\s*status:(ASC|DESC)\s*(?:,|$)/i);
+    return match ? (match[1].toUpperCase() as 'ASC' | 'DESC') : null;
+  }
+
+  if (Array.isArray(sort)) {
+    for (const item of sort) {
+      const result = extractStatusSortOrder(item);
+      if (result) return result;
+    }
+    return null;
+  }
+
+  if (typeof sort === 'object' && sort !== null && 'status' in sort) {
+    const dir = String((sort as Record<string, unknown>).status).toUpperCase();
+    return dir === 'ASC' || dir === 'DESC' ? dir : null;
+  }
+
+  return null;
+};
+
+/**
+ * Removes the 'status' field from a sort parameter, returning the remainder
+ * (or undefined if status was the only sort field).
+ */
+const removeStatusFromSort = (sort: unknown): unknown => {
+  if (!sort) return sort;
+
+  if (typeof sort === 'string') {
+    const cleaned = sort
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
+      .join(',');
+    return cleaned || undefined;
+  }
+
+  if (Array.isArray(sort)) {
+    const cleaned = sort.filter((item) => extractStatusSortOrder(item) === null);
+    return cleaned.length ? cleaned : undefined;
+  }
+
+  if (typeof sort === 'object' && sort !== null) {
+    const { status: _removed, ...rest } = sort as Record<string, unknown>;
+    return Object.keys(rest).length ? rest : undefined;
+  }
+
+  return sort;
+};
+
+/**
  * Create a new document.
  *
  * @param ctx - Koa context
@@ -134,7 +194,15 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
+    // Extract and remove 'status' sort before sanitization/validation, since status
+    // is not a real schema attribute and would be rejected by the permission checker.
+    // It is re-added after sanitization so the DB layer can handle it via a CASE expression.
+    const statusSortOrder = extractStatusSortOrder(query.sort);
+    const queryWithoutStatusSort = statusSortOrder
+      ? { ...query, sort: removeStatusFromSort(query.sort) }
+      : query;
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryWithoutStatusSort);
 
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
@@ -142,12 +210,15 @@ export default {
       .countRelations({ toOne: false, toMany: true })
       .build();
 
-    const { locale, status } = await getDocumentLocaleAndStatus(query, model);
+    const { locale, status } = await getDocumentLocaleAndStatus(queryWithoutStatusSort, model);
 
-    const { results: documents, pagination } = await documentManager.findPage(
-      { ...permissionQuery, populate, locale, status },
-      model
-    );
+    const { results: documents, pagination } = statusSortOrder
+      ? await documentManager.findPageWithStatusSort(
+          { ...permissionQuery, populate, locale, status },
+          model,
+          statusSortOrder.toLowerCase() as 'asc' | 'desc'
+        )
+      : await documentManager.findPage({ ...permissionQuery, populate, locale, status }, model);
 
     // TODO: Skip this part if not necessary (if D&P disabled or columns not displayed in the view)
     const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(

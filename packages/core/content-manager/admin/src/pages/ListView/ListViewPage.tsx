@@ -235,7 +235,7 @@ const ListViewPage = () => {
           defaultMessage: 'status',
         }),
         searchable: false,
-        sortable: false,
+        sortable: true,
       } satisfies ListFieldLayout);
     }
 
