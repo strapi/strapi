@@ -154,17 +154,32 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return {};
     },
 
-    // FIXME: handle relations
     async deleteMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
-      opts: DocServiceParams<'findMany'> & { locale?: string } = {}
+      opts: Omit<DocServiceParams<'delete'>, 'documentId'> = {} as any
     ) {
-      const deletedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(documentIds.map(async (id) => this.delete(id, uid, opts)));
+      const populate = await buildDeepPopulate(uid);
+      const uniqueDocumentIds = [...new Set(documentIds)];
+
+      // Reuse document-service delete so bulk deletes keep relation and component cleanup.
+      const deletedDocuments = await strapi.db.transaction(async () => {
+        return Promise.all(
+          uniqueDocumentIds.map((documentId) =>
+            strapi.documents(uid).delete({
+              ...opts,
+              documentId,
+              populate,
+            })
+          )
+        );
       });
 
-      return { count: deletedEntries.length };
+      const count = deletedDocuments.reduce((total, deletedDocument) => {
+        return deletedDocument.entries.length > 0 ? total + 1 : total;
+      }, 0);
+
+      return { count };
     },
 
     async publish(
