@@ -23,7 +23,7 @@ import {
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
 } from './content-types';
-import { PaginationError } from './errors';
+import { PaginationError, ValidationError } from './errors';
 import { isOperator } from './operators';
 
 import parseType from './parse-type';
@@ -118,18 +118,15 @@ export interface Query {
   pageSize?: number;
 }
 
-class InvalidOrderError extends Error {
+class InvalidOrderError extends ValidationError {
   constructor() {
-    super();
-    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+    super('Invalid order. order can only be one of asc|desc|ASC|DESC');
   }
 }
 
-class InvalidSortError extends Error {
+class InvalidSortError extends ValidationError {
   constructor() {
-    super();
-    this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
+    super('Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects');
   }
 }
 
