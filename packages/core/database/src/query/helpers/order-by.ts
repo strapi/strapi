@@ -276,7 +276,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     })),
     // Add T.id to the order by clause to get consistent results in case several rows have the exact same order
     { column: `${partitionedQueryAlias}.id`, order: 'asc' },
-  ] as any[]);
+  ] as any);
 
   return resultQuery;
 };

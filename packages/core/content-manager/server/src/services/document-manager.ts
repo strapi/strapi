@@ -135,7 +135,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       // Apply D&P status filter (document service does this internally via statusToLookup)
       const model = strapi.getModel(uid);
       if (contentTypes.hasDraftAndPublish(model)) {
-        const docStatus = (params as any).status || 'draft';
+        const docStatus = params.status || 'draft';
         where.publishedAt = docStatus === 'published' ? { $notNull: true } : null;
       }
 
@@ -146,7 +146,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       // Convert existing sort to DB orderBy format and append status sort
-      const baseOrderBy = convertSortToOrderBy((params as any).sort);
+      const baseOrderBy = convertSortToOrderBy(params.sort);
       const orderBy = [...baseOrderBy, { status: statusSortDirection }];
 
       // withDefaultPagination normalizes page/pageSize → start/limit at the top level
