@@ -1,6 +1,6 @@
 import { isNil } from 'lodash/fp';
 
-import { setCreatorFields, async, errors } from '@strapi/utils';
+import { setCreatorFields, async, contentTypes, errors } from '@strapi/utils';
 import type { Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
@@ -151,13 +151,11 @@ export default {
       model
     );
 
-    // TODO: Skip this part if not necessary (if D&P disabled or columns not displayed in the view)
-    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
-      model,
-      documents
-    );
+    const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(model));
 
-    const statusByDocumentId = indexByDocumentId(documentsAvailableStatus);
+    const statusByDocumentId = hasDraftAndPublish
+      ? indexByDocumentId(await documentMetadata.getManyAvailableStatus(model, documents))
+      : new Map();
 
     const setStatus = (document: any) => {
       // Available status of document
@@ -499,10 +497,11 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { populate, locale, isPublished: false })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      populate,
+      locale,
+      isPublished: false,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -537,10 +536,10 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { locale, isPublished: true })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      locale,
+      isPublished: true,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -751,17 +750,11 @@ export default {
       return ctx.forbidden();
     }
 
-    const documents = await documentManager.findMany(
-      {
-        filters: {
-          documentId: ids,
-        },
-        locale,
-      },
-      model
-    );
+    const count = await strapi.db.query(model).count({
+      where: { documentId: ids },
+    });
 
-    if (!documents) {
+    if (count === 0) {
       return ctx.notFound();
     }
 
