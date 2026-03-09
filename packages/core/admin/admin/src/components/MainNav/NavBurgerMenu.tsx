@@ -41,12 +41,11 @@ export const NavBurgerMenu = ({
   listLinks,
 }: NavBurgerMenuProps) => {
   return (
-    <Portal>
-      <AnimatePresence>
-        {isShown && (
+    <AnimatePresence>
+      {isShown === true && (
+        <Portal key="burger">
           <FocusTrap onEscape={onClose}>
             <MotionLayer
-              key="burger"
               role="dialog"
               aria-modal="true"
               initial={{ y: '-100%' }}
@@ -83,8 +82,8 @@ export const NavBurgerMenu = ({
               </Surface>
             </MotionLayer>
           </FocusTrap>
-        )}
-      </AnimatePresence>
-    </Portal>
+        </Portal>
+      )}
+    </AnimatePresence>
   );
 };
