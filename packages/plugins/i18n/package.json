@@ -2,9 +2,13 @@
   "name": "@strapi/i18n",
   "version": "5.38.0",
   "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/strapi/strapi.git",
+    "url": "git://github.com/strapi/strapi.git",
     "directory": "packages/plugins/i18n"
   },
   "license": "SEE LICENSE IN LICENSE",

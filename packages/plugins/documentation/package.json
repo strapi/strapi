@@ -2,9 +2,13 @@
   "name": "@strapi/plugin-documentation",
   "version": "5.38.0",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/strapi/strapi.git",
+    "url": "git://github.com/strapi/strapi.git",
     "directory": "packages/plugins/documentation"
   },
   "license": "SEE LICENSE IN LICENSE",
