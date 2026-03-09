@@ -42,21 +42,24 @@ describe('Filters', () => {
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
 
-    expect(screen.getByRole('combobox', { name: 'Select field' })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Select field' })).toHaveTextContent('Name');
-    expect(screen.getByRole('combobox', { name: 'Select filter' })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Select filter' })).toHaveTextContent('is');
-    expect(screen.getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add filter' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add filter' })).toBeDisabled();
+    const selectFieldCombobox = await screen.findByRole('combobox', { name: 'Select field' });
+    expect(selectFieldCombobox).toBeInTheDocument();
+    expect(selectFieldCombobox).toHaveTextContent('Name');
+    const selectFilterCombobox = await screen.findByRole('combobox', { name: 'Select filter' });
+    expect(selectFilterCombobox).toBeInTheDocument();
+    expect(selectFilterCombobox).toHaveTextContent('is');
+    expect(await screen.findByRole('textbox', { name: 'Name' })).toBeInTheDocument();
+    const addFilterButton = await screen.findByRole('button', { name: 'Add filter' });
+    expect(addFilterButton).toBeInTheDocument();
+    expect(addFilterButton).toBeDisabled();
   });
 
   it("should add a filter to the list when the 'Add filter' button is clicked & close the popover", async () => {
     const { user } = render();
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
-    await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Jimbob');
-    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+    await user.type(await screen.findByRole('textbox', { name: 'Name' }), 'Jimbob');
+    fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
 
     await screen.findByText('Name $eq Jimbob');
 
@@ -70,8 +73,8 @@ describe('Filters', () => {
     const { user } = render();
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
-    await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Jimbob');
-    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+    await user.type(await screen.findByRole('textbox', { name: 'Name' }), 'Jimbob');
+    fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
 
     const filter = await screen.findByText('Name $eq Jimbob');
 
@@ -86,35 +89,35 @@ describe('Filters', () => {
     const { user } = render();
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
-    await user.click(screen.getByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
 
-    expect(screen.getByRole('option', { name: 'Name' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Status' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Created At' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Name' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Status' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Created At' })).toBeInTheDocument();
   });
 
   it("should display a list of the operators when the combobox named Select filter is pressed & the 'Status' filter is selected", async () => {
     const { user } = render();
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
-    await user.click(screen.getByRole('combobox', { name: 'Select field' }));
-    await user.click(screen.getByRole('option', { name: 'Status' }));
-    await user.click(screen.getByRole('combobox', { name: 'Select filter' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('option', { name: 'Status' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select filter' }));
 
-    expect(screen.getByRole('option', { name: 'is' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'is not' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is not' })).toBeInTheDocument();
   });
 
   it('should correctly show the options passed to an enumeration type filter', async () => {
     const { user } = render();
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
-    await user.click(screen.getByRole('combobox', { name: 'Select field' }));
-    await user.click(screen.getByRole('option', { name: 'Status' }));
-    await user.click(screen.getByRole('combobox', { name: 'Status' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('option', { name: 'Status' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Status' }));
 
-    expect(screen.getByRole('option', { name: 'Draft' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Modified' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Published' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Draft' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Modified' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Published' })).toBeInTheDocument();
   });
 });

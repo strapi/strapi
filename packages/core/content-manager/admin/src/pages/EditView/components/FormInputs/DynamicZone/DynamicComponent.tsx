@@ -115,7 +115,9 @@ const DynamicComponent = ({
 
   const { value = [], rawError } = useField(`${name}.${index}`);
 
-  const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
+  const [collapseToOpen, setCollapseToOpen] = React.useState<string>(
+    value.id ? '' : accordionValue
+  );
 
   React.useEffect(() => {
     if (rawError && value) {
