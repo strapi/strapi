@@ -139,24 +139,10 @@ interface RelationsFieldProps
   extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {}
 
-type RelationAttribute = RelationsFieldProps['attribute'];
-
 export interface RelationsFormValue {
   connect?: Relation[];
   disconnect?: Pick<Relation, 'id'>[];
 }
-
-const getRelationTargetModel = (attribute: RelationAttribute) => {
-  if ('targetModel' in attribute && typeof attribute.targetModel === 'string') {
-    return attribute.targetModel;
-  }
-
-  if ('target' in attribute && typeof attribute.target === 'string') {
-    return attribute.target;
-  }
-
-  return undefined;
-};
 
 /**
  * TODO: we get a rather ugly flash when we remove a single relation from the list leaving
@@ -185,8 +171,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
-    const targetModel = getRelationTargetModel(props.attribute);
-    const safeTargetModel = targetModel ?? '';
+    // @ts-expect-error – `targetModel` exists on supported non-morph relations (morph is disabled).
+    const targetModel = props.attribute.targetModel;
 
     const componentId = useComponent('RelationsField', (state) => state.id);
     const componentUID = useComponent('RelationsField', (state) => state.uid);
@@ -246,7 +232,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id || !isRelatedToCurrentDocument || !targetModel,
+        skip: !id || !isRelatedToCurrentDocument,
       }
     );
 
@@ -281,7 +267,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const relations = React.useMemo(() => {
       const ctx = {
         field: field.value,
-        href: `../${COLLECTION_TYPES}/${safeTargetModel}`,
+        href: `../${COLLECTION_TYPES}/${targetModel}`,
         mainField: props.mainField,
       };
 
@@ -305,7 +291,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         if (a.__temp_key__ > b.__temp_key__) return 1;
         return 0;
       });
-    }, [serverData, field.value, props.mainField, safeTargetModel]);
+    }, [serverData, field.value, targetModel, props.mainField]);
 
     const handleDisconnect = useHandleDisconnect(props.name, 'RelationsField');
 
@@ -328,7 +314,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
           [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
           label: getRelationLabel(relation, props.mainField),
-          href: `../${COLLECTION_TYPES}/${safeTargetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
+          href: `../${COLLECTION_TYPES}/${targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
         };
 
         if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
@@ -348,13 +334,9 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         props.mainField,
         props.name,
         relations,
-        safeTargetModel,
+        targetModel,
       ]
     );
-
-    if (!targetModel) {
-      return null;
-    }
 
     return (
       <Flex
@@ -513,8 +495,8 @@ const RelationsInput = ({
   const { formatMessage } = useIntl();
 
   const field = useField<RelationsFormValue>(name);
-  const targetModel = getRelationTargetModel(props.attribute);
-  const safeTargetModel = targetModel ?? '';
+  // @ts-expect-error – `targetModel` exists on supported non-morph relations (morph is disabled).
+  const targetModel = props.attribute.targetModel;
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
   const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
@@ -606,11 +588,11 @@ const RelationsInput = ({
     () =>
       ({
         collectionType: COLLECTION_TYPES,
-        model: safeTargetModel,
+        model: targetModel,
         documentId: '',
         params: currentDocumentMeta.params,
       }) as DocumentMeta,
-    [currentDocumentMeta.params, safeTargetModel]
+    [currentDocumentMeta.params, targetModel]
   );
 
   const {
@@ -623,10 +605,6 @@ const RelationsInput = ({
       subject: relation.model,
     }))
   );
-
-  if (!targetModel) {
-    return null;
-  }
 
   if (error) {
     return (
