@@ -31,12 +31,20 @@ export class PluginRoutesProvider extends AbstractRoutesProvider {
 
       return Array.isArray(routes)
         ? routes
-        : Object.values(routes).flatMap((router: any) => {
-            const prefix = router.prefix ?? '';
-
+        : Object.values(routes).flatMap((router: Core.Router) => {
             return router.routes.map((route: Core.Route) => {
+              const hasOwnPrefix =
+                route.config != null &&
+                Object.prototype.hasOwnProperty.call(route.config, 'prefix');
+
+              const effectivePrefix = hasOwnPrefix
+                ? (route.config?.prefix ?? '')
+                : (router.prefix ?? '');
+
               const fullPath =
-                (`${prefix}${route.path}` || '/').replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+                (`${effectivePrefix}${route.path}` || '/')
+                  .replace(/\/+/g, '/')
+                  .replace(/\/$/, '') || '/';
 
               return {
                 ...route,
