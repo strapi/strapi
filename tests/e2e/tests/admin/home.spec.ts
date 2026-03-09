@@ -284,6 +284,14 @@ test.describe('Home as super admin', () => {
       await waitForRestart(page);
     }
   });
+
+  test('a super admin should see the deploy now widget', async ({ page }) => {
+    const deployWidget = page.getByLabel(/Deploy/i, { exact: true });
+    await expect(deployWidget).toBeVisible();
+    await expect(deployWidget.getByText('Ready to go live?')).toBeVisible();
+    await expect(deployWidget.getByText('Trigger a new deployment of your project.')).toBeVisible();
+    await expect(deployWidget.getByRole('button', { name: /deploy now/i })).toBeVisible();
+  });
 });
 
 test.describe('Home as editor', () => {
@@ -298,5 +306,11 @@ test.describe('Home as editor', () => {
   }) => {
     const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
     await expect(keyStatisticsWidget).not.toBeVisible();
+  });
+
+  test('a user should see the deploy now widget regardless of their role', async ({ page }) => {
+    const deployWidget = page.getByLabel(/Deploy/i, { exact: true });
+    await expect(deployWidget).toBeVisible();
+    await expect(deployWidget.getByRole('button', { name: /deploy now/i })).toBeVisible();
   });
 });
