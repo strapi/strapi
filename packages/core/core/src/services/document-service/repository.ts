@@ -1,4 +1,4 @@
-import { omit, assoc, merge, curry, isEmpty } from 'lodash/fp';
+import { omit, assoc, merge, curry, isEmpty, pick } from 'lodash/fp';
 
 import {
   async,
@@ -8,7 +8,7 @@ import {
   createModelCache,
 } from '@strapi/utils';
 
-import type { UID } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
@@ -16,7 +16,7 @@ import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
-import { pickSelectionParams } from './params';
+import { ALLOWED_DOCUMENT_ROOT_PARAM_KEYS, pickSelectionParams } from './params';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
@@ -32,6 +32,15 @@ const { validators } = validate;
 
 // we have to typecast to reconcile the differences between validator and database getModel
 const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
+
+// config.api.documents.strictParams: false/undefined (pass through), true (throw on invalid)
+
+// BCP 47–style locale format: 2–3 letter language code (any case), optional subtags (-XX or -XXX...), max 35 chars
+const LOCALE_FORMAT = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
+const MAX_LOCALE_LENGTH = 35;
+
+/** Treat as "param not provided": null, undefined, or empty string (e.g. from query/JSON). */
+const isParamEmpty = (v: unknown): boolean => v === undefined || v === null || v === '';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
@@ -51,7 +60,196 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     populate: ['nonAttributesOperators'],
   };
 
-  const validateParams = async (params: any) => {
+  /**
+   * Checks status parameter. When strict is true, throws on invalid status.
+   * Valid values are 'published' and 'draft'; for types without D&P they are currently ignored but may throw in the future
+   */
+  const checkStatus = (
+    params: Record<string, unknown>,
+    strict: boolean
+  ): Record<string, unknown> => {
+    if (!strict) {
+      return params;
+    }
+
+    if (isParamEmpty(params.status)) {
+      delete params.status;
+      return params;
+    }
+
+    if (params.status !== 'published' && params.status !== 'draft') {
+      throw new errors.ValidationError(
+        `Invalid parameter at 'status'. Expected 'published' or 'draft', received: ${params.status}`
+      );
+    }
+
+    return params;
+  };
+
+  /**
+   * Checks locale parameter. When strict is true, throws on invalid locale value.
+   * Accepts only: string (single locale or '*'), array of locale strings (e.g. bulk publish),
+   * empty string, null, or undefined (removed but allowed)
+   */
+  const checkLocale = (
+    params: Record<string, unknown>,
+    strict: boolean
+  ): Record<string, unknown> => {
+    if (!strict) {
+      return params;
+    }
+
+    if (isParamEmpty(params.locale)) {
+      delete params.locale;
+      return params;
+    }
+
+    // Reject objects (we only accept string, array of strings, empty string, null, undefined)
+    if (typeof params.locale === 'object' && !Array.isArray(params.locale)) {
+      throw new errors.ValidationError(
+        `Invalid parameter at 'locale'. Expected a string, array of strings, empty string, null, or undefined; received: object`,
+        { received: params.locale }
+      );
+    }
+
+    const validateAndNormalizeOne = (value: unknown, path: string): string => {
+      if (typeof value !== 'string') {
+        throw new errors.ValidationError(
+          `Invalid parameter at '${path}'. Expected a string, received: ${typeof value}`,
+          { received: value }
+        );
+      }
+      if (value === '*') return value;
+      const isEmpty = value.length === 0;
+      const tooLong = value.length > MAX_LOCALE_LENGTH;
+      const invalidFormat = !LOCALE_FORMAT.test(value);
+      if (isEmpty || tooLong || invalidFormat) {
+        let reason: string;
+        if (isEmpty) {
+          reason = 'Locale cannot be empty';
+        } else if (tooLong) {
+          reason = `Locale exceeds maximum length of ${MAX_LOCALE_LENGTH} characters`;
+        } else {
+          reason = 'Locale must be a valid BCP 47 format (e.g. en, en-US, zh-Hans)';
+        }
+        throw new errors.ValidationError(`Invalid parameter at '${path}'. ${reason}.`);
+      }
+      return value;
+    };
+
+    if (Array.isArray(params.locale)) {
+      const filtered = (params.locale as unknown[]).filter(
+        (item): item is string => typeof item === 'string' && !isParamEmpty(item)
+      );
+      if (filtered.length === 0) {
+        delete params.locale;
+        return params;
+      }
+      params.locale = filtered.map((item, i) => validateAndNormalizeOne(item, `locale[${i}]`));
+      return params;
+    }
+
+    params.locale = validateAndNormalizeOne(params.locale, 'locale');
+    return params;
+  };
+
+  /**
+   * Pagination param parsing (used only when strict).
+   * Contract: empty (null/undefined/'') → undefined (omit from result).
+   *           present but invalid → throw ValidationError.
+   *           present and valid → return normalized value.
+   */
+  const parsePaginationInt = (
+    name: string,
+    value: unknown,
+    strict: boolean,
+    spec: { min: number; allowMinusOne?: boolean }
+  ): number | undefined => {
+    if (isParamEmpty(value)) return undefined;
+    const num = Number(value);
+    const valid =
+      Number.isInteger(num) && (num >= spec.min || (spec.allowMinusOne === true && num === -1));
+    if (!valid && strict) {
+      const expected = spec.allowMinusOne
+        ? `integer >= ${spec.min} or -1`
+        : `integer >= ${spec.min}`;
+      throw new errors.ValidationError(
+        `Invalid parameter at '${name}'. Expected ${expected}, received: ${value}`
+      );
+    }
+    return valid ? num : undefined;
+  };
+
+  const parseWithCount = (value: unknown): boolean | undefined => {
+    if (isParamEmpty(value)) return undefined;
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string' && (value === 'true' || value === 'false'))
+      return value === 'true';
+    throw new errors.ValidationError(
+      `Invalid parameter at 'withCount'. Expected a boolean, received: ${typeof value}`
+    );
+  };
+
+  const PAGINATION_KEYS = ['page', 'pageSize', 'start', 'limit', 'withCount'] as const;
+
+  /**
+   * When strict: empty → omit, invalid → throw, valid → include.
+   * When not strict: return params unchanged.
+   */
+  const checkPagination = (
+    params: Record<string, unknown>,
+    strict: boolean
+  ): Record<string, unknown> => {
+    if (!strict) return params;
+
+    const hasPage = !isParamEmpty(params.page) || !isParamEmpty(params.pageSize);
+    const hasOffset = !isParamEmpty(params.start) || !isParamEmpty(params.limit);
+    if (hasPage && hasOffset) {
+      throw new errors.ValidationError(
+        'Invalid pagination parameters. Cannot use both page-based (page, pageSize) and offset-based (start, limit) pagination in the same query.'
+      );
+    }
+
+    const page = parsePaginationInt('page', params.page, strict, { min: 1 });
+    const pageSize = parsePaginationInt('pageSize', params.pageSize, strict, { min: 1 });
+    const start = parsePaginationInt('start', params.start, strict, { min: 0 });
+    const limit = parsePaginationInt('limit', params.limit, strict, {
+      min: 1,
+      allowMinusOne: true,
+    });
+    const withCount = parseWithCount(params.withCount);
+
+    const result = { ...omit(PAGINATION_KEYS, params) };
+    if (page !== undefined) result.page = page;
+    if (pageSize !== undefined) result.pageSize = pageSize;
+    if (start !== undefined) result.start = start;
+    if (limit !== undefined) result.limit = limit;
+    if (withCount !== undefined) result.withCount = withCount;
+    return result;
+  };
+
+  /**
+   * When strict is true, strip to allowed root-level keys so only those reach the query.
+   * Extra params (e.g. from content API addQueryParams) are allowed in so middlewares see them,
+   * but are stripped here before the query pipeline; they never affect the document query.
+   */
+  const checkUnrecognizedRootParams = (
+    params: Record<string, unknown>,
+    strict: boolean
+  ): Record<string, unknown> => {
+    if (!strict) {
+      return params;
+    }
+
+    return pick(ALLOWED_DOCUMENT_ROOT_PARAM_KEYS as unknown as string[], params) as Record<
+      string,
+      unknown
+    >;
+  };
+
+  const validateParams = async (
+    params: Modules.Documents.Params.All
+  ): Promise<Modules.Documents.Params.All> => {
     // Cache model lookups for this request to avoid repeating the same work
     const modelCache = createModelCache(getModel);
 
@@ -87,9 +285,29 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       throw new errors.ValidationError("Invalid params: 'lookup'");
     }
 
-    // TODO: add validate status, locale, pagination
+    // Validate status, locale, and pagination based on config
+    // config.api.documents.strictParams: false/undefined (pass through), true (throw on invalid)
+    const rawStrictParams: unknown = strapi.config.get('api.documents.strictParams', undefined);
 
-    return params;
+    if (rawStrictParams !== undefined && rawStrictParams !== false && rawStrictParams !== true) {
+      throw new errors.ValidationError(
+        `Invalid config.api.documents.strictParams value: "${rawStrictParams}". Expected boolean (true or false).`
+      );
+    }
+
+    const strict = rawStrictParams === true;
+
+    let processedParams: Record<string, unknown>;
+    if (strict) {
+      processedParams = checkUnrecognizedRootParams(params as Record<string, unknown>, strict);
+      processedParams = checkStatus(processedParams, strict);
+      processedParams = checkLocale(processedParams, strict);
+      processedParams = checkPagination(processedParams, strict);
+    } else {
+      processedParams = params as Record<string, unknown>;
+    }
+
+    return processedParams as Modules.Documents.Params.All;
   };
 
   const entries = createEntriesService(uid, validator);
@@ -102,6 +320,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
+
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsDocumentId(uid),
@@ -116,6 +335,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
+
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       transformParamsDocumentId(uid),
@@ -133,6 +353,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
+
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       transformParamsDocumentId(uid),
@@ -155,7 +376,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
 
-    if (params.status === 'draft') {
+    if (hasDraftAndPublish && params.status === 'draft') {
       throw new Error('Cannot delete a draft document');
     }
 
@@ -222,7 +443,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const clonedEntries = await async.map(
       entriesToClone,
       async.pipe(
-        validateParams,
         omit(['id', 'createdAt', 'updatedAt']),
         // assign new documentId
         assoc('documentId', createDocumentId()),
@@ -302,6 +522,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validateParams,
       DP.defaultStatus(contentType),
       DP.statusToLookup(contentType),
+
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid)
