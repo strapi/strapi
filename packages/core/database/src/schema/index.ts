@@ -4,6 +4,7 @@ import createSchemaBuilder from './builder';
 import createSchemaDiff from './diff';
 import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
+import { backfillUniqueIndexes } from './backfill-unique-indexes';
 
 import type { Schema, SchemaDiff } from './types';
 import type { Database } from '..';
@@ -95,6 +96,7 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
+        await backfillUniqueIndexes(db, diff);
       }
 
       await this.schemaStorage.add(this.schema);

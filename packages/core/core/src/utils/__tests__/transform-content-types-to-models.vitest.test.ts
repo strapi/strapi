@@ -357,7 +357,7 @@ describe('transformContentTypesToModels', () => {
       expect(nameIndex?.type).toBeUndefined();
     });
 
-    it('ignores unique entries in schema indexes array', () => {
+    it('adds variant unique index and claim column when type is unique with scope variant or omitted', () => {
       const modifiedContentTypes = patchContentTypes('countries', {
         indexes: [{ attributes: ['name'], type: 'unique' }],
       } as any);
@@ -365,8 +365,36 @@ describe('transformContentTypesToModels', () => {
       const models = transformContentTypesToModels(modifiedContentTypes, identifiers);
       const model = models.find((m) => m.uid === 'api::countries.countries');
       const uniqueIndex = model?.indexes?.find((idx) => idx.type === 'unique');
+      const regularIndexOnName = model?.indexes?.find(
+        (idx) => idx.type !== 'unique' && idx.columns.length === 1 && idx.columns[0] === 'name'
+      );
 
-      expect(uniqueIndex).toBeUndefined();
+      expect(uniqueIndex).toBeDefined();
+      expect(uniqueIndex?.columns).toHaveLength(1);
+      expect(model?.attributes).toHaveProperty('__uniqueVariantClaim_name');
+      expect(model?.attributes?.__uniqueVariantClaim_name).toMatchObject({
+        type: 'string',
+        columnName: expect.any(String),
+      });
+      expect(regularIndexOnName).toBeDefined();
+      expect(regularIndexOnName?.name).toBeDefined();
+    });
+
+    it('creates documents model when type is unique with scope global', () => {
+      const modifiedContentTypes = patchContentTypes('countries', {
+        indexes: [{ attributes: ['name'], type: 'unique', scope: 'global' }],
+      } as any);
+
+      const models = transformContentTypesToModels(modifiedContentTypes, identifiers);
+      const mainModel = models.find((m) => m.uid === 'api::countries.countries');
+      const documentsModel = models.find((m) => m.uid === 'api::countries.countries.documents');
+
+      expect(mainModel?.attributes).not.toHaveProperty('__uniqueVariantClaim_name');
+      expect(documentsModel).toBeDefined();
+      expect(documentsModel?.tableName).toBe('countries_documents');
+      expect(documentsModel?.attributes).toHaveProperty('document_id');
+      expect(documentsModel?.attributes).toHaveProperty('name');
+      expect(documentsModel?.indexes?.filter((i) => i.type === 'unique')).toHaveLength(1);
     });
 
     it('keeps legacy columns indexes', () => {

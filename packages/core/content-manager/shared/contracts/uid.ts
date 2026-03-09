@@ -33,6 +33,8 @@ export declare namespace CheckUIDAvailability {
       contentTypeUID: string;
       field: string;
       value: string;
+      /** When editing, exclude this document from the availability check. */
+      documentId?: string;
     };
     query: {
       locale?: string | null;
@@ -46,7 +48,7 @@ export declare namespace CheckUIDAvailability {
       }
     | {
         isAvailable?: never;
-        suggesiton?: never;
+        suggestion?: never;
         error?: errors.ApplicationError | errors.YupValidationError;
       };
 }
