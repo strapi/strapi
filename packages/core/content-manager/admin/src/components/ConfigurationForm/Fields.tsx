@@ -164,10 +164,17 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     addFieldRow('layout', { children: [field] });
   };
 
-  const [containers, setContainers] = React.useState(() =>
+  const [containers, setContainersState] = React.useState(() =>
     createDragAndDropContainersFromLayout(layout)
   );
   type Container = (typeof containers)[number];
+  const containersRef = React.useRef(containers);
+
+  const setContainers = React.useCallback((update: typeof containers) => {
+    containersRef.current = update;
+    setContainersState(update);
+  }, []);
+
   const [activeDragItem, setActiveDragItem] = React.useState<Container['children'][number] | null>(
     null
   );
@@ -198,7 +205,9 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
    * Gets the containers as dictionary for quick lookup
    */
   const getContainersAsDictionary = () => {
-    return Object.fromEntries(containers.map((container) => [container.dndId, container]));
+    return Object.fromEntries(
+      containersRef.current.map((container) => [container.dndId, container])
+    );
   };
 
   /**
@@ -243,8 +252,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
    * we need to update the ids and form names
    */
   React.useEffect(() => {
-    const containers = createDragAndDropContainersFromLayout(layout);
-    setContainers(containers);
+    setContainers(createDragAndDropContainersFromLayout(layout));
   }, [layout, setContainers]);
 
   return (
@@ -269,10 +277,10 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         const containersAsDictionary = getContainersAsDictionary();
         const activeContainer = findContainer(active.id, containersAsDictionary);
         const overContainer = findContainer(over?.id ?? '', containersAsDictionary);
-        const activeContainerIndex = containers.findIndex(
+        const activeContainerIndex = containersRef.current.findIndex(
           (container) => container.dndId === activeContainer
         );
-        const overContainerIndex = containers.findIndex(
+        const overContainerIndex = containersRef.current.findIndex(
           (container) => container.dndId === overContainer
         );
 
@@ -297,12 +305,16 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
         if (!draggedItem) return;
 
+        if (activeContainer === overContainer) return;
+
         // Handle a full width field being dragged
         if (draggedItem?.size === GRID_COLUMNS) {
           // Swap the items in the containers
-          const update = produce(containers, (draft) => {
-            draft[activeContainerIndex].children = containers[overContainerIndex].children;
-            draft[overContainerIndex].children = containers[activeContainerIndex].children;
+          const update = produce(containersRef.current, (draft) => {
+            draft[activeContainerIndex].children =
+              containersRef.current[overContainerIndex].children;
+            draft[overContainerIndex].children =
+              containersRef.current[activeContainerIndex].children;
           });
           setContainers(update);
           return;
@@ -313,7 +325,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
          * the item is removed from its current container, and then added to its new container
          * An item can only be added in a container if there is enough space
          */
-        const update = produce(containers, (draft) => {
+        const update = produce(containersRef.current, (draft) => {
           draft[activeContainerIndex].children = draft[activeContainerIndex].children.filter(
             (item) => item.dndId !== active.id
           );
@@ -420,6 +432,20 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         const overContainer = findContainer(overId!, containersAsDictionary);
 
         if (!activeContainer || !overContainer) {
+          if (activeContainer && over) {
+            const updatedContainers = Object.values(containersAsDictionary);
+            const updatedContainersWithSpacers = createContainersWithSpacers(
+              updatedContainers as typeof containers
+            ) as typeof containers;
+            const updatedLayout = updatedContainersWithSpacers.map(
+              ({ dndId: _dndId, children, ...container }) => ({
+                ...container,
+                children: children.map(({ dndId: _dndId, formName: _formName, ...child }) => child),
+              })
+            );
+            onChange('layout', updatedLayout);
+          }
+          setActiveDragItem(null);
           return;
         }
 
@@ -431,7 +457,12 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         );
 
         const movedContainerItems = produce(containersAsDictionary, (draft) => {
-          if (activeIndex !== overIndex && activeContainer === overContainer) {
+          if (
+            activeIndex !== -1 &&
+            overIndex !== -1 &&
+            activeIndex !== overIndex &&
+            activeContainer === overContainer
+          ) {
             // Move items around inside their own container
             draft[activeContainer].children = arraySwap(
               draft[activeContainer].children,
