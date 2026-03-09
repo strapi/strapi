@@ -59,6 +59,7 @@ type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview' | 're
 
 interface DocumentActionDescription {
   label: string;
+  type?: string;
   onClick?: (event: React.SyntheticEvent) => Promise<boolean | void> | boolean | void;
   icon?: React.ReactNode;
   /**
@@ -204,22 +205,14 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   const primaryActionContent = (
     <>
       <Flex flex={1} alignItems="stretch" direction="column">
-        {primaryAction.label === 'Publish'
-          ? addHintTooltip(
-              primaryAction,
-              <DocumentActionButton
-                {...primaryAction}
-                variant={primaryAction.variant || 'default'}
-              />
-            )
-          : addHintTooltip(
-              primaryAction,
-              <DocumentActionButton
-                {...primaryAction}
-                variant={primaryAction.variant || 'default'}
-                buttonType="submit"
-              />
-            )}
+        {addHintTooltip(
+          primaryAction,
+          <DocumentActionButton
+            {...primaryAction}
+            variant={primaryAction.variant || 'default'}
+            {...(primaryAction.type === 'publish' ? {} : { buttonType: 'submit' })}
+          />
+        )}
       </Flex>
 
       {restActions.length > 0 ? (
@@ -241,7 +234,7 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
       </tours.contentManager.Publish>
       {secondaryAction ? (
         <Flex flex={1} order={{ initial: -1, large: 0 }} alignItems="stretch" direction="column">
-          {secondaryAction.label === 'Publish' ? (
+          {secondaryAction.type === 'publish' ? (
             <tours.contentManager.Publish>
               <DocumentActionButton
                 {...secondaryAction}
@@ -622,7 +615,6 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
-  const initialValues = useForm('PublishAction', ({ initialValues }) => initialValues);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
   const {
     currentDocument: { components },
@@ -953,6 +945,7 @@ const PublishAction: DocumentActionComponent = ({
   }
 
   return {
+    type: 'publish',
     loading: isLoading,
     position: ['panel', 'preview', 'relation-modal'],
     /**
