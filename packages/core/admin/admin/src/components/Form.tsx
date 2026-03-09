@@ -167,6 +167,10 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       isSubmitting: false,
       values: props.initialValues ?? {},
     });
+
+    // Keep a ref to the latest form values so `getValues()` can always return fresh data.
+    // We expose `getValues` as a stable callback so consumers (e.g. conditional/rules logic)
+    // can call it without causing extra rerenders from changing function references.
     const valuesRef = React.useRef(state.values);
 
     React.useEffect(() => {
