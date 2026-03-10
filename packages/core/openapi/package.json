@@ -1,6 +1,6 @@
 {
   "name": "@strapi/openapi",
-  "version": "5.36.0",
+  "version": "5.38.0",
   "description": "A tool set to help generate and validate API documentation for Strapi projects",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/openapi"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -61,7 +62,7 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/types": "5.36.0",
+    "@strapi/types": "5.38.0",
     "@types/debug": "^4"
   }
 }
