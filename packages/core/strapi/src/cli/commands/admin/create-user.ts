@@ -52,7 +52,6 @@ interface Answers {
  * `ReadOnlyArray<inquirer.DistinctQuestion<Answers>>`
  * but then the logic of the validate function needs to change.
  */
-// eslint-disable-next-line rxjs/finnish
 const promptQuestions: inquirer.QuestionCollection<Answers> = [
   {
     type: 'input',

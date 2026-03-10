@@ -1,3 +1,6 @@
+import os from 'os';
+import path from 'path';
+import fse from 'fs-extra';
 import _ from 'lodash';
 import { errors, async } from '@strapi/utils';
 
@@ -7,7 +10,7 @@ import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
-import { FileInfo } from '../types';
+import { Config, FileInfo } from '../types';
 import { prepareUploadRequest, type FileUploadError } from '../utils/mime-validation';
 import type { UploadFileInfo } from '../../../shared/contracts/files';
 
@@ -308,6 +311,148 @@ export default {
       data: await pm.sanitizeOutput(successfulFiles, { action: ACTIONS.read }),
       errors: uploadErrors,
     });
+
+    res.end();
+  },
+
+  /**
+   * @experimental
+   * Upload files from URLs with SSE streaming for per-file progress
+   *
+   * Accepts JSON body with URLs and fetches them server-side.
+   * Streams Server-Sent Events as each URL is fetched and uploaded:
+   * - file:fetching  — when starting to fetch a URL
+   * - file:uploading — when upload starts for a fetched file
+   * - file:complete  — when a file is successfully uploaded
+   * - file:error     — when a URL fetch or upload fails
+   * - stream:complete — final summary with all results
+   */
+  async unstable_uploadFromUrls(ctx: Context) {
+    const {
+      state: { userAbility, user },
+      request: { body },
+    } = ctx;
+
+    const uploadService = getService('upload');
+    const fileService = getService('file');
+    const pm = strapi.service('admin::permission').createPermissionsManager({
+      ability: userAbility,
+      action: ACTIONS.create,
+      model: FILE_MODEL_UID,
+    });
+
+    if (!pm.isAllowed) {
+      return ctx.forbidden();
+    }
+
+    // Parse and validate request body
+    const { urls, folderId } = body as { urls?: string[]; folderId?: number | null };
+
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      throw new errors.ApplicationError('URLs are required');
+    }
+
+    if (urls.length > 20) {
+      throw new errors.ApplicationError('Maximum 20 URLs allowed per request');
+    }
+
+    // Take manual control of the response for SSE streaming
+    ctx.respond = false;
+    const res = ctx.res;
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    });
+
+    const writeSSE = (event: string, data: Record<string, unknown>) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    const total = urls.length;
+    const uploadErrors: FileUploadError[] = [];
+    const successfulFiles: any[] = [];
+
+    // Create temp directory for fetched files
+    const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-url-upload-'));
+    const { sizeLimit } = strapi.config.get<Config>('plugin::upload');
+
+    try {
+      // Process each URL sequentially
+      for (let i = 0; i < urls.length; i += 1) {
+        const url = urls[i];
+
+        writeSSE('file:fetching', { url, index: i, total });
+
+        try {
+          // Fetch URL to temp file
+          const { file } = await fileService.fetchUrlToInputFile(
+            url,
+            tmpWorkingDirectory,
+            sizeLimit
+          );
+          const fileName = file.originalFilename;
+
+          writeSSE('file:uploading', {
+            name: fileName,
+            index: i,
+            total,
+            size: file.size,
+          });
+
+          // Validate using security checks
+          const fileInfo: UploadFileInfo = {
+            name: fileName,
+            caption: null,
+            alternativeText: null,
+            folder: folderId ?? null,
+          };
+
+          const { validFiles, errors: validationErrors } = await prepareUploadRequest(
+            file,
+            { fileInfo: JSON.stringify(fileInfo) },
+            strapi
+          );
+
+          if (validFiles.length === 0) {
+            const errorMessage = validationErrors[0]?.message || 'Validation failed';
+            uploadErrors.push({ name: fileName, message: errorMessage });
+            writeSSE('file:error', { name: fileName, url, index: i, message: errorMessage });
+          } else {
+            // Upload the file
+            const data = await validateUploadBody({ fileInfo }, false);
+            const [uploadedFile] = await uploadService.upload(
+              { data, files: [validFiles[0]] },
+              { user }
+            );
+
+            // Sign file url
+            const signedFile = await fileService.signFileUrls(uploadedFile);
+            successfulFiles.push(signedFile);
+
+            writeSSE('file:complete', { name: fileName, index: i, file: signedFile });
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          uploadErrors.push({ name: url, message: errorMessage });
+          writeSSE('file:error', { url, index: i, message: errorMessage });
+        }
+      }
+
+      // Track image upload metric once if any images were uploaded
+      if (successfulFiles.some((file) => file.mime?.startsWith('image/'))) {
+        await getService('metrics').trackUsage('didUploadImage');
+      }
+
+      // Send final stream summary
+      writeSSE('stream:complete', {
+        data: await pm.sanitizeOutput(successfulFiles, { action: ACTIONS.read }),
+        errors: uploadErrors,
+      });
+    } finally {
+      // Clean up temp directory
+      await fse.remove(tmpWorkingDirectory);
+    }
 
     res.end();
   },

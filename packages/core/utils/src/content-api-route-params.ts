@@ -3,7 +3,7 @@ import type { z } from 'zod/v4';
 import { ALLOWED_QUERY_PARAM_KEYS } from './content-api-constants';
 
 /**
- * Minimal route shape used by sanitize/validate to derive allowed extra query/body params
+ * Minimal route shape used by sanitize/validate to derive allowed extra query/input params
  * from the route's request schema. When present, extra keys are taken from route.request.query
  * / route.request.body and validated or sanitized with Zod.
  */

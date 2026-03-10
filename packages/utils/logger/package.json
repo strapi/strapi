@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "5.36.1",
+  "version": "5.38.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/utils/logger"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -44,8 +45,8 @@
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.36.1",
-    "tsconfig": "5.36.1"
+    "eslint-config-custom": "5.38.0",
+    "tsconfig": "5.38.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

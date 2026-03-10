@@ -9,23 +9,34 @@ export class AssetsPage {
   readonly page: Page;
   readonly newButton: Locator;
   readonly importFilesMenuItem: Locator;
+  readonly newFolderMenuItem: Locator;
+  readonly importFromUrlMenuItem: Locator;
   readonly fileInput: Locator;
   readonly gridViewButton: Locator;
   readonly tableViewButton: Locator;
   readonly dropZone: Locator;
   readonly uploadProgressDialog: Locator;
   readonly assetDetailsDrawer: Locator;
+  readonly createFolderDialog: Locator;
+  readonly importFromUrlDialog: Locator;
+  readonly urlTextarea: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.newButton = page.getByRole('button', { name: 'New' });
-    this.importFilesMenuItem = page.getByRole('menuitem', { name: 'Import files' });
+    this.newFolderMenuItem = page.getByRole('menuitem', { name: 'New folder' });
+    this.importFilesMenuItem = page.getByRole('menuitem', { name: 'File upload', exact: true });
+    this.importFromUrlMenuItem = page.getByRole('menuitem', { name: 'File upload from URL' });
+
     this.fileInput = page.locator('input[type="file"]');
     this.gridViewButton = page.getByRole('radio', { name: 'Grid view' });
     this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
     this.dropZone = page.getByTestId('assets-dropzone');
     this.uploadProgressDialog = page.getByRole('dialog', { name: /upload/i });
     this.assetDetailsDrawer = page.getByRole('dialog').filter({ has: page.getByText('File info') });
+    this.createFolderDialog = page.getByRole('dialog', { name: /new folder in/i });
+    this.importFromUrlDialog = page.getByRole('dialog', { name: 'Import from URL' });
+    this.urlTextarea = page.getByRole('textbox', { name: 'URL' });
   }
 
   async goto() {
@@ -212,5 +223,62 @@ export class AssetsPage {
    */
   async closeAssetDetailsDrawer() {
     await this.assetDetailsDrawer.getByRole('button', { name: 'Close' }).click();
+  }
+
+  /**
+   * Open the New menu and click "New folder"
+   */
+  async openCreateFolderDialog() {
+    await this.openNewMenu();
+    await this.newFolderMenuItem.click();
+  }
+
+  /**
+   * Full flow: open dialog, type name, submit
+   */
+  async createFolder(name: string) {
+    await this.openCreateFolderDialog();
+    await this.createFolderDialog.getByRole('textbox').fill(name);
+    await this.createFolderDialog.getByRole('button', { name: /create folder/i }).click();
+  }
+
+  /**
+   * Get a folder card in grid view
+   */
+  getFolderCard(name: string) {
+    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+  }
+
+  /**
+   * Get a folder row in table view
+   */
+  getFolderRow(name: string) {
+    return this.page.getByRole('grid').getByRole('row').filter({ hasText: name }).first();
+  }
+
+  /**
+   * Navigate into a folder by clicking its card/row
+   */
+  async navigateIntoFolder(name: string) {
+    await this.page.getByText(name).first().click();
+  }
+
+  /**
+   * Open the import from URL dialog
+   */
+  async openImportFromUrlDialog() {
+    await this.openNewMenu();
+    await this.importFromUrlMenuItem.click();
+    await expect(this.importFromUrlDialog).toBeVisible();
+  }
+
+  /**
+   * Upload files from URLs using the import from URL dialog
+   */
+  async uploadFilesFromUrl(urls: string | string[]) {
+    await this.openImportFromUrlDialog();
+    const urlsArray = Array.isArray(urls) ? urls : [urls];
+    await this.urlTextarea.fill(urlsArray.join('\n'));
+    await this.importFromUrlDialog.getByRole('button', { name: 'Upload' }).click();
   }
 }

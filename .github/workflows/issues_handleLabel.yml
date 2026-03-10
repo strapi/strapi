@@ -10,7 +10,6 @@ permissions:
   actions: read
   checks: read
   contents: read
-  repository-projects: read
   statuses: read
 
 jobs:
@@ -203,18 +202,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           lock-reason: 'off-topic'
-
-      - name: assign issues to DevExp squad project
-        uses: actions/add-to-project@v0.4.1
-        with:
-          project-url: https://github.com/orgs/strapi/projects/13
-          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:upgrade, source: core:permissions, source: rbac, source: providers, source: core:openapi, source: strapi-ai'
-          label-operator: OR
-      - name: assign issues to Content squad project
-        uses: actions/add-to-project@v0.4.1
-        with:
-          project-url: https://github.com/orgs/strapi/projects/48
-          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:review-workflows, source: core:upload, source: plugin:color-picker, source: plugin:documentation, source: plugin:i18n, source: core:preview'
-          label-operator: OR

@@ -24,7 +24,7 @@ describe('validateInput', () => {
    * Extra params are validated with Zod; invalid values throw ValidationError.
    */
   describe('route.request.body', () => {
-    it('allows extra body param from route at root and Zod parses', async () => {
+    it('allows extra input param from route at root and Zod parses', async () => {
       const route = {
         request: {
           body: {
@@ -72,7 +72,7 @@ describe('validateInput', () => {
       await expect(validators.input(input, schema, { route })).rejects.toThrow(ValidationError);
     });
 
-    it('allows extra body param that is a nested object (non-scalar)', async () => {
+    it('allows extra input param that is a nested object (non-scalar)', async () => {
       const route = {
         request: {
           body: {
@@ -88,7 +88,7 @@ describe('validateInput', () => {
       await expect(validators.input(input, schema, { route })).resolves.not.toThrow();
     });
 
-    it('throws when extra body param object fails Zod parse', async () => {
+    it('throws when extra input param object fails Zod parse', async () => {
       const route = {
         request: {
           body: {

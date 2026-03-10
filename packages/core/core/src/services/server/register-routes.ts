@@ -61,6 +61,7 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
         generateRouteScope(route);
         route.info = { pluginName };
       });
+      strapi.contentAPI.applyExtraParamsToRoutes(plugin.routes);
 
       strapi.server.routes({
         type: 'admin',
@@ -79,9 +80,7 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
           generateRouteScope(route);
           route.info = { pluginName };
         });
-        if (router.type === 'content-api') {
-          strapi.contentAPI.applyExtraParamsToRoutes(router.routes);
-        }
+        strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
 
         strapi.server.routes(router);
       });
