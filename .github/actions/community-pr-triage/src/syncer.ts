@@ -132,18 +132,20 @@ export async function syncToLinear(
   const client = new LinearClient({ apiKey });
   const stats = { created: 0, updated: 0, closed: 0, relationsCreated: 0 };
 
-  // Fetch all existing issues in the team
+  // Search for existing PR issues across all teams (not just our team)
+  // so we don't create duplicates when tickets are moved to other teams
   const existingIssues: ExistingIssue[] = [];
   let hasNext = true;
   let cursor: string | undefined;
 
   while (hasNext) {
-    const result = await client.issues({
-      filter: { team: { id: { eq: LINEAR_TEAM_ID } } },
+    const result = await client.searchIssues('PR #', {
       after: cursor,
       first: 100,
     });
     for (const issue of result.nodes) {
+      // Only consider issues with our PR title pattern
+      if (!matchPRNumber(issue.title)) continue;
       const state = await issue.state;
       const labels = await issue.labels();
       const attachments = await issue.attachments();
