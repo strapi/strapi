@@ -12,11 +12,9 @@ const getMainFieldForModel = (targetUid: UID.Schema): string => {
 
 const getRelationLabel = (
   relation: { documentId: string; id: number | string; locale?: string },
-  mainField: string,
-  labelByKey: Map<string, unknown>
+  labelById: Map<number | string, unknown>
 ): string => {
-  const key = relation.locale ? `${relation.documentId}:${relation.locale}` : relation.documentId;
-  const value = labelByKey.get(key);
+  const value = labelById.get(relation.id);
   if (typeof value === 'string') return value;
   return relation.documentId;
 };
@@ -38,94 +36,104 @@ const FIELDS_TO_REMOVE = [
 const STATUS_FIELDS = ['id', 'documentId', 'locale', 'updatedAt', 'publishedAt'];
 
 /**
- * Add correct status to a relation using content-manager's document-metadata.
+ * Add status to multiple relations in one batch (avoids N+1 queries).
  */
-const addStatusToRelation = async (
+const addStatusToRelationsBatch = (
   targetUid: UID.Schema,
-  relation: { documentId: string; id: number | string; locale?: string }
-): Promise<{ documentId: string; id: number | string; locale?: string; status?: string }> => {
+  relations: Array<{ documentId: string; id: number | string; locale?: string }>,
+  allEntries: Array<{
+    id: number | string;
+    documentId: string;
+    locale?: string;
+    updatedAt?: unknown;
+    publishedAt?: unknown;
+  }>
+): Array<{ documentId: string; id: number | string; locale?: string; status?: string }> => {
   const model = strapi.getModel(targetUid);
   if (!contentTypes.hasDraftAndPublish(model)) {
-    return relation;
+    return relations;
   }
 
   const documentMetadata = strapi.plugin('content-manager')?.service('document-metadata');
   if (!documentMetadata) {
-    return relation;
+    return relations;
   }
 
-  const entries = await strapi.db.query(targetUid).findMany({
-    where: {
-      documentId: relation.documentId,
-      ...(relation.locale ? { locale: relation.locale } : {}),
-    },
-    select: STATUS_FIELDS,
+  const isLocalized = strapi
+    .plugin('i18n')
+    ?.service('content-types')
+    ?.isLocalizedContentType(model);
+  const groupKey = (e: { documentId: string; locale?: string }) =>
+    isLocalized && e.locale ? `${e.documentId}:${e.locale}` : e.documentId;
+
+  const byGroup = new Map<string, typeof allEntries>();
+  for (const e of allEntries) {
+    const key = groupKey(e);
+    const list = byGroup.get(key) ?? [];
+    list.push(e);
+    byGroup.set(key, list);
+  }
+
+  return relations.map((relation) => {
+    const key = groupKey(relation);
+    const entries = byGroup.get(key) ?? [];
+    if (!entries.length) return relation;
+
+    const version = entries.find((e) => e.id === relation.id) ?? entries[0];
+    const otherVersions = entries.filter((e) => e.id !== version.id);
+
+    return {
+      ...relation,
+      status: documentMetadata.getStatus(version, otherVersions),
+    };
   });
-
-  if (!entries.length) {
-    return relation;
-  }
-
-  const version = entries.find((e) => e.publishedAt != null) ?? entries[0];
-  const otherVersions = entries.filter((e) => e.id !== version.id);
-
-  return {
-    ...relation,
-    status: documentMetadata.getStatus(version, otherVersions),
-  };
 };
 
 /**
- * Resolve a relation for the target locale.
- * - Non-localized: keep same documentId and id
- * - Localized: find equivalent in target locale (same documentId, target locale)
- * - Localized without target translation: return null
+ * Resolve relations for the target locale (batched to avoid N+1).
  */
-const resolveRelationForLocale = async (
-  relation: { documentId: string; id?: number; locale?: string; [key: string]: unknown },
+const resolveRelationsForLocaleBatch = async (
+  relations: Array<{ documentId: string; id?: number; locale?: string }>,
   targetUid: UID.Schema,
   targetLocale: string
-): Promise<{
-  documentId: string;
-  id: number | string;
-  locale?: string;
-  status?: string;
-} | null> => {
-  if (!relation?.documentId) {
-    return null;
-  }
-
+): Promise<Array<{ documentId: string; id: number | string; locale?: string } | null>> => {
   const i18nContentTypesService = strapi.plugin('i18n')?.service('content-types');
   const isTargetLocalized = i18nContentTypesService?.isLocalizedContentType(
     strapi.getModel(targetUid)
   );
 
   if (!isTargetLocalized) {
-    const resolved = {
-      documentId: relation.documentId,
-      id: relation.id ?? relation.documentId,
+    return relations.map((rel) => ({
+      documentId: rel.documentId,
+      id: rel.id ?? rel.documentId,
+    }));
+  }
+
+  const documentIds = [...new Set(relations.map((r) => r.documentId))];
+  const model = strapi.getModel(targetUid);
+  const targetEntriesQuery: { where: object; select: string[]; orderBy?: Record<string, string> } =
+    {
+      where: { documentId: { $in: documentIds }, locale: targetLocale },
+      select: STATUS_FIELDS,
     };
-    return addStatusToRelation(targetUid, resolved);
+  if (contentTypes.hasDraftAndPublish(model)) {
+    targetEntriesQuery.orderBy = { publishedAt: 'desc' };
+  }
+  const targetEntries = await strapi.db.query(targetUid).findMany(targetEntriesQuery);
+  const byDocumentId = new Map<string, (typeof targetEntries)[0]>();
+  for (const e of targetEntries) {
+    byDocumentId.set(e.documentId, e);
   }
 
-  const targetEntry = await strapi.db.query(targetUid).findOne({
-    where: {
-      documentId: relation.documentId,
-      locale: targetLocale,
-    },
-    select: STATUS_FIELDS,
+  return relations.map((rel) => {
+    const entry = byDocumentId.get(rel.documentId);
+    if (!entry) return null;
+    return {
+      documentId: entry.documentId,
+      id: entry.id,
+      locale: entry.locale,
+    };
   });
-
-  if (!targetEntry) {
-    return null;
-  }
-
-  const resolved = {
-    documentId: targetEntry.documentId,
-    id: targetEntry.id,
-    locale: targetEntry.locale,
-  };
-  return addStatusToRelation(targetUid, resolved);
 };
 
 /**
@@ -154,20 +162,19 @@ const transformRelationsForLocale = async (
   } else {
     relations = [];
   }
-  const resolved = await Promise.all(
-    relations
-      .filter(
-        (rel): rel is { documentId: string; id?: number; locale?: string } =>
-          typeof rel === 'object' && rel !== null && 'documentId' in rel && !!rel.documentId
-      )
-      .map((rel) => resolveRelationForLocale(rel, targetUid, targetLocale))
+
+  const validRels = relations.filter(
+    (rel): rel is { documentId: string; id?: number; locale?: string } =>
+      typeof rel === 'object' && rel !== null && 'documentId' in rel && !!rel.documentId
   );
+  if (validRels.length === 0) {
+    return { connect: [], disconnect: [] };
+  }
+
+  const resolved = await resolveRelationsForLocaleBatch(validRels, targetUid, targetLocale);
   const baseConnect = resolved
     .filter((r): r is NonNullable<typeof r> => r !== null)
-    .map((r, index) => ({
-      ...r,
-      __temp_key__: `a${index}`,
-    }));
+    .map((r, index) => ({ ...r, __temp_key__: `a${index}` }));
 
   if (baseConnect.length === 0) {
     return { connect: [], disconnect: [] };
@@ -193,21 +200,37 @@ const transformRelationsForLocale = async (
     }
   }
 
-  const entries = await strapi.db.query(targetUid).findMany({
-    where,
-    select: selectFields,
-  });
-
-  const labelByKey = new Map<string, unknown>();
-  for (const entry of entries) {
-    const key = entry.locale ? `${entry.documentId}:${entry.locale}` : entry.documentId;
-    labelByKey.set(key, entry[mainField]);
+  const statusWhere: { documentId: { $in: string[] }; locale?: { $in: string[] } } = {
+    documentId: { $in: documentIds },
+  };
+  if (isTargetLocalized && where.locale) {
+    statusWhere.locale = where.locale;
   }
 
-  const connect = baseConnect.map((r) => ({
+  const [allStatusEntries, labelEntries] = await Promise.all([
+    contentTypes.hasDraftAndPublish(strapi.getModel(targetUid))
+      ? strapi.db.query(targetUid).findMany({
+          where: statusWhere,
+          select: STATUS_FIELDS,
+        })
+      : Promise.resolve([]),
+    strapi.db.query(targetUid).findMany({
+      where,
+      select: selectFields,
+    }),
+  ]);
+
+  const withStatus = addStatusToRelationsBatch(targetUid, baseConnect, allStatusEntries);
+
+  const labelById = new Map<number | string, unknown>();
+  for (const entry of labelEntries) {
+    labelById.set(entry.id, entry[mainField]);
+  }
+
+  const connect = withStatus.map((r) => ({
     ...r,
-    [mainField]: labelByKey.get(r.locale ? `${r.documentId}:${r.locale}` : r.documentId),
-    label: getRelationLabel(r, mainField, labelByKey),
+    [mainField]: labelById.get(r.id),
+    label: getRelationLabel(r, labelById),
   }));
 
   return { connect, disconnect: [] };
@@ -304,7 +327,6 @@ const fillFromLocale = () => {
       sourceLocale: string,
       targetLocale: string
     ) {
-      const documentManager = strapi.plugin('content-manager').service('document-manager');
       const populateBuilderService = strapi
         .plugin('content-manager')
         .service('populate-builder') as (uid: UID.ContentType) => {
@@ -319,10 +341,20 @@ const fillFromLocale = () => {
       // Build populate WITHOUT countRelations so we get full relation objects
       const populate = await populateBuilderService(model).populateDeep(Infinity).build();
 
-      const document = await documentManager.findOne(documentId, model, {
+      // Single query: prefer published, fall back to draft (orderBy puts non-null publishedAt first)
+      const queryParams: {
+        where: Record<string, unknown>;
+        populate: unknown;
+        orderBy?: Record<string, string>;
+      } = {
+        where: { documentId, locale: sourceLocale },
         populate,
-        locale: sourceLocale,
-      });
+      };
+      if (contentTypes.hasDraftAndPublish(modelDef)) {
+        queryParams.orderBy = { publishedAt: 'desc' };
+      }
+
+      const document = await strapi.db.query(model).findOne(queryParams);
 
       if (!document) {
         return null;
