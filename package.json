@@ -6,7 +6,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -160,7 +160,6 @@
     "jest-cli": "29.6.0",
     "jest-environment-jsdom": "29.6.1",
     "jest-watch-typeahead": "2.2.2",
-    "lerna": "8.2.4",
     "lint-staged": "15.2.10",
     "lodash": "4.17.23",
     "minimatch": "10.2.4",
