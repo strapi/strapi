@@ -40,10 +40,10 @@ import { styled } from 'styled-components';
 import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
 import { useI18n } from '../hooks/useI18n';
 import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
+import { useGetFillFromLocaleDataMutation } from '../services/fillFromLocale';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
 import { useGetSettingsQuery } from '../services/settings';
-import { cleanData } from '../utils/clean';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
@@ -528,19 +528,16 @@ const FillFromAnotherLocaleAction = ({
   collectionType,
 }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { hasI18n } = useI18n();
   const currentDesiredLocale = query.plugins?.i18n?.locale;
   const [localeSelected, setLocaleSelected] = React.useState<string | null>(null);
   const setValues = useForm('FillFromAnotherLocale', (state) => state.setValues);
 
-  const { getDocument } = useDocumentActions();
-  const { schema, components } = useDocument({
-    model,
-    documentId,
-    collectionType,
-    params: { locale: currentDesiredLocale },
-  });
+  const [getFillFromLocaleData, { isLoading: isFillFromLocaleLoading }] =
+    useGetFillFromLocaleDataMutation();
   const { data: locales = [] } = useGetLocalesQuery();
 
   const isAIAvailable = useAIAvailability();
@@ -552,23 +549,30 @@ const FillFromAnotherLocaleAction = ({
     : [];
 
   const fillFromLocale = (onClose: () => void) => async () => {
-    const response = await getDocument({
-      collectionType,
-      model,
-      documentId,
-      params: { locale: localeSelected },
-    });
-    if (!response || !schema) {
+    if (!localeSelected || !currentDesiredLocale || !documentId) {
       return;
     }
 
-    const { data } = response;
+    try {
+      const { data } = await getFillFromLocaleData({
+        model,
+        documentId,
+        sourceLocale: localeSelected,
+        targetLocale: currentDesiredLocale,
+        collectionType: collectionType as 'collection-types' | 'single-types',
+      }).unwrap();
 
-    const cleanedData = cleanData(data, schema, components);
+      if (data) {
+        setValues(data);
+      }
 
-    setValues(cleanedData);
-
-    onClose();
+      onClose();
+    } catch (err) {
+      toggleNotification({
+        type: 'danger',
+        message: formatAPIError(err as Parameters<typeof formatAPIError>[0]),
+      });
+    }
   };
 
   if (!hasI18n) {
@@ -633,13 +637,24 @@ const FillFromAnotherLocaleAction = ({
           </Dialog.Body>
           <Dialog.Footer>
             <Flex gap={2} width="100%">
-              <Button flex="auto" variant="tertiary" onClick={onClose}>
+              <Button
+                flex="auto"
+                variant="tertiary"
+                onClick={onClose}
+                disabled={isFillFromLocaleLoading}
+              >
                 {formatMessage({
                   id: getTranslation('CMEditViewCopyLocale.cancel-text'),
                   defaultMessage: 'No, cancel',
                 })}
               </Button>
-              <Button flex="auto" variant="success" onClick={fillFromLocale(onClose)}>
+              <Button
+                flex="auto"
+                variant="success"
+                onClick={fillFromLocale(onClose)}
+                loading={isFillFromLocaleLoading}
+                disabled={isFillFromLocaleLoading}
+              >
                 {formatMessage({
                   id: getTranslation('CMEditViewCopyLocale.submit-text'),
                   defaultMessage: 'Yes, fill in',

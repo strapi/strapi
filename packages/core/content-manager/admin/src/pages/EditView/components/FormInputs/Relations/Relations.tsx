@@ -283,10 +283,23 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       const transformedRels = transformations([...serverData]);
 
       /**
+       * Connect items (e.g. from fill-from-locale) may lack href/label. Ensure they have them
+       * so ListItem's getCollectionType(href) and display work correctly.
+       */
+      const connectItems = (field.value?.connect ?? []).map((rel: Relation) => {
+        if (rel.href) return rel;
+        return {
+          ...rel,
+          label: rel.label ?? getRelationLabel(rel, props.mainField),
+          href: `../${COLLECTION_TYPES}/${targetModel}/${rel.documentId}?${rel.locale ? `plugins[i18n][locale]=${rel.locale}` : ''}`,
+        };
+      });
+
+      /**
        * THIS IS CRUCIAL. If you don't sort by the __temp_key__ which comes from fractional indexing
        * then the list will be in the wrong order.
        */
-      return [...transformedRels, ...(field.value?.connect ?? [])].sort((a, b) => {
+      return [...transformedRels, ...connectItems].sort((a, b) => {
         if (a.__temp_key__ < b.__temp_key__) return -1;
         if (a.__temp_key__ > b.__temp_key__) return 1;
         return 0;

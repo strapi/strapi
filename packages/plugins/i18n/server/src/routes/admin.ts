@@ -74,6 +74,14 @@ export default {
       },
     },
     {
+      method: 'POST',
+      path: '/content-manager/actions/fill-from-locale',
+      handler: 'content-types.getFillFromLocaleData',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
       method: 'GET',
       path: '/settings',
       handler: 'settings.getSettings',

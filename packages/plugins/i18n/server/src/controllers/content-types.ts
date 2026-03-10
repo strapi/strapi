@@ -1,8 +1,11 @@
 import { pick, uniq, prop, getOr, flatten, pipe, map } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { getService } from '../utils';
-import { validateGetNonLocalizedAttributesInput } from '../validation/content-types';
+import {
+  validateGetNonLocalizedAttributesInput,
+  validateFillFromLocaleInput,
+} from '../validation/content-types';
 
 const { ApplicationError } = errors;
 
@@ -83,6 +86,31 @@ const controller = {
         pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], entity)
       ),
     };
+  },
+
+  async getFillFromLocaleData(ctx) {
+    await validateFillFromLocaleInput(ctx.request.body);
+
+    const { model, documentId, sourceLocale, targetLocale } = ctx.request.body as {
+      model: string;
+      documentId: string;
+      sourceLocale: string;
+      targetLocale: string;
+    };
+
+    const fillFromLocaleService = getService('fill-from-locale');
+    const data = await fillFromLocaleService.getDataForLocale(
+      model as UID.ContentType,
+      documentId,
+      sourceLocale,
+      targetLocale
+    );
+
+    if (!data) {
+      return ctx.notFound();
+    }
+
+    ctx.body = { data };
   },
 } satisfies Core.Controller;
 

@@ -20,4 +20,18 @@ const validateGetNonLocalizedAttributesInput = validateYupSchema(
   validateGetNonLocalizedAttributesSchema
 );
 
-export { validateGetNonLocalizedAttributesInput };
+const validateFillFromLocaleInputSchema = yup
+  .object()
+  .shape({
+    model: yup.string().required(),
+    documentId: yup.string().required(),
+    sourceLocale: yup.string().required(),
+    targetLocale: yup.string().required(),
+    collectionType: yup.string().oneOf(['collection-types', 'single-types']).required(),
+  })
+  .noUnknown()
+  .required();
+
+const validateFillFromLocaleInput = validateYupSchema(validateFillFromLocaleInputSchema);
+
+export { validateGetNonLocalizedAttributesInput, validateFillFromLocaleInput };
