@@ -48,7 +48,7 @@ interface SetupProps {
 }
 
 const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
-  render(<AssetsTable assets={assets} folders={folders} />);
+  render(<AssetsTable assets={assets} folders={folders} onAssetItemClick={jest.fn()} />);
 
 describe('AssetsTable', () => {
   beforeEach(() => {

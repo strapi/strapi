@@ -22,16 +22,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   const validateQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
-    const { auth } = ctx.state;
+    const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.validate.query(data, schema, { auth });
+    return strapi.contentAPI.validate.query(data, schema, { auth, route });
   };
 
   const sanitizeQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
-    const { auth } = ctx.state;
+    const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.sanitize.query(data, schema, { auth });
+    return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
   };
 
   return {
