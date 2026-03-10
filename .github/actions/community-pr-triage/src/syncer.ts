@@ -125,12 +125,25 @@ export async function syncToLinear(
   updated: number;
   closed: number;
   relationsCreated: number;
+  issueUrls: Map<number, string>;
 }> {
   const apiKey = process.env.LINEAR_API_KEY;
   if (!apiKey) throw new Error('LINEAR_API_KEY environment variable is required');
 
   const client = new LinearClient({ apiKey });
-  const stats = { created: 0, updated: 0, closed: 0, relationsCreated: 0 };
+  const stats: {
+    created: number;
+    updated: number;
+    closed: number;
+    relationsCreated: number;
+    issueUrls: Map<number, string>;
+  } = {
+    created: 0,
+    updated: 0,
+    closed: 0,
+    relationsCreated: 0,
+    issueUrls: new Map(),
+  };
 
   // Search for existing PR issues across all teams (not just our team)
   // so we don't create duplicates when tickets are moved to other teams
@@ -192,6 +205,18 @@ export async function syncToLinear(
       }
       await client.updateIssue(existing.id, updatePayload);
       prLinearIssueIds.set(scored.pr.number, existing.id);
+      // Capture issue URL
+      try {
+        const updatedIssue = await client.issue(existing.id);
+        const team = await updatedIssue.team;
+        if (team)
+          stats.issueUrls.set(
+            scored.pr.number,
+            `https://linear.app/strapi/issue/${team.key}-${updatedIssue.number}`
+          );
+      } catch {
+        /* non-critical */
+      }
       // Ensure PR attachment exists
       if (!existing.attachmentUrls.some((url) => url.includes(`/pull/${scored.pr.number}`))) {
         try {
@@ -218,6 +243,17 @@ export async function syncToLinear(
       const created = await result.issue;
       if (created) {
         prLinearIssueIds.set(scored.pr.number, created.id);
+        // Capture issue URL
+        try {
+          const team = await created.team;
+          if (team)
+            stats.issueUrls.set(
+              scored.pr.number,
+              `https://linear.app/strapi/issue/${team.key}-${created.number}`
+            );
+        } catch {
+          /* non-critical */
+        }
         // Attach the GitHub PR URL to the newly created issue
         try {
           await client.createAttachment({

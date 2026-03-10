@@ -53,13 +53,21 @@ pnpm start --sprint-update -y
 
 ## GitHub Action
 
-The action is defined in `.github/workflows/community-pr-triage.yml` and has two trigger modes:
+The action is defined in `.github/workflows/community-pr-triage.yml` and has three jobs:
 
-### Scheduled (automatic)
+### Job 1: `single-pr-triage` — PR labeled "community"
 
-Runs every other Tuesday at 9am UTC (biweekly, even ISO weeks). Performs a full sync + sprint update automatically.
+Triggered automatically when a PR is labeled `community`. Fetches that single PR, scores it, creates a Linear ticket in CMS-community-PRs (triage status), attaches the PR URL for activity sync, and links to related GitHub issue tickets in Linear.
 
-### Manual dispatch (from GitHub Actions UI)
+### Job 2: `check-schedule` — Biweekly gate
+
+Runs every Tuesday at 9am UTC. Checks if it's an even ISO week — if not, the full triage job is skipped (biweekly cadence).
+
+### Job 3: `triage` — Full batch triage
+
+Runs on even-week Tuesdays (after `check-schedule` passes) or via manual dispatch. Fetches all open community PRs, scores them, generates a markdown report, and optionally syncs to Linear.
+
+#### Manual dispatch (from GitHub Actions UI)
 
 Go to Actions → "Community PR Triage" → "Run workflow" and configure two checkboxes:
 

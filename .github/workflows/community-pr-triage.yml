@@ -3,6 +3,8 @@ name: Community PR Triage
 on:
   schedule:
     - cron: '0 9 * * 2' # Every Tuesday 9am UTC (filtered to biweekly in check job)
+  pull_request_target:
+    types: [labeled]
   workflow_dispatch:
     inputs:
       sync:
@@ -19,6 +21,46 @@ permissions:
   pull-requests: read
 
 jobs:
+  # Single-PR triage: triggered when a PR is labeled "community"
+  single-pr-triage:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target' && github.event.label.name == 'community'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Build action
+        run: npx tsup src/index.ts --format cjs --target node20 --clean
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Triage PR
+        uses: ./.github/actions/community-pr-triage
+        with:
+          dry-run: 'false'
+          pr-number: ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+          LINEAR_CMS_GITHUB_TEAM_ID: ${{ secrets.LINEAR_CMS_GITHUB_TEAM_ID }}
+          LINEAR_SPRINT_PROJECT_ID: ${{ secrets.LINEAR_SPRINT_PROJECT_ID }}
+          LINEAR_STATUS_TRIAGE: ${{ secrets.LINEAR_STATUS_TRIAGE }}
+          LINEAR_STATUS_TODO: ${{ secrets.LINEAR_STATUS_TODO }}
+          LINEAR_STATUS_DONE: ${{ secrets.LINEAR_STATUS_DONE }}
+          LINEAR_STATUS_CANCELED: ${{ secrets.LINEAR_STATUS_CANCELED }}
+          LINEAR_LABELS: ${{ secrets.LINEAR_LABELS }}
+          LINEAR_TRIAGE_LABELS: ${{ secrets.LINEAR_TRIAGE_LABELS }}
+          LINEAR_SOURCE_LABELS: ${{ secrets.LINEAR_SOURCE_LABELS }}
+
   check-schedule:
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'

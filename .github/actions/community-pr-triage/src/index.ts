@@ -3,6 +3,7 @@ import { AREA_TIERS, validateConfig } from './config.js';
 import {
   fetchInternalAuthors,
   fetchCommunityPRs,
+  fetchSinglePR,
   fetchRecentlyMergedPRNumbers,
   fetchIssue,
   parseIssueRefs,
@@ -30,14 +31,75 @@ function getPRType(labels: string[]): string {
   return 'unknown';
 }
 
+async function scorePR(pr: import('./types.js').GitHubPR): Promise<ScoredPR> {
+  const issueNumbers = parseIssueRefs(pr.body);
+  const linkedIssues: LinkedIssueData[] = [];
+
+  for (const num of issueNumbers) {
+    const issue = await fetchIssue(num);
+    if (issue) linkedIssues.push(parseLinkedIssueData(issue));
+  }
+
+  const ageDays = Math.floor((Date.now() - new Date(pr.createdAt).getTime()) / 86400000);
+  let area = extractArea(pr.labels);
+  if (area === 'unknown') area = estimateAreaFromFiles(pr.files);
+  const areaTier = getAreaTier(area);
+  const loc = pr.additions + pr.deletions;
+
+  const value = calculateValue(pr, linkedIssues, ageDays);
+  const complexity = calculateComplexity(loc, pr.changedFiles, areaTier);
+  const priority = calculatePriority(value.total);
+
+  return {
+    pr,
+    linkedIssues,
+    value,
+    complexity,
+    priority,
+    area,
+    areaTier,
+    prType: getPRType(pr.labels),
+    isQuickWin: isQuickWin(value.total, complexity),
+  };
+}
+
 async function main() {
   const dryRun = core.getInput('dry-run') !== 'false';
+  const prNumber = core.getInput('pr-number');
   const sprintUpdate = core.getInput('sprint-update') === 'true';
 
   if (!dryRun) {
     validateConfig();
   }
 
+  // Single-PR mode: fetch one PR, score it, sync immediately
+  if (prNumber) {
+    const num = parseInt(prNumber, 10);
+    console.log(`Fetching PR #${num}...`);
+    const pr = fetchSinglePR(num);
+    const scored = await scorePR(pr);
+
+    console.log(
+      `PR #${num}: value=${scored.value.total}, priority=${scored.priority}, complexity=${scored.complexity}, area=${scored.area}`
+    );
+
+    if (dryRun) {
+      console.log('[DRY RUN] Skipping Linear sync.\n');
+    } else {
+      console.log('Syncing to Linear...');
+      const stats = await syncToLinear([scored]);
+      console.log(
+        `Linear sync complete: ${stats.created} created, ${stats.updated} updated, ${stats.relationsCreated} relations linked.\n`
+      );
+    }
+
+    core.setOutput('created', dryRun ? '0' : '1');
+    core.setOutput('updated', '0');
+    core.setOutput('closed', '0');
+    return;
+  }
+
+  // Full triage mode
   console.log('Fetching internal authors from GitHub org...');
   const internalAuthors = fetchInternalAuthors();
   console.log(`Found ${internalAuthors.size} internal authors.\n`);
@@ -50,35 +112,7 @@ async function main() {
   const scoredPRs: ScoredPR[] = [];
 
   for (const pr of prs) {
-    const issueNumbers = parseIssueRefs(pr.body);
-    const linkedIssues: LinkedIssueData[] = [];
-
-    for (const num of issueNumbers) {
-      const issue = await fetchIssue(num);
-      if (issue) linkedIssues.push(parseLinkedIssueData(issue));
-    }
-
-    const ageDays = Math.floor((Date.now() - new Date(pr.createdAt).getTime()) / 86400000);
-    let area = extractArea(pr.labels);
-    if (area === 'unknown') area = estimateAreaFromFiles(pr.files);
-    const areaTier = getAreaTier(area);
-    const loc = pr.additions + pr.deletions;
-
-    const value = calculateValue(pr, linkedIssues, ageDays);
-    const complexity = calculateComplexity(loc, pr.changedFiles, areaTier);
-    const priority = calculatePriority(value.total);
-
-    scoredPRs.push({
-      pr,
-      linkedIssues,
-      value,
-      complexity,
-      priority,
-      area,
-      areaTier,
-      prType: getPRType(pr.labels),
-      isQuickWin: isQuickWin(value.total, complexity),
-    });
+    scoredPRs.push(await scorePR(pr));
   }
 
   scoredPRs.sort((a, b) => b.value.total - a.value.total);
