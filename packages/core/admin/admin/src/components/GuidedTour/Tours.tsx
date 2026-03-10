@@ -62,7 +62,7 @@ const GuidedTourOverlay = styled(Box)`
   bottom: 0;
   background-color: rgba(50, 50, 77, 0.2);
   z-index: 10;
-  pointer-events: none;
+  // pointer-events: none;
 `;
 
 const GuidedTourTooltipImpl = ({
@@ -75,6 +75,7 @@ const GuidedTourTooltipImpl = ({
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
   const state = useGuidedTour('GuidedTourTooltip', (s) => s.state);
   const dispatch = useGuidedTour('GuidedTourTooltip', (s) => s.dispatch);
+  const anchorRef = React.useRef<HTMLDivElement>(null);
 
   const tourState = state.tours?.[tourName];
   const isCurrentStep = tourState?.currentStep === step;
@@ -85,21 +86,19 @@ const GuidedTourTooltipImpl = ({
     isCurrentStep &&
     isStepConditionMet;
 
-  // Scroll sidebar for specific steps in Content-Type Builder
+  // Ensure the tooltip is visible in the viewport
   React.useEffect(() => {
     if (!isPopoverOpen) return;
 
-    if (tourName !== 'contentTypeBuilder') return;
-    if (step !== 2 && step !== 3 && step !== 4 && step !== 5) return;
+    // Use setTimeout to ensure the popover is fully rendered in the DOM
+    const timeoutId = setTimeout(() => {
+      if (anchorRef.current) {
+        anchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
 
-    // Find CTB sidebar scroll container
-    const sidebarScroll = document.querySelector('[data-radix-scroll-area-viewport]');
-
-    if (sidebarScroll) {
-      const scrollAmount = step === 2 ? 0 : step === 3 ? 100 : step === 4 ? 260 : 250;
-      (sidebarScroll as HTMLElement).scrollTop = scrollAmount;
-    }
-  }, [isPopoverOpen, tourName, step]);
+    return () => clearTimeout(timeoutId);
+  }, [isPopoverOpen]);
 
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
@@ -137,7 +136,9 @@ const GuidedTourTooltipImpl = ({
         </Portal>
       )}
       <Popover.Root open={isPopoverOpen}>
-        <Popover.Anchor>{children}</Popover.Anchor>
+        <Popover.Anchor>
+          <div ref={anchorRef}>{children}</div>
+        </Popover.Anchor>
         {content({ Step, state, dispatch })}
       </Popover.Root>
     </>
