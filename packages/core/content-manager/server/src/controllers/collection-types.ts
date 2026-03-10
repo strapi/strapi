@@ -317,8 +317,19 @@ export default {
     // Extract and remove 'status' sort before sanitization/validation, since status
     // is not a real schema attribute and would be rejected by the permission checker.
     // It is re-added after sanitization so the DB layer can handle it via a CASE expression.
-    const statusSortOrder = extractStatusSortOrder(query.sort);
-    const queryWithoutStatusSort = statusSortOrder
+    // If a publication status filter is active, disable status sort — all results share the
+    // same status so the sort is a no-op, and findPageWithStatusSort would ignore the filter.
+    const hasPublicationStatusFilter =
+      query.status !== undefined ||
+      query.hasPublishedVersion !== undefined ||
+      query.publicationStatusFilter !== undefined;
+    const rawStatusSortOrder = extractStatusSortOrder(query.sort);
+    // Disable status sort when a publication status filter is active — all results share the
+    // same status so the sort is a no-op, and findPageWithStatusSort would ignore the filter.
+    const statusSortOrder = hasPublicationStatusFilter ? null : rawStatusSortOrder;
+    // Always strip 'status' from the sort before passing to the document service / permission
+    // checker — it is not a real schema attribute and would be rejected by validation.
+    const queryWithoutStatusSort = rawStatusSortOrder
       ? { ...query, sort: removeStatusFromSort(query.sort) }
       : query;
 
