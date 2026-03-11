@@ -79,7 +79,7 @@
     "ora": "5.4.1",
     "prompts": "2.4.2",
     "semver": "7.5.4",
-    "simple-git": "3.21.0",
+    "simple-git": "3.32.3",
     "undici": "6.23.0"
   },
   "devDependencies": {
