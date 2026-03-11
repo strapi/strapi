@@ -58,6 +58,14 @@ export const routes = {
       },
     },
     {
+      method: 'POST',
+      path: '/actions/import-vimeo-id',
+      handler: 'admin-vimeo.importFromVimeoId',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
       method: 'GET',
       path: '/files',
       handler: 'admin-file.find',

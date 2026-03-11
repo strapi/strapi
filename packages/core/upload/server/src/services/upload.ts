@@ -399,14 +399,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // execute delete function of the provider
       if (dbFile.provider === config.provider) {
-        await strapi.plugin('upload').provider.delete(dbFile);
+        const pm = dbFile.provider_metadata || {};
 
-        if (dbFile.formats) {
-          await Promise.all(
-            Object.keys(dbFile.formats).map((key) => {
-              return strapi.plugin('upload').provider.delete(dbFile.formats[key]);
-            })
-          );
+        if (pm.provider === 'vimeo' && pm.vimeoId) {
+          console.log('[VIMEO-DELETE] SKIP remote delete (imported from Vimeo ID).');
+        } else {
+          await strapi.plugin('upload').provider.delete(dbFile);
+
+          if (dbFile.formats) {
+            await Promise.all(
+              Object.keys(dbFile.formats).map((key) => {
+                return strapi.plugin('upload').provider.delete(dbFile.formats[key]);
+              })
+            );
+          }
         }
       }
 
@@ -513,16 +519,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     // execute delete function of the provider
     if (file.provider === config.provider) {
-      await strapi.plugin('upload').provider.delete(file);
+      const pm = file.provider_metadata || {};
 
-      if (file.formats) {
-        const keys = Object.keys(file.formats);
+      if (pm.provider === 'vimeo' && pm.vimeoId) {
+        console.log('[VIMEO-DELETE] SKIP remote delete (imported from Vimeo ID).');
+      } else {
+        await strapi.plugin('upload').provider.delete(file);
 
-        await Promise.all(
-          keys.map((key) => {
-            return strapi.plugin('upload').provider.delete(file.formats![key]);
-          })
-        );
+        if (file.formats) {
+          const keys = Object.keys(file.formats);
+
+          await Promise.all(
+            keys.map((key) => {
+              return strapi.plugin('upload').provider.delete(file.formats![key]);
+            })
+          );
+        }
       }
     }
 
@@ -567,10 +579,73 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
   }
 
+  async function importFromVimeoId(
+    { vimeoId, fileInfo = {} }: { vimeoId: string; fileInfo?: any } = { vimeoId: '' },
+    opts?: CommonOptions
+  ) {
+    const { user } = opts ?? {};
+
+    const config = strapi.config.get<Config>('plugin::upload');
+    const imageManipulationService = getService('image-manipulation');
+
+    const id = String(vimeoId ?? '').trim();
+
+    if (!id || !/^\d+$/.test(id)) {
+      throw new ApplicationError('Invalid vimeoId');
+    }
+
+    const fileData: any = {
+      alternativeText: fileInfo.alternativeText,
+      caption: fileInfo.caption,
+      folder: fileInfo.folder,
+      folderPath: await fileService.getFolderPath(fileInfo.folder),
+      size: 0,
+      sizeInBytes: 0,
+      formats: {},
+      provider_metadata: {
+        provider: 'vimeo',
+        uri: `/videos/${id}`,
+        vimeoId: id,
+      },
+    };
+
+    const provider = strapi.plugin('upload').provider;
+
+    if (!provider || typeof provider.importFromVimeoId !== 'function') {
+      throw new ApplicationError('Upload provider does not implement importFromVimeoId');
+    }
+
+    await provider.importFromVimeoId(fileData, id);
+
+    const vimeoName = fileData.provider_metadata?.vimeoName;
+
+    let rawName = (fileInfo.name || vimeoName || `vimeo-${id}`).normalize();
+
+    if (!isValidFilename(rawName)) {
+      throw new ApplicationError('File name contains invalid characters');
+    }
+
+    const ext = fileData.ext || '';
+
+    if (ext && !rawName.toLowerCase().endsWith(ext.toLowerCase())) {
+      rawName = `${rawName}${ext}`;
+    }
+
+    const basename = ext ? path.basename(rawName, ext) : rawName;
+
+    fileData.name = rawName;
+    fileData.hash = imageManipulationService.generateFileName(basename);
+
+    _.set(fileData, 'provider', config.provider);
+
+    return add(fileData, { user });
+  }
+
   return {
     formatFileInfo,
     upload,
     updateFileInfo,
+    importFromVimeoId,
     replace,
     findOne,
     findMany,

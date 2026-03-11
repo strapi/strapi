@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { getTrad } from '../../../utils';
 
 import { FromComputerForm } from './FromComputerForm';
-import { FromUrlForm } from './FromUrlForm';
+import { FromVimeoIdForm } from './FromVimeoIdForm';
 
 import type { RawFile, File } from '../../../../../shared/contracts/files';
 
@@ -17,10 +17,16 @@ export interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {
 interface AddAssetStepProps {
   onClose: () => void;
   onAddAsset: (assets: FileWithRawFile[]) => void;
+  addUploadedFiles?: (files: any[]) => void;
   trackedLocation?: string;
 }
 
-export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }: AddAssetStepProps) => {
+export const AddAssetStep = ({
+  onClose,
+  onAddAsset,
+  addUploadedFiles,
+  trackedLocation,
+}: AddAssetStepProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -47,10 +53,10 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }: AddAssetS
                 defaultMessage: 'From computer',
               })}
             </Tabs.Trigger>
-            <Tabs.Trigger value="url">
+            <Tabs.Trigger value="vimeo">
               {formatMessage({
-                id: getTrad('modal.nav.url'),
-                defaultMessage: 'From URL',
+                id: getTrad('modal.nav.vimeo-id'),
+                defaultMessage: 'Depuis un ID Vimeo',
               })}
             </Tabs.Trigger>
           </Tabs.List>
@@ -64,10 +70,10 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }: AddAssetS
             trackedLocation={trackedLocation}
           />
         </Tabs.Content>
-        <Tabs.Content value="url">
-          <FromUrlForm
+        <Tabs.Content value="vimeo">
+          <FromVimeoIdForm
             onClose={onClose}
-            onAddAsset={onAddAsset}
+            addUploadedFiles={addUploadedFiles}
             trackedLocation={trackedLocation}
           />
         </Tabs.Content>

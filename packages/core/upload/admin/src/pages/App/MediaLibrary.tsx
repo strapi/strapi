@@ -168,6 +168,12 @@ export const MediaLibrary = () => {
   const indeterminateBulkSelect =
     selected?.length > 0 && selected?.length !== assetCount + folderCount;
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
+  const refreshAssets = () => {
+    setQuery({
+      ...query,
+      page: query?.page ?? 1,
+    });
+  };
   const toggleEditFolderDialog = ({ created = false } = {}) => {
     // folders are only displayed on the first page, therefore
     // we have to navigate the user to that page, in case a folder
@@ -547,6 +553,7 @@ export const MediaLibrary = () => {
             onClose={toggleUploadAssetDialog}
             trackedLocation="upload"
             folderId={query?.folder as string | number | null | undefined}
+            addUploadedFiles={refreshAssets}
           />
         ))}
       {showEditFolderDialog && (

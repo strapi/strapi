@@ -128,6 +128,7 @@ export const UploadAssetDialog = ({
             onAddAsset={(assets: FileWithRawFile[]) =>
               handleAddToPendingAssets(assets as unknown as Asset[])
             }
+            addUploadedFiles={addUploadedFiles}
             trackedLocation={trackedLocation}
           />
         </Modal.Content>

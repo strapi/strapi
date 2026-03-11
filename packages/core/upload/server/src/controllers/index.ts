@@ -5,6 +5,7 @@ import adminSettings from './admin-settings';
 import adminUpload from './admin-upload';
 import contentApi from './content-api';
 import viewConfiguration from './view-configuration';
+import adminVimeo from './admin-vimeo';
 
 export const controllers = {
   'admin-file': adminFile,
@@ -12,6 +13,7 @@ export const controllers = {
   'admin-folder-file': adminFolderFile,
   'admin-settings': adminSettings,
   'admin-upload': adminUpload,
+  'admin-vimeo': adminVimeo,
   'content-api': contentApi,
   'view-configuration': viewConfiguration,
 };
