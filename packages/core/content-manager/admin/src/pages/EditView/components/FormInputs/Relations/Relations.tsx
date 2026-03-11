@@ -62,8 +62,6 @@ import { RelationModalRenderer, getCollectionType } from '../Relations/RelationM
 import type { FindAvailable } from '../../../../../../../shared/contracts/relations';
 import type { Schema } from '@strapi/types';
 
-const EMPTY_ARRAY: RelationResult[] = [];
-
 /**
  * Remove a relation, whether it's been already saved or not.
  * It's used both in RelationsList, where the "remove relation" button is, and in the input,
@@ -101,7 +99,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
         },
       });
     },
-    [field.value, fieldName, removeFieldRow, addFieldRow]
+    [addFieldRow, field.value, fieldName, removeFieldRow]
   );
 
   return handleDisconnect;
@@ -113,6 +111,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
 
 const RELATIONS_TO_DISPLAY = 5;
 const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
+const EMPTY_RELATION_RESULTS: RelationResult[] = [];
 
 type RelationPosition =
   | (Pick<RelationResult, 'status' | 'locale'> & {
@@ -172,11 +171,11 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
+    // @ts-expect-error – `targetModel` exists on supported non-morph relations (morph is disabled).
+    const targetModel = props.attribute.targetModel;
 
-    const { componentId, componentUID } = useComponent('RelationsField', ({ uid, id }) => ({
-      componentId: id,
-      componentUID: uid,
-    }));
+    const componentId = useComponent('RelationsField', (state) => state.id);
+    const componentUID = useComponent('RelationsField', (state) => state.uid);
 
     const isSubmitting = useForm('RelationsList', (state) => state.isSubmitting);
 
@@ -219,7 +218,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { results, pagination, isLoading, isFetching } = useGetRelationsQuery(
+    const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -234,11 +233,6 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       {
         refetchOnMountOrArgChange: true,
         skip: !id || !isRelatedToCurrentDocument,
-        selectFromResult: (result) => ({
-          ...result,
-          results: result.data?.results ?? EMPTY_ARRAY,
-          pagination: result.data?.pagination ?? null,
-        }),
       }
     );
 
@@ -247,10 +241,11 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     };
 
     const field = useField(props.name);
+    const serverData = data?.results ?? EMPTY_RELATION_RESULTS;
 
     const isFetchingMoreRelations = isLoading || isFetching;
 
-    const realServerRelationsCount = pagination ? pagination.total : 0;
+    const realServerRelationsCount = data?.pagination ? data.pagination.total : 0;
 
     /**
      * Items that are already connected, but reordered would be in
@@ -258,7 +253,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      */
     const relationsConnected =
       (field.value?.connect ?? []).filter(
-        (rel: Relation) => results.findIndex((relation) => relation.id === rel.id) === -1
+        (rel: Relation) => serverData.findIndex((relation) => relation.id === rel.id) === -1
       ).length ?? 0;
     const relationsDisconnected = field.value?.disconnect?.length ?? 0;
 
@@ -272,8 +267,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const relations = React.useMemo(() => {
       const ctx = {
         field: field.value,
-        // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
-        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}`,
+        href: `../${COLLECTION_TYPES}/${targetModel}`,
         mainField: props.mainField,
       };
 
@@ -286,7 +280,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         addLabelAndHref(ctx)
       );
 
-      const transformedRels = transformations([...results]);
+      const transformedRels = transformations([...serverData]);
 
       /**
        * THIS IS CRUCIAL. If you don't sort by the __temp_key__ which comes from fractional indexing
@@ -297,48 +291,52 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         if (a.__temp_key__ > b.__temp_key__) return 1;
         return 0;
       });
-    }, [
-      results,
-      field.value,
-      // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
-      props.attribute.targetModel,
-      props.mainField,
-    ]);
+    }, [serverData, field.value, targetModel, props.mainField]);
 
     const handleDisconnect = useHandleDisconnect(props.name, 'RelationsField');
 
-    const handleConnect: RelationsInputProps['onChange'] = (relation) => {
-      const [lastItemInList] = relations.slice(-1);
-      const item = {
-        id: relation.id,
-        apiData: {
+    const handleConnect = React.useCallback<RelationsInputProps['onChange']>(
+      (relation) => {
+        const [lastItemInList] = relations.slice(-1);
+        const item = {
           id: relation.id,
-          documentId: relation.documentId,
-          locale: relation.locale,
-          isTemporary: true,
-        },
-        status: relation.status,
-        /**
-         * If there's a last item, that's the first key we use to generate out next one.
-         */
-        __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
-        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
-        label: getRelationLabel(relation, props.mainField),
-        // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
-        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
-      };
+          apiData: {
+            id: relation.id,
+            documentId: relation.documentId,
+            locale: relation.locale,
+            isTemporary: true,
+          },
+          status: relation.status,
+          /**
+           * If there's a last item, that's the first key we use to generate out next one.
+           */
+          __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
+          // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
+          [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
+          label: getRelationLabel(relation, props.mainField),
+          href: `../${COLLECTION_TYPES}/${targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
+        };
 
-      if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
-        // Remove any existing relation so they can be replaced with the new one
-        field.value?.connect?.forEach(handleDisconnect);
-        relations.forEach(handleDisconnect);
+        if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
+          // Remove any existing relation so they can be replaced with the new one
+          field.value?.connect?.forEach(handleDisconnect);
+          relations.forEach(handleDisconnect);
 
-        field.onChange(`${props.name}.connect`, [item]);
-      } else {
-        field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
-      }
-    };
+          field.onChange(`${props.name}.connect`, [item]);
+        } else {
+          field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
+        }
+      },
+      [
+        field,
+        handleDisconnect,
+        props.attribute.relation,
+        props.mainField,
+        props.name,
+        relations,
+        targetModel,
+      ]
+    );
 
     return (
       <Flex
@@ -350,7 +348,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         wrap="wrap"
       >
         <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
-          <RelationsInput
+          <MemoizedRelationsComboboxInput
             disabled={isDisabled}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
             id={componentUID && component ? (componentId ? `${componentId}` : '') : documentId}
@@ -360,7 +358,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
             isRelatedToCurrentDocument={isRelatedToCurrentDocument}
             {...props}
           />
-          {pagination && pagination.pageCount > pagination.page ? (
+          {data?.pagination && data.pagination.pageCount > data.pagination.page ? (
             <TextButton
               disabled={isFetchingMoreRelations}
               onClick={handleLoadMore}
@@ -376,15 +374,15 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
             </TextButton>
           ) : null}
         </StyledFlex>
-        <RelationsList
+        <MemoizedRelationsList
           data={relations}
-          serverData={results}
+          serverData={serverData}
           disabled={isDisabled}
           name={props.name}
           isLoading={isFetchingMoreRelations}
           relationType={props.attribute.relation}
-          // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
-          targetModel={props.attribute.targetModel}
+          targetModel={targetModel}
+          documentParams={currentDocumentMeta.params}
           mainField={props.mainField}
         />
       </Flex>
@@ -472,87 +470,88 @@ interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
  * @description Contains all the logic for the combobox that can search
  * for relations and then add them to the field's connect array.
  */
-const RelationsInput = React.memo(
-  ({
-    hint,
+const RelationsInput = ({
+  hint,
+  id,
+  model,
+  label,
+  labelAction,
+  name,
+  mainField,
+  placeholder,
+  required,
+  unique: _unique,
+  'aria-label': _ariaLabel,
+  onChange,
+  isRelatedToCurrentDocument,
+  ...props
+}: RelationsInputProps) => {
+  const [searchParams, setSearchParams] = React.useState({
+    _q: '',
+    page: 1,
+  });
+  const { toggleNotification } = useNotification();
+  const { currentDocumentMeta } = useDocumentContext('RelationsInput');
+  const { formatMessage } = useIntl();
+
+  const field = useField<RelationsFormValue>(name);
+  // @ts-expect-error – `targetModel` exists on supported non-morph relations (morph is disabled).
+  const targetModel = props.attribute.targetModel;
+
+  const searchParamsDebounced = useDebounce(searchParams, 300);
+  const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
+
+  /**
+   * Because we're using a lazy query, we need to trigger the search
+   * when the component mounts and when the search params change.
+   * We also need to trigger the search when the field value changes
+   * so that we can filter out the relations that are already connected.
+   */
+  React.useEffect(() => {
+    /**
+     * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
+     * Where the above example would a nested field within two components, however
+     * we only require the field on the component not the complete path since we query
+     * individual components. Therefore we split the string and take the last item.
+     */
+    const [targetField] = name.split('.').slice(-1);
+
+    // Return early if there is no relation to the document
+    if (!isRelatedToCurrentDocument) return;
+
+    searchForTrigger({
+      model,
+      targetField,
+      params: {
+        ...currentDocumentMeta.params,
+        id: id ?? '',
+        pageSize: 10,
+        idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
+        idsToOmit: field.value?.connect?.map((rel) => rel.id.toString()) ?? [],
+        ...searchParamsDebounced,
+      },
+    });
+  }, [
+    field.value?.connect,
+    field.value?.disconnect,
     id,
     model,
-    label,
-    labelAction,
     name,
-    mainField,
-    placeholder,
-    required,
-    unique: _unique,
-    'aria-label': _ariaLabel,
-    onChange,
+    searchForTrigger,
+    searchParamsDebounced,
     isRelatedToCurrentDocument,
-    ...props
-  }: RelationsInputProps) => {
-    const [searchParams, setSearchParams] = React.useState({
-      _q: '',
-      page: 1,
-    });
-    const { toggleNotification } = useNotification();
-    const { currentDocumentMeta } = useDocumentContext('RelationsInput');
-    const { formatMessage } = useIntl();
+    currentDocumentMeta.params,
+  ]);
 
-    const field = useField<RelationsFormValue>(name);
+  const hasNextPage = data?.pagination ? data.pagination.page < data.pagination.pageCount : false;
 
-    const searchParamsDebounced = useDebounce(searchParams, 300);
-    const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
-
-    /**
-     * Because we're using a lazy query, we need to trigger the search
-     * when the component mounts and when the search params change.
-     * We also need to trigger the search when the field value changes
-     * so that we can filter out the relations that are already connected.
-     */
-    React.useEffect(() => {
-      /**
-       * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
-       * Where the above example would a nested field within two components, however
-       * we only require the field on the component not the complete path since we query
-       * individual components. Therefore we split the string and take the last item.
-       */
-      const [targetField] = name.split('.').slice(-1);
-
-      // Return early if there is no relation to the document
-      if (!isRelatedToCurrentDocument) return;
-
-      searchForTrigger({
-        model,
-        targetField,
-        params: {
-          ...currentDocumentMeta.params,
-          id: id ?? '',
-          pageSize: 10,
-          idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
-          idsToOmit: field.value?.connect?.map((rel) => rel.id.toString()) ?? [],
-          ...searchParamsDebounced,
-        },
-      });
-    }, [
-      field.value?.connect,
-      field.value?.disconnect,
-      id,
-      model,
-      name,
-      searchForTrigger,
-      searchParamsDebounced,
-      isRelatedToCurrentDocument,
-      currentDocumentMeta.params,
-    ]);
-
-    const hasNextPage = data?.pagination ? data.pagination.page < data.pagination.pageCount : false;
-
-    const options = data?.results ?? [];
-
-    const handleChange = (relationId?: string) => {
+  const handleChange = React.useCallback(
+    (relationId?: string) => {
       if (!relationId) {
         return;
       }
 
+      const options = data?.results ?? [];
       const relation = options.find((opt) => opt.id.toString() === relationId);
 
       if (!relation) {
@@ -580,66 +579,72 @@ const RelationsInput = React.memo(
        *
        */
       onChange(relation);
-    };
+    },
+    [data, formatMessage, onChange, toggleNotification]
+  );
 
-    const relation = {
-      collectionType: COLLECTION_TYPES,
-      // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
-      model: props.attribute.targetModel,
-      documentId: '',
-      params: currentDocumentMeta.params,
-    } as DocumentMeta;
+  const relation = React.useMemo(
+    () =>
+      ({
+        collectionType: COLLECTION_TYPES,
+        model: targetModel,
+        documentId: '',
+        params: currentDocumentMeta.params,
+      }) as DocumentMeta,
+    [currentDocumentMeta.params, targetModel]
+  );
 
-    const {
-      permissions = [],
-      isLoading: isLoadingPermissions,
-      error,
-    } = useRBAC(
-      PERMISSIONS.map((action) => ({
-        action,
-        subject: relation.model,
-      }))
-    );
+  const {
+    permissions = [],
+    isLoading: isLoadingPermissions,
+    error,
+  } = useRBAC(
+    PERMISSIONS.map((action) => ({
+      action,
+      subject: relation.model,
+    }))
+  );
 
-    if (error) {
-      return (
-        <Flex alignItems="center" height="100%" justifyContent="center">
-          <EmptyStateLayout
-            icon={<WarningCircle width="16rem" />}
-            content={formatMessage({
-              id: 'anErrorOccurred',
-              defaultMessage: 'Whoops! Something went wrong. Please, try again.',
-            })}
-          />
-        </Flex>
-      );
-    }
-
+  if (error) {
     return (
-      <Field.Root error={field.error} hint={hint} name={name} required={required}>
-        <Field.Label action={labelAction}>{label}</Field.Label>
-        <DocumentRBAC permissions={permissions} model={relation.model}>
-          <RelationModalWithContext
-            relation={relation}
-            name={name}
-            placeholder={placeholder}
-            hasNextPage={hasNextPage}
-            isLoadingPermissions={isLoadingPermissions}
-            isLoadingSearchRelations={isLoading}
-            handleChange={handleChange}
-            setSearchParams={setSearchParams}
-            data={data}
-            mainField={mainField}
-            fieldValue={field.value}
-            {...props}
-          />
-        </DocumentRBAC>
-        <Field.Error />
-        <Field.Hint />
-      </Field.Root>
+      <Flex alignItems="center" height="100%" justifyContent="center">
+        <EmptyStateLayout
+          icon={<WarningCircle width="16rem" />}
+          content={formatMessage({
+            id: 'anErrorOccurred',
+            defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+          })}
+        />
+      </Flex>
     );
   }
-);
+
+  return (
+    <Field.Root error={field.error} hint={hint} name={name} required={required}>
+      <Field.Label action={labelAction}>{label}</Field.Label>
+      <DocumentRBAC permissions={permissions} model={relation.model}>
+        <MemoizedRelationModalWithContext
+          relation={relation}
+          name={name}
+          placeholder={placeholder}
+          hasNextPage={hasNextPage}
+          isLoadingPermissions={isLoadingPermissions}
+          isLoadingSearchRelations={isLoading}
+          handleChange={handleChange}
+          setSearchParams={setSearchParams}
+          data={data}
+          mainField={mainField}
+          fieldValue={field.value}
+          {...props}
+        />
+      </DocumentRBAC>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
+  );
+};
+
+const MemoizedRelationsComboboxInput = React.memo(RelationsInput);
 
 interface RelationModalWithContextProps
   extends Omit<RelationsInputProps, 'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'> {
@@ -676,9 +681,7 @@ const RelationModalWithContext = ({
   const { formatMessage } = useIntl();
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
-  const { componentUID } = useComponent('RelationsField', ({ uid }) => ({
-    componentUID: uid,
-  }));
+  const componentUID = useComponent('RelationsField', (state) => state.uid);
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -780,6 +783,8 @@ const RelationModalWithContext = ({
   );
 };
 
+const MemoizedRelationModalWithContext = React.memo(RelationModalWithContext);
+
 /* -------------------------------------------------------------------------------------------------
  * RelationsList
  * -----------------------------------------------------------------------------------------------*/
@@ -795,270 +800,286 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
    */
   serverData: RelationResult[];
   targetModel: string;
+  documentParams?: DocumentMeta['params'];
   mainField?: MainField;
 }
 
-const RelationsList = React.memo(
-  ({
-    data,
-    serverData,
-    disabled,
-    name,
-    isLoading,
-    relationType,
-    targetModel,
-    mainField,
-  }: RelationsListProps) => {
-    const ariaDescriptionId = React.useId();
-    const { formatMessage } = useIntl();
-    const listRef = React.useRef<FixedSizeList>(null);
-    const outerListRef = React.useRef<HTMLUListElement>(null);
-    const [overflow, setOverflow] = React.useState<'top' | 'bottom' | 'top-bottom'>();
-    const [liveText, setLiveText] = React.useState('');
-    const field = useField(name);
+const RelationsList = ({
+  data,
+  serverData,
+  disabled,
+  name,
+  isLoading,
+  relationType,
+  targetModel,
+  documentParams,
+  mainField,
+}: RelationsListProps) => {
+  const ariaDescriptionId = React.useId();
+  const { formatMessage } = useIntl();
+  const listRef = React.useRef<FixedSizeList>(null);
+  const outerListRef = React.useRef<HTMLUListElement>(null);
+  const [overflow, setOverflow] = React.useState<'top' | 'bottom' | 'top-bottom'>();
+  const [liveText, setLiveText] = React.useState('');
+  const field = useField(name);
 
-    React.useEffect(() => {
-      if (data.length <= RELATIONS_TO_DISPLAY) {
-        return setOverflow(undefined);
+  React.useEffect(() => {
+    if (data.length <= RELATIONS_TO_DISPLAY) {
+      return setOverflow(undefined);
+    }
+
+    const handleNativeScroll = (e: Event) => {
+      const el = e.target as HTMLUListElement;
+      const parentScrollContainerHeight = (el.parentNode as HTMLDivElement).scrollHeight;
+      const maxScrollBottom = el.scrollHeight - el.scrollTop;
+
+      if (el.scrollTop === 0) {
+        return setOverflow('bottom');
       }
 
-      const handleNativeScroll = (e: Event) => {
-        const el = e.target as HTMLUListElement;
-        const parentScrollContainerHeight = (el.parentNode as HTMLDivElement).scrollHeight;
-        const maxScrollBottom = el.scrollHeight - el.scrollTop;
-
-        if (el.scrollTop === 0) {
-          return setOverflow('bottom');
-        }
-
-        if (maxScrollBottom === parentScrollContainerHeight) {
-          return setOverflow('top');
-        }
-
-        return setOverflow('top-bottom');
-      };
-
-      const outerListRefCurrent = outerListRef?.current;
-
-      if (!isLoading && data.length > 0 && outerListRefCurrent) {
-        outerListRef.current.addEventListener('scroll', handleNativeScroll);
+      if (maxScrollBottom === parentScrollContainerHeight) {
+        return setOverflow('top');
       }
 
-      return () => {
-        if (outerListRefCurrent) {
-          outerListRefCurrent.removeEventListener('scroll', handleNativeScroll);
-        }
-      };
-    }, [isLoading, data.length]);
+      return setOverflow('top-bottom');
+    };
 
-    const getItemPos = React.useCallback(
-      (index: number) => `${index + 1} of ${data.length}`,
-      [data.length]
-    );
+    const outerListRefCurrent = outerListRef?.current;
 
-    const handleMoveItem = React.useCallback<NonNullable<UseDragAndDropOptions['onMoveItem']>>(
-      (newIndex, oldIndex) => {
-        const item = data[oldIndex];
+    if (!isLoading && data.length > 0 && outerListRefCurrent) {
+      outerListRef.current.addEventListener('scroll', handleNativeScroll);
+    }
 
-        setLiveText(
-          formatMessage(
-            {
-              id: getTranslation('dnd.reorder'),
-              defaultMessage: '{item}, moved. New position in list: {position}.',
-            },
-            {
-              item: item.label ?? item.documentId,
-              position: getItemPos(newIndex),
-            }
-          )
-        );
+    return () => {
+      if (outerListRefCurrent) {
+        outerListRefCurrent.removeEventListener('scroll', handleNativeScroll);
+      }
+    };
+  }, [isLoading, data.length]);
 
-        /**
-         * Splicing mutates the array, so we need to create a new array
-         */
-        const newData = [...data];
-        const currentRow = data[oldIndex];
+  const getItemPos = React.useCallback(
+    (index: number) => `${index + 1} of ${data.length}`,
+    [data.length]
+  );
 
-        const startKey =
-          oldIndex > newIndex
-            ? newData[newIndex - 1]?.__temp_key__
-            : newData[newIndex]?.__temp_key__;
-        const endKey =
-          oldIndex > newIndex
-            ? newData[newIndex]?.__temp_key__
-            : newData[newIndex + 1]?.__temp_key__;
+  const handleMoveItem = React.useCallback<NonNullable<UseDragAndDropOptions['onMoveItem']>>(
+    (newIndex, oldIndex) => {
+      const item = data[oldIndex];
 
-        /**
-         * We're moving the relation between two other relations, so
-         * we need to generate a new key that keeps the order
-         */
-        const [newKey] = generateNKeysBetween(startKey, endKey, 1);
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.reorder'),
+            defaultMessage: '{item}, moved. New position in list: {position}.',
+          },
+          {
+            item: item.label ?? item.documentId,
+            position: getItemPos(newIndex),
+          }
+        )
+      );
 
-        newData.splice(oldIndex, 1);
-        newData.splice(newIndex, 0, { ...currentRow, __temp_key__: newKey });
+      /**
+       * Splicing mutates the array, so we need to create a new array
+       */
+      const newData = [...data];
+      const currentRow = data[oldIndex];
 
-        /**
-         * Now we diff against the server to understand what's different so we
-         * can keep the connect array nice and tidy. It also needs reversing because
-         * we reverse the relations from the server in the first place.
-         */
-        const connectedRelations = newData
-          .reduce<Relation[]>((acc, relation, currentIndex, array) => {
-            const relationOnServer = serverData.find(
-              (oldRelation) => oldRelation.id === relation.id
-            );
+      const startKey =
+        oldIndex > newIndex ? newData[newIndex - 1]?.__temp_key__ : newData[newIndex]?.__temp_key__;
+      const endKey =
+        oldIndex > newIndex ? newData[newIndex]?.__temp_key__ : newData[newIndex + 1]?.__temp_key__;
 
-            const relationInFront = array[currentIndex + 1];
+      /**
+       * We're moving the relation between two other relations, so
+       * we need to generate a new key that keeps the order
+       */
+      const [newKey] = generateNKeysBetween(startKey, endKey, 1);
 
-            if (!relationOnServer || relationOnServer.__temp_key__ !== relation.__temp_key__) {
-              const position = relationInFront
-                ? {
-                    before: relationInFront.documentId,
-                    locale: relationInFront.locale,
-                    status:
-                      'publishedAt' in relationInFront && relationInFront.publishedAt
-                        ? ('published' as Relation['status'])
-                        : ('draft' as Relation['status']),
-                  }
-                : { end: true };
+      newData.splice(oldIndex, 1);
+      newData.splice(newIndex, 0, { ...currentRow, __temp_key__: newKey });
 
-              const relationWithPosition: Relation = {
-                ...relation,
-                ...{
-                  apiData: {
-                    id: relation.id,
-                    documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
-                    locale: relation.locale || relation.apiData?.locale,
-                    isTemporary: relation.apiData?.isTemporary,
-                    position,
-                  },
+      /**
+       * Now we diff against the server to understand what's different so we
+       * can keep the connect array nice and tidy. It also needs reversing because
+       * we reverse the relations from the server in the first place.
+       */
+      const connectedRelations = newData
+        .reduce<Relation[]>((acc, relation, currentIndex, array) => {
+          const relationOnServer = serverData.find((oldRelation) => oldRelation.id === relation.id);
+
+          const relationInFront = array[currentIndex + 1];
+
+          if (!relationOnServer || relationOnServer.__temp_key__ !== relation.__temp_key__) {
+            const position = relationInFront
+              ? {
+                  before: relationInFront.documentId,
+                  locale: relationInFront.locale,
+                  status:
+                    'publishedAt' in relationInFront && relationInFront.publishedAt
+                      ? ('published' as Relation['status'])
+                      : ('draft' as Relation['status']),
+                }
+              : { end: true };
+
+            const relationWithPosition: Relation = {
+              ...relation,
+              ...{
+                apiData: {
+                  id: relation.id,
+                  documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
+                  locale: relation.locale || relation.apiData?.locale,
+                  isTemporary: relation.apiData?.isTemporary,
+                  position,
                 },
-              };
+              },
+            };
 
-              return [...acc, relationWithPosition];
-            }
+            return [...acc, relationWithPosition];
+          }
 
-            return acc;
-          }, [])
-          .toReversed();
+          return acc;
+        }, [])
+        .toReversed();
 
-        field.onChange(`${name}.connect`, connectedRelations);
-      },
-      [data, serverData, field, name, formatMessage, getItemPos]
-    );
+      field.onChange(`${name}.connect`, connectedRelations);
+    },
+    [data, serverData, field, name, formatMessage, getItemPos]
+  );
 
-    const handleGrabItem = React.useCallback<NonNullable<UseDragAndDropOptions['onGrabItem']>>(
-      (index) => {
-        const item = data[index];
+  const handleGrabItem = React.useCallback<NonNullable<UseDragAndDropOptions['onGrabItem']>>(
+    (index) => {
+      const item = data[index];
 
-        setLiveText(
-          formatMessage(
-            {
-              id: getTranslation('dnd.grab-item'),
-              defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
-            },
-            {
-              item: item.label ?? item.documentId,
-              position: getItemPos(index),
-            }
-          )
-        );
-      },
-      [data, formatMessage, getItemPos]
-    );
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.grab-item'),
+            defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+          },
+          {
+            item: item.label ?? item.documentId,
+            position: getItemPos(index),
+          }
+        )
+      );
+    },
+    [data, formatMessage, getItemPos]
+  );
 
-    const handleDropItem = React.useCallback<NonNullable<UseDragAndDropOptions['onDropItem']>>(
-      (index) => {
-        const { href: _href, label, ...item } = data[index];
+  const handleDropItem = React.useCallback<NonNullable<UseDragAndDropOptions['onDropItem']>>(
+    (index) => {
+      const { href: _href, label, ...item } = data[index];
 
-        setLiveText(
-          formatMessage(
-            {
-              id: getTranslation('dnd.drop-item'),
-              defaultMessage: `{item}, dropped. Final position in list: {position}.`,
-            },
-            {
-              item: label ?? item.documentId,
-              position: getItemPos(index),
-            }
-          )
-        );
-      },
-      [data, formatMessage, getItemPos]
-    );
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.drop-item'),
+            defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+          },
+          {
+            item: label ?? item.documentId,
+            position: getItemPos(index),
+          }
+        )
+      );
+    },
+    [data, formatMessage, getItemPos]
+  );
 
-    const handleCancel = React.useCallback<NonNullable<UseDragAndDropOptions['onCancel']>>(
-      (index) => {
-        const item = data[index];
+  const handleCancel = React.useCallback<NonNullable<UseDragAndDropOptions['onCancel']>>(
+    (index) => {
+      const item = data[index];
 
-        setLiveText(
-          formatMessage(
-            {
-              id: getTranslation('dnd.cancel-item'),
-              defaultMessage: '{item}, dropped. Re-order cancelled.',
-            },
-            {
-              item: item.label ?? item.documentId,
-            }
-          )
-        );
-      },
-      [data, formatMessage, getItemPos]
-    );
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.cancel-item'),
+            defaultMessage: '{item}, dropped. Re-order cancelled.',
+          },
+          {
+            item: item.label ?? item.documentId,
+          }
+        )
+      );
+    },
+    [data, formatMessage]
+  );
 
-    const handleDisconnect = useHandleDisconnect(name, 'RelationsList');
+  const handleDisconnect = useHandleDisconnect(name, 'RelationsList');
 
-    /**
-     * These relation types will only ever have one item
-     * in their list, so you can't reorder a single item!
-     */
-    const canReorder = !ONE_WAY_RELATIONS.includes(relationType);
+  /**
+   * These relation types will only ever have one item
+   * in their list, so you can't reorder a single item!
+   */
+  const canReorder = !ONE_WAY_RELATIONS.includes(relationType);
 
-    const dynamicListHeight =
-      data.length > RELATIONS_TO_DISPLAY
-        ? Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
-          RELATION_ITEM_HEIGHT / 2
-        : Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
+  const dynamicListHeight =
+    data.length > RELATIONS_TO_DISPLAY
+      ? Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
+        RELATION_ITEM_HEIGHT / 2
+      : Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
 
-    return (
-      <ShadowBox $overflowDirection={overflow}>
-        <VisuallyHidden id={ariaDescriptionId}>
-          {formatMessage({
-            id: getTranslation('dnd.instructions'),
-            defaultMessage: `Press spacebar to grab and re-order`,
-          })}
-        </VisuallyHidden>
-        <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
-        {/* @ts-expect-error – width is expected, but we've not needed to pass it before. */}
-        <FixedSizeList
-          height={dynamicListHeight}
-          ref={listRef}
-          outerRef={outerListRef}
-          itemCount={data.length}
-          itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
-          itemData={{
-            ariaDescribedBy: ariaDescriptionId,
-            canDrag: canReorder,
-            disabled,
-            handleCancel,
-            handleDropItem,
-            handleGrabItem,
-            handleMoveItem,
-            name,
-            handleDisconnect,
-            relations: data,
-            targetModel,
-            mainField,
-          }}
-          itemKey={(index) => data[index].id}
-          innerElementType="ol"
-        >
-          {ListItem}
-        </FixedSizeList>
-      </ShadowBox>
-    );
-  }
-);
+  const itemData = React.useMemo(
+    () => ({
+      ariaDescribedBy: ariaDescriptionId,
+      canDrag: canReorder,
+      disabled,
+      documentParams,
+      handleCancel,
+      handleDropItem,
+      handleGrabItem,
+      handleMoveItem,
+      name,
+      handleDisconnect,
+      relations: data,
+      targetModel,
+      mainField,
+    }),
+    [
+      ariaDescriptionId,
+      canReorder,
+      disabled,
+      documentParams,
+      handleCancel,
+      handleDisconnect,
+      handleDropItem,
+      handleGrabItem,
+      handleMoveItem,
+      name,
+      data,
+      targetModel,
+      mainField,
+    ]
+  );
+
+  return (
+    <ShadowBox $overflowDirection={overflow}>
+      <VisuallyHidden id={ariaDescriptionId}>
+        {formatMessage({
+          id: getTranslation('dnd.instructions'),
+          defaultMessage: `Press spacebar to grab and re-order`,
+        })}
+      </VisuallyHidden>
+      <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+      {/* @ts-expect-error – width is expected, but we've not needed to pass it before. */}
+      <FixedSizeList
+        height={dynamicListHeight}
+        ref={listRef}
+        outerRef={outerListRef}
+        itemCount={data.length}
+        itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
+        itemData={itemData}
+        itemKey={(index) => data[index].id}
+        innerElementType="ol"
+      >
+        {ListItem}
+      </FixedSizeList>
+    </ShadowBox>
+  );
+};
+
+const MemoizedRelationsList = React.memo(RelationsList);
 
 const ShadowBox = styled<BoxComponent>(Box)<{
   $overflowDirection?: 'top-bottom' | 'top' | 'bottom';
@@ -1113,6 +1134,7 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     name: string;
     relations: Relation[];
     targetModel: string;
+    documentParams?: DocumentMeta['params'];
     mainField?: MainField;
   };
 }
@@ -1140,10 +1162,10 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
     name,
     relations,
     targetModel,
+    documentParams,
     mainField,
   } = data;
   const isDesktop = useIsDesktop();
-  const { currentDocumentMeta } = useDocumentContext('RelationsField');
 
   const { formatMessage } = useIntl();
 
@@ -1169,7 +1191,7 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
       collectionType,
       model: targetModel,
       documentId: documentId ?? apiData?.documentId,
-      params: currentDocumentMeta.params,
+      params: documentParams,
     },
     { skip: !isTemporary }
   );
