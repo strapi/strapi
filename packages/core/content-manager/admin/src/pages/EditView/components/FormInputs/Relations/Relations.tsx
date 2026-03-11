@@ -287,11 +287,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
        * so ListItem's getCollectionType(href) and display work correctly.
        */
       const connectItems = (field.value?.connect ?? []).map((rel: Relation) => {
+        const urlLocaleParam = currentDocumentMeta.params?.locale
+          ? `?plugins[i18n][locale]=${rel.locale}`
+          : '';
         if (rel.href) return rel;
         return {
           ...rel,
           label: rel.label ?? getRelationLabel(rel, props.mainField),
-          href: `../${COLLECTION_TYPES}/${targetModel}/${rel.documentId}?${rel.locale ? `plugins[i18n][locale]=${rel.locale}` : ''}`,
+          href: `../${COLLECTION_TYPES}/${targetModel}/${rel.documentId}${urlLocaleParam}`,
         };
       });
 

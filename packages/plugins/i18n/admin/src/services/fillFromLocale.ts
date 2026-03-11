@@ -2,7 +2,7 @@ import { i18nApi } from './api';
 
 interface FillFromLocaleArgs {
   model: string;
-  documentId: string;
+  documentId?: string;
   sourceLocale: string;
   targetLocale: string;
   collectionType: 'collection-types' | 'single-types';

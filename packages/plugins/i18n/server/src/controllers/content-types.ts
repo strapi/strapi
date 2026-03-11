@@ -93,7 +93,7 @@ const controller = {
 
     const { model, documentId, sourceLocale, targetLocale } = ctx.request.body as {
       model: string;
-      documentId: string;
+      documentId?: string;
       sourceLocale: string;
       targetLocale: string;
     };
@@ -101,9 +101,9 @@ const controller = {
     const fillFromLocaleService = getService('fill-from-locale');
     const data = await fillFromLocaleService.getDataForLocale(
       model as UID.ContentType,
-      documentId,
       sourceLocale,
-      targetLocale
+      targetLocale,
+      documentId
     );
 
     if (!data) {

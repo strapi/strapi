@@ -549,7 +549,7 @@ const FillFromAnotherLocaleAction = ({
     : [];
 
   const fillFromLocale = (onClose: () => void) => async () => {
-    if (!localeSelected || !currentDesiredLocale || !documentId) {
+    if (!localeSelected || !currentDesiredLocale) {
       return;
     }
 

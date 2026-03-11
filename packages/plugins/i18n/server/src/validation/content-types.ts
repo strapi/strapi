@@ -24,7 +24,11 @@ const validateFillFromLocaleInputSchema = yup
   .object()
   .shape({
     model: yup.string().required(),
-    documentId: yup.string().required(),
+    documentId: yup.string().when('collectionType', {
+      is: 'single-types',
+      then: (schema) => schema.nullable(),
+      otherwise: (schema) => schema.required(),
+    }),
     sourceLocale: yup.string().required(),
     targetLocale: yup.string().required(),
     collectionType: yup.string().oneOf(['collection-types', 'single-types']).required(),

@@ -19,7 +19,7 @@ const getRelationLabel = (
   return relation.documentId;
 };
 
-const FIELDS_TO_REMOVE = [
+const FIELDS_TO_REMOVE = new Set([
   'createdAt',
   'createdBy',
   'updatedAt',
@@ -31,9 +31,9 @@ const FIELDS_TO_REMOVE = [
   'strapi_assignee',
   'locale',
   'status',
-];
+]);
 
-const STATUS_FIELDS = ['id', 'documentId', 'locale', 'updatedAt', 'publishedAt'];
+const STATUS_FIELDS = new Set(['id', 'documentId', 'locale', 'updatedAt', 'publishedAt']);
 
 /**
  * Add status to multiple relations in one batch (avoids N+1 queries).
@@ -114,7 +114,7 @@ const resolveRelationsForLocaleBatch = async (
   const targetEntriesQuery: { where: object; select: string[]; orderBy?: Record<string, string> } =
     {
       where: { documentId: { $in: documentIds }, locale: targetLocale },
-      select: STATUS_FIELDS,
+      select: [...STATUS_FIELDS],
     };
   if (contentTypes.hasDraftAndPublish(model)) {
     targetEntriesQuery.orderBy = { publishedAt: 'desc' };
@@ -211,7 +211,7 @@ const transformRelationsForLocale = async (
     contentTypes.hasDraftAndPublish(strapi.getModel(targetUid))
       ? strapi.db.query(targetUid).findMany({
           where: statusWhere,
-          select: STATUS_FIELDS,
+          select: [...STATUS_FIELDS],
         })
       : Promise.resolve([]),
     strapi.db.query(targetUid).findMany({
@@ -252,7 +252,7 @@ const processDocumentData = async (
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(data)) {
-    if (FIELDS_TO_REMOVE.includes(key)) {
+    if (FIELDS_TO_REMOVE.has(key)) {
       continue;
     }
 
@@ -323,9 +323,9 @@ const fillFromLocale = () => {
   return {
     async getDataForLocale(
       model: UID.ContentType,
-      documentId: string,
       sourceLocale: string,
-      targetLocale: string
+      targetLocale: string,
+      documentId?: string
     ) {
       const populateBuilderService = strapi
         .plugin('content-manager')
@@ -341,20 +341,24 @@ const fillFromLocale = () => {
       // Build populate WITHOUT countRelations so we get full relation objects
       const populate = await populateBuilderService(model).populateDeep(Infinity).build();
 
-      // Single query: prefer published, fall back to draft (orderBy puts non-null publishedAt first)
-      const queryParams: {
-        where: Record<string, unknown>;
-        populate: unknown;
-        orderBy?: Record<string, string>;
-      } = {
-        where: { documentId, locale: sourceLocale },
-        populate,
+      // Use strapi.documents to fetch with relations properly populated
+      // Can't use db.query because it's not fetching draft relations
+      const docs = strapi.documents(model);
+      const baseParams = {
+        locale: sourceLocale,
+        populate: populate as never,
+        pageSize: 1,
+        ...(documentId && { documentId }),
       };
-      if (contentTypes.hasDraftAndPublish(modelDef)) {
-        queryParams.orderBy = { publishedAt: 'desc' };
-      }
+      const findSourceDoc = (status?: 'draft' | 'published') =>
+        docs.findMany({ ...baseParams, ...(status && { status }) }).then((r) => r[0] ?? null);
 
-      const document = await strapi.db.query(model).findOne(queryParams);
+      // Prefer published first, fall back to draft
+      const document = (
+        contentTypes.hasDraftAndPublish(modelDef)
+          ? ((await findSourceDoc('published')) ?? (await findSourceDoc('draft')))
+          : await findSourceDoc()
+      ) as Record<string, unknown> | null;
 
       if (!document) {
         return null;
