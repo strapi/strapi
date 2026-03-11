@@ -1,7 +1,7 @@
 import { addDays, format } from 'date-fns';
 import * as locales from 'date-fns/locale';
 
-import { getDateFnsLocaleName } from '../../../../../../utils/locales';
+import { getDateFnsLocaleName } from '../../../../../utils/locales';
 
 export const getDateOfExpiration = (
   createdAt: string,

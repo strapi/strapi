@@ -135,13 +135,22 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
 
   for (let page = 0; page < pageCount; page += 1) {
     // 1. Find invalid permissions and collect their ID to delete them later
-    const results = (await strapi.db
-      .query('admin::permission')
-      .findMany({ limit: pageSize, offset: page * pageSize })) as Permission[];
+    const results = (await strapi.db.query('admin::permission').findMany({
+      limit: pageSize,
+      offset: page * pageSize,
+      populate: ['role', 'apiToken'],
+    })) as Permission[];
 
     const permissions = permissionDomain.toPermission(results);
     const permissionsToRemove = await filterPermissionsToRemove(permissions);
-    const permissionsIdToRemove = map(prop('id'), permissionsToRemove);
+
+    // Also remove orphaned permissions (no role AND no apiToken)
+    const orphanedPermissions = permissions.filter(
+      (permission: any) => !permission.role && !permission.apiToken
+    );
+
+    const allPermissionsToRemove = [...permissionsToRemove, ...orphanedPermissions];
+    const permissionsIdToRemove = map(prop('id'), allPermissionsToRemove);
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
     const remainingPermissions = permissions.filter(

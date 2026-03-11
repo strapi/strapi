@@ -739,6 +739,7 @@ describe('Role', () => {
             condition: { isValidCondition },
             'content-type': { getPermissionsWithNestedFields },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole: jest.fn() },
           },
         },
         eventHub: {
@@ -775,6 +776,7 @@ describe('Role', () => {
             metrics: { sendDidUpdateRolePermissions },
             permission: { findMany, createMany, actionProvider: { values }, deleteByIds },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole: jest.fn() },
           },
         },
         eventHub: {

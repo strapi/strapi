@@ -77,6 +77,14 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
     },
 
     /**
+     * Generate an ability based on an admin token's stored permissions, scoped to the owner.
+     * Token permissions are already validated and ceiling-clamped at write time.
+     */
+    async generateTokenAbility(tokenPermissions: Permission[], owner: AdminUser): Promise<Ability> {
+      return engine.generateAbility(tokenPermissions as any, owner);
+    },
+
+    /**
      * Check many permissions based on an ability
      */
     checkMany: curry((ability: Ability, permissions: Permission[]) => {

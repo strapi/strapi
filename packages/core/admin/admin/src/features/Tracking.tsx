@@ -318,7 +318,8 @@ interface WillModifyTokenEvent {
   name: 'didCreateToken' | 'didEditToken';
   properties: {
     tokenType: TokenEvents['properties']['tokenType'];
-    type: 'custom' | 'full-access' | 'read-only' | Array<'push' | 'pull' | 'push-pull'>;
+    kind?: 'admin' | 'content-api';
+    type?: 'custom' | 'full-access' | 'read-only' | Array<'push' | 'pull' | 'push-pull'>;
   };
 }
 
