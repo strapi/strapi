@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "5.38.0",
+  "version": "5.38.1",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/utils": "5.38.0",
+    "@strapi/utils": "5.38.1",
     "ajv": "8.18.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
@@ -55,8 +55,8 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.38.0",
-    "tsconfig": "5.38.0"
+    "eslint-config-custom": "5.38.1",
+    "tsconfig": "5.38.1"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
