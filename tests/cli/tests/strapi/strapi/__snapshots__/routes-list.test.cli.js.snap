@@ -158,6 +158,13 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/api-tokens/:id                                                           │
 │ PUT                │ /admin/api-tokens/:id                                                           │
 │ POST               │ /admin/api-tokens/:id/regenerate                                                │
+│ POST               │ /admin/admin-tokens                                                             │
+│ HEAD|GET           │ /admin/admin-tokens                                                             │
+│ DELETE             │ /admin/admin-tokens/:id                                                         │
+│ HEAD|GET           │ /admin/admin-tokens/:id                                                         │
+│ PUT                │ /admin/admin-tokens/:id                                                         │
+│ POST               │ /admin/admin-tokens/:id/regenerate                                              │
+│ HEAD|GET           │ /admin/admin-tokens/:id/owner-permissions                                       │
 │ HEAD|GET           │ /admin/content-api/permissions                                                  │
 │ HEAD|GET           │ /admin/content-api/routes                                                       │
 │ HEAD|GET           │ /admin/transfer/runner/push                                                     │
