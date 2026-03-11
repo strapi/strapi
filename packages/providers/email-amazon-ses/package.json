@@ -14,7 +14,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/email-amazon-ses"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
