@@ -19,6 +19,7 @@ module.exports = (fixtures) => {
         name_private: 'Private Component A Name A',
         password: 'compPass9101',
       },
+      componentRepeat: [{ name: 'Repeat A1' }, { name: 'Repeat A2' }],
       dz: [
         {
           __component: 'default.component-a',
@@ -55,6 +56,7 @@ module.exports = (fixtures) => {
         name_private: 'Private Component A Name B',
         password: 'compPass5678',
       },
+      componentRepeat: [{ name: 'Repeat B1' }],
       dz: [
         {
           __component: 'default.component-a',
@@ -90,6 +92,7 @@ module.exports = (fixtures) => {
         name_private: 'Private Component A Name C',
         password: 'compPass1234',
       },
+      componentRepeat: [{ name: 'Repeat C1' }, { name: 'Repeat C2' }, { name: 'Repeat C3' }],
       dz: [
         {
           __component: 'default.component-a',
