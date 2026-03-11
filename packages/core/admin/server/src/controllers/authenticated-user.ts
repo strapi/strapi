@@ -41,6 +41,19 @@ export default {
       }
     }
 
+    if (userInfo.email !== undefined) {
+      const emailAlreadyTaken = await userService.exists({
+        id: { $ne: ctx.state.user.id },
+        email: userInfo.email,
+      });
+
+      if (emailAlreadyTaken === true) {
+        return ctx.badRequest('ValidationError', {
+          email: ['Email already taken'],
+        });
+      }
+    }
+
     const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
 
     ctx.body = {
