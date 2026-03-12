@@ -11,7 +11,7 @@
  * Without the fix, sync() only does an UPDATE (for order), which affects 0 rows
  * because the entry was deleted. The relation is permanently lost.
  */
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
@@ -22,8 +22,8 @@ let strapi: Core.Strapi;
 const builder = createTestBuilder();
 let rq;
 
-const PRODUCT_UID = 'api::product.product';
-const TAG_UID = 'api::tag.tag';
+const PRODUCT_UID = 'api::product.product' as UID.ContentType;
+const TAG_UID = 'api::tag.tag' as UID.ContentType;
 
 // Tag model — the inverse side is auto-created by content-type-builder
 // when Product declares inversedBy: 'products'
@@ -203,7 +203,7 @@ describe('Document Service bidirectional relations', () => {
 
       // All 3 tags should still be present after republishing tagB
       expect(publishedProduct?.tags).toHaveLength(3);
-      const tagNames = publishedProduct?.tags.map((t: any) => t.name);
+      const tagNames = publishedProduct?.tags.map((t) => t.name);
       expect(tagNames).toContain('OrderTagA');
       expect(tagNames).toContain('OrderTagB Updated');
       expect(tagNames).toContain('OrderTagC');

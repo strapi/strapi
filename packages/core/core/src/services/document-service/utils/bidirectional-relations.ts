@@ -2,10 +2,16 @@
 import { keyBy, omit } from 'lodash/fp';
 import { async } from '@strapi/utils';
 import type { UID, Schema } from '@strapi/types';
+import type { JoinTable } from '@strapi/database';
 
 interface LoadContext {
   oldVersions: { id: string; locale: string }[];
   newVersions: { id: string; locale: string }[];
+}
+
+interface RelationEntry {
+  joinTable: JoinTable;
+  relations: Record<string, unknown>[];
 }
 
 /**
@@ -54,7 +60,7 @@ interface LoadContext {
  * @returns Array of objects containing join table metadata and relations to be updated
  */
 const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
-  const relationsToUpdate = [] as any;
+  const relationsToUpdate: RelationEntry[] = [];
 
   await strapi.db.transaction(async ({ trx }) => {
     const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
@@ -63,7 +69,7 @@ const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
     for (const model of [...contentTypes, ...components]) {
       const dbModel = strapi.db.metadata.get(model.uid);
 
-      for (const attribute of Object.values(dbModel.attributes) as any) {
+      for (const attribute of Object.values(dbModel.attributes) as Record<string, any>[]) {
         // Skip if not a bidirectional relation targeting our content type
         if (
           attribute.type !== 'relation' ||
@@ -135,7 +141,7 @@ const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
 const sync = async (
   oldEntries: { id: string; locale: string }[],
   newEntries: { id: string; locale: string }[],
-  existingRelations: { joinTable: any; relations: any[] }[]
+  existingRelations: RelationEntry[]
 ) => {
   // Group new entries by locale for easier lookup
   const newEntriesByLocale = keyBy('locale', newEntries);
@@ -164,12 +170,10 @@ const sync = async (
 
       // Update order values for each relation
       // TODO: Find a way to batch it more efficiently
-      await async.map(relations, async (relation: any) => {
-        const {
-          [sourceColumn]: oldSourceId,
-          [targetColumn]: targetId,
-          [orderColumn]: originalOrder,
-        } = relation;
+      await async.map(relations, async (relation: Record<string, unknown>) => {
+        const oldSourceId = relation[sourceColumn] as string;
+        const targetId = relation[targetColumn] as string;
+        const originalOrder = relation[orderColumn];
 
         const newSourceId = entryIdMapping[oldSourceId];
 
