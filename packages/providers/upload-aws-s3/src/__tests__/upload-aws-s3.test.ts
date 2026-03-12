@@ -1158,10 +1158,34 @@ describe('AWS-S3 provider', () => {
   });
 
   describe('S3-compatible provider URL construction', () => {
-    test('should construct URL from endpoint for IONOS', async () => {
+    test('should construct path-style URL from endpoint for IONOS when forcePathStyle is true', async () => {
       uploadMock.done.mockImplementationOnce(() =>
         Promise.resolve({
           // IONOS returns incorrect Location format for multipart uploads
+          Location: 'my-bucket/tmp/test.json',
+          ETag: '"abc"',
+        })
+      );
+
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          endpoint: 'https://s3-eu-central-2.ionoscloud.com',
+          forcePathStyle: true,
+          params: {
+            Bucket: 'my-bucket',
+          },
+        },
+      });
+
+      const file = createTestFile();
+      await providerInstance.upload(file);
+
+      expect(file.url).toBe('https://s3-eu-central-2.ionoscloud.com/my-bucket/tmp/test.json');
+    });
+
+    test('should construct virtual-hosted-style URL from endpoint for IONOS when forcePathStyle is false (default)', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
           Location: 'my-bucket/tmp/test.json',
           ETag: '"abc"',
         })
@@ -1179,10 +1203,10 @@ describe('AWS-S3 provider', () => {
       const file = createTestFile();
       await providerInstance.upload(file);
 
-      expect(file.url).toBe('https://s3-eu-central-2.ionoscloud.com/my-bucket/tmp/test.json');
+      expect(file.url).toBe('https://my-bucket.s3-eu-central-2.ionoscloud.com/tmp/test.json');
     });
 
-    test('should construct URL from endpoint for MinIO', async () => {
+    test('should construct path-style URL from endpoint for MinIO when forcePathStyle is true', async () => {
       uploadMock.done.mockImplementationOnce(() =>
         Promise.resolve({
           Location: 'test-bucket/tmp/test.json',
@@ -1193,6 +1217,7 @@ describe('AWS-S3 provider', () => {
       const providerInstance = awsProvider.init({
         s3Options: {
           endpoint: 'http://minio.local:9000',
+          forcePathStyle: true,
           params: {
             Bucket: 'test-bucket',
           },
@@ -1203,6 +1228,56 @@ describe('AWS-S3 provider', () => {
       await providerInstance.upload(file);
 
       expect(file.url).toBe('http://minio.local:9000/test-bucket/tmp/test.json');
+    });
+
+    test('should construct virtual-hosted-style URL for DigitalOcean Spaces (default, forcePathStyle not set)', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          // DO Spaces may return a path-style Location from the SDK when forcePathStyle is not set
+          Location: 'fra1.digitaloceanspaces.com/pcstrapi/tmp/test.json',
+          ETag: '"abc"',
+        })
+      );
+
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          endpoint: 'https://fra1.digitaloceanspaces.com',
+          params: {
+            Bucket: 'pcstrapi',
+          },
+        },
+      });
+
+      const file = createTestFile();
+      await providerInstance.upload(file);
+
+      // Virtual-hosted-style: bucket is part of the hostname, not the path
+      expect(file.url).toBe('https://pcstrapi.fra1.digitaloceanspaces.com/tmp/test.json');
+    });
+
+    test('should construct path-style URL for DigitalOcean Spaces CDN when forcePathStyle is true', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          Location: 'fra1.cdn.digitaloceanspaces.com/pcstrapi/tmp/test.json',
+          ETag: '"abc"',
+        })
+      );
+
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          endpoint: 'https://fra1.cdn.digitaloceanspaces.com',
+          forcePathStyle: true,
+          params: {
+            Bucket: 'pcstrapi',
+          },
+        },
+      });
+
+      const file = createTestFile();
+      await providerInstance.upload(file);
+
+      // Path-style: bucket appears in path (CDN-style for DO)
+      expect(file.url).toBe('https://fra1.cdn.digitaloceanspaces.com/pcstrapi/tmp/test.json');
     });
 
     test('should prefer baseUrl over endpoint', async () => {
@@ -1229,7 +1304,7 @@ describe('AWS-S3 provider', () => {
       expect(file.url).toBe('https://cdn.example.com/tmp/test.json');
     });
 
-    test('should handle endpoint without protocol', async () => {
+    test('should handle endpoint without protocol using virtual-hosted-style by default', async () => {
       uploadMock.done.mockImplementationOnce(() =>
         Promise.resolve({
           Location: 'bucket/tmp/test.json',
@@ -1240,6 +1315,31 @@ describe('AWS-S3 provider', () => {
       const providerInstance = awsProvider.init({
         s3Options: {
           endpoint: 's3.wasabisys.com',
+          params: {
+            Bucket: 'my-bucket',
+          },
+        },
+      });
+
+      const file = createTestFile();
+      await providerInstance.upload(file);
+
+      // Default (no forcePathStyle) → virtual-hosted-style
+      expect(file.url).toBe('https://my-bucket.s3.wasabisys.com/tmp/test.json');
+    });
+
+    test('should handle endpoint without protocol using path-style when forcePathStyle is true', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          Location: 'bucket/tmp/test.json',
+          ETag: '"abc"',
+        })
+      );
+
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          endpoint: 's3.wasabisys.com',
+          forcePathStyle: true,
           params: {
             Bucket: 'my-bucket',
           },

@@ -410,6 +410,13 @@ export default {
     /**
      * Constructs the correct file URL.
      * Handles S3-compatible providers that return incorrect Location formats.
+     *
+     * When a custom endpoint is configured, the URL style depends on `forcePathStyle`:
+     * - `forcePathStyle: true`  → path-style:          `{endpoint}/{bucket}/{key}`
+     * - `forcePathStyle: false` → virtual-hosted-style: `{bucket}.{endpoint-host}/{key}` (default)
+     *
+     * This mirrors how the AWS SDK itself routes requests, preventing mismatches between
+     * the stored URL and the actual object location (e.g. DigitalOcean Spaces CDN URLs).
      */
     const constructFileUrl = (fileKey: string, uploadLocation: string): string => {
       // Priority 1: Use baseUrl if configured (CDN or custom domain)
@@ -418,14 +425,24 @@ export default {
         return `${cleanBase}/${fileKey}`;
       }
 
-      // Priority 2: Construct URL from endpoint if configured
-      // This fixes issues with S3-compatible providers (IONOS, MinIO, etc.)
-      // that return Location in incorrect format for multipart uploads
+      // Priority 2: Construct URL from endpoint if configured.
+      // Respect forcePathStyle to match the AWS SDK's actual request routing.
       const endpoint = config.endpoint?.toString();
       if (endpoint) {
         const endpointUrl = endpoint.startsWith('http') ? endpoint : `https://${endpoint}`;
-        const cleanEndpoint = endpointUrl.replace(/\/+$/, '');
-        return `${cleanEndpoint}/${config.params.Bucket}/${fileKey}`;
+
+        if (config.forcePathStyle) {
+          // Path-style: https://{endpoint}/{bucket}/{key}
+          // Required for providers like MinIO and IONOS that do not support virtual-hosted-style.
+          const cleanEndpoint = endpointUrl.replace(/\/+$/, '');
+          return `${cleanEndpoint}/${config.params.Bucket}/${fileKey}`;
+        }
+
+        // Virtual-hosted-style: https://{bucket}.{endpoint-host}/{key}
+        // This is the default (forcePathStyle defaults to false in the AWS SDK) and is
+        // required for providers like DigitalOcean Spaces.
+        const endpointUrlObj = new URL(endpointUrl);
+        return `${endpointUrlObj.protocol}//${config.params.Bucket}.${endpointUrlObj.host}/${fileKey}`;
       }
 
       // Priority 3: Use the Location from S3 response
