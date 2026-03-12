@@ -111,7 +111,9 @@ const DynamicComponent = ({
   );
   const rawError = useForm('DynamicComponent', (state) => getIn(state.errors, componentPath));
 
-  const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
+  const [collapseToOpen, setCollapseToOpen] = React.useState<string>(
+    value.id ? '' : accordionValue
+  );
 
   React.useEffect(() => {
     if (rawError && hasValue) {

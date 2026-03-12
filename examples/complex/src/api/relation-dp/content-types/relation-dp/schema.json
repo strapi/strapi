@@ -13,6 +13,11 @@
     "name": {
       "type": "string"
     },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
     "selfOne": {
       "type": "relation",
       "relation": "oneToOne",
@@ -53,6 +58,12 @@
       "relation": "manyToMany",
       "target": "api::basic.basic"
     },
+    "morphTargets": {
+      "type": "relation",
+      "relation": "morphMany",
+      "target": "api::relation.relation",
+      "morphBy": "morph_to_many"
+    },
     "simpleInfo": {
       "type": "component",
       "repeatable": false,
@@ -74,7 +85,12 @@
     },
     "sections": {
       "type": "dynamiczone",
-      "components": ["shared.text-block", "shared.media-block", "shared.header"]
+      "components": [
+        "shared.text-block",
+        "shared.media-block",
+        "shared.header",
+        "shared.reference-list"
+      ]
     },
     "header": {
       "type": "component",
