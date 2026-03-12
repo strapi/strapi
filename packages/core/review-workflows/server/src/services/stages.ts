@@ -41,34 +41,42 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         )
       );
 
-      // Create stage permissions
       await async.reduce(stagesList)(async (_, stage, idx) => {
-        // Ignore stages without permissions
-        if (!stage.permissions || stage.permissions.length === 0) {
-          return;
-        }
-
-        const stagePermissions = stage.permissions;
         const stageId = stages[idx].id;
+        const allPermissionIds: number[] = [];
 
-        const permissions = await async.map(
-          stagePermissions,
-          // Register each stage permission
-          (permission: any) =>
+        // Register "from" permissions
+        if (stage.permissions && stage.permissions.length > 0) {
+          const fromPermissions = await async.map(stage.permissions, (permission: any) =>
             stagePermissionsService.register({
               roleId: permission.role,
               action: permission.action,
               fromStage: stageId,
             })
-        );
+          );
+          allPermissionIds.push(...fromPermissions.flat().map((p: any) => p.id));
+        }
 
-        // Update stage with the new permissions
-        await strapi.db.query(STAGE_MODEL_UID).update({
-          where: { id: stageId },
-          data: {
-            permissions: permissions.flat().map((p: any) => p.id),
-          },
-        });
+        // Register "to" permissions
+        if (stage.toPermissions && stage.toPermissions.length > 0) {
+          const toPermissions = await async.map(stage.toPermissions, (permission: any) =>
+            stagePermissionsService.registerTo({
+              roleId: permission.role,
+              action: permission.action,
+              toStage: stageId,
+            })
+          );
+          allPermissionIds.push(...toPermissions.flat().map((p: any) => p.id));
+        }
+
+        if (allPermissionIds.length > 0) {
+          await strapi.db.query(STAGE_MODEL_UID).update({
+            where: { id: stageId },
+            data: {
+              permissions: allPermissionIds,
+            },
+          });
+        }
       }, []);
 
       metrics.sendDidCreateStage();
@@ -77,27 +85,63 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async update(srcStage: any, destStage: any) {
-      let stagePermissions = srcStage?.permissions ?? [];
       const stageId = destStage.id;
+      const hasPermissionChanges = destStage.permissions || destStage.toPermissions;
 
-      if (destStage.permissions) {
+      let allPermissionIds: number[];
+
+      if (hasPermissionChanges) {
+        // Delete all old permissions (both from and to) when either type changes
         await this.deleteStagePermissions([srcStage]);
 
-        const permissions = await async.map(destStage.permissions, (permission: any) =>
-          stagePermissionsService.register({
-            roleId: permission.role,
-            action: permission.action,
-            fromStage: stageId,
-          })
-        );
-        stagePermissions = permissions.flat().map((p: any) => p.id);
+        allPermissionIds = [];
+
+        const extractRoleId = (p: any) => p.role?.id ?? p.role;
+
+        // Re-register "from" permissions (fall back to existing "from" entries from DB)
+        const fromPerms =
+          destStage.permissions ??
+          (srcStage?.permissions ?? [])
+            .filter((p: any) => p.actionParameters?.from)
+            .map((p: any) => ({ role: extractRoleId(p), action: p.action }));
+
+        if (fromPerms.length > 0) {
+          const registered = await async.map(fromPerms, (permission: any) =>
+            stagePermissionsService.register({
+              roleId: permission.role,
+              action: permission.action,
+              fromStage: stageId,
+            })
+          );
+          allPermissionIds.push(...registered.flat().map((p: any) => p.id));
+        }
+
+        // Re-register "to" permissions (fall back to existing "to" entries from DB)
+        const toPerms =
+          destStage.toPermissions ??
+          (srcStage?.permissions ?? [])
+            .filter((p: any) => p.actionParameters?.to)
+            .map((p: any) => ({ role: extractRoleId(p), action: p.action }));
+
+        if (toPerms.length > 0) {
+          const registered = await async.map(toPerms, (permission: any) =>
+            stagePermissionsService.registerTo({
+              roleId: permission.role,
+              action: permission.action,
+              toStage: stageId,
+            })
+          );
+          allPermissionIds.push(...registered.flat().map((p: any) => p.id));
+        }
+      } else {
+        allPermissionIds = (srcStage?.permissions ?? []).map((p: any) => p.id).filter(Boolean);
       }
 
       const stage = await strapi.db.query(STAGE_MODEL_UID).update({
         where: { id: stageId },
         data: {
           ...destStage,
-          permissions: stagePermissions,
+          permissions: allPermissionIds,
         },
       });
 
@@ -128,7 +172,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async deleteStagePermissions(stages: any) {
-      // TODO: Find another way to do this for when we use the "to" parameter.
       const permissions = stages.map((s: any) => s.permissions || []).flat();
       await stagePermissionsService.unregister(permissions || []);
     },
@@ -313,6 +356,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   };
 };
 
+const normalizeStageForDiff = (stage: any) => ({
+  ...pick(['name', 'color'], stage),
+  permissions: stage.permissions ?? [],
+  toPermissions: stage.toPermissions ?? [],
+});
+
 /**
  * Compares two arrays of stages and returns an object indicating the differences.
  *
@@ -342,12 +391,7 @@ function getDiffBetweenStages(sourceStages: any, comparisonStages: any) {
 
       if (!srcStage) {
         acc.created.push(stageToCompare);
-      } else if (
-        !isEqual(
-          pick(['name', 'color', 'permissions'], srcStage),
-          pick(['name', 'color', 'permissions'], stageToCompare)
-        )
-      ) {
+      } else if (!isEqual(normalizeStageForDiff(srcStage), normalizeStageForDiff(stageToCompare))) {
         acc.updated.push(stageToCompare);
       }
       return acc;

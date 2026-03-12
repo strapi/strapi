@@ -37,6 +37,7 @@ interface Stage extends Entity {
   color: string;
   name: string;
   permissions?: StagePermission[];
+  toPermissions?: StagePermission[];
 }
 
 /**
@@ -88,6 +89,7 @@ interface Stage extends Entity {
   color: string;
   name: string;
   permissions?: StagePermission[];
+  toPermissions?: StagePermission[];
 }
 
 interface Workflow extends Entity {

@@ -103,6 +103,25 @@ const WORKFLOW_SCHEMA = yup.object({
             })
           )
           .strict(),
+
+        toPermissions: yup
+          .array(
+            yup.object({
+              role: yup
+                .number()
+                .strict()
+                .typeError({
+                  id: 'review-workflows.validation.stage.permissions.role.number',
+                  defaultMessage: 'Role must be of type number',
+                })
+                .required(),
+              action: yup.string().required({
+                id: 'review-workflows.validation.stage.permissions.action.required',
+                defaultMessage: 'Action is a required argument',
+              }),
+            })
+          )
+          .strict(),
       })
     )
     .min(1),
@@ -173,10 +192,13 @@ const EditPage = () => {
           // changed; this enables partial updates e.g. for users who don't have
           // permissions to see roles
           stages: rest.stages.map((stage) => {
-            let hasUpdatedPermissions = true;
             const serverStage = currentWorkflow?.stages?.find(
               (serverStage) => serverStage.id === stage?.id
             );
+
+            let hasUpdatedPermissions = true;
+            let hasUpdatedToPermissions = true;
+
             if (serverStage) {
               hasUpdatedPermissions =
                 serverStage.permissions?.length !== stage.permissions?.length ||
@@ -186,10 +208,21 @@ const EditPage = () => {
                       (permission) => permission.role === serverPermission.role
                     )
                 );
+
+              hasUpdatedToPermissions =
+                serverStage.toPermissions?.length !== stage.toPermissions?.length ||
+                !serverStage.toPermissions?.every(
+                  (serverPermission) =>
+                    !!stage.toPermissions?.find(
+                      (permission) => permission.role === serverPermission.role
+                    )
+                );
             }
+
             return {
               ...stage,
               permissions: hasUpdatedPermissions ? stage.permissions : undefined,
+              toPermissions: hasUpdatedToPermissions ? stage.toPermissions : undefined,
             } satisfies Stage;
           }),
           stageRequiredToPublishName,

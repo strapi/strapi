@@ -3,20 +3,28 @@ import { yup, validateYupSchema } from '@strapi/utils';
 import { hasStageAttribute } from '../utils/review-workflows';
 import { STAGE_TRANSITION_UID } from '../constants/workflows';
 
+const fromPermissionObject = yup.object().shape({
+  role: yup.number().integer().min(1).required(),
+  action: yup.string().oneOf([STAGE_TRANSITION_UID]).required(),
+  actionParameters: yup.object().shape({
+    from: yup.number().integer().min(1),
+  }),
+});
+
+const toPermissionObject = yup.object().shape({
+  role: yup.number().integer().min(1).required(),
+  action: yup.string().oneOf([STAGE_TRANSITION_UID]).required(),
+  actionParameters: yup.object().shape({
+    to: yup.number().integer().min(1),
+  }),
+});
+
 const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
   name: yup.string().max(255).required(),
   color: yup.string().matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/i), // hex color
-  permissions: yup.array().of(
-    yup.object().shape({
-      role: yup.number().integer().min(1).required(),
-      action: yup.string().oneOf([STAGE_TRANSITION_UID]).required(),
-      actionParameters: yup.object().shape({
-        from: yup.number().integer().min(1).required(),
-        to: yup.number().integer().min(1),
-      }),
-    })
-  ),
+  permissions: yup.array().of(fromPermissionObject),
+  toPermissions: yup.array().of(toPermissionObject),
 });
 
 const validateUpdateStageOnEntitySchema = yup
