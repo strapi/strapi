@@ -5,4 +5,5 @@ export { default as removeMorphToRelations } from './remove-morph-to-relations';
 export { default as removeDynamicZones } from './remove-dynamic-zones';
 export { default as removeDisallowedFields } from './remove-disallowed-fields';
 export { default as removeRestrictedFields } from './remove-restricted-fields';
+export { default as removeUnrecognizedFields } from './remove-unrecognized-fields';
 export { default as expandWildcardPopulate } from './expand-wildcard-populate';

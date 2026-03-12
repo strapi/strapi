@@ -79,7 +79,9 @@ describe('Stages', () => {
 
     await user.click(screen.getByRole('button', { name: 'Add new stage' }));
 
-    expect(screen.getAllByRole('button').length).toBe(11);
+    await waitFor(() => {
+      expect(screen.getAllByRole('button').length).toBe(11);
+    });
   });
 
   it('should not render the "add stage" button if canUpdate = false', () => {
@@ -95,11 +97,9 @@ describe('Stages', () => {
 
     await user.click(screen.getByRole('button', { name: 'stage-1' }));
 
-    expect(screen.getByRole('textbox', { name: 'Stage name' })).toHaveAttribute(
-      'name',
-      'stages.0.name'
-    );
-    expect(screen.getByRole('textbox', { name: 'Stage name' })).toHaveValue('stage-1');
+    const stageNameInput = await screen.findByRole('textbox', { name: 'Stage name' });
+    expect(stageNameInput).toHaveAttribute('name', 'stages.0.name');
+    expect(stageNameInput).toHaveValue('stage-1');
 
     // Color combobox
     await waitFor(() =>
@@ -113,7 +113,9 @@ describe('Stages', () => {
       ).toHaveTextContent('Editor')
     );
 
-    expect(screen.getByRole('button', { name: /apply to all stages/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /apply to all stages/i })).toBeInTheDocument();
+    });
   });
 
   it('should not render the delete button if canDelete=false', async () => {
@@ -195,15 +197,21 @@ describe('Stages', () => {
     await waitFor(() => expect(screen.getByRole('textbox')).toBeDisabled());
 
     // Color
-    expect(screen.getByRole('combobox', { name: /color/i })).toHaveAttribute('data-disabled');
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: /color/i })).toHaveAttribute('data-disabled')
+    );
 
     // Permissions
-    expect(
-      screen.getByRole('combobox', { name: /roles that can change this stage/i })
-    ).toHaveAttribute('data-disabled');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('combobox', { name: /roles that can change this stage/i })
+      ).toHaveAttribute('data-disabled')
+    );
 
-    expect(screen.getByRole('button', { name: /apply to all stages/i })).toHaveAttribute(
-      'aria-disabled'
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /apply to all stages/i })).toHaveAttribute(
+        'aria-disabled'
+      )
     );
   });
 
