@@ -1,7 +1,7 @@
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest, createRequest } from 'api-tests/request';
 import { createTestBuilder } from 'api-tests/builder';
-import { describeOnCondition } from 'api-tests/utils';
+import { describeOnCondition, createUtils } from 'api-tests/utils';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -236,6 +236,272 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       // Permissions should be kept
       expect(updatedWorkflow.stages[0].permissions).toHaveLength(1);
+    });
+  });
+
+  describe('Assign "to" stage permissions', () => {
+    test('Can assign new "to" permissions on stage creation', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          baseWorkflow.stages[0],
+          {
+            ...baseWorkflow.stages[1],
+            toPermissions: getStageTransitionPermissions([roles[0].id]),
+          },
+        ],
+      });
+
+      expect(workflow.stages[1].toPermissions).toHaveLength(1);
+      expect(workflow.stages[1].toPermissions[0].role).toBe(roles[0].id);
+    });
+
+    test('Can assign both "from" and "to" permissions on the same stage', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            ...baseWorkflow.stages[0],
+            permissions: getStageTransitionPermissions([roles[0].id]),
+            toPermissions: getStageTransitionPermissions([roles[1].id]),
+          },
+          baseWorkflow.stages[1],
+        ],
+      });
+
+      expect(workflow.stages[0].permissions).toHaveLength(1);
+      expect(workflow.stages[0].toPermissions).toHaveLength(1);
+      expect(workflow.stages[0].permissions[0].role).toBe(roles[0].id);
+      expect(workflow.stages[0].toPermissions[0].role).toBe(roles[1].id);
+    });
+
+    test('Can update "to" permissions', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          baseWorkflow.stages[0],
+          {
+            ...baseWorkflow.stages[1],
+            toPermissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+          },
+        ],
+      });
+
+      expect(workflow.stages[1].toPermissions).toHaveLength(2);
+
+      const { workflow: updatedWorkflow } = await updateWorkflow(workflow.id, {
+        stages: [
+          workflow.stages[0],
+          {
+            ...workflow.stages[1],
+            toPermissions: getStageTransitionPermissions([roles[0].id]),
+          },
+        ],
+      });
+
+      expect(updatedWorkflow.stages[1].toPermissions).toHaveLength(1);
+    });
+
+    test('Deleting stage removes "to" permissions from database', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          baseWorkflow.stages[0],
+          {
+            ...baseWorkflow.stages[1],
+            toPermissions: getStageTransitionPermissions([roles[0].id]),
+          },
+        ],
+      });
+
+      const toPermissionIds = workflow.stages[1].toPermissions.map((p) => p.id);
+
+      await updateWorkflow(workflow.id, {
+        ...workflow,
+        stages: [workflow.stages[0]],
+      });
+
+      const permissions = await strapi.db.query('admin::permission').findMany({
+        where: { id: { $in: toPermissionIds } },
+      });
+
+      expect(permissions).toHaveLength(0);
+    });
+
+    test('Deleting workflow removes "to" permissions from database', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            ...baseWorkflow.stages[0],
+            toPermissions: getStageTransitionPermissions([roles[0].id]),
+          },
+        ],
+      });
+
+      const toPermissionIds = workflow.stages[0].toPermissions.map((p) => p.id);
+
+      await deleteWorkflow(workflow.id);
+
+      const permissions = await strapi.db.query('admin::permission').findMany({
+        where: { id: { $in: toPermissionIds } },
+      });
+
+      expect(permissions).toHaveLength(0);
+    });
+
+    test('Stages without "to" permissions are backward compatible (all roles allowed)', async () => {
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [baseWorkflow.stages[0], baseWorkflow.stages[1]],
+      });
+
+      // No toPermissions set - stage should still be listed
+      expect(workflow.stages[0].toPermissions).toHaveLength(0);
+      expect(workflow.stages[1].toPermissions).toHaveLength(0);
+    });
+  });
+
+  describe('Enforce "to" stage permissions', () => {
+    let utils;
+    let allowedRole;
+    let deniedRole;
+    let allowedUser;
+    let deniedUser;
+    let allowedRequest;
+    let deniedRequest;
+    let enforcementWorkflow;
+    let entry;
+
+    const stagesEndpoint = (uid, documentId) =>
+      `/review-workflows/content-manager/collection-types/${uid}/${documentId}/stages`;
+
+    const stageTransitionEndpoint = (uid, documentId) =>
+      `/review-workflows/content-manager/collection-types/${uid}/${documentId}/stage`;
+
+    beforeAll(async () => {
+      utils = createUtils(strapi);
+
+      // Create two roles
+      allowedRole = await utils.createRole({
+        name: 'to-perm-allowed-role',
+        description: 'Role allowed to transition to restricted stage',
+      });
+      deniedRole = await utils.createRole({
+        name: 'to-perm-denied-role',
+        description: 'Role denied from transitioning to restricted stage',
+      });
+
+      // Grant both roles content-manager read + stage transition "from" permissions
+      const cmPermissions = [
+        {
+          action: 'plugin::content-manager.explorer.read',
+          subject: productUID,
+          fields: null,
+          conditions: [],
+        },
+        {
+          action: 'plugin::content-manager.explorer.update',
+          subject: productUID,
+          fields: null,
+          conditions: [],
+        },
+      ];
+
+      await utils.assignPermissionsToRole(allowedRole.id, cmPermissions);
+      await utils.assignPermissionsToRole(deniedRole.id, cmPermissions);
+
+      // Create users
+      const allowedUserInfo = {
+        email: 'allowed-to-perm@test.io',
+        password: 'Testing123!',
+        firstname: 'Allowed',
+        lastname: 'User',
+      };
+      const deniedUserInfo = {
+        email: 'denied-to-perm@test.io',
+        password: 'Testing123!',
+        firstname: 'Denied',
+        lastname: 'User',
+      };
+
+      allowedUser = await utils.createUser({ ...allowedUserInfo, roles: [allowedRole.id] });
+      deniedUser = await utils.createUser({ ...deniedUserInfo, roles: [deniedRole.id] });
+
+      allowedRequest = await createAuthRequest({ strapi, userInfo: allowedUserInfo });
+      deniedRequest = await createAuthRequest({ strapi, userInfo: deniedUserInfo });
+
+      // Create workflow: Stage 1 (no "from" restriction) -> Stage 2 (restricted "to" only for allowedRole)
+      const { workflow } = await createWorkflow({
+        ...baseWorkflow,
+        stages: [
+          {
+            name: 'Open',
+          },
+          {
+            name: 'Restricted',
+            toPermissions: getStageTransitionPermissions([allowedRole.id]),
+          },
+        ],
+      });
+
+      enforcementWorkflow = workflow;
+
+      // Create a product entry (it will be assigned to the first stage by default)
+      const { body } = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${productUID}`,
+        body: { name: 'Enforcement Test Product' },
+      });
+
+      entry = body.data;
+    });
+
+    afterAll(async () => {
+      if (allowedUser) await utils.deleteUserById(allowedUser.id);
+      if (deniedUser) await utils.deleteUserById(deniedUser.id);
+      if (allowedRole) await utils.deleteRolesById([allowedRole.id]);
+      if (deniedRole) await utils.deleteRolesById([deniedRole.id]);
+      if (enforcementWorkflow) await deleteWorkflow(enforcementWorkflow.id);
+    });
+
+    test('GET .../stages excludes restricted stage for denied role', async () => {
+      const res = await deniedRequest.get(stagesEndpoint(productUID, entry.documentId));
+
+      // The denied user should not see the "Restricted" stage in available stages
+      const stageNames = (res.body.data || []).map((s) => s.name);
+      expect(stageNames).not.toContain('Restricted');
+    });
+
+    test('GET .../stages includes restricted stage for allowed role', async () => {
+      const res = await allowedRequest.get(stagesEndpoint(productUID, entry.documentId));
+
+      const stageNames = (res.body.data || []).map((s) => s.name);
+      expect(stageNames).toContain('Restricted');
+    });
+
+    test('PUT .../stage returns 403 when denied role transitions to restricted stage', async () => {
+      const restrictedStage = enforcementWorkflow.stages.find((s) => s.name === 'Restricted');
+
+      const res = await deniedRequest({
+        method: 'PUT',
+        url: stageTransitionEndpoint(productUID, entry.documentId),
+        body: { data: { id: restrictedStage.id } },
+      });
+
+      expect(res.statusCode).toBe(403);
+    });
+
+    test('PUT .../stage succeeds when allowed role transitions to restricted stage', async () => {
+      const restrictedStage = enforcementWorkflow.stages.find((s) => s.name === 'Restricted');
+
+      const res = await allowedRequest({
+        method: 'PUT',
+        url: stageTransitionEndpoint(productUID, entry.documentId),
+        body: { data: { id: restrictedStage.id } },
+      });
+
+      expect(res.statusCode).toBe(200);
     });
   });
 });
