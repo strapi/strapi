@@ -43,6 +43,35 @@ interface FitlersContextValue {
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
 
+const isFilterBeingEdited = (
+  filter: Record<string, unknown>,
+  options: Filters.Filter[],
+  editingFilter: FilterFormData
+): boolean => {
+  const [attributeName] = Object.keys(filter);
+  if (attributeName !== editingFilter.name) return false;
+
+  const option = options.find(({ name }) => name === attributeName);
+  if (!option) return false;
+
+  const { type, mainField } = option;
+  const operatorObj =
+    type === 'relation'
+      ? (filter[attributeName] as Record<string, unknown>)?.[mainField?.name ?? 'id']
+      : (filter[attributeName] as Record<string, unknown>);
+  if (typeof operatorObj !== 'object' || operatorObj === null) return false;
+  const entries = Object.keys(operatorObj);
+  if (entries.length === 0) return false;
+  const operator = entries[0];
+  const filterValue = (operatorObj as Record<string, unknown>)[operator];
+
+  if (operator !== editingFilter.filter) return false;
+  if (FILTERS_WITH_NO_VALUE.includes(editingFilter.filter)) return true;
+  const decodedFilterValue =
+    typeof filterValue === 'string' ? decodeURIComponent(filterValue) : filterValue;
+  return decodedFilterValue === editingFilter.value;
+};
+
 interface RootProps
   extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>,
     Popover.Props {
@@ -188,77 +217,28 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
       [data.filter]: value,
     };
 
-    let newFilterQuery;
-
-    if (editingFilter) {
-      const nextFilters = (query.filters?.$and ?? []).map((filter) => {
-        const [attributeName] = Object.keys(filter);
-        if (attributeName !== editingFilter.name) {
-          return filter;
-        }
-
-        const { type, mainField } = options.find(({ name }) => name === attributeName)!;
-
-        if (type === 'relation') {
-          const filterObj = filter[attributeName][mainField?.name ?? 'id'];
-
-          if (typeof filterObj === 'object') {
-            const [operator] = Object.keys(filterObj);
-            const filterValue = filterObj[operator];
-
-            if (operator === editingFilter.filter && filterValue === editingFilter.value) {
-              return {
-                [data.name]:
-                  fieldOptions.type === 'relation'
-                    ? {
-                        [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
-                      }
-                    : operatorValuePairing,
-              };
+    const newFilterEntry = {
+      [data.name]:
+        fieldOptions.type === 'relation'
+          ? {
+              [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
             }
-          }
+          : operatorValuePairing,
+    };
 
-          return filter;
-        } else {
-          const filterObj = filter[attributeName];
-          const [operator] = Object.keys(filterObj);
-          const filterValue = filterObj[operator];
+    const existingFilters = query.filters?.$and ?? [];
 
-          if (operator === editingFilter.filter && filterValue === editingFilter.value) {
-            return {
-              [data.name]:
-                fieldOptions.type === 'relation'
-                  ? {
-                      [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
-                    }
-                  : operatorValuePairing,
-            };
-          }
-
-          return filter;
+    const newFilterQuery = editingFilter
+      ? {
+          ...query.filters,
+          $and: existingFilters.map((filter) =>
+            isFilterBeingEdited(filter, options, editingFilter) ? newFilterEntry : filter
+          ),
         }
-      });
-
-      newFilterQuery = {
-        ...query.filters,
-        $and: nextFilters,
-      };
-    } else {
-      newFilterQuery = {
-        ...query.filters,
-        $and: [
-          ...(query.filters?.$and ?? []),
-          {
-            [data.name]:
-              fieldOptions.type === 'relation'
-                ? {
-                    [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
-                  }
-                : operatorValuePairing,
-          },
-        ],
-      };
-    }
+      : {
+          ...query.filters,
+          $and: [...existingFilters, newFilterEntry],
+        };
 
     setQuery({ filters: newFilterQuery, page: 1 }, 'push', true);
     setOpen(false);
@@ -274,7 +254,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
           onSubmit={handleSubmit}
           key={
             editingFilter
-              ? `edit-${editingFilter.name}-${editingFilter.filter}-${editingFilter.value}`
+              ? `edit-${editingFilter.name}-${editingFilter.filter}-${editingFilter.value ?? 'empty'}`
               : 'create'
           }
         >
@@ -601,10 +581,8 @@ const AttributeTag = ({
   return (
     <Box style={{ display: 'inline-block' }}>
       <Tag padding={1} onClick={handleRemoveClick} style={{ cursor: 'pointer' }} icon={<Cross />}>
-        <Flex alignItems="center" gap={1}>
-          <Box onClick={handleEditClick} style={{ flex: 1 }}>
-            {content}
-          </Box>
+        <Flex alignItems="center" gap={1} onClick={handleEditClick}>
+          {content}
         </Flex>
       </Tag>
     </Box>

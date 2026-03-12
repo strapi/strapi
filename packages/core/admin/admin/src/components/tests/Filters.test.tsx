@@ -120,4 +120,56 @@ describe('Filters', () => {
     expect(await screen.findByRole('option', { name: 'Modified' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'Published' })).toBeInTheDocument();
   });
+
+  it('should replace existing filter when editing instead of adding a duplicate', async () => {
+    const { user } = render();
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Jimbob');
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    const filterTagWithJimbob = await screen.findByText(/Jimbob/);
+    await user.click(filterTagWithJimbob);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Update filter' })).toBeInTheDocument();
+    });
+
+    const nameInput = screen.getByRole('textbox', { name: 'Name' });
+    await user.clear(nameInput);
+    await user.type(nameInput, 'Jane');
+    fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Jane/)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/Jimbob/)).not.toBeInTheDocument();
+    expect(screen.queryAllByText(/Jane/)).toHaveLength(1);
+  });
+
+  it('should correctly match filter when value is URL-encoded (decoded comparison)', async () => {
+    const { user } = render();
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.type(screen.getByRole('textbox', { name: 'Name' }), 'hello world');
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    const filterTag = await screen.findByText(/hello world/);
+    await user.click(filterTag);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Update filter' })).toBeInTheDocument();
+    });
+
+    const nameInput = screen.getByRole('textbox', { name: 'Name' });
+    await user.clear(nameInput);
+    await user.type(nameInput, 'hello there');
+    fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/hello there/)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/hello world/)).not.toBeInTheDocument();
+    expect(screen.queryAllByText(/hello there/)).toHaveLength(1);
+  });
 });
