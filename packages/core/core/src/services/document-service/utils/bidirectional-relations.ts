@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import { keyBy } from 'lodash/fp';
+import { keyBy, omit } from 'lodash/fp';
 import { async } from '@strapi/utils';
 import type { UID, Schema } from '@strapi/types';
 
@@ -164,19 +164,45 @@ const sync = async (
 
       // Update order values for each relation
       // TODO: Find a way to batch it more efficiently
-      await async.map(relations, (relation: any) => {
+      await async.map(relations, async (relation: any) => {
         const {
           [sourceColumn]: oldSourceId,
           [targetColumn]: targetId,
           [orderColumn]: originalOrder,
         } = relation;
 
-        // Update the order column for the new relation entry
-        return trx
-          .from(joinTable.name)
-          .where(sourceColumn, entryIdMapping[oldSourceId])
+        const newSourceId = entryIdMapping[oldSourceId];
+
+        // If no mapping exists for this old entry, skip it
+        if (!newSourceId) {
+          return;
+        }
+
+        // Check whether the join entry already exists for the new entity ID.
+        // We cannot rely on UPDATE's affected-row count to detect missing rows
+        // because MySQL/MariaDB returns 0 for no-op updates (value unchanged),
+        // which would cause a spurious INSERT and a duplicate join row.
+        const existingRow = await trx(joinTable.name)
+          .where(sourceColumn, newSourceId)
           .where(targetColumn, targetId)
-          .update({ [orderColumn]: originalOrder });
+          .first();
+
+        if (existingRow) {
+          // Row exists — update the order column only.
+          await trx(joinTable.name)
+            .where(sourceColumn, newSourceId)
+            .where(targetColumn, targetId)
+            .update({ [orderColumn]: originalOrder });
+        } else {
+          // Row was cascade-deleted when the old published entry was removed.
+          // Re-insert it with the new entity ID.
+          const newRelation = {
+            ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
+            [sourceColumn]: newSourceId,
+            [orderColumn]: originalOrder,
+          };
+          await trx(joinTable.name).insert(newRelation);
+        }
       });
     }
   });
