@@ -44,6 +44,7 @@ import type { Schema } from '@strapi/types';
  * -----------------------------------------------------------------------------------------------*/
 
 type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
+// Stateless utility — safe to share as a module-level singleton across all component instances.
 const repeatableFieldsRulesEngine = createRulesEngine();
 
 const RepeatableComponent = ({
@@ -363,8 +364,10 @@ const RepeatableComponentFields = React.memo(
     nameWithIndex,
   }: RepeatableComponentFieldsProps) => {
     const { formatMessage } = useIntl();
-    const currentComponentValues =
-      useForm('RepeatableComponentFields', (state) => getIn(state.values, nameWithIndex)) ?? {};
+    const currentComponentValues = useForm(
+      'RepeatableComponentFields',
+      (state) => (getIn(state.values, nameWithIndex) ?? {}) as Record<string, unknown>
+    );
 
     return (
       <>
@@ -509,7 +512,7 @@ const Component = ({
 
   const canMoveUp = index > 0;
   const canMoveDown = index < totalLength - 1;
-  const handleDeleteComponent = () => {
+  const handleDeleteClick = () => {
     onDeleteComponent?.(index);
   };
 
@@ -525,7 +528,7 @@ const Component = ({
               <IconButton
                 disabled={disabled}
                 variant="ghost"
-                onClick={handleDeleteComponent}
+                onClick={handleDeleteClick}
                 label={formatMessage({
                   id: getTranslation('containers.Edit.delete'),
                   defaultMessage: 'Delete',

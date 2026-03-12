@@ -139,7 +139,7 @@ const useDocument: UseDocument = (args, opts) => {
       }
 
       // When it's a singleType without a mainField, use the contentType displayName
-      if (isSingleType && schema?.info.displayName) {
+      if (schema?.kind === 'singleType' && schema.info.displayName) {
         return schema.info.displayName;
       }
 
@@ -149,7 +149,7 @@ const useDocument: UseDocument = (args, opts) => {
         defaultMessage: 'Untitled',
       });
     },
-    [document, formatMessage, isSingleType, schema]
+    [document, formatMessage, schema]
   );
 
   React.useEffect(() => {

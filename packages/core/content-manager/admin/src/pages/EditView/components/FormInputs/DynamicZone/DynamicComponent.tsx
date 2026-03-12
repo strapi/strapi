@@ -109,10 +109,14 @@ const DynamicComponent = ({
     'DynamicComponent',
     (state) => getIn(state.values, componentPath) != null
   );
+  const isNewItem = useForm(
+    'DynamicComponent',
+    (state) => getIn(state.values, componentPath)?.id == null
+  );
   const rawError = useForm('DynamicComponent', (state) => getIn(state.errors, componentPath));
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>(
-    value.id ? '' : accordionValue
+    isNewItem ? accordionValue : ''
   );
 
   React.useEffect(() => {
@@ -125,9 +129,9 @@ const DynamicComponent = ({
 
   const canMoveUp = index > 0;
   const canMoveDown = index < totalLength - 1;
-  const handleRemoveCurrentComponent = () => {
+  const handleRemoveCurrentComponent = React.useCallback(() => {
     onRemoveComponentClick(index);
-  };
+  }, [onRemoveComponentClick, index]);
 
   const accordionActions = disabled ? null : (
     <>
