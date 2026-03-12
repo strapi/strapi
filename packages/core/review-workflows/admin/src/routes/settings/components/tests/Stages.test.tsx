@@ -19,6 +19,7 @@ const STAGES_FIXTURE: Stage[] = [
         actionParameters: {},
       },
     ],
+    toPermissions: [],
     createdAt: new Date().toDateString(),
     updatedAt: new Date().toDateString(),
     __temp_key__: 'a0',
@@ -28,6 +29,14 @@ const STAGES_FIXTURE: Stage[] = [
     color: STAGE_COLOR_DEFAULT,
     name: 'stage-2',
     permissions: [],
+    toPermissions: [
+      {
+        id: 2,
+        role: 1,
+        action: 'admin::review-workflows.stage.transition',
+        actionParameters: {},
+      },
+    ],
     createdAt: new Date().toDateString(),
     updatedAt: new Date().toDateString(),
     __temp_key__: 'a1',
@@ -80,7 +89,7 @@ describe('Stages', () => {
     await user.click(screen.getByRole('button', { name: 'Add new stage' }));
 
     await waitFor(() => {
-      expect(screen.getAllByRole('button').length).toBe(11);
+      expect(screen.getAllByRole('button').length).toBe(12);
     });
   });
 
@@ -109,12 +118,12 @@ describe('Stages', () => {
     // Permissions combobox
     await waitFor(() =>
       expect(
-        screen.getByRole('combobox', { name: /roles that can change this stage/i })
+        screen.getByRole('combobox', { name: /roles that can change from this stage/i })
       ).toHaveTextContent('Editor')
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /apply to all stages/i })).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: /apply to all stages/i })).toHaveLength(2);
     });
   });
 
@@ -170,6 +179,20 @@ describe('Stages', () => {
     expect(deleteEl).toBeInTheDocument();
   });
 
+  it('should render the "to" permissions field in a stage', async () => {
+    const { user } = setup({
+      initialValues: {
+        stages: STAGES_FIXTURE,
+      },
+    });
+
+    await user.click(screen.getByRole('button', { name: 'stage-2' }));
+
+    expect(
+      await screen.findByRole('combobox', { name: /roles that can move content to this stage/i })
+    ).toBeInTheDocument();
+  });
+
   it('should not crash on a custom color code', async () => {
     const { user } = setup({
       canDelete: false,
@@ -204,15 +227,14 @@ describe('Stages', () => {
     // Permissions
     await waitFor(() =>
       expect(
-        screen.getByRole('combobox', { name: /roles that can change this stage/i })
+        screen.getByRole('combobox', { name: /roles that can change from this stage/i })
       ).toHaveAttribute('data-disabled')
     );
 
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: /apply to all stages/i })).toHaveAttribute(
-        'aria-disabled'
-      )
-    );
+    await waitFor(() => {
+      const applyButtons = screen.getAllByRole('button', { name: /apply to all stages/i });
+      applyButtons.forEach((button) => expect(button).toHaveAttribute('aria-disabled'));
+    });
   });
 
   it('should render a list of all available roles (except super admins)', async () => {
@@ -221,12 +243,12 @@ describe('Stages', () => {
     await user.click(screen.getByRole('button', { name: 'stage-1' }));
 
     const comboboxEl = await screen.findByRole('combobox', {
-      name: /roles that can change this stage/i,
+      name: /roles that can change from this stage/i,
     });
 
     expect(comboboxEl).toBeInTheDocument();
 
-    await user.click(getByRole('combobox', { name: /roles that can change this stage/i }));
+    await user.click(getByRole('combobox', { name: /roles that can change from this stage/i }));
 
     const allRolesOptionEl = await screen.findByRole('option', { name: /All roles/i });
     const editorOptionEl = await screen.findByRole('option', { name: /Editor/i });
