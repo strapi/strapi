@@ -4,7 +4,6 @@ import { useForm, useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { getIn } from '../../../../../utils/objects';
 import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
@@ -25,7 +24,6 @@ const NonRepeatableComponent = ({
   );
   const level = useComponent('NonRepeatableComponent', (state) => state.level);
   const isNested = level > 0;
-  const { currentDocument } = useDocumentContext('NonRepeatableComponent');
   const isMobile = useIsMobile();
 
   return (
@@ -41,12 +39,7 @@ const NonRepeatableComponent = ({
         hasRadius={isNested}
         borderColor={isNested || isMobile ? 'neutral200' : undefined}
       >
-        <NonRepeatableComponentFields
-          attribute={attribute}
-          name={name}
-          layout={layout}
-          currentDocument={currentDocument}
-        >
+        <NonRepeatableComponentFields attribute={attribute} name={name} layout={layout}>
           {children}
         </NonRepeatableComponentFields>
       </Box>
@@ -55,12 +48,10 @@ const NonRepeatableComponent = ({
 };
 
 interface NonRepeatableComponentFieldsProps
-  extends Pick<NonRepeatableComponentProps, 'attribute' | 'children' | 'layout' | 'name'> {
-  currentDocument: ReturnType<typeof useDocumentContext>['currentDocument'];
-}
+  extends Pick<NonRepeatableComponentProps, 'attribute' | 'children' | 'layout' | 'name'> {}
 
 const NonRepeatableComponentFields = React.memo(
-  ({ attribute, children, currentDocument, layout, name }: NonRepeatableComponentFieldsProps) => {
+  ({ attribute, children, layout, name }: NonRepeatableComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
@@ -95,7 +86,6 @@ const NonRepeatableComponentFields = React.memo(
                       ...field,
                       label: translatedLabel,
                       name: completeFieldName,
-                      document: currentDocument,
                     })}
                   </ResponsiveGridItem>
                 );

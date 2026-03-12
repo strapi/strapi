@@ -37,7 +37,7 @@ import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
-  document: ReturnType<UseDocument>;
+  document?: ReturnType<UseDocument>;
 };
 
 /**
@@ -51,11 +51,15 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
 const BaseInputRenderer = ({
   visible,
   hint: providedHint,
-  document,
+  document: providedDocument,
   ...inputProps
 }: InputRendererProps) => {
+  const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  // Most edit-view fields can read the document from context, which avoids threading a
+  // frequently-changing `document` prop through nested component/DZ trees and reduces churn.
+  // Keep `providedDocument` as an explicit override for callers outside that default flow.
+  const document = providedDocument ?? currentDocument;
   const localeKey = document?.document?.locale || 'default';
-  const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);

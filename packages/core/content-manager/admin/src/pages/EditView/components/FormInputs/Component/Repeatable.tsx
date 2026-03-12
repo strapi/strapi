@@ -1,12 +1,6 @@
 import * as React from 'react';
 
-import {
-  useField,
-  useNotification,
-  useForm,
-  createRulesEngine,
-  useIsDesktop,
-} from '@strapi/admin/strapi-admin';
+import { useField, useNotification, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -44,8 +38,6 @@ import type { Schema } from '@strapi/types';
  * -----------------------------------------------------------------------------------------------*/
 
 type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
-// Stateless utility — safe to share as a module-level singleton across all component instances.
-const repeatableFieldsRulesEngine = createRulesEngine();
 
 const RepeatableComponent = ({
   attribute,
@@ -298,7 +290,6 @@ const RepeatableComponent = ({
                 onGrabItem={handleGrabItem}
                 __temp_key__={key}
                 totalLength={value.length}
-                currentDocument={currentDocument}
                 layout={layout}
                 renderField={children}
               />
@@ -352,42 +343,18 @@ interface RepeatableComponentFieldsProps
   extends Pick<RepeatableComponentProps, 'children' | 'layout'> {
   attributeComponent: string;
   nameWithIndex: string;
-  currentDocument: ReturnType<typeof useDocumentContext>['currentDocument'];
 }
 
 const RepeatableComponentFields = React.memo(
-  ({
-    attributeComponent,
-    children,
-    currentDocument,
-    layout,
-    nameWithIndex,
-  }: RepeatableComponentFieldsProps) => {
+  ({ attributeComponent, children, layout, nameWithIndex }: RepeatableComponentFieldsProps) => {
     const { formatMessage } = useIntl();
-    const currentComponentValues = useForm(
-      'RepeatableComponentFields',
-      (state) => (getIn(state.values, nameWithIndex) ?? {}) as Record<string, unknown>
-    );
 
     return (
       <>
         {layout.map((row, index) => {
-          const visibleFields = row.filter((field) => {
-            const condition = field.attribute.conditions?.visible;
-            if (condition) {
-              return repeatableFieldsRulesEngine.evaluate(condition, currentComponentValues);
-            }
-
-            return true;
-          });
-
-          if (visibleFields.length === 0) {
-            return null;
-          }
-
           return (
             <ResponsiveGridRoot gap={4} key={index}>
-              {visibleFields.map(({ size, ...field }) => {
+              {row.map(({ size, ...field }) => {
                 /**
                  * Layouts are built from schemas so they don't understand the complete
                  * schema tree, for components we append the parent name to the field name
@@ -414,7 +381,6 @@ const RepeatableComponentFields = React.memo(
                       ...field,
                       label: translatedLabel,
                       name: completeFieldName,
-                      document: currentDocument,
                     })}
                   </ResponsiveGridItem>
                 );
@@ -437,7 +403,6 @@ interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField' | 'layout'> {
   attributeComponent: string;
-  currentDocument: ReturnType<typeof useDocumentContext>['currentDocument'];
   disabled?: boolean;
   index: number;
   name: string;
@@ -457,7 +422,6 @@ const Component = ({
     name: 'id',
     type: 'integer',
   },
-  currentDocument,
   layout,
   onDeleteComponent,
   renderField,
@@ -604,7 +568,6 @@ const Component = ({
             >
               <RepeatableComponentFields
                 attributeComponent={attributeComponent}
-                currentDocument={currentDocument}
                 layout={layout}
                 nameWithIndex={name}
               >

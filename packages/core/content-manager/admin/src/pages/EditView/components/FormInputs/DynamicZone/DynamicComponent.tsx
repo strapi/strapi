@@ -58,7 +58,7 @@ const DynamicComponent = ({
   children,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
-  const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const isDesktop = useIsDesktop();
 
   const {
@@ -287,7 +287,6 @@ const DynamicComponent = ({
                 <AccordionContentRadius background="neutral0">
                   <DynamicComponentFields
                     componentUid={componentUid}
-                    currentDocument={currentDocument}
                     index={index}
                     layout={components[componentUid]?.layout}
                     name={name}
@@ -337,21 +336,13 @@ const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
 
 interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children'> {
   componentUid: string;
-  currentDocument: ReturnType<typeof useDocumentContext>['currentDocument'];
   index: number;
   layout?: EditFieldLayout[][];
   name: string;
 }
 
 const DynamicComponentFields = React.memo(
-  ({
-    children,
-    componentUid,
-    currentDocument,
-    index,
-    layout,
-    name,
-  }: DynamicComponentFieldsProps) => {
+  ({ children, componentUid, index, layout, name }: DynamicComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
@@ -384,15 +375,10 @@ const DynamicComponentFields = React.memo(
                         {children ? (
                           children({
                             ...fieldWithTranslatedLabel,
-                            document: currentDocument,
                             name: fieldName,
                           })
                         ) : (
-                          <InputRenderer
-                            {...fieldWithTranslatedLabel}
-                            document={currentDocument}
-                            name={fieldName}
-                          />
+                          <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
                         )}
                       </ResponsiveGridItem>
                     );
