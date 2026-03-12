@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "5.36.1",
+  "version": "5.39.0",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/database"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -42,8 +43,8 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/utils": "5.36.1",
-    "ajv": "8.16.0",
+    "@strapi/utils": "5.39.0",
+    "ajv": "8.18.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "11.2.0",
@@ -54,8 +55,8 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.36.1",
-    "tsconfig": "5.36.1"
+    "eslint-config-custom": "5.39.0",
+    "tsconfig": "5.39.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

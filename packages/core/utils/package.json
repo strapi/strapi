@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "5.36.1",
+  "version": "5.39.0",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -12,7 +12,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/utils"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -61,10 +62,10 @@
     "@types/http-errors": "2.0.4",
     "@types/koa": "2.13.4",
     "@types/node": "24.10.0",
-    "eslint-config-custom": "5.36.1",
-    "koa": "2.16.3",
+    "eslint-config-custom": "5.39.0",
+    "koa": "2.16.4",
     "koa-body": "6.0.1",
-    "tsconfig": "5.36.1"
+    "tsconfig": "5.39.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

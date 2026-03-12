@@ -74,8 +74,8 @@ describe('Configure the List View', () => {
     await user.click(getByRole('button', { name: 'Add a field' }));
     await user.click(getByRole('menuitem', { name: 'slug' }));
 
-    expect(getByRole('button', { name: `Edit slug` })).toBeInTheDocument();
-    expect(getByRole('button', { name: `Delete slug` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Edit slug` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Delete slug` })).toBeInTheDocument();
   });
 
   it('should let me re-add a field I just removed from the original list', async () => {
@@ -87,8 +87,8 @@ describe('Configure the List View', () => {
     await user.click(getByRole('button', { name: 'Add a field' }));
     await user.click(getByRole('menuitem', { name: 'id' }));
 
-    expect(getByRole('button', { name: `Edit id` })).toBeInTheDocument();
-    expect(getByRole('button', { name: `Delete id` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Edit id` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Delete id` })).toBeInTheDocument();
   });
 
   describe('Edit modal', () => {
@@ -99,15 +99,18 @@ describe('Configure the List View', () => {
 
       await user.click(getByRole('button', { name: 'Edit id' }));
 
-      expect(getByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
-      expect(getByRole('heading', { name: 'Edit Id' })).toBeInTheDocument();
-      expect(getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
-      expect(getByRole('checkbox', { name: 'Enable sort on this field' })).toBeInTheDocument();
+      expect(await findByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
+      expect(await findByRole('heading', { name: 'Edit Id' })).toBeInTheDocument();
+      const labelInput = await findByRole('textbox', { name: 'Label' });
+      expect(labelInput).toBeInTheDocument();
+      expect(
+        await findByRole('checkbox', { name: 'Enable sort on this field' })
+      ).toBeInTheDocument();
 
-      await user.type(getByRole('textbox', { name: 'Label' }), 'testname');
+      await user.type(labelInput, 'testname');
 
-      expect(getByRole('button', { name: 'Finish' })).toBeInTheDocument();
-      expect(getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+      expect(await findByRole('button', { name: 'Finish' })).toBeInTheDocument();
+      expect(await findByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
       fireEvent.click(getByRole('button', { name: 'Finish' }));
 
@@ -123,9 +126,9 @@ describe('Configure the List View', () => {
 
       await user.click(getByRole('button', { name: 'Edit id' }));
 
-      expect(getByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
+      expect(await findByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
 
-      await user.click(getByRole('button', { name: 'Cancel' }));
+      await user.click(await findByRole('button', { name: 'Cancel' }));
 
       await waitFor(() =>
         expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument()
