@@ -76,13 +76,12 @@ describe('Filters', () => {
     await user.type(await screen.findByRole('textbox', { name: 'Name' }), 'Jimbob');
     fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
 
-    const filter = await screen.findByText('Name $eq Jimbob');
+    await screen.findByText('Name $eq Jimbob');
 
-    fireEvent.click(filter);
+    const removeButton = screen.getByRole('button', { name: 'Name $eq Jimbob' });
+    fireEvent.click(removeButton);
 
-    await waitFor(() =>
-      expect(screen.queryByRole('button', { name: 'Name $eq Jimbob' })).not.toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.queryByText('Name $eq Jimbob')).not.toBeInTheDocument());
   });
 
   it('should display a list of the filter names when the combobox named Select field is pressed', async () => {
