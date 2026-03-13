@@ -341,23 +341,18 @@ const fillFromLocale = () => {
       // Build populate WITHOUT countRelations so we get full relation objects
       const populate = await populateBuilderService(model).populateDeep(Infinity).build();
 
-      // Use strapi.documents to fetch with relations properly populated
-      // Can't use db.query because it's not fetching draft relations
       const docs = strapi.documents(model);
       const baseParams = {
         locale: sourceLocale,
         populate: populate as never,
-        pageSize: 1,
-        ...(documentId && { documentId }),
       };
-      const findSourceDoc = (status?: 'draft' | 'published') =>
-        docs.findMany({ ...baseParams, ...(status && { status }) }).then((r) => r[0] ?? null);
+      const findSourceDoc = () =>
+        documentId
+          ? docs.findOne({ ...baseParams, documentId })
+          : docs.findFirst({ ...baseParams });
 
-      // Prefer published first, fall back to draft
       const document = (
-        contentTypes.hasDraftAndPublish(modelDef)
-          ? ((await findSourceDoc('published')) ?? (await findSourceDoc('draft')))
-          : await findSourceDoc()
+        contentTypes.hasDraftAndPublish(modelDef) ? await findSourceDoc() : await findSourceDoc()
       ) as Record<string, unknown> | null;
 
       if (!document) {
