@@ -52,7 +52,7 @@ describe('getDocumentDimensions', () => {
     expect(getDocumentLocaleAndStatus({}, modelWithDraftAndPublishUID)).resolves.toEqual({});
   });
 
-  test('status = modifed is invalid', () => {
+  test('status = modified is invalid (not a document status; use publicationStatusFilter)', () => {
     expect(
       getDocumentLocaleAndStatus({ status: 'modified' }, modelWithDraftAndPublishUID)
     ).rejects.toThrow();

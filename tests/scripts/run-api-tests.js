@@ -45,16 +45,25 @@ const databases = {
 const jestCmd = 'jest --config jest.config.api.js --runInBand --forceExit'.split(' ');
 
 const runAllTests = async (args) => {
+  // Required for Jest: code run under Jest (including app code loaded by tests) can execute in a context
+  // where Node treats dynamic import() as VM-bound; from Node v20.10+ that requires this flag.
+  // ESM-only deps (e.g. file-type in upload) use dynamic import(); without the flag we get
+  // ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING_FLAG. Other dynamic imports (plop, prettier) run in the
+  // main process (CLI/scripts) or browser (admin), so they never hit this.
+  const nodeOptions = [process.env.NODE_OPTIONS, '--experimental-vm-modules']
+    .filter(Boolean)
+    .join(' ');
+
   return execa('yarn', [...jestCmd, ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '../..'),
     env: {
-      // if STRAPI_LICENSE is in the env the test will run in ee automatically
       STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
       FORCE_COLOR: 1,
       ENV_PATH: process.env.ENV_PATH,
       JWT_SECRET: 'aSecret',
       STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE: 'true',
+      NODE_OPTIONS: nodeOptions,
     },
   });
 };
