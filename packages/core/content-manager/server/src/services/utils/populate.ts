@@ -297,7 +297,7 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
         // Skip relations to content types without draft & publish,
         // as they don't have a publishedAt attribute and can't have drafts
         const targetModel = strapi.getModel(attribute.target);
-        if (targetModel && !hasDraftAndPublish(targetModel)) {
+        if (!targetModel || !hasDraftAndPublish(targetModel)) {
           break;
         }
 
