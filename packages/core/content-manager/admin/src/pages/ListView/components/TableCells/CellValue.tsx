@@ -10,7 +10,7 @@ interface CellValueProps {
 }
 
 const CellValue = ({ type, value }: CellValueProps) => {
-  const { formatDate, formatTime, formatNumber } = useIntl();
+  const { formatDate, formatTime, formatNumber, formatMessage } = useIntl();
   let formattedValue = value;
 
   if (type === 'date') {
@@ -38,6 +38,15 @@ const CellValue = ({ type, value }: CellValueProps) => {
       // Should be kept in sync with the corresponding value
       // in the design-system/NumberInput: https://github.com/strapi/design-system/blob/main/packages/strapi-design-system/src/NumberInput/NumberInput.js#L53
       maximumFractionDigits: 20,
+    });
+  }
+
+  if (type === 'boolean') {
+    formattedValue = formatMessage({
+      id: value
+        ? 'app.components.ToggleCheckbox.on-label'
+        : 'app.components.ToggleCheckbox.off-label',
+      defaultMessage: value ? 'true' : 'false',
     });
   }
 

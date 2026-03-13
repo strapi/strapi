@@ -191,7 +191,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         if (stats && (stats.started !== count || stats.finished !== count)) {
           callback(
             new Error(
-              `Data missing: sent ${this.stats[step].count} ${step}, recieved ${stats.started} and saved ${stats.finished} ${step}`
+              `Data missing: sent ${this.stats[step].count} ${step}, received ${stats.started} and saved ${stats.finished} ${step}`
             )
           );
         }

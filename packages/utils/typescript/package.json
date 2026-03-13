@@ -1,14 +1,18 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "5.36.0",
+  "version": "5.39.0",
   "description": "Typescript support for Strapi",
   "keywords": [
     "strapi",
     "generators"
   ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git",
+    "url": "https://github.com/strapi/strapi.git",
     "directory": "packages/utils/typescript"
   },
   "license": "SEE LICENSE IN LICENSE",
