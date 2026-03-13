@@ -103,6 +103,19 @@ test.describe('List View', () => {
     await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();
   });
 
+  test('A user can copy the document ID from the list view', async ({ page }) => {
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.getByRole('link', { name: 'Article' }).click();
+
+    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+    // documentId column should show a copy button in each row
+    const copyButton = page.getByRole('button', { name: 'Copy' }).first();
+    await expect(copyButton).toBeVisible();
+
+    await copyButton.click();
+    await expect(page.getByText('Document ID copied to clipboard', { exact: false })).toBeVisible();
+  });
+
   test('Entries should be paginated', async ({ page }) => {
     // Go to the authors list view, all three entries should be visible
     await page.getByRole('link', { name: 'Content Manager' }).click();

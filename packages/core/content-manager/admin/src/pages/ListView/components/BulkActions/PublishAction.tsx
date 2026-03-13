@@ -187,7 +187,7 @@ interface SelectedEntriesTableContentProps {
 }
 
 const TABLE_HEADERS = [
-  { name: 'id', label: 'id' },
+  { name: 'documentId', label: 'documentId' },
   { name: 'name', label: 'name' },
   { name: 'status', label: 'status' },
   { name: 'publicationStatus', label: 'Publication status' },
@@ -208,7 +208,8 @@ const SelectedEntriesTableContent = ({
     },
   } = useDocLayout();
 
-  const shouldDisplayMainField = mainField != null && mainField !== 'id';
+  const shouldDisplayMainField =
+    mainField != null && mainField !== 'id' && mainField !== 'documentId';
 
   return (
     <Table.Content>
@@ -223,10 +224,10 @@ const SelectedEntriesTableContent = ({
       <Table.Loading />
       <Table.Body>
         {rowsToDisplay.map((row) => (
-          <Table.Row key={row.id}>
-            <Table.CheckboxCell id={row.id} />
+          <Table.Row key={row.documentId}>
+            <Table.CheckboxCell id={row.documentId} />
             <Table.Cell>
-              <Typography>{row.id}</Typography>
+              <Typography>{row.documentId}</Typography>
             </Table.Cell>
             {shouldDisplayMainField && (
               <Table.Cell>

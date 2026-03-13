@@ -16,6 +16,8 @@
   "ListViewTable.relation-loaded": "Relations have been loaded",
   "ListViewTable.relation-loading": "Relations are loading",
   "ListViewTable.relation-more": "This relation contains more entities than displayed",
+  "ListView.copy-documentId.label": "Copy",
+  "ListView.copy-documentId.success": "Document ID copied to clipboard",
   "EditRelations.title": "Relational data",
   "HeaderLayout.button.label-add-entry": "Create new entry",
   "api.id": "API ID",

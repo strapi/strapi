@@ -17,6 +17,7 @@ import {
   useTable,
   useIsMobile,
   useIsDesktop,
+  useClipboard,
   tours,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -26,8 +27,9 @@ import {
   ButtonProps,
   Box,
   EmptyStateLayout,
+  IconButton,
 } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
+import { Duplicate, Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -74,6 +76,7 @@ const ListViewPage = () => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const { copy } = useClipboard();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
   const isDesktop = useIsDesktop();
@@ -420,6 +423,40 @@ const ListViewPage = () => {
                                       ? getDisplayName(row[header.name.split('.')[0]])
                                       : '-'}
                                   </Typography>
+                                </Table.Cell>
+                              );
+                            }
+                            if (header.name === 'documentId') {
+                              const documentId = row.documentId ?? '';
+                              const handleCopyDocumentId = (e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                copy(documentId);
+                                toggleNotification({
+                                  type: 'success',
+                                  message: formatMessage({
+                                    id: 'content-manager.ListView.copy-documentId.success',
+                                    defaultMessage: 'Document ID copied to clipboard',
+                                  }),
+                                });
+                              };
+                              return (
+                                <Table.Cell key={header.name}>
+                                  <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
+                                    <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
+                                      {documentId || '-'}
+                                    </Typography>
+                                    <IconButton
+                                      variant="ghost"
+                                      size="S"
+                                      label={formatMessage({
+                                        id: 'content-manager.ListView.copy-documentId.label',
+                                        defaultMessage: 'Copy',
+                                      })}
+                                      onClick={handleCopyDocumentId}
+                                    >
+                                      <Duplicate />
+                                    </IconButton>
+                                  </Flex>
                                 </Table.Cell>
                               );
                             }
