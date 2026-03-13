@@ -481,7 +481,7 @@ describe('CM API - Number of draft relations', () => {
     } = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/${UID_PRODUCT}`,
-      body: { name: 'TaggedProduct', tag: tag.id },
+      body: { name: 'TaggedProduct', tag: tag.documentId },
     });
 
     // countDraftRelations should not crash and should return 0

@@ -281,6 +281,9 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
  */
 const getDeepPopulateDraftCount = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);
+  if (!model) {
+    return { populate: {}, hasRelations: false };
+  }
   let hasRelations = false;
 
   const populate = Object.keys(model.attributes).reduce((populateAcc: any, attributeName) => {
@@ -296,6 +299,10 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
 
         // Skip relations to content types without draft & publish,
         // as they don't have a publishedAt attribute and can't have drafts
+        if (!('target' in attribute)) {
+          break;
+        }
+
         const targetModel = strapi.getModel(attribute.target);
         if (!targetModel || !hasDraftAndPublish(targetModel)) {
           break;
