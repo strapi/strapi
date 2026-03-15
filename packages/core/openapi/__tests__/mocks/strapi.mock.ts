@@ -31,4 +31,15 @@ export class StrapiMock {
       },
     };
   }
+
+  get config() {
+    return {
+      get: (key: string, defaultValue?: string) => {
+        const values: Record<string, string> = {
+          'api.rest.prefix': '/api',
+        };
+        return values[key] ?? defaultValue;
+      },
+    };
+  }
 }

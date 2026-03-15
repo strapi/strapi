@@ -24,12 +24,21 @@ export class ApiRoutesProvider extends AbstractRoutesProvider {
    */
   public get routes(): Core.Route[] {
     const { apis } = this._strapi;
+    const apiPrefix = this._strapi.config.get('api.rest.prefix', '/api');
 
     const routes = Object.values(apis)
       // Extract and flatten each router from every API
       .flatMap((api) => Object.values(api.routes))
       // Extract and flatten the routes from each router
-      .flatMap((router) => router.routes);
+      .flatMap((router) => router.routes)
+      // Apply the REST API prefix to content-api routes
+      .map((route) => {
+        if (route.info?.type === 'content-api') {
+          return { ...route, path: `${apiPrefix}${route.path}` };
+        }
+
+        return route;
+      });
 
     debug('found %o routes in Strapi APIs', routes.length);
 
