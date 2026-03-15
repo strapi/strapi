@@ -91,6 +91,40 @@ describe('getFetchClient', () => {
     );
   });
 
+  it('should not append trailing ? when params is an empty object', async () => {
+    (window.fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        status: 200,
+        ok: true,
+        json: () => Promise.resolve({ data: 'success response' }),
+      })
+    );
+    const fetchClient = getFetchClient();
+    await fetchClient.get('/content-manager/actions/publish', {
+      params: {},
+    });
+    expect(window.fetch).toHaveBeenCalledWith(
+      'http://localhost:1337/content-manager/actions/publish',
+      expect.anything()
+    );
+  });
+
+  it('should not append trailing ? when params is undefined', async () => {
+    (window.fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        status: 200,
+        ok: true,
+        json: () => Promise.resolve({ data: 'success response' }),
+      })
+    );
+    const fetchClient = getFetchClient();
+    await fetchClient.get('/content-manager/actions/publish');
+    expect(window.fetch).toHaveBeenCalledWith(
+      'http://localhost:1337/content-manager/actions/publish',
+      expect.anything()
+    );
+  });
+
   describe('token refresh on 401', () => {
     it('should refresh token and retry on 401 error', async () => {
       // First call returns 401
