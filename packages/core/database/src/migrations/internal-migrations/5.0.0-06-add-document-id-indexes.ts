@@ -2,27 +2,39 @@ import type { Knex } from 'knex';
 
 import type { Migration } from '../common';
 
+/**
+ * PostgreSQL silently truncates identifiers longer than 63 characters.
+ * When the migration later checks for the full-length name, it does not
+ * find the truncated version, and the CREATE INDEX fails with 42P07.
+ */
+const PG_IDENTIFIER_MAX_LENGTH = 63;
+
 // Add an index if it does not already exist
 const createIndex = async (knex: Knex, tableName: string, columns: string[], indexName: string) => {
+  // Truncate to PostgreSQL's identifier limit to avoid silent name mismatch
+  const safeName =
+    indexName.length > PG_IDENTIFIER_MAX_LENGTH
+      ? indexName.substring(0, PG_IDENTIFIER_MAX_LENGTH)
+      : indexName;
+
   try {
-    // If the database can check for indexes, avoid duplicates
-    const hasIndex = (
-      knex.schema as unknown as {
-        hasIndex?: (tableName: string, indexName: string) => Promise<boolean>;
-      }
-    ).hasIndex;
-    if (hasIndex) {
-      const exists = await hasIndex.call(knex.schema, tableName, indexName);
-      if (exists) {
-        return;
-      }
-    }
+    // Use a savepoint so that a duplicate-index error in PostgreSQL does not
+    // abort the surrounding transaction and block all subsequent statements.
+    await knex.raw('SAVEPOINT create_idx');
 
     await knex.schema.alterTable(tableName, (table) => {
-      table.index(columns, indexName);
+      table.index(columns, safeName);
     });
-  } catch (error) {
-    // If the index exists (or cannot be created), move on
+
+    await knex.raw('RELEASE SAVEPOINT create_idx');
+  } catch {
+    // Index already exists or cannot be created — roll back to the savepoint
+    // so the transaction remains usable for subsequent operations.
+    try {
+      await knex.raw('ROLLBACK TO SAVEPOINT create_idx');
+    } catch {
+      // Savepoints may not be supported (e.g. some SQLite modes); ignore.
+    }
   }
 };
 
