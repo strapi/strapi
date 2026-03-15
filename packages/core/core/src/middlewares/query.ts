@@ -6,7 +6,7 @@ type Config = Parameters<typeof qs.parse>[1];
 
 const defaults: Config = {
   strictNullHandling: true,
-  arrayLimit: 100,
+  arrayLimit: 200,
   depth: 20,
 };
 
