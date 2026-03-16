@@ -21,7 +21,7 @@ const models = {
       one_to_one: { type: 'relation', relation: 'oneToOne', target: 'api::dog.dog' },
       cpa: { type: 'component', component: 'default.cpa' },
       cpb: { type: 'component', component: 'default.cpb' },
-      dz: { type: 'dynamiczone', components: ['default.cpa', 'default.cpb'] },
+      dz: { type: 'dynamiczone', components: ['default.cpa', 'default.cpb', 'default.cpc'] },
       morph_to_one: { type: 'relation', relation: 'morphToOne' },
       morph_to_many: { type: 'relation', relation: 'morphToMany' },
       createdAt: { type: 'timestamp' },
@@ -40,6 +40,45 @@ const models = {
     modelType: 'component',
     attributes: {
       field: { type: 'integer' },
+    },
+  },
+  'api::vdp.vdp': {
+    uid: 'api::vdp.vdp',
+    modelType: 'contentType',
+    kind: 'collectionType',
+    info: {
+      displayName: 'VDP',
+      singularName: 'vdp',
+      pluralName: 'vdps',
+    },
+    options: {},
+    attributes: {
+      title: { type: 'string' },
+      filters: { type: 'string' },
+      sort: { type: 'string' },
+      page: { type: 'integer' },
+    },
+  },
+  'api::page.page': {
+    uid: 'api::page.page',
+    modelType: 'contentType',
+    kind: 'collectionType',
+    info: {
+      displayName: 'Page',
+      singularName: 'page',
+      pluralName: 'pages',
+    },
+    options: {},
+    attributes: {
+      title: { type: 'string' },
+      searchResultsPage: { type: 'relation', relation: 'oneToOne', target: 'api::vdp.vdp' },
+    },
+  },
+  'default.cpc': {
+    uid: 'default.cpc',
+    modelType: 'component',
+    attributes: {
+      filters: { type: 'string' },
     },
   },
 } satisfies Record<string, Model>;
@@ -284,6 +323,100 @@ describe('convert-query-params', () => {
         );
 
         expect(newPopulate).toStrictEqual({ [key]: { count: true } });
+      });
+    });
+
+    describe('Keyword-named attribute collision', () => {
+      test('attribute named "filters" is not treated as query keyword', () => {
+        const populate = {
+          searchResultsPage: { filters: { name: 'test' } },
+        };
+
+        const result = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::page.page']
+        );
+
+        // "filters" should NOT be interpreted as a query filter (no "where" key)
+        expect(result).toStrictEqual({
+          searchResultsPage: {},
+        });
+      });
+
+      test('attribute named "sort" is not treated as query keyword', () => {
+        const populate = {
+          searchResultsPage: { sort: 'name:asc' },
+        };
+
+        const result = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::page.page']
+        );
+
+        // "sort" should NOT be interpreted as orderBy
+        expect(result).toStrictEqual({
+          searchResultsPage: {},
+        });
+      });
+
+      test('attribute named "page" is not treated as query keyword', () => {
+        const populate = {
+          searchResultsPage: { page: 1 },
+        };
+
+        const result = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::page.page']
+        );
+
+        // "page" should NOT be interpreted as pagination
+        expect(result).toStrictEqual({
+          searchResultsPage: {},
+        });
+      });
+
+      test('keywords still work when target has no colliding attributes', () => {
+        const populate = {
+          one_to_one: { filters: { title: 'hello' }, sort: 'title:asc', fields: ['title'] },
+        };
+
+        const result = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
+
+        // dog->dog has no "filters"/"sort"/"fields" attributes, so keywords work normally
+        expect(result).toStrictEqual({
+          one_to_one: {
+            where: { title: 'hello' },
+            orderBy: [{ title: 'asc' }],
+            select: ['id', 'documentId', 'title'],
+          },
+        });
+      });
+
+      test('dynamic zone "on" fragment with colliding schema attribute', () => {
+        const populate = {
+          dz: {
+            on: {
+              'default.cpc': { filters: { $contains: 'foo' } },
+            },
+          },
+        };
+
+        const result = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
+
+        // cpc has a "filters" attribute, so it should NOT become "where"
+        expect(result).toStrictEqual({
+          dz: {
+            on: {
+              'default.cpc': {},
+            },
+          },
+        });
       });
     });
   });

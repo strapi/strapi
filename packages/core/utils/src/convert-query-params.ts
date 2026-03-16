@@ -493,8 +493,24 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       throw new Error(`Invalid nested populate. Expected '*' or an object`);
     }
 
-    const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
-      subPopulate as PopulateObjectParams;
+    const subPopulateParams = subPopulate as PopulateObjectParams;
+
+    // If the target schema has an attribute matching a query keyword name,
+    // treat it as an attribute (not a keyword). This prevents collisions
+    // when users name fields 'filters', 'sort', 'fields', or 'populate'.
+    // Matches the approach in traverse/query-populate.ts.
+    const isKeyword = (key: string) => !schema?.attributes?.[key];
+
+    const sort = isKeyword('sort') ? subPopulateParams.sort : undefined;
+    const filters = isKeyword('filters') ? subPopulateParams.filters : undefined;
+    const fields = isKeyword('fields') ? subPopulateParams.fields : undefined;
+    const populate = isKeyword('populate') ? subPopulateParams.populate : undefined;
+    const count = isKeyword('count') ? subPopulateParams.count : undefined;
+    const ordering = isKeyword('ordering') ? subPopulateParams.ordering : undefined;
+    const page = isKeyword('page') ? subPopulateParams.page : undefined;
+    const pageSize = isKeyword('pageSize') ? subPopulateParams.pageSize : undefined;
+    const start = isKeyword('start') ? subPopulateParams.start : undefined;
+    const limit = isKeyword('limit') ? subPopulateParams.limit : undefined;
 
     const query: Query = {};
 
