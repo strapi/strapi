@@ -1,1 +1,8 @@
-npx --no-install -- commitlint --edit ${1}
+#!/usr/bin/env sh
+# Use commitlint when node_modules are available (local dev), otherwise fall back
+# to the standalone bash validator (CI, Cursor Cloud Agent VMs without deps installed).
+if [ -x "$(pwd)/node_modules/.bin/commitlint" ]; then
+  npx --no-install -- commitlint --edit "$1"
+else
+  "$(dirname "$0")/../scripts/hooks/conventional-commits.sh" "$1"
+fi

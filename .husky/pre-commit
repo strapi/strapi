@@ -1,1 +1,5 @@
-npx --no-install lint-staged
+#!/usr/bin/env sh
+# Skip lint-staged when node_modules are not installed (e.g. Cursor Cloud Agent VMs)
+if [ -x "$(pwd)/node_modules/.bin/lint-staged" ]; then
+  npx --no-install lint-staged
+fi
