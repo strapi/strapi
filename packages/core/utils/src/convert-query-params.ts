@@ -332,6 +332,17 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (_.isPlainObject(populate)) {
+      // When qs parses arrays that exceed its arrayLimit, it returns an object
+      // with numeric string keys (e.g. { '0': 'field1', '1': 'field2' }).
+      // Convert these back to arrays so populate works correctly.
+      const keys = Object.keys(populate);
+      if (keys.length > 0 && keys.every((k) => /^\d+$/.test(k))) {
+        const arr = keys
+          .sort((a, b) => Number(a) - Number(b))
+          .map((k) => (populate as Record<string, unknown>)[k]);
+        return convertPopulateQueryParams(arr as PopulateParams, schema, depth);
+      }
+
       return convertPopulateObject(populate, schema);
     }
 

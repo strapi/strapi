@@ -286,6 +286,31 @@ describe('convert-query-params', () => {
         expect(newPopulate).toStrictEqual({ [key]: { count: true } });
       });
     });
+
+    describe('Numeric-key object fallback (qs arrayLimit overflow)', () => {
+      test('converts an object with numeric keys back to an array', () => {
+        // Simulates what qs returns when populate has more entries than arrayLimit
+        const populate = { '0': 'title', '1': 'one_to_one', '2': 'cpa' } as any;
+
+        const result = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
+
+        expect(result).toStrictEqual(['title', 'one_to_one', 'cpa']);
+      });
+
+      test('does not treat regular attribute-key objects as arrays', () => {
+        const populate = { cpa: true, cpb: true };
+
+        const result = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
+
+        expect(result).toStrictEqual({ cpa: true, cpb: true });
+      });
+    });
   });
 
   test.todo('convertFieldsQueryParams');
