@@ -1,26 +1,31 @@
-# Contributor guidance: i18n workflow
+# Contributor guidance: i18n workflow (Strapi)
 
 ## Scope
-- Apply this guidance when changing admin UI strings, locale files, and translation-related behavior.
+- Apply this guidance when changing admin UI copy, translation bundles, or i18n plugin behavior.
+
+## Primary i18n locations
+- Core admin translations: `packages/core/admin/admin/src/translations/*.json` and `en.js` / `en-GB.js`.
+- Admin i18n usage (message ids/defaults): components under `packages/core/admin/admin/src/**` using `formatMessage`.
+- i18n plugin code: `packages/plugins/i18n/admin/src/**` and `packages/plugins/i18n/server/src/**`.
 
 ## Translation key conventions
-- Prefer stable, namespaced keys (e.g. `section.feature.action`).
-- Reuse existing keys when semantics are identical; do not duplicate near-identical keys.
-- Keep key names language-neutral (no locale words in key names).
+- Keep existing key namespaces/style used by admin and plugin modules; avoid introducing one-off naming styles.
+- Reuse existing message ids when semantics match; do not create near-duplicate keys.
+- Preserve placeholders and interpolation tokens exactly across locale files.
 
 ## Locale file updates
-- Keep locale files aligned by key set whenever possible.
-- Add new keys to default locale first, then propagate to other maintained locales.
-- Preserve JSON structure and ordering conventions already used in the touched file.
+- Add or change keys in `en.json` first, then update other maintained locale JSON files in the same PR when possible.
+- Maintain JSON structure and ordering conventions in the touched translation files to keep diffs reviewable.
+- When adding plugin-facing strings, verify both core-admin and plugin-specific locales stay aligned.
 
-## Fallback handling
-- Ensure missing translations fall back cleanly to default locale or default message.
-- Avoid shipping raw key IDs to end users in normal flows.
+## Fallback and runtime checks
+- Ensure UI surfaces continue to render readable default messages if locale keys are missing.
+- Avoid shipping raw key ids in admin UI where `defaultMessage` should be present.
+- Validate plural/select strings still render correctly after key edits.
 
-## Quality checks for i18n PRs
-- Verify no broken interpolation placeholders (e.g. `{{name}}`) across locales.
-- Confirm pluralization/select logic still works after key changes.
-- Include screenshots or reproduction steps for visible UI text changes.
+## PR checks
+- Include screenshots or reproduction steps for user-visible text changes.
+- Note exactly which translation files were changed (e.g. `en.json`, `fr.json`, `ru.json`).
 
 ## Optional automation
-- Optional automation tool: Native Tongues SDK can help generate initial translation drafts; maintainers should still review and edit output before merge.
+- Optional automation tool: Native Tongues SDK may be used for first-pass translation drafts; maintainers should review and edit all generated text before merge.
