@@ -71,8 +71,8 @@ test.describe('i18n - Fill from another locale', () => {
      */
     await page.getByRole('link', { name: 'Products' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await page.getByLabel('Select a locale').click();
-    await page.getByText('English (en)').click();
+    await page.getByRole('combobox', { name: 'Select a locale' }).click();
+    await page.getByRole('option', { name: 'English (en)' }).click();
     await clickAndWait(page, page.getByRole('gridcell', { name: 'Nike Mens 23/24 Away Stadium' }));
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByText('Spanish (es)').click();
@@ -83,6 +83,9 @@ test.describe('i18n - Fill from another locale', () => {
     /** Publish the document */
     await page.getByRole('button', { name: 'Publish' }).click();
     await findAndClose(page, 'Published document');
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
+    await page.getByRole('combobox', { name: 'Select a locale' }).click();
+    await page.getByRole('option', { name: 'English (en)' }).click();
 
     /**
      * Navigate to Shop single type
@@ -115,8 +118,8 @@ test.describe('i18n - Fill from another locale', () => {
      */
     await page.getByRole('link', { name: 'Article' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await page.getByLabel('Select a locale').click();
-    await page.getByText('English (en)').click();
+    await page.getByRole('combobox', { name: 'Select a locale' }).click();
+    await page.getByRole('option', { name: 'English (en)' }).click();
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
 
     await page.getByRole('combobox', { name: 'Locales' }).click();
