@@ -78,32 +78,26 @@ export const formatErrorMessages = (
   Object.entries(errors).forEach(([key, value]) => {
     const currentKey = parentKey ? `${parentKey}.${key}` : key;
 
-    if (Array.isArray(value)) {
-      messages.push(...formatErrorMessages(value, currentKey, formatMessage));
-    } else if (
-      value !== null &&
-      typeof value === 'object' &&
-      'id' in value &&
-      'defaultMessage' in value
-    ) {
+    if (!value) return;
+    const isErrorMessageDescriptor =
+      typeof value === 'object' && 'id' in value && 'defaultMessage' in value;
+    if (isErrorMessageDescriptor || typeof value === 'string') {
+      const id = isErrorMessageDescriptor ? value.id : value;
+      const defaultMessage = isErrorMessageDescriptor
+        ? (value.defaultMessage as string)
+        : (value as string);
       messages.push(
         formatMessage(
           {
-            id: `${value.id}.withField`,
-            defaultMessage: value.defaultMessage as string,
+            id: `${id}.withField`,
+            defaultMessage,
           },
           { field: currentKey }
         )
       );
     } else {
       messages.push(
-        formatMessage(
-          {
-            id: `${value}.withField`,
-            defaultMessage: value as string,
-          },
-          { field: currentKey }
-        )
+        ...formatErrorMessages(value as unknown as FormErrors, currentKey, formatMessage)
       );
     }
   });
