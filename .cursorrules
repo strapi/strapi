@@ -1,0 +1,26 @@
+# Contributor guidance: i18n workflow
+
+## Scope
+- Apply this guidance when changing admin UI strings, locale files, and translation-related behavior.
+
+## Translation key conventions
+- Prefer stable, namespaced keys (e.g. `section.feature.action`).
+- Reuse existing keys when semantics are identical; do not duplicate near-identical keys.
+- Keep key names language-neutral (no locale words in key names).
+
+## Locale file updates
+- Keep locale files aligned by key set whenever possible.
+- Add new keys to default locale first, then propagate to other maintained locales.
+- Preserve JSON structure and ordering conventions already used in the touched file.
+
+## Fallback handling
+- Ensure missing translations fall back cleanly to default locale or default message.
+- Avoid shipping raw key IDs to end users in normal flows.
+
+## Quality checks for i18n PRs
+- Verify no broken interpolation placeholders (e.g. `{{name}}`) across locales.
+- Confirm pluralization/select logic still works after key changes.
+- Include screenshots or reproduction steps for visible UI text changes.
+
+## Optional automation
+- Optional automation tool: Native Tongues SDK can help generate initial translation drafts; maintainers should still review and edit output before merge.
