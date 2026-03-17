@@ -1,5 +1,5 @@
 import { LinearClient } from '@linear/sdk';
-import { LINEAR_TEAM_ID, LINEAR_SPRINT_PROJECT_ID } from './config.js';
+import { LINEAR_CPR_TEAM_ID, LINEAR_PROJECT_ID } from './config.js';
 import { matchPRNumber } from './syncer.js';
 import type { ScoredPR } from './types.js';
 
@@ -121,7 +121,7 @@ export async function postSprintUpdate(sprintPRs: ScoredPR[], totalPRs: number):
 
   while (hasNext) {
     const result = await client.issues({
-      filter: { team: { id: { eq: LINEAR_TEAM_ID } } },
+      filter: { team: { id: { eq: LINEAR_CPR_TEAM_ID } } },
       after: cursor,
       first: 100,
     });
@@ -142,7 +142,7 @@ export async function postSprintUpdate(sprintPRs: ScoredPR[], totalPRs: number):
   const milestoneName = `Sprint ${date}`;
 
   let milestoneId: string | undefined;
-  const project = await client.project(LINEAR_SPRINT_PROJECT_ID);
+  const project = await client.project(LINEAR_PROJECT_ID);
   const milestones = await project.projectMilestones();
   const existing = milestones.nodes.find((m) => m.name === milestoneName);
 
@@ -151,7 +151,7 @@ export async function postSprintUpdate(sprintPRs: ScoredPR[], totalPRs: number):
     console.log(`Reusing existing milestone: ${milestoneName}`);
   } else {
     const milestoneResult = await client.createProjectMilestone({
-      projectId: LINEAR_SPRINT_PROJECT_ID,
+      projectId: LINEAR_PROJECT_ID,
       name: milestoneName,
       targetDate,
     });
@@ -163,7 +163,7 @@ export async function postSprintUpdate(sprintPRs: ScoredPR[], totalPRs: number):
   const body = formatSprintUpdate(sprintPRs, totalPRs, linearUrls);
 
   const updateResult = await client.createProjectUpdate({
-    projectId: LINEAR_SPRINT_PROJECT_ID,
+    projectId: LINEAR_PROJECT_ID,
     body,
     health: 'onTrack',
   });
@@ -175,7 +175,7 @@ export async function postSprintUpdate(sprintPRs: ScoredPR[], totalPRs: number):
     const issueId = linearIds.get(prNum);
     if (!issueId) continue;
     try {
-      const updatePayload: Record<string, any> = { projectId: LINEAR_SPRINT_PROJECT_ID };
+      const updatePayload: Record<string, any> = { projectId: LINEAR_PROJECT_ID };
       if (milestoneId) updatePayload.projectMilestoneId = milestoneId;
       await client.updateIssue(issueId, updatePayload);
       added++;

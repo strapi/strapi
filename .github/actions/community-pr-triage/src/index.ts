@@ -12,7 +12,7 @@ import {
   estimateAreaFromFiles,
 } from './fetcher.js';
 import { calculateValue, calculateComplexity, calculatePriority, isQuickWin } from './scorer.js';
-import { syncToLinear } from './syncer.js';
+import { syncToLinear, findSiblingPRs } from './syncer.js';
 import { printReport, generateMarkdownReport } from './reporter.js';
 import { selectSprintPRs, formatSprintUpdate, postSprintUpdate } from './sprint.js';
 import type { ScoredPR, LinkedIssueData } from './types.js';
@@ -66,7 +66,7 @@ async function scorePR(pr: import('./types.js').GitHubPR): Promise<ScoredPR> {
 async function main() {
   const dryRun = core.getInput('dry-run') !== 'false';
   const prNumber = core.getInput('pr-number');
-  const sprintUpdate = core.getInput('sprint-update') === 'true';
+  const weeklyUpdate = core.getInput('weekly-update') === 'true';
 
   if (!dryRun) {
     validateConfig();
@@ -129,17 +129,31 @@ async function main() {
   const reportContent = readFileSync(reportPath, 'utf-8');
   await core.summary.addRaw(reportContent).write();
 
-  if (sprintUpdate) {
+  if (weeklyUpdate) {
     const sprintPRs = selectSprintPRs(scoredPRs);
-    console.log(`\nSprint recommendation (${sprintPRs.length} PRs):\n`);
+    console.log(`\nWeekly recommendation (${sprintPRs.length} PRs):\n`);
     console.log(formatSprintUpdate(sprintPRs, scoredPRs.length));
 
     if (!dryRun) {
       const url = await postSprintUpdate(sprintPRs, scoredPRs.length);
-      console.log(`Sprint update posted: ${url}\n`);
+      console.log(`Weekly update posted: ${url}\n`);
     } else {
-      console.log('[DRY RUN] Skipping sprint update post.\n');
+      console.log('[DRY RUN] Skipping weekly update post.\n');
     }
+  }
+
+  // Preview sibling PR relations
+  const siblingPairs = findSiblingPRs(scoredPRs);
+  if (siblingPairs.length > 0) {
+    console.log(`Sibling PRs (shared GitHub issues) — ${siblingPairs.length} relation(s) to link:`);
+    for (const [a, b] of siblingPairs) {
+      const prA = scoredPRs.find((s) => s.pr.number === a);
+      const prB = scoredPRs.find((s) => s.pr.number === b);
+      const titleA = prA ? prA.pr.title.slice(0, 60) : `#${a}`;
+      const titleB = prB ? prB.pr.title.slice(0, 60) : `#${b}`;
+      console.log(`  PR #${a} (${titleA}) ↔ PR #${b} (${titleB})`);
+    }
+    console.log();
   }
 
   if (dryRun) {

@@ -7,8 +7,8 @@ inputs:
   pr-number:
     description: 'Single PR number to triage (skips full scan)'
     required: false
-  sprint-update:
-    description: 'Post sprint update and create milestone'
+  weekly-update:
+    description: 'Post weekly update and create milestone'
     default: 'false'
 outputs:
   report-path:

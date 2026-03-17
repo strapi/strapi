@@ -2,17 +2,15 @@ name: Community PR Triage
 
 on:
   schedule:
-    - cron: '0 9 * * 2' # Every Tuesday 9am UTC (filtered to biweekly in check job)
-  pull_request_target:
-    types: [labeled]
+    - cron: '0 9 * * 2' # Every Tuesday 9am UTC
   workflow_dispatch:
     inputs:
       sync:
         description: 'Sync to Linear (not just dry-run)'
         type: boolean
         default: false
-      sprint-update:
-        description: 'Post sprint update and create milestone'
+      weekly-update:
+        description: 'Post weekly update and create milestone'
         type: boolean
         default: false
 
@@ -21,73 +19,14 @@ permissions:
   pull-requests: read
 
 jobs:
-  # Single-PR triage: triggered when a PR is labeled "community"
-  single-pr-triage:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target' && github.event.label.name == 'community'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-        working-directory: .github/actions/community-pr-triage
-
-      - name: Build action
-        run: npx tsup src/index.ts --format cjs --target node20 --clean
-        working-directory: .github/actions/community-pr-triage
-
-      - name: Triage PR
-        uses: ./.github/actions/community-pr-triage
-        with:
-          dry-run: 'false'
-          pr-number: ${{ github.event.pull_request.number }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
-          LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
-          LINEAR_CMS_GITHUB_TEAM_ID: ${{ secrets.LINEAR_CMS_GITHUB_TEAM_ID }}
-          LINEAR_SPRINT_PROJECT_ID: ${{ secrets.LINEAR_SPRINT_PROJECT_ID }}
-          LINEAR_STATUS_TRIAGE: ${{ secrets.LINEAR_STATUS_TRIAGE }}
-          LINEAR_STATUS_TODO: ${{ secrets.LINEAR_STATUS_TODO }}
-          LINEAR_STATUS_DONE: ${{ secrets.LINEAR_STATUS_DONE }}
-          LINEAR_STATUS_CANCELED: ${{ secrets.LINEAR_STATUS_CANCELED }}
-          LINEAR_LABELS: ${{ secrets.LINEAR_LABELS }}
-          LINEAR_TRIAGE_LABELS: ${{ secrets.LINEAR_TRIAGE_LABELS }}
-          LINEAR_SOURCE_LABELS: ${{ secrets.LINEAR_SOURCE_LABELS }}
-
-  check-schedule:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
-    outputs:
-      should-run: ${{ steps.check.outputs.should-run }}
-    steps:
-      - name: Check if biweekly Tuesday
-        id: check
-        run: |
-          WEEK=$(date +%V)
-          if (( WEEK % 2 == 0 )); then
-            echo "should-run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "should-run=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping — odd week ($WEEK), runs on even weeks only"
-          fi
-
   triage:
     runs-on: ubuntu-latest
-    needs: [check-schedule]
-    if: always() && (github.event_name != 'schedule' || needs.check-schedule.outputs.should-run == 'true')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -103,20 +42,19 @@ jobs:
         uses: ./.github/actions/community-pr-triage
         with:
           dry-run: ${{ github.event_name == 'schedule' || !inputs.sync }}
-          sprint-update: ${{ inputs.sprint-update || 'false' }}
+          weekly-update: ${{ inputs.weekly-update || 'false' }}
         env:
           GH_TOKEN: ${{ github.token }}
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
-          LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+          LINEAR_CPR_TEAM_ID: ${{ secrets.LINEAR_CPR_TEAM_ID }}
+          LINEAR_CMS_TEAM_ID: ${{ secrets.LINEAR_CMS_TEAM_ID }}
           LINEAR_CMS_GITHUB_TEAM_ID: ${{ secrets.LINEAR_CMS_GITHUB_TEAM_ID }}
-          LINEAR_SPRINT_PROJECT_ID: ${{ secrets.LINEAR_SPRINT_PROJECT_ID }}
-          LINEAR_STATUS_TRIAGE: ${{ secrets.LINEAR_STATUS_TRIAGE }}
+          LINEAR_PROJECT_ID: ${{ secrets.LINEAR_PROJECT_ID }}
           LINEAR_STATUS_TODO: ${{ secrets.LINEAR_STATUS_TODO }}
           LINEAR_STATUS_DONE: ${{ secrets.LINEAR_STATUS_DONE }}
           LINEAR_STATUS_CANCELED: ${{ secrets.LINEAR_STATUS_CANCELED }}
           LINEAR_LABELS: ${{ secrets.LINEAR_LABELS }}
           LINEAR_TRIAGE_LABELS: ${{ secrets.LINEAR_TRIAGE_LABELS }}
-          LINEAR_SOURCE_LABELS: ${{ secrets.LINEAR_SOURCE_LABELS }}
 
       - name: Upload report
         uses: actions/upload-artifact@v4

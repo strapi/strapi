@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { LinearClient } from '@linear/sdk';
-import { LINEAR_TEAM_ID, LINEAR_CMS_GITHUB_TEAM_ID } from './config.js';
+import { LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID, LINEAR_CMS_GITHUB_TEAM_ID } from './config.js';
 import { matchPRNumber } from './syncer.js';
 import type { ScoredPR } from './types.js';
 
@@ -120,7 +120,11 @@ export async function findAIRelations(
   const results = new Map<number, EvaluatedRelation[]>();
 
   // Only link to issues from these teams
-  const allowedTeamIds = new Set([LINEAR_TEAM_ID, LINEAR_CMS_GITHUB_TEAM_ID]);
+  const allowedTeamIds = new Set([
+    LINEAR_CPR_TEAM_ID,
+    LINEAR_CMS_TEAM_ID,
+    LINEAR_CMS_GITHUB_TEAM_ID,
+  ]);
 
   // Build a set of existing PR issue IDs to skip self-matches
   const prIssueIds = new Set<string>();
@@ -129,7 +133,7 @@ export async function findAIRelations(
 
   while (hasNext) {
     const result = await linearClient.issues({
-      filter: { team: { id: { eq: LINEAR_TEAM_ID } } },
+      filter: { team: { id: { eq: LINEAR_CPR_TEAM_ID } } },
       after: cursor,
       first: 100,
     });
@@ -287,7 +291,7 @@ export async function syncAIRelations(
 
   while (hasNext) {
     const result = await linearClient.issues({
-      filter: { team: { id: { eq: LINEAR_TEAM_ID } } },
+      filter: { team: { id: { eq: LINEAR_CPR_TEAM_ID } } },
       after: cursor,
       first: 100,
     });

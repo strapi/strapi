@@ -1,18 +1,20 @@
 # SECURITY (read before editing):
-# Do NOT add actions/checkout of the PR head or it could expose repo secrets.
+# The label job does NOT checkout PR head code — it only uses github-script.
+# The triage job checks out the BASE branch (not PR head) to build the action.
 
-name: Community PR Label
+name: Community PR
 
 on:
   pull_request_target:
-    types: [opened]
+    types: [opened, labeled]
 
 permissions: {}
 
 jobs:
+  # On PR open: check if author is external, add "community" label
   label:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.base.ref == github.event.repository.default_branch
+    if: github.event.action == 'opened' && github.event.pull_request.base.ref == github.event.repository.default_branch
     permissions:
       pull-requests: write
     steps:
@@ -53,3 +55,45 @@ jobs:
             } else {
               core.info(`Skipped — ${login} is a ${association.toLowerCase()}`);
             }
+
+  # On "community" label: triage the PR and sync to Linear
+  triage:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'labeled' && github.event.label.name == 'community'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Build action
+        run: npx tsup src/index.ts --format cjs --target node20 --clean
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Triage PR
+        uses: ./.github/actions/community-pr-triage
+        with:
+          dry-run: 'false'
+          pr-number: ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_CPR_TEAM_ID: ${{ secrets.LINEAR_CPR_TEAM_ID }}
+          LINEAR_CMS_TEAM_ID: ${{ secrets.LINEAR_CMS_TEAM_ID }}
+          LINEAR_CMS_GITHUB_TEAM_ID: ${{ secrets.LINEAR_CMS_GITHUB_TEAM_ID }}
+          LINEAR_PROJECT_ID: ${{ secrets.LINEAR_PROJECT_ID }}
+          LINEAR_STATUS_TODO: ${{ secrets.LINEAR_STATUS_TODO }}
+          LINEAR_STATUS_DONE: ${{ secrets.LINEAR_STATUS_DONE }}
+          LINEAR_STATUS_CANCELED: ${{ secrets.LINEAR_STATUS_CANCELED }}
+          LINEAR_LABELS: ${{ secrets.LINEAR_LABELS }}
+          LINEAR_TRIAGE_LABELS: ${{ secrets.LINEAR_TRIAGE_LABELS }}
