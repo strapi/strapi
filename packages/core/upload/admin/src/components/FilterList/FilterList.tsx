@@ -24,6 +24,16 @@ export type FilterStructure = {
   [key: string]: MimeFilter | StringFilter | undefined;
 };
 
+/** Normalizes array or number-keyed object { 0: 'a', 1: 'b' } to string array */
+const toMimeArray = (val: unknown): string[] | undefined => {
+  if (Array.isArray(val)) return val;
+  if (val && typeof val === 'object') {
+    const values = Object.values(val);
+    if (values.length > 0 && values.every((v) => typeof v === 'string')) return values as string[];
+  }
+  return undefined;
+};
+
 export interface FilterListProps {
   appliedFilters: FilterStructure[];
   filtersSchema: {
@@ -48,23 +58,18 @@ export interface FilterListProps {
 
 export const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }: FilterListProps) => {
   const handleClick = (filter: FilterStructure) => {
+    const [name] = Object.keys(filter);
+    const filterObj = filter[name];
+    const [filterType] = Object.keys(filterObj!);
+    const filterValue = filterObj![filterType];
+
     const nextFilters = appliedFilters.filter((prevFilter) => {
-      const name = Object.keys(filter)[0];
-      const filterName = filter[name];
-      if (filterName !== undefined) {
-        const filterType = Object.keys(filterName)[0];
-        const filterValue = filterName[filterType];
-        if (typeof filterValue === 'string') {
-          const decodedValue = decodeURIComponent(filterValue);
-          return prevFilter[name]?.[filterType] !== decodedValue;
-        }
-
-        // Handle object filter values (e.g., "file" type uses { $not: { $contains: [...] } })
-        if (typeof filterValue === 'object' && filterValue !== null) {
-          return JSON.stringify(prevFilter[name]?.[filterType]) !== JSON.stringify(filterValue);
-        }
+      if (typeof filterValue === 'string') {
+        return prevFilter[name]?.[filterType] !== decodeURIComponent(filterValue);
       }
-
+      if (typeof filterValue === 'object' && filterValue !== null) {
+        return JSON.stringify(prevFilter[name]?.[filterType]) !== JSON.stringify(filterValue);
+      }
       return true;
     });
 
@@ -75,43 +80,34 @@ export const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }: Fi
     const attributeName = Object.keys(filter)[0];
     const attribute = filtersSchema.find(({ name }) => name === attributeName);
 
-    if (!attribute) {
-      // Handle the case where attribute is undefined
-      return null;
-    }
+    if (!attribute) return null;
 
     const filterObj = filter[attributeName];
     const operator = Object.keys(filterObj!)[0];
-    let value = filterObj![operator];
+    const rawValue = filterObj![operator];
 
-    if (Array.isArray(value)) {
-      value = value.join(', ');
-    } else if (typeof value === 'object') {
-      value = Object.values(value).join(', ');
+    let value: string;
+    if (Array.isArray(rawValue)) {
+      value = rawValue.join(', ');
+    } else if (typeof rawValue === 'object' && rawValue !== null) {
+      const inner = (rawValue as { $contains?: unknown }).$contains;
+      const arr = toMimeArray(inner ?? rawValue);
+      value = arr ? arr.join(', ') : Object.values(rawValue).join(', ');
     } else {
-      value =
-        Array.isArray(value) || typeof value === 'object'
-          ? Object.values(value).join(', ')
-          : decodeURIComponent(value!);
+      value = decodeURIComponent(rawValue!);
     }
 
     let displayedOperator = operator;
+    if (attribute.name === 'mime') {
+      const mimeArray = Array.isArray(rawValue)
+        ? rawValue
+        : toMimeArray((rawValue as { $contains?: unknown })?.$contains ?? rawValue);
 
-    if (attribute?.name === 'mime') {
-      displayedOperator = operator === '$contains' ? '$eq' : '$ne';
-
-      // Type is file
-      // The filter for the file is the following: { mime: {$not: {$contains: ['image', 'video']}}}
-      if (operator === '$not') {
+      if (mimeArray?.includes('image') && mimeArray.includes('video')) {
         value = 'file';
-        displayedOperator = '$eq';
-      }
-
-      // Here the type is file and the filter is not file
-      // { mime: {$contains: ['image', 'video'] }}
-      if (['image', 'video'].includes(value[0]) && ['image', 'video'].includes(value[1])) {
-        value = 'file';
-        displayedOperator = '$ne';
+        displayedOperator = operator === '$not' ? '$eq' : '$ne';
+      } else {
+        displayedOperator = operator === '$contains' ? '$eq' : '$ne';
       }
     }
 

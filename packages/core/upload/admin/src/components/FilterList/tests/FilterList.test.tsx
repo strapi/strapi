@@ -151,14 +151,10 @@ describe('<FilterList />', () => {
       </DesignSystemProvider>
     );
 
-    // The filter tag should be rendered with "type is file" text
-    const filterTag = screen.getByText(/type is file/i);
-    expect(filterTag).toBeInTheDocument();
+    expect(screen.getByText(/type is file/i)).toBeInTheDocument();
 
-    // Click on the filter tag to remove it
-    await user.click(filterTag);
+    await user.click(screen.getByRole('button'));
 
-    // onRemoveFilter should be called with an empty array (filter removed)
     expect(onRemoveFilter).toHaveBeenCalledWith([]);
   });
 
@@ -187,14 +183,10 @@ describe('<FilterList />', () => {
       </DesignSystemProvider>
     );
 
-    // The filter tag should be rendered
-    const filterTag = screen.getByText(/type is not file/i);
-    expect(filterTag).toBeInTheDocument();
+    expect(screen.getByText(/type is not file/i)).toBeInTheDocument();
 
-    // Click on the filter tag to remove it
-    await user.click(filterTag);
+    await user.click(screen.getByRole('button'));
 
-    // onRemoveFilter should be called with an empty array (filter removed)
     expect(onRemoveFilter).toHaveBeenCalledWith([]);
   });
 });
