@@ -39,6 +39,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   let workflow;
   let rq;
   let roles;
+  const createdWorkflowIds: number[] = [];
 
   const createWorkflow = async (data) => {
     const name = `workflow-${Math.random().toString(36)}`;
@@ -49,6 +50,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     const status = req.statusCode;
     const error = req.body.error;
     const workflow = req.body.data;
+
+    if (workflow?.id) {
+      createdWorkflowIds.push(workflow.id);
+    }
 
     return { workflow, status, error };
   };
@@ -89,6 +94,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   afterAll(async () => {
+    // Clean up all workflows created during tests
+    for (const id of createdWorkflowIds) {
+      await rq.delete(`/review-workflows/workflows/${id}`);
+    }
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -350,13 +359,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       expect(permissions).toHaveLength(0);
     });
 
-    test('Stages without "to" permissions are backward compatible (all roles allowed)', async () => {
+    test('Stages without "to" permissions have empty toPermissions array', async () => {
       const { workflow } = await createWorkflow({
         ...baseWorkflow,
         stages: [baseWorkflow.stages[0], baseWorkflow.stages[1]],
       });
 
-      // No toPermissions set - stage should still be listed
+      // No toPermissions set - stages should have empty toPermissions (no auto-population)
       expect(workflow.stages[0].toPermissions).toHaveLength(0);
       expect(workflow.stages[1].toPermissions).toHaveLength(0);
     });
@@ -431,15 +440,18 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       allowedRequest = await createAuthRequest({ strapi, userInfo: allowedUserInfo });
       deniedRequest = await createAuthRequest({ strapi, userInfo: deniedUserInfo });
 
-      // Create workflow: Stage 1 (no "from" restriction) -> Stage 2 (restricted "to" only for allowedRole)
+      // Create workflow with both "from" and "to" permissions to isolate "to" enforcement
       const { workflow } = await createWorkflow({
         ...baseWorkflow,
         stages: [
           {
             name: 'Open',
+            permissions: getStageTransitionPermissions([allowedRole.id, deniedRole.id]),
+            toPermissions: getStageTransitionPermissions([allowedRole.id, deniedRole.id]),
           },
           {
             name: 'Restricted',
+            permissions: getStageTransitionPermissions([allowedRole.id, deniedRole.id]),
             toPermissions: getStageTransitionPermissions([allowedRole.id]),
           },
         ],

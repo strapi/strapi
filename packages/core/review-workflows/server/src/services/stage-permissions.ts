@@ -111,11 +111,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const toPermissions = (stage.permissions || []).filter((p: any) => p.actionParameters?.to);
 
-      // Backward compatible: if no "to" permissions are configured, allow all
-      if (toPermissions.length === 0) {
-        return true;
-      }
-
       const userRoleIds = new Set(userRoles.map((role: any) => role.id));
 
       return toPermissions.some((p: any) => userRoleIds.has(p.role?.id ?? p.role));
