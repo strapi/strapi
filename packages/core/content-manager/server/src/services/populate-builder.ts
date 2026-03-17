@@ -16,6 +16,7 @@ const populateBuilder = (uid: UID.Schema) => {
   let getInitialPopulate = async (): Promise<undefined | Populate> => {
     return undefined;
   };
+  let localizationsPopulate: Populate = {};
   const deepPopulateOptions = {
     countMany: false,
     countOne: false,
@@ -58,11 +59,37 @@ const populateBuilder = (uid: UID.Schema) => {
     },
 
     /**
+     * Select specific fields for "localizations" field.
+     * This reduces the payload significantly.
+     * Important for performance of content manager views.
+     * ref: https://github.com/strapi/strapi/issues/24504
+     */
+    limitLocalizationsPopulate() {
+      const model = strapi.getModel(uid);
+      const i18n = { ...(model.pluginOptions?.i18n || { localized: false }) };
+      if (i18n?.localized) {
+        localizationsPopulate = {
+          localizations: {
+            fields: ['documentId', 'id', 'locale', 'createdAt', 'updatedAt', 'publishedAt'],
+          },
+        };
+      }
+
+      return builder;
+    },
+
+    /**
      * Construct the populate object based on the builder options.
      * @returns Populate object
      */
     async build() {
-      const initialPopulate = await getInitialPopulate();
+      // spreading type Populate causes TS error
+      // eslint-disable-next-line prefer-object-spread
+      const initialPopulate: Populate = Object.assign(
+        {},
+        localizationsPopulate,
+        await getInitialPopulate()
+      );
 
       if (deepPopulateOptions.maxLevel === -1) {
         return initialPopulate;
