@@ -13464,14 +13464,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:12.6.2":
-  version: 12.6.2
-  resolution: "better-sqlite3@npm:12.6.2"
+"better-sqlite3@npm:12.8.0":
+  version: 12.8.0
+  resolution: "better-sqlite3@npm:12.8.0"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 10c0/a58fb3f7a7f5469ba0b8de0855aa67396ff34f951a6975746e4b21987f530be6a34427d1d4bd5958cf48c67ed7ba1df038ae163d2ee9d944237f6b8112f6640d
+  checksum: 10c0/b31da8a8a9bd0dd77d44c11fbfc72141a18b7267aed1ee5bedd481397415ace18eb54140706f82aca8149e4102fb2a543f833761e80f9668470ed53d03958515
   languageName: node
   linkType: hard
 
@@ -16061,7 +16061,7 @@ __metadata:
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
-    better-sqlite3: "npm:12.6.2"
+    better-sqlite3: "npm:12.8.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
@@ -17525,7 +17525,7 @@ __metadata:
     "@strapi/strapi": "workspace:*"
     "@vitejs/plugin-react": "npm:4.2.1"
     babel-plugin-react-compiler: "npm:0.0.0-experimental-c23de8d-20240515"
-    better-sqlite3: "npm:12.6.2"
+    better-sqlite3: "npm:12.8.0"
     react: "npm:rc"
     react-dom: "npm:rc"
     react-router-dom: "npm:6.30.3"
@@ -18612,7 +18612,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": "workspace:*"
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    better-sqlite3: "npm:12.6.2"
+    better-sqlite3: "npm:12.8.0"
     lodash: "npm:4.17.23"
     mysql2: "npm:3.9.8"
     passport-google-oauth2: "npm:0.2.0"
@@ -21622,7 +21622,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    better-sqlite3: "npm:12.6.2"
+    better-sqlite3: "npm:12.8.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
@@ -21638,7 +21638,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": "workspace:*"
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    better-sqlite3: "npm:12.6.2"
+    better-sqlite3: "npm:12.8.0"
     lodash: "npm:4.17.23"
     mysql2: "npm:3.9.8"
     passport-google-oauth2: "npm:0.2.0"
