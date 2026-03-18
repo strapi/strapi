@@ -412,13 +412,16 @@ module.exports = config
             await Promise.all(
               batch.map(async (domain) => {
                 const config = domainConfigs[domain];
+                // Must not call splice(0): that deletes the entire pool. Use splice only when n > 0.
+                const neededApps =
+                  typeof config.testApps === 'number' && config.testApps >= 0 ? config.testApps : 1;
 
-                if (availableTestApps.length < config.testApps) {
+                if (availableTestApps.length < neededApps) {
                   console.error('Not enough test apps available; aborting');
                   process.exit(1);
                 }
 
-                const testApps = availableTestApps.splice(-1 * config.testApps);
+                const testApps = neededApps > 0 ? availableTestApps.splice(-neededApps) : [];
 
                 try {
                   const domainDir = path.join(testDomainRoot, domain);
