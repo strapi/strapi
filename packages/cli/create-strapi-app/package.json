@@ -69,7 +69,7 @@
   "devDependencies": {
     "@types/async-retry": "^1",
     "@types/fs-extra": "11.0.4",
-    "@types/inquirer": "8.2.5",
+    "@types/inquirer": "9.0.9",
     "eslint-config-custom": "5.40.0",
     "tsconfig": "5.40.0"
   },
