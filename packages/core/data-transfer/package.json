@@ -65,7 +65,7 @@
     "semver": "7.5.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
-    "tar": "7.5.10",
+    "tar": "7.5.11",
     "tar-stream": "2.2.0",
     "ws": "8.17.1"
   },
@@ -79,7 +79,6 @@
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.3",
-    "@types/tar": "6.1.4",
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
     "knex": "3.0.1",
