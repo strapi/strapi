@@ -286,7 +286,6 @@ describe('convert-query-params', () => {
         expect(newPopulate).toStrictEqual({ [key]: { count: true } });
       });
     });
-
   });
 
   test.todo('convertFieldsQueryParams');
