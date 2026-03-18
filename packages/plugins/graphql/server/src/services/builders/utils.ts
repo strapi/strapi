@@ -1,6 +1,6 @@
 import { entries, mapValues, omit } from 'lodash/fp';
 import { idArg, nonNull } from 'nexus';
-import { contentTypes, pagination } from '@strapi/utils';
+import { pagination } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 
 const { withDefaultPagination } = pagination;
@@ -36,36 +36,30 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const { kind } = contentType;
 
-      const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
+      // `status` / `hasPublishedVersion` on every root collection & single-type query.
+      // Document service ignores or applies them by content type (D&P vs not).
+      const publicationArgs = {
+        status: args.PublicationStatusArg,
+        hasPublishedVersion: args.HasPublishedVersionArg,
+      };
 
       // Collection Types
       if (kind === 'collectionType') {
         if (!multiple) {
-          const params: Record<string, unknown> = {
+          return {
             documentId: nonNull(idArg()),
+            ...publicationArgs,
           };
-
-          if (hasDraftAndPublish) {
-            Object.assign(params, {
-              status: args.PublicationStatusArg,
-              hasPublishedVersion: args.HasPublishedVersionArg,
-            });
-          }
-
-          return params;
         }
 
-        const params = {
+        const params: Record<string, unknown> = {
           filters: naming.getFiltersInputTypeName(contentType),
           pagination: args.PaginationArg,
           sort: args.SortArg,
         };
 
-        if (!isNested && hasDraftAndPublish) {
-          Object.assign(params, {
-            status: args.PublicationStatusArg,
-            hasPublishedVersion: args.HasPublishedVersionArg,
-          });
+        if (!isNested) {
+          Object.assign(params, publicationArgs);
         }
 
         return params;
@@ -73,13 +67,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Single Types
       if (kind === 'singleType') {
-        const params = {};
+        const params: Record<string, unknown> = {};
 
-        if (!isNested && hasDraftAndPublish) {
-          Object.assign(params, {
-            status: args.PublicationStatusArg,
-            hasPublishedVersion: args.HasPublishedVersionArg,
-          });
+        if (!isNested) {
+          Object.assign(params, publicationArgs);
         }
 
         return params;
