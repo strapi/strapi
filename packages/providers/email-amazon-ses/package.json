@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-amazon-ses",
-  "version": "5.39.0",
+  "version": "5.40.0",
   "description": "Amazon SES provider for strapi email",
   "keywords": [
     "email",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git",
+    "url": "https://github.com/strapi/strapi.git",
     "directory": "packages/providers/email-amazon-ses"
   },
   "license": "SEE LICENSE IN LICENSE",
@@ -45,12 +45,12 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.39.0",
+    "@strapi/utils": "5.40.0",
     "node-ses": "^3.0.3"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.39.0",
-    "tsconfig": "5.39.0"
+    "eslint-config-custom": "5.40.0",
+    "tsconfig": "5.40.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
