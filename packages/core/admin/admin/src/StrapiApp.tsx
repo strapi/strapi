@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { Clock, User, TrendUp, Rocket } from '@strapi/icons';
+import { Cloud, Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -348,7 +348,7 @@ class StrapiApp {
         roles: ['strapi-super-admin'],
       },
       {
-        icon: Rocket,
+        icon: Cloud,
         title: {
           id: 'widget.deploy-now.title',
           defaultMessage: 'Deploy',

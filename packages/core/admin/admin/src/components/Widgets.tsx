@@ -1,6 +1,17 @@
 import { useAuth, useTracking } from '@strapi/admin/strapi-admin';
 import { Avatar, Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
-import { Earth, Images, User, Key, Files, Layout, Graph, Webhooks, Rocket } from '@strapi/icons';
+import {
+  Cloud,
+  CloudUpload,
+  Earth,
+  Images,
+  User,
+  Key,
+  Files,
+  Layout,
+  Graph,
+  Webhooks,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -253,17 +264,32 @@ const KeyStatisticsWidget = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const DeployNowWidget = () => {
+  const { formatMessage } = useIntl();
+
   return (
     <Flex direction="column" gap={4} height="100%" alignItems="center" justifyContent="center">
-      <Rocket width="3.2rem" height="3.2rem" />
+      <CloudUpload width="3.2rem" height="3.2rem" />
       <Typography variant="beta" textAlign="center">
-        Ready to go live?
+        {formatMessage({
+          id: 'HomePage.widget.deploy-now.title',
+          defaultMessage: 'Deploy with Strapi Cloud',
+        })}
       </Typography>
       <Typography variant="omega" textColor="neutral600" textAlign="center">
-        Deployment your project on Strapi Cloud.
+        {formatMessage({
+          id: 'HomePage.widget.deploy-now.description',
+          defaultMessage: 'Deploy your project.',
+        })}
       </Typography>
-      <Button size="L" startIcon={<Rocket />}>
-        Deploy Now
+      <Button
+        tag="a"
+        href="https://cloud.strapi.io/login"
+        target="_blank"
+        rel="noreferrer"
+        size="L"
+        startIcon={<Cloud />}
+      >
+        {formatMessage({ id: 'HomePage.widget.deploy-now.button', defaultMessage: 'Deploy Now' })}
       </Button>
     </Flex>
   );

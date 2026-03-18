@@ -799,5 +799,8 @@
   "widget.key-statistics.list.entries": "Entradas",
   "widget.key-statistics.list.locales": "Idiomas",
   "widget.key-statistics.list.webhooks": "Webhooks",
-  "widget.profile.title": "Perfil"
+  "widget.profile.title": "Perfil",
+  "HomePage.widget.deploy-now.title": "¿Listo para publicar?",
+  "HomePage.widget.deploy-now.description": "Despliega tu proyecto.",
+  "HomePage.widget.deploy-now.button": "Desplegar ahora"
 }

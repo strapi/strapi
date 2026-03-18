@@ -843,5 +843,8 @@
   "HomePage.addWidget.noWidgetsAvailable": "No widgets available to add",
   "HomePage.addWidget.button": "Add Widget",
   "HomePage.widget.delete": "Delete",
-  "HomePage.widget.drag": "Drag to move"
+  "HomePage.widget.drag": "Drag to move",
+  "HomePage.widget.deploy-now.title": "Ready to go live",
+  "HomePage.widget.deploy-now.description": "Deploy with Strapi Cloud",
+  "HomePage.widget.deploy-now.button": "Deploy Now"
 }
