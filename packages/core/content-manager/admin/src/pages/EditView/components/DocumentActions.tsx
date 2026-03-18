@@ -59,7 +59,7 @@ type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview' | 're
 
 interface DocumentActionDescription {
   label: string;
-  type?: string;
+  type?: 'publish' | 'update' | 'unpublish' | 'discard';
   onClick?: (event: React.SyntheticEvent) => Promise<boolean | void> | boolean | void;
   icon?: React.ReactNode;
   /**
@@ -210,7 +210,7 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
           <DocumentActionButton
             {...primaryAction}
             variant={primaryAction.variant || 'default'}
-            {...(primaryAction.type === 'publish' ? {} : { buttonType: 'submit' })}
+            buttonType={primaryAction.type === 'publish' ? undefined : 'submit'}
           />
         )}
       </Flex>
@@ -258,15 +258,16 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
  * DocumentActionButton
  * -----------------------------------------------------------------------------------------------*/
 
-interface DocumentActionButtonProps extends Action {
+interface DocumentActionButtonProps extends Omit<Action, 'type'> {
   buttonType?: 'button' | 'submit' | 'reset';
+  type?: string;
 }
 
 const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { toggleNotification } = useNotification();
 
-  const handleClick = (action: Action) => async (e: React.MouseEvent) => {
+  const handleClick = (action: DocumentActionButtonProps) => async (e: React.MouseEvent) => {
     const { onClick = () => false, dialog, id } = action;
 
     const muteDialog = await onClick(e);

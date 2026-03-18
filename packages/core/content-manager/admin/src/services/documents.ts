@@ -261,7 +261,7 @@ const documentApi = contentManagerApi.injectEndpoints({
      * Reuses the edit view's data structure for validation.
      */
     getDocumentsForValidation: builder.query<
-      FindOne.Response['data'][],
+      Find.Response['results'],
       {
         collectionType: string;
         model: string;
