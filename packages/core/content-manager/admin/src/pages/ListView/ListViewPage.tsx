@@ -81,6 +81,22 @@ const ListViewPage = () => {
   const isMobile = useIsMobile();
   const isDesktop = useIsDesktop();
 
+  const handleCopyDocumentId = React.useCallback(
+    (e: React.MouseEvent, documentId: string | undefined) => {
+      e.stopPropagation();
+      if (!documentId) return;
+      copy(documentId);
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-manager.ListView.copy-documentId.success',
+          defaultMessage: 'Document ID copied to clipboard',
+        }),
+      });
+    },
+    [copy, formatMessage, toggleNotification]
+  );
+
   usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
   usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
 
@@ -427,35 +443,25 @@ const ListViewPage = () => {
                               );
                             }
                             if (header.name === 'documentId') {
-                              const documentId = row.documentId ?? '';
-                              const handleCopyDocumentId = (e: React.MouseEvent) => {
-                                e.stopPropagation();
-                                copy(documentId);
-                                toggleNotification({
-                                  type: 'success',
-                                  message: formatMessage({
-                                    id: 'content-manager.ListView.copy-documentId.success',
-                                    defaultMessage: 'Document ID copied to clipboard',
-                                  }),
-                                });
-                              };
                               return (
                                 <Table.Cell key={header.name}>
                                   <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
                                     <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
-                                      {documentId || '-'}
+                                      {row.documentId || '-'}
                                     </Typography>
-                                    <IconButton
-                                      variant="ghost"
-                                      size="S"
-                                      label={formatMessage({
-                                        id: 'content-manager.ListView.copy-documentId.label',
-                                        defaultMessage: 'Copy',
-                                      })}
-                                      onClick={handleCopyDocumentId}
-                                    >
-                                      <Duplicate />
-                                    </IconButton>
+                                    {row.documentId && (
+                                      <IconButton
+                                        variant="ghost"
+                                        size="S"
+                                        label={formatMessage({
+                                          id: 'content-manager.ListView.copy-documentId.label',
+                                          defaultMessage: 'Copy',
+                                        })}
+                                        onClick={(e) => handleCopyDocumentId(e, row.documentId)}
+                                      >
+                                        <Duplicate />
+                                      </IconButton>
+                                    )}
                                   </Flex>
                                 </Table.Cell>
                               );

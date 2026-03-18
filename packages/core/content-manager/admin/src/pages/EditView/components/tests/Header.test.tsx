@@ -217,5 +217,15 @@ describe('Header', () => {
       expect(screen.getByText('Document ID')).toBeInTheDocument();
       expect(screen.getByText('doc-123')).toBeInTheDocument();
     });
+
+    it('copies document ID to clipboard and shows success notification on click', async () => {
+      useDocMock.mockImplementation(() => defaultUseDocReturn);
+      const { user } = render({ status: 'draft' });
+
+      await user.click(await screen.findByRole('button', { name: 'More actions' }));
+      await user.click(await screen.findByText('Copy document ID'));
+
+      expect(await screen.findByText('Document ID copied to clipboard')).toBeInTheDocument();
+    });
   });
 });

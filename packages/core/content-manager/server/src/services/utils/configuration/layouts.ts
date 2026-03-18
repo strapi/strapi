@@ -37,10 +37,8 @@ async function createDefaultLayouts(schema: any) {
 }
 
 function createDefaultListLayout(schema: any) {
-  const hasDocumentId = _.has(schema.attributes, 'documentId');
   return Object.keys(schema.attributes)
     .filter((name) => isListable(schema, name) && name !== 'documentId')
-    .map((name) => (name === 'id' && hasDocumentId ? 'documentId' : name))
     .slice(0, DEFAULT_LIST_LENGTH);
 }
 
@@ -59,10 +57,7 @@ function syncLayouts(configuration: any, schema: any) {
 
   const { list = [], editRelations = [], edit = [] } = configuration.layouts || {};
 
-  const hasDocumentId = _.has(schema.attributes, 'documentId');
-  let cleanList = list
-    .filter((attr: any) => isListable(schema, attr))
-    .map((attr: string) => (attr === 'id' && hasDocumentId ? 'documentId' : attr));
+  let cleanList = list.filter((attr: any) => isListable(schema, attr));
 
   // TODO V5: remove editRelations
   const cleanEditRelations = editRelations.filter((attr: any) =>

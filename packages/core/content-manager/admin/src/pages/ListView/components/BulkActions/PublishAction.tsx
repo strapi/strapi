@@ -224,8 +224,8 @@ const SelectedEntriesTableContent = ({
       <Table.Loading />
       <Table.Body>
         {rowsToDisplay.map((row) => (
-          <Table.Row key={row.documentId}>
-            <Table.CheckboxCell id={row.documentId} />
+          <Table.Row key={row.id}>
+            <Table.CheckboxCell id={row.id} />
             <Table.Cell>
               <Typography>{row.documentId}</Typography>
             </Table.Cell>
