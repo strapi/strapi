@@ -4,6 +4,13 @@ import exportAction from '../action';
 import * as mockUtils from '../../../utils/data-transfer';
 import { expectExit } from '../../__tests__/commands.test.utils';
 
+jest.mock('inquirer', () => ({
+  __esModule: true,
+  default: {
+    prompt: jest.fn(),
+  },
+}));
+
 jest.mock('fs-extra', () => ({
   ...jest.requireActual('fs-extra'),
   pathExists: jest.fn(() => Promise.resolve(true)),
