@@ -1,7 +1,7 @@
 'use strict';
 
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createAuthRequest } from 'api-tests/request';
+import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
 import { describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 
@@ -28,10 +28,42 @@ const productModel = {
   },
 };
 
+const categoryUID = 'api::category.category';
+const categoryModel = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'category',
+  pluralName: 'categories',
+  displayName: 'Category',
+  kind: 'collectionType',
+  attributes: {
+    name: { type: 'string' },
+  },
+};
+
+const articleUID = 'api::article.article';
+const articleModel = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'article',
+  pluralName: 'articles',
+  displayName: 'Article',
+  kind: 'collectionType',
+  attributes: {
+    title: { type: 'string' },
+    categories: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::category.category',
+    },
+  },
+};
+
 describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const builder = createTestBuilder();
   let strapi;
   let rq;
+  let rqContent;
   let validEntries = [];
   let invalidEntries = [];
 
@@ -86,9 +118,13 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   };
 
   beforeAll(async () => {
-    await builder.addContentType(productModel).build();
+    await builder
+      .addContentType(productModel)
+      .addContentTypes([categoryModel, articleModel])
+      .build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+    rqContent = createContentAPIRequest({ strapi });
 
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
@@ -624,6 +660,58 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.error.message).toBe(
         'description must be a `string` type, but the final value was: `null`.'
       );
+    });
+
+    test('retrieves relations correctly in content API after publishing release', async () => {
+      const categoryEntry = await createEntry(categoryUID, { name: 'Tech' });
+      const articleEntry = await createEntry(articleUID, {
+        title: 'My Article',
+        categories: [{ documentId: categoryEntry.data.documentId }],
+      });
+
+      const createReleaseRes = await createRelease();
+      const release = createReleaseRes.body.data;
+
+      await createReleaseAction(release.id, {
+        contentType: categoryUID,
+        entryDocumentId: categoryEntry.data.documentId,
+        type: 'publish',
+      });
+      await createReleaseAction(release.id, {
+        contentType: articleUID,
+        entryDocumentId: articleEntry.data.documentId,
+        type: 'publish',
+      });
+
+      const publishRes = await rq({
+        method: 'POST',
+        url: `/content-releases/${release.id}/publish`,
+      });
+      expect(publishRes.statusCode).toBe(200);
+      expect(publishRes.body.data.status).toBe('done');
+
+      const apiRes = await rqContent({
+        method: 'GET',
+        url: `/articles`,
+        qs: { populate: 'categories' },
+      });
+
+      expect(apiRes.statusCode).toBe(200);
+      expect(apiRes.body.data).toHaveLength(1);
+
+      const article = apiRes.body.data[0];
+      expect(article.attributes?.title ?? article.title).toBe('My Article');
+
+      const categories =
+        article.attributes?.categories?.data ??
+        article.attributes?.categories ??
+        article.categories;
+      expect(categories).toBeDefined();
+      const categoryList = Array.isArray(categories) ? categories : [categories];
+      expect(categoryList).toHaveLength(1);
+      const categoryData = categoryList[0];
+      const categoryName = categoryData.attributes?.name ?? categoryData.name;
+      expect(categoryName).toBe('Tech');
     });
   });
 

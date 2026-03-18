@@ -87,7 +87,7 @@ describe('Permissions', () => {
 
     await user.click(screen.getByRole('tab', { name: 'Plugins' }));
 
-    expect(screen.getByRole('tabpanel', { name: 'Plugins' })).toBeInTheDocument();
+    expect(await screen.findByRole('tabpanel', { name: 'Plugins' })).toBeInTheDocument();
 
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
   });
@@ -97,7 +97,7 @@ describe('Permissions', () => {
 
     await user.click(screen.getByRole('tab', { name: 'Settings' }));
 
-    expect(screen.getByRole('tabpanel', { name: 'Settings' })).toBeInTheDocument();
+    expect(await screen.findByRole('tabpanel', { name: 'Settings' })).toBeInTheDocument();
 
     [
       'Email email settings',
@@ -109,7 +109,7 @@ describe('Permissions', () => {
 
     await user.click(screen.getByRole('button', { name: 'Email email settings' }));
 
-    expect(screen.getByRole('checkbox', { name: 'Select all' })).toBeInTheDocument();
+    expect(await screen.findByRole('checkbox', { name: 'Select all' })).toBeInTheDocument();
 
     expect(
       screen.getByRole('checkbox', { name: 'Access the Email Settings page' })
