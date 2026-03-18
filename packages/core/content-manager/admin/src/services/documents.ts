@@ -257,38 +257,23 @@ const documentApi = contentManagerApi.injectEndpoints({
       }),
     }),
     /**
-     * Fetches documents via the existing findOne endpoint (same as edit view).
-     * Reuses the edit view's data structure for validation.
+     * Fetches multiple documents with deep populate in a single request for bulk publish validation.
      */
     getDocumentsForValidation: builder.query<
       Find.Response['results'],
       {
-        collectionType: string;
         model: string;
         documentIds: string[];
-        params?: FindOne.Request['query'];
+        locale?: string;
       }
     >({
-      queryFn: async (
-        { collectionType, model, documentIds, params },
-        _api,
-        _extraOpts,
-        baseQuery
-      ) => {
-        const results = await Promise.all(
-          documentIds.map(async (documentId) => {
-            const res = await baseQuery({
-              url: `/content-manager/${collectionType}/${model}/${documentId}`,
-              method: 'GET',
-              config: { params },
-            });
-            if (res.error) return null;
-            return (res.data as FindOne.Response)?.data ?? null;
-          })
-        );
-        const documents = results.filter((doc): doc is FindOne.Response['data'] => doc != null);
-        return { data: documents };
-      },
+      query: ({ model, documentIds, locale }) => ({
+        url: `/content-manager/collection-types/${model}/actions/bulkFindForValidation`,
+        method: 'POST',
+        data: { documentIds, locale },
+      }),
+      transformResponse: (response: { results: Find.Response['results'] }) =>
+        response?.results ?? [],
       providesTags: (result, _error, { model }) =>
         result
           ? [

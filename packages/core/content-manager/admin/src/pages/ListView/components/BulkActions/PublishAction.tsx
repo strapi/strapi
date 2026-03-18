@@ -423,10 +423,9 @@ const SelectedEntriesModalContent = ({
     refetch,
   } = useGetDocumentsForValidationQuery(
     {
-      collectionType: 'collection-types',
       model,
       documentIds,
-      params: { locale: query.plugins?.i18n?.locale },
+      locale: query.plugins?.i18n?.locale,
     },
     { skip: documentIds.length === 0 }
   );
