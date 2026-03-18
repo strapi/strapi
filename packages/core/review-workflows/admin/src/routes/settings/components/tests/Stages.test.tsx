@@ -11,7 +11,7 @@ const STAGES_FIXTURE: Stage[] = [
     id: 1,
     color: STAGE_COLOR_DEFAULT,
     name: 'stage-1',
-    permissions: [
+    fromPermissions: [
       {
         id: 1,
         role: 1,
@@ -28,7 +28,7 @@ const STAGES_FIXTURE: Stage[] = [
     id: 2,
     color: STAGE_COLOR_DEFAULT,
     name: 'stage-2',
-    permissions: [],
+    fromPermissions: [],
     toPermissions: [
       {
         id: 2,

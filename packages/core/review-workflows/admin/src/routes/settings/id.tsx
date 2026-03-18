@@ -32,7 +32,20 @@ import { Stages, WorkflowStage } from './components/Stages';
 import { WorkflowAttributes } from './components/WorkflowAttributes';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 
-import type { Stage, Workflow } from '../../../../shared/contracts/review-workflows';
+import type {
+  Stage,
+  StagePermission,
+  Workflow,
+} from '../../../../shared/contracts/review-workflows';
+
+const havePermissionsChanged = (before?: StagePermission[], after?: StagePermission[]): boolean => {
+  if (before?.length !== after?.length) {
+    return true;
+  }
+  return !before?.every((beforePermission) =>
+    after?.some((afterPermission) => afterPermission.role === beforePermission.role)
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * EditPage
@@ -85,7 +98,7 @@ const WORKFLOW_SCHEMA = yup.object({
           })
           .matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/i),
 
-        permissions: yup
+        fromPermissions: yup
           .array(
             yup.object({
               role: yup
@@ -196,32 +209,16 @@ const EditPage = () => {
               (serverStage) => serverStage.id === stage?.id
             );
 
-            let hasUpdatedPermissions = true;
-            let hasUpdatedToPermissions = true;
-
-            if (serverStage) {
-              hasUpdatedPermissions =
-                serverStage.permissions?.length !== stage.permissions?.length ||
-                !serverStage.permissions?.every(
-                  (serverPermission) =>
-                    !!stage.permissions?.find(
-                      (permission) => permission.role === serverPermission.role
-                    )
-                );
-
-              hasUpdatedToPermissions =
-                serverStage.toPermissions?.length !== stage.toPermissions?.length ||
-                !serverStage.toPermissions?.every(
-                  (serverPermission) =>
-                    !!stage.toPermissions?.find(
-                      (permission) => permission.role === serverPermission.role
-                    )
-                );
-            }
+            const hasUpdatedPermissions =
+              !serverStage ||
+              havePermissionsChanged(serverStage.fromPermissions, stage.fromPermissions);
+            const hasUpdatedToPermissions =
+              !serverStage ||
+              havePermissionsChanged(serverStage.toPermissions, stage.toPermissions);
 
             return {
               ...stage,
-              permissions: hasUpdatedPermissions ? stage.permissions : undefined,
+              fromPermissions: hasUpdatedPermissions ? stage.fromPermissions : undefined,
               toPermissions: hasUpdatedToPermissions ? stage.toPermissions : undefined,
             } satisfies Stage;
           }),

@@ -4,6 +4,7 @@ import { update, map, property } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 
+import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
@@ -26,36 +27,56 @@ function getWorkflowsPermissionChecker({ strapi }: { strapi: Core.Strapi }, user
  * Some attributes (like permissions) are presented in a different format in the admin UI.
  *
  * Permissions stored on each stage are split into two arrays:
- *  - `permissions`: entries with `actionParameters.from` (controls who can move
+ *  - `fromPermissions`: entries with `actionParameters.from` (controls who can move
  *    content out of the stage)
  *  - `toPermissions`: entries with `actionParameters.to` (controls who can move
  *    content into the stage)
  *
  * Role objects are also flattened to their numeric id.
  */
-function formatWorkflowToAdmin(workflow: any) {
+
+/**
+ * Shape of a permission row as returned by the DB populate.
+ */
+interface PopulatedPermission {
+  action: string;
+  subject?: string | null;
+  role: number | { id: number };
+  actionParameters?: { from?: number; to?: number };
+}
+
+interface PopulatedStage {
+  permissions?: PopulatedPermission[];
+  [key: string]: unknown;
+}
+
+function formatWorkflowToAdmin(workflow: { stages?: PopulatedStage[]; [key: string]: unknown }) {
   if (!workflow) return;
   if (!workflow.stages) return workflow;
 
-  const transformRoleToId = (permission: any) => ({
-    ...permission,
-    role: typeof permission.role === 'object' ? permission.role.id : permission.role,
+  const transformRoleToId = ({
+    actionParameters: _,
+    role,
+    ...rest
+  }: PopulatedPermission): StagePermission => ({
+    ...rest,
+    role: typeof role === 'object' ? role.id : role,
   });
 
-  const transformStages = map((stage: any) => {
-    const allPermissions: any[] = stage.permissions ?? [];
+  const transformStages = map((stage: PopulatedStage) => {
+    const { permissions: allPermissions = [], ...rest } = stage;
 
     const fromPermissions = allPermissions
-      .filter((p: any) => p.actionParameters?.from)
+      .filter((p) => p.actionParameters?.from)
       .map(transformRoleToId);
 
     const toPermissions = allPermissions
-      .filter((p: any) => p.actionParameters?.to)
+      .filter((p) => p.actionParameters?.to)
       .map(transformRoleToId);
 
     return {
-      ...stage,
-      permissions: fromPermissions,
+      ...rest,
+      fromPermissions,
       toPermissions,
     };
   });

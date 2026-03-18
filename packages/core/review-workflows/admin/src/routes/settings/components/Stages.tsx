@@ -41,7 +41,7 @@ import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { AddStage } from './AddStage';
 
 interface WorkflowStage
-  extends Pick<IStage, 'id' | 'name' | 'permissions' | 'toPermissions' | 'color'> {
+  extends Pick<IStage, 'id' | 'name' | 'fromPermissions' | 'toPermissions' | 'color'> {
   __temp_key__: string;
 }
 
@@ -132,7 +132,7 @@ const Stage = ({
   canUpdate = false,
   stagesCount,
   name,
-  permissions,
+  fromPermissions,
   toPermissions,
   color,
   defaultOpen,
@@ -231,7 +231,7 @@ const Stage = ({
   }, [dragPreviewRef, index]);
 
   const handleCloneClick = () => {
-    addFieldRow('stages', { name, color, permissions, toPermissions });
+    addFieldRow('stages', { name, color, fromPermissions, toPermissions });
   };
 
   const id = React.useId();
@@ -357,7 +357,7 @@ const Stage = ({
                       id: 'Settings.review-workflows.stage.permissions.label',
                       defaultMessage: 'Roles that can change from this stage',
                     }),
-                    name: `stages.${index}.permissions`,
+                    name: `stages.${index}.fromPermissions`,
                     placeholder: formatMessage({
                       id: 'Settings.review-workflows.stage.permissions.placeholder',
                       defaultMessage: 'Select a role',
@@ -535,7 +535,7 @@ const PermissionsField = ({
   const allStages = useForm<WorkflowStage[]>('PermissionsField', (state) => state.values.stages);
   const onFormValueChange = useForm('PermissionsField', (state) => state.onChange);
 
-  // Derive the field key (e.g. "permissions" or "toPermissions") from the full field name
+  // Derive the field key (e.g. "fromPermissions" or "toPermissions") from the full field name
   const fieldKey = name.split('.').pop() as keyof WorkflowStage;
   const rolesErrorCount = React.useRef(0);
 

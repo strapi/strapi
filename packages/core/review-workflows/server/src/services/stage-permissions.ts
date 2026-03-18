@@ -12,7 +12,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const permissionService = getAdminService('permission');
 
   return {
-    async register({ roleId, action, fromStage }: any) {
+    async register({
+      roleId,
+      action,
+      fromStage,
+    }: {
+      roleId: number;
+      action: string;
+      fromStage: number;
+    }) {
       if (!validActions.includes(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
@@ -28,10 +36,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // TODO: Filter response
       return permissions;
     },
-    async registerMany(permissions: any) {
+    async registerMany(permissions: { roleId: number; action: string; fromStage: number }[]) {
       return async.map(permissions, this.register);
     },
-    async registerTo({ roleId, action, toStage }: any) {
+    async registerTo({
+      roleId,
+      action,
+      toStage,
+    }: {
+      roleId: number;
+      action: string;
+      toStage: number;
+    }) {
       if (!validActions.includes(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
@@ -46,14 +62,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       return permissions;
     },
-    async registerManyTo(permissions: any) {
+    async registerManyTo(permissions: { roleId: number; action: string; toStage: number }[]) {
       return async.map(permissions, this.registerTo);
     },
-    async unregister(permissions: any) {
+    async unregister(permissions: { id: number }[]) {
       const permissionIds = permissions.map(prop('id'));
       await permissionService.deleteByIds(permissionIds);
     },
-    can(action: any, fromStage: any) {
+    can(action: string, fromStage: number) {
       const requestState = strapi.requestContext.get()?.state;
 
       if (!requestState) {
@@ -61,7 +77,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const userRoles = requestState.user?.roles;
-      if (userRoles?.some((role: any) => role.code === 'strapi-super-admin')) {
+      if (userRoles?.some((role: { code: string }) => role.code === 'strapi-super-admin')) {
         return true;
       }
 
@@ -70,7 +86,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         params: { from: fromStage },
       });
     },
-    async canTransitionToStage(toStageId: any) {
+    async canTransitionToStage(toStageId: number) {
       const requestState = strapi.requestContext.get()?.state;
 
       if (!requestState) {
@@ -78,7 +94,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const userRoles = requestState.user?.roles;
-      if (userRoles?.some((role: any) => role.code === 'strapi-super-admin')) {
+      if (userRoles?.some((role: { code: string }) => role.code === 'strapi-super-admin')) {
         return true;
       }
 
@@ -97,7 +113,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Check if the current user can transition to a stage using pre-loaded permissions.
      * The stage must already have its permissions populated with roles.
      */
-    canTransitionToStageWithPermissions(stage: any) {
+    canTransitionToStageWithPermissions(stage: {
+      permissions?: { actionParameters?: { to?: unknown }; role?: { id: number } | number }[];
+    }) {
       const requestState = strapi.requestContext.get()?.state;
 
       if (!requestState) {
@@ -105,15 +123,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const userRoles = requestState.user?.roles;
-      if (userRoles?.some((role: any) => role.code === 'strapi-super-admin')) {
+      if (userRoles?.some((role: { code: string }) => role.code === 'strapi-super-admin')) {
         return true;
       }
 
-      const toPermissions = (stage.permissions || []).filter((p: any) => p.actionParameters?.to);
+      const toPermissions = (stage.permissions || []).filter(
+        (p: { actionParameters?: { to?: unknown } }) => p.actionParameters?.to
+      );
 
-      const userRoleIds = new Set(userRoles.map((role: any) => role.id));
+      const userRoleIds = new Set(userRoles.map((role: { id: number }) => role.id));
 
-      return toPermissions.some((p: any) => userRoleIds.has(p.role?.id ?? p.role));
+      return toPermissions.some((p: { role?: { id: number } | number }) => {
+        const roleId = typeof p.role === 'object' ? p.role?.id : p.role;
+        return roleId !== undefined && userRoleIds.has(roleId);
+      });
     },
   };
 };

@@ -116,7 +116,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         ],
       });
 
-      expect(workflow.stages[0].permissions).toHaveLength(2);
+      expect(workflow.stages[0].fromPermissions).toHaveLength(2);
     });
 
     // Can unassign a role
@@ -147,11 +147,11 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       // Validate that permissions have been removed from database
       const deletedPermission = await strapi.db.query('admin::permission').findOne({
         where: {
-          id: workflow.stages[0].permissions[1].id,
+          id: workflow.stages[0].fromPermissions[1].id,
         },
       });
 
-      expect(updatedWorkflow.stages[0].permissions).toHaveLength(1);
+      expect(updatedWorkflow.stages[0].fromPermissions).toHaveLength(1);
       expect(deletedPermission).toBeNull();
     });
 
@@ -175,7 +175,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       // Deleted stage permissions should be removed from database
       const permissions = await strapi.db.query('admin::permission').findMany({
         where: {
-          id: { $in: workflow.stages[0].permissions.map((p) => p.id) },
+          id: { $in: workflow.stages[0].fromPermissions.map((p) => p.id) },
         },
       });
 
@@ -198,7 +198,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       // Deleted workflow permissions should be removed from database
       const permissions = await strapi.db.query('admin::permission').findMany({
         where: {
-          id: { $in: workflow.stages[0].permissions.map((p) => p.id) },
+          id: { $in: workflow.stages[0].fromPermissions.map((p) => p.id) },
         },
       });
 
@@ -244,7 +244,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
 
       // Permissions should be kept
-      expect(updatedWorkflow.stages[0].permissions).toHaveLength(1);
+      expect(updatedWorkflow.stages[0].fromPermissions).toHaveLength(1);
     });
   });
 
@@ -278,9 +278,9 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         ],
       });
 
-      expect(workflow.stages[0].permissions).toHaveLength(1);
+      expect(workflow.stages[0].fromPermissions).toHaveLength(1);
       expect(workflow.stages[0].toPermissions).toHaveLength(1);
-      expect(workflow.stages[0].permissions[0].role).toBe(roles[0].id);
+      expect(workflow.stages[0].fromPermissions[0].role).toBe(roles[0].id);
       expect(workflow.stages[0].toPermissions[0].role).toBe(roles[1].id);
     });
 
