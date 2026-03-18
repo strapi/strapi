@@ -1,4 +1,3 @@
-import inquirer from 'inquirer';
 import type { Question } from 'inquirer';
 
 import type { Scope, Options, DBClient, DBConfig } from '../types';
@@ -16,6 +15,7 @@ const DEFAULT_CONFIG: DBConfig = {
 };
 
 async function dbPrompt() {
+  const { default: inquirer } = await import('inquirer');
   const { useDefault } = await inquirer.prompt<{ useDefault: boolean }>([
     {
       type: 'confirm',
