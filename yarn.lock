@@ -10629,15 +10629,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/inquirer@npm:8.2.5":
-  version: 8.2.5
-  resolution: "@types/inquirer@npm:8.2.5"
-  dependencies:
-    "@types/through": "npm:*"
-  checksum: 10c0/a2d80487cee41f552cc49d9ca32d84cd9fc19a157dcd6484519925f7205de7ae9b51fae1fb10ec425b960396b734908521cb515a839172509313d8db6e105c6b
-  languageName: node
-  linkType: hard
-
 "@types/inquirer@npm:9.0.9, @types/inquirer@npm:^9.0.9":
   version: 9.0.9
   resolution: "@types/inquirer@npm:9.0.9"
@@ -14953,7 +14944,7 @@ __metadata:
     "@strapi/cloud-cli": "npm:5.40.0"
     "@types/async-retry": "npm:^1"
     "@types/fs-extra": "npm:11.0.4"
-    "@types/inquirer": "npm:8.2.5"
+    "@types/inquirer": "npm:9.0.9"
     async-retry: "npm:1.3.3"
     chalk: "npm:4.1.2"
     commander: "npm:8.3.0"
