@@ -53,7 +53,7 @@ interface LoadContext {
  * @param context - Object containing arrays of old and new entry versions
  * @returns Array of objects containing join table metadata and relations to be updated
  */
-const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
+const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadContext) => {
   const relationsToUpdate = [] as any;
 
   await strapi.db.transaction(async ({ trx }) => {
@@ -98,6 +98,91 @@ const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
 
         if (existingRelations.length > 0) {
           relationsToUpdate.push({ joinTable, relations: existingRelations });
+        }
+
+        // For entries being published that have no prior published version (e.g. after
+        // unpublish→republish), the draft link table still holds the correct relation
+        // order.
+        // Capture those draft-side relations so sync() can restore the order on
+        // the newly created published link rows.
+        if (!strapi.contentTypes[model.uid as UID.ContentType]) {
+          continue;
+        }
+
+        const oldLocales = new Set(oldVersions.map((e) => e.locale));
+        const draftsWithoutPublished = newVersions.filter((v) => !oldLocales.has(v.locale));
+
+        if (draftsWithoutPublished.length === 0) {
+          continue;
+        }
+
+        const draftIds = draftsWithoutPublished.map((e) => e.id);
+
+        const draftRelations = await strapi.db
+          .getConnection()
+          .select('*')
+          .from(joinTable.name)
+          .whereIn(targetColumnName, draftIds)
+          .transacting(trx);
+
+        if (draftRelations.length === 0) {
+          continue;
+        }
+
+        const sourceCol = joinTable.joinColumn.name;
+
+        if (model.options?.draftAndPublish) {
+          // The join column points at draft IDs of the related entity.
+          // We need to map those to published IDs so sync() can match them.
+          const relatedMeta = strapi.db.metadata.get(model.uid);
+          const relatedDraftIds = [
+            ...new Set(draftRelations.map((relation: any) => relation[sourceCol])),
+          ];
+
+          const draftEntries = await strapi.db
+            .getConnection()
+            .select('id', 'document_id', 'locale')
+            .from(relatedMeta.tableName)
+            .whereIn('id', relatedDraftIds)
+            .transacting(trx);
+
+          const pubEntries = await strapi.db
+            .getConnection()
+            .select('id', 'document_id', 'locale')
+            .from(relatedMeta.tableName)
+            .whereNotNull('published_at')
+            .whereIn(
+              'document_id',
+              draftEntries.map((entry: any) => entry.document_id)
+            )
+            .transacting(trx);
+
+          // Build draft→published map keyed by document_id + locale
+          const pubByKey = new Map(
+            pubEntries.map((entry: any) => [`${entry.document_id}_${entry.locale}`, entry.id])
+          );
+
+          const draftToPubMap = new Map<string, string>();
+          for (const draft of draftEntries) {
+            const pubId = pubByKey.get(`${draft.document_id}_${draft.locale}`);
+            if (pubId) {
+              draftToPubMap.set(String(draft.id), String(pubId));
+            }
+          }
+
+          const transformed = draftRelations
+            .filter((relation: any) => draftToPubMap.has(String(relation[sourceCol])))
+            .map((relation: any) => ({
+              ...relation,
+              [sourceCol]: draftToPubMap.get(String(relation[sourceCol])),
+            }));
+
+          if (transformed.length > 0) {
+            relationsToUpdate.push({ joinTable, relations: transformed });
+          }
+        } else {
+          // No D&P on the related model – IDs are the same for draft and published
+          relationsToUpdate.push({ joinTable, relations: draftRelations });
         }
       }
     }
