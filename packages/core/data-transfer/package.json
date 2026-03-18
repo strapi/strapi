@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "5.38.0",
+  "version": "5.39.0",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -11,6 +11,15 @@
     "backup",
     "restore"
   ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/data-transfer"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
     "name": "Strapi Solutions SAS",
@@ -42,9 +51,9 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/logger": "5.38.0",
-    "@strapi/types": "5.38.0",
-    "@strapi/utils": "5.38.0",
+    "@strapi/logger": "5.39.0",
+    "@strapi/types": "5.39.0",
+    "@strapi/utils": "5.39.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
@@ -61,7 +70,7 @@
     "ws": "8.17.1"
   },
   "devDependencies": {
-    "@strapi/database": "5.38.0",
+    "@strapi/database": "5.39.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",

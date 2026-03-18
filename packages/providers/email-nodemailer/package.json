@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "5.38.0",
+  "version": "5.39.0",
   "description": "Nodemailer provider for Strapi",
   "keywords": [
     "strapi",
@@ -14,7 +14,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/email-nodemailer"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -75,8 +76,8 @@
   },
   "devDependencies": {
     "@types/nodemailer": "7.0.10",
-    "eslint-config-custom": "5.38.0",
-    "tsconfig": "5.38.0"
+    "eslint-config-custom": "5.39.0",
+    "tsconfig": "5.39.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
