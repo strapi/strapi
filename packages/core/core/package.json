@@ -83,7 +83,7 @@
     "glob": "13.0.6",
     "global-agent": "4.1.3",
     "http-errors": "2.0.0",
-    "inquirer": "8.2.5",
+    "inquirer": "9.3.8",
     "is-docker": "2.2.1",
     "json-logic-js": "2.0.5",
     "jsonwebtoken": "9.0.0",
@@ -134,7 +134,7 @@
     "@types/node-schedule": "2.1.7",
     "@types/statuses": "2.0.1",
     "eslint-config-custom": "5.39.0",
-    "supertest": "6.3.3",
+    "supertest": "7.2.2",
     "tsconfig": "5.39.0",
     "vitest": "catalog:",
     "vitest-config": "5.39.0"
