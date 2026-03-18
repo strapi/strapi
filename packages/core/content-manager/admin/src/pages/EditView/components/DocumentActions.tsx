@@ -409,7 +409,7 @@ const DocumentActionsMenu = ({
         icon={<More />}
         variant={variant}
       />
-      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
+      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end" maxWidth="25rem">
         {actions.map((action) => {
           return (
             <Menu.Item
