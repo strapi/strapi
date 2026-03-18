@@ -157,6 +157,9 @@ const sync = async (
     {} as Record<string, string>
   );
 
+  const republishedEntryIds = new Set(newEntries.map((e) => String(e.id)));
+  const isRepublishedEntry = (id: string | number) => republishedEntryIds.has(String(id));
+
   await strapi.db.transaction(async ({ trx }) => {
     for (const { joinTable, relations } of existingRelations) {
       const sourceColumn = joinTable.inverseJoinColumn.name;
@@ -197,9 +200,9 @@ const sync = async (
             .where(sourceColumn, newSourceId)
             .where(targetColumn, targetId)
             .update({ [orderColumn]: originalOrder });
-        } else {
-          // Row was cascade-deleted when the old published entry was removed.
-          // Re-insert it with the new entity ID.
+        } else if (!isRepublishedEntry(newSourceId)) {
+          // Missing row was cascade-deleted (we republished the target) — re-insert.
+          // If we republished the source, the row was never created (user removed the relation).
           const newRelation = {
             ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
             [sourceColumn]: newSourceId,
