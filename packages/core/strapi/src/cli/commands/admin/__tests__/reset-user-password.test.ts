@@ -1,13 +1,6 @@
 import inquirer from 'inquirer';
 import { action as resetAdminPasswordCommand } from '../reset-user-password';
 
-jest.mock('inquirer', () => ({
-  __esModule: true,
-  default: {
-    prompt: jest.fn(),
-  },
-}));
-
 const load = jest.fn(() => mock) as any;
 const resetPasswordByEmail = jest.fn();
 const admin = {

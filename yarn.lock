@@ -28117,6 +28117,7 @@ __metadata:
     stream-json: "npm:1.8.0"
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
+    tar: "npm:7.5.11"
     ts-jest: "npm:29.1.0"
     typescript: "npm:5.4.4"
     vitest: "catalog:"

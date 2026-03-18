@@ -1,13 +1,6 @@
 import inquirer from 'inquirer';
 import { action as createAdminCommand } from '../create-user';
 
-jest.mock('inquirer', () => ({
-  __esModule: true,
-  default: {
-    prompt: jest.fn(),
-  },
-}));
-
 const roleId = 1;
 const load = jest.fn(() => mock) as any;
 

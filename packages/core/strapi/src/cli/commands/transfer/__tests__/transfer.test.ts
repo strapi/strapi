@@ -3,13 +3,6 @@ import * as mockDataTransfer from '@strapi/data-transfer';
 import transferAction from '../action';
 import { expectExit } from '../../__tests__/commands.test.utils';
 
-jest.mock('inquirer', () => ({
-  __esModule: true,
-  default: {
-    prompt: jest.fn(),
-  },
-}));
-
 jest.mock('../../../utils/data-transfer', () => {
   return {
     ...jest.requireActual('../../../utils/data-transfer'),
