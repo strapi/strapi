@@ -43,6 +43,8 @@ After tests for remote data-transfer are implemented, there will be utility func
 
 Each subdirectory within the `./tests` directory here is considered a test "domain" and will have its own test app(s) available. By default only one test app is made available unless additional ones are configured in a config.js within that test domain.
 
+Some domains need no shared test app (e.g. **`create-strapi-app`** uses `testApps: 0` in `config.js`). Others put tests in **subfolders** under the domain—e.g. `strapi/strapi/`, `strapi/data-transfer/`, `strapi/version/`. Use the `*.test.cli.js` / `*.test.cli.ts` naming from `jest.config.cli.js` at the repo root.
+
 #### tests/{domain}/config.js
 
 This optional file should return a function that returns a configuration object like the following complete example:

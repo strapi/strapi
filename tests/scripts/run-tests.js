@@ -119,13 +119,18 @@ yargs
           testAppsRequired = Math.min(selectedDomains.length, concurrency);
         }
 
+        // CLI domains may use testApps: 0 (e.g. create-strapi-app scaffolds to tmp, not TEST_APPS).
+        let testAppPaths;
         if (testAppsRequired === 0) {
-          throw new Error('No test apps to spawn');
+          if (type !== 'cli') {
+            throw new Error('No test apps to spawn');
+          }
+          testAppPaths = [];
+        } else {
+          testAppPaths = Array.from({ length: testAppsRequired }, (_, i) =>
+            path.join(testAppDirectory, `test-app-${i}`)
+          );
         }
-
-        const testAppPaths = Array.from({ length: testAppsRequired }, (_, i) =>
-          path.join(testAppDirectory, `test-app-${i}`)
-        );
 
         const currentTestApps = await getCurrentTestApps(testAppDirectory);
 
