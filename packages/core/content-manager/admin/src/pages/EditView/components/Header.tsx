@@ -301,7 +301,7 @@ const CopyDocumentIdMenuItem = ({ documentId }: CopyDocumentIdMenuItemProps) => 
     toggleNotification({
       type: 'success',
       message: formatMessage({
-        id: 'content-manager.ListView.copy-documentId.success',
+        id: 'content-manager.actions.copy-documentId.success',
         defaultMessage: 'Document ID copied to clipboard',
       }),
     });

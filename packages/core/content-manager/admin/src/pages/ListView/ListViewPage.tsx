@@ -89,7 +89,7 @@ const ListViewPage = () => {
       toggleNotification({
         type: 'success',
         message: formatMessage({
-          id: 'content-manager.ListView.copy-documentId.success',
+          id: 'content-manager.actions.copy-documentId.success',
           defaultMessage: 'Document ID copied to clipboard',
         }),
       });
@@ -454,7 +454,7 @@ const ListViewPage = () => {
                                         variant="ghost"
                                         size="S"
                                         label={formatMessage({
-                                          id: 'content-manager.ListView.copy-documentId.label',
+                                          id: 'content-manager.actions.copy-documentId.label',
                                           defaultMessage: 'Copy',
                                         })}
                                         onClick={(e) => handleCopyDocumentId(e, row.documentId)}
