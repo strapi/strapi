@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from 'chalk';
 import { has, isString, isArray } from 'lodash/fp';
-import { prompt } from 'inquirer';
+import inquirer from 'inquirer';
 import boxen from 'boxen';
 import type { Command } from 'commander';
 
@@ -178,7 +178,7 @@ const notifyExperimentalCommand = async (name: string, { force }: { force?: bool
   );
 
   if (!force) {
-    const { confirmed } = await prompt({
+    const { confirmed } = await inquirer.prompt({
       type: 'confirm',
       name: 'confirmed',
       message: 'Do you want to continue?',
