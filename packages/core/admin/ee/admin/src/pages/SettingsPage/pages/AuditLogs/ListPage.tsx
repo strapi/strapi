@@ -126,7 +126,7 @@ const ListPage = () => {
             <Table.Loading />
             <Table.Body>
               {results.map((log) => (
-                <Table.Row key={log.id} onClick={() => setQuery({ id: log.id })}>
+                <Table.Row key={log.id} onClick={() => setQuery({ id: log.id }, 'push', true)}>
                   {headers.map((header) => {
                     const { name, cellFormatter } = header;
 
@@ -175,7 +175,7 @@ const ListPage = () => {
                   <Table.Cell onClick={(e) => e.stopPropagation()}>
                     <Flex justifyContent="end">
                       <IconButton
-                        onClick={() => setQuery({ id: log.id })}
+                        onClick={() => setQuery({ id: log.id }, 'push', true)}
                         withTooltip={false}
                         label={formatMessage(
                           { id: 'app.component.table.view', defaultMessage: '{target} details' },
@@ -199,7 +199,10 @@ const ListPage = () => {
         </Pagination.Root>
       </Layouts.Content>
       {query?.id && (
-        <Modal handleClose={() => setQuery({ id: '' }, 'remove')} logId={query.id.toString()} />
+        <Modal
+          handleClose={() => setQuery({ id: '' }, 'remove', true)}
+          logId={query.id.toString()}
+        />
       )}
     </Page.Main>
   );

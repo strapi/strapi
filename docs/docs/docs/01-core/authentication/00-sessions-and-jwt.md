@@ -63,12 +63,20 @@ Optional request fields on login/register:
 
 Configuration:
 
-- `admin.auth.secret` — required JWT secret used by admin origin
+- `admin.auth.secret` — JWT secret for symmetric algorithms (HS256, HS384, HS512)
+- `admin.auth.sessions.options.algorithm` — JWT algorithm (default: 'HS256')
+- `admin.auth.sessions.options.privateKey` — Private key for asymmetric algorithms (RS256, RS512, ES256, etc.)
+- `admin.auth.sessions.options.publicKey` — Public key for asymmetric algorithms (RS256, RS512, ES256, etc.)
+- `admin.auth.sessions.options.*` — Any other JWT options (issuer, audience, subject, etc.)
 - `admin.auth.sessions.accessTokenLifespan` (default 1800)
 - `admin.auth.sessions.maxRefreshTokenLifespan` (default 30 days)
-- `admin.auth.sessions.idleRefreshTokenLifespan` (default 7 days)
-- `admin.auth.sessions.maxSessionLifespan` (default 7 days)
-- `admin.auth.sessions.idleSessionLifespan` (default 1 hour)
+- `admin.auth.sessions.idleRefreshTokenLifespan` (default 14 days)
+- `admin.auth.sessions.maxSessionLifespan` (default 1 day)
+- `admin.auth.sessions.idleSessionLifespan` (default 2 hours)
+
+**Deprecated:**
+
+- `admin.auth.options.*` — Use `admin.auth.sessions.options.*` instead
 - Cookie options (applied to `strapi_admin_refresh`):
   - `admin.auth.cookie.domain` (or `admin.auth.domain`)
   - `admin.auth.cookie.path` (default `/admin`)
@@ -110,6 +118,16 @@ Key files:
 - Controller: `packages/plugins/users-permissions/server/controllers/auth.js`
 - Routes: `packages/plugins/users-permissions/server/routes/content-api/auth.js`
 - JWT service: `packages/plugins/users-permissions/server/services/jwt.js`
+
+## Session Revocation on Credential Changes
+
+For security, **password changes and resets automatically invalidate all active refresh/session tokens** across all devices:
+
+- **Admin**: When an admin user changes their password via `PUT /admin/users/me` (with `currentPassword` and `password`), all admin sessions are revoked, including the current session. The user must re-authenticate.
+- **Admin**: When an admin resets their password via `POST /admin/reset-password`, all existing admin sessions are revoked before issuing a new session.
+- **Content API (refresh mode)**: When a user changes their password via `POST /api/auth/change-password` or resets it via `POST /api/auth/reset-password`, all users-permissions sessions are revoked. A new refresh token is issued for the current request.
+
+This behavior ensures that compromised refresh tokens cannot be used after a password change, mitigating persistent session hijacking attacks.
 
 ## Notes
 

@@ -178,7 +178,7 @@ const ListPage = () => {
   }
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -197,7 +197,14 @@ const ListPage = () => {
           primaryAction={
             canCreate &&
             !isLoading && (
-              <LinkButton tag={NavLink} startIcon={<Plus />} variant="default" to="create" size="S">
+              <LinkButton
+                tag={NavLink}
+                startIcon={<Plus />}
+                variant="default"
+                to="create"
+                size="S"
+                fullWidth
+              >
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
                   defaultMessage: 'Create new webhook',
@@ -412,7 +419,7 @@ const ListPage = () => {
       <Dialog.Root open={showModal} onOpenChange={setShowModal}>
         <ConfirmDialog onConfirm={confirmBulkDelete} />
       </Dialog.Root>
-    </Layouts.Root>
+    </>
   );
 };
 

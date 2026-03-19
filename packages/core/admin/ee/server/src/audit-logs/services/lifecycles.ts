@@ -46,7 +46,7 @@ const getEventMap = (defaultEvents: any) => {
 const getRetentionDays = (strapi: Core.Strapi) => {
   const featureConfig = strapi.ee.features.get('audit-logs');
   const licenseRetentionDays =
-    typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
+    typeof featureConfig === 'object' && featureConfig?.options?.retentionDays;
   const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
 
   // For enterprise plans, use 90 days by default, but allow users to override it
@@ -160,7 +160,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
         deleteExpiredAuditLogs: {
           task: async () => {
             const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-            auditLogsService.deleteExpiredEvents(expirationDate);
+            await auditLogsService.deleteExpiredEvents(expirationDate);
           },
           options: '0 0 * * *',
         },

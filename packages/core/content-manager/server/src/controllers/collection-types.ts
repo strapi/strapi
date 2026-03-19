@@ -1,6 +1,6 @@
-import { isNil } from 'lodash/fp';
+import { isNil, omit } from 'lodash/fp';
 
-import { setCreatorFields, async, errors } from '@strapi/utils';
+import { setCreatorFields, async, contentTypes, errors } from '@strapi/utils';
 import type { Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
@@ -8,6 +8,125 @@ import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
+import { indexByDocumentId } from './utils/document-status';
+import { getPopulateForLocalizations } from '../services/utils/populate';
+
+/**
+ * Returns documentIds for (documentId, locale) that have both draft and published,
+ * optionally filtered by whether the draft is newer than the published row.
+ * Uses strapi.documents only.
+ */
+const getDocumentIdsByDraftPublishRelation = async (
+  uid: UID.ContentType,
+  opts: {
+    locale?: string | string[] | null;
+    type: 'modified' | 'unmodified';
+  }
+): Promise<string[]> => {
+  const schema = strapi.getModel(uid);
+  if (!contentTypes.hasDraftAndPublish(schema)) {
+    return [];
+  }
+
+  const baseParams = {
+    fields: ['documentId', 'locale', 'updatedAt'],
+    page: 1,
+    pageSize: 10000,
+    ...(opts.locale != null &&
+      opts.locale !== '*' && {
+        locale: opts.locale as string,
+      }),
+  };
+
+  const [drafts, published] = await Promise.all([
+    strapi.documents(uid).findMany({ ...baseParams, status: 'draft' }),
+    strapi.documents(uid).findMany({ ...baseParams, status: 'published' }),
+  ]);
+
+  const publishedByKey = new Map<string, { updatedAt: string }>();
+  for (const p of published) {
+    const key = `${p.documentId}\t${String(p?.locale ?? '')}`;
+    publishedByKey.set(key, { updatedAt: p.updatedAt as string });
+  }
+
+  const ids: string[] = [];
+  const wantModified = opts.type === 'modified';
+  for (const d of drafts) {
+    const key = `${d.documentId}\t${String(d?.locale ?? '')}`;
+    const pub = publishedByKey.get(key);
+    if (pub) {
+      const dUpdated = d?.updatedAt ? new Date(d.updatedAt as string).getTime() : 0;
+      const pUpdated = pub?.updatedAt ? new Date(pub.updatedAt).getTime() : 0;
+      const isModified = dUpdated > pUpdated;
+      if (isModified === wantModified) {
+        ids.push(d.documentId as string);
+      }
+    }
+  }
+  return [...new Set(ids)];
+};
+
+/** Map from __status filter value to top-level query fields (mirrors client STATUS_PARAMS). */
+const STATUS_QUERY_FROM_FILTER: Record<string, Record<string, string>> = {
+  draft: { status: 'draft', hasPublishedVersion: 'false' },
+  published: { status: 'published' },
+  'published-modified': { publicationStatusFilter: 'published-modified' },
+  'published-unmodified': { publicationStatusFilter: 'published-unmodified' },
+};
+
+/**
+ * Extracts __status from query.filters.$and into top-level status, hasPublishedVersion,
+ * and publicationStatusFilter so list works with either transformed params or raw filter params.
+ */
+const normalizeStatusFromFilters = (query: Record<string, unknown>): void => {
+  const filters = query.filters as Record<string, unknown> | undefined;
+  if (!filters?.$and || !Array.isArray(filters.$and)) return;
+
+  const remainingFilters: unknown[] = [];
+  const statusValues: string[] = [];
+
+  for (const filter of filters.$and as Record<string, unknown>[]) {
+    const eq = (filter?.__status as Record<string, unknown>)?.$eq;
+    if (eq != null) {
+      statusValues.push(String(eq));
+    } else {
+      remainingFilters.push(filter);
+    }
+  }
+
+  if (statusValues.length === 0) return;
+
+  const q = query as Record<string, unknown>;
+  for (const value of statusValues) {
+    const toApply = STATUS_QUERY_FROM_FILTER[value];
+    if (toApply) Object.assign(q, toApply);
+  }
+
+  if (remainingFilters.length > 0) {
+    (filters as Record<string, unknown>).$and = remainingFilters;
+  } else {
+    delete q.filters;
+  }
+};
+
+/** Returns filters object that merges existing $and with a documentId $in filter. */
+const mergeDocumentIdFilter = (
+  existingFilters: Record<string, unknown> | undefined,
+  documentIds: string[]
+): Record<string, unknown> => {
+  const documentIdFilter = {
+    documentId: documentIds.length > 0 ? { $in: documentIds } : { $in: [] },
+  };
+  let existingAnd: unknown[];
+  if (existingFilters?.$and && Array.isArray(existingFilters.$and)) {
+    existingAnd = existingFilters.$and;
+  } else if (existingFilters && Object.keys(existingFilters).length > 0) {
+    existingAnd = [existingFilters];
+  } else {
+    existingAnd = [];
+  }
+  return { $and: [...existingAnd, documentIdFilter] };
+};
 
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
@@ -110,11 +229,13 @@ const updateDocument = async (ctx: any, opts?: Options) => {
   const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  return documentManager.update(documentVersion?.documentId || id, model, {
+  const updatedDocument = await documentManager.update(documentVersion?.documentId || id, model, {
     data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
   });
+
+  return updatedDocument;
 };
 
 export default {
@@ -122,6 +243,9 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { query } = ctx.request;
+
+    // Normalize so status/publicationStatusFilter are set from filters.$and.__status when present
+    normalizeStatusFromFilters(query as Record<string, unknown>);
 
     const documentMetadata = getService('document-metadata');
     const documentManager = getService('document-manager');
@@ -137,26 +261,63 @@ export default {
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
       .countRelations({ toOne: false, toMany: true })
+      .withPopulateOverride(getPopulateForLocalizations(model))
       .build();
 
-    const { locale, status } = await getDocumentLocaleAndStatus(query, model);
+    // "Modified" is a UI-only filter; not a real document status. Read and strip it
+    // so we never pass it to validation or the document service.
+    const publicationStatusFilter = query.publicationStatusFilter;
+    const queryForValidation = { ...query };
+    delete queryForValidation.publicationStatusFilter;
+
+    const { locale, status } = await getDocumentLocaleAndStatus(queryForValidation, model);
+
+    const paramsForDocumentService = omit(['publicationStatusFilter'], permissionQuery) as Record<
+      string,
+      unknown
+    >;
+    let findPageParams: Record<string, unknown> = {
+      ...paramsForDocumentService,
+      populate,
+      locale,
+      status,
+    };
+
+    // Pass through hasPublishedVersion so "Draft" filter returns only drafts with no published version
+    if (query.hasPublishedVersion !== undefined) {
+      findPageParams.hasPublishedVersion = query.hasPublishedVersion;
+    }
+
+    if (
+      publicationStatusFilter === 'published-modified' ||
+      publicationStatusFilter === 'published-unmodified'
+    ) {
+      const type = publicationStatusFilter === 'published-modified' ? 'modified' : 'unmodified';
+      const documentIds = await getDocumentIdsByDraftPublishRelation(model, { locale, type });
+      findPageParams = {
+        ...findPageParams,
+        status: 'published',
+        filters: mergeDocumentIdFilter(
+          paramsForDocumentService.filters as Record<string, unknown> | undefined,
+          documentIds
+        ),
+      };
+    }
 
     const { results: documents, pagination } = await documentManager.findPage(
-      { ...permissionQuery, populate, locale, status },
+      findPageParams as Parameters<typeof documentManager.findPage>[0],
       model
     );
 
-    // TODO: Skip this part if not necessary (if D&P disabled or columns not displayed in the view)
-    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
-      model,
-      documents
-    );
+    const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(model));
+
+    const statusByDocumentId = hasDraftAndPublish
+      ? indexByDocumentId(await documentMetadata.getManyAvailableStatus(model, documents))
+      : new Map();
 
     const setStatus = (document: any) => {
       // Available status of document
-      const availableStatuses = documentsAvailableStatus.filter(
-        (d: any) => d.documentId === document.documentId
-      );
+      const availableStatuses = statusByDocumentId.get(document.documentId) || [];
       // Compute document version status
       document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
@@ -185,10 +346,12 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
       .countRelations()
+      .withPopulateOverride(getPopulateForLocalizations(model))
       .build();
 
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
@@ -387,10 +550,12 @@ export default {
     const publishedDocument = await strapi.db.transaction(async () => {
       // Create or update document
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
+
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
         .populateDeep(Infinity)
         .countRelations()
+        .withPopulateOverride(getPopulateForLocalizations(model))
         .build();
 
       let document: any;
@@ -490,10 +655,11 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { populate, locale, isPublished: false })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      populate,
+      locale,
+      isPublished: false,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -528,10 +694,10 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { locale, isPublished: true })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      locale,
+      isPublished: true,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -703,20 +869,23 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    const populate = await getService('populate-builder')(model)
-      .populateFromQuery(permissionQuery)
-      .build();
-
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
-    const entity = await documentManager.findOne(id, model, { populate, locale, status });
 
-    if (!entity) {
-      return ctx.notFound();
-    }
+    if (permissionChecker.requiresEntity.read()) {
+      // Only load what we need for access checks
+      const entity = await documentManager.findOne(id, model, {
+        locale,
+        status,
+        populate: {},
+      });
 
-    if (permissionChecker.cannot.read(entity)) {
-      return ctx.forbidden();
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.read(entity)) {
+        return ctx.forbidden();
+      }
     }
 
     const number = await documentManager.countDraftRelations(id, model, locale);
@@ -739,17 +908,11 @@ export default {
       return ctx.forbidden();
     }
 
-    const documents = await documentManager.findMany(
-      {
-        filters: {
-          documentId: ids,
-        },
-        locale,
-      },
-      model
-    );
+    const count = await strapi.db.query(model).count({
+      where: { documentId: ids },
+    });
 
-    if (!documents) {
+    if (count === 0) {
       return ctx.notFound();
     }
 

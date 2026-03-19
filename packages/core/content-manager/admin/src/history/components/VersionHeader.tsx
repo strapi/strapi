@@ -161,6 +161,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
               onClick={() => {
                 setIsConfirmDialogOpen(true);
               }}
+              fullWidth
             >
               {formatMessage({
                 id: 'content-manager.history.restore.confirm.button',
@@ -173,7 +174,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
       <ConfirmDialog
         onConfirm={handleRestore}
         endAction={
-          <Button variant="secondary" onClick={handleRestore} loading={isLoading}>
+          <Button fullWidth variant="secondary" onClick={handleRestore} loading={isLoading}>
             {formatMessage({
               id: 'content-manager.history.restore.confirm.button',
               defaultMessage: 'Restore',

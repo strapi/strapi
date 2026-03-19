@@ -104,7 +104,6 @@ type UseDocument = (
  * }
  * ```
  *
- * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document} for more information
  */
 const useDocument: UseDocument = (args, opts) => {
   const { toggleNotification } = useNotification();
@@ -132,23 +131,26 @@ const useDocument: UseDocument = (args, opts) => {
   } = useContentTypeSchema(args.model);
   const isSingleType = schema?.kind === 'singleType';
 
-  const getTitle = (mainField: string) => {
-    // Always use mainField if it's not an id
-    if (mainField !== 'id' && document?.[mainField]) {
-      return document[mainField];
-    }
+  const getTitle = React.useCallback(
+    (mainField: string) => {
+      // Always use mainField if it's not an id
+      if (mainField !== 'id' && document?.[mainField]) {
+        return document[mainField];
+      }
 
-    // When it's a singleType without a mainField, use the contentType displayName
-    if (isSingleType && schema?.info.displayName) {
-      return schema.info.displayName;
-    }
+      // When it's a singleType without a mainField, use the contentType displayName
+      if (schema?.kind === 'singleType' && schema.info.displayName) {
+        return schema.info.displayName;
+      }
 
-    // Otherwise, use a fallback
-    return formatMessage({
-      id: 'content-manager.containers.untitled',
-      defaultMessage: 'Untitled',
-    });
-  };
+      // Otherwise, use a fallback
+      return formatMessage({
+        id: 'content-manager.containers.untitled',
+        defaultMessage: 'Untitled',
+      });
+    },
+    [document, formatMessage, schema]
+  );
 
   React.useEffect(() => {
     if (error) {
@@ -218,19 +220,35 @@ const useDocument: UseDocument = (args, opts) => {
   const isLoading = isLoadingDocument || isFetchingDocument || isLoadingSchema;
   const hasError = !!error;
 
-  return {
-    components,
-    document,
-    meta,
-    isLoading,
-    hasError,
-    schema,
-    schemas,
-    validate,
-    getTitle,
-    getInitialFormValues,
-    refetch,
-  } satisfies ReturnType<UseDocument>;
+  return React.useMemo(
+    () =>
+      ({
+        components,
+        document,
+        meta,
+        isLoading,
+        hasError,
+        schema,
+        schemas,
+        validate,
+        getTitle,
+        getInitialFormValues,
+        refetch,
+      }) satisfies ReturnType<UseDocument>,
+    [
+      components,
+      document,
+      meta,
+      isLoading,
+      hasError,
+      schema,
+      schemas,
+      validate,
+      getTitle,
+      getInitialFormValues,
+      refetch,
+    ]
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -266,7 +284,7 @@ const useDoc = () => {
     }
   );
 
-  const returnId = origin || id === 'create' ? undefined : id;
+  const returnId = origin || (id === 'create' ? undefined : id);
 
   return {
     collectionType,

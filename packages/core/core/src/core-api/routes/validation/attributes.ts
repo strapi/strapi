@@ -60,7 +60,7 @@ export const blocksToSchema = (): z.Schema => {
 export const booleanToSchema = (attribute: Schema.Attribute.Boolean): z.Schema => {
   const { writable, required, default: defaultValue } = attribute;
 
-  const schema = augmentSchema(z.boolean(), [
+  const schema = augmentSchema(z.boolean().nullable(), [
     maybeRequired(required),
     maybeWithDefault(defaultValue),
     maybeReadonly(writable),
@@ -425,7 +425,7 @@ export const blocksToInputSchema = () => {
 export const booleanToInputSchema = (attribute: Schema.Attribute.Boolean) => {
   const { required, default: defaultValue } = attribute;
 
-  const baseSchema = z.enum(BOOLEAN_LITERAL_VALUES);
+  const baseSchema = z.enum(BOOLEAN_LITERAL_VALUES).nullable();
 
   const schema = augmentSchema(baseSchema, [
     maybeRequired(required),

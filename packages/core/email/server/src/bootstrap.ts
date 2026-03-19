@@ -1,8 +1,13 @@
 import type { Core } from '@strapi/types';
+import type { ProviderCapabilities } from '../../shared/types';
 import type { EmailConfig, SendOptions } from './types';
 
 interface EmailProvider {
   send: (options: SendOptions) => Promise<any>;
+  verify?: () => Promise<boolean>;
+  isIdle?: () => boolean;
+  close?: () => void;
+  getCapabilities?: () => ProviderCapabilities;
 }
 
 interface EmailProviderModule {
@@ -37,7 +42,11 @@ const createProvider = (emailConfig: EmailConfig) => {
   try {
     provider = require(modulePath);
   } catch (err) {
-    throw new Error(`Could not load email provider "${providerName}".`);
+    const newError = new Error(`Could not load email provider "${providerName}".`);
+    if (err instanceof Error) {
+      newError.stack = err.stack;
+    }
+    throw newError;
   }
 
   return provider.init(emailConfig.providerOptions, emailConfig.settings);

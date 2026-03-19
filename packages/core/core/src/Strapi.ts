@@ -449,11 +449,15 @@ class Strapi extends Container implements Core.Strapi {
       contentTypes: this.contentTypes,
     });
 
+    // NOTE: commenting out repair logic for now as it is causing relationship loss in some cases
+    // will revisit soon in the future PR
+
     const status = await this.db.schema.sync();
 
-    // if schemas have changed, run repairs
+    // // if schemas have changed, run repairs
     if (status === 'CHANGED') {
       await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+      await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
     }
 
     const alreadyRanComponentRepair = await this.store.get({

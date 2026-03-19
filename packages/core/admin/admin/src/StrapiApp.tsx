@@ -42,7 +42,6 @@ const {
 interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>> {
   config?: {
     auth?: { logo: string };
-    head?: { favicon: string };
     locales?: string[];
     menu?: { logo: string };
     notifications?: { releases: boolean };
@@ -101,7 +100,6 @@ class StrapiApp {
 
   configurations = {
     authLogo: Logo,
-    head: { favicon: '' },
     locales: ['en'],
     menuLogo: Logo,
     notifications: { releases: true },
@@ -265,10 +263,6 @@ class StrapiApp {
 
     if (customConfig.menu?.logo) {
       this.configurations.menuLogo = customConfig.menu.logo;
-    }
-
-    if (customConfig.head?.favicon) {
-      this.configurations.head.favicon = customConfig.head.favicon;
     }
 
     if (customConfig.theme) {

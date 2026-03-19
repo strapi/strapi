@@ -37,6 +37,7 @@ const createSettingsSchema = (schema: any) => {
         )
         .default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
+      relationOpenMode: yup.string().oneOf(['modal', 'page', 'newTab']).default('modal'),
     })
     .noUnknown();
 };
@@ -51,8 +52,8 @@ const createMetadasSchema = (schema: any) => {
             .object()
             .shape({
               label: yup.string(),
-              description: yup.string(),
-              placeholder: yup.string(),
+              description: yup.string().nullable(),
+              placeholder: yup.string().nullable(),
               editable: yup.boolean(),
               visible: yup.boolean(),
               mainField: yup.lazy((value) => {

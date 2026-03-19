@@ -7,6 +7,8 @@ import weeklyMetrics from './weekly-metrics';
 import metrics from './metrics';
 import apiUploadFolder from './api-upload-folder';
 import extensions from './extensions';
+import { createAIMetadataService } from './ai-metadata';
+import { createAIMetadataJobsService } from './ai-metadata-jobs';
 
 export const services = {
   provider,
@@ -18,4 +20,6 @@ export const services = {
   'image-manipulation': imageManipulation,
   'api-upload-folder': apiUploadFolder,
   extensions,
+  aiMetadata: createAIMetadataService,
+  aiMetadataJobs: createAIMetadataJobsService,
 };

@@ -139,6 +139,8 @@ module.exports = async ({ strapi }) => {
         upConfig.sessions?.idleRefreshTokenLifespan || DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
       maxSessionLifespan: upConfig.sessions?.maxSessionLifespan || DEFAULT_MAX_SESSION_LIFESPAN,
       idleSessionLifespan: upConfig.sessions?.idleSessionLifespan || DEFAULT_IDLE_SESSION_LIFESPAN,
+      algorithm: upConfig.jwt?.algorithm,
+      jwtOptions: upConfig.jwt || {},
     });
   }
 

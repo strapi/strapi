@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "5.23.6",
+  "version": "5.40.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/utils/logger"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -40,15 +41,15 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.23.6",
-    "tsconfig": "5.23.6"
+    "eslint-config-custom": "5.40.0",
+    "tsconfig": "5.40.0"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   }
 }

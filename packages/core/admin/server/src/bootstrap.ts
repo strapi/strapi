@@ -103,8 +103,7 @@ const createDefaultAPITokensIfNeeded = async () => {
 };
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  // Fallback for backward compatibility: if the new maxRefreshTokenLifespan is not set,
-  // reuse the legacy admin.auth.options.expiresIn value (previously the sole JWT lifespan)
+  // Get the merged token options (includes defaults merged with user config)
   const { options } = getTokenOptions();
   const legacyMaxRefreshFallback =
     expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
@@ -141,7 +140,18 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       'admin.auth.sessions.idleSessionLifespan',
       DEFAULT_IDLE_SESSION_LIFESPAN
     ),
+    algorithm: options?.algorithm,
+    // Pass through all JWT options (includes privateKey, publicKey, and any other options)
+    jwtOptions: options,
   });
+
+  const isProduction = process.env.NODE_ENV === 'production';
+  const adminCookieSecure = strapi.config.get('admin.auth.cookie.secure');
+  if (isProduction && adminCookieSecure === false) {
+    strapi.log.warn(
+      'Server is in production mode, but admin.auth.cookie.secure has been set to false. This is not recommended and will allow cookies to be sent over insecure connections.'
+    );
+  }
 
   await registerAdminConditions();
   await registerPermissionActions();
