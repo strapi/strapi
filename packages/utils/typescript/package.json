@@ -1,6 +1,6 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "5.38.0",
+  "version": "5.40.0",
   "description": "Typescript support for Strapi",
   "keywords": [
     "strapi",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git",
+    "url": "https://github.com/strapi/strapi.git",
     "directory": "packages/utils/typescript"
   },
   "license": "SEE LICENSE IN LICENSE",
