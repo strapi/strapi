@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -9,46 +10,60 @@ import {
   Box,
   FlexComponent,
   BoxComponent,
+  Menu,
 } from '@strapi/design-system';
-import { Link } from '@strapi/icons';
+import { Link, ArrowUp, ArrowDown } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 
+import { getTranslation } from '../../../../../utils/translations';
+import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
+
+import { insertLink } from './Blocks/Link';
 import {
   type BlocksStore,
   type SelectorBlockKey,
   isSelectorBlockKey,
   useBlocksEditorContext,
 } from './BlocksEditor';
-import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`
   &[aria-disabled='true'] {
     cursor: not-allowed;
+    background: ${({ theme }) => theme.colors.neutral150};
   }
 `;
 
-const Separator = styled(Toolbar.Separator)`
+const ToolbarSeparator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
   height: 2.4rem;
+  margin-left: ${({ theme }) => theme.spaces[1]};
+  margin-right: ${({ theme }) => theme.spaces[1]};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    margin-left: ${({ theme }) => theme.spaces[2]};
+    margin-right: ${({ theme }) => theme.spaces[2]};
+  }
 `;
 
 const FlexButton = styled<FlexComponent<'button'>>(Flex)`
   // Inherit the not-allowed cursor from ToolbarWrapper when disabled
   &[aria-disabled] {
-    cursor: inherit;
+    cursor: not-allowed;
   }
 
   &[aria-disabled='false'] {
     cursor: pointer;
 
-    // Only apply hover styles if the button is enabled
-    &:hover {
-      background: ${({ theme }) => theme.colors.primary100};
+    // Only apply hover styles if the button is enabled on desktop
+    ${({ theme }) => theme.breakpoints.medium} {
+      &:hover {
+        background: ${({ theme }) => theme.colors.primary100};
+      }
     }
   }
 `;
@@ -59,8 +74,17 @@ const SelectWrapper = styled<BoxComponent>(Box)`
     border: none;
     cursor: pointer;
     min-height: unset;
-    padding-top: 6px;
-    padding-bottom: 6px;
+    padding-top: ${({ theme }) => theme.spaces[2]};
+    padding-bottom: ${({ theme }) => theme.spaces[2]};
+    padding-left: ${({ theme }) => theme.spaces[4]};
+    padding-right: ${({ theme }) => theme.spaces[4]};
+    gap: ${({ theme }) => theme.spaces[2]};
+    
+    ${({ theme }) => theme.breakpoints.medium} {
+      padding-top: ${({ theme }) => theme.spaces[1]};
+      padding-bottom: ${({ theme }) => theme.spaces[1]};
+      gap: ${({ theme }) => theme.spaces[4]};
+    }
 
     &[aria-disabled='false']:hover {
       cursor: pointer;
@@ -75,6 +99,13 @@ const SelectWrapper = styled<BoxComponent>(Box)`
       span {
         color: ${({ theme }) => theme.colors.neutral600};
       }
+    }
+
+    & > span:first-child {
+     gap: ${({ theme }) => theme.spaces[0]};
+
+     ${({ theme }) => theme.breakpoints.medium} {
+      gap: ${({ theme }) => theme.spaces[3]};
     }
   }
 `;
@@ -121,11 +152,11 @@ const ToolbarButton = ({
   const enabledColor = isActive ? 'primary600' : 'neutral600';
 
   return (
-    <Tooltip description={labelMessage}>
+    <Tooltip label={labelMessage}>
       <Toolbar.ToggleItem
         value={name}
         data-state={isActive ? 'on' : 'off'}
-        onMouseDown={(e) => {
+        onPointerDown={(e) => {
           e.preventDefault();
           handleClick();
           ReactEditor.focus(editor);
@@ -143,6 +174,7 @@ const ToolbarButton = ({
           width={7}
           height={7}
           hasRadius
+          type="button"
         >
           <Icon fill={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
@@ -155,6 +187,7 @@ const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
   const { modalElement, handleConversionResult } = useConversionModal();
+  const isMobile = useIsMobile();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -286,7 +319,7 @@ const BlocksDropdown = () => {
         <SingleSelect
           startIcon={<Icon />}
           onChange={handleSelect}
-          placeholder={formatMessage(blocks[blockSelected].label)}
+          customizeContent={() => (isMobile ? '' : formatMessage(blocks[blockSelected].label))}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
           aria-label={formatMessage({
@@ -325,7 +358,7 @@ const BlockOption = ({ value, icon: Icon, label, blockSelected }: BlockOptionPro
 
   return (
     <SingleSelectOption
-      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral600'} />}
+      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral500'} />}
       value={value}
     >
       {formatMessage(label)}
@@ -340,9 +373,11 @@ const isListNode = (node: unknown): node is Block<'list'> => {
 interface ListButtonProps {
   block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
   format: Block<'list'>['format'];
+  location?: 'toolbar' | 'menu';
 }
 
-const ListButton = ({ block, format }: ListButtonProps) => {
+const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) => {
+  const { formatMessage } = useIntl();
   const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
 
   const isListActive = () => {
@@ -359,6 +394,7 @@ const ListButton = ({ block, format }: ListButtonProps) => {
       if (!Editor.isEditor(currentList) && isListNode(currentList) && currentList.format === format)
         return true;
     }
+
     return false;
   };
 
@@ -430,6 +466,21 @@ const ListButton = ({ block, format }: ListButtonProps) => {
     }
   };
 
+  if (location === 'menu') {
+    const Icon = block.icon;
+
+    return (
+      <StyledMenuItem
+        startIcon={<Icon />}
+        onSelect={() => toggleList(format)}
+        isActive={isListActive()}
+        disabled={isListDisabled()}
+      >
+        {formatMessage(block.label)}
+      </StyledMenuItem>
+    );
+  }
+
   return (
     <ToolbarButton
       icon={block.icon}
@@ -442,8 +493,15 @@ const ListButton = ({ block, format }: ListButtonProps) => {
   );
 };
 
-const LinkButton = ({ disabled }: { disabled: boolean }) => {
+const LinkButton = ({
+  disabled,
+  location = 'toolbar',
+}: {
+  disabled: boolean;
+  location?: 'toolbar' | 'menu';
+}) => {
   const { editor } = useBlocksEditorContext('LinkButton');
+  const { formatMessage } = useIntl();
 
   const isLinkActive = () => {
     const { selection } = editor;
@@ -495,14 +553,29 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
     insertLink(editor, { url: '' });
   };
 
+  const label = {
+    id: 'components.Blocks.link',
+    defaultMessage: 'Link',
+  } as MessageDescriptor;
+
+  if (location === 'menu') {
+    return (
+      <StyledMenuItem
+        startIcon={<Link />}
+        onSelect={addLink}
+        isActive={isLinkActive()}
+        disabled={isLinkDisabled()}
+      >
+        {formatMessage(label)}
+      </StyledMenuItem>
+    );
+  }
+
   return (
     <ToolbarButton
       icon={Link}
       name="link"
-      label={{
-        id: 'components.Blocks.link',
-        defaultMessage: 'Link',
-      }}
+      label={label}
       isActive={isLinkActive()}
       handleClick={addLink}
       disabled={isLinkDisabled()}
@@ -510,8 +583,161 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
   );
 };
 
+const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
+  ${(props) =>
+    props.isActive &&
+    css`
+      color: ${({ theme }) => theme.colors.primary600};
+      font-weight: 600;
+    `}
+
+  svg {
+    fill: ${({ theme, isActive }) =>
+      isActive ? theme.colors.primary600 : theme.colors.neutral500};
+  }
+`;
+
+const ReorderToolbarButtons = () => {
+  const { editor, disabled, blocks, name, setLiveText } =
+    useBlocksEditorContext('ReorderToolbarButtons');
+  const { formatMessage } = useIntl();
+
+  const selection = editor.selection;
+  const totalBlocks = editor.children.length;
+
+  const anchorIndex = selection ? selection.anchor.path[0] : null;
+  const focusIndex = selection ? selection.focus.path[0] : null;
+  const isSingleBlockSelection =
+    anchorIndex !== null && focusIndex !== null && anchorIndex === focusIndex;
+
+  const selectedTopLevelNode =
+    isSingleBlockSelection && anchorIndex !== null ? editor.children[anchorIndex] : null;
+  const selectedBlock =
+    selectedTopLevelNode &&
+    Object.values(blocks).find((block) => block.matchNode(selectedTopLevelNode));
+
+  const isSelectedBlockDraggable =
+    selectedTopLevelNode && selectedBlock
+      ? (selectedBlock.isDraggable?.(selectedTopLevelNode) ?? true)
+      : false;
+
+  const canMoveUp =
+    !disabled &&
+    isSingleBlockSelection &&
+    isSelectedBlockDraggable &&
+    anchorIndex !== null &&
+    anchorIndex > 0;
+  const canMoveDown =
+    !disabled &&
+    isSingleBlockSelection &&
+    isSelectedBlockDraggable &&
+    anchorIndex !== null &&
+    anchorIndex < totalBlocks - 1;
+
+  const moveBlock = (direction: 'up' | 'down') => {
+    if (!selection || anchorIndex === null) return;
+
+    const currentIndex = [anchorIndex];
+    const newIndex = [direction === 'up' ? anchorIndex - 1 : anchorIndex + 1];
+
+    Transforms.moveNodes(editor, {
+      at: currentIndex,
+      to: newIndex,
+    });
+
+    // Keep the moved block focused so disabled states update immediately.
+    Transforms.select(editor, Editor.start(editor, newIndex));
+    ReactEditor.focus(editor);
+
+    setLiveText(
+      formatMessage(
+        {
+          id: getTranslation('components.Blocks.dnd.reorder'),
+          defaultMessage: '{item}, moved. New position in the editor: {position}.',
+        },
+        {
+          item: `${name}.${currentIndex[0] + 1}`,
+          position: `${newIndex[0] + 1} of ${editor.children.length}`,
+        }
+      )
+    );
+  };
+
+  return (
+    <Flex direction="row" gap={1}>
+      <Tooltip
+        label={formatMessage({
+          id: getTranslation('components.DynamicZone.move-up'),
+          defaultMessage: 'Move up',
+        })}
+      >
+        <Toolbar.Button
+          onPointerDown={(e) => {
+            e.preventDefault();
+            if (canMoveUp) moveBlock('up');
+          }}
+          aria-disabled={!canMoveUp}
+          disabled={!canMoveUp}
+          aria-label={formatMessage({
+            id: getTranslation('components.DynamicZone.move-up'),
+            defaultMessage: 'Move up',
+          })}
+          asChild
+        >
+          <FlexButton
+            tag="button"
+            alignItems="center"
+            justifyContent="center"
+            width={7}
+            height={7}
+            hasRadius
+            type="button"
+          >
+            <ArrowUp fill={!canMoveUp ? 'neutral300' : 'neutral600'} />
+          </FlexButton>
+        </Toolbar.Button>
+      </Tooltip>
+
+      <Tooltip
+        label={formatMessage({
+          id: getTranslation('components.DynamicZone.move-down'),
+          defaultMessage: 'Move down',
+        })}
+      >
+        <Toolbar.Button
+          onPointerDown={(e) => {
+            e.preventDefault();
+            if (canMoveDown) moveBlock('down');
+          }}
+          aria-disabled={!canMoveDown}
+          disabled={!canMoveDown}
+          aria-label={formatMessage({
+            id: getTranslation('components.DynamicZone.move-down'),
+            defaultMessage: 'Move down',
+          })}
+          asChild
+        >
+          <FlexButton
+            tag="button"
+            alignItems="center"
+            justifyContent="center"
+            width={7}
+            height={7}
+            hasRadius
+            type="button"
+          >
+            <ArrowDown fill={!canMoveDown ? 'neutral300' : 'neutral600'} />
+          </FlexButton>
+        </Toolbar.Button>
+      </Tooltip>
+    </Flex>
+  );
+};
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
+  const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -527,6 +753,7 @@ const BlocksToolbar = () => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    if (!selectedNode) return true;
 
     if (['image', 'code'].includes(selectedNode.type)) {
       return true;
@@ -537,32 +764,82 @@ const BlocksToolbar = () => {
 
   const isButtonDisabled = checkButtonDisabled();
 
+  /**
+   * Observed components are ones that may or may not be visible in the toolbar, depending on the
+   * available space. They provide two render props:
+   * - renderInToolbar: for when we try to render the component in the toolbar (may be hidden)
+   * - renderInMenu: for when the component didn't fit in the toolbar and is relegated
+   *   to the "more" menu
+   */
+  const observedComponents: ObservedComponent[] = [
+    ...Object.entries(modifiers).map(([name, modifier]) => {
+      const Icon = modifier.icon;
+      const isActive = modifier.checkIsActive(editor);
+      const handleSelect = () => modifier.handleToggle(editor);
+
+      return {
+        toolbar: (
+          <ToolbarButton
+            key={name}
+            name={name}
+            icon={modifier.icon}
+            label={modifier.label}
+            isActive={modifier.checkIsActive(editor)}
+            handleClick={handleSelect}
+            disabled={isButtonDisabled}
+          />
+        ),
+        menu: (
+          <StyledMenuItem startIcon={<Icon />} onSelect={handleSelect} isActive={isActive}>
+            {formatMessage(modifier.label)}
+          </StyledMenuItem>
+        ),
+        key: `modifier.${name}`,
+      };
+    }),
+    {
+      toolbar: <LinkButton disabled={isButtonDisabled} location="toolbar" />,
+      menu: <LinkButton disabled={isButtonDisabled} location="menu" />,
+      key: 'block.link',
+    },
+    {
+      // List buttons can only be rendered together when in the toolbar
+      toolbar: (
+        <Flex direction="row">
+          <ToolbarSeparator style={{ marginLeft: '0.4rem' }} />
+          <Toolbar.ToggleGroup type="single" asChild>
+            <Flex gap={1}>
+              <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
+              <ListButton block={blocks['list-ordered']} format="ordered" location="toolbar" />
+            </Flex>
+          </Toolbar.ToggleGroup>
+        </Flex>
+      ),
+      menu: (
+        <>
+          <Menu.Separator />
+          <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
+          <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
+        </>
+      ),
+      key: 'block.list',
+    },
+  ];
+
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      <ToolbarWrapper gap={2} padding={2}>
+      <ToolbarWrapper padding={{ initial: 1, medium: 2 }} width="100%">
         <BlocksDropdown />
-        <Separator />
+        {isMobile && (
+          <>
+            <ToolbarSeparator />
+            <ReorderToolbarButtons />
+          </>
+        )}
+        <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1}>
-            {Object.entries(modifiers).map(([name, modifier]) => (
-              <ToolbarButton
-                key={name}
-                name={name}
-                icon={modifier.icon}
-                label={modifier.label}
-                isActive={modifier.checkIsActive(editor)}
-                handleClick={() => modifier.handleToggle(editor)}
-                disabled={isButtonDisabled}
-              />
-            ))}
-            <LinkButton disabled={isButtonDisabled} />
-          </Flex>
-        </Toolbar.ToggleGroup>
-        <Separator />
-        <Toolbar.ToggleGroup type="single" asChild>
-          <Flex gap={1}>
-            <ListButton block={blocks['list-unordered']} format="unordered" />
-            <ListButton block={blocks['list-ordered']} format="ordered" />
+          <Flex direction="row" gap={1} grow={1} overflow="hidden">
+            <EditorToolbarObserver observedComponents={observedComponents} />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>

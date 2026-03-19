@@ -53,7 +53,7 @@ const TableActions = ({ document }: TableActionsProps) => {
     <DescriptionComponentRenderer
       props={props}
       descriptions={(plugins['content-manager'].apis as ContentManagerPlugin['config']['apis'])
-        .getDocumentActions()
+        .getDocumentActions('table-row')
         // We explicitly remove the PublishAction from description so we never render it and we don't make unnecessary requests.
         .filter((action) => action.name !== 'PublishAction')}
     >
@@ -68,7 +68,7 @@ const TableActions = ({ document }: TableActionsProps) => {
             actions={tableRowActions}
             label={formatMessage({
               id: 'content-manager.containers.list.table.row-actions',
-              defaultMessage: 'Row action',
+              defaultMessage: 'Row actions',
             })}
             variant="ghost"
           />
@@ -125,6 +125,7 @@ const EditAction: DocumentActionComponent = ({ documentId }) => {
 };
 
 EditAction.type = 'edit';
+EditAction.position = 'table-row';
 
 /**
  * Because the icon system is completely broken, we have to do
@@ -143,6 +144,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
   const { toggleNotification } = useNotification();
   const { autoClone } = useDocumentActions();
   const [prohibitedFields, setProhibitedFields] = React.useState<ProhibitedCloningField[]>([]);
+  const [{ query }] = useQueryParams<{ plugins?: Record<string, any> }>();
 
   return {
     disabled: !canCreate,
@@ -169,10 +171,19 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
         return;
       }
 
-      const res = await autoClone({ model, sourceId: documentId });
+      const res = await autoClone({
+        model,
+        sourceId: documentId,
+        locale: query.plugins?.i18n?.locale,
+      });
 
       if ('data' in res) {
-        navigate(res.data.documentId);
+        navigate({
+          pathname: res.data.documentId,
+          search: stringify({
+            plugins: query.plugins,
+          }),
+        });
 
         /**
          * We return true because we don't need to show a modal anymore.
@@ -212,6 +223,9 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
               tag={NavLink}
               to={{
                 pathname: `clone/${documentId}`,
+                search: stringify({
+                  plugins: query.plugins,
+                }),
               }}
             >
               {formatMessage({
@@ -227,6 +241,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
 };
 
 CloneAction.type = 'clone';
+CloneAction.position = 'table-row';
 
 /**
  * Because the icon system is completely broken, we have to do

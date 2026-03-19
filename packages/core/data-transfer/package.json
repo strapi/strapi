@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "5.3.0",
+  "version": "5.40.0",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -11,6 +11,15 @@
     "backup",
     "restore"
   ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/data-transfer"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
     "name": "Strapi Solutions SAS",
@@ -32,40 +41,41 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "rimraf ./dist",
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/logger": "workspace:*",
-    "@strapi/types": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/logger": "5.40.0",
+    "@strapi/types": "5.40.0",
+    "@strapi/utils": "5.40.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
     "fs-extra": "11.2.0",
     "inquirer": "8.2.5",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "ora": "5.4.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.5.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
-    "tar": "6.2.1",
+    "tar": "7.5.10",
     "tar-stream": "2.2.0",
     "ws": "8.17.1"
   },
   "devDependencies": {
-    "@strapi/database": "workspace:*",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/database": "5.40.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
-    "@types/node": "18.19.24",
+    "@types/node": "24.10.0",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.3",
@@ -73,12 +83,12 @@
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
     "knex": "3.0.1",
-    "koa": "2.15.2",
+    "koa": "2.16.4",
     "rimraf": "5.0.5",
-    "typescript": "5.3.2"
+    "typescript": "5.4.4"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   }
 }

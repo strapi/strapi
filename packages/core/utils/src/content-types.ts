@@ -17,6 +17,7 @@ const ID_ATTRIBUTE = 'id';
 const DOC_ID_ATTRIBUTE = 'documentId';
 
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
+const FIRST_PUBLISHED_AT_ATTRIBUTE = 'firstPublishedAt';
 const CREATED_BY_ATTRIBUTE = 'createdBy';
 const UPDATED_BY_ATTRIBUTE = 'updatedBy';
 
@@ -27,6 +28,7 @@ const constants = {
   ID_ATTRIBUTE,
   DOC_ID_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
+  FIRST_PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
@@ -34,6 +36,15 @@ const constants = {
   SINGLE_TYPE,
   COLLECTION_TYPE,
 };
+
+/** ID-like fields accepted at root level and on relations/media/components (validate/sanitize traversal). */
+const ID_FIELDS: string[] = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
+/** Keys accepted on morphTo relation payloads (e.g. __type). */
+const MORPH_TO_KEYS: string[] = ['__type'];
+/** Keys accepted on dynamic zone component payloads (e.g. __component). */
+const DYNAMIC_ZONE_KEYS: string[] = ['__component'];
+/** Relation operation keys (connect, disconnect, set, options). */
+const RELATION_OPERATION_KEYS: string[] = ['connect', 'disconnect', 'set', 'options'];
 
 const getTimestamps = (model: Model) => {
   const attributes: string[] = [];
@@ -97,7 +108,13 @@ const getNonVisibleAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
+  return _.uniq([
+    ID_ATTRIBUTE,
+    DOC_ID_ATTRIBUTE,
+    PUBLISHED_AT_ATTRIBUTE,
+    ...getTimestamps(model),
+    ...nonVisibleAttributes,
+  ]);
 };
 
 const getVisibleAttributes = (model: Model) => {
@@ -113,6 +130,10 @@ const getOptions = (model: Model) =>
 
 const hasDraftAndPublish = (model: Model) =>
   _.get(model, 'options.draftAndPublish', false) === true;
+
+const hasFirstPublishedAtField = (model: Model) =>
+  strapi.config.get('features.future.experimental_firstPublishedAt', false) &&
+  hasDraftAndPublish(model);
 
 const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
@@ -182,9 +203,9 @@ const hasRelationReordering = (attribute?: Attribute) =>
   isRelationalAttribute(attribute) && HAS_RELATION_REORDERING.includes(attribute.relation);
 
 const isComponentAttribute = (
-  attribute: Attribute
+  attribute?: Attribute
 ): attribute is ComponentAttribute | DynamicZoneAttribute =>
-  ['component', 'dynamiczone'].includes(attribute?.type);
+  !!attribute && ['component', 'dynamiczone'].includes(attribute.type);
 
 const isDynamicZoneAttribute = (attribute?: Attribute): attribute is DynamicZoneAttribute =>
   !!attribute && attribute.type === 'dynamiczone';
@@ -199,6 +220,17 @@ const getComponentAttributes = (schema: Model) => {
     schema.attributes,
     (acc, attr, attrName) => {
       if (isComponentAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    [] as string[]
+  );
+};
+
+const getMediaAttributes = (schema: Model) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isMediaAttribute(attr)) acc.push(attrName);
       return acc;
     },
     [] as string[]
@@ -262,8 +294,13 @@ export {
   getPrivateAttributes,
   isPrivateAttribute,
   constants,
+  ID_FIELDS,
+  MORPH_TO_KEYS,
+  DYNAMIC_ZONE_KEYS,
+  RELATION_OPERATION_KEYS,
   getNonWritableAttributes,
   getComponentAttributes,
+  getMediaAttributes,
   getScalarAttributes,
   getRelationalAttributes,
   getWritableAttributes,
@@ -276,6 +313,7 @@ export {
   getOptions,
   isDraft,
   hasDraftAndPublish,
+  hasFirstPublishedAtField,
   isSingleType,
   isCollectionType,
   isKind,

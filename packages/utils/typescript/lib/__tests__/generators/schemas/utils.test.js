@@ -168,10 +168,16 @@ describe('Utils', () => {
     });
 
     test('Number', () => {
-      const node = toTypeLiteral(42);
+      const nodePositive = toTypeLiteral(42);
+      const nodeNegative = toTypeLiteral(-42);
 
-      expect(node.kind).toBe(ts.SyntaxKind.FirstLiteralToken);
-      expect(node.text).toBe('42');
+      expect(nodePositive.kind).toBe(ts.SyntaxKind.FirstLiteralToken);
+      expect(nodePositive.text).toBe('42');
+
+      expect(nodeNegative.kind).toBe(ts.SyntaxKind.PrefixUnaryExpression);
+      expect(nodeNegative.operator).toBe(ts.SyntaxKind.MinusToken);
+      expect(nodeNegative.operand.kind).toBe(ts.SyntaxKind.FirstLiteralToken);
+      expect(nodeNegative.operand.text).toBe('42');
     });
 
     test('Boolean', () => {
@@ -247,13 +253,13 @@ describe('Utils', () => {
       expect(objectNode.members).toHaveLength(2);
 
       expect(objectNode.members[0].kind).toBe(ts.SyntaxKind.PropertyDeclaration);
-      expect(objectNode.members[0].name.escapedText).toBe('foo');
-      expect(objectNode.members[0].type.kind).toBe(ts.SyntaxKind.StringLiteral);
-      expect(objectNode.members[0].type.text).toBe('bar');
+      expect(objectNode.members[0].name.escapedText).toBe('bar');
+      expect(objectNode.members[0].type.kind).toBe(ts.SyntaxKind.TrueKeyword);
 
       expect(objectNode.members[1].kind).toBe(ts.SyntaxKind.PropertyDeclaration);
-      expect(objectNode.members[1].name.escapedText).toBe('bar');
-      expect(objectNode.members[1].type.kind).toBe(ts.SyntaxKind.TrueKeyword);
+      expect(objectNode.members[1].name.escapedText).toBe('foo');
+      expect(objectNode.members[1].type.kind).toBe(ts.SyntaxKind.StringLiteral);
+      expect(objectNode.members[1].type.text).toBe('bar');
     });
 
     test('Object', () => {
@@ -262,20 +268,20 @@ describe('Utils', () => {
       expect(node.kind).toBe(ts.SyntaxKind.TypeLiteral);
       expect(node.members).toHaveLength(2);
 
-      const [firstMember, secondMember] = node.members;
+      const [barMember, fooMember] = node.members;
 
-      expect(firstMember.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
-      expect(firstMember.name.escapedText).toBe('foo');
-      expect(firstMember.type.kind).toBe(ts.SyntaxKind.TupleType);
-      expect(firstMember.type.elements).toHaveLength(3);
-      expect(firstMember.type.elements[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-      expect(firstMember.type.elements[1].kind).toBe(ts.SyntaxKind.TrueKeyword);
-      expect(firstMember.type.elements[2].kind).toBe(ts.SyntaxKind.FirstLiteralToken);
+      expect(barMember.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+      expect(barMember.name.escapedText).toBe('bar');
+      expect(barMember.type.kind).toBe(ts.SyntaxKind.LiteralType);
+      expect(barMember.type.literal).toBe(ts.SyntaxKind.NullKeyword);
 
-      expect(secondMember.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
-      expect(secondMember.name.escapedText).toBe('bar');
-      expect(secondMember.type.kind).toBe(ts.SyntaxKind.LiteralType);
-      expect(secondMember.type.literal).toBe(ts.SyntaxKind.NullKeyword);
+      expect(fooMember.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+      expect(fooMember.name.escapedText).toBe('foo');
+      expect(fooMember.type.kind).toBe(ts.SyntaxKind.TupleType);
+      expect(fooMember.type.elements).toHaveLength(3);
+      expect(fooMember.type.elements[0].kind).toBe(ts.SyntaxKind.StringLiteral);
+      expect(fooMember.type.elements[1].kind).toBe(ts.SyntaxKind.TrueKeyword);
+      expect(fooMember.type.elements[2].kind).toBe(ts.SyntaxKind.FirstLiteralToken);
     });
 
     test('Object with complex keys', () => {
@@ -284,19 +290,19 @@ describe('Utils', () => {
       expect(node.kind).toBe(ts.SyntaxKind.TypeLiteral);
       expect(node.members).toHaveLength(2);
 
-      const [firstMember, secondMember] = node.members;
+      const [fooBar, fooDashBar] = node.members;
 
-      expect(firstMember.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
-      expect(firstMember.name.kind).toBe(ts.SyntaxKind.StringLiteral);
-      expect(firstMember.name.text).toBe('foo-bar');
-      expect(firstMember.type.kind).toBe(ts.SyntaxKind.StringLiteral);
-      expect(firstMember.type.text).toBe('foobar');
+      expect(fooBar.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+      expect(fooBar.name.kind).toBe(ts.SyntaxKind.Identifier);
+      expect(fooBar.name.escapedText).toBe('foo');
+      expect(fooBar.type.kind).toBe(ts.SyntaxKind.StringLiteral);
+      expect(fooBar.type.text).toBe('bar');
 
-      expect(secondMember.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
-      expect(secondMember.name.kind).toBe(ts.SyntaxKind.Identifier);
-      expect(secondMember.name.escapedText).toBe('foo');
-      expect(secondMember.type.kind).toBe(ts.SyntaxKind.StringLiteral);
-      expect(secondMember.type.text).toBe('bar');
+      expect(fooDashBar.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+      expect(fooDashBar.name.kind).toBe(ts.SyntaxKind.StringLiteral);
+      expect(fooDashBar.name.text).toBe('foo-bar');
+      expect(fooDashBar.type.kind).toBe(ts.SyntaxKind.StringLiteral);
+      expect(fooDashBar.type.text).toBe('foobar');
     });
 
     test('Invalid data type supplied (function)', () => {

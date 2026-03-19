@@ -1,18 +1,18 @@
-import { Flex } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
+import { Flex, Typography } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
+
+import { getFileIconComponent } from '../../utils/icons';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 
-const IconWrapper = styled.span`
-  svg {
-    font-size: 4.8rem;
-  }
-`;
-
 const CardAsset = styled(Flex)`
   border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
+  background: linear-gradient(
+    180deg,
+    ${({ theme }) => theme.colors.neutral0} 0%,
+    ${({ theme }) => theme.colors.neutral100} 121.48%
+  );
 `;
 
 interface DocAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children'> {
@@ -27,6 +27,8 @@ export const DocAssetCard = ({
   selected = false,
   ...restProps
 }: DocAssetCardProps) => {
+  const { formatMessage } = useIntl();
+  const IconComponent = getFileIconComponent(extension);
   return (
     <AssetCardBase
       name={name}
@@ -36,9 +38,15 @@ export const DocAssetCard = ({
       variant="Doc"
     >
       <CardAsset width="100%" height={size === 'S' ? `8.8rem` : `16.4rem`} justifyContent="center">
-        <IconWrapper>
-          {extension === 'pdf' ? <FilePdf aria-label={name} /> : <File aria-label={name} />}
-        </IconWrapper>
+        <Flex gap={2} direction="column" alignItems="center">
+          <IconComponent aria-label={name} fill="neutral500" width={24} height={24} />
+          <Typography textColor="neutral500" variant="pi">
+            {formatMessage({
+              id: 'noPreview',
+              defaultMessage: 'No preview available',
+            })}
+          </Typography>
+        </Flex>
       </CardAsset>
     </AssetCardBase>
   );

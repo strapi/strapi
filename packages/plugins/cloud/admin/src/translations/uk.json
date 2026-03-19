@@ -1,0 +1,21 @@
+{
+  "Plugin.name": "Розгортання",
+  "Homepage.title": "Розгорніть за допомогою Strapi Cloud безкоштовно!",
+  "Homepage.subTitle": "Почніть із повністю безкоштовного плану — без кредитної картки та обмежень у часі.",
+  "Homepage.deploy.title": "Оберіть бажаний метод розгортання",
+  "Homepage.deploy.ariaLabel": "Параметри розгортання",
+  "Homepage.deploy.git.badge": "Рекомендовано",
+  "Homepage.deploy.git.title": "Розгортання у Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "Розгорніть проєкт із GitHub або GitLab безпосередньо у Strapi Cloud",
+  "Homepage.deploy.git.button": "Розгорнути у Strapi Cloud",
+  "Homepage.deploy.cli.title": "Розгортання через CLI",
+  "Homepage.deploy.cli.subTitle": "Використовуйте командний рядок для прямого розгортання вашого проєкту Strapi",
+  "Homepage.deploy.cli.ariaLabel": "Система керування пакунками",
+  "Homepage.deploy.cli.copy": "Копіювати",
+  "Homepage.deploy.documentation": "Маєте труднощі? Перевірте нашу документацію",
+  "Homepage.freePlan.api": "2 500 API-запитів",
+  "Homepage.freePlan.storage": "10 ГБ сховища",
+  "Homepage.freePlan.bandwidth": "10 ГБ пропускної здатності для ресурсів",
+  "Homepage.freePlan.cdn": "Глобальний CDN",
+  "Homepage.freePlan.pushToDeploy": "Push для розгортання"
+}

@@ -1,0 +1,46 @@
+name: Close Pre-2024 Issues
+on:
+  workflow_dispatch: # Allows manual triggering from the Github UI
+
+permissions:
+  issues: write # Required to close issues and post comments
+  contents: read # Needed by most GitHub Actions
+
+jobs:
+  close-inactive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close stale issues
+        uses: actions/stale@v10
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          ascending: true # Start with oldest issues first
+          only-labels: 'stale-q1-q2-2024' # Only process issues with this label
+          exempt-issue-labels: 'issue: security,severity: critical,severity: high,status: confirmed' # Don't close issues with these label
+          exempt-all-milestones: true # Don't close issues that are part of a milestone
+          exempt-all-assignees: false # Close even if they are assigned
+          days-before-stale: 0 # Mark as stale immediately
+          days-before-close: 14 # Close in 14 days
+          days-before-pr-stale: -1 # dont apply to PRs
+          days-before-pr-close: -1 # PRs disabled
+          operations-per-run: 100
+          stale-issue-message: |
+            👋 Hello, and thank you for helping us to make Strapi better!
+
+            As part of our effort to keep the issue tracker focused and manageable, we are reviewing older reports.  
+            This issue has been inactive for a while. To ensure we spend our limited resources effectively, we are prioritizing:
+            - Active issues related to Strapi v5
+            - Issues with recent engagement
+            - Issues that are not duplicates of others
+
+            This issue will be automatically closed in **14 days** unless there is new activity.  
+            👉 If this is still relevant:
+            - Please add a comment with any updates.
+            - If the problem also exists in **Strapi v5**, we encourage you to open (or link to) a v5 issue.
+
+            Thank you for helping us improve Strapi! 🙏
+          close-issue-message: |
+            This issue has been closed due to inactivity as part of our backlog review.  
+
+            If the problem is still relevant (especially in **Strapi v5**), please let us know or open a new issue. 
+            We truly appreciate your input and contributions 💜

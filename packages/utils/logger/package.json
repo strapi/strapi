@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "5.3.0",
+  "version": "5.40.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/utils/logger"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -31,23 +32,24 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*"
+    "eslint-config-custom": "5.40.0",
+    "tsconfig": "5.40.0"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   }
 }

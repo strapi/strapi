@@ -10,7 +10,7 @@ import { NotificationsProvider } from '../features/Notifications';
 import { StrapiAppProvider } from '../features/StrapiApp';
 import { TrackingProvider } from '../features/Tracking';
 
-import { GuidedTourProvider } from './GuidedTour/Provider';
+import { GuidedTourProvider } from './GuidedTour/GuidedTourProvider';
 import { LanguageProvider } from './LanguageProvider';
 import { Theme } from './Theme';
 
@@ -36,6 +36,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
     <StrapiAppProvider
       components={strapi.library.components}
       customFields={strapi.customFields}
+      widgets={strapi.widgets}
       fields={strapi.library.fields}
       menu={strapi.router.menu}
       getAdminInjectedComponents={strapi.getAdminInjectedComponents}
@@ -59,7 +60,6 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                         <ConfigurationProvider
                           defaultAuthLogo={strapi.configurations.authLogo}
                           defaultMenuLogo={strapi.configurations.menuLogo}
-                          showTutorials={strapi.configurations.tutorials}
                           showReleaseNotification={strapi.configurations.notifications.releases}
                         >
                           {children}

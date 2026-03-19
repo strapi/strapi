@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "5.3.0",
+  "version": "5.40.0",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -10,6 +10,10 @@
     "migrate",
     "version"
   ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/strapi/strapi.git",
@@ -49,41 +53,44 @@
     "resources"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "workspace:*",
+    "@strapi/utils": "5.40.0",
     "chalk": "4.1.2",
-    "cli-table3": "0.6.2",
+    "cli-table3": "0.6.5",
     "commander": "8.3.0",
     "esbuild-register": "3.5.0",
+    "execa": "5.1.1",
     "fast-glob": "3.3.2",
     "fs-extra": "11.2.0",
-    "jscodeshift": "0.15.1",
-    "lodash": "4.17.21",
+    "jscodeshift": "17.3.0",
+    "lodash": "4.17.23",
     "memfs": "4.6.0",
     "ora": "5.4.1",
     "prompts": "2.4.2",
     "semver": "7.5.4",
-    "simple-git": "3.21.0"
+    "simple-git": "3.21.0",
+    "undici": "6.24.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "workspace:*",
+    "@strapi/types": "5.40.0",
     "@types/fs-extra": "11.0.4",
-    "@types/jscodeshift": "0.11.10",
-    "eslint-config-custom": "workspace:*",
+    "@types/jscodeshift": "0.12.0",
+    "eslint-config-custom": "5.40.0",
     "rimraf": "5.0.5"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   }
 }

@@ -2,3 +2,4 @@ node_modules/
 .eslintrc.js
 index.d.ts
 dist/
+rollup.config.mjs

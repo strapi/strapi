@@ -54,7 +54,10 @@ describe('DocumentActions', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('should render a notification if either of the button actions has been pressed and the notification dialog props are provided', async () => {
@@ -200,7 +203,10 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it("should render an actions's icon if provided", async () => {
@@ -224,19 +230,15 @@ describe('DocumentActionsMenu', () => {
       <DocumentActionsMenu
         actions={[
           { id: '1', label: 'Action 1', onClick: jest.fn(), variant: 'default' },
-          { id: '2', label: 'Action 2', onClick: jest.fn(), variant: 'secondary' },
           { id: '3', label: 'Action 3', onClick: jest.fn(), variant: 'danger' },
-          { id: '4', label: 'Action 4', onClick: jest.fn(), variant: 'success' },
         ]}
       />
     );
 
     await user.click(screen.getByRole('button', { name: 'More document actions' }));
 
-    expect(screen.getByText('Action 1')).toHaveStyle({ color: '#4945ff' }); // primary600
-    expect(screen.getByText('Action 2')).toHaveStyle({ color: 'rgb(50, 50, 77);' }); // neutral800
-    expect(screen.getByText('Action 3')).toHaveStyle({ color: '#D02B20' }); // danger600
-    expect(screen.getByText('Action 4')).toHaveStyle({ color: 'rgb(50, 128, 72)' }); // success600
+    expect(screen.getByText('Action 1')).toHaveStyle({ color: 'rgb(50, 50, 77);' }); // neutral800
+    expect(screen.getByText('Action 3')).toHaveStyle({ color: 'rgb(183, 43, 60);' }); // danger700
   });
 
   it('should render a notification if action has been pressed and the notification dialog props are provided', async () => {
@@ -342,5 +344,37 @@ describe('DocumentActionsMenu', () => {
     await user.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('should show correct background colors on hover for different variants', async () => {
+    const { user } = render(
+      <DocumentActionsMenu
+        actions={[
+          { id: '1', label: 'Action 1', onClick: jest.fn(), variant: 'default' },
+          { id: '2', label: 'Action 2', onClick: jest.fn(), variant: 'danger', disabled: false },
+          { id: '3', label: 'Action 3', onClick: jest.fn(), variant: 'danger', disabled: true },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
+
+    const neutralMenuItem = screen.getByText('Action 1');
+    await user.hover(neutralMenuItem);
+    expect(neutralMenuItem).toHaveStyle({
+      backgroundColor: 'theme.colors.neutral',
+    });
+
+    const dangerMenuItem = screen.getByText('Action 2');
+    await user.hover(dangerMenuItem);
+    expect(dangerMenuItem).toHaveStyle({
+      backgroundColor: 'theme.colors.danger100',
+    });
+
+    const disabledDangerMenuItem = screen.getByText('Action 3');
+    await user.hover(disabledDangerMenuItem);
+    expect(disabledDangerMenuItem).toHaveStyle({
+      backgroundColor: 'theme.colors.neutral',
+    });
   });
 });

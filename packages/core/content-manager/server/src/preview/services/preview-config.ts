@@ -1,5 +1,5 @@
-import type { Core, UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import type { Core } from '@strapi/types';
+import { errors, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export type HandlerParams = {
   documentId: string;
@@ -7,18 +7,53 @@ export type HandlerParams = {
   status: 'published' | 'draft';
 };
 
-export interface PreviewConfig {
-  enabled: boolean;
-  config: {
-    handler: (uid: UID.Schema, params: HandlerParams) => string | undefined;
-  };
-}
+/**
+ * @deprecated Use Core.Config.Admin['preview'] from @strapi/types instead
+ * Keeping for backward compatibility
+ */
+export type PreviewConfig = NonNullable<Core.Config.Admin['preview']>;
 
 /**
  * Read configuration for static preview
  */
 const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
+    register() {
+      if (!this.isEnabled()) {
+        return;
+      }
+
+      const config = strapi.config.get('admin.preview') as PreviewConfig;
+
+      /**
+       * Register the allowed origins for CSP, so the preview URL can be displayed
+       */
+      if (config.config?.allowedOrigins) {
+        const middlewares = strapi.config.get('middlewares') as (
+          | string
+          | { name?: string; config?: any }
+        )[];
+
+        const configuredMiddlewares = extendMiddlewareConfiguration(middlewares, {
+          name: 'strapi::security',
+          config: {
+            contentSecurityPolicy: {
+              directives: {
+                'frame-src': config.config.allowedOrigins,
+              },
+            },
+          },
+        });
+
+        strapi.config.set('middlewares', configuredMiddlewares);
+      }
+    },
+
+    isConfigured() {
+      const config = strapi.config.get('admin.preview') as PreviewConfig;
+      return config?.enabled === false || config?.config?.handler != null;
+    },
+
     isEnabled() {
       const config = strapi.config.get('admin.preview') as PreviewConfig;
 
@@ -50,9 +85,7 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Utility to get the preview handler from the configuration
      */
-    getPreviewHandler(): PreviewConfig['config']['handler'] {
-      const config = strapi.config.get('admin.preview') as PreviewConfig;
-
+    getPreviewHandler(): NonNullable<Core.Config.Admin['preview']>['config']['handler'] {
       const emptyHandler = () => {
         return undefined;
       };
@@ -60,6 +93,8 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!this.isEnabled()) {
         return emptyHandler;
       }
+
+      const config = strapi.config.get('admin.preview') as PreviewConfig;
 
       return config?.config?.handler || emptyHandler;
     },

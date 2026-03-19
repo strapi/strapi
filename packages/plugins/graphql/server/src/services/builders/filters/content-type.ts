@@ -1,4 +1,5 @@
 import { inputObjectType } from 'nexus';
+import { contentTypes } from '@strapi/utils';
 import type * as Nexus from 'nexus';
 import type { Struct, Schema } from '@strapi/types';
 import type { Context } from '../../types';
@@ -79,14 +80,19 @@ export default ({ strapi }: Context) => {
       name: filtersTypeName,
 
       definition(t) {
-        const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
-          extension.shadowCRUD(contentType.uid).field(attributeName).hasFiltersEnabeld()
-        );
+        const validAttributes = Object.entries(attributes)
+          // Remove private attributes
+          .filter(([attributeName]) => !contentTypes.isPrivateAttribute(contentType, attributeName))
+          // Remove attributes that have been disabled using the shadow CRUD extension API
+          .filter(([attributeName]) =>
+            extension.shadowCRUD(contentType.uid).field(attributeName).hasFiltersEnabeld()
+          );
 
         const isIDFilterEnabled = extension
           .shadowCRUD(contentType.uid)
           .field('documentId')
           .hasFiltersEnabeld();
+
         // Add an ID filter to the collection types
         if (contentType.kind === 'collectionType' && isIDFilterEnabled) {
           t.field('documentId', { type: getScalarFilterInputTypeName('ID') });

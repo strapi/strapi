@@ -13,24 +13,22 @@ describe('useFolders', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.data).toMatchInlineSnapshot(`
-      [
-        {
-          "children": {
-            "count": 2,
-          },
-          "createdAt": "2023-06-26T12:48:54.054Z",
-          "files": {
-            "count": 0,
-          },
-          "id": 1,
-          "name": "test",
-          "path": "/1",
-          "pathId": 1,
-          "updatedAt": "2023-06-26T12:48:54.054Z",
+    expect(result.current.data).toEqual([
+      {
+        children: {
+          count: 2,
         },
-      ]
-    `);
+        createdAt: '2023-06-26T12:48:54.054Z',
+        files: {
+          count: 0,
+        },
+        id: 1,
+        name: 'test',
+        path: '/1',
+        pathId: 1,
+        updatedAt: '2023-06-26T12:48:54.054Z',
+      },
+    ]);
   });
 
   test('does not use parent filter in params if _q', async () => {
@@ -42,24 +40,22 @@ describe('useFolders', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.data).toMatchInlineSnapshot(`
-      [
-        {
-          "children": {
-            "count": 2,
-          },
-          "createdAt": "2023-06-26T12:48:54.054Z",
-          "files": {
-            "count": 0,
-          },
-          "id": 1,
-          "name": "something",
-          "path": "/1",
-          "pathId": 1,
-          "updatedAt": "2023-06-26T12:48:54.054Z",
+    expect(result.current.data).toEqual([
+      {
+        children: {
+          count: 2,
         },
-      ]
-    `);
+        createdAt: '2023-06-26T12:48:54.054Z',
+        files: {
+          count: 0,
+        },
+        id: 1,
+        name: 'something',
+        path: '/1',
+        pathId: 1,
+        updatedAt: '2023-06-26T12:48:54.054Z',
+      },
+    ]);
 
     if (result.current.data) {
       expect(result.current.data[0].name).toBe('something');
@@ -71,38 +67,36 @@ describe('useFolders', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.data).toMatchInlineSnapshot(`
-      [
-        {
-          "children": {
-            "count": 0,
-          },
-          "createdAt": "2023-06-26T12:49:31.354Z",
-          "files": {
-            "count": 3,
-          },
-          "id": 3,
-          "name": "2022",
-          "path": "/1/3",
-          "pathId": 3,
-          "updatedAt": "2023-06-26T12:49:31.354Z",
+    expect(result.current.data).toEqual([
+      {
+        children: {
+          count: 0,
         },
-        {
-          "children": {
-            "count": 0,
-          },
-          "createdAt": "2023-06-26T12:49:08.466Z",
-          "files": {
-            "count": 3,
-          },
-          "id": 2,
-          "name": "2023",
-          "path": "/1/2",
-          "pathId": 2,
-          "updatedAt": "2023-06-26T12:49:08.466Z",
+        createdAt: '2023-06-26T12:49:31.354Z',
+        files: {
+          count: 3,
         },
-      ]
-    `);
+        id: 3,
+        name: '2022',
+        path: '/1/3',
+        pathId: 3,
+        updatedAt: '2023-06-26T12:49:31.354Z',
+      },
+      {
+        children: {
+          count: 0,
+        },
+        createdAt: '2023-06-26T12:49:08.466Z',
+        files: {
+          count: 3,
+        },
+        id: 2,
+        name: '2023',
+        path: '/1/2',
+        pathId: 2,
+        updatedAt: '2023-06-26T12:49:08.466Z',
+      },
+    ]);
 
     result.current.data?.forEach((folder) => {
       /**

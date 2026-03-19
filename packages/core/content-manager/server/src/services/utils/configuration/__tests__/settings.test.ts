@@ -33,17 +33,16 @@ describe('Configuration settings service', () => {
 
       const settings = await settingsService.createDefaultSettings(schema);
 
-      expect(settings).toMatchInlineSnapshot(`
-        {
-          "bulkable": true,
-          "defaultSortBy": "id",
-          "defaultSortOrder": "ASC",
-          "filterable": true,
-          "mainField": "id",
-          "pageSize": 10,
-          "searchable": true,
-        }
-      `);
+      expect(settings).toEqual({
+        bulkable: true,
+        defaultSortBy: 'id',
+        defaultSortOrder: 'ASC',
+        filterable: true,
+        mainField: 'id',
+        pageSize: 10,
+        relationOpenMode: 'modal',
+        searchable: true,
+      });
     });
 
     test('uses id as mainField by default', async () => {

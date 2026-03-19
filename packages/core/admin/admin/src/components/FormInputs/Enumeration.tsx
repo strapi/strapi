@@ -1,6 +1,7 @@
 import { forwardRef, memo } from 'react';
 
 import { SingleSelect, SingleSelectOption, useComposedRefs, Field } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -9,6 +10,7 @@ import { EnumerationProps } from './types';
 
 const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
   ({ name, required, label, hint, labelAction, options = [], ...props }, ref) => {
+    const { formatMessage } = useIntl();
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLDivElement>(name);
 
@@ -20,11 +22,17 @@ const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
         <SingleSelect
           ref={composedRefs}
           onChange={(value) => {
-            field.onChange(name, value);
+            field.onChange(name, value === '' ? null : value);
           }}
           value={field.value}
           {...props}
         >
+          <SingleSelectOption value="" disabled={required} hidden={required}>
+            {formatMessage({
+              id: 'components.InputSelect.option.placeholder',
+              defaultMessage: 'Choose here',
+            })}
+          </SingleSelectOption>
           {options.map(({ value, label, disabled, hidden }) => {
             return (
               <SingleSelectOption key={value} value={value} disabled={disabled} hidden={hidden}>

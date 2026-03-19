@@ -13,11 +13,12 @@ import type {
   ProviderType,
   TransferStage,
 } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
-import { createDispatcher, connectToWebsocket, trimTrailingSlash, wait, waitUntil } from '../utils';
+import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourceProviderOptions {
   url: URL; // the url of the remote Strapi admin
@@ -26,7 +27,11 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
     retryMessageTimeout: number; // milliseconds to wait for a response from a message
     retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
   };
+  streamTimeout?: number; // milliseconds to wait between chunks of an asset before aborting the transfer
 }
+
+type QueueableAction = Protocol.Client.TransferAssetFlow &
+  ({ action: 'stream' } | { action: 'end' });
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
   name = 'source::remote-strapi';
@@ -39,13 +44,23 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   dispatcher: ReturnType<typeof createDispatcher> | null;
 
+  defaultOptions: Partial<IRemoteStrapiSourceProviderOptions> = {
+    streamTimeout: 15000,
+  };
+
   constructor(options: IRemoteStrapiSourceProviderOptions) {
-    this.options = options;
+    this.options = {
+      ...this.defaultOptions,
+      ...options,
+    };
+
     this.ws = null;
     this.dispatcher = null;
   }
 
   results?: ISourceProviderTransferResults | undefined;
+
+  #diagnostics?: IDiagnosticReporter;
 
   async #createStageReadStream(stage: Exclude<TransferStage, 'schemas'>) {
     const startResult = await this.#startStep(stage);
@@ -125,12 +140,26 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     // Init the asset map
     const assets: {
-      [filename: string]: IAsset & {
+      // TODO: could we include filename in this for improved logging?
+      [assetID: string]: IAsset & {
         stream: PassThrough;
-        queue: Array<Protocol.Client.TransferAssetFlow & { action: 'stream' }>;
-        status: 'idle' | 'busy' | 'closed' | 'errored';
+        queue: Array<QueueableAction>;
+        status: 'ok' | 'closed' | 'errored';
+        timeout?: NodeJS.Timeout;
       };
     } = {};
+
+    // Watch for stalled assets; if we don't receive a chunk within timeout, abort transfer
+    const resetTimeout = (assetID: string) => {
+      if (assets[assetID].timeout) {
+        clearTimeout(assets[assetID].timeout);
+      }
+      assets[assetID].timeout = setTimeout(() => {
+        this.#reportInfo(`Asset ${assetID} transfer stalled, aborting.`);
+        assets[assetID].status = 'errored';
+        assets[assetID].stream.destroy(new Error(`Asset ${assetID} transfer timed out`));
+      }, this.options.streamTimeout);
+    };
 
     stream
       /**
@@ -145,18 +174,21 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
           // Creates the stream to send the incoming asset through
           if (action === 'start') {
-            // Ignore the item if a transfer has already been started for the same asset ID
+            // if a transfer has already been started for the same asset ID, something is wrong
             if (assets[assetID]) {
-              continue;
+              throw new Error(`Asset ${assetID} already started`);
             }
 
+            this.#reportInfo(`Asset ${assetID} starting`);
             // Register the asset
             assets[assetID] = {
               ...item.data,
               stream: new PassThrough(),
-              status: 'idle',
+              status: 'ok',
               queue: [],
             };
+
+            resetTimeout(assetID);
 
             // Connect the individual asset stream to the main asset stage stream
             // Note: nothing is transferred until data chunks are fed to the asset stream
@@ -164,57 +196,36 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           }
 
           // Writes the asset's data chunks to their corresponding stream
-          else if (action === 'stream') {
-            // If the asset hasn't been registered, or if it's been closed already, then ignore the message
+          // "end" is considered a chunk, but it's not a data chunk, it's a control message
+          // That is done so that we don't complicate the already complicated async processing of the queue
+          else if (action === 'stream' || action === 'end') {
+            // If the asset hasn't been registered, or if it's been closed already, something is wrong
             if (!assets[assetID]) {
-              continue;
+              throw new Error(`No id matching ${assetID} for stream action`);
             }
 
-            switch (assets[assetID].status) {
-              // The asset is ready to accept a new chunk, write it now
-              case 'idle':
-                await writeAssetChunk(assetID, item.data);
-                break;
-              // The resource is busy, queue the current chunk so that it gets transferred as soon as possible
-              case 'busy':
-                assets[assetID].queue.push(item);
-                break;
-              // Ignore asset chunks for assets with a closed/errored status
-              case 'closed':
-              case 'errored':
-              default:
-                break;
+            // On every action, reset the timeout timer
+            if (action === 'stream') {
+              resetTimeout(assetID);
+            } else {
+              clearTimeout(assets[assetID].timeout);
             }
+
+            if (assets[assetID].status === 'closed') {
+              throw new Error(`Asset ${assetID} is closed`);
+            }
+
+            assets[assetID].queue.push(item);
           }
+        }
 
-          // All the asset chunks have been transferred
-          else if (action === 'end') {
-            // If the asset has already been closed, or if it was never registered, ignore the command
-            if (!assets[assetID]) {
-              continue;
-            }
-
-            switch (assets[assetID].status) {
-              // There's no ongoing activity, the asset is ready to be closed
-              case 'idle':
-              case 'errored':
-                await closeAssetStream(assetID);
-                break;
-              // The resource is busy, wait for a different state and close the stream.
-              case 'busy':
-                await Promise.race([
-                  // Either: wait for the asset to be ready to be closed
-                  waitUntil(() => assets[assetID].status !== 'busy', 100),
-                  // Or: if the last chunks are still not processed after ten seconds
-                  wait(10000),
-                ]);
-
-                await closeAssetStream(assetID);
-                break;
-              // Ignore commands for assets being currently closed
-              case 'closed':
-              default:
-                break;
+        // each new payload will start new processQueue calls, which may cause some extra calls
+        // it's essentially saying "start processing this asset again, I added more data to the queue"
+        for (const assetID in assets) {
+          if (Object.prototype.hasOwnProperty.call(assets, assetID)) {
+            const asset = assets[assetID];
+            if (asset.queue?.length > 0) {
+              await processQueue(assetID);
             }
           }
         }
@@ -224,42 +235,47 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       });
 
     /**
-     * Writes a chunk of data for the specified asset with the given id.
+     * Start processing the queue for a given assetID
+     *
+     * Even though this is a loop that attempts to process the entire queue, it is safe to call this more than once
+     * for the same asset id because the queue is shared globally, the items are shifted off, and immediately written
      */
-    const writeAssetChunk = async (id: string, data: unknown) => {
+    const processQueue = async (id: string) => {
       if (!assets[id]) {
         throw new Error(`Failed to write asset chunk for "${id}". Asset not found.`);
       }
 
-      const { status: currentStatus } = assets[id];
+      const asset = assets[id];
+      const { status: currentStatus } = asset;
 
-      if (currentStatus !== 'idle') {
+      if (['closed', 'errored'].includes(currentStatus)) {
         throw new Error(
           `Failed to write asset chunk for "${id}". The asset is currently "${currentStatus}"`
         );
       }
 
-      const nextItemInQueue = () => assets[id].queue.shift();
+      while (asset.queue.length > 0) {
+        const data = asset.queue.shift();
 
-      try {
-        // Lock the asset
-        assets[id].status = 'busy';
-
-        // Save the current chunk
-        await unsafe_writeAssetChunk(id, data);
-
-        // Empty the queue if needed
-        let item = nextItemInQueue();
-
-        while (item) {
-          await unsafe_writeAssetChunk(id, item.data);
-          item = nextItemInQueue();
+        if (!data) {
+          throw new Error(`Invalid chunk found for ${id}`);
         }
 
-        // Unlock the asset
-        assets[id].status = 'idle';
-      } catch {
-        assets[id].status = 'errored';
+        try {
+          // if this is an end chunk, close the asset stream
+          if (data.action === 'end') {
+            this.#reportInfo(`Ending asset stream for ${id}`);
+            await closeAssetStream(id);
+            break; // Exit the loop after closing the stream
+          }
+
+          // Save the current chunk
+          await writeChunkToStream(id, data);
+        } catch {
+          if (!assets[id]) {
+            throw new Error(`No id matching ${id} for writeAssetChunk`);
+          }
+        }
       }
     };
 
@@ -268,7 +284,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
      *
      * Only check if the targeted asset exists, no other validation is done.
      */
-    const unsafe_writeAssetChunk = async (id: string, data: unknown) => {
+    const writeChunkToStream = async (id: string, data: unknown) => {
       const asset = assets[id];
 
       if (!asset) {
@@ -298,11 +314,12 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
         stream
           .on('close', () => {
-            delete assets[id];
-
             resolve();
           })
-          .on('error', reject)
+          .on('error', (e) => {
+            assets[id].status = 'errored';
+            reject(new Error(`Failed to close asset "${id}". Asset stream error: ${e.toString()}`));
+          })
           .end();
       });
     };
@@ -348,7 +365,19 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     return res.transferID;
   }
 
-  async bootstrap(): Promise<void> {
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'remote-source-provider',
+      },
+      kind: 'info',
+    });
+  }
+
+  async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
+    this.#diagnostics = diagnostics;
     const { url, auth } = this.options;
     let ws: WebSocket;
     this.assertValidProtocol(url);
@@ -357,15 +386,16 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       url.pathname
     )}${TRANSFER_PATH}/pull`;
 
+    this.#reportInfo('establishing websocket connection');
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = await connectToWebsocket(wsUrl);
+      ws = await connectToWebsocket(wsUrl, undefined, this.#diagnostics);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = await connectToWebsocket(wsUrl, { headers });
+      ws = await connectToWebsocket(wsUrl, { headers }, this.#diagnostics);
     }
 
     // Invalid auth method provided
@@ -378,10 +408,19 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       });
     }
 
+    this.#reportInfo('established websocket connection');
     this.ws = ws;
     const { retryMessageOptions } = this.options;
-    this.dispatcher = createDispatcher(this.ws, retryMessageOptions);
+
+    this.#reportInfo('creating dispatcher');
+    this.dispatcher = createDispatcher(this.ws, retryMessageOptions, (message: string) =>
+      this.#reportInfo(message)
+    );
+    this.#reportInfo('creating dispatcher');
+
+    this.#reportInfo('initialize transfer');
     const transferID = await this.initTransfer();
+    this.#reportInfo(`initialized transfer ${transferID}`);
 
     this.dispatcher.setTransferProperties({ id: transferID, kind: 'pull' });
     await this.dispatcher.dispatchTransferAction('bootstrap');

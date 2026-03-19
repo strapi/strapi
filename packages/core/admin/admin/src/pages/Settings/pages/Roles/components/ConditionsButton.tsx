@@ -15,7 +15,7 @@ const ConditionsButtonImpl = React.forwardRef<HTMLButtonElement, ConditionsButto
 
     return (
       <ButtonContainer $hasConditions={hasConditions} className={className}>
-        <Button variant={variant} startIcon={<Cog />} onClick={onClick} ref={ref}>
+        <Button variant={variant} startIcon={<Cog />} onClick={onClick} ref={ref} type="button">
           {formatMessage({
             id: 'global.settings',
             defaultMessage: 'Settings',

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Flex, Grid, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
@@ -24,6 +24,7 @@ const Policies = () => {
   return (
     <Grid.Item
       col={5}
+      xs={12}
       background="neutral150"
       paddingTop={6}
       paddingBottom={6}

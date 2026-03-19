@@ -4,12 +4,13 @@ import {
   ConfirmDialog,
   useNotification,
   useQueryParams,
+  useTracking,
   useRBAC,
   Layouts,
+  GradientBadge,
 } from '@strapi/admin/strapi-admin';
 import { Button, Typography, Flex, Link, Dialog } from '@strapi/design-system';
 import { ArrowLeft, WarningCircle } from '@strapi/icons';
-import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, useParams, type To } from 'react-router-dom';
@@ -17,6 +18,8 @@ import { NavLink, useNavigate, useParams, type To } from 'react-router-dom';
 import { PERMISSIONS } from '../../constants/plugin';
 import { useHistoryContext } from '../pages/History';
 import { useRestoreVersionMutation } from '../services/historyVersion';
+
+import type { UID } from '@strapi/types';
 
 interface VersionHeaderProps {
   headerId: string;
@@ -26,6 +29,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const navigate = useNavigate();
   const { formatMessage, formatDate } = useIntl();
+  const { trackUsage } = useTracking();
   const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
@@ -76,9 +80,11 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           }),
           message: formatMessage({
             id: 'content-manager.restore.success.message',
-            defaultMessage: 'The content of the restored version is not published yet.',
+            defaultMessage: 'A past version of the content was restored.',
           }),
         });
+
+        trackUsage('didRestoreHistoryVersion');
       }
 
       if ('error' in response) {
@@ -109,6 +115,14 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           hour: 'numeric',
           minute: 'numeric',
         })}
+        secondaryAction={
+          <GradientBadge
+            label={formatMessage({
+              id: 'components.premiumFeature.title',
+              defaultMessage: 'Premium feature',
+            })}
+          />
+        }
         subtitle={
           <Typography variant="epsilon" textColor="neutral600">
             {formatMessage(
@@ -147,6 +161,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
               onClick={() => {
                 setIsConfirmDialogOpen(true);
               }}
+              fullWidth
             >
               {formatMessage({
                 id: 'content-manager.history.restore.confirm.button',
@@ -159,7 +174,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
       <ConfirmDialog
         onConfirm={handleRestore}
         endAction={
-          <Button variant="secondary" onClick={handleRestore} loading={isLoading}>
+          <Button fullWidth variant="secondary" onClick={handleRestore} loading={isLoading}>
             {formatMessage({
               id: 'content-manager.history.restore.confirm.button',
               defaultMessage: 'Restore',

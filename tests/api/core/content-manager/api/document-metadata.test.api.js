@@ -55,8 +55,6 @@ const product = {
     },
     // TODO - Add other fields with validation requirements
     shopName: {
-      // This field has no validation requirements so should be excluded from
-      // available locales
       type: 'string',
     },
   },
@@ -263,9 +261,12 @@ describe('CM API - Document metadata', () => {
     }
   );
 
-  test('Return available locales, including any fields that require validation', async () => {
-    // Create products with different locales with content for every kind of
-    // field that requires validation
+  test('Return available locales with non-localized scalar fields for prefilling', async () => {
+    // Create products with different locales. The metadata should include
+    // non-localized scalar fields in availableLocales to support prefilling
+    // when creating a new locale. Validation fields for other locales are
+    // no longer included — server-side validation handles other locales
+    // during bulk publish operations.
     const defaultLocaleProduct = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/${PRODUCT_UID}`,
@@ -308,23 +309,17 @@ describe('CM API - Document metadata', () => {
       name: 'prod-fr-draft',
       category: 'Cat-1-fr',
       price: 1,
-      features: {
-        id: expect.any(Number),
-        name: 'Feature 1 fr',
-      },
       status: 'draft',
       publishedAt: null,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     };
-    expect(meta.availableLocales).toEqual(
-      expect.arrayContaining([expect.objectContaining(expectedLocaleData)])
-    );
-
-    // Ensure no unwanted keys are present
-    const unwantedKeys = ['shopName'];
-    unwantedKeys.forEach((key) => {
-      expect(meta.availableLocales[0]).not.toHaveProperty(key);
+    expect(meta.availableLocales).toMatchObject([expectedLocaleData]);
+    // The data should include the non-localized fields in the available locales
+    // to auto fill the form when creating a new locale
+    const neededKeys = ['shopName'];
+    neededKeys.forEach((key) => {
+      expect(meta.availableLocales[0]).toHaveProperty(key);
     });
 
     expect(meta.availableStatus).toEqual([]);

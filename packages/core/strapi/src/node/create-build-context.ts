@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
-import { Core, Modules } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import type { Server } from 'node:http';
 
 import type { CLIContext } from '../cli/types';
@@ -78,17 +78,28 @@ const createBuildContext = async <TOptions extends BaseOptions>({
       serveAdminPanel: false,
     });
 
-  const serverUrl = strapiInstance.config.get<string>('server.url');
+  const serverAbsoluteUrl = strapiInstance.config.get<string>('server.absoluteUrl');
+  const adminAbsoluteUrl = strapiInstance.config.get<string>('admin.absoluteUrl');
   const adminPath = strapiInstance.config.get<string>('admin.path');
+
+  // NOTE: Checks that both the server and admin will be served from the same origin (protocol, host, port)
+  const sameOrigin = new URL(adminAbsoluteUrl).origin === new URL(serverAbsoluteUrl).origin;
+
+  const adminPublicPath = new URL(adminAbsoluteUrl).pathname;
+  const serverPublicPath = new URL(serverAbsoluteUrl).pathname;
 
   const appDir = strapiInstance.dirs.app.root;
 
   await loadEnv(cwd);
 
   const env = getStrapiAdminEnvVars({
-    ADMIN_PATH: adminPath,
-    STRAPI_ADMIN_BACKEND_URL: serverUrl,
+    ADMIN_PATH: adminPublicPath,
+    STRAPI_ADMIN_BACKEND_URL: sameOrigin ? serverPublicPath : serverAbsoluteUrl,
     STRAPI_TELEMETRY_DISABLED: String(strapiInstance.telemetry.isDisabled),
+    // TODO: Get this url from a utility/consts rather than duplicating it in AIChat constants.ts
+    STRAPI_AI_URL:
+      process.env.STRAPI_AI_URL?.replace(/\/+$/, '') ?? 'https://strapi-ai.apps.strapi.io',
+    STRAPI_ANALYTICS_URL: process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io',
   });
 
   const envKeys = Object.keys(env);
@@ -138,7 +149,8 @@ const createBuildContext = async <TOptions extends BaseOptions>({
 
   const buildContext = {
     appDir,
-    basePath: `${adminPath}/`,
+    adminPath,
+    basePath: adminPublicPath,
     bundler,
     customisations,
     cwd,

@@ -7,6 +7,7 @@ import { Database } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
+import tsUtils from '@strapi/typescript-utils';
 import { loadConfiguration } from './configuration';
 
 import * as factories from './factories';
@@ -28,11 +29,15 @@ import createAuth from './services/auth';
 import createCustomFields from './services/custom-fields';
 import createContentAPI from './services/content-api';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
+import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
+import { createContentSourceMapsService } from './services/content-source-maps';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
+
+import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -134,6 +139,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get telemetry(): Modules.Metrics.TelemetryService {
     return this.get('telemetry');
+  }
+
+  get sessionManager(): Modules.SessionManager.SessionManagerService {
+    return this.get('sessionManager');
   }
 
   get store(): Modules.CoreStore.CoreStore {
@@ -269,21 +278,24 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityValidator', entityValidator)
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
-      .add(
-        'db',
-        () =>
-          new Database(
-            _.merge(this.config.get('database'), {
-              logger,
-              settings: {
-                migrations: {
-                  dir: path.join(this.dirs.app.root, 'database/migrations'),
-                },
+      .add('db', () => {
+        const tsDir = tsUtils.resolveOutDirSync(this.dirs.app.root);
+        const tsMigrationsEnabled =
+          this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
+        const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
+        return new Database(
+          _.merge(this.config.get('database'), {
+            logger,
+            settings: {
+              migrations: {
+                dir: path.join(projectDir, 'database/migrations'),
               },
-            })
-          )
-      )
-      .add('reload', () => createReloader(this));
+            },
+          })
+        );
+      })
+      .add('reload', () => createReloader(this))
+      .add('content-source-maps', () => createContentSourceMapsService(this));
   }
 
   sendStartupTelemetry() {
@@ -298,6 +310,7 @@ class Strapi extends Container implements Core.Strapi {
           numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
           numberOfComponents: _.size(this.components),
           numberOfDynamicZones: getNumberOfDynamicZones(),
+          numberOfConditionalFields: getNumberOfConditionalFields(),
           numberOfCustomControllers: Object.values<Core.Controller>(this.controllers).filter(
             // TODO: Fix this at the content API loader level to prevent future types issues
             (controller) => controller !== undefined && factories.isCustomController(controller)
@@ -436,7 +449,30 @@ class Strapi extends Container implements Core.Strapi {
       contentTypes: this.contentTypes,
     });
 
-    await this.db.schema.sync();
+    // NOTE: commenting out repair logic for now as it is causing relationship loss in some cases
+    // will revisit soon in the future PR
+
+    const status = await this.db.schema.sync();
+
+    // // if schemas have changed, run repairs
+    if (status === 'CHANGED') {
+      await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+      await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
+    }
+
+    const alreadyRanComponentRepair = await this.store.get({
+      type: 'strapi',
+      key: 'unidirectional-join-table-repair-ran',
+    });
+
+    if (!alreadyRanComponentRepair) {
+      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
+      await this.store.set({
+        type: 'strapi',
+        key: 'unidirectional-join-table-repair-ran',
+        value: true,
+      });
+    }
 
     if (this.EE) {
       await utils.ee.checkLicense({ strapi: this });

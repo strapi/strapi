@@ -17,6 +17,8 @@ export const createStartupLogger = (app: Core.Strapi) => {
         chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
       });
 
+      const dbInfo = app.db?.getInfo();
+
       infoTable.push(
         [chalk.blue('Time'), `${new Date()}`],
         [chalk.blue('Launched in'), `${Date.now() - app.config.launchedAt} ms`],
@@ -24,8 +26,13 @@ export const createStartupLogger = (app: Core.Strapi) => {
         [chalk.blue('Process PID'), process.pid],
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
         [chalk.blue('Edition'), app.EE ? 'Enterprise' : 'Community'],
-        [chalk.blue('Database'), app.db?.dialect.client]
+        [chalk.blue('Database'), dbInfo?.client],
+        [chalk.blue('Database name'), dbInfo?.displayName]
       );
+
+      if (dbInfo?.schema) {
+        infoTable.push([chalk.blue('Database schema'), dbInfo.schema]);
+      }
 
       console.log(infoTable.toString());
       console.log();

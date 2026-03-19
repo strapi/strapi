@@ -1,18 +1,20 @@
 import type { Knex } from 'knex';
 
+import path from 'node:path';
+
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider } from './migrations';
+import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { Model } from './types';
-import type { Migration } from './migrations';
-import { type Identifiers } from './utils/identifiers';
+import type { Model, JoinTable } from './types';
+import type { Identifiers } from './utils/identifiers';
+import { createRepairManager, type RepairManager } from './repairs';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -65,6 +67,8 @@ class Database {
 
   entityManager: EntityManager;
 
+  repair: RepairManager;
+
   logger: Logger;
 
   constructor(config: DatabaseConfig) {
@@ -116,6 +120,8 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
+
+    this.repair = createRepairManager(this);
   }
 
   async init({ models }: { models: Model[] }) {
@@ -214,6 +220,34 @@ class Database {
     return schema ? connection.withSchema(schema) : connection;
   }
 
+  // Returns basic info about the database connection
+  getInfo() {
+    const connectionSettings = this.connection?.client?.connectionSettings || {};
+    const client = this.dialect?.client || '';
+
+    let displayName = '';
+    let schema;
+
+    // For SQLite, get the relative filename
+    if (client === 'sqlite') {
+      const absolutePath = connectionSettings?.filename;
+      if (absolutePath) {
+        displayName = path.relative(process.cwd(), absolutePath);
+      }
+    }
+    // For other dialects, get the database name
+    else {
+      displayName = connectionSettings?.database;
+      schema = connectionSettings?.schema;
+    }
+
+    return {
+      displayName,
+      schema,
+      client,
+    };
+  }
+
   getSchemaConnection(trx = this.connection) {
     const schema = this.getSchemaName();
     return schema ? trx.schema.withSchema(schema) : trx.schema;
@@ -230,4 +264,4 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, Identifiers, Migration };
+export type { Model, JoinTable, Identifiers, Migration };

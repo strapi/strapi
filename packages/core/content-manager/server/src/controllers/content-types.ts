@@ -56,7 +56,17 @@ export default {
 
     const confWithUpdatedMetadata = {
       ...configuration,
-      metadatas: mapValues(assocMainField, configuration.metadatas),
+      metadatas: {
+        ...mapValues(assocMainField, configuration.metadatas),
+        documentId: {
+          edit: {},
+          list: {
+            label: 'documentId',
+            searchable: true,
+            sortable: true,
+          },
+        },
+      },
     };
 
     const components = await contentTypeService.findComponentsConfigurations(contentType);

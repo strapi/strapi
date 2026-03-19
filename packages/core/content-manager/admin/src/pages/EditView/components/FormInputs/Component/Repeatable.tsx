@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useField, useNotification, useForm } from '@strapi/admin/strapi-admin';
+import { useField, useNotification, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -9,23 +9,23 @@ import {
   Accordion,
   IconButton,
   useComposedRefs,
-  Grid,
   BoxComponent,
 } from '@strapi/design-system';
-import { Plus, Drag, Trash } from '@strapi/icons';
+import { Plus, Drag, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDoc } from '../../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
@@ -51,7 +51,8 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const { components } = useDoc();
+  const { currentDocument } = useDocumentContext('RepeatableComponent');
+  const components = currentDocument.components;
 
   const {
     value = [],
@@ -131,9 +132,9 @@ const RepeatableComponent = ({
     }
   }, [componentTmpKeyWithFocussedField]);
 
-  const toggleCollapses = () => {
+  const toggleCollapses = React.useCallback(() => {
     setCollapseToOpen('');
-  };
+  }, []);
 
   const handleClick = () => {
     if (value.length < max) {
@@ -153,72 +154,90 @@ const RepeatableComponent = ({
     }
   };
 
-  const handleMoveComponentField: ComponentProps['onMoveItem'] = (newIndex, currentIndex) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.reorder'),
-          defaultMessage: '{item}, moved. New position in list: {position}.',
-        },
-        {
-          item: `${name}.${currentIndex}`,
-          position: getItemPos(newIndex),
-        }
-      )
-    );
+  const handleMoveComponentField = React.useCallback(
+    (newIndex: number, currentIndex: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.reorder'),
+            defaultMessage: '{item}, moved. New position in list: {position}.',
+          },
+          {
+            item: `${name}.${currentIndex}`,
+            position: `${newIndex + 1} of ${value.length}`,
+          }
+        )
+      );
 
-    moveFieldRow(name, currentIndex, newIndex);
-  };
+      moveFieldRow(name, currentIndex, newIndex);
+    },
+    [formatMessage, moveFieldRow, name, value.length]
+  );
 
   const handleValueChange = (key: string) => {
     setCollapseToOpen(key);
   };
 
-  const getItemPos = (index: number) => `${index + 1} of ${value.length}`;
+  const handleCancel = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.cancel-item'),
+            defaultMessage: '{item}, dropped. Re-order cancelled.',
+          },
+          {
+            item: `${name}.${index}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name]
+  );
 
-  const handleCancel = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.cancel-item'),
-          defaultMessage: '{item}, dropped. Re-order cancelled.',
-        },
-        {
-          item: `${name}.${index}`,
-        }
-      )
-    );
-  };
+  const handleGrabItem = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.grab-item'),
+            defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+          },
+          {
+            item: `${name}.${index}`,
+            position: `${index + 1} of ${value.length}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name, value.length]
+  );
 
-  const handleGrabItem = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.grab-item'),
-          defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
-        },
-        {
-          item: `${name}.${index}`,
-          position: getItemPos(index),
-        }
-      )
-    );
-  };
+  const handleDropItem = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.drop-item'),
+            defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+          },
+          {
+            item: `${name}.${index}`,
+            position: `${index + 1} of ${value.length}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name, value.length]
+  );
 
-  const handleDropItem = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.drop-item'),
-          defaultMessage: `{item}, dropped. Final position in list: {position}.`,
-        },
-        {
-          item: `${name}.${index}`,
-          position: getItemPos(index),
-        }
-      )
-    );
-  };
+  const handleDeleteComponent = React.useCallback(
+    (index: number) => {
+      removeFieldRow(name, index);
+      toggleCollapses();
+    },
+    [name, removeFieldRow, toggleCollapses]
+  );
 
   const ariaDescriptionId = React.useId();
 
@@ -243,8 +262,11 @@ const RepeatableComponent = ({
         onValueChange={handleValueChange}
         aria-describedby={ariaDescriptionId}
       >
-        {value.map(({ __temp_key__: key, id }, index) => {
+        {value.map((componentValue, index) => {
+          const key = componentValue.__temp_key__;
+          const id = componentValue.id;
           const nameWithIndex = `${name}.${index}`;
+
           return (
             <ComponentProvider
               key={key}
@@ -254,61 +276,23 @@ const RepeatableComponent = ({
               level={level + 1}
               type="repeatable"
             >
-              <Component
+              <MemoizedComponent
                 disabled={disabled}
                 name={nameWithIndex}
-                attribute={attribute}
+                attributeComponent={attribute.component}
                 index={index}
                 mainField={mainField}
                 onMoveItem={handleMoveComponentField}
-                onDeleteComponent={() => {
-                  removeFieldRow(name, index);
-                  toggleCollapses();
-                }}
+                onDeleteComponent={handleDeleteComponent}
                 toggleCollapses={toggleCollapses}
                 onCancel={handleCancel}
                 onDropItem={handleDropItem}
                 onGrabItem={handleGrabItem}
                 __temp_key__={key}
-              >
-                {layout.map((row, index) => {
-                  return (
-                    <Grid.Root gap={4} key={index}>
-                      {row.map(({ size, ...field }) => {
-                        /**
-                         * Layouts are built from schemas so they don't understand the complete
-                         * schema tree, for components we append the parent name to the field name
-                         * because this is the structure for the data & permissions also understand
-                         * the nesting involved.
-                         */
-                        const completeFieldName = `${nameWithIndex}.${field.name}`;
-
-                        const translatedLabel = formatMessage({
-                          id: `content-manager.components.${attribute.component}.${field.name}`,
-                          defaultMessage: field.label,
-                        });
-
-                        return (
-                          <Grid.Item
-                            col={size}
-                            key={completeFieldName}
-                            s={12}
-                            xs={12}
-                            direction="column"
-                            alignItems="stretch"
-                          >
-                            {children({
-                              ...field,
-                              label: translatedLabel,
-                              name: completeFieldName,
-                            })}
-                          </Grid.Item>
-                        );
-                      })}
-                    </Grid.Root>
-                  );
-                })}
-              </Component>
+                totalLength={value.length}
+                layout={layout}
+                renderField={children}
+              />
             </ComponentProvider>
           );
         })}
@@ -355,24 +339,82 @@ const TextButtonCustom = styled(TextButton)`
   }
 `;
 
+interface RepeatableComponentFieldsProps
+  extends Pick<RepeatableComponentProps, 'children' | 'layout'> {
+  attributeComponent: string;
+  nameWithIndex: string;
+}
+
+const RepeatableComponentFields = React.memo(
+  ({ attributeComponent, children, layout, nameWithIndex }: RepeatableComponentFieldsProps) => {
+    const { formatMessage } = useIntl();
+
+    return (
+      <>
+        {layout.map((row, index) => {
+          return (
+            <ResponsiveGridRoot gap={4} key={index}>
+              {row.map(({ size, ...field }) => {
+                /**
+                 * Layouts are built from schemas so they don't understand the complete
+                 * schema tree, for components we append the parent name to the field name
+                 * because this is the structure for the data & permissions also understand
+                 * the nesting involved.
+                 */
+                const completeFieldName = `${nameWithIndex}.${field.name}`;
+
+                const translatedLabel = formatMessage({
+                  id: `content-manager.components.${attributeComponent}.${field.name}`,
+                  defaultMessage: field.label,
+                });
+
+                return (
+                  <ResponsiveGridItem
+                    col={size}
+                    key={completeFieldName}
+                    s={12}
+                    xs={12}
+                    direction="column"
+                    alignItems="stretch"
+                  >
+                    {children({
+                      ...field,
+                      label: translatedLabel,
+                      name: completeFieldName,
+                    })}
+                  </ResponsiveGridItem>
+                );
+              })}
+            </ResponsiveGridRoot>
+          );
+        })}
+      </>
+    );
+  }
+);
+
+RepeatableComponentFields.displayName = 'RepeatableComponentFields';
+
 /* -------------------------------------------------------------------------------------------------
  * Field
  * -----------------------------------------------------------------------------------------------*/
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
-    Pick<RepeatableComponentProps, 'mainField'> {
-  attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
+    Pick<RepeatableComponentProps, 'mainField' | 'layout'> {
+  attributeComponent: string;
   disabled?: boolean;
   index: number;
   name: string;
-  onDeleteComponent?: React.MouseEventHandler<HTMLButtonElement>;
+  onDeleteComponent?: (index: number) => void;
+  renderField: RepeatableComponentProps['children'];
   toggleCollapses: () => void;
-  children: React.ReactNode;
   __temp_key__: string;
+  totalLength: number;
 }
 
 const Component = ({
+  attributeComponent,
   disabled,
   index,
   name,
@@ -380,13 +422,17 @@ const Component = ({
     name: 'id',
     type: 'integer',
   },
-  children,
+  layout,
   onDeleteComponent,
+  renderField,
   toggleCollapses,
   __temp_key__,
+  totalLength,
+  onMoveItem,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -414,6 +460,7 @@ const Component = ({
         // Close all collapses
         toggleCollapses();
       },
+      onMoveItem,
       ...dragProps,
     });
 
@@ -427,6 +474,12 @@ const Component = ({
     dropRef
   );
 
+  const canMoveUp = index > 0;
+  const canMoveDown = index < totalLength - 1;
+  const handleDeleteClick = () => {
+    onDeleteComponent?.(index);
+  };
+
   return (
     <>
       {isDragging ? (
@@ -437,8 +490,9 @@ const Component = ({
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
               <IconButton
+                disabled={disabled}
                 variant="ghost"
-                onClick={onDeleteComponent}
+                onClick={handleDeleteClick}
                 label={formatMessage({
                   id: getTranslation('containers.Edit.delete'),
                   defaultMessage: 'Delete',
@@ -446,19 +500,62 @@ const Component = ({
               >
                 <Trash />
               </IconButton>
-              <IconButton
-                ref={composedAccordionRefs}
-                variant="ghost"
-                onClick={(e) => e.stopPropagation()}
-                data-handler-id={handlerId}
-                label={formatMessage({
-                  id: getTranslation('components.DragHandle-label'),
-                  defaultMessage: 'Drag',
-                })}
-                onKeyDown={handleKeyDown}
-              >
-                <Drag />
-              </IconButton>
+              {isDesktop && (
+                <IconButton
+                  disabled={disabled}
+                  ref={composedAccordionRefs}
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                  data-handler-id={handlerId}
+                  label={formatMessage({
+                    id: getTranslation('components.DragHandle-label'),
+                    defaultMessage: 'Drag',
+                  })}
+                  onKeyDown={handleKeyDown}
+                >
+                  <Drag />
+                </IconButton>
+              )}
+              {!isDesktop && (
+                <>
+                  {canMoveUp && (
+                    <IconButton
+                      disabled={disabled || !canMoveUp}
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onMoveItem) {
+                          onMoveItem(index - 1, index);
+                        }
+                      }}
+                      label={formatMessage({
+                        id: getTranslation('components.DynamicZone.move-up'),
+                        defaultMessage: 'Move up',
+                      })}
+                    >
+                      <ArrowUp />
+                    </IconButton>
+                  )}
+                  {canMoveDown && (
+                    <IconButton
+                      disabled={disabled || !canMoveDown}
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onMoveItem) {
+                          onMoveItem(index + 1, index);
+                        }
+                      }}
+                      label={formatMessage({
+                        id: getTranslation('components.DynamicZone.move-down'),
+                        defaultMessage: 'Move down',
+                      })}
+                    >
+                      <ArrowDown />
+                    </IconButton>
+                  )}
+                </>
+              )}
             </Accordion.Actions>
           </Accordion.Header>
           <Accordion.Content>
@@ -466,10 +563,16 @@ const Component = ({
               direction="column"
               alignItems="stretch"
               background="neutral100"
-              padding={6}
-              gap={6}
+              padding={{ initial: 4, medium: 6 }}
+              gap={{ initial: 3, medium: 4 }}
             >
-              {children}
+              <RepeatableComponentFields
+                attributeComponent={attributeComponent}
+                layout={layout}
+                nameWithIndex={name}
+              >
+                {renderField}
+              </RepeatableComponentFields>
             </Flex>
           </Accordion.Content>
         </Accordion.Item>
@@ -488,5 +591,8 @@ const StyledSpan = styled<BoxComponent<'span'>>(Box)`
   outline-offset: -1px;
 `;
 
-export { RepeatableComponent };
+const MemoizedComponent = React.memo(Component);
+const MemoizedRepeatableComponent = React.memo(RepeatableComponent);
+
+export { MemoizedRepeatableComponent as RepeatableComponent };
 export type { RepeatableComponentProps };

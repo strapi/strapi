@@ -1,7 +1,7 @@
 import { buildValidParams } from '../api';
 
 describe('api', () => {
-  describe('buildValidQueryParams', () => {
+  describe('buildValidParams', () => {
     it('should format query params from plugins', () => {
       const queryParams = {
         page: '1',
@@ -14,35 +14,25 @@ describe('api', () => {
 
       const params = buildValidParams(queryParams);
 
-      expect(params).toMatchInlineSnapshot(`
-        {
-          "locale": "en",
-          "page": "1",
-          "pageSize": "10",
-          "sort": "name:ASC",
-        }
-      `);
-    });
-
-    it('should encode a search query', () => {
-      const _q = `test query`;
-      const queryParams = {
+      expect(params).toEqual({
+        locale: 'en',
         page: '1',
         pageSize: '10',
         sort: 'name:ASC',
-        _q,
-      };
+      });
+    });
 
+    it('should pass through filters including __status (server rewrites them)', () => {
+      const queryParams = {
+        filters: { $and: [{ __status: { $eq: 'draft' } }] },
+        page: '1',
+      };
       const params = buildValidParams(queryParams);
 
-      expect(params).toMatchInlineSnapshot(`
-        {
-          "_q": "test%20query",
-          "page": "1",
-          "pageSize": "10",
-          "sort": "name:ASC",
-        }
-      `);
+      expect(params).toEqual({
+        filters: { $and: [{ __status: { $eq: 'draft' } }] },
+        page: '1',
+      });
     });
   });
 });

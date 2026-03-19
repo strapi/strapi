@@ -1,5 +1,6 @@
 import fse from 'fs-extra';
 import inquirer from 'inquirer';
+import boxen from 'boxen';
 import path from 'path';
 import chalk from 'chalk';
 import { AxiosError } from 'axios';
@@ -7,14 +8,25 @@ import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
 import { compressFilesToTar } from '../utils/compress-files';
 import createProjectAction from '../create-project/action';
-import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfos } from '../types';
+import type {
+  CLIContext,
+  CloudApiService,
+  CloudCliConfig,
+  EnvironmentDetails,
+  ProjectInfo,
+} from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
+import { VERSION } from '../services/cli-api';
 import { notificationServiceFactory } from '../services/notification';
 import { loadPkg } from '../utils/pkg';
 import { buildLogsServiceFactory } from '../services/build-logs';
 import { promptLogin } from '../login/action';
 import { trackEvent } from '../utils/analytics';
+import {
+  environmentCreationErrorFactory,
+  environmentErrorMessageFactory,
+} from '../utils/error-message-factories';
 
 type PackageJson = {
   name: string;
@@ -24,8 +36,17 @@ type PackageJson = {
 };
 
 interface CmdOptions {
-  environment?: string;
+  env?: string;
+  force?: boolean;
 }
+
+const boxenOptions: boxen.Options = {
+  padding: 1,
+  margin: 1,
+  align: 'center',
+  borderColor: 'yellow',
+  borderStyle: 'round',
+};
 
 const QUIT_OPTION = 'Quit';
 
@@ -43,28 +64,17 @@ async function promptForEnvironment(environments: string[]): Promise<string> {
     process.exit(1);
   }
 
-  const { confirm } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: `Do you want to proceed with deployment to ${chalk.cyan(selectedEnvironment)}?`,
-    },
-  ]);
-
-  if (!confirm) {
-    process.exit(1);
-  }
   return selectedEnvironment;
 }
 
 async function upload(
   ctx: CLIContext,
-  project: ProjectInfos,
+  project: Omit<ProjectInfo, 'id'>,
+  cliConfig: CloudCliConfig,
   token: string,
   maxProjectFileSize: number
 ) {
   const cloudApi = await cloudApiFactory(ctx, token);
-  // * Upload project
   try {
     const storagePath = await getTmpStoragePath();
     const projectFolder = path.resolve(process.cwd());
@@ -77,7 +87,8 @@ async function upload(
       return;
     }
 
-    ctx.logger.log('📦 Compressing project...');
+    const compressSpinner = ctx.logger.spinner('Compressing project...').start();
+    compressSpinner.indent = 1;
     // hash packageJson.name to avoid conflicts
     const hashname = crypto.createHash('sha512').update(packageJson.name).digest('hex');
     const compressedFilename = `${hashname}.tar.gz`;
@@ -89,10 +100,10 @@ async function upload(
         `Compressed filename: ${compressedFilename}`
       );
       await compressFilesToTar(storagePath, projectFolder, compressedFilename);
-      ctx.logger.log('📦 Project compressed successfully!');
+      compressSpinner.succeed(`Project compressed successfully!`);
     } catch (e: unknown) {
-      ctx.logger.error(
-        '⚠️ Project compression failed. Try again later or check for large/incompatible files.'
+      compressSpinner.fail(
+        'Project compression failed. Try again later or check for large/incompatible files.'
       );
       ctx.logger.debug(e);
       process.exit(1);
@@ -114,8 +125,7 @@ async function upload(
       return;
     }
 
-    ctx.logger.info('🚀 Uploading project...');
-    const progressBar = ctx.logger.progressBar(100, 'Upload Progress');
+    const progressBar = ctx.logger.progressBar(100, ' ∷ Uploading project');
 
     try {
       const { data } = await cloudApi.deploy(
@@ -131,12 +141,11 @@ async function upload(
 
       progressBar.update(100);
       progressBar.stop();
-      ctx.logger.success('✨ Upload finished!');
+      ctx.logger.log(`${chalk.green.bold('✔')} Upload finished!\n`);
       return data.build_id;
     } catch (e: any) {
       progressBar.stop();
-      ctx.logger.error('An error occurred while deploying the project. Please try again later.');
-      ctx.logger.debug(e);
+      await handleUploadError(ctx, e, project, cliConfig);
     } finally {
       await fse.remove(tarFilePath);
     }
@@ -148,11 +157,47 @@ async function upload(
   }
 }
 
+async function handleUploadError(
+  ctx: CLIContext,
+  error: any,
+  project: any,
+  cliConfig: CloudCliConfig
+) {
+  const { logger } = ctx;
+  logger.debug(error);
+
+  if (error.response?.status) {
+    switch (error.response.status) {
+      case 405: {
+        const environmentErrorMessage = environmentErrorMessageFactory({
+          projectName: project.name,
+          firstLine: cliConfig.projectDeployment.errors.environmentNotReady.firstLine,
+          secondLine: cliConfig.projectDeployment.errors.environmentNotReady.secondLine,
+        });
+        logger.log(environmentCreationErrorFactory(environmentErrorMessage));
+        return;
+      }
+      case 413:
+        logger.error(
+          'The project you are trying to upload is too big. Please remove unnecessary files and try again.'
+        );
+        return;
+      default:
+        break;
+    }
+  }
+  logger.error('An error occurred while deploying the project. Please try again later.');
+}
+
 async function getProject(ctx: CLIContext) {
   const { project } = await local.retrieve();
   if (!project) {
     try {
-      return await createProjectAction(ctx);
+      const projectResponse = await createProjectAction(ctx);
+      if (projectResponse) {
+        const { project: projectSaved } = await local.retrieve();
+        return projectSaved;
+      }
     } catch (e: any) {
       ctx.logger.error('An error occurred while deploying the project. Please try again later.');
       ctx.logger.debug(e);
@@ -178,6 +223,46 @@ async function getConfig({
   }
 }
 
+function validateEnvironment(ctx: CLIContext, environment: string, environments: string[]): void {
+  if (!environments.includes(environment)) {
+    ctx.logger.error(`Environment ${environment} does not exist.`);
+    process.exit(1);
+  }
+}
+
+async function getTargetEnvironment(
+  ctx: CLIContext,
+  opts: CmdOptions,
+  project: Omit<ProjectInfo, 'id'>,
+  environments: string[]
+): Promise<string> {
+  if (opts.env) {
+    validateEnvironment(ctx, opts.env, environments);
+    return opts.env;
+  }
+
+  if (project.targetEnvironment) {
+    return project.targetEnvironment;
+  }
+
+  if (environments.length > 1) {
+    return promptForEnvironment(environments);
+  }
+
+  return environments[0];
+}
+
+function hasPendingOrLiveDeployment(
+  environments: EnvironmentDetails[],
+  targetEnvironment: string
+): boolean {
+  const environment = environments.find((env) => env.name === targetEnvironment);
+  if (!environment) {
+    throw new Error(`Environment details ${targetEnvironment} not found.`);
+  }
+  return environment.hasPendingDeployment || environment.hasLiveDeployment || false;
+}
+
 export default async (ctx: CLIContext, opts: CmdOptions) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
   const token = await getValidToken(ctx, promptLogin);
@@ -187,19 +272,22 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
 
   const project = await getProject(ctx);
   if (!project) {
-    return;
+    process.exit(1);
   }
 
   const cloudApiService = await cloudApiFactory(ctx, token);
+  let projectData;
   let environments: string[];
+  let environmentsDetails: EnvironmentDetails[];
 
   try {
     const {
-      data: { data: projectData, metadata },
+      data: { data, metadata },
     } = await cloudApiService.getProject({ name: project.name });
-
-    const isProjectSuspended = projectData.suspendedAt;
+    projectData = data;
     environments = projectData.environments;
+    environmentsDetails = projectData.environmentsDetails;
+    const isProjectSuspended = projectData.suspendedAt;
 
     if (isProjectSuspended) {
       ctx.logger.log(
@@ -251,36 +339,59 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
     maxSize = 100000000;
   }
 
-  let targetEnvironment: string;
+  project.targetEnvironment = await getTargetEnvironment(ctx, opts, project, environments);
 
-  if (opts.environment) {
-    if (!environments.includes(opts.environment)) {
-      ctx.logger.error(`Environment ${opts.environment} does not exist.`);
-      return;
+  if (!opts.force) {
+    const shouldDisplayWarning = hasPendingOrLiveDeployment(
+      environmentsDetails,
+      project.targetEnvironment
+    );
+    if (shouldDisplayWarning) {
+      ctx.logger.log(boxen(cliConfig.projectDeployment.confirmationText, boxenOptions));
+      const { confirm } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirm',
+          message: `Do you want to proceed with deployment to ${chalk.cyan(projectData.displayName)} on ${chalk.cyan(project.targetEnvironment)} environment?`,
+        },
+      ]);
+      if (!confirm) {
+        process.exit(1);
+      }
     }
-    targetEnvironment = opts.environment;
-  } else {
-    targetEnvironment =
-      environments.length > 1 ? await promptForEnvironment(environments) : environments[0];
   }
 
-  project.targetEnvironment = targetEnvironment;
-
-  const buildId = await upload(ctx, project, token, maxSize);
+  const buildId = await upload(ctx, project, cliConfig, token, maxSize);
 
   if (!buildId) {
     return;
   }
 
-  try {
-    notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig);
-    await buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig);
+  let notifications: ReturnType<typeof notificationService> | null = null;
 
+  try {
     ctx.logger.log(
-      'Visit the following URL for deployment logs. Your deployment will be available here shortly.'
+      `∷ Deploying project to ${chalk.cyan(project.targetEnvironment ?? `production`)} environment...`
     );
+
+    notifications = notificationService(
+      `${apiConfig.apiBaseUrl}/${VERSION}/notifications`,
+      token,
+      cliConfig
+    );
+
+    await buildLogsService(`${apiConfig.apiBaseUrl}/${VERSION}/logs/${buildId}`, token, cliConfig);
+    const dashboardUrlLine =
+      chalk.cyan(' →  ') +
+      chalk.cyan.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments`);
     ctx.logger.log(
-      chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments`)
+      boxen(`Project and deployment logs ready at:\n${dashboardUrlLine}`, {
+        padding: 1,
+        margin: 1,
+        borderStyle: 'round',
+        borderColor: 'white',
+        titleAlignment: 'left',
+      })
     );
   } catch (e: Error | unknown) {
     ctx.logger.debug(e);
@@ -288,6 +399,10 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
       ctx.logger.error(e.message);
     } else {
       ctx.logger.error('An error occurred while deploying the project. Please try again later.');
+    }
+  } finally {
+    if (notifications) {
+      notifications.close();
     }
   }
 };

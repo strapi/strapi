@@ -1,4 +1,4 @@
-import { UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
 interface Options {
@@ -10,12 +10,20 @@ interface Options {
 
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypes.constants;
 
+const deepPopulateCache = new Map<string, any>();
+
 // We want to build a populate object based on the schema
 export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
+  const cacheKey = `${uid}::${JSON.stringify(opts)}`;
+  const cached = deepPopulateCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const model = strapi.getModel(uid);
   const attributes = Object.entries(model.attributes);
 
-  return attributes.reduce((acc: any, [attributeName, attribute]) => {
+  const result = attributes.reduce((acc: any, [attributeName, attribute]) => {
     switch (attribute.type) {
       case 'relation': {
         // TODO: Support polymorphic relations
@@ -67,4 +75,7 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
 
     return acc;
   }, {});
+
+  deepPopulateCache.set(cacheKey, result);
+  return result;
 };

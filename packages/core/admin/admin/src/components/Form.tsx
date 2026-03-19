@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { Button, Dialog, useCallbackRef, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  type BoxProps,
+  Button,
+  Dialog,
+  useCallbackRef,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
@@ -8,6 +15,7 @@ import isEqual from 'lodash/isEqual';
 import { useIntl, type MessageDescriptor, type PrimitiveType } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
+import { useWarnIfUnsavedChanges } from '../hooks/useWarnIfUnsavedChanges';
 import { getIn, setIn } from '../utils/objects';
 
 import { createContext } from './Context';
@@ -35,6 +43,7 @@ interface FormValues {
 interface FormContextValue<TFormValues extends FormValues = FormValues>
   extends FormState<TFormValues> {
   disabled: boolean;
+  getValues: () => TFormValues;
   initialValues: TFormValues;
   modified: boolean;
   /**
@@ -49,7 +58,7 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    * pass the index.
    */
   removeFieldRow: (field: string, removeAtIndex?: number) => void;
-  resetForm: () => void;
+  resetForm: (newInitialValues?: TFormValues) => void;
   setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
   setValues: (values: TFormValues) => void;
@@ -73,6 +82,9 @@ const ERR_MSG =
 const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
   disabled: false,
   errors: {},
+  getValues: () => {
+    throw new Error(ERR_MSG);
+  },
   initialValues: {},
   isSubmitting: false,
   modified: false,
@@ -114,7 +126,8 @@ interface FormHelpers<TFormValues extends FormValues = FormValues>
   extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues' | 'resetForm'> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>> {
+  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
+    Pick<BoxProps, 'width' | 'height'> {
   children:
     | React.ReactNode
     | ((
@@ -154,6 +167,17 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       isSubmitting: false,
       values: props.initialValues ?? {},
     });
+
+    // Keep a ref to the latest form values so `getValues()` can always return fresh data.
+    // We expose `getValues` as a stable callback so consumers (e.g. conditional/rules logic)
+    // can call it without causing extra rerenders from changing function references.
+    const valuesRef = React.useRef(state.values);
+
+    React.useEffect(() => {
+      valuesRef.current = state.values;
+    }, [state.values]);
+
+    const getValues = React.useCallback(() => valuesRef.current, []);
 
     React.useEffect(() => {
       /**
@@ -298,7 +322,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
 
     const modified = React.useMemo(
       () => !isEqual(initialValues.current, state.values),
-      [state.values]
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [state.values, initialValues.current]
     );
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
@@ -406,7 +431,10 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       []
     );
 
-    const resetForm: FormContextValue['resetForm'] = React.useCallback(() => {
+    const resetForm: FormContextValue['resetForm'] = React.useCallback((newInitialValues) => {
+      if (newInitialValues) {
+        initialValues.current = newInitialValues;
+      }
       dispatch({
         type: 'RESET_FORM',
         payload: {
@@ -424,9 +452,18 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     const composedRefs = useComposedRefs(formRef, ref);
 
     return (
-      <form ref={composedRefs} method={method} noValidate onSubmit={handleSubmit}>
+      <Box
+        tag="form"
+        ref={composedRefs}
+        method={method}
+        noValidate
+        onSubmit={handleSubmit}
+        width={props.width}
+        height={props.height}
+      >
         <FormProvider
           disabled={disabled}
+          getValues={getValues}
           onChange={handleChange}
           initialValues={initialValues.current}
           modified={modified}
@@ -451,7 +488,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
               })
             : props.children}
         </FormProvider>
-      </form>
+      </Box>
     );
   }
 ) as <TFormValues extends FormValues>(
@@ -574,7 +611,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         }
 
         const [key] = generateNKeysBetween(
-          currentField.at(position - 1)?.__temp_key__,
+          position > 0 ? currentField.at(position - 1)?.__temp_key__ : null,
           currentField.at(position)?.__temp_key__,
           1
         );
@@ -582,7 +619,10 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.values = setIn(
           state.values,
           action.payload.field,
-          setIn(currentField, position.toString(), { ...action.payload.value, __temp_key__: key })
+          currentField.toSpliced(position, 0, {
+            ...action.payload.value,
+            __temp_key__: key,
+          })
         );
 
         break;
@@ -674,7 +714,7 @@ interface FieldValue<TValue = any> {
   rawError?: any;
 }
 
-const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> => {
+function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
   const { formatMessage } = useIntl();
 
   const initialValue = useForm(
@@ -723,7 +763,7 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
     onChange: handleChange,
     value: value,
   };
-};
+}
 
 const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
   return (
@@ -752,6 +792,12 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
 
+  // this is trigering a native browser prompt on page unload
+  // We aren't able to use our Dialog component in that scenario
+  // so we fallback to the native browser one when the user is trying to close/refresh the tab/browser
+  // This hook will be triggered on dev mode because of the live reloads but it's fine as it's only for that scenario
+  useWarnIfUnsavedChanges(modified && !isSubmitting);
+
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     return (
       !isSubmitting &&
@@ -778,7 +824,10 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
               defaultMessage: 'Confirmation',
             })}
           </Dialog.Header>
-          <Dialog.Body icon={<WarningCircle width="24px" height="24px" fill="danger600" />}>
+          <Dialog.Body
+            icon={<WarningCircle width="24px" height="24px" fill="danger600" />}
+            textAlign="center"
+          >
             {formatMessage({
               id: 'global.prompt.unsaved',
               defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
@@ -786,7 +835,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
           </Dialog.Body>
           <Dialog.Footer>
             <Dialog.Cancel>
-              <Button variant="tertiary">
+              <Button variant="tertiary" fullWidth>
                 {formatMessage({
                   id: 'app.components.Button.cancel',
                   defaultMessage: 'Cancel',
@@ -799,6 +848,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
                 blocker.proceed();
               }}
               variant="danger"
+              fullWidth
             >
               {formatMessage({
                 id: 'app.components.Button.confirm',

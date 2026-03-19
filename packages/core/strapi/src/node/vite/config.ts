@@ -3,6 +3,8 @@ import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
+import { getModulePath } from '../core/resolve-module';
+import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
 import type { BuildContext } from '../create-build-context';
@@ -10,9 +12,12 @@ import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
+  const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
+  const designSystemLinked = isDesignSystemLinked();
 
   return {
     root: ctx.cwd,
+    base: ctx.basePath,
     build: {
       emptyOutDir: false, // Rely on CLI to do this
       outDir: ctx.distDir,
@@ -21,10 +26,14 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     cacheDir: 'node_modules/.strapi/vite',
     configFile: false,
     define: {
-      'process.env': ctx.env,
+      process: {},
+      'process.env': JSON.stringify(ctx.env),
     },
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
+      // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
+      // so changes are reflected without clearing node_modules/.strapi/vite cache
+      ...(designSystemLinked && { exclude: ['@strapi/design-system'] }),
       include: [
         // pre-bundle React dependencies to avoid React duplicates,
         // even if React dependencies are not direct dependencies
@@ -34,11 +43,101 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom/client',
         'styled-components',
         'react-router-dom',
+        // Pre-bundle design-system so plugin custom field chunks (dynamic imports) resolve
+        // to the same instance as the main app. Otherwise TooltipProvider/DesignSystemProvider
+        // context from the root is not seen by components in plugin chunks.
+        // Omit when linked so local changes are picked up (see exclude above)
+        ...(!designSystemLinked ? ['@strapi/design-system'] : []),
+        '@radix-ui/react-tooltip',
+        // Pre-bundle lodash: design-system uses named imports (e.g. assignWith) but lodash
+        // is CommonJS-only; pre-bundling converts it to ESM for the browser
+        'lodash',
+        /**
+         * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
+         * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
+         * Only include dependencies for our internal example apps, otherwise it will break
+         * real user apps that may not have those dependencies.
+         */
+        ...(isMonorepoExampleApp
+          ? [
+              '@dnd-kit/core',
+              '@dnd-kit/sortable',
+              '@dnd-kit/utilities',
+              '@dnd-kit/modifiers',
+              '@radix-ui/react-toolbar',
+              'codemirror5',
+              'codemirror5/addon/display/placeholder',
+              'date-fns-tz',
+              'date-fns/format',
+              'date-fns/formatISO',
+              'highlight.js',
+              'lodash/capitalize',
+              'lodash/fp',
+              'lodash/groupBy',
+              'lodash/has',
+              'lodash/isNil',
+              'lodash/locale',
+              'lodash/map',
+              'lodash/mapValues',
+              'lodash/pull',
+              'lodash/size',
+              'lodash/sortBy',
+              'lodash/tail',
+              'lodash/toLower',
+              'lodash/toNumber',
+              'lodash/toString',
+              'lodash/truncate',
+              'lodash/uniq',
+              'lodash/upperFirst',
+              'markdown-it',
+              'markdown-it-abbr',
+              'markdown-it-container',
+              'markdown-it-deflist',
+              'markdown-it-emoji',
+              'markdown-it-footnote',
+              'markdown-it-ins',
+              'markdown-it-mark',
+              'markdown-it-sub',
+              'markdown-it-sup',
+              'prismjs/components/*.js',
+              'react-colorful',
+              'react-dnd-html5-backend',
+              'react-window',
+              'sanitize-html',
+              'semver',
+              'semver/functions/lt',
+              'semver/functions/valid',
+              'slate',
+              'slate-history',
+              'slate-react',
+              'motion',
+            ]
+          : []),
       ],
     },
     resolve: {
       // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
-      dedupe: ['react', 'react-dom', 'react-router-dom', 'styled-components'],
+      // Include design-system so plugin chunks use the same instance and inherit root context
+      dedupe: [
+        'react',
+        'react-dom',
+        'react-router-dom',
+        'styled-components',
+        '@strapi/design-system',
+        '@radix-ui/react-tooltip',
+        'lodash',
+      ],
+      // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
+      // where packages imported by plugins may not be resolvable from plugin chunks
+      alias: {
+        react: getModulePath('react'),
+        'react-dom': getModulePath('react-dom'),
+        'react-router-dom': getModulePath('react-router-dom'),
+        'styled-components': getModulePath('styled-components'),
+        '@strapi/design-system': getModulePath('@strapi/design-system'),
+        '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
+        lodash: getModulePath('lodash'),
+      },
     },
     plugins: [react(), buildFilesPlugin(ctx)],
   };
@@ -53,7 +152,6 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
 
   return {
     ...baseConfig,
-    base: ctx.basePath,
     logLevel: 'silent',
     mode: 'production',
     build: {
@@ -85,9 +183,11 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
       },
     },
     server: {
+      cors: false,
       middlewareMode: true,
       open: ctx.options.open,
       hmr: {
+        overlay: false,
         server: ctx.options.hmrServer,
         clientPort: ctx.options.hmrClientPort,
       },

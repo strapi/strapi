@@ -80,6 +80,11 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
+  /**
+   * Filter documents by whether they have a published version.
+   * Use with `status: 'draft'` to find documents that have never been published.
+   */
+  hasPublishedVersion?: boolean | 'true' | 'false';
 }
 
 type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;
@@ -262,12 +267,13 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     return pageVal;
   };
 
-  const convertPageSizeQueryParams = (pageSize: unknown, page: unknown): number => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const convertPageSizeQueryParams = (pageSize: unknown, _page: unknown): number => {
     const pageSizeVal = toNumber(pageSize);
 
     if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
       throw new PaginationError(
-        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
+        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${pageSize}`
       );
     }
 
@@ -285,7 +291,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     if (isPagePagination && isOffsetPagination) {
       throw new PaginationError(
-        'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
+        'Invalid pagination attributes. The page parameters are incorrect and must be in the pagination object'
       );
     }
   };
@@ -501,7 +507,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (fields) {
-      query.select = convertFieldsQueryParams(fields);
+      query.select = convertFieldsQueryParams(fields, schema);
     }
 
     if (populate) {
@@ -538,23 +544,36 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   };
 
   // TODO: ensure field is valid in content types (will probably have to check strapi.contentTypes since it can be a string.path)
-  const convertFieldsQueryParams = (fields: FieldsParams, depth = 0): SelectQuery | undefined => {
+  const convertFieldsQueryParams = (
+    fields: FieldsParams,
+    schema?: Model,
+    depth = 0
+  ): SelectQuery | undefined => {
     if (depth === 0 && fields === '*') {
       return undefined;
     }
 
     if (typeof fields === 'string') {
       const fieldsValues = fields.split(',').map((value) => _.trim(value));
-      return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
+
+      // NOTE: Only include the doc id if it's a content type
+      if (schema?.modelType === 'contentType') {
+        return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
+      }
+      return _.uniq([ID_ATTRIBUTE, ...fieldsValues]);
     }
 
     if (isStringArray(fields)) {
       // map convert
       const fieldsValues = fields
-        .flatMap((value) => convertFieldsQueryParams(value, depth + 1))
+        .flatMap((value) => convertFieldsQueryParams(value, schema, depth + 1))
         .filter((v) => !isNil(v)) as string[];
 
-      return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
+      // NOTE: Only include the doc id if it's a content type
+      if (schema?.modelType === 'contentType') {
+        return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
+      }
+      return _.uniq([ID_ATTRIBUTE, ...fieldsValues]);
     }
 
     throw new Error('Invalid fields parameter. Expected a string or an array of strings');
@@ -700,7 +719,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (!isNil(fields)) {
-      query.select = convertFieldsQueryParams(fields);
+      query.select = convertFieldsQueryParams(fields, schema);
     }
 
     if (!isNil(populate)) {

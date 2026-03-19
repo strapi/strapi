@@ -7,6 +7,10 @@ import {
   useNotification,
   useStrapiApp,
   useQueryParams,
+  useIsDesktop,
+  useDebounce,
+  RESPONSIVE_DEFAULT_SPACING,
+  useIsMobile,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -16,10 +20,11 @@ import {
   Typography,
   IconButton,
   Dialog,
+  Popover,
 } from '@strapi/design-system';
 import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate, useParams } from 'react-router-dom';
 
 import { RelativeTime } from '../../../components/RelativeTime';
 import {
@@ -30,7 +35,7 @@ import {
   UPDATED_AT_ATTRIBUTE_NAME,
   UPDATED_BY_ATTRIBUTE_NAME,
 } from '../../../constants/attributes';
-import { SINGLE_TYPES } from '../../../constants/collections';
+import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
@@ -55,6 +60,13 @@ interface HeaderProps {
 const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: HeaderProps) => {
   const { formatMessage } = useIntl();
   const isCloning = useMatch(CLONE_PATH) !== null;
+  const isMobile = useIsMobile();
+  const params = useParams<{ collectionType: string; slug: string }>();
+  const [
+    {
+      query: { status: activeTab = 'draft' },
+    },
+  ] = useQueryParams<{ status: 'draft' | 'published' }>();
 
   const title = isCreating
     ? formatMessage({
@@ -64,13 +76,66 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
     : documentTitle;
 
   return (
-    <Flex direction="column" alignItems="flex-start" paddingTop={6} paddingBottom={4} gap={2}>
-      <BackButton />
-      <Flex width="100%" justifyContent="space-between" gap="80px" alignItems="flex-start">
-        <Typography variant="alpha" tag="h1">
-          {title}
-        </Typography>
-        <HeaderToolbar />
+    <Flex
+      direction="column"
+      alignItems="flex-start"
+      paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+      paddingRight={RESPONSIVE_DEFAULT_SPACING}
+      paddingTop={{
+        initial: 4,
+        medium: 6,
+      }}
+      paddingBottom={4}
+      gap={2}
+    >
+      {!isMobile && (
+        <BackButton
+          fallback={
+            params.collectionType === SINGLE_TYPES
+              ? undefined
+              : `../${COLLECTION_TYPES}/${params.slug}`
+          }
+        />
+      )}
+      <Flex
+        width="100%"
+        justifyContent="space-between"
+        gap={{
+          initial: 2,
+          medium: '8rem',
+        }}
+        alignItems="flex-start"
+        direction={{
+          initial: 'column-reverse',
+          medium: 'row',
+        }}
+      >
+        <Flex
+          gap={2}
+          justifyContent="space-between"
+          alignItems="flex-start"
+          width="100%"
+          overflow="hidden"
+        >
+          <Typography variant="alpha" tag="h1" overflow="hidden">
+            {title}
+          </Typography>
+          <Box display={{ initial: 'block', medium: 'none' }}>
+            <HeaderDocumentActions activeTab={activeTab} isCloning={isCloning} />
+          </Box>
+        </Flex>
+        <Flex width={{ initial: '100%', medium: 'auto' }} gap={3} justifyContent="space-between">
+          {isMobile && (
+            <BackButton
+              fallback={
+                params.collectionType === SINGLE_TYPES
+                  ? undefined
+                  : `../${COLLECTION_TYPES}/${params.slug}`
+              }
+            />
+          )}
+          <HeaderToolbar activeTab={activeTab} isCloning={isCloning} />
+        </Flex>
       </Flex>
       {status ? (
         <Box marginTop={1}>
@@ -105,24 +170,77 @@ interface HeaderActionDescription {
     startIcon?: React.ReactNode;
     textValue?: string;
     value: string;
+    /**
+     * @internal
+     * @description
+     * Internal SelectOption renderer used to display the status of AI translation background jobs
+     */
+    _render?: () => React.ReactNode;
   }>;
+  /**
+   * @internal
+   * @description
+   * Internal document header action to display the status of AI translation background jobs
+   */
+  _status?: {
+    message: React.ReactNode;
+    tooltip?: React.ReactNode;
+  };
   onSelect?: (value: string) => void;
   value?: string;
   customizeContent?: (value: string) => React.ReactNode;
 }
 
+interface HeaderDocumentActionsProps {
+  activeTab: 'draft' | 'published';
+  isCloning: boolean;
+}
+
+const HeaderDocumentActions = ({ activeTab, isCloning }: HeaderDocumentActionsProps) => {
+  const { model, id, document, meta, collectionType } = useDoc();
+  const { formatMessage } = useIntl();
+  const plugins = useStrapiApp('HeaderToolbar', (state) => state.plugins);
+  return (
+    <DescriptionComponentRenderer
+      props={{
+        activeTab,
+        model,
+        documentId: id,
+        document: isCloning ? undefined : document,
+        meta: isCloning ? undefined : meta,
+        collectionType,
+      }}
+      descriptions={(
+        plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+      ).getDocumentActions('header')}
+    >
+      {(actions) => {
+        const headerActions = actions.filter((action) => {
+          const positions = Array.isArray(action.position) ? action.position : [action.position];
+          return positions.includes('header');
+        });
+
+        return (
+          <DocumentActionsMenu
+            actions={headerActions}
+            label={formatMessage({
+              id: 'content-manager.containers.edit.header.more-actions',
+              defaultMessage: 'More actions',
+            })}
+          >
+            <Information activeTab={activeTab} />
+          </DocumentActionsMenu>
+        );
+      }}
+    </DescriptionComponentRenderer>
+  );
+};
+
 /**
  * @description Contains the document actions that have `position: header`, if there are
  * none we still render the menu because we render the information about the document there.
  */
-const HeaderToolbar = () => {
-  const { formatMessage } = useIntl();
-  const isCloning = useMatch(CLONE_PATH) !== null;
-  const [
-    {
-      query: { status = 'draft' },
-    },
-  ] = useQueryParams<{ status: 'draft' | 'published' }>();
+const HeaderToolbar = ({ activeTab, isCloning }: HeaderDocumentActionsProps) => {
   const { model, id, document, meta, collectionType } = useDoc();
   const plugins = useStrapiApp('HeaderToolbar', (state) => state.plugins);
 
@@ -130,7 +248,7 @@ const HeaderToolbar = () => {
     <Flex gap={2}>
       <DescriptionComponentRenderer
         props={{
-          activeTab: status,
+          activeTab,
           model,
           documentId: id,
           document: isCloning ? undefined : document,
@@ -149,38 +267,9 @@ const HeaderToolbar = () => {
           }
         }}
       </DescriptionComponentRenderer>
-      <DescriptionComponentRenderer
-        props={{
-          activeTab: status,
-          model,
-          documentId: id,
-          document: isCloning ? undefined : document,
-          meta: isCloning ? undefined : meta,
-          collectionType,
-        }}
-        descriptions={(
-          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-        ).getDocumentActions()}
-      >
-        {(actions) => {
-          const headerActions = actions.filter((action) => {
-            const positions = Array.isArray(action.position) ? action.position : [action.position];
-            return positions.includes('header');
-          });
-
-          return (
-            <DocumentActionsMenu
-              actions={headerActions}
-              label={formatMessage({
-                id: 'content-manager.containers.edit.header.more-actions',
-                defaultMessage: 'More actions',
-              })}
-            >
-              <Information activeTab={status} />
-            </DocumentActionsMenu>
-          );
-        }}
-      </DescriptionComponentRenderer>
+      <Box display={{ initial: 'none', medium: 'block' }}>
+        <HeaderDocumentActions activeTab={activeTab} isCloning={isCloning} />
+      </Box>
     </Flex>
   );
 };
@@ -319,7 +408,12 @@ const Information = ({ activeTab }: InformationProps) => {
           <Typography tag="dt" variant="pi" fontWeight="bold">
             {info.label}
           </Typography>
-          <Typography tag="dd" variant="pi" textColor="neutral600">
+          <Typography
+            tag="dd"
+            variant="pi"
+            textColor="neutral600"
+            style={{ wordBreak: 'break-word' }}
+          >
             {info.value}
           </Typography>
         </Flex>
@@ -370,38 +464,97 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               aria-label={action.label}
               {...action}
             >
-              {action.options.map(({ label, ...option }) => (
-                <SingleSelectOption key={option.value} {...option}>
-                  {label}
-                </SingleSelectOption>
-              ))}
+              {action.options.map(({ label, ...option }) => {
+                if (option._render) {
+                  return option._render();
+                }
+
+                return (
+                  <SingleSelectOption key={option.value} {...option}>
+                    {label}
+                  </SingleSelectOption>
+                );
+              })}
             </SingleSelect>
           );
+        } else if (action._status) {
+          return (
+            <HeaderActionStatus tooltip={action._status?.tooltip} key={action.id}>
+              {action._status.message}
+            </HeaderActionStatus>
+          );
         } else {
-          if (action.type === 'icon') {
-            return (
-              <React.Fragment key={action.id}>
-                <IconButton
-                  disabled={action.disabled}
-                  label={action.label}
-                  size="S"
-                  onClick={handleClick(action)}
-                >
-                  {action.icon}
-                </IconButton>
-                {action.dialog ? (
-                  <HeaderActionDialog
-                    {...action.dialog}
-                    isOpen={dialogId === action.id}
-                    onClose={handleClose}
-                  />
-                ) : null}
-              </React.Fragment>
-            );
-          }
+          return (
+            <React.Fragment key={action.id}>
+              <IconButton
+                disabled={action.disabled}
+                label={action.label}
+                size="S"
+                onClick={handleClick(action)}
+              >
+                {action.icon}
+              </IconButton>
+              {action.dialog ? (
+                <HeaderActionDialog
+                  {...action.dialog}
+                  isOpen={dialogId === action.id}
+                  onClose={handleClose}
+                />
+              ) : null}
+            </React.Fragment>
+          );
         }
       })}
     </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * HeaderActionStatus
+ * -----------------------------------------------------------------------------------------------*/
+
+interface HeaderActionStatusProps {
+  tooltip: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const HeaderActionStatus = ({ tooltip, children }: HeaderActionStatusProps) => {
+  const [open, setOpen] = React.useState(false);
+  // Debounce the open/close so the user can hover over the popover content before it closes
+  const debouncedOpen = useDebounce(open, 100);
+
+  const handleMouseEnter = () => {
+    if (tooltip) {
+      setOpen(true);
+    }
+  };
+  const handleMouseLeave = () => {
+    if (tooltip) {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <Popover.Root open={debouncedOpen} onOpenChange={setOpen}>
+      <Popover.Anchor
+        style={{ alignSelf: 'stretch' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        aria-describedby="document-header-action-status"
+      >
+        <Box height="100%">{children}</Box>
+      </Popover.Anchor>
+      <Popover.Content
+        role="tooltip"
+        id="document-header-action-status"
+        side="bottom"
+        align="center"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {tooltip}
+      </Popover.Content>
+    </Popover.Root>
   );
 };
 
@@ -448,47 +601,55 @@ const HeaderActionDialog = ({
 const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
-  return {
-    label: formatMessage({
-      id: 'app.links.configure-view',
-      defaultMessage: 'Configure the view',
-    }),
-    icon: <ListPlus />,
-    onClick: () => {
-      navigate(`../${collectionType}/${model}/configurations/edit`);
-    },
-    position: 'header',
-  };
+  return isDesktop
+    ? {
+        label: formatMessage({
+          id: 'app.links.configure-view',
+          defaultMessage: 'Configure the view',
+        }),
+        icon: <ListPlus />,
+        onClick: () => {
+          navigate(`../${collectionType}/${model}/configurations/edit`);
+        },
+        position: 'header',
+      }
+    : null;
 };
 
 ConfigureTheViewAction.type = 'configure-the-view';
+ConfigureTheViewAction.position = 'header';
 
 const EditTheModelAction: DocumentActionComponent = ({ model }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
-  return {
-    label: formatMessage({
-      id: 'content-manager.link-to-ctb',
-      defaultMessage: 'Edit the model',
-    }),
-    icon: <Pencil />,
-    onClick: () => {
-      navigate(`/plugins/content-type-builder/content-types/${model}`);
-    },
-    position: 'header',
-  };
+  return isDesktop
+    ? {
+        label: formatMessage({
+          id: 'content-manager.link-to-ctb',
+          defaultMessage: 'Edit the model',
+        }),
+        icon: <Pencil />,
+        onClick: () => {
+          navigate(`/plugins/content-type-builder/content-types/${model}`);
+        },
+        position: 'header',
+      }
+    : null;
 };
 
 EditTheModelAction.type = 'edit-the-model';
+EditTheModelAction.position = 'header';
 
 const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionType, document }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const listViewPathMatch = useMatch(LIST_PATH);
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
-  const { delete: deleteAction } = useDocumentActions();
+  const { delete: deleteAction, isLoading } = useDocumentActions();
   const { toggleNotification } = useNotification();
   const setSubmitting = useForm('DeleteAction', (state) => state.setSubmitting);
   const isLocalized = document?.locale != null;
@@ -520,6 +681,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
           </Typography>
         </Flex>
       ),
+      loading: isLoading,
       onConfirm: async () => {
         /**
          * If we have a match, we're in the list view
@@ -571,6 +733,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
 };
 
 DeleteAction.type = 'delete';
+DeleteAction.position = ['header', 'table-row'];
 
 const DEFAULT_HEADER_ACTIONS = [EditTheModelAction, ConfigureTheViewAction, DeleteAction];
 

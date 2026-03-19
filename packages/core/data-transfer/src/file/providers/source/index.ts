@@ -1,16 +1,18 @@
+import type { Stats } from 'node:fs';
 import type { Readable } from 'stream';
 
 import zip from 'zlib';
 import path from 'path';
 import { pipeline, PassThrough } from 'stream';
 import fs from 'fs-extra';
-import tar from 'tar';
+import { Parser, type ReadEntry } from 'tar';
 import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
 import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
@@ -54,6 +56,8 @@ class LocalFileSourceProvider implements ISourceProvider {
 
   #metadata?: IMetadata;
 
+  #diagnostics?: IDiagnosticReporter;
+
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
@@ -64,10 +68,22 @@ class LocalFileSourceProvider implements ISourceProvider {
     }
   }
 
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'file-source-provider',
+      },
+      kind: 'info',
+    });
+  }
+
   /**
    * Pre flight checks regarding the provided options, making sure that the file can be opened (decrypted, decompressed), etc.
    */
-  async bootstrap() {
+  async bootstrap(diagnostics: IDiagnosticReporter) {
+    this.#diagnostics = diagnostics;
     const { path: filePath } = this.options.file;
 
     try {
@@ -99,6 +115,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getMetadata() {
+    this.#reportInfo('getting metadata');
     if (!this.#metadata) {
       await this.#loadMetadata();
     }
@@ -107,6 +124,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
+    this.#reportInfo('getting schemas');
     const schemaCollection = await utils.stream.collect<Struct.Schema>(
       this.createSchemasReadStream()
     );
@@ -123,18 +141,22 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   createEntitiesReadStream(): Readable {
+    this.#reportInfo('creating entities read stream');
     return this.#streamJsonlDirectory('entities');
   }
 
   createSchemasReadStream(): Readable {
+    this.#reportInfo('creating schemas read stream');
     return this.#streamJsonlDirectory('schemas');
   }
 
   createLinksReadStream(): Readable {
+    this.#reportInfo('creating links read stream');
     return this.#streamJsonlDirectory('links');
   }
 
   createConfigurationReadStream(): Readable {
+    this.#reportInfo('creating configuration read stream');
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
@@ -143,19 +165,20 @@ class LocalFileSourceProvider implements ISourceProvider {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
+    this.#reportInfo('creating assets read stream');
 
     pipeline(
       [
         inStream,
-        new tar.Parse({
+        new Parser({
           // find only files in the assets/uploads folder
-          filter(filePath, entry) {
-            if (entry.type !== 'File') {
+          filter(filePath: string, entry: Stats | ReadEntry) {
+            if (!('type' in entry) || entry.type !== 'File') {
               return false;
             }
             return isFilePathInDirname('assets/uploads', filePath);
           },
-          async onentry(entry) {
+          async onReadEntry(entry: ReadEntry) {
             const { path: filePath, size = 0 } = entry;
             const normalizedPath = unknownPathToPosix(filePath);
             const file = path.basename(normalizedPath);
@@ -163,9 +186,7 @@ class LocalFileSourceProvider implements ISourceProvider {
             try {
               metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
             } catch (error) {
-              console.warn(
-                ` Failed to read metadata for ${file}, Strapi will try to fix this issue automatically`
-              );
+              throw new Error(`Failed to read metadata for ${file}`);
             }
             const asset: IAsset = {
               metadata,
@@ -215,16 +236,16 @@ class LocalFileSourceProvider implements ISourceProvider {
     pipeline(
       [
         inStream,
-        new tar.Parse({
-          filter(filePath, entry) {
-            if (entry.type !== 'File') {
+        new Parser({
+          filter(filePath: string, entry: Stats | ReadEntry) {
+            if (!('type' in entry) || entry.type !== 'File') {
               return false;
             }
 
             return isFilePathInDirname(directory, filePath);
           },
 
-          async onentry(entry) {
+          async onReadEntry(entry: ReadEntry) {
             const transforms = [
               // JSONL parser to read the data chunks one by one (line by line)
               parser({
@@ -274,25 +295,28 @@ class LocalFileSourceProvider implements ISourceProvider {
         [
           fileStream,
           // Custom backup archive parsing
-          new tar.Parse({
+          new Parser({
             /**
              * Filter the parsed entries to only keep the one that matches the given filepath
              */
-            filter(entryPath, entry) {
-              if (entry.type !== 'File') {
+            filter(entryPath: string, entry: Stats | ReadEntry) {
+              if (!('type' in entry) || entry.type !== 'File') {
                 return false;
               }
 
               return isPathEquivalent(entryPath, filePath);
             },
 
-            async onentry(entry) {
-              // Collect all the content of the entry file
-              const content = await entry.collect();
+            async onReadEntry(entry: ReadEntry) {
+              // Collect all the content of the entry stream (ReadEntry has no .collect() in tar v7)
+              const chunks: Buffer[] = [];
+              for await (const chunk of entry) {
+                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+              }
 
               try {
                 // Parse from buffer array to string to JSON
-                const parsedContent = JSON.parse(Buffer.concat(content).toString());
+                const parsedContent = JSON.parse(Buffer.concat(chunks).toString());
 
                 // Resolve the Promise with the parsed content
                 resolve(parsedContent);

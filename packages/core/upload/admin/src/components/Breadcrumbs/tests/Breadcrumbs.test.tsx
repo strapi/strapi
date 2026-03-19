@@ -55,14 +55,27 @@ const setup = (props: Partial<BreadcrumbsProps>) => ({
 });
 
 describe('Media Library | Breadcrumbs', () => {
-  test('should render and match snapshot', () => {
-    const { container, getByText, getByLabelText } = setup({ currentFolderId: 22 });
-    const nav = getByLabelText('Navigation');
-    expect(nav).toBeInTheDocument();
+  test('should render the breadcrumbs correctly', () => {
+    const { getByText, getByLabelText, getByRole, queryByRole } = setup({ currentFolderId: 22 });
+
+    // Navigation element should be present
+    expect(getByLabelText('Navigation')).toBeInTheDocument();
+
+    // All breadcrumb items should be present
+    expect(getByText('Media Library')).toBeInTheDocument();
     expect(getByText('parent folder')).toBeInTheDocument();
     expect(getByText('current folder')).toBeInTheDocument();
-    expect(getByText('Media Library')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
+
+    // The "current folder" should not be a link
+    const currentFolderLink = queryByRole('link', { name: 'current folder' });
+    expect(currentFolderLink).not.toBeInTheDocument();
+
+    // The "Media Library" and "parent folder" should be links
+    expect(getByRole('link', { name: 'Media Library' })).toHaveAttribute('href', '/');
+    expect(getByRole('link', { name: 'parent folder' })).toHaveAttribute('href', '/');
+
+    // Should have a menu button for other ancestors
+    expect(getByRole('button', { name: /ascendants folders/i })).toBeInTheDocument();
   });
 
   test('should store other ascendants in simple menu', async () => {

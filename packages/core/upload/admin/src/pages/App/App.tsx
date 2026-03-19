@@ -8,7 +8,7 @@ import { Route, Routes } from 'react-router-dom';
 import { useConfig } from '../../hooks/useConfig';
 import { getTrad } from '../../utils';
 
-import { MediaLibrary } from './MediaLibrary/MediaLibrary';
+import { MediaLibrary } from './MediaLibrary';
 
 import type { Configuration } from '../../../../shared/contracts/configuration';
 
@@ -37,16 +37,12 @@ export const Upload = () => {
   }, [isLoading, isError, config, rawQuery, setQuery]);
 
   if (isLoading) {
-    return (
-      <>
-        <Page.Title>{title}</Page.Title>
-        <Page.Loading />
-      </>
-    );
+    return <Page.Loading />;
   }
 
   return (
     <Page.Main>
+      <Page.Title>{title}</Page.Title>
       {rawQuery ? (
         <React.Suspense fallback={<Page.Loading />}>
           <Routes>

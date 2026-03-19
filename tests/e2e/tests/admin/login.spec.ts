@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { toggleRateLimiting } from '../../utils/rate-limit';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { toggleRateLimiting } from '../../../utils/rate-limit';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '../../constants';
-import { login } from '../../utils/login';
+import { login } from '../../../utils/login';
 
 test.describe('Login', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await context.clearCookies();
     await page.goto('/admin');
   });
 
@@ -16,12 +17,24 @@ test.describe('Login', () => {
       context,
     }) => {
       // Test without making user authentication persistent
-      await login({ page });
+      await login({ page, rememberMe: false });
       await expect(page).toHaveTitle(TITLE_HOME);
 
-      await page.close();
+      // Verify session cookie is created
+      const cookies = await context.cookies();
+      const refreshCookie = cookies.find((cookie) => cookie.name === 'strapi_admin_refresh');
+      expect(refreshCookie).toBeDefined();
+      expect(refreshCookie?.httpOnly).toBe(true);
 
+      // Close page but keep context (simulates tab close, not browser restart)
+      await page.close();
       page = await context.newPage();
+      await page.goto('/admin');
+      // TODO: should still be logged in as browser context persists ?
+      await expect(page).toHaveTitle(TITLE_HOME);
+
+      // Clear cookies to simulate session expiry
+      await context.clearCookies();
       await page.goto('/admin');
       await expect(page).toHaveTitle(TITLE_LOGIN);
 
@@ -29,11 +42,17 @@ test.describe('Login', () => {
       await login({ page, rememberMe: true });
       await expect(page).toHaveTitle(TITLE_HOME);
 
-      await page.close();
+      // Verify persistent cookie has explicit expiry
+      const persistentCookies = await context.cookies();
+      const persistentRefreshCookie = persistentCookies.find(
+        (cookie) => cookie.name === 'strapi_admin_refresh'
+      );
+      expect(persistentRefreshCookie?.expires).toBeGreaterThan(-1);
 
-      page = await context.newPage();
+      // Clear cookies to test persistence behavior
+      await context.clearCookies();
       await page.goto('/admin');
-      await expect(page).toHaveTitle(TITLE_HOME);
+      await expect(page).toHaveTitle(TITLE_LOGIN);
     });
   });
 
@@ -42,7 +61,7 @@ test.describe('Login', () => {
       page,
       browserName,
     }) => {
-      async function clickLoginTimes(n) {
+      async function clickLoginTimes(n: number) {
         for (let i = 0; i < n; i++) {
           // eslint-disable-next-line no-await-in-loop
           await page.getByRole('button', { name: 'Login' }).click();

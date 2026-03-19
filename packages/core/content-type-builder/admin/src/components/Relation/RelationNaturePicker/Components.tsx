@@ -30,9 +30,20 @@ const IconWrapper = styled<BoxComponent<'button'>>(Box)<{ $isSelected: boolean }
       fill: ${({ theme, $isSelected }) => theme.colors[$isSelected ? 'primary700' : 'neutral500']};
     }
   }
+  cursor: pointer;
   &:disabled {
     cursor: not-allowed;
+    background: ${({ theme }) => theme.colors.neutral150};
+
+    svg {
+      path {
+        fill: ${({ theme }) => theme.colors.neutral300};
+      }
+    }
   }
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const InfosWrapper = styled<FlexComponent>(Flex)`

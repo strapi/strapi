@@ -45,14 +45,16 @@ describe('CRUD locales', () => {
     rq = await createAuthRequest({ strapi });
 
     localeService = strapi.plugin('i18n').service('locales');
+
+    // ensure we don't have any data in the database left over from previous tests that didn't clean up
+    await strapi.db.query('api::product.product').deleteMany();
   });
 
   afterAll(async () => {
     await localeService.setDefaultLocale({ code: 'en' });
 
-    // Delete all locales that have been created
+    // Delete all data that has been created
     await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
-
     await strapi.destroy();
     await builder.cleanup();
   });

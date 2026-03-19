@@ -1,6 +1,6 @@
 export interface FeaturesConfig {
   future?: {
-    preview?: boolean;
+    unstableMediaLibrary?: boolean;
   };
 }
 

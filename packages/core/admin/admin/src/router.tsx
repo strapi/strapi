@@ -34,7 +34,7 @@ const getInitialRoutes = (): RouteObject[] => [
   {
     index: true,
     lazy: async () => {
-      const { HomePage } = await import('./pages/HomePage');
+      const { HomePage } = await import('./pages/Home/HomePage');
 
       return {
         Component: HomePage,
@@ -48,16 +48,6 @@ const getInitialRoutes = (): RouteObject[] => [
 
       return {
         Component: ProfilePage,
-      };
-    },
-  },
-  {
-    path: 'marketplace',
-    lazy: async () => {
-      const { ProtectedMarketplacePage } = await import('./pages/Marketplace/MarketplacePage');
-
-      return {
-        Component: ProtectedMarketplacePage,
       };
     },
   },

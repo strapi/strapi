@@ -1,7 +1,9 @@
 import { useForm, BackButton, Layouts } from '@strapi/admin/strapi-admin';
 import { Button } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { useParams } from 'react-router-dom';
 
+import { COLLECTION_TYPES } from '../../../constants/collections';
 import { capitalise } from '../../../utils/strings';
 import { getTranslation } from '../../../utils/translations';
 
@@ -13,13 +15,14 @@ interface HeaderProps {
 
 const Header = ({ name }: HeaderProps) => {
   const { formatMessage } = useIntl();
+  const params = useParams<{ slug: string }>();
 
   const modified = useForm('Header', (state) => state.modified);
   const isSubmitting = useForm('Header', (state) => state.isSubmitting);
 
   return (
     <Layouts.Header
-      navigationAction={<BackButton />}
+      navigationAction={<BackButton fallback={`../${COLLECTION_TYPES}/${params.slug}`} />}
       primaryAction={
         <Button size="S" disabled={!modified} type="submit" loading={isSubmitting}>
           {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}

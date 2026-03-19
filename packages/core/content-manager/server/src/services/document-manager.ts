@@ -72,9 +72,10 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         maxLimit: 1000,
       });
 
+      const { populate, sort, ...countParams } = params;
       const [documents, total = 0] = await Promise.all([
         strapi.documents(uid).findMany(params),
-        strapi.documents(uid).count(params),
+        strapi.documents(uid).count(countParams),
       ]);
 
       return {
@@ -108,8 +109,13 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType
     ) {
       const populate = await buildDeepPopulate(uid);
+
+      // Extract the locale to pass it as a plain param
+      const locale = body?.locale;
       const params = {
-        data: omitIdField(body),
+        // Ensure id and documentId are not copied to the clone
+        data: omit(['id', 'documentId'], body),
+        locale,
         populate,
       };
 
@@ -139,12 +145,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'delete'>, 'documentId'> = {} as any
     ) {
-      const populate = await buildDeepPopulate(uid);
-
       await strapi.documents(uid).delete({
         ...opts,
         documentId: id,
-        populate,
       });
       return {};
     },
@@ -165,9 +168,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async publish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: Omit<DocServiceParams<'publish'>, 'documentId'> = {} as any
+      opts: Omit<DocServiceParams<'publish'>, 'documentId'> & { populate?: object } = {} as any
     ) {
-      const populate = await buildDeepPopulate(uid);
+      const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
       return strapi
@@ -179,7 +182,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
       return strapi.db.transaction(async () => {
         const results = await Promise.all(
-          documentIds.map((documentId) => this.publish(documentId, uid, { locale }))
+          documentIds.map((documentId) => this.publish(documentId, uid, { locale, populate: {} }))
         );
 
         const publishedEntitiesCount = results.flat().filter(Boolean).length;
@@ -197,7 +200,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
           documentIds.map((id) =>
             strapi
               .documents(uid)
-              .unpublish({ ...opts, documentId: id })
+              .unpublish({ ...opts, documentId: id, populate: {} })
               .then((result) => result?.entries)
           )
         );
@@ -212,9 +215,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async unpublish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
+      opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> & { populate?: object } = {} as any
     ) {
-      const populate = await buildDeepPopulate(uid);
+      const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
       return strapi
@@ -226,9 +229,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async discardDraft(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: Omit<DocServiceParams<'discardDraft'>, 'documentId'> = {} as any
+      opts: Omit<DocServiceParams<'discardDraft'>, 'documentId'> & { populate?: object } = {} as any
     ) {
-      const populate = await buildDeepPopulate(uid);
+      const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, populate };
 
       return strapi

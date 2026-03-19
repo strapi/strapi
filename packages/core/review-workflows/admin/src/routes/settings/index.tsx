@@ -138,6 +138,7 @@ export const ReviewWorkflowsListView = () => {
               tag={NavLink}
               to="create"
               onClick={handleCreateClick}
+              fullWidth
             >
               {formatMessage({
                 id: 'Settings.review-workflows.list.page.create',
@@ -162,7 +163,7 @@ export const ReviewWorkflowsListView = () => {
           rows={workflows}
           footer={
             canCreate ? (
-              <TFooter icon={<Plus />} onClick={handleCreateClick}>
+              <TFooter cursor="pointer" icon={<Plus />} onClick={handleCreateClick}>
                 {formatMessage({
                   id: 'Settings.review-workflows.list.page.create',
                   defaultMessage: 'Create new workflow',
@@ -213,6 +214,7 @@ export const ReviewWorkflowsListView = () => {
                       {canRead || canUpdate ? (
                         <IconButton
                           tag={Link}
+                          onClick={(e) => e.stopPropagation()}
                           to={workflow.id.toString()}
                           label={formatMessage(
                             {

@@ -13,23 +13,21 @@ describe('useFolder', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.data).toMatchInlineSnapshot(`
-      {
-        "children": {
-          "count": 2,
-        },
-        "createdAt": "2023-06-26T12:48:54.054Z",
-        "files": {
-          "count": 0,
-        },
-        "id": 1,
-        "name": "test",
-        "parent": null,
-        "path": "/1",
-        "pathId": 1,
-        "updatedAt": "2023-06-26T12:48:54.054Z",
-      }
-    `);
+    expect(result.current.data).toEqual({
+      id: 1,
+      name: 'test',
+      parent: null,
+      path: '/1',
+      pathId: 1,
+      createdAt: '2023-06-26T12:48:54.054Z',
+      updatedAt: '2023-06-26T12:48:54.054Z',
+      children: {
+        count: 2,
+      },
+      files: {
+        count: 0,
+      },
+    });
   });
 
   test('it does not fetch, if enabled is set to false', async () => {
