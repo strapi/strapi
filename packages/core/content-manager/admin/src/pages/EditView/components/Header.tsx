@@ -408,7 +408,12 @@ const Information = ({ activeTab }: InformationProps) => {
           <Typography tag="dt" variant="pi" fontWeight="bold">
             {info.label}
           </Typography>
-          <Typography tag="dd" variant="pi" textColor="neutral600">
+          <Typography
+            tag="dd"
+            variant="pi"
+            textColor="neutral600"
+            style={{ wordBreak: 'break-word' }}
+          >
             {info.value}
           </Typography>
         </Flex>

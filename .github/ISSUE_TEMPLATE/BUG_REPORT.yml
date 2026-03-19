@@ -10,12 +10,27 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: packageManager
+    attributes:
+      label: Package Manager
+      description: Which package manager are you using?
+      multiple: false
+      options:
+        - npm
+        - yarn
+        - pnpm
+        - bun
+        - Other
+    validations:
+      required: true
+
   - type: input
     id: pmVersion
     attributes:
-      label: NPM/Yarn/PNPM Version
-      description: The package manager and version you are using.
-      placeholder: NPM 10.0.0
+      label: Package Manager Version
+      description: The version of the package manager you selected above.
+      placeholder: 10.0.0
     validations:
       required: true
 
