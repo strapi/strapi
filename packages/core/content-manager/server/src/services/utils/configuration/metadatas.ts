@@ -63,6 +63,7 @@ function createDefaultMetadata(schema: any, name: any) {
       'visible',
       'editable',
       'mainField',
+      'mediaField',
     ])
   );
 
@@ -115,14 +116,16 @@ async function syncMetadatas(configuration: any, schema: any) {
       _.set(acc, [key], updatedMeta);
     }
 
-    if (!_.has(edit, 'mainField')) return acc;
-
-    // remove mainField if the attribute is not a relation anymore
+    // remove mainField and mediaField if the attribute is not a relation anymore
     if (!isRelation(attr)) {
-      _.set(updatedMeta, 'edit', _.omit(edit, ['mainField']));
-      _.set(acc, [key], updatedMeta);
+      if (_.has(edit, 'mainField') || _.has(edit, 'mediaField')) {
+        _.set(updatedMeta, 'edit', _.omit(edit, ['mainField', 'mediaField']));
+        _.set(acc, [key], updatedMeta);
+      }
       return acc;
     }
+
+    if (!_.has(edit, 'mainField')) return acc;
 
     // if the mainField is id you can keep it
     if (edit.mainField === 'id') return acc;
@@ -135,7 +138,15 @@ async function syncMetadatas(configuration: any, schema: any) {
     if (!isSortable(targetSchema, edit.mainField) && !isListable(targetSchema, edit.mainField)) {
       _.set(updatedMeta, ['edit', 'mainField'], getDefaultMainField(targetSchema));
       _.set(acc, [key], updatedMeta);
-      return acc;
+    }
+
+    // Validate mediaField
+    if (_.has(edit, 'mediaField') && edit.mediaField) {
+      const mediaAttr = targetSchema.attributes?.[edit.mediaField];
+      if (!mediaAttr || mediaAttr.type !== 'media') {
+        _.set(updatedMeta, ['edit', 'mediaField'], undefined);
+        _.set(acc, [key], updatedMeta);
+      }
     }
 
     return acc;

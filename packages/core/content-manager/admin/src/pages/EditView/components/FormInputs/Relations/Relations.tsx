@@ -10,6 +10,7 @@ import {
   useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import {
+  Avatar,
   Box,
   Combobox,
   ComboboxOption,
@@ -52,15 +53,27 @@ import {
   useLazySearchRelationsQuery,
   RelationResult,
 } from '../../../../../services/relations';
-import { type MainField } from '../../../../../utils/attributes';
-import { getRelationLabel } from '../../../../../utils/relations';
+import { type MainField, type MediaField } from '../../../../../utils/attributes';
+import { getRelationLabel, getRelationThumbnail } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
+import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
 import { RelationModalRenderer, getCollectionType } from '../Relations/RelationModal';
 
 import type { FindAvailable } from '../../../../../../../shared/contracts/relations';
 import type { Schema } from '@strapi/types';
+
+/* -------------------------------------------------------------------------------------------------
+ * RelationThumbnail
+ * -----------------------------------------------------------------------------------------------*/
+
+const RelationThumbnail = ({ media }: { media: { url: string; alt: string } | undefined }) => {
+  if (!media?.url) return null;
+  const src = prefixFileUrlWithBackendUrl(media.url);
+  if (!src) return null;
+  return <Avatar.Item src={src} alt={media.alt} fallback={media.alt} preview />;
+};
 
 /**
  * Remove a relation, whether it's been already saved or not.
@@ -123,6 +136,7 @@ type RelationPosition =
 interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> {
   href: string;
   label: string;
+  media?: { url: string; alt: string };
   position?: RelationPosition;
   __temp_key__: string;
   apiData?: {
@@ -269,6 +283,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         field: field.value,
         href: `../${COLLECTION_TYPES}/${targetModel}`,
         mainField: props.mainField,
+        mediaField: props.mediaField,
       };
 
       /**
@@ -291,7 +306,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         if (a.__temp_key__ > b.__temp_key__) return 1;
         return 0;
       });
-    }, [serverData, field.value, targetModel, props.mainField]);
+    }, [serverData, field.value, targetModel, props.mainField, props.mediaField]);
 
     const handleDisconnect = useHandleDisconnect(props.name, 'RelationsField');
 
@@ -314,6 +329,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
           [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
           label: getRelationLabel(relation, props.mainField),
+          media: getRelationThumbnail(relation, props.mediaField),
           href: `../${COLLECTION_TYPES}/${targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
         };
 
@@ -332,6 +348,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         handleDisconnect,
         props.attribute.relation,
         props.mainField,
+        props.mediaField,
         props.name,
         relations,
         targetModel,
@@ -384,6 +401,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           targetModel={targetModel}
           documentParams={currentDocumentMeta.params}
           mainField={props.mainField}
+          mediaField={props.mediaField}
         />
       </Flex>
     );
@@ -404,7 +422,7 @@ const StyledFlex = styled<FlexComponent>(Flex)`
  * Relation Transformations
  * -----------------------------------------------------------------------------------------------*/
 
-interface TransformationContext extends Pick<RelationsFieldProps, 'mainField'> {
+interface TransformationContext extends Pick<RelationsFieldProps, 'mainField' | 'mediaField'> {
   field?: RelationsFormValue;
   href: string;
 }
@@ -440,7 +458,7 @@ const removeDisconnected =
  * a better UI where we can link to the relation and display a human-readable label.
  */
 const addLabelAndHref =
-  ({ mainField, href }: TransformationContext) =>
+  ({ mainField, mediaField, href }: TransformationContext) =>
   (relations: RelationResult[]): Relation[] =>
     relations.map((relation) => {
       return {
@@ -448,6 +466,7 @@ const addLabelAndHref =
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `documentId` property with the exact same data.
         [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, mainField),
+        media: getRelationThumbnail(relation, mediaField),
         href: `${href}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
       };
     });
@@ -672,6 +691,7 @@ const RelationModalWithContext = ({
   isLoadingPermissions,
   handleChange,
   mainField,
+  mediaField,
   setSearchParams,
   fieldValue,
   data,
@@ -764,12 +784,17 @@ const RelationModalWithContext = ({
         >
           {options?.map((opt) => {
             const textValue = getRelationLabel(opt, mainField);
+            const thumbnail = getRelationThumbnail(opt, mediaField);
 
             return (
               <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
                 <Flex gap={2} justifyContent="space-between">
                   <Flex gap={2}>
-                    <LinkIcon fill="neutral500" />
+                    {thumbnail ? (
+                      <RelationThumbnail media={thumbnail} />
+                    ) : (
+                      <LinkIcon fill="neutral500" />
+                    )}
                     <Typography ellipsis>{textValue}</Typography>
                   </Flex>
                   {opt.status ? <DocumentStatus status={opt.status} /> : null}
@@ -802,6 +827,7 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
   targetModel: string;
   documentParams?: DocumentMeta['params'];
   mainField?: MainField;
+  mediaField?: MediaField;
 }
 
 const RelationsList = ({
@@ -814,6 +840,7 @@ const RelationsList = ({
   targetModel,
   documentParams,
   mainField,
+  mediaField,
 }: RelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
@@ -1035,6 +1062,7 @@ const RelationsList = ({
       relations: data,
       targetModel,
       mainField,
+      mediaField,
     }),
     [
       ariaDescriptionId,
@@ -1050,6 +1078,7 @@ const RelationsList = ({
       data,
       targetModel,
       mainField,
+      mediaField,
     ]
   );
 
@@ -1136,6 +1165,7 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     targetModel: string;
     documentParams?: DocumentMeta['params'];
     mainField?: MainField;
+    mediaField?: MediaField;
   };
 }
 
@@ -1164,6 +1194,7 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
     targetModel,
     documentParams,
     mainField,
+    mediaField: _mediaField,
   } = data;
   const isDesktop = useIsDesktop();
 
@@ -1174,6 +1205,7 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
     id,
     label: originalLabel,
     status: originalStatus,
+    media,
     documentId,
     apiData,
     locale,
@@ -1281,9 +1313,12 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
               </IconButton>
             ) : null}
             <Flex width="100%" minWidth={0} gap={4} justifyContent="space-between">
-              <Box flex={1} minWidth={0} paddingTop={1} paddingBottom={1}>
-                <RelationModalRenderer relation={documentMeta}>{label}</RelationModalRenderer>
-              </Box>
+              <Flex flex={1} minWidth={0} gap={2} alignItems="center">
+                <RelationThumbnail media={media} />
+                <Box flex={1} minWidth={0} paddingTop={1} paddingBottom={1}>
+                  <RelationModalRenderer relation={documentMeta}>{label}</RelationModalRenderer>
+                </Box>
+              </Flex>
               {status ? <DocumentStatus status={status} /> : null}
             </Flex>
           </FlexWrapper>

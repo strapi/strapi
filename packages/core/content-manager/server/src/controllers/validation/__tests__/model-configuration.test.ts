@@ -3,6 +3,7 @@ import modelConfigurationValidation from '../model-configuration';
 describe('model-configuration validation', () => {
   // Mock strapi service
   const mockGetService = jest.fn();
+  const mockFindContentType = jest.fn();
 
   beforeAll(() => {
     global.strapi = {
@@ -14,6 +15,15 @@ describe('model-configuration validation', () => {
           description: { type: 'text' },
         },
       }),
+      plugins: {
+        'content-manager': {
+          services: {
+            'content-types': {
+              findContentType: mockFindContentType,
+            },
+          },
+        },
+      },
     } as any;
   });
 
@@ -452,6 +462,124 @@ describe('model-configuration validation', () => {
       const schema = modelConfigurationValidation(mockSchema);
       // This should fail because label is required and shouldn't be null
       await expect(schema.validate(config)).rejects.toThrow();
+    });
+  });
+
+  describe('mediaField validation', () => {
+    const schemaWithRelation = {
+      attributes: {
+        title: { type: 'string' },
+        product: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: 'api::product.product',
+          targetModel: 'api::product.product',
+        },
+      },
+    };
+
+    const setupMediaMock = () => {
+      mockFindContentType.mockReturnValue({
+        attributes: {
+          id: { type: 'integer' },
+          name: { type: 'string' },
+          coverImage: { type: 'media' },
+          document: { type: 'media' },
+        },
+      });
+    };
+
+    it('should accept valid mediaField for relation attributes', async () => {
+      setupMediaMock();
+      const config = {
+        metadatas: {
+          product: {
+            edit: {
+              label: 'Product',
+              mainField: 'name',
+              mediaField: 'coverImage',
+            },
+          },
+        },
+      };
+
+      const schema = modelConfigurationValidation(schemaWithRelation);
+      const result = await schema.validate(config);
+      expect(result.metadatas.product.edit.mediaField).toBe('coverImage');
+    });
+
+    it('should reject mediaField pointing to non-media attribute', async () => {
+      setupMediaMock();
+      const config = {
+        metadatas: {
+          product: {
+            edit: {
+              label: 'Product',
+              mainField: 'name',
+              mediaField: 'name',
+            },
+          },
+        },
+      };
+
+      const schema = modelConfigurationValidation(schemaWithRelation);
+      await expect(schema.validate(config)).rejects.toThrow();
+    });
+
+    it('should accept null mediaField', async () => {
+      setupMediaMock();
+      const config = {
+        metadatas: {
+          product: {
+            edit: {
+              label: 'Product',
+              mainField: 'name',
+              mediaField: null,
+            },
+          },
+        },
+      };
+
+      const schema = modelConfigurationValidation(schemaWithRelation);
+      const result = await schema.validate(config);
+      expect(result.metadatas.product.edit.mediaField).toBeNull();
+    });
+
+    it('should accept undefined mediaField', async () => {
+      setupMediaMock();
+      const config = {
+        metadatas: {
+          product: {
+            edit: {
+              label: 'Product',
+              mainField: 'name',
+            },
+          },
+        },
+      };
+
+      const schema = modelConfigurationValidation(schemaWithRelation);
+      const result = await schema.validate(config);
+      expect(result.metadatas.product.edit.mediaField).toBeUndefined();
+    });
+
+    it('should accept another valid media attribute', async () => {
+      setupMediaMock();
+      const config = {
+        metadatas: {
+          product: {
+            edit: {
+              label: 'Product',
+              mainField: 'name',
+              mediaField: 'document',
+            },
+          },
+        },
+      };
+
+      const schema = modelConfigurationValidation(schemaWithRelation);
+      const result = await schema.validate(config);
+      expect(result.metadatas.product.edit.mediaField).toBe('document');
     });
   });
 

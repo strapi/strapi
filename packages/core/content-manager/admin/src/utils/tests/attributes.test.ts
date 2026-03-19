@@ -1,6 +1,46 @@
-import { checkIfAttributeIsDisplayable } from '../attributes';
+import { checkIfAttributeIsDisplayable, getMediaField } from '../attributes';
 
 describe('attributes', () => {
+  describe('getMediaField', () => {
+    const schemas = [
+      {
+        uid: 'api::product.product',
+        attributes: {
+          name: { type: 'string' },
+          coverImage: { type: 'media' },
+          description: { type: 'text' },
+        },
+      },
+    ] as any;
+
+    const components = {} as any;
+
+    it('should return undefined when mediaFieldName is undefined', () => {
+      const attribute = { type: 'relation', targetModel: 'api::product.product' } as any;
+      expect(getMediaField(attribute, undefined, { schemas, components })).toBeUndefined();
+    });
+
+    it('should return MediaField object for valid media attribute', () => {
+      const attribute = { type: 'relation', targetModel: 'api::product.product' } as any;
+      const result = getMediaField(attribute, 'coverImage', { schemas, components });
+      expect(result).toEqual({ name: 'coverImage' });
+    });
+
+    it('should return undefined for non-media attribute', () => {
+      const attribute = { type: 'relation', targetModel: 'api::product.product' } as any;
+      expect(getMediaField(attribute, 'name', { schemas, components })).toBeUndefined();
+    });
+
+    it('should return undefined for non-existent attribute', () => {
+      const attribute = { type: 'relation', targetModel: 'api::product.product' } as any;
+      expect(getMediaField(attribute, 'nonExistent', { schemas, components })).toBeUndefined();
+    });
+
+    it('should return undefined when target schema is not found', () => {
+      const attribute = { type: 'relation', targetModel: 'api::unknown.unknown' } as any;
+      expect(getMediaField(attribute, 'coverImage', { schemas, components })).toBeUndefined();
+    });
+  });
   describe('checkIfAttributeIsDisplayable', () => {
     it('should return false if the relation is morph', () => {
       const attribute = {

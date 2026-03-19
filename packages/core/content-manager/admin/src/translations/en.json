@@ -137,6 +137,8 @@
   "containers.edit-settings.modal-form.mainField": "Entry title",
   "containers.edit-settings.modal-form.mainField.hint": "Set the displayed field in both the edit and list views",
   "containers.edit-settings.modal-form.editable": "Editable field",
+  "containers.edit-settings.modal-form.mediaField": "Entry thumbnail",
+  "containers.edit-settings.modal-form.mediaField.hint": "Set the media field used as thumbnail for relation items",
   "containers.edit-settings.modal-form.size": "Size",
   "containers.SettingPage.add.field": "Insert another field",
   "containers.SettingPage.add.relational-field": "Insert another related field",
