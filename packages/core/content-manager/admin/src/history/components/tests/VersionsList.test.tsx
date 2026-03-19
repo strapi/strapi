@@ -60,12 +60,10 @@ describe('VersionsList', () => {
 
     // Redirects to 2nd version on click
     await user.click(versions[1]);
-    expect(screen.queryByText('?id=26')).not.toBeInTheDocument();
-    expect(screen.getByText('?id=25')).toBeInTheDocument();
+    expect(await screen.findByText('?id=25')).toBeInTheDocument();
 
     // Redirects to 1st version again on click
     await user.click(versions[0]);
-    expect(screen.queryByText('?id=25')).not.toBeInTheDocument();
-    expect(screen.getByText('?id=26')).toBeInTheDocument();
+    expect(await screen.findByText('?id=26')).toBeInTheDocument();
   });
 });

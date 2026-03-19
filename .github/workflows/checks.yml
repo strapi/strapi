@@ -4,10 +4,13 @@ on:
   pull_request:
     types:
       - opened
+      - edited
       - synchronize
       - reopened
       - labeled
       - unlabeled
+      - milestoned
+      - demilestoned
     branches:
       - main
       - develop

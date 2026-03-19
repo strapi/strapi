@@ -1,10 +1,15 @@
 {
   "name": "@strapi/admin",
-  "version": "5.38.0",
+  "version": "5.40.0",
   "description": "Strapi Admin",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/admin"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -86,10 +91,10 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.2.0",
     "@strapi/icons": "2.2.0",
-    "@strapi/permissions": "5.38.0",
-    "@strapi/types": "5.38.0",
-    "@strapi/typescript-utils": "5.38.0",
-    "@strapi/utils": "5.38.0",
+    "@strapi/permissions": "5.40.0",
+    "@strapi/types": "5.40.0",
+    "@strapi/typescript-utils": "5.40.0",
+    "@strapi/utils": "5.40.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.0",
     "@testing-library/user-event": "14.6.1",
@@ -112,7 +117,7 @@
     "is-localhost-ip": "2.0.0",
     "json-logic-js": "2.0.5",
     "jsonwebtoken": "9.0.0",
-    "koa": "2.16.3",
+    "koa": "2.16.4",
     "koa-compose": "4.1.0",
     "koa-passport": "6.0.0",
     "koa-static": "5.0.0",
@@ -145,8 +150,8 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "5.38.0",
-    "@strapi/data-transfer": "5.38.0",
+    "@strapi/admin-test-utils": "5.40.0",
+    "@strapi/data-transfer": "5.40.0",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/fs-extra": "11.0.4",
     "@types/invariant": "2.2.36",
