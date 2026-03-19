@@ -281,7 +281,14 @@ const DeployNowWidget = () => {
           defaultMessage: 'Deploy your project.',
         })}
       </Typography>
-      <Button
+       <LinkButton
+        href={STRAPI_CLOUD_LOGIN_URL}
+        isExternal
+        size="L"
+        startIcon={<Cloud />}
+      >
+        {formatMessage({ id: 'HomePage.widget.deploy-now.button', defaultMessage: 'Deploy Now' })}
+      </LinkButton>
         tag="a"
         href="https://cloud.strapi.io/login"
         target="_blank"
