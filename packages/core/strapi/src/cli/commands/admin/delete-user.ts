@@ -22,12 +22,7 @@ interface Answers {
   confirm: boolean;
 }
 
-/**
- * It's not an observable, in reality this is
- * `ReadOnlyArray<inquirer.DistinctQuestion<Answers>>`
- * but then the logic of the validate function needs to change.
- */
-const promptQuestions: inquirer.QuestionCollection<Answers> = [
+const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
   {
     type: 'input',
     name: 'email',
@@ -80,6 +75,11 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     }
 
     ({ email } = inquiry);
+  }
+
+  if (_.isEmpty(email)) {
+    console.error('Missing required option `email`');
+    process.exit(1);
   }
 
   try {
