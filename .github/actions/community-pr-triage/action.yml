@@ -2,14 +2,17 @@ name: Community PR Triage
 description: Score and triage community PRs, optionally sync to Linear
 inputs:
   dry-run:
-    description: 'Skip Linear sync (report only)'
+    description: 'Preview only, no writes to Linear'
     default: 'true'
+  sync:
+    description: 'Sync tickets to Linear'
+    default: 'false'
+  update:
+    description: 'Post project update to Linear'
+    default: 'false'
   pr-number:
     description: 'Single PR number to triage (skips full scan)'
     required: false
-  weekly-update:
-    description: 'Post weekly update and create milestone'
-    default: 'false'
 outputs:
   report-path:
     description: 'Path to the generated markdown report'

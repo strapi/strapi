@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { AREA_TIERS, validateConfig } from './config.js';
+import { AREA_TIERS, LINEAR_CMS_TEAM_ID, validateConfig } from './config.js';
 import {
   fetchInternalAuthors,
   fetchCommunityPRs,
@@ -12,9 +12,10 @@ import {
   estimateAreaFromFiles,
 } from './fetcher.js';
 import { calculateValue, calculateComplexity, calculatePriority, isQuickWin } from './scorer.js';
-import { syncToLinear, findSiblingPRs } from './syncer.js';
+import { syncToLinear, findSiblingPRs, fetchExistingPRSummary } from './syncer.js';
 import { printReport, generateMarkdownReport } from './reporter.js';
-import { selectSprintPRs, formatSprintUpdate, postSprintUpdate } from './sprint.js';
+import type { SyncPreview, PickedUpPR } from './reporter.js';
+import { generateProjectUpdate } from './project-update.js';
 import type { ScoredPR, LinkedIssueData } from './types.js';
 
 function getAreaTier(area: string): string {
@@ -64,9 +65,10 @@ async function scorePR(pr: import('./types.js').GitHubPR): Promise<ScoredPR> {
 }
 
 async function main() {
-  const dryRun = core.getInput('dry-run') !== 'false';
+  const doSync = core.getInput('sync') === 'true';
+  const doUpdate = core.getInput('update') === 'true';
+  const dryRun = core.getInput('dry-run') !== 'false' || (!doSync && !doUpdate);
   const prNumber = core.getInput('pr-number');
-  const weeklyUpdate = core.getInput('weekly-update') === 'true';
 
   if (!dryRun) {
     validateConfig();
@@ -118,30 +120,6 @@ async function main() {
   scoredPRs.sort((a, b) => b.value.total - a.value.total);
   printReport(scoredPRs);
 
-  // Generate markdown report
-  const reportPath = `reports/triage-${new Date().toISOString().split('T')[0]}.md`;
-  generateMarkdownReport(scoredPRs, reportPath);
-  core.setOutput('report-path', reportPath);
-  console.log(`Markdown report saved to: ${reportPath}\n`);
-
-  // Write report to job summary
-  const { readFileSync } = await import('node:fs');
-  const reportContent = readFileSync(reportPath, 'utf-8');
-  await core.summary.addRaw(reportContent).write();
-
-  if (weeklyUpdate) {
-    const sprintPRs = selectSprintPRs(scoredPRs);
-    console.log(`\nWeekly recommendation (${sprintPRs.length} PRs):\n`);
-    console.log(formatSprintUpdate(sprintPRs, scoredPRs.length));
-
-    if (!dryRun) {
-      const url = await postSprintUpdate(sprintPRs, scoredPRs.length);
-      console.log(`Weekly update posted: ${url}\n`);
-    } else {
-      console.log('[DRY RUN] Skipping weekly update post.\n');
-    }
-  }
-
   // Preview sibling PR relations
   const siblingPairs = findSiblingPRs(scoredPRs);
   if (siblingPairs.length > 0) {
@@ -156,12 +134,47 @@ async function main() {
     console.log();
   }
 
-  if (dryRun) {
-    console.log('[DRY RUN] Skipping Linear sync.\n');
-    core.setOutput('created', '0');
-    core.setOutput('updated', '0');
-    core.setOutput('closed', '0');
-  } else {
+  // Fetch sync preview
+  let syncPreview: SyncPreview | undefined;
+  const apiKey = process.env.LINEAR_API_KEY;
+  if (apiKey) {
+    const { LinearClient } = await import('@linear/sdk');
+    const client = new LinearClient({ apiKey });
+    console.log('Fetching existing Linear tickets for sync preview...');
+    const prSummary = await fetchExistingPRSummary(client);
+    const newPRs = scoredPRs.filter((s) => !prSummary.has(s.pr.number));
+    const existingCount = scoredPRs.filter((s) => prSummary.has(s.pr.number)).length;
+
+    const pickedUpPRs: PickedUpPR[] = [];
+    for (const [prNum, summary] of prSummary) {
+      if (summary.teamId === LINEAR_CMS_TEAM_ID) {
+        const scored = scoredPRs.find((s) => s.pr.number === prNum);
+        pickedUpPRs.push({
+          prNumber: prNum,
+          title: scored?.pr.title ?? `PR #${prNum}`,
+          identifier: summary.identifier,
+          status: summary.status,
+        });
+      }
+    }
+
+    syncPreview = { newPRs, existingCount, pickedUpPRs };
+    console.log(`Sync preview: ${newPRs.length} new, ${existingCount} existing, ${pickedUpPRs.length} picked up by CMS.`);
+  }
+
+  // Generate markdown report (includes sync preview)
+  const reportPath = `reports/triage-${new Date().toISOString().split('T')[0]}.md`;
+  generateMarkdownReport(scoredPRs, reportPath, syncPreview);
+  core.setOutput('report-path', reportPath);
+  console.log(`Markdown report saved to: ${reportPath}\n`);
+
+  // Write report to job summary
+  const { readFileSync } = await import('node:fs');
+  const reportContent = readFileSync(reportPath, 'utf-8');
+  await core.summary.addRaw(reportContent).write();
+
+  // Sync to Linear
+  if (doSync && !dryRun) {
     console.log('Fetching recently merged PRs...');
     const mergedPRNumbers = fetchRecentlyMergedPRNumbers();
     console.log(`Found ${mergedPRNumbers.size} recently merged PRs.\n`);
@@ -175,6 +188,20 @@ async function main() {
     core.setOutput('created', String(stats.created));
     core.setOutput('updated', String(stats.updated));
     core.setOutput('closed', String(stats.closed));
+  } else {
+    if (doSync) console.log('[DRY RUN] Skipping Linear sync.\n');
+    core.setOutput('created', '0');
+    core.setOutput('updated', '0');
+    core.setOutput('closed', '0');
+  }
+
+  // Project update
+  if (doUpdate) {
+    console.log('Fetching recently merged PRs...');
+    const mergedPRNumbers = fetchRecentlyMergedPRNumbers();
+    console.log(`Found ${mergedPRNumbers.size} recently merged PRs.\n`);
+
+    await generateProjectUpdate(scoredPRs, mergedPRNumbers, dryRun);
   }
 }
 

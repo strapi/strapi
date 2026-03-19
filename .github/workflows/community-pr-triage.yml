@@ -2,17 +2,18 @@ name: Community PR Triage
 
 on:
   schedule:
-    - cron: '0 9 * * 2' # Every Tuesday 9am UTC
+    - cron: '0 9 * * 1' # Every Monday 9am UTC
   workflow_dispatch:
     inputs:
-      sync:
-        description: 'Sync to Linear (not just dry-run)'
-        type: boolean
-        default: false
-      weekly-update:
-        description: 'Post weekly update and create milestone'
-        type: boolean
-        default: false
+      action:
+        description: 'What to run'
+        type: choice
+        default: 'dry-run'
+        options:
+          - dry-run
+          - sync
+          - update
+          - sync + update
 
 permissions:
   contents: read
@@ -41,8 +42,9 @@ jobs:
       - name: Run triage
         uses: ./.github/actions/community-pr-triage
         with:
-          dry-run: ${{ github.event_name == 'schedule' || !inputs.sync }}
-          weekly-update: ${{ inputs.weekly-update || 'false' }}
+          dry-run: ${{ github.event_name == 'schedule' || inputs.action == 'dry-run' || inputs.action == '' }}
+          sync: ${{ inputs.action == 'sync' || inputs.action == 'sync + update' }}
+          update: ${{ inputs.action == 'update' || inputs.action == 'sync + update' }}
         env:
           GH_TOKEN: ${{ github.token }}
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
@@ -60,4 +62,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: triage-report
-          path: reports/triage-*.md
+          path: reports/*.md

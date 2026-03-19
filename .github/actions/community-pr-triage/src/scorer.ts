@@ -1,10 +1,4 @@
-import type {
-  GitHubPR,
-  LinkedIssueData,
-  ValueBreakdown,
-  ComplexityTier,
-  PriorityTier,
-} from './types.js';
+import type { GitHubPR, LinkedIssueData, ValueBreakdown, ComplexityTier, PriorityTier } from './types.js';
 
 const BASE_SCORES: Record<string, number> = {
   'pr: fix': 30,
@@ -15,27 +9,15 @@ const BASE_SCORES: Record<string, number> = {
 };
 
 const SEVERITY_SCORES: Record<string, number> = {
-  critical: 50,
-  high: 35,
-  medium: 20,
-  low: 5,
-  none: 0,
+  critical: 50, high: 35, medium: 20, low: 5, none: 0,
 };
 
 const STATUS_SCORES: Record<string, number> = {
-  confirmed: 15,
-  pending_repro: 5,
-  cant_repro: -10,
-  none: 0,
+  confirmed: 15, pending_repro: 5, cant_repro: -10, none: 0,
 };
 
 const URGENCY_BRACKETS: [number, number][] = [
-  [46, 2.0],
-  [31, 1.8],
-  [22, 1.6],
-  [15, 1.4],
-  [8, 1.2],
-  [0, 1.0],
+  [46, 2.0], [31, 1.8], [22, 1.6], [15, 1.4], [8, 1.2], [0, 1.0],
 ];
 
 function getBase(labels: string[]): number {
@@ -66,9 +48,7 @@ function getEngagement(linkedIssues: LinkedIssueData[]): number {
 }
 
 export function calculateValue(
-  pr: GitHubPR,
-  linkedIssues: LinkedIssueData[],
-  ageDays: number
+  pr: GitHubPR, linkedIssues: LinkedIssueData[], ageDays: number
 ): ValueBreakdown {
   const base = getBase(pr.labels);
   const severity = Math.max(0, ...linkedIssues.map((li) => SEVERITY_SCORES[li.severity] ?? 0));

@@ -53,10 +53,7 @@ export function formatStats(prs: ScoredPR[]): string {
 }
 
 const TIER_HEADERS: Record<PriorityTier, string> = {
-  urgent: 'URGENT',
-  high: 'HIGH',
-  normal: 'NORMAL',
-  low: 'LOW',
+  urgent: 'URGENT', high: 'HIGH', normal: 'NORMAL', low: 'LOW',
 };
 
 export function printReport(prs: ScoredPR[]): void {
@@ -79,9 +76,9 @@ export function printReport(prs: ScoredPR[]): void {
     console.log();
   }
 
-  const quickWins = prs
-    .filter((p) => p.isQuickWin)
-    .sort((a, b) => a.pr.additions + a.pr.deletions - (b.pr.additions + b.pr.deletions));
+  const quickWins = prs.filter((p) => p.isQuickWin).sort((a, b) =>
+    (a.pr.additions + a.pr.deletions) - (b.pr.additions + b.pr.deletions)
+  );
   console.log(`QUICK WINS (${quickWins.length} PRs)`);
   if (quickWins.length === 0) {
     console.log('  (none)\n');
@@ -101,19 +98,27 @@ function mdPrRow(pr: ScoredPR): string {
   const loc = pr.pr.additions + pr.pr.deletions;
   const size = sizeLabel(loc);
   const qw = pr.isQuickWin ? ' :zap:' : '';
-  const ci =
-    pr.pr.ciStatus === 'passing'
-      ? ':white_check_mark:'
-      : pr.pr.ciStatus === 'failing'
-        ? ':x:'
-        : ':hourglass:';
+  const ci = pr.pr.ciStatus === 'passing' ? ':white_check_mark:' : pr.pr.ciStatus === 'failing' ? ':x:' : ':hourglass:';
   const ageDays = Math.floor((Date.now() - new Date(pr.pr.createdAt).getTime()) / 86400000);
   const issueRefs = pr.linkedIssues.map((li) => `#${li.issue.number}`).join(', ');
 
   return `| [#${pr.pr.number}](https://github.com/strapi/strapi/pull/${pr.pr.number}) | ${pr.pr.title} | ${pr.pr.author} | ${pr.prType} | ${pr.area} | ${size} | ${ci} | ${ageDays}d | ${pr.value.total} | ${issueRefs}${qw} |`;
 }
 
-export function generateMarkdownReport(prs: ScoredPR[], outputPath: string): string {
+export interface PickedUpPR {
+  prNumber: number;
+  title: string;
+  identifier: string;
+  status: string;
+}
+
+export interface SyncPreview {
+  newPRs: ScoredPR[];
+  existingCount: number;
+  pickedUpPRs: PickedUpPR[];
+}
+
+export function generateMarkdownReport(prs: ScoredPR[], outputPath: string, syncPreview?: SyncPreview): string {
   const grouped = groupByPriority(prs);
   const date = new Date().toISOString().split('T')[0];
   const quickWins = prs.filter((p) => p.isQuickWin).length;
@@ -129,18 +134,34 @@ export function generateMarkdownReport(prs: ScoredPR[], outputPath: string): str
   md += `**Total PRs:** ${prs.length} | **Quick Wins:** ${quickWins} | **Stale (>60d):** ${stale}  \n`;
   md += `**CI:** ${passing} passing, ${failing} failing, ${prs.length - passing - failing} pending\n\n`;
 
+  if (syncPreview) {
+    md += `## Sync Preview\n\n`;
+    md += `**${syncPreview.newPRs.length}** new | **${syncPreview.existingCount}** existing | **${syncPreview.pickedUpPRs.length}** picked up by CMS\n\n`;
+    if (syncPreview.pickedUpPRs.length > 0) {
+      md += `### Picked Up (transferred to CMS)\n\n`;
+      md += `| PR | Title | Ticket | Status |\n`;
+      md += `|----|-------|--------|--------|\n`;
+      for (const pr of syncPreview.pickedUpPRs) {
+        md += `| [#${pr.prNumber}](https://github.com/strapi/strapi/pull/${pr.prNumber}) | ${pr.title} | ${pr.identifier} | ${pr.status} |\n`;
+      }
+      md += '\n';
+    }
+    if (syncPreview.newPRs.length > 0) {
+      md += `### New PRs\n\n`;
+      md += `| PR | Title | Author | Area | Value |\n`;
+      md += `|----|-------|--------|------|-------|\n`;
+      for (const pr of syncPreview.newPRs) {
+        md += `| [#${pr.pr.number}](https://github.com/strapi/strapi/pull/${pr.pr.number}) | ${pr.pr.title} | ${pr.pr.author} | ${pr.area} | ${pr.value.total} |\n`;
+      }
+      md += '\n';
+    }
+  }
+
   md += `---\n\n`;
 
   for (const tier of ['urgent', 'high', 'normal', 'low'] as PriorityTier[]) {
     const items = grouped[tier];
-    const emoji =
-      tier === 'urgent'
-        ? ':red_circle:'
-        : tier === 'high'
-          ? ':orange_circle:'
-          : tier === 'normal'
-            ? ':large_blue_circle:'
-            : ':white_circle:';
+    const emoji = tier === 'urgent' ? ':red_circle:' : tier === 'high' ? ':orange_circle:' : tier === 'normal' ? ':large_blue_circle:' : ':white_circle:';
     md += `## ${emoji} ${tier.toUpperCase()} (${items.length} PRs)\n\n`;
 
     if (items.length === 0) {
@@ -157,9 +178,9 @@ export function generateMarkdownReport(prs: ScoredPR[], outputPath: string): str
   }
 
   md += `## :zap: Quick Wins\n\n`;
-  const qwPRs = prs
-    .filter((p) => p.isQuickWin)
-    .sort((a, b) => a.pr.additions + a.pr.deletions - (b.pr.additions + b.pr.deletions));
+  const qwPRs = prs.filter((p) => p.isQuickWin).sort((a, b) =>
+    (a.pr.additions + a.pr.deletions) - (b.pr.additions + b.pr.deletions)
+  );
   if (qwPRs.length === 0) {
     md += `_None_\n`;
   } else {
