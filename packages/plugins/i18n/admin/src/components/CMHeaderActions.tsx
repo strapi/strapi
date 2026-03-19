@@ -40,7 +40,7 @@ import { styled } from 'styled-components';
 import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
 import { useI18n } from '../hooks/useI18n';
 import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
-import { useGetFillFromLocaleDataMutation } from '../services/fillFromLocale';
+import { useLazyGetFillFromLocaleDataQuery } from '../services/fillFromLocale';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
 import { useGetSettingsQuery } from '../services/settings';
@@ -537,7 +537,7 @@ const FillFromAnotherLocaleAction = ({
   const setValues = useForm('FillFromAnotherLocale', (state) => state.setValues);
 
   const [getFillFromLocaleData, { isLoading: isFillFromLocaleLoading }] =
-    useGetFillFromLocaleDataMutation();
+    useLazyGetFillFromLocaleDataQuery();
   const { data: locales = [] } = useGetLocalesQuery();
 
   const isAIAvailable = useAIAvailability();

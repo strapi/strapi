@@ -63,17 +63,16 @@ describe('i18n - fill-from-locale', () => {
     await builder.cleanup();
   });
 
-  describe('POST /i18n/content-manager/actions/fill-from-locale', () => {
+  describe('GET /i18n/content-manager/actions/fill-from-locale/api::article.article', () => {
     beforeEach(async () => {
       await strapi.db.query('api::article.article').deleteMany({});
     });
 
     test('returns 400 when required fields are missing', async () => {
       const res = await rq({
-        method: 'POST',
-        url: '/i18n/content-manager/actions/fill-from-locale',
-        body: {
-          model: 'api::article.article',
+        method: 'GET',
+        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        qs: {
           documentId: 'doc-123',
           sourceLocale: 'en',
           targetLocale: 'fr',
@@ -86,10 +85,9 @@ describe('i18n - fill-from-locale', () => {
 
     test('returns 400 when collectionType is invalid', async () => {
       const res = await rq({
-        method: 'POST',
-        url: '/i18n/content-manager/actions/fill-from-locale',
-        body: {
-          model: 'api::article.article',
+        method: 'GET',
+        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        qs: {
           documentId: 'doc-123',
           sourceLocale: 'en',
           targetLocale: 'fr',
@@ -102,10 +100,9 @@ describe('i18n - fill-from-locale', () => {
 
     test('returns 404 when document does not exist', async () => {
       const res = await rq({
-        method: 'POST',
-        url: '/i18n/content-manager/actions/fill-from-locale',
-        body: {
-          model: 'api::article.article',
+        method: 'GET',
+        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        qs: {
           documentId: 'non-existent-doc-id',
           sourceLocale: 'en',
           targetLocale: 'fr',
@@ -137,10 +134,9 @@ describe('i18n - fill-from-locale', () => {
       });
 
       const res = await rq({
-        method: 'POST',
-        url: '/i18n/content-manager/actions/fill-from-locale',
-        body: {
-          model: 'api::article.article',
+        method: 'GET',
+        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        qs: {
           documentId,
           sourceLocale: 'en',
           targetLocale: 'fr',
@@ -173,10 +169,9 @@ describe('i18n - fill-from-locale', () => {
       const documentId = createRes.body.data.documentId;
 
       const res = await rq({
-        method: 'POST',
-        url: '/i18n/content-manager/actions/fill-from-locale',
-        body: {
-          model: 'api::article.article',
+        method: 'GET',
+        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        qs: {
           documentId,
           sourceLocale: 'en',
           targetLocale: 'fr',

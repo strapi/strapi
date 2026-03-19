@@ -1,22 +1,31 @@
-import { isNil, isArray } from 'lodash/fp';
+import { isArray } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
-import type { UID, Schema } from '@strapi/types';
+import type { UID, Schema, Core } from '@strapi/types';
 
-const getMainFieldForModel = (targetUid: UID.Schema): string => {
-  const model = strapi.getModel(targetUid);
-  const firstString = Object.keys(model?.attributes || {}).find(
-    (key) => model.attributes[key]?.type === 'string' && key !== 'id'
-  );
-  return firstString || 'id';
+const READ_ACTION = 'plugin::content-manager.explorer.read';
+
+/**
+ * Returns the main display field for a model (e.g. title, name).
+ * Uses content-manager configuration when available, falls back to first string attribute or 'id'.
+ */
+const getMainField = async (targetUid: UID.Schema): Promise<string> => {
+  const contentManagerContentTypeService = strapi
+    .plugin('content-manager')
+    .service('content-types');
+  const configuration = await contentManagerContentTypeService.findConfiguration({
+    uid: targetUid,
+  });
+  return configuration.settings.mainField;
 };
 
-const getRelationLabel = (
-  relation: { documentId: string; id: number | string; locale?: string },
-  labelById: Map<number | string, unknown>
-): string => {
-  const value = labelById.get(relation.id);
-  if (typeof value === 'string') return value;
-  return relation.documentId;
+/**
+ * Returns the display label for a relation.
+ * Matches the logic of the getRelationLabel function in the content-manager plugin.
+ */
+const getRelationLabel = (relation: Record<string, unknown>, mainField: string): string => {
+  const label = relation[mainField];
+  if (typeof label === 'string') return label;
+  return String(relation.documentId ?? '');
 };
 
 const FIELDS_TO_REMOVE = new Set([
@@ -36,7 +45,24 @@ const FIELDS_TO_REMOVE = new Set([
 const STATUS_FIELDS = new Set(['id', 'documentId', 'locale', 'updatedAt', 'publishedAt']);
 
 /**
- * Add status to multiple relations in one batch (avoids N+1 queries).
+ * Normalizes a value to an array: arrays pass through, single values become [value], null/undefined become [].
+ */
+const normalizeToArray = (value: unknown): unknown[] => {
+  if (isArray(value)) return value;
+  if (value) return [value];
+  return [];
+};
+
+/**
+ * Type guard: returns true if the value is a valid relation object with documentId.
+ */
+const isValidRelation = (
+  rel: unknown
+): rel is { documentId: string; id?: number; locale?: string } =>
+  typeof rel === 'object' && rel !== null && 'documentId' in rel && !!(rel as any).documentId;
+
+/**
+ * Add status to relations (batched for better performance).
  */
 const addStatusToRelationsBatch = (
   targetUid: UID.Schema,
@@ -90,7 +116,7 @@ const addStatusToRelationsBatch = (
 };
 
 /**
- * Resolve relations for the target locale (batched to avoid N+1).
+ * Maps relations from the source locale to target locale (batched for better performance).
  */
 const resolveRelationsForLocaleBatch = async (
   relations: Array<{ documentId: string; id?: number; locale?: string }>,
@@ -103,26 +129,24 @@ const resolveRelationsForLocaleBatch = async (
   );
 
   if (!isTargetLocalized) {
-    return relations.map((rel) => ({
-      documentId: rel.documentId,
-      id: rel.id ?? rel.documentId,
-    }));
+    return relations.map((rel) => {
+      if (rel.id === undefined) return null;
+      return { documentId: rel.documentId, id: rel.id };
+    });
   }
 
   const documentIds = [...new Set(relations.map((r) => r.documentId))];
-  const model = strapi.getModel(targetUid);
-  const targetEntriesQuery: { where: object; select: string[]; orderBy?: Record<string, string> } =
-    {
-      where: { documentId: { $in: documentIds }, locale: targetLocale },
-      select: [...STATUS_FIELDS],
-    };
-  if (contentTypes.hasDraftAndPublish(model)) {
-    targetEntriesQuery.orderBy = { publishedAt: 'desc' };
-  }
+  const targetEntriesQuery = {
+    where: { documentId: { $in: documentIds }, locale: targetLocale },
+    select: [...STATUS_FIELDS],
+  };
   const targetEntries = await strapi.db.query(targetUid).findMany(targetEntriesQuery);
   const byDocumentId = new Map<string, (typeof targetEntries)[0]>();
   for (const e of targetEntries) {
-    byDocumentId.set(e.documentId, e);
+    const existing = byDocumentId.get(e.documentId);
+    if (!existing || (e.publishedAt === null && existing.publishedAt !== null)) {
+      byDocumentId.set(e.documentId, e);
+    }
   }
 
   return relations.map((rel) => {
@@ -137,12 +161,37 @@ const resolveRelationsForLocaleBatch = async (
 };
 
 /**
+ * Builds the where clause for relation queries: documentIds + locales (when target model is localized).
+ */
+const buildWhereForRelations = (
+  relations: Array<{ documentId: string; locale?: string }>,
+  documentIds: string[],
+  targetUid: UID.Schema
+): { documentId: { $in: string[] }; locale?: { $in: string[] } } => {
+  const where: { documentId: { $in: string[] }; locale?: { $in: string[] } } = {
+    documentId: { $in: documentIds },
+  };
+  const i18nContentTypesService = strapi.plugin('i18n')?.service('content-types');
+  const isTargetLocalized = i18nContentTypesService?.isLocalizedContentType(
+    strapi.getModel(targetUid)
+  );
+  if (isTargetLocalized) {
+    const locales = [...new Set(relations.map((r) => r.locale).filter(Boolean))] as string[];
+    if (locales.length > 0) {
+      where.locale = { $in: locales };
+    }
+  }
+  return where;
+};
+
+/**
  * Transform relation value to { connect: [...], disconnect: [] } with relations resolved for target locale.
  */
 const transformRelationsForLocale = async (
   value: unknown,
   attribute: Schema.Attribute.Relation,
-  targetLocale: string
+  targetLocale: string,
+  userAbility: any
 ): Promise<{ connect: unknown[]; disconnect: unknown[] }> => {
   const attr = attribute as Schema.Attribute.Relation & { relation?: string; target?: string };
   if (attr.relation?.toLowerCase().includes('morph')) {
@@ -154,19 +203,13 @@ const transformRelationsForLocale = async (
     return { connect: [], disconnect: [] };
   }
 
-  let relations: unknown[];
-  if (isArray(value)) {
-    relations = value;
-  } else if (value) {
-    relations = [value];
-  } else {
-    relations = [];
+  // Guard: skip relations to content types the user cannot read
+  if (!userAbility.can(READ_ACTION, targetUid)) {
+    return { connect: [], disconnect: [] };
   }
 
-  const validRels = relations.filter(
-    (rel): rel is { documentId: string; id?: number; locale?: string } =>
-      typeof rel === 'object' && rel !== null && 'documentId' in rel && !!rel.documentId
-  );
+  const relations = normalizeToArray(value);
+  const validRels = relations.filter(isValidRelation);
   if (validRels.length === 0) {
     return { connect: [], disconnect: [] };
   }
@@ -180,44 +223,24 @@ const transformRelationsForLocale = async (
     return { connect: [], disconnect: [] };
   }
 
-  const mainField = getMainFieldForModel(targetUid);
-  const selectFields: string[] = ['documentId', 'id', 'locale', mainField];
-  const i18nContentTypesService = strapi.plugin('i18n')?.service('content-types');
-  const isTargetLocalized = i18nContentTypesService?.isLocalizedContentType(
-    strapi.getModel(targetUid)
-  );
-
+  const mainField = await getMainField(targetUid);
   const documentIds = [...new Set(baseConnect.map((r) => r.documentId))];
-  const where: { documentId?: { $in: string[] }; locale?: { $in: string[] } } = {
-    documentId: { $in: documentIds },
-  };
-  if (isTargetLocalized) {
-    const locales = [
-      ...new Set(baseConnect.map((r) => r.locale).filter((l): l is string => Boolean(l))),
-    ];
-    if (locales.length) {
-      where.locale = { $in: locales };
-    }
-  }
+  const where = buildWhereForRelations(baseConnect, documentIds, targetUid);
 
-  const statusWhere: { documentId: { $in: string[] }; locale?: { $in: string[] } } = {
-    documentId: { $in: documentIds },
-  };
-  if (isTargetLocalized && where.locale) {
-    statusWhere.locale = where.locale;
-  }
-
-  const [allStatusEntries, labelEntries] = await Promise.all([
+  const fetchStatusEntries = () =>
     contentTypes.hasDraftAndPublish(strapi.getModel(targetUid))
-      ? strapi.db.query(targetUid).findMany({
-          where: statusWhere,
-          select: [...STATUS_FIELDS],
-        })
-      : Promise.resolve([]),
+      ? strapi.db.query(targetUid).findMany({ where, select: [...STATUS_FIELDS] })
+      : Promise.resolve([]);
+
+  const fetchLabelEntries = () =>
     strapi.db.query(targetUid).findMany({
       where,
-      select: selectFields,
-    }),
+      select: ['documentId', 'id', 'locale', mainField],
+    });
+
+  const [allStatusEntries, labelEntries] = await Promise.all([
+    fetchStatusEntries(),
+    fetchLabelEntries(),
   ]);
 
   const withStatus = addStatusToRelationsBatch(targetUid, baseConnect, allStatusEntries);
@@ -227,26 +250,30 @@ const transformRelationsForLocale = async (
     labelById.set(entry.id, entry[mainField]);
   }
 
-  const connect = withStatus.map((r) => ({
-    ...r,
-    [mainField]: labelById.get(r.id),
-    label: getRelationLabel(r, labelById),
-  }));
+  const connect = withStatus.map((r) => {
+    const mainFieldValue = labelById.get(r.id);
+    const relationWithMainField = { ...r, [mainField]: mainFieldValue };
+    return {
+      ...relationWithMainField,
+      label: getRelationLabel(relationWithMainField, mainField),
+    };
+  });
 
   return { connect, disconnect: [] };
 };
 
 /**
- * Recursively process document data: remove meta fields, resolve relations for target locale.
+ * Recursively process document data: remove fields and resolve relations.
  */
 const processDocumentData = async (
   data: Record<string, unknown>,
   schema: Schema.ContentType | Schema.Component,
   components: Record<string, Schema.Component>,
-  targetLocale: string
+  targetLocale: string,
+  userAbility: any
 ): Promise<Record<string, unknown>> => {
-  if (isNil(data)) {
-    return data;
+  if (!data) {
+    return {};
   }
 
   const result: Record<string, unknown> = {};
@@ -270,7 +297,8 @@ const processDocumentData = async (
       result[key] = await transformRelationsForLocale(
         value,
         attribute as Schema.Attribute.Relation,
-        targetLocale
+        targetLocale,
+        userAbility
       );
       continue;
     }
@@ -282,7 +310,13 @@ const processDocumentData = async (
       if (attribute.repeatable && isArray(value)) {
         result[key] = await Promise.all(
           value.map(async (item: Record<string, unknown>, index: number) => {
-            const processed = await processDocumentData(item, compSchema, components, targetLocale);
+            const processed = await processDocumentData(
+              item,
+              compSchema,
+              components,
+              targetLocale,
+              userAbility
+            );
             return { ...processed, __temp_key__: index + 1 };
           })
         );
@@ -291,7 +325,8 @@ const processDocumentData = async (
           value as Record<string, unknown>,
           compSchema,
           components,
-          targetLocale
+          targetLocale,
+          userAbility
         );
         result[key] = processed;
       } else {
@@ -306,7 +341,13 @@ const processDocumentData = async (
           const compSchema = (components[item?.__component as string] || {
             attributes: {},
           }) as Schema.Component;
-          const processed = await processDocumentData(item, compSchema, components, targetLocale);
+          const processed = await processDocumentData(
+            item,
+            compSchema,
+            components,
+            targetLocale,
+            userAbility
+          );
           return { ...processed, __temp_key__: index + 1 };
         })
       );
@@ -319,14 +360,13 @@ const processDocumentData = async (
   return result;
 };
 
-const fillFromLocale = () => {
+export const createFillFromLocaleService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
-    async getDataForLocale(
-      model: UID.ContentType,
-      sourceLocale: string,
-      targetLocale: string,
-      documentId?: string
-    ) {
+    /**
+     * Fetch the raw populated document for the given locale without any transformation.
+     * The caller is responsible for sanitizing the output before passing it to transformDocument.
+     */
+    async fetchRawDocument(model: UID.ContentType, sourceLocale: string, documentId?: string) {
       const populateBuilderService = strapi
         .plugin('content-manager')
         .service('populate-builder') as (uid: UID.ContentType) => {
@@ -346,19 +386,22 @@ const fillFromLocale = () => {
         locale: sourceLocale,
         populate: populate as never,
       };
-      const findSourceDoc = () =>
-        documentId
-          ? docs.findOne({ ...baseParams, documentId })
-          : docs.findFirst({ ...baseParams });
 
-      const document = (
-        contentTypes.hasDraftAndPublish(modelDef) ? await findSourceDoc() : await findSourceDoc()
-      ) as Record<string, unknown> | null;
+      return documentId
+        ? docs.findOne({ ...baseParams, documentId })
+        : docs.findFirst({ ...baseParams });
+    },
 
-      if (!document) {
-        return null;
-      }
-
+    /**
+     * Transform a (sanitized) document: strip internal fields, resolve relations to the target
+     * locale, and skip relations to content types the user cannot read.
+     */
+    async transformDocument(
+      document: Record<string, unknown>,
+      model: UID.ContentType,
+      targetLocale: string,
+      userAbility: any
+    ) {
       const schema = strapi.getModel(model) as Schema.ContentType;
       const getComponentSchema = (uid: string) =>
         (strapi.getModel(uid as UID.Schema) ?? { attributes: {} }) as Schema.Component;
@@ -368,15 +411,7 @@ const fillFromLocale = () => {
         },
       });
 
-      return processDocumentData(
-        document as unknown as Record<string, unknown>,
-        schema,
-        components,
-        targetLocale
-      );
+      return processDocumentData(document, schema, components, targetLocale, userAbility);
     },
   };
 };
-
-export type FillFromLocaleService = ReturnType<typeof fillFromLocale>;
-export default fillFromLocale;

@@ -23,7 +23,6 @@ const validateGetNonLocalizedAttributesInput = validateYupSchema(
 const validateFillFromLocaleInputSchema = yup
   .object()
   .shape({
-    model: yup.string().required(),
     documentId: yup.string().when('collectionType', {
       is: 'single-types',
       then: (schema) => schema.nullable(),

@@ -74,11 +74,17 @@ export default {
       },
     },
     {
-      method: 'POST',
-      path: '/content-manager/actions/fill-from-locale',
+      method: 'GET',
+      path: '/content-manager/actions/fill-from-locale/:model',
       handler: 'content-types.getFillFromLocaleData',
       config: {
-        policies: ['admin::isAuthenticatedAdmin'],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
+          },
+        ],
       },
     },
     {

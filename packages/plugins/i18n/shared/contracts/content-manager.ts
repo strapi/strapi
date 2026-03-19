@@ -25,6 +25,37 @@ export declare namespace GetNonLocalizedFields {
 }
 
 /**
+ * GET /i18n/content-manager/actions/fill-from-locale - Get data from source locale to fill target locale
+ */
+export interface FillFromLocaleParams {
+  model: string;
+  documentId?: string;
+  sourceLocale: string;
+  targetLocale: string;
+  collectionType: 'collection-types' | 'single-types';
+}
+
+export declare namespace FillFromLocale {
+  export interface Request {
+    body: {};
+    query: Params;
+  }
+
+  export interface Params {
+    model: string;
+    documentId?: string;
+    sourceLocale: string;
+    targetLocale: string;
+    collectionType: 'collection-types' | 'single-types';
+  }
+
+  export interface Response {
+    data: Record<string, unknown>;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
  * GET content-manager/collection-types/:model/actions/countManyEntriesDraftRelations
  */
 export declare namespace CountManyEntriesDraftRelations {

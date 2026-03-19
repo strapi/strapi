@@ -1,6 +1,7 @@
 import { pick, uniq, prop, getOr, flatten, pipe, map } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
+import type { FillFromLocale } from '../../../shared/contracts/content-manager';
 import { getService } from '../utils';
 import {
   validateGetNonLocalizedAttributesInput,
@@ -18,11 +19,20 @@ const getFirstLevelPath = map((path: string) => path.split('.')[0]);
 
 const controller = {
   async getNonLocalizedAttributes(ctx) {
-    const { user } = ctx.state;
+    const { user, userAbility } = ctx.state;
     const body = ctx.request.body as any;
     const { model, id, locale } = body;
 
     await validateGetNonLocalizedAttributesInput({ model, id, locale });
+
+    const permissionChecker = strapi
+      .plugin('content-manager')
+      .service('permission-checker')
+      .create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
 
     const {
       copyNonLocalizedAttributes,
@@ -68,7 +78,18 @@ const controller = {
     const permittedFields = pipe(flatten, getFirstLevelPath, uniq)(localePermissions);
 
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
-    const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);
+    const pickedFields = pick(permittedFields, nonLocalizedFields);
+
+    // Guard relations: omit fields that point to content types the user cannot read
+    const sanitizedNonLocalizedFields = Object.fromEntries(
+      Object.entries(pickedFields).filter(([key]) => {
+        const attribute = modelDef.attributes?.[key] as any;
+        if (attribute?.type === 'relation' && attribute.target) {
+          return userAbility.can(READ_ACTION, attribute.target);
+        }
+        return true;
+      })
+    );
 
     const availableLocalesResult = await strapi.plugins['content-manager']
       .service('document-metadata')
@@ -89,26 +110,47 @@ const controller = {
   },
 
   async getFillFromLocaleData(ctx) {
-    await validateFillFromLocaleInput(ctx.request.body);
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
 
-    const { model, documentId, sourceLocale, targetLocale } = ctx.request.body as {
-      model: string;
-      documentId?: string;
-      sourceLocale: string;
-      targetLocale: string;
-    };
+    await validateFillFromLocaleInput(ctx.query);
+
+    const { documentId, sourceLocale, targetLocale } = ctx.query as unknown as Omit<
+      FillFromLocale.Params,
+      'model'
+    >;
+
+    const permissionChecker = strapi
+      .plugin('content-manager')
+      .service('permission-checker')
+      .create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
 
     const fillFromLocaleService = getService('fill-from-locale');
-    const data = await fillFromLocaleService.getDataForLocale(
+
+    const rawDocument = await fillFromLocaleService.fetchRawDocument(
       model as UID.ContentType,
       sourceLocale,
-      targetLocale,
       documentId
     );
 
-    if (!data) {
+    if (!rawDocument) {
       return ctx.notFound();
     }
+
+    // Field-level filtering: strip fields the user cannot read on this content type
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(rawDocument);
+
+    // Transform relations to target locale, skipping those the user cannot read
+    const data = await fillFromLocaleService.transformDocument(
+      sanitizedDocument as Record<string, unknown>,
+      model as UID.ContentType,
+      targetLocale,
+      userAbility
+    );
 
     ctx.body = { data };
   },
