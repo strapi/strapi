@@ -4,7 +4,7 @@ import type { modules } from '../../../dist';
 
 const DEP_NAME = 'better-sqlite3';
 const DEP_PATH = `dependencies.${DEP_NAME}`;
-const DEP_VERSION = '11.3.0';
+const DEP_VERSION = '12.8.0';
 
 /**
  *
