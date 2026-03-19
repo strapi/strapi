@@ -27,6 +27,9 @@ export default () => ({
           type: 'integer',
         },
         ...formatAttributes(contentType),
+        documentId: {
+          type: 'string',
+        },
       },
     };
   },

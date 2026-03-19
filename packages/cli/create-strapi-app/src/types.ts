@@ -20,6 +20,8 @@ export interface Options {
   install?: boolean;
   example?: boolean;
   gitInit?: boolean;
+  enableAbTests?: boolean;
+  nonInteractive?: boolean;
   templateBranch?: string;
   templatePath?: string;
 }
@@ -56,13 +58,15 @@ export interface Scope {
   runApp?: boolean;
   isQuickstart?: boolean;
   uuid?: string;
-  deviceId?: string;
+  installId?: string;
   database: DatabaseInfo;
   tmpPath?: string;
   packageJsonStrapi?: Record<string, unknown>;
   useTypescript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
+  shouldCreateGrowthSsoTrial: boolean;
+  isABTestEnabled: boolean;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';

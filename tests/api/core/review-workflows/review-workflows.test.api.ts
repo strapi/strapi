@@ -100,7 +100,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         lifespan: null,
         description: '',
         type: 'full-access',
-        name: 'Full Access',
+        name: 'RW - Full Access',
         permissions: null,
       },
     });

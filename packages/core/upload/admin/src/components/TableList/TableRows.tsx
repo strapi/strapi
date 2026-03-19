@@ -68,7 +68,7 @@ export const TableRows = ({
 
         return (
           <Tr
-            key={id}
+            key={`${contentType}-${id}`}
             onClick={() => handleRowClickFn(element, id, path || undefined, contentType)}
           >
             <Td onClick={(e) => e.stopPropagation()}>
@@ -83,6 +83,9 @@ export const TableRows = ({
                 )}
                 disabled={!isSelectable}
                 onCheckedChange={() => onSelectOne(element)}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                }}
                 checked={isSelected}
               />
             </Td>

@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_default_test_components",
+  "info": {
+    "displayName": "testComponent",
+    "icon": "archive"
+  },
+  "options": {},
+  "attributes": {
+    "testName": {
+      "type": "string"
+    },
+    "testAnotherText": {
+      "type": "string"
+    },
+    "TestMedia": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images", "files", "videos", "audios"]
+    }
+  },
+  "config": {}
+}

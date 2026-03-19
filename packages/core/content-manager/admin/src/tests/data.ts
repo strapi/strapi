@@ -20,6 +20,7 @@ const testData = {
       createdAt: { type: 'timestamp' },
       dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
       id: { type: 'integer' },
+      documentId: { type: 'string' },
       name: { type: 'string' },
       notrepeatable: {
         type: 'component',
@@ -45,6 +46,7 @@ const testData = {
       },
       attributes: {
         id: { type: 'integer' },
+        documentId: { type: 'string' },
         name: { type: 'string' },
         password: { type: 'password' },
       },
@@ -62,6 +64,7 @@ const testData = {
       },
       attributes: {
         id: { type: 'integer' },
+        documentId: { type: 'string' },
         name: { type: 'string' },
         password: { type: 'password' },
         subcomponotrepeatable: {
@@ -83,6 +86,7 @@ const testData = {
       { __component: 'compos.sub-compo', id: 7, name: 'name', password: 'password' },
       {
         id: 4,
+        documentId: '456789',
         name: 'name',
         password: 'password',
         subcomponotrepeatable: null,
@@ -91,6 +95,7 @@ const testData = {
       },
       {
         id: 5,
+        documentId: '567890',
         name: 'name',
         password: 'password',
         subcomponotrepeatable: { id: 9, name: 'name', password: 'password' },
@@ -99,6 +104,7 @@ const testData = {
       },
       {
         id: 6,
+        documentId: '678901',
         name: null,
         password: null,
         subcomponotrepeatable: null,
@@ -110,6 +116,7 @@ const testData = {
     name: 'name',
     notrepeatable: {
       id: 1,
+      documentId: '123456',
       name: 'name',
       password: 'password',
       subcomponotrepeatable: { id: 4, name: 'name', password: 'password' },
@@ -123,6 +130,7 @@ const testData = {
     repeatable: [
       {
         id: 2,
+        documentId: '234567',
         name: 'name',
         password: 'password',
         subrepeatable: [{ id: 5, name: 'name', password: 'password' }],
@@ -130,6 +138,7 @@ const testData = {
       },
       {
         id: 3,
+        documentId: '345678',
         name: 'name',
         password: 'password',
         subrepeatable: [],

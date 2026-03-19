@@ -11,13 +11,24 @@ import {
   useTracking,
   useAPIErrorHandler,
   useQueryParams,
+  useScopedPersistentState,
   useRBAC,
   Layouts,
   useTable,
+  useIsMobile,
+  useIsDesktop,
+  tours,
 } from '@strapi/admin/strapi-admin';
-import { Button, Flex, Typography, ButtonProps } from '@strapi/design-system';
+import {
+  Button,
+  Flex,
+  Typography,
+  ButtonProps,
+  Box,
+  EmptyStateLayout,
+} from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
-import isEqual from 'lodash/isEqual';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
@@ -33,6 +44,7 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
+import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -41,7 +53,7 @@ import { getDisplayName } from '../../utils/users';
 import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
 import { BulkActionsRenderer } from './components/BulkActions/Actions';
-import { Filters } from './components/Filters';
+import { listViewFilters as Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
@@ -63,28 +75,69 @@ const ListViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
+  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
+
+  usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
+  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
 
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
 
-  const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
+  const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
+    `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
+    null
+  );
 
-  const listLayout = usePrev(list.layout);
-  React.useEffect(() => {
-    /**
-     * ONLY update the displayedHeaders if the document
-     * layout has actually changed in value.
-     */
-    if (!isEqual(listLayout, list.layout)) {
-      setDisplayedHeaders(list.layout);
-    }
-  }, [list.layout, listLayout]);
+  const mapDisplayedHeaders = (headers: ListFieldLayout[]) => headers.map((header) => header.name);
+
+  const displayedHeaders: ListFieldLayout[] = React.useMemo(() => {
+    if (
+      !displayedHeaderNames ||
+      !list.metadatas ||
+      Object.keys(list.metadatas).length <= 0 ||
+      !schema?.attributes
+    )
+      return [];
+
+    return convertListLayoutToFieldLayouts(displayedHeaderNames, schema.attributes, list.metadatas);
+  }, [displayedHeaderNames, schema, list]);
 
   const handleSetHeaders = (headers: string[]) => {
-    setDisplayedHeaders(
-      convertListLayoutToFieldLayouts(headers, schema!.attributes, list.metadatas)
-    );
+    setDisplayedHeaderNames(headers);
   };
+
+  const handleResetHeaders = () => {
+    setDisplayedHeaderNames(mapDisplayedHeaders(list.layout));
+  };
+
+  /**
+   * If the persistent displayedHeaders are not yet initialized, set them to list.layout
+   */
+  React.useEffect(() => {
+    // wait for list.layout to be loaded
+    if (list.layout.length === 0) {
+      return;
+    }
+
+    if (!displayedHeaderNames) {
+      handleResetHeaders();
+    }
+  }, [list.layout]);
+
+  React.useEffect(() => {
+    if (!schema?.attributes) return;
+    if (!displayedHeaderNames || displayedHeaderNames.length === 0) return;
+    if (schema.uid !== model) return;
+
+    const allowedDisplayHeaders = displayedHeaderNames.filter((header) =>
+      Object.keys(schema?.attributes).includes(header)
+    );
+
+    if (allowedDisplayHeaders.length !== displayedHeaderNames.length) {
+      handleSetHeaders(allowedDisplayHeaders);
+    }
+  }, [displayedHeaderNames]);
 
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
@@ -100,8 +153,9 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+  const hasAppliedFilters = Boolean((query as any)?.filters?.$and?.length);
 
-  const { data, error, isFetching } = useGetAllDocumentsQuery({
+  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery({
     model,
     params,
   });
@@ -195,7 +249,7 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isFetching) {
+  if (isLoading) {
     return <Page.Loading />;
   }
 
@@ -203,7 +257,12 @@ const ListViewPage = () => {
     return <Page.Error />;
   }
 
-  const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
+  const contentTypeTitle = schema?.info.displayName
+    ? formatMessage({ id: schema.info.displayName, defaultMessage: schema.info.displayName })
+    : formatMessage({
+        id: 'content-manager.containers.untitled',
+        defaultMessage: 'Untitled',
+      });
 
   const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
@@ -213,139 +272,197 @@ const ListViewPage = () => {
     });
   };
 
-  return (
-    <Page.Main>
-      <Page.Title>{`${contentTypeTitle}`}</Page.Title>
-      <LayoutsHeaderCustom
-        primaryAction={canCreate ? <CreateButton /> : null}
-        subtitle={formatMessage(
-          {
-            id: getTranslation('pages.ListView.header-subtitle'),
-            defaultMessage:
-              '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
-          },
-          { number: pagination?.total }
-        )}
-        title={contentTypeTitle}
-        navigationAction={<BackButton />}
-      />
-      <Layouts.Action
-        endActions={
-          <>
-            <InjectionZone area="listView.actions" />
-            <ViewSettingsMenu
-              setHeaders={handleSetHeaders}
-              resetHeaders={() => setDisplayedHeaders(list.layout)}
-              headers={displayedHeaders.map((header) => header.name)}
-            />
-          </>
-        }
-        startActions={
-          <>
-            {list.settings.searchable && (
-              <SearchInput
-                disabled={results.length === 0}
-                label={formatMessage(
-                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                  { target: contentTypeTitle }
-                )}
-                placeholder={formatMessage({
-                  id: 'global.search',
-                  defaultMessage: 'Search',
-                })}
-                trackedEvent="didSearch"
-              />
-            )}
-            {list.settings.filterable && schema ? (
-              <Filters disabled={results.length === 0} schema={schema} />
-            ) : null}
-          </>
-        }
-      />
-      <Layouts.Content>
-        <Flex gap={4} direction="column" alignItems="stretch">
-          <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
-            <TableActionsBar />
-            <Table.Content>
-              <Table.Head>
-                <Table.HeaderCheckboxCell />
-                {tableHeaders.map((header: ListFieldLayout) => (
-                  <Table.HeaderCell key={header.name} {...header} />
-                ))}
-              </Table.Head>
-              <Table.Loading />
-              <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
-              <Table.Body>
-                {results.map((row) => {
-                  return (
-                    <Table.Row
-                      cursor="pointer"
-                      key={row.id}
-                      onClick={handleRowClick(row.documentId)}
-                    >
-                      <Table.CheckboxCell id={row.id} />
-                      {tableHeaders.map(({ cellFormatter, ...header }) => {
-                        if (header.name === 'status') {
-                          const { status } = row;
+  const isEmptyState = !isFetching && results.length === 0;
 
-                          return (
-                            <Table.Cell key={header.name}>
-                              <DocumentStatus status={status} maxWidth={'min-content'} />
-                            </Table.Cell>
-                          );
-                        }
-                        if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
-                          // Display the users full name
-                          // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
-                          // In this case, we display a dash
-                          return (
-                            <Table.Cell key={header.name}>
-                              <Typography textColor="neutral800">
-                                {row[header.name.split('.')[0]]
-                                  ? getDisplayName(row[header.name.split('.')[0]])
-                                  : '-'}
-                              </Typography>
-                            </Table.Cell>
-                          );
-                        }
-                        if (typeof cellFormatter === 'function') {
-                          return (
-                            <Table.Cell key={header.name}>
-                              {/* @ts-expect-error – TODO: fix this TS error */}
-                              {cellFormatter(row, header, { collectionType, model })}
-                            </Table.Cell>
-                          );
-                        }
-                        return (
-                          <Table.Cell key={header.name}>
-                            <CellContent
-                              content={row[header.name.split('.')[0]]}
-                              rowId={row.documentId}
-                              {...header}
-                            />
-                          </Table.Cell>
-                        );
-                      })}
-                      {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
-                      <ActionsCell onClick={(e) => e.stopPropagation()}>
-                        <TableActions document={row} />
-                      </ActionsCell>
-                    </Table.Row>
-                  );
+  const endActions = (
+    <>
+      {isMobile && list.settings.filterable && schema && <Filters.Trigger />}
+      <InjectionZone area="listView.actions" />
+      <ViewSettingsMenu
+        setHeaders={handleSetHeaders}
+        resetHeaders={handleResetHeaders}
+        headers={displayedHeaderNames ?? []}
+      />
+    </>
+  );
+
+  const searchInput = (
+    <>
+      {list.settings.searchable && (
+        <SearchInput
+          label={formatMessage(
+            { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+            { target: contentTypeTitle }
+          )}
+          placeholder={formatMessage({
+            id: 'global.search',
+            defaultMessage: 'Search',
+          })}
+          trackedEvent="didSearch"
+        />
+      )}
+    </>
+  );
+
+  const startActions = (
+    <>
+      {searchInput}
+      {!isMobile && list.settings.filterable && schema && (
+        <>
+          <Filters.Trigger />
+          <Filters.List />
+        </>
+      )}
+    </>
+  );
+
+  const actions =
+    list.settings.filterable && schema ? (
+      <Filters.Root schema={schema}>
+        <Layouts.Action
+          endActions={endActions}
+          startActions={startActions}
+          bottomActions={isMobile && hasAppliedFilters ? <Filters.List /> : null}
+        />
+        <Filters.Popover />
+      </Filters.Root>
+    ) : (
+      <Layouts.Action endActions={endActions} startActions={startActions} />
+    );
+
+  return (
+    <>
+      <tours.contentManager.Introduction>
+        {/* Invisible Anchor */}
+        <Box />
+      </tours.contentManager.Introduction>
+      <Page.Main>
+        <Page.Title>{`${contentTypeTitle}`}</Page.Title>
+        <LayoutsHeaderCustom
+          primaryAction={
+            canCreate ? (
+              <tours.contentManager.CreateNewEntry>
+                <CreateButton />
+              </tours.contentManager.CreateNewEntry>
+            ) : null
+          }
+          subtitle={formatMessage(
+            {
+              id: getTranslation('pages.ListView.header-subtitle'),
+              defaultMessage:
+                '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+            },
+            { number: pagination?.total }
+          )}
+          title={contentTypeTitle}
+          navigationAction={<BackButton />}
+        />
+        {actions}
+        <Layouts.Content>
+          {isEmptyState ? (
+            <Box background="neutral0" shadow="filterShadow" hasRadius>
+              <EmptyStateLayout
+                action={
+                  canCreate && (
+                    <Box>
+                      <CreateButton variant="secondary" />
+                    </Box>
+                  )
+                }
+                content={formatMessage({
+                  id: 'app.components.EmptyStateLayout.content-document',
+                  defaultMessage: 'No content found',
                 })}
-              </Table.Body>
-            </Table.Content>
-          </Table.Root>
-          <Pagination.Root
-            {...pagination}
-            onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
-          >
-            <Pagination.PageSize />
-            <Pagination.Links />
-          </Pagination.Root>
-        </Flex>
-      </Layouts.Content>
-    </Page.Main>
+                hasRadius
+                icon={<EmptyDocuments width="16rem" />}
+              />
+            </Box>
+          ) : (
+            <Flex gap={4} direction="column" alignItems="stretch">
+              <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
+                <TableActionsBar />
+                <Table.Content>
+                  <Table.Head>
+                    <Table.HeaderCheckboxCell />
+                    {tableHeaders.map((header: ListFieldLayout) => (
+                      <Table.HeaderCell key={header.name} {...header} />
+                    ))}
+                  </Table.Head>
+                  <Table.Loading />
+                  <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
+                  <Table.Body>
+                    {results.map((row) => {
+                      return (
+                        <Table.Row
+                          cursor="pointer"
+                          key={row.id}
+                          onClick={handleRowClick(row.documentId)}
+                        >
+                          <Table.CheckboxCell id={row.id} />
+                          {tableHeaders.map(({ cellFormatter, ...header }) => {
+                            if (header.name === 'status') {
+                              const { status } = row;
+
+                              return (
+                                <Table.Cell key={header.name}>
+                                  <DocumentStatus status={status} maxWidth={'min-content'} />
+                                </Table.Cell>
+                              );
+                            }
+                            if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
+                              // Display the users full name
+                              // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
+                              // In this case, we display a dash
+                              return (
+                                <Table.Cell key={header.name}>
+                                  <Typography textColor="neutral800">
+                                    {row[header.name.split('.')[0]]
+                                      ? getDisplayName(row[header.name.split('.')[0]])
+                                      : '-'}
+                                  </Typography>
+                                </Table.Cell>
+                              );
+                            }
+                            if (typeof cellFormatter === 'function') {
+                              return (
+                                <Table.Cell key={header.name}>
+                                  {/* @ts-expect-error – TODO: fix this TS error */}
+                                  {cellFormatter(row, header, { collectionType, model })}
+                                </Table.Cell>
+                              );
+                            }
+                            return (
+                              <Table.Cell key={header.name}>
+                                <CellContent
+                                  content={row[header.name.split('.')[0]]}
+                                  rowId={row.documentId}
+                                  {...header}
+                                />
+                              </Table.Cell>
+                            );
+                          })}
+                          {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
+                          <ActionsCell onClick={(e) => e.stopPropagation()}>
+                            <TableActions document={row} />
+                          </ActionsCell>
+                        </Table.Row>
+                      );
+                    })}
+                  </Table.Body>
+                </Table.Content>
+              </Table.Root>
+              <Pagination.Root
+                {...pagination}
+                onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
+              >
+                <Pagination.PageSize />
+                <Pagination.Links />
+              </Pagination.Root>
+            </Flex>
+          )}
+        </Layouts.Content>
+      </Page.Main>
+    </>
   );
 };
 
@@ -403,7 +520,7 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
         search: stringify({ plugins: query.plugins }),
       }}
       minWidth="max-content"
-      marginLeft={2}
+      fullWidth
     >
       {formatMessage({
         id: getTranslation('HeaderLayout.button.label-add-entry'),
@@ -444,7 +561,7 @@ const ProtectedListViewPage = () => {
     <Page.Protect permissions={permissions}>
       {({ permissions }) => (
         <DocumentRBAC permissions={permissions}>
-          <ListViewPage />
+          <ListViewPage key={slug} />
         </DocumentRBAC>
       )}
     </Page.Protect>

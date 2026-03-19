@@ -1,3 +1,3 @@
 export type Kind = 'draft' | 'published';
 
-export type Param = { status?: Kind };
+export type Param = { status?: Kind; hasPublishedVersion?: boolean };

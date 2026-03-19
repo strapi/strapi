@@ -45,7 +45,13 @@ describe('Local Strapi Source Destination', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
-          db: { transaction },
+          db: {
+            transaction,
+            lifecycles: {
+              enable: jest.fn(),
+              disable: jest.fn(),
+            },
+          },
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
@@ -62,7 +68,13 @@ describe('Local Strapi Source Destination', () => {
     test('Should have a defined Strapi instance if bootstrap has been called', async () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
-          db: { transaction },
+          db: {
+            transaction,
+            lifecycles: {
+              enable: jest.fn(),
+              disable: jest.fn(),
+            },
+          },
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
@@ -82,7 +94,13 @@ describe('Local Strapi Source Destination', () => {
     test('requires strategy to be restore', async () => {
       const restoreProvider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
-          db: { transaction },
+          db: {
+            transaction,
+            lifecycles: {
+              enable: jest.fn(),
+              disable: jest.fn(),
+            },
+          },
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
@@ -99,7 +117,13 @@ describe('Local Strapi Source Destination', () => {
         (async () => {
           const invalidProvider = createLocalStrapiDestinationProvider({
             getStrapi: getStrapiFactory({
-              db: { transaction },
+              db: {
+                transaction,
+                lifecycles: {
+                  enable: jest.fn(),
+                  disable: jest.fn(),
+                },
+              },
             }),
             /* @ts-ignore: disable-next-line */
             strategy: 'foo',
@@ -203,6 +227,10 @@ describe('Local Strapi Source Destination', () => {
               transacting: jest.fn().mockReturnThis(),
             }),
           }),
+          lifecycles: {
+            enable: jest.fn(),
+            disable: jest.fn(),
+          },
         },
         ...strapiCommonProperties,
       })();

@@ -209,8 +209,10 @@ function isValidUrl(value: string) {
   }
 }
 
+const OFFICIAL_NAME_REGEX = /^[a-zA-Z]*$/;
+
 async function isOfficialTemplate(template: string, branch: string | undefined) {
-  if (isValidUrl(template)) {
+  if (isValidUrl(template) || !OFFICIAL_NAME_REGEX.test(template)) {
     return false;
   }
 

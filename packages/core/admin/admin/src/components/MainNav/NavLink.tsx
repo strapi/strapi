@@ -8,46 +8,96 @@ import {
   AccessibleIcon,
 } from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
-import { styled } from 'styled-components';
+import { styled, css } from 'styled-components';
+
+const isExternalLink = (to: LinkProps['to']) =>
+  typeof to === 'string' && (to.startsWith('http://') || to.startsWith('https://'));
 
 /* -------------------------------------------------------------------------------------------------
  * Link
  * -----------------------------------------------------------------------------------------------*/
-const MainNavLinkWrapper = styled(RouterLink)`
+const MainNavLinkStyles = css`
   text-decoration: none;
   display: flex;
+  align-items: center;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral500};
   position: relative;
-  width: fit-content;
-  padding-block: 0.6rem;
-  padding-inline: 0.6rem;
+  width: 100%;
+  padding-block: 0.4rem;
+  padding-inline: 1.2rem;
 
-  &:hover,
-  &.active {
-    background: ${({ theme }) => theme.colors.neutral100};
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-block: 0.6rem;
+    padding-inline: 0.6rem;
   }
 
   &:hover {
     svg path {
       fill: ${({ theme }) => theme.colors.neutral600};
     }
-    color: ${({ theme }) => theme.colors.neutral700};
+    background: ${({ theme }) => theme.colors.neutral100};
   }
 
   &.active {
     svg path {
       fill: ${({ theme }) => theme.colors.primary600};
     }
-
-    color: ${({ theme }) => theme.colors.primary600};
-    font-weight: 500;
+    background: ${({ theme }) => theme.colors.primary100};
   }
 `;
 
-const LinkImpl = ({ children, ...props }: LinkProps) => {
-  return <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>;
+const MainNavLinkWrapper = styled(RouterLink)`
+  ${MainNavLinkStyles}
+`;
+
+const MainNavLinkAnchor = styled.a`
+  ${MainNavLinkStyles}
+`;
+
+const MainNavButtonStyles = css`
+  padding-block: 1rem;
+  padding-inline: 1rem;
+`;
+
+const MainNavButtonWrapper = styled(MainNavLinkWrapper)`
+  ${MainNavButtonStyles}
+`;
+
+const MainNavButtonAnchor = styled(MainNavLinkAnchor)`
+  ${MainNavButtonStyles}
+`;
+
+const LinkImpl = ({ children, to, ...props }: LinkProps) => {
+  if (isExternalLink(to)) {
+    return (
+      <MainNavLinkAnchor href={to as string} {...props}>
+        {children}
+      </MainNavLinkAnchor>
+    );
+  }
+  return (
+    <MainNavLinkWrapper to={to} {...props}>
+      {children}
+    </MainNavLinkWrapper>
+  );
+};
+
+const NavButtonImpl = ({ children, to, ...props }: LinkProps) => {
+  if (isExternalLink(to)) {
+    return (
+      <MainNavButtonAnchor href={to as string} {...props}>
+        {children}
+      </MainNavButtonAnchor>
+    );
+  }
+
+  return (
+    <MainNavButtonWrapper to={to} {...props}>
+      {children}
+    </MainNavButtonWrapper>
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -104,6 +154,7 @@ const BadgeImpl = ({ children, label, ...props }: NavLink.NavBadgeProps) => {
 
 const NavLink = {
   Link: LinkImpl,
+  NavButton: NavButtonImpl,
   Tooltip: TooltipImpl,
   Icon: IconImpl,
   Badge: BadgeImpl,

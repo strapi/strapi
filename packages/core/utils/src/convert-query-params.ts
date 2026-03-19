@@ -80,6 +80,11 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
+  /**
+   * Filter documents by whether they have a published version.
+   * Use with `status: 'draft'` to find documents that have never been published.
+   */
+  hasPublishedVersion?: boolean | 'true' | 'false';
 }
 
 type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;
@@ -262,12 +267,13 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     return pageVal;
   };
 
-  const convertPageSizeQueryParams = (pageSize: unknown, page: unknown): number => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const convertPageSizeQueryParams = (pageSize: unknown, _page: unknown): number => {
     const pageSizeVal = toNumber(pageSize);
 
     if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
       throw new PaginationError(
-        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
+        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${pageSize}`
       );
     }
 
@@ -285,7 +291,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     if (isPagePagination && isOffsetPagination) {
       throw new PaginationError(
-        'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
+        'Invalid pagination attributes. The page parameters are incorrect and must be in the pagination object'
       );
     }
   };

@@ -187,39 +187,41 @@ const Collapse = ({
               if (isParentCheckbox) {
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
-                    {hasConditions && (
-                      <Box
-                        tag="span"
-                        position="absolute"
-                        top="-6px"
-                        left="37px"
-                        width="6px"
-                        height="6px"
-                        borderRadius="20px"
-                        background="primary600"
-                      />
-                    )}
-                    <Checkbox
-                      disabled={isFormDisabled}
-                      name={checkboxName}
-                      aria-label={formatMessage(
-                        {
-                          id: `Settings.permissions.select-by-permission`,
-                          defaultMessage: 'Select {label} permission',
-                        },
-                        { label: `${permissionLabel} ${label}` }
+                    <Box position="relative" zIndex={1}>
+                      {hasConditions && (
+                        <Box
+                          tag="span"
+                          position="absolute"
+                          top="-6px"
+                          left="37px"
+                          width="6px"
+                          height="6px"
+                          borderRadius="20px"
+                          background="primary600"
+                        />
                       )}
-                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onCheckedChange={(value) => {
-                        onChangeParentCheckbox({
-                          target: {
-                            name: checkboxName,
-                            value: !!value,
+                      <Checkbox
+                        disabled={isFormDisabled}
+                        name={checkboxName}
+                        aria-label={formatMessage(
+                          {
+                            id: `Settings.permissions.select-by-permission`,
+                            defaultMessage: 'Select {label} permission',
                           },
-                        });
-                      }}
-                      checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
-                    />
+                          { label: `${permissionLabel} ${label}` }
+                        )}
+                        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                        onCheckedChange={(value) => {
+                          onChangeParentCheckbox({
+                            target: {
+                              name: checkboxName,
+                              value: !!value,
+                            },
+                          });
+                        }}
+                        checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
+                      />
+                    </Box>
                   </Cell>
                 );
               }

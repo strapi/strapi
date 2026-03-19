@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Button, Grid, Modal, Breadcrumbs, Crumb, VisuallyHidden } from '@strapi/design-system';
 import { Form, InputRenderer } from '@strapi/strapi/admin';
@@ -104,7 +104,8 @@ const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
                     ].map(({ size, ...field }) => (
                       <Grid.Item
                         key={field.name}
-                        col={size}
+                        m={size}
+                        xs={12}
                         direction="column"
                         alignItems="stretch"
                       >

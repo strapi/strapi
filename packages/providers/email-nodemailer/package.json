@@ -1,7 +1,7 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "5.6.0",
-  "description": "Nodemailer provider for Strapi 3",
+  "version": "5.40.0",
+  "description": "Nodemailer provider for Strapi",
   "keywords": [
     "strapi",
     "email",
@@ -14,7 +14,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/email-nodemailer"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -45,27 +46,41 @@
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "watch": "pack-up watch"
+    "test:unit": "run -T jest",
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "lodash": "4.17.21",
-    "nodemailer": "6.9.1"
+    "nodemailer": "8.0.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
-    "@types/nodemailer": "6.4.7",
-    "eslint-config-custom": "5.6.0",
-    "tsconfig": "5.6.0"
+    "@types/nodemailer": "7.0.10",
+    "eslint-config-custom": "5.40.0",
+    "tsconfig": "5.40.0"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   }
 }

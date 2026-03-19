@@ -1,12 +1,11 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
-import { ESBuildMinifyPlugin } from 'esbuild-loader';
+import { EsbuildPlugin } from 'esbuild-loader';
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import crypto from 'node:crypto';
 import path from 'node:path';
-import readPkgUp from 'read-pkg-up';
 import {
   Configuration,
   DefinePlugin,
@@ -18,7 +17,9 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import type { BuildContext } from '../create-build-context';
 import { getUserConfig } from '../core/config';
+import { getLinkedDesignSystemPath } from '../core/linked-packages';
 import { getMonorepoAliases } from '../core/aliases';
+import { getModulePath } from '../core/resolve-module';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
   const target = browserslistToEsbuild(ctx.target);
@@ -36,6 +37,9 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         'react-dom': getModulePath('react-dom'),
         'styled-components': getModulePath('styled-components'),
         'react-router-dom': getModulePath('react-router-dom'),
+        // Force single instance so plugin custom field chunks inherit root DesignSystemProvider context
+        '@strapi/design-system': getModulePath('@strapi/design-system'),
+        '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
       },
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
     },
@@ -124,6 +128,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuration> => {
   const baseConfig = await resolveBaseConfig(ctx);
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
+  const linkedDesignSystemPath = getLinkedDesignSystemPath();
 
   return {
     ...baseConfig,
@@ -132,6 +137,10 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuratio
       // version cache when there are changes to aliases
       buildDependencies: {
         config: [__filename],
+        // When design-system is linked, invalidate cache when it changes
+        ...(linkedDesignSystemPath && {
+          designSystem: [path.join(linkedDesignSystemPath, 'dist')],
+        }),
       },
       version: crypto
         .createHash('md5')
@@ -193,7 +202,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
     optimization: {
       minimize: ctx.options.minify,
       minimizer: [
-        new ESBuildMinifyPlugin({
+        new EsbuildPlugin({
           target,
           css: true, // Apply minification to CSS assets
         }),
@@ -237,16 +246,6 @@ const mergeConfigWithUserConfig = async (config: Configuration, ctx: BuildContex
   }
 
   return config;
-};
-
-/**
- * @internal This function is used to resolve the path of a module.
- * It mimics what vite does internally already.
- */
-const getModulePath = (mod: string) => {
-  const modulePath = require.resolve(mod);
-  const pkg = readPkgUp.sync({ cwd: path.dirname(modulePath) });
-  return pkg ? path.dirname(pkg.path) : modulePath;
 };
 
 export { mergeConfigWithUserConfig, resolveDevelopmentConfig, resolveProductionConfig };

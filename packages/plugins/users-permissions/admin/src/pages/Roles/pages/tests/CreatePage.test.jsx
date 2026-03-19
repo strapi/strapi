@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { DesignSystemProvider } from '@strapi/design-system';
 import { NotificationsProvider } from '@strapi/strapi/admin';
@@ -9,6 +9,13 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { CreatePage } from '../CreatePage';
+
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/new" element={<CreatePage />} />, {

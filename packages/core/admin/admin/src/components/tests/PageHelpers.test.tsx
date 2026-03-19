@@ -23,7 +23,7 @@ describe('PageHelpers', () => {
       render(<Page.Error />);
 
       expect(
-        screen.getByText('Woops! Something went wrong. Please, try again.')
+        screen.getByText('Whoops! Something went wrong. Please, try again.')
       ).toBeInTheDocument();
     });
 

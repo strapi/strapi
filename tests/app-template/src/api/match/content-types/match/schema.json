@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "matches",
+  "info": {
+    "singularName": "match",
+    "pluralName": "matches",
+    "displayName": "Match"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "date": {
+      "type": "date"
+    },
+    "kit_man": {
+      "type": "string"
+    },
+    "opponent": {
+      "type": "string",
+      "required": true,
+      "regex": "^(?!.*richmond).*"
+    },
+    "lineup": {
+      "type": "component",
+      "repeatable": true,
+      "component": "match.player"
+    },
+    "most_valuable_player": {
+      "type": "component",
+      "repeatable": false,
+      "component": "match.player"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["match.player", "product.variations"]
+    }
+  }
+}

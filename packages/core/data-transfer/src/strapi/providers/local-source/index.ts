@@ -39,6 +39,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     this.strapi = await this.options.getStrapi();
+    this.strapi.db.lifecycles.disable();
   }
 
   #reportInfo(message: string) {
@@ -52,9 +53,42 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     });
   }
 
+  /**
+   * Reports an error to the diagnostic reporter.
+   */
+  #reportError(message: string, error: Error) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        error,
+        severity: 'fatal',
+        name: error.name,
+      },
+      kind: 'error',
+    });
+  }
+
+  /**
+   * Handles errors that occur in read streams.
+   */
+  #handleStreamError(streamType: string, err: Error) {
+    const { message, stack } = err;
+    const errorMessage = `[Data transfer] Error in ${streamType} read stream: ${message}`;
+    const formattedError = {
+      message: errorMessage,
+      stack,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.strapi?.log.error(formattedError);
+    this.#reportError(formattedError.message, err);
+  }
+
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
-
+    assertValidStrapi(this.strapi);
+    this.strapi.db.lifecycles.enable();
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
       await this.strapi?.destroy();
@@ -117,7 +151,13 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   createAssetsReadStream(): Readable {
     assertValidStrapi(this.strapi, 'Not able to stream assets');
     this.#reportInfo('creating assets read stream');
-    return createAssetsStream(this.strapi);
+
+    const stream = createAssetsStream(this.strapi);
+    stream.on('error', (err) => {
+      this.#handleStreamError('assets', err);
+    });
+
+    return stream;
   }
 }
 

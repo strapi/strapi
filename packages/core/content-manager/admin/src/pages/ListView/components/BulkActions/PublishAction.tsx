@@ -1,25 +1,29 @@
 import * as React from 'react';
 
 import {
-  useQueryParams,
-  Table,
-  useTable,
-  getYupValidationErrors,
   FormErrors,
+  getYupValidationErrors,
+  Table,
+  useQueryParams,
+  useTable,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
-  Typography,
-  Modal,
-  IconButton,
   Flex,
-  Tooltip,
+  IconButton,
   Loader,
+  Modal,
+  Tooltip,
+  Typography,
   TypographyComponent,
+  RawTable,
+  Tr,
+  Td,
+  Tbody,
 } from '@strapi/design-system';
-import { Pencil, CrossCircle, CheckCircle, ArrowsCounterClockwise } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { ArrowsCounterClockwise, CheckCircle, CrossCircle, Pencil } from '@strapi/icons';
+import { useIntl, type IntlShape } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
@@ -47,46 +51,53 @@ const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;
 `;
 
+const TableComponent = styled(RawTable)`
+  width: 100%;
+  table-layout: fixed;
+  td:first-child {
+    border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+  }
+  td:first-of-type {
+    padding: ${({ theme }) => theme.spaces[4]};
+  }
+`;
+
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText
  * -----------------------------------------------------------------------------------------------*/
 
-const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessage: any) => {
+export const formatErrorMessages = (
+  errors: FormErrors,
+  parentKey: string,
+  formatMessage: IntlShape['formatMessage']
+) => {
+  if (!errors) return [];
+
   const messages: string[] = [];
 
   Object.entries(errors).forEach(([key, value]) => {
     const currentKey = parentKey ? `${parentKey}.${key}` : key;
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      if ('id' in value && 'defaultMessage' in value) {
-        messages.push(
-          formatMessage(
-            {
-              id: `${value.id}.withField`,
-              defaultMessage: value.defaultMessage,
-            },
-            { field: currentKey }
-          )
-        );
-      } else {
-        messages.push(
-          ...formatErrorMessages(
-            // @ts-expect-error TODO: check why value is not compatible with FormErrors
-            value,
-            currentKey,
-            formatMessage
-          )
-        );
-      }
-    } else {
+    if (!value) return;
+    const isErrorMessageDescriptor =
+      typeof value === 'object' && 'id' in value && 'defaultMessage' in value;
+    if (isErrorMessageDescriptor || typeof value === 'string') {
+      const id = isErrorMessageDescriptor ? value.id : value;
+      const defaultMessage = isErrorMessageDescriptor
+        ? (value.defaultMessage as string)
+        : (value as string);
       messages.push(
         formatMessage(
           {
-            id: `${value}.withField`,
-            defaultMessage: value,
+            id: `${id}.withField`,
+            defaultMessage,
           },
           { field: currentKey }
         )
+      );
+    } else {
+      messages.push(
+        ...formatErrorMessages(value as unknown as FormErrors, currentKey, formatMessage)
       );
     }
   });
@@ -110,8 +121,8 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
     return (
       <Flex gap={2}>
         <CrossCircle fill="danger600" />
-        <Tooltip description={validationErrorsMessages}>
-          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+        <Tooltip label={validationErrorsMessages}>
+          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="bold" ellipsis>
             {validationErrorsMessages}
           </TypographyMaxWidth>
         </Tooltip>
@@ -137,7 +148,7 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
     return (
       <Flex gap={2}>
         <ArrowsCounterClockwise fill="alternative600" />
-        <Typography>
+        <Typography textColor="alternative600" fontWeight="bold">
           {formatMessage({
             id: 'content-manager.bulk-publish.modified',
             defaultMessage: 'Ready to publish changes',
@@ -150,7 +161,7 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
   return (
     <Flex gap={2}>
       <CheckCircle fill="success600" />
-      <Typography>
+      <Typography textColor="success600" fontWeight="bold">
         {formatMessage({
           id: 'app.utils.ready-to-publish',
           defaultMessage: 'Ready to publish',
@@ -207,7 +218,7 @@ const SelectedEntriesTableContent = ({
       </Table.Head>
       <Table.Loading />
       <Table.Body>
-        {rowsToDisplay.map((row, index) => (
+        {rowsToDisplay.map((row) => (
           <Table.Row key={row.id}>
             <Table.CheckboxCell id={row.id} />
             <Table.Cell>
@@ -268,10 +279,111 @@ const SelectedEntriesTableContent = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
- * BoldChunk
+ * PublicationStatusSummary
  * -----------------------------------------------------------------------------------------------*/
 
-const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{chunks}</Typography>;
+interface PublicationStatusSummaryProps {
+  count: number;
+  icon: React.ReactNode;
+  message: string;
+  textColor: string;
+}
+
+const PublicationStatusSummary = ({
+  count,
+  icon,
+  message,
+  textColor,
+}: PublicationStatusSummaryProps) => {
+  return (
+    <Flex justifyContent="space-between" flex={1} gap={3}>
+      <Flex gap={2}>
+        {icon}
+        <Typography textColor={textColor} fontWeight="bold">
+          {message}
+        </Typography>
+      </Flex>
+      <Typography fontWeight="bold">{count}</Typography>
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * PublicationStatusGrid
+ * -----------------------------------------------------------------------------------------------*/
+
+interface PublicationStatusGridProps {
+  entriesReadyToPublishCount: number;
+  entriesModifiedCount: number;
+  entriesPublishedCount: number;
+  entriesWithErrorsCount: number;
+}
+
+const PublicationStatusGrid = ({
+  entriesReadyToPublishCount,
+  entriesPublishedCount,
+  entriesModifiedCount,
+  entriesWithErrorsCount,
+}: PublicationStatusGridProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Box hasRadius borderColor="neutral150">
+      <TableComponent colCount={2} rowCount={2}>
+        <Tbody>
+          <Tr>
+            <Td>
+              <PublicationStatusSummary
+                textColor="success600"
+                count={entriesReadyToPublishCount}
+                icon={<CheckCircle fill="success600" />}
+                message={formatMessage({
+                  id: 'app.utils.ready-to-publish',
+                  defaultMessage: 'Ready to publish',
+                })}
+              />
+            </Td>
+            <Td>
+              <PublicationStatusSummary
+                textColor="success600"
+                count={entriesPublishedCount}
+                icon={<CheckCircle fill="success600" />}
+                message={formatMessage({
+                  id: 'app.utils.already-published',
+                  defaultMessage: 'Already published',
+                })}
+              />
+            </Td>
+          </Tr>
+          <Tr>
+            <Td>
+              <PublicationStatusSummary
+                textColor="alternative600"
+                count={entriesModifiedCount}
+                icon={<ArrowsCounterClockwise fill="alternative600" />}
+                message={formatMessage({
+                  id: 'content-manager.bulk-publish.modified',
+                  defaultMessage: 'Ready to publish changes',
+                })}
+              />
+            </Td>
+            <Td>
+              <PublicationStatusSummary
+                textColor="danger600"
+                count={entriesWithErrorsCount}
+                icon={<CrossCircle fill="danger600" />}
+                message={formatMessage({
+                  id: 'content-manager.bulk-publish.waiting-for-action',
+                  defaultMessage: 'Waiting for action',
+                })}
+              />
+            </Td>
+          </Tr>
+        </Tbody>
+      </TableComponent>
+    </Box>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesModalContent
@@ -355,10 +467,9 @@ const SelectedEntriesModalContent = ({
     };
   }, [components, data, schema]);
 
-  const [publishedCount, setPublishedCount] = React.useState(0);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
-  const { publishMany: bulkPublishAction } = useDocumentActions();
+  const { publishMany: bulkPublishAction, isLoading: isPublishing } = useDocumentActions();
   const [, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
 
   const selectedRows = useTable('publishAction', (state) => state.selectedRows);
@@ -375,11 +486,14 @@ const SelectedEntriesModalContent = ({
   const selectedEntriesWithErrorsCount = selectedEntries.filter(
     ({ documentId }) => validationErrors[documentId]
   ).length;
-  const selectedEntriesPublished = selectedEntries.filter(
+  const selectedEntriesPublishedCount = selectedEntries.filter(
     ({ status }) => status === 'published'
   ).length;
+  const selectedEntriesModifiedCount = selectedEntries.filter(
+    ({ status, documentId }) => status === 'modified' && !validationErrors[documentId]
+  ).length;
   const selectedEntriesWithNoErrorsCount =
-    selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublished;
+    selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublishedCount;
 
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
@@ -388,9 +502,6 @@ const SelectedEntriesModalContent = ({
 
     const res = await bulkPublishAction({ model: model, documentIds: entriesToPublish, params });
     if (!('error' in res)) {
-      // @ts-expect-error TODO: check with BE why response is not consistent with other actions
-      setPublishedCount(res.count);
-
       const unpublishedEntries = rows.filter((row) => {
         return !entriesToPublish.includes(row.documentId);
       });
@@ -399,42 +510,18 @@ const SelectedEntriesModalContent = ({
     }
   };
 
-  const getFormattedCountMessage = () => {
-    if (publishedCount) {
-      return formatMessage(
-        {
-          id: getTranslation('containers.list.selectedEntriesModal.publishedCount'),
-          defaultMessage:
-            '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} published. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
-        },
-        {
-          publishedCount,
-          withErrorsCount: selectedEntriesWithErrorsCount,
-          b: BoldChunk,
-        }
-      );
-    }
-
-    return formatMessage(
-      {
-        id: getTranslation('containers.list.selectedEntriesModal.selectedCount'),
-        defaultMessage:
-          '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
-      },
-      {
-        readyToPublishCount: selectedEntriesWithNoErrorsCount,
-        withErrorsCount: selectedEntriesWithErrorsCount,
-        alreadyPublishedCount: selectedEntriesPublished,
-        b: BoldChunk,
-      }
-    );
-  };
-
   return (
     <>
       <Modal.Body>
-        <Typography>{getFormattedCountMessage()}</Typography>
-        <Box marginTop={5}>
+        <PublicationStatusGrid
+          entriesReadyToPublishCount={
+            selectedEntriesWithNoErrorsCount - selectedEntriesModifiedCount
+          }
+          entriesPublishedCount={selectedEntriesPublishedCount}
+          entriesModifiedCount={selectedEntriesModifiedCount}
+          entriesWithErrorsCount={selectedEntriesWithErrorsCount}
+        />
+        <Box marginTop={7}>
           <SelectedEntriesTableContent
             isPublishing={isSubmittingForm}
             rowsToDisplay={rows}
@@ -459,10 +546,10 @@ const SelectedEntriesModalContent = ({
             disabled={
               selectedEntries.length === 0 ||
               selectedEntries.length === selectedEntriesWithErrorsCount ||
-              selectedEntriesPublished === selectedEntries.length ||
+              selectedEntriesPublishedCount === selectedEntries.length ||
               isLoading
             }
-            loading={isSubmittingForm}
+            loading={isPublishing || isSubmittingForm}
           >
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
@@ -471,7 +558,7 @@ const SelectedEntriesModalContent = ({
       <ConfirmDialogPublishAll
         isOpen={isDialogOpen}
         onToggleDialog={toggleDialog}
-        isConfirmButtonLoading={isSubmittingForm}
+        isConfirmButtonLoading={isPublishing || isSubmittingForm}
         onConfirm={handleConfirmBulkPublish}
       />
     </>

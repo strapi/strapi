@@ -5,6 +5,9 @@ import { Button } from '@strapi/design-system';
 import { ListPlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
+import { styled } from 'styled-components';
+
+import type { Component, ContentType } from '../../types';
 
 const cmPermissions: Record<string, Permission[]> = {
   collectionTypesConfigurations: [
@@ -27,74 +30,81 @@ const cmPermissions: Record<string, Permission[]> = {
   ],
 };
 
+const getPermission = (type: Component | ContentType) => {
+  if (type.modelType === 'contentType') {
+    if (type.kind === 'singleType') {
+      return cmPermissions.singleTypesConfigurations;
+    }
+
+    return cmPermissions.collectionTypesConfigurations;
+  }
+
+  return cmPermissions.componentsConfigurations;
+};
+
 interface LinkToCMSettingsViewProps {
   disabled: boolean;
-  contentTypeKind?: string;
-  isInContentTypeView?: boolean;
-  isTemporary?: boolean;
-  targetUid?: string;
+  type: Component | ContentType;
 }
 
-export const LinkToCMSettingsView = memo(
-  ({
-    disabled,
-    isTemporary = false,
-    isInContentTypeView = true,
-    contentTypeKind = 'collectionType',
-    targetUid = '',
-  }: LinkToCMSettingsViewProps) => {
-    const { formatMessage } = useIntl();
-    const navigate = useNavigate();
-    const { collectionTypesConfigurations, componentsConfigurations, singleTypesConfigurations } =
-      cmPermissions;
-    const label = formatMessage({
-      id: 'content-type-builder.form.button.configure-view',
-      defaultMessage: 'Configure the view',
-    });
-    let permissionsToApply = collectionTypesConfigurations;
-
-    const handleClick = () => {
-      if (isTemporary) {
-        return false;
+const getLink = (type: Component | ContentType) => {
+  switch (type.modelType) {
+    case 'contentType':
+      switch (type.kind) {
+        case 'singleType':
+          return `/content-manager/single-types/${type.uid}/configurations/edit`;
+        case 'collectionType':
+          return `/content-manager/collection-types/${type.uid}/configurations/edit`;
       }
-
-      if (isInContentTypeView) {
-        navigate(`/content-manager/collection-types/${targetUid}/configurations/edit`);
-      } else {
-        navigate(`/content-manager/components/${targetUid}/configurations/edit`);
-      }
-
-      return false;
-    };
-
-    if (isInContentTypeView && contentTypeKind === 'singleType') {
-      permissionsToApply = singleTypesConfigurations;
-    }
-
-    if (!isInContentTypeView) {
-      permissionsToApply = componentsConfigurations;
-    }
-    const { isLoading, allowedActions } = useRBAC({
-      viewConfig: permissionsToApply,
-    });
-
-    if (isLoading) {
-      return null;
-    }
-
-    if (!allowedActions.canConfigureView && !allowedActions.canConfigureLayout) {
-      return null;
-    }
-
-    return (
-      <Button
-        startIcon={<ListPlus />}
-        variant="tertiary"
-        onClick={handleClick}
-        disabled={isTemporary || disabled}
-      >
-        {label}
-      </Button>
-    );
+    case 'component':
+      return `/content-manager/components/${type.uid}/configurations/edit`;
   }
-);
+};
+
+const StyledButton = styled(Button)`
+  white-space: nowrap;
+`;
+
+export const LinkToCMSettingsView = memo(({ disabled, type }: LinkToCMSettingsViewProps) => {
+  const { formatMessage } = useIntl();
+  const navigate = useNavigate();
+  const permissionsToApply = getPermission(type);
+
+  const label = formatMessage({
+    id: 'content-type-builder.form.button.configure-view',
+    defaultMessage: 'Configure the view',
+  });
+
+  const handleClick = () => {
+    if (disabled) {
+      return false;
+    }
+
+    const link = getLink(type);
+
+    navigate(link);
+
+    return false;
+  };
+
+  const { isLoading, allowedActions } = useRBAC(permissionsToApply);
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (!allowedActions.canConfigureView && !allowedActions.canConfigureLayout) {
+    return null;
+  }
+
+  return (
+    <StyledButton
+      startIcon={<ListPlus />}
+      variant="tertiary"
+      onClick={handleClick}
+      disabled={disabled}
+    >
+      {label}
+    </StyledButton>
+  );
+});

@@ -1,10 +1,12 @@
 import * as React from 'react';
 
-import { Button, Dialog, Flex } from '@strapi/design-system';
-import { Check, ArrowClockwise } from '@strapi/icons';
+import { Box, Button, Dialog, Flex, Tooltip } from '@strapi/design-system';
+import { Check, ArrowClockwise, Eye, EyeStriked } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
@@ -17,6 +19,10 @@ interface RegenerateProps {
   onRegenerate?: (newKey: string) => void;
   url: string;
 }
+
+const ActionButton = styled(Button)`
+  white-space: nowrap;
+`;
 
 const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
   const { formatMessage } = useIntl();
@@ -65,19 +71,20 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
   return (
     <Dialog.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
       <Dialog.Trigger>
-        <Button
+        <ActionButton
           startIcon={<ArrowClockwise />}
           type="button"
           size="S"
           variant="tertiary"
           onClick={() => setShowConfirmDialog(true)}
           name="regenerate"
+          fullWidth
         >
           {formatMessage({
             id: 'Settings.tokens.regenerate',
             defaultMessage: 'Regenerate',
           })}
-        </Button>
+        </ActionButton>
       </Dialog.Trigger>
 
       <ConfirmDialog
@@ -117,7 +124,10 @@ interface FormHeadProps<TToken extends Token | null> {
   token: TToken;
   canEditInputs: boolean;
   canRegenerate: boolean;
+  canShowToken?: boolean;
   setToken: (token: TToken) => void;
+  toggleToken?: () => void;
+  showToken?: boolean;
   isSubmitting: boolean;
   regenerateUrl: string;
 }
@@ -126,6 +136,9 @@ export const FormHead = <TToken extends Token | null>({
   title,
   token,
   setToken,
+  toggleToken,
+  showToken,
+  canShowToken,
   canEditInputs,
   canRegenerate,
   isSubmitting,
@@ -137,6 +150,7 @@ export const FormHead = <TToken extends Token | null>({
       ...token,
       accessKey: newKey,
     });
+    toggleToken?.();
   };
 
   return (
@@ -144,25 +158,56 @@ export const FormHead = <TToken extends Token | null>({
       title={token?.name || formatMessage(title)}
       primaryAction={
         canEditInputs ? (
-          <Flex gap={2}>
+          <Flex width="100%" gap={2} wrap={{ initial: 'wrap', medium: 'nowrap' }}>
             {canRegenerate && token?.id && (
               <Regenerate
                 onRegenerate={handleRegenerate}
                 url={`${regenerateUrl}${token?.id ?? ''}`}
               />
             )}
-            <Button
-              disabled={isSubmitting}
-              loading={isSubmitting}
-              startIcon={<Check />}
-              type="submit"
-              size="S"
-            >
-              {formatMessage({
-                id: 'global.save',
-                defaultMessage: 'Save',
-              })}
-            </Button>
+            <Flex width="100%" gap={2}>
+              {token?.id && toggleToken && (
+                <tours.apiTokens.ViewAPIToken>
+                  <Tooltip
+                    label={
+                      !canShowToken &&
+                      formatMessage({
+                        id: 'Settings.tokens.encryptionKeyMissing',
+                        defaultMessage:
+                          'In order to view the token, you need a valid encryption key in the admin configuration',
+                      })
+                    }
+                  >
+                    <ActionButton
+                      type="button"
+                      startIcon={showToken ? <EyeStriked /> : <Eye />}
+                      variant="secondary"
+                      onClick={() => toggleToken?.()}
+                      disabled={!canShowToken}
+                      fullWidth
+                    >
+                      {formatMessage({
+                        id: 'Settings.tokens.viewToken',
+                        defaultMessage: 'View token',
+                      })}
+                    </ActionButton>
+                  </Tooltip>
+                </tours.apiTokens.ViewAPIToken>
+              )}
+              <ActionButton
+                disabled={isSubmitting}
+                loading={isSubmitting}
+                startIcon={<Check />}
+                type="submit"
+                size="S"
+                fullWidth
+              >
+                {formatMessage({
+                  id: 'global.save',
+                  defaultMessage: 'Save',
+                })}
+              </ActionButton>
+            </Flex>
           </Flex>
         ) : (
           canRegenerate &&
@@ -174,7 +219,12 @@ export const FormHead = <TToken extends Token | null>({
           )
         )
       }
-      navigationAction={<BackButton />}
+      navigationAction={
+        // The back link for mobile works differently; it is placed higher up in the DOM.
+        <Box display={{ initial: 'none', medium: 'block' }}>
+          <BackButton />
+        </Box>
+      }
       ellipsis
     />
   );

@@ -1,6 +1,6 @@
 import { forwardRef, memo } from 'react';
 
-import { Toggle, useComposedRefs, Field } from '@strapi/design-system';
+import { Toggle, useComposedRefs, Field, Flex, TextButton } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
@@ -16,9 +16,22 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
+    const handleClear = () => {
+      field.onChange(name, null);
+    };
+
+    const showClearButton = !required && field.value !== null;
+
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required} maxWidth="320px">
-        <Field.Label action={labelAction}>{label}</Field.Label>
+        <Flex justifyContent="space-between" alignItems="flex-end" gap={2}>
+          <Field.Label action={labelAction}>{label}</Field.Label>
+          {showClearButton && (
+            <TextButton onClick={handleClear}>
+              {formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+            </TextButton>
+          )}
+        </Flex>
         <Toggle
           ref={composedRefs}
           checked={field.value === null ? null : field.value || false}
@@ -31,6 +44,7 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
             defaultMessage: 'True',
           })}
           onChange={field.onChange}
+          name={name}
           {...props}
         />
         <Field.Hint />

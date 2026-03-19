@@ -74,7 +74,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
   const hasDBOptions = DBOptions.some((key) => key in options);
 
   if (!hasDBOptions) {
-    if (options.quickstart) {
+    if (options.quickstart || options.nonInteractive) {
       return DEFAULT_CONFIG;
     }
 
@@ -107,7 +107,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
 const sqlClientModule = {
   mysql: { mysql2: '3.9.8' },
   postgres: { pg: '8.8.0' },
-  sqlite: { 'better-sqlite3': '11.3.0' },
+  sqlite: { 'better-sqlite3': '12.6.2' },
 };
 
 export function addDatabaseDependencies(scope: Scope) {

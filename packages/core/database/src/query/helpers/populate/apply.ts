@@ -539,26 +539,28 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
   const map: MorphIdMap = {};
   const { on, ...typePopulate } = populateValue;
 
-  for (const type of Object.keys(idsByType)) {
-    const ids = idsByType[type];
+  await Promise.all(
+    Object.keys(idsByType).map(async (type) => {
+      const ids = idsByType[type];
 
-    // type was removed but still in morph relation
-    if (!db.metadata.get(type)) {
-      map[type] = {};
+      // type was removed but still in morph relation
+      if (!db.metadata.get(type)) {
+        map[type] = {};
 
-      continue;
-    }
+        return;
+      }
 
-    const qb = db.entityManager.createQueryBuilder(type);
+      const qb = db.entityManager.createQueryBuilder(type);
 
-    const rows = await qb
-      .init(on?.[type] ?? typePopulate)
-      .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
-      .where({ [idColumn.referencedColumn]: ids })
-      .execute<Row[]>({ mapResults: false });
+      const rows = await qb
+        .init(on?.[type] ?? typePopulate)
+        .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
+        .where({ [idColumn.referencedColumn]: ids })
+        .execute<Row[]>({ mapResults: false });
 
-    map[type] = _.groupBy<Row>(idColumn.referencedColumn)(rows);
-  }
+      map[type] = _.groupBy<Row>(idColumn.referencedColumn)(rows);
+    })
+  );
 
   results.forEach((result) => {
     const joinResults = joinMap[result[joinColumn.referencedColumn] as string] || [];
@@ -671,6 +673,28 @@ const pickPopulateParams = (populate: Record<string, unknown>) => {
   return _.pick(fieldsToPick, populate);
 };
 
+const getPopulateValue = (populate: Record<string, any>, filters: Record<string, any>) => {
+  const populateValue = {
+    filters,
+    ...pickPopulateParams(populate),
+  };
+
+  if ('on' in populateValue) {
+    populateValue.on = _.mapValues(
+      (value) => {
+        if (_.isPlainObject(value)) {
+          value.filters = filters;
+        }
+
+        return value;
+      },
+      populateValue.on as Record<string, any>
+    );
+  }
+
+  return populateValue;
+};
+
 const applyPopulate = async (results: Row[], populate: Record<string, any>, ctx: Context) => {
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
@@ -679,17 +703,14 @@ const applyPopulate = async (results: Row[], populate: Record<string, any>, ctx:
     return results;
   }
 
-  for (const attributeName of Object.keys(populate)) {
+  const populateAttribute = async (attributeName: string) => {
     const attribute = meta.attributes[attributeName];
 
     if (attribute.type !== 'relation') {
       throw new Error(`Invalid populate attribute ${attributeName}`);
     }
 
-    const populateValue = {
-      filters: qb.state.filters,
-      ...pickPopulateParams(populate[attributeName]),
-    };
+    const populateValue = getPopulateValue(populate[attributeName], qb.state.filters);
 
     const isCount = 'count' in populateValue && populateValue.count === true;
 
@@ -734,7 +755,9 @@ const applyPopulate = async (results: Row[], populate: Record<string, any>, ctx:
         break;
       }
     }
-  }
+  };
+
+  await Promise.all(Object.keys(populate).map(populateAttribute));
 };
 
 export default applyPopulate;

@@ -12,7 +12,23 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   width: 1px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
+@media (min-width: 768px) {
+
+}
+
+@media (min-width: 768px) {
+
+}
+
+@media (min-width: 768px) {
+
+}
+
+@media (min-width: 768px) {
+
+}
+
+@media (min-width: 768px) {
 
 }
 
@@ -20,11 +36,15 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 }
 
-@media (prefers-reduced-motion: no-preference) {
+@media (min-width: 768px) {
 
 }
 
 @media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (min-width: 768px) {
 
 }
 
@@ -41,6 +61,18 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 }
 
 @media (min-width: 1080px) {
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (min-width: 768px) {
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
 
 }
 

@@ -17,6 +17,45 @@ const componentModel = {
   },
 };
 
+const componentToNest = {
+  displayName: 'first-level-compo',
+  category: 'tests',
+  attributes: {
+    firstLevelCompoImage: {
+      allowedTypes: ['images', 'files', 'videos', 'audios'],
+      type: 'media',
+      multiple: false,
+    },
+    firstLevelCompoSiblingImage: {
+      allowedTypes: ['images', 'files', 'videos', 'audios'],
+      type: 'media',
+      multiple: false,
+    },
+  },
+};
+
+const componentWithImageModel = {
+  displayName: 'root-compo',
+  category: 'tests',
+  attributes: {
+    rootImage: {
+      allowedTypes: ['images', 'files', 'videos', 'audios'],
+      type: 'media',
+      multiple: false,
+    },
+    rootImageSibling: {
+      allowedTypes: ['images', 'files', 'videos', 'audios'],
+      type: 'media',
+      multiple: false,
+    },
+    firstLevelCompo: {
+      type: 'component',
+      repeatable: false,
+      component: 'tests.first-level-compo',
+    },
+  },
+};
+
 const relationUid = 'api::tag.tag';
 const relationModel = {
   draftAndPublish: true,
@@ -121,6 +160,11 @@ const collectionTypeModel = {
       repeatable: true,
       component: 'default.review',
     },
+    nestedComposWithImages: {
+      type: 'component',
+      repeatable: false,
+      component: 'tests.root-compo',
+    },
   },
 };
 
@@ -195,7 +239,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       method: 'PUT',
       url: `/content-manager/${params}`,
       body: data,
-      qs: { locale },
+      qs: { locale: locale ?? 'en' },
     });
 
     return body;
@@ -242,10 +286,11 @@ describeOnCondition(edition === 'EE')('History API', () => {
   };
 
   beforeAll(async () => {
-    await builder
-      .addComponent(componentModel)
-      .addContentTypes([relationModel, collectionTypeModel, singleTypeModel])
-      .build();
+    builder.addComponent(componentModel);
+    builder.addComponent(componentToNest);
+    builder.addComponent(componentWithImageModel);
+    builder.addContentTypes([relationModel, collectionTypeModel, singleTypeModel]);
+    await builder.build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -279,6 +324,14 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
     // Upload media assets to be added to versions
     const [imageA, imageB] = await uploadFiles();
+    const nestedComposWithImages = {
+      rootImage: imageA.id,
+      rootImageSibling: imageB.id,
+      firstLevelCompo: {
+        firstLevelCompoImage: imageA.id,
+        firstLevelCompoSiblingImage: imageB.id,
+      },
+    };
     // Create a collection type to create an initial history version
     const collectionTypeEntry = await createEntry({
       uid: collectionTypeUid,
@@ -286,9 +339,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
         name: 'Product 1',
         tags_one_to_one: relationIds[0],
         tags_one_to_many: relationIds,
-
         image: imageA.id,
         images: [imageA.id, imageB.id],
+        nestedComposWithImages,
       },
     });
 
@@ -534,35 +587,14 @@ describeOnCondition(edition === 'EE')('History API', () => {
   });
 
   describe('Restore a history version', () => {
-    let englishVersionIdToRestore;
-    let frenchVersionIdToRestore;
-
-    beforeAll(async () => {
-      // Set the entry ids to restore
-      englishVersionIdToRestore = (
-        await strapi.db.query('plugin::content-manager.history-version').findOne({
-          where: {
-            contentType: collectionTypeUid,
-            relatedDocumentId: collectionTypeDocumentId,
-            locale: 'en',
-          },
-        })
-      ).id;
-      frenchVersionIdToRestore = (
-        await strapi.db.query('plugin::content-manager.history-version').findOne({
-          where: {
-            contentType: collectionTypeUid,
-            relatedDocumentId: collectionTypeDocumentId,
-            locale: 'fr',
-          },
-        })
-      ).id;
-    });
-
     test('Throws with invalid body', async () => {
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=3&locale=en`,
+      });
       const res = await rq({
         method: 'PUT',
-        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
+        url: `/content-manager/history-versions/${versions.body.data.at(-1)}/restore`,
         body: {},
       });
 
@@ -578,12 +610,16 @@ describeOnCondition(edition === 'EE')('History API', () => {
     });
 
     test('Throws without update permissions', async () => {
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=3&locale=en`,
+      });
       const restrictedRq = await createUserAndReq('read', [
         { action: 'plugin::content-manager.explorer.read', subject: collectionTypeUid },
       ]);
       const res = await restrictedRq({
         method: 'PUT',
-        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
+        url: `/content-manager/history-versions/${versions.body.data.at(-1)}/restore`,
         body: {
           contentType: collectionTypeUid,
         },
@@ -601,92 +637,132 @@ describeOnCondition(edition === 'EE')('History API', () => {
     });
 
     test('Restores a history version in the default locale', async () => {
-      const currentDocument = await strapi
-        .documents(collectionTypeUid)
-        .findOne({ documentId: collectionTypeDocumentId });
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}`,
+      });
 
-      await rq({
+      const res = await rq({
         method: 'PUT',
-        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
+        url: `/content-manager/history-versions/${versions.body.data.at(-1).id}/restore`,
         body: {
           contentType: collectionTypeUid,
         },
       });
-
       const restoredDocument = await strapi
         .documents(collectionTypeUid)
         .findOne({ documentId: collectionTypeDocumentId });
 
-      expect(currentDocument.description).toBe('Hello');
+      expect(res.statusCode).toBe(200);
       expect(restoredDocument.description).toBe(null);
     });
 
     test('Restores a history version in the provided locale', async () => {
-      const currentDocument = await strapi
-        .documents(collectionTypeUid)
-        .findOne({ documentId: collectionTypeDocumentId, locale: 'fr' });
-
-      await rq({
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&locale=fr`,
+      });
+      const res = await rq({
         method: 'PUT',
-        url: `/content-manager/history-versions/${frenchVersionIdToRestore}/restore`,
+        url: `/content-manager/history-versions/${versions.body.data.at(-1).id}/restore`,
         body: {
           contentType: collectionTypeUid,
         },
       });
-
       const restoredDocument = await strapi
         .documents(collectionTypeUid)
         .findOne({ documentId: collectionTypeDocumentId, locale: 'fr' });
 
-      expect(currentDocument.description).toBe('Coucou');
+      expect(res.statusCode).toBe(200);
       expect(restoredDocument.description).toBe(null);
     });
 
     test('Restores a history version with missing relations', async () => {
-      // All versions of the document were created with relations
-      const currentDocument = await strapi.documents(collectionTypeUid).findOne({
-        documentId: collectionTypeDocumentId,
-        populate: ['tags_one_to_one', 'tags_one_to_many'],
+      // The initial version of the document had relations
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&locale=en`,
       });
 
       // Delete a relation
       await strapi.documents(relationUid).delete({ documentId: relations[0].data.documentId });
 
-      // Restore the version containing the deleted relation
+      // Restore the initial version containing the deleted relation
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/history-versions/${versions.body.data.at(-1).id}/restore`,
+        body: {
+          contentType: collectionTypeUid,
+        },
+      });
+      // Get the restored document
       const restoredDocument = await strapi.documents(collectionTypeUid).findOne({
         documentId: collectionTypeDocumentId,
         populate: ['tags_one_to_one', 'tags_one_to_many', 'image'],
       });
 
-      expect(currentDocument['tags_one_to_one']).not.toBe(null);
-      expect(currentDocument['tags_one_to_many']).toHaveLength(3);
+      // Assert the request was successful
+      expect(res.statusCode).toBe(200);
+      // Assert the restored document set the relation to null after they were deleted
       expect(restoredDocument['tags_one_to_one']).toBe(null);
       expect(restoredDocument['tags_one_to_many']).toHaveLength(2);
     });
 
     test('Restores a history version with missing media assets', async () => {
-      // All versions of the document were created with media
-      const currentDocument = await strapi.documents(collectionTypeUid).findOne({
-        documentId: collectionTypeDocumentId,
-        populate: ['image', 'images'],
+      // All versions of the document were created with media assets
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=3&locale=en`,
       });
 
-      // Delete the asset
+      // Delete an asset
       await rq({
         method: 'DELETE',
         url: `/upload/files/1`,
       });
 
-      // Restore the version containing the deleted media
-      const restoredDocument = await strapi.documents(collectionTypeUid).findOne({
-        documentId: collectionTypeDocumentId,
-        populate: ['image', 'images'],
+      // Restore the initial version containing the deleted asset
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/history-versions/${versions.body.data.at(-1).id}/restore`,
+        body: {
+          contentType: collectionTypeUid,
+        },
       });
 
-      expect(currentDocument['image']).not.toBe(null);
-      expect(currentDocument['images']).toHaveLength(2);
-      expect(restoredDocument['image']).toBe(null);
-      expect(restoredDocument['images']).toHaveLength(1);
+      // Assert the request was successful
+      await expect(res.statusCode).toBe(200);
+
+      // Get the restored document
+      const restoredDocument = await strapi.documents(collectionTypeUid).findOne({
+        documentId: collectionTypeDocumentId,
+        populate: {
+          image: true,
+          images: true,
+          nestedComposWithImages: {
+            populate: {
+              rootImage: true,
+              rootImageSibling: true,
+              firstLevelCompo: {
+                populate: {
+                  firstLevelCompoImage: true,
+                  firstLevelCompoSiblingImage: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Assert the restored document handles the asset deletion in nested components
+      expect(restoredDocument.nestedComposWithImages.rootImage).toBe(null);
+      expect(restoredDocument.nestedComposWithImages.rootImageSibling).not.toBe(null);
+      expect(restoredDocument.nestedComposWithImages.firstLevelCompo.firstLevelCompoImage).toBe(
+        null
+      );
+      expect(
+        restoredDocument.nestedComposWithImages.firstLevelCompo.firstLevelCompoSiblingImage
+      ).not.toBe(null);
     });
 
     test('Restores a version with deleted components', async () => {

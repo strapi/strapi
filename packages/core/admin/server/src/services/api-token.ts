@@ -1,8 +1,10 @@
 import crypto from 'crypto';
 import { omit, difference, isNil, isEmpty, map, isArray, uniq, isNumber } from 'lodash/fp';
+import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import type { Update, ApiToken, ApiTokenBody } from '../../../shared/contracts/api-token';
 import constants from './constants';
+import { getService } from '../utils';
 
 const { ValidationError, NotFoundError } = errors;
 
@@ -117,15 +119,28 @@ const getBy = async (whereParams: WhereParams = {}): Promise<ApiToken | null> =>
     return null;
   }
 
-  const token = await strapi.db
-    .query('admin::api-token')
-    .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
+  const token = await strapi.db.query('admin::api-token').findOne({
+    select: [...SELECT_FIELDS, 'encryptedKey'],
+    populate: POPULATE_FIELDS,
+    where: whereParams,
+  });
 
   if (!token) {
     return token;
   }
 
-  return flattenTokenPermissions(token);
+  const { encryptedKey, ...rest } = token;
+
+  if (!encryptedKey) {
+    return flattenTokenPermissions(rest);
+  }
+
+  const accessKey = getService('encryption').decrypt(encryptedKey);
+
+  return flattenTokenPermissions({
+    ...rest,
+    accessKey,
+  });
 };
 
 /**
@@ -141,10 +156,10 @@ const exists = async (whereParams: WhereParams = {}): Promise<boolean> => {
  * Return a secure sha512 hash of an accessKey
  */
 const hash = (accessKey: string) => {
-  return crypto
-    .createHmac('sha512', strapi.config.get('admin.apiToken.salt'))
-    .update(accessKey)
-    .digest('hex');
+  const apiTokenCfg = strapi.config.get<Core.Config.Admin['apiToken']>('admin.apiToken');
+  const salt = apiTokenCfg.salt;
+
+  return crypto.createHmac('sha512', salt).update(accessKey).digest('hex');
 };
 
 const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
@@ -164,7 +179,9 @@ const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
  * Create a token and its permissions
  */
 const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
+  const encryptionService = getService('encryption');
   const accessKey = crypto.randomBytes(128).toString('hex');
+  const encryptedKey = encryptionService.encrypt(accessKey);
 
   assertCustomTokenPermissionsValidity(attributes.type, attributes.permissions);
   assertValidLifespan(attributes.lifespan);
@@ -176,6 +193,7 @@ const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
     data: {
       ...omit('permissions', attributes),
       accessKey: hash(accessKey),
+      encryptedKey,
       ...getExpirationFields(attributes.lifespan),
     },
   });
@@ -211,12 +229,15 @@ const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
 
 const regenerate = async (id: string | number): Promise<ApiToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
+  const encryptionService = getService('encryption');
+  const encryptedKey = encryptionService.encrypt(accessKey);
 
   const apiToken: ApiToken = await strapi.db.query('admin::api-token').update({
     select: ['id', 'accessKey'],
     where: { id },
     data: {
       accessKey: hash(accessKey),
+      encryptedKey,
     },
   });
 
@@ -231,7 +252,8 @@ const regenerate = async (id: string | number): Promise<ApiToken> => {
 };
 
 const checkSaltIsDefined = () => {
-  if (!strapi.config.get('admin.apiToken.salt')) {
+  const apiTokenCfg = strapi.config.get<Core.Config.Admin['apiToken']>('admin.apiToken');
+  if (!apiTokenCfg?.salt) {
     // TODO V5: stop reading API_TOKEN_SALT
     if (process.env.API_TOKEN_SALT) {
       process.emitWarning(`[deprecated] In future versions, Strapi will stop reading directly from the environment variable API_TOKEN_SALT. Please set apiToken.salt in config/admin.js instead.
@@ -374,8 +396,13 @@ const update = async (
   };
 };
 
+const count = async (where = {}): Promise<number> => {
+  return strapi.db.query('admin::api-token').count({ where });
+};
+
 export {
   create,
+  count,
   regenerate,
   exists,
   checkSaltIsDefined,

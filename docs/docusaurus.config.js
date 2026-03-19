@@ -12,7 +12,6 @@ const config = {
   url: 'https://contributor.strapi.io',
   baseUrl: '/',
   onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.png',
   organizationName: 'strapi',
   projectName: 'strapi',
@@ -28,6 +27,9 @@ const config = {
   },
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
   },
   plugins: [
     () => ({

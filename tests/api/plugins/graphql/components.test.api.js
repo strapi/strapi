@@ -51,6 +51,13 @@ const labelModel = {
   collectionName: '',
 };
 
+const COLORS = {
+  tomato: { name: 'tomato', red: 255, green: 99, blue: 71 },
+  red: { name: 'red', red: 255, green: 0, blue: 0 },
+  green: { name: 'green', red: 0, green: 255, blue: 0 },
+  blue: { name: 'blue', red: 0, green: 0, blue: 255 },
+};
+
 describe('Test Graphql Components API End to End', () => {
   beforeAll(async () => {
     await builder.addComponent(rgbColorComponent).addContentTypes([labelModel]).build();
@@ -76,11 +83,12 @@ describe('Test Graphql Components API End to End', () => {
     const data = {
       labels: [],
     };
+
     const labelsPayload = [
       {
         name: 'label 3, repeatable and non-repeatable',
-        color: { name: 'tomato', red: 255, green: 99, blue: 71 },
-        colors: [{ name: 'red', red: 255, green: 0, blue: 0 }],
+        color: COLORS.tomato,
+        colors: [COLORS.red, COLORS.green, COLORS.blue],
       },
     ];
 
@@ -175,16 +183,8 @@ describe('Test Graphql Components API End to End', () => {
           {
             labels_connection {
               data {
-                id
                 attributes {
-                  name
-                  color {
-                    name
-                    red
-                    green
-                    blue
-                  }
-                  colors(filters: { red: { eq: 255 } }) {
+                  colors(filters: { red: { eq: ${COLORS.red.red} } }) {
                     name
                     red
                     green
@@ -200,10 +200,10 @@ describe('Test Graphql Components API End to End', () => {
       const { body } = res;
 
       expect(res.statusCode).toBe(200);
-      expect(body).toMatchObject({
+      expect(body).toStrictEqual({
         data: {
           labels_connection: {
-            data: expect.arrayContaining(data.labels),
+            data: [{ attributes: { colors: [COLORS.red] } }],
           },
         },
       });

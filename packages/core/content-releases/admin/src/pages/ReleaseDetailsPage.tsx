@@ -29,7 +29,7 @@ import {
   LinkButton,
   Dialog,
   SimpleMenu,
-  MenuItem,
+  Menu,
 } from '@strapi/design-system';
 import { More, Pencil, Trash } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -75,38 +75,6 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
   border-bottom-left-radius: ${({ theme }) => theme.borderRadius};
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
-const StyledMenuItem = styled(MenuItem)<{
-  disabled?: boolean;
-  $variant?: 'neutral' | 'danger';
-}>`
-  svg path {
-    fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
-  }
-  span {
-    color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
-  }
-
-  &:hover {
-    background: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}100`]};
-  }
-`;
-
-const PencilIcon = styled(Pencil)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
-  path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
-
-const TrashIcon = styled(Trash)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
-  path {
-    fill: ${({ theme }) => theme.colors.danger600};
-  }
 `;
 
 interface ReleaseDetailsLayoutProps {
@@ -260,111 +228,108 @@ const ReleaseDetailsLayout = ({
     : '';
 
   return (
-    <Main aria-busy={isLoadingDetails}>
-      <Layouts.Header
-        title={release.name}
-        subtitle={
-          <Flex gap={2} lineHeight={6}>
-            <Typography textColor="neutral600" variant="epsilon">
-              {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
-            </Typography>
-            <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
-          </Flex>
-        }
-        navigationAction={<BackButton fallback=".." />}
-        primaryAction={
-          !release.releasedAt && (
-            <Flex gap={2}>
-              <SimpleMenuButton
-                label={<More />}
-                variant="tertiary"
-                endIcon={null}
-                paddingLeft="7px"
-                paddingRight="7px"
-                aria-label={formatMessage({
-                  id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release edit and delete menu',
-                })}
-                popoverPlacement="bottom-end"
-              >
-                <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
-                  <Flex alignItems="center" gap={2} hasRadius width="100%">
-                    <PencilIcon />
-                    <Typography ellipsis>
-                      {formatMessage({
-                        id: 'content-releases.header.actions.edit',
-                        defaultMessage: 'Edit',
-                      })}
-                    </Typography>
-                  </Flex>
-                </StyledMenuItem>
-                <StyledMenuItem
-                  disabled={!canDelete}
-                  onSelect={toggleWarningSubmit}
-                  $variant="danger"
+    <Layouts.Root>
+      <Main aria-busy={isLoadingDetails}>
+        <Layouts.Header
+          title={release.name}
+          subtitle={
+            <Flex gap={2} lineHeight={6}>
+              <Typography textColor="neutral600" variant="epsilon">
+                {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
+              </Typography>
+              <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+            </Flex>
+          }
+          navigationAction={<BackButton fallback=".." />}
+          primaryAction={
+            !release.releasedAt && (
+              <Flex gap={2}>
+                <SimpleMenuButton
+                  label={<More />}
+                  variant="tertiary"
+                  endIcon={null}
+                  paddingLeft="7px"
+                  paddingRight="7px"
+                  aria-label={formatMessage({
+                    id: 'content-releases.header.actions.open-release-actions',
+                    defaultMessage: 'Release edit and delete menu',
+                  })}
+                  popoverPlacement="bottom-end"
                 >
-                  <Flex alignItems="center" gap={2} hasRadius width="100%">
-                    <TrashIcon />
-                    <Typography ellipsis textColor="danger600">
-                      {formatMessage({
-                        id: 'content-releases.header.actions.delete',
-                        defaultMessage: 'Delete',
-                      })}
-                    </Typography>
-                  </Flex>
-                </StyledMenuItem>
-                <ReleaseInfoWrapper
-                  direction="column"
-                  justifyContent="center"
-                  alignItems="flex-start"
-                  gap={1}
-                  padding={4}
-                >
-                  <Typography variant="pi" fontWeight="bold">
+                  <Menu.Item
+                    disabled={!canUpdate}
+                    onSelect={toggleEditReleaseModal}
+                    startIcon={<Pencil />}
+                  >
                     {formatMessage({
-                      id: 'content-releases.header.actions.created',
-                      defaultMessage: 'Created',
+                      id: 'content-releases.header.actions.edit',
+                      defaultMessage: 'Edit',
                     })}
-                  </Typography>
-                  <Typography variant="pi" color="neutral300">
-                    <RelativeTime timestamp={new Date(release.createdAt)} />
-                    {formatMessage(
-                      {
-                        id: 'content-releases.header.actions.created.description',
-                        defaultMessage:
-                          '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
-                      },
-                      { createdBy: getCreatedByUser(), hasCreatedByUser }
-                    )}
-                  </Typography>
-                </ReleaseInfoWrapper>
-              </SimpleMenuButton>
-              <Button size="S" variant="tertiary" onClick={handleRefresh}>
-                {formatMessage({
-                  id: 'content-releases.header.actions.refresh',
-                  defaultMessage: 'Refresh',
-                })}
-              </Button>
-              {canPublish ? (
-                <Button
-                  size="S"
-                  variant="default"
-                  onClick={handlePublishRelease(release.id.toString())}
-                  loading={isPublishing}
-                  disabled={release.actions.meta.count === 0}
-                >
+                  </Menu.Item>
+                  <Menu.Item
+                    disabled={!canDelete}
+                    onSelect={toggleWarningSubmit}
+                    variant="danger"
+                    startIcon={<Trash />}
+                  >
+                    {formatMessage({
+                      id: 'content-releases.header.actions.delete',
+                      defaultMessage: 'Delete',
+                    })}
+                  </Menu.Item>
+                  <ReleaseInfoWrapper
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="flex-start"
+                    gap={1}
+                    padding={4}
+                  >
+                    <Typography variant="pi" fontWeight="bold">
+                      {formatMessage({
+                        id: 'content-releases.header.actions.created',
+                        defaultMessage: 'Created',
+                      })}
+                    </Typography>
+                    <Typography variant="pi" color="neutral300">
+                      <RelativeTime timestamp={new Date(release.createdAt)} />
+                      {formatMessage(
+                        {
+                          id: 'content-releases.header.actions.created.description',
+                          defaultMessage:
+                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
+                        },
+                        { createdBy: getCreatedByUser(), hasCreatedByUser }
+                      )}
+                    </Typography>
+                  </ReleaseInfoWrapper>
+                </SimpleMenuButton>
+                <Button size="S" variant="tertiary" onClick={handleRefresh}>
                   {formatMessage({
-                    id: 'content-releases.header.actions.publish',
-                    defaultMessage: 'Publish',
+                    id: 'content-releases.header.actions.refresh',
+                    defaultMessage: 'Refresh',
                   })}
                 </Button>
-              ) : null}
-            </Flex>
-          )
-        }
-      />
-      {children}
-    </Main>
+                {canPublish ? (
+                  <Button
+                    size="S"
+                    variant="default"
+                    onClick={handlePublishRelease(release.id.toString())}
+                    loading={isPublishing}
+                    disabled={release.actions.meta.count === 0}
+                  >
+                    {formatMessage({
+                      id: 'content-releases.header.actions.publish',
+                      defaultMessage: 'Publish',
+                    })}
+                  </Button>
+                ) : null}
+              </Flex>
+            )
+          }
+        />
+        {children}
+      </Main>
+    </Layouts.Root>
   );
 };
 
@@ -586,7 +551,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   return (
     <Layouts.Content>
-      <Flex gap={8} direction="column" alignItems="stretch">
+      <Flex gap={4} direction="column" alignItems="stretch">
         <Flex>
           <SingleSelect
             placeholder={groupByLabel}
@@ -711,13 +676,15 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             </Table.Root>
           </Flex>
         ))}
-        <Pagination.Root
-          {...releaseMeta?.pagination}
-          defaultPageSize={releaseMeta?.pagination?.pageSize}
-        >
-          <Pagination.PageSize />
-          <Pagination.Links />
-        </Pagination.Root>
+        {releaseMeta?.pagination?.pageCount && releaseMeta.pagination.pageCount > 1 && (
+          <Pagination.Root
+            {...releaseMeta?.pagination}
+            defaultPageSize={releaseMeta?.pagination?.pageSize}
+          >
+            <Pagination.PageSize />
+            <Pagination.Links />
+          </Pagination.Root>
+        )}
       </Flex>
     </Layouts.Content>
   );

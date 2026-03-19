@@ -43,7 +43,7 @@ Leave the development server running, and then run the following command to rese
 STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-import.ts with-admin.tar
 ```
 
-This script will include admin users and all the content-types specificed in `tests/e2e/constants.ts`
+This script will include admin users and all the content-types specified in `tests/e2e/constants.ts`
 
 You should be able to login with the test app instance credentials.
 
@@ -53,9 +53,7 @@ You should be able to login with the test app instance credentials.
 
 Now that you have a Strapi instance with the same data that each e2e starts with, you can modify the data in the CMS to prepare for a new data export.
 
-:::note
-If you change any of the content schemas (including adding new ones) be sure to [update the `app-template`](./01-app-template.md) otherwise DTS will fail to import the data for schemas that do not exist.
-:::
+> **Note:** If you change any of the content schemas (including adding new ones) be sure to [update the `app-template`](./01-app-template.md) otherwise DTS will fail to import the data for schemas that do not exist.
 
 ### Exporting an updated data packet
 

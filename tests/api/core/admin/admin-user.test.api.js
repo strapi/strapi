@@ -313,7 +313,7 @@ describe('Admin User CRUD (api)', () => {
     });
   });
 
-  test('13. Deletes last super admin user in batch (bad request)', async () => {
+  test('13. User can not delete themselves (bad request)', async () => {
     const res = await rq({
       url: `/admin/users/batch-delete`,
       method: 'POST',
@@ -327,8 +327,8 @@ describe('Admin User CRUD (api)', () => {
       data: null,
       error: {
         details: {},
-        message: 'You must have at least one user with super admin role.',
-        name: 'ValidationError',
+        message: 'You cannot delete your own user',
+        name: 'ApplicationError',
         status: 400,
       },
     });
