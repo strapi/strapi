@@ -27,10 +27,16 @@ jest.mock('@strapi/core', () => {
 });
 
 describe('admin:delete-user command', () => {
+  const originalIsTTY = process.stdin.isTTY;
+
   beforeEach(() => {
     load.mockClear();
     findOneByEmail.mockClear();
     deleteById.mockClear();
+  });
+
+  afterEach(() => {
+    process.stdin.isTTY = originalIsTTY;
   });
 
   test('accepts direct input and deletes the user', async () => {
@@ -87,6 +93,7 @@ describe('admin:delete-user command', () => {
         expect(err).toEqual(new Error('exit'));
       });
 
+      expect(consoleError).toBeCalledWith('Missing required option `email`');
       expect(mockExit).toHaveBeenCalledWith(1);
       expect(deleteById).not.toHaveBeenCalled();
 

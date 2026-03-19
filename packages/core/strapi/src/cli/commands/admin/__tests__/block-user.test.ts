@@ -27,10 +27,16 @@ jest.mock('@strapi/core', () => {
 });
 
 describe('admin:block-user command', () => {
+  const originalIsTTY = process.stdin.isTTY;
+
   beforeEach(() => {
     load.mockClear();
     findOneByEmail.mockClear();
     updateById.mockClear();
+  });
+
+  afterEach(() => {
+    process.stdin.isTTY = originalIsTTY;
   });
 
   test('accepts direct input and sets blocked to true', async () => {

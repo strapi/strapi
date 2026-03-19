@@ -27,10 +27,16 @@ jest.mock('@strapi/core', () => {
 });
 
 describe('admin:active-user command', () => {
+  const originalIsTTY = process.stdin.isTTY;
+
   beforeEach(() => {
     load.mockClear();
     findOneByEmail.mockClear();
     updateById.mockClear();
+  });
+
+  afterEach(() => {
+    process.stdin.isTTY = originalIsTTY;
   });
 
   test('accepts direct input and sets active to true', async () => {
