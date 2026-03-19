@@ -1,9 +1,16 @@
 import type { Core, UID } from '@strapi/types';
+import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { async, errors } from '@strapi/utils';
 import { map, pick, isEqual } from 'lodash/fp';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../constants/workflows';
 import { WORKFLOW_UPDATE_STAGE } from '../constants/webhook-events';
 import { getService } from '../utils';
+
+interface PopulatedPermission {
+  role: number | { id: number };
+  action: string;
+  actionParameters?: { from?: number; to?: number };
+}
 
 const { ApplicationError, ValidationError } = errors;
 const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
@@ -47,26 +54,30 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         // Register "from" permissions
         if (stage.permissions && stage.permissions.length > 0) {
-          const fromPermissions = await async.map(stage.permissions, (permission: any) =>
-            stagePermissionsService.register({
-              roleId: permission.role,
-              action: permission.action,
-              fromStage: stageId,
-            })
+          const fromPermissions = await async.map(
+            stage.permissions,
+            (permission: StagePermission) =>
+              stagePermissionsService.register({
+                roleId: permission.role,
+                action: permission.action,
+                fromStage: stageId,
+              })
           );
-          allPermissionIds.push(...fromPermissions.flat().map((p: any) => p.id));
+          allPermissionIds.push(...fromPermissions.flat().map((p: { id: number }) => p.id));
         }
 
         // Register "to" permissions
         if (stage.toPermissions && stage.toPermissions.length > 0) {
-          const toPermissions = await async.map(stage.toPermissions, (permission: any) =>
-            stagePermissionsService.registerTo({
-              roleId: permission.role,
-              action: permission.action,
-              toStage: stageId,
-            })
+          const toPermissions = await async.map(
+            stage.toPermissions,
+            (permission: StagePermission) =>
+              stagePermissionsService.registerTo({
+                roleId: permission.role,
+                action: permission.action,
+                toStage: stageId,
+              })
           );
-          allPermissionIds.push(...toPermissions.flat().map((p: any) => p.id));
+          allPermissionIds.push(...toPermissions.flat().map((p: { id: number }) => p.id));
         }
 
         if (allPermissionIds.length > 0) {
@@ -96,45 +107,48 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         allPermissionIds = [];
 
-        const extractRoleId = (p: any) => p.role?.id ?? p.role;
+        const extractRoleId = (p: PopulatedPermission): number =>
+          typeof p.role === 'object' ? p.role.id : p.role;
 
         // Re-register "from" permissions (fall back to existing "from" entries from DB)
         const fromPerms =
           destStage.permissions ??
           (srcStage?.permissions ?? [])
-            .filter((p: any) => p.actionParameters?.from)
-            .map((p: any) => ({ role: extractRoleId(p), action: p.action }));
+            .filter((p: PopulatedPermission) => p.actionParameters?.from)
+            .map((p: PopulatedPermission) => ({ role: extractRoleId(p), action: p.action }));
 
         if (fromPerms.length > 0) {
-          const registered = await async.map(fromPerms, (permission: any) =>
+          const registered = await async.map(fromPerms, (permission: StagePermission) =>
             stagePermissionsService.register({
               roleId: permission.role,
               action: permission.action,
               fromStage: stageId,
             })
           );
-          allPermissionIds.push(...registered.flat().map((p: any) => p.id));
+          allPermissionIds.push(...registered.flat().map((p: { id: number }) => p.id));
         }
 
         // Re-register "to" permissions (fall back to existing "to" entries from DB)
         const toPerms =
           destStage.toPermissions ??
           (srcStage?.permissions ?? [])
-            .filter((p: any) => p.actionParameters?.to)
-            .map((p: any) => ({ role: extractRoleId(p), action: p.action }));
+            .filter((p: PopulatedPermission) => p.actionParameters?.to)
+            .map((p: PopulatedPermission) => ({ role: extractRoleId(p), action: p.action }));
 
         if (toPerms.length > 0) {
-          const registered = await async.map(toPerms, (permission: any) =>
+          const registered = await async.map(toPerms, (permission: StagePermission) =>
             stagePermissionsService.registerTo({
               roleId: permission.role,
               action: permission.action,
               toStage: stageId,
             })
           );
-          allPermissionIds.push(...registered.flat().map((p: any) => p.id));
+          allPermissionIds.push(...registered.flat().map((p: { id: number }) => p.id));
         }
       } else {
-        allPermissionIds = (srcStage?.permissions ?? []).map((p: any) => p.id).filter(Boolean);
+        allPermissionIds = (srcStage?.permissions ?? [])
+          .map((p: { id: number }) => p.id)
+          .filter(Boolean);
       }
 
       const stage = await strapi.db.query(STAGE_MODEL_UID).update({
@@ -356,7 +370,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   };
 };
 
-const normalizeStageForDiff = (stage: any) => ({
+const normalizeStageForDiff = (stage: {
+  name?: string;
+  color?: string;
+  permissions?: unknown[];
+  toPermissions?: unknown[];
+}) => ({
   ...pick(['name', 'color'], stage),
   permissions: stage.permissions ?? [],
   toPermissions: stage.toPermissions ?? [],

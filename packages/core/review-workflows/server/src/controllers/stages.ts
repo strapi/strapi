@@ -196,9 +196,11 @@ export default {
       return;
     }
 
-    const otherStages = workflowStages.filter((stage: any) => stage.id !== entityStageId);
+    const otherStages = workflowStages.filter(
+      (stage: { id: number; permissions?: unknown[] }) => stage.id !== entityStageId
+    );
 
-    const data = otherStages.filter((stage: any) =>
+    const data = otherStages.filter((stage: { id: number; permissions?: unknown[] }) =>
       stagePermissions.canTransitionToStageWithPermissions(stage)
     );
 
