@@ -36,7 +36,7 @@
     "styled-components": "^6.0.0"
   },
   "devDependencies": {
-    "@strapi/sdk-plugin": "^5.2.0",
+    "@strapi/sdk-plugin": "^6.0.1",
     "@strapi/strapi": "workspace:*"
   },
   "engines": {
