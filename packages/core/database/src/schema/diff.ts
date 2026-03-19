@@ -151,14 +151,14 @@ export default (db: Database) => {
 
   /**
    * Compares two columns info
-   * @param {Object} oldColumn - column info read from DB
+   * @param {Object} oldColumn - column info read from DB (dialect specific) or from previous generated schema
    * @param {Object} column - newly generate column info
    */
   const diffColumns = (oldColumn: Column, column: Column): ColumnDiff => {
     const changes = [];
 
     const isIgnoredType = ['increments'].includes(column.type);
-    const oldType = oldColumn.type;
+    const oldType = db.dialect.getSqlType(oldColumn.type);
     const type = db.dialect.getSqlType(column.type);
 
     if (oldType !== type && !isIgnoredType) {

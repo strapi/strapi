@@ -170,11 +170,16 @@ const createBuildContext = async ({
 
   const features = strapiInstance.config.get('features', undefined);
 
+  const serveAdminPanel = strapiInstance.config.get('admin.serveAdminPanel', true);
+
   const { bundler = 'webpack', ...restOptions } = options;
 
   const buildContext = {
     appDir,
-    basePath: `${adminPath}/`,
+    // If serveAdminPanel is false, use relative paths for separate deployment
+    basePath: serveAdminPanel
+      ? `${adminPath}/`
+      : strapiInstance.config.get('admin.url', `${adminPath}/`),
     bundler,
     customisations,
     cwd,

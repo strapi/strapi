@@ -9,6 +9,7 @@ import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import { createRepairManager, type RepairManager } from './repairs';
 
 // TODO: move back into strapi
 import { transformContentTypes } from './utils/content-types';
@@ -20,13 +21,20 @@ export { isKnexQuery } from './utils/knex';
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
+  strictSyncSchema?: boolean;
   [key: string]: unknown;
 }
+
+export type Logger = Record<
+  'info' | 'warn' | 'error' | 'debug',
+  (message: string | Record<string, unknown>) => void
+>;
 
 export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
   models: Model[];
+  logger?: Logger;
 }
 
 class Database {
@@ -46,6 +54,8 @@ class Database {
 
   entityManager: EntityManager;
 
+  repair: RepairManager;
+
   static transformContentTypes = transformContentTypes;
 
   static async init(config: DatabaseConfig) {
@@ -62,6 +72,7 @@ class Database {
       settings: {
         forceMigration: true,
         runMigrations: true,
+        strictSyncSchema: true,
         ...(config.settings ?? {}),
       },
     };
@@ -79,6 +90,8 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
+
+    this.repair = createRepairManager(this);
   }
 
   query(uid: string) {

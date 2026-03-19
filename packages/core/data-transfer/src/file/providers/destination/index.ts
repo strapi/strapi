@@ -15,6 +15,7 @@ import type {
   ProviderType,
   Stream,
 } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createFilePathFactory, createTarEntryStream } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
@@ -61,8 +62,21 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   #archive: { stream?: tar.Pack; pipeline?: Stream } = {};
 
+  #diagnostics?: IDiagnosticReporter;
+
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
+  }
+
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'file-destination-provider',
+      },
+      kind: 'info',
+    });
   }
 
   get #archivePath() {
@@ -88,10 +102,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   createGzip(): zlib.Gzip {
+    this.#reportInfo('creating gzip');
     return zlib.createGzip();
   }
 
-  bootstrap(): void | Promise<void> {
+  bootstrap(diagnostics: IDiagnosticReporter): void | Promise<void> {
+    this.#diagnostics = diagnostics;
     const { compression, encryption } = this.options;
 
     if (encryption.enabled && !encryption.key) {
@@ -144,6 +160,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   async rollback(): Promise<void> {
+    this.#reportInfo('rolling back');
     await this.close();
     await rm(this.#archivePath, { force: true });
   }
@@ -153,6 +170,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   async #writeMetadata(): Promise<void> {
+    this.#reportInfo('writing metadata');
     const metadata = this.#providersMetadata.source;
 
     if (metadata) {
@@ -179,7 +197,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-
+    this.#reportInfo('creating schemas write stream');
     const filePathFactory = createFilePathFactory('schemas');
 
     const entryStream = createTarEntryStream(
@@ -195,7 +213,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-
+    this.#reportInfo('creating entities write stream');
     const filePathFactory = createFilePathFactory('entities');
 
     const entryStream = createTarEntryStream(
@@ -211,7 +229,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-
+    this.#reportInfo('creating links write stream');
     const filePathFactory = createFilePathFactory('links');
 
     const entryStream = createTarEntryStream(
@@ -227,7 +245,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-
+    this.#reportInfo('creating configuration write stream');
     const filePathFactory = createFilePathFactory('configuration');
 
     const entryStream = createTarEntryStream(
@@ -246,6 +264,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       throw new Error('Archive stream is unavailable');
     }
 
+    this.#reportInfo('creating assets write stream');
     return new Writable({
       objectMode: true,
       write(data: IAsset, _encoding, callback) {

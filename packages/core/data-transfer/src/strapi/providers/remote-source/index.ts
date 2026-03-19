@@ -13,6 +13,7 @@ import type {
   ProviderType,
   TransferStage,
 } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
@@ -38,6 +39,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   ws: WebSocket | null;
 
   dispatcher: ReturnType<typeof createDispatcher> | null;
+
+  #diagnostics?: IDiagnosticReporter;
 
   constructor(options: IRemoteStrapiSourceProviderOptions) {
     this.options = options;
@@ -349,6 +352,17 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     return res.transferID;
   }
 
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'remote-source-provider',
+      },
+      kind: 'info',
+    });
+  }
+
   async bootstrap(): Promise<void> {
     const { url, auth } = this.options;
     let ws: WebSocket;
@@ -358,6 +372,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       url.pathname
     )}${TRANSFER_PATH}/pull`;
 
+    this.#reportInfo('establishing websocket connection');
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = await connectToWebsocket(wsUrl);
@@ -379,10 +394,19 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       });
     }
 
+    this.#reportInfo('established websocket connection');
     this.ws = ws;
     const { retryMessageOptions } = this.options;
-    this.dispatcher = createDispatcher(this.ws, retryMessageOptions);
+
+    this.#reportInfo('creating dispatcher');
+    this.dispatcher = createDispatcher(this.ws, retryMessageOptions, (message: string) =>
+      this.#reportInfo(message)
+    );
+    this.#reportInfo('creating dispatcher');
+
+    this.#reportInfo('initialize transfer');
     const transferID = await this.initTransfer();
+    this.#reportInfo(`initialized transfer ${transferID}`);
 
     this.dispatcher.setTransferProperties({ id: transferID, kind: 'pull' });
     await this.dispatcher.dispatchTransferAction('bootstrap');

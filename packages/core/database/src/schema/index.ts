@@ -6,6 +6,7 @@ import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
 import type { Database } from '..';
+import { SchemaDiff, Schema } from './types';
 
 export type * from './types';
 
@@ -15,8 +16,8 @@ export interface SchemaProvider {
   builder: ReturnType<typeof createSchemaBuilder>;
   schemaDiff: ReturnType<typeof createSchemaDiff>;
   schemaStorage: ReturnType<typeof createSchemaStorage>;
-  sync(): Promise<void>;
-  syncSchema(): Promise<void>;
+  sync(): Promise<SchemaDiff['status']>;
+  syncSchema(schema?: Schema): Promise<SchemaDiff['status']>;
   reset(): Promise<void>;
   create(): Promise<void>;
   drop(): Promise<void>;
@@ -60,24 +61,26 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       await this.create();
     },
 
-    async syncSchema() {
+    async syncSchema(oldSchema?: Schema): Promise<SchemaDiff['status']> {
       debug('Synchronizing database schema');
 
-      const DBSchema = await db.dialect.schemaInspector.getSchema();
+      const currentSchema = oldSchema ?? (await db.dialect.schemaInspector.getSchema());
 
-      const { status, diff } = await this.schemaDiff.diff(DBSchema, schema);
+      const { status, diff } = await this.schemaDiff.diff(currentSchema, schema);
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
       }
 
       await this.schemaStorage.add(schema);
+
+      return status;
     },
 
     // TODO: support options to migrate softly or forcefully
     // TODO: support option to disable auto migration & run a CLI command instead to avoid doing it at startup
     // TODO: Allow keeping extra indexes / extra tables / extra columns (globally or on a per table basis)
-    async sync() {
+    async sync(): Promise<SchemaDiff['status']> {
       if (await db.migrations.shouldRun()) {
         debug('Found migrations to run');
         await db.migrations.up();
@@ -98,10 +101,17 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       if (oldHash !== hash) {
         debug('Schema changed');
 
+        if (!db.config.settings.strictSyncSchema) {
+          debug('Syncing schema keeping not Strapi managed elements');
+          return this.syncSchema(oldSchema.schema);
+        }
+
         return this.syncSchema();
       }
 
       debug('Schema unchanged');
+
+      return 'UNCHANGED';
     },
   };
 };
