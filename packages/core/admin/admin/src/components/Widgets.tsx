@@ -269,7 +269,20 @@ const DeployNowWidget = () => {
   return (
     <Flex direction="column" gap={4} height="100%" alignItems="center" justifyContent="center">
       <CloudUpload width="3.2rem" height="3.2rem" />
-      <Typography variant="beta" textAlign="center">
+<Flex direction="column" gap={2}>
+        <Typography variant="beta" textAlign="center">
+          {formatMessage({
+            id: 'HomePage.widget.deploy-now.title',
+            defaultMessage: 'Deploy with Strapi Cloud',
+          })}
+        </Typography>
+        <Typography variant="omega" textColor="neutral600" textAlign="center">
+          {formatMessage({
+            id: 'HomePage.widget.deploy-now.description',
+            defaultMessage: 'Deploy your project.',
+          })}
+        </Typography>
+      </Flex>
         {formatMessage({
           id: 'HomePage.widget.deploy-now.title',
           defaultMessage: 'Deploy with Strapi Cloud',
