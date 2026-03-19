@@ -296,15 +296,17 @@ const CopyDocumentIdMenuItem = ({ documentId }: CopyDocumentIdMenuItemProps) => 
     return null;
   }
 
-  const handleCopy = () => {
-    copy(documentId);
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'content-manager.actions.copy-documentId.success',
-        defaultMessage: 'Document ID copied to clipboard',
-      }),
-    });
+  const handleCopy = async () => {
+    const didCopy = await copy(documentId);
+    if (didCopy) {
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-manager.actions.copy-documentId.success',
+          defaultMessage: 'Document ID copied to clipboard',
+        }),
+      });
+    }
   };
 
   return (

@@ -82,17 +82,19 @@ const ListViewPage = () => {
   const isDesktop = useIsDesktop();
 
   const handleCopyDocumentId = React.useCallback(
-    (e: React.MouseEvent, documentId: string | undefined) => {
+    async (e: React.MouseEvent, documentId: string | undefined) => {
       e.stopPropagation();
       if (!documentId) return;
-      copy(documentId);
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: 'content-manager.actions.copy-documentId.success',
-          defaultMessage: 'Document ID copied to clipboard',
-        }),
-      });
+      const didCopy = await copy(documentId);
+      if (didCopy) {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'content-manager.actions.copy-documentId.success',
+            defaultMessage: 'Document ID copied to clipboard',
+          }),
+        });
+      }
     },
     [copy, formatMessage, toggleNotification]
   );
