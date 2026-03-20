@@ -372,7 +372,8 @@ const createContentTypeUID = ({
 }: {
   plugin?: string;
   singularName: string;
-}): Internal.UID.ContentType => `${plugin ? `plugin` : `api`}::${plugin ? plugin : singularName}.${singularName}`;
+}): Internal.UID.ContentType =>
+  `${plugin ? `plugin` : `api`}::${plugin || singularName}.${singularName}`;
 
 const generateRelation = ({
   key,
