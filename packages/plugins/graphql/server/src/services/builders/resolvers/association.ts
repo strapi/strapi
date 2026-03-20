@@ -1,5 +1,11 @@
 import { get, merge } from 'lodash/fp';
-import { async, contentTypes, errors } from '@strapi/utils';
+import {
+  async,
+  contentTypes,
+  errors,
+  buildPublicationFilterWhere,
+  parsePublicationFilter,
+} from '@strapi/utils';
 import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
@@ -88,39 +94,38 @@ export default ({ strapi }: Context) => {
               }
             : {};
 
-        // Inherit hasPublishedVersion from root query (same pattern as status)
-        const inheritedHasPublishedVersion =
-          context.rootQueryArgs?.hasPublishedVersion !== undefined &&
+        const inheritedPublicationFilter =
+          context.rootQueryArgs?.publicationFilter !== undefined &&
           context.rootQueryArgs?._originField &&
           isBuiltInQueryField(context.rootQueryArgs._originField)
-            ? context.rootQueryArgs.hasPublishedVersion
+            ? context.rootQueryArgs.publicationFilter
             : undefined;
 
-        // Build hasPublishedVersion condition for this relation's model
-        let hasPublishedVersionFilters: Record<string, any> = {};
-        if (isTargetDraftAndPublishContentType && inheritedHasPublishedVersion !== undefined) {
-          const meta = strapi.db.metadata.get(targetUID);
-          const tableName = meta.tableName;
-          const documentIdAttr = meta.attributes.documentId;
-          const publishedAtAttr = meta.attributes.publishedAt;
-          const documentIdColumn =
-            ('columnName' in documentIdAttr && documentIdAttr.columnName) || 'document_id';
-          const publishedAtColumn =
-            ('columnName' in publishedAtAttr && publishedAtAttr.columnName) || 'published_at';
-
-          const knex = strapi.db.connection;
-          const subquery = knex(tableName)
-            .distinct(documentIdColumn)
-            .whereNotNull(publishedAtColumn);
-
-          hasPublishedVersionFilters = {
-            where: {
-              documentId: inheritedHasPublishedVersion ? { $in: subquery } : { $notIn: subquery },
-            },
-          };
+        let publicationFilterWhere: Record<string, any> = {};
+        if (isTargetDraftAndPublishContentType && inheritedPublicationFilter !== undefined) {
+          let mode;
+          try {
+            mode = parsePublicationFilter(inheritedPublicationFilter);
+          } catch {
+            mode = undefined;
+          }
+          if (mode !== undefined) {
+            const meta = strapi.db.metadata.get(targetUID);
+            const st = statusToApply === 'published' ? 'published' : 'draft';
+            const cond = buildPublicationFilterWhere(
+              strapi.db.connection,
+              meta,
+              targetContentType,
+              mode,
+              st
+            );
+            if (cond && Object.keys(cond).length > 0) {
+              publicationFilterWhere = { where: cond };
+            }
+          }
         }
 
-        const dbQuery = merge(merge(defaultFilters, hasPublishedVersionFilters), transformedQuery);
+        const dbQuery = merge(merge(defaultFilters, publicationFilterWhere), transformedQuery);
 
         // Sign media URLs if upload plugin is available and using private provider
         const data = await (async () => {

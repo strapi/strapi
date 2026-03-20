@@ -12,7 +12,6 @@ export type QueryParam =
   | 'populate'
   | 'sort'
   | 'status'
-  | 'hasPublishedVersion'
   | 'publicationFilter'
   | 'locale'
   | 'pagination'
@@ -167,14 +166,6 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       .describe('Fetch documents based on their status. Default to "published" if not specified.');
   }
 
-  get hasPublishedVersion() {
-    return z
-      .union([z.boolean(), z.enum(['true', 'false'])])
-      .describe(
-        'Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published'
-      );
-  }
-
   get publicationFilter() {
     return z
       .enum(['never-published', 'has-published-version', 'modified', 'unmodified'])
@@ -228,7 +219,6 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       locale: () => this.locale.optional(),
       pagination: () => this.pagination.optional(),
       status: () => this.status.optional(),
-      hasPublishedVersion: () => this.hasPublishedVersion.optional(),
       publicationFilter: () => this.publicationFilter.optional(),
       _q: () => this.query.optional(),
     } as const;

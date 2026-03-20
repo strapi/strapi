@@ -41,6 +41,7 @@ export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIn
     [HasMember<TKind, 'pagination:page'>, Pagination.PageNotation],
     // Publication Status
     [HasMember<TKind, 'status'>, PublicationStatus.Param],
+    [HasMember<TKind, 'publicationFilter'>, PublicationStatus.PublicationFilterParam],
     // Locale
     [HasMember<TKind, 'locale'>, { locale?: Locale.Any }],
     [HasMember<TKind, 'locale:string'>, { locale?: Locale.StringNotation }],
@@ -74,6 +75,7 @@ export type Kind =
   | 'pagination:offset'
   | 'pagination:page'
   | 'status'
+  | 'publicationFilter'
   | 'locale'
   | 'locale:string'
   | 'locale:array'

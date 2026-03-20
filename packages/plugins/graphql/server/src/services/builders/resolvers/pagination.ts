@@ -1,3 +1,5 @@
+import { pick } from 'lodash/fp';
+
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => ({
@@ -15,7 +17,15 @@ export default ({ strapi }: Context) => ({
       auth: ctx?.state?.auth,
     });
 
-    const total = await strapi.documents!(resourceUID).count(sanitizedQuery);
+    const publicationFilterFromArgs = pick(['publicationFilter'], args);
+    const sanitized = sanitizedQuery as Record<string, unknown>;
+    const { status, ...restSanitized } = sanitized;
+
+    const total = await strapi.documents!(resourceUID).count({
+      ...restSanitized,
+      ...publicationFilterFromArgs,
+      status: (status as 'draft' | 'published' | undefined) ?? 'published',
+    });
 
     const pageSize = limit === -1 ? total - start : safeLimit;
     const pageCount = limit === -1 ? safeLimit : Math.ceil(total / safeLimit);

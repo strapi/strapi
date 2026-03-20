@@ -1,7 +1,6 @@
 import type { UID } from '@strapi/types';
 
-import { curry, assoc } from 'lodash/fp';
-import { parseHasPublishedVersion, getHasPublishedVersionCondition } from '../draft-and-publish';
+import { curry, assoc, omit, pipe } from 'lodash/fp';
 import { parsePublicationFilter, getPublicationFilterCondition } from '../publication-filter';
 
 import { pickAllowedQueryParams } from '../params';
@@ -10,61 +9,34 @@ const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
   const allowlisted = pickAllowedQueryParams(params ?? {});
   const query = strapi.get('query-params').transform(uid, allowlisted);
 
-  const hasPublishedVersion = parseHasPublishedVersion(allowlisted?.hasPublishedVersion);
   const publicationFilter = parsePublicationFilter(allowlisted?.publicationFilter);
   const status: 'draft' | 'published' = allowlisted.status === 'published' ? 'published' : 'draft';
 
-  if (hasPublishedVersion !== undefined || publicationFilter !== undefined) {
-    const existingFilters = query.filters;
+  const baseWhere = { ...params?.lookup, ...query.where };
 
-    query.filters = ({ meta, ...rest }: { meta: { uid: UID.Schema } }) => {
-      let existingResult = {};
-      if (typeof existingFilters === 'function') {
-        existingResult = existingFilters({ meta, ...rest }) || {};
-      } else if (existingFilters) {
-        existingResult = existingFilters;
-      }
+  // `transformQueryParams` leaves `publicationFilter` on the query object via `...rest`; the DB
+  // layer must not receive it as an extra top-level key.
+  const stripPublicationFilterFromQuery = omit(['publicationFilter'] as const);
 
-      const pieces: Record<string, unknown>[] = [];
-
-      if (Object.keys(existingResult).length > 0) {
-        pieces.push(existingResult);
-      }
-
-      if (hasPublishedVersion !== undefined) {
-        const hasPublishedCondition = getHasPublishedVersionCondition(
-          meta.uid,
-          hasPublishedVersion
-        );
-        if (hasPublishedCondition && Object.keys(hasPublishedCondition).length > 0) {
-          pieces.push(hasPublishedCondition);
-        }
-      }
-
-      if (publicationFilter !== undefined) {
-        const publicationCondition = getPublicationFilterCondition(
-          meta.uid,
-          publicationFilter,
-          status
-        );
-        if (publicationCondition && Object.keys(publicationCondition).length > 0) {
-          pieces.push(publicationCondition);
-        }
-      }
-
-      if (pieces.length === 0) {
-        return {};
-      }
-
-      if (pieces.length === 1) {
-        return pieces[0];
-      }
-
-      return { $and: pieces };
-    };
+  if (publicationFilter !== undefined) {
+    const publicationCondition = getPublicationFilterCondition(uid, publicationFilter, status);
+    if (publicationCondition && Object.keys(publicationCondition).length > 0) {
+      // Draft/publish is on `baseWhere` via `lookup`; publication modes add an `id` subquery.
+      // Drop `query.filters` (status callback) so we do not stack duplicate `publishedAt` logic.
+      // Use a single root `$and` so both fragments apply in one grouped predicate.
+      const queryWithoutStatusFilters = pipe(
+        omit(['filters'] as const),
+        stripPublicationFilterFromQuery
+      )(query);
+      const hasBase = Object.keys(baseWhere).length > 0;
+      const whereClause = hasBase
+        ? { $and: [baseWhere, publicationCondition] }
+        : publicationCondition;
+      return assoc('where', whereClause, queryWithoutStatusFilters);
+    }
   }
 
-  return assoc('where', { ...params?.lookup, ...query.where }, query);
+  return assoc('where', baseWhere, stripPublicationFilterFromQuery(query));
 });
 
 export { transformParamsToQuery };

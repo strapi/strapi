@@ -80,11 +80,6 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
-  /**
-   * Filter documents by whether they have a published version.
-   * Use with `status: 'draft'` to find documents that have never been published.
-   */
-  hasPublishedVersion?: boolean | 'true' | 'false';
   publicationFilter?: 'never-published' | 'has-published-version' | 'modified' | 'unmodified';
 }
 

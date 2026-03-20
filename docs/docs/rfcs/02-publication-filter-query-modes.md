@@ -67,7 +67,7 @@ Clients could approximate some of this with multiple requests, client-side joins
 
 ### Query translation contract
 
-Public query params normalize to binary status plus derived constraints. Implementations should use **`(documentId, locale)`-aware** predicates for localized content types. The existing top-level `hasPublishedVersion` parameter is **document-scoped** (distinct `documentId` with any published row); it does **not** substitute for locale-level `never-published` / `has-published-version` when i18n is enabled.
+Public query params normalize to binary status plus derived constraints. Implementations use **`(documentId, locale)`-aware** predicates for localized content types so cohorts like `never-published` and `has-published-version` are **pair-scoped**, not merely document-scoped.
 
 | Public query                                               | Internal normalized behavior (conceptual)                                                                                |
 | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -98,8 +98,7 @@ Validation happens after status resolution (explicit or defaulted):
 
 Compatibility:
 
-- Keep `hasPublishedVersion` supported unchanged (document-level; any locale published counts).
-- `publicationFilter=never-published` and `has-published-version` are **not** simple aliases of `hasPublishedVersion=false|true` when the content type is localized; they are **pair-scoped**. For non-localized types, pair scope collapses to `documentId` only and may align more closely with the old parameter.
+- GraphQL exposes optional `publicationFilter` with the same cohort strings as REST (`PublicationFilter` enum).
 
 Mutation semantics (`create`, `update`, `publish`, `unpublish`) do not change.
 
@@ -108,7 +107,7 @@ Mutation semantics (`create`, `update`, `publish`, `unpublish`) do not change.
 1. Extend allowlists and validators to accept `publicationFilter`.
 2. Resolve status defaults as today (no changes to REST/document service defaulting).
 3. Translate `publicationFilter` into derived constraints before final query execution (prefer correlated subqueries or joins on `(documentId, locale)` for localized types).
-4. Reuse patterns where possible, but do not assume document-level `hasPublishedVersion` subqueries are sufficient for localized `never-published` / `has-published-version`.
+4. Reuse patterns where possible; for localized types, avoid document-only existence checks when pair-scoped cohort semantics are required.
 
 ### Future options (not in initial scope)
 
@@ -163,7 +162,7 @@ With `status` omitted, direct document service resolves `status=draft` first, th
 - Requires clear documentation because default status differs by surface (REST vs direct document service).
 - `modified`/`unmodified` can be expensive on large datasets without optimized query paths.
 - Combination matrix must be validated carefully to avoid ambiguity.
-- Pair-scoped semantics must be distinguished from legacy document-level `hasPublishedVersion` in docs and OpenAPI.
+- Pair-scoped semantics should be explicit in docs and OpenAPI so clients do not confuse cohort filters with plain `publishedAt` checks.
 
 ## Alternatives
 
@@ -177,11 +176,11 @@ Why not preferred:
 - Increases risk in code (both internal and user code) that currently assumes only `draft|published`.
 - Harder to keep mutation/read semantics clean and obvious.
 
-### B) Keep only `hasPublishedVersion` and do nothing else
+### B) Rely only on a coarse boolean “published row exists for documentId” filter
 
 Why not preferred:
 
-- Does not address `modified` / `unmodified`, scales poorly as more derived publication states are introduced, does not address **locale-level** never / has-published cohorts.
+- Does not address `modified` / `unmodified`, scales poorly as more derived publication states are introduced, and does not express **locale-level** never / has-published cohorts.
 - Leaves users without a complete public query model for common publication workflows.
 
 ### C) Add a persisted status column

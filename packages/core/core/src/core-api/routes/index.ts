@@ -162,6 +162,6 @@ const getConditionalQueryParams = (schema: Schema.ContentType) => {
 
   return [
     ...(isLocalized ? ['locale'] : []),
-    ...(hasDraftAndPublish ? ['status', 'hasPublishedVersion', 'publicationFilter'] : []),
+    ...(hasDraftAndPublish ? ['status', 'publicationFilter'] : []),
   ] as QueryParam[];
 };

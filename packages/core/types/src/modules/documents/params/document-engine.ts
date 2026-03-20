@@ -15,6 +15,7 @@ export type FindMany<TContentTypeUID extends UID.ContentType> = Pick<
   | 'sort'
   | 'populate'
   | 'status'
+  | 'publicationFilter'
   | 'locale'
   | 'plugin'
   | 'lookup'
@@ -30,6 +31,7 @@ export type FindFirst<TContentTypeUID extends UID.ContentType> = Pick<
   | 'sort'
   | 'populate'
   | 'status'
+  | 'publicationFilter'
   | 'locale:string'
   | 'plugin'
   | 'lookup'
@@ -44,7 +46,7 @@ export type FindOne<TContentTypeUID extends UID.ContentType> = Pick<
 
 export type Delete<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'fields' | 'populate' | 'filters' | 'status' | 'locale:string' | 'lookup'
+  'fields' | 'populate' | 'filters' | 'status' | 'publicationFilter' | 'locale:string' | 'lookup'
 > & {
   documentId: ID;
 };
