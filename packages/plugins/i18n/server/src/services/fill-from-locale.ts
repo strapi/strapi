@@ -62,60 +62,6 @@ const isValidRelation = (
   typeof rel === 'object' && rel !== null && 'documentId' in rel && !!(rel as any).documentId;
 
 /**
- * Add status to relations (batched for better performance).
- */
-const addStatusToRelationsBatch = (
-  targetUid: UID.Schema,
-  relations: Array<{ documentId: string; id: number | string; locale?: string }>,
-  allEntries: Array<{
-    id: number | string;
-    documentId: string;
-    locale?: string;
-    updatedAt?: unknown;
-    publishedAt?: unknown;
-  }>
-): Array<{ documentId: string; id: number | string; locale?: string; status?: string }> => {
-  const model = strapi.getModel(targetUid);
-  if (!contentTypes.hasDraftAndPublish(model)) {
-    return relations;
-  }
-
-  const documentMetadata = strapi.plugin('content-manager')?.service('document-metadata');
-  if (!documentMetadata) {
-    return relations;
-  }
-
-  const isLocalized = strapi
-    .plugin('i18n')
-    ?.service('content-types')
-    ?.isLocalizedContentType(model);
-  const groupKey = (e: { documentId: string; locale?: string }) =>
-    isLocalized && e.locale ? `${e.documentId}:${e.locale}` : e.documentId;
-
-  const byGroup = new Map<string, typeof allEntries>();
-  for (const e of allEntries) {
-    const key = groupKey(e);
-    const list = byGroup.get(key) ?? [];
-    list.push(e);
-    byGroup.set(key, list);
-  }
-
-  return relations.map((relation) => {
-    const key = groupKey(relation);
-    const entries = byGroup.get(key) ?? [];
-    if (!entries.length) return relation;
-
-    const version = entries.find((e) => e.id === relation.id) ?? entries[0];
-    const otherVersions = entries.filter((e) => e.id !== version.id);
-
-    return {
-      ...relation,
-      status: documentMetadata.getStatus(version, otherVersions),
-    };
-  });
-};
-
-/**
  * Maps relations from the source locale to target locale (batched for better performance).
  */
 const resolveRelationsForLocaleBatch = async (
@@ -184,93 +130,259 @@ const buildWhereForRelations = (
   return where;
 };
 
+// ---------------------------------------------------------------------------
+// Batch pre-resolution
+// ---------------------------------------------------------------------------
+
+type ValidRelation = { documentId: string; id?: number; locale?: string };
+type ResolvedRelation = { documentId: string; id: number | string; locale?: string };
+type RelationsByUid = Map<string, ValidRelation[]>;
+
+interface UidResolutionData {
+  blocked: boolean;
+  mainField: string;
+  /** sourceDocumentId → resolved entry in targetLocale (null if not found) */
+  bySourceDocumentId: Map<string, ResolvedRelation | null>;
+  /** resolvedEntry.id → status string */
+  statusById: Map<number | string, string | undefined>;
+  /** resolvedEntry.id → mainField value */
+  labelById: Map<number | string, unknown>;
+}
+
 /**
- * Transform relation value to { connect: [...], disconnect: [] } with relations resolved for target locale.
+ * Walk the full document tree and collect all valid relation objects grouped by targetUid.
  */
-const transformRelationsForLocale = async (
-  value: unknown,
-  attribute: Schema.Attribute.Relation,
+const collectRelationsByUid = (
+  data: Record<string, unknown>,
+  schema: Schema.ContentType | Schema.Component,
+  components: Record<string, Schema.Component>
+): RelationsByUid => {
+  const result: RelationsByUid = new Map();
+
+  const addRels = (uid: string, rels: ValidRelation[]) => {
+    const existing = result.get(uid) ?? [];
+    result.set(uid, existing.concat(rels));
+  };
+
+  const collect = (d: Record<string, unknown>, s: Schema.ContentType | Schema.Component) => {
+    if (!d || typeof d !== 'object') return;
+    for (const [key, value] of Object.entries(d)) {
+      const attribute = s?.attributes?.[key];
+      if (!attribute) continue;
+
+      if (attribute.type === 'relation') {
+        const attr = attribute as Schema.Attribute.Relation & {
+          relation?: string;
+          target?: string;
+        };
+        if (attr.relation?.toLowerCase().includes('morph') || !attr.target) continue;
+        const validRels = normalizeToArray(value).filter(isValidRelation);
+        if (validRels.length > 0) addRels(attr.target, validRels);
+      } else if (attribute.type === 'component') {
+        const compSchema = (components[attribute.component] ?? {
+          attributes: {},
+        }) as Schema.Component;
+        if (attribute.repeatable && isArray(value)) {
+          for (const item of value as Record<string, unknown>[]) {
+            collect(item, compSchema);
+          }
+        } else if (value) {
+          collect(value as Record<string, unknown>, compSchema);
+        }
+      } else if (attribute.type === 'dynamiczone' && isArray(value)) {
+        for (const item of value as Record<string, unknown>[]) {
+          const compUid = (item as any)?.__component as string;
+          const compSchema = (components[compUid] ?? { attributes: {} }) as Schema.Component;
+          collect(item as Record<string, unknown>, compSchema);
+        }
+      }
+    }
+  };
+
+  collect(data, schema);
+  return result;
+};
+
+/**
+ * Perform the 3 DB queries (resolve + status + labels) grouped by targetUid for optimal performance.
+ */
+const prefetchResolutionData = async (
+  relationsByUid: RelationsByUid,
   targetLocale: string,
   userAbility: any
-): Promise<{ connect: unknown[]; disconnect: unknown[] }> => {
+): Promise<Map<string, UidResolutionData>> => {
+  const result = new Map<string, UidResolutionData>();
+  await Promise.all(
+    [...relationsByUid.entries()].map(async ([targetUid, allRels]) => {
+      const empty: UidResolutionData = {
+        blocked: !userAbility.can(READ_ACTION, targetUid),
+        mainField: '',
+        bySourceDocumentId: new Map(),
+        statusById: new Map(),
+        labelById: new Map(),
+      };
+
+      if (empty.blocked) {
+        result.set(targetUid, empty);
+        return;
+      }
+
+      const mainField = await getMainField(targetUid as UID.Schema);
+      const validRels = allRels.filter(isValidRelation);
+
+      if (validRels.length === 0) {
+        result.set(targetUid, { ...empty, mainField });
+        return;
+      }
+
+      // Deduplicate by documentId before querying
+      const uniqueRels = [...new Map(validRels.map((r) => [r.documentId, r])).values()];
+      const resolvedList = await resolveRelationsForLocaleBatch(
+        uniqueRels,
+        targetUid as UID.Schema,
+        targetLocale
+      );
+
+      const bySourceDocumentId = new Map<string, ResolvedRelation | null>();
+      for (let i = 0; i < uniqueRels.length; i += 1) {
+        bySourceDocumentId.set(uniqueRels[i].documentId, resolvedList[i]);
+      }
+
+      const resolvedEntries = resolvedList.filter((r): r is ResolvedRelation => r !== null);
+
+      if (resolvedEntries.length === 0) {
+        result.set(targetUid, {
+          blocked: false,
+          mainField,
+          bySourceDocumentId,
+          statusById: new Map(),
+          labelById: new Map(),
+        });
+        return;
+      }
+
+      const documentIds = [...new Set(resolvedEntries.map((r) => r.documentId))];
+      const where = buildWhereForRelations(resolvedEntries, documentIds, targetUid as UID.Schema);
+
+      const [allStatusEntries, labelEntries] = await Promise.all([
+        contentTypes.hasDraftAndPublish(strapi.getModel(targetUid as UID.Schema))
+          ? strapi.db.query(targetUid).findMany({ where, select: [...STATUS_FIELDS] })
+          : Promise.resolve([]),
+        strapi.db.query(targetUid).findMany({
+          where,
+          select: ['documentId', 'id', 'locale', mainField],
+        }),
+      ]);
+
+      // Build status map
+      const statusById = new Map<number | string, string | undefined>();
+      if (allStatusEntries.length > 0) {
+        const documentMetadata = strapi.plugin('content-manager')?.service('document-metadata');
+        if (documentMetadata) {
+          const model = strapi.getModel(targetUid as UID.Schema);
+          const isLocalized = strapi
+            .plugin('i18n')
+            ?.service('content-types')
+            ?.isLocalizedContentType(model);
+          const groupKey = (e: { documentId: string; locale?: string }) =>
+            isLocalized && e.locale ? `${e.documentId}:${e.locale}` : e.documentId;
+
+          const byGroup = new Map<string, typeof allStatusEntries>();
+          for (const e of allStatusEntries) {
+            const key = groupKey(e);
+            const list = byGroup.get(key) ?? [];
+            list.push(e);
+            byGroup.set(key, list);
+          }
+
+          for (const entry of resolvedEntries) {
+            const key = groupKey(entry);
+            const entries = byGroup.get(key) ?? [];
+            if (!entries.length) continue;
+            const version = entries.find((e) => e.id === entry.id) ?? entries[0];
+            const otherVersions = entries.filter((e) => e.id !== version.id);
+            statusById.set(entry.id, documentMetadata.getStatus(version, otherVersions));
+          }
+        }
+      }
+
+      // Build label map
+      const labelById = new Map<number | string, unknown>();
+      for (const entry of labelEntries) {
+        labelById.set(entry.id, entry[mainField]);
+      }
+
+      result.set(targetUid, {
+        blocked: false,
+        mainField,
+        bySourceDocumentId,
+        statusById,
+        labelById,
+      });
+    })
+  );
+
+  return result;
+};
+
+/**
+ * Build the { connect, disconnect } for a single relation attribute using pre-fetched data.
+ */
+const buildConnectFromPreResolved = (
+  value: unknown,
+  attribute: Schema.Attribute.Relation,
+  preResolved: Map<string, UidResolutionData>
+): { connect: unknown[]; disconnect: unknown[] } => {
   const attr = attribute as Schema.Attribute.Relation & { relation?: string; target?: string };
-  if (attr.relation?.toLowerCase().includes('morph')) {
+  if (attr.relation?.toLowerCase().includes('morph') || !attr.target) {
     return { connect: [], disconnect: [] };
   }
 
-  const targetUid = attr.target as UID.Schema;
-  if (!targetUid) {
+  const uidData = preResolved.get(attr.target);
+  if (!uidData || uidData.blocked) {
     return { connect: [], disconnect: [] };
   }
 
-  // Guard: skip relations to content types the user cannot read
-  if (!userAbility.can(READ_ACTION, targetUid)) {
-    return { connect: [], disconnect: [] };
-  }
-
-  const relations = normalizeToArray(value);
-  const validRels = relations.filter(isValidRelation);
+  const validRels = normalizeToArray(value).filter(isValidRelation);
   if (validRels.length === 0) {
     return { connect: [], disconnect: [] };
   }
 
-  const resolved = await resolveRelationsForLocaleBatch(validRels, targetUid, targetLocale);
-  const baseConnect = resolved
-    .filter((r): r is NonNullable<typeof r> => r !== null)
-    .map((r, index) => ({ ...r, __temp_key__: `a${index}` }));
+  const connect = validRels
+    .map((rel, index) => {
+      const resolved = uidData.bySourceDocumentId.get(rel.documentId);
+      if (!resolved) return null;
 
-  if (baseConnect.length === 0) {
-    return { connect: [], disconnect: [] };
-  }
+      const status = uidData.statusById.get(resolved.id);
+      const mainFieldValue = uidData.labelById.get(resolved.id);
+      const relationWithMainField: Record<string, unknown> = {
+        ...resolved,
+        [uidData.mainField]: mainFieldValue,
+      };
+      if (status !== undefined) {
+        relationWithMainField.status = status;
+      }
 
-  const mainField = await getMainField(targetUid);
-  const documentIds = [...new Set(baseConnect.map((r) => r.documentId))];
-  const where = buildWhereForRelations(baseConnect, documentIds, targetUid);
-
-  const fetchStatusEntries = () =>
-    contentTypes.hasDraftAndPublish(strapi.getModel(targetUid))
-      ? strapi.db.query(targetUid).findMany({ where, select: [...STATUS_FIELDS] })
-      : Promise.resolve([]);
-
-  const fetchLabelEntries = () =>
-    strapi.db.query(targetUid).findMany({
-      where,
-      select: ['documentId', 'id', 'locale', mainField],
-    });
-
-  const [allStatusEntries, labelEntries] = await Promise.all([
-    fetchStatusEntries(),
-    fetchLabelEntries(),
-  ]);
-
-  const withStatus = addStatusToRelationsBatch(targetUid, baseConnect, allStatusEntries);
-
-  const labelById = new Map<number | string, unknown>();
-  for (const entry of labelEntries) {
-    labelById.set(entry.id, entry[mainField]);
-  }
-
-  const connect = withStatus.map((r) => {
-    const mainFieldValue = labelById.get(r.id);
-    const relationWithMainField = { ...r, [mainField]: mainFieldValue };
-    return {
-      ...relationWithMainField,
-      label: getRelationLabel(relationWithMainField, mainField),
-    };
-  });
+      return {
+        ...relationWithMainField,
+        __temp_key__: `a${index}`,
+        label: getRelationLabel(relationWithMainField, uidData.mainField),
+      };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
 
   return { connect, disconnect: [] };
 };
 
 /**
- * Recursively process document data: remove fields and resolve relations.
+ * Recursively process document data: remove internal fields and resolve relations using
+ * pre-fetched resolution data (no additional DB calls).
  */
 const processDocumentData = async (
   data: Record<string, unknown>,
   schema: Schema.ContentType | Schema.Component,
   components: Record<string, Schema.Component>,
-  targetLocale: string,
-  userAbility: any
+  preResolved: Map<string, UidResolutionData>
 ): Promise<Record<string, unknown>> => {
   if (!data) {
     return {};
@@ -294,11 +406,10 @@ const processDocumentData = async (
     }
 
     if (attribute.type === 'relation') {
-      result[key] = await transformRelationsForLocale(
+      result[key] = buildConnectFromPreResolved(
         value,
         attribute as Schema.Attribute.Relation,
-        targetLocale,
-        userAbility
+        preResolved
       );
       continue;
     }
@@ -310,13 +421,7 @@ const processDocumentData = async (
       if (attribute.repeatable && isArray(value)) {
         result[key] = await Promise.all(
           value.map(async (item: Record<string, unknown>, index: number) => {
-            const processed = await processDocumentData(
-              item,
-              compSchema,
-              components,
-              targetLocale,
-              userAbility
-            );
+            const processed = await processDocumentData(item, compSchema, components, preResolved);
             return { ...processed, __temp_key__: index + 1 };
           })
         );
@@ -325,8 +430,7 @@ const processDocumentData = async (
           value as Record<string, unknown>,
           compSchema,
           components,
-          targetLocale,
-          userAbility
+          preResolved
         );
         result[key] = processed;
       } else {
@@ -341,13 +445,7 @@ const processDocumentData = async (
           const compSchema = (components[item?.__component as string] || {
             attributes: {},
           }) as Schema.Component;
-          const processed = await processDocumentData(
-            item,
-            compSchema,
-            components,
-            targetLocale,
-            userAbility
-          );
+          const processed = await processDocumentData(item, compSchema, components, preResolved);
           return { ...processed, __temp_key__: index + 1 };
         })
       );
@@ -411,7 +509,9 @@ export const createFillFromLocaleService = ({ strapi }: { strapi: Core.Strapi })
         },
       });
 
-      return processDocumentData(document, schema, components, targetLocale, userAbility);
+      const relsByUid = collectRelationsByUid(document, schema, components);
+      const preResolved = await prefetchResolutionData(relsByUid, targetLocale, userAbility);
+      return processDocumentData(document, schema, components, preResolved);
     },
   };
 };
