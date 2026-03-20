@@ -452,10 +452,12 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Coach Beard').click();
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
       // Delete one of the authors, leaving only Coach Beard
       // Open the relation modal
       await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
+      await expect(page.getByRole('button', { name: 'Go to entry' })).toBeVisible();
       // Click to go to the related document
       await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
       await page.getByRole('button', { name: /more actions/i }).click();
