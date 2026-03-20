@@ -13,6 +13,7 @@ export type QueryParam =
   | 'sort'
   | 'status'
   | 'hasPublishedVersion'
+  | 'publicationFilter'
   | 'locale'
   | 'pagination'
   | 'filters'
@@ -174,6 +175,12 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       );
   }
 
+  get publicationFilter() {
+    return z
+      .enum(['never-published', 'has-published-version', 'modified', 'unmodified'])
+      .describe('Filter documents by derived publication state for the same documentId and locale');
+  }
+
   get data() {
     const isWritableAttribute = ([attributeName]: [string, Schema.Attribute.AnyAttribute]) => {
       return contentTypes.isWritableAttribute(this._schema, attributeName);
@@ -222,6 +229,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       pagination: () => this.pagination.optional(),
       status: () => this.status.optional(),
       hasPublishedVersion: () => this.hasPublishedVersion.optional(),
+      publicationFilter: () => this.publicationFilter.optional(),
       _q: () => this.query.optional(),
     } as const;
 

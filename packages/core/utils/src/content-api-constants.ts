@@ -17,6 +17,7 @@ export const SHARED_QUERY_PARAM_KEYS = [
   'limit',
   '_q',
   'hasPublishedVersion',
+  'publicationFilter',
 ] as const;
 
 /**

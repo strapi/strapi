@@ -85,6 +85,7 @@ export interface Params {
    * Use with `status: 'draft'` to find documents that have never been published.
    */
   hasPublishedVersion?: boolean | 'true' | 'false';
+  publicationFilter?: 'never-published' | 'has-published-version' | 'modified' | 'unmodified';
 }
 
 type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;
