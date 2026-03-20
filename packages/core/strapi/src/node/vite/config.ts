@@ -133,6 +133,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
       // where packages imported by plugins may not be resolvable from plugin chunks
       alias: {
+        react: getModulePath('react'),
+        'react-dom': getModulePath('react-dom'),
+        'react-router-dom': getModulePath('react-router-dom'),
+        'styled-components': getModulePath('styled-components'),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),

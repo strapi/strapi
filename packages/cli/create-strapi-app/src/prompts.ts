@@ -1,6 +1,5 @@
-import inquirer from 'inquirer';
-
 async function directory() {
+  const { default: inquirer } = await import('inquirer');
   const { directory } = await inquirer.prompt<{
     directory: string;
   }>([
@@ -16,6 +15,7 @@ async function directory() {
 }
 
 async function typescript() {
+  const { default: inquirer } = await import('inquirer');
   const { useTypescript } = await inquirer.prompt<{
     useTypescript: boolean;
   }>([
@@ -31,6 +31,7 @@ async function typescript() {
 }
 
 async function example() {
+  const { default: inquirer } = await import('inquirer');
   const { useExample } = await inquirer.prompt<{
     useExample: boolean;
   }>([
@@ -46,6 +47,7 @@ async function example() {
 }
 
 async function gitInit() {
+  const { default: inquirer } = await import('inquirer');
   const { gitInit } = await inquirer.prompt<{
     gitInit: boolean;
   }>([
@@ -61,6 +63,7 @@ async function gitInit() {
 }
 
 async function installDependencies(packageManager: string) {
+  const { default: inquirer } = await import('inquirer');
   const { installDependencies } = await inquirer.prompt<{
     installDependencies: boolean;
   }>([
@@ -76,6 +79,7 @@ async function installDependencies(packageManager: string) {
 }
 
 async function enableABTests() {
+  const { default: inquirer } = await import('inquirer');
   const { enableABTests } = await inquirer.prompt<{
     enableABTests: boolean;
   }>([

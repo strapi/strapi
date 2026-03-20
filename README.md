@@ -157,9 +157,8 @@ Check out our [roadmap](https://feedback.strapi.io) to get informed of the lates
 
 See our dedicated [repository](https://github.com/strapi/documentation) for the Strapi documentation, or view our documentation live:
 
-- [Developer docs](https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html)
-- [User guide](https://docs.strapi.io/user-docs/latest/getting-started/introduction.html)
-- [Cloud guide](https://docs.strapi.io/cloud/intro)
+- [CMS docs](https://docs.strapi.io/cms/intro)
+- [Cloud docs](https://docs.strapi.io/cloud/intro)
 
 ## Try live demo
 
