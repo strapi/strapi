@@ -26,6 +26,7 @@
     "test:migration": "node scripts/validate-migration.js"
   },
   "dependencies": {
+    "@strapi/plugin-graphql": "workspace:*",
     "@strapi/plugin-users-permissions": "workspace:*",
     "@strapi/strapi": "workspace:*",
     "mysql2": "3.20.0",
@@ -41,7 +42,7 @@
     "typescript": "^5"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

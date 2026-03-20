@@ -1,7 +1,8 @@
 import { toUpper, snakeCase, pick, isEmpty } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import { unwrapResolverError } from '@apollo/server/errors';
 import { GraphQLError, type GraphQLFormattedError } from 'graphql';
+
+import type { Core } from '@strapi/types';
 
 const { HttpError, ForbiddenError, UnauthorizedError, ApplicationError, ValidationError } = errors;
 
@@ -29,14 +30,14 @@ function createFormattedError(
 }
 
 /**
- * The handler for Apollo Server v4's formatError config option
- *
- * Intercepts specific Strapi error types to send custom error response codes in the GraphQL response
+ * Maps an already-unwrapped resolver error to Strapi GraphQL error extensions.
+ * Use with Apollo via {@link createApolloFormatErrorHandler} or pass `originalError` from another engine.
  */
-export function formatGraphqlError(formattedError: GraphQLFormattedError, error: unknown) {
-  const originalError = unwrapResolverError(error);
-
-  // If this error doesn't have an associated originalError, it
+export function formatStrapiGraphqlError(
+  strapi: Core.Strapi,
+  formattedError: GraphQLFormattedError,
+  originalError: unknown
+): GraphQLFormattedError | GraphQLError {
   if (isEmpty(originalError)) {
     return formattedError;
   }
@@ -60,12 +61,8 @@ export function formatGraphqlError(formattedError: GraphQLFormattedError, error:
     return formattedError;
   }
 
-  // else if originalError doesn't appear to be from Strapi or GraphQL..
-
-  // Log the error
   strapi.log.error(originalError);
 
-  // Create a generic 500 to send so we don't risk leaking any data
   return createFormattedError(
     new GraphQLError('Internal Server Error'),
     'Internal Server Error',

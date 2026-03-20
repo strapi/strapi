@@ -76,12 +76,21 @@ module.exports = () => ({
       apolloServer: {
         tracing: true,
       },
+
+      // Optional: explicit GraphQL HTTP server (defaults to Apollo v4 with legacy `apolloServer` merge)
+      // server: {
+      //   provider: 'apollo',
+      //   version: 4,
+      //   options: {},
+      // },
     },
   },
 });
 ```
 
 NOTE: Because this configuration contains user and plugin keys and Strapi does not yet provide a method to extend the definitions, this configuration is not strictly typed and will not be loaded from the environment variables
+
+When `server` is set, it takes precedence over `apolloServer` (which is then ignored, with a warning if `apolloServer` was non-empty). See the GraphQL plugin README for details.
 
 #### middlewares
 
