@@ -1,6 +1,5 @@
 /* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash/fp';
-import { async } from '@strapi/utils';
 import type { UID, Schema } from '@strapi/types';
 import type { JoinTable } from '@strapi/database';
 
@@ -171,46 +170,63 @@ const sync = async (
         continue;
       }
 
-      // Update order values for each relation
-      // TODO: Find a way to batch it more efficiently
-      await async.map(relations, async (relation: Record<string, unknown>) => {
-        const oldSourceId = relation[sourceColumn] as string;
-        const targetId = relation[targetColumn] as string;
-        const originalOrder = relation[orderColumn];
+      const mappedRelations = relations
+        .map((relation) => ({
+          relation,
+          oldSourceId: relation[sourceColumn] as string,
+          targetId: relation[targetColumn] as string,
+          originalOrder: relation[orderColumn],
+          newSourceId: entryIdMapping[relation[sourceColumn] as string],
+        }))
+        .filter((r): r is typeof r & { newSourceId: string } => Boolean(r.newSourceId));
 
-        const newSourceId = entryIdMapping[oldSourceId];
+      if (!mappedRelations.length) continue;
 
-        // If no mapping exists for this old entry, skip it
-        if (!newSourceId) {
-          return;
-        }
+      const newSourceIds = mappedRelations.map((r) => r.newSourceId);
 
-        // Check whether the join entry already exists for the new entity ID.
-        // We cannot rely on UPDATE's affected-row count to detect missing rows
-        // because MySQL/MariaDB returns 0 for no-op updates (value unchanged),
-        // which would cause a spurious INSERT and a duplicate join row.
-        const existingRow = await trx(joinTable.name)
-          .where(sourceColumn, newSourceId)
-          .where(targetColumn, targetId)
-          .first();
+      // Batch UPDATE: set each row's order in a single statement using CASE
+      const caseFragments = mappedRelations.map(() => `WHEN ?? = ? AND ?? = ? THEN ?`);
+      const caseBindings = mappedRelations.flatMap(({ newSourceId, targetId, originalOrder }) => [
+        sourceColumn,
+        newSourceId,
+        targetColumn,
+        targetId,
+        originalOrder,
+      ]);
 
-        if (existingRow) {
-          // Row exists — update the order column only.
-          await trx(joinTable.name)
-            .where(sourceColumn, newSourceId)
-            .where(targetColumn, targetId)
-            .update({ [orderColumn]: originalOrder });
-        } else if (!isRepublishedEntry(newSourceId)) {
-          // Missing row was cascade-deleted (we republished the target) — re-insert.
-          // If we republished the source, the row was never created (user removed the relation).
-          const newRelation = {
-            ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
-            [sourceColumn]: newSourceId,
-            [orderColumn]: originalOrder,
-          };
-          await trx(joinTable.name).insert(newRelation);
-        }
-      });
+      await trx(joinTable.name)
+        .whereIn(sourceColumn, newSourceIds)
+        .update({
+          [orderColumn]: trx.raw(`CASE ${caseFragments.join(' ')} ELSE ?? END`, [
+            ...caseBindings,
+            orderColumn,
+          ]),
+        });
+
+      // Batch SELECT: find which rows exist so we know what to insert
+      const existingRows = await trx(joinTable.name)
+        .whereIn(sourceColumn, newSourceIds)
+        .select(sourceColumn, targetColumn);
+
+      const existingSet = new Set(
+        existingRows.map((r: Record<string, unknown>) => `${r[sourceColumn]}:${r[targetColumn]}`)
+      );
+
+      // Batch INSERT: insert cascade-deleted rows that aren't from republished sources
+      const toInsert = mappedRelations
+        .filter(
+          ({ newSourceId, targetId }) =>
+            !existingSet.has(`${newSourceId}:${targetId}`) && !isRepublishedEntry(newSourceId)
+        )
+        .map(({ relation, newSourceId, originalOrder }) => ({
+          ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
+          [sourceColumn]: newSourceId,
+          [orderColumn]: originalOrder,
+        }));
+
+      if (toInsert.length) {
+        await trx.batchInsert(joinTable.name, toInsert, 1000);
+      }
     }
   });
 };

@@ -201,12 +201,12 @@ describe('Document Service bidirectional relations', () => {
         status: 'published',
       });
 
-      // All 3 tags should still be present after republishing tagB
-      expect(publishedProduct?.tags).toHaveLength(3);
-      const tagNames = publishedProduct?.tags.map((t) => t.name);
-      expect(tagNames).toContain('OrderTagA');
-      expect(tagNames).toContain('OrderTagB Updated');
-      expect(tagNames).toContain('OrderTagC');
+      // All 3 tags should still be present in the original order after republishing tagB
+      expect(publishedProduct?.tags.map((t) => t.name)).toEqual([
+        'OrderTagA',
+        'OrderTagB Updated',
+        'OrderTagC',
+      ]);
     }
   );
 });
