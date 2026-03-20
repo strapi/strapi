@@ -94,10 +94,7 @@ describe('Test GraphQL publicationFilter', () => {
     await builder.cleanup();
   });
 
-  // publicationFilter is applied correctly when GraphQL sends user `filters` (see test below) and in
-  // REST/document-service. List/_connection with publicationFilter only (no `filters`) still needs
-  // the same query merge path fixed — skip until then (PoC scope).
-  describe.skip('publicationFilter without user filters (TODO: GraphQL list merge)', () => {
+  describe('publicationFilter without user filters', () => {
     test('publicationFilter NEVER_PUBLISHED returns only never-published drafts', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `

@@ -66,7 +66,10 @@ export const buildPublicationFilterWhere = (
   const pairOn = (aliasA: string, aliasB: string) => {
     const parts = [`${aliasA}.${docCol} = ${aliasB}.${docCol}`];
     if (localeCol) {
-      parts.push(`${aliasA}.${localeCol} = ${aliasB}.${localeCol}`);
+      // SQL `NULL = NULL` is unknown; drafts often store NULL locale when i18n is off.
+      parts.push(
+        `(${aliasA}.${localeCol} = ${aliasB}.${localeCol} OR (${aliasA}.${localeCol} IS NULL AND ${aliasB}.${localeCol} IS NULL))`
+      );
     }
     return parts.join(' AND ');
   };
