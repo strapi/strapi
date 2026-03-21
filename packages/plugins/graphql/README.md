@@ -37,4 +37,4 @@ Types for the `server` field (for TypeScript projects):
 import type { GraphqlPluginServerConfig } from '@strapi/plugin-graphql/types/graphql-plugin-server';
 ```
 
-Maintainers: see [`server/src/graphql-transport/EXTENDING.md`](./server/src/graphql-transport/EXTENDING.md) for adding new transports (e.g. Tailcall).
+Maintainers: see [`server/src/graphql-transport/EXTENDING.md`](./server/src/graphql-transport/EXTENDING.md) for adding new transports.

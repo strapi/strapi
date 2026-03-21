@@ -96,11 +96,11 @@ describe('resolveGraphqlServerConfig', () => {
     });
   });
 
-  it('throws for tailcall with a clear message', () => {
+  it('throws for unknown server provider', () => {
     expect(() =>
       resolveGraphqlServerConfig({
-        server: { provider: 'tailcall', options: {} },
+        server: { provider: 'unknown-engine', options: {} },
       })
-    ).toThrow(/tailcall.*not supported/);
+    ).toThrow(/Unknown graphql server provider/);
   });
 });

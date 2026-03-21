@@ -39,12 +39,6 @@ export function resolveGraphqlServerConfig(
       };
     }
 
-    if (provider === 'tailcall') {
-      throw new Error(
-        '[@strapi/plugin-graphql] `server.provider: "tailcall"` is not supported yet. Remove it or use a future release that includes this transport.'
-      );
-    }
-
     throw new Error(
       `[@strapi/plugin-graphql] Unknown graphql server provider: ${String(provider)}. Use "apollo" or omit \`server\` for the default Apollo v4 setup.`
     );

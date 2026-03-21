@@ -6,7 +6,7 @@ export type ApolloGraphqlTransportVersion = 4 | 5;
 
 /**
  * Resolved GraphQL HTTP transport after normalizing legacy and explicit `server` config.
- * Extend with additional `provider` unions when adding non-Apollo transports (e.g. tailcall).
+ * Extend with additional `provider` unions when adding non-Apollo transports.
  */
 export interface ResolvedApolloGraphqlTransport {
   provider: 'apollo';
