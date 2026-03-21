@@ -263,7 +263,7 @@ const DynamicComponent = ({
   return (
     <ComponentContainer tag="li" width="100%">
       <Flex justifyContent="center">
-        <Rectangle background="neutral200" />
+        <Rectangle />
       </Flex>
       <StyledBox ref={composedBoxRefs} hasRadius>
         {isDragging ? (
@@ -271,7 +271,7 @@ const DynamicComponent = ({
         ) : (
           <Accordion.Root value={collapseToOpen} onValueChange={setCollapseToOpen}>
             <Accordion.Item value={accordionValue}>
-              <Accordion.Header>
+              <Accordion.Header variant={index % 2 === 0 ? 'primary' : 'secondary'}>
                 <Accordion.Trigger
                   icon={
                     icon && COMPONENT_ICONS[icon]
@@ -284,7 +284,7 @@ const DynamicComponent = ({
                 <Accordion.Actions>{accordionActions}</Accordion.Actions>
               </Accordion.Header>
               <Accordion.Content>
-                <AccordionContentRadius background="neutral0">
+                <AccordionContentRadius>
                   <DynamicComponentFields
                     componentUid={componentUid}
                     index={index}
@@ -303,21 +303,28 @@ const DynamicComponent = ({
   );
 };
 
-// TODO: Delete once https://github.com/strapi/design-system/pull/858
-// is merged and released.
 const StyledBox = styled<BoxComponent>(Box)`
+  width: 100%;
+  min-width: 0;
+
   > div:first-child {
     box-shadow: ${({ theme }) => theme.shadows.tableShadow};
+    background-color: ${({ theme }) => theme.colors.neutral0};
+    color: ${({ theme }) => theme.colors.neutral800};
   }
 `;
 
 const AccordionContentRadius = styled<BoxComponent>(Box)`
   border-radius: 0 0 ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[1]};
+  background-color: ${({ theme }) => theme.colors.neutral0};
+  color: ${({ theme }) => theme.colors.neutral800};
 `;
 
 const Rectangle = styled<BoxComponent>(Box)`
   width: ${({ theme }) => theme.spaces[2]};
   height: ${({ theme }) => theme.spaces[4]};
+  background-color: ${({ theme }) => theme.colors.neutral200};
+  border-radius: ${({ theme }) => theme.spaces[1]};
 `;
 
 const Preview = styled.span`
@@ -332,6 +339,8 @@ const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 100%;
+  min-width: 0;
 `;
 
 interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children'> {

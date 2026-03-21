@@ -34,7 +34,7 @@ const ComponentCategory = ({
           {formatMessage({ id: category, defaultMessage: category })}
         </Accordion.Trigger>
       </Accordion.Header>
-      <ResponsiveAccordionContent>
+      <Accordion.Content>
         <Grid paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           {components.map(({ uid, displayName, icon }) => (
             <ComponentBox
@@ -59,14 +59,10 @@ const ComponentCategory = ({
             </ComponentBox>
           ))}
         </Grid>
-      </ResponsiveAccordionContent>
+      </Accordion.Content>
     </Accordion.Item>
   );
 };
-
-const ResponsiveAccordionContent = styled(Accordion.Content)`
-  container-type: inline-size;
-`;
 
 /**
  * TODO:
