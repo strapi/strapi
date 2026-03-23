@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-cloudinary",
-  "version": "5.37.1",
+  "version": "5.40.0",
   "description": "Cloudinary provider for strapi upload",
   "keywords": [
     "upload",
@@ -13,7 +13,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/upload-cloudinary"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -44,13 +45,13 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.37.1",
+    "@strapi/utils": "5.40.0",
     "cloudinary": "^2.7.0",
     "into-stream": "^5.1.0"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.37.1",
-    "tsconfig": "5.37.1"
+    "eslint-config-custom": "5.40.0",
+    "tsconfig": "5.40.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

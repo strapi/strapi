@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import inquirer from 'inquirer';
+import type { DistinctQuestion } from 'inquirer';
 import { createCommand } from 'commander';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
@@ -17,7 +18,7 @@ interface Answers {
   confirm: boolean;
 }
 
-const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
+const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
   { type: 'input', name: 'email', message: 'User email?' },
   { type: 'password', name: 'password', message: 'New password?' },
   {

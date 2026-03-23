@@ -41,6 +41,7 @@ export interface Proxy {
   http?: string;
   https?: string;
   fetch?: string;
+  koa?: boolean;
 }
 
 export interface Webhooks {
