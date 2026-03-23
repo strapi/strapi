@@ -108,8 +108,8 @@ describe('Link', () => {
 
     await user.click(link);
 
-    expect(screen.getByRole('button', { name: /Save/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Save/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Cancel/i })).toBeInTheDocument();
   });
 
   it('only enables save button in popover when content has changed', async () => {
@@ -141,8 +141,8 @@ describe('Link', () => {
     const link = screen.getByRole('link', { name: 'Some link' });
     await user.click(link);
 
-    const linkTextInput = screen.getByPlaceholderText('Enter link text');
-    const saveButton = screen.queryByRole('button', { name: /save/i });
+    const linkTextInput = await screen.findByPlaceholderText('Enter link text');
+    const saveButton = await screen.findByRole('button', { name: /save/i });
     expect(saveButton).toBeDisabled();
 
     // change link text and check if save button is enabled

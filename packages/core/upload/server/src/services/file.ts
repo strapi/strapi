@@ -109,10 +109,11 @@ const fetchUrlToInputFile = async (
     throw new ApplicationError(`Could not resolve hostname: ${parsedUrl.hostname}`);
   }
 
-  // Fetch the URL with timeout
+  // use strapi.fetch so we can intercept requests and support proxy settings
+  const doFetch = typeof strapi?.fetch === 'function' ? strapi.fetch : fetch;
   let response: Response;
   try {
-    response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    response = await doFetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
   } catch (error) {
     if (error instanceof Error && error.name === 'TimeoutError') {
       throw new ApplicationError(`Request timed out while fetching URL: ${url}`);

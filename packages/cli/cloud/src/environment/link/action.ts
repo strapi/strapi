@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import inquirer, { type Answers } from 'inquirer';
+import type { Answers } from 'inquirer';
 import { EnvironmentDetails, ProjectInput } from '../../services/cli-api';
 import type { CLIContext, CloudApiService } from '../../types';
 import { cloudApiFactory, tokenServiceFactory, local } from '../../services';
@@ -91,6 +91,7 @@ async function promptUserForEnvironment(
   const { logger } = ctx;
 
   try {
+    const { default: inquirer } = await import('inquirer');
     const answer: LinkEnvironmentInput = await inquirer.prompt([
       {
         type: 'list',
