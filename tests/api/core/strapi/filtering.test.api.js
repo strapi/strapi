@@ -465,6 +465,50 @@ describe('Filtering API', () => {
       });
     });
 
+    /**
+     * Regression for https://github.com/strapi/strapi/issues/25795
+     *
+     * Root cause: filter traversal did not recurse into scalar field values (`name: { $contains: ... }`),
+     * so nested keys were invisible to sanitize/validate visitors. That could strip or mishandle operators
+     * and let invalid nested keys through. This block asserts the real Content API sanitize path (same as
+     * REST `find`) and a bracket-notation HTTP request (curl-style query string).
+     */
+    describe('Scalar filter map traversal ($contains / $containsi, issue #25795)', () => {
+      test('content-API sanitize.query strips invalid keys next to operators under scalar fields', async () => {
+        const schema = strapi.getModel('api::product.product');
+        const sanitized = await strapi.contentAPI.sanitize.query(
+          {
+            filters: {
+              name: {
+                $containsi: 'oduct',
+                __strapi25795_invalidNestedKey: 'should-be-removed',
+              },
+            },
+          },
+          schema,
+          {}
+        );
+
+        expect(sanitized.filters).toEqual({ name: { $containsi: 'oduct' } });
+      });
+
+      test('GET with filters[name][$containsi] matches (qs.stringify bracket keys, curl-equivalent)', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            'filters[name][$containsi]': 'oduct',
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.length).toBeGreaterThanOrEqual(1);
+        expect(res.body.data).toEqual(
+          expect.arrayContaining(data.product.map((o) => expect.objectContaining(o)))
+        );
+      });
+    });
+
     describe('Filter not contains insensitive', () => {
       test('Should return an array of entities on match', async () => {
         const res = await rq({

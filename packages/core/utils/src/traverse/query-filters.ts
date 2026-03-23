@@ -1,8 +1,15 @@
 import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
 
+import { isScalarAttribute } from '../content-types';
+import { isOperator } from '../operators';
 import traverseFactory, { type Parent } from './factory';
+import type { Model } from '../types';
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
+
+/** True if this object should be walked as a filter subtree (operators / attributes), not an opaque operand. */
+const isFilterLikeObject = (value: Record<string, unknown>, schema?: Model) =>
+  Object.keys(value).some((k) => isOperator(k) || Boolean(schema?.attributes?.[k]));
 
 const filters = traverseFactory()
   .intercept(
@@ -58,6 +65,18 @@ const filters = traverseFactory()
     async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
       const parent: Parent = { key, path, schema, attribute };
 
+      // $null / $notNull operands are boolean-cast downstream; arbitrary objects are not filter maps.
+      // Without this, traversing into e.g. { $null: { anything: 'x' } } makes validate throw on "anything".
+      if (
+        (key === '$null' || key === '$notNull') &&
+        isObj(value) &&
+        !isArray(value) &&
+        !isFilterLikeObject(value, schema)
+      ) {
+        set(key, value);
+        return;
+      }
+
       set(key, await recurse(visitor, { schema, path, getModel, parent }, value));
     }
   )
@@ -112,6 +131,17 @@ const filters = traverseFactory()
     );
 
     set(key, newValue);
-  });
+  })
+  // Scalar fields (string, number, etc.): recurse into operator maps like { $contains: 'x' } so
+  // visitors run on nested keys (issue #25795 / REST filters[field][$operator]=...).
+  .onAttribute(
+    ({ attribute, value }) =>
+      Boolean(isScalarAttribute(attribute)) && isObj(value) && !isArray(value),
+    async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
+      const parent: Parent = { key, path, schema, attribute };
+
+      set(key, await recurse(visitor, { schema, path, getModel, parent }, value));
+    }
+  );
 
 export default curry(filters.traverse);

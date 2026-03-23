@@ -2,6 +2,7 @@ import * as visitors from '../sanitize/visitors';
 import * as contentTypeUtils from '../content-types';
 import { sanitizers } from '../sanitize';
 import { traverseQueryFilters } from '../traverse';
+import type { Visitor } from '../traverse/factory';
 import traverseEntity from '../traverse-entity';
 import { adminUserModel, articleModel, getModel } from './test-fixtures';
 
@@ -140,6 +141,39 @@ describe('Sanitize visitors util', () => {
           lastname: 'Doe',
         },
       });
+    });
+
+    test('keeps scalar field $contains filter (issue #25795)', async () => {
+      const filters = { title: { $contains: 'est02' } };
+      await expect(sanitizers.defaultSanitizeFilters(ctx, filters)).resolves.toEqual(filters);
+    });
+
+    test('keeps scalar field $containsi filter (issue #25795)', async () => {
+      const filters = { title: { $containsi: 'EST02' } };
+      await expect(sanitizers.defaultSanitizeFilters(ctx, filters)).resolves.toEqual(filters);
+    });
+
+    /**
+     * Regression for https://github.com/strapi/strapi/issues/25795
+     * Without recursing into scalar attribute filter objects, the first sanitizer pass never visits
+     * nested keys, so unrecognized keys are not removed (and valid operators are invisible to visitors).
+     */
+    test('removes unrecognized keys nested under scalar field filters (#25795)', async () => {
+      await expect(
+        sanitizers.defaultSanitizeFilters(ctx, { title: { totallyUnknownNestedKey: 'x' } })
+      ).resolves.toEqual({});
+    });
+
+    test('traverseQueryFilters visits nested operators under scalar fields (#25795)', async () => {
+      const visited: string[] = [];
+      const visitor: Visitor = ({ key }) => {
+        visited.push(key);
+      };
+
+      await traverseQueryFilters(visitor, ctx)({ title: { $contains: 'est02' } });
+
+      expect(visited).toContain('title');
+      expect(visited).toContain('$contains');
     });
 
     test('handles nested $and/$or operators with sensitive fields', async () => {
