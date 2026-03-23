@@ -1,11 +1,16 @@
 /* eslint-disable no-continue */
-import { keyBy } from 'lodash/fp';
-import { async } from '@strapi/utils';
+import { keyBy, omit } from 'lodash/fp';
 import type { UID, Schema } from '@strapi/types';
+import type { JoinTable } from '@strapi/database';
 
 interface LoadContext {
   oldVersions: { id: string; locale: string }[];
   newVersions: { id: string; locale: string }[];
+}
+
+interface RelationEntry {
+  joinTable: JoinTable;
+  relations: Record<string, unknown>[];
 }
 
 /**
@@ -54,7 +59,7 @@ interface LoadContext {
  * @returns Array of objects containing join table metadata and relations to be updated
  */
 const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
-  const relationsToUpdate = [] as any;
+  const relationsToUpdate: RelationEntry[] = [];
 
   await strapi.db.transaction(async ({ trx }) => {
     const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
@@ -63,7 +68,7 @@ const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
     for (const model of [...contentTypes, ...components]) {
       const dbModel = strapi.db.metadata.get(model.uid);
 
-      for (const attribute of Object.values(dbModel.attributes) as any) {
+      for (const attribute of Object.values(dbModel.attributes) as Record<string, any>[]) {
         // Skip if not a bidirectional relation targeting our content type
         if (
           attribute.type !== 'relation' ||
@@ -135,7 +140,7 @@ const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
 const sync = async (
   oldEntries: { id: string; locale: string }[],
   newEntries: { id: string; locale: string }[],
-  existingRelations: { joinTable: any; relations: any[] }[]
+  existingRelations: RelationEntry[]
 ) => {
   // Group new entries by locale for easier lookup
   const newEntriesByLocale = keyBy('locale', newEntries);
@@ -151,6 +156,9 @@ const sync = async (
     {} as Record<string, string>
   );
 
+  const republishedEntryIds = new Set(newEntries.map((e) => String(e.id)));
+  const isRepublishedEntry = (id: string | number) => republishedEntryIds.has(String(id));
+
   await strapi.db.transaction(async ({ trx }) => {
     for (const { joinTable, relations } of existingRelations) {
       const sourceColumn = joinTable.inverseJoinColumn.name;
@@ -162,22 +170,63 @@ const sync = async (
         continue;
       }
 
-      // Update order values for each relation
-      // TODO: Find a way to batch it more efficiently
-      await async.map(relations, (relation: any) => {
-        const {
-          [sourceColumn]: oldSourceId,
-          [targetColumn]: targetId,
-          [orderColumn]: originalOrder,
-        } = relation;
+      const mappedRelations = relations
+        .map((relation) => ({
+          relation,
+          oldSourceId: relation[sourceColumn] as string,
+          targetId: relation[targetColumn] as string,
+          originalOrder: relation[orderColumn],
+          newSourceId: entryIdMapping[relation[sourceColumn] as string],
+        }))
+        .filter((r): r is typeof r & { newSourceId: string } => Boolean(r.newSourceId));
 
-        // Update the order column for the new relation entry
-        return trx
-          .from(joinTable.name)
-          .where(sourceColumn, entryIdMapping[oldSourceId])
-          .where(targetColumn, targetId)
-          .update({ [orderColumn]: originalOrder });
-      });
+      if (!mappedRelations.length) continue;
+
+      const newSourceIds = mappedRelations.map((r) => r.newSourceId);
+
+      // Batch UPDATE: set each row's order in a single statement using CASE
+      const caseFragments = mappedRelations.map(() => `WHEN ?? = ? AND ?? = ? THEN ?`);
+      const caseBindings = mappedRelations.flatMap(({ newSourceId, targetId, originalOrder }) => [
+        sourceColumn,
+        newSourceId,
+        targetColumn,
+        targetId,
+        originalOrder,
+      ]);
+
+      await trx(joinTable.name)
+        .whereIn(sourceColumn, newSourceIds)
+        .update({
+          [orderColumn]: trx.raw(`CASE ${caseFragments.join(' ')} ELSE ?? END`, [
+            ...caseBindings,
+            orderColumn,
+          ]),
+        });
+
+      // Batch SELECT: find which rows exist so we know what to insert
+      const existingRows = await trx(joinTable.name)
+        .whereIn(sourceColumn, newSourceIds)
+        .select(sourceColumn, targetColumn);
+
+      const existingSet = new Set(
+        existingRows.map((r: Record<string, unknown>) => `${r[sourceColumn]}:${r[targetColumn]}`)
+      );
+
+      // Batch INSERT: insert cascade-deleted rows that aren't from republished sources
+      const toInsert = mappedRelations
+        .filter(
+          ({ newSourceId, targetId }) =>
+            !existingSet.has(`${newSourceId}:${targetId}`) && !isRepublishedEntry(newSourceId)
+        )
+        .map(({ relation, newSourceId, originalOrder }) => ({
+          ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
+          [sourceColumn]: newSourceId,
+          [orderColumn]: originalOrder,
+        }));
+
+      if (toInsert.length) {
+        await trx.batchInsert(joinTable.name, toInsert, 1000);
+      }
     }
   });
 };
