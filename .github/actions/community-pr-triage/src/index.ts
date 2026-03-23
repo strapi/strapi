@@ -159,7 +159,9 @@ async function main() {
     }
 
     syncPreview = { newPRs, existingCount, pickedUpPRs };
-    console.log(`Sync preview: ${newPRs.length} new, ${existingCount} existing, ${pickedUpPRs.length} picked up by CMS.`);
+    console.log(
+      `Sync preview: ${newPRs.length} new, ${existingCount} existing, ${pickedUpPRs.length} picked up by CMS.`
+    );
   }
 
   // Generate markdown report (includes sync preview)

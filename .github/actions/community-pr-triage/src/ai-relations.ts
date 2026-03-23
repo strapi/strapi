@@ -120,7 +120,11 @@ export async function findAIRelations(
   const results = new Map<number, EvaluatedRelation[]>();
 
   // Only link to issues from these teams
-  const allowedTeamIds = new Set([LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID, LINEAR_CMS_GITHUB_TEAM_ID]);
+  const allowedTeamIds = new Set([
+    LINEAR_CPR_TEAM_ID,
+    LINEAR_CMS_TEAM_ID,
+    LINEAR_CMS_GITHUB_TEAM_ID,
+  ]);
 
   // Build a set of existing PR issue IDs to skip self-matches
   const prIssueIds = new Set<string>();

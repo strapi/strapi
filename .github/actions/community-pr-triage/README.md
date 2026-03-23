@@ -37,16 +37,16 @@ cp .env.example .env
 
 ## Commands
 
-| Command | What it does |
-|---------|-------------|
-| `pnpm run sync` | Fetch, score, preview sync stats, confirm, sync to Linear |
-| `pnpm run sync:dry` | Fetch, score, preview sync stats only |
-| `pnpm run update` | Fetch, score, generate project update, confirm, post to Linear + create milestone |
-| `pnpm run update:dry` | Fetch, score, generate project update report only |
-| `pnpm run all` | Sync + project update (two confirmations) |
-| `pnpm run all:dry` | Preview everything, no writes |
-| `pnpm test` | Run tests (single run). |
-| `pnpm test:watch` | Run tests in watch mode. |
+| Command               | What it does                                                                      |
+| --------------------- | --------------------------------------------------------------------------------- |
+| `pnpm run sync`       | Fetch, score, preview sync stats, confirm, sync to Linear                         |
+| `pnpm run sync:dry`   | Fetch, score, preview sync stats only                                             |
+| `pnpm run update`     | Fetch, score, generate project update, confirm, post to Linear + create milestone |
+| `pnpm run update:dry` | Fetch, score, generate project update report only                                 |
+| `pnpm run all`        | Sync + project update (two confirmations)                                         |
+| `pnpm run all:dry`    | Preview everything, no writes                                                     |
+| `pnpm test`           | Run tests (single run).                                                           |
+| `pnpm test:watch`     | Run tests in watch mode.                                                          |
 
 All commands accept `-y` / `--yes` to skip confirmations.
 
@@ -86,14 +86,15 @@ Defined in [`.github/workflows/community-pr-triage.yml`](.github/workflows/commu
 
 **Manual dispatch:** Go to **Actions** → **Community PR Triage** → **Run workflow** and select from the dropdown:
 
-| Selection | Result |
-|-----------|--------|
-| `dry-run` | Fetch & score PRs, print report with sync preview. Nothing written to Linear. |
-| `sync` | Create/update/close Linear tickets. |
-| `update` | Post project update to Linear, create sprint milestone, assign top PRs. |
-| `sync + update` | Both sync and project update. |
+| Selection       | Result                                                                        |
+| --------------- | ----------------------------------------------------------------------------- |
+| `dry-run`       | Fetch & score PRs, print report with sync preview. Nothing written to Linear. |
+| `sync`          | Create/update/close Linear tickets.                                           |
+| `update`        | Post project update to Linear, create sprint milestone, assign top PRs.       |
+| `sync + update` | Both sync and project update.                                                 |
 
 The project update compares GitHub state against Linear state and reports:
+
 - **Picked up** — PRs transferred from CPR to CMS team (with current status)
 - **Merged** — PRs successfully merged
 - **In Progress** — PRs being worked on in CPR team
@@ -105,18 +106,18 @@ The project update compares GitHub state against Linear state and reports:
 
 Add these as repository secrets in **Settings → Secrets → Actions**:
 
-| Secret | Description |
-|--------|-------------|
-| `LINEAR_API_KEY` | Linear personal API key |
-| `LINEAR_CPR_TEAM_ID` | CMS-Community-PRs team ID (for triage issue creation) |
-| `LINEAR_CMS_TEAM_ID` | CMS team ID (for tracking picked-up PRs) |
-| `LINEAR_CMS_GITHUB_TEAM_ID` | CMS-Github team ID (for relation matching) |
-| `LINEAR_PROJECT_ID` | Project ID for sprint tracking and project updates |
-| `LINEAR_STATUS_TODO` | Status ID for "Todo" |
-| `LINEAR_STATUS_DONE` | Status ID for "Done" |
-| `LINEAR_STATUS_CANCELED` | Status ID for "Canceled" |
-| `LINEAR_LABELS` | JSON mapping of PR type labels to Linear label IDs |
-| `LINEAR_TRIAGE_LABELS` | JSON with priority, complexity, CI, quickWin, and hasLinkedIssue label IDs |
+| Secret                      | Description                                                                |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `LINEAR_API_KEY`            | Linear personal API key                                                    |
+| `LINEAR_CPR_TEAM_ID`        | CMS-Community-PRs team ID (for triage issue creation)                      |
+| `LINEAR_CMS_TEAM_ID`        | CMS team ID (for tracking picked-up PRs)                                   |
+| `LINEAR_CMS_GITHUB_TEAM_ID` | CMS-Github team ID (for relation matching)                                 |
+| `LINEAR_PROJECT_ID`         | Project ID for sprint tracking and project updates                         |
+| `LINEAR_STATUS_TODO`        | Status ID for "Todo"                                                       |
+| `LINEAR_STATUS_DONE`        | Status ID for "Done"                                                       |
+| `LINEAR_STATUS_CANCELED`    | Status ID for "Canceled"                                                   |
+| `LINEAR_LABELS`             | JSON mapping of PR type labels to Linear label IDs                         |
+| `LINEAR_TRIAGE_LABELS`      | JSON with priority, complexity, CI, quickWin, and hasLinkedIssue label IDs |
 
 `GITHUB_TOKEN` is provided automatically by GitHub Actions.
 
@@ -141,35 +142,36 @@ Add these as repository secrets in **Settings → Secrets → Actions**:
 
 **Value breakdown:**
 
-| Component | Source | Range |
-|-----------|--------|-------|
-| Base | PR type label (`pr: fix`=30, `pr: enhancement`=20, `pr: doc`=15, `pr: feature`=10, `pr: chore`=10, dependencies=5) | 5–30 |
-| Severity | Highest severity of linked issues (critical=50, high=35, medium=20, low=5) | 0–50 |
-| Status | Best reproduction status (confirmed=15, pending=5, can't repro=-10) | -10–15 |
-| Engagement | Thumbs-up + half of comments, with bonus tiers at 10/20/50 thumbs-up, capped at 40 | 0–40 |
-| Urgency | Multiplier based on PR age (8d=1.2×, 15d=1.4×, 22d=1.6×, 31d=1.8×, 46d+=2.0×) | 1.0–2.0× |
+| Component  | Source                                                                                                             | Range    |
+| ---------- | ------------------------------------------------------------------------------------------------------------------ | -------- |
+| Base       | PR type label (`pr: fix`=30, `pr: enhancement`=20, `pr: doc`=15, `pr: feature`=10, `pr: chore`=10, dependencies=5) | 5–30     |
+| Severity   | Highest severity of linked issues (critical=50, high=35, medium=20, low=5)                                         | 0–50     |
+| Status     | Best reproduction status (confirmed=15, pending=5, can't repro=-10)                                                | -10–15   |
+| Engagement | Thumbs-up + half of comments, with bonus tiers at 10/20/50 thumbs-up, capped at 40                                 | 0–40     |
+| Urgency    | Multiplier based on PR age (8d=1.2×, 15d=1.4×, 22d=1.6×, 31d=1.8×, 46d+=2.0×)                                      | 1.0–2.0× |
 
 **Complexity tiers:**
 
-| Tier | LOC | Adjusted by area risk |
-|------|-----|-----------------------|
-| Low | ≤50 LOC, ≤10 files | Bumped down in `low` risk areas |
-| Medium | 51–300 LOC or >10 files | — |
-| High | 301–1000 LOC | Bumped up in `critical` risk areas |
-| Very High | >1000 LOC | — |
+| Tier      | LOC                     | Adjusted by area risk              |
+| --------- | ----------------------- | ---------------------------------- |
+| Low       | ≤50 LOC, ≤10 files      | Bumped down in `low` risk areas    |
+| Medium    | 51–300 LOC or >10 files | —                                  |
+| High      | 301–1000 LOC            | Bumped up in `critical` risk areas |
+| Very High | >1000 LOC               | —                                  |
 
 ### Area risk tiers
 
-| Tier | Areas |
-|------|-------|
-| Critical | `database`, `strapi` (core) |
-| High | `content-manager`, `upload`, `users-permissions` |
-| Medium | `admin`, `content-type-builder`, `i18n` |
-| Low | `documentation`, `graphql`, `typescript`, `dependencies` |
+| Tier     | Areas                                                    |
+| -------- | -------------------------------------------------------- |
+| Critical | `database`, `strapi` (core)                              |
+| High     | `content-manager`, `upload`, `users-permissions`         |
+| Medium   | `admin`, `content-type-builder`, `i18n`                  |
+| Low      | `documentation`, `graphql`, `typescript`, `dependencies` |
 
 ### Area detection
 
 Two-pass strategy:
+
 1. **Labels first** — Checks for `source: core:<area>` or `source: plugin:<area>` GitHub labels
 2. **File paths fallback** — Parses changed file paths matching `packages/core/<name>/` or `packages/plugins/<name>/` and picks the most frequent package name
 
@@ -198,19 +200,19 @@ src/
 
 See [`.env.example`](.env.example) for the full list. Key variables:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `LINEAR_API_KEY` | Yes | Linear personal API key |
-| `ANTHROPIC_API_KEY` | No | Anthropic API key (only for AI relations) |
-| `GITHUB_REPO` | No | Target repo (default: `strapi/strapi`) |
-| `GITHUB_ORG` | No | GitHub org for internal author detection (default: `strapi`) |
-| `LINEAR_CPR_TEAM_ID` | Yes | CMS-Community-PRs team for triage tickets |
-| `LINEAR_CMS_TEAM_ID` | Yes | CMS team for tracking picked-up PRs |
-| `LINEAR_CMS_GITHUB_TEAM_ID` | Yes | CMS-Github team for issue relation matching |
-| `LINEAR_PROJECT_ID` | Yes | Linear project for sprint milestones and project updates |
-| `LINEAR_STATUS_*` | Yes | Linear workflow status IDs (todo, done, canceled) |
-| `LINEAR_LABELS` | Yes | JSON: GitHub PR type label → Linear label ID |
-| `LINEAR_TRIAGE_LABELS` | Yes | JSON: priority, complexity, CI, quickWin, hasLinkedIssue label IDs |
+| Variable                    | Required | Description                                                        |
+| --------------------------- | -------- | ------------------------------------------------------------------ |
+| `LINEAR_API_KEY`            | Yes      | Linear personal API key                                            |
+| `ANTHROPIC_API_KEY`         | No       | Anthropic API key (only for AI relations)                          |
+| `GITHUB_REPO`               | No       | Target repo (default: `strapi/strapi`)                             |
+| `GITHUB_ORG`                | No       | GitHub org for internal author detection (default: `strapi`)       |
+| `LINEAR_CPR_TEAM_ID`        | Yes      | CMS-Community-PRs team for triage tickets                          |
+| `LINEAR_CMS_TEAM_ID`        | Yes      | CMS team for tracking picked-up PRs                                |
+| `LINEAR_CMS_GITHUB_TEAM_ID` | Yes      | CMS-Github team for issue relation matching                        |
+| `LINEAR_PROJECT_ID`         | Yes      | Linear project for sprint milestones and project updates           |
+| `LINEAR_STATUS_*`           | Yes      | Linear workflow status IDs (todo, done, canceled)                  |
+| `LINEAR_LABELS`             | Yes      | JSON: GitHub PR type label → Linear label ID                       |
+| `LINEAR_TRIAGE_LABELS`      | Yes      | JSON: priority, complexity, CI, quickWin, hasLinkedIssue label IDs |
 
 ## FAQ
 

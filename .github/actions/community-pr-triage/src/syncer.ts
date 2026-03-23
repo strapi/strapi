@@ -155,7 +155,7 @@ export interface PRTicketSummary {
  * Searches CPR and CMS teams. Fast enough for dry-run previews.
  */
 export async function fetchExistingPRSummary(
-  client: LinearClient,
+  client: LinearClient
 ): Promise<Map<number, PRTicketSummary>> {
   const result = new Map<number, PRTicketSummary>();
 
@@ -190,7 +190,7 @@ export async function fetchExistingPRSummary(
 
 export async function fetchExistingPRIssues(
   client: LinearClient,
-  scoredPRs: ScoredPR[],
+  scoredPRs: ScoredPR[]
 ): Promise<Map<number, ExistingIssue>> {
   const existingIssues: ExistingIssue[] = [];
 
@@ -432,7 +432,11 @@ export async function syncToLinear(
         const ghIssueNum = linked.issue.number;
         const relatedNodes: { id: string }[] = [];
 
-        const relationTeamIds = new Set([LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID, LINEAR_CMS_GITHUB_TEAM_ID]);
+        const relationTeamIds = new Set([
+          LINEAR_CPR_TEAM_ID,
+          LINEAR_CMS_TEAM_ID,
+          LINEAR_CMS_GITHUB_TEAM_ID,
+        ]);
 
         // Strategy 1: Find issues with attachment linking to the GitHub issue
         for (const teamId of relationTeamIds) {
@@ -452,10 +456,9 @@ export async function syncToLinear(
 
         // Strategy 2: Search by issue URL in description (catches manually-created tickets)
         try {
-          const bySearch = await client.searchIssues(
-            `strapi/strapi/issues/${ghIssueNum}`,
-            { first: 10 }
-          );
+          const bySearch = await client.searchIssues(`strapi/strapi/issues/${ghIssueNum}`, {
+            first: 10,
+          });
           for (const node of bySearch.nodes) {
             const team = await node.team;
             if (team && relationTeamIds.has(team.id)) {
@@ -468,10 +471,9 @@ export async function syncToLinear(
 
         // Strategy 3: Search by PR URL in description (catches tickets referencing the same PR)
         try {
-          const byPRSearch = await client.searchIssues(
-            `strapi/strapi/pull/${scored.pr.number}`,
-            { first: 10 }
-          );
+          const byPRSearch = await client.searchIssues(`strapi/strapi/pull/${scored.pr.number}`, {
+            first: 10,
+          });
           for (const node of byPRSearch.nodes) {
             const team = await node.team;
             if (team && relationTeamIds.has(team.id)) {
@@ -519,13 +521,19 @@ export async function syncToLinear(
         const relations = await issue.relations();
         for (const rel of relations.nodes) {
           const related = await rel.relatedIssue;
-          if (related?.id === bId) { alreadyLinked = true; break; }
+          if (related?.id === bId) {
+            alreadyLinked = true;
+            break;
+          }
         }
         if (!alreadyLinked) {
           const inverseRelations = await issue.inverseRelations();
           for (const rel of inverseRelations.nodes) {
             const related = await rel.issue;
-            if (related?.id === bId) { alreadyLinked = true; break; }
+            if (related?.id === bId) {
+              alreadyLinked = true;
+              break;
+            }
           }
         }
       } catch {

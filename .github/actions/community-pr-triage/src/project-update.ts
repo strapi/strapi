@@ -1,11 +1,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { LinearClient } from '@linear/sdk';
-import {
-  LINEAR_CPR_TEAM_ID,
-  LINEAR_CMS_TEAM_ID,
-  LINEAR_PROJECT_ID,
-} from './config.js';
+import { LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID, LINEAR_PROJECT_ID } from './config.js';
 import { matchPRNumber, fetchExistingPRSummary } from './syncer.js';
 import type { PRTicketSummary } from './syncer.js';
 import type { ScoredPR } from './types.js';
@@ -26,7 +22,7 @@ interface ProjectUpdateCategory {
 export function categorizeTickets(
   scoredPRs: ScoredPR[],
   mergedPRNumbers: Set<number>,
-  prSummary: Map<number, PRTicketSummary>,
+  prSummary: Map<number, PRTicketSummary>
 ): ProjectUpdateCategory {
   const categories: ProjectUpdateCategory = {
     pickedUp: [],
@@ -122,11 +118,20 @@ export function selectSprintPRs(scoredPRs: ScoredPR[], count = 10): ScoredPR[] {
   const sorted = [...scoredPRs].sort((a, b) => b.value.total - a.value.total);
 
   // 1. Urgent/high priority (4-5 slots)
-  pick(sorted.filter((p) => p.priority === 'urgent' || p.priority === 'high'), 5);
+  pick(
+    sorted.filter((p) => p.priority === 'urgent' || p.priority === 'high'),
+    5
+  );
   // 2. Quick wins (3-4 slots)
-  pick(sorted.filter((p) => p.isQuickWin), 4);
+  pick(
+    sorted.filter((p) => p.isQuickWin),
+    4
+  );
   // 3. Enhancements/features (1-2 slots)
-  pick(sorted.filter((p) => p.prType === 'enhancement' || p.prType === 'feature'), 2);
+  pick(
+    sorted.filter((p) => p.prType === 'enhancement' || p.prType === 'feature'),
+    2
+  );
   // Fill remaining
   if (selected.length < count) pick(sorted, count - selected.length);
 
@@ -136,7 +141,7 @@ export function selectSprintPRs(scoredPRs: ScoredPR[], count = 10): ScoredPR[] {
 function formatSprintSection(
   sprintPRs: ScoredPR[],
   totalPRs: number,
-  linearUrls: Map<number, string>,
+  linearUrls: Map<number, string>
 ): string {
   const grouped = new Map<string, ScoredPR[]>();
   for (const pr of sprintPRs) {
@@ -147,7 +152,9 @@ function formatSprintSection(
 
   const urgent = sprintPRs.filter((p) => p.priority === 'urgent' || p.priority === 'high').length;
   const quickWins = sprintPRs.filter((p) => p.isQuickWin).length;
-  const features = sprintPRs.filter((p) => p.prType === 'enhancement' || p.prType === 'feature').length;
+  const features = sprintPRs.filter(
+    (p) => p.prType === 'enhancement' || p.prType === 'feature'
+  ).length;
 
   let md = `### Sprint Recommendation\n\n`;
   md += `Selected **${sprintPRs.length}** PRs from **${totalPRs}** open community PRs.\n`;
@@ -163,7 +170,8 @@ function formatSprintSection(
       if (pr.priority === 'urgent') tags.push('🔴 urgent');
       else if (pr.priority === 'high') tags.push('🟠 high');
       if (pr.isQuickWin) tags.push('⚡ quick win');
-      const ciIcon = pr.pr.ciStatus === 'passing' ? '✅' : pr.pr.ciStatus === 'failing' ? '❌' : '⏳';
+      const ciIcon =
+        pr.pr.ciStatus === 'passing' ? '✅' : pr.pr.ciStatus === 'failing' ? '❌' : '⏳';
       const linearUrl = linearUrls.get(pr.pr.number);
       const ticketRef = linearUrl ? ` · ${linearUrl}` : '';
 
@@ -182,7 +190,7 @@ export function formatProjectUpdate(
   categories: ProjectUpdateCategory,
   totalPRs: number,
   sprintPRs?: ScoredPR[],
-  linearUrls?: Map<number, string>,
+  linearUrls?: Map<number, string>
 ): string {
   const date = new Date().toISOString().split('T')[0];
 
@@ -269,7 +277,7 @@ export function formatProjectUpdate(
 export async function generateProjectUpdate(
   scoredPRs: ScoredPR[],
   mergedPRNumbers: Set<number>,
-  dryRun: boolean,
+  dryRun: boolean
 ): Promise<string> {
   const apiKey = process.env.LINEAR_API_KEY;
   if (!apiKey) throw new Error('LINEAR_API_KEY environment variable is required');

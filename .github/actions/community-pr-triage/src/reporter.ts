@@ -53,7 +53,10 @@ export function formatStats(prs: ScoredPR[]): string {
 }
 
 const TIER_HEADERS: Record<PriorityTier, string> = {
-  urgent: 'URGENT', high: 'HIGH', normal: 'NORMAL', low: 'LOW',
+  urgent: 'URGENT',
+  high: 'HIGH',
+  normal: 'NORMAL',
+  low: 'LOW',
 };
 
 export function printReport(prs: ScoredPR[]): void {
@@ -76,9 +79,9 @@ export function printReport(prs: ScoredPR[]): void {
     console.log();
   }
 
-  const quickWins = prs.filter((p) => p.isQuickWin).sort((a, b) =>
-    (a.pr.additions + a.pr.deletions) - (b.pr.additions + b.pr.deletions)
-  );
+  const quickWins = prs
+    .filter((p) => p.isQuickWin)
+    .sort((a, b) => a.pr.additions + a.pr.deletions - (b.pr.additions + b.pr.deletions));
   console.log(`QUICK WINS (${quickWins.length} PRs)`);
   if (quickWins.length === 0) {
     console.log('  (none)\n');
@@ -98,7 +101,12 @@ function mdPrRow(pr: ScoredPR): string {
   const loc = pr.pr.additions + pr.pr.deletions;
   const size = sizeLabel(loc);
   const qw = pr.isQuickWin ? ' :zap:' : '';
-  const ci = pr.pr.ciStatus === 'passing' ? ':white_check_mark:' : pr.pr.ciStatus === 'failing' ? ':x:' : ':hourglass:';
+  const ci =
+    pr.pr.ciStatus === 'passing'
+      ? ':white_check_mark:'
+      : pr.pr.ciStatus === 'failing'
+        ? ':x:'
+        : ':hourglass:';
   const ageDays = Math.floor((Date.now() - new Date(pr.pr.createdAt).getTime()) / 86400000);
   const issueRefs = pr.linkedIssues.map((li) => `#${li.issue.number}`).join(', ');
 
@@ -118,7 +126,11 @@ export interface SyncPreview {
   pickedUpPRs: PickedUpPR[];
 }
 
-export function generateMarkdownReport(prs: ScoredPR[], outputPath: string, syncPreview?: SyncPreview): string {
+export function generateMarkdownReport(
+  prs: ScoredPR[],
+  outputPath: string,
+  syncPreview?: SyncPreview
+): string {
   const grouped = groupByPriority(prs);
   const date = new Date().toISOString().split('T')[0];
   const quickWins = prs.filter((p) => p.isQuickWin).length;
@@ -161,7 +173,14 @@ export function generateMarkdownReport(prs: ScoredPR[], outputPath: string, sync
 
   for (const tier of ['urgent', 'high', 'normal', 'low'] as PriorityTier[]) {
     const items = grouped[tier];
-    const emoji = tier === 'urgent' ? ':red_circle:' : tier === 'high' ? ':orange_circle:' : tier === 'normal' ? ':large_blue_circle:' : ':white_circle:';
+    const emoji =
+      tier === 'urgent'
+        ? ':red_circle:'
+        : tier === 'high'
+          ? ':orange_circle:'
+          : tier === 'normal'
+            ? ':large_blue_circle:'
+            : ':white_circle:';
     md += `## ${emoji} ${tier.toUpperCase()} (${items.length} PRs)\n\n`;
 
     if (items.length === 0) {
@@ -178,9 +197,9 @@ export function generateMarkdownReport(prs: ScoredPR[], outputPath: string, sync
   }
 
   md += `## :zap: Quick Wins\n\n`;
-  const qwPRs = prs.filter((p) => p.isQuickWin).sort((a, b) =>
-    (a.pr.additions + a.pr.deletions) - (b.pr.additions + b.pr.deletions)
-  );
+  const qwPRs = prs
+    .filter((p) => p.isQuickWin)
+    .sort((a, b) => a.pr.additions + a.pr.deletions - (b.pr.additions + b.pr.deletions));
   if (qwPRs.length === 0) {
     md += `_None_\n`;
   } else {
