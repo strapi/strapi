@@ -143,28 +143,23 @@ describe('Sanitize visitors util', () => {
       });
     });
 
-    test('keeps scalar field $contains filter (issue #25795)', async () => {
+    test('keeps scalar field $contains filter', async () => {
       const filters = { title: { $contains: 'est02' } };
       await expect(sanitizers.defaultSanitizeFilters(ctx, filters)).resolves.toEqual(filters);
     });
 
-    test('keeps scalar field $containsi filter (issue #25795)', async () => {
+    test('keeps scalar field $containsi filter', async () => {
       const filters = { title: { $containsi: 'EST02' } };
       await expect(sanitizers.defaultSanitizeFilters(ctx, filters)).resolves.toEqual(filters);
     });
 
-    /**
-     * Regression for https://github.com/strapi/strapi/issues/25795
-     * Without recursing into scalar attribute filter objects, the first sanitizer pass never visits
-     * nested keys, so unrecognized keys are not removed (and valid operators are invisible to visitors).
-     */
-    test('removes unrecognized keys nested under scalar field filters (#25795)', async () => {
+    test('removes unrecognized keys nested under scalar field filters', async () => {
       await expect(
         sanitizers.defaultSanitizeFilters(ctx, { title: { totallyUnknownNestedKey: 'x' } })
       ).resolves.toEqual({});
     });
 
-    test('traverseQueryFilters visits nested operators under scalar fields (#25795)', async () => {
+    test('traverseQueryFilters visits nested operators under scalar fields', async () => {
       const visited: string[] = [];
       const visitor: Visitor = ({ key }) => {
         visited.push(key);

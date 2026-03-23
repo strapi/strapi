@@ -465,15 +465,7 @@ describe('Filtering API', () => {
       });
     });
 
-    /**
-     * Regression for https://github.com/strapi/strapi/issues/25795
-     *
-     * Root cause: filter traversal did not recurse into scalar field values (`name: { $contains: ... }`),
-     * so nested keys were invisible to sanitize/validate visitors. That could strip or mishandle operators
-     * and let invalid nested keys through. This block asserts the real Content API sanitize path (same as
-     * REST `find`) and a bracket-notation HTTP request (curl-style query string).
-     */
-    describe('Scalar filter map traversal ($contains / $containsi, issue #25795)', () => {
+    describe('Scalar filter maps ($contains / $containsi)', () => {
       test('content-API sanitize.query strips invalid keys next to operators under scalar fields', async () => {
         const schema = strapi.getModel('api::product.product');
         const sanitized = await strapi.contentAPI.sanitize.query(
@@ -481,7 +473,7 @@ describe('Filtering API', () => {
             filters: {
               name: {
                 $containsi: 'oduct',
-                __strapi25795_invalidNestedKey: 'should-be-removed',
+                __invalidNestedFilterKey: 'should-be-removed',
               },
             },
           },

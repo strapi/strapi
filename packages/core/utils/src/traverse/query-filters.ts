@@ -132,8 +132,7 @@ const filters = traverseFactory()
 
     set(key, newValue);
   })
-  // Scalar fields (string, number, etc.): recurse into operator maps like { $contains: 'x' } so
-  // visitors run on nested keys (issue #25795 / REST filters[field][$operator]=...).
+  // Scalar fields: recurse into operator maps (e.g. { $contains: 'x' }) so visitors see nested keys.
   .onAttribute(
     ({ attribute, value }) =>
       Boolean(isScalarAttribute(attribute)) && isObj(value) && !isArray(value),

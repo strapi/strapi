@@ -142,12 +142,7 @@ describe('Validate visitors util', () => {
       ).resolves.not.toThrow();
     });
 
-    /**
-     * Regression for https://github.com/strapi/strapi/issues/25795
-     * Scalar filters like `{ title: { $contains: 'x' } }` must be traversed so `nonAttributesOperators`
-     * validation sees nested keys; otherwise invalid keys are silently ignored (and operators are skipped).
-     */
-    test('throws when scalar field filter map contains an invalid nested key (#25795)', async () => {
+    test('throws when scalar field filter map contains an invalid nested key', async () => {
       const filters = { title: { totallyUnknownNestedKey: 'x' } };
 
       await expect(
