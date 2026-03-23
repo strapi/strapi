@@ -21,28 +21,28 @@ describe('transformChatToCTB', () => {
       const schema = makeSchema({ options: undefined });
       const result = transformChatToCTB(schema) as ContentType;
 
-      expect(result.options.draftAndPublish).toBe(true);
+      expect(result).toMatchObject({ options: { draftAndPublish: true } });
     });
 
     it('should default draftAndPublish to true when options object is empty', () => {
       const schema = makeSchema({ options: {} });
       const result = transformChatToCTB(schema) as ContentType;
 
-      expect(result.options.draftAndPublish).toBe(true);
+      expect(result).toMatchObject({ options: { draftAndPublish: true } });
     });
 
     it('should respect explicit draftAndPublish: false from AI', () => {
       const schema = makeSchema({ options: { draftAndPublish: false } });
       const result = transformChatToCTB(schema) as ContentType;
 
-      expect(result.options.draftAndPublish).toBe(false);
+      expect(result).toMatchObject({ options: { draftAndPublish: false } });
     });
 
     it('should respect explicit draftAndPublish: true from AI', () => {
       const schema = makeSchema({ options: { draftAndPublish: true } });
       const result = transformChatToCTB(schema) as ContentType;
 
-      expect(result.options.draftAndPublish).toBe(true);
+      expect(result).toMatchObject({ options: { draftAndPublish: true } });
     });
   });
 });
