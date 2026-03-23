@@ -18,7 +18,7 @@ describe('useAPIErrorHandler', () => {
     const { result } = renderHook(() => useAPIErrorHandler());
 
     const message = result.current.formatAPIError(
-      new FetchError('Error occured', {
+      new FetchError('Error occurred', {
         data: {
           error: {
             name: 'ApplicationError',
