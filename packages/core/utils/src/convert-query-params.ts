@@ -23,7 +23,7 @@ import {
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
 } from './content-types';
-import { PaginationError } from './errors';
+import { PaginationError, ValidationError } from './errors';
 import { isOperator } from './operators';
 
 import parseType from './parse-type';
@@ -296,11 +296,11 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
   };
 
-  class InvalidPopulateError extends Error {
+  class InvalidPopulateError extends ValidationError {
     constructor() {
-      super();
-      this.message =
-        'Invalid populate parameter. Expected a string, an array of strings, a populate object';
+      super(
+        'Invalid populate parameter. Expected a string, an array of strings, a populate object'
+      );
     }
   }
 
@@ -391,7 +391,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         );
 
         if (hasInvalidProperties) {
-          throw new Error(
+          throw new ValidationError(
             `Invalid nested populate for ${schema.info?.singularName}.${key} (${schema.uid}). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
           );
         }
@@ -402,7 +402,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
          */
         if ('populate' in subPopulate && subPopulate.populate !== '*') {
-          throw new Error(
+          throw new ValidationError(
             `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
               `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
               `Consider using the fragment API for more granular population control.`
@@ -442,7 +442,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // Edge case when trying to use the fragment ('on') on a non-morph like attribute
       if (!isMorphLikeRelationalAttribute && hasPopulateFragmentDefined(subPopulate)) {
-        throw new Error(`Using fragments is not permitted to populate "${key}" in "${schema.uid}"`);
+        throw new ValidationError(
+          `Using fragments is not permitted to populate "${key}" in "${schema.uid}"`
+        );
       }
 
       // NOTE: Retrieve the target schema UID.
@@ -490,7 +492,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (!isPlainObject(subPopulate)) {
-      throw new Error(`Invalid nested populate. Expected '*' or an object`);
+      throw new ValidationError(`Invalid nested populate. Expected '*' or an object`);
     }
 
     const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
