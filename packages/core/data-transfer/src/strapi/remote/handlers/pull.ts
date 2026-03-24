@@ -8,9 +8,13 @@ import {
   createTransferAssetStreamChunk,
   transferAssetStreamChunkByteLength,
 } from '../../../utils/transfer-asset-chunk';
-import { createLocalStrapiSourceProvider, ILocalStrapiSourceProvider } from '../../providers';
+import {
+  createLocalStrapiSourceProvider,
+  estimateAssetTotals,
+  ILocalStrapiSourceProvider,
+} from '../../providers';
 import { ProviderTransferError } from '../../../errors/providers';
-import type { IAsset, TransferStage, Protocol } from '../../../../types';
+import type { IAsset, StageTotalsEstimate, TransferStage, Protocol } from '../../../../types';
 import { Client } from '../../../../types/remote/protocol';
 
 const TRANSFER_KIND = 'pull';
@@ -251,10 +255,19 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
       const flushUUID = randomUUID();
 
+      let totals: StageTotalsEstimate | undefined;
+      if (step === 'assets') {
+        totals = await estimateAssetTotals(strapi as Core.Strapi);
+      }
+
       await this.createReadableStreamForStep(step);
       this.flush(step, flushUUID);
 
-      return { ok: true, id: flushUUID };
+      return {
+        ok: true,
+        id: flushUUID,
+        ...(totals !== undefined ? { totals } : {}),
+      };
     }
 
     if (action === 'end') {

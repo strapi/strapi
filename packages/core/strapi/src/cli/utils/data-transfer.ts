@@ -280,6 +280,8 @@ type Data = {
     endTime?: number;
     bytes?: number;
     count?: number;
+    totalBytes?: number;
+    totalCount?: number;
   };
 };
 
@@ -294,14 +296,40 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
     const elapsedTime = stageData?.startTime
       ? (stageData?.endTime || Date.now()) - stageData.startTime
       : 0;
-    const size = `size: ${readableBytes(stageData?.bytes ?? 0)}`;
-    const elapsed = `elapsed: ${readableTime(elapsedTime ?? 0)}`;
-    const speed =
-      elapsedTime > 0 ? `(${readableBytes(((stageData?.bytes ?? 0) * 1000) / elapsedTime)}/s)` : '';
+    const bytes = stageData?.bytes ?? 0;
+    const count = stageData?.count ?? 0;
+    const totalBytes = stageData?.totalBytes;
+    const totalCount = stageData?.totalCount;
 
-    loaders[stage].text = `${stage}: ${stageData?.count ?? 0} transferred (${size}) (${elapsed}) ${
+    const countLabel =
+      totalCount != null && totalCount > 0 ? `${count} / ${totalCount}` : String(count);
+    const size =
+      totalBytes != null && totalBytes > 0
+        ? `size: ${readableBytes(bytes)} / ${readableBytes(totalBytes)}`
+        : `size: ${readableBytes(bytes)}`;
+    const elapsed = `elapsed: ${readableTime(elapsedTime ?? 0)}`;
+    const speed = elapsedTime > 0 ? `(${readableBytes((bytes * 1000) / elapsedTime)}/s)` : '';
+
+    let eta = '';
+    if (
+      !stageData?.endTime &&
+      totalBytes != null &&
+      totalBytes > 0 &&
+      bytes < totalBytes &&
+      elapsedTime >= 500 &&
+      bytes > 0
+    ) {
+      const speedBps = bytes / elapsedTime;
+      const remaining = totalBytes - bytes;
+      const etaMs = remaining / speedBps;
+      if (Number.isFinite(etaMs) && etaMs > 0 && etaMs < 86400000) {
+        eta = ` eta ~${readableTime(etaMs)}`;
+      }
+    }
+
+    loaders[stage].text = `${stage}: ${countLabel} transferred (${size}) (${elapsed}) ${
       !stageData?.endTime ? speed : ''
-    }`;
+    }${eta}`;
 
     return loaders[stage];
   };

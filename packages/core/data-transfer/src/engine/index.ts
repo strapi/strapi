@@ -1004,7 +1004,35 @@ class TransferEngine<
       key: (value: IAsset) => extname(value.filename) || 'No extension',
     });
 
+    await this.#mergeSourceStageTotals(stage);
     await this.#transferStage({ stage, source, destination, transform, tracker });
+  }
+
+  /**
+   * Merge optional source-reported totals into progress before the stage starts (CLI ETA / totals).
+   */
+  async #mergeSourceStageTotals(stage: TransferStage) {
+    const getTotals = this.sourceProvider.getStageTotals;
+    if (!getTotals) {
+      return;
+    }
+    const totals = await getTotals.call(this.sourceProvider, stage);
+    if (!totals || (totals.totalBytes == null && totals.totalCount == null)) {
+      return;
+    }
+    if (!this.progress.data[stage]) {
+      this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
+    }
+    const stageProgress = this.progress.data[stage];
+    if (!stageProgress) {
+      return;
+    }
+    if (totals.totalBytes != null) {
+      stageProgress.totalBytes = totals.totalBytes;
+    }
+    if (totals.totalCount != null) {
+      stageProgress.totalCount = totals.totalCount;
+    }
   }
 
   async transferConfiguration(): Promise<void> {

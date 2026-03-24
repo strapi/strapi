@@ -11,6 +11,7 @@ import type {
   MaybePromise,
   Protocol,
   ProviderType,
+  StageTotalsEstimate,
   TransferStage,
 } from '../../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
@@ -67,14 +68,28 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   #pullAssetStreamWireSampleLogged = false;
 
+  /** Set from pull server `start` response for `assets` when present (for engine `getStageTotals`). */
+  #cachedAssetsTotals?: StageTotalsEstimate;
+
   async #createStageReadStream(stage: Exclude<TransferStage, 'schemas'>) {
+    if (stage === 'assets') {
+      this.#cachedAssetsTotals = undefined;
+    }
+
     const startResult = await this.#startStep(stage);
 
     if (startResult instanceof Error) {
       throw startResult;
     }
 
-    const { id: processID } = startResult as { id: string };
+    const { id: processID, totals } = startResult as {
+      id: string;
+      totals?: StageTotalsEstimate;
+    };
+
+    if (stage === 'assets' && totals && (totals.totalBytes != null || totals.totalCount != null)) {
+      this.#cachedAssetsTotals = totals;
+    }
 
     // Default object-mode HWM (~16 chunks). Do not await `drain` on manual `push` while `pipe()`
     // is attached — drain/`readableLength` races reliably deadlock after a few 1MiB asset frames.
@@ -502,6 +517,14 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       await this.dispatcher?.dispatchTransferAction<Utils.String.Dict<Struct.Schema>>('getSchemas');
 
     return schemas ?? null;
+  }
+
+  async getStageTotals(stage: TransferStage): Promise<StageTotalsEstimate | null> {
+    if (stage !== 'assets') {
+      return null;
+    }
+    const cached = this.#cachedAssetsTotals;
+    return cached ?? null;
   }
 
   async #startStep<T extends Client.TransferPullStep>(step: T) {

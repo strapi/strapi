@@ -725,6 +725,31 @@ describe('Transfer engine', () => {
       expect(calls).toEqual(TRANSFER_STAGES.length);
     });
 
+    test('merges source getStageTotals into assets progress before stage::start', async () => {
+      const source = createSource();
+      source.getStageTotals = jest.fn().mockResolvedValue({ totalBytes: 12_345, totalCount: 7 });
+
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      let assetsAtStart: Record<string, unknown> | undefined;
+      engine.progress.stream.on('stage::start', ({ stage, data }) => {
+        if (stage === 'assets' && data.assets) {
+          // Snapshot: `data` is the live progress object and mutates during the stage.
+          assetsAtStart = { ...data.assets };
+        }
+      });
+
+      await engine.transfer();
+
+      expect(source.getStageTotals).toHaveBeenCalledWith('assets');
+      expect(assetsAtStart).toMatchObject({
+        totalBytes: 12_345,
+        totalCount: 7,
+        count: 0,
+        bytes: 0,
+      });
+    });
+
     test("emits 'stage::finish' events", async () => {
       const source = createSource();
       const engine = createTransferEngine(source, completeDestination, defaultOptions);

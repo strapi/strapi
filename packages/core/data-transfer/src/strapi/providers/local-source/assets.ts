@@ -41,7 +41,7 @@ function getFileStream(
   return readableStream;
 }
 
-function getFileStats(
+export function getFileStatsForTransfer(
   filepath: string,
   strapi: Core.Strapi,
   isLocal = false
@@ -71,19 +71,17 @@ function getFileStats(
   });
 }
 
-async function signFile(file: IFile) {
+export async function signUploadFileForTransfer(strapi: Core.Strapi, file: IFile) {
   const { provider } = strapi.plugins.upload;
   const { provider: providerName } = strapi.config.get('plugin.upload') as { provider: string };
   const isPrivate = await provider.isPrivate();
   if (file?.provider === providerName && isPrivate) {
-    const signUrl = async (file: IFile) => {
-      const signedUrl = await provider.getSignedUrl(file);
-      file.url = signedUrl.url;
+    const signUrl = async (f: IFile) => {
+      const signedUrl = await provider.getSignedUrl(f);
+      f.url = signedUrl.url;
     };
 
-    // Sign the original file
     await signUrl(file);
-    // Sign each file format
     if (file.formats) {
       for (const format of Object.keys(file.formats)) {
         await signUrl(file.formats[format]);
@@ -108,12 +106,12 @@ export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
     for await (const file of stream) {
       const isLocalProvider = file.provider === 'local';
       if (!isLocalProvider) {
-        await signFile(file);
+        await signUploadFileForTransfer(strapi, file);
       }
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
       let stats: { size: number };
       try {
-        stats = await getFileStats(filepath, strapi, isLocalProvider);
+        stats = await getFileStatsForTransfer(filepath, strapi, isLocalProvider);
       } catch (err: unknown) {
         const code =
           err && typeof err === 'object' && 'code' in err
@@ -143,7 +141,11 @@ export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
             : fileFormat.url;
           let fileFormatStats: { size: number };
           try {
-            fileFormatStats = await getFileStats(fileFormatFilepath, strapi, isLocalProvider);
+            fileFormatStats = await getFileStatsForTransfer(
+              fileFormatFilepath,
+              strapi,
+              isLocalProvider
+            );
           } catch (err: unknown) {
             const code =
               err && typeof err === 'object' && 'code' in err
