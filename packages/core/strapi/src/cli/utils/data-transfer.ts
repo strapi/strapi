@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import path from 'node:path';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
 import { configs, createLogger, type winston, formats } from '@strapi/logger';
@@ -211,23 +212,35 @@ const errorColors = {
 
 const formatDiagnostic = (
   operation: string,
-  info?: boolean
+  verbose?: boolean
 ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] => {
-  // Create log file for all incoming diagnostics
   let logger: undefined | winston.Logger;
+  let logFileBasename: string | undefined;
+
   const getLogger = () => {
     if (!logger) {
+      logFileBasename = `${operation}_${Date.now()}.log`;
+      const absoluteLogPath = path.resolve(process.cwd(), logFileBasename);
+
       logger = createLogger(
-        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, {
-          level: 'info',
-          format: formats?.detailedLogs,
-        })
+        configs.createOutputFileConfiguration(
+          logFileBasename,
+          {
+            level: 'info',
+            format: formats?.detailedLogs,
+          },
+          {
+            consoleLevel: verbose ? 'info' : 'warn',
+          }
+        )
+      );
+
+      logger.info(
+        `[${operation}] Diagnostic log file: ${absoluteLogPath} (info-level messages are written here even without --verbose)`
       );
     }
     return logger;
   };
-
-  // We don't want to write a log file until there is something to be logged
 
   return ({ details, kind }) => {
     try {
@@ -239,7 +252,7 @@ const formatDiagnostic = (
 
         getLogger().error(errorMessage);
       }
-      if (kind === 'info' && info) {
+      if (kind === 'info') {
         const { message, params, origin } = details;
 
         const msg = `[${origin ?? 'transfer'}] ${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;

@@ -19,6 +19,10 @@ import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
+import {
+  createTransferAssetStreamChunk,
+  transferAssetStreamChunkByteLength,
+} from '../../../utils/transfer-asset-chunk';
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
@@ -357,10 +361,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     const batchSize = 1024 * 1024; // 1MB;
     const batchLength = () => {
-      return batch.reduce(
-        (acc, chunk) => (chunk.action === 'stream' ? acc + chunk.data.byteLength : acc),
-        0
-      );
+      return batch.reduce((acc, chunk) => acc + transferAssetStreamChunkByteLength(chunk), 0);
     };
     const startAssetsTransferOnce = this.#startStepOnce('assets');
 
@@ -418,7 +419,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
           });
 
           for await (const chunk of stream) {
-            await safePush({ action: 'stream', assetID, data: chunk });
+            await safePush(createTransferAssetStreamChunk(assetID, chunk));
           }
 
           await safePush({ action: 'end', assetID });

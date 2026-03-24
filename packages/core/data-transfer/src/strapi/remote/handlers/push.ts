@@ -6,6 +6,7 @@ import type { TransferFlow, Step } from '../flows';
 import type { TransferStage, IAsset, Protocol } from '../../../../types';
 
 import { ProviderTransferError } from '../../../errors/providers';
+import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
 import { createLocalStrapiDestinationProvider } from '../../providers';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
 import { Handler } from './abstract';
@@ -465,10 +466,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       }
 
       if (action === 'stream') {
-        // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
-        // We need to transform it back into a Buffer instance
-        const rawBuffer = item.data as unknown as { type: 'Buffer'; data: Uint8Array };
-        const chunk = Buffer.from(rawBuffer.data);
+        const chunk = decodeTransferAssetStreamItem(item);
         await writeAsync(this.assets[assetID].stream, chunk);
       }
 

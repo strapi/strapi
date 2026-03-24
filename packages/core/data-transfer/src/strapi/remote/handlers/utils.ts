@@ -22,6 +22,24 @@ export const transformUpgradeHeader = (header = '') => {
   return header.split(',').map((s) => s.trim().toLowerCase());
 };
 
+/**
+ * Default `JSON.stringify` uses `Buffer.toJSON()` → `{ type: 'Buffer', data: [n,n,...] }`, which
+ * blows the client's heap on `JSON.parse`. Encode any binary values as compact base64 strings instead.
+ */
+const replacerForTransferWebSocket = (_key: string, value: unknown): unknown => {
+  if (Buffer.isBuffer(value)) {
+    return value.toString('base64');
+  }
+  if (value instanceof Uint8Array) {
+    return Buffer.from(value).toString('base64');
+  }
+  if (ArrayBuffer.isView(value) && !(value instanceof DataView)) {
+    const v = value as NodeJS.TypedArray;
+    return Buffer.from(v.buffer, v.byteOffset, v.byteLength).toString('base64');
+  }
+  return value;
+};
+
 let timeouts: Record<string, number> | undefined;
 
 const hasHttpServer = () => {
@@ -245,17 +263,20 @@ export const handlerControllerFactory =
                 details = e.details;
               }
 
-              const payload = JSON.stringify({
-                uuid,
-                data: data ?? null,
-                error: e
-                  ? {
-                      code: e?.name ?? 'ERR',
-                      message: e?.message,
-                      details,
-                    }
-                  : null,
-              });
+              const payload = JSON.stringify(
+                {
+                  uuid,
+                  data: data ?? null,
+                  error: e
+                    ? {
+                        code: e?.name ?? 'ERR',
+                        message: e?.message,
+                        details,
+                      }
+                    : null,
+                },
+                replacerForTransferWebSocket
+              );
 
               this.send(payload, (error) => (error ? reject(error) : resolve()));
             });
@@ -268,7 +289,7 @@ export const handlerControllerFactory =
             return new Promise((resolve, reject) => {
               const uuid = randomUUID();
 
-              const payload = JSON.stringify({ uuid, data: message });
+              const payload = JSON.stringify({ uuid, data: message }, replacerForTransferWebSocket);
 
               this.send(payload, (error) => {
                 if (error) {

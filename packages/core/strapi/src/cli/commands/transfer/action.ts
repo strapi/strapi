@@ -27,6 +27,17 @@ const {
   },
 } = strapiDataTransfer;
 
+const resolveRemotePullAssetIdleTimeoutMs = (value: unknown): number | undefined => {
+  if (value == null || value === '') {
+    return undefined;
+  }
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n) || n <= 0) {
+    return undefined;
+  }
+  return n;
+};
+
 interface CmdOptions {
   from?: URL;
   fromToken: string;
@@ -69,6 +80,10 @@ export default async (opts: CmdOptions) => {
       exitWith(1, 'Missing token for remote destination');
     }
 
+    const assetIdleTimeoutMs = resolveRemotePullAssetIdleTimeoutMs(
+      strapi.config.get('server.transfer.remote.assetIdleTimeoutMs')
+    );
+
     source = createRemoteStrapiSourceProvider({
       getStrapi: () => strapi,
       url: opts.from,
@@ -76,6 +91,7 @@ export default async (opts: CmdOptions) => {
         type: 'token',
         token: opts.fromToken,
       },
+      ...(assetIdleTimeoutMs !== undefined ? { streamTimeout: assetIdleTimeoutMs } : {}),
     });
   }
 

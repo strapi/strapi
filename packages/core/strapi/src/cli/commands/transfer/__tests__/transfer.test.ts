@@ -1,5 +1,6 @@
 import * as mockDataTransfer from '@strapi/data-transfer';
 
+import * as dataTransferUtils from '../../../utils/data-transfer';
 import transferAction from '../action';
 import { expectExit } from '../../__tests__/commands.test.utils';
 
@@ -9,13 +10,14 @@ jest.mock('../../../utils/data-transfer', () => {
     getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
-    createStrapiInstance() {
-      return {
-        telemetry: {
-          send: jest.fn(),
-        },
-      };
-    },
+    createStrapiInstance: jest.fn(async () => ({
+      config: {
+        get: jest.fn(),
+      },
+      telemetry: {
+        send: jest.fn(),
+      },
+    })),
     getDefaultExportName: jest.fn(() => 'default'),
     buildTransferTable: jest.fn(() => {
       return {
@@ -94,6 +96,14 @@ describe('Transfer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (dataTransferUtils.createStrapiInstance as jest.Mock).mockImplementation(async () => ({
+      config: {
+        get: jest.fn(),
+      },
+      telemetry: {
+        send: jest.fn(),
+      },
+    }));
   });
 
   it('exits with error when no --to or --from is provided', async () => {
@@ -205,6 +215,35 @@ describe('Transfer', () => {
             type: 'token',
             token: sourceToken,
           },
+        })
+      );
+    });
+
+    it('passes server.transfer.remote.assetIdleTimeoutMs to remote source provider as streamTimeout', async () => {
+      (dataTransferUtils.createStrapiInstance as jest.Mock).mockImplementationOnce(async () => ({
+        config: {
+          get: (key: string) =>
+            key === 'server.transfer.remote.assetIdleTimeoutMs' ? 99_000 : undefined,
+        },
+        telemetry: {
+          send: jest.fn(),
+        },
+      }));
+
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: sourceUrl,
+          streamTimeout: 99_000,
         })
       );
     });

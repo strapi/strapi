@@ -4,6 +4,10 @@ import type { Core } from '@strapi/types';
 
 import { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
+import {
+  createTransferAssetStreamChunk,
+  transferAssetStreamChunkByteLength,
+} from '../../../utils/transfer-asset-chunk';
 import { createLocalStrapiSourceProvider, ILocalStrapiSourceProvider } from '../../providers';
 import { ProviderTransferError } from '../../../errors/providers';
 import type { IAsset, TransferStage, Protocol } from '../../../../types';
@@ -278,10 +282,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         let batch: Protocol.Client.TransferAssetFlow[] = [];
 
         const batchLength = () => {
-          return batch.reduce(
-            (acc, chunk) => (chunk.action === 'stream' ? acc + chunk.data.byteLength : acc),
-            0
-          );
+          return batch.reduce((acc, chunk) => acc + transferAssetStreamChunkByteLength(chunk), 0);
         };
 
         const BATCH_MAX_SIZE = 1024 * 1024; // 1MB
@@ -309,8 +310,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
             }
 
             for await (const assetChunk of assetStream) {
-              // Add the asset data to the batch
-              batch.push({ action: 'stream', assetID, data: assetChunk });
+              batch.push(createTransferAssetStreamChunk(assetID, assetChunk));
 
               // if the batch size is bigger than BATCH_MAX_SIZE stream the batch
               if (batchLength() >= BATCH_MAX_SIZE) {

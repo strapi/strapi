@@ -17,6 +17,7 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
+import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
@@ -27,7 +28,8 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
     retryMessageTimeout: number; // milliseconds to wait for a response from a message
     retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
   };
-  streamTimeout?: number; // milliseconds to wait between chunks of an asset before aborting the transfer
+  /** Max ms without forward progress on an asset (new remote chunk accepted or chunk fully handed to the asset stream). */
+  streamTimeout?: number;
 }
 
 type QueueableAction = Protocol.Client.TransferAssetFlow &
@@ -45,7 +47,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   dispatcher: ReturnType<typeof createDispatcher> | null;
 
   defaultOptions: Partial<IRemoteStrapiSourceProviderOptions> = {
-    streamTimeout: 15000,
+    // Large files + JSON/WS backpressure can go minutes between *messages* while bytes still drain locally
+    streamTimeout: 300_000,
   };
 
   constructor(options: IRemoteStrapiSourceProviderOptions) {
@@ -62,6 +65,10 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   #diagnostics?: IDiagnosticReporter;
 
+  #pullAssetStreamWireSampleLogged = false;
+
+  #pullLargeFrameLogCount = 0;
+
   async #createStageReadStream(stage: Exclude<TransferStage, 'schemas'>) {
     const startResult = await this.#startStep(stage);
 
@@ -71,9 +78,24 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     const { id: processID } = startResult as { id: string };
 
+    // Default object-mode HWM (~16 chunks). Do not await `drain` on manual `push` while `pipe()`
+    // is attached — drain/`readableLength` races reliably deadlock after a few 1MiB asset frames.
+    // Backpressure for pull assets is enforced by the Writable below (`highWaterMark: 1`).
     const stream = new PassThrough({ objectMode: true });
 
     const listener = async (raw: Buffer) => {
+      // Legacy pull payloads expand each byte into JSON numbers; parse alone can use several× the frame size in heap.
+      const frameMiB = raw.length / 1024 / 1024;
+      if (frameMiB >= 0.75) {
+        this.#pullLargeFrameLogCount += 1;
+        if (this.#pullLargeFrameLogCount <= 3 || this.#pullLargeFrameLogCount % 25 === 0) {
+          this.#reportWarning(
+            `[Data transfer][pull] WebSocket frame ~${frameMiB.toFixed(2)} MiB (before JSON.parse). ` +
+              `If the remote uses an older Strapi without base64 asset chunks, upgrade the remote or increase NODE_OPTIONS=--max-old-space-size=...`
+          );
+        }
+      }
+
       const parsed = JSON.parse(raw.toString());
       // If not a message related to our transfer process, ignore it
       if (!parsed.uuid || parsed?.data?.type !== 'transfer' || parsed?.data?.id !== processID) {
@@ -98,9 +120,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         return;
       }
 
-      // if we get a single items instead of a batch
       for (const item of castArray(data)) {
-        stream.push(item);
+        stream.push(item as Parameters<PassThrough['push']>[0]);
       }
 
       this.ws?.once('message', listener);
@@ -149,7 +170,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       };
     } = {};
 
-    // Watch for stalled assets; if we don't receive a chunk within timeout, abort transfer
+    // Watch for stalled assets: no remote chunks and no completed writes to the asset stream for streamTimeout ms
     const resetTimeout = (assetID: string) => {
       if (assets[assetID].timeout) {
         clearTimeout(assets[assetID].timeout);
@@ -161,78 +182,111 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       }, this.options.streamTimeout);
     };
 
-    stream
-      /**
-       * Process a payload of many transfer assets and performs the following tasks:
-       * - Start: creates a stream for new assets.
-       * - Stream: writes asset chunks to the asset's stream.
-       * - End: closes the stream after the asset s transferred and cleanup related resources.
-       */
-      .on('data', async (payload: Protocol.Client.TransferAssetFlow[]) => {
-        for (const item of payload) {
-          const { action, assetID } = item;
+    /**
+     * Serialize asset batch handling: `Readable.on('data', async …)` does not apply backpressure,
+     * so we pipe through a Writable with highWaterMark 1 so only one batch is in flight.
+     */
+    const processAssetPayload = async (payload: Protocol.Client.TransferAssetFlow[]) => {
+      for (const item of payload) {
+        const { action, assetID } = item;
 
-          // Creates the stream to send the incoming asset through
-          if (action === 'start') {
-            // if a transfer has already been started for the same asset ID, something is wrong
-            if (assets[assetID]) {
-              throw new Error(`Asset ${assetID} already started`);
+        if (action === 'start') {
+          if (assets[assetID]) {
+            throw new Error(`Asset ${assetID} already started`);
+          }
+
+          this.#reportInfo(`Asset ${assetID} starting`);
+          assets[assetID] = {
+            ...item.data,
+            stream: new PassThrough(),
+            status: 'ok',
+            queue: [],
+          };
+
+          resetTimeout(assetID);
+
+          await this.writeAsync(pass, assets[assetID]);
+        } else if (action === 'stream' || action === 'end') {
+          if (!assets[assetID]) {
+            throw new Error(`No id matching ${assetID} for stream action`);
+          }
+
+          if (action === 'stream') {
+            if (!this.#pullAssetStreamWireSampleLogged) {
+              this.#pullAssetStreamWireSampleLogged = true;
+              const isBase64 = 'encoding' in item && item.encoding === 'base64';
+              const legacyArray =
+                item.data &&
+                typeof item.data === 'object' &&
+                (item.data as { type?: string }).type === 'Buffer' &&
+                Array.isArray((item.data as { data?: unknown }).data);
+              if (isBase64) {
+                this.#reportInfo(
+                  '[Data transfer][pull] Remote sends asset stream chunks as base64 (preferred; lower JSON.parse memory).'
+                );
+              } else if (legacyArray) {
+                this.#reportWarning(
+                  '[Data transfer][pull] Remote sends legacy Buffer-as-JSON-array chunks — JSON.parse allocates huge typed arrays; upgrade the remote Strapi to match this CLI to use base64 wire format, or OOM may persist on large files.'
+                );
+              } else {
+                this.#reportWarning(
+                  '[Data transfer][pull] Asset stream chunk format not recognized (neither base64 nor legacy Buffer JSON).'
+                );
+              }
             }
-
-            this.#reportInfo(`Asset ${assetID} starting`);
-            // Register the asset
-            assets[assetID] = {
-              ...item.data,
-              stream: new PassThrough(),
-              status: 'ok',
-              queue: [],
-            };
-
             resetTimeout(assetID);
-
-            // Connect the individual asset stream to the main asset stage stream
-            // Note: nothing is transferred until data chunks are fed to the asset stream
-            await this.writeAsync(pass, assets[assetID]);
+          } else {
+            clearTimeout(assets[assetID].timeout);
           }
 
-          // Writes the asset's data chunks to their corresponding stream
-          // "end" is considered a chunk, but it's not a data chunk, it's a control message
-          // That is done so that we don't complicate the already complicated async processing of the queue
-          else if (action === 'stream' || action === 'end') {
-            // If the asset hasn't been registered, or if it's been closed already, something is wrong
-            if (!assets[assetID]) {
-              throw new Error(`No id matching ${assetID} for stream action`);
-            }
+          if (assets[assetID].status === 'closed') {
+            throw new Error(`Asset ${assetID} is closed`);
+          }
 
-            // On every action, reset the timeout timer
-            if (action === 'stream') {
-              resetTimeout(assetID);
-            } else {
-              clearTimeout(assets[assetID].timeout);
-            }
+          assets[assetID].queue.push(item);
+        }
+      }
 
-            if (assets[assetID].status === 'closed') {
-              throw new Error(`Asset ${assetID} is closed`);
-            }
-
-            assets[assetID].queue.push(item);
+      for (const assetID in assets) {
+        if (Object.prototype.hasOwnProperty.call(assets, assetID)) {
+          const asset = assets[assetID];
+          if (asset.queue?.length > 0) {
+            await processQueue(assetID);
           }
         }
+      }
+    };
 
-        // each new payload will start new processQueue calls, which may cause some extra calls
-        // it's essentially saying "start processing this asset again, I added more data to the queue"
-        for (const assetID in assets) {
-          if (Object.prototype.hasOwnProperty.call(assets, assetID)) {
-            const asset = assets[assetID];
-            if (asset.queue?.length > 0) {
-              await processQueue(assetID);
-            }
+    const processor = new Writable({
+      objectMode: true,
+      highWaterMark: 1,
+      write(payload: Protocol.Client.TransferAssetFlow[], _encoding, callback) {
+        processAssetPayload(payload).then(
+          () => {
+            callback();
+          },
+          (err: Error) => {
+            stream.destroy(err);
+            callback(err);
           }
-        }
-      })
-      .on('close', () => {
+        );
+      },
+      final(callback) {
         pass.end();
-      });
+        callback();
+      },
+    });
+
+    processor.on('error', (err) => {
+      pass.destroy(err);
+    });
+
+    stream.on('error', (err) => {
+      processor.destroy(err);
+      pass.destroy(err);
+    });
+
+    stream.pipe(processor);
 
     /**
      * Start processing the queue for a given assetID
@@ -284,17 +338,22 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
      *
      * Only check if the targeted asset exists, no other validation is done.
      */
-    const writeChunkToStream = async (id: string, data: unknown) => {
+    const writeChunkToStream = async (id: string, item: QueueableAction) => {
       const asset = assets[id];
 
       if (!asset) {
         throw new Error(`Failed to write asset chunk for "${id}". Asset not found.`);
       }
 
-      const rawBuffer = data as { type: 'Buffer'; data: Uint8Array };
-      const chunk = Buffer.from(rawBuffer.data);
+      if (item.action !== 'stream') {
+        throw new Error(`Expected stream queue item for "${id}"`);
+      }
+
+      const chunk = decodeTransferAssetStreamItem(item);
 
       await this.writeAsync(asset.stream, chunk);
+      // Count slow draining as progress so backpressure on large chunks does not trip the stall timer
+      resetTimeout(id);
     };
 
     /**
@@ -307,17 +366,19 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         throw new Error(`Failed to close asset "${id}". Asset not found.`);
       }
 
-      assets[id].status = 'closed';
+      const asset = assets[id];
+      asset.status = 'closed';
 
       await new Promise<void>((resolve, reject) => {
-        const { stream } = assets[id];
+        const { stream } = asset;
 
         stream
           .on('close', () => {
+            delete assets[id];
             resolve();
           })
           .on('error', (e) => {
-            assets[id].status = 'errored';
+            delete assets[id];
             reject(new Error(`Failed to close asset "${id}". Asset stream error: ${e.toString()}`));
           })
           .end();
@@ -376,6 +437,18 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     });
   }
 
+  /** Warnings are always emitted by the transfer CLI logger (unlike info, which needs --verbose). */
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'remote-source-provider',
+      },
+      kind: 'warning',
+    });
+  }
+
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     const { url, auth } = this.options;
@@ -385,6 +458,9 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     const wsUrl = `${wsProtocol}//${url.host}${trimTrailingSlash(
       url.pathname
     )}${TRANSFER_PATH}/pull`;
+
+    this.#pullAssetStreamWireSampleLogged = false;
+    this.#pullLargeFrameLogCount = 0;
 
     this.#reportInfo('establishing websocket connection');
     // No auth defined, trying public access for transfer
