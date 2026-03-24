@@ -6,6 +6,19 @@ const os = require('os');
 
 const { SEED_UPLOAD_NAME_PREFIX } = require('./constants');
 
+/**
+ * Deterministic octet stream: every offset has a distinct value (per file index) so a
+ * full-file checksum catches chunk reordering; a single fill byte would not.
+ */
+function createDeterministicTransferTestFile(fileIndex, byteLength) {
+  const buf = Buffer.allocUnsafe(byteLength);
+  for (let j = 0; j < byteLength; j += 1) {
+    const mixed = (fileIndex + 1) * 0x9e3779b1 + j * 0x517cc1b7;
+    buf[j] = (mixed ^ (mixed >>> 11) ^ (j << 3)) & 255;
+  }
+  return buf;
+}
+
 function parseCountEnv() {
   return Math.max(0, parseInt(process.env.TRANSFER_CLI_MEDIA_COUNT || '2', 10));
 }
@@ -46,7 +59,7 @@ async function seedTransferTestMedia(appPath, options = {}) {
     for (let i = 0; i < count; i += 1) {
       const name = `${SEED_UPLOAD_NAME_PREFIX}${i}.bin`;
       const tmpPath = path.join(tmpDir, name);
-      fs.writeFileSync(tmpPath, Buffer.alloc(bytes, i % 251));
+      fs.writeFileSync(tmpPath, createDeterministicTransferTestFile(i, bytes));
 
       await strapi
         .plugin('upload')
