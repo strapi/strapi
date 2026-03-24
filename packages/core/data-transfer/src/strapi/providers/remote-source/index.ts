@@ -67,8 +67,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   #pullAssetStreamWireSampleLogged = false;
 
-  #pullLargeFrameLogCount = 0;
-
   async #createStageReadStream(stage: Exclude<TransferStage, 'schemas'>) {
     const startResult = await this.#startStep(stage);
 
@@ -84,18 +82,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     const stream = new PassThrough({ objectMode: true });
 
     const listener = async (raw: Buffer) => {
-      // Legacy pull payloads expand each byte into JSON numbers; parse alone can use several× the frame size in heap.
-      const frameMiB = raw.length / 1024 / 1024;
-      if (frameMiB >= 0.75) {
-        this.#pullLargeFrameLogCount += 1;
-        if (this.#pullLargeFrameLogCount <= 3 || this.#pullLargeFrameLogCount % 25 === 0) {
-          this.#reportWarning(
-            `[Data transfer][pull] WebSocket frame ~${frameMiB.toFixed(2)} MiB (before JSON.parse). ` +
-              `If the remote uses an older Strapi without base64 asset chunks, upgrade the remote or increase NODE_OPTIONS=--max-old-space-size=...`
-          );
-        }
-      }
-
       const parsed = JSON.parse(raw.toString());
       // If not a message related to our transfer process, ignore it
       if (!parsed.uuid || parsed?.data?.type !== 'transfer' || parsed?.data?.id !== processID) {
@@ -214,23 +200,18 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           if (action === 'stream') {
             if (!this.#pullAssetStreamWireSampleLogged) {
               this.#pullAssetStreamWireSampleLogged = true;
-              const isBase64 = 'encoding' in item && item.encoding === 'base64';
-              const legacyArray =
-                item.data &&
-                typeof item.data === 'object' &&
-                (item.data as { type?: string }).type === 'Buffer' &&
-                Array.isArray((item.data as { data?: unknown }).data);
-              if (isBase64) {
-                this.#reportInfo(
-                  '[Data transfer][pull] Remote sends asset stream chunks as base64 (preferred; lower JSON.parse memory).'
-                );
-              } else if (legacyArray) {
+              const { data } = item;
+              // Same legacy shape `decodeTransferAssetStreamData` accepts after JSON.parse (proof, not frame-size guess).
+              const legacyBufferJson =
+                data &&
+                typeof data === 'object' &&
+                !Buffer.isBuffer(data) &&
+                (data as { type?: string }).type === 'Buffer' &&
+                (Array.isArray((data as { data?: unknown }).data) ||
+                  ArrayBuffer.isView((data as { data?: unknown }).data));
+              if (legacyBufferJson) {
                 this.#reportWarning(
-                  '[Data transfer][pull] Remote sends legacy Buffer-as-JSON-array chunks — JSON.parse allocates huge typed arrays; upgrade the remote Strapi to match this CLI to use base64 wire format, or OOM may persist on large files.'
-                );
-              } else {
-                this.#reportWarning(
-                  '[Data transfer][pull] Asset stream chunk format not recognized (neither base64 nor legacy Buffer JSON).'
+                  '[Data transfer][pull] Remote is using legacy Buffer JSON for asset chunks (each byte as a JSON number). That uses much more memory during JSON.parse than base64. Upgrade the remote Strapi to a version that sends base64 asset chunks, or out-of-memory errors may still happen on large files.'
                 );
               }
             }
@@ -460,7 +441,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     )}${TRANSFER_PATH}/pull`;
 
     this.#pullAssetStreamWireSampleLogged = false;
-    this.#pullLargeFrameLogCount = 0;
 
     this.#reportInfo('establishing websocket connection');
     // No auth defined, trying public access for transfer
