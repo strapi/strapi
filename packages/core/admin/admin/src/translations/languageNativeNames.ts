@@ -3,7 +3,7 @@ export const languageNativeNames = {
   ca: 'Català',
   cs: 'Čeština',
   de: 'Deutsch',
-  dk: 'Dansk',
+  da: 'Dansk',
   en: 'English',
   'en-GB': 'English (United Kingdom)',
   es: 'Español',

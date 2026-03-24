@@ -4,7 +4,7 @@ const config = {
     // 'fr',
     // 'cs',
     // 'de',
-    // 'dk',
+    // 'da',
     // 'es',
     // 'he',
     // 'id',
