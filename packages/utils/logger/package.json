@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "5.38.0",
+  "version": "5.40.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -45,8 +45,8 @@
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.38.0",
-    "tsconfig": "5.38.0"
+    "eslint-config-custom": "5.40.0",
+    "tsconfig": "5.40.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
