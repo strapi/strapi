@@ -60,7 +60,7 @@
   "dependencies": {
     "@apollo/server": "4.13.0",
     "@as-integrations/koa": "1.1.1",
-    "@graphql-tools/schema": "10.0.3",
+    "@graphql-tools/schema": "~10.0.3",
     "@graphql-tools/utils": "^10.1.3",
     "@koa/cors": "5.0.0",
     "@strapi/design-system": "2.2.0",
