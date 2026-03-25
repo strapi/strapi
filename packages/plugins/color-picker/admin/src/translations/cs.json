@@ -8,5 +8,8 @@
   "color-picker.options.advanced.requiredField": "Povinné pole",
   "color-picker.options.advanced.requiredField.description": "Pokud je toto pole prázdné, nebudete moci vytvořit záznam",
   "color-picker.settings": "Nastavení",
-  "color-picker.toggle.aria-label": "Přepínač výběru barvy"
+  "color-picker.toggle.aria-label": "Přepínač výběru barvy",
+  "plugin.description.long": "Vlastní pole pro výběr barvy spravované Strapi. Pomocí posuvníků sytosti a odstínu vyberte barvu a uložte hodnotu jako řetězec HEX.",
+  "plugin.description.short": "Vlastní pole pro výběr barvy spravované Strapi.",
+  "plugin.name": "Výběr barvy"
 }
