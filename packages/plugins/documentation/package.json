@@ -77,7 +77,7 @@
     "path-to-regexp": "8.2.0",
     "react-intl": "6.6.2",
     "swagger-ui-dist": "4.19.0",
-    "yaml": "1.10.2",
+    "yaml": "1.10.3",
     "yup": "0.32.9"
   },
   "devDependencies": {
