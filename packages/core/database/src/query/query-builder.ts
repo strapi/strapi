@@ -499,7 +499,21 @@ const createQueryBuilder = (
         });
         const orderByColumns = state.orderBy.map(({ column }) => column);
 
-        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+        // When DISTINCT is applied due to joins, the primary key must be
+        // included in the SELECT.  Without it, rows that share the same
+        // values in the selected columns are collapsed into a single row,
+        // which causes findMany to return fewer results than expected.
+        const pkColumns: string[] = [];
+        if (_.has('id', meta.attributes)) {
+          pkColumns.push(helpers.toColumnName(meta, 'id'));
+        }
+
+        state.select = _.uniq([
+          ...pkColumns,
+          ...joinsOrderByColumns,
+          ...orderByColumns,
+          ...state.select,
+        ]);
       }
     },
 

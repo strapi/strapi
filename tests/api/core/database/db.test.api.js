@@ -89,6 +89,35 @@ describe('Deep Filtering API', () => {
     expect(res.ids.length).toBe(2);
   });
 
+  test('findMany with select and relation filter returns all matching rows', async () => {
+    // Regression test: using select with a relation filter previously returned
+    // only 1 row because DISTINCT was applied without the primary key,
+    // collapsing rows that shared the same values in the selected columns.
+    const results = await strapi.db.query('api::test.test').findMany({
+      where: {
+        related: { title: 'Category A' },
+      },
+      select: ['name'],
+    });
+
+    expect(results.length).toBe(2);
+    expect(results.map((r) => r.name).sort()).toEqual(['Hugo LLORIS', 'Lucas HERNANDEZ']);
+  });
+
+  test('findMany with select and relation filter works with duplicate selected values', async () => {
+    // Edge case: when selected columns contain duplicate values across rows,
+    // DISTINCT without the PK would collapse them into one row.
+    // Insert two entries with the same name but different relations.
+    await strapi.db.query('api::test.test').create({ data: { name: 'Hugo LLORIS' } });
+
+    const results = await strapi.db.query('api::test.test').findMany({
+      select: ['name'],
+    });
+
+    // Should return all entries even when name values collide
+    expect(results.length).toBeGreaterThanOrEqual(4);
+  });
+
   test('Delete multiple entries with deep filtering', async () => {
     const deleteRes = await strapi.db.query('api::test.test').deleteMany({
       where: {
