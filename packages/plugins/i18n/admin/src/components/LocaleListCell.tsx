@@ -82,7 +82,11 @@ const LocaleListCell = ({
 
   return (
     <Menu.Root>
-      <Menu.Trigger>
+      <Menu.Trigger
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        onContextMenu={(e: React.MouseEvent) => e.stopPropagation()}
+        style={{ position: 'relative', zIndex: 2 }}
+      >
         <Flex minWidth="100%" alignItems="center" justifyContent="center" fontWeight="regular">
           <Typography textColor="neutral800" ellipsis marginRight={2}>
             {getDisplayText()}

@@ -17,6 +17,7 @@ import {
   useTable,
   useIsMobile,
   useIsDesktop,
+  useMediaQuery,
   tours,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -69,6 +70,15 @@ const LayoutsHeaderCustom = styled(Layouts.Header)`
   overflow-wrap: anywhere;
 `;
 
+const RowLink = styled(ReactRouterLink)`
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 1;
+`;
+
 const ListViewPage = () => {
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -77,6 +87,8 @@ const ListViewPage = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
   const isDesktop = useIsDesktop();
+  // Only show the row link overlay (right-click context menu) on desktop with a mouse; tablet (even in landscape) and touch devices use row click
+  const showRowLinkOverlay = isDesktop && useMediaQuery('(pointer: fine)');
 
   usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
   usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
@@ -264,13 +276,24 @@ const ListViewPage = () => {
         defaultMessage: 'Untitled',
       });
 
+  const getRowLinkTo = (id: Modules.Documents.ID) => ({
+    pathname: id.toString(),
+    search: stringify({ plugins: query.plugins }),
+  });
+
   const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
-    navigate({
-      pathname: id.toString(),
-      search: stringify({ plugins: query.plugins }),
-    });
+    navigate(getRowLinkTo(id));
   };
+
+  const getRowLinkProps = (row: (typeof results)[number]) => ({
+    to: getRowLinkTo(row.documentId),
+    onClick: () => trackUsage('willEditEntryFromList'),
+    'aria-label': formatMessage({
+      id: getTranslation('components.Table.open-entry'),
+      defaultMessage: 'Open entry',
+    }),
+  });
 
   const isEmptyState = !isFetching && results.length === 0;
 
@@ -396,15 +419,27 @@ const ListViewPage = () => {
                         <Table.Row
                           cursor="pointer"
                           key={row.id}
-                          onClick={handleRowClick(row.documentId)}
+                          style={{ position: 'relative' }}
+                          {...(!showRowLinkOverlay && { onClick: handleRowClick(row.documentId) })}
                         >
-                          <Table.CheckboxCell id={row.id} />
-                          {tableHeaders.map(({ cellFormatter, ...header }) => {
+                          <Table.CheckboxCell
+                            id={row.id}
+                            style={{ position: 'relative', zIndex: 2 }}
+                            onClick={
+                              !showRowLinkOverlay
+                                ? (e: React.MouseEvent) => e.stopPropagation()
+                                : undefined
+                            }
+                          />
+                          {tableHeaders.map(({ cellFormatter, ...header }, cellIndex) => {
                             if (header.name === 'status') {
                               const { status } = row;
 
                               return (
                                 <Table.Cell key={header.name}>
+                                  {showRowLinkOverlay && cellIndex === 0 && (
+                                    <RowLink {...getRowLinkProps(row)} />
+                                  )}
                                   <DocumentStatus status={status} maxWidth={'min-content'} />
                                 </Table.Cell>
                               );
@@ -415,6 +450,9 @@ const ListViewPage = () => {
                               // In this case, we display a dash
                               return (
                                 <Table.Cell key={header.name}>
+                                  {showRowLinkOverlay && cellIndex === 0 && (
+                                    <RowLink {...getRowLinkProps(row)} />
+                                  )}
                                   <Typography textColor="neutral800">
                                     {row[header.name.split('.')[0]]
                                       ? getDisplayName(row[header.name.split('.')[0]])
@@ -426,6 +464,9 @@ const ListViewPage = () => {
                             if (typeof cellFormatter === 'function') {
                               return (
                                 <Table.Cell key={header.name}>
+                                  {showRowLinkOverlay && cellIndex === 0 && (
+                                    <RowLink {...getRowLinkProps(row)} />
+                                  )}
                                   {/* @ts-expect-error – TODO: fix this TS error */}
                                   {cellFormatter(row, header, { collectionType, model })}
                                 </Table.Cell>
@@ -433,6 +474,9 @@ const ListViewPage = () => {
                             }
                             return (
                               <Table.Cell key={header.name}>
+                                {showRowLinkOverlay && cellIndex === 0 && (
+                                  <RowLink {...getRowLinkProps(row)} />
+                                )}
                                 <CellContent
                                   content={row[header.name.split('.')[0]]}
                                   rowId={row.documentId}
@@ -469,6 +513,8 @@ const ListViewPage = () => {
 const ActionsCell = styled(Table.Cell)`
   display: flex;
   justify-content: flex-end;
+  position: relative;
+  z-index: 2;
 `;
 
 /* -------------------------------------------------------------------------------------------------
