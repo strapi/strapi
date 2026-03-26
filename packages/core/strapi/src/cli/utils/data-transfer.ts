@@ -222,24 +222,17 @@ const formatDiagnostic = (
       logFileBasename = `${operation}_${Date.now()}.log`;
       const absoluteLogPath = path.resolve(process.cwd(), logFileBasename);
 
-      const createOutputFileConfigurationCompat = configs.createOutputFileConfiguration as (
-        filename: string,
-        fileTransportOptions?: winston.transports.FileTransportOptions,
-        options?: { consoleLevel?: string }
-      ) => winston.LoggerOptions;
-
       logger = createLogger(
-        createOutputFileConfigurationCompat(
-          logFileBasename,
-          {
-            level: 'info',
-            format: formats?.detailedLogs,
-          },
-          {
-            consoleLevel: verbose ? 'info' : 'warn',
-          }
-        )
+        configs.createOutputFileConfiguration(logFileBasename, {
+          level: 'info',
+          format: formats?.detailedLogs,
+        })
       );
+
+      const [consoleTransport] = logger.transports;
+      if (consoleTransport) {
+        consoleTransport.level = verbose ? 'info' : 'warn';
+      }
 
       logger.info(
         `[${operation}] Diagnostic log file: ${absoluteLogPath} (info-level messages are written here even without --verbose)`

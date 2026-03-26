@@ -30,6 +30,20 @@ export function decodeTransferAssetStreamItem(item: {
   );
 }
 
+const getLegacyBufferJsonData = (value: unknown): Uint8Array | readonly number[] | null => {
+  if (!value || typeof value !== 'object' || !('type' in value)) {
+    return null;
+  }
+  if ((value as { type: unknown }).type !== 'Buffer') {
+    return null;
+  }
+  const raw = (value as { data?: unknown }).data;
+  if (Array.isArray(raw) || ArrayBuffer.isView(raw)) {
+    return raw as Uint8Array | readonly number[];
+  }
+  return null;
+};
+
 /**
  * Decode binary payload for `TransferAssetFlow` `action: 'stream'` after JSON.parse.
  *
@@ -53,16 +67,9 @@ export function decodeTransferAssetStreamData(data: unknown, encoding?: 'base64'
     return Buffer.from(data);
   }
 
-  if (
-    data &&
-    typeof data === 'object' &&
-    'type' in data &&
-    (data as { type: unknown }).type === 'Buffer'
-  ) {
-    const raw = data as { data?: unknown };
-    if (Array.isArray(raw.data) || ArrayBuffer.isView(raw.data)) {
-      return Buffer.from(raw.data as Uint8Array | readonly number[]);
-    }
+  const legacyBufferData = getLegacyBufferJsonData(data);
+  if (legacyBufferData) {
+    return Buffer.from(legacyBufferData);
   }
 
   // Wire base64 string (pull generator and any other path that stringifies a string payload).
@@ -88,18 +95,14 @@ export function transferAssetStreamChunkByteLength(chunk: {
   if (Buffer.isBuffer(chunk.data)) {
     return chunk.data.byteLength;
   }
-  if (
-    chunk.data &&
-    typeof chunk.data === 'object' &&
-    'type' in chunk.data &&
-    (chunk.data as { type: unknown }).type === 'Buffer'
-  ) {
-    const raw = (chunk.data as { data?: unknown }).data;
-    if (Array.isArray(raw)) {
-      return raw.length;
+
+  const legacyBufferData = getLegacyBufferJsonData(chunk.data);
+  if (legacyBufferData) {
+    if (Array.isArray(legacyBufferData)) {
+      return legacyBufferData.length;
     }
-    if (ArrayBuffer.isView(raw)) {
-      return raw.byteLength;
+    if (ArrayBuffer.isView(legacyBufferData)) {
+      return legacyBufferData.byteLength;
     }
   }
   return 0;
