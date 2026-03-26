@@ -14,8 +14,9 @@ export type GetCommandParams<T extends Command> = {
 export type InitCommand = CreateCommand<
   'init',
   {
-    options: Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'>;
+    options?: Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'>;
     transfer: TransferMethod;
+    checksums?: boolean;
   }
 >;
 export type TransferKind = InitCommand['params']['transfer'];

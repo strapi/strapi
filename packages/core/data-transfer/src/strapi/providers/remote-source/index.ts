@@ -1,3 +1,4 @@
+import { createHash, type Hash } from 'crypto';
 import { PassThrough, Readable, Writable } from 'stream';
 import type { Struct, Utils } from '@strapi/types';
 import { WebSocket } from 'ws';
@@ -31,6 +32,8 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
   };
   /** Max ms without forward progress on an asset (new remote chunk accepted or chunk fully handed to the asset stream). */
   streamTimeout?: number;
+  /** Require per-asset checksum verification for transferred asset bytes. */
+  verifyChecksums?: boolean;
 }
 
 type QueueableAction = Protocol.Client.TransferAssetFlow &
@@ -57,6 +60,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       ...this.defaultOptions,
       ...options,
     };
+    this.#checksumsEnabled = this.options.verifyChecksums === true;
 
     this.ws = null;
     this.dispatcher = null;
@@ -67,6 +71,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   #diagnostics?: IDiagnosticReporter;
 
   #pullAssetStreamWireSampleLogged = false;
+
+  #checksumsEnabled = false;
 
   /** Set from pull server `start` response for `assets` when present (for engine `getStageTotals`). */
   #cachedAssetsTotals?: StageTotalsEstimate;
@@ -168,15 +174,22 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         queue: Array<QueueableAction>;
         status: 'ok' | 'closed' | 'errored';
         timeout?: NodeJS.Timeout;
+        checksumHash?: Hash;
       };
     } = {};
 
     // Watch for stalled assets: no remote chunks and no completed writes to the asset stream for streamTimeout ms
     const resetTimeout = (assetID: string) => {
+      if (!assets[assetID]) {
+        return;
+      }
       if (assets[assetID].timeout) {
         clearTimeout(assets[assetID].timeout);
       }
       assets[assetID].timeout = setTimeout(() => {
+        if (!assets[assetID]) {
+          return;
+        }
         this.#reportInfo(`Asset ${assetID} transfer stalled, aborting.`);
         assets[assetID].status = 'errored';
         assets[assetID].stream.destroy(new Error(`Asset ${assetID} transfer timed out`));
@@ -202,6 +215,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
             stream: new PassThrough(),
             status: 'ok',
             queue: [],
+            ...(this.#checksumsEnabled ? { checksumHash: createHash('sha256') } : {}),
           };
 
           resetTimeout(assetID);
@@ -315,16 +329,20 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           // if this is an end chunk, close the asset stream
           if (data.action === 'end') {
             this.#reportInfo(`Ending asset stream for ${id}`);
-            await closeAssetStream(id);
+            await closeAssetStream(id, data.checksum);
             break; // Exit the loop after closing the stream
           }
 
           // Save the current chunk
           await writeChunkToStream(id, data);
-        } catch {
+        } catch (error) {
           if (!assets[id]) {
             throw new Error(`No id matching ${id} for writeAssetChunk`);
           }
+          if (error instanceof Error) {
+            throw error;
+          }
+          throw new Error(`Unexpected error while processing asset chunk for "${id}"`);
         }
       }
     };
@@ -346,6 +364,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       }
 
       const chunk = decodeTransferAssetStreamItem(item);
+      asset.checksumHash?.update(chunk);
 
       await this.writeAsync(asset.stream, chunk);
       // Count slow draining as progress so backpressure on large chunks does not trip the stall timer
@@ -357,12 +376,33 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
      *
      * It deletes the stream for the asset upon successful closure.
      */
-    const closeAssetStream = async (id: string) => {
+    const closeAssetStream = async (
+      id: string,
+      checksum?: { algorithm: 'sha256'; value: string }
+    ) => {
       if (!assets[id]) {
         throw new Error(`Failed to close asset "${id}". Asset not found.`);
       }
 
       const asset = assets[id];
+      if (this.#checksumsEnabled) {
+        if (!checksum) {
+          throw new ProviderTransferError(
+            `Asset ${id} is missing checksum in transfer end payload`
+          );
+        }
+        if (checksum.algorithm !== 'sha256') {
+          throw new ProviderTransferError(
+            `Asset ${id} checksum algorithm "${checksum.algorithm}" is not supported`
+          );
+        }
+        const actual = asset.checksumHash?.digest('hex');
+        if (!actual || actual !== checksum.value) {
+          throw new ProviderTransferError(
+            `Checksum mismatch for asset "${id}" (expected ${checksum.value}, got ${actual ?? 'none'})`
+          );
+        }
+      }
       asset.status = 'closed';
 
       await new Promise<void>((resolve, reject) => {
@@ -409,14 +449,24 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   async initTransfer(): Promise<string> {
+    const wantsChecksums = this.options.verifyChecksums === true;
     const query = this.dispatcher?.dispatchCommand({
       command: 'init',
+      ...(wantsChecksums ? { params: { transfer: 'pull', checksums: true } } : {}),
     });
 
-    const res = (await query) as Server.Payload<Server.InitMessage>;
+    const res = (await query) as
+      | (Server.Payload<Server.InitMessage> & { checksums?: boolean })
+      | null;
 
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
+    }
+    this.#checksumsEnabled = wantsChecksums && res.checksums === true;
+    if (wantsChecksums && res.checksums !== true) {
+      this.#reportWarning(
+        '[Data transfer][pull] Checksums were requested but the remote does not support checksum negotiation; continuing without checksum validation.'
+      );
     }
 
     return res.transferID;

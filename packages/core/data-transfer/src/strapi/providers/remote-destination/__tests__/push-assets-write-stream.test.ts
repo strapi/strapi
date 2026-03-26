@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { Readable } from 'stream';
 
 import type { IAsset } from '../../../../../types';
@@ -33,6 +34,15 @@ function mockPushDispatcher() {
     },
   };
 }
+
+const writeOneAsset = async (writable: NodeJS.WritableStream, asset: IAsset): Promise<void> => {
+  await new Promise<void>((resolve, reject) => {
+    writable.write(asset, (err: Error | null | undefined) => (err ? reject(err) : resolve()));
+  });
+  await new Promise<void>((resolve, reject) => {
+    writable.end((err: Error | null | undefined) => (err ? reject(err) : resolve()));
+  });
+};
 
 describe('Remote Strapi destination provider — push assets write stream', () => {
   test('flushes before asset completes when decoded payload exceeds 1MiB and uses base64 stream chunks', async () => {
@@ -115,4 +125,68 @@ describe('Remote Strapi destination provider — push assets write stream', () =
     expect(streamBatches.length).toBeGreaterThan(0);
     expect(dispatcher.dispatchTransferStep).toHaveBeenCalled();
   }, 30_000);
+
+  test('includes per-asset checksum in end row when verifyChecksums is enabled', async () => {
+    const { streamBatches, dispatcher } = mockPushDispatcher();
+    const provider = createRemoteStrapiDestinationProvider({
+      ...defaultOptions,
+      verifyChecksums: true,
+    });
+    provider.dispatcher = dispatcher as unknown as typeof provider.dispatcher;
+
+    const writable = provider.createAssetsWriteStream();
+    if (writable instanceof Promise) {
+      throw new Error('Expected synchronous Writable');
+    }
+
+    const payload = [Buffer.from('hello'), Buffer.from(' world')];
+    const stream = Readable.from(payload);
+    const asset: IAsset = {
+      filename: 'checksum.bin',
+      filepath: '/tmp/checksum.bin',
+      stats: { size: 11 } as IAsset['stats'],
+      metadata: { id: 1 },
+      stream,
+    };
+
+    await writeOneAsset(writable, asset);
+
+    const endItem = streamBatches.flat().find((i) => (i as { action: string }).action === 'end') as
+      | { checksum?: { algorithm: string; value: string } }
+      | undefined;
+
+    const expected = createHash('sha256').update(Buffer.concat(payload)).digest('hex');
+    expect(endItem?.checksum).toEqual({ algorithm: 'sha256', value: expected });
+  });
+
+  test('does not include checksum in end row when verifyChecksums is disabled', async () => {
+    const { streamBatches, dispatcher } = mockPushDispatcher();
+    const provider = createRemoteStrapiDestinationProvider({
+      ...defaultOptions,
+      verifyChecksums: false,
+    });
+    provider.dispatcher = dispatcher as unknown as typeof provider.dispatcher;
+
+    const writable = provider.createAssetsWriteStream();
+    if (writable instanceof Promise) {
+      throw new Error('Expected synchronous Writable');
+    }
+
+    const stream = Readable.from([Buffer.from('abc')]);
+    const asset: IAsset = {
+      filename: 'no-checksum.bin',
+      filepath: '/tmp/no-checksum.bin',
+      stats: { size: 3 } as IAsset['stats'],
+      metadata: { id: 1 },
+      stream,
+    };
+
+    await writeOneAsset(writable, asset);
+
+    const endItem = streamBatches.flat().find((i) => (i as { action: string }).action === 'end') as
+      | { checksum?: { algorithm: string; value: string } }
+      | undefined;
+
+    expect(endItem?.checksum).toBeUndefined();
+  });
 });

@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID, type Hash } from 'crypto';
 import { Writable, PassThrough } from 'stream';
 import type { Core } from '@strapi/types';
 
@@ -44,6 +44,9 @@ export interface PushHandler extends Handler {
    * Holds all the transferred assets for the current transfer handler (one registry per connection)
    */
   assets: { [filepath: string]: IAsset & { stream: PassThrough } };
+  // Incremental checksum state keyed by transfer asset ID
+  assetChecksums?: { [filepath: string]: Hash };
+  checksumsEnabled?: boolean;
 
   /**
    * Ochestrate and manage the transfer messages' ordering
@@ -160,6 +163,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
     this.streams = {};
     this.assets = {};
+    this.assetChecksums = {};
+    this.checksumsEnabled = false;
 
     delete this.flow;
     delete this.provider;
@@ -458,6 +463,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       if (action === 'start') {
         this.stats.assets.started += 1;
         this.assets[assetID] = { ...item.data, stream: new PassThrough() };
+        this.assetChecksums ??= {};
+        this.assetChecksums[assetID] = createHash('sha256');
         const filename = item.data?.filename ?? assetID;
         strapi.log.info(
           `[Transfer destination] Asset start #${this.stats.assets.started} id=${assetID} filename=${filename}`
@@ -467,10 +474,30 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
       if (action === 'stream') {
         const chunk = decodeTransferAssetStreamItem(item);
+        this.assetChecksums?.[assetID]?.update(chunk);
         await writeAsync(this.assets[assetID].stream, chunk);
       }
 
       if (action === 'end') {
+        if (this.checksumsEnabled) {
+          if (!item.checksum) {
+            throw new ProviderTransferError(`Missing checksum for asset "${assetID}"`);
+          }
+          if (item.checksum.algorithm !== 'sha256') {
+            throw new ProviderTransferError(
+              `Unsupported checksum algorithm "${item.checksum.algorithm}" for asset ${assetID}`
+            );
+          }
+          const checksum = this.assetChecksums?.[assetID]?.digest('hex');
+          if (!checksum || checksum !== item.checksum.value) {
+            throw new ProviderTransferError(
+              `Checksum mismatch for asset "${assetID}" (expected ${item.checksum.value}, got ${checksum ?? 'none'})`
+            );
+          }
+        }
+        if (this.assetChecksums?.[assetID]) {
+          delete this.assetChecksums[assetID];
+        }
         strapi.log.info(
           `[Transfer destination] Asset end id=${assetID} (finished=${this.stats.assets.finished + 1}/${this.stats.assets.started})`
         );
@@ -514,6 +541,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.startedAt = Date.now();
 
     this.assets = {};
+    this.assetChecksums = {};
+    this.checksumsEnabled = params?.checksums === true;
     this.streams = {};
     this.stats = {
       assets: { started: 0, finished: 0 },
@@ -525,7 +554,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.flow = createFlow(DEFAULT_TRANSFER_FLOW);
 
     this.provider = createLocalStrapiDestinationProvider({
-      ...params.options,
+      strategy: params?.options?.strategy ?? 'restore',
+      restore: params?.options?.restore ?? {},
       autoDestroy: false,
       getStrapi: () => strapi as Core.Strapi,
     });
@@ -535,7 +565,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       strapi.log.warn(message);
     };
 
-    return { transferID: this.transferID };
+    return { transferID: this.transferID, checksums: true };
   },
 
   async status(this: PushHandler) {

@@ -48,6 +48,7 @@ interface CmdOptions {
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   throttle?: number;
   force?: boolean;
+  checksums?: boolean;
 }
 /**
  * Transfer command.
@@ -65,6 +66,7 @@ export default async (opts: CmdOptions) => {
   }
 
   const strapi = await createStrapiInstance();
+  const checksumsEnabled = opts.checksums !== false;
   let source;
   let destination;
 
@@ -92,6 +94,7 @@ export default async (opts: CmdOptions) => {
         token: opts.fromToken,
       },
       ...(assetIdleTimeoutMs !== undefined ? { streamTimeout: assetIdleTimeoutMs } : {}),
+      ...(checksumsEnabled ? { verifyChecksums: true } : {}),
     });
   }
 
@@ -117,6 +120,7 @@ export default async (opts: CmdOptions) => {
       },
       strategy: 'restore',
       restore: parseRestoreFromOptions(opts),
+      ...(checksumsEnabled ? { verifyChecksums: true } : {}),
     });
   }
 

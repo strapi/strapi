@@ -181,6 +181,40 @@ describe('Transfer', () => {
         mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
       ).toHaveBeenCalled();
     });
+
+    it('passes verifyChecksums to remote destination when --checksums is enabled', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          from: undefined,
+          to: destinationUrl,
+          toToken: destinationToken,
+          checksums: true,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          verifyChecksums: true,
+        })
+      );
+    });
+
+    it('does not pass verifyChecksums to remote destination when checksums are disabled', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          from: undefined,
+          to: destinationUrl,
+          toToken: destinationToken,
+          checksums: false,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+      ).toHaveBeenCalledWith(expect.not.objectContaining({ verifyChecksums: true }));
+    });
   });
 
   describe('--from', () => {
@@ -215,6 +249,44 @@ describe('Transfer', () => {
             type: 'token',
             token: sourceToken,
           },
+        })
+      );
+    });
+
+    it('passes verifyChecksums to remote source when --checksums is enabled', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+          checksums: true,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          verifyChecksums: true,
+        })
+      );
+    });
+
+    it('does not pass verifyChecksums to remote source when checksums are disabled', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+          checksums: false,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          verifyChecksums: true,
         })
       );
     });

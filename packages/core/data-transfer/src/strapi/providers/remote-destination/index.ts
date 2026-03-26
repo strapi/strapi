@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import { WebSocket } from 'ws';
 import { once } from 'lodash/fp';
@@ -32,6 +32,8 @@ export interface IRemoteStrapiDestinationProviderOptions
     retryMessageTimeout: number; // milliseconds to wait for a response from a message
     retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
   };
+  /** Include per-asset stream checksums and require peers to validate on receive. */
+  verifyChecksums?: boolean;
 }
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
@@ -53,11 +55,14 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   #diagnostics?: IDiagnosticReporter;
 
+  #checksumsEnabled = false;
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
     this.dispatcher = null;
     this.transferID = null;
+    this.#checksumsEnabled = options.verifyChecksums === true;
 
     this.resetStats();
   }
@@ -73,15 +78,28 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   async initTransfer(): Promise<string> {
     const { strategy, restore } = this.options;
+    const wantsChecksums = this.options.verifyChecksums === true;
 
     const query = this.dispatcher?.dispatchCommand({
       command: 'init',
-      params: { options: { strategy, restore }, transfer: 'push' },
+      params: {
+        options: { strategy, restore },
+        transfer: 'push',
+        ...(wantsChecksums ? { checksums: true } : {}),
+      },
     });
 
-    const res = (await query) as Server.Payload<Server.InitMessage>;
+    const res = (await query) as
+      | (Server.Payload<Server.InitMessage> & { checksums?: boolean })
+      | null;
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
+    }
+    this.#checksumsEnabled = wantsChecksums && res.checksums === true;
+    if (wantsChecksums && res.checksums !== true) {
+      this.#reportWarning(
+        '[Data transfer][push] Checksums were requested but the remote does not support checksum negotiation; continuing without checksum validation.'
+      );
     }
 
     this.resetStats();
@@ -237,6 +255,17 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'remote-destination-provider',
+      },
+      kind: 'warning',
+    });
+  }
+
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     const { url, auth } = this.options;
@@ -358,6 +387,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   createAssetsWriteStream(): Writable | Promise<Writable> {
     let batch: Client.TransferAssetFlow[] = [];
     let hasStarted = false;
+    const verifyChecksums = this.#checksumsEnabled;
 
     const batchSize = 1024 * 1024; // 1MB;
     const batchLength = () => {
@@ -410,6 +440,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
         const assetID = randomUUID();
         const { filename, filepath, stats, stream, metadata } = asset;
+        const checksumHash = verifyChecksums ? createHash('sha256') : undefined;
 
         try {
           await safePush({
@@ -419,10 +450,17 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
           });
 
           for await (const chunk of stream) {
+            checksumHash?.update(chunk);
             await safePush(createTransferAssetStreamChunk(assetID, chunk));
           }
 
-          await safePush({ action: 'end', assetID });
+          await safePush({
+            action: 'end',
+            assetID,
+            ...(checksumHash
+              ? { checksum: { algorithm: 'sha256' as const, value: checksumHash.digest('hex') } }
+              : {}),
+          });
 
           callback();
         } catch (error) {
