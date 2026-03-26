@@ -86,6 +86,11 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   /** Mutable ref so the dispatcher and pull listeners can follow a new socket after reconnect. */
   #socketRef: { current: WebSocket | null } = { current: null };
 
+  /** Prefer ref after bootstrap/reconnect; fall back to `ws` for tests that inject `provider.ws` only. */
+  #getActiveSocket(): WebSocket | null {
+    return this.#socketRef.current ?? this.ws;
+  }
+
   /** Set from pull server `start` response for `assets` when present (for engine `getStageTotals`). */
   #cachedAssetsTotals?: StageTotalsEstimate;
 
@@ -118,7 +123,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       const parsed = JSON.parse(raw.toString());
       // If not a message related to our transfer process, ignore it
       if (!parsed.uuid || parsed?.data?.type !== 'transfer' || parsed?.data?.id !== processID) {
-        this.#socketRef.current?.once('message', listener);
+        this.#getActiveSocket()?.once('message', listener);
         return;
       }
 
@@ -143,12 +148,12 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         stream.push(item as Parameters<PassThrough['push']>[0]);
       }
 
-      this.#socketRef.current?.once('message', listener);
+      this.#getActiveSocket()?.once('message', listener);
 
       await this.#respond(uuid);
     };
 
-    this.#socketRef.current?.once('message', listener);
+    this.#getActiveSocket()?.once('message', listener);
 
     return stream;
   }
@@ -599,7 +604,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     this.#reportInfo('creating dispatcher');
     this.dispatcher = createDispatcher(
       () => {
-        const current = this.#socketRef.current;
+        const current = this.#getActiveSocket();
         if (!current) {
           throw new Error('No websocket connection found');
         }
@@ -669,7 +674,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   async #respond(uuid: string) {
     return new Promise((resolve, reject) => {
-      this.#socketRef.current?.send(JSON.stringify({ uuid }), (e) => {
+      this.#getActiveSocket()?.send(JSON.stringify({ uuid }), (e) => {
         if (e) {
           reject(e);
         } else {
