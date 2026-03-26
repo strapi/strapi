@@ -3,13 +3,22 @@ import { TRANSFER_PATH } from '../../../remote/constants';
 import { CommandMessage } from '../../../../../types/remote/protocol/client';
 import { createDispatcher } from '../../utils';
 
-jest.useFakeTimers();
 jest.mock('ws', () => ({
   WebSocket: jest.fn().mockImplementation(() => {
+    let onMessage: ((data: string) => void) | undefined;
     return {
-      ...jest.requireActual('ws').WebSocket,
-      send: jest.fn(),
-      once: jest.fn(),
+      send: jest.fn((payload: string, cb?: (err?: Error) => void) => {
+        cb?.();
+        const parsed = JSON.parse(payload) as { uuid: string };
+        queueMicrotask(() => {
+          onMessage?.(JSON.stringify({ uuid: parsed.uuid, data: null }));
+        });
+      }),
+      once: jest.fn((event: string, handler: (data: string) => void) => {
+        if (event === 'message') {
+          onMessage = handler;
+        }
+      }),
     };
   }),
 }));
@@ -19,14 +28,14 @@ afterEach(() => {
 });
 
 describe('Remote Strapi Destination Utils', () => {
-  test('Dispatch method sends payload', () => {
+  test('Dispatch method sends payload', async () => {
     const ws = new WebSocket(`ws://test/admin${TRANSFER_PATH}`);
     const message: CommandMessage = {
       type: 'command',
       command: 'status',
     };
 
-    createDispatcher(ws).dispatch(message);
+    await createDispatcher(ws).dispatch(message);
 
     expect.extend({
       toContain(receivedString, expected) {
@@ -45,7 +54,7 @@ describe('Remote Strapi Destination Utils', () => {
     expect(ws.send).toHaveBeenCalledWith(expect.toContain(message), expect.anything());
   });
 
-  test('dispatch stringifies typed arrays with websocket replacer', () => {
+  test('dispatch stringifies typed arrays with websocket replacer', async () => {
     const ws = new WebSocket(`ws://test/admin${TRANSFER_PATH}`);
     const message = {
       type: 'transfer' as const,
@@ -55,7 +64,7 @@ describe('Remote Strapi Destination Utils', () => {
       data: [{ bytes: new Uint8Array([0xde, 0xad]) }],
     };
 
-    createDispatcher(ws).dispatch(message);
+    await createDispatcher(ws).dispatch(message);
 
     // @ts-ignore
     const payload = (ws.send as jest.Mock).mock.calls[0]?.[0];
