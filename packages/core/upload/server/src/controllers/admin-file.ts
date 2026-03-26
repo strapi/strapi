@@ -38,33 +38,29 @@ export default {
       if (!obj || typeof obj !== 'object') return;
 
       if (Array.isArray(obj)) {
-        for (let i = obj.length - 1; i >= 0; i--) {
+        for (let i = obj.length - 1; i >= 0; i -= 1) {
           const val = obj[i];
           if (val === '') {
             obj.splice(i, 1);
           } else if (val !== null && typeof val === 'object') {
             cleanEmpty(val);
-            let hasKey = false;
-            for (const _k in val) {
-              hasKey = true;
-              break;
+            if (Object.keys(val).length === 0) {
+              obj.splice(i, 1);
             }
-            if (!hasKey) obj.splice(i, 1);
           }
         }
       } else {
         for (const key in obj) {
-          const val = obj[key];
-          if (val === '') {
-            delete obj[key];
-          } else if (val !== null && typeof val === 'object') {
-            cleanEmpty(val);
-            let hasKey = false;
-            for (const _k in val) {
-              hasKey = true;
-              break;
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const val = obj[key];
+            if (val === '') {
+              delete obj[key];
+            } else if (val !== null && typeof val === 'object') {
+              cleanEmpty(val);
+              if (Object.keys(val).length === 0) {
+                delete obj[key];
+              }
             }
-            if (!hasKey) delete obj[key];
           }
         }
       }
