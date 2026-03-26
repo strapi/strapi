@@ -28,6 +28,12 @@ export interface IProvider {
   getSchemas?(): MaybePromise<Record<string, Struct.Schema> | null>; // returns the schemas for the schema validation
 
   beforeTransfer?(): MaybePromise<void>; // called immediately before transfer stages are run
+
+  /**
+   * After bootstrap, remote providers may expose the last negotiated resume checkpoint
+   * (e.g. completed stages) so the transfer engine can skip work when resuming.
+   */
+  getResumeCheckpoint?(): Record<string, unknown> | null;
 }
 
 export interface ISourceProvider extends IProvider {

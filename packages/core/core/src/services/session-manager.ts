@@ -25,8 +25,21 @@ export interface SessionData {
   status?: 'active' | 'rotated' | 'revoked';
   expiresAt: Date;
   absoluteExpiresAt?: Date | null;
+  metadata?: Record<string, unknown>;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface CreateSessionInput {
+  userId: string;
+  origin: string;
+  sessionId?: string;
+  deviceId?: string;
+  type?: 'refresh' | 'session';
+  status?: 'active' | 'rotated' | 'revoked';
+  expiresAt?: Date;
+  absoluteExpiresAt?: Date | null;
+  metadata?: Record<string, unknown>;
 }
 
 export interface RefreshTokenPayload {
@@ -172,6 +185,22 @@ class OriginSessionManager {
   async isSessionActive(sessionId: string): Promise<boolean> {
     return this.sessionManager.isSessionActive(sessionId, this.origin);
   }
+
+  async createSession(input: Omit<CreateSessionInput, 'origin'>): Promise<SessionData> {
+    return this.sessionManager.createSession({ ...input, origin: this.origin });
+  }
+
+  async getSession(sessionId: string): Promise<SessionData | null> {
+    return this.sessionManager.getSession(sessionId, this.origin);
+  }
+
+  async updateSessionMetadata(
+    sessionId: string,
+    metadata: Record<string, unknown>,
+    options?: { merge?: boolean }
+  ): Promise<void> {
+    return this.sessionManager.updateSessionMetadata(sessionId, this.origin, metadata, options);
+  }
 }
 
 class SessionManager {
@@ -201,6 +230,18 @@ class SessionManager {
    */
   hasOrigin(origin: string): boolean {
     return this.originConfigs.has(origin);
+  }
+
+  assertValidOrigin(origin: string): void {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+  }
+
+  private static isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
 
   /**
@@ -282,11 +323,7 @@ class SessionManager {
     origin: string,
     options?: { type?: 'refresh' | 'session' }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
-    if (!origin || typeof origin !== 'string') {
-      throw new Error(
-        'SessionManager: Origin parameter is required and must be a non-empty string'
-      );
-    }
+    this.assertValidOrigin(origin);
 
     await this.maybeCleanupExpired();
 
@@ -350,11 +387,7 @@ class SessionManager {
     token: string,
     origin: string
   ): { isValid: true; payload: AccessTokenPayload } | { isValid: false; payload: null } {
-    if (!origin || typeof origin !== 'string') {
-      throw new Error(
-        'SessionManager: Origin parameter is required and must be a non-empty string'
-      );
-    }
+    this.assertValidOrigin(origin);
 
     try {
       const config = this.getConfigForOrigin(origin);
@@ -377,11 +410,7 @@ class SessionManager {
   }
 
   async validateRefreshToken(token: string, origin: string): Promise<ValidateRefreshTokenResult> {
-    if (!origin || typeof origin !== 'string') {
-      throw new Error(
-        'SessionManager: Origin parameter is required and must be a non-empty string'
-      );
-    }
+    this.assertValidOrigin(origin);
 
     try {
       const config = this.getConfigForOrigin(origin);
@@ -444,11 +473,7 @@ class SessionManager {
     refreshToken: string,
     origin: string
   ): Promise<{ token: string } | { error: string }> {
-    if (!origin || typeof origin !== 'string') {
-      throw new Error(
-        'SessionManager: Origin parameter is required and must be a non-empty string'
-      );
-    }
+    this.assertValidOrigin(origin);
 
     const validation = await this.validateRefreshToken(refreshToken, origin);
 
@@ -490,11 +515,7 @@ class SessionManager {
       }
     | { error: string }
   > {
-    if (!origin || typeof origin !== 'string') {
-      throw new Error(
-        'SessionManager: Origin parameter is required and must be a non-empty string'
-      );
-    }
+    this.assertValidOrigin(origin);
 
     try {
       const config = this.getConfigForOrigin(origin);
@@ -659,6 +680,64 @@ class SessionManager {
 
     return true;
   }
+
+  async createSession(input: CreateSessionInput): Promise<SessionData> {
+    this.assertValidOrigin(input.origin);
+    const config = this.getConfigForOrigin(input.origin);
+    const now = Date.now();
+    const type = input.type ?? 'session';
+    const sessionId = input.sessionId ?? this.generateSessionId();
+    const idleLifespan =
+      type === 'refresh' ? config.idleRefreshTokenLifespan : config.idleSessionLifespan;
+    const maxLifespan =
+      type === 'refresh' ? config.maxRefreshTokenLifespan : config.maxSessionLifespan;
+
+    return this.provider.create({
+      userId: input.userId,
+      origin: input.origin,
+      sessionId,
+      ...(input.deviceId ? { deviceId: input.deviceId } : {}),
+      childId: null,
+      type,
+      status: input.status ?? 'active',
+      expiresAt: input.expiresAt ?? new Date(now + idleLifespan * 1000),
+      absoluteExpiresAt: input.absoluteExpiresAt ?? new Date(now + maxLifespan * 1000),
+      metadata: input.metadata,
+    });
+  }
+
+  async getSession(sessionId: string, origin: string): Promise<SessionData | null> {
+    this.assertValidOrigin(origin);
+    const session = await this.provider.findBySessionId(sessionId);
+    if (!session || session.origin !== origin) {
+      return null;
+    }
+    return session;
+  }
+
+  async updateSessionMetadata(
+    sessionId: string,
+    origin: string,
+    metadata: Record<string, unknown>,
+    options?: { merge?: boolean }
+  ): Promise<void> {
+    this.assertValidOrigin(origin);
+    const session = await this.getSession(sessionId, origin);
+    if (!session) {
+      throw new Error(`SessionManager: Session '${sessionId}' not found for origin '${origin}'`);
+    }
+
+    let nextMetadata: Record<string, unknown>;
+    if (options?.merge === false) {
+      nextMetadata = metadata;
+    } else if (SessionManager.isRecord(session.metadata)) {
+      nextMetadata = { ...session.metadata, ...metadata };
+    } else {
+      nextMetadata = metadata;
+    }
+
+    await this.provider.updateBySessionId(sessionId, { metadata: nextMetadata });
+  }
 }
 
 const createDatabaseProvider = (db: Database, contentType: string): SessionProvider => {
@@ -675,11 +754,7 @@ const createSessionManager = ({
 
   // Add callable functionality
   const fluentApi = (origin: string): OriginSessionManager => {
-    if (!origin || typeof origin !== 'string') {
-      throw new Error(
-        'SessionManager: Origin parameter is required and must be a non-empty string'
-      );
-    }
+    sessionManager.assertValidOrigin(origin);
     return new OriginSessionManager(sessionManager, origin);
   };
 
@@ -688,6 +763,9 @@ const createSessionManager = ({
   api.generateSessionId = sessionManager.generateSessionId.bind(sessionManager);
   api.defineOrigin = sessionManager.defineOrigin.bind(sessionManager);
   api.hasOrigin = sessionManager.hasOrigin.bind(sessionManager);
+  api.createSession = sessionManager.createSession.bind(sessionManager);
+  api.getSession = sessionManager.getSession.bind(sessionManager);
+  api.updateSessionMetadata = sessionManager.updateSessionMetadata.bind(sessionManager);
   // Note: isSessionActive is origin-scoped and exposed on OriginSessionManager only
 
   // Forward the cleanupThreshold getter (used in tests)

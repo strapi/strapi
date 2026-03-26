@@ -27,6 +27,11 @@ export interface PullHandler extends Handler {
 
   streams?: { [stage in TransferStage]?: Readable };
   checksumsEnabled?: boolean;
+  sessionId?: string;
+  resumeCheckpoint?: Record<string, unknown>;
+
+  /** Prevents duplicate teardown when both ws `error` and `close` fire. */
+  disconnectHandled?: boolean;
 
   assertValidTransferAction(action: string): asserts action is PullTransferAction;
 
@@ -35,6 +40,10 @@ export interface PullHandler extends Handler {
   onTransferStep(msg: Protocol.Client.TransferPullMessage): Promise<unknown> | unknown;
 
   createReadableStreamForStep(step: TransferStage): Promise<void>;
+  persistResumeCheckpoint(
+    patch: Record<string, unknown>,
+    options?: { merge?: boolean }
+  ): Promise<void>;
 
   flush(stage: TransferStage, id: string): Promise<void> | void;
 }
@@ -53,8 +62,45 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     this.streams = {};
     this.checksumsEnabled = false;
+    this.sessionId = undefined;
+    this.resumeCheckpoint = undefined;
 
     delete this.provider;
+  },
+  async persistResumeCheckpoint(this: PullHandler, patch, options) {
+    if (!this.sessionId) {
+      return;
+    }
+
+    await strapi
+      .sessionManager('data-transfer')
+      .updateSessionMetadata(this.sessionId, patch, options ?? { merge: true });
+  },
+
+  teardown(this: PullHandler) {
+    if (this.disconnectHandled) {
+      return;
+    }
+    this.disconnectHandled = true;
+
+    if (this.streams) {
+      for (const stream of Object.values(this.streams)) {
+        if (stream && typeof stream.destroy === 'function' && !stream.readableEnded) {
+          stream.destroy();
+        }
+      }
+    }
+
+    proto.teardown.call(this);
+  },
+
+  onClose(this: Handler) {
+    this.teardown();
+  },
+
+  onError(this: Handler, err) {
+    this.teardown();
+    strapi.log.error(err);
   },
 
   onInfo(message) {
@@ -75,19 +121,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         origin: 'pull-handler',
       },
       kind: 'warning',
-    });
-  },
-
-  onError(error) {
-    this.diagnostics?.report({
-      details: {
-        message: error.message,
-        error,
-        createdAt: new Date(),
-        name: error.name,
-        severity: 'fatal',
-      },
-      kind: 'error',
     });
   },
 
@@ -200,7 +233,16 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         strapi?.log.error(
           `[Data transfer] Message confirmation failed: ${(error as Error)?.message}`
         );
-        this.onError(error as Error);
+        this.diagnostics?.report({
+          details: {
+            message: (error as Error).message,
+            error: error as Error,
+            createdAt: new Date(),
+            name: (error as Error).name,
+            severity: 'fatal',
+          },
+          kind: 'error',
+        });
       }
     };
 
@@ -282,6 +324,12 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       }
 
       delete this.streams?.[step];
+      const completedStages = Array.from(
+        new Set([...((this.resumeCheckpoint?.completedStages as string[] | undefined) ?? []), step])
+      );
+      const checkpoint = { ...(this.resumeCheckpoint ?? {}), completedStages };
+      this.resumeCheckpoint = checkpoint;
+      await this.persistResumeCheckpoint({ checkpoint }, { merge: true });
 
       return { ok: true };
     }
@@ -384,8 +432,40 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       autoDestroy: false,
       getStrapi: () => strapi as Core.Strapi,
     });
+    const transferSessionManager = strapi.sessionManager('data-transfer');
+    const resumedSession =
+      params?.resume === true && params?.resumeSessionId
+        ? await transferSessionManager.getSession(params.resumeSessionId)
+        : null;
+    const checkpoint =
+      resumedSession?.metadata && typeof resumedSession.metadata === 'object'
+        ? ((resumedSession.metadata as Record<string, unknown>).checkpoint as Record<
+            string,
+            unknown
+          >)
+        : undefined;
+    this.sessionId =
+      resumedSession?.sessionId ??
+      (
+        await transferSessionManager.createSession({
+          userId: '0',
+          type: 'session',
+          metadata: {
+            kind: 'data-transfer',
+            transfer: TRANSFER_KIND,
+            checkpoint: { completedStages: [], completedAssets: [] },
+          },
+        })
+      ).sessionId;
+    this.resumeCheckpoint = checkpoint ?? { completedStages: [], completedAssets: [] };
 
-    return { transferID: this.transferID, checksums: true };
+    return {
+      transferID: this.transferID,
+      checksums: true,
+      resume: true,
+      sessionId: this.sessionId,
+      checkpoint: this.resumeCheckpoint,
+    };
   },
 
   async end(

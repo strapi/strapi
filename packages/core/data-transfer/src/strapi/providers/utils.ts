@@ -23,25 +23,62 @@ interface IDispatchOptions {
 
 type Dispatch<T> = Omit<T, 'transferID' | 'uuid'>;
 
+export type WebSocketRef = WebSocket | (() => WebSocket);
+
+export type DispatcherReconnectOptions = {
+  /** Called after the socket is lost mid-request; should open a new socket and re-handshake (e.g. init + bootstrap). */
+  reconnect: () => Promise<void>;
+  isEnabled: () => boolean;
+  /**
+   * Delay (ms) before the next reconnect attempt after `reconnect()` throws (e.g. host still down).
+   * Attempt is 0-based after the first failure.
+   */
+  reconnectBackoffMs?: (attempt: number) => number;
+};
+
+const CONNECTION_LOST_MESSAGE = 'WebSocket connection lost';
+
+const isConnectionLossError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  return error.message === CONNECTION_LOST_MESSAGE;
+};
+
+const defaultReconnectBackoffMs = (attempt: number): number =>
+  Math.min(60_000, 1000 * 2 ** Math.min(attempt, 6));
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+const getWebSocketFromRef = (ref: WebSocketRef): WebSocket => {
+  const ws = typeof ref === 'function' ? ref() : ref;
+  if (!ws) {
+    throw new Error('No websocket connection found');
+  }
+  return ws;
+};
+
 export const createDispatcher = (
-  ws: WebSocket,
+  wsOrRef: WebSocketRef,
   retryMessageOptions = {
     retryMessageMaxRetries: 5,
     retryMessageTimeout: 30000,
   },
-  reportInfo?: (message: string) => void
+  reportInfo?: (message: string) => void,
+  reconnectOptions?: DispatcherReconnectOptions
 ) => {
   const state: IDispatcherState = {};
 
   type DispatchMessage = Dispatch<Client.Message>;
 
-  const dispatch = async <U = null>(
+  const dispatchOnce = async <U = null>(
     message: DispatchMessage,
     options: IDispatchOptions = {}
   ): Promise<U | null> => {
-    if (!ws) {
-      throw new Error('No websocket connection found');
-    }
+    const ws = getWebSocketFromRef(wsOrRef);
 
     return new Promise<U | null>((resolve, reject) => {
       const uuid = randomUUID();
@@ -63,27 +100,68 @@ export const createDispatcher = (
         );
       }
       const stringifiedPayload = JSON.stringify(payload, replacerForTransferWebSocket);
-      ws.send(stringifiedPayload, (error) => {
-        if (error) {
-          reject(error);
+
+      const intervalHolder: { current: ReturnType<typeof setInterval> | undefined } = {
+        current: undefined,
+      };
+
+      const cleanupListeners = () => {
+        ws.removeListener('close', onClose);
+        ws.removeListener('error', onError);
+      };
+
+      const clearRetryInterval = () => {
+        if (intervalHolder.current) {
+          clearInterval(intervalHolder.current);
+          intervalHolder.current = undefined;
         }
-      });
+      };
+
+      const onClose = () => {
+        cleanupListeners();
+        clearRetryInterval();
+        reject(new ProviderTransferError(CONNECTION_LOST_MESSAGE));
+      };
+
+      const onError = () => {
+        cleanupListeners();
+        clearRetryInterval();
+        reject(new ProviderTransferError(CONNECTION_LOST_MESSAGE));
+      };
+
+      ws.once('close', onClose);
+      ws.once('error', onError);
+
       const { retryMessageMaxRetries, retryMessageTimeout } = retryMessageOptions;
       const sendPeriodically = () => {
+        const activeWs = getWebSocketFromRef(wsOrRef);
         if (numberOfTimesMessageWasSent <= retryMessageMaxRetries) {
           numberOfTimesMessageWasSent += 1;
-          ws.send(stringifiedPayload, (error) => {
+          activeWs.send(stringifiedPayload, (error) => {
             if (error) {
-              reject(error);
+              cleanupListeners();
+              clearRetryInterval();
+              reject(new ProviderTransferError(CONNECTION_LOST_MESSAGE));
             }
           });
         } else {
+          cleanupListeners();
+          clearRetryInterval();
           reject(new ProviderError('error', 'Request timed out'));
         }
       };
-      const interval = setInterval(sendPeriodically, retryMessageTimeout);
+      intervalHolder.current = setInterval(sendPeriodically, retryMessageTimeout);
+
+      ws.send(stringifiedPayload, (error) => {
+        if (error) {
+          cleanupListeners();
+          clearRetryInterval();
+          reject(new ProviderTransferError(CONNECTION_LOST_MESSAGE));
+        }
+      });
 
       const onResponse = (raw: RawData) => {
+        const activeWs = getWebSocketFromRef(wsOrRef);
         const response: Server.Message<U> = JSON.parse(raw.toString());
         if (message.type === 'command') {
           reportInfo?.(
@@ -96,29 +174,73 @@ export const createDispatcher = (
           );
         }
         if (response.uuid === uuid) {
-          clearInterval(interval);
+          clearRetryInterval();
+          cleanupListeners();
           if (response.error) {
-            const message = response.error.message;
+            const errMessage = response.error.message;
             const details = response.error.details?.details as ProviderErrorDetails;
             const step = response.error.details?.step;
-            let error = new ProviderError('error', message, details);
+            let err = new ProviderError('error', errMessage, details);
             if (step === 'transfer') {
-              error = new ProviderTransferError(message, details);
+              err = new ProviderTransferError(errMessage, details);
             } else if (step === 'validation') {
-              error = new ProviderValidationError(message, details);
+              err = new ProviderValidationError(errMessage, details);
             } else if (step === 'initialization') {
-              error = new ProviderInitializationError(message);
+              err = new ProviderInitializationError(errMessage);
             }
-            return reject(error);
+            return reject(err);
           }
           resolve(response.data ?? null);
         } else {
-          ws.once('message', onResponse);
+          activeWs.once('message', onResponse);
         }
       };
 
       ws.once('message', onResponse);
     });
+  };
+
+  const dispatch = async <U = null>(
+    message: DispatchMessage,
+    options: IDispatchOptions = {}
+  ): Promise<U | null> => {
+    let reconnectFailureAttempt = 0;
+
+    const reconnectUntilSuccess = async (opts: DispatcherReconnectOptions) => {
+      let reconnectSucceeded = false;
+      while (!reconnectSucceeded) {
+        try {
+          await opts.reconnect();
+          reconnectFailureAttempt = 0;
+          reconnectSucceeded = true;
+        } catch (reconnectErr) {
+          const backoff =
+            opts.reconnectBackoffMs?.(reconnectFailureAttempt) ??
+            defaultReconnectBackoffMs(reconnectFailureAttempt);
+          reportInfo?.(
+            `[Data transfer] Reconnect failed (${String(reconnectErr)}); next attempt in ${backoff}ms`
+          );
+          reconnectFailureAttempt += 1;
+          await sleep(backoff);
+        }
+      }
+    };
+
+    const tryDispatchWithReconnect = async (): Promise<U | null> => {
+      try {
+        return await dispatchOnce<U>(message, options);
+      } catch (e) {
+        if (!reconnectOptions?.isEnabled() || !isConnectionLossError(e)) {
+          throw e;
+        }
+
+        reportInfo?.('[Data transfer] Connection lost; attempting reconnect');
+        await reconnectUntilSuccess(reconnectOptions);
+        return tryDispatchWithReconnect();
+      }
+    };
+
+    return tryDispatchWithReconnect();
   };
 
   const dispatchCommand = <U extends Client.Command>(
@@ -184,6 +306,31 @@ type WebsocketParams = ConstructorParameters<typeof WebSocket>;
 type Address = WebsocketParams[0];
 type Options = WebsocketParams[2];
 
+/**
+ * Receives diagnostics frames sent by the server on the same WebSocket as transfer messages.
+ */
+export const attachTransferDiagnosticsChannel = (
+  ws: WebSocket,
+  diagnostics?: IDiagnosticReporter
+): void => {
+  if (!diagnostics) {
+    return;
+  }
+
+  ws.on('message', (raw: RawData) => {
+    try {
+      const response: Server.Message = JSON.parse(raw.toString());
+      if (response.diagnostic) {
+        diagnostics.report({
+          ...response.diagnostic,
+        });
+      }
+    } catch {
+      // ignore non-JSON frames
+    }
+  });
+};
+
 export const connectToWebsocket = (
   address: Address,
   options?: Options,
@@ -192,6 +339,7 @@ export const connectToWebsocket = (
   return new Promise((resolve, reject) => {
     const server = new WebSocket(address, options);
     server.once('open', () => {
+      attachTransferDiagnosticsChannel(server, diagnostics);
       resolve(server);
     });
 
@@ -225,15 +373,6 @@ export const connectToWebsocket = (
           `Failed to initialize the connection: Unexpected server response ${res.statusCode}`
         )
       );
-    });
-
-    server.on('message', (raw: RawData) => {
-      const response: Server.Message = JSON.parse(raw.toString());
-      if (response.diagnostic) {
-        diagnostics?.report({
-          ...response.diagnostic,
-        });
-      }
     });
 
     server.once('error', (err) => {

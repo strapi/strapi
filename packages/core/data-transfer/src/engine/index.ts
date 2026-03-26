@@ -586,6 +586,20 @@ class TransferEngine<
     return !included;
   }
 
+  /**
+   * When a remote provider negotiated resume and returned a checkpoint (e.g. completedStages),
+   * skip re-streaming those stages. Used after reconnect when the server still reports progress.
+   */
+  #shouldSkipResumeStage(stage: TransferStage): boolean {
+    const checkpoint =
+      this.destinationProvider.getResumeCheckpoint?.() ??
+      this.sourceProvider.getResumeCheckpoint?.();
+    if (!checkpoint || !Array.isArray(checkpoint.completedStages)) {
+      return false;
+    }
+    return (checkpoint.completedStages as string[]).includes(stage);
+  }
+
   async #transferStage(options: {
     stage: TransferStage;
     source?: Readable;
@@ -895,6 +909,11 @@ class TransferEngine<
     if (this.shouldSkipStage(stage)) {
       return;
     }
+    if (this.#shouldSkipResumeStage(stage)) {
+      this.reportInfo(`Skipping stage "${stage}" (resume checkpoint)`);
+      this.#emitStageUpdate('skip', stage);
+      return;
+    }
 
     const source = await this.sourceProvider.createSchemasReadStream?.();
     const destination = await this.destinationProvider.createSchemasWriteStream?.();
@@ -910,6 +929,11 @@ class TransferEngine<
   async transferEntities(): Promise<void> {
     const stage: TransferStage = 'entities';
     if (this.shouldSkipStage(stage)) {
+      return;
+    }
+    if (this.#shouldSkipResumeStage(stage)) {
+      this.reportInfo(`Skipping stage "${stage}" (resume checkpoint)`);
+      this.#emitStageUpdate('skip', stage);
       return;
     }
 
@@ -957,6 +981,11 @@ class TransferEngine<
     if (this.shouldSkipStage(stage)) {
       return;
     }
+    if (this.#shouldSkipResumeStage(stage)) {
+      this.reportInfo(`Skipping stage "${stage}" (resume checkpoint)`);
+      this.#emitStageUpdate('skip', stage);
+      return;
+    }
 
     const source = await this.sourceProvider.createLinksReadStream?.();
     const destination = await this.destinationProvider.createLinksWriteStream?.();
@@ -993,6 +1022,11 @@ class TransferEngine<
   async transferAssets(): Promise<void> {
     const stage: TransferStage = 'assets';
     if (this.shouldSkipStage(stage)) {
+      return;
+    }
+    if (this.#shouldSkipResumeStage(stage)) {
+      this.reportInfo(`Skipping stage "${stage}" (resume checkpoint)`);
+      this.#emitStageUpdate('skip', stage);
       return;
     }
 
@@ -1038,6 +1072,11 @@ class TransferEngine<
   async transferConfiguration(): Promise<void> {
     const stage: TransferStage = 'configuration';
     if (this.shouldSkipStage(stage)) {
+      return;
+    }
+    if (this.#shouldSkipResumeStage(stage)) {
+      this.reportInfo(`Skipping stage "${stage}" (resume checkpoint)`);
+      this.#emitStageUpdate('skip', stage);
       return;
     }
 

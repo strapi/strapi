@@ -32,6 +32,7 @@ describe('SessionManager Factory', () => {
       }),
       findOne: jest.fn(),
       findMany: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
       deleteMany: jest.fn(),
     };
@@ -340,6 +341,86 @@ describe('SessionManager Factory', () => {
 
       expect(result).toBe(true);
       expect(mockQuery.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('session metadata', () => {
+    const sessionId = 'abcdef1234567890abcdef1234567890';
+    const userId = 'user-abc';
+
+    it('creates a session with metadata using origin-scoped API', async () => {
+      const now = new Date();
+      mockQuery.create.mockResolvedValue({
+        userId,
+        sessionId,
+        origin: 'admin',
+        expiresAt: now,
+        absoluteExpiresAt: new Date(now.getTime() + 60_000),
+        metadata: { checkpoint: { stage: 'entities' } },
+      });
+
+      const result = await sessionManager('admin').createSession({
+        userId,
+        sessionId,
+        metadata: { checkpoint: { stage: 'entities' } },
+      });
+
+      expect(mockQuery.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId,
+          sessionId,
+          origin: 'admin',
+          metadata: { checkpoint: { stage: 'entities' } },
+        }),
+      });
+      expect(result.metadata).toEqual({ checkpoint: { stage: 'entities' } });
+    });
+
+    it('updates metadata by merging with existing metadata by default', async () => {
+      mockQuery.findOne.mockResolvedValue({
+        userId,
+        sessionId,
+        origin: 'admin',
+        expiresAt: new Date(Date.now() + 60_000),
+        metadata: { checkpoint: { stage: 'entities' }, retries: 1 },
+      });
+
+      await sessionManager('admin').updateSessionMetadata(sessionId, {
+        retries: 2,
+        lastStage: 'links',
+      });
+
+      expect(mockQuery.update).toHaveBeenCalledWith({
+        where: { sessionId },
+        data: {
+          metadata: {
+            checkpoint: { stage: 'entities' },
+            retries: 2,
+            lastStage: 'links',
+          },
+        },
+      });
+    });
+
+    it('updates metadata by replacing when merge is disabled', async () => {
+      mockQuery.findOne.mockResolvedValue({
+        userId,
+        sessionId,
+        origin: 'admin',
+        expiresAt: new Date(Date.now() + 60_000),
+        metadata: { previous: true },
+      });
+
+      await sessionManager('admin').updateSessionMetadata(
+        sessionId,
+        { checkpoint: { stage: 'assets' } },
+        { merge: false }
+      );
+
+      expect(mockQuery.update).toHaveBeenCalledWith({
+        where: { sessionId },
+        data: { metadata: { checkpoint: { stage: 'assets' } } },
+      });
     });
   });
 
@@ -739,6 +820,7 @@ describe('DatabaseSessionProvider', () => {
       create: jest.fn(),
       findOne: jest.fn(),
       findMany: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
       deleteMany: jest.fn(),
     };

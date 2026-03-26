@@ -145,6 +145,29 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     jwtOptions: options,
   });
 
+  strapi.sessionManager.defineOrigin('data-transfer', {
+    jwtSecret: strapi.config.get('admin.auth.secret'),
+    accessTokenLifespan: strapi.config.get('admin.transfer.sessions.accessTokenLifespan', 30 * 60),
+    maxRefreshTokenLifespan: strapi.config.get(
+      'admin.transfer.sessions.maxRefreshTokenLifespan',
+      DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN
+    ),
+    idleRefreshTokenLifespan: strapi.config.get(
+      'admin.transfer.sessions.idleRefreshTokenLifespan',
+      DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN
+    ),
+    maxSessionLifespan: strapi.config.get(
+      'admin.transfer.sessions.maxSessionLifespan',
+      DEFAULT_MAX_SESSION_LIFESPAN
+    ),
+    idleSessionLifespan: strapi.config.get(
+      'admin.transfer.sessions.idleSessionLifespan',
+      DEFAULT_IDLE_SESSION_LIFESPAN
+    ),
+    algorithm: options?.algorithm,
+    jwtOptions: options,
+  });
+
   const isProduction = process.env.NODE_ENV === 'production';
   const adminCookieSecure = strapi.config.get('admin.auth.cookie.secure');
   if (isProduction && adminCookieSecure === false) {

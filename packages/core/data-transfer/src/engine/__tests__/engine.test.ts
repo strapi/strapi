@@ -431,6 +431,47 @@ describe('Transfer engine', () => {
     });
   });
 
+  describe('resume checkpoint', () => {
+    test('skips stages listed in destination getResumeCheckpoint completedStages', async () => {
+      const destination = createDestination({
+        getResumeCheckpoint: jest.fn().mockReturnValue({
+          completedStages: ['schemas', 'entities'],
+        }),
+      });
+      const engine = createTransferEngine(completeSource, destination, defaultOptions);
+      await engine.transfer();
+
+      expect(completeSource.createSchemasReadStream).toHaveBeenCalledTimes(0);
+      expect(completeSource.createEntitiesReadStream).toHaveBeenCalledTimes(0);
+      expect(completeSource.createAssetsReadStream).toHaveBeenCalledTimes(1);
+      expect(completeSource.createLinksReadStream).toHaveBeenCalledTimes(1);
+      expect(completeSource.createConfigurationReadStream).toHaveBeenCalledTimes(1);
+
+      expect(destination.createSchemasWriteStream).toHaveBeenCalledTimes(0);
+      expect(destination.createEntitiesWriteStream).toHaveBeenCalledTimes(0);
+      expect(destination.createAssetsWriteStream).toHaveBeenCalledTimes(1);
+      expect(destination.createLinksWriteStream).toHaveBeenCalledTimes(1);
+      expect(destination.createConfigurationWriteStream).toHaveBeenCalledTimes(1);
+    });
+
+    test('uses destination checkpoint only when both providers expose getResumeCheckpoint', async () => {
+      const destination = createDestination({
+        getResumeCheckpoint: jest.fn().mockReturnValue({
+          completedStages: ['schemas'],
+        }),
+      });
+      const source = createSource();
+      source.getResumeCheckpoint = jest.fn().mockReturnValue({
+        completedStages: ['entities'],
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+      await engine.transfer();
+
+      expect(source.createSchemasReadStream).toHaveBeenCalledTimes(0);
+      expect(source.createEntitiesReadStream).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('bootstrap', () => {
     test('works for providers without a bootstrap', async () => {
       const engine = createTransferEngine(minimalSource, minimalDestination, defaultOptions);

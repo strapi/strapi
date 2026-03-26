@@ -95,6 +95,7 @@ export default async (opts: CmdOptions) => {
       },
       ...(assetIdleTimeoutMs !== undefined ? { streamTimeout: assetIdleTimeoutMs } : {}),
       ...(checksumsEnabled ? { verifyChecksums: true } : {}),
+      resumeOnReconnect: true,
     });
   }
 
@@ -121,6 +122,7 @@ export default async (opts: CmdOptions) => {
       strategy: 'restore',
       restore: parseRestoreFromOptions(opts),
       ...(checksumsEnabled ? { verifyChecksums: true } : {}),
+      resumeOnReconnect: true,
     });
   }
 

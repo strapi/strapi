@@ -34,6 +34,8 @@ export interface IRemoteStrapiDestinationProviderOptions
   };
   /** Include per-asset stream checksums and require peers to validate on receive. */
   verifyChecksums?: boolean;
+  /** Request resume-on-reconnect capability negotiation (future reconnect flow). */
+  resumeOnReconnect?: boolean;
 }
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
@@ -57,12 +59,22 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   #checksumsEnabled = false;
 
+  #resumeEnabled = false;
+
+  #resumeSessionId: string | null = null;
+
+  #resumeCheckpoint: Record<string, unknown> | null = null;
+
+  /** Mutable ref so the dispatcher can follow a new socket after reconnect. */
+  #socketRef: { current: WebSocket | null } = { current: null };
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
     this.dispatcher = null;
     this.transferID = null;
     this.#checksumsEnabled = options.verifyChecksums === true;
+    this.#resumeEnabled = options.resumeOnReconnect === true;
 
     this.resetStats();
   }
@@ -79,6 +91,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   async initTransfer(): Promise<string> {
     const { strategy, restore } = this.options;
     const wantsChecksums = this.options.verifyChecksums === true;
+    const wantsResume = this.options.resumeOnReconnect === true;
 
     const query = this.dispatcher?.dispatchCommand({
       command: 'init',
@@ -86,11 +99,18 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         options: { strategy, restore },
         transfer: 'push',
         ...(wantsChecksums ? { checksums: true } : {}),
+        ...(wantsResume ? { resume: true } : {}),
+        ...(wantsResume && this.#resumeSessionId ? { resumeSessionId: this.#resumeSessionId } : {}),
       },
     });
 
     const res = (await query) as
-      | (Server.Payload<Server.InitMessage> & { checksums?: boolean })
+      | (Server.Payload<Server.InitMessage> & {
+          checksums?: boolean;
+          resume?: boolean;
+          sessionId?: string;
+          checkpoint?: Record<string, unknown>;
+        })
       | null;
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
@@ -99,6 +119,19 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     if (wantsChecksums && res.checksums !== true) {
       this.#reportWarning(
         '[Data transfer][push] Checksums were requested but the remote does not support checksum negotiation; continuing without checksum validation.'
+      );
+    }
+    this.#resumeEnabled = wantsResume && res.resume === true;
+    if (wantsResume && res.resume !== true) {
+      this.#reportWarning(
+        '[Data transfer][push] Reconnect-resume was requested but the remote does not support reconnect negotiation; continuing in non-resumable mode.'
+      );
+    }
+    this.#resumeSessionId = this.#resumeEnabled ? (res.sessionId ?? null) : null;
+    this.#resumeCheckpoint = this.#resumeEnabled ? (res.checkpoint ?? null) : null;
+    if (this.#resumeEnabled && this.#resumeCheckpoint) {
+      this.#reportInfo(
+        '[Data transfer][push] Resume checkpoint restored from remote session state'
       );
     }
 
@@ -266,12 +299,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
-  async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
-    this.#diagnostics = diagnostics;
+  async #openWebSocket(): Promise<WebSocket> {
     const { url, auth } = this.options;
     const validProtocols = ['https:', 'http:'];
-
-    let ws: WebSocket;
 
     if (!validProtocols.includes(url.protocol)) {
       throw new ProviderValidationError(`Invalid protocol "${url.protocol}"`, {
@@ -288,35 +318,71 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     )}${TRANSFER_PATH}/push`;
 
     this.#reportInfo('establishing websocket connection');
-    // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = await connectToWebsocket(wsUrl, undefined, this.#diagnostics);
+      return connectToWebsocket(wsUrl, undefined, this.#diagnostics);
     }
 
-    // Common token auth, this should be the main auth method
-    else if (auth.type === 'token') {
+    if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = await connectToWebsocket(wsUrl, { headers }, this.#diagnostics);
+      return connectToWebsocket(wsUrl, { headers }, this.#diagnostics);
     }
 
-    // Invalid auth method provided
-    else {
-      throw new ProviderValidationError('Auth method not available', {
-        check: 'auth.type',
-        details: {
-          auth: auth.type,
-        },
-      });
+    throw new ProviderValidationError('Auth method not available', {
+      check: 'auth.type',
+      details: {
+        auth: auth.type,
+      },
+    });
+  }
+
+  /**
+   * Opens a new WebSocket, re-runs init (with resumeSessionId when negotiated), bootstrap, and updates transfer id on the dispatcher.
+   * Used after connection loss when resume is enabled.
+   */
+  async #reconnectWebSocketAndResume(): Promise<void> {
+    this.#reportInfo('[Data transfer][push] Reconnecting WebSocket after connection loss');
+    const ws = await this.#openWebSocket();
+    this.ws = ws;
+    this.#socketRef.current = ws;
+
+    if (!this.dispatcher) {
+      throw new ProviderTransferError('Internal error: dispatcher missing during reconnect');
     }
+
+    this.#reportInfo('established websocket connection (reconnect)');
+    this.transferID = await this.initTransfer();
+    this.#reportInfo(`re-initialized transfer ${this.transferID}`);
+
+    this.dispatcher.setTransferProperties({ id: this.transferID, kind: 'push' });
+    await this.dispatcher.dispatchTransferAction('bootstrap');
+  }
+
+  async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
+    this.#diagnostics = diagnostics;
+
+    const ws = await this.#openWebSocket();
 
     this.#reportInfo('established websocket connection');
 
     this.ws = ws;
+    this.#socketRef.current = ws;
     const { retryMessageOptions } = this.options;
 
     this.#reportInfo('creating dispatcher');
-    this.dispatcher = createDispatcher(this.ws, retryMessageOptions, (message: string) =>
-      this.#reportInfo(message)
+    this.dispatcher = createDispatcher(
+      () => {
+        const current = this.#socketRef.current;
+        if (!current) {
+          throw new Error('No websocket connection found');
+        }
+        return current;
+      },
+      retryMessageOptions,
+      (message: string) => this.#reportInfo(message),
+      {
+        reconnect: () => this.#reconnectWebSocketAndResume(),
+        isEnabled: () => this.#resumeEnabled && this.#resumeSessionId != null,
+      }
     );
     this.#reportInfo('created dispatcher');
 
@@ -370,6 +436,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
 
     return this.dispatcher.dispatchTransferAction<Utils.String.Dict<Struct.Schema>>('getSchemas');
+  }
+
+  getResumeCheckpoint(): Record<string, unknown> | null {
+    return this.#resumeCheckpoint;
   }
 
   createEntitiesWriteStream(): Writable {

@@ -47,6 +47,11 @@ export interface PushHandler extends Handler {
   // Incremental checksum state keyed by transfer asset ID
   assetChecksums?: { [filepath: string]: Hash };
   checksumsEnabled?: boolean;
+  sessionId?: string;
+  resumeCheckpoint?: Record<string, unknown>;
+
+  /** Prevents duplicate teardown when both ws `error` and `close` fire. */
+  disconnectHandled?: boolean;
 
   /**
    * Ochestrate and manage the transfer messages' ordering
@@ -112,6 +117,10 @@ export interface PushHandler extends Handler {
    * Checks whether it's possible to stream a chunk for the given stage
    */
   assertValidStreamTransferStep(stage: TransferStage): void;
+  persistResumeCheckpoint(
+    patch: Record<string, unknown>,
+    options?: { merge?: boolean }
+  ): Promise<void>;
 }
 
 const writeAsync = <T>(stream: Writable, data: T) => {
@@ -165,18 +174,41 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.assets = {};
     this.assetChecksums = {};
     this.checksumsEnabled = false;
+    this.sessionId = undefined;
+    this.resumeCheckpoint = undefined;
 
     delete this.flow;
     delete this.provider;
   },
+  async persistResumeCheckpoint(this: PushHandler, patch, options) {
+    if (!this.sessionId) {
+      return;
+    }
 
-  teardown(this: PushHandler) {
+    await strapi
+      .sessionManager('data-transfer')
+      .updateSessionMetadata(this.sessionId, patch, options ?? { merge: true });
+  },
+
+  async teardown(this: PushHandler) {
+    if (this.disconnectHandled) {
+      return;
+    }
+    this.disconnectHandled = true;
+
     if (this.memoryLogInterval) {
       clearInterval(this.memoryLogInterval);
       delete this.memoryLogInterval;
     }
-    if (this.provider) {
-      this.provider.rollback();
+
+    try {
+      if (this.sessionId && this.provider) {
+        await this.provider.close();
+      } else if (this.provider) {
+        await this.provider.rollback();
+      }
+    } catch (err: unknown) {
+      strapi.log.warn(`[Data transfer] Destination teardown: ${String(err)}`);
     }
 
     proto.teardown.call(this);
@@ -417,6 +449,18 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
       delete this.streams?.[stage];
 
+      if (stage !== 'assets') {
+        const completedStages = Array.from(
+          new Set([
+            ...((this.resumeCheckpoint?.completedStages as string[] | undefined) ?? []),
+            stage,
+          ])
+        );
+        const checkpoint = { ...(this.resumeCheckpoint ?? {}), completedStages };
+        this.resumeCheckpoint = checkpoint;
+        await this.persistResumeCheckpoint({ checkpoint }, { merge: true });
+      }
+
       return { ok: true, stats: this.stats[stage] };
     }
   },
@@ -469,6 +513,12 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         strapi.log.info(
           `[Transfer destination] Asset start #${this.stats.assets.started} id=${assetID} filename=${filename}`
         );
+        const checkpoint = {
+          ...(this.resumeCheckpoint ?? {}),
+          currentAsset: { assetID, filepath: this.assets[assetID].filepath, status: 'in_progress' },
+        };
+        this.resumeCheckpoint = checkpoint;
+        await this.persistResumeCheckpoint({ checkpoint }, { merge: true });
         writeAsync(assetsStream, this.assets[assetID]);
       }
 
@@ -506,22 +556,38 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
           assetStream
             .on('close', () => {
               this.stats.assets.finished += 1;
+              const completedAssets = Array.from(
+                new Set([
+                  ...((this.resumeCheckpoint?.completedAssets as string[] | undefined) ?? []),
+                  this.assets[assetID].filepath,
+                ])
+              );
+              const checkpoint = {
+                ...(this.resumeCheckpoint ?? {}),
+                currentAsset: null,
+                completedAssets,
+              };
+              this.resumeCheckpoint = checkpoint;
               delete this.assets[assetID];
               resolve();
             })
             .on('error', reject)
             .end();
         });
+        await this.persistResumeCheckpoint(
+          { checkpoint: this.resumeCheckpoint ?? {} },
+          { merge: true }
+        );
       }
     }
   },
 
-  onClose(this: Handler) {
-    this.teardown();
+  async onClose(this: Handler) {
+    await this.teardown();
   },
 
-  onError(this: Handler, err) {
-    this.teardown();
+  async onError(this: Handler, err) {
+    await this.teardown();
     strapi.log.error(err);
   },
 
@@ -564,8 +630,40 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       this.onWarning(message);
       strapi.log.warn(message);
     };
+    const transferSessionManager = strapi.sessionManager('data-transfer');
+    const resumedSession =
+      params?.resume === true && params?.resumeSessionId
+        ? await transferSessionManager.getSession(params.resumeSessionId)
+        : null;
+    const checkpoint =
+      resumedSession?.metadata && typeof resumedSession.metadata === 'object'
+        ? ((resumedSession.metadata as Record<string, unknown>).checkpoint as Record<
+            string,
+            unknown
+          >)
+        : undefined;
+    this.sessionId =
+      resumedSession?.sessionId ??
+      (
+        await transferSessionManager.createSession({
+          userId: '0',
+          type: 'session',
+          metadata: {
+            kind: 'data-transfer',
+            transfer: TRANSFER_KIND,
+            checkpoint: { completedStages: [], completedAssets: [] },
+          },
+        })
+      ).sessionId;
+    this.resumeCheckpoint = checkpoint ?? { completedStages: [], completedAssets: [] };
 
-    return { transferID: this.transferID, checksums: true };
+    return {
+      transferID: this.transferID,
+      checksums: true,
+      resume: true,
+      sessionId: this.sessionId,
+      checkpoint: this.resumeCheckpoint,
+    };
   },
 
   async status(this: PushHandler) {

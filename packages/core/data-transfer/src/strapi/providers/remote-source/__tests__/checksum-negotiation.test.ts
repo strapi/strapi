@@ -129,4 +129,98 @@ describe('Remote source checksum negotiation', () => {
 
     await expect(drainPass).resolves.toBeUndefined();
   });
+
+  test('warns when reconnect-resume is requested but peer does not support it', async () => {
+    const ws = new MockWebSocket();
+    (connectToWebsocket as jest.Mock).mockResolvedValue(ws);
+
+    const dispatcher = {
+      dispatchCommand: jest.fn().mockResolvedValue({ transferID: 't1', checksums: true }), // no `resume`
+      dispatchTransferAction: jest.fn().mockResolvedValue(null),
+      dispatchTransferStep: jest.fn(async (msg: { action: string }) => {
+        if (msg.action === 'start') {
+          return { id: 'pid-1' };
+        }
+        return null;
+      }),
+      setTransferProperties: jest.fn(),
+      dispatch: jest.fn(),
+      transferID: 't1',
+      transferKind: 'pull' as const,
+    };
+    (createDispatcher as jest.Mock).mockReturnValue(dispatcher);
+
+    const diagnostics = { report: jest.fn() };
+    const provider = createRemoteStrapiSourceProvider({
+      url: new URL('http://localhost:1337/admin'),
+      getStrapi: () => ({}) as Core.Strapi,
+      resumeOnReconnect: true,
+    });
+
+    await provider.bootstrap(diagnostics as any);
+
+    expect(diagnostics.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: 'warning',
+        details: expect.objectContaining({
+          message: expect.stringContaining('does not support reconnect negotiation'),
+        }),
+      })
+    );
+  });
+
+  test('reuses resume session id on subsequent init when peer supports reconnect', async () => {
+    const ws = new MockWebSocket();
+    (connectToWebsocket as jest.Mock).mockResolvedValue(ws);
+
+    const dispatcher = {
+      dispatchCommand: jest
+        .fn()
+        .mockResolvedValueOnce({
+          transferID: 't1',
+          checksums: true,
+          resume: true,
+          sessionId: 's-1',
+        })
+        .mockResolvedValueOnce({
+          transferID: 't2',
+          checksums: true,
+          resume: true,
+          sessionId: 's-1',
+        }),
+      dispatchTransferAction: jest.fn().mockResolvedValue(null),
+      dispatchTransferStep: jest.fn(async (msg: { action: string }) => {
+        if (msg.action === 'start') {
+          return { id: 'pid-1' };
+        }
+        return null;
+      }),
+      setTransferProperties: jest.fn(),
+      dispatch: jest.fn(),
+      transferID: 't1',
+      transferKind: 'pull' as const,
+    };
+    (createDispatcher as jest.Mock).mockReturnValue(dispatcher);
+
+    const provider = createRemoteStrapiSourceProvider({
+      url: new URL('http://localhost:1337/admin'),
+      getStrapi: () => ({}) as Core.Strapi,
+      resumeOnReconnect: true,
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as any);
+    await (provider as any).initTransfer();
+
+    expect(dispatcher.dispatchCommand).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        command: 'init',
+        params: expect.objectContaining({
+          transfer: 'pull',
+          resume: true,
+          resumeSessionId: 's-1',
+        }),
+      })
+    );
+  });
 });

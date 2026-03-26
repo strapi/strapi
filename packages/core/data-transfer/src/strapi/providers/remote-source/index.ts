@@ -34,6 +34,8 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
   streamTimeout?: number;
   /** Require per-asset checksum verification for transferred asset bytes. */
   verifyChecksums?: boolean;
+  /** Request resume-on-reconnect capability negotiation (future reconnect flow). */
+  resumeOnReconnect?: boolean;
 }
 
 type QueueableAction = Protocol.Client.TransferAssetFlow &
@@ -61,6 +63,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       ...options,
     };
     this.#checksumsEnabled = this.options.verifyChecksums === true;
+    this.#resumeEnabled = this.options.resumeOnReconnect === true;
 
     this.ws = null;
     this.dispatcher = null;
@@ -73,6 +76,15 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   #pullAssetStreamWireSampleLogged = false;
 
   #checksumsEnabled = false;
+
+  #resumeEnabled = false;
+
+  #resumeSessionId: string | null = null;
+
+  #resumeCheckpoint: Record<string, unknown> | null = null;
+
+  /** Mutable ref so the dispatcher and pull listeners can follow a new socket after reconnect. */
+  #socketRef: { current: WebSocket | null } = { current: null };
 
   /** Set from pull server `start` response for `assets` when present (for engine `getStageTotals`). */
   #cachedAssetsTotals?: StageTotalsEstimate;
@@ -106,7 +118,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       const parsed = JSON.parse(raw.toString());
       // If not a message related to our transfer process, ignore it
       if (!parsed.uuid || parsed?.data?.type !== 'transfer' || parsed?.data?.id !== processID) {
-        this.ws?.once('message', listener);
+        this.#socketRef.current?.once('message', listener);
         return;
       }
 
@@ -131,12 +143,12 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         stream.push(item as Parameters<PassThrough['push']>[0]);
       }
 
-      this.ws?.once('message', listener);
+      this.#socketRef.current?.once('message', listener);
 
       await this.#respond(uuid);
     };
 
-    this.ws?.once('message', listener);
+    this.#socketRef.current?.once('message', listener);
 
     return stream;
   }
@@ -450,13 +462,30 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   async initTransfer(): Promise<string> {
     const wantsChecksums = this.options.verifyChecksums === true;
+    const wantsResume = this.options.resumeOnReconnect === true;
     const query = this.dispatcher?.dispatchCommand({
       command: 'init',
-      ...(wantsChecksums ? { params: { transfer: 'pull', checksums: true } } : {}),
+      ...(wantsChecksums || wantsResume
+        ? {
+            params: {
+              transfer: 'pull',
+              ...(wantsChecksums ? { checksums: true } : {}),
+              ...(wantsResume ? { resume: true } : {}),
+              ...(wantsResume && this.#resumeSessionId
+                ? { resumeSessionId: this.#resumeSessionId }
+                : {}),
+            },
+          }
+        : {}),
     });
 
     const res = (await query) as
-      | (Server.Payload<Server.InitMessage> & { checksums?: boolean })
+      | (Server.Payload<Server.InitMessage> & {
+          checksums?: boolean;
+          resume?: boolean;
+          sessionId?: string;
+          checkpoint?: Record<string, unknown>;
+        })
       | null;
 
     if (!res?.transferID) {
@@ -468,8 +497,69 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         '[Data transfer][pull] Checksums were requested but the remote does not support checksum negotiation; continuing without checksum validation.'
       );
     }
+    this.#resumeEnabled = wantsResume && res.resume === true;
+    if (wantsResume && res.resume !== true) {
+      this.#reportWarning(
+        '[Data transfer][pull] Reconnect-resume was requested but the remote does not support reconnect negotiation; continuing in non-resumable mode.'
+      );
+    }
+    this.#resumeSessionId = this.#resumeEnabled ? (res.sessionId ?? null) : null;
+    this.#resumeCheckpoint = this.#resumeEnabled ? (res.checkpoint ?? null) : null;
+    if (this.#resumeEnabled && this.#resumeCheckpoint) {
+      this.#reportInfo(
+        '[Data transfer][pull] Resume checkpoint restored from remote session state'
+      );
+    }
 
     return res.transferID;
+  }
+
+  getResumeCheckpoint(): Record<string, unknown> | null {
+    return this.#resumeCheckpoint;
+  }
+
+  async #openWebSocket(): Promise<WebSocket> {
+    const { url, auth } = this.options;
+    this.assertValidProtocol(url);
+    const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${url.host}${trimTrailingSlash(
+      url.pathname
+    )}${TRANSFER_PATH}/pull`;
+
+    this.#reportInfo('establishing websocket connection');
+    if (!auth) {
+      return connectToWebsocket(wsUrl, undefined, this.#diagnostics);
+    }
+
+    if (auth.type === 'token') {
+      const headers = { Authorization: `Bearer ${auth.token}` };
+      return connectToWebsocket(wsUrl, { headers }, this.#diagnostics);
+    }
+
+    throw new ProviderValidationError('Auth method not available', {
+      check: 'auth.type',
+      details: {
+        auth: auth.type,
+      },
+    });
+  }
+
+  async #reconnectWebSocketAndResume(): Promise<void> {
+    this.#reportInfo('[Data transfer][pull] Reconnecting WebSocket after connection loss');
+    const ws = await this.#openWebSocket();
+    this.ws = ws;
+    this.#socketRef.current = ws;
+
+    if (!this.dispatcher) {
+      throw new ProviderTransferError('Internal error: dispatcher missing during reconnect');
+    }
+
+    this.#reportInfo('established websocket connection (reconnect)');
+    const transferID = await this.initTransfer();
+    this.#reportInfo(`re-initialized transfer ${transferID}`);
+
+    this.dispatcher.setTransferProperties({ id: transferID, kind: 'pull' });
+    await this.dispatcher.dispatchTransferAction('bootstrap');
   }
 
   #reportInfo(message: string) {
@@ -497,47 +587,31 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
-    const { url, auth } = this.options;
-    let ws: WebSocket;
-    this.assertValidProtocol(url);
-    const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${trimTrailingSlash(
-      url.pathname
-    )}${TRANSFER_PATH}/pull`;
-
     this.#pullAssetStreamWireSampleLogged = false;
 
-    this.#reportInfo('establishing websocket connection');
-    // No auth defined, trying public access for transfer
-    if (!auth) {
-      ws = await connectToWebsocket(wsUrl, undefined, this.#diagnostics);
-    }
-
-    // Common token auth, this should be the main auth method
-    else if (auth.type === 'token') {
-      const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = await connectToWebsocket(wsUrl, { headers }, this.#diagnostics);
-    }
-
-    // Invalid auth method provided
-    else {
-      throw new ProviderValidationError('Auth method not available', {
-        check: 'auth.type',
-        details: {
-          auth: auth.type,
-        },
-      });
-    }
+    const ws = await this.#openWebSocket();
 
     this.#reportInfo('established websocket connection');
     this.ws = ws;
+    this.#socketRef.current = ws;
     const { retryMessageOptions } = this.options;
 
     this.#reportInfo('creating dispatcher');
-    this.dispatcher = createDispatcher(this.ws, retryMessageOptions, (message: string) =>
-      this.#reportInfo(message)
+    this.dispatcher = createDispatcher(
+      () => {
+        const current = this.#socketRef.current;
+        if (!current) {
+          throw new Error('No websocket connection found');
+        }
+        return current;
+      },
+      retryMessageOptions,
+      (message: string) => this.#reportInfo(message),
+      {
+        reconnect: () => this.#reconnectWebSocketAndResume(),
+        isEnabled: () => this.#resumeEnabled && this.#resumeSessionId != null,
+      }
     );
-    this.#reportInfo('creating dispatcher');
 
     this.#reportInfo('initialize transfer');
     const transferID = await this.initTransfer();
@@ -595,7 +669,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   async #respond(uuid: string) {
     return new Promise((resolve, reject) => {
-      this.ws?.send(JSON.stringify({ uuid }), (e) => {
+      this.#socketRef.current?.send(JSON.stringify({ uuid }), (e) => {
         if (e) {
           reject(e);
         } else {

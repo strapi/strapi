@@ -17,6 +17,8 @@ export type InitCommand = CreateCommand<
     options?: Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'>;
     transfer: TransferMethod;
     checksums?: boolean;
+    resume?: boolean;
+    resumeSessionId?: string;
   }
 >;
 export type TransferKind = InitCommand['params']['transfer'];
