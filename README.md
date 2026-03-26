@@ -24,6 +24,7 @@
   </a>
   <a href="https://github.com/strapi/strapi/actions/workflows/nightly.yml">
     <img src="https://github.com/strapi/strapi/actions/workflows/nightly.yml/badge.svg" alt="Strapi Nightly Release Build Status" />
+[![Stack Health](https://indiestack.ai/api/badge/health/strapi/strapi.svg)](https://indiestack.ai/audit?repo=strapi/strapi)
   </a>
 </p>
 
