@@ -223,16 +223,17 @@ const formatDiagnostic = (
       const absoluteLogPath = path.resolve(process.cwd(), logFileBasename);
 
       logger = createLogger(
-        configs.createOutputFileConfiguration(logFileBasename, {
-          level: 'info',
-          format: formats?.detailedLogs,
-        })
+        configs.createOutputFileConfiguration(
+          logFileBasename,
+          {
+            level: 'info',
+            format: formats?.detailedLogs,
+          },
+          {
+            consoleLevel: verbose ? 'info' : 'warn',
+          }
+        )
       );
-
-      const [consoleTransport] = logger.transports;
-      if (consoleTransport) {
-        consoleTransport.level = verbose ? 'info' : 'warn';
-      }
 
       logger.info(
         `[${operation}] Diagnostic log file: ${absoluteLogPath} (info-level messages are written here even without --verbose)`
