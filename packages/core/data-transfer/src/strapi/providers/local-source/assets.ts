@@ -90,10 +90,23 @@ export async function signUploadFileForTransfer(strapi: Core.Strapi, file: IFile
   }
 }
 
+const missingAssetWarningMessage = (file: IFile, filepath: string, format?: string): string => {
+  const formatPart = format ? ` (format: ${format})` : '';
+  return `[Data transfer] Media item ${file.id} (hash: ${file.hash}) exists in database but no corresponding file was found to transfer${formatPart}. Path: ${filepath}`;
+};
+
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
-export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
+export const createAssetsStream = (
+  strapi: Core.Strapi,
+  options: { onWarning?: (message: string) => void } = {}
+): Duplex => {
+  const warnMissingAsset = (message: string) => {
+    strapi.log.warn(message);
+    options.onWarning?.(message);
+  };
+
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const stream: Readable = strapi.db
       .queryBuilder('plugin::upload.file')
@@ -118,7 +131,7 @@ export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
             ? (err as NodeJS.ErrnoException).code
             : undefined;
         if (code === 'ENOENT') {
-          strapi.log.warn(`[Data transfer] Skipping missing asset file: ${filepath}`);
+          warnMissingAsset(missingAssetWarningMessage(file, filepath));
           continue;
         }
         throw err;
@@ -152,7 +165,7 @@ export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
                 ? (err as NodeJS.ErrnoException).code
                 : undefined;
             if (code === 'ENOENT') {
-              strapi.log.warn(`[Data transfer] Skipping missing asset file: ${fileFormatFilepath}`);
+              warnMissingAsset(missingAssetWarningMessage(file, fileFormatFilepath, format));
               continue;
             }
             throw err;

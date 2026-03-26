@@ -54,6 +54,17 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     });
   }
 
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'local-source-provider',
+      },
+      kind: 'warning',
+    });
+  }
+
   /**
    * Reports an error to the diagnostic reporter.
    */
@@ -154,7 +165,9 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     assertValidStrapi(this.strapi, 'Not able to stream assets');
     this.#reportInfo('creating assets read stream');
 
-    const stream = createAssetsStream(this.strapi);
+    const stream = createAssetsStream(this.strapi, {
+      onWarning: (message) => this.#reportWarning(message),
+    });
     stream.on('error', (err) => {
       this.#handleStreamError('assets', err);
     });
