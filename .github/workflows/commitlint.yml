@@ -20,9 +20,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@3e9ad7370203c1e93d109be57f3b72eb0eb511b1 # v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Validate PR commits with commitlint
         if: github.event_name == 'pull_request'
-        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${PR_HEAD_SHA} --verbose
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
