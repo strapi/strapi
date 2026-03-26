@@ -1,0 +1,21 @@
+{
+  "Plugin.name": "Nasadenie",
+  "Homepage.title": "Nasaďte pomocou Strapi Cloud zadarmo!",
+  "Homepage.subTitle": "Začnite s naším úplne bezplatným plánom – bez potreby kreditnej karty, bez časových obmedzení.",
+  "Homepage.deploy.title": "Vyberte si preferovaný spôsob nasadenia",
+  "Homepage.deploy.ariaLabel": "Možnosti nasadenia",
+  "Homepage.deploy.git.badge": "Odporúčané",
+  "Homepage.deploy.git.title": "Nasadiť do Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "Nasaďte GitHub alebo GitLab projekt priamo v Strapi Cloud",
+  "Homepage.deploy.git.button": "Nasadiť do Strapi Cloud",
+  "Homepage.deploy.cli.title": "Nasadiť cez CLI",
+  "Homepage.deploy.cli.subTitle": "Použite príkazový riadok na priame nasadenie vášho Strapi projektu",
+  "Homepage.deploy.cli.ariaLabel": "Správca balíčkov",
+  "Homepage.deploy.cli.copy": "Kopírovať",
+  "Homepage.deploy.documentation": "Máte problémy? Pozrite si našu dokumentáciu",
+  "Homepage.freePlan.api": "2.5K API requestov",
+  "Homepage.freePlan.storage": "10 GB úložiska",
+  "Homepage.freePlan.bandwidth": "10 GB prenosu súborov",
+  "Homepage.freePlan.cdn": "Globálne CDN",
+  "Homepage.freePlan.pushToDeploy": "Push to deploy"
+}
