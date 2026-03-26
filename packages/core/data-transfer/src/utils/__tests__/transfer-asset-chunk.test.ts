@@ -4,21 +4,7 @@ import {
   decodeTransferAssetStreamItem,
   transferAssetStreamChunkByteLength,
 } from '../transfer-asset-chunk';
-
-/** Same rules as `replacerForTransferWebSocket` (Uint8Array → base64; Buffer handled below). */
-const wsLikeReplacer = (_key: string, value: unknown): unknown => {
-  if (Buffer.isBuffer(value)) {
-    return value.toString('base64');
-  }
-  if (value instanceof Uint8Array) {
-    return Buffer.from(value.buffer, value.byteOffset, value.byteLength).toString('base64');
-  }
-  if (ArrayBuffer.isView(value) && !(value instanceof DataView)) {
-    const v = value as NodeJS.TypedArray;
-    return Buffer.from(v.buffer, v.byteOffset, v.byteLength).toString('base64');
-  }
-  return value;
-};
+import { replacerForTransferWebSocket } from '../transfer-websocket-json';
 
 describe('transfer-asset-chunk', () => {
   const bytes = Buffer.from([0xde, 0xad, 0xbe, 0xef]);
@@ -60,14 +46,18 @@ describe('transfer-asset-chunk', () => {
 
   test('wire compatibility: Buffer property stringifies as legacy JSON (Node toJSON, not replacer)', () => {
     const item = { action: 'stream' as const, assetID: 'a', data: Buffer.from(bytes) };
-    const wire = JSON.parse(JSON.stringify(item, wsLikeReplacer)) as { data: unknown };
+    const wire = JSON.parse(JSON.stringify(item, replacerForTransferWebSocket)) as {
+      data: unknown;
+    };
     expect(wire.data).toEqual(expect.objectContaining({ type: 'Buffer' }));
     expect(decodeTransferAssetStreamData(wire.data)).toEqual(bytes);
   });
 
   test('wire compatibility: Uint8Array → WS replacer → base64 string → decode', () => {
     const item = { action: 'stream' as const, assetID: 'a', data: new Uint8Array(bytes) };
-    const wire = JSON.parse(JSON.stringify(item, wsLikeReplacer)) as { data: unknown };
+    const wire = JSON.parse(JSON.stringify(item, replacerForTransferWebSocket)) as {
+      data: unknown;
+    };
     expect(typeof wire.data).toBe('string');
     expect(decodeTransferAssetStreamData(wire.data)).toEqual(bytes);
   });
@@ -120,5 +110,30 @@ describe('transfer-asset-chunk', () => {
     ).toBe(4);
 
     expect(transferAssetStreamChunkByteLength({ action: 'end' })).toBe(0);
+  });
+
+  test('decodeTransferAssetStreamData: encoding base64 with legacy object falls back (no throw)', () => {
+    const legacy = { type: 'Buffer' as const, data: Array.from(bytes) };
+    expect(decodeTransferAssetStreamData(legacy, 'base64')).toEqual(bytes);
+  });
+
+  test('decodeTransferAssetStreamItem: encoding base64 with legacy payload', () => {
+    const item = {
+      action: 'stream' as const,
+      assetID: 'a',
+      encoding: 'base64' as const,
+      data: { type: 'Buffer' as const, data: Array.from(bytes) },
+    };
+    expect(decodeTransferAssetStreamItem(item)).toEqual(bytes);
+  });
+
+  test('transferAssetStreamChunkByteLength: legacy Buffer JSON shape', () => {
+    const legacy = { type: 'Buffer' as const, data: Array.from(bytes) };
+    expect(
+      transferAssetStreamChunkByteLength({
+        action: 'stream',
+        data: legacy,
+      })
+    ).toBe(bytes.length);
   });
 });

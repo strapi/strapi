@@ -222,8 +222,14 @@ const formatDiagnostic = (
       logFileBasename = `${operation}_${Date.now()}.log`;
       const absoluteLogPath = path.resolve(process.cwd(), logFileBasename);
 
+      const createOutputFileConfigurationCompat = configs.createOutputFileConfiguration as (
+        filename: string,
+        fileTransportOptions?: winston.transports.FileTransportOptions,
+        options?: { consoleLevel?: string }
+      ) => winston.LoggerOptions;
+
       logger = createLogger(
-        configs.createOutputFileConfiguration(
+        createOutputFileConfigurationCompat(
           logFileBasename,
           {
             level: 'info',

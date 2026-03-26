@@ -43,12 +43,11 @@ export function decodeTransferAssetStreamItem(item: {
  * values become the legacy object unless you pass a string (use `createTransferAssetStreamChunk`).
  */
 export function decodeTransferAssetStreamData(data: unknown, encoding?: 'base64'): Buffer {
-  if (encoding === 'base64') {
-    if (typeof data !== 'string') {
-      throw new TypeError('Expected base64 string for transfer asset stream chunk');
-    }
+  if (encoding === 'base64' && typeof data === 'string') {
     return Buffer.from(data, 'base64');
   }
+  // `encoding: 'base64'` with a non-string payload (or no encoding) uses the same fallbacks as
+  // legacy peers — avoids throwing when flags and payload disagree.
 
   if (Buffer.isBuffer(data)) {
     return Buffer.from(data);
@@ -88,6 +87,20 @@ export function transferAssetStreamChunkByteLength(chunk: {
   }
   if (Buffer.isBuffer(chunk.data)) {
     return chunk.data.byteLength;
+  }
+  if (
+    chunk.data &&
+    typeof chunk.data === 'object' &&
+    'type' in chunk.data &&
+    (chunk.data as { type: unknown }).type === 'Buffer'
+  ) {
+    const raw = (chunk.data as { data?: unknown }).data;
+    if (Array.isArray(raw)) {
+      return raw.length;
+    }
+    if (ArrayBuffer.isView(raw)) {
+      return raw.byteLength;
+    }
   }
   return 0;
 }
