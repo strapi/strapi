@@ -196,6 +196,20 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       }, this.options.streamTimeout);
     };
 
+    const clearStallTimeoutForAsset = (assetID: string) => {
+      const entry = assets[assetID];
+      if (entry?.timeout) {
+        clearTimeout(entry.timeout);
+        entry.timeout = undefined;
+      }
+    };
+
+    const clearAllStallTimeouts = () => {
+      for (const id of Object.keys(assets)) {
+        clearStallTimeoutForAsset(id);
+      }
+    };
+
     /**
      * Serialize asset batch handling: `Readable.on('data', async …)` does not apply backpressure,
      * so we pipe through a Writable with highWaterMark 1 so only one batch is in flight.
@@ -276,6 +290,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
             callback();
           },
           (err: Error) => {
+            clearAllStallTimeouts();
             stream.destroy(err);
             callback(err);
           }
@@ -288,12 +303,18 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     });
 
     processor.on('error', (err) => {
+      clearAllStallTimeouts();
       pass.destroy(err);
     });
 
     stream.on('error', (err) => {
+      clearAllStallTimeouts();
       processor.destroy(err);
       pass.destroy(err);
+    });
+
+    stream.once('end', () => {
+      clearAllStallTimeouts();
     });
 
     stream.pipe(processor);
@@ -339,6 +360,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           if (!assets[id]) {
             throw new Error(`No id matching ${id} for writeAssetChunk`);
           }
+          clearStallTimeoutForAsset(id);
           if (error instanceof Error) {
             throw error;
           }
@@ -385,6 +407,10 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       }
 
       const asset = assets[id];
+      // The queue processes stream chunks before `end`; the last `writeChunkToStream` calls
+      // `resetTimeout` after the `end` chunk already cleared the timer — clear again before closing.
+      clearStallTimeoutForAsset(id);
+
       if (this.#checksumsEnabled) {
         if (!checksum) {
           throw new ProviderTransferError(
