@@ -47,26 +47,47 @@ export class OperationParametersAssembler implements Assembler.Operation {
   }
 
   private _getQueryParameters(route: Core.Route): QueryParameterObject[] {
-    const { query } = route.request ?? {};
+  const { query } = route.request ?? {};
 
-    if (!query) {
-      return [];
-    }
-
-    const queryParams: QueryParameterObject[] = [];
-
-    for (const [name, zodSchema] of Object.entries(query)) {
-      const required = !zodSchema.isOptional();
-      const schema = zodToOpenAPI(zodSchema) as any;
-      const param: QueryParameterObject = { name, in: 'query', required, schema };
-
-      // In Strapi, query params are always interpreted as query strings, which isn't supported by the specification
-      // TODO: Make that configurable somehow
-      Object.assign(param, { 'x-strapi-serialize': 'querystring' });
-
-      queryParams.push(param);
-    }
-
-    return queryParams;
+  if (!query) {
+    return [];
   }
+
+  const queryParams: QueryParameterObject[] = [];
+
+  const paginationFields = ['page', 'pageSize'];
+  const paginationProps: Record<string, any> = {};
+
+  for (const [name, zodSchema] of Object.entries(query)) {
+    if (paginationFields.includes(name)) {
+      paginationProps[name] = zodToOpenAPI(zodSchema);
+      continue;
+    }
+
+    const required = !zodSchema.isOptional();
+    const schema = zodToOpenAPI(zodSchema) as any;
+    const param: QueryParameterObject = { name, in: 'query', required, schema };
+
+     // In Strapi, query params are always interpreted as query strings, which isn't supported by the specification
+    // TODO: Make that configurable somehow
+
+    Object.assign(param, { 'x-strapi-serialize': 'querystring' });
+
+    queryParams.push(param);
+  }
+
+  if (Object.keys(paginationProps).length > 0) {
+    queryParams.push({
+      name: 'pagination',
+      in: 'query',
+      required: false,
+      schema: {
+        type: 'object',
+        properties: paginationProps,
+      },
+    } as QueryParameterObject);
+  }
+
+  return queryParams;
+}
 }

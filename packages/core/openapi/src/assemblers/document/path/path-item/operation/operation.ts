@@ -45,6 +45,8 @@ export class OperationAssembler implements Assembler.PathItem {
 
       const { data: operationObject } = operationContext.output;
 
+      operationObject.security = [{ bearerAuth: [] }];
+      
       this._validateOperationObject(operationObject);
 
       debug('assembled operation object for %o %o', method, path);

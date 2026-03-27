@@ -24,5 +24,15 @@ export class DocumentMetadataAssembler implements Assembler.Document {
     debug(`document's metadata assembled: %O`, metadataObject);
 
     Object.assign(context.output.data, metadataObject);
+    context.output.data.components = {
+  ...context.output.data.components,
+  securitySchemes: {
+    bearerAuth: {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+    },
+  },
+};
   }
 }
