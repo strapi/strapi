@@ -22,6 +22,9 @@ const config = {
       // Customize the label of the CM table..
       Id: 'ID french',
     },
+    de: {
+      About: 'Über uns',
+    },
   },
   tutorials: false,
   notifications: { releases: false },
