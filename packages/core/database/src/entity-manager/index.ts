@@ -475,16 +475,32 @@ export const createEntityManager = (db: Database): EntityManager => {
       return entity;
     },
 
-    // TODO: where do we handle relation processing for many queries ?
     async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
       const { where } = params;
 
+      const entitiesToDelete = await this.createQueryBuilder(uid)
+        .init({ select: ['id'], where })
+        .execute<{ id: ID }[]>();
+
       const deletedRows = await this.createQueryBuilder(uid)
         .where(where)
         .delete()
         .execute<number>({ mapResults: false });
+
+      if (entitiesToDelete.length > 0) {
+        const trx = await strapi.db.transaction();
+        try {
+          for (const entity of entitiesToDelete) {
+            await this.deleteRelations(uid, entity.id, { transaction: trx.get() });
+          }
+          await trx.commit();
+        } catch (e) {
+          await trx.rollback();
+          throw e;
+        }
+      }
 
       const result = { count: deletedRows };
 
