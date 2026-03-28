@@ -25,6 +25,6 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Validate PR commits with commitlint
         if: github.event_name == 'pull_request'
-        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${PR_HEAD_SHA} --verbose
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to "${PR_HEAD_SHA}" --verbose
         env:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
