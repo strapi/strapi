@@ -392,8 +392,8 @@ export const validatePopulate = asyncCurry(
                   parent: { key, path, schema, attribute },
                   path,
                 },
-                value,
-                includes
+                value, // pass the nested populate value
+                includes // pass down the same includes object
               )
             );
             return;
