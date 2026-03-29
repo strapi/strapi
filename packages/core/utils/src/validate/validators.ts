@@ -372,6 +372,17 @@ export const validatePopulate = asyncCurry(
 
           // Handle recursive nested `populate` validation with the same include object
           if (key === 'populate') {
+            const isPolymorphicAttribute =
+              attribute?.type === 'dynamiczone' ||
+              (attribute?.type === 'relation' &&
+                typeof attribute.relation === 'string' &&
+                attribute.relation.startsWith('morph'));
+
+            if (isPolymorphicAttribute) {
+              if (value !== '*') {
+                throwInvalidKey({ key, path: path.raw });
+              }
+            }
             set(
               key,
               await validatePopulate(
@@ -381,8 +392,8 @@ export const validatePopulate = asyncCurry(
                   parent: { key, path, schema, attribute },
                   path,
                 },
-                value, // pass the nested populate value
-                includes // pass down the same includes object
+                value,
+                includes
               )
             );
             return;

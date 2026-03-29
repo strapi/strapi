@@ -246,6 +246,55 @@ describe('Validate visitors util', () => {
         ValidationError
       );
     });
+
+    test('throws ValidationError for invalid populate in polymorphic structures (dynamic zone)', async () => {
+      const dynamicZoneModel: any = {
+        uid: 'api::article.article',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+        options: {},
+        attributes: {
+          id: { type: 'integer' },
+          contentBlocks: {
+            type: 'dynamiczone',
+            components: ['default.component'],
+          },
+        },
+      };
+
+      const componentModel = {
+        uid: 'default.component',
+        modelType: 'component',
+        info: { singularName: 'component', pluralName: 'components' },
+        options: {},
+        attributes: {
+          title: { type: 'string' },
+        },
+      };
+
+      const models = {
+        'api::article.article': dynamicZoneModel,
+        'default.component': componentModel,
+      };
+
+      const getModelMock = (uid: string) => models[uid];
+
+      const ctxDynamic: any = {
+        schema: dynamicZoneModel,
+        getModel: getModelMock,
+      };
+
+      const invalidPopulate = {
+        contentBlocks: {
+          populate: 'deep',
+        },
+      };
+
+      await expect(validators.defaultValidatePopulate(ctxDynamic, invalidPopulate)).rejects.toThrow(
+        ValidationError
+      );
+    });
   });
 
   describe('throwRestrictedRelations', () => {
