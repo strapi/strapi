@@ -54,7 +54,7 @@ describe('ViewSettingsMenu', () => {
     expect(await screen.findByText('Displayed fields')).toBeInTheDocument();
 
     expect(await screen.findByRole('checkbox', { name: 'createdAt' })).toBeInTheDocument();
-    expect(await screen.findByRole('checkbox', { name: 'id' })).toBeInTheDocument();
+    expect(await screen.findByRole('checkbox', { name: 'documentId' })).toBeInTheDocument();
     expect(await screen.findByRole('checkbox', { name: 'slug' })).toBeInTheDocument();
     expect(await screen.findByRole('checkbox', { name: 'updatedAt' })).toBeInTheDocument();
 
@@ -69,7 +69,7 @@ describe('ViewSettingsMenu', () => {
 
   it('should contains the initially selected headers within the popover', async () => {
     const { user } = render({
-      headers: ['id'],
+      headers: ['documentId'],
     });
 
     await user.click(
@@ -79,7 +79,7 @@ describe('ViewSettingsMenu', () => {
     );
 
     expect(await screen.findByRole('checkbox', { name: 'createdAt' })).not.toBeChecked();
-    expect(await screen.findByRole('checkbox', { name: 'id' })).toBeChecked();
+    expect(await screen.findByRole('checkbox', { name: 'documentId' })).toBeChecked();
     expect(await screen.findByRole('checkbox', { name: 'postal_code' })).not.toBeChecked();
     expect(await screen.findByRole('checkbox', { name: 'updatedAt' })).not.toBeChecked();
 
