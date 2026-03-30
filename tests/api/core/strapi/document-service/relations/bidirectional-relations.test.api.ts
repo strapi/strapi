@@ -65,18 +65,18 @@ describe('Document Service bidirectional relations', () => {
   testInTransaction(
     'Relation order is preserved after unpublish and republish of a related entry',
     async () => {
-      // Step 1: Create Authors A, B, C (draft)
+      // Create authors out of alphabetical order so correct ordering is not an accident of id sort
+      const authorC = await strapi.documents(AUTHOR_UID).create({
+        data: { name: 'Author C' },
+      });
       const authorA = await strapi.documents(AUTHOR_UID).create({
         data: { name: 'Author A' },
       });
       const authorB = await strapi.documents(AUTHOR_UID).create({
         data: { name: 'Author B' },
       });
-      const authorC = await strapi.documents(AUTHOR_UID).create({
-        data: { name: 'Author C' },
-      });
 
-      // Step 2: Create Article with relations to all three authors in order
+      // Step 2: Create Article with relations to all three authors in order (not creation order)
       const article = await strapi.documents(ARTICLE_UID).create({
         data: {
           title: 'Test Article',
@@ -88,10 +88,10 @@ describe('Document Service bidirectional relations', () => {
         },
       });
 
-      // Step 3: Publish everything
+      // Step 3: Publish everything (authors in non-alphabetical publish order, then article)
+      await strapi.documents(AUTHOR_UID).publish({ documentId: authorC.documentId });
       await strapi.documents(AUTHOR_UID).publish({ documentId: authorA.documentId });
       await strapi.documents(AUTHOR_UID).publish({ documentId: authorB.documentId });
-      await strapi.documents(AUTHOR_UID).publish({ documentId: authorC.documentId });
       await strapi.documents(ARTICLE_UID).publish({ documentId: article.documentId });
 
       // Step 4: Verify Article published shows A, B, C in order
@@ -127,6 +127,118 @@ describe('Document Service bidirectional relations', () => {
         'Author B',
         'Author C',
       ]);
+    }
+  );
+
+  /**
+   * Publishing articles and authors in an interleaved order must preserve join-table order for
+   * `author.articles` when draft data is already correct (related authors may still be draft
+   * when some articles publish first).
+   */
+  testInTransaction(
+    'interleaved article/author publishes: author-side article order should match draft',
+    async () => {
+      const articleTitlesOnAuthor = (authorEntry: any) =>
+        (authorEntry?.articles as any[])?.map((a: any) => a.title) ?? [];
+
+      const periphZ = await strapi.documents(ARTICLE_UID).create({
+        data: { title: 'ix-periph-Z' },
+      });
+      const periphM = await strapi.documents(ARTICLE_UID).create({
+        data: { title: 'ix-periph-M' },
+      });
+      const periphA = await strapi.documents(ARTICLE_UID).create({
+        data: { title: 'ix-periph-A' },
+      });
+
+      const authZ = await strapi.documents(AUTHOR_UID).create({
+        data: { name: 'ix-auth-Z' },
+      });
+      const authM = await strapi.documents(AUTHOR_UID).create({
+        data: { name: 'ix-auth-M' },
+      });
+      const authA = await strapi.documents(AUTHOR_UID).create({
+        data: { name: 'ix-auth-A' },
+      });
+
+      const hub = await strapi.documents(ARTICLE_UID).create({
+        data: { title: 'ix-hub-main' },
+      });
+
+      await strapi.documents(ARTICLE_UID).update({
+        documentId: hub.documentId,
+        data: {
+          authors: {
+            set: [
+              { documentId: authM.documentId },
+              { documentId: authZ.documentId },
+              { documentId: authA.documentId },
+            ],
+          },
+        } as any,
+      });
+
+      await strapi.documents(AUTHOR_UID).update({
+        documentId: authZ.documentId,
+        data: {
+          articles: {
+            set: [
+              { documentId: periphA.documentId },
+              { documentId: hub.documentId },
+              { documentId: periphM.documentId },
+            ],
+          },
+        } as any,
+      });
+      await strapi.documents(AUTHOR_UID).update({
+        documentId: authM.documentId,
+        data: {
+          articles: {
+            set: [
+              { documentId: hub.documentId },
+              { documentId: periphZ.documentId },
+              { documentId: periphA.documentId },
+            ],
+          },
+        } as any,
+      });
+      await strapi.documents(AUTHOR_UID).update({
+        documentId: authA.documentId,
+        data: {
+          articles: {
+            set: [
+              { documentId: periphZ.documentId },
+              { documentId: periphM.documentId },
+              { documentId: hub.documentId },
+            ],
+          },
+        } as any,
+      });
+
+      const draftAuthZ = await strapi.documents(AUTHOR_UID).findFirst({
+        filters: { name: 'ix-auth-Z' },
+        populate: { articles: true },
+        status: 'draft',
+      });
+      const expectedAuthZ = ['ix-periph-A', 'ix-hub-main', 'ix-periph-M'];
+      expect(articleTitlesOnAuthor(draftAuthZ)).toEqual(expectedAuthZ);
+
+      // Intentionally interleave: some articles publish before all authors are published.
+      await strapi.documents(ARTICLE_UID).publish({ documentId: periphM.documentId });
+      await strapi.documents(AUTHOR_UID).publish({ documentId: authA.documentId });
+      await strapi.documents(ARTICLE_UID).publish({ documentId: periphA.documentId });
+      await strapi.documents(AUTHOR_UID).publish({ documentId: authZ.documentId });
+      await strapi.documents(ARTICLE_UID).publish({ documentId: periphZ.documentId });
+      await strapi.documents(AUTHOR_UID).publish({ documentId: authM.documentId });
+      await strapi.documents(ARTICLE_UID).publish({ documentId: hub.documentId });
+
+      const publishedAuthZ = await strapi.documents(AUTHOR_UID).findFirst({
+        filters: { name: 'ix-auth-Z' },
+        populate: { articles: true },
+        status: 'published',
+      });
+
+      expect(articleTitlesOnAuthor(publishedAuthZ)).toEqual(expectedAuthZ);
     }
   );
 });

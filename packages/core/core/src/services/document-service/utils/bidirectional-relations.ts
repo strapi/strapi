@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import { keyBy } from 'lodash/fp';
 import { async } from '@strapi/utils';
 import type { UID, Schema } from '@strapi/types';
@@ -7,6 +6,142 @@ interface LoadContext {
   oldVersions: { id: string; locale: string }[];
   newVersions: { id: string; locale: string }[];
 }
+
+type JoinCaptureBatch = { joinTable: any; relations: any[]; publishedOn?: 'joinColumn' };
+
+/** Draft id → published id for rows that already have a published counterpart (same document_id + locale). */
+const draftToPublishedMap = async (trx: any, tableName: string, rowIds: unknown[]) => {
+  const uniqueIds = [...new Set(rowIds)];
+  if (uniqueIds.length === 0) {
+    return new Map<string, string>();
+  }
+
+  const draftEntries = await strapi.db
+    .getConnection()
+    .select('id', 'document_id', 'locale')
+    .from(tableName)
+    .whereIn('id', uniqueIds as any)
+    .transacting(trx);
+
+  if (draftEntries.length === 0) {
+    return new Map<string, string>();
+  }
+
+  const pubEntries = await strapi.db
+    .getConnection()
+    .select('id', 'document_id', 'locale')
+    .from(tableName)
+    .whereNotNull('published_at')
+    .whereIn(
+      'document_id',
+      draftEntries.map((e: any) => e.document_id)
+    )
+    .transacting(trx);
+
+  const pubByDocLocale = new Map(
+    pubEntries.map((e: any) => [`${e.document_id}_${e.locale}`, e.id])
+  );
+
+  const map = new Map<string, string>();
+  for (const d of draftEntries) {
+    const pubId = pubByDocLocale.get(`${d.document_id}_${d.locale}`);
+    if (pubId) {
+      map.set(String(d.id), String(pubId));
+    }
+  }
+  return map;
+};
+
+const remapRelatedIds = (rows: any[], relatedCol: string, idMap: Map<string, string>) =>
+  rows.map((row) => {
+    const next = idMap.get(String(row[relatedCol]));
+    return next ? { ...row, [relatedCol]: next } : row;
+  });
+
+/**
+ * Reads join rows tied to the entry being published (`publishedCol` IN draft/old ids) and returns
+ * batches for `sync()`. When the FK in `relatedCol` points at a D&P type, maps known draft ids to
+ * published ids; otherwise keeps draft ids so sync can still run after both sides exist.
+ */
+const captureJoinBatches = async (
+  trx: any,
+  opts: {
+    joinTable: any;
+    /** Column holding ids of the document being published (the `uid` passed to load). */
+    publishedCol: string;
+    /** The other FK; may be remapped via draftToPublishedMap. */
+    relatedCol: string;
+    /** Content type behind `relatedCol` (used for D&P + table name). */
+    relatedUid: UID.ContentType;
+    relatedHasDraftAndPublish: boolean;
+    /** Model that owns this attribute; draft capture is skipped for components. */
+    schemaUid: UID.ContentType;
+    oldVersions: LoadContext['oldVersions'];
+    newVersions: LoadContext['newVersions'];
+    publishedOn?: 'joinColumn';
+  }
+): Promise<JoinCaptureBatch[]> => {
+  const {
+    joinTable,
+    publishedCol,
+    relatedCol,
+    relatedUid,
+    relatedHasDraftAndPublish,
+    schemaUid,
+    oldVersions,
+    newVersions,
+    publishedOn,
+  } = opts;
+
+  const batches: JoinCaptureBatch[] = [];
+  const { name: table } = joinTable;
+
+  const oldIds = oldVersions.map((e) => e.id);
+  if (oldIds.length > 0) {
+    const existing = await strapi.db
+      .getConnection()
+      .select('*')
+      .from(table)
+      .whereIn(publishedCol, oldIds)
+      .transacting(trx);
+    if (existing.length > 0) {
+      batches.push({ joinTable, relations: existing, ...(publishedOn ? { publishedOn } : {}) });
+    }
+  }
+
+  if (!strapi.contentTypes[schemaUid]) {
+    return batches;
+  }
+
+  const oldLocales = new Set(oldVersions.map((e) => e.locale));
+  const draftsOnly = newVersions.filter((v) => !oldLocales.has(v.locale));
+  if (draftsOnly.length === 0) {
+    return batches;
+  }
+
+  const draftIds = draftsOnly.map((e) => e.id);
+  const draftRows = await strapi.db
+    .getConnection()
+    .select('*')
+    .from(table)
+    .whereIn(publishedCol, draftIds)
+    .transacting(trx);
+
+  if (draftRows.length === 0) {
+    return batches;
+  }
+
+  let relations = draftRows;
+  if (relatedHasDraftAndPublish) {
+    const meta = strapi.db.metadata.get(relatedUid);
+    const relatedIds = draftRows.map((r: any) => r[relatedCol]);
+    const map = await draftToPublishedMap(trx, meta.tableName, relatedIds);
+    relations = remapRelatedIds(draftRows, relatedCol, map);
+  }
+
+  batches.push({ joinTable, relations, ...(publishedOn ? { publishedOn } : {}) });
+  return batches;
+};
 
 /**
  * Loads all bidirectional relations that need to be synchronized when content entries change state
@@ -54,135 +189,63 @@ interface LoadContext {
  * @returns Array of objects containing join table metadata and relations to be updated
  */
 const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadContext) => {
-  const relationsToUpdate = [] as any;
+  const relationsToUpdate = [] as JoinCaptureBatch[];
 
   await strapi.db.transaction(async ({ trx }) => {
-    const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
-    const components = Object.values(strapi.components) as Schema.Component[];
+    const models = [
+      ...(Object.values(strapi.contentTypes) as Schema.ContentType[]),
+      ...Object.values(strapi.components),
+    ];
 
-    for (const model of [...contentTypes, ...components]) {
+    for (const model of models) {
       const dbModel = strapi.db.metadata.get(model.uid);
 
-      for (const attribute of Object.values(dbModel.attributes) as any) {
-        // Skip if not a bidirectional relation targeting our content type
-        if (
-          attribute.type !== 'relation' ||
-          attribute.target !== uid ||
-          !(attribute.inversedBy || attribute.mappedBy)
-        ) {
-          continue;
-        }
-
-        // If it's a self referencing relation, there is no need to sync any relation
-        // The order will already be handled as both sides are inside the same content type
-        if (model.uid === uid) {
-          continue;
-        }
-
+      for (const attribute of Object.values(dbModel.attributes) as any[]) {
         const joinTable = attribute.joinTable;
-        if (!joinTable) {
-          continue;
-        }
 
-        const { name: targetColumnName } = joinTable.inverseJoinColumn;
-
-        // Load all relations that need their order preserved
-        const oldEntryIds = oldVersions.map((entry) => entry.id);
-
-        const existingRelations = await strapi.db
-          .getConnection()
-          .select('*')
-          .from(joinTable.name)
-          .whereIn(targetColumnName, oldEntryIds)
-          .transacting(trx);
-
-        if (existingRelations.length > 0) {
-          relationsToUpdate.push({ joinTable, relations: existingRelations });
-        }
-
-        // For entries being published that have no prior published version (e.g. after
-        // unpublish→republish), the draft link table still holds the correct relation
-        // order.
-        // Capture those draft-side relations so sync() can restore the order on
-        // the newly created published link rows.
-        if (!strapi.contentTypes[model.uid as UID.ContentType]) {
-          continue;
-        }
-
-        const oldLocales = new Set(oldVersions.map((e) => e.locale));
-        const draftsWithoutPublished = newVersions.filter((v) => !oldLocales.has(v.locale));
-
-        if (draftsWithoutPublished.length === 0) {
-          continue;
-        }
-
-        const draftIds = draftsWithoutPublished.map((e) => e.id);
-
-        const draftRelations = await strapi.db
-          .getConnection()
-          .select('*')
-          .from(joinTable.name)
-          .whereIn(targetColumnName, draftIds)
-          .transacting(trx);
-
-        if (draftRelations.length === 0) {
-          continue;
-        }
-
-        const sourceCol = joinTable.joinColumn.name;
-
-        if (model.options?.draftAndPublish) {
-          // The join column points at draft IDs of the related entity.
-          // We need to map those to published IDs so sync() can match them.
-          const relatedMeta = strapi.db.metadata.get(model.uid);
-          const relatedDraftIds = [
-            ...new Set(draftRelations.map((relation: any) => relation[sourceCol])),
-          ];
-
-          const draftEntries = await strapi.db
-            .getConnection()
-            .select('id', 'document_id', 'locale')
-            .from(relatedMeta.tableName)
-            .whereIn('id', relatedDraftIds)
-            .transacting(trx);
-
-          const pubEntries = await strapi.db
-            .getConnection()
-            .select('id', 'document_id', 'locale')
-            .from(relatedMeta.tableName)
-            .whereNotNull('published_at')
-            .whereIn(
-              'document_id',
-              draftEntries.map((entry: any) => entry.document_id)
-            )
-            .transacting(trx);
-
-          // Build draft→published map keyed by document_id + locale
-          const pubByKey = new Map(
-            pubEntries.map((entry: any) => [`${entry.document_id}_${entry.locale}`, entry.id])
-          );
-
-          const draftToPubMap = new Map<string, string>();
-          for (const draft of draftEntries) {
-            const pubId = pubByKey.get(`${draft.document_id}_${draft.locale}`);
-            if (pubId) {
-              draftToPubMap.set(String(draft.id), String(pubId));
-            }
-          }
-
-          const transformed = draftRelations
-            .filter((relation: any) => draftToPubMap.has(String(relation[sourceCol])))
-            .map((relation: any) => ({
-              ...relation,
-              [sourceCol]: draftToPubMap.get(String(relation[sourceCol])),
-            }));
-
-          if (transformed.length > 0) {
-            relationsToUpdate.push({ joinTable, relations: transformed });
-          }
-        } else {
-          // No D&P on the related model – IDs are the same for draft and published
-          relationsToUpdate.push({ joinTable, relations: draftRelations });
+        // Owning side of bidirectional M2M (e.g. Author.articles when publishing an author).
+        // Identified by `inversedBy` — same rule as @strapi/database `isOwner` for bidirectional.
+        if (
+          attribute.type === 'relation' &&
+          joinTable &&
+          attribute.relation === 'manyToMany' &&
+          attribute.inversedBy &&
+          model.uid === uid &&
+          model.uid !== attribute.target
+        ) {
+          const targetUid = attribute.target as UID.ContentType;
+          const batches = await captureJoinBatches(trx, {
+            joinTable,
+            publishedCol: joinTable.joinColumn.name,
+            relatedCol: joinTable.inverseJoinColumn.name,
+            relatedUid: targetUid,
+            relatedHasDraftAndPublish: !!strapi.contentTypes[targetUid]?.options?.draftAndPublish,
+            schemaUid: model.uid as UID.ContentType,
+            oldVersions,
+            newVersions,
+            publishedOn: 'joinColumn',
+          });
+          relationsToUpdate.push(...batches);
+        } else if (
+          attribute.type === 'relation' &&
+          joinTable &&
+          attribute.target === uid &&
+          (attribute.inversedBy || attribute.mappedBy) &&
+          model.uid !== uid
+        ) {
+          // Inverse side (e.g. Article.authors when publishing an article)
+          const relatedUid = model.uid as UID.ContentType;
+          const batches = await captureJoinBatches(trx, {
+            joinTable,
+            publishedCol: joinTable.inverseJoinColumn.name,
+            relatedCol: joinTable.joinColumn.name,
+            relatedUid,
+            relatedHasDraftAndPublish: !!model.options?.draftAndPublish,
+            schemaUid: relatedUid,
+            oldVersions,
+            newVersions,
+          });
+          relationsToUpdate.push(...batches);
         }
       }
     }
@@ -220,16 +283,16 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
 const sync = async (
   oldEntries: { id: string; locale: string }[],
   newEntries: { id: string; locale: string }[],
-  existingRelations: { joinTable: any; relations: any[] }[]
+  existingRelations: JoinCaptureBatch[]
 ) => {
-  // Group new entries by locale for easier lookup
   const newEntriesByLocale = keyBy('locale', newEntries);
 
-  // Create a mapping of old entry IDs to new entry IDs based on locale
   const entryIdMapping = oldEntries.reduce(
     (acc, oldEntry) => {
       const newEntry = newEntriesByLocale[oldEntry.locale];
-      if (!newEntry) return acc;
+      if (!newEntry) {
+        return acc;
+      }
       acc[oldEntry.id] = newEntry.id;
       return acc;
     },
@@ -237,32 +300,26 @@ const sync = async (
   );
 
   await strapi.db.transaction(async ({ trx }) => {
-    for (const { joinTable, relations } of existingRelations) {
-      const sourceColumn = joinTable.inverseJoinColumn.name;
-      const targetColumn = joinTable.joinColumn.name;
-      const orderColumn = joinTable.orderColumnName;
+    for (const { joinTable, relations, publishedOn } of existingRelations) {
+      const publishedCol =
+        publishedOn === 'joinColumn' ? joinTable.joinColumn.name : joinTable.inverseJoinColumn.name;
+      const relatedCol =
+        publishedOn === 'joinColumn' ? joinTable.inverseJoinColumn.name : joinTable.joinColumn.name;
+      const { orderColumnName: orderColumn } = joinTable;
 
-      // Failsafe in case those don't exist
-      if (!sourceColumn || !targetColumn || !orderColumn) {
-        continue;
+      if (publishedCol && relatedCol && orderColumn) {
+        await async.map(relations, (relation: any) => {
+          const oldPublishedId = relation[publishedCol];
+          const relatedId = relation[relatedCol];
+          const originalOrder = relation[orderColumn];
+
+          return trx
+            .from(joinTable.name)
+            .where(publishedCol, entryIdMapping[oldPublishedId])
+            .where(relatedCol, relatedId)
+            .update({ [orderColumn]: originalOrder });
+        });
       }
-
-      // Update order values for each relation
-      // TODO: Find a way to batch it more efficiently
-      await async.map(relations, (relation: any) => {
-        const {
-          [sourceColumn]: oldSourceId,
-          [targetColumn]: targetId,
-          [orderColumn]: originalOrder,
-        } = relation;
-
-        // Update the order column for the new relation entry
-        return trx
-          .from(joinTable.name)
-          .where(sourceColumn, entryIdMapping[oldSourceId])
-          .where(targetColumn, targetId)
-          .update({ [orderColumn]: originalOrder });
-      });
     }
   });
 };
