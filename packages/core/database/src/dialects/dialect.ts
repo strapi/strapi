@@ -78,6 +78,14 @@ export default class Dialect {
   }
 
   /**
+   * Max rows per batch for bulk inserts.
+   * Some databases limit multi-row insert size; override in dialect when a lower limit is required.
+   */
+  getBatchInsertSize(): number {
+    return 1000;
+  }
+
+  /**
    * Get column type conversion SQL for complex type changes
    * Override in specific dialects to handle database-specific conversions
    * @param currentType - The current database data type
