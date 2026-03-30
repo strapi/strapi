@@ -49,9 +49,16 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       },
     });
 
-    return readPermissions
-      .map((permission) => permission.subject)
-      .filter(Boolean) as RecentDocument['contentTypeUid'][];
+    // Deduplicate subjects using a Set: the JOIN across permission -> role -> users produces one row
+    // per role the user belongs, so a multi-role user gets duplicate subjects.
+    // Using a Set collapses them to unique content type UID.
+    return [
+      ...new Set(
+        readPermissions
+          .map((permission) => permission.subject)
+          .filter(Boolean) as RecentDocument['contentTypeUid'][]
+      ),
+    ];
   };
 
   type ContentTypeMeta = {
