@@ -1,5 +1,4 @@
 import { keyBy, omit } from 'lodash/fp';
-import { async } from '@strapi/utils';
 import type { UID, Schema } from '@strapi/types';
 import type { JoinTable } from '@strapi/database';
 
@@ -8,7 +7,11 @@ interface LoadContext {
   newVersions: { id: string; locale: string }[];
 }
 
-type JoinCaptureBatch = { joinTable: any; relations: any[]; publishedOn?: 'joinColumn' };
+interface RelationEntry {
+  joinTable: JoinTable;
+  relations: Record<string, unknown>[];
+  publishedOn?: 'joinColumn';
+}
 
 /** Draft id → published id for rows that already have a published counterpart (same document_id + locale). */
 const draftToPublishedMap = async (trx: any, tableName: string, rowIds: unknown[]) => {
@@ -81,7 +84,7 @@ const captureJoinBatches = async (
     newVersions: LoadContext['newVersions'];
     publishedOn?: 'joinColumn';
   }
-): Promise<JoinCaptureBatch[]> => {
+): Promise<RelationEntry[]> => {
   const {
     joinTable,
     publishedCol,
@@ -94,7 +97,7 @@ const captureJoinBatches = async (
     publishedOn,
   } = opts;
 
-  const batches: JoinCaptureBatch[] = [];
+  const batches: RelationEntry[] = [];
   const { name: table } = joinTable;
 
   const oldIds = oldVersions.map((e) => e.id);
@@ -143,11 +146,6 @@ const captureJoinBatches = async (
   batches.push({ joinTable, relations, ...(publishedOn ? { publishedOn } : {}) });
   return batches;
 };
-
-interface RelationEntry {
-  joinTable: JoinTable;
-  relations: Record<string, unknown>[];
-}
 
 /**
  * Loads all bidirectional relations that need to be synchronized when content entries change state
@@ -207,24 +205,9 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
       const dbModel = strapi.db.metadata.get(model.uid);
 
       for (const attribute of Object.values(dbModel.attributes) as Record<string, any>[]) {
-        // Skip if not a bidirectional relation targeting our content type
-        if (
-          attribute.type !== 'relation' ||
-          attribute.target !== uid ||
-          !(attribute.inversedBy || attribute.mappedBy)
-        ) {
-          continue;
-        }
-
-        // If it's a self referencing relation, there is no need to sync any relation
-        // The order will already be handled as both sides are inside the same content type
-        if (model.uid === uid) {
-          continue;
-        }
-
         const joinTable = attribute.joinTable;
 
-        // Owning side of bidirectional M2M (e.g. Author.articles when publishing an author).
+        // Owning side of bidirectional M2M (e.g. Author.articles when publishing an Author).
         // Identified by `inversedBy` — same rule as @strapi/database `isOwner` for bidirectional.
         if (
           attribute.type === 'relation' &&
@@ -254,7 +237,7 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
           (attribute.inversedBy || attribute.mappedBy) &&
           model.uid !== uid
         ) {
-          // Inverse side (e.g. Article.authors when publishing an article)
+          // Inverse side (e.g. Article.authors when publishing an Article)
           const relatedUid = model.uid as UID.ContentType;
           const batches = await captureJoinBatches(trx, {
             joinTable,
@@ -304,7 +287,7 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
 const sync = async (
   oldEntries: { id: string; locale: string }[],
   newEntries: { id: string; locale: string }[],
-  existingRelations: JoinCaptureBatch[]
+  existingRelations: RelationEntry[]
 ) => {
   const newEntriesByLocale = keyBy('locale', newEntries);
 
@@ -325,33 +308,26 @@ const sync = async (
 
   await strapi.db.transaction(async ({ trx }) => {
     for (const { joinTable, relations, publishedOn } of existingRelations) {
-      const publishedCol =
+      // Direction-aware column selection: the owning-side path sets publishedOn='joinColumn'
+      // so sync knows which FK column belongs to the entity being published.
+      const sourceColumn =
         publishedOn === 'joinColumn' ? joinTable.joinColumn.name : joinTable.inverseJoinColumn.name;
-      const relatedCol =
+      const targetColumn =
         publishedOn === 'joinColumn' ? joinTable.inverseJoinColumn.name : joinTable.joinColumn.name;
-      const { orderColumnName: orderColumn } = joinTable;
+      const orderColumn = joinTable.orderColumnName;
 
-      if (publishedCol && relatedCol && orderColumn) {
-        await async.map(relations, (relation: any) => {
-          const oldPublishedId = relation[publishedCol];
-          const relatedId = relation[relatedCol];
-          const originalOrder = relation[orderColumn];
-
-          return trx
-            .from(joinTable.name)
-            .where(publishedCol, entryIdMapping[oldPublishedId])
-            .where(relatedCol, relatedId)
-            .update({ [orderColumn]: originalOrder });
-        });
+      // Failsafe in case those don't exist
+      if (!sourceColumn || !targetColumn || !orderColumn) {
+        continue;
       }
 
       const mappedRelations = relations
         .map((relation) => ({
           relation,
-          oldSourceId: relation[publishedCol] as string,
-          targetId: relation[relatedCol] as string,
+          oldSourceId: relation[sourceColumn] as string,
+          targetId: relation[targetColumn] as string,
           originalOrder: relation[orderColumn],
-          newSourceId: entryIdMapping[relation[publishedCol] as string],
+          newSourceId: entryIdMapping[relation[sourceColumn] as string],
         }))
         .filter((r): r is typeof r & { newSourceId: string } => Boolean(r.newSourceId));
 
@@ -362,15 +338,15 @@ const sync = async (
       // Batch UPDATE: set each row's order in a single statement using CASE
       const caseFragments = mappedRelations.map(() => `WHEN ?? = ? AND ?? = ? THEN ?`);
       const caseBindings = mappedRelations.flatMap(({ newSourceId, targetId, originalOrder }) => [
-        publishedCol,
+        sourceColumn,
         newSourceId,
-        relatedCol,
+        targetColumn,
         targetId,
         originalOrder,
       ]);
 
       await trx(joinTable.name)
-        .whereIn(publishedCol, newSourceIds)
+        .whereIn(sourceColumn, newSourceIds)
         .update({
           [orderColumn]: trx.raw(`CASE ${caseFragments.join(' ')} ELSE ?? END`, [
             ...caseBindings,
@@ -380,11 +356,11 @@ const sync = async (
 
       // Batch SELECT: find which rows exist so we know what to insert
       const existingRows = await trx(joinTable.name)
-        .whereIn(publishedCol, newSourceIds)
-        .select(publishedCol, relatedCol);
+        .whereIn(sourceColumn, newSourceIds)
+        .select(sourceColumn, targetColumn);
 
       const existingSet = new Set(
-        existingRows.map((r: Record<string, unknown>) => `${r[publishedCol]}:${r[relatedCol]}`)
+        existingRows.map((r: Record<string, unknown>) => `${r[sourceColumn]}:${r[targetColumn]}`)
       );
 
       // Batch INSERT: insert cascade-deleted rows that aren't from republished sources
@@ -395,7 +371,7 @@ const sync = async (
         )
         .map(({ relation, newSourceId, originalOrder }) => ({
           ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
-          [publishedCol]: newSourceId,
+          [sourceColumn]: newSourceId,
           [orderColumn]: originalOrder,
         }));
 

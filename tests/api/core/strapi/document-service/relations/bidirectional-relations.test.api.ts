@@ -102,10 +102,12 @@ const productModel = {
 
 describe('Document Service bidirectional relations', () => {
   beforeAll(async () => {
-    await builder.addContentTypes([articleModel, authorModel]).build();
     // Tag must be created before Product so Product can reference it via inversedBy.
     // The content-type builder will auto-create the inverse 'products' attribute on Tag.
-    await builder.addContentTypes([tagModel]).addContentTypes([productModel]).build();
+    await builder
+      .addContentTypes([articleModel, authorModel, tagModel])
+      .addContentTypes([productModel])
+      .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
