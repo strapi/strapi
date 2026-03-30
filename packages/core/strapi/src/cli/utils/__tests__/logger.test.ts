@@ -46,8 +46,8 @@ describe('logger', () => {
 
   describe('formatDiagnostic', () => {
     it('only creates a single logger', () => {
-      const info = true; // so we info reports are called
-      const diagnosticReporter = formatDiagnostic('export', info);
+      const verbose = true;
+      const diagnosticReporter = formatDiagnostic('export', verbose);
 
       // Use the diagnostic reporter to log different levels of messages
       diagnosticReporter({
@@ -88,23 +88,7 @@ describe('logger', () => {
       expect(infoMessages.some((m) => m.includes('Test info'))).toBe(true);
     });
 
-    it('writes info diagnostics to the log file even when verbose (console) is false', () => {
-      const diagnosticReporter = formatDiagnostic('export');
-
-      diagnosticReporter({
-        kind: 'info',
-        details: {
-          message: 'Test info',
-          createdAt: new Date(),
-        },
-      });
-
-      expect(createLogger).toHaveBeenCalledTimes(1);
-      const infoMessages = mockLogger.info.mock.calls.map((c) => String(c[0]));
-      expect(infoMessages.some((m) => m.includes('Test info'))).toBe(true);
-    });
-
-    it('logs info to the diagnostic file after error and warning when verbose is false', () => {
+    it('writes error, warning, and info to the diagnostic file when verbose (console) is false', () => {
       const diagnosticReporter = formatDiagnostic('export');
 
       // Use the diagnostic reporter to log different levels of messages
