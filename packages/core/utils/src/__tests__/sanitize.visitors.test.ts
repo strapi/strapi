@@ -153,6 +153,23 @@ describe('Sanitize visitors util', () => {
       await expect(sanitizers.defaultSanitizeFilters(ctx, filters)).resolves.toEqual(filters);
     });
 
+    test('keeps scalar datetime $gt filter with Date operand (GraphQL)', async () => {
+      const schemaWithDatetime: typeof articleModel = {
+        ...articleModel,
+        attributes: {
+          ...articleModel.attributes,
+          publishedAt: { type: 'datetime' },
+        },
+      };
+      const ctxDatetime = { schema: schemaWithDatetime, getModel };
+      const date = new Date('2022-03-17T15:06:57.878Z');
+      const filters = { publishedAt: { $gt: date } };
+
+      await expect(sanitizers.defaultSanitizeFilters(ctxDatetime, filters)).resolves.toEqual(
+        filters
+      );
+    });
+
     test('removes unrecognized keys nested under scalar field filters', async () => {
       await expect(
         sanitizers.defaultSanitizeFilters(ctx, { title: { totallyUnknownNestedKey: 'x' } })
