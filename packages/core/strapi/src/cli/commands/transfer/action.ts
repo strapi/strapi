@@ -38,6 +38,31 @@ const resolveRemotePullAssetIdleTimeoutMs = (value: unknown): number | undefined
   return n;
 };
 
+/** Matches @strapi/data-transfer `parseOptionalMaxBatchSize` (kept local for CLI / Jest resolution). */
+const MAX_TRANSFER_MAX_BATCH_SIZE = 16384;
+const parseOptionalMaxBatchSizeCli = (value: unknown): number | undefined => {
+  if (value == null || value === '') {
+    return undefined;
+  }
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n) || n <= 0 || n > MAX_TRANSFER_MAX_BATCH_SIZE) {
+    return undefined;
+  }
+  return n;
+};
+
+/** CLI flag wins; else optional server.transfer.remote.maxBatchSize from local config. */
+const resolveTransferMaxBatchSize = (
+  flagValue: unknown,
+  configValue: unknown
+): number | undefined => {
+  const fromFlag = parseOptionalMaxBatchSizeCli(flagValue);
+  if (fromFlag !== undefined) {
+    return fromFlag;
+  }
+  return parseOptionalMaxBatchSizeCli(configValue);
+};
+
 interface CmdOptions {
   from?: URL;
   fromToken: string;
@@ -49,6 +74,7 @@ interface CmdOptions {
   throttle?: number;
   force?: boolean;
   checksums?: boolean;
+  maxBatchSize?: number;
 }
 /**
  * Transfer command.
@@ -85,6 +111,10 @@ export default async (opts: CmdOptions) => {
     const assetIdleTimeoutMs = resolveRemotePullAssetIdleTimeoutMs(
       strapi.config.get('server.transfer.remote.assetIdleTimeoutMs')
     );
+    const maxBatchSize = resolveTransferMaxBatchSize(
+      opts.maxBatchSize,
+      strapi.config.get('server.transfer.remote.maxBatchSize')
+    );
 
     source = createRemoteStrapiSourceProvider({
       getStrapi: () => strapi,
@@ -95,6 +125,7 @@ export default async (opts: CmdOptions) => {
       },
       ...(assetIdleTimeoutMs !== undefined ? { streamTimeout: assetIdleTimeoutMs } : {}),
       ...(checksumsEnabled ? { verifyChecksums: true } : {}),
+      ...(maxBatchSize !== undefined ? { maxBatchSize } : {}),
     });
   }
 
@@ -112,6 +143,11 @@ export default async (opts: CmdOptions) => {
       exitWith(1, 'Missing token for remote destination');
     }
 
+    const maxBatchSize = resolveTransferMaxBatchSize(
+      opts.maxBatchSize,
+      strapi.config.get('server.transfer.remote.maxBatchSize')
+    );
+
     destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
       auth: {
@@ -121,6 +157,7 @@ export default async (opts: CmdOptions) => {
       strategy: 'restore',
       restore: parseRestoreFromOptions(opts),
       ...(checksumsEnabled ? { verifyChecksums: true } : {}),
+      ...(maxBatchSize !== undefined ? { maxBatchSize } : {}),
     });
   }
 

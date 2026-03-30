@@ -20,6 +20,12 @@ import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
+import {
+  assertAssetFlowBatchWithinLimit,
+  assertJsonBatchWithinLimit,
+  LEGACY_BATCH_BYTES,
+  parseOptionalMaxBatchSize,
+} from '../../../utils/transfer-max-batch-size';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
@@ -34,6 +40,8 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
   streamTimeout?: number;
   /** Require per-asset checksum verification for transferred asset bytes. */
   verifyChecksums?: boolean;
+  /** Max batch size (MiB); negotiated with remote via init. See user docs. */
+  maxBatchSize?: number;
 }
 
 type QueueableAction = Protocol.Client.TransferAssetFlow &
@@ -76,6 +84,10 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   /** Set from pull server `start` response for `assets` when present (for engine `getStageTotals`). */
   #cachedAssetsTotals?: StageTotalsEstimate;
+
+  #assetBatchMaxBytes = LEGACY_BATCH_BYTES;
+
+  #jsonBatchMaxBytes = LEGACY_BATCH_BYTES;
 
   async #createStageReadStream(stage: Exclude<TransferStage, 'schemas'>) {
     if (stage === 'assets') {
@@ -125,6 +137,22 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
         stream.end();
         return;
+      }
+
+      if (data != null) {
+        try {
+          if (stage === 'assets') {
+            for (const item of castArray(data)) {
+              const batch = Array.isArray(item) ? item : [item];
+              assertAssetFlowBatchWithinLimit(batch, this.#assetBatchMaxBytes);
+            }
+          } else {
+            assertJsonBatchWithinLimit(data, this.#jsonBatchMaxBytes);
+          }
+        } catch (err) {
+          stream.destroy(err instanceof Error ? err : new Error(String(err)));
+          return;
+        }
       }
 
       for (const item of castArray(data)) {
@@ -476,9 +504,14 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   async initTransfer(): Promise<string> {
     const wantsChecksums = this.options.verifyChecksums === true;
+    const maxBatchSizeMiB = parseOptionalMaxBatchSize(this.options.maxBatchSize);
     const query = this.dispatcher?.dispatchCommand({
       command: 'init',
-      ...(wantsChecksums ? { params: { transfer: 'pull', checksums: true } } : {}),
+      params: {
+        transfer: 'pull',
+        ...(wantsChecksums ? { checksums: true } : {}),
+        ...(maxBatchSizeMiB !== undefined ? { maxBatchSize: maxBatchSizeMiB } : {}),
+      },
     });
 
     const res = (await query) as
@@ -488,6 +521,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
     }
+    this.#assetBatchMaxBytes = res.assetBatchMaxBytes ?? LEGACY_BATCH_BYTES;
+    this.#jsonBatchMaxBytes = res.jsonBatchMaxBytes ?? LEGACY_BATCH_BYTES;
     this.#checksumsEnabled = wantsChecksums && res.checksums === true;
     if (wantsChecksums && res.checksums !== true) {
       this.#reportWarning(

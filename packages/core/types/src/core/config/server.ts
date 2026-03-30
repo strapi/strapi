@@ -34,6 +34,11 @@ export interface ServerTransfer {
          * Omit to use the package default (typically several minutes for large files over JSON/WS).
          */
         assetIdleTimeoutMs?: number;
+        /**
+         * Max batch size for remote transfer WebSocket batches; negotiated with the initiator as the
+         * minimum of both sides’ values. Unit and behavior are documented in user docs — not a hard RSS cap.
+         */
+        maxBatchSize?: number;
       }
     | undefined;
 }

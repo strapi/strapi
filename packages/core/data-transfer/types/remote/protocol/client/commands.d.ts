@@ -17,6 +17,8 @@ export type InitCommand = CreateCommand<
     options?: Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'>;
     transfer: TransferMethod;
     checksums?: boolean;
+    /** Initiator max batch size; server takes min with its config. See user docs. */
+    maxBatchSize?: number;
   }
 >;
 export type TransferKind = InitCommand['params']['transfer'];

@@ -7,6 +7,14 @@ import type { TransferStage, IAsset, Protocol } from '../../../../types';
 
 import { ProviderTransferError } from '../../../errors/providers';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
+import {
+  assertAssetFlowBatchWithinLimit,
+  assertJsonBatchWithinLimit,
+  batchLimitsFromAgreedMaxBatchSize,
+  LEGACY_BATCH_BYTES,
+  negotiateAgreedMaxBatchSize,
+  parseOptionalMaxBatchSize,
+} from '../../../utils/transfer-max-batch-size';
 import { createLocalStrapiDestinationProvider } from '../../providers';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
 import { Handler } from './abstract';
@@ -47,6 +55,10 @@ export interface PushHandler extends Handler {
   /** Incremental checksum state keyed by transfer asset ID (only populated when checksums are enabled). */
   assetChecksums?: { [assetID: string]: Hash };
   checksumsEnabled?: boolean;
+
+  assetBatchMaxBytes?: number;
+  jsonBatchMaxBytes?: number;
+  agreedMaxBatchSize?: number;
 
   /**
    * Orchestrate and manage the transfer messages' ordering
@@ -165,6 +177,9 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.assets = {};
     this.assetChecksums = {};
     this.checksumsEnabled = false;
+    delete this.assetBatchMaxBytes;
+    delete this.jsonBatchMaxBytes;
+    delete this.agreedMaxBatchSize;
 
     delete this.flow;
     delete this.provider;
@@ -390,6 +405,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         return this.streamAsset(msg.data);
       }
 
+      assertJsonBatchWithinLimit(msg.data, this.jsonBatchMaxBytes ?? LEGACY_BATCH_BYTES);
+
       // For all other steps
       await Promise.all(
         msg.data.map(async (item) => {
@@ -446,6 +463,10 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
   async streamAsset(this: PushHandler, payload) {
     const assetsStream = this.streams?.assets;
+
+    if (payload !== null && payload !== undefined) {
+      assertAssetFlowBatchWithinLimit(payload, this.assetBatchMaxBytes ?? LEGACY_BATCH_BYTES);
+    }
 
     // TODO: close the stream upon receiving an 'end' event instead
     if (payload === null) {
@@ -542,6 +563,22 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.transferID = randomUUID();
     this.startedAt = Date.now();
 
+    const serverMiB = parseOptionalMaxBatchSize(
+      strapi.config.get('server.transfer.remote.maxBatchSize')
+    );
+    const clientMiB = parseOptionalMaxBatchSize(params?.maxBatchSize);
+    const agreed = negotiateAgreedMaxBatchSize(clientMiB, serverMiB);
+    const limits = batchLimitsFromAgreedMaxBatchSize(agreed);
+    this.assetBatchMaxBytes = limits.assetBatchMaxBytes;
+    this.jsonBatchMaxBytes = limits.jsonBatchMaxBytes;
+    this.agreedMaxBatchSize = agreed ?? undefined;
+
+    if (agreed != null) {
+      strapi.log.info(
+        `[Data transfer][push] maxBatchSize: agreed ${agreed} MiB → assetBatchMaxBytes=${limits.assetBatchMaxBytes}, jsonBatchMaxBytes=${limits.jsonBatchMaxBytes}`
+      );
+    }
+
     this.assets = {};
     this.assetChecksums = {};
     this.checksumsEnabled = params?.checksums === true;
@@ -567,7 +604,13 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       strapi.log.warn(message);
     };
 
-    return { transferID: this.transferID, checksums: true };
+    return {
+      transferID: this.transferID,
+      checksums: true,
+      assetBatchMaxBytes: limits.assetBatchMaxBytes,
+      jsonBatchMaxBytes: limits.jsonBatchMaxBytes,
+      ...(agreed != null ? { maxBatchSize: agreed } : {}),
+    };
   },
 
   async status(this: PushHandler) {

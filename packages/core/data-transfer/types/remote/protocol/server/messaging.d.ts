@@ -11,7 +11,15 @@ export type Message<T = unknown> = {
 
 // Successful
 export type OKMessage = Message<{ ok: true }>;
-export type InitMessage = Message<{ transferID: string; checksums?: boolean }>;
+export type InitMessage = Message<{
+  transferID: string;
+  checksums?: boolean;
+  /** Agreed max batch size when at least one side declared maxBatchSize; omitted in legacy sessions. */
+  maxBatchSize?: number;
+  /** Authoritative per-message limits (new peers). Old servers omit; use legacy 1 MiB defaults. */
+  assetBatchMaxBytes?: number;
+  jsonBatchMaxBytes?: number;
+}>;
 export type EndMessage = OKMessage;
 export type StatusMessage = Message<
   | { active: true; kind: TransferKind; startedAt: number; elapsed: number }

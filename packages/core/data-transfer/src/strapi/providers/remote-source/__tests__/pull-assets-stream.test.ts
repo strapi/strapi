@@ -303,7 +303,7 @@ describe('Remote Strapi source provider — pull assets stream', () => {
     const id = 'asset-with-bad-checksum';
     const badChecksum = createHash('sha256').update(Buffer.from('wrong')).digest('hex');
 
-    const drainPass = pipeline(
+    const settled = pipeline(
       pass,
       new Writable({
         objectMode: true,
@@ -321,7 +321,7 @@ describe('Remote Strapi source provider — pull assets stream', () => {
           );
         },
       })
-    );
+    ).catch((e: unknown) => e);
 
     ws.emit(
       'message',
@@ -347,7 +347,7 @@ describe('Remote Strapi source provider — pull assets stream', () => {
       })
     );
 
-    const checksumErr = await drainPass.catch((e: unknown) => e);
+    const checksumErr = await settled;
     expect(checksumErr).toBeInstanceOf(ProviderTransferError);
     expect((checksumErr as Error).message).toMatch(/Checksum mismatch/);
   });
@@ -359,7 +359,7 @@ describe('Remote Strapi source provider — pull assets stream', () => {
     const pass = await provider.createAssetsReadStream();
     const id = 'asset-missing-checksum';
 
-    const drainPass = pipeline(
+    const settled = pipeline(
       pass,
       new Writable({
         objectMode: true,
@@ -377,7 +377,7 @@ describe('Remote Strapi source provider — pull assets stream', () => {
           );
         },
       })
-    );
+    ).catch((e: unknown) => e);
 
     ws.emit(
       'message',
@@ -398,7 +398,7 @@ describe('Remote Strapi source provider — pull assets stream', () => {
       })
     );
 
-    const missingErr = await drainPass.catch((e: unknown) => e);
+    const missingErr = await settled;
     expect(missingErr).toBeInstanceOf(ProviderTransferError);
     expect((missingErr as Error).message).toMatch(/missing checksum/i);
   });
