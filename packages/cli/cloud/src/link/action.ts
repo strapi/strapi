@@ -1,4 +1,3 @@
-import inquirer from 'inquirer';
 import chalk from 'chalk';
 
 import type { Answers } from 'inquirer';
@@ -46,6 +45,7 @@ async function promptForRelink(
   existingConfig: LocalSave | null
 ) {
   if (existingConfig && existingConfig.project) {
+    const { default: inquirer } = await import('inquirer');
     const { shouldRelink } = await inquirer.prompt([
       {
         type: 'confirm',
@@ -116,6 +116,7 @@ async function getUserSelection(
 ): Promise<LinkProjectAnswer | null> {
   const { logger } = ctx;
   try {
+    const { default: inquirer } = await import('inquirer');
     const answer: LinkProjectInput = await inquirer.prompt([
       {
         type: 'list',
@@ -173,6 +174,7 @@ export default async (ctx: CLIContext) => {
   }
 
   try {
+    const { default: inquirer } = await import('inquirer');
     const { confirmAction } = await inquirer.prompt([
       {
         type: 'confirm',

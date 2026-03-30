@@ -889,20 +889,16 @@ const BulkLocaleAction: DocumentActionComponent = ({
       });
     }
 
-    // Build the validation errors for each locale.
-    const allDocuments = [document, ...(document.localizations ?? [])];
-    const errors = allDocuments.reduce<FormErrors>((errs, document) => {
-      if (!document) {
-        return errs;
-      }
-
-      // Validate each locale entry via the useDocument validate function and store any errors in a dictionary
+    // Validate the current document locale only. Other locales have minimal
+    // data populated for performance reasons and will be validated server-side
+    // during the actual bulk publish operation.
+    const errors: FormErrors = {};
+    if (document.locale) {
       const validation = validate(document as Modules.Documents.AnyDocument);
       if (validation !== null) {
-        errs[document.locale] = validation;
+        errors[document.locale] = validation;
       }
-      return errs;
-    }, {});
+    }
 
     return [locales, errors];
   }, [document, meta?.availableLocales, validate]);
