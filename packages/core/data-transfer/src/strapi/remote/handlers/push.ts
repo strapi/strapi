@@ -43,13 +43,13 @@ export interface PushHandler extends Handler {
   /**
    * Holds all the transferred assets for the current transfer handler (one registry per connection)
    */
-  assets: { [filepath: string]: IAsset & { stream: PassThrough } };
-  // Incremental checksum state keyed by transfer asset ID
-  assetChecksums?: { [filepath: string]: Hash };
+  assets: { [assetID: string]: IAsset & { stream: PassThrough } };
+  /** Incremental checksum state keyed by transfer asset ID (only populated when checksums are enabled). */
+  assetChecksums?: { [assetID: string]: Hash };
   checksumsEnabled?: boolean;
 
   /**
-   * Ochestrate and manage the transfer messages' ordering
+   * Orchestrate and manage the transfer messages' ordering
    */
   flow?: TransferFlow;
 
@@ -358,8 +358,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       this.stats[stage] = { started: 0, finished: 0 };
 
       if (stage === 'assets') {
-        strapi.log.info(
-          '[Transfer destination] Assets stage started, starting memory log every 2s'
+        strapi.log.debug(
+          '[Transfer destination] Assets stage started; sampling memory usage every 5s until stage end'
         );
         this.memoryLogInterval = setInterval(() => {
           const mem = process.memoryUsage();
@@ -463,10 +463,12 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       if (action === 'start') {
         this.stats.assets.started += 1;
         this.assets[assetID] = { ...item.data, stream: new PassThrough() };
-        this.assetChecksums ??= {};
-        this.assetChecksums[assetID] = createHash('sha256');
+        if (this.checksumsEnabled) {
+          this.assetChecksums ??= {};
+          this.assetChecksums[assetID] = createHash('sha256');
+        }
         const filename = item.data?.filename ?? assetID;
-        strapi.log.info(
+        strapi.log.debug(
           `[Transfer destination] Asset start #${this.stats.assets.started} id=${assetID} filename=${filename}`
         );
         writeAsync(assetsStream, this.assets[assetID]);
@@ -498,7 +500,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         if (this.assetChecksums?.[assetID]) {
           delete this.assetChecksums[assetID];
         }
-        strapi.log.info(
+        strapi.log.debug(
           `[Transfer destination] Asset end id=${assetID} (finished=${this.stats.assets.finished + 1}/${this.stats.assets.started})`
         );
         await new Promise<void>((resolve, reject) => {

@@ -464,9 +464,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
           callback();
         } catch (error) {
-          if (error instanceof Error) {
-            callback(error);
-          }
+          callback(error instanceof Error ? error : new Error(String(error)));
         }
       },
     });

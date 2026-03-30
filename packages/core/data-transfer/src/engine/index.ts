@@ -365,6 +365,7 @@ class TransferEngine<
         const progressTransform = new Transform({
           objectMode: true,
           transform(chunk: Buffer | unknown, _enc, cb) {
+            // Asset file reads should yield Buffers; avoid skewing totals if not.
             const byteLength = Buffer.isBuffer(chunk) ? chunk.length : 1;
             stageProgress.bytes += byteLength;
             if (key) {

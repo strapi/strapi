@@ -2,7 +2,7 @@
  * Shared `JSON.stringify` replacer for data-transfer WebSocket frames (push and pull).
  *
  * Default `JSON.stringify` uses `Buffer.toJSON()` → `{ type: 'Buffer', data: [n,n,...] }`, which
- * blows the peer's heap on `JSON.parse`. Encode binary values as compact base64 strings instead.
+ * allocates a large array on the peer during `JSON.parse`. Encode binary values as compact base64 strings instead.
  *
  * Note: Node runs `Buffer.prototype.toJSON` before the replacer sees a `Buffer` property, so the
  * replacer receives `{ type: 'Buffer', data: [...] }` unless the value is already a string (see

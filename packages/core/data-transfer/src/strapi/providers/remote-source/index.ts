@@ -509,7 +509,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     });
   }
 
-  /** Warnings are always emitted by the transfer CLI logger (unlike info, which needs --verbose). */
+  /** Reports a warning diagnostic (`kind: 'warning'`). Consumers (e.g. CLI) choose log levels and routing. */
   #reportWarning(message: string) {
     this.#diagnostics?.report({
       details: {
@@ -563,7 +563,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     this.dispatcher = createDispatcher(this.ws, retryMessageOptions, (message: string) =>
       this.#reportInfo(message)
     );
-    this.#reportInfo('creating dispatcher');
+    this.#reportInfo('created dispatcher');
 
     this.#reportInfo('initialize transfer');
     const transferID = await this.initTransfer();
