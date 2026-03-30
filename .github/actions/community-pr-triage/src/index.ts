@@ -175,14 +175,18 @@ async function main() {
   const reportContent = readFileSync(reportPath, 'utf-8');
   await core.summary.addRaw(reportContent).write();
 
+  // Fetch merged PRs once for both sync and update
+  let mergedPRNumbers: Set<number> | undefined;
+  if ((doSync && !dryRun) || doUpdate) {
+    console.log('Fetching recently merged PRs...');
+    mergedPRNumbers = fetchRecentlyMergedPRNumbers();
+    console.log(`Found ${mergedPRNumbers.size} recently merged PRs.\n`);
+  }
+
   // Sync to Linear
   if (doSync && !dryRun) {
-    console.log('Fetching recently merged PRs...');
-    const mergedPRNumbers = fetchRecentlyMergedPRNumbers();
-    console.log(`Found ${mergedPRNumbers.size} recently merged PRs.\n`);
-
     console.log('Syncing to Linear...');
-    const stats = await syncToLinear(scoredPRs, mergedPRNumbers);
+    const stats = await syncToLinear(scoredPRs, mergedPRNumbers!);
     console.log(
       `Linear sync complete: ${stats.created} created, ${stats.updated} updated, ${stats.closed} closed, ${stats.relationsCreated} relations linked.\n`
     );
@@ -199,11 +203,7 @@ async function main() {
 
   // Project update
   if (doUpdate) {
-    console.log('Fetching recently merged PRs...');
-    const mergedPRNumbers = fetchRecentlyMergedPRNumbers();
-    console.log(`Found ${mergedPRNumbers.size} recently merged PRs.\n`);
-
-    await generateProjectUpdate(scoredPRs, mergedPRNumbers, dryRun);
+    await generateProjectUpdate(scoredPRs, mergedPRNumbers!, dryRun);
   }
 }
 

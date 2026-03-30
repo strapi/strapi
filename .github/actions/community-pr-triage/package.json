@@ -11,7 +11,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@anthropic-ai/sdk": "^0.78.0",
-    "@linear/sdk": "^37.0.0"
+    "@linear/sdk": "80.0.0"
   },
   "devDependencies": {
     "tsup": "^8.3.0",

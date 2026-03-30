@@ -6,11 +6,11 @@ import type { GitHubPR, GitHubIssue, LinkedIssueData } from './types.js';
 
 export function parseIssueRefs(body: string): number[] {
   const refs = new Set<number>();
-  const hashPattern = /(?:fixes|closes|resolves|ref|related)?\s*#(\d{3,5})/gi;
+  const hashPattern = /(?:fixes|closes|resolves|ref|related)?\s*#(\d{3,})/gi;
   for (const match of body.matchAll(hashPattern)) {
     refs.add(parseInt(match[1], 10));
   }
-  const urlPattern = /github\.com\/strapi\/strapi\/issues\/(\d{3,5})/g;
+  const urlPattern = /github\.com\/strapi\/strapi\/issues\/(\d{3,})/g;
   for (const match of body.matchAll(urlPattern)) {
     refs.add(parseInt(match[1], 10));
   }

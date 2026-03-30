@@ -66,7 +66,7 @@ Respond in exactly this JSON format, nothing else:
       reason: String(parsed.reason || ''),
     };
   } catch {
-    // If parsing fails, be conservative and include the relation
+    // If parsing fails, return confidence below the 0.6 threshold so the relation is excluded
     return { related: true, confidence: 0.5, reason: 'Failed to parse AI response' };
   }
 }

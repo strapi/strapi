@@ -72,10 +72,8 @@ export function categorizeTickets(
           status: summary.status,
         });
       } else {
-        // Check if stale (>14 days in Todo)
-        const ageDays = scored
-          ? Math.floor((Date.now() - new Date(scored.pr.createdAt).getTime()) / 86400000)
-          : 0;
+        // Check if stale (>14 days since the ticket was last updated in Linear)
+        const ageDays = Math.floor((Date.now() - summary.updatedAt.getTime()) / 86400000);
         if (ageDays > 14) {
           categories.stale.push({
             prNumber: prNum,

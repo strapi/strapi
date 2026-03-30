@@ -148,6 +148,7 @@ export interface PRTicketSummary {
   teamId: string;
   identifier: string;
   status: string;
+  updatedAt: Date;
 }
 
 /**
@@ -178,6 +179,7 @@ export async function fetchExistingPRSummary(
           teamId,
           identifier: team ? `${team.key}-${issue.number}` : issue.id,
           status: state?.name ?? 'Unknown',
+          updatedAt: issue.updatedAt,
         });
       }
       hasNext = page.pageInfo.hasNextPage;
