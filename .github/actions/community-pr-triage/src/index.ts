@@ -51,13 +51,13 @@ async function main() {
   const dryRun = process.argv.includes('--dry-run') || (!doSync && !doUpdate);
   const autoYes = process.argv.includes('--yes') || process.argv.includes('-y');
 
-  // --- Scored PRs: use cache for dry-runs and update-only; always fetch fresh for actual sync ---
+  // --- Scored PRs: use cache if available (update-only mode), otherwise fetch fresh ---
   let scoredPRs: ScoredPR[];
   let mergedPRNumbers: Set<number> | undefined;
   let cachedSyncStats: { createdPRNumbers: number[] } | undefined;
 
   const updateOnly = doUpdate && !doSync;
-  const cache = dryRun || updateOnly ? readCache() : null;
+  const cache = updateOnly ? readCache() : null;
 
   if (cache) {
     scoredPRs = cache.scoredPRs;
