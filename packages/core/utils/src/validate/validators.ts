@@ -267,6 +267,20 @@ export const validatePopulate = asyncCurry(
               'media',
             ].includes(attribute.type);
 
+            const isMorphLikeAttribute =
+              attribute.type === 'dynamiczone' ||
+              (attribute.type === 'relation' &&
+                typeof attribute.relation === 'string' &&
+                ['morphToOne', 'morphToMany'].includes(attribute.relation));
+
+            if (isMorphLikeAttribute && isObject(value) && 'populate' in value) {
+              const populateValue = (value as Record<string, unknown>).populate;
+
+              if (populateValue !== '*') {
+                throwInvalidKey({ key: 'populate', path: path.raw });
+              }
+            }
+
             // Throw on non-populate attributes
             if (!isPopulatableAttribute) {
               throwInvalidKey({ key, path: path.raw });
@@ -376,7 +390,7 @@ export const validatePopulate = asyncCurry(
               attribute?.type === 'dynamiczone' ||
               (attribute?.type === 'relation' &&
                 typeof attribute.relation === 'string' &&
-                attribute.relation.startsWith('morph'));
+                ['morphToOne', 'morphToMany'].includes(attribute.relation));
 
             if (isPolymorphicAttribute) {
               if (value !== '*') {
