@@ -65,10 +65,14 @@ const filters = traverseFactory()
     async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
       const parent: Parent = { key, path, schema, attribute };
 
-      // $null / $notNull operands are boolean-cast downstream; arbitrary objects are not filter maps.
+      // Operator operands that are plain objects (not arrays) are only traversed when they look like
+      // filter subtrees (nested operators or schema attributes). Otherwise treat as opaque operands
+      // (e.g. GraphQL DateTime / Date for $gt, $null / $notNull booleans, or { $null: { anything } }).
       // Without this, traversing into e.g. { $null: { anything: 'x' } } makes validate throw on "anything".
+      // $not is excluded: its value is always a nested filter map, not an opaque scalar operand.
       if (
-        (key === '$null' || key === '$notNull') &&
+        isOperator(key) &&
+        key !== '$not' &&
         isObj(value) &&
         !isArray(value) &&
         !isFilterLikeObject(value, schema)
