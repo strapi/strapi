@@ -300,6 +300,7 @@ export async function syncToLinear(
   updated: number;
   closed: number;
   relationsCreated: number;
+  createdPRNumbers: number[];
   issueUrls: Map<number, string>;
 }> {
   const apiKey = process.env.LINEAR_API_KEY;
@@ -311,12 +312,14 @@ export async function syncToLinear(
     updated: number;
     closed: number;
     relationsCreated: number;
+    createdPRNumbers: number[];
     issueUrls: Map<number, string>;
   } = {
     created: 0,
     updated: 0,
     closed: 0,
     relationsCreated: 0,
+    createdPRNumbers: [],
     issueUrls: new Map(),
   };
 
@@ -396,6 +399,7 @@ export async function syncToLinear(
       const created = await result.issue;
       if (created) {
         prLinearIssueIds.set(scored.pr.number, created.id);
+        stats.createdPRNumbers.push(scored.pr.number);
         stats.issueUrls.set(
           scored.pr.number,
           `https://linear.app/strapi/issue/${cprTeamKey}-${created.number}`

@@ -184,12 +184,14 @@ async function main() {
   }
 
   // Sync to Linear
+  let newlySyncedPRNumbers: Set<number> | undefined;
   if (doSync && !dryRun) {
     console.log('Syncing to Linear...');
     const stats = await syncToLinear(scoredPRs, mergedPRNumbers!);
     console.log(
       `Linear sync complete: ${stats.created} created, ${stats.updated} updated, ${stats.closed} closed, ${stats.relationsCreated} relations linked.\n`
     );
+    newlySyncedPRNumbers = new Set(stats.createdPRNumbers);
 
     core.setOutput('created', String(stats.created));
     core.setOutput('updated', String(stats.updated));
@@ -203,7 +205,7 @@ async function main() {
 
   // Project update
   if (doUpdate) {
-    await generateProjectUpdate(scoredPRs, mergedPRNumbers!, dryRun);
+    await generateProjectUpdate(scoredPRs, mergedPRNumbers!, dryRun, newlySyncedPRNumbers);
   }
 }
 

@@ -38,7 +38,8 @@ export function categorizeTickets(
   scoredPRs: ScoredPR[],
   mergedPRNumbers: Set<number>,
   prSummary: Map<number, PRTicketSummary>,
-  lastUpdateDate?: Date
+  lastUpdateDate?: Date,
+  newlySyncedPRNumbers?: Set<number>
 ): ProjectUpdateCategory {
   const categories: ProjectUpdateCategory = {
     pickedUp: [],
@@ -110,8 +111,15 @@ export function categorizeTickets(
     }
   }
 
-  // PRs whose CPR ticket was created since the last project update
-  if (lastUpdateDate) {
+  // PRs new since last update — prefer explicit sync list, fall back to Linear timestamp
+  if (newlySyncedPRNumbers) {
+    for (const scored of scoredPRs) {
+      if (newlySyncedPRNumbers.has(scored.pr.number)) {
+        categories.newSinceLastUpdate.push(scored);
+      }
+    }
+    categories.newSinceLastUpdate.sort((a, b) => b.value.total - a.value.total);
+  } else if (lastUpdateDate) {
     for (const scored of scoredPRs) {
       const summary = prSummary.get(scored.pr.number);
       if (summary && summary.teamId === LINEAR_CPR_TEAM_ID && summary.createdAt > lastUpdateDate) {
@@ -342,7 +350,8 @@ export function formatProjectUpdate(
 export async function generateProjectUpdate(
   scoredPRs: ScoredPR[],
   mergedPRNumbers: Set<number>,
-  dryRun: boolean
+  dryRun: boolean,
+  newlySyncedPRNumbers?: Set<number>
 ): Promise<string> {
   const apiKey = process.env.LINEAR_API_KEY;
   if (!apiKey) throw new Error('LINEAR_API_KEY environment variable is required');
@@ -361,7 +370,13 @@ export async function generateProjectUpdate(
     console.log('No previous project update found — all tickets treated as existing.');
   }
 
-  const categories = categorizeTickets(scoredPRs, mergedPRNumbers, prSummary, lastUpdateDate);
+  const categories = categorizeTickets(
+    scoredPRs,
+    mergedPRNumbers,
+    prSummary,
+    lastUpdateDate,
+    newlySyncedPRNumbers
+  );
 
   // Sprint recommendation: select top PRs and look up their Linear URLs
   const sprintPRs = selectSprintPRs(scoredPRs);
