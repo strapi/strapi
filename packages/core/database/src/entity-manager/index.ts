@@ -51,6 +51,37 @@ import { EntityManager, Repository, Entity } from './types';
 
 export * from './types';
 
+/**
+ * Batched join-table insert for SQLite etc. (GH#25198). Uses dialect.getBatchInsertSize().
+ * All batches run in the same transaction so the operation is atomic; no partial state on failure.
+ * Caller must pass an active transaction (trx) — do not call without one.
+ */
+async function batchInsertJoinTable(
+  db: Database,
+  joinTableName: string,
+  rows: Record<string, unknown>[],
+  trx: any,
+  options?: { onConflict?: string[]; merge?: string[]; ignore?: boolean }
+): Promise<void> {
+  if (rows.length === 0) return;
+  if (trx == null) {
+    throw new Error(
+      'batchInsertJoinTable requires a transaction so all batches commit or roll back atomically'
+    );
+  }
+  const batchSize = db.dialect.getBatchInsertSize();
+  for (let i = 0; i < rows.length; i += batchSize) {
+    const chunk = rows.slice(i, i + batchSize);
+    let qb = createQueryBuilder(joinTableName, db).insert(chunk).transacting(trx);
+    if (options?.onConflict) {
+      qb = qb.onConflict(options.onConflict);
+      if (options.merge) qb.merge(options.merge);
+      else if (options.ignore) qb.ignore();
+    }
+    await qb.execute();
+  }
+}
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   isObject(value) && !isNil(value);
 
@@ -342,9 +373,25 @@ export const createEntityManager = (db: Database): EntityManager => {
         throw new Error('Nothing to insert');
       }
 
-      const createdEntries = await this.createQueryBuilder(uid)
-        .insert(dataToInsert)
-        .execute<Array<ID | { id: ID }>>();
+      const batchSize = db.dialect.getBatchInsertSize();
+      const trx = await db.transaction();
+      let createdEntries: Array<ID | { id: ID }> = [];
+      try {
+        for (let i = 0; i < dataToInsert.length; i += batchSize) {
+          const chunk = dataToInsert.slice(i, i + batchSize);
+          const chunkResult = await this.createQueryBuilder(uid)
+            .insert(chunk)
+            .transacting(trx.get())
+            .execute<Array<ID | { id: ID }>>();
+          createdEntries = createdEntries.concat(
+            Array.isArray(chunkResult) ? chunkResult : [chunkResult]
+          );
+        }
+        await trx.commit();
+      } catch (e) {
+        await trx.rollback();
+        throw e;
+      }
 
       const result = {
         count: data.length,
@@ -558,7 +605,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 };
               }) ?? [];
 
-            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+            await batchInsertJoinTable(db, joinTable.name, rows, trx);
           }
 
           continue;
@@ -624,7 +671,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             transaction: trx,
           });
 
-          await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+          await batchInsertJoinTable(db, joinTable.name, rows, trx);
 
           continue;
         }
@@ -748,7 +795,7 @@ export const createEntityManager = (db: Database): EntityManager => {
           }
 
           // insert new relations
-          await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
+          await batchInsertJoinTable(db, joinTable.name, insert, trx);
         }
       }
     },
@@ -862,10 +909,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                   field: attributeName,
                 })) satisfies Record<string, any>[];
 
-                await this.createQueryBuilder(joinTable.name)
-                  .insert(rows)
-                  .transacting(trx)
-                  .execute();
+                await batchInsertJoinTable(db, joinTable.name, rows, trx);
               }
 
               continue;
@@ -894,7 +938,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 field: attributeName,
               })) satisfies Record<string, any>[];
 
-              await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+              await batchInsertJoinTable(db, joinTable.name, rows, trx);
             }
           }
 
@@ -1039,7 +1083,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 row.order = orderMap[encodedId];
               });
 
-              await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+              await batchInsertJoinTable(db, joinTable.name, rows, trx);
             }
 
             continue;
@@ -1074,7 +1118,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               transaction: trx,
             });
 
-            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+            await batchInsertJoinTable(db, joinTable.name, rows, trx);
           }
 
           continue;
@@ -1243,18 +1287,11 @@ export const createEntityManager = (db: Database): EntityManager => {
               }
 
               // insert rows
-              const query = this.createQueryBuilder(joinTable.name)
-                .insert(insert)
-                .onConflict(joinTable.pivotColumns)
-                .transacting(trx);
-
-              if (hasOrderColumn(attribute)) {
-                query.merge([orderColumnName]);
-              } else {
-                query.ignore();
-              }
-
-              await query.execute();
+              await batchInsertJoinTable(db, joinTable.name, insert, trx, {
+                onConflict: joinTable.pivotColumns,
+                merge: hasOrderColumn(attribute) ? [orderColumnName] : undefined,
+                ignore: !hasOrderColumn(attribute),
+              });
 
               // remove gap between orders
               await cleanOrderColumns({ attribute, db, id, transaction: trx });
@@ -1328,18 +1365,11 @@ export const createEntityManager = (db: Database): EntityManager => {
               }
 
               // insert rows
-              const query = this.createQueryBuilder(joinTable.name)
-                .insert(insert)
-                .onConflict(joinTable.pivotColumns)
-                .transacting(trx);
-
-              if (hasOrderColumn(attribute)) {
-                query.merge([orderColumnName]);
-              } else {
-                query.ignore();
-              }
-
-              await query.execute();
+              await batchInsertJoinTable(db, joinTable.name, insert, trx, {
+                onConflict: joinTable.pivotColumns,
+                merge: hasOrderColumn(attribute) ? [orderColumnName] : undefined,
+                ignore: !hasOrderColumn(attribute),
+              });
             }
 
             // Delete the previous relations for oneToAny relations
@@ -1554,6 +1584,36 @@ export const createEntityManager = (db: Database): EntityManager => {
     // extra features
     // -> virtuals
     // -> private
+
+    /**
+     * Insert join-table rows in batches (GH#25198).
+     * Uses dialect.getBatchInsertSize() so SQLite etc. can enforce a safe batch size.
+     * All batches run in the same transaction; caller must pass an active transaction.
+     */
+    async insertJoinTableRows(
+      joinTableName: string,
+      rows: Record<string, unknown>[],
+      trx: any,
+      options?: { onConflict?: string[]; merge?: string[]; ignore?: boolean }
+    ) {
+      if (rows.length === 0) return;
+      if (trx == null) {
+        throw new Error(
+          'insertJoinTableRows requires a transaction so all batches commit or roll back atomically'
+        );
+      }
+      const batchSize = db.dialect.getBatchInsertSize();
+      for (let i = 0; i < rows.length; i += batchSize) {
+        const chunk = rows.slice(i, i + batchSize);
+        let qb = this.createQueryBuilder(joinTableName).insert(chunk).transacting(trx);
+        if (options?.onConflict) {
+          qb = qb.onConflict(options.onConflict);
+          if (options.merge) qb.merge(options.merge);
+          else if (options.ignore) qb.ignore();
+        }
+        await qb.execute();
+      }
+    },
 
     createQueryBuilder(uid) {
       return createQueryBuilder(uid, db);
