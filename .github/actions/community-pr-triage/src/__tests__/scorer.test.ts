@@ -12,6 +12,7 @@ const makePR = (overrides: Partial<GitHubPR> = {}): GitHubPR => ({
   deletions: 5,
   changedFiles: 2,
   createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
   state: 'open',
   isDraft: false,
   mergedAt: null,

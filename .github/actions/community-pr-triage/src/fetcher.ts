@@ -193,7 +193,7 @@ export function fetchCommunityPRs(internalAuthors: Set<string>): GitHubPR[] {
       isDraft: pr.isDraft,
       mergedAt: pr.mergedAt,
       closedAt: pr.closedAt,
-      ciStatus: 'pending' as const,
+      ciStatus: 'pending' as GitHubPR['ciStatus'],
       files: (pr.files ?? []).map((f: any) => f.path),
     }));
 

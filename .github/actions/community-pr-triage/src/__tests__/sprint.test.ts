@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { selectSprintPRs, groupByArea, formatSprintUpdate } from '../sprint.js';
-import type { ScoredPR, PriorityTier, ComplexityTier } from '../types.js';
+import type { ScoredPR, GitHubPR, PriorityTier, ComplexityTier } from '../types.js';
 
 const makeScoredPR = (
-  overrides: Partial<ScoredPR> & { pr?: Partial<ScoredPR['pr']> } = {}
+  overrides: Omit<Partial<ScoredPR>, 'pr'> & { pr?: Partial<GitHubPR> } = {}
 ): ScoredPR => {
   const { pr: prOverrides, ...rest } = overrides;
   return {

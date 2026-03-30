@@ -13,6 +13,7 @@ const makeScoredPR = (overrides: Partial<ScoredPR> = {}): ScoredPR => ({
     deletions: 5,
     changedFiles: 1,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: 'open',
     isDraft: false,
     mergedAt: null,

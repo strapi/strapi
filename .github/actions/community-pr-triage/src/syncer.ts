@@ -191,6 +191,7 @@ export interface PRTicketSummary {
   teamId: string;
   identifier: string;
   status: string;
+  createdAt: Date;
   updatedAt: Date;
 }
 
@@ -222,11 +223,12 @@ export async function fetchExistingPRSummary(
           teamId,
           identifier: team ? `${team.key}-${issue.number}` : issue.id,
           status: state?.name ?? 'Unknown',
+          createdAt: issue.createdAt,
           updatedAt: issue.updatedAt,
         });
       }
       hasNext = page.pageInfo.hasNextPage;
-      cursor = page.pageInfo.endCursor;
+      cursor = page.pageInfo.endCursor ?? undefined;
     }
   }
 
@@ -282,7 +284,7 @@ export async function fetchExistingPRIssues(
       }
 
       hasNext = page.pageInfo.hasNextPage;
-      cursor = page.pageInfo.endCursor;
+      cursor = page.pageInfo.endCursor ?? undefined;
     }
   }
 
