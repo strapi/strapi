@@ -29,8 +29,8 @@ export function mapLabelsToLinear(ghLabels: string[]): string[] {
 export function buildLabelIds(scored: ScoredPR): string[] {
   const ids: string[] = [];
 
-  // PR type labels (fix, feature, etc.)
-  ids.push(...mapLabelsToLinear(scored.pr.labels));
+  // PR type labels (fix, feature, etc.) — only map "pr: *" labels, not area labels
+  ids.push(...mapLabelsToLinear(scored.pr.labels.filter((l) => l.startsWith('pr: '))));
 
   // Priority tier
   ids.push(LINEAR_TRIAGE_LABELS.priority[scored.priority]);
@@ -136,12 +136,55 @@ export function findSiblingPRs(scoredPRs: ScoredPR[]): [number, number][] {
 
 // --- I/O functions (Linear API) ---
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function getRateLimitRetryAfter(err: unknown): number | null {
+  const response = (err as any)?.response;
+  if (!response) return null;
+  const status = response.status;
+  const headers = response.headers;
+  const retryAfter = headers?.get?.('retry-after') ?? headers?.['retry-after'];
+  if ((status === 400 || status === 429) && retryAfter) {
+    return parseInt(String(retryAfter), 10);
+  }
+  return null;
+}
+
+async function withRateLimit<T>(fn: () => Promise<T>): Promise<T> {
+  const MAX_AUTO_WAIT_S = 65;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const retryAfter = getRateLimitRetryAfter(err);
+      if (retryAfter !== null) {
+        if (retryAfter <= MAX_AUTO_WAIT_S) {
+          console.log(`Rate limited — waiting ${retryAfter}s before retry...`);
+          await sleep(retryAfter * 1000);
+          continue;
+        }
+        const resetAt = new Date(Date.now() + retryAfter * 1000).toLocaleTimeString();
+        throw new Error(
+          `Linear API rate limit exceeded (retry-after: ${retryAfter}s). ` +
+            `Rate limit resets around ${resetAt}. Run again after that.`
+        );
+      }
+      throw err;
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+
 export interface ExistingIssue {
   id: string;
+  number: number;
   title: string;
   stateType: string;
   labelIds: string[];
   attachmentUrls: string[];
+  teamId?: string;
 }
 
 export interface PRTicketSummary {
@@ -194,92 +237,52 @@ export async function fetchExistingPRIssues(
   client: LinearClient,
   scoredPRs: ScoredPR[]
 ): Promise<Map<number, ExistingIssue>> {
-  const existingIssues: ExistingIssue[] = [];
+  const issueByPR = new Map<number, ExistingIssue>();
+  const scoredPRNumbers = new Set(scoredPRs.map((s) => s.pr.number));
 
-  // Strategy 1: Search by title pattern "PR #"
-  let hasNext = true;
-  let cursor: string | undefined;
+  // Query CPR then CMS teams directly — avoids global searchIssues + per-issue fetches.
+  // CPR is processed first so its entries take priority if a PR appears in both teams.
+  for (const teamId of [LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID]) {
+    let hasNext = true;
+    let cursor: string | undefined;
 
-  while (hasNext) {
-    const result = await client.searchIssues('PR #', {
-      after: cursor,
-      first: 100,
-    });
-    for (const searchNode of result.nodes) {
-      if (!matchPRNumber(searchNode.title)) continue;
-      // searchIssues returns lightweight nodes; fetch full issue for labels/attachments
-      try {
-        const issue = await client.issue(searchNode.id);
-        const state = await issue.state;
-        const labels = await issue.labels();
-        const attachments = await issue.attachments();
-        existingIssues.push({
+    while (hasNext) {
+      const page = await withRateLimit(() =>
+        client.issues({ filter: { team: { id: { eq: teamId } } }, first: 250, after: cursor })
+      );
+
+      for (const issue of page.nodes) {
+        const prNum = matchPRNumber(issue.title);
+        if (!prNum) continue;
+        if (teamId === LINEAR_CMS_TEAM_ID && issueByPR.has(prNum)) continue; // CPR wins
+
+        const state = issue.state ? await withRateLimit(() => issue.state!) : undefined;
+
+        // Only fetch labels/attachments for CPR issues we'll actually update
+        let labelIds: string[] = [];
+        let attachmentUrls: string[] = [];
+        if (teamId === LINEAR_CPR_TEAM_ID && scoredPRNumbers.has(prNum)) {
+          const [labels, attachments] = await Promise.all([
+            withRateLimit(() => issue.labels()),
+            withRateLimit(() => issue.attachments()),
+          ]);
+          labelIds = labels.nodes.map((l) => l.id);
+          attachmentUrls = attachments.nodes.map((a) => a.url);
+        }
+
+        issueByPR.set(prNum, {
           id: issue.id,
+          number: issue.number,
           title: issue.title,
           stateType: state?.type ?? 'triage',
-          labelIds: labels.nodes.map((l) => l.id),
-          attachmentUrls: attachments.nodes.map((a) => a.url),
+          labelIds,
+          attachmentUrls,
+          teamId,
         });
-      } catch {
-        // Issue fetch failed, skip
       }
-    }
-    hasNext = result.pageInfo.hasNextPage;
-    cursor = result.pageInfo.endCursor;
-  }
 
-  const seenIds = new Set(existingIssues.map((i) => i.id));
-
-  // Strategy 2: Search by GitHub PR attachment URL in CPR, CMS, and CMS-GitHub teams
-  // Catches tickets that were moved from CPR to CMS and possibly renamed
-  const dedupeTeamIds = [LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID, LINEAR_CMS_GITHUB_TEAM_ID];
-  for (const scored of scoredPRs) {
-    const prUrl = `strapi/strapi/pull/${scored.pr.number}`;
-    for (const teamId of dedupeTeamIds) {
-      try {
-        const result = await client.issues({
-          filter: {
-            team: { id: { eq: teamId } },
-            attachments: { url: { contains: prUrl } },
-          },
-          first: 5,
-        });
-        for (const issue of result.nodes) {
-          if (seenIds.has(issue.id)) continue;
-          seenIds.add(issue.id);
-          const state = await issue.state;
-          const labels = await issue.labels();
-          const attachments = await issue.attachments();
-          existingIssues.push({
-            id: issue.id,
-            title: issue.title,
-            stateType: state?.type ?? 'triage',
-            labelIds: labels.nodes.map((l) => l.id),
-            attachmentUrls: attachments.nodes.map((a) => a.url),
-          });
-        }
-      } catch {
-        // Attachment search failed, continue with title-based results
-      }
-    }
-  }
-
-  // Build lookup: PR number -> existing Linear issue
-  // Match by title pattern first, then by attachment URL
-  const issueByPR = new Map<number, ExistingIssue>();
-  for (const issue of existingIssues) {
-    const prNum = matchPRNumber(issue.title);
-    if (prNum) {
-      issueByPR.set(prNum, issue);
-    } else {
-      // No title match — extract PR number from attachment URLs
-      for (const url of issue.attachmentUrls) {
-        const attachMatch = url.match(/strapi\/strapi\/pull\/(\d+)/);
-        if (attachMatch) {
-          const num = parseInt(attachMatch[1], 10);
-          if (!issueByPR.has(num)) issueByPR.set(num, issue);
-        }
-      }
+      hasNext = page.pageInfo.hasNextPage;
+      cursor = page.pageInfo.endCursor;
     }
   }
 
@@ -315,6 +318,15 @@ export async function syncToLinear(
     issueUrls: new Map(),
   };
 
+  // Fetch CPR team key once for URL building (avoids per-issue team fetches)
+  let cprTeamKey = 'CPR';
+  try {
+    const cprTeam = await withRateLimit(() => client.team(LINEAR_CPR_TEAM_ID));
+    cprTeamKey = cprTeam.key;
+  } catch {
+    /* use default */
+  }
+
   const issueByPR = await fetchExistingPRIssues(client, scoredPRs);
 
   const openPRNumbers = new Set(scoredPRs.map((s) => s.pr.number));
@@ -331,6 +343,13 @@ export async function syncToLinear(
     const prUrl = `https://github.com/strapi/strapi/pull/${scored.pr.number}`;
 
     if (existing) {
+      // Don't update issues that have been moved to another team (e.g. picked up by CMS)
+      if (existing.teamId && existing.teamId !== LINEAR_CPR_TEAM_ID) {
+        prLinearIssueIds.set(scored.pr.number, existing.id);
+        stats.updated++;
+        continue;
+      }
+
       const updatePayload: Record<string, any> = {
         description,
         labelIds: mergeLabelIds(existing.labelIds, labelIds),
@@ -339,65 +358,56 @@ export async function syncToLinear(
       if (existing.stateType === 'triage') {
         updatePayload.stateId = LINEAR_STATUSES.todo;
       }
-      await client.updateIssue(existing.id, updatePayload);
+      await withRateLimit(() => client.updateIssue(existing.id, updatePayload));
       prLinearIssueIds.set(scored.pr.number, existing.id);
-      // Capture issue URL
-      try {
-        const updatedIssue = await client.issue(existing.id);
-        const team = await updatedIssue.team;
-        if (team)
-          stats.issueUrls.set(
-            scored.pr.number,
-            `https://linear.app/strapi/issue/${team.key}-${updatedIssue.number}`
-          );
-      } catch {
-        /* non-critical */
-      }
+      stats.issueUrls.set(
+        scored.pr.number,
+        `https://linear.app/strapi/issue/${cprTeamKey}-${existing.number}`
+      );
       // Ensure PR attachment exists
       if (!existing.attachmentUrls.some((url) => url.includes(`/pull/${scored.pr.number}`))) {
         try {
-          await client.createAttachment({
-            issueId: existing.id,
-            url: prUrl,
-            title: `PR #${scored.pr.number}: ${scored.pr.title}`,
-            iconUrl: 'https://github.githubassets.com/favicons/favicon.svg',
-          });
+          await withRateLimit(() =>
+            client.createAttachment({
+              issueId: existing.id,
+              url: prUrl,
+              title: `PR #${scored.pr.number}: ${scored.pr.title}`,
+              iconUrl: 'https://github.githubassets.com/favicons/favicon.svg',
+            })
+          );
         } catch {
           // Attachment creation failed, non-critical
         }
       }
       stats.updated++;
     } else {
-      const result = await client.createIssue({
-        teamId: LINEAR_CPR_TEAM_ID,
-        title: `PR #${scored.pr.number}: ${scored.pr.title}`,
-        description,
-        priority: linearPriority,
-        stateId: LINEAR_STATUSES.todo,
-        labelIds,
-      });
+      const result = await withRateLimit(() =>
+        client.createIssue({
+          teamId: LINEAR_CPR_TEAM_ID,
+          title: `PR #${scored.pr.number}: ${scored.pr.title}`,
+          description,
+          priority: linearPriority,
+          stateId: LINEAR_STATUSES.todo,
+          labelIds,
+        })
+      );
       const created = await result.issue;
       if (created) {
         prLinearIssueIds.set(scored.pr.number, created.id);
-        // Capture issue URL
-        try {
-          const team = await created.team;
-          if (team)
-            stats.issueUrls.set(
-              scored.pr.number,
-              `https://linear.app/strapi/issue/${team.key}-${created.number}`
-            );
-        } catch {
-          /* non-critical */
-        }
+        stats.issueUrls.set(
+          scored.pr.number,
+          `https://linear.app/strapi/issue/${cprTeamKey}-${created.number}`
+        );
         // Attach the GitHub PR URL to the newly created issue
         try {
-          await client.createAttachment({
-            issueId: created.id,
-            url: prUrl,
-            title: `PR #${scored.pr.number}: ${scored.pr.title}`,
-            iconUrl: 'https://github.githubassets.com/favicons/favicon.svg',
-          });
+          await withRateLimit(() =>
+            client.createAttachment({
+              issueId: created.id,
+              url: prUrl,
+              title: `PR #${scored.pr.number}: ${scored.pr.title}`,
+              iconUrl: 'https://github.githubassets.com/favicons/favicon.svg',
+            })
+          );
         } catch {
           // Attachment creation failed, non-critical
         }
@@ -561,7 +571,7 @@ export async function syncToLinear(
   for (const [prNum, issue] of issueByPR) {
     if (!openPRNumbers.has(prNum) && !['completed', 'canceled'].includes(issue.stateType)) {
       const stateId = mergedPRNumbers.has(prNum) ? LINEAR_STATUSES.done : LINEAR_STATUSES.canceled;
-      await client.updateIssue(issue.id, { stateId });
+      await withRateLimit(() => client.updateIssue(issue.id, { stateId }));
       stats.closed++;
     }
   }

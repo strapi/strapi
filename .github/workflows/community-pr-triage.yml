@@ -36,7 +36,7 @@ jobs:
         working-directory: .github/actions/community-pr-triage
 
       - name: Build action
-        run: npx tsup src/index.ts --format cjs --target node20 --clean
+        run: npx tsup --entry.index src/index.action.ts --format cjs --target node20 --clean
         working-directory: .github/actions/community-pr-triage
 
       - name: Run triage

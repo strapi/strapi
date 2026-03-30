@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs --target node20 --clean",
+    "build": "tsup --entry.index src/index.action.ts --format cjs --target node20 --clean",
     "test": "vitest run",
     "test:watch": "vitest"
   },

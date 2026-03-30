@@ -99,6 +99,49 @@ export function fetchInternalAuthors(): Set<string> {
   return new Set(logins);
 }
 
+export function fetchSinglePR(prNumber: number): GitHubPR {
+  const fields = [
+    'number',
+    'title',
+    'author',
+    'body',
+    'labels',
+    'additions',
+    'deletions',
+    'changedFiles',
+    'createdAt',
+    'updatedAt',
+    'state',
+    'isDraft',
+    'mergedAt',
+    'closedAt',
+    'files',
+  ].join(',');
+
+  const raw = gh(['pr', 'view', String(prNumber), '--repo', REPO, '--json', fields]);
+  const pr = JSON.parse(raw) as Record<string, any>;
+
+  const ciMap = fetchCIStatuses([prNumber]);
+  return {
+    number: pr.number,
+    title: pr.title,
+    author: pr.author.login,
+    body: pr.body || '',
+    labels: pr.labels.map((l: any) => l.name),
+    additions: pr.additions,
+    deletions: pr.deletions,
+    changedFiles: pr.changedFiles,
+    createdAt: pr.createdAt,
+    updatedAt: pr.updatedAt,
+    state: pr.state,
+    isDraft: pr.isDraft,
+    mergedAt: pr.mergedAt,
+    closedAt: pr.closedAt,
+    ciStatus: ciMap.get(prNumber) ?? 'pending',
+    files: (pr.files ?? []).map((f: any) => f.path),
+  };
+}
+
 export function fetchCommunityPRs(internalAuthors: Set<string>): GitHubPR[] {
   const fields = [
     'number',
@@ -132,7 +175,7 @@ export function fetchCommunityPRs(internalAuthors: Set<string>): GitHubPR[] {
   ]);
   const prs = JSON.parse(raw) as Array<Record<string, any>>;
 
-  const communityPRs: GitHubPR[] = prs
+  const communityPRs = prs
     .filter((pr) => isCommunityAuthor(pr.author.login, internalAuthors))
     .filter((pr) => !pr.isDraft)
     .map((pr) => ({
@@ -240,50 +283,6 @@ export function fetchCIStatuses(
   }
 
   return result;
-}
-
-export function fetchSinglePR(prNumber: number): GitHubPR {
-  const fields = [
-    'number',
-    'title',
-    'author',
-    'body',
-    'labels',
-    'additions',
-    'deletions',
-    'changedFiles',
-    'createdAt',
-    'updatedAt',
-    'state',
-    'isDraft',
-    'mergedAt',
-    'closedAt',
-    'files',
-  ].join(',');
-
-  const raw = gh(['pr', 'view', '--repo', REPO, String(prNumber), '--json', fields]);
-  const pr = JSON.parse(raw) as Record<string, any>;
-
-  const ciMap = fetchCIStatuses([prNumber]);
-
-  return {
-    number: pr.number,
-    title: pr.title,
-    author: pr.author.login,
-    body: pr.body || '',
-    labels: pr.labels.map((l: any) => l.name),
-    additions: pr.additions,
-    deletions: pr.deletions,
-    changedFiles: pr.changedFiles,
-    createdAt: pr.createdAt,
-    updatedAt: pr.updatedAt,
-    state: pr.state,
-    isDraft: pr.isDraft,
-    mergedAt: pr.mergedAt,
-    closedAt: pr.closedAt,
-    ciStatus: ciMap.get(prNumber) ?? 'pending',
-    files: (pr.files ?? []).map((f: any) => f.path),
-  };
 }
 
 export async function fetchIssue(issueNumber: number): Promise<GitHubIssue | null> {

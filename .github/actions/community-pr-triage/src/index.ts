@@ -1,9 +1,9 @@
-import * as core from '@actions/core';
-import { AREA_TIERS, LINEAR_CMS_TEAM_ID, validateConfig } from './config.js';
+import 'dotenv/config';
+import { createInterface } from 'node:readline';
+import { AREA_TIERS, validateConfig } from './config.js';
 import {
   fetchInternalAuthors,
   fetchCommunityPRs,
-  fetchSinglePR,
   fetchRecentlyMergedPRNumbers,
   fetchIssue,
   parseIssueRefs,
@@ -13,10 +13,20 @@ import {
 } from './fetcher.js';
 import { calculateValue, calculateComplexity, calculatePriority, isQuickWin } from './scorer.js';
 import { syncToLinear, findSiblingPRs, fetchExistingPRSummary } from './syncer.js';
+import { LINEAR_CMS_TEAM_ID } from './config.js';
 import { printReport, generateMarkdownReport } from './reporter.js';
-import type { SyncPreview, PickedUpPR } from './reporter.js';
 import { generateProjectUpdate } from './project-update.js';
 import type { ScoredPR, LinkedIssueData } from './types.js';
+
+function confirm(question: string): Promise<boolean> {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === 'y' || answer.trim().toLowerCase() === 'yes');
+    });
+  });
+}
 
 function getAreaTier(area: string): string {
   for (const [tier, areas] of Object.entries(AREA_TIERS)) {
@@ -32,76 +42,14 @@ function getPRType(labels: string[]): string {
   return 'unknown';
 }
 
-async function scorePR(pr: import('./types.js').GitHubPR): Promise<ScoredPR> {
-  const issueNumbers = parseIssueRefs(pr.body);
-  const linkedIssues: LinkedIssueData[] = [];
-
-  for (const num of issueNumbers) {
-    const issue = await fetchIssue(num);
-    if (issue) linkedIssues.push(parseLinkedIssueData(issue));
-  }
-
-  const ageDays = Math.floor((Date.now() - new Date(pr.createdAt).getTime()) / 86400000);
-  let area = extractArea(pr.labels);
-  if (area === 'unknown') area = estimateAreaFromFiles(pr.files);
-  const areaTier = getAreaTier(area);
-  const loc = pr.additions + pr.deletions;
-
-  const value = calculateValue(pr, linkedIssues, ageDays);
-  const complexity = calculateComplexity(loc, pr.changedFiles, areaTier);
-  const priority = calculatePriority(value.total);
-
-  return {
-    pr,
-    linkedIssues,
-    value,
-    complexity,
-    priority,
-    area,
-    areaTier,
-    prType: getPRType(pr.labels),
-    isQuickWin: isQuickWin(value.total, complexity),
-  };
-}
-
 async function main() {
-  const doSync = core.getInput('sync') === 'true';
-  const doUpdate = core.getInput('update') === 'true';
-  const dryRun = core.getInput('dry-run') !== 'false' || (!doSync && !doUpdate);
-  const prNumber = core.getInput('pr-number');
+  validateConfig();
 
-  if (!dryRun) {
-    validateConfig();
-  }
+  const doSync = process.argv.includes('--sync');
+  const doUpdate = process.argv.includes('--update');
+  const dryRun = process.argv.includes('--dry-run') || (!doSync && !doUpdate);
+  const autoYes = process.argv.includes('--yes') || process.argv.includes('-y');
 
-  // Single-PR mode: fetch one PR, score it, sync immediately
-  if (prNumber) {
-    const num = parseInt(prNumber, 10);
-    console.log(`Fetching PR #${num}...`);
-    const pr = fetchSinglePR(num);
-    const scored = await scorePR(pr);
-
-    console.log(
-      `PR #${num}: value=${scored.value.total}, priority=${scored.priority}, complexity=${scored.complexity}, area=${scored.area}`
-    );
-
-    if (dryRun) {
-      console.log('[DRY RUN] Skipping Linear sync.\n');
-    } else {
-      console.log('Syncing to Linear...');
-      const stats = await syncToLinear([scored]);
-      console.log(
-        `Linear sync complete: ${stats.created} created, ${stats.updated} updated, ${stats.relationsCreated} relations linked.\n`
-      );
-    }
-
-    core.setOutput('created', dryRun ? '0' : '1');
-    core.setOutput('updated', '0');
-    core.setOutput('closed', '0');
-    return;
-  }
-
-  // Full triage mode
   console.log('Fetching internal authors from GitHub org...');
   const internalAuthors = fetchInternalAuthors();
   console.log(`Found ${internalAuthors.size} internal authors.\n`);
@@ -114,7 +62,35 @@ async function main() {
   const scoredPRs: ScoredPR[] = [];
 
   for (const pr of prs) {
-    scoredPRs.push(await scorePR(pr));
+    const issueNumbers = parseIssueRefs(pr.body);
+    const linkedIssues: LinkedIssueData[] = [];
+
+    for (const num of issueNumbers) {
+      const issue = await fetchIssue(num);
+      if (issue) linkedIssues.push(parseLinkedIssueData(issue));
+    }
+
+    const ageDays = Math.floor((Date.now() - new Date(pr.createdAt).getTime()) / 86400000);
+    let area = extractArea(pr.labels);
+    if (area === 'unknown') area = estimateAreaFromFiles(pr.files);
+    const areaTier = getAreaTier(area);
+    const loc = pr.additions + pr.deletions;
+
+    const value = calculateValue(pr, linkedIssues, ageDays);
+    const complexity = calculateComplexity(loc, pr.changedFiles, areaTier);
+    const priority = calculatePriority(value.total);
+
+    scoredPRs.push({
+      pr,
+      linkedIssues,
+      value,
+      complexity,
+      priority,
+      area,
+      areaTier,
+      prType: getPRType(pr.labels),
+      isQuickWin: isQuickWin(value.total, complexity),
+    });
   }
 
   scoredPRs.sort((a, b) => b.value.total - a.value.total);
@@ -134,8 +110,8 @@ async function main() {
     console.log();
   }
 
-  // Fetch sync preview
-  let syncPreview: SyncPreview | undefined;
+  // Fetch sync preview (used in both dry-run report and console output)
+  let syncPreview: import('./reporter.js').SyncPreview | undefined;
   const apiKey = process.env.LINEAR_API_KEY;
   if (apiKey) {
     const { LinearClient } = await import('@linear/sdk');
@@ -145,7 +121,8 @@ async function main() {
     const newPRs = scoredPRs.filter((s) => !prSummary.has(s.pr.number));
     const existingCount = scoredPRs.filter((s) => prSummary.has(s.pr.number)).length;
 
-    const pickedUpPRs: PickedUpPR[] = [];
+    // Find PRs picked up by CMS team
+    const pickedUpPRs: import('./reporter.js').PickedUpPR[] = [];
     for (const [prNum, summary] of prSummary) {
       if (summary.teamId === LINEAR_CMS_TEAM_ID) {
         const scored = scoredPRs.find((s) => s.pr.number === prNum);
@@ -162,51 +139,69 @@ async function main() {
     console.log(
       `Sync preview: ${newPRs.length} new, ${existingCount} existing, ${pickedUpPRs.length} picked up by CMS.`
     );
+    if (pickedUpPRs.length > 0) {
+      console.log('Picked up by CMS:');
+      for (const p of pickedUpPRs) {
+        console.log(`  PR #${p.prNumber} → ${p.identifier} (${p.status})`);
+      }
+    }
+    if (newPRs.length > 0) {
+      console.log('New PRs to create:');
+      for (const s of newPRs) {
+        console.log(`  PR #${s.pr.number}: ${s.pr.title.slice(0, 70)}`);
+      }
+    }
+    console.log();
   }
 
-  // Generate markdown report (includes sync preview)
+  // Generate markdown report (includes sync preview if available)
   const reportPath = `reports/triage-${new Date().toISOString().split('T')[0]}.md`;
   generateMarkdownReport(scoredPRs, reportPath, syncPreview);
-  core.setOutput('report-path', reportPath);
   console.log(`Markdown report saved to: ${reportPath}\n`);
 
-  // Write report to job summary
-  const { readFileSync } = await import('node:fs');
-  const reportContent = readFileSync(reportPath, 'utf-8');
-  await core.summary.addRaw(reportContent).write();
-
-  // Fetch merged PRs once for both sync and update
-  let mergedPRNumbers: Set<number> | undefined;
-  if ((doSync && !dryRun) || doUpdate) {
-    console.log('Fetching recently merged PRs...');
-    mergedPRNumbers = fetchRecentlyMergedPRNumbers();
-    console.log(`Found ${mergedPRNumbers.size} recently merged PRs.\n`);
-  }
-
   // Sync to Linear
-  if (doSync && !dryRun) {
-    console.log('Syncing to Linear...');
-    const stats = await syncToLinear(scoredPRs, mergedPRNumbers!);
-    console.log(
-      `Linear sync complete: ${stats.created} created, ${stats.updated} updated, ${stats.closed} closed, ${stats.relationsCreated} relations linked.\n`
-    );
-
-    core.setOutput('created', String(stats.created));
-    core.setOutput('updated', String(stats.updated));
-    core.setOutput('closed', String(stats.closed));
-  } else {
-    if (doSync) console.log('[DRY RUN] Skipping Linear sync.\n');
-    core.setOutput('created', '0');
-    core.setOutput('updated', '0');
-    core.setOutput('closed', '0');
+  if (doSync) {
+    if (dryRun) {
+      console.log('[DRY RUN] Skipping Linear sync.\n');
+    } else {
+      const confirmed =
+        autoYes ||
+        (await confirm(`About to sync ${scoredPRs.length} PRs to Linear. Proceed? (y/N) `));
+      if (confirmed) {
+        console.log('Fetching recently merged PRs...');
+        const mergedPRNumbers = fetchRecentlyMergedPRNumbers();
+        console.log(`Found ${mergedPRNumbers.size} recently merged PRs.\n`);
+        console.log('Syncing to Linear...');
+        const stats = await syncToLinear(scoredPRs, mergedPRNumbers);
+        console.log(
+          `Linear sync complete: ${stats.created} created, ${stats.updated} updated, ${stats.closed} closed, ${stats.relationsCreated} relations linked.\n`
+        );
+      } else {
+        console.log('Sync canceled.\n');
+      }
+    }
   }
 
   // Project update
   if (doUpdate) {
-    await generateProjectUpdate(scoredPRs, mergedPRNumbers!, dryRun);
+    console.log('Fetching recently merged PRs...');
+    const mergedPRNumbers = fetchRecentlyMergedPRNumbers();
+    console.log(`Found ${mergedPRNumbers.size} recently merged PRs.\n`);
+
+    if (dryRun) {
+      await generateProjectUpdate(scoredPRs, mergedPRNumbers, true);
+    } else {
+      const confirmed = autoYes || (await confirm('Post project update to Linear? (y/N) '));
+      if (confirmed) {
+        await generateProjectUpdate(scoredPRs, mergedPRNumbers, false);
+      } else {
+        console.log('Project update skipped.\n');
+      }
+    }
   }
 }
 
 main().catch((err) => {
-  core.setFailed(`Fatal error: ${err instanceof Error ? err.message : String(err)}`);
+  console.error('Fatal error:', err);
+  process.exit(1);
 });
