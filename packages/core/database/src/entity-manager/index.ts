@@ -1463,7 +1463,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
         // do not need to delete links when using foreign keys
         if (db.dialect.usesForeignKeys()) {
-          return;
+          continue;
         }
 
         // NOTE: we do not remove existing associations with the target as it should handled by unique FKs instead
