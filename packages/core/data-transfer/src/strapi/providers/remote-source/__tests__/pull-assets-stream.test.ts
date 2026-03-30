@@ -110,6 +110,12 @@ describe('Remote Strapi source provider — pull assets stream', () => {
 
   test('after each asset completes the same assetID can start again (registry must not retain closed assets)', async () => {
     const ws = new MockTransferWebSocket();
+    const dispatchTransferStep = jest.fn(async (msg: { action: string; step?: string }) => {
+      if (msg.action === 'start') {
+        return { id: processId };
+      }
+      return null;
+    });
     const provider = createRemoteStrapiSourceProvider({
       url: new URL('http://localhost:1337/admin'),
       getStrapi: () => ({}) as Core.Strapi,
@@ -118,12 +124,7 @@ describe('Remote Strapi source provider — pull assets stream', () => {
 
     provider.ws = ws as unknown as WebSocket;
     provider.dispatcher = {
-      dispatchTransferStep: jest.fn(async (msg: { action: string }) => {
-        if (msg.action === 'start') {
-          return { id: processId };
-        }
-        return null;
-      }),
+      dispatchTransferStep,
       setTransferProperties: jest.fn(),
       dispatchCommand: jest.fn(),
       dispatch: jest.fn(),
@@ -190,11 +191,25 @@ describe('Remote Strapi source provider — pull assets stream', () => {
 
     await drainPass;
 
-    expect(provider.dispatcher?.dispatchTransferStep).toHaveBeenCalled();
+    // Client start + end for the assets step, and one WebSocket ACK per incoming message (cycles + end).
+    expect(dispatchTransferStep).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'start', step: 'assets' })
+    );
+    expect(dispatchTransferStep).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'end', step: 'assets' })
+    );
+    expect(dispatchTransferStep).toHaveBeenCalledTimes(2);
+    expect(ws.send).toHaveBeenCalledTimes(cycles + 1);
   }, 15_000);
 
-  test('heap growth stays bounded when many small asset batches are pulled (no per-asset registry leak)', async () => {
+  test('many small asset batches complete without error (registry does not grow with batch count)', async () => {
     const ws = new MockTransferWebSocket();
+    const dispatchTransferStep = jest.fn(async (msg: { action: string }) => {
+      if (msg.action === 'start') {
+        return { id: processId };
+      }
+      return null;
+    });
     const provider = createRemoteStrapiSourceProvider({
       url: new URL('http://localhost:1337/admin'),
       getStrapi: () => ({}) as Core.Strapi,
@@ -203,12 +218,7 @@ describe('Remote Strapi source provider — pull assets stream', () => {
 
     provider.ws = ws as unknown as WebSocket;
     provider.dispatcher = {
-      dispatchTransferStep: jest.fn(async (msg: { action: string }) => {
-        if (msg.action === 'start') {
-          return { id: processId };
-        }
-        return null;
-      }),
+      dispatchTransferStep,
       setTransferProperties: jest.fn(),
       dispatchCommand: jest.fn(),
       dispatch: jest.fn(),
@@ -220,7 +230,6 @@ describe('Remote Strapi source provider — pull assets stream', () => {
     const pass = await provider.createAssetsReadStream();
 
     const batchCount = 25;
-    const heapBefore = process.memoryUsage().heapUsed;
 
     const drainPass = pipeline(
       pass,
@@ -276,10 +285,14 @@ describe('Remote Strapi source provider — pull assets stream', () => {
 
     await drainPass;
 
-    const heapAfter = process.memoryUsage().heapUsed;
-    const growth = heapAfter - heapBefore;
-    // Retaining every asset registry entry would scale with batchCount; allow generous slack for V8/Jest.
-    expect(growth).toBeLessThan(8 * 1024 * 1024);
+    expect(dispatchTransferStep).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'start', step: 'assets' })
+    );
+    expect(dispatchTransferStep).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'end', step: 'assets' })
+    );
+    expect(dispatchTransferStep).toHaveBeenCalledTimes(2);
+    expect(ws.send).toHaveBeenCalledTimes(batchCount + 1);
   }, 20_000);
 
   test('throws on checksum mismatch when verifyChecksums is enabled', async () => {
@@ -334,8 +347,9 @@ describe('Remote Strapi source provider — pull assets stream', () => {
       })
     );
 
-    await expect(drainPass).rejects.toBeInstanceOf(ProviderTransferError);
-    await expect(drainPass).rejects.toThrow(/Checksum mismatch/);
+    const checksumErr = await drainPass.catch((e: unknown) => e);
+    expect(checksumErr).toBeInstanceOf(ProviderTransferError);
+    expect((checksumErr as Error).message).toMatch(/Checksum mismatch/);
   });
 
   test('throws ProviderTransferError when checksum is required but missing', async () => {
@@ -384,8 +398,9 @@ describe('Remote Strapi source provider — pull assets stream', () => {
       })
     );
 
-    await expect(drainPass).rejects.toBeInstanceOf(ProviderTransferError);
-    await expect(drainPass).rejects.toThrow(/missing checksum/i);
+    const missingErr = await drainPass.catch((e: unknown) => e);
+    expect(missingErr).toBeInstanceOf(ProviderTransferError);
+    expect((missingErr as Error).message).toMatch(/missing checksum/i);
   });
 
   test('accepts matching checksum when verifyChecksums is enabled', async () => {

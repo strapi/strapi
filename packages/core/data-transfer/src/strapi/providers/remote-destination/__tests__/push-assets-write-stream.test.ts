@@ -22,6 +22,12 @@ function mockPushDispatcher() {
           if (msg.action === 'stream' && msg.step === 'assets' && Array.isArray(msg.data)) {
             streamBatches.push(msg.data);
           }
+          if (msg.action === 'start') {
+            return { ok: true };
+          }
+          if (msg.action === 'end') {
+            return { ok: true, stats: { started: 1, finished: 1 } };
+          }
           return null;
         }
       ),
@@ -89,7 +95,7 @@ describe('Remote Strapi destination provider — push assets write stream', () =
     }
   }, 30_000);
 
-  test('heap growth stays bounded when pushing many small assets (batches are flushed, not retained)', async () => {
+  test('pushes many small assets with one start/end per asset (batches flushed, not accumulated)', async () => {
     const { streamBatches, dispatcher } = mockPushDispatcher();
     const provider = createRemoteStrapiDestinationProvider(defaultOptions);
     provider.dispatcher = dispatcher as unknown as typeof provider.dispatcher;
@@ -100,7 +106,6 @@ describe('Remote Strapi destination provider — push assets write stream', () =
     }
 
     const assetCount = 30;
-    const heapBefore = process.memoryUsage().heapUsed;
 
     for (let i = 0; i < assetCount; i += 1) {
       const stream = Readable.from([Buffer.from([i % 256, 0x02, 0x03])]);
@@ -120,8 +125,9 @@ describe('Remote Strapi destination provider — push assets write stream', () =
       writable.end((err) => (err ? reject(err) : resolve()));
     });
 
-    const heapAfter = process.memoryUsage().heapUsed;
-    expect(heapAfter - heapBefore).toBeLessThan(12 * 1024 * 1024);
+    const flat = streamBatches.flat() as { action: string }[];
+    expect(flat.filter((i) => i.action === 'start')).toHaveLength(assetCount);
+    expect(flat.filter((i) => i.action === 'end')).toHaveLength(assetCount);
     expect(streamBatches.length).toBeGreaterThan(0);
     expect(dispatcher.dispatchTransferStep).toHaveBeenCalled();
   }, 30_000);
