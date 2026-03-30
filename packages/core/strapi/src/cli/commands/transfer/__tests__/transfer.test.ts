@@ -35,13 +35,13 @@ jest.mock('../../../utils/data-transfer', () => {
 
 // mock data transfer
 jest.mock('@strapi/data-transfer', () => {
-  const acutal = jest.requireActual('@strapi/data-transfer');
+  const actual = jest.requireActual('@strapi/data-transfer');
   return {
-    ...acutal,
+    ...actual,
     strapi: {
-      ...acutal.strapi,
+      ...actual.strapi,
       providers: {
-        ...acutal.strapi.providers,
+        ...actual.strapi.providers,
         createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
         createLocalStrapiDestinationProvider: jest.fn().mockReturnValue({ name: 'testLocalDest' }),
         createRemoteStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testRemoteSource' }),
@@ -51,7 +51,7 @@ jest.mock('@strapi/data-transfer', () => {
       },
     },
     engine: {
-      ...acutal.engine,
+      ...actual.engine,
       createTransferEngine() {
         return {
           transfer: jest.fn(() => {
