@@ -12,6 +12,7 @@ export type QueryParam =
   | 'populate'
   | 'sort'
   | 'status'
+  | 'hasPublishedVersion'
   | 'locale'
   | 'pagination'
   | 'filters'
@@ -165,6 +166,14 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       .describe('Fetch documents based on their status. Default to "published" if not specified.');
   }
 
+  get hasPublishedVersion() {
+    return z
+      .union([z.boolean(), z.enum(['true', 'false'])])
+      .describe(
+        'Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published'
+      );
+  }
+
   get data() {
     const isWritableAttribute = ([attributeName]: [string, Schema.Attribute.AnyAttribute]) => {
       return contentTypes.isWritableAttribute(this._schema, attributeName);
@@ -212,6 +221,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       locale: () => this.locale.optional(),
       pagination: () => this.pagination.optional(),
       status: () => this.status.optional(),
+      hasPublishedVersion: () => this.hasPublishedVersion.optional(),
       _q: () => this.query.optional(),
     } as const;
 

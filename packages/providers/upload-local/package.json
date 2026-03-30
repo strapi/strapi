@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-local",
-  "version": "5.36.0",
+  "version": "5.40.0",
   "description": "Local provider for strapi upload",
   "keywords": [
     "upload",
@@ -12,7 +12,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/upload-local"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -45,16 +46,16 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.36.0",
+    "@strapi/utils": "5.40.0",
     "fs-extra": "11.2.0"
   },
   "devDependencies": {
-    "@strapi/types": "5.36.0",
+    "@strapi/types": "5.40.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "5.36.0",
+    "eslint-config-custom": "5.40.0",
     "memfs": "4.6.0",
-    "tsconfig": "5.36.0"
+    "tsconfig": "5.40.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

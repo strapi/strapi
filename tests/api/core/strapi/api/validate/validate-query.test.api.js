@@ -4,7 +4,7 @@ const { values, zip, symmetricDifference } = require('lodash/fp');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
+const { createAuthRequest, createContentAPIRequest } = require('api-tests/request');
 const resources = require('./resources');
 
 const { fixtures, schemas } = resources;
@@ -14,6 +14,7 @@ const builder = createTestBuilder();
 let data;
 let strapi;
 let rq;
+let publicRq;
 
 const addSchemas = () => {
   for (const component of values(schemas.components)) {
@@ -24,7 +25,11 @@ const addSchemas = () => {
 };
 
 const addFixtures = () => {
-  const creationOrder = ['api::relation.relation', 'api::document.document'];
+  const creationOrder = [
+    'api::relation.relation',
+    'api::document.document',
+    'api::article.article',
+  ];
 
   creationOrder.forEach((uid) => {
     const fixture = fixtures['content-types'][uid];
@@ -42,6 +47,7 @@ const init = async () => {
 
   strapi = await createStrapiInstance();
   rq = await createAuthRequest({ strapi });
+  publicRq = createContentAPIRequest({ strapi }); // Unauthenticated public API
 
   data = await builder.sanitizedFixtures(strapi);
 };
@@ -105,6 +111,233 @@ describe('Core API - Validate', () => {
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
+  });
+
+  describe('strictParams option', () => {
+    it('throws when strictParams: true and query has unrecognized top-level key', async () => {
+      const contentType = strapi.contentType('api::document.document');
+      const queryWithUnrecognized = { filters: { id: 1 }, where: { id: 1 } };
+
+      await expect(
+        strapi.contentAPI.validate.query(queryWithUnrecognized, contentType, {
+          strictParams: true,
+        })
+      ).rejects.toThrow();
+    });
+
+    it('does not throw for unrecognized top-level key when strictParams: false', async () => {
+      const contentType = strapi.contentType('api::document.document');
+      const queryWithUnrecognized = { filters: { id: 1 }, where: { id: 1 } };
+
+      await expect(
+        strapi.contentAPI.validate.query(queryWithUnrecognized, contentType, {
+          strictParams: false,
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('does not throw when strictParams: true and query has only allowed keys', async () => {
+      const contentType = strapi.contentType('api::document.document');
+      const queryAllowed = { filters: { id: 1 }, sort: ['name'], page: 1, pageSize: 10 };
+
+      await expect(
+        strapi.contentAPI.validate.query(queryAllowed, contentType, {
+          strictParams: true,
+        })
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('route.request.query (extra query params)', () => {
+    const z = require('zod/v4');
+
+    it('allows extra query param from route when strictParams: true and Zod parses', async () => {
+      const route = { request: { query: { search: z.string() } } };
+      const contentType = strapi.contentType('api::document.document');
+      const query = { filters: { id: 1 }, search: 'foo' };
+      await expect(
+        strapi.contentAPI.validate.query(query, contentType, { strictParams: true, route })
+      ).resolves.not.toThrow();
+    });
+
+    it('throws when strictParams: true and extra param fails Zod validation', async () => {
+      const route = { request: { query: { searchFail: z.string() } } };
+      const contentType = strapi.contentType('api::document.document');
+      const query = { filters: { id: 1 }, searchFail: 123 };
+      await expect(
+        strapi.contentAPI.validate.query(query, contentType, { strictParams: true, route })
+      ).rejects.toThrow();
+    });
+
+    it('sanitizes extra query param from route when strictParams: true', async () => {
+      const route = {
+        request: { query: { searchSanitize: z.string().transform((s) => s.trim()) } },
+      };
+      const contentType = strapi.contentType('api::document.document');
+      const query = { filters: { id: 1 }, searchSanitize: '  bar  ' };
+      const result = await strapi.contentAPI.sanitize.query(query, contentType, {
+        strictParams: true,
+        route,
+      });
+      expect(result.searchSanitize).toBe('bar');
+      expect(result.filters).toEqual({ id: 1 });
+    });
+  });
+
+  describe('api.rest.strictParams config', () => {
+    it('can be set and read at api.rest.strictParams', () => {
+      strapi.config.set('api.rest.strictParams', true);
+      expect(strapi.config.get('api.rest.strictParams')).toBe(true);
+      strapi.config.set('api.rest.strictParams', undefined);
+      expect(strapi.config.get('api.rest.strictParams')).toBeUndefined();
+    });
+
+    it('returns 400 when api.rest.strictParams is true and request has unrecognized top-level query param', async () => {
+      // Integration: controller should pass api.rest.strictParams to validate.query; skip if config not visible at request time in test env
+      strapi.config.set('api.rest.strictParams', true);
+
+      const res = await rq.get('/api/documents', { qs: { where: { id: 1 } } });
+
+      strapi.config.set('api.rest.strictParams', undefined);
+
+      expect(res.status).toEqual(400);
+    });
+  });
+
+  describe('contentAPI.addQueryParams and addInputParams (strictParams + real request)', () => {
+    let bodyParamTestDocumentId;
+
+    beforeAll(() => {
+      strapi.contentAPI.addQueryParams({
+        extraParam: {
+          schema: (zInstance) => zInstance.string().max(200).optional(),
+          matchRoute: (route) => route.method === 'GET' && route.path === '/documents',
+        },
+      });
+      strapi.contentAPI.addInputParams({
+        clientMutationId: {
+          schema: (zInstance) => zInstance.string().max(100).optional(),
+          matchRoute: (route) => route.method === 'POST' && route.path === '/documents',
+        },
+      });
+    });
+
+    afterEach(async () => {
+      strapi.config.set('api.rest.strictParams', undefined);
+      strapi.config.set('api.documents.strictParams', undefined);
+      if (bodyParamTestDocumentId) {
+        await strapi.documents('api::document.document').delete({
+          documentId: bodyParamTestDocumentId,
+          locale: '*',
+        });
+        bodyParamTestDocumentId = null;
+      }
+    });
+
+    const applyExtraParamsToAllRouters = () => {
+      for (const apiName of Object.keys(strapi.apis)) {
+        const api = strapi.api(apiName);
+        const routers = api.routes ?? {};
+        for (const router of Object.values(routers)) {
+          if (router.routes && Array.isArray(router.routes)) {
+            strapi.contentAPI.applyExtraParamsToRoutes(router.routes);
+          }
+        }
+      }
+    };
+
+    // Order matters: run "no apply" tests first, then apply once, then "after apply" tests.
+    it('returns 400 when strictParams is true and custom query param was registered but applyExtraParamsToRoutes has not been run', async () => {
+      strapi.config.set('api.rest.strictParams', true);
+      strapi.config.set('api.documents.strictParams', true);
+
+      const res = await rq.get('/api/documents', { qs: { extraParam: 'hello' } });
+
+      expect(res.status).toEqual(400);
+    });
+
+    it('returns 400 when strictParams is true and custom body param was registered but applyExtraParamsToRoutes has not been run', async () => {
+      strapi.config.set('api.rest.strictParams', true);
+
+      const res = await rq.post('/api/documents', {
+        body: {
+          data: { name: 'Body param test', clientMutationId: 'abc-123' },
+        },
+      });
+
+      expect(res.status).toEqual(400);
+    });
+
+    it('returns 200 when strictParams is true and request includes custom query param after applyExtraParamsToRoutes (as initRouting does)', async () => {
+      applyExtraParamsToAllRouters();
+      strapi.config.set('api.rest.strictParams', true);
+      strapi.config.set('api.documents.strictParams', true);
+
+      const res = await rq.get('/api/documents', { qs: { extraParam: 'hello' } });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.data).toBeDefined();
+    });
+
+    it('returns 201 when strictParams is true and request body includes custom body param after applyExtraParamsToRoutes (as initRouting does)', async () => {
+      strapi.config.set('api.rest.strictParams', true);
+
+      const res = await rq.post('/api/documents', {
+        body: {
+          data: { name: 'Body param test', clientMutationId: 'abc-123' },
+        },
+      });
+
+      expect(res.status).toEqual(201);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.name).toBe('Body param test');
+      bodyParamTestDocumentId = res.body.data.documentId;
+    });
+  });
+
+  /**
+   * api.documents.strictParams (document service validation)
+   *
+   * When api.documents.strictParams is true, the document service rejects invalid root-level
+   * params (e.g. invalid status, non-string locale). We test the document service directly
+   * for status; invalid locale is covered by an E2E request.
+   */
+  describe('api.documents.strictParams (document service)', () => {
+    afterEach(() => {
+      strapi.config.set('api.documents.strictParams', undefined);
+    });
+
+    it('document service throws when strictParams is true and params have invalid status (non-D&P type)', async () => {
+      strapi.config.set('api.documents.strictParams', true);
+      await expect(
+        strapi.documents('api::document.document').findMany({ status: 'invalid' })
+      ).rejects.toThrow(/status|published|draft/i);
+    });
+
+    it('document service throws when strictParams is true and params have invalid status (D&P type)', async () => {
+      strapi.config.set('api.documents.strictParams', true);
+      await expect(
+        strapi.documents('api::article.article').findMany({ status: 'invalid' })
+      ).rejects.toThrow(/status|published|draft/i);
+    });
+
+    it('returns 400 when strictParams is true and request has invalid locale (non-string)', async () => {
+      strapi.config.set('api.documents.strictParams', true);
+
+      const res = await publicRq.get('/documents', { qs: { locale: 123 } });
+
+      expect(res.status).toEqual(400);
+      expect(res.body?.error?.message).toMatch(/locale|string/i);
+    });
+
+    it('allows valid locale string on non-localized type when strictParams is true (ignored downstream)', async () => {
+      strapi.config.set('api.documents.strictParams', true);
+
+      const res = await publicRq.get('/documents', { qs: { locale: 'en' } });
+
+      expect(res.status).toEqual(200);
+      expect(res.body?.data).toBeDefined();
+    });
   });
 
   /**
@@ -368,6 +601,156 @@ describe('Core API - Validate', () => {
           }
         });
       });
+
+      describe('Admin User Relations - Content API', () => {
+        // Note: Validation for blocking private fields in admin user relations
+        // works the same regardless of authentication (throwPrivate always runs via defaultValidateFilters).
+        // We test both authenticated and unauthenticated cases to ensure consistency.
+
+        describe('createdBy relation - private fields must be blocked', () => {
+          it.each([
+            ['email $startsWith', { createdBy: { email: { $startsWith: 'a' } } }],
+            ['email $contains', { createdBy: { email: { $contains: 'admin' } } }],
+            ['password $startsWith', { createdBy: { password: { $startsWith: '$2' } } }],
+            [
+              'resetPasswordToken $startsWith',
+              { createdBy: { resetPasswordToken: { $startsWith: 'abc' } } },
+            ],
+            ['isActive $eq', { createdBy: { isActive: true } }],
+            ['blocked $eq', { createdBy: { blocked: false } }],
+          ])('Returns 400 on createdBy.%s filter (authenticated)', async (_label, filters) => {
+            const res = await rq.get('/api/documents', { qs: { filters } });
+            expect(res.status).toEqual(400);
+          });
+
+          it.each([
+            ['email $startsWith', { createdBy: { email: { $startsWith: 'a' } } }],
+            ['email $contains', { createdBy: { email: { $contains: 'admin' } } }],
+            ['password $startsWith', { createdBy: { password: { $startsWith: '$2' } } }],
+            [
+              'resetPasswordToken $startsWith',
+              { createdBy: { resetPasswordToken: { $startsWith: 'abc' } } },
+            ],
+            ['isActive $eq', { createdBy: { isActive: true } }],
+            ['blocked $eq', { createdBy: { blocked: false } }],
+          ])('Returns 400 on createdBy.%s filter (unauthenticated)', async (_label, filters) => {
+            const res = await publicRq.get('/documents', { qs: { filters } });
+            expect(res.status).toEqual(400);
+          });
+        });
+
+        describe('updatedBy relation - private fields must be blocked', () => {
+          it.each([
+            ['email $startsWith', { updatedBy: { email: { $startsWith: 'a' } } }],
+            ['email $contains', { updatedBy: { email: { $contains: 'admin' } } }],
+            ['password $startsWith', { updatedBy: { password: { $startsWith: '$2' } } }],
+            [
+              'resetPasswordToken $startsWith',
+              { updatedBy: { resetPasswordToken: { $startsWith: 'abc' } } },
+            ],
+            ['isActive $eq', { updatedBy: { isActive: true } }],
+            ['blocked $eq', { updatedBy: { blocked: false } }],
+          ])('Returns 400 on updatedBy.%s filter (authenticated)', async (_label, filters) => {
+            const res = await rq.get('/api/documents', { qs: { filters } });
+            expect(res.status).toEqual(400);
+          });
+
+          it.each([
+            ['email $startsWith', { updatedBy: { email: { $startsWith: 'a' } } }],
+            ['email $contains', { updatedBy: { email: { $contains: 'admin' } } }],
+            ['password $startsWith', { updatedBy: { password: { $startsWith: '$2' } } }],
+            [
+              'resetPasswordToken $startsWith',
+              { updatedBy: { resetPasswordToken: { $startsWith: 'abc' } } },
+            ],
+            ['isActive $eq', { updatedBy: { isActive: true } }],
+            ['blocked $eq', { updatedBy: { blocked: false } }],
+          ])('Returns 400 on updatedBy.%s filter (unauthenticated)', async (_label, filters) => {
+            const res = await publicRq.get('/documents', { qs: { filters } });
+            expect(res.status).toEqual(400);
+          });
+        });
+
+        describe('nested operators with private fields', () => {
+          it.each([
+            [
+              '$and with updatedBy.email',
+              { $and: [{ updatedBy: { email: { $startsWith: 'a' } } }] },
+            ],
+            [
+              '$or with createdBy.resetPasswordToken',
+              { $or: [{ createdBy: { resetPasswordToken: { $startsWith: 'x' } } }] },
+            ],
+            [
+              '$not with updatedBy.password',
+              { $not: { updatedBy: { password: { $contains: 'hash' } } } },
+            ],
+          ])('Returns 400 on %s filter (authenticated)', async (_label, filters) => {
+            const res = await rq.get('/api/documents', { qs: { filters } });
+            expect(res.status).toEqual(400);
+          });
+
+          it.each([
+            [
+              '$and with updatedBy.email',
+              { $and: [{ updatedBy: { email: { $startsWith: 'a' } } }] },
+            ],
+            [
+              '$or with createdBy.resetPasswordToken',
+              { $or: [{ createdBy: { resetPasswordToken: { $startsWith: 'x' } } }] },
+            ],
+            [
+              '$not with updatedBy.password',
+              { $not: { updatedBy: { password: { $contains: 'hash' } } } },
+            ],
+          ])('Returns 400 on %s filter (unauthenticated)', async (_label, filters) => {
+            const res = await publicRq.get('/documents', { qs: { filters } });
+            expect(res.status).toEqual(400);
+          });
+        });
+
+        describe('Unrecognized top-level query params', () => {
+          it.each([
+            [
+              'nested object param',
+              { customFilter: { relation: { field: { $startsWith: 'x' } } } },
+            ],
+            ['plain param', { unknownKey: 'value' }],
+          ])(
+            'do not affect the response (authenticated) - %s',
+            async (_label, unrecognizedParams) => {
+              const base = await rq.get('/api/documents');
+              const withParams = await rq.get('/api/documents', { qs: unrecognizedParams });
+              expect(base.status).toEqual(200);
+              expect(withParams.status).toEqual(200);
+              expect(withParams.body.data).toHaveLength(base.body.data.length);
+              expect(withParams.body.data.map((d) => d.id).sort()).toEqual(
+                base.body.data.map((d) => d.id).sort()
+              );
+            }
+          );
+
+          it.each([
+            [
+              'nested object param',
+              { customFilter: { relation: { field: { $startsWith: 'x' } } } },
+            ],
+            ['plain param', { unknownKey: 'value' }],
+          ])(
+            'do not affect the response (unauthenticated) - %s',
+            async (_label, unrecognizedParams) => {
+              const base = await publicRq.get('/documents');
+              const withParams = await publicRq.get('/documents', { qs: unrecognizedParams });
+              expect(base.status).toEqual(200);
+              expect(withParams.status).toEqual(200);
+              expect(withParams.body.data).toHaveLength(base.body.data.length);
+              expect(withParams.body.data.map((d) => d.id).sort()).toEqual(
+                base.body.data.map((d) => d.id).sort()
+              );
+            }
+          );
+        });
+      });
     });
   });
 
@@ -496,6 +879,32 @@ describe('Core API - Validate', () => {
         ])('Error on sort: %s', async (_s, sort, order) => {
           const res = await rq.get('/api/documents', { qs: { sort } });
 
+          expect(res.status).toEqual(400);
+        });
+      });
+
+      describe('Admin User Relations - Content API', () => {
+        it.each([
+          ['updatedBy.email asc', { updatedBy: { email: 'asc' } }],
+          ['createdBy.email desc', { createdBy: { email: 'desc' } }],
+          ['updatedBy.password asc', { updatedBy: { password: 'asc' } }],
+          ['createdBy.resetPasswordToken desc', { createdBy: { resetPasswordToken: 'desc' } }],
+          ['updatedBy.isActive asc', { updatedBy: { isActive: 'asc' } }],
+          ['createdBy.blocked desc', { createdBy: { blocked: 'desc' } }],
+        ])('Returns 400 on %s sort (private field, authenticated)', async (_label, sort) => {
+          const res = await rq.get('/api/documents', { qs: { sort } });
+          expect(res.status).toEqual(400);
+        });
+
+        it.each([
+          ['updatedBy.email asc', { updatedBy: { email: 'asc' } }],
+          ['createdBy.email desc', { createdBy: { email: 'desc' } }],
+          ['updatedBy.password asc', { updatedBy: { password: 'asc' } }],
+          ['createdBy.resetPasswordToken desc', { createdBy: { resetPasswordToken: 'desc' } }],
+          ['updatedBy.isActive asc', { updatedBy: { isActive: 'asc' } }],
+          ['createdBy.blocked desc', { createdBy: { blocked: 'desc' } }],
+        ])('Returns 400 on %s sort (private field, unauthenticated)', async (_label, sort) => {
+          const res = await publicRq.get('/documents', { qs: { sort } });
           expect(res.status).toEqual(400);
         });
       });

@@ -36,23 +36,41 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const { kind } = contentType;
 
+      // On non–D&P roots (e.g. User) these args do not version the parent document, but they
+      // are required: association resolvers inherit them into nested D&P relations (see
+      // builders/resolvers/association.ts + rootQueryArgs). Omitting them broke draft/published
+      // control for populated relations (e.g. github.com/strapi/strapi/issues/25746).
+      //
+      // Future direction: add `status` / `hasPublishedVersion` to GraphQL args on nested
+      // to-many (and to-one) relation fields when the *target* content type has D&P, instead
+      // of relying on root-level “context” that is easy to misread (args on User affecting
+      // Articles). That would allow different publication settings per relation branch, match
+      // how developers think about the graph, and let non-DP roots drop these args if desired.
+      // Would require extending getContentTypeArgs(..., { isNested: true }) for D&P targets
+      // and teaching association.ts to honor args.hasPublishedVersion on nested fields, not
+      // only root inheritance.
+      const publicationArgs = {
+        status: args.PublicationStatusArg,
+        hasPublishedVersion: args.HasPublishedVersionArg,
+      };
+
       // Collection Types
       if (kind === 'collectionType') {
         if (!multiple) {
           return {
             documentId: nonNull(idArg()),
-            status: args.PublicationStatusArg,
+            ...publicationArgs,
           };
         }
 
-        const params = {
+        const params: Record<string, unknown> = {
           filters: naming.getFiltersInputTypeName(contentType),
           pagination: args.PaginationArg,
           sort: args.SortArg,
         };
 
         if (!isNested) {
-          Object.assign(params, { status: args.PublicationStatusArg });
+          Object.assign(params, publicationArgs);
         }
 
         return params;
@@ -60,10 +78,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Single Types
       if (kind === 'singleType') {
-        const params = {};
+        const params: Record<string, unknown> = {};
 
         if (!isNested) {
-          Object.assign(params, { status: args.PublicationStatusArg });
+          Object.assign(params, publicationArgs);
         }
 
         return params;
