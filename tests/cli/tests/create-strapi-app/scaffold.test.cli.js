@@ -76,6 +76,34 @@ describe('create-strapi-app', () => {
     }
   });
 
+  it('writes a Yarn node-modules linker config for Yarn projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'])
+        .expect('code', 0)
+        .end();
+
+      expect(fs.readFileSync(path.join(projectDir, '.yarnrc.yml'), 'utf8')).toBe(
+        'nodeLinker: node-modules\n'
+      );
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not write a Yarn config for npm projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-npm'])
+        .expect('code', 0)
+        .end();
+
+      expect(fs.existsSync(path.join(projectDir, '.yarnrc.yml'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
   it('fails when --non-interactive is used without a directory', async () => {
     const { stderr, stdout } = await spawnCsa(['--non-interactive', '--skip-cloud'])
       .expect('code', 1)

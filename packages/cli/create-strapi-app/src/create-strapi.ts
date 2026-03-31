@@ -18,6 +18,8 @@ import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
 import { getInstallArgs } from './utils/get-package-manager-args';
 
+const yarnNodeModulesConfig = 'nodeLinker: node-modules\n';
+
 async function createStrapi(scope: Scope) {
   const { rootPath } = scope;
   try {
@@ -99,6 +101,10 @@ async function createApp(scope: Scope) {
 
     // create config/database
     await fse.writeFile(join(rootPath, '.env'), generateDotEnv(scope));
+
+    if (packageManager === 'yarn' && !(await fse.pathExists(join(rootPath, '.yarnrc.yml')))) {
+      await fse.writeFile(join(rootPath, '.yarnrc.yml'), yarnNodeModulesConfig);
+    }
 
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
   } catch (err) {
