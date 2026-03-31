@@ -42,7 +42,7 @@ import type { Schema } from '@strapi/types';
 const UID_REGEX = /^[A-Za-z0-9-_.~]*$/;
 
 interface UIDInputProps extends Omit<InputProps, 'type'> {
-  attribute?: Pick<Schema.Attribute.UIDProperties, 'regex'>;
+  attribute?: Pick<Schema.Attribute.UIDProperties, 'regex' | 'targetField'>;
   type: Schema.Attribute.TypeOf<Schema.Attribute.UID>;
 }
 
@@ -62,8 +62,13 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const [{ query }] = useQueryParams();
     const params = React.useMemo(() => buildValidParams(query), [query]);
 
-    const { regex } = attribute;
+    const { regex, targetField } = attribute;
     const validationRegExp = regex ? new RegExp(regex) : UID_REGEX;
+
+    const targetFieldValue = targetField ? allFormValues[targetField] : undefined;
+    const debouncedTargetFieldValue = useDebounce(targetFieldValue, 300);
+    // Track whether the user has manually edited the UID field
+    const [isCustomModified, setIsCustomModified] = React.useState(false);
 
     const {
       data: defaultGeneratedUID,
@@ -105,6 +110,36 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
 
     const [generateUID, { isLoading: isGeneratingUID }] = useGenerateUIDMutation();
 
+    /**
+     * When the target field value changes and the user hasn't manually edited
+     * the UID, auto-regenerate the slug from the target field.
+     */
+    React.useEffect(() => {
+      if (!targetField || !debouncedTargetFieldValue || isCustomModified) {
+        return;
+      }
+
+      const regenerate = async () => {
+        try {
+          const res = await generateUID({
+            contentTypeUID: currentDocumentMeta.model,
+            field: name,
+            data: { id: currentDocumentMeta.documentId ?? '', ...allFormValues },
+            params,
+          });
+
+          if ('data' in res) {
+            field.onChange(name, res.data);
+          }
+        } catch {
+          // Silently fail — the user can still manually regenerate
+        }
+      };
+
+      regenerate();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedTargetFieldValue]);
+
     const handleRegenerateClick = async () => {
       try {
         const res = await generateUID({
@@ -116,6 +151,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
 
         if ('data' in res) {
           field.onChange(name, res.data);
+          setIsCustomModified(false);
         } else {
           toggleNotification({
             type: 'danger',
@@ -268,7 +304,10 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
               )}
             </Flex>
           }
-          onChange={field.onChange}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            field.onChange(e);
+            setIsCustomModified(true);
+          }}
           value={field.value ?? ''}
           {...props}
           type="text"
