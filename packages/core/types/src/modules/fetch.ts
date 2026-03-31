@@ -7,6 +7,6 @@ import type { Dispatcher } from 'undici';
  * */
 
 export interface Fetch {
-  (input: string | URL | Request, init?: RequestInit | undefined): Promise<Response>;
+  (input: string | URL | Request, init?: RequestInit): Promise<Response>;
   dispatcher?: Dispatcher;
 }
