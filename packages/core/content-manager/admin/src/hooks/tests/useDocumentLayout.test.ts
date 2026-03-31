@@ -344,9 +344,9 @@ describe('useDocumentLayout', () => {
         attribute: {
           type: 'string',
         },
-        label: 'id',
+        label: 'documentId',
         mainField: undefined,
-        name: 'id',
+        name: 'documentId',
         searchable: true,
         sortable: true,
       },
