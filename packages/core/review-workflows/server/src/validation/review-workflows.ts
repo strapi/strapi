@@ -23,7 +23,7 @@ const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
   name: yup.string().max(255).required(),
   color: yup.string().matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/i), // hex color
-  permissions: yup.array().of(fromPermissionObject),
+  fromPermissions: yup.array().of(fromPermissionObject),
   toPermissions: yup.array().of(toPermissionObject),
 });
 

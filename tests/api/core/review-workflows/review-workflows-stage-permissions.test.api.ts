@@ -110,7 +110,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...baseWorkflow.stages[0],
-            permissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+            fromPermissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
           },
           baseWorkflow.stages[1],
         ],
@@ -127,7 +127,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...baseWorkflow.stages[0],
-            permissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+            fromPermissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
           },
           baseWorkflow.stages[1],
         ],
@@ -138,7 +138,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...workflow.stages[0],
-            permissions: getStageTransitionPermissions([roles[0].id]),
+            fromPermissions: getStageTransitionPermissions([roles[0].id]),
           },
           workflow.stages[1],
         ],
@@ -161,7 +161,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...baseWorkflow.stages[0],
-            permissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+            fromPermissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
           },
           baseWorkflow.stages[1],
         ],
@@ -188,7 +188,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...baseWorkflow.stages[0],
-            permissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
+            fromPermissions: getStageTransitionPermissions([roles[0].id, roles[1].id]),
           },
         ],
       });
@@ -211,7 +211,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...baseWorkflow.stages[0],
-            permissions: [{ action: 'invalid-action', role: roles[0].id }],
+            fromPermissions: [{ action: 'invalid-action', role: roles[0].id }],
           },
         ],
       });
@@ -228,7 +228,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...baseWorkflow.stages[0],
-            permissions: [{ action: 'invalid-action', role: roles[0].id }],
+            fromPermissions: [{ action: 'invalid-action', role: roles[0].id }],
           },
         ],
       });
@@ -238,7 +238,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...workflow.stages[0],
-            permissions: undefined,
+            fromPermissions: undefined,
           },
         ],
       });
@@ -271,7 +271,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             ...baseWorkflow.stages[0],
-            permissions: getStageTransitionPermissions([roles[0].id]),
+            fromPermissions: getStageTransitionPermissions([roles[0].id]),
             toPermissions: getStageTransitionPermissions([roles[1].id]),
           },
           baseWorkflow.stages[1],
@@ -446,12 +446,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [
           {
             name: 'Open',
-            permissions: getStageTransitionPermissions([allowedRole.id, deniedRole.id]),
+            fromPermissions: getStageTransitionPermissions([allowedRole.id, deniedRole.id]),
             toPermissions: getStageTransitionPermissions([allowedRole.id, deniedRole.id]),
           },
           {
             name: 'Restricted',
-            permissions: getStageTransitionPermissions([allowedRole.id, deniedRole.id]),
+            fromPermissions: getStageTransitionPermissions([allowedRole.id, deniedRole.id]),
             toPermissions: getStageTransitionPermissions([allowedRole.id]),
           },
         ],

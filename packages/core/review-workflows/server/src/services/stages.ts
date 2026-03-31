@@ -53,9 +53,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const allPermissionIds: number[] = [];
 
         // Register "from" permissions
-        if (stage.permissions && stage.permissions.length > 0) {
+        if (stage.fromPermissions && stage.fromPermissions.length > 0) {
           const fromPermissions = await async.map(
-            stage.permissions,
+            stage.fromPermissions,
             (permission: StagePermission) =>
               stagePermissionsService.register({
                 roleId: permission.role,
@@ -97,7 +97,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async update(srcStage: any, destStage: any) {
       const stageId = destStage.id;
-      const hasPermissionChanges = destStage.permissions || destStage.toPermissions;
+      const hasPermissionChanges = destStage.fromPermissions || destStage.toPermissions;
 
       let allPermissionIds: number[];
 
@@ -112,7 +112,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         // Re-register "from" permissions (fall back to existing "from" entries from DB)
         const fromPerms =
-          destStage.permissions ??
+          destStage.fromPermissions ??
           (srcStage?.permissions ?? [])
             .filter((p: PopulatedPermission) => p.actionParameters?.from)
             .map((p: PopulatedPermission) => ({ role: extractRoleId(p), action: p.action }));
@@ -373,11 +373,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 const normalizeStageForDiff = (stage: {
   name?: string;
   color?: string;
-  permissions?: unknown[];
+  fromPermissions?: unknown[];
   toPermissions?: unknown[];
 }) => ({
   ...pick(['name', 'color'], stage),
-  permissions: stage.permissions ?? [],
+  fromPermissions: stage.fromPermissions ?? [],
   toPermissions: stage.toPermissions ?? [],
 });
 
