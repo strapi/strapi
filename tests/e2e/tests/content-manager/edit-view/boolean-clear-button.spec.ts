@@ -80,7 +80,14 @@ test.describe('Boolean Component - Clear Button Functionality', () => {
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByText('Saved')).toBeVisible({ timeout: 10000 });
     await page.reload();
-    await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
+    await navToHeader(
+      page,
+      [
+        { text: 'Content Manager', exact: true },
+        { text: 'Cat', exact: true },
+      ],
+      'Cat'
+    );
     await page.getByRole('gridcell', { name: 'Boolean Clear Persist Cat' }).click();
     await expect(booleanFieldContainer).not.toBeChecked();
     await expect(clearButton).not.toBeVisible();

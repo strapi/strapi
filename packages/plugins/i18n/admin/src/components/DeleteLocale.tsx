@@ -38,7 +38,7 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
         type: 'success',
         message: formatMessage({
           id: getTranslation('Settings.locales.modal.delete.success'),
-          defaultMessage: 'Deleted locale',
+          defaultMessage: 'Locale successfully deleted',
         }),
       });
 

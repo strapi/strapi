@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { navToHeader } from '../../../utils/shared';
+import { findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Blocks editor', () => {
   test.beforeEach(async ({ page }) => {
@@ -47,6 +47,7 @@ test.describe('Blocks editor', () => {
 
     // Save and reload to make sure the change is persisted
     await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
     await page.reload();
     await expect(page.getByText(code)).toBeVisible();
     await page.getByText(code).click();

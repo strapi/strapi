@@ -81,7 +81,15 @@ export const NavUser = ({
   return (
     <Flex {...props}>
       <Menu.Root>
-        <MenuTrigger endIcon={null} fullWidth justifyContent="flex-start">
+        <MenuTrigger
+          endIcon={null}
+          fullWidth
+          justifyContent="flex-start"
+          aria-label={formatMessage({
+            id: 'app.components.LeftMenu.openUserMenuAriaLabel',
+            defaultMessage: 'Open user menu',
+          })}
+        >
           <Flex alignItems="center" gap={3}>
             <MenuIcon justifyContent="center">
               <Avatar.Item delayMs={0} fallback={initials || getInitials(user)} />
