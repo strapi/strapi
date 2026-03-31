@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "noEmit": false
+    "noEmit": false,
+    "allowJs": false
   },
   "include": ["src"],
   "exclude": ["**/__tests__/**"]

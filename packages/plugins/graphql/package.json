@@ -95,7 +95,7 @@
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
     "tsconfig": "5.50.2",
-    "typescript": "5.9.3"
+    "typescript": "6.0.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",

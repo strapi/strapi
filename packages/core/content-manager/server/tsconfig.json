@@ -1,7 +1,13 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["./src"],
+  "include": [
+    "./src"
+  ],
   "compilerOptions": {
-    "types": ["node", "jest"]
+    "rootDir": "../",
+    "types": [
+      "node",
+      "jest"
+    ]
   }
 }

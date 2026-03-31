@@ -1073,6 +1073,9 @@ export type {
   ErrorHandlerContext,
   SchemaDiffHandlerContext,
   ITransferResults,
+  ILink,
+  IEntity,
+  Diff,
 };
 
 export * as errors from './errors';
