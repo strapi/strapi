@@ -8,7 +8,7 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
+    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resetFiles();
     await page.goto('/admin');
     await login({ page });
@@ -136,7 +136,7 @@ test.describe('Preview', () => {
 // TODO: add license check in condition
 describeOnCondition(edition === 'EE')('Advanced Preview', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, {
+    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, {
       coreStore: false,
     });
     await resetFiles();

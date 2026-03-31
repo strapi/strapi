@@ -1,7 +1,11 @@
+import type { Stats } from 'fs';
+
+import fs from 'fs-extra';
 import {
   engine as engineDataTransfer,
   strapi as strapiDataTransfer,
   file as fileDataTransfer,
+  directory as directoryDataTransfer,
 } from '@strapi/data-transfer';
 
 import importAction from '../action';
@@ -37,6 +41,17 @@ jest.mock('@strapi/data-transfer', () => {
 
   return {
     ...actual,
+    directory: {
+      ...actual.directory,
+      providers: {
+        ...actual.directory.providers,
+        createLocalDirectorySourceProvider: jest.fn().mockReturnValue({
+          name: 'testDirSource',
+          type: 'source',
+          getMetadata: jest.fn(),
+        }),
+      },
+    },
     file: {
       ...actual.file,
       providers: {
@@ -98,6 +113,7 @@ describe('Import', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => false } as Stats);
   });
 
   it('creates providers with correct options ', async () => {
@@ -138,5 +154,28 @@ describe('Import', () => {
         versionStrategy: engineDataTransfer.DEFAULT_VERSION_STRATEGY,
       })
     );
+  });
+
+  it('uses directory source when backup path is a directory', async () => {
+    jest.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as Stats);
+
+    const options = {
+      file: '/path/to/export',
+      decrypt: false,
+      decompress: false,
+      exclude: [],
+      only: [],
+    };
+
+    await expectExit(0, async () => {
+      await importAction(options);
+    });
+
+    expect(directoryDataTransfer.providers.createLocalDirectorySourceProvider).toHaveBeenCalledWith(
+      {
+        directory: { path: '/path/to/export' },
+      }
+    );
+    expect(fileDataTransfer.providers.createLocalFileSourceProvider).not.toHaveBeenCalled();
   });
 });
