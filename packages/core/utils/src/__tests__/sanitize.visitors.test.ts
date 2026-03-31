@@ -2,6 +2,7 @@ import * as visitors from '../sanitize/visitors';
 import * as contentTypeUtils from '../content-types';
 import { sanitizers } from '../sanitize';
 import { traverseQueryFilters } from '../traverse';
+import type { Visitor } from '../traverse/factory';
 import traverseEntity from '../traverse-entity';
 import { adminUserModel, articleModel, getModel } from './test-fixtures';
 
@@ -140,6 +141,51 @@ describe('Sanitize visitors util', () => {
           lastname: 'Doe',
         },
       });
+    });
+
+    test('keeps scalar field $contains filter', async () => {
+      const filters = { title: { $contains: 'est02' } };
+      await expect(sanitizers.defaultSanitizeFilters(ctx, filters)).resolves.toEqual(filters);
+    });
+
+    test('keeps scalar field $containsi filter', async () => {
+      const filters = { title: { $containsi: 'EST02' } };
+      await expect(sanitizers.defaultSanitizeFilters(ctx, filters)).resolves.toEqual(filters);
+    });
+
+    test('keeps scalar datetime $gt filter with Date operand (GraphQL)', async () => {
+      const schemaWithDatetime: typeof articleModel = {
+        ...articleModel,
+        attributes: {
+          ...articleModel.attributes,
+          publishedAt: { type: 'datetime' },
+        },
+      };
+      const ctxDatetime = { schema: schemaWithDatetime, getModel };
+      const date = new Date('2022-03-17T15:06:57.878Z');
+      const filters = { publishedAt: { $gt: date } };
+
+      await expect(sanitizers.defaultSanitizeFilters(ctxDatetime, filters)).resolves.toEqual(
+        filters
+      );
+    });
+
+    test('removes unrecognized keys nested under scalar field filters', async () => {
+      await expect(
+        sanitizers.defaultSanitizeFilters(ctx, { title: { totallyUnknownNestedKey: 'x' } })
+      ).resolves.toEqual({});
+    });
+
+    test('traverseQueryFilters visits nested operators under scalar fields', async () => {
+      const visited: string[] = [];
+      const visitor: Visitor = ({ key }) => {
+        visited.push(key);
+      };
+
+      await traverseQueryFilters(visitor, ctx)({ title: { $contains: 'est02' } });
+
+      expect(visited).toContain('title');
+      expect(visited).toContain('$contains');
     });
 
     test('handles nested $and/$or operators with sensitive fields', async () => {
