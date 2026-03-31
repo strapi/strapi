@@ -69,6 +69,8 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const debouncedTargetFieldValue = useDebounce(targetFieldValue, 300);
     // Track whether the user has manually edited the UID field
     const [isCustomModified, setIsCustomModified] = React.useState(false);
+    // Skip auto-generation on first render to avoid overwriting existing UIDs
+    const isFirstRender = React.useRef(true);
 
     const {
       data: defaultGeneratedUID,
@@ -113,8 +115,15 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     /**
      * When the target field value changes and the user hasn't manually edited
      * the UID, auto-regenerate the slug from the target field.
+     * Skip the first render to avoid overwriting an existing UID when
+     * opening an entry that already has a saved slug.
      */
     React.useEffect(() => {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+
       if (!targetField || !debouncedTargetFieldValue || isCustomModified) {
         return;
       }
