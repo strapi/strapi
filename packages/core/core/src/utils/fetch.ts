@@ -14,7 +14,7 @@ export const createStrapiFetch = (
 ): Modules.Fetch.Fetch => {
   const { logs = true } = options ?? {};
 
-  function strapiFetch(url: RequestInfo | URL, options?: RequestInit) {
+  function strapiFetch(url: string | URL | Request, options?: RequestInit) {
     const fetchOptions = {
       ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
       ...options,
@@ -24,7 +24,7 @@ export const createStrapiFetch = (
       strapi.log.debug(`Making request for ${url}`);
     }
 
-    return fetch(url, fetchOptions);
+    return fetch(url, fetchOptions as RequestInit);
   }
 
   const proxy =

@@ -1,5 +1,8 @@
 {
   "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "types": ["node", "jest"]
+  },
   "include": ["src"],
   "exclude": ["node_modules", "src/files", "src/templates"]
 }

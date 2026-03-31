@@ -2,9 +2,10 @@
   "extends": "tsconfig/client.json",
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": ".",
     "paths": {
-      "@tests/*": ["./tests/*"]
+      "@tests/*": ["./tests/*"],
+      "msw": ["../../admin/node_modules/msw"],
+      "msw/*": ["../../admin/node_modules/msw/*"]
     }
   },
   "include": ["../package.json", "./src", "../shared", "./tests", "./custom.d.ts"]

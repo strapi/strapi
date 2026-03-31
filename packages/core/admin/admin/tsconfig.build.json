@@ -2,7 +2,6 @@
   "extends": "tsconfig/client.json",
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": ".",
     "outDir": "../dist",
     "noEmit": false
   },

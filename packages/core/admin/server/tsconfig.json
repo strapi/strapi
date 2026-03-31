@@ -3,8 +3,7 @@
   "include": ["src"],
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": ".",
-    "types": ["jest"],
+    "types": ["node", "jest"],
     "esModuleInterop": true
   }
 }

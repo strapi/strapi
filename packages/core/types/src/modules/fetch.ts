@@ -7,6 +7,6 @@ import type { ProxyAgent } from 'undici';
  * */
 
 export interface Fetch {
-  (input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response>;
+  (input: string | URL | Request, init?: RequestInit): Promise<Response>;
   dispatcher?: ProxyAgent;
 }

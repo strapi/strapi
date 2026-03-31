@@ -203,7 +203,7 @@ async function run(args: string[]): Promise<void> {
   if (scope.useTypescript) {
     scope.devDependencies = {
       ...scope.devDependencies,
-      typescript: '^5',
+      typescript: '^6',
       '@types/node': '^20',
       '@types/react': '^18',
       '@types/react-dom': '^18',
