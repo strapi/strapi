@@ -1,4 +1,4 @@
-import { Page, chromium } from '@playwright/test';
+import { Page, chromium, type FullConfig } from '@playwright/test';
 import path from 'path';
 
 export const STRAPI_GUIDED_TOUR_CONFIG = {
@@ -30,11 +30,11 @@ export const STRAPI_GUIDED_TOUR_CONFIG = {
 
 export const setGuidedTourLocalStorage = async (
   page: Page,
-  guidedTourState: typeof STRAPI_GUIDED_TOUR_CONFIG
+  guidedTourState: typeof STRAPI_GUIDED_TOUR_CONFIG,
+  adminURL?: string
 ) => {
-  // Navigate to the admin page to set localStorage
-  const port = process.env.PORT || 1337;
-  await page.goto(`http://127.0.0.1:${port}/admin`);
+  const url = adminURL ?? `http://127.0.0.1:${process.env.PORT || 1337}/admin`;
+  await page.goto(url);
 
   // Set a default local storage so the guided tour is disabled by default
   await page.evaluate((config) => {
@@ -42,16 +42,30 @@ export const setGuidedTourLocalStorage = async (
   }, guidedTourState);
 };
 
-async function globalSetup() {
-  // Create a browser context and set up localStorage
+function resolveE2eBaseURL(config: FullConfig): string {
+  const fromProject = config.projects[0]?.use?.baseURL;
+  if (typeof fromProject === 'string' && fromProject !== '') {
+    return fromProject;
+  }
+  return `http://127.0.0.1:${process.env.PORT ?? 1337}`;
+}
+
+async function globalSetup(config: FullConfig) {
+  const baseURL = resolveE2eBaseURL(config);
+
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  await setGuidedTourLocalStorage(page, STRAPI_GUIDED_TOUR_CONFIG);
+  await setGuidedTourLocalStorage(page, STRAPI_GUIDED_TOUR_CONFIG, `${baseURL}/admin`);
 
-  // Save the storage state to be used by all tests - save it in the e2e directory
-  const storageStatePath = path.join(__dirname, '..', 'e2e', 'playwright-storage-state.json');
+  const port = new URL(baseURL).port;
+  const storageStatePath = path.join(
+    __dirname,
+    '..',
+    'e2e',
+    `playwright-storage-state-${port}.json`
+  );
   await context.storageState({ path: storageStatePath });
 
   await browser.close();

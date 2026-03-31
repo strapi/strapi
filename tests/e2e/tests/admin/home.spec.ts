@@ -22,7 +22,7 @@ test.describe('Home as super admin', () => {
     await expect(page).toHaveTitle(/homepage/i);
 
     // Change the name and make sure it's reflected in the homepage
-    await page.getByRole('button', { name: 'test' }).click();
+    await page.getByRole('button', { name: 'Open user menu' }).click();
     await clickAndWait(page, page.getByRole('menuitem', { name: /profile/i }));
     await page.getByRole('textbox', { name: /first name/i }).fill('Rebecca');
     await page.getByRole('button', { name: /save/i }).click();
