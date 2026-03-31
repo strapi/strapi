@@ -435,7 +435,13 @@ const applyWhere = (qb: Knex.QueryBuilder, where: Where) => {
       const value = where[key] ?? [];
 
       return qb.where((subQB: Knex.QueryBuilder) => {
-        value.forEach((v) => subQB.orWhere((inner) => applyWhere(inner, v)));
+        value.forEach((v, index) => {
+          if (index === 0) {
+            subQB.where((inner) => applyWhere(inner, v));
+          } else {
+            subQB.orWhere((inner) => applyWhere(inner, v));
+          }
+        });
       });
     }
 
