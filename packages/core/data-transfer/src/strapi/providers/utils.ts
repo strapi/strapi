@@ -17,15 +17,22 @@ interface IDispatcherState {
   transfer?: { kind: Client.TransferKind; id: string };
 }
 
+export interface RetryMessageOptions {
+  retryMessageMaxRetries: number;
+  retryMessageTimeout: number;
+}
+
 interface IDispatchOptions {
   attachTransfer?: boolean;
+  /** Merged onto the dispatcher's default `retryMessageOptions` for this message only. */
+  retryOverrides?: Partial<RetryMessageOptions>;
 }
 
 type Dispatch<T> = Omit<T, 'transferID' | 'uuid'>;
 
 export const createDispatcher = (
   ws: WebSocket,
-  retryMessageOptions = {
+  retryMessageOptions: RetryMessageOptions = {
     retryMessageMaxRetries: 5,
     retryMessageTimeout: 30000,
   },
@@ -68,7 +75,10 @@ export const createDispatcher = (
           reject(error);
         }
       });
-      const { retryMessageMaxRetries, retryMessageTimeout } = retryMessageOptions;
+      const { retryMessageMaxRetries, retryMessageTimeout } = {
+        ...retryMessageOptions,
+        ...options.retryOverrides,
+      };
       const sendPeriodically = () => {
         if (numberOfTimesMessageWasSent <= retryMessageMaxRetries) {
           numberOfTimesMessageWasSent += 1;
@@ -145,7 +155,8 @@ export const createDispatcher = (
     payload: {
       step: S;
       action: A;
-    } & (A extends 'stream' ? { data: Client.GetTransferPushStreamData<S> } : unknown)
+    } & (A extends 'stream' ? { data: Client.GetTransferPushStreamData<S> } : unknown),
+    dispatchOptions?: Omit<IDispatchOptions, 'attachTransfer'>
   ) => {
     const message: Dispatch<Client.TransferPushMessage> = {
       type: 'transfer',
@@ -153,7 +164,9 @@ export const createDispatcher = (
       ...payload,
     };
 
-    return dispatch<T>(message, { attachTransfer: true }) ?? Promise.resolve(null);
+    return (
+      dispatch<T>(message, { attachTransfer: true, ...dispatchOptions }) ?? Promise.resolve(null)
+    );
   };
 
   const setTransferProperties = (

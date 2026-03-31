@@ -21,7 +21,22 @@ import { ProviderTransferError, ProviderValidationError } from '../../../errors/
 import { TRANSFER_PATH } from '../../remote/constants';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
-import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
+import {
+  createDispatcher,
+  connectToWebsocket,
+  trimTrailingSlash,
+  type RetryMessageOptions,
+} from '../utils';
+
+/**
+ * Pull server answers `assets` step `start` only after `estimateAssetTotals` (DB stream; remote sizes from DB when complete, else HTTP like `createAssetsStream`).
+ * That can exceed the default dispatcher wait (~30s between resends, a few minutes total). This message
+ * uses a longer window so large libraries do not fail with `Request timed out` before totals are returned.
+ */
+const ASSETS_START_RETRY_OVERRIDES: Partial<RetryMessageOptions> = {
+  retryMessageTimeout: 120_000,
+  retryMessageMaxRetries: 30,
+};
 
 export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourceProviderOptions {
   url: URL; // the url of the remote Strapi admin
@@ -605,7 +620,10 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   async #startStep<T extends Client.TransferPullStep>(step: T) {
     try {
-      return await this.dispatcher?.dispatchTransferStep({ action: 'start', step });
+      return await this.dispatcher?.dispatchTransferStep(
+        { action: 'start', step },
+        step === 'assets' ? { retryOverrides: ASSETS_START_RETRY_OVERRIDES } : undefined
+      );
     } catch (e) {
       if (e instanceof Error) {
         return e;

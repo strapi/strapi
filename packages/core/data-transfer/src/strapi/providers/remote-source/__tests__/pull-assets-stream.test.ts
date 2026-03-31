@@ -193,7 +193,13 @@ describe('Remote Strapi source provider — pull assets stream', () => {
 
     // Client start + end for the assets step, and one WebSocket ACK per incoming message (cycles + end).
     expect(dispatchTransferStep).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'start', step: 'assets' })
+      expect.objectContaining({ action: 'start', step: 'assets' }),
+      expect.objectContaining({
+        retryOverrides: expect.objectContaining({
+          retryMessageTimeout: 120_000,
+          retryMessageMaxRetries: 30,
+        }),
+      })
     );
     expect(dispatchTransferStep).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'end', step: 'assets' })
@@ -286,7 +292,13 @@ describe('Remote Strapi source provider — pull assets stream', () => {
     await drainPass;
 
     expect(dispatchTransferStep).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'start', step: 'assets' })
+      expect.objectContaining({ action: 'start', step: 'assets' }),
+      expect.objectContaining({
+        retryOverrides: expect.objectContaining({
+          retryMessageTimeout: 120_000,
+          retryMessageMaxRetries: 30,
+        }),
+      })
     );
     expect(dispatchTransferStep).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'end', step: 'assets' })

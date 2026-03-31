@@ -9,6 +9,7 @@ jest.mock('../assets', () => {
     __esModule: true,
     ...actual,
     getFileStatsForTransfer: jest.fn(),
+    signUploadFileForTransfer: jest.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -36,6 +37,7 @@ describe('estimateAssetTotals', () => {
 
   beforeEach(() => {
     jest.mocked(assets.getFileStatsForTransfer).mockReset();
+    jest.mocked(assets.signUploadFileForTransfer).mockClear();
   });
 
   test('sums sizes and counts for local files (no formats)', async () => {
@@ -90,5 +92,92 @@ describe('estimateAssetTotals', () => {
       totalBytes: 130,
       totalCount: 2,
     });
+  });
+
+  test('remote files use DB sizes only when main and formats have size (no HTTP stat)', async () => {
+    const strapi = getStrapiMock([
+      {
+        provider: 'aws-s3',
+        url: 'https://bucket/a.png',
+        hash: 'h1',
+        ext: '.png',
+        id: 1,
+        size: 400,
+        formats: {
+          thumbnail: {
+            url: 'https://bucket/a_thumb.png',
+            hash: 't',
+            ext: '.png',
+            size: 50,
+          },
+        },
+      },
+      {
+        provider: 'aws-s3',
+        url: 'https://bucket/b.png',
+        hash: 'h2',
+        ext: '.png',
+        id: 2,
+        size: 100,
+      },
+    ]);
+
+    await expect(estimateAssetTotals(strapi as any)).resolves.toEqual({
+      totalBytes: 550,
+      totalCount: 3,
+    });
+
+    expect(assets.getFileStatsForTransfer).not.toHaveBeenCalled();
+    expect(assets.signUploadFileForTransfer).not.toHaveBeenCalled();
+  });
+
+  test('remote files fall back to HTTP stat when size is missing on main', async () => {
+    jest.mocked(assets.getFileStatsForTransfer).mockResolvedValue({ size: 999 });
+    const strapi = getStrapiMock([
+      {
+        provider: 'aws-s3',
+        url: 'https://bucket/a.png',
+        hash: 'h1',
+        ext: '.png',
+        id: 1,
+      },
+    ]);
+
+    await expect(estimateAssetTotals(strapi as any)).resolves.toEqual({
+      totalBytes: 999,
+      totalCount: 1,
+    });
+
+    expect(assets.signUploadFileForTransfer).toHaveBeenCalledTimes(1);
+    expect(assets.getFileStatsForTransfer).toHaveBeenCalledTimes(1);
+  });
+
+  test('remote files fall back to HTTP stat when a format size is missing', async () => {
+    jest.mocked(assets.getFileStatsForTransfer).mockResolvedValueOnce({ size: 12 }); // thumbnail probe only
+    const strapi = getStrapiMock([
+      {
+        provider: 'aws-s3',
+        url: 'https://bucket/a.png',
+        hash: 'h1',
+        ext: '.png',
+        id: 1,
+        size: 400,
+        formats: {
+          thumbnail: {
+            url: 'https://bucket/a_thumb.png',
+            hash: 't',
+            ext: '.png',
+          },
+        },
+      },
+    ]);
+
+    await expect(estimateAssetTotals(strapi as any)).resolves.toEqual({
+      totalBytes: 412,
+      totalCount: 2,
+    });
+
+    expect(assets.signUploadFileForTransfer).toHaveBeenCalledTimes(1);
+    expect(assets.getFileStatsForTransfer).toHaveBeenCalledTimes(1);
   });
 });
