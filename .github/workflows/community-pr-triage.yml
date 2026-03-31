@@ -1,0 +1,65 @@
+name: Community PR Triage
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday 9am UTC
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'What to run'
+        type: choice
+        default: 'dry-run'
+        options:
+          - dry-run
+          - sync
+          - update
+          - sync + update
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Build action
+        run: npx tsup --entry.index src/index.action.ts --format cjs --target node20 --clean
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Run triage
+        uses: ./.github/actions/community-pr-triage
+        with:
+          dry-run: ${{ github.event_name == 'schedule' || inputs.action == 'dry-run' || inputs.action == '' }}
+          sync: ${{ inputs.action == 'sync' || inputs.action == 'sync + update' }}
+          update: ${{ inputs.action == 'update' || inputs.action == 'sync + update' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_CPR_TEAM_ID: ${{ secrets.LINEAR_CPR_TEAM_ID }}
+          LINEAR_CMS_TEAM_ID: ${{ secrets.LINEAR_CMS_TEAM_ID }}
+          LINEAR_CMS_GITHUB_TEAM_ID: ${{ secrets.LINEAR_CMS_GITHUB_TEAM_ID }}
+          LINEAR_PROJECT_ID: ${{ secrets.LINEAR_PROJECT_ID }}
+          LINEAR_STATUS_TODO: ${{ secrets.LINEAR_STATUS_TODO }}
+          LINEAR_STATUS_DONE: ${{ secrets.LINEAR_STATUS_DONE }}
+          LINEAR_STATUS_CANCELED: ${{ secrets.LINEAR_STATUS_CANCELED }}
+          LINEAR_LABELS: ${{ secrets.LINEAR_LABELS }}
+          LINEAR_TRIAGE_LABELS: ${{ secrets.LINEAR_TRIAGE_LABELS }}
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-report
+          path: reports/*.md

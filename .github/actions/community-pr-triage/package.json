@@ -1,0 +1,22 @@
+{
+  "name": "community-pr-triage",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsup --entry.index src/index.action.ts --format cjs --target node20 --clean",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@anthropic-ai/sdk": "^0.78.0",
+    "@linear/sdk": "80.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
