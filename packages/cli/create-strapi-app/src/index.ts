@@ -50,9 +50,9 @@ const command = new commander.Command('create-strapi-app')
   .option('--git-init', 'Initialize a git repository')
   .option('--no-git-init', 'Do no initialize a git repository')
 
-  // A/B testing options
-  .option('--enable-ab-tests', 'Enable anonymous A/B testing')
-  .option('--no-enable-ab-tests', 'Disable anonymous A/B testing')
+  // Legacy no-ops (hidden from --help): accept old flags so existing CI/scripts keep working
+  .addOption(new commander.Option('--enable-ab-tests', 'ignored').hideHelp())
+  .addOption(new commander.Option('--no-enable-ab-tests', 'ignored').hideHelp())
 
   // Automation
   .option('--non-interactive', 'Skip all interactive prompts and use defaults')
