@@ -10,7 +10,10 @@ interface LoadContext {
 interface RelationEntry {
   joinTable: JoinTable;
   relations: Record<string, unknown>[];
-  publishedOn?: 'joinColumn';
+  /** FK column for the entity being published */
+  entityColumn: string;
+  /** FK column for the related entity */
+  relatedColumn: string;
 }
 
 /** Draft id → published id for rows that already have a published counterpart (same document_id + locale). */
@@ -82,7 +85,6 @@ const captureJoinBatches = async (
     schemaUid: UID.ContentType;
     oldVersions: LoadContext['oldVersions'];
     newVersions: LoadContext['newVersions'];
-    publishedOn?: 'joinColumn';
   }
 ): Promise<RelationEntry[]> => {
   const {
@@ -94,7 +96,6 @@ const captureJoinBatches = async (
     schemaUid,
     oldVersions,
     newVersions,
-    publishedOn,
   } = opts;
 
   const batches: RelationEntry[] = [];
@@ -109,7 +110,12 @@ const captureJoinBatches = async (
       .whereIn(publishedCol, oldIds)
       .transacting(trx);
     if (existing.length > 0) {
-      batches.push({ joinTable, relations: existing, ...(publishedOn ? { publishedOn } : {}) });
+      batches.push({
+        joinTable,
+        relations: existing,
+        entityColumn: publishedCol,
+        relatedColumn: relatedCol,
+      });
     }
   }
 
@@ -143,7 +149,7 @@ const captureJoinBatches = async (
     relations = remapRelatedIds(draftRows, relatedCol, map);
   }
 
-  batches.push({ joinTable, relations, ...(publishedOn ? { publishedOn } : {}) });
+  batches.push({ joinTable, relations, entityColumn: publishedCol, relatedColumn: relatedCol });
   return batches;
 };
 
@@ -207,50 +213,51 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
       for (const attribute of Object.values(dbModel.attributes) as Record<string, any>[]) {
         const joinTable = attribute.joinTable;
 
-        // Owning side of bidirectional M2M (e.g. Author.articles when publishing an Author).
-        // Identified by `inversedBy` — same rule as @strapi/database `isOwner` for bidirectional.
-        if (
-          attribute.type === 'relation' &&
-          joinTable &&
-          attribute.relation === 'manyToMany' &&
-          attribute.inversedBy &&
-          model.uid === uid &&
-          model.uid !== attribute.target
-        ) {
-          const targetUid = attribute.target as UID.ContentType;
-          const batches = await captureJoinBatches(trx, {
-            joinTable,
-            publishedCol: joinTable.joinColumn.name,
-            relatedCol: joinTable.inverseJoinColumn.name,
-            relatedUid: targetUid,
-            relatedHasDraftAndPublish: !!strapi.contentTypes[targetUid]?.options?.draftAndPublish,
-            schemaUid: model.uid as UID.ContentType,
-            oldVersions,
-            newVersions,
-            publishedOn: 'joinColumn',
-          });
-          relationsToUpdate.push(...batches);
-        } else if (
-          attribute.type === 'relation' &&
-          joinTable &&
-          attribute.target === uid &&
-          (attribute.inversedBy || attribute.mappedBy) &&
-          model.uid !== uid
-        ) {
-          // Inverse side (e.g. Article.authors when publishing an Article)
-          const relatedUid = model.uid as UID.ContentType;
-          const batches = await captureJoinBatches(trx, {
-            joinTable,
-            publishedCol: joinTable.inverseJoinColumn.name,
-            relatedCol: joinTable.joinColumn.name,
-            relatedUid,
-            relatedHasDraftAndPublish: !!model.options?.draftAndPublish,
-            schemaUid: relatedUid,
-            oldVersions,
-            newVersions,
-          });
-          relationsToUpdate.push(...batches);
+        if (attribute.type !== 'relation' || !joinTable) {
+          continue;
         }
+
+        if (!(attribute.inversedBy || attribute.mappedBy)) {
+          continue;
+        }
+
+        // Owning side: e.g. Author.articles when publishing an Author.
+        const isOwningSide =
+          !!attribute.inversedBy &&
+          model.uid === uid &&
+          attribute.relation === 'manyToMany' &&
+          model.uid !== attribute.target;
+
+        // Inverse side: e.g. Article.authors when publishing an Article.
+        const isInverseSide = attribute.target === uid && model.uid !== uid;
+
+        if (!isOwningSide && !isInverseSide) {
+          continue;
+        }
+
+        // Direction determines which join column belongs to the entity being published
+        const publishedCol = isOwningSide
+          ? joinTable.joinColumn.name
+          : joinTable.inverseJoinColumn.name;
+        const relatedCol = isOwningSide
+          ? joinTable.inverseJoinColumn.name
+          : joinTable.joinColumn.name;
+
+        const relatedUid = (isOwningSide ? attribute.target : model.uid) as UID.ContentType;
+
+        const batches = await captureJoinBatches(trx, {
+          joinTable,
+          publishedCol,
+          relatedCol,
+          relatedUid,
+          relatedHasDraftAndPublish: isOwningSide
+            ? !!strapi.contentTypes[relatedUid]?.options?.draftAndPublish
+            : !!model.options?.draftAndPublish,
+          schemaUid: model.uid as UID.ContentType,
+          oldVersions,
+          newVersions,
+        });
+        relationsToUpdate.push(...batches);
       }
     }
   });
@@ -307,13 +314,12 @@ const sync = async (
   const isRepublishedEntry = (id: string | number) => republishedEntryIds.has(String(id));
 
   await strapi.db.transaction(async ({ trx }) => {
-    for (const { joinTable, relations, publishedOn } of existingRelations) {
-      // Direction-aware column selection: the owning-side path sets publishedOn='joinColumn'
-      // so sync knows which FK column belongs to the entity being published.
-      const sourceColumn =
-        publishedOn === 'joinColumn' ? joinTable.joinColumn.name : joinTable.inverseJoinColumn.name;
-      const targetColumn =
-        publishedOn === 'joinColumn' ? joinTable.inverseJoinColumn.name : joinTable.joinColumn.name;
+    for (const {
+      joinTable,
+      relations,
+      entityColumn: sourceColumn,
+      relatedColumn: targetColumn,
+    } of existingRelations) {
       const orderColumn = joinTable.orderColumnName;
 
       // Failsafe in case those don't exist
@@ -376,7 +382,8 @@ const sync = async (
         }));
 
       if (toInsert.length) {
-        await trx.batchInsert(joinTable.name, toInsert, 1000);
+        const batchSize = strapi.db.dialect.getBatchInsertSize();
+        await trx.batchInsert(joinTable.name, toInsert, batchSize);
       }
     }
   });
