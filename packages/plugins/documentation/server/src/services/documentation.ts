@@ -31,7 +31,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       // In production, documentation files live under dist/src/extensions/
       // after the build step. Use dist.extensions for reading.
       const extensionsDir =
-        process.env.NODE_ENV === 'production'
+        strapi.config.environment === 'production'
           ? strapi.dirs.dist.extensions
           : strapi.dirs.app.extensions;
 
@@ -76,7 +76,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     getApiDocumentationPath(api: { name: string; getter: string }) {
-      const isProduction = process.env.NODE_ENV === 'production';
+      const isProduction = strapi.config.environment === 'production';
 
       if (api.getter === 'plugin') {
         const extensionsDir = isProduction
