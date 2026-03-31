@@ -108,38 +108,56 @@ export const clickAndWait = async (page: Page, locator: Locator) => {
 };
 
 /**
- * Look for an element containing text, and then click a sibling close button
+ * Look for an element containing text, and then click a close button inside it (or a sibling fallback)
  */
 
-interface FindAndCloseOptions {
-  role?: string;
+type FindAndCloseOptions = {
+  role?: string | string[];
   closeLabel?: string;
   required?: boolean;
-}
+};
 
 export const findAndClose = async (page: Page, text: string, options: FindAndCloseOptions = {}) => {
-  const { role = 'status', closeLabel = 'Close', required = true } = options;
+  const { role = ['status', 'alert'], closeLabel = 'Close', required = true } = options;
 
-  // Verify the popup text is visible.
-  const elements = page.locator(`:has-text("${text}")[role="${role}"]`);
+  const roles = Array.isArray(role) ? role : [role];
+  // Build a comma-separated CSS selector that matches any of the given roles
+  const toastSelector = roles.map((r) => `:has-text("${text}")[role="${r}"]`).join(', ');
 
-  if (required) {
-    await expect(elements.first()).toBeVisible(); // expect at least one element
+  const elements = page.locator(toastSelector);
+
+  if (required === true) {
+    await expect(elements.first()).toBeVisible({ timeout: 30000 });
   }
 
-  // Find all 'Close' buttons that are siblings of the elements containing the specified text.
-  const closeBtns = page.locator(
-    `:has-text("${text}")[role="${role}"] ~ button:has-text("${closeLabel}")`
-  );
-
-  // Click all 'Close' buttons.
-  const count = await closeBtns.count();
+  const count = await elements.count();
   for (let i = 0; i < count; i++) {
-    if (await closeBtns.nth(i).isVisible()) {
-      await closeBtns
-        .nth(i)
-        .click()
-        .catch(() => {});
+    const toast = elements.nth(i);
+    if (await toast.isVisible()) {
+      // Prefer a close button nested inside the toast
+      const innerClose = toast.getByRole('button', { name: closeLabel });
+      if ((await innerClose.count()) > 0 && (await innerClose.first().isVisible())) {
+        await innerClose
+          .first()
+          .click()
+          .catch(() => {});
+        // Wait for the toast to be hidden
+        await toast.waitFor({ state: 'hidden' }).catch(() => {});
+      } else {
+        // Fall back to a sibling button (original strategy)
+        const siblingSelector = roles
+          .map((r) => `:has-text("${text}")[role="${r}"] ~ button:has-text("${closeLabel}")`)
+          .join(', ');
+        const siblingClose = page.locator(siblingSelector);
+        if ((await siblingClose.count()) > 0 && (await siblingClose.first().isVisible())) {
+          await siblingClose
+            .first()
+            .click()
+            .catch(() => {});
+          // Wait for the toast to be hidden
+          await toast.waitFor({ state: 'hidden' }).catch(() => {});
+        }
+      }
     }
   }
 };

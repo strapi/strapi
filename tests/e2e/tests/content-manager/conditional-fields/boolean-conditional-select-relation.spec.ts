@@ -17,7 +17,14 @@ test.describe('Conditional Fields - Boolean-controlled conditional relation fiel
     page,
   }) => {
     // Create a cat first
-    await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
+    await navToHeader(
+      page,
+      [
+        { text: 'Content Manager', exact: true },
+        { text: 'Cat', exact: true },
+      ],
+      'Cat'
+    );
     await page.getByRole('link', { name: 'Create new entry' }).last().click();
 
     await fillField(page, { name: 'name*', type: 'text', value: 'Whiskers' });

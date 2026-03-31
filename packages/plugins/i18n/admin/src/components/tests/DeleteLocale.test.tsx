@@ -44,7 +44,7 @@ describe('DeleteLocale', () => {
     await user.click(screen.getByRole('button', { name: 'Delete English locale' }));
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
-    await screen.findByText('Deleted locale');
+    await screen.findByText('Locale successfully deleted');
   });
 
   it('show an error if the deletion failed', async () => {

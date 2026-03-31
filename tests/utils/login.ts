@@ -2,6 +2,25 @@ import type { Page } from '@playwright/test';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../e2e/constants';
 
 /**
+ * Log out via UI (clears in-memory auth state), then log in as the given user.
+ * Use when switching users in e2e tests.
+ */
+export const switchUser = async ({
+  page,
+  username,
+  password,
+}: {
+  page: Page;
+  username: string;
+  password: string;
+}): Promise<void> => {
+  await page.getByRole('button', { name: 'Open user menu' }).click();
+  await page.getByRole('menuitem', { name: 'Log out' }).click();
+  await page.waitForURL('**/auth/login');
+  await login({ page, username, password });
+};
+
+/**
  * Log in to an e2e test app
  */
 export const login = async ({

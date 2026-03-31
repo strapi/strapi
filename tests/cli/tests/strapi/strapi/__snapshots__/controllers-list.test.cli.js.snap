@@ -54,6 +54,7 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ api::upcoming-match.upcoming-match                   │
 │ admin::admin                                         │
 │ admin::api-token                                     │
+│ admin::admin-token                                   │
 │ admin::authenticated-user                            │
 │ admin::authentication                                │
 │ admin::permission                                    │
