@@ -1,7 +1,6 @@
 import { merge, isEmpty, set, propEq } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
-import { getService } from '../../utils';
 
 const {
   isVisibleAttribute,
@@ -423,7 +422,7 @@ const buildDeepPopulate = async (uid: UID.CollectionType) => {
     return cached;
   }
 
-  const result = await getService('populate-builder')(uid)
+  const result = await (strapi.plugin('content-manager').service('populate-builder') as any)(uid)
     .populateDeep(Infinity)
     .countRelations()
     .build();

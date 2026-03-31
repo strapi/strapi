@@ -48,7 +48,7 @@
     "docusaurus-plugin-typedoc": "0.22.0",
     "typedoc": "0.25.10",
     "typedoc-plugin-markdown": "3.17.1",
-    "typescript": "5.4.5",
+    "typescript": "6.0.2",
     "unist-util-visit": "5.0.0"
   }
 }
