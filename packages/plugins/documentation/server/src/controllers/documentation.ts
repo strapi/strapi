@@ -59,8 +59,13 @@ export default {
           ? `${major}.${minor}.${patch}`
           : getService('documentation').getDocumentationVersion();
 
+      const extensionsDir =
+        process.env.NODE_ENV === 'production'
+          ? strapi.dirs.dist.extensions
+          : strapi.dirs.app.extensions;
+
       const openAPISpecsPath = path.join(
-        strapi.dirs.app.extensions,
+        extensionsDir,
         'documentation',
         'documentation',
         version,
@@ -79,7 +84,7 @@ export default {
 
         try {
           const layoutPath = path.resolve(
-            strapi.dirs.app.extensions,
+            extensionsDir,
             'documentation',
             'public',
             'index.html'
@@ -92,7 +97,7 @@ export default {
 
           try {
             const staticFolder = path.resolve(
-              strapi.dirs.app.extensions,
+              extensionsDir,
               'documentation',
               'public'
             );
