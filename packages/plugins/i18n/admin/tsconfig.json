@@ -1,10 +1,21 @@
 {
   "extends": "tsconfig/client.json",
   "compilerOptions": {
+    "rootDir": "../",
     "paths": {
-      "@tests/*": ["./tests/*"]
+      "@tests/*": [
+        "./tests/*"
+      ]
     },
-    "types": ["@testing-library/jest-dom", "jest"]
+    "types": [
+      "@testing-library/jest-dom",
+      "jest"
+    ]
   },
-  "include": ["src", "../shared", "tests", "custom.d.ts"]
+  "include": [
+    "src",
+    "../shared",
+    "tests",
+    "custom.d.ts"
+  ]
 }
