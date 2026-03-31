@@ -176,7 +176,6 @@ async function run(args: string[]): Promise<void> {
       'styled-components': '^6.0.0',
     },
     shouldCreateGrowthSsoTrial,
-    isABTestEnabled: false,
   };
 
   if (options.template !== undefined) {
@@ -212,13 +211,6 @@ async function run(args: string[]): Promise<void> {
   }
 
   scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
-
-  scope.isABTestEnabled = await resolveOption(
-    options.enableAbTests,
-    skipPrompts,
-    false,
-    prompts.enableABTests
-  );
 
   addDatabaseDependencies(scope);
 
