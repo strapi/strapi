@@ -44,7 +44,7 @@
     "fs-extra": "11.2.0",
     "lodash": "4.18.1",
     "prettier": "3.3.3",
-    "typescript": "5.4.4"
+    "typescript": "6.0.2"
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4"

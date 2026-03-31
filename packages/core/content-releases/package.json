@@ -93,7 +93,7 @@
     "react-query": "3.39.3",
     "react-router-dom": "6.30.3",
     "styled-components": "6.1.8",
-    "typescript": "5.4.4"
+    "typescript": "6.0.2"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

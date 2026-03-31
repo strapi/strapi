@@ -345,7 +345,9 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new Error(`AI Localizations request failed: ${response.statusText}`);
       }
 
-      const aiResult = await response.json();
+      const aiResult = (await response.json()) as {
+        localizations: Array<{ content: Record<string, unknown>; locale: string }>;
+      };
 
       // Use populate-builder service for deep populate to fetch all nested fields
       const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');

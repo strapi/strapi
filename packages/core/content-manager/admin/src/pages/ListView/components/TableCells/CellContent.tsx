@@ -19,8 +19,10 @@ const CellContent = ({ content, mainField, attribute, rowId, name }: CellContent
     return (
       <Typography
         textColor="neutral800"
-        paddingLeft={attribute.type === ('relation' || 'component') ? '1.6rem' : 0}
-        paddingRight={attribute.type === ('relation' || 'component') ? '1.6rem' : 0}
+        paddingLeft={attribute.type === 'relation' || attribute.type === 'component' ? '1.6rem' : 0}
+        paddingRight={
+          attribute.type === 'relation' || attribute.type === 'component' ? '1.6rem' : 0
+        }
       >
         -
       </Typography>

@@ -180,7 +180,7 @@
     "syncpack": "13.0.4",
     "tar": "7.5.11",
     "ts-jest": "29.1.0",
-    "typescript": "5.4.4",
+    "typescript": "6.0.2",
     "vitest": "catalog:",
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"

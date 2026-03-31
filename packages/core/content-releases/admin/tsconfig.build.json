@@ -4,7 +4,6 @@
   "exclude": ["node_modules", "tests", "**/*.test.*"],
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": ".",
     "outDir": "../dist",
     "noEmit": false
   }

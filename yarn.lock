@@ -8544,7 +8544,7 @@ __metadata:
     sift: "npm:16.0.1"
     sonner: "npm:2.0.7"
     styled-components: "npm:6.1.8"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
     use-context-selector: "npm:1.4.1"
     vite: "npm:5.4.21"
     vite-plugin-dts: "npm:^4.3.0"
@@ -8700,7 +8700,7 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -8844,7 +8844,7 @@ __metadata:
     statuses: "npm:2.0.1"
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.42.1"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
     undici: "npm:6.25.0"
     vitest: "catalog:"
     vitest-config: "npm:5.42.1"
@@ -8887,7 +8887,7 @@ __metadata:
     stream-json: "npm:1.8.0"
     tar: "npm:7.5.11"
     tar-stream: "npm:2.2.0"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
     ws: "npm:8.17.1"
   languageName: unknown
   linkType: soft
@@ -8899,6 +8899,7 @@ __metadata:
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/utils": "npm:5.42.1"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     ajv: "npm:8.18.0"
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
@@ -9141,7 +9142,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     tsconfig: "npm:5.42.1"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
@@ -9167,7 +9168,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9260,7 +9261,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     tsconfig: "npm:5.42.1"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9568,7 +9569,7 @@ __metadata:
     semver: "npm:7.5.4"
     style-loader: "npm:3.3.4"
     tsconfig: "npm:5.42.1"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
     vite: "npm:5.4.21"
     webpack: "npm:^5.90.3"
     webpack-bundle-analyzer: "npm:^4.10.1"
@@ -9624,7 +9625,7 @@ __metadata:
     typedoc: "npm:0.25.10"
     typedoc-github-wiki-theme: "npm:1.1.0"
     typedoc-plugin-markdown: "npm:3.17.1"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
     undici: "npm:6.25.0"
     zod: "npm:3.25.67"
   languageName: unknown
@@ -9640,7 +9641,7 @@ __metadata:
     fs-extra: "npm:11.2.0"
     lodash: "npm:4.18.1"
     prettier: "npm:3.3.3"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
   languageName: unknown
   linkType: soft
 
@@ -14612,7 +14613,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
-    typescript: "npm:^5"
+    typescript: "npm:^6.0.2"
   languageName: unknown
   linkType: soft
 
@@ -16041,7 +16042,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
-    typescript: "npm:^5"
+    typescript: "npm:^6.0.2"
   languageName: unknown
   linkType: soft
 
@@ -28150,7 +28151,7 @@ __metadata:
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.11"
     ts-jest: "npm:29.1.0"
-    typescript: "npm:5.4.4"
+    typescript: "npm:6.0.2"
     vitest: "catalog:"
     yalc: "npm:1.0.0-pre.53"
     yargs: "npm:17.7.2"
@@ -29478,13 +29479,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5":
-  version: 5.8.3
-  resolution: "typescript@npm:5.8.3"
+"typescript@npm:6.0.2, typescript@npm:^6.0.2":
+  version: 6.0.2
+  resolution: "typescript@npm:6.0.2"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/5f8bb01196e542e64d44db3d16ee0e4063ce4f3e3966df6005f2588e86d91c03e1fb131c2581baf0fb65ee79669eea6e161cd448178986587e9f6844446dbb48
+  checksum: 10c0/4b860b0bf87cc0fee0f66d8ef2640b5a8a8a8c74d1129adb82e389e5f97124383823c47946bef8a73ede371461143a3aa8544399d2133c7b2e4f07e81860af7f
   languageName: node
   linkType: hard
 
@@ -29508,13 +29509,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5#optional!builtin<compat/typescript>":
-  version: 5.8.3
-  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=5786d5"
+"typescript@patch:typescript@npm%3A6.0.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^6.0.2#optional!builtin<compat/typescript>":
+  version: 6.0.2
+  resolution: "typescript@patch:typescript@npm%3A6.0.2#optional!builtin<compat/typescript>::version=6.0.2&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/39117e346ff8ebd87ae1510b3a77d5d92dae5a89bde588c747d25da5c146603a99c8ee588c7ef80faaf123d89ed46f6dbd918d534d641083177d5fac38b8a1cb
+  checksum: 10c0/49f0b84fc6ca55653e77752b8a61beabc09ee3dae5d965c31596225aa6ef213c5727b1d2e895b900416dc603854ba0872ac4a812c2a4ed6793a601f9c675de02
   languageName: node
   linkType: hard
 

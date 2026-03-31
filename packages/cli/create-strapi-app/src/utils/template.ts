@@ -158,7 +158,6 @@ async function downloadGithubRepo(rootPath: string, { owner, repo, branch, subPa
   }
 
   await pipeline(
-    // @ts-expect-error - Readable is not a valid source
     Readable.fromWeb(res.body),
     tar.x({
       cwd: rootPath,

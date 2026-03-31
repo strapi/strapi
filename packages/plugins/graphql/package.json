@@ -90,7 +90,7 @@
     "react-router-dom": "6.30.3",
     "styled-components": "6.1.8",
     "tsconfig": "5.42.1",
-    "typescript": "5.4.4"
+    "typescript": "6.0.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",

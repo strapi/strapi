@@ -107,7 +107,7 @@
     "resolve.exports": "2.0.2",
     "semver": "7.5.4",
     "statuses": "2.0.1",
-    "typescript": "5.4.4",
+    "typescript": "6.0.2",
     "undici": "6.25.0",
     "yup": "0.32.9",
     "zod": "3.25.67"
