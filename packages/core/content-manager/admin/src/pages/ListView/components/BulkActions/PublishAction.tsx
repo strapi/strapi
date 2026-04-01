@@ -23,7 +23,7 @@ import {
   Tbody,
 } from '@strapi/design-system';
 import { ArrowsCounterClockwise, CheckCircle, CrossCircle, Pencil } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { useIntl, type IntlShape } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
@@ -66,42 +66,38 @@ const TableComponent = styled(RawTable)`
  * EntryValidationText
  * -----------------------------------------------------------------------------------------------*/
 
-const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessage: any) => {
+export const formatErrorMessages = (
+  errors: FormErrors,
+  parentKey: string,
+  formatMessage: IntlShape['formatMessage']
+) => {
+  if (!errors) return [];
+
   const messages: string[] = [];
 
   Object.entries(errors).forEach(([key, value]) => {
     const currentKey = parentKey ? `${parentKey}.${key}` : key;
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      if ('id' in value && 'defaultMessage' in value) {
-        messages.push(
-          formatMessage(
-            {
-              id: `${value.id}.withField`,
-              defaultMessage: value.defaultMessage,
-            },
-            { field: currentKey }
-          )
-        );
-      } else {
-        messages.push(
-          ...formatErrorMessages(
-            // @ts-expect-error TODO: check why value is not compatible with FormErrors
-            value,
-            currentKey,
-            formatMessage
-          )
-        );
-      }
-    } else {
+    if (!value) return;
+    const isErrorMessageDescriptor =
+      typeof value === 'object' && 'id' in value && 'defaultMessage' in value;
+    if (isErrorMessageDescriptor || typeof value === 'string') {
+      const id = isErrorMessageDescriptor ? value.id : value;
+      const defaultMessage = isErrorMessageDescriptor
+        ? (value.defaultMessage as string)
+        : (value as string);
       messages.push(
         formatMessage(
           {
-            id: `${value}.withField`,
-            defaultMessage: value,
+            id: `${id}.withField`,
+            defaultMessage,
           },
           { field: currentKey }
         )
+      );
+    } else {
+      messages.push(
+        ...formatErrorMessages(value as unknown as FormErrors, currentKey, formatMessage)
       );
     }
   });
@@ -187,7 +183,7 @@ interface SelectedEntriesTableContentProps {
 }
 
 const TABLE_HEADERS = [
-  { name: 'id', label: 'id' },
+  { name: 'documentId', label: 'documentId' },
   { name: 'name', label: 'name' },
   { name: 'status', label: 'status' },
   { name: 'publicationStatus', label: 'Publication status' },
@@ -208,7 +204,8 @@ const SelectedEntriesTableContent = ({
     },
   } = useDocLayout();
 
-  const shouldDisplayMainField = mainField != null && mainField !== 'id';
+  const shouldDisplayMainField =
+    mainField != null && mainField !== 'id' && mainField !== 'documentId';
 
   return (
     <Table.Content>
@@ -226,7 +223,7 @@ const SelectedEntriesTableContent = ({
           <Table.Row key={row.id}>
             <Table.CheckboxCell id={row.id} />
             <Table.Cell>
-              <Typography>{row.id}</Typography>
+              <Typography>{row.documentId}</Typography>
             </Table.Cell>
             {shouldDisplayMainField && (
               <Table.Cell>

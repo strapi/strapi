@@ -13,32 +13,31 @@ import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { HEIGHT_TOP_NAVIGATION, HEIGHT_TOP_NAVIGATION_MEDIUM } from '../constants/theme';
+import {
+  HEIGHT_TOP_NAVIGATION,
+  HEIGHT_TOP_NAVIGATION_MEDIUM,
+  WIDTH_SIDE_NAVIGATION,
+} from '../constants/theme';
 
 import { tours } from './GuidedTour/Tours';
 
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
-  height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
+  height: 100%;
   overflow: hidden;
   background-color: ${({ theme }) => theme.colors.neutral0};
   display: flex;
   flex-direction: column;
   border-right: 0;
   box-shadow: none;
-  position: fixed;
-  top: calc(${HEIGHT_TOP_NAVIGATION} + 1px);
-  left: 0;
-  z-index: 2;
+  position: relative;
 
   ${({ theme }) => theme.breakpoints.medium} {
-    width: 23.2rem;
+    width: ${WIDTH_SIDE_NAVIGATION};
     position: sticky;
     top: 0;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
-  }
-  ${({ theme }) => theme.breakpoints.large} {
-    height: 100dvh;
+    overscroll-behavior: contain;
   }
 `;
 
@@ -155,7 +154,7 @@ const Sections = ({
       paddingBottom={{ initial: 5, large: 4 }}
       paddingLeft={{ initial: 3, large: 0 }}
       paddingRight={{ initial: 3, large: 0 }}
-      maxWidth={{ initial: '100%', medium: '23.2rem' }}
+      maxWidth={{ initial: '100%', medium: WIDTH_SIDE_NAVIGATION }}
     >
       <Flex tag="ul" gap={6} direction="column" alignItems="stretch" {...props}>
         {children.map((child, index) => {
@@ -358,12 +357,16 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
 };
 
 const PageWrapper = styled(Box)`
+  width: 100%;
+
   ${MainSubNav} {
     background-color: transparent;
     border-right: none;
   }
 
   ${({ theme }) => theme.breakpoints.medium} {
+    overflow: hidden;
+
     ${MainSubNav} {
       top: 0;
     }
