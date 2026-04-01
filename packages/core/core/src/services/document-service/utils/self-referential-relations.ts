@@ -1,6 +1,7 @@
 /* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash/fp';
 import type { UID } from '@strapi/types';
+import type { JoinTable } from '@strapi/database';
 
 interface VersionEntry {
   id: string;
@@ -8,8 +9,8 @@ interface VersionEntry {
 }
 
 interface RelationData {
-  joinTable: any;
-  relations: Record<string, any>[];
+  joinTable: JoinTable;
+  relations: Record<string, unknown>[];
 }
 
 /**
@@ -106,8 +107,8 @@ const sync = async (
 
       const newRelations = relations
         .map((relation) => {
-          const newSourceId = idMapping[relation[sourceColumn]];
-          const newTargetId = idMapping[relation[targetColumn]];
+          const newSourceId = idMapping[relation[sourceColumn] as string];
+          const newTargetId = idMapping[relation[targetColumn] as string];
 
           // Both sides must map to new entries
           if (!newSourceId || !newTargetId) return null;

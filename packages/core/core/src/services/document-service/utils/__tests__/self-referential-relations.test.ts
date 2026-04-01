@@ -142,7 +142,7 @@ describe('self-referential-relations', () => {
         },
       ];
 
-      await sync(sourceEntries, targetEntries, relationData);
+      await sync(sourceEntries, targetEntries, relationData as any);
 
       expect(mockBatchInsert).toHaveBeenCalledWith(
         'categories_parent_lnk',
@@ -172,7 +172,7 @@ describe('self-referential-relations', () => {
         },
       ];
 
-      await sync(sourceEntries, targetEntries, relationData);
+      await sync(sourceEntries, targetEntries, relationData as any);
 
       expect(mockBatchInsert).not.toHaveBeenCalled();
     });
@@ -207,7 +207,7 @@ describe('self-referential-relations', () => {
         },
       ];
 
-      await sync(sourceEntries, targetEntries, relationData);
+      await sync(sourceEntries, targetEntries, relationData as any);
 
       expect(mockBatchInsert).toHaveBeenCalledWith(
         'categories_parent_lnk',
