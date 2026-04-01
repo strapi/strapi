@@ -268,6 +268,14 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     response: Response,
     validateStatus?: FetchOptions['validateStatus']
   ): Promise<FetchResponse<TData>> => {
+    /**
+     * Handles responses with no body (e.g., 204 No Content) before attempting JSON parse.
+     * Safari may throw a non-SyntaxError when calling .json() on an empty body,
+     * which would bypass the SyntaxError-specific catch below.
+     */
+    if (response.status === 204) {
+      return { data: [] as unknown as TData, status: response.status };
+    }
     try {
       const result = await response.json();
 
