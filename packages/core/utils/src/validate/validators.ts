@@ -276,7 +276,10 @@ export const validatePopulate = asyncCurry(
             if (isMorphLikeAttribute && isObject(value) && 'populate' in value) {
               const populateValue = (value as Record<string, unknown>).populate;
 
-              if (populateValue !== '*') {
+              const isValidPopulate =
+                populateValue === '*' || (isObject(populateValue) && !Array.isArray(populateValue));
+
+              if (!isValidPopulate) {
                 throwInvalidKey({ key: 'populate', path: path.raw });
               }
             }
@@ -393,7 +396,13 @@ export const validatePopulate = asyncCurry(
                 ['morphToOne', 'morphToMany'].includes(attribute.relation));
 
             if (isPolymorphicAttribute) {
-              if (value !== '*') {
+              const isValidPopulate =
+                value === '*' ||
+                value === undefined ||
+                value === null ||
+                (isObject(value) && !Array.isArray(value));
+
+              if (!isValidPopulate) {
                 throwInvalidKey({ key, path: path.raw });
               }
             }
