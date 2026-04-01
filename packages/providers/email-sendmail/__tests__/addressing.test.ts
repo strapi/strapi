@@ -39,6 +39,28 @@ describe('addressing', () => {
     it('returns domain after @', () => {
       expect(getHostFromAddress('user@mail.example.org')).toBe('mail.example.org');
     });
+
+    it('uses the last @ for the domain segment', () => {
+      expect(getHostFromAddress('odd@local@mail.example.org')).toBe('mail.example.org');
+    });
+
+    it('returns localhost when there is no @', () => {
+      expect(getHostFromAddress('not-an-email')).toBe('localhost');
+    });
+
+    it('returns localhost when the domain is too long', () => {
+      const local = 'a';
+      const domain = `${'b'.repeat(300)}.com`;
+      expect(getHostFromAddress(`${local}@${domain}`)).toBe('localhost');
+    });
+
+    it('returns localhost when the whole address exceeds the pre-check limit', () => {
+      expect(getHostFromAddress(`${'a'.repeat(315)}@x.com`)).toBe('localhost');
+    });
+
+    it('returns localhost when the domain has disallowed characters (no ReDoS-prone regex)', () => {
+      expect(getHostFromAddress('user@münchen.de')).toBe('localhost');
+    });
   });
 
   describe('groupRecipientsByDomain', () => {
