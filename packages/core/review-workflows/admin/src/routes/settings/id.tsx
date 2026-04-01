@@ -32,7 +32,20 @@ import { Stages, WorkflowStage } from './components/Stages';
 import { WorkflowAttributes } from './components/WorkflowAttributes';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 
-import type { Stage, Workflow } from '../../../../shared/contracts/review-workflows';
+import type {
+  Stage,
+  StagePermission,
+  Workflow,
+} from '../../../../shared/contracts/review-workflows';
+
+const havePermissionsChanged = (before?: StagePermission[], after?: StagePermission[]): boolean => {
+  if (before?.length !== after?.length) {
+    return true;
+  }
+  return !before?.every((beforePermission) =>
+    after?.some((afterPermission) => afterPermission.role === beforePermission.role)
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * EditPage
@@ -85,7 +98,26 @@ const WORKFLOW_SCHEMA = yup.object({
           })
           .matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/i),
 
-        permissions: yup
+        fromPermissions: yup
+          .array(
+            yup.object({
+              role: yup
+                .number()
+                .strict()
+                .typeError({
+                  id: 'review-workflows.validation.stage.permissions.role.number',
+                  defaultMessage: 'Role must be of type number',
+                })
+                .required(),
+              action: yup.string().required({
+                id: 'review-workflows.validation.stage.permissions.action.required',
+                defaultMessage: 'Action is a required argument',
+              }),
+            })
+          )
+          .strict(),
+
+        toPermissions: yup
           .array(
             yup.object({
               role: yup
@@ -173,23 +205,21 @@ const EditPage = () => {
           // changed; this enables partial updates e.g. for users who don't have
           // permissions to see roles
           stages: rest.stages.map((stage) => {
-            let hasUpdatedPermissions = true;
             const serverStage = currentWorkflow?.stages?.find(
               (serverStage) => serverStage.id === stage?.id
             );
-            if (serverStage) {
-              hasUpdatedPermissions =
-                serverStage.permissions?.length !== stage.permissions?.length ||
-                !serverStage.permissions?.every(
-                  (serverPermission) =>
-                    !!stage.permissions?.find(
-                      (permission) => permission.role === serverPermission.role
-                    )
-                );
-            }
+
+            const hasUpdatedPermissions =
+              !serverStage ||
+              havePermissionsChanged(serverStage.fromPermissions, stage.fromPermissions);
+            const hasUpdatedToPermissions =
+              !serverStage ||
+              havePermissionsChanged(serverStage.toPermissions, stage.toPermissions);
+
             return {
               ...stage,
-              permissions: hasUpdatedPermissions ? stage.permissions : undefined,
+              fromPermissions: hasUpdatedPermissions ? stage.fromPermissions : undefined,
+              toPermissions: hasUpdatedToPermissions ? stage.toPermissions : undefined,
             } satisfies Stage;
           }),
           stageRequiredToPublishName,
