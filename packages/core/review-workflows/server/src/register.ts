@@ -6,6 +6,7 @@ import { getService, getAdminService } from './utils';
 import migrateStageAttribute from './migrations/shorten-stage-attribute';
 import migrateReviewWorkflowStagesColor from './migrations/set-stages-default-color';
 import migrateReviewWorkflowStagesRoles from './migrations/set-stages-roles';
+import migrateReviewWorkflowStagesTransferToRoles from './migrations/setup-stage-transfer-to-roles';
 import migrateReviewWorkflowName from './migrations/set-workflow-default-name';
 import migrateWorkflowsContentTypes from './migrations/multiple-workflows';
 import migrateDeletedCTInWorkflows from './migrations/handle-deleted-ct-in-workflows';
@@ -109,6 +110,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     .hook('strapi::content-types.afterSync')
     .register(migrateReviewWorkflowStagesColor)
     .register(migrateReviewWorkflowStagesRoles)
+    .register(migrateReviewWorkflowStagesTransferToRoles)
     .register(migrateReviewWorkflowName)
     .register(migrateWorkflowsContentTypes)
     .register(migrateDeletedCTInWorkflows);

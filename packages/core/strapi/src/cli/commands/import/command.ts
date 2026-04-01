@@ -1,6 +1,5 @@
 import path from 'path';
 import { createCommand, Option } from 'commander';
-import inquirer from 'inquirer';
 import {
   excludeOption,
   onlyOption,
@@ -9,6 +8,7 @@ import {
 } from '../../utils/data-transfer';
 import { getCommanderConfirmMessage, forceOption } from '../../utils/commander';
 import { exitWith } from '../../utils/helpers';
+import { getInquirer } from '../../utils/get-inquirer';
 import action from './action';
 
 /**
@@ -42,6 +42,7 @@ const command = () => {
         // check extension to guess if we should prompt for key
         if (ext === '.enc') {
           if (!opts.key) {
+            const inquirer = await getInquirer();
             const answers = await inquirer.prompt([
               {
                 type: 'password',
