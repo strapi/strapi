@@ -9208,7 +9208,7 @@ __metadata:
     lodash: "npm:4.17.23"
     msw: "npm:1.3.0"
     openapi-types: "npm:12.1.3"
-    path-to-regexp: "npm:8.4.0"
+    path-to-regexp: "npm:8.4.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
@@ -9362,7 +9362,7 @@ __metadata:
   dependencies:
     "@types/nodemailer": "npm:7.0.10"
     eslint-config-custom: "npm:5.41.1"
-    nodemailer: "npm:8.0.1"
+    nodemailer: "npm:8.0.4"
     tsconfig: "npm:5.41.1"
   languageName: unknown
   linkType: soft
@@ -9698,7 +9698,7 @@ __metadata:
     prompts: "npm:2.4.2"
     rimraf: "npm:6.1.3"
     semver: "npm:7.5.4"
-    simple-git: "npm:3.21.0"
+    simple-git: "npm:3.32.3"
     undici: "npm:6.24.1"
   bin:
     upgrade: ./bin/upgrade.js
@@ -9731,7 +9731,7 @@ __metadata:
     byte-size: "npm:8.1.1"
     cropperjs: "npm:1.6.1"
     date-fns: "npm:2.30.0"
-    file-type: "npm:21.3.3"
+    file-type: "npm:21.3.4"
     formidable: "npm:3.5.4"
     formik: "npm:2.4.5"
     fs-extra: "npm:11.2.0"
@@ -17746,15 +17746,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-type@npm:21.3.3":
-  version: 21.3.3
-  resolution: "file-type@npm:21.3.3"
+"file-type@npm:21.3.4":
+  version: 21.3.4
+  resolution: "file-type@npm:21.3.4"
   dependencies:
     "@tokenizer/inflate": "npm:^0.4.1"
     strtok3: "npm:^10.3.4"
     token-types: "npm:^6.1.1"
     uint8array-extras: "npm:^1.4.0"
-  checksum: 10c0/3d2a52e6ab1ec4cac8f08a59f0bbd69fba72033e4ee709a41df6562ba79a1d8d0a2bec82bbc70409f74cbffa6467db93599af27bbf1719d4d9e6294e3fae5156
+  checksum: 10c0/6f15e7538c5d73f9308d2e897365d253a6647a6751bb1b0d85c78aebc02b8976afb7c6c9b3759687a064b1b3d60246e5504746b8f11e38b0d5a1b339087e00d2
   languageName: node
   linkType: hard
 
@@ -23713,6 +23713,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nodemailer@npm:8.0.4":
+  version: 8.0.4
+  resolution: "nodemailer@npm:8.0.4"
+  checksum: 10c0/5fb6fa72645b541c18b84b861de46f4740449e1d7c987b4d9ef715d815d613f93262225bc319e217df6215d6f123efadb9a412dcf937fe0a41cbecf279dfb2a0
+  languageName: node
+  linkType: hard
+
 "nodemon@npm:3.0.2":
   version: 3.0.2
   resolution: "nodemon@npm:3.0.2"
@@ -24852,10 +24859,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:8.4.0":
-  version: 8.4.0
-  resolution: "path-to-regexp@npm:8.4.0"
-  checksum: 10c0/171a540aed2a5dff3da6e7584f263ae65d868daea382ea3bd1ddeb828912661133d5a94fce83bd3125f0799df8dfd4924b270e2987a31930901cfd94ae164b45
+"path-to-regexp@npm:8.4.1":
+  version: 8.4.1
+  resolution: "path-to-regexp@npm:8.4.1"
+  checksum: 10c0/5c9686cd10ab5e8e964365a6318e9cc818061ed68d9b49aa37a0f5a04ec2ae1ead00f614a3596f3b1430b4e326b7ecec454725d8ba26b6eb00f0d9ea5d119de0
   languageName: node
   linkType: hard
 
@@ -27425,14 +27432,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-git@npm:3.21.0":
-  version: 3.21.0
-  resolution: "simple-git@npm:3.21.0"
+"simple-git@npm:3.32.3":
+  version: 3.32.3
+  resolution: "simple-git@npm:3.32.3"
   dependencies:
     "@kwsites/file-exists": "npm:^1.1.1"
     "@kwsites/promise-deferred": "npm:^1.1.1"
-    debug: "npm:^4.3.4"
-  checksum: 10c0/b3083da7736f1bac448cfe7d359d257cfe128091041d23c3ed9a35cddab4d454abdac8d9928b33920e4eaf328d350b68d62bac18bf6fbf3f31d8ef05b6d20f02
+    debug: "npm:^4.4.0"
+  checksum: 10c0/b08ad0811b82d69a9b150109cbf29247bc13f8d5fb5380dcb834a5e0467124c3b5a41a2b9a5dd3c16f1edc9af7fae9add5182ac6476ef0d50e2341c7820fa0f0
   languageName: node
   linkType: hard
 
