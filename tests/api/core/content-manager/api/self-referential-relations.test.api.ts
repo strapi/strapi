@@ -1,14 +1,24 @@
-'use strict';
+import { createTestBuilder } from 'api-tests/builder';
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest } from 'api-tests/request';
 
-const { createTestBuilder } = require('api-tests/builder');
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
+interface CategoryRelation {
+  documentId: string;
+}
+
+interface CategoryEntry {
+  documentId: string;
+  name: string;
+  parent?: CategoryRelation | null;
+  children?: CategoryRelation[];
+  related?: CategoryRelation[];
+}
 
 const builder = createTestBuilder();
-let strapi;
-let rq;
+let strapi: any;
+let rq: any;
 
-const data = {
+const data: { categories: CategoryEntry[] } = {
   categories: [],
 };
 
@@ -22,29 +32,32 @@ const category = {
     name: {
       type: 'string',
     },
-    // Bidirectional self-referential: parent/children
+    // Bidirectional self-referential: parent ↔ children
     parent: {
       type: 'relation',
       relation: 'manyToOne',
       target: 'api::category.category',
       targetAttribute: 'children',
     },
-    // Unidirectional self-referential: related
+    // Unidirectional self-referential
     related: {
       type: 'relation',
       relation: 'oneToMany',
       target: 'api::category.category',
     },
   },
-};
+} as const;
 
-const getCategory = async (documentId, status = 'draft') => {
+const getCategory = async (
+  documentId: string,
+  status: 'draft' | 'published' = 'draft'
+): Promise<CategoryEntry> => {
   const res = await rq({
     method: 'GET',
     url: `/content-manager/collection-types/api::category.category/${documentId}`,
     qs: { status },
   });
-  return res.body.data;
+  return res.body.data as CategoryEntry;
 };
 
 describe('CM API - Self-referential relations with Draft & Publish', () => {
@@ -61,7 +74,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
         url: '/content-manager/collection-types/api::category.category',
         body: { name },
       });
-      data.categories.push(res.body.data);
+      data.categories.push(res.body.data as CategoryEntry);
     }
   });
 
@@ -125,8 +138,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
   test('Self-referential relation (entry to itself) is preserved after discard draft', async () => {
     const [catA] = data.categories;
 
-    // Ensure catA is published with self-relation from earlier test
-    // Now update the draft to change something
+    // Update the draft while keeping the self-relation
     await rq({
       method: 'PUT',
       url: `/content-manager/collection-types/api::category.category/${catA.documentId}`,
@@ -136,13 +148,13 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
       },
     });
 
-    // Discard draft (should revert to published version)
+    // Discard draft (reverts to published version)
     await rq({
       method: 'POST',
       url: `/content-manager/collection-types/api::category.category/${catA.documentId}/actions/discard`,
     });
 
-    // Verify the draft was reverted and still has the self-relation
+    // Verify the reverted draft still has the self-relation
     const draft = await getCategory(catA.documentId, 'draft');
     expect(draft.parent).toMatchObject({ documentId: catA.documentId });
   });
