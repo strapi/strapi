@@ -1,6 +1,7 @@
 // folders
 export type * as EntityService from './entity-service';
 export type * as Documents from './documents';
+export type * as AI from './ai';
 
 // individual files
 export type * as Auth from './auth';

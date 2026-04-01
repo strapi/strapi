@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { createAIContainer } from '../ai';
+import { createAIAdminService } from '../ai';
 
 // Mock fs module
 jest.mock('fs');
@@ -24,62 +24,106 @@ describe('AI Container', () => {
     process.env = ORIGINAL_ENV; // fully restore after suite
   });
 
-  describe('getAiToken', () => {
-    const mockUser = {
-      id: 1,
-      email: 'test@example.com',
-      firstname: 'Test',
-      lastname: 'User',
+  const mockUser = {
+    id: 1,
+    email: 'test@example.com',
+    firstname: 'Test',
+    lastname: 'User',
+  };
+
+  const createMockStrapi = (config = {}) => {
+    return {
+      ee: { isEE: true },
+      dirs: { app: { root: '/app' } },
+      config: {
+        get: jest.fn((key: string, defaultValue?: unknown) => {
+          if (key === 'uuid') return 'test-project-id';
+          return defaultValue;
+        }),
+      },
+      log: {
+        info: jest.fn(),
+        error: jest.fn(),
+        http: jest.fn(),
+      },
+      requestContext: {
+        get: jest.fn(() => ({
+          state: { user: mockUser },
+        })),
+      },
+      ...config,
+    };
+  };
+
+  const setupValidEnvironment = () => {
+    process.env.STRAPI_LICENSE = 'test-license';
+    process.env.STRAPI_AI_URL = 'http://ai-server.com';
+  };
+
+  const createSuccessfulTokenFetch = (responseData = {}) => {
+    const defaultResponse = {
+      jwt: 'test-jwt-token',
+      expiresAt: '2025-01-01T12:00:00Z',
     };
 
-    const createMockStrapi = (config = {}) => {
-      return {
-        ee: { isEE: true },
-        dirs: { app: { root: '/app' } },
-        config: {
-          get: jest.fn((key, defaultValue) => {
-            if (key === 'uuid') return 'test-project-id';
-            return defaultValue;
-          }),
-        },
-        log: {
-          info: jest.fn(),
-          error: jest.fn(),
-          http: jest.fn(),
-        },
-        requestContext: {
-          get: jest.fn(() => ({
-            state: { user: mockUser },
-          })),
-        },
-        ...config,
-      };
-    };
+    return jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: jest.fn().mockResolvedValueOnce({ ...defaultResponse, ...responseData }),
+    });
+  };
 
-    // Helper to setup standard valid environment
-    const setupValidEnvironment = () => {
-      process.env.STRAPI_LICENSE = 'test-license';
-      process.env.STRAPI_AI_URL = 'http://ai-server.com';
-    };
+  describe('resolveAIContext (shared by getAiToken and getAiUsage)', () => {
+    test('Should throw when EE features are not enabled', async () => {
+      const mockStrapi = createMockStrapi({ ee: { isEE: false } }) as any;
+      setupValidEnvironment();
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
 
-    // Helper to create successful AI server response
-    const createSuccessfulFetch = (responseData = {}) => {
-      const defaultResponse = {
-        jwt: 'test-jwt-token',
-        expiresAt: '2025-01-01T12:00:00Z',
-      };
+      await expect(aiContainer.getAiUsage()).rejects.toThrow(
+        'AI usage data request failed. Check server logs for details.'
+      );
+      expect(mockStrapi.log.error).toHaveBeenCalledWith(
+        'AI usage data request failed: Enterprise Edition features are not enabled'
+      );
+    });
 
-      return jest.fn().mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce({ ...defaultResponse, ...responseData }),
+    test('Should throw when no EE license is found', async () => {
+      const mockStrapi = createMockStrapi() as any;
+      delete process.env.STRAPI_LICENSE;
+      mockFs.readFileSync.mockImplementation(() => {
+        throw new Error('File not found');
       });
-    };
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
 
+      await expect(aiContainer.getAiUsage()).rejects.toThrow(
+        'AI usage data request failed. Check server logs for details.'
+      );
+      expect(mockStrapi.log.error).toHaveBeenCalledWith(
+        'AI usage data request failed: No EE license found. Please ensure STRAPI_LICENSE environment variable is set or license.txt file exists.'
+      );
+    });
+
+    test('Should throw when project ID is not configured', async () => {
+      const mockStrapi = createMockStrapi({
+        config: { get: jest.fn((key: string) => (key === 'uuid' ? null : undefined)) },
+      }) as any;
+      setupValidEnvironment();
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
+
+      await expect(aiContainer.getAiUsage()).rejects.toThrow(
+        'AI usage data request failed. Check server logs for details.'
+      );
+      expect(mockStrapi.log.error).toHaveBeenCalledWith(
+        'AI usage data request failed: Project ID not configured'
+      );
+    });
+  });
+
+  describe('getAiToken', () => {
     test('Should throw error when EE features are not enabled', async () => {
       const mockStrapi = createMockStrapi({
         ee: { isEE: false },
       }) as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
 
       await expect(aiContainer.getAiToken()).rejects.toThrow(
         'AI token request failed. Check server logs for details.'
@@ -92,9 +136,8 @@ describe('AI Container', () => {
 
     test('Should throw error when no EE license is found', async () => {
       const mockStrapi = createMockStrapi() as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
 
-      // Ensure no license is available
       delete process.env.STRAPI_LICENSE;
       mockFs.readFileSync.mockImplementation(() => {
         throw new Error('File not found');
@@ -111,13 +154,13 @@ describe('AI Container', () => {
 
     test('Should read license from file when environment variable is not set', async () => {
       const mockStrapi = createMockStrapi() as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
 
       delete process.env.STRAPI_LICENSE;
       process.env.STRAPI_AI_URL = 'http://ai-server.com';
 
       mockFs.readFileSync.mockReturnValue(Buffer.from('file-license-content'));
-      global.fetch = createSuccessfulFetch();
+      global.fetch = createSuccessfulTokenFetch();
 
       await aiContainer.getAiToken();
 
@@ -136,7 +179,7 @@ describe('AI Container', () => {
           get: jest.fn(() => ({ state: {} })),
         },
       }) as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
       setupValidEnvironment();
 
       await expect(aiContainer.getAiToken()).rejects.toThrow(
@@ -151,10 +194,10 @@ describe('AI Container', () => {
     test('Should throw error when project ID is not configured', async () => {
       const mockStrapi = createMockStrapi({
         config: {
-          get: jest.fn((key) => (key === 'uuid' ? null : 'default-value')),
+          get: jest.fn((key: string) => (key === 'uuid' ? null : 'default-value')),
         },
       }) as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
       setupValidEnvironment();
 
       await expect(aiContainer.getAiToken()).rejects.toThrow(
@@ -168,10 +211,10 @@ describe('AI Container', () => {
 
     test('Should successfully return AI token when all conditions are met', async () => {
       const mockStrapi = createMockStrapi() as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
       setupValidEnvironment();
 
-      global.fetch = createSuccessfulFetch();
+      global.fetch = createSuccessfulTokenFetch();
 
       const result = await aiContainer.getAiToken();
 
@@ -201,12 +244,12 @@ describe('AI Container', () => {
 
     test('Should use default AI server URL when not configured', async () => {
       const mockStrapi = createMockStrapi() as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
 
       process.env.STRAPI_LICENSE = 'test-license';
       delete process.env.STRAPI_AI_URL;
 
-      global.fetch = createSuccessfulFetch();
+      global.fetch = createSuccessfulTokenFetch();
 
       await aiContainer.getAiToken();
 
@@ -218,7 +261,7 @@ describe('AI Container', () => {
 
     test('Should handle AI server error response', async () => {
       const mockStrapi = createMockStrapi() as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
       setupValidEnvironment();
 
       global.fetch = jest.fn().mockResolvedValueOnce({
@@ -243,7 +286,7 @@ describe('AI Container', () => {
 
     test('Should handle invalid JSON response from AI server', async () => {
       const mockStrapi = createMockStrapi() as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
       setupValidEnvironment();
 
       global.fetch = jest.fn().mockResolvedValueOnce({
@@ -263,7 +306,7 @@ describe('AI Container', () => {
 
     test('Should handle missing JWT in response', async () => {
       const mockStrapi = createMockStrapi() as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
       setupValidEnvironment();
 
       global.fetch = jest.fn().mockResolvedValueOnce({
@@ -282,7 +325,7 @@ describe('AI Container', () => {
 
     test('Should handle fetch timeout', async () => {
       const mockStrapi = createMockStrapi() as any;
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
       setupValidEnvironment();
 
       const abortError = new Error('Request timeout');
@@ -299,13 +342,160 @@ describe('AI Container', () => {
     });
   });
 
+  describe('getAiUsage', () => {
+    const mockUsageResponse = {
+      data: { cmsAiCreditsUsed: 42 },
+      subscription: {
+        subscriptionId: 'sub-1',
+        planPriceId: 'price-1',
+        subscriptionStatus: 'active',
+        isActiveSubscription: true,
+        cmsAiEnabled: true,
+        cmsAiCreditsBase: 1000,
+        cmsAiCreditsMaxUsage: 2000,
+        currentTermStart: '2025-01-01',
+        currentTermEnd: '2025-12-31',
+      },
+    };
+
+    test('Should return usage data when all conditions are met', async () => {
+      const mockStrapi = createMockStrapi() as any;
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
+      setupValidEnvironment();
+
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce(mockUsageResponse),
+      });
+
+      const result = await aiContainer.getAiUsage();
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://ai-server.com/cms/ai-data',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+            'X-Request-Id': expect.any(String),
+          }),
+          body: expect.stringContaining('test-license'),
+        })
+      );
+
+      expect(result).toEqual({
+        cmsAiCreditsUsed: 42,
+        subscription: mockUsageResponse.subscription,
+      });
+    });
+
+    test('Should throw on AI server error response', async () => {
+      const mockStrapi = createMockStrapi() as any;
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
+      setupValidEnvironment();
+
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        statusText: 'Service Unavailable',
+        text: jest.fn().mockResolvedValueOnce('{"error": "Server error"}'),
+      });
+
+      await expect(aiContainer.getAiUsage()).rejects.toThrow(
+        'AI usage data request failed. Check server logs for details.'
+      );
+    });
+
+    test('Should throw on fetch timeout', async () => {
+      const mockStrapi = createMockStrapi() as any;
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
+      setupValidEnvironment();
+
+      const abortError = new Error('timeout');
+      abortError.name = 'AbortError';
+      global.fetch = jest.fn().mockRejectedValueOnce(abortError);
+
+      await expect(aiContainer.getAiUsage()).rejects.toThrow(
+        'AI usage data request failed. Check server logs for details.'
+      );
+      expect(mockStrapi.log.error).toHaveBeenCalledWith(
+        'AI usage data request failed: Request to AI server timed out'
+      );
+    });
+  });
+
+  describe('isEnabled', () => {
+    test('returns true when config is default and cms-ai license feature is active', () => {
+      const mockStrapi = {
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'admin.ai.enabled') return defaultValue ?? true;
+            return defaultValue;
+          }),
+        },
+        ee: { features: { isEnabled: jest.fn().mockReturnValue(true) } },
+      } as any;
+
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
+
+      expect(aiContainer.isEnabled()).toBe(true);
+    });
+
+    test('returns false when config explicitly disables AI', () => {
+      const mockStrapi = {
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'admin.ai.enabled') return false;
+            return defaultValue;
+          }),
+        },
+        ee: { features: { isEnabled: jest.fn().mockReturnValue(true) } },
+      } as any;
+
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
+
+      expect(aiContainer.isEnabled()).toBe(false);
+    });
+
+    test('returns false when cms-ai license feature is not enabled', () => {
+      const mockStrapi = {
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'admin.ai.enabled') return defaultValue ?? true;
+            return defaultValue;
+          }),
+        },
+        ee: { features: { isEnabled: jest.fn().mockReturnValue(false) } },
+      } as any;
+
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
+
+      expect(aiContainer.isEnabled()).toBe(false);
+    });
+
+    test('returns false when ee is undefined', () => {
+      const mockStrapi = {
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'admin.ai.enabled') return defaultValue ?? true;
+            return defaultValue;
+          }),
+        },
+        ee: undefined,
+      } as any;
+
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
+
+      expect(aiContainer.isEnabled()).toBe(false);
+    });
+  });
+
   describe('getAIFeatureConfig', () => {
     test('Should return AI feature configuration', async () => {
       const mockI18nSettings = { aiLocalizations: true };
       const mockUploadSettings = { aiMetadata: false };
 
       const mockStrapi = {
-        plugin: jest.fn((pluginName) => {
+        plugin: jest.fn((pluginName: string) => {
           if (pluginName === 'i18n') {
             return {
               service: jest.fn(() => ({
@@ -324,7 +514,7 @@ describe('AI Container', () => {
         }),
       } as any;
 
-      const aiContainer = createAIContainer({ strapi: mockStrapi });
+      const aiContainer = createAIAdminService({ strapi: mockStrapi });
       const result = await aiContainer.getAIFeatureConfig();
 
       expect(result).toEqual({

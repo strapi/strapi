@@ -8,40 +8,70 @@ describe('AI Controller', () => {
     jest.clearAllMocks();
   });
 
+  const mockUser = {
+    id: 1,
+    email: 'test@example.com',
+    firstname: 'Test',
+    lastname: 'User',
+  };
+
+  const createMockContext = (user = mockUser as any, overrides = {}) => {
+    return createContext(
+      {},
+      {
+        state: { user },
+        unauthorized: jest.fn(),
+        internalServerError: jest.fn(),
+        notFound: jest.fn(),
+        ...overrides,
+      }
+    );
+  };
+
+  const createMockStrapi = (adminService = {}, aiEnabled = true) => {
+    return {
+      ai: {
+        admin: {
+          isEnabled: jest.fn().mockReturnValue(aiEnabled),
+          getAiToken: jest.fn(),
+          getAiUsage: jest.fn(),
+          getAIFeatureConfig: jest.fn(),
+          ...adminService,
+        },
+      },
+    };
+  };
+
+  describe('when AI is disabled', () => {
+    test('getAiToken returns notFound', async () => {
+      const ctx = createMockContext();
+      global.strapi = createMockStrapi({}, false) as any;
+
+      await aiController.getAiToken(ctx as any);
+
+      expect(ctx.notFound).toHaveBeenCalled();
+    });
+
+    test('getAiUsage returns notFound', async () => {
+      const ctx = createMockContext();
+      global.strapi = createMockStrapi({}, false) as any;
+
+      await aiController.getAiUsage(ctx as any);
+
+      expect(ctx.notFound).toHaveBeenCalled();
+    });
+
+    test('getAIFeatureConfig returns notFound', async () => {
+      const ctx = createMockContext();
+      global.strapi = createMockStrapi({}, false) as any;
+
+      await aiController.getAIFeatureConfig(ctx as any);
+
+      expect(ctx.notFound).toHaveBeenCalled();
+    });
+  });
+
   describe('getAiToken', () => {
-    const mockUser = {
-      id: 1,
-      email: 'test@example.com',
-      firstname: 'Test',
-      lastname: 'User',
-    };
-
-    const createMockContext = (user = mockUser as any, overrides = {}) => {
-      return createContext(
-        {},
-        {
-          state: { user },
-          unauthorized: jest.fn(),
-          internalServerError: jest.fn(),
-          ...overrides,
-        }
-      );
-    };
-
-    const createMockStrapi = (aiContainer = {}) => {
-      return {
-        get: jest.fn((service) => {
-          if (service === 'ai') {
-            return {
-              getAiToken: jest.fn(),
-              ...aiContainer,
-            };
-          }
-          return {};
-        }),
-      };
-    };
-
     test('Should return unauthorized when user is not authenticated', async () => {
       const ctx = createMockContext(null);
       global.strapi = createMockStrapi() as any;
@@ -53,17 +83,17 @@ describe('AI Controller', () => {
 
     test('Should return internal server error when AI container throws error', async () => {
       const ctx = createMockContext();
-      const mockAiContainer = {
+      const mockAdminService = {
         getAiToken: jest.fn().mockRejectedValue(new Error('Container error')),
       };
-      global.strapi = createMockStrapi(mockAiContainer) as any;
+      global.strapi = createMockStrapi(mockAdminService) as any;
 
       await aiController.getAiToken(ctx as any);
 
       expect(ctx.internalServerError).toHaveBeenCalledWith(
         'AI token request failed. Check server logs for details.'
       );
-      expect(mockAiContainer.getAiToken).toHaveBeenCalled();
+      expect(mockAdminService.getAiToken).toHaveBeenCalled();
     });
 
     test('Should successfully return AI token when container returns token', async () => {
@@ -72,32 +102,66 @@ describe('AI Controller', () => {
         token: 'test-jwt-token',
         expiresAt: '2025-01-01T12:00:00Z',
       };
-      const mockAiContainer = {
+      const mockAdminService = {
         getAiToken: jest.fn().mockResolvedValue(mockTokenData),
       };
-      global.strapi = createMockStrapi(mockAiContainer) as any;
+      global.strapi = createMockStrapi(mockAdminService) as any;
 
       await aiController.getAiToken(ctx as any);
 
-      expect(mockAiContainer.getAiToken).toHaveBeenCalled();
+      expect(mockAdminService.getAiToken).toHaveBeenCalled();
       expect(ctx.body).toEqual({
         data: mockTokenData,
       });
     });
+  });
 
-    test('Should delegate to AI container and return formatted response', async () => {
+  describe('getAiUsage', () => {
+    test('Should delegate to admin service and set ctx.body', async () => {
       const ctx = createMockContext();
-      const mockAiContainer = {
-        getAiToken: jest
-          .fn()
-          .mockResolvedValue({ token: 'test-token', expiresAt: '2025-01-01T12:00:00Z' }),
+      const mockUsage = {
+        cmsAiCreditsUsed: 42,
+        subscription: { subscriptionId: 'sub-1', isActiveSubscription: true },
       };
-      global.strapi = createMockStrapi(mockAiContainer) as any;
+      const mockAdminService = {
+        getAiUsage: jest.fn().mockResolvedValue(mockUsage),
+      };
+      global.strapi = createMockStrapi(mockAdminService) as any;
 
-      await aiController.getAiToken(ctx as any);
+      await aiController.getAiUsage(ctx as any);
 
-      expect(global.strapi.get).toHaveBeenCalledWith('ai');
-      expect(mockAiContainer.getAiToken).toHaveBeenCalled();
+      expect(mockAdminService.getAiUsage).toHaveBeenCalled();
+      expect(ctx.body).toEqual(mockUsage);
+    });
+
+    test('Should return internalServerError when admin service throws', async () => {
+      const ctx = createMockContext();
+      const mockAdminService = {
+        getAiUsage: jest.fn().mockRejectedValue(new Error('Service error')),
+      };
+      global.strapi = createMockStrapi(mockAdminService) as any;
+
+      await aiController.getAiUsage(ctx as any);
+
+      expect(ctx.internalServerError).toHaveBeenCalledWith(
+        'AI usage data request failed. Check server logs for details.'
+      );
+    });
+  });
+
+  describe('getAIFeatureConfig', () => {
+    test('Should delegate to admin service and set ctx.body', async () => {
+      const ctx = createMockContext();
+      const mockConfig = { isAIi18nConfigured: true, isAIMediaLibraryConfigured: false };
+      const mockAdminService = {
+        getAIFeatureConfig: jest.fn().mockResolvedValue(mockConfig),
+      };
+      global.strapi = createMockStrapi(mockAdminService) as any;
+
+      await aiController.getAIFeatureConfig(ctx as any);
+
+      expect(mockAdminService.getAIFeatureConfig).toHaveBeenCalled();
+      expect(ctx.body).toEqual({ data: mockConfig });
     });
   });
 });
