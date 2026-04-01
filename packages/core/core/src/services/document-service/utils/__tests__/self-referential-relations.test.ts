@@ -25,45 +25,10 @@ describe('self-referential-relations', () => {
     jest.clearAllMocks();
   });
 
+  // Note: load() happy-path SQL correctness (i.e. that whereIn actually filters the right rows)
+  // is covered by the API integration test, which runs against a real DB.
+  // These unit tests cover the attribute-filtering branches only.
   describe('load', () => {
-    it('should load self-referential relations from source entries', async () => {
-      const selfRelations = [{ id: 1, category_id: 10, inv_category_id: 10, field_order: 1 }];
-
-      const chain = createChainedQuery(selfRelations);
-
-      (global as any).strapi = {
-        db: {
-          metadata: {
-            get: jest.fn().mockReturnValue({
-              attributes: {
-                parent: {
-                  type: 'relation',
-                  target: 'api::category.category',
-                  joinTable: {
-                    name: 'categories_parent_lnk',
-                    joinColumn: { name: 'category_id' },
-                    inverseJoinColumn: { name: 'inv_category_id' },
-                  },
-                },
-                name: { type: 'string' },
-              },
-            }),
-          },
-          transaction: createMockTransaction(),
-          getConnection: jest.fn().mockReturnValue(chain),
-        },
-      };
-
-      const result = await load('api::category.category' as any, [{ id: '10', locale: 'en' }]);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].relations).toEqual(selfRelations);
-      expect(chain.select).toHaveBeenCalledWith('*');
-      expect(chain.from).toHaveBeenCalledWith('categories_parent_lnk');
-      expect(chain.whereIn).toHaveBeenCalledWith('category_id', ['10']);
-      expect(chain.whereIn).toHaveBeenCalledWith('inv_category_id', ['10']);
-    });
-
     it('should skip non-relation and non-self-referential attributes', async () => {
       const chain = createChainedQuery([]);
 
