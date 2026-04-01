@@ -45,7 +45,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "nodemailer": "8.0.1"
+    "nodemailer": "8.0.4"
   },
   "devDependencies": {
     "@types/nodemailer": "7.0.10",
