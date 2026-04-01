@@ -41,14 +41,14 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
+    "test:unit": "run -T jest --watchman=false",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.41.1",
-    "sendmail": "^1.6.1"
+    "nodemailer": "8.0.1"
   },
   "devDependencies": {
-    "@types/sendmail": "1.4.4",
+    "@types/nodemailer": "7.0.10",
     "eslint-config-custom": "5.41.1",
     "tsconfig": "5.41.1"
   },
