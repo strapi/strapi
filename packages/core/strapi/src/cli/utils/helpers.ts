@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from 'chalk';
 import { has, isString, isArray } from 'lodash/fp';
-import inquirer from 'inquirer';
 import boxen from 'boxen';
 import type { Command } from 'commander';
+import { getInquirer } from './get-inquirer';
 
 /**
  * Helper functions for the Strapi CLI
@@ -178,6 +178,7 @@ const notifyExperimentalCommand = async (name: string, { force }: { force?: bool
   );
 
   if (!force) {
+    const inquirer = await getInquirer();
     const { confirmed } = await inquirer.prompt({
       type: 'confirm',
       name: 'confirmed',
