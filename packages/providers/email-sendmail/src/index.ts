@@ -31,7 +31,7 @@ export default {
           to,
           cc,
           bcc,
-          replyTo: replyTo ?? settings.defaultReplyTo,
+          replyTo: replyTo || settings.defaultReplyTo,
           subject,
           text,
           html,

@@ -10,22 +10,22 @@ interface Logger {
 function noop() {}
 
 /**
- * Legacy `sendmail` factory merged `{ silent: true, ...providerOptions }`.
- * `silent` defaults to true but can be overridden by `providerOptions`.
+ * Matches guileen/node-sendmail: `options.logger` wins over `silent` — if a custom logger is
+ * set, it is used as-is. Only when there is no custom logger does `silent` suppress output.
+ * Strapi merges `{ silent: true, ...providerOptions }` so explicit `silent: false` still applies.
  */
 export function createLogger(options: ProviderSendmailOptions): Logger {
-  const silent = options.silent === true;
-
   if (options.logger) {
     const l = options.logger;
     return {
-      debug: silent || !l.debug ? noop : l.debug.bind(l),
-      info: silent || !l.info ? noop : l.info.bind(l),
-      warn: silent || !l.warn ? noop : l.warn.bind(l),
-      error: silent || !l.error ? noop : l.error.bind(l),
+      debug: l.debug ? l.debug.bind(l) : noop,
+      info: l.info ? l.info.bind(l) : noop,
+      warn: l.warn ? l.warn.bind(l) : noop,
+      error: l.error ? l.error.bind(l) : noop,
     };
   }
 
+  const silent = options.silent === true;
   if (silent) {
     return { debug: noop, info: noop, warn: noop, error: noop };
   }

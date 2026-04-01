@@ -11,15 +11,23 @@ import {
 import { createLogger } from './logger';
 import type { ProviderSendmailOptions } from './types';
 
+/**
+ * Mirrors legacy `const devPort = options.devPort || -1` (guileen/node-sendmail).
+ * `0` is falsy → `-1` (MX mode). `true` is truthy and was passed to `createConnection` (Node
+ * coerces port `true` to `1`).
+ */
 function getEffectiveDevPort(options: ProviderSendmailOptions): number {
   const v = options.devPort;
-  if (v === undefined || v === false) {
+  if (v === undefined || v === false || v === null) {
     return -1;
   }
   if (v === true) {
-    return -1;
+    return 1;
   }
-  return typeof v === 'number' ? v : -1;
+  if (typeof v === 'number') {
+    return v || -1;
+  }
+  return -1;
 }
 
 /**

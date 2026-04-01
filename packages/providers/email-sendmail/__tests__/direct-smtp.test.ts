@@ -27,6 +27,20 @@ describe('resolveMxHosts', () => {
     expect(hosts).toEqual([{ exchange: 'localhost' }]);
   });
 
+  it('treats devPort 0 as MX mode (legacy: 0 || -1)', async () => {
+    mockedResolveMx.mockResolvedValueOnce([{ exchange: 'mx.example.com', priority: 0 }]);
+
+    const hosts = await resolveMxHosts('example.com', { devPort: 0 });
+    expect(mockedResolveMx).toHaveBeenCalledWith('example.com');
+    expect(hosts.map((h) => h.exchange)).toEqual(['mx.example.com']);
+  });
+
+  it('uses dev mode when devPort is true (legacy: true coerces to port 1)', async () => {
+    const hosts = await resolveMxHosts('example.com', { devPort: true, devHost: '127.0.0.1' });
+    expect(mockedResolveMx).not.toHaveBeenCalled();
+    expect(hosts).toEqual([{ exchange: '127.0.0.1' }]);
+  });
+
   it('resolves MX records sorted by priority (lower number = higher preference)', async () => {
     mockedResolveMx.mockResolvedValueOnce([
       { exchange: 'mx20.example.com.', priority: 20 },
