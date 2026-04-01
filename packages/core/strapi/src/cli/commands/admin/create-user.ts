@@ -1,11 +1,11 @@
 import { createCommand } from 'commander';
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-import inquirer from 'inquirer';
 import type { QuestionCollection } from 'inquirer';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
+import { getInquirer } from '../../utils/get-inquirer';
 import type { StrapiCommand } from '../../types';
 
 interface CmdOptions {
@@ -120,6 +120,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     _.isEmpty(lastname) &&
     process.stdin.isTTY
   ) {
+    const inquirer = await getInquirer();
     const inquiry = await inquirer.prompt(promptQuestions);
 
     if (!inquiry.confirm) {
