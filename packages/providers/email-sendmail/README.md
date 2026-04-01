@@ -39,6 +39,10 @@ This provider implements the same **direct SMTP delivery** model as the historic
 | providerOptions.smtpPort | number            | Outbound SMTP port when **not** in `devPort` mode (default **25**).                                                                                                                              | no       | 25        |
 | providerOptions.smtpHost | string            | Extra hostname tried after MX records for each domain (legacy behavior).                                                                                                                         | no       | -1        |
 
+MIME is now produced with **Nodemailer** instead of the old `mailcomposer` stack, so the raw message may not match the legacy package byte-for-byte; routing and documented `providerOptions` stay the same.
+
+You can pass through **additional Nodemailer mail fields** on each `send()` (for example `headers`, `messageId`, `textEncoding`, `priority`) if you need finer control.
+
 > :warning: The Shipper Email (or defaultfrom) may also need to be changed in the `Email Templates` tab on the admin panel for emails to send properly
 
 ### Example
