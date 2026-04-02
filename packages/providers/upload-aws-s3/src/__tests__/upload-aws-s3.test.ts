@@ -239,6 +239,28 @@ describe('AWS-S3 provider', () => {
       expect(file.url).toEqual('https://cdn.test/dir/dir2/tmp/test/test.json');
     });
 
+    test('should handle missing Location in upload response', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          $metadata: {},
+        })
+      );
+
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          params: {
+            Bucket: 'test',
+          },
+        },
+      });
+
+      const file = createTestFile();
+      await providerInstance.upload(file);
+
+      expect(file.url).toBeDefined();
+      expect(file.url).toBe('https://');
+    });
+
     test('should store ETag from upload response', async () => {
       const providerInstance = awsProvider.init({
         s3Options: {
