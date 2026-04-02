@@ -37,6 +37,15 @@ export const createDirectoryJsonlWriter = (
   };
 
   return new Writable({
+    async final(callback) {
+      try {
+        await flush();
+        callback();
+      } catch (err: unknown) {
+        callback(err instanceof Error ? err : new Error(String(err)));
+      }
+    },
+
     async destroy(err, callback) {
       await flush();
       callback(err);

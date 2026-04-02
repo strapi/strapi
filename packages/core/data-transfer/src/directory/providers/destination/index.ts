@@ -156,23 +156,32 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
     return new Writable({
       objectMode: true,
       write(data: IAsset, _encoding, callback) {
-        const entryPath = path.join(root, 'assets', 'uploads', data.filename);
-        const entryMetadataPath = path.join(root, 'assets', 'metadata', `${data.filename}.json`);
+        const { filename } = data;
+        const entryPath = path.join(root, 'assets', 'uploads', filename);
+        const entryMetadataPath = path.join(root, 'assets', 'metadata', `${filename}.json`);
 
-        fs.mkdirSync(path.dirname(entryPath), { recursive: true });
-        fs.mkdirSync(path.dirname(entryMetadataPath), { recursive: true });
+        const assetWriteError = (cause: unknown) =>
+          new ProviderTransferError(`Failed to write asset ${filename}`, {
+            details: {
+              error: cause instanceof Error ? cause : new Error(String(cause)),
+            },
+          });
 
-        fs.writeFileSync(entryMetadataPath, JSON.stringify(data.metadata), 'utf8');
+        let fileStream: ReturnType<typeof createWriteStream>;
 
-        const fileStream = createWriteStream(entryPath);
+        try {
+          fs.mkdirSync(path.dirname(entryPath), { recursive: true });
+          fs.mkdirSync(path.dirname(entryMetadataPath), { recursive: true });
+          fs.writeFileSync(entryMetadataPath, JSON.stringify(data.metadata), 'utf8');
+          fileStream = createWriteStream(entryPath);
+        } catch (error: unknown) {
+          callback(assetWriteError(error));
+          return;
+        }
 
         pipeline(data.stream, fileStream, (err) => {
           if (err) {
-            callback(
-              new ProviderTransferError(`Failed to write asset ${data.filename}`, {
-                details: { error: err },
-              })
-            );
+            callback(assetWriteError(err));
             return;
           }
           callback(null);
