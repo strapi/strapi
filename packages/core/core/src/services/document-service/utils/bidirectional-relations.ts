@@ -225,7 +225,8 @@ const sync = async (
         }));
 
       if (toInsert.length) {
-        await trx.batchInsert(joinTable.name, toInsert, 1000);
+        const batchSize = strapi.db.dialect.getBatchInsertSize();
+        await trx.batchInsert(joinTable.name, toInsert, batchSize);
       }
     }
   });
