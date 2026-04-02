@@ -72,7 +72,7 @@
     "lodash": "4.17.23",
     "tsconfig": "5.41.1",
     "typescript": "5.4.4",
-    "undici": "6.24.0"
+    "undici": "6.24.1"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
