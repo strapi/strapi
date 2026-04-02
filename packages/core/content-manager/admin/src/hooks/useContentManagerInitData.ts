@@ -39,6 +39,26 @@ interface ContentManagerLink {
   isDisplayed: boolean;
 }
 
+const getPermissionKey = (permission: Pick<Permission, 'action' | 'subject'>) =>
+  `${permission.action}::${permission.subject ?? ''}`;
+
+const authorizeLinks = async (
+  links: ContentManagerLink[],
+  checkUserHasPermissions: (
+    permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>
+  ) => Promise<Permission[]>
+) => {
+  const authorizedPermissions = await checkUserHasPermissions(
+    links.flatMap(({ permissions }) => permissions)
+  );
+
+  const authorizedPermissionKeys = new Set(authorizedPermissions.map(getPermissionKey));
+
+  return links.filter(({ permissions }) =>
+    permissions.some((permission) => authorizedPermissionKeys.has(getPermissionKey(permission)))
+  );
+};
+
 const useContentManagerInitData = (): AppState => {
   const { toggleNotification } = useNotification();
   const dispatch = useTypedDispatch();
@@ -127,21 +147,13 @@ const useContentManagerInitData = (): AppState => {
     );
     const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
 
-    // Collection Types verifications
-    const collectionTypeLinksPermissions = await Promise.all(
-      collectionTypeSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
+    const authorizedCollectionTypeLinks = await authorizeLinks(
+      collectionTypeSectionLinks,
+      checkUserHasPermissions
     );
-
-    const authorizedCollectionTypeLinks = collectionTypeSectionLinks.filter(
-      (_, index) => collectionTypeLinksPermissions[index].length > 0
-    );
-
-    // Single Types verifications
-    const singleTypeLinksPermissions = await Promise.all(
-      singleTypeSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
-    );
-    const authorizedSingleTypeLinks = singleTypeSectionLinks.filter(
-      (_, index) => singleTypeLinksPermissions[index].length > 0
+    const authorizedSingleTypeLinks = await authorizeLinks(
+      singleTypeSectionLinks,
+      checkUserHasPermissions
     );
     const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
       ctLinks: authorizedCollectionTypeLinks,

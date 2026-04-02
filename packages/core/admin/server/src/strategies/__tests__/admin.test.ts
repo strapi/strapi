@@ -4,9 +4,13 @@
 import createContext from '../../../../../../../tests/helpers/create-context';
 // @ts-expect-error - test purposes
 import { createMockSessionManager } from '../../../../../../../tests/helpers/create-session-manager-mock';
-import adminAuthStrategy from '../admin';
+import adminAuthStrategy, { clearAdminAuthAbilityCache } from '../admin';
 
 describe('Admin Auth Strategy', () => {
+  beforeEach(() => {
+    clearAdminAuthAbilityCache();
+  });
+
   describe('Authenticate a user (sessions-based access token)', () => {
     const request = {
       header: {
@@ -48,6 +52,36 @@ describe('Admin Auth Strategy', () => {
         credentials: user,
         ability: 'ability',
       });
+    });
+
+    test('reuses the generated ability for repeated requests from the same session', async () => {
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => true);
+      const firstCtx = createContext({}, { request, state: {} });
+      const secondCtx = createContext({}, { request, state: {} });
+      const user = { id: 1, isActive: true } as any;
+      const findOne = jest.fn(() => user);
+      const generateUserAbility = jest.fn(() => 'ability');
+
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
+      global.strapi = {
+        sessionManager: sessionManager as any,
+        admin: {
+          services: {
+            permission: { engine: { generateUserAbility } },
+          },
+        },
+        db: { query: jest.fn(() => ({ findOne })) },
+      } as any;
+
+      await adminAuthStrategy.authenticate(firstCtx);
+      await adminAuthStrategy.authenticate(secondCtx);
+
+      expect(generateUserAbility).toHaveBeenCalledTimes(1);
     });
 
     test('Fails to authenticate if the authorization header is missing', async () => {
