@@ -46,7 +46,7 @@ const legacyModel = {
   draftAndPublish: false,
   displayName: 'Legacy',
   singularName: 'legacy',
-  pluralName: 'Legacies',
+  pluralName: 'legacies',
   description: '',
   collectionName: '',
 };
