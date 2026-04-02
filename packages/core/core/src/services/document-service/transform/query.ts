@@ -1,6 +1,6 @@
 import type { UID } from '@strapi/types';
 
-import { curry, assoc, omit, pipe } from 'lodash/fp';
+import { curry, assoc, omit } from 'lodash/fp';
 import {
   parseHasPublishedVersionQueryParam,
   hasPublishedVersionBooleanToPublicationFilterMode,
@@ -38,26 +38,43 @@ const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
     'hasPublishedVersion',
   ] as const);
 
+  // Publication filtering must go through `query.filters`, not only `where`, so the same
+  // cohort logic applies to nested populate queries (each sub-query uses `meta.uid`).
+  // Merging into `where` alone breaks populate cascade — see has-published-version API tests.
   if (effectivePublicationFilter !== undefined) {
-    const publicationCondition = getPublicationFilterCondition(
-      uid,
-      effectivePublicationFilter,
-      status
+    const existingFilters = query.filters;
+
+    const wrappedFilters = ({ meta, ...rest }: { meta: { uid: UID.Schema } }) => {
+      let existingResult = {};
+      if (typeof existingFilters === 'function') {
+        existingResult = existingFilters({ meta, ...rest }) || {};
+      } else if (existingFilters) {
+        existingResult = existingFilters;
+      }
+
+      const publicationCondition = getPublicationFilterCondition(
+        meta.uid,
+        effectivePublicationFilter,
+        status
+      );
+
+      if (publicationCondition && Object.keys(publicationCondition).length > 0) {
+        const conditions = [existingResult, publicationCondition].filter(
+          (c) => Object.keys(c).length
+        );
+        return { $and: conditions };
+      }
+
+      return existingResult;
+    };
+
+    const queryWithoutPublicationParams = stripPublicationParamsFromQuery(query);
+
+    return assoc(
+      'where',
+      baseWhere,
+      assoc('filters', wrappedFilters, queryWithoutPublicationParams)
     );
-    if (publicationCondition && Object.keys(publicationCondition).length > 0) {
-      // Draft/publish is on `baseWhere` via `lookup`; publication modes add an `id` subquery.
-      // Drop `query.filters` (status callback) so we do not stack duplicate `publishedAt` logic.
-      // Use a single root `$and` so both fragments apply in one grouped predicate.
-      const queryWithoutStatusFilters = pipe(
-        omit(['filters'] as const),
-        stripPublicationParamsFromQuery
-      )(query);
-      const hasBase = Object.keys(baseWhere).length > 0;
-      const whereClause = hasBase
-        ? { $and: [baseWhere, publicationCondition] }
-        : publicationCondition;
-      return assoc('where', whereClause, queryWithoutStatusFilters);
-    }
   }
 
   return assoc('where', baseWhere, stripPublicationParamsFromQuery(query));
