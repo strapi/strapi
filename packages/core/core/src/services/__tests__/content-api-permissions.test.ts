@@ -73,6 +73,36 @@ describe('Content API - Permissions', () => {
       });
     });
 
+    test('includes synthetic readDraft for draft & publish content types that have a content-api controller', () => {
+      global.strapi = {
+        ...strapiMock,
+        apis: {
+          'basic-dp': {
+            controllers: {
+              'basic-dp': {
+                find: bindToContentAPI(() => {}),
+                findOne: bindToContentAPI(() => {}),
+              },
+            },
+          },
+        },
+        contentTypes: {
+          'api::basic-dp.basic-dp': {
+            uid: 'api::basic-dp.basic-dp',
+            options: { draftAndPublish: true },
+          },
+        },
+      } as any;
+
+      const contentAPI = createContentAPI(global.strapi);
+      const actionsMap = contentAPI.permissions.getActionsMap();
+
+      expect(actionsMap['api::basic-dp']?.controllers['basic-dp']).toEqual(
+        expect.arrayContaining(['find', 'findOne', 'readDraft'])
+      );
+      expect(actionsMap['api::basic-dp']?.controllers['basic-dp']).toHaveLength(3);
+    });
+
     test('Creates and populate a map of actions from APIs and plugins', () => {
       global.strapi = {
         ...strapiMock,

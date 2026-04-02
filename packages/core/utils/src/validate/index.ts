@@ -21,6 +21,7 @@ import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '
 import { Model, Data } from '../types';
 import { ValidationError } from '../errors';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
+import { assertReadDraftPermission } from '../read-draft-permission';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
@@ -172,6 +173,8 @@ const createAPIValidators = (opts: APIOptions) => {
     if ('publicationFilter' in query) {
       validatePublicationFilterQueryParam(query.publicationFilter);
     }
+
+    assertReadDraftPermission(query, schema, auth as { ability?: { can: (a: string) => boolean } });
 
     if (strictParams) {
       const extraQueryKeys = getExtraQueryKeysFromRoute(route);

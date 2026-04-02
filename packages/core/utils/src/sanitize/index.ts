@@ -18,6 +18,7 @@ import traverseEntity from '../traverse-entity';
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 import type { Model, Data } from '../types';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
+import { assertReadDraftPermission } from '../read-draft-permission';
 
 export interface Options {
   auth?: unknown;
@@ -193,6 +194,12 @@ const createAPISanitizers = (opts: APIOptions) => {
     if ('publicationFilter' in sanitizedQuery) {
       validatePublicationFilterQueryParam(sanitizedQuery.publicationFilter);
     }
+
+    assertReadDraftPermission(
+      sanitizedQuery,
+      schema,
+      auth as { ability?: { can: (a: string) => boolean } }
+    );
 
     if (filters) {
       Object.assign(sanitizedQuery, { filters: await sanitizeFilters(filters, schema, { auth }) });

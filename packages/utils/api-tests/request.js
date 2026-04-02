@@ -36,4 +36,5 @@ module.exports = {
   createContentAPIRequest,
   createAuthRequest,
   transformToRESTResource,
+  createAgent,
 };

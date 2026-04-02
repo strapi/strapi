@@ -8,6 +8,8 @@ const {
   errors,
   objects,
   sanitizeRoutesMapForSerialization,
+  contentTypes: contentTypeUtils,
+  parseContentApiUidParts,
 } = require('@strapi/utils');
 
 const { getService } = require('../utils');
@@ -102,6 +104,30 @@ module.exports = ({ strapi }) => ({
       }
     });
 
+    _.forEach(strapi.contentTypes || {}, (ct) => {
+      if (!contentTypeUtils.hasDraftAndPublish(ct)) {
+        return;
+      }
+      const uid = ct.uid;
+      if (typeof uid !== 'string' || (!uid.startsWith('api::') && !uid.startsWith('plugin::'))) {
+        return;
+      }
+      const parts = parseContentApiUidParts(uid);
+      if (!parts) {
+        return;
+      }
+      const { apiKey, controllerName } = parts;
+      const entry = actionMap[apiKey];
+      if (!entry?.controllers?.[controllerName]) {
+        return;
+      }
+      entry.controllers[controllerName].readDraft = {
+        enabled: defaultEnable,
+        policy: '',
+        displayName: 'Read drafts',
+      };
+    });
+
     // Return a deeply cloned version to avoid circular references
     return _.cloneDeep(actionMap);
   },
@@ -176,7 +202,14 @@ module.exports = ({ strapi }) => ({
       });
     });
 
-    const allActions = [...appActions, ...pluginsActions];
+    const readDraftActions = _.flatMap(strapi.contentTypes || {}, (ct) => {
+      if (!contentTypeUtils.hasDraftAndPublish(ct) || typeof ct.uid !== 'string') {
+        return [];
+      }
+      return [`${ct.uid}.readDraft`];
+    });
+
+    const allActions = [...appActions, ...pluginsActions, ...readDraftActions];
 
     const toDelete = _.difference(permissionsFoundInDB, allActions);
 

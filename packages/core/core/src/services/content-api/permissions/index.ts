@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import type { Core } from '@strapi/types';
+import { contentTypes as contentTypeUtils, parseContentApiUidParts } from '@strapi/utils';
 import { createActionProvider, createConditionProvider } from './providers';
 import createPermissionEngine from './engine';
 
@@ -45,7 +46,10 @@ export default (strapi: Core.Strapi) => {
    * Get a tree representation of the available Content API actions
    * based on the methods of the Content API controllers.
    *
-   * @note Only actions bound to a content-API route are returned.
+   * @note Controller methods are only included when bound to a content-API route. Synthetic
+   * `readDraft` actions for draft & publish types are merged in as well (same set as
+   * {@link registerActions}); they are not controller methods but appear in admin (e.g. API tokens)
+   * and in permission checks.
    */
   const getActionsMap = () => {
     const actionMap: Record<
@@ -100,6 +104,30 @@ export default (strapi: Core.Strapi) => {
     registerAPIsActions(strapi.apis, 'api');
     registerAPIsActions(strapi.plugins, 'plugin');
 
+    const cts = strapi.contentTypes ? Object.values(strapi.contentTypes) : [];
+    for (const ct of cts) {
+      if (!contentTypeUtils.hasDraftAndPublish(ct)) {
+        continue;
+      }
+      const uid = ct.uid;
+      if (typeof uid !== 'string' || (!uid.startsWith('api::') && !uid.startsWith('plugin::'))) {
+        continue;
+      }
+      const parts = parseContentApiUidParts(uid);
+      if (!parts) {
+        continue;
+      }
+      const { apiKey, controllerName } = parts;
+      const bucket = actionMap[apiKey];
+      if (!bucket?.controllers?.[controllerName]) {
+        continue;
+      }
+      const actions = bucket.controllers[controllerName];
+      if (!actions.includes('readDraft')) {
+        actions.push('readDraft');
+      }
+    }
+
     return actionMap;
   };
 
@@ -131,6 +159,10 @@ export default (strapi: Core.Strapi) => {
         );
       }
     }
+
+    // `readDraft` is registered in the loop above: {@link getActionsMap} merges it into each
+    // draft & publish controller's action list (it is not a controller method). Do not register
+    // `readDraft` again here — same UID would duplicate the action provider key and fail bootstrap.
   };
 
   // Create an instance of a content-API permission engine

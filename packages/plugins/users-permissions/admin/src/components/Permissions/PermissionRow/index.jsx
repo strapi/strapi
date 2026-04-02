@@ -17,7 +17,7 @@ const PermissionRow = ({ name, permissions }) => {
               ...acc,
               {
                 ...curr[current],
-                label: current,
+                label: curr[current].displayName || current,
                 name: `${currentName}.${current}`,
               },
             ];
