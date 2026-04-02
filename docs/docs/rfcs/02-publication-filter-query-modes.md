@@ -11,7 +11,7 @@ tags:
 
 ## Summary
 
-This RFC proposes an optional `publicationFilter` query parameter for the document service and REST API.
+This RFC specifies an optional `publicationFilter` query parameter for the document service, REST API, and GraphQL.
 The goal is to expose derived publication queries without changing the existing `status` contract (`draft`, `published`) or existing default behavior.
 
 The change is intentionally non-breaking:
@@ -22,17 +22,31 @@ The change is intentionally non-breaking:
 - Existing defaulting behavior remains unchanged:
   - Core REST API default status is `published`.
   - Direct document service default status is `draft`.
+- The older `hasPublishedVersion` boolean query parameter remains accepted for compatibility; it is implemented by mapping to the document-scoped modes `never-published-document` / `has-published-version-document` (see [Deprecated `hasPublishedVersion`](#deprecated-haspublishedversion)).
 
 ## Detailed design
 
 ### API shape
 
 - Keep `status` unchanged (`draft`, `published`).
-- Add optional `publicationFilter` with initial values:
-  - `never-published`
-  - `has-published-version`
-  - `modified`
-  - `unmodified`
+- Add optional `publicationFilter` with the following string values (REST and document service use kebab-case; GraphQL exposes the same cohorts as the `PublicationFilter` enum, e.g. `NEVER_PUBLISHED` → `never-published`).
+
+**Pair-scoped** (cohorts are defined per `(documentId, locale)`):
+
+- `never-published`
+- `has-published-version`
+- `modified`
+- `unmodified`
+
+**Document-scoped** (cohorts aggregate across locales for the same `documentId`):
+
+- `never-published-document`
+- `has-published-version-document`
+
+**Published-slice diagnostics** (only meaningful with `status=published`; degenerate with `status=draft`):
+
+- `published-without-draft` — published row for a pair with **no** draft sibling
+- `published-with-draft` — published row for a pair that **has** a draft sibling
 
 If `publicationFilter` is omitted, behavior is unchanged.
 
@@ -47,6 +61,10 @@ The same `publicationFilter` can therefore be used with either status where mean
 - `has-published-version`: for this `(documentId, locale)`, **both** a draft row and a published row exist (each slice has a row). This excludes “orphan” published-only rows (published row with no draft peer for the same pair), which can arise from legacy data or manual DB edits—not normal D&P invariants.
 - `modified`: among pairs that have both slices, the draft row is strictly newer than the published row (`draft.updatedAt > published.updatedAt`).
 - `unmodified`: among pairs that have both slices, the draft row is not newer (`draft.updatedAt <= published.updatedAt`).
+
+Document-scoped modes apply the same _ideas_ as `never-published` / `has-published-version`, but existence checks are evaluated at **document** granularity (any locale), not per pair. Use these when the caller cares whether a _document_ has ever been published anywhere, not per-locale publication.
+
+Published-slice diagnostics inspect the **published** row and correlate with the presence or absence of a **draft** row for the same pair (`published-without-draft` / `published-with-draft`). They replace the earlier sketch names `no-draft-version` / `has-draft-version`.
 
 Some combinations are naturally degenerate (for example, the selected status slice is empty for the chosen cohort).
 Degenerate combinations should return empty results, not validation errors.
@@ -69,18 +87,22 @@ Clients could approximate some of this with multiple requests, client-side joins
 
 Public query params normalize to binary status plus derived constraints. Implementations use **`(documentId, locale)`-aware** predicates for localized content types so cohorts like `never-published` and `has-published-version` are **pair-scoped**, not merely document-scoped.
 
-| Public query                                               | Internal normalized behavior (conceptual)                                                                                |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `status=draft`                                             | `status='draft'`                                                                                                         |
-| `status=published`                                         | `status='published'`                                                                                                     |
-| `status=draft&publicationFilter=never-published`           | Draft rows for pairs with **no** published row for the same `(documentId, locale)`                                       |
-| `status=published&publicationFilter=never-published`       | Intersection of “published row” with “pair has no published version”—**empty** in consistent data (degenerate but valid) |
-| `status=draft&publicationFilter=has-published-version`     | Draft rows for pairs where a published row **also** exists for the same `(documentId, locale)`                           |
-| `status=published&publicationFilter=has-published-version` | Published rows for pairs where a draft row **also** exists (excludes published-only orphans for that pair)               |
-| `status=draft&publicationFilter=modified`                  | Draft rows for pairs where `draft.updatedAt > published.updatedAt`                                                       |
-| `status=published&publicationFilter=modified`              | Published rows for pairs where `draft.updatedAt > published.updatedAt`                                                   |
-| `status=draft&publicationFilter=unmodified`                | Draft rows for pairs where `draft.updatedAt <= published.updatedAt`                                                      |
-| `status=published&publicationFilter=unmodified`            | Published rows for pairs where `draft.updatedAt <= published.updatedAt`                                                  |
+| Public query                                                 | Internal normalized behavior (conceptual)                                                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `status=draft`                                               | `status='draft'`                                                                                                         |
+| `status=published`                                           | `status='published'`                                                                                                     |
+| `status=draft&publicationFilter=never-published`             | Draft rows for pairs with **no** published row for the same `(documentId, locale)`                                       |
+| `status=published&publicationFilter=never-published`         | Intersection of “published row” with “pair has no published version”—**empty** in consistent data (degenerate but valid) |
+| `status=draft&publicationFilter=has-published-version`       | Draft rows for pairs where a published row **also** exists for the same `(documentId, locale)`                           |
+| `status=published&publicationFilter=has-published-version`   | Published rows for pairs where a draft row **also** exists (excludes published-only orphans for that pair)               |
+| `status=draft&publicationFilter=modified`                    | Draft rows for pairs where `draft.updatedAt > published.updatedAt`                                                       |
+| `status=published&publicationFilter=modified`                | Published rows for pairs where `draft.updatedAt > published.updatedAt`                                                   |
+| `status=draft&publicationFilter=unmodified`                  | Draft rows for pairs where `draft.updatedAt <= published.updatedAt`                                                      |
+| `status=published&publicationFilter=unmodified`              | Published rows for pairs where `draft.updatedAt <= published.updatedAt`                                                  |
+| `…&publicationFilter=never-published-document`               | Same intent as `never-published`, scoped to **document** (see semantics above)                                           |
+| `…&publicationFilter=has-published-version-document`         | Same intent as `has-published-version`, scoped to **document**                                                           |
+| `status=published&publicationFilter=published-without-draft` | Published rows whose pair has **no** draft row                                                                           |
+| `status=published&publicationFilter=published-with-draft`    | Published rows whose pair **has** a draft row                                                                            |
 
 If `status` is omitted:
 
@@ -98,36 +120,28 @@ Validation happens after status resolution (explicit or defaulted):
 
 Compatibility:
 
-- GraphQL exposes optional `publicationFilter` with the same cohort strings as REST (`PublicationFilter` enum).
+- GraphQL exposes optional `publicationFilter` via the `PublicationFilter` enum; internal values match REST (`never-published`, …). Deprecated `hasPublishedVersion` is still accepted and normalized to document-scoped `publicationFilter` values for queries and relation resolution.
 
 Mutation semantics (`create`, `update`, `publish`, `unpublish`) do not change.
 
+### Deprecated `hasPublishedVersion`
+
+The legacy boolean `hasPublishedVersion` (`true` / `false`, or string `"true"` / `"false"`) is **deprecated** in favor of `publicationFilter`. Implementations resolve it to:
+
+- `false` → `never-published-document`
+- `true` → `has-published-version-document`
+
+so that a single code path (`publicationFilter` translation) handles both the new parameter and backward compatibility. Invalid values yield the same validation errors as before.
+
 ### Implementation outline
 
-1. Extend allowlists and validators to accept `publicationFilter`.
+1. Extend allowlists and validators to accept `publicationFilter` (and validate unknown values with HTTP 400 / GraphQL input rules as appropriate).
 2. Resolve status defaults as today (no changes to REST/document service defaulting).
-3. Translate `publicationFilter` into derived constraints before final query execution (prefer correlated subqueries or joins on `(documentId, locale)` for localized types).
+3. Translate `publicationFilter` into derived constraints before final query execution (prefer correlated subqueries or joins on `(documentId, locale)` for localized types; document-scoped modes use document-level predicates).
 4. Reuse patterns where possible; for localized types, avoid document-only existence checks when pair-scoped cohort semantics are required.
+5. Normalize deprecated `hasPublishedVersion` to document-scoped `publicationFilter` modes so one implementation path applies all cohorts.
 
-### Future options (not in initial scope)
-
-- `no-draft-version` (**published** slice): published row exists, **no** draft row for the same pair—useful for diagnostics, cleanup, and detecting invariant violations (“orphan published”).
-- `has-draft-version` (**published** slice): published row exists **and** a draft row exists for the same pair—the usual healthy state for published content that still has an editable draft.
-
-Both share the same caveats:
-
-- They only make sense in a **draft & publish** model with two physical rows per pair in the steady state.
-- They require **pair-scoped** (not merely document-scoped) existence checks, just like locale-aware `has-published-version` / `never-published`.
-- Naming is easy to confuse with `has-published-version`; documentation should stress **which slice** is selected by `status` and **which sibling** is being tested.
-
-Example translation (conceptual):
-
-| Public query                                           | Internal normalized behavior                                     |
-| ------------------------------------------------------ | ---------------------------------------------------------------- |
-| `status=published&publicationFilter=no-draft-version`  | Published rows whose `(documentId, locale)` has **no** draft row |
-| `status=published&publicationFilter=has-draft-version` | Published rows whose `(documentId, locale)` **has** a draft row  |
-
-Other ideas (orthogonal):
+### Future options (orthogonal)
 
 - Time-window variants (for example, “stale” modified content).
 - Locale completeness variants (for example, published in locale A but missing locale B).
