@@ -9,6 +9,10 @@
  * `createTransferAssetStreamChunk` in `transfer-asset-chunk.ts`).
  */
 export const replacerForTransferWebSocket = (_key: string, value: unknown): unknown => {
+  /** `JSON.stringify` throws on bigint; upload metadata or ORM fields may surface as BigInt. */
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
   if (Buffer.isBuffer(value)) {
     return value.toString('base64');
   }
@@ -52,7 +56,13 @@ export function stripRootToJSONMethod(payload: Record<string, unknown>): void {
  */
 export function stringifyTransferWebSocketPayload(payload: Record<string, unknown>): string {
   stripRootToJSONMethod(payload);
-  const s = JSON.stringify(payload, replacerForTransferWebSocket);
+  let s: string | undefined;
+  try {
+    s = JSON.stringify(payload, replacerForTransferWebSocket);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new TypeError(`Transfer WebSocket payload could not be serialized to JSON: ${message}`);
+  }
   if (typeof s !== 'string') {
     throw new TypeError(
       'Transfer WebSocket payload could not be serialized to JSON (result was undefined). Check for Symbol or other non-JSON values on the root payload.'
