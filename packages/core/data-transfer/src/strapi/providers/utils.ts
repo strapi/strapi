@@ -11,7 +11,7 @@ import {
   ProviderErrorDetails,
 } from '../../errors/providers';
 import { IDiagnosticReporter } from '../../utils/diagnostic';
-import { replacerForTransferWebSocket } from '../../utils/transfer-websocket-json';
+import { stringifyTransferWebSocketPayload } from '../../utils/transfer-websocket-json';
 
 interface IDispatcherState {
   transfer?: { kind: Client.TransferKind; id: string };
@@ -69,7 +69,9 @@ export const createDispatcher = (
           `dispatching message action:${messageToSend.action} ${messageToSend.kind === 'step' ? `step:${messageToSend.step}` : ''} uuid:${uuid} sent:${numberOfTimesMessageWasSent}`
         );
       }
-      const stringifiedPayload = JSON.stringify(payload, replacerForTransferWebSocket);
+      const stringifiedPayload = stringifyTransferWebSocketPayload(
+        payload as Record<string, unknown>
+      );
       ws.send(stringifiedPayload, (error) => {
         if (error) {
           reject(error);

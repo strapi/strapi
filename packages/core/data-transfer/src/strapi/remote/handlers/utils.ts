@@ -10,7 +10,7 @@ import { ProviderError, ProviderTransferError } from '../../../errors/providers'
 import { VALID_TRANSFER_COMMANDS, ValidTransferCommand } from './constants';
 import { TransferMethod } from '../constants';
 import { createDiagnosticReporter } from '../../../utils/diagnostic';
-import { replacerForTransferWebSocket } from '../../../utils/transfer-websocket-json';
+import { stringifyTransferWebSocketPayload } from '../../../utils/transfer-websocket-json';
 
 type WSCallback = (client: WebSocket, request: IncomingMessage) => void;
 
@@ -246,20 +246,19 @@ export const handlerControllerFactory =
                 details = e.details;
               }
 
-              const payload = JSON.stringify(
-                {
-                  uuid,
-                  data: data ?? null,
-                  error: e
-                    ? {
-                        code: e?.name ?? 'ERR',
-                        message: e?.message,
-                        details,
-                      }
-                    : null,
-                },
-                replacerForTransferWebSocket
-              );
+              const envelope: Record<string, unknown> = {
+                uuid,
+                data: data ?? null,
+                error: e
+                  ? {
+                      code: e?.name ?? 'ERR',
+                      message: e?.message,
+                      details,
+                    }
+                  : null,
+              };
+
+              const payload = stringifyTransferWebSocketPayload(envelope);
 
               this.send(payload, (error) => (error ? reject(error) : resolve()));
             });
@@ -272,7 +271,7 @@ export const handlerControllerFactory =
             return new Promise((resolve, reject) => {
               const uuid = randomUUID();
 
-              const payload = JSON.stringify({ uuid, data: message }, replacerForTransferWebSocket);
+              const payload = stringifyTransferWebSocketPayload({ uuid, data: message });
 
               this.send(payload, (error) => {
                 if (error) {

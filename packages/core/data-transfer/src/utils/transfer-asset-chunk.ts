@@ -6,6 +6,11 @@ export function createTransferAssetStreamChunk(
   assetID: string,
   chunk: Buffer | Uint8Array
 ): { action: 'stream'; assetID: string; encoding: 'base64'; data: string } {
+  if (chunk == null) {
+    throw new TypeError(
+      'Asset stream yielded a null/undefined chunk; refusing to encode (would trigger Buffer.from(undefined))'
+    );
+  }
   const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
   return {
     action: 'stream',
