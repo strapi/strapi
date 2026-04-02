@@ -242,4 +242,219 @@ describe('Test GraphQL publicationFilter', () => {
     expect(res.body.data.articles_connection.nodes[0].title).toBe('Article 1');
     expect(res.body.data.articles_connection.pageInfo.total).toBe(1);
   });
+
+  test('publicationFilter NEVER_PUBLISHED_DOCUMENT (document-scoped) returns only never-published drafts', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        {
+          articles(status: DRAFT, publicationFilter: NEVER_PUBLISHED_DOCUMENT) {
+            documentId
+            title
+          }
+        }
+      `,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.articles).toHaveLength(1);
+    expect(res.body.data.articles[0].documentId).toBe('article-1');
+  });
+
+  test('publicationFilter HAS_PUBLISHED_VERSION_DOCUMENT returns draft rows for documents with any published locale', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        {
+          articles(status: DRAFT, publicationFilter: HAS_PUBLISHED_VERSION_DOCUMENT) {
+            documentId
+            title
+          }
+        }
+      `,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.articles).toHaveLength(1);
+    expect(res.body.data.articles[0].documentId).toBe('article-2');
+  });
+
+  test('publicationFilter PUBLISHED_WITH_DRAFT returns published rows that have a draft peer (same pair)', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        {
+          articles(status: PUBLISHED, publicationFilter: PUBLISHED_WITH_DRAFT) {
+            documentId
+            title
+          }
+        }
+      `,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.articles).toHaveLength(1);
+    expect(res.body.data.articles[0].documentId).toBe('article-2');
+  });
+
+  describe('findOne (article by documentId)', () => {
+    test('publicationFilter NEVER_PUBLISHED returns the matching draft document', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            article(documentId: "article-1", status: DRAFT, publicationFilter: NEVER_PUBLISHED) {
+              documentId
+              title
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.errors).toBeUndefined();
+      expect(res.body.data.article).not.toBeNull();
+      expect(res.body.data.article.documentId).toBe('article-1');
+      expect(res.body.data.article.title).toBe('Article 1');
+    });
+
+    test('publicationFilter HAS_PUBLISHED_VERSION yields null for a never-published documentId', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            article(
+              documentId: "article-1"
+              status: DRAFT
+              publicationFilter: HAS_PUBLISHED_VERSION
+            ) {
+              documentId
+              title
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.errors).toBeUndefined();
+      expect(res.body.data.article).toBeNull();
+    });
+  });
+
+  describe('publicationFilter MODIFIED and UNMODIFIED (document service parity)', () => {
+    const articleUid = 'api::article.article';
+    const titleModified = 'GQL-PF-Modified-v2';
+    const titleUnmodified = 'GQL-PF-Unmodified-v1';
+
+    beforeAll(async () => {
+      const modifiedDraft = await strapi.documents(articleUid).create({
+        status: 'draft',
+        locale: 'en',
+        data: { title: 'GQL-PF-Modified-v1' },
+      });
+      await strapi.documents(articleUid).publish({
+        documentId: modifiedDraft.documentId,
+        locale: 'en',
+      });
+      await strapi.documents(articleUid).update({
+        status: 'draft',
+        documentId: modifiedDraft.documentId,
+        locale: 'en',
+        data: { title: titleModified },
+      });
+
+      const unmodifiedDraft = await strapi.documents(articleUid).create({
+        status: 'draft',
+        locale: 'en',
+        data: { title: titleUnmodified },
+      });
+      await strapi.documents(articleUid).publish({
+        documentId: unmodifiedDraft.documentId,
+        locale: 'en',
+      });
+    });
+
+    test('MODIFIED returns only drafts whose draft row is newer than the published peer (same pair)', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            articles(
+              status: DRAFT
+              publicationFilter: MODIFIED
+              filters: { title: { eq: "${titleModified}" } }
+            ) {
+              documentId
+              title
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.errors).toBeUndefined();
+      expect(res.body.data.articles).toHaveLength(1);
+      expect(res.body.data.articles[0].title).toBe(titleModified);
+    });
+
+    test('UNMODIFIED returns only drafts that are not newer than the published peer', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            articles(
+              status: DRAFT
+              publicationFilter: UNMODIFIED
+              filters: { title: { eq: "${titleUnmodified}" } }
+            ) {
+              documentId
+              title
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.errors).toBeUndefined();
+      expect(res.body.data.articles).toHaveLength(1);
+      expect(res.body.data.articles[0].title).toBe(titleUnmodified);
+    });
+
+    test('articles_connection counts MODIFIED rows correctly (pagination resolver)', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            articles_connection(
+              status: DRAFT
+              publicationFilter: MODIFIED
+              filters: { title: { eq: "${titleModified}" } }
+            ) {
+              nodes {
+                documentId
+              }
+              pageInfo {
+                total
+              }
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.errors).toBeUndefined();
+      expect(res.body.data.articles_connection.nodes).toHaveLength(1);
+      expect(res.body.data.articles_connection.pageInfo.total).toBe(1);
+    });
+  });
+
+  test('publicationFilter PUBLISHED_WITHOUT_DRAFT returns no rows when every published row has a draft peer', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        {
+          articles(status: PUBLISHED, publicationFilter: PUBLISHED_WITHOUT_DRAFT) {
+            documentId
+            title
+          }
+        }
+      `,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.articles).toHaveLength(0);
+  });
 });

@@ -170,8 +170,19 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
 
   get publicationFilter() {
     return z
-      .enum(['never-published', 'has-published-version', 'modified', 'unmodified'])
-      .describe('Filter documents by derived publication state for the same documentId and locale');
+      .enum([
+        'never-published',
+        'has-published-version',
+        'modified',
+        'unmodified',
+        'never-published-document',
+        'has-published-version-document',
+        'published-without-draft',
+        'published-with-draft',
+      ])
+      .describe(
+        'Derived publication cohort: pair-scoped (per documentId+locale), document-scoped variants (-document), or published-slice diagnostics (published-without-draft / published-with-draft)'
+      );
   }
 
   /** @deprecated Use `publicationFilter` instead (`never-published`, `has-published-version`, …). */

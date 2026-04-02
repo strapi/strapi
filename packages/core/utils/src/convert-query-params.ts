@@ -80,7 +80,15 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
-  publicationFilter?: 'never-published' | 'has-published-version' | 'modified' | 'unmodified';
+  publicationFilter?:
+    | 'never-published'
+    | 'has-published-version'
+    | 'modified'
+    | 'unmodified'
+    | 'never-published-document'
+    | 'has-published-version-document'
+    | 'published-without-draft'
+    | 'published-with-draft';
   /**
    * @deprecated Replaced by `publicationFilter` (`never-published`, `has-published-version`, …).
    * Retained for backward compatibility with existing REST and GraphQL clients.

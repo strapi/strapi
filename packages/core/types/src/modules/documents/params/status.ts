@@ -4,7 +4,11 @@ export type PublicationFilterMode =
   | 'never-published'
   | 'has-published-version'
   | 'modified'
-  | 'unmodified';
+  | 'unmodified'
+  | 'never-published-document'
+  | 'has-published-version-document'
+  | 'published-without-draft'
+  | 'published-with-draft';
 
 export type Param = {
   status?: Kind;

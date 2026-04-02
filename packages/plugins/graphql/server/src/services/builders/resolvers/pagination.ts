@@ -1,6 +1,6 @@
-import { pick } from 'lodash/fp';
-
 import type { Context } from '../../types';
+
+import { mergePublicationFilterFromGraphQLArgs } from './merge-publication-args';
 
 export default ({ strapi }: Context) => ({
   async resolvePagination(parent: any, _: any, ctx: any) {
@@ -17,14 +17,15 @@ export default ({ strapi }: Context) => ({
       auth: ctx?.state?.auth,
     });
 
-    // `hasPublishedVersion` is deprecated; included so counts match root queries still using it.
-    const publicationFilterFromArgs = pick(['publicationFilter', 'hasPublishedVersion'], args);
+    const { publicationFilter } = mergePublicationFilterFromGraphQLArgs(
+      args as Record<string, unknown>
+    );
     const sanitized = sanitizedQuery as Record<string, unknown>;
     const { status, ...restSanitized } = sanitized;
 
     const total = await strapi.documents!(resourceUID).count({
       ...restSanitized,
-      ...publicationFilterFromArgs,
+      ...(publicationFilter !== undefined ? { publicationFilter } : {}),
       status: (status as 'draft' | 'published' | undefined) ?? 'published',
     });
 

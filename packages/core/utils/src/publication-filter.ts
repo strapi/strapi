@@ -6,13 +6,21 @@ export type PublicationFilterMode =
   | 'never-published'
   | 'has-published-version'
   | 'modified'
-  | 'unmodified';
+  | 'unmodified'
+  | 'never-published-document'
+  | 'has-published-version-document'
+  | 'published-without-draft'
+  | 'published-with-draft';
 
 const ALLOWED: PublicationFilterMode[] = [
   'never-published',
   'has-published-version',
   'modified',
   'unmodified',
+  'never-published-document',
+  'has-published-version-document',
+  'published-without-draft',
+  'published-with-draft',
 ];
 
 export const parsePublicationFilter = (value: unknown): PublicationFilterMode | undefined => {
@@ -29,6 +37,32 @@ export const parsePublicationFilter = (value: unknown): PublicationFilterMode | 
   );
 };
 
+type QueryParamDetails = { source?: string; param?: string; [key: string]: unknown };
+
+/**
+ * Validates a `publicationFilter` query value for Content API `validate.query` / `sanitize.query`.
+ * Attaches `details.source` and `details.param` so HTTP layer maps to 400 with correct field context.
+ */
+export const validatePublicationFilterQueryParam = (value: unknown): void => {
+  if (value === undefined || value === null) {
+    return;
+  }
+
+  try {
+    parsePublicationFilter(value);
+  } catch (e) {
+    if (e instanceof ValidationError) {
+      const prev = e.details as QueryParamDetails | undefined;
+      e.details = {
+        ...(prev && typeof prev === 'object' ? prev : {}),
+        source: 'query',
+        param: 'publicationFilter',
+      };
+    }
+    throw e;
+  }
+};
+
 const columnName = (meta: any, attr: string): string => {
   const a = meta.attributes[attr];
   if (!a) {
@@ -42,7 +76,7 @@ const emptyIdSelection = (knex: any, table: string, idCol: string) =>
 
 /**
  * Extra `id IN (subquery)` filter for publicationFilter, scoped to (documentId, locale) when i18n is enabled.
- * Returns null when the model does not use draft & publish.
+ * Document-scoped modes use `documentId` only. Returns null when the model does not use draft & publish.
  */
 export const buildPublicationFilterWhere = (
   knex: any,
@@ -66,13 +100,15 @@ export const buildPublicationFilterWhere = (
   const pairOn = (aliasA: string, aliasB: string) => {
     const parts = [`${aliasA}.${docCol} = ${aliasB}.${docCol}`];
     if (localeCol) {
-      // SQL `NULL = NULL` is unknown; drafts often store NULL locale when i18n is off.
       parts.push(
         `(${aliasA}.${localeCol} = ${aliasB}.${localeCol} OR (${aliasA}.${localeCol} IS NULL AND ${aliasB}.${localeCol} IS NULL))`
       );
     }
     return parts.join(' AND ');
   };
+
+  const documentOn = (aliasA: string, aliasB: string) =>
+    `${aliasA}.${docCol} = ${aliasB}.${docCol}`;
 
   const idIn = (sub: any) => ({ id: { $in: sub } });
 
@@ -178,6 +214,88 @@ export const buildPublicationFilterWhere = (
             .whereRaw(pairOn('d', 'p'))
             .whereNull(`d.${pubCol}`)
             .whereRaw(`d.${updatedCol} <= p.${updatedCol}`);
+        });
+
+      return idIn(sub);
+    }
+
+    case 'never-published-document': {
+      if (status === 'published') {
+        return idIn(emptyIdSelection(knex, table, idCol));
+      }
+
+      const sub = knex(`${table} as d`)
+        .select(`d.${idCol}`)
+        .whereNull(`d.${pubCol}`)
+        .whereNotExists(function (this: any) {
+          this.select(knex.raw('1'))
+            .from(`${table} as p`)
+            .whereRaw(documentOn('p', 'd'))
+            .whereNotNull(`p.${pubCol}`);
+        });
+
+      return idIn(sub);
+    }
+
+    case 'has-published-version-document': {
+      if (status === 'draft') {
+        const sub = knex(`${table} as d`)
+          .select(`d.${idCol}`)
+          .whereNull(`d.${pubCol}`)
+          .whereExists(function (this: any) {
+            this.select(knex.raw('1'))
+              .from(`${table} as p`)
+              .whereRaw(documentOn('p', 'd'))
+              .whereNotNull(`p.${pubCol}`);
+          });
+
+        return idIn(sub);
+      }
+
+      const sub = knex(`${table} as p`)
+        .select(`p.${idCol}`)
+        .whereNotNull(`p.${pubCol}`)
+        .whereExists(function (this: any) {
+          this.select(knex.raw('1'))
+            .from(`${table} as d`)
+            .whereRaw(documentOn('d', 'p'))
+            .whereNull(`d.${pubCol}`);
+        });
+
+      return idIn(sub);
+    }
+
+    case 'published-without-draft': {
+      if (status === 'draft') {
+        return idIn(emptyIdSelection(knex, table, idCol));
+      }
+
+      const sub = knex(`${table} as p`)
+        .select(`p.${idCol}`)
+        .whereNotNull(`p.${pubCol}`)
+        .whereNotExists(function (this: any) {
+          this.select(knex.raw('1'))
+            .from(`${table} as d`)
+            .whereRaw(pairOn('d', 'p'))
+            .whereNull(`d.${pubCol}`);
+        });
+
+      return idIn(sub);
+    }
+
+    case 'published-with-draft': {
+      if (status === 'draft') {
+        return idIn(emptyIdSelection(knex, table, idCol));
+      }
+
+      const sub = knex(`${table} as p`)
+        .select(`p.${idCol}`)
+        .whereNotNull(`p.${pubCol}`)
+        .whereExists(function (this: any) {
+          this.select(knex.raw('1'))
+            .from(`${table} as d`)
+            .whereRaw(pairOn('d', 'p'))
+            .whereNull(`d.${pubCol}`);
         });
 
       return idIn(sub);

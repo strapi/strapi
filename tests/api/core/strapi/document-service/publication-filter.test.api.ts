@@ -11,7 +11,15 @@ type ApiEntry = {
   title?: string;
 };
 
-type PublicationFilter = 'never-published' | 'has-published-version' | 'modified' | 'unmodified';
+type PublicationFilter =
+  | 'never-published'
+  | 'has-published-version'
+  | 'modified'
+  | 'unmodified'
+  | 'never-published-document'
+  | 'has-published-version-document'
+  | 'published-without-draft'
+  | 'published-with-draft';
 type Status = 'draft' | 'published';
 
 let strapi: Core.Strapi;
@@ -146,6 +154,12 @@ describe('Document Service - publicationFilter', () => {
     hasPublishedPairsPublished: [] as string[],
     modifiedPairs: [] as string[],
     unmodifiedPairs: [] as string[],
+    /** Draft rows whose document has no published row in any locale. */
+    neverPublishedDocumentDraftPairs: [] as string[],
+    /** Draft rows whose document has at least one published row (any locale). */
+    hasPublishedVersionDocumentDraftPairs: [] as string[],
+    /** Published rows with no draft peer for the same (documentId, locale) — orphan published. */
+    publishedWithoutDraftPublishedPairs: [] as string[],
   };
 
   beforeAll(async () => {
@@ -420,6 +434,30 @@ describe('Document Service - publicationFilter', () => {
       `${splitLocaleId}:nl`,
       `${inverseSplitId}:en`,
     ]);
+
+    expected.neverPublishedDocumentDraftPairs = sortKeys([
+      `${neverPublishedId}:en`,
+      `${neverPublishedId}:nl`,
+      `${noiseNeverOnlyId}:en`,
+      `${esOnlyNeverId}:es`,
+    ]);
+
+    expected.hasPublishedVersionDocumentDraftPairs = sortKeys([
+      `${modifiedId}:en`,
+      `${noiseModifiedId}:en`,
+      `${unmodifiedId}:en`,
+      `${noiseUnmodifiedId}:en`,
+      `${mixedId}:en`,
+      `${mixedId}:nl`,
+      `${partialLocaleId}:en`,
+      `${partialLocaleId}:nl`,
+      `${splitLocaleId}:en`,
+      `${bothLocalesModifiedId}:en`,
+      `${bothLocalesModifiedId}:nl`,
+      `${inverseSplitId}:nl`,
+    ]);
+
+    expected.publishedWithoutDraftPublishedPairs = sortKeys([`${orphanPublishedOnlyId}:en`]);
   });
 
   afterAll(async () => {
@@ -436,6 +474,18 @@ describe('Document Service - publicationFilter', () => {
       ['modified', 'published', () => expected.modifiedPairs],
       ['unmodified', 'draft', () => expected.unmodifiedPairs],
       ['unmodified', 'published', () => expected.unmodifiedPairs],
+      ['never-published-document', 'draft', () => expected.neverPublishedDocumentDraftPairs],
+      ['never-published-document', 'published', () => []],
+      [
+        'has-published-version-document',
+        'draft',
+        () => expected.hasPublishedVersionDocumentDraftPairs,
+      ],
+      ['has-published-version-document', 'published', () => expected.hasPublishedPairsPublished],
+      ['published-without-draft', 'draft', () => []],
+      ['published-without-draft', 'published', () => expected.publishedWithoutDraftPublishedPairs],
+      ['published-with-draft', 'draft', () => []],
+      ['published-with-draft', 'published', () => expected.hasPublishedPairsPublished],
     ] as const)(
       'returns exact set for publicationFilter=%s with status=%s',
       async (publicationFilter, status, getExpected) => {
@@ -599,6 +649,18 @@ describe('Document Service - publicationFilter', () => {
       ['modified', 'published', () => expected.modifiedPairs],
       ['unmodified', 'draft', () => expected.unmodifiedPairs],
       ['unmodified', 'published', () => expected.unmodifiedPairs],
+      ['never-published-document', 'draft', () => expected.neverPublishedDocumentDraftPairs],
+      ['never-published-document', 'published', () => []],
+      [
+        'has-published-version-document',
+        'draft',
+        () => expected.hasPublishedVersionDocumentDraftPairs,
+      ],
+      ['has-published-version-document', 'published', () => expected.hasPublishedPairsPublished],
+      ['published-without-draft', 'draft', () => []],
+      ['published-without-draft', 'published', () => expected.publishedWithoutDraftPublishedPairs],
+      ['published-with-draft', 'draft', () => []],
+      ['published-with-draft', 'published', () => expected.hasPublishedPairsPublished],
     ] as const)(
       'GET /api/articles returns exact set for publicationFilter=%s with status=%s',
       async (publicationFilter, status, getExpected) => {
