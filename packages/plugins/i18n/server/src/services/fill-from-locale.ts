@@ -28,7 +28,7 @@ const getRelationLabel = (relation: Record<string, unknown>, mainField: string):
   return String(relation.documentId ?? '');
 };
 
-const FIELDS_TO_REMOVE = new Set([
+const FIELDS_TO_IGNORE = new Set([
   'createdAt',
   'createdBy',
   'updatedAt',
@@ -40,6 +40,7 @@ const FIELDS_TO_REMOVE = new Set([
   'strapi_assignee',
   'locale',
   'status',
+  'localizations',
 ]);
 
 const STATUS_FIELDS = new Set(['id', 'documentId', 'locale', 'updatedAt', 'publishedAt']);
@@ -391,7 +392,7 @@ const processDocumentData = async (
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(data)) {
-    if (FIELDS_TO_REMOVE.has(key)) {
+    if (FIELDS_TO_IGNORE.has(key)) {
       continue;
     }
 
