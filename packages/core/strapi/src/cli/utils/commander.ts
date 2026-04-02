@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import { isNaN } from 'lodash/fp';
 import { exitWith } from './helpers';
 import { getInquirer } from './get-inquirer';
+
 /**
  * argParser: Parse a comma-delimited string as an array
  */

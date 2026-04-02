@@ -156,6 +156,7 @@ tests/cli/.env
 # AI tools
 ############################
 CLAUDE.local.md
+.claude
 
 ############################
 # Strapi
