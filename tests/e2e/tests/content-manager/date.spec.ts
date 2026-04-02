@@ -14,7 +14,7 @@ function toMMDDYYYY(date: Date) {
 
 test.describe('Date field tests', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
 

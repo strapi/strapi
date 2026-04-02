@@ -103,7 +103,7 @@ const ListViewPage = () => {
   usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
 
   const { collectionType, model, schema } = useDoc();
-  const { list } = useDocumentLayout(model);
+  const { list, listViewConversionContext } = useDocumentLayout(model);
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
@@ -117,12 +117,22 @@ const ListViewPage = () => {
       !displayedHeaderNames ||
       !list.metadatas ||
       Object.keys(list.metadatas).length <= 0 ||
-      !schema?.attributes
+      !schema?.attributes ||
+      !listViewConversionContext
     )
       return [];
 
-    return convertListLayoutToFieldLayouts(displayedHeaderNames, schema.attributes, list.metadatas);
-  }, [displayedHeaderNames, schema, list]);
+    return convertListLayoutToFieldLayouts(
+      displayedHeaderNames,
+      schema.attributes,
+      list.metadatas,
+      {
+        configurations: listViewConversionContext.componentConfigurations,
+        schemas: listViewConversionContext.componentSchemas,
+      },
+      listViewConversionContext.contentTypeSchemas
+    );
+  }, [displayedHeaderNames, schema, list, listViewConversionContext]);
 
   const handleSetHeaders = (headers: string[]) => {
     setDisplayedHeaderNames(headers);

@@ -2,10 +2,13 @@ import type { Core } from '@strapi/types';
 import { isObject } from 'lodash/fp';
 import chalk from 'chalk';
 
+import fs from 'fs-extra';
+
 import {
   engine as engineDataTransfer,
   strapi as strapiDataTransfer,
   file as fileDataTransfer,
+  directory as directoryDataTransfer,
 } from '@strapi/data-transfer';
 
 import {
@@ -26,6 +29,10 @@ import { exitWith } from '../../utils/helpers';
 const {
   providers: { createLocalFileSourceProvider },
 } = fileDataTransfer;
+
+const {
+  providers: { createLocalDirectorySourceProvider },
+} = directoryDataTransfer;
 
 const {
   providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
@@ -52,7 +59,7 @@ type EngineOptions = Parameters<typeof createTransferEngine>[2];
 /**
  * Import command.
  *
- * It transfers data from a file to a local Strapi instance
+ * It transfers data from a Strapi backup file or unpacked export directory to a local Strapi instance
  */
 export default async (opts: CmdOptions) => {
   // validate inputs from Commander
@@ -60,12 +67,10 @@ export default async (opts: CmdOptions) => {
     exitWith(1, 'Could not parse arguments');
   }
 
-  /**
-   * From strapi backup file
-   */
-  const sourceOptions = getLocalFileSourceOptions(opts);
-
-  const source = createLocalFileSourceProvider(sourceOptions);
+  const backupPath = opts.file ?? '';
+  const source = (await fs.stat(backupPath)).isDirectory()
+    ? createLocalDirectorySourceProvider({ directory: { path: backupPath } })
+    : createLocalFileSourceProvider(getLocalFileSourceOptions(opts));
 
   /**
    * To local Strapi instance

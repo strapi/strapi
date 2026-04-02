@@ -8,7 +8,7 @@ import { navToHeader } from '../../../utils/shared';
 
 test.describe('Media Library', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await resetFiles();
     await page.goto('/admin');
     await login({ page });

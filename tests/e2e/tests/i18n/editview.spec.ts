@@ -28,7 +28,7 @@ test.describe('Edit view', () => {
   test.describe.configure({ timeout: 500000 });
 
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -597,7 +597,7 @@ test.describe('Edit view', () => {
 
 describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(() => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -640,7 +640,7 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 't
   'Unstable edit view',
   () => {
     test.beforeEach(async ({ page }) => {
-      await resetDatabaseAndImportDataFromPath('with-admin.tar');
+      await resetDatabaseAndImportDataFromPath('with-admin');
       await page.goto('/admin');
       await login({ page });
     });
