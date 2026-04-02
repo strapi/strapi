@@ -107,6 +107,30 @@ const buildPublicationFilterRestQs = (
   return query;
 };
 
+/** REST query with deprecated `hasPublishedVersion` (strings match typical `?hasPublishedVersion=true` clients). */
+const buildHasPublishedVersionRestQs = (
+  corpusDocumentIds: string[],
+  hasPublishedVersion: 'true' | 'false',
+  status: Status | undefined
+): Record<string, unknown> => {
+  const query: Record<string, unknown> = {
+    locale: '*',
+    filters: {
+      $and: [
+        { documentId: { $in: [...corpusDocumentIds] } },
+        { title: { $startsWith: PF_PREFIX } },
+      ],
+    },
+    hasPublishedVersion,
+  };
+
+  if (status) {
+    query.status = status;
+  }
+
+  return query;
+};
+
 const getPfArticlesRest = async (
   status: Status | undefined,
   publicationFilter: PublicationFilter | undefined,
@@ -442,6 +466,11 @@ describe('Document Service - publicationFilter', () => {
       `${esOnlyNeverId}:es`,
     ]);
 
+    // `has-published-version-document` is the string mode used when normalizing legacy `hasPublishedVersion: true`
+    // (see `has-published-version.test.api.ts`). That legacy filter is document-scoped: draft rows whose `documentId`
+    // appears in any published row (any locale). It is strictly broader than pair-scoped `has-published-version`
+    // (e.g. splitLocale has draft EN + published NL → both draft rows qualify). The list below must match that
+    // contract, not the smaller hand-written set we had before, or CI would contradict the legacy helper.
     expected.hasPublishedVersionDocumentDraftPairs = sortKeys([
       `${modifiedId}:en`,
       `${noiseModifiedId}:en`,
@@ -452,8 +481,10 @@ describe('Document Service - publicationFilter', () => {
       `${partialLocaleId}:en`,
       `${partialLocaleId}:nl`,
       `${splitLocaleId}:en`,
+      `${splitLocaleId}:nl`,
       `${bothLocalesModifiedId}:en`,
       `${bothLocalesModifiedId}:nl`,
+      `${inverseSplitId}:en`,
       `${inverseSplitId}:nl`,
     ]);
 
@@ -462,6 +493,140 @@ describe('Document Service - publicationFilter', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
+  });
+
+  /**
+   * Guarantees deprecated `hasPublishedVersion` and the normalized `publicationFilter` document modes stay
+   * identical (same rows for the same corpus). If this fails, a client using only the legacy param would see
+   * different results than one using the new param — a breaking regression.
+   */
+  describe('Legacy hasPublishedVersion ↔ publicationFilter parity', () => {
+    const assertSamePairs = (a: ApiEntry[], b: ApiEntry[]) => {
+      expect(sortKeys(a.map(toPairKey))).toEqual(sortKeys(b.map(toPairKey)));
+    };
+
+    it.each([
+      ['draft', 'draft' as const],
+      ['published', 'published' as const],
+    ])(
+      'document service: hasPublishedVersion=true matches publicationFilter=has-published-version-document (status=%s)',
+      async (_label, status) => {
+        const legacy = await findPfArticles(
+          { status, hasPublishedVersion: true } as any,
+          corpusDocumentIds
+        );
+        const mapped = await findPfArticles(
+          { status, publicationFilter: 'has-published-version-document' } as any,
+          corpusDocumentIds
+        );
+        assertSamePairs(legacy, mapped);
+      }
+    );
+
+    it.each([
+      ['draft', 'draft' as const],
+      ['published', 'published' as const],
+    ])(
+      'document service: hasPublishedVersion=false matches publicationFilter=never-published-document (status=%s)',
+      async (_label, status) => {
+        const legacy = await findPfArticles(
+          { status, hasPublishedVersion: false } as any,
+          corpusDocumentIds
+        );
+        const mapped = await findPfArticles(
+          { status, publicationFilter: 'never-published-document' } as any,
+          corpusDocumentIds
+        );
+        assertSamePairs(legacy, mapped);
+      }
+    );
+
+    it.each([
+      ['draft', 'draft' as const],
+      ['published', 'published' as const],
+    ])(
+      'document service: count() matches for legacy vs mapped params (status=%s)',
+      async (_label, status) => {
+        const base = {
+          locale: '*',
+          status,
+          filters: corpusFilters(corpusDocumentIds),
+        };
+        const cTrue = await strapi.documents(ARTICLE_UID).count({
+          ...base,
+          hasPublishedVersion: true,
+        } as any);
+        const cMappedTrue = await strapi.documents(ARTICLE_UID).count({
+          ...base,
+          publicationFilter: 'has-published-version-document',
+        } as any);
+        expect(cTrue).toBe(cMappedTrue);
+
+        const cFalse = await strapi.documents(ARTICLE_UID).count({
+          ...base,
+          hasPublishedVersion: false,
+        } as any);
+        const cMappedFalse = await strapi.documents(ARTICLE_UID).count({
+          ...base,
+          publicationFilter: 'never-published-document',
+        } as any);
+        expect(cFalse).toBe(cMappedFalse);
+      }
+    );
+
+    it.each([
+      ['draft', 'draft' as const],
+      ['published', 'published' as const],
+    ])(
+      'REST: ?hasPublishedVersion=true matches ?publicationFilter=has-published-version-document (status=%s)',
+      async (_label, status) => {
+        const legacyRes = await rqContent({
+          method: 'GET',
+          url: '/articles',
+          qs: buildHasPublishedVersionRestQs(corpusDocumentIds, 'true', status),
+        });
+        const mappedRes = await rqContent({
+          method: 'GET',
+          url: '/articles',
+          qs: buildPublicationFilterRestQs(
+            corpusDocumentIds,
+            'has-published-version-document',
+            status
+          ),
+        });
+        expect(legacyRes.statusCode).toBe(200);
+        expect(mappedRes.statusCode).toBe(200);
+        assertSamePairs(
+          (legacyRes.body.data ?? []) as ApiEntry[],
+          (mappedRes.body.data ?? []) as ApiEntry[]
+        );
+      }
+    );
+
+    it.each([
+      ['draft', 'draft' as const],
+      ['published', 'published' as const],
+    ])(
+      'REST: ?hasPublishedVersion=false matches ?publicationFilter=never-published-document (status=%s)',
+      async (_label, status) => {
+        const legacyRes = await rqContent({
+          method: 'GET',
+          url: '/articles',
+          qs: buildHasPublishedVersionRestQs(corpusDocumentIds, 'false', status),
+        });
+        const mappedRes = await rqContent({
+          method: 'GET',
+          url: '/articles',
+          qs: buildPublicationFilterRestQs(corpusDocumentIds, 'never-published-document', status),
+        });
+        expect(legacyRes.statusCode).toBe(200);
+        expect(mappedRes.statusCode).toBe(200);
+        assertSamePairs(
+          (legacyRes.body.data ?? []) as ApiEntry[],
+          (mappedRes.body.data ?? []) as ApiEntry[]
+        );
+      }
+    );
   });
 
   describe('document service findMany', () => {
