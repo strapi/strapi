@@ -17,7 +17,8 @@ export default ({ strapi }: Context) => ({
       auth: ctx?.state?.auth,
     });
 
-    const publicationFilterFromArgs = pick(['publicationFilter'], args);
+    // `hasPublishedVersion` is deprecated; included so counts match root queries still using it.
+    const publicationFilterFromArgs = pick(['publicationFilter', 'hasPublishedVersion'], args);
     const sanitized = sanitizedQuery as Record<string, unknown>;
     const { status, ...restSanitized } = sanitized;
 

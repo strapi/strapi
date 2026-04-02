@@ -17,6 +17,8 @@ export const SHARED_QUERY_PARAM_KEYS = [
   'limit',
   '_q',
   'publicationFilter',
+  // Deprecated: replaced by `publicationFilter` for richer cohorts; kept for backward compatibility.
+  'hasPublishedVersion',
 ] as const;
 
 /**

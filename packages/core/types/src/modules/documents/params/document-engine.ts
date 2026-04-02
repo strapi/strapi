@@ -5,6 +5,8 @@ import { ID } from '..';
 
 /**
  * Document Service specific method params
+ *
+ * `hasPublishedVersion` on these picks is deprecated in favor of `publicationFilter`.
  */
 export type FindMany<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
@@ -16,6 +18,7 @@ export type FindMany<TContentTypeUID extends UID.ContentType> = Pick<
   | 'populate'
   | 'status'
   | 'publicationFilter'
+  | 'hasPublishedVersion'
   | 'locale'
   | 'plugin'
   | 'lookup'
@@ -32,6 +35,7 @@ export type FindFirst<TContentTypeUID extends UID.ContentType> = Pick<
   | 'populate'
   | 'status'
   | 'publicationFilter'
+  | 'hasPublishedVersion'
   | 'locale:string'
   | 'plugin'
   | 'lookup'
@@ -46,7 +50,14 @@ export type FindOne<TContentTypeUID extends UID.ContentType> = Pick<
 
 export type Delete<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'fields' | 'populate' | 'filters' | 'status' | 'publicationFilter' | 'locale:string' | 'lookup'
+  | 'fields'
+  | 'populate'
+  | 'filters'
+  | 'status'
+  | 'publicationFilter'
+  | 'hasPublishedVersion'
+  | 'locale:string'
+  | 'lookup'
 > & {
   documentId: ID;
 };

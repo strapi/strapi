@@ -798,7 +798,7 @@ describe('Document Service Validations', () => {
         expect(Array.isArray(result)).toBe(true);
       });
 
-      it('should accept allowed params including publicationFilter and strip extra unrecognized keys', async () => {
+      it('should accept allowed params including publicationFilter, hasPublishedVersion and strip extra unrecognized keys', async () => {
         strapi.config.set('api.documents.strictParams', true);
 
         const result = await strapi.documents(ARTICLE_UID).findMany({
@@ -807,6 +807,13 @@ describe('Document Service Validations', () => {
         });
         expect(result).toBeDefined();
         expect(Array.isArray(result)).toBe(true);
+
+        const resultLegacy = await strapi.documents(ARTICLE_UID).findMany({
+          status: 'draft',
+          hasPublishedVersion: false,
+        });
+        expect(resultLegacy).toBeDefined();
+        expect(Array.isArray(resultLegacy)).toBe(true);
 
         const resultWithExtra = await strapi.documents(ARTICLE_UID).findMany({
           status: 'draft',

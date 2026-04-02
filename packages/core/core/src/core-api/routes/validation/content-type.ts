@@ -7,12 +7,14 @@ import * as z from 'zod/v4';
 import { createAttributesInputSchema, createAttributesSchema } from './mappers';
 import { AbstractCoreRouteValidator } from './common';
 
+/** REST query param names. `hasPublishedVersion` is deprecated in favor of `publicationFilter`. */
 export type QueryParam =
   | 'fields'
   | 'populate'
   | 'sort'
   | 'status'
   | 'publicationFilter'
+  | 'hasPublishedVersion'
   | 'locale'
   | 'pagination'
   | 'filters'
@@ -172,6 +174,15 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       .describe('Filter documents by derived publication state for the same documentId and locale');
   }
 
+  /** @deprecated Use `publicationFilter` instead (`never-published`, `has-published-version`, …). */
+  get hasPublishedVersion() {
+    return z
+      .union([z.boolean(), z.enum(['true', 'false'])])
+      .describe(
+        '[Deprecated: prefer publicationFilter] Filter documents by whether they have a published version. Use with status=draft to find documents that have never been published'
+      );
+  }
+
   get data() {
     const isWritableAttribute = ([attributeName]: [string, Schema.Attribute.AnyAttribute]) => {
       return contentTypes.isWritableAttribute(this._schema, attributeName);
@@ -220,6 +231,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       pagination: () => this.pagination.optional(),
       status: () => this.status.optional(),
       publicationFilter: () => this.publicationFilter.optional(),
+      hasPublishedVersion: () => this.hasPublishedVersion.optional(),
       _q: () => this.query.optional(),
     } as const;
 

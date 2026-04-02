@@ -68,14 +68,15 @@ const getDocumentIdsByDraftPublishRelation = async (
 
 /** Map from __status filter value to top-level query fields (mirrors client STATUS_PARAMS). */
 const STATUS_QUERY_FROM_FILTER: Record<string, Record<string, string>> = {
-  draft: { status: 'draft', publicationFilter: 'never-published' },
+  // Draft list uses deprecated `hasPublishedVersion` (equivalent cohort: publicationFilter=never-published).
+  draft: { status: 'draft', hasPublishedVersion: 'false' },
   published: { status: 'published' },
   'published-modified': { publicationStatusFilter: 'published-modified' },
   'published-unmodified': { publicationStatusFilter: 'published-unmodified' },
 };
 
 /**
- * Extracts __status from query.filters.$and into top-level status, publicationFilter,
+ * Extracts __status from query.filters.$and into top-level status, hasPublishedVersion,
  * and publicationStatusFilter so list works with either transformed params or raw filter params.
  */
 const normalizeStatusFromFilters = (query: Record<string, unknown>): void => {
@@ -285,6 +286,11 @@ export default {
 
     if (query.publicationFilter !== undefined) {
       findPageParams.publicationFilter = query.publicationFilter;
+    }
+
+    // Pass through deprecated `hasPublishedVersion` so "Draft" filter returns only drafts with no published version
+    if (query.hasPublishedVersion !== undefined) {
+      findPageParams.hasPublishedVersion = query.hasPublishedVersion;
     }
 
     if (

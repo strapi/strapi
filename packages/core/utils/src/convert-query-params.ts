@@ -81,6 +81,11 @@ export interface Params {
   pageSize?: number | string;
   status?: 'draft' | 'published';
   publicationFilter?: 'never-published' | 'has-published-version' | 'modified' | 'unmodified';
+  /**
+   * @deprecated Replaced by `publicationFilter` (`never-published`, `has-published-version`, …).
+   * Retained for backward compatibility with existing REST and GraphQL clients.
+   */
+  hasPublishedVersion?: boolean | 'true' | 'false';
 }
 
 type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;

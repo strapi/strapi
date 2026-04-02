@@ -101,6 +101,14 @@ export default ({ strapi }: Context) => {
             ? context.rootQueryArgs.publicationFilter
             : undefined;
 
+        // Deprecated root arg; prefer inheriting `publicationFilter`.
+        const inheritedHasPublishedVersion =
+          context.rootQueryArgs?.hasPublishedVersion !== undefined &&
+          context.rootQueryArgs?._originField &&
+          isBuiltInQueryField(context.rootQueryArgs._originField)
+            ? context.rootQueryArgs.hasPublishedVersion
+            : undefined;
+
         let publicationFilterWhere: Record<string, any> = {};
         if (isTargetDraftAndPublishContentType && inheritedPublicationFilter !== undefined) {
           let mode;
@@ -125,7 +133,38 @@ export default ({ strapi }: Context) => {
           }
         }
 
-        const dbQuery = merge(merge(defaultFilters, publicationFilterWhere), transformedQuery);
+        // Deprecated `hasPublishedVersion` (documentId-only subquery); skipped when `publicationFilter` applies above.
+        let hasPublishedVersionFilters: Record<string, any> = {};
+        if (
+          isTargetDraftAndPublishContentType &&
+          inheritedHasPublishedVersion !== undefined &&
+          Object.keys(publicationFilterWhere).length === 0
+        ) {
+          const meta = strapi.db.metadata.get(targetUID);
+          const tableName = meta.tableName;
+          const documentIdAttr = meta.attributes.documentId;
+          const publishedAtAttr = meta.attributes.publishedAt;
+          const documentIdColumn =
+            ('columnName' in documentIdAttr && documentIdAttr.columnName) || 'document_id';
+          const publishedAtColumn =
+            ('columnName' in publishedAtAttr && publishedAtAttr.columnName) || 'published_at';
+
+          const knex = strapi.db.connection;
+          const subquery = knex(tableName)
+            .distinct(documentIdColumn)
+            .whereNotNull(publishedAtColumn);
+
+          hasPublishedVersionFilters = {
+            where: {
+              documentId: inheritedHasPublishedVersion ? { $in: subquery } : { $notIn: subquery },
+            },
+          };
+        }
+
+        const dbQuery = merge(
+          merge(merge(defaultFilters, publicationFilterWhere), hasPublishedVersionFilters),
+          transformedQuery
+        );
 
         // Sign media URLs if upload plugin is available and using private provider
         const data = await (async () => {

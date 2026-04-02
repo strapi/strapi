@@ -2,7 +2,7 @@ import { omit } from 'lodash/fp';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../../types';
 
-/** Merge sanitized query with resolver args so GraphQL-coerced `publicationFilter` is not dropped. */
+/** Merge sanitized query with resolver args so GraphQL-coerced publication args are not dropped. */
 const mergeDocumentListParams = (
   sanitizedQuery: Record<string, unknown>,
   args: Record<string, unknown>
@@ -16,6 +16,11 @@ const mergeDocumentListParams = (
 
   if (args.publicationFilter !== undefined && args.publicationFilter !== null) {
     merged.publicationFilter = args.publicationFilter;
+  }
+
+  // Deprecated GraphQL arg; prefer `publicationFilter`.
+  if (args.hasPublishedVersion !== undefined && args.hasPublishedVersion !== null) {
+    merged.hasPublishedVersion = args.hasPublishedVersion;
   }
 
   return merged;
