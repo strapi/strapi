@@ -3,12 +3,6 @@
  * (guileen/node-sendmail) behavior for recipient grouping and domain extraction.
  */
 
-/** Max length for an SMTP domain part / DNS name. */
-const MAX_DOMAIN_LENGTH = 253;
-
-/** RFC 5321 practical upper bound; cheap pre-check before any parsing. */
-const MAX_EMAIL_LOCAL_PART_PLUS_DOMAIN = 320;
-
 /** Extract bare email from `Name <email@domain>` or return trimmed input (linear time, no regex). */
 export function extractEmail(address: string): string {
   const trimmed = address.trim();
@@ -23,10 +17,13 @@ export function extractEmail(address: string): string {
   return trimmed.slice(open + 1, close).trim();
 }
 
-/** Split comma-separated address lists (legacy package used string + comma split). */
-export function parseAddressList(addresses: string | undefined): string[] {
+/** Split address lists (legacy package accepted both string and array). */
+export function parseAddressList(addresses: string | string[] | undefined): string[] {
   if (!addresses) {
     return [];
+  }
+  if (Array.isArray(addresses)) {
+    return addresses.map((a) => extractEmail(String(a))).filter((a) => a.length > 0);
   }
   return addresses
     .split(',')
@@ -34,34 +31,30 @@ export function parseAddressList(addresses: string | undefined): string[] {
     .filter((a) => a.length > 0);
 }
 
+/** Legacy sendmail host extraction regex from guileen/node-sendmail@1.6.1. */
+const LEGACY_HOST_REGEX = /[^@]+@([\w\d\-.]+)/;
+
 /**
- * Legacy `sendmail` used `[\w\d\-.]+` for the domain. We only run this on strings already
- * capped to `MAX_DOMAIN_LENGTH`, so the match is linear in a bounded input (no ReDoS).
+ * Do not run the legacy regex on unbounded input (defense in depth; the pattern is not ReDoS-prone,
+ * but capping work is cheap and matches RFC 5321 practical address size expectations).
  */
-const LEGACY_DOMAIN_CHAR_PATTERN = /^[a-zA-Z0-9_.-]+$/;
+const MAX_INPUT_LEN_FOR_LEGACY_HOST_REGEX = 320;
 
 /** Domain part of an email address (after the last `@`). */
-export function getHostFromAddress(email: string): string {
+export function getHostFromAddress(email: string): string | undefined {
   const normalized = extractEmail(email);
-  if (normalized.length > MAX_EMAIL_LOCAL_PART_PLUS_DOMAIN) {
-    return 'localhost';
+  if (normalized.length > MAX_INPUT_LEN_FOR_LEGACY_HOST_REGEX) {
+    return undefined;
   }
-  const at = normalized.lastIndexOf('@');
-  if (at <= 0 || at === normalized.length - 1) {
-    return 'localhost';
-  }
-  const domain = normalized.slice(at + 1);
-  if (domain.length > MAX_DOMAIN_LENGTH || !LEGACY_DOMAIN_CHAR_PATTERN.test(domain)) {
-    return 'localhost';
-  }
-  return domain;
+  const match = LEGACY_HOST_REGEX.exec(normalized);
+  return match?.[1];
 }
 
 /** Group recipient addresses by recipient domain (MX routing key). */
 export function groupRecipientsByDomain(recipients: string[]): Record<string, string[]> {
   const groups: Record<string, string[]> = {};
   for (const raw of recipients) {
-    const host = getHostFromAddress(raw);
+    const host = String(getHostFromAddress(raw));
     if (!groups[host]) {
       groups[host] = [];
     }
@@ -71,7 +64,11 @@ export function groupRecipientsByDomain(recipients: string[]): Record<string, st
 }
 
 /** Collect all recipients from to / cc / bcc (same sources as legacy sendmail). */
-export function collectRecipients(mail: { to?: string; cc?: string; bcc?: string }): string[] {
+export function collectRecipients(mail: {
+  to?: string | string[];
+  cc?: string | string[];
+  bcc?: string | string[];
+}): string[] {
   return [
     ...parseAddressList(mail.to),
     ...parseAddressList(mail.cc),

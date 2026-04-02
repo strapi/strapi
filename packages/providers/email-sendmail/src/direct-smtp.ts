@@ -71,9 +71,10 @@ export async function resolveMxHosts(
 
   records.sort((a, b) => a.priority - b.priority);
 
-  const smtpHost = options.smtpHost;
-  if (smtpHost !== undefined && smtpHost !== -1 && typeof smtpHost === 'string') {
-    records.push({ exchange: smtpHost, priority: 9999 });
+  // Mirror legacy `const smtpHost = options.smtpHost || -1` behavior: falsy (eg 0) disables.
+  const smtpHost = options.smtpHost || -1;
+  if (smtpHost !== -1) {
+    records.push({ exchange: String(smtpHost), priority: 9999 });
   }
 
   return records.map((r) => ({
@@ -95,6 +96,8 @@ async function trySendViaHost(
     host: exchange,
     port: smtpPort,
     secure: false,
+    // Legacy sendmail@1.6.1 uses plain SMTP sockets and does not attempt STARTTLS.
+    ignoreTLS: true,
     requireTLS: false,
     name: srcHost,
     tls: {
@@ -103,7 +106,6 @@ async function trySendViaHost(
     connectionTimeout: 60_000,
     greetingTimeout: 30_000,
     socketTimeout: 60_000,
-    opportunisticTLS: true,
   });
 
   try {
@@ -133,7 +135,7 @@ export async function sendDirectSmtp(
 
   const fromHeader = String(mail.from || '');
   const fromAddr = extractEmail(fromHeader);
-  const srcHost = getHostFromAddress(fromAddr);
+  const srcHost = String(getHostFromAddress(fromAddr));
 
   const dkimOpt = providerOptions.dkim;
   const dkim: SendMailOptions['dkim'] =
@@ -146,9 +148,9 @@ export async function sendDirectSmtp(
       : undefined;
 
   const recipients = collectRecipients({
-    to: mail.to as string | undefined,
-    cc: mail.cc as string | undefined,
-    bcc: mail.bcc as string | undefined,
+    to: mail.to as string | string[] | undefined,
+    cc: mail.cc as string | string[] | undefined,
+    bcc: mail.bcc as string | string[] | undefined,
   });
 
   if (recipients.length === 0) {
@@ -157,6 +159,8 @@ export async function sendDirectSmtp(
 
   const groups = groupRecipientsByDomain(recipients);
   const fromEnvelope = fromAddr;
+
+  let anyDomainDelivered = false;
 
   for (const domain of Object.keys(groups)) {
     const domainRecipients = groups[domain];
@@ -191,8 +195,14 @@ export async function sendDirectSmtp(
       }
     }
 
-    if (!sent) {
-      throw lastError ?? new Error(`Failed to deliver mail for domain ${domain}`);
+    if (sent) {
+      anyDomainDelivered = true;
+    } else {
+      logger.error(`Sendmail provider: failed to deliver for domain ${domain}`, lastError);
     }
+  }
+
+  if (!anyDomainDelivered) {
+    throw new Error('Failed to deliver mail for all recipient domains');
   }
 }

@@ -66,6 +66,20 @@ describe('resolveMxHosts', () => {
     expect(hosts.map((h) => h.exchange)).toEqual(['mx.example.com', 'relay.extra.com']);
   });
 
+  it('appends smtpHost when set to a number (legacy sendmail coercion)', async () => {
+    mockedResolveMx.mockResolvedValueOnce([{ exchange: 'mx.example.com', priority: 0 }]);
+
+    const hosts = await resolveMxHosts('example.com', { smtpHost: 2525 });
+    expect(hosts.map((h) => h.exchange)).toEqual(['mx.example.com', '2525']);
+  });
+
+  it('treats smtpHost 0 as disabled (legacy: options.smtpHost || -1)', async () => {
+    mockedResolveMx.mockResolvedValueOnce([{ exchange: 'mx.example.com', priority: 0 }]);
+
+    const hosts = await resolveMxHosts('example.com', { smtpHost: 0 });
+    expect(hosts.map((h) => h.exchange)).toEqual(['mx.example.com']);
+  });
+
   it('throws when MX resolution returns empty', async () => {
     mockedResolveMx.mockResolvedValueOnce([]);
 
