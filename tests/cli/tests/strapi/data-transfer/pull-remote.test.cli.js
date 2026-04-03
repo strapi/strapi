@@ -46,8 +46,8 @@ describe('strapi transfer pull — remote to local (generated media)', () => {
       throw new Error('Expected TEST_APPS to list two app paths (strapi domain testApps: 2)');
     }
 
-    await resetDatabaseAndImportDataFromPathProgrammatic(remotePath, 'with-admin.tar');
-    await resetDatabaseAndImportDataFromPathProgrammatic(localPath, 'with-admin.tar');
+    await resetDatabaseAndImportDataFromPathProgrammatic(remotePath, 'with-admin');
+    await resetDatabaseAndImportDataFromPathProgrammatic(localPath, 'with-admin');
 
     await seedTransferTestMedia(remotePath);
 
