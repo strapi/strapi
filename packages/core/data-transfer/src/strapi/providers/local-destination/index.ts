@@ -31,6 +31,8 @@ export interface ILocalStrapiDestinationProviderOptions {
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
   restore?: restore.IRestoreOptions; // erase data in strapi database before transfer; required if strategy is 'restore'
   strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
+  /** CLI / UI: human-readable progress during {@link beforeTransfer} (restore prep). */
+  onTransferPhase?: (message: string) => void;
 }
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {
@@ -177,11 +179,20 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Strapi instance not found');
     }
 
+    this.options.onTransferPhase?.('Local: preparing destination for restore…');
+
     await this.transaction?.attach(async (trx) => {
       try {
         if (this.options.strategy === 'restore') {
+          if (this.#areAssetsIncluded()) {
+            this.options.onTransferPhase?.('Local: backing up existing upload folder…');
+          }
           await this.#handleAssetsBackup();
+          if (this.#areAssetsIncluded()) {
+            this.options.onTransferPhase?.('Local: deleting existing media files from disk…');
+          }
           await this.#deleteAllAssets(trx);
+          this.options.onTransferPhase?.('Local: clearing database content for restore…');
           await this.#deleteFromRestoreOptions();
         }
       } catch (error) {
