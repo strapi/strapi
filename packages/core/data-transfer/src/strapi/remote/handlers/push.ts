@@ -7,6 +7,7 @@ import type { TransferStage, IAsset, Protocol } from '../../../../types';
 
 import { ProviderTransferError } from '../../../errors/providers';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
+import { writeWritableAsync } from '../../../utils/write-writable-async';
 import { createLocalStrapiDestinationProvider } from '../../providers';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
 import { Handler } from './abstract';
@@ -113,18 +114,6 @@ export interface PushHandler extends Handler {
    */
   assertValidStreamTransferStep(stage: TransferStage): void;
 }
-
-const writeAsync = <T>(stream: Writable, data: T) => {
-  return new Promise<void>((resolve, reject) => {
-    stream.write(data, (error) => {
-      if (error) {
-        reject(error);
-      }
-
-      resolve();
-    });
-  });
-};
 
 export const createPushController = handlerControllerFactory<Partial<PushHandler>>((proto) => ({
   isTransferStarted(this: PushHandler) {
@@ -394,7 +383,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       await Promise.all(
         msg.data.map(async (item) => {
           this.stats[stage].started += 1;
-          await writeAsync(stream, item);
+          await writeWritableAsync(stream, item);
           this.stats[stage].finished += 1;
         })
       );
@@ -471,13 +460,13 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         strapi.log.debug(
           `[Transfer destination] Asset start #${this.stats.assets.started} id=${assetID} filename=${filename}`
         );
-        writeAsync(assetsStream, this.assets[assetID]);
+        await writeWritableAsync(assetsStream, this.assets[assetID]);
       }
 
       if (action === 'stream') {
         const chunk = decodeTransferAssetStreamItem(item);
         this.assetChecksums?.[assetID]?.update(chunk);
-        await writeAsync(this.assets[assetID].stream, chunk);
+        await writeWritableAsync(this.assets[assetID].stream, chunk);
       }
 
       if (action === 'end') {

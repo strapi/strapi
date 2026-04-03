@@ -20,6 +20,7 @@ import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
+import { writeWritableAsync } from '../../../utils/write-writable-async';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import {
   createDispatcher,
@@ -89,13 +90,11 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   #checksumsEnabled = false;
 
-  /** Set from pull server `start` response for `assets` when present (for engine `getStageTotals`). */
-  #cachedAssetsTotals?: StageTotalsEstimate;
+  /** Set from pull server `start` response when `totals` is present (for engine `getStageTotals`). */
+  #cachedStageTotals: Partial<Record<TransferStage, StageTotalsEstimate>> = {};
 
   async #createStageReadStream(stage: Exclude<TransferStage, 'schemas'>) {
-    if (stage === 'assets') {
-      this.#cachedAssetsTotals = undefined;
-    }
+    this.#cachedStageTotals[stage] = undefined;
 
     const startResult = await this.#startStep(stage);
 
@@ -108,8 +107,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       totals?: StageTotalsEstimate;
     };
 
-    if (stage === 'assets' && totals && (totals.totalBytes != null || totals.totalCount != null)) {
-      this.#cachedAssetsTotals = totals;
+    if (totals && (totals.totalBytes != null || totals.totalCount != null)) {
+      this.#cachedStageTotals[stage] = totals;
     }
 
     // Default object-mode HWM (~16 chunks). Do not await `drain` on manual `push` while `pipe()`
@@ -164,17 +163,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     return this.#createStageReadStream('links');
   }
 
-  writeAsync = <T>(stream: Writable, data: T) => {
-    return new Promise<void>((resolve, reject) => {
-      stream.write(data, (error) => {
-        if (error) {
-          reject(error);
-        }
-
-        resolve();
-      });
-    });
-  };
+  writeAsync = (stream: Writable, data: unknown) => writeWritableAsync(stream, data);
 
   async createAssetsReadStream(): Promise<Readable> {
     // Create the streams used to transfer the assets
@@ -611,11 +600,15 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   async getStageTotals(stage: TransferStage): Promise<StageTotalsEstimate | null> {
-    if (stage !== 'assets') {
+    if (
+      stage !== 'assets' &&
+      stage !== 'entities' &&
+      stage !== 'links' &&
+      stage !== 'configuration'
+    ) {
       return null;
     }
-    const cached = this.#cachedAssetsTotals;
-    return cached ?? null;
+    return this.#cachedStageTotals[stage] ?? null;
   }
 
   async #startStep<T extends Client.TransferPullStep>(step: T) {

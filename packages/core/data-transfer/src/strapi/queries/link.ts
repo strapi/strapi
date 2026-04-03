@@ -201,6 +201,95 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
       }
     }
 
+    /**
+     * Count links for one relational attribute (same branches as {@link generateAllForAttribute}, SQL-only).
+     */
+    async function countLinksForAttribute(uid: string, fieldName: string): Promise<number> {
+      const metadata = strapi.db.metadata.get(uid);
+
+      if (!metadata) {
+        return 0;
+      }
+
+      const attributes = filterValidRelationalAttributes(metadata.attributes);
+
+      if (!(fieldName in attributes)) {
+        return 0;
+      }
+
+      const attribute = attributes[fieldName];
+
+      let n = 0;
+
+      if (attribute.joinColumn) {
+        const joinColumnName: string = attribute.joinColumn.name;
+
+        const qb = connection
+          .queryBuilder()
+          .from(addSchema(metadata.tableName))
+          .whereNotNull(joinColumnName);
+
+        if (trx) {
+          qb.transacting(trx);
+        }
+
+        const rows = await qb.count('* as count');
+        const row = Array.isArray(rows) ? rows[0] : rows;
+        n += Number((row as { count?: string | number })?.count ?? 0);
+      }
+
+      if (attribute.joinTable) {
+        const { name } = attribute.joinTable;
+
+        const qb = connection.queryBuilder().from(addSchema(name));
+
+        if (trx) {
+          qb.transacting(trx);
+        }
+
+        const rows = await qb.count('* as count');
+        const row = Array.isArray(rows) ? rows[0] : rows;
+        n += Number((row as { count?: string | number })?.count ?? 0);
+      }
+
+      if (attribute.morphColumn) {
+        const { typeColumn, idColumn } = attribute.morphColumn;
+
+        const qb = connection
+          .queryBuilder()
+          .from(addSchema(metadata.tableName))
+          .whereNotNull(typeColumn.name)
+          .whereNotNull(idColumn.name);
+
+        if (trx) {
+          qb.transacting(trx);
+        }
+
+        const rows = await qb.count('* as count');
+        const row = Array.isArray(rows) ? rows[0] : rows;
+        n += Number((row as { count?: string | number })?.count ?? 0);
+      }
+
+      return n;
+    }
+
+    async function countAllForUid(uid: string): Promise<number> {
+      const metadata = strapi.db.metadata.get(uid);
+
+      if (!metadata) {
+        return 0;
+      }
+
+      const attributes = filterValidRelationalAttributes(metadata.attributes);
+      let total = 0;
+
+      for (const fieldName of Object.keys(attributes)) {
+        total += await countLinksForAttribute(uid, fieldName);
+      }
+
+      return total;
+    }
+
     async function* generateAll(uid: string): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
 
@@ -324,7 +413,7 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
       }
     };
 
-    return { generateAll, generateAllForAttribute, insert };
+    return { generateAll, generateAllForAttribute, insert, countAllForUid };
   };
 
   return query;

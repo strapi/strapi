@@ -15,6 +15,7 @@ import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '..
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
+import { writeWritableAsync } from '../../../utils/write-writable-async';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
 
@@ -167,6 +168,9 @@ class LocalFileSourceProvider implements ISourceProvider {
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
     this.#reportInfo('creating assets read stream');
 
+    /** Tar parser may finish the pipeline before async onReadEntry work completes; end only after. */
+    let entryWorkChain = Promise.resolve();
+
     pipeline(
       [
         inStream,
@@ -179,27 +183,34 @@ class LocalFileSourceProvider implements ISourceProvider {
             return isFilePathInDirname('assets/uploads', filePath);
           },
           async onReadEntry(entry: ReadEntry) {
-            const { path: filePath, size = 0 } = entry;
-            const normalizedPath = unknownPathToPosix(filePath);
-            const file = path.basename(normalizedPath);
-            let metadata;
-            try {
-              metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
-            } catch (error) {
-              throw new Error(`Failed to read metadata for ${file}`);
-            }
-            const asset: IAsset = {
-              metadata,
-              filename: file,
-              filepath: normalizedPath,
-              stats: { size },
-              stream: entry as unknown as Readable,
-            };
-            outStream.write(asset);
+            const work = (async () => {
+              const { path: filePath, size = 0 } = entry;
+              const normalizedPath = unknownPathToPosix(filePath);
+              const file = path.basename(normalizedPath);
+              let metadata;
+              try {
+                metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
+              } catch (error) {
+                throw new Error(`Failed to read metadata for ${file}`);
+              }
+              const asset: IAsset = {
+                metadata,
+                filename: file,
+                filepath: normalizedPath,
+                stats: { size },
+                stream: entry as unknown as Readable,
+              };
+              await writeWritableAsync(outStream, asset);
+            })();
+            entryWorkChain = entryWorkChain.then(() => work);
+            await work;
           },
         }),
       ],
-      () => outStream.end()
+      async () => {
+        await entryWorkChain;
+        outStream.end();
+      }
     );
 
     return outStream;
@@ -233,6 +244,8 @@ class LocalFileSourceProvider implements ISourceProvider {
 
     const outStream = new PassThrough({ objectMode: true });
 
+    let entryWorkChain = Promise.resolve();
+
     pipeline(
       [
         inStream,
@@ -246,41 +259,44 @@ class LocalFileSourceProvider implements ISourceProvider {
           },
 
           async onReadEntry(entry: ReadEntry) {
-            const transforms = [
-              // JSONL parser to read the data chunks one by one (line by line)
-              parser({
-                checkErrors: true,
-              }),
-              // The JSONL parser returns each line as key/value
-              (line: { key: string; value: object }) => line.value,
-            ];
+            const work = (async () => {
+              const transforms = [
+                // JSONL parser to read the data chunks one by one (line by line)
+                parser({
+                  checkErrors: true,
+                }),
+                // The JSONL parser returns each line as key/value
+                (line: { key: string; value: object }) => line.value,
+              ];
 
-            const stream = entry.pipe(chain(transforms));
+              const stream = entry.pipe(chain(transforms));
 
-            try {
-              for await (const chunk of stream) {
-                outStream.write(chunk);
+              try {
+                for await (const chunk of stream) {
+                  await writeWritableAsync(outStream, chunk);
+                }
+              } catch (e: unknown) {
+                outStream.destroy(
+                  new ProviderTransferError(
+                    `Error parsing backup files from backup file ${entry.path}: ${
+                      (e as Error).message
+                    }`,
+                    {
+                      details: {
+                        error: e,
+                      },
+                    }
+                  )
+                );
               }
-            } catch (e: unknown) {
-              outStream.destroy(
-                new ProviderTransferError(
-                  `Error parsing backup files from backup file ${entry.path}: ${
-                    (e as Error).message
-                  }`,
-                  {
-                    details: {
-                      error: e,
-                    },
-                  }
-                )
-              );
-            }
+            })();
+            entryWorkChain = entryWorkChain.then(() => work);
+            await work;
           },
         }),
       ],
       async () => {
-        // Manually send the 'end' event to the out stream
-        // once every entry has finished streaming its content
+        await entryWorkChain;
         outStream.end();
       }
     );

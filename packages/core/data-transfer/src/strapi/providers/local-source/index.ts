@@ -9,6 +9,9 @@ import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
 import { createAssetsStream } from './assets';
 import { estimateAssetTotals } from './estimate-asset-totals';
+import { estimateConfigurationTotals } from './estimate-configuration-totals';
+import { estimateEntityTotals } from './estimate-entity-totals';
+import { estimateLinkTotals } from './estimate-link-totals';
 import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
 
@@ -176,14 +179,29 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   async getStageTotals(stage: TransferStage) {
-    if (stage !== 'assets') {
-      return null;
+    if (stage === 'assets') {
+      assertValidStrapi(this.strapi, 'Not able to estimate asset totals');
+      return estimateAssetTotals(this.strapi);
     }
-    assertValidStrapi(this.strapi, 'Not able to estimate asset totals');
-    return estimateAssetTotals(this.strapi);
+    if (stage === 'entities') {
+      assertValidStrapi(this.strapi, 'Not able to estimate entity totals');
+      return estimateEntityTotals(this.strapi);
+    }
+    if (stage === 'links') {
+      assertValidStrapi(this.strapi, 'Not able to estimate link totals');
+      return estimateLinkTotals(this.strapi);
+    }
+    if (stage === 'configuration') {
+      assertValidStrapi(this.strapi, 'Not able to estimate configuration totals');
+      return estimateConfigurationTotals(this.strapi);
+    }
+    return null;
   }
 }
 
 export type ILocalStrapiSourceProvider = InstanceType<typeof LocalStrapiSourceProvider>;
 
 export { estimateAssetTotals } from './estimate-asset-totals';
+export { estimateConfigurationTotals } from './estimate-configuration-totals';
+export { estimateEntityTotals } from './estimate-entity-totals';
+export { estimateLinkTotals } from './estimate-link-totals';

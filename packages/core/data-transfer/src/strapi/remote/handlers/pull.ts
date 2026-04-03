@@ -11,8 +11,15 @@ import {
 import {
   createLocalStrapiSourceProvider,
   estimateAssetTotals,
+  estimateConfigurationTotals,
+  estimateEntityTotals,
+  estimateLinkTotals,
   ILocalStrapiSourceProvider,
 } from '../../providers';
+import {
+  TRANSFER_NON_ASSET_BATCH_MAX_BYTES,
+  TRANSFER_NON_ASSET_BATCH_MAX_ITEMS,
+} from '../../transfer-stream-batch';
 import { ProviderTransferError } from '../../../errors/providers';
 import type { IAsset, StageTotalsEstimate, TransferStage, Protocol } from '../../../../types';
 import { Client } from '../../../../types/remote/protocol';
@@ -185,11 +192,14 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
   async flush(this: PullHandler, stage: Client.TransferPullStep, id) {
     type Stage = typeof stage;
-    const batchSize = 1024 * 1024;
+    const maxBatchBytes = TRANSFER_NON_ASSET_BATCH_MAX_BYTES;
+    const maxBatchItems = TRANSFER_NON_ASSET_BATCH_MAX_ITEMS;
     let batch = [] as Client.GetTransferPullStreamData<Stage>;
     const stream = this.streams?.[stage];
 
     const batchLength = () => Buffer.byteLength(JSON.stringify(batch));
+    const shouldFlush = () =>
+      batch.length >= maxBatchItems || (batch.length > 0 && batchLength() >= maxBatchBytes);
 
     const maybeConfirm = async (data: any) => {
       try {
@@ -223,7 +233,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       for await (const chunk of stream) {
         if (stage !== 'assets') {
           batch.push(chunk);
-          if (batchLength() >= batchSize) {
+          if (shouldFlush()) {
             await sendBatch();
           }
         } else {
@@ -260,6 +270,12 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       let totals: StageTotalsEstimate | undefined;
       if (step === 'assets') {
         totals = await estimateAssetTotals(strapi as Core.Strapi);
+      } else if (step === 'entities') {
+        totals = await estimateEntityTotals(strapi as Core.Strapi);
+      } else if (step === 'links') {
+        totals = await estimateLinkTotals(strapi as Core.Strapi);
+      } else if (step === 'configuration') {
+        totals = await estimateConfigurationTotals(strapi as Core.Strapi);
       }
 
       await this.createReadableStreamForStep(step);
