@@ -60,3 +60,9 @@ module.exports = () => {
 ### How to run and test CLI commands
 
 See the available tests in the `tests` directory for examples.
+
+### Updating Jest snapshots
+
+Some CLI tests (for example `strapi/strapi/openapi-generate.test.cli.ts`) commit **Jest snapshot** files. After intentional changes to the app template, generator output, or CLI output, regenerate snapshots with `jest … -u` instead of editing `.snap` files by hand.
+
+See **[tests/strapi/strapi/README.md](tests/strapi/strapi/README.md)** for how snapshots work in the `strapi` domain (including OpenAPI and list-output tests) and when to run `yarn test:cli:clean` / `yarn test:cli --setup`.
