@@ -38,6 +38,26 @@ export interface IRemoteStrapiDestinationProviderOptions
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
 
+/**
+ * Default batching for entities / links / configuration over WebSocket push.
+ *
+ * Goals: (1) enough payload per round-trip to stay efficient on large transfers,
+ * (2) small enough per message that the remote can process and ack without multi-minute stalls,
+ * (3) bounded gap between engine progress and the wire (see item cap + age).
+ *
+ * These are fixed defaults (not tuned per dataset) so behavior is predictable everywhere.
+ */
+const STREAM_STEP_MAX_BATCH_BYTES = 512 * 1024;
+
+/** Caps parallel work per message and how far UI count can lead the network for tiny rows. */
+const STREAM_STEP_MAX_BATCH_ITEMS = 100;
+
+/**
+ * If the first row in the current batch has waited this long, flush before appending more.
+ * Helps mixed-size streams (e.g. occasional large rows) without relying on tiny byte caps alone.
+ */
+const STREAM_STEP_MAX_BATCH_AGE_MS = 450;
+
 class RemoteStrapiDestinationProvider implements IDestinationProvider {
   name = 'destination::remote-strapi';
 
@@ -186,21 +206,40 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   #writeStream(step: Exclude<Client.TransferPushStep, 'assets'>): Writable {
     type Step = typeof step;
 
-    const batchSize = 1024 * 1024; // 1MB;
     const startTransferOnce = this.#startStepOnce(step);
 
     let batch = [] as Client.GetTransferPushStreamData<Step>;
+    let batchStartedAt = 0;
 
     const batchLength = () => jsonLength(batch);
+
+    const flushBatch = async (): Promise<Error | null> => {
+      if (batch.length === 0) {
+        return null;
+      }
+      const payload = batch;
+      batch = [];
+      batchStartedAt = 0;
+      return this.#streamStep(step, payload);
+    };
+
+    const shouldFlushBatchAfterPush = () => {
+      if (batch.length === 0) {
+        return false;
+      }
+      return (
+        batchLength() >= STREAM_STEP_MAX_BATCH_BYTES ||
+        batch.length >= STREAM_STEP_MAX_BATCH_ITEMS ||
+        Date.now() - batchStartedAt >= STREAM_STEP_MAX_BATCH_AGE_MS
+      );
+    };
 
     return new Writable({
       objectMode: true,
 
       final: async (callback) => {
         if (batch.length > 0) {
-          const streamError = await this.#streamStep(step, batch);
-
-          batch = [];
+          const streamError = await flushBatch();
 
           if (streamError) {
             return callback(streamError);
@@ -221,19 +260,27 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         callback(error);
       },
 
-      write: async (chunk, _encoding, callback) => {
+      async write(chunk, _encoding, callback) {
         const startError = await startTransferOnce();
         if (startError) {
           return callback(startError);
         }
 
+        // Flush a batch that has sat long enough before growing it further (bounded latency).
+        if (batch.length > 0 && Date.now() - batchStartedAt >= STREAM_STEP_MAX_BATCH_AGE_MS) {
+          const staleError = await flushBatch();
+          if (staleError) {
+            return callback(staleError);
+          }
+        }
+
         batch.push(chunk);
+        if (batch.length === 1) {
+          batchStartedAt = Date.now();
+        }
 
-        if (batchLength() >= batchSize) {
-          const streamError = await this.#streamStep(step, batch);
-
-          batch = [];
-
+        if (shouldFlushBatchAfterPush()) {
+          const streamError = await flushBatch();
           if (streamError) {
             return callback(streamError);
           }
