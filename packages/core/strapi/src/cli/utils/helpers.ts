@@ -53,6 +53,24 @@ const readableTime = (elapsedTime: number, decimals = 1, padStart = 0): string =
   return result.padStart(padStart);
 };
 
+/**
+ * Separates transfer progress segments (count, size, elapsed, rate, ETA) instead of nested
+ * parentheses — easier to scan in a single terminal line.
+ */
+const TRANSFER_PROGRESS_FIELD_SEP = ' · ';
+
+/**
+ * Stage / prep timing: plain `readableTime` (e.g. `1.2s`) when no ETA; with ETA, append
+ * `, ~4.0s remaining` (`~` = approximate). Same base format for every stage; remaining is additive.
+ */
+const formatElapsedAndMaybeRemainingLabel = (
+  elapsedMs: number,
+  remainingMs: number | null
+): string =>
+  remainingMs != null
+    ? `${readableTime(elapsedMs)}, ~${readableTime(remainingMs)} remaining`
+    : readableTime(elapsedMs);
+
 interface ExitWithOptions {
   logger?: Console;
   prc?: NodeJS.Process;
@@ -224,6 +242,8 @@ export {
   ifOptions,
   readableBytes,
   readableTime,
+  formatElapsedAndMaybeRemainingLabel,
+  TRANSFER_PROGRESS_FIELD_SEP,
   runAction,
   assertCwdContainsStrapiProject,
   notifyExperimentalCommand,

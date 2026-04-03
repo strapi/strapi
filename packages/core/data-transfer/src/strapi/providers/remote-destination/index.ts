@@ -25,7 +25,7 @@ import {
 } from '../../../utils/transfer-asset-chunk';
 
 export interface IRemoteStrapiDestinationProviderOptions
-  extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
+  extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy' | 'onTransferPhase'> {
   url: URL; // the url of the remote Strapi admin
   auth?: Auth.ITransferTokenAuth;
   retryMessageOptions?: {
@@ -404,6 +404,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async beforeTransfer() {
+    this.options.onTransferPhase?.(
+      'Remote: waiting for server to clear data and prepare destination…'
+    );
     await this.dispatcher?.dispatchTransferAction('beforeTransfer');
   }
 

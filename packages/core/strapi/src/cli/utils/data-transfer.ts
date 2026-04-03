@@ -9,7 +9,12 @@ import { merge } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
-import { readableBytes, readableTime, exitWith } from './helpers';
+import {
+  readableBytes,
+  formatElapsedAndMaybeRemainingLabel,
+  TRANSFER_PROGRESS_FIELD_SEP,
+  exitWith,
+} from './helpers';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
 
 const {
@@ -285,6 +290,31 @@ type Data = {
   };
 };
 
+/** Stages where throughput is dominated by DB work; items/s is more meaningful than JSON byte rate. */
+const STAGES_WITH_ITEM_THROUGHPUT = new Set<engineDataTransfer.TransferStage>([
+  'entities',
+  'links',
+]);
+
+const MAX_ETA_MS = 86_400_000;
+
+/**
+ * Linear ETA from completed amount vs total, using average rate so far (done / elapsedMs).
+ * Returns null when progress or totals are not usable yet.
+ */
+const estimateEtaMs = (elapsedMs: number, done: number, total: number): number | null => {
+  if (elapsedMs < 500 || done <= 0 || total <= 0 || done >= total) {
+    return null;
+  }
+  const ratePerMs = done / elapsedMs;
+  const remaining = total - done;
+  const etaMs = remaining / ratePerMs;
+  if (!Number.isFinite(etaMs) || etaMs <= 0 || etaMs >= MAX_ETA_MS) {
+    return null;
+  }
+  return etaMs;
+};
+
 const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
   const loaders = defaultLoaders;
   const updateLoader = (stage: engineDataTransfer.TransferStage, data: Data) => {
@@ -303,33 +333,33 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
 
     const countLabel =
       totalCount != null && totalCount > 0 ? `${count} / ${totalCount}` : String(count);
-    const size =
+    const sizeCompact =
       totalBytes != null && totalBytes > 0
-        ? `size: ${readableBytes(bytes)} / ${readableBytes(totalBytes)}`
-        : `size: ${readableBytes(bytes)}`;
-    const elapsed = `elapsed: ${readableTime(elapsedTime ?? 0)}`;
-    const speed = elapsedTime > 0 ? `(${readableBytes((bytes * 1000) / elapsedTime)}/s)` : '';
+        ? `${readableBytes(bytes)} / ${readableBytes(totalBytes)}`
+        : readableBytes(bytes);
 
-    let eta = '';
-    if (
-      !stageData?.endTime &&
-      totalBytes != null &&
-      totalBytes > 0 &&
-      bytes < totalBytes &&
-      elapsedTime >= 500 &&
-      bytes > 0
-    ) {
-      const speedBps = bytes / elapsedTime;
-      const remaining = totalBytes - bytes;
-      const etaMs = remaining / speedBps;
-      if (Number.isFinite(etaMs) && etaMs > 0 && etaMs < 86400000) {
-        eta = ` eta ~${readableTime(etaMs)}`;
+    const parts: string[] = [`${stage}: ${countLabel} transferred`, sizeCompact];
+
+    if (elapsedTime > 0 && !stageData?.endTime) {
+      if (STAGES_WITH_ITEM_THROUGHPUT.has(stage)) {
+        const itemsPerSec = (count * 1000) / elapsedTime;
+        parts.push(`${itemsPerSec.toFixed(1)} items/s`);
+      } else {
+        parts.push(`${readableBytes((bytes * 1000) / elapsedTime)}/s`);
       }
     }
 
-    loaders[stage].text = `${stage}: ${countLabel} transferred (${size}) (${elapsed}) ${
-      !stageData?.endTime ? speed : ''
-    }${eta}`;
+    let etaMs: number | null = null;
+    if (!stageData?.endTime) {
+      if (STAGES_WITH_ITEM_THROUGHPUT.has(stage) && totalCount != null) {
+        etaMs = estimateEtaMs(elapsedTime, count, totalCount);
+      } else if (totalBytes != null) {
+        etaMs = estimateEtaMs(elapsedTime, bytes, totalBytes);
+      }
+    }
+    parts.push(formatElapsedAndMaybeRemainingLabel(elapsedTime ?? 0, etaMs));
+
+    loaders[stage].text = parts.join(TRANSFER_PROGRESS_FIELD_SEP);
 
     return loaders[stage];
   };
