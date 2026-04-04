@@ -17,6 +17,7 @@
   "EditPage.form.roles": "角色详情",
   "Email.template.data.loaded": "电子邮件模板已加载",
   "Email.template.email_confirmation": "邮箱地址确认",
+  "Email.template.reset_password": "重置密码",
   "Email.template.form.edit.label": "编辑模板",
   "Email.template.table.action.label": "操作",
   "Email.template.table.icon.label": "图标",
