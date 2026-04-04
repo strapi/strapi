@@ -844,22 +844,5 @@
   "HomePage.addWidget.noWidgetsAvailable": "No widgets available to add",
   "HomePage.addWidget.button": "Add Widget",
   "HomePage.widget.delete": "Delete",
-  "HomePage.widget.drag": "Drag to move",
-  "HomePage.roadmap": "查看路线图",
-  "HomePage.welcome.congrats": "恭喜!",
-  "HomePage.welcome.congrats.content": "您已登录为第一个管理员。为了发现Strapi提供的强大功能,",
-  "HomePage.welcome.congrats.content.bold": "我们建议您创建您的第一个集合类型。",
-  "app.components.HomePage.button.blog": "在博客上查看更多信息",
-  "app.components.HomePage.community": "加入社区",
-  "app.components.HomePage.community.content": "在不同的渠道中与团队成员、贡献者和开发人员进行讨论。",
-  "app.components.HomePage.create": "创建您的第一个内容类型",
-  "app.components.HomePage.roadmap": "查看路线图",
-  "app.components.HomePage.welcome": "欢迎登机 👋",
-  "app.components.HomePage.welcome.again": "欢迎 👋",
-  "app.components.HomePage.welcomeBlock.content": "恭喜您!您已登录为第一个管理员。为了发现Strapi提供的强大功能,我们建议您创建您的第一个内容类型!",
-  "app.components.HomePage.welcomeBlock.content.again": "我们希望您在项目上取得进展!请随时阅读关于Strapi的最新新闻。我们正根据您的反馈尽最大努力改进产品。",
-  "app.components.HomePage.welcomeBlock.content.issues": "问题。",
-  "app.components.HomePage.welcomeBlock.content.raise": " 或提出 ",
-  "app.components.LeftMenu.trialCountdown": "您的试用期将于 {date} 结束。",
-  "components.Search.placeholder": "搜索..."
+  "HomePage.widget.drag": "Drag to move"
 }
