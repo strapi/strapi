@@ -1,0 +1,21 @@
+{
+  "Homepage.deploy.ariaLabel": "Deploy-opties",
+  "Homepage.deploy.cli.ariaLabel": "Pakketbeheerder",
+  "Homepage.deploy.cli.copy": "Kopiëren",
+  "Homepage.deploy.cli.subTitle": "Gebruik de opdrachtregel om je Strapi-project rechtstreeks te deployen",
+  "Homepage.deploy.cli.title": "Deployen via CLI",
+  "Homepage.deploy.documentation": "Problemen? Bekijk onze documentatie",
+  "Homepage.deploy.git.badge": "Aanbevolen",
+  "Homepage.deploy.git.button": "Deployen naar Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "Deploy een GitHub- of GitLab-project rechtstreeks via Strapi Cloud",
+  "Homepage.deploy.git.title": "Deployen naar Strapi Cloud",
+  "Homepage.deploy.title": "Kies je gewenste deploymethode",
+  "Homepage.freePlan.api": "2.500 API-verzoeken",
+  "Homepage.freePlan.bandwidth": "10 GB bestandsbandbreedte",
+  "Homepage.freePlan.cdn": "Wereldwijd CDN",
+  "Homepage.freePlan.pushToDeploy": "Push om te deployen",
+  "Homepage.freePlan.storage": "10 GB opslag",
+  "Homepage.subTitle": "Begin met ons volledig gratis plan — geen creditcard nodig, geen tijdslimiet.",
+  "Homepage.title": "Deploy gratis met Strapi Cloud!",
+  "Plugin.name": "Deployen"
+}
