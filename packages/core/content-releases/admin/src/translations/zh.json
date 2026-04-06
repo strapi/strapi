@@ -89,7 +89,7 @@
   "pages.ReleaseDetails.header-subtitle.scheduled": "安排在 {date} {time} ({offset})",
   "pages.ReleaseDetails.entry-validation.fields": "字段",
   "pages.Settings.releases.description": "創建和管理內容更新",
-  "pages.Settings.releases.preferences.title": "偏好設置",
+  "pages.Settings.releases.preferences.title": "偏好設定",
   "pages.Settings.releases.timezone.label": "默認時區",
   "pages.Settings.releases.timezone.hint": "每個發布版本的時區仍可單獨更改。",
   "pages.Settings.releases.setting.default-timezone-notification-success": "默認時區已更新。",
