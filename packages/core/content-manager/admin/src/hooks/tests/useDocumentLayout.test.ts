@@ -27,6 +27,8 @@ describe('useDocumentLayout', () => {
       },
     });
 
+    expect(result.current.listViewConversionContext).toBeNull();
+
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.edit.components).toEqual({
@@ -334,10 +336,14 @@ describe('useDocumentLayout', () => {
       },
     });
 
+    expect(result.current.listViewConversionContext).toBeNull();
+
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     // list layouts don't need the components.
     expect(result.current.list.components).toBeUndefined();
+
+    expect(result.current.listViewConversionContext).not.toBeNull();
 
     const expectedListLayout = [
       {
