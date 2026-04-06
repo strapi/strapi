@@ -56,19 +56,8 @@ Strapi Community Edition is a free and open-source headless CMS enabling you to 
 
 Use the **Quickstart** command below to create a new Strapi project instantly:
 
-- We recommend using **yarn** to create a Strapi project.  
-  [View yarn installation docs](https://yarnpkg.com/lang/en/docs/install/).
-
 ```bash
-yarn create strapi
-```
-
-**or**
-
-(Using npx to install the Latest Version Strapi project.)
-
-```bash
-npx create-strapi@latest
+npx create-strapi-app@latest my-project
 ```
 
 This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
