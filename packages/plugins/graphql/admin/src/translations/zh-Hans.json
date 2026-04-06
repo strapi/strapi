@@ -1,5 +1,5 @@
 {
-  "plugin.description.long": "为默认API方法添加GraphQL端点",
-  "plugin.description.short": "为默认API方法添加GraphQL端点",
+  "plugin.description.long": "添加带有默认 API 方法的 GraphQL 端点。",
+  "plugin.description.short": "添加带有默认 API 方法的 GraphQL 端点。",
   "plugin.name": "GraphQL"
 }
