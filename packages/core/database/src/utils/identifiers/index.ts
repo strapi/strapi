@@ -400,7 +400,7 @@ export class Identifiers {
           return this.getShortenedName(token.name, token.allocatedLength);
         }
 
-        // if is is only compressible as a fixed value, use that
+        // if it is only compressible as a fixed value, use that
         if (token.compressible === false && token.shortName) {
           return token.shortName;
         }
