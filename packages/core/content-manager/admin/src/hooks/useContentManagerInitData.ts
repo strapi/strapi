@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import {
   useAuth,
@@ -112,68 +112,71 @@ const useContentManagerInitData = (): AppState => {
     }
   }, [formatAPIError, contentTypeSettingsQuery.error, toggleNotification]);
 
-  const formatData = async (
-    components: Component[],
-    contentTypes: ContentType[],
-    fieldSizes: GetInitData.Response['data']['fieldSizes'],
-    contentTypeConfigurations: FindContentTypesSettings.Response['data']
-  ) => {
-    /**
-     * We group these by the two types we support. We do with an object because we can use default
-     * values of arrays to make sure we always have an array to manipulate further on if, for example,
-     * a user has not made any single types.
-     *
-     * This means we have to manually add new content types to this hook if we add a new type – but
-     * the safety is worth it.
-     */
-    const { collectionType: collectionTypeLinks, singleType: singleTypeLinks } =
-      contentTypes.reduce<{
-        collectionType: ContentType[];
-        singleType: ContentType[];
-      }>(
-        (acc, model) => {
-          acc[model.kind].push(model);
-          return acc;
-        },
-        {
-          collectionType: [],
-          singleType: [],
-        }
+  const formatData = useCallback(
+    async (
+      components: Component[],
+      contentTypes: ContentType[],
+      fieldSizes: GetInitData.Response['data']['fieldSizes'],
+      contentTypeConfigurations: FindContentTypesSettings.Response['data']
+    ) => {
+      /**
+       * We group these by the two types we support. We do with an object because we can use default
+       * values of arrays to make sure we always have an array to manipulate further on if, for example,
+       * a user has not made any single types.
+       *
+       * This means we have to manually add new content types to this hook if we add a new type – but
+       * the safety is worth it.
+       */
+      const { collectionType: collectionTypeLinks, singleType: singleTypeLinks } =
+        contentTypes.reduce<{
+          collectionType: ContentType[];
+          singleType: ContentType[];
+        }>(
+          (acc, model) => {
+            acc[model.kind].push(model);
+            return acc;
+          },
+          {
+            collectionType: [],
+            singleType: [],
+          }
+        );
+      const collectionTypeSectionLinks = generateLinks(
+        collectionTypeLinks,
+        'collectionTypes',
+        contentTypeConfigurations
       );
-    const collectionTypeSectionLinks = generateLinks(
-      collectionTypeLinks,
-      'collectionTypes',
-      contentTypeConfigurations
-    );
-    const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
+      const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
 
-    const authorizedCollectionTypeLinks = await authorizeLinks(
-      collectionTypeSectionLinks,
-      checkUserHasPermissions
-    );
-    const authorizedSingleTypeLinks = await authorizeLinks(
-      singleTypeSectionLinks,
-      checkUserHasPermissions
-    );
-    const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
-      ctLinks: authorizedCollectionTypeLinks,
-      models: contentTypes,
-    });
-    const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
-      stLinks: authorizedSingleTypeLinks,
-      models: contentTypes,
-    });
+      const authorizedCollectionTypeLinks = await authorizeLinks(
+        collectionTypeSectionLinks,
+        checkUserHasPermissions
+      );
+      const authorizedSingleTypeLinks = await authorizeLinks(
+        singleTypeSectionLinks,
+        checkUserHasPermissions
+      );
+      const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
+        ctLinks: authorizedCollectionTypeLinks,
+        models: contentTypes,
+      });
+      const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
+        stLinks: authorizedSingleTypeLinks,
+        models: contentTypes,
+      });
 
-    dispatch(
-      setInitialData({
-        authorizedCollectionTypeLinks: ctLinks,
-        authorizedSingleTypeLinks: stLinks,
-        components,
-        contentTypeSchemas: contentTypes,
-        fieldSizes,
-      })
-    );
-  };
+      dispatch(
+        setInitialData({
+          authorizedCollectionTypeLinks: ctLinks,
+          authorizedSingleTypeLinks: stLinks,
+          components,
+          contentTypeSchemas: contentTypes,
+          fieldSizes,
+        })
+      );
+    },
+    [checkUserHasPermissions, dispatch, runHookWaterfall]
+  );
 
   useEffect(() => {
     if (initialDataQuery.data && contentTypeSettingsQuery.data) {
@@ -182,9 +185,20 @@ const useContentManagerInitData = (): AppState => {
         initialDataQuery.data.contentTypes,
         initialDataQuery.data.fieldSizes,
         contentTypeSettingsQuery.data
-      );
+      ).catch((error) => {
+        toggleNotification({
+          type: 'danger',
+          message: formatAPIError(error),
+        });
+      });
     }
-  }, [initialDataQuery.data, contentTypeSettingsQuery.data]);
+  }, [
+    formatAPIError,
+    formatData,
+    initialDataQuery.data,
+    contentTypeSettingsQuery.data,
+    toggleNotification,
+  ]);
 
   return { ...state };
 };

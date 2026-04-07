@@ -11,6 +11,10 @@ describe('Admin Auth Strategy', () => {
     clearAdminAuthAbilityCache();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('Authenticate a user (sessions-based access token)', () => {
     const request = {
       header: {
@@ -82,6 +86,105 @@ describe('Admin Auth Strategy', () => {
       await adminAuthStrategy.authenticate(secondCtx);
 
       expect(generateUserAbility).toHaveBeenCalledTimes(1);
+    });
+
+    test('recomputes the ability after cache invalidation', async () => {
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => true);
+      const firstCtx = createContext({}, { request, state: {} });
+      const secondCtx = createContext({}, { request, state: {} });
+      const user = { id: 1, isActive: true } as any;
+      const findOne = jest.fn(() => user);
+      const generateUserAbility = jest.fn(() => 'ability');
+
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
+      global.strapi = {
+        sessionManager: sessionManager as any,
+        admin: {
+          services: {
+            permission: { engine: { generateUserAbility } },
+          },
+        },
+        db: { query: jest.fn(() => ({ findOne })) },
+      } as any;
+
+      await adminAuthStrategy.authenticate(firstCtx);
+      clearAdminAuthAbilityCache();
+      await adminAuthStrategy.authenticate(secondCtx);
+
+      expect(generateUserAbility).toHaveBeenCalledTimes(2);
+    });
+
+    test('treats expired cache entries as misses', async () => {
+      jest.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(61_000);
+
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => true);
+      const firstCtx = createContext({}, { request, state: {} });
+      const secondCtx = createContext({}, { request, state: {} });
+      const user = { id: 1, isActive: true } as any;
+      const findOne = jest.fn(() => user);
+      const generateUserAbility = jest.fn(() => 'ability');
+
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
+      global.strapi = {
+        sessionManager: sessionManager as any,
+        admin: {
+          services: {
+            permission: { engine: { generateUserAbility } },
+          },
+        },
+        db: { query: jest.fn(() => ({ findOne })) },
+      } as any;
+
+      await adminAuthStrategy.authenticate(firstCtx);
+      await adminAuthStrategy.authenticate(secondCtx);
+
+      expect(generateUserAbility).toHaveBeenCalledTimes(2);
+    });
+
+    test('rejects an inactive session even when the cache was already warmed', async () => {
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest
+        .fn(async () => true)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      const firstCtx = createContext({}, { request, state: {} });
+      const secondCtx = createContext({}, { request, state: {} });
+      const thirdCtx = createContext({}, { request, state: {} });
+      const user = { id: 1, isActive: true } as any;
+      const findOne = jest.fn(() => user);
+      const generateUserAbility = jest.fn(() => 'ability');
+
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
+      global.strapi = {
+        sessionManager: sessionManager as any,
+        admin: {
+          services: {
+            permission: { engine: { generateUserAbility } },
+          },
+        },
+        db: { query: jest.fn(() => ({ findOne })) },
+      } as any;
+
+      await adminAuthStrategy.authenticate(firstCtx);
+      const secondResponse = await adminAuthStrategy.authenticate(secondCtx);
+      await adminAuthStrategy.authenticate(thirdCtx);
+
+      expect(secondResponse).toStrictEqual({ authenticated: false });
+      expect(generateUserAbility).toHaveBeenCalledTimes(2);
     });
 
     test('Fails to authenticate if the authorization header is missing', async () => {
