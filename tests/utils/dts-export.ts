@@ -60,7 +60,7 @@ export const exportData = async (): Promise<void> => {
     const { destination: dest, engine: engineResults } = results;
 
     // Enhanced output with details (from CLI version)
-    if (dest?.file?.path && engineResults !== undefined) {
+    if (dest?.file?.path) {
       const path = require('path');
       const relativeArchivePath = path.relative(process.cwd(), dest.file.path);
       console.log(`Dataset exported to: ${relativeArchivePath}`);

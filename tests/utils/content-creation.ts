@@ -223,7 +223,7 @@ export const createContent = async (
   fields: FieldValue[],
   options: CreateContentOptions
 ): Promise<void> => {
-  await navToHeader(page, ['Content Manager', { text: contentType, exact: true }], contentType);
+  await navToHeader(page, ['Content Manager', contentType], contentType);
 
   await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
 

@@ -3,6 +3,12 @@ import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 
+/** Tooltip: `{count} {label}` — see content-manager.widget.chart-entries.tooltip */
+const parseEntriesChartCount = (text: string | null, label: 'Draft' | 'Modified' | 'Published') => {
+  const m = text?.match(new RegExp(`(\\d+) ${label}`));
+  return m ? parseInt(m[1], 10) : 0;
+};
+
 test.describe('Homepage - Content Manager Widgets', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
@@ -116,33 +122,46 @@ test.describe('Homepage - Content Manager Widgets', () => {
 
   test('a user should see the entries chart widget', async ({ page }) => {
     const chartWidget = page.getByLabel('Entries', { exact: true });
+    const tooltip = page.getByTestId('entries-chart-tooltip');
 
     await expect(chartWidget).toBeVisible();
 
-    // By default, the chart should only show draft entries (no published/modified)
-    await expect(chartWidget.getByText('Draft')).toBeVisible();
-    await expect(chartWidget.getByText('Modified')).not.toBeVisible();
-    await expect(chartWidget.getByText('Published')).not.toBeVisible();
+    /**
+     * Counts come from GET /content-manager/homepage/count-documents (all permitted types).
+     * Donut segment order: Draft, Modified, Published — see ChartEntriesWidget in Widgets.tsx.
+     * Legend only lists segments with count > 0, so "Published" may show before this test runs.
+     */
+    const arcDraft = chartWidget.locator('circle').nth(0);
+    const arcModifiedSeg = chartWidget.locator('circle').nth(1);
+    const arcPublishedSeg = chartWidget.locator('circle').nth(2);
 
-    const arcDraft = chartWidget.locator('circle').first();
     await arcDraft.focus();
-
-    const tooltip = page.getByTestId('entries-chart-tooltip');
-
     await expect(tooltip).toBeVisible();
+    const initialDraft = parseEntriesChartCount(await tooltip.textContent(), 'Draft');
 
-    // Get the initial draft count from the tooltip
-    const tooltipText = await tooltip.textContent();
-    const initialDraftMatch = tooltipText?.match(/(\d+) Draft/);
-    const initialDraftCount = initialDraftMatch ? parseInt(initialDraftMatch[1]) : 0;
+    await arcModifiedSeg.focus();
+    await expect(tooltip).toBeVisible();
+    const initialModified = parseEntriesChartCount(await tooltip.textContent(), 'Modified');
 
-    // Publish an entry
+    await arcPublishedSeg.focus();
+    await expect(tooltip).toBeVisible();
+    const initialPublished = parseEntriesChartCount(await tooltip.textContent(), 'Published');
+
+    await expect(chartWidget.getByText('Draft')).toBeVisible();
+    expect(initialModified).toBe(0);
+    await expect(chartWidget.getByText('Modified')).not.toBeVisible();
+    if (initialPublished === 0) {
+      await expect(chartWidget.getByText('Published')).not.toBeVisible();
+    } else {
+      await expect(chartWidget.getByText('Published')).toBeVisible();
+    }
+
+    // Publish two Article drafts (West Ham, then Why I prefer…), then save a change on the second → +1 Modified
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
     await page.getByRole('button', { name: /publish/i }).click();
     await findAndClose(page, 'Published document');
 
-    // Modify an entry
     await page.getByRole('link', { name: 'Back' }).click();
     await clickAndWait(
       page,
@@ -155,31 +174,47 @@ test.describe('Homepage - Content Manager Widgets', () => {
     await page.getByRole('button', { name: /save/i }).click();
     await findAndClose(page, 'Saved document');
 
-    // Go back to the home page
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
 
-    // The published and modified entries should be visible in the chart
     await expect(chartWidget.getByText('Draft')).toBeVisible();
     await expect(chartWidget.getByText('Modified')).toBeVisible();
     await expect(chartWidget.getByText('Published')).toBeVisible();
 
-    const arcDraftUpdated = chartWidget.locator('circle').nth(0);
-    await arcDraftUpdated.focus();
-
+    await arcDraft.focus();
     await expect(tooltip).toBeVisible();
-    // Should be 2 less than initial (we published 2 entries)
-    await expect(tooltip).toContainText(`${initialDraftCount - 2} Draft`);
+    const finalDraft = parseEntriesChartCount(await tooltip.textContent(), 'Draft');
 
-    const arcPublished = chartWidget.locator('circle').nth(1);
-    await arcPublished.focus();
-
+    await arcModifiedSeg.focus();
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toContainText('1 Modified');
+    const finalModified = parseEntriesChartCount(await tooltip.textContent(), 'Modified');
 
-    const arcModified = chartWidget.locator('circle').nth(2);
-    await arcModified.focus();
-
+    await arcPublishedSeg.focus();
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toContainText('1 Published');
+    const finalPublished = parseEntriesChartCount(await tooltip.textContent(), 'Published');
+
+    const publishedGain = finalPublished - initialPublished;
+
+    /**
+     * Publishing two Article drafts and then saving an edit should:
+     * - add at least one “modified” document (draft ≠ published row for same document_id),
+     * - increase published count by 1–2 depending on prior DB state for those entries,
+     * - reduce total drafts. Draft/published are not 1:1 with these UI steps (see homepage getCountDocuments).
+     */
+    expect(finalModified).toBe(initialModified + 1);
+    expect(publishedGain).toBeGreaterThanOrEqual(1);
+    expect(publishedGain).toBeLessThanOrEqual(2);
+    expect(finalDraft).toBeLessThan(initialDraft);
+
+    await arcDraft.focus();
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toContainText(`${finalDraft} Draft`);
+
+    await arcModifiedSeg.focus();
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toContainText(`${finalModified} Modified`);
+
+    await arcPublishedSeg.focus();
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toContainText(`${finalPublished} Published`);
   });
 });

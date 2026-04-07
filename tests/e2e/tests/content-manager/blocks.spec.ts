@@ -46,9 +46,15 @@ test.describe('Blocks editor', () => {
     await expect(page.getByText('Fortran')).not.toBeVisible();
 
     // Save and reload to make sure the change is persisted
+    const saveResponse = page.waitForResponse(
+      (res) =>
+        res.request().method() === 'PUT' && res.url().includes('api::homepage.homepage') && res.ok()
+    );
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Saved Document');
-    await page.reload();
+    await saveResponse;
+    await findAndClose(page, 'Saved document');
+    await page.goto('/admin/content-manager/single-types/api::homepage.homepage');
+    await page.waitForLoadState('networkidle');
     await expect(page.getByText(code)).toBeVisible();
     await page.getByText(code).click();
     await expect(page.getByText('Fortran')).toBeVisible();

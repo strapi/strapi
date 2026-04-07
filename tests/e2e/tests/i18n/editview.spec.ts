@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login, switchUser } from '../../../utils/login';
+import { login } from '../../../utils/login';
 import {
   clickAndWait,
   describeOnCondition,
@@ -292,7 +292,10 @@ test.describe('Edit view', () => {
     /**
      * Logout and login as editor
      */
-    await switchUser({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
+    await page.getByRole('button', { name: 'tt test testing' }).click();
+    await page.getByRole('menuitem', { name: 'Log out' }).click();
+
+    await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
 
     /**
      * Verify permissions

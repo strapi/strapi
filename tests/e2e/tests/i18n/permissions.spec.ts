@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login, switchUser } from '../../../utils/login';
+import { login } from '../../../utils/login';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
@@ -54,7 +54,11 @@ test.describe('Locale Permissions', () => {
     /**
      * Logout and login as editor
      */
-    await switchUser({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
+    await clickAndWait(page, page.getByRole('button', { name: 'tt test testing' }));
+    await page.getByRole('menuitem', { name: /^Log(?:out| out)$/i }).click();
+    await page.waitForURL('/admin/auth/login');
+
+    await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
 
     /**
      * Verify permissions

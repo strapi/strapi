@@ -22,7 +22,7 @@ test.describe('Home as super admin', () => {
     await expect(page).toHaveTitle(/homepage/i);
 
     // Change the name and make sure it's reflected in the homepage
-    await page.getByRole('button', { name: 'Open user menu' }).click();
+    await page.getByRole('button', { name: /open user menu/i }).click();
     await clickAndWait(page, page.getByRole('menuitem', { name: /profile/i }));
     await page.getByRole('textbox', { name: /first name/i }).fill('Rebecca');
     await page.getByRole('button', { name: /save/i }).click();
@@ -231,9 +231,9 @@ test.describe('Home as super admin', () => {
         .fill('http://localhost:1337/api/webhooks/new');
       await page.getByRole('button', { name: /save/i }).click();
 
-      // Create an API token
-      await navToHeader(page, ['API Tokens'], 'API Tokens');
-      await clickAndWait(page, page.getByRole('link', { name: 'Create new API token' }).first());
+      // Create an API token (Settings → API Tokens; primary action has stable test id)
+      await navToHeader(page, ['Settings', 'API Tokens'], 'API Tokens');
+      await clickAndWait(page, page.getByTestId('create-api-token-button'));
       await page.getByRole('textbox', { name: /name/i }).fill('NewAPIToken');
       await page.getByRole('combobox', { name: 'Token duration' }).click();
       await page.getByRole('option', { name: '30 days' }).click();

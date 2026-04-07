@@ -69,14 +69,7 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     await expect(nextReleaseRow.getByRole('gridcell', { name: /empty/i })).toBeVisible();
 
     // Add an entry to the release
-    await navToHeader(
-      page,
-      [
-        { text: 'Content Manager', exact: true },
-        { text: 'Cat', exact: true },
-      ],
-      'Cat'
-    );
+    await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
     await page.getByRole('textbox', { name: /age/i }).fill('1');
     await page.getByRole('button', { name: /save/i }).click();

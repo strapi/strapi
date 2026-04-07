@@ -30,6 +30,14 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
 
   test('should start and complete each tour', async ({ page }) => {
     /**
+     * Must not collide with `api::test.test` (bundled in the e2e app) or a prior run's generated API.
+     * sharedSetup uses resetFiles + import so a stable name is fine here.
+     */
+    const guidedTourCtDisplayName = 'E2e guided tour ct';
+    const guidedTourFieldName = 'e2e_gt_field';
+    const guidedTourCtUidSubstring = 'e2e-guided-tour-ct';
+
+    /**
      * Content Type Builder
      */
     await clickAndWait(
@@ -64,7 +72,7 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
 
     // Create collection type
     await page.getByRole('button', { name: 'Create new collection type' }).click();
-    await page.getByRole('textbox', { name: 'Display name' }).fill('Test');
+    await page.getByRole('textbox', { name: 'Display name' }).fill(guidedTourCtDisplayName);
     await page.getByRole('button', { name: 'Continue' }).click();
 
     await expect(
@@ -77,7 +85,7 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
     await page
       .getByRole('button', { name: 'Text Small or long text like title or description' })
       .click();
-    await page.getByRole('textbox', { name: 'Name' }).fill('testField');
+    await page.getByRole('textbox', { name: 'Name' }).fill(guidedTourFieldName);
     await page.getByRole('button', { name: 'Finish' }).click();
 
     await expect(page.getByRole('dialog', { name: "Don't leave without saving!" })).toBeVisible();
@@ -88,7 +96,7 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
     await expect(page.getByRole('dialog', { name: 'First Step: Done! 🎉' })).toBeVisible();
     await clickAndWait(page, page.getByRole('link', { name: 'Next' }));
 
-    await expect(page).toHaveURL(/.*\/admin\/content-manager\/collection-types\/api::test.test.*/);
+    await expect(page.url()).toContain(guidedTourCtUidSubstring);
     await page.goto('/admin');
 
     await expect(

@@ -186,7 +186,11 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
   const matchingPermissions = userPermissions.filter(
     (permission) =>
       permissions.findIndex(
-        (perm) => perm.action === permission.action && perm.subject === permission.subject
+        (perm) =>
+          perm.action === permission.action &&
+          // Align with Auth.checkUserHasPermissions: API may omit subject (undefined) while
+          // required permissions use subject: null.
+          (perm.subject == undefined || perm.subject === permission.subject)
       ) >= 0
   );
 
