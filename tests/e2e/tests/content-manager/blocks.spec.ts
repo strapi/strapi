@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { findAndClose, navToHeader } from '../../../utils/shared';
+import { navToHeader } from '../../../utils/shared';
 
 test.describe('Blocks editor', () => {
   test.beforeEach(async ({ page }) => {
@@ -45,16 +45,20 @@ test.describe('Blocks editor', () => {
     await page.keyboard.press('Enter');
     await expect(page.getByText('Fortran')).not.toBeVisible();
 
-    // Save and reload to make sure the change is persisted
+    // BlocksEditor debounces Slate → form onChange by 300ms (packages/core/content-manager/...
+    // BlocksInput/BlocksEditor.tsx). Saving before that flush runs can PUT stale blocks JSON
+    // (e.g. code language still default plaintext).
+    await page.waitForTimeout(400);
+
+    // Save and reload to make sure the change is persisted.
+    // Wait for the homepage PUT before reload so we do not fetch before the save finishes.
     const saveResponse = page.waitForResponse(
       (res) =>
-        res.request().method() === 'PUT' && res.url().includes('api::homepage.homepage') && res.ok()
+        res.request().method() === 'PUT' && res.url().includes('homepage.homepage') && res.ok()
     );
     await page.getByRole('button', { name: 'Save' }).click();
     await saveResponse;
-    await findAndClose(page, 'Saved document');
-    await page.goto('/admin/content-manager/single-types/api::homepage.homepage');
-    await page.waitForLoadState('networkidle');
+    await page.reload();
     await expect(page.getByText(code)).toBeVisible();
     await page.getByText(code).click();
     await expect(page.getByText('Fortran')).toBeVisible();
