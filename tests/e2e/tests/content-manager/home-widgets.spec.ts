@@ -4,7 +4,10 @@ import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 
 /** Tooltip: `{count} {label}` — see content-manager.widget.chart-entries.tooltip */
-const parseEntriesChartCount = (text: string | null, label: 'Draft' | 'Modified' | 'Published') => {
+const parseEntriesChartTooltipCount = (
+  text: string | null,
+  label: 'Draft' | 'Modified' | 'Published'
+) => {
   const m = text?.match(new RegExp(`(\\d+) ${label}`));
   return m ? parseInt(m[1], 10) : 0;
 };
@@ -137,15 +140,18 @@ test.describe('Homepage - Content Manager Widgets', () => {
 
     await arcDraft.focus();
     await expect(tooltip).toBeVisible();
-    const initialDraft = parseEntriesChartCount(await tooltip.textContent(), 'Draft');
+    const initialDraft = parseEntriesChartTooltipCount(await tooltip.textContent(), 'Draft');
 
     await arcModifiedSeg.focus();
     await expect(tooltip).toBeVisible();
-    const initialModified = parseEntriesChartCount(await tooltip.textContent(), 'Modified');
+    const initialModified = parseEntriesChartTooltipCount(await tooltip.textContent(), 'Modified');
 
     await arcPublishedSeg.focus();
     await expect(tooltip).toBeVisible();
-    const initialPublished = parseEntriesChartCount(await tooltip.textContent(), 'Published');
+    const initialPublished = parseEntriesChartTooltipCount(
+      await tooltip.textContent(),
+      'Published'
+    );
 
     await expect(chartWidget.getByText('Draft')).toBeVisible();
     expect(initialModified).toBe(0);
@@ -182,15 +188,15 @@ test.describe('Homepage - Content Manager Widgets', () => {
 
     await arcDraft.focus();
     await expect(tooltip).toBeVisible();
-    const finalDraft = parseEntriesChartCount(await tooltip.textContent(), 'Draft');
+    const finalDraft = parseEntriesChartTooltipCount(await tooltip.textContent(), 'Draft');
 
     await arcModifiedSeg.focus();
     await expect(tooltip).toBeVisible();
-    const finalModified = parseEntriesChartCount(await tooltip.textContent(), 'Modified');
+    const finalModified = parseEntriesChartTooltipCount(await tooltip.textContent(), 'Modified');
 
     await arcPublishedSeg.focus();
     await expect(tooltip).toBeVisible();
-    const finalPublished = parseEntriesChartCount(await tooltip.textContent(), 'Published');
+    const finalPublished = parseEntriesChartTooltipCount(await tooltip.textContent(), 'Published');
 
     const publishedGain = finalPublished - initialPublished;
 

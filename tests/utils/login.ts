@@ -2,7 +2,8 @@ import type { Page } from '@playwright/test';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../e2e/constants';
 
 /**
- * Log out via UI, then log in as another user (multi-user e2e flows).
+ * Log out via UI (clears in-memory auth state), then log in as the given user.
+ * Use when switching users in e2e tests.
  */
 export const switchUser = async ({
   page,
