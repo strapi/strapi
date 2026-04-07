@@ -1,5 +1,6 @@
-import { Form } from '@strapi/admin/strapi-admin';
-import { render as renderRTL, waitFor, act, screen } from '@tests/utils';
+import { Form, useField } from '@strapi/admin/strapi-admin';
+import { render as renderRTL, waitFor, act, screen, server } from '@tests/utils';
+import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { UIDInput, UIDInputProps } from '../UID';
@@ -33,6 +34,67 @@ const render = ({
     },
     initialEntries: ['/content-manager/collection-types/api::address.address/create'],
   });
+
+const waitForSlugInput = async () => {
+  await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+  await screen.findByRole('textbox', { name: 'Slug' });
+};
+
+/**
+ * A form-connected input for the target field.
+ * Lets tests simulate typing in the field that the UID watches.
+ */
+const TargetFieldInput = ({ name }: { name: string }) => {
+  const field = useField(name);
+  return (
+    <label>
+      {name}
+      <input name={name} value={field.value ?? ''} onChange={field.onChange} />
+    </label>
+  );
+};
+
+/**
+ * Render helper that includes a target field input alongside the UID input,
+ * enabling tests for auto-regeneration when the target field changes.
+ */
+const renderWithTargetField = ({
+  initialValues = { name: '', title: '' },
+  targetFieldName = 'title',
+  ...props
+}: Partial<UIDInputProps> & { initialValues?: object; targetFieldName?: string } = {}) =>
+  renderRTL(
+    <>
+      <TargetFieldInput name={targetFieldName} />
+      <UIDInput
+        label="Slug"
+        name="name"
+        type="uid"
+        attribute={{ targetField: targetFieldName }}
+        {...props}
+      />
+    </>,
+    {
+      renderOptions: {
+        wrapper: ({ children }) => (
+          <Routes>
+            <Route
+              path="/content-manager/:collectionType/:slug/:id"
+              element={
+                <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+                  {children}
+                </Form>
+              }
+            />
+          </Routes>
+        ),
+      },
+      userEventOptions: {
+        advanceTimers: jest.advanceTimersByTime,
+      },
+      initialEntries: ['/content-manager/collection-types/api::address.address/create'],
+    }
+  );
 
 describe('UIDInput', () => {
   test('renders', async () => {
@@ -156,5 +218,93 @@ describe('UIDInput', () => {
 
     expect(screen.queryByText('Available')).not.toBeInTheDocument();
     expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();
+  });
+
+  describe('Auto-regeneration from target field', () => {
+    test('auto-regenerates UID when target field value changes', async () => {
+      jest.useFakeTimers();
+      const { user } = renderWithTargetField();
+      await waitForSlugInput();
+
+      const titleInput = screen.getByRole('textbox', { name: 'title' });
+      await user.type(titleInput, 'My Article');
+
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      await waitFor(() =>
+        expect(screen.getByRole('textbox', { name: 'Slug' })).toHaveValue('regenerated')
+      );
+
+      jest.useRealTimers();
+    });
+
+    test('does not auto-regenerate on first render with existing slug', async () => {
+      renderWithTargetField({
+        initialValues: { name: 'existing-slug', title: 'Existing Title' },
+      });
+      await waitForSlugInput();
+
+      expect(screen.getByRole('textbox', { name: 'Slug' })).toHaveValue('existing-slug');
+    });
+
+    test('does not auto-regenerate after user manually edits UID', async () => {
+      jest.useFakeTimers();
+      const { user } = renderWithTargetField();
+      await waitForSlugInput();
+
+      // Manually edit the UID field first
+      const slugInput = screen.getByRole('textbox', { name: 'Slug' });
+      await user.type(slugInput, 'custom-slug');
+
+      // Then change the target field
+      const titleInput = screen.getByRole('textbox', { name: 'title' });
+      await user.type(titleInput, 'My Article');
+
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      // UID should stay at the manually entered value
+      expect(slugInput).toHaveValue('custom-slug');
+
+      jest.useRealTimers();
+    });
+
+    test('regenerate button resets manual edit tracking, allowing auto-regeneration again', async () => {
+      jest.useFakeTimers();
+      let generateCallCount = 0;
+      server.use(
+        rest.post('/content-manager/uid/generate', async (req, res, ctx) => {
+          generateCallCount++;
+          return res(ctx.json({ data: `generated-${generateCallCount}` }));
+        })
+      );
+
+      const { user } = renderWithTargetField();
+      await waitForSlugInput();
+
+      // Manually edit the UID
+      const slugInput = screen.getByRole('textbox', { name: 'Slug' });
+      await user.type(slugInput, 'custom-slug');
+
+      // Click regenerate — resets isCustomModified
+      await user.click(screen.getByRole('button', { name: /regenerate/i }));
+      await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+      expect(slugInput).toHaveValue('generated-1');
+
+      // Change the target field — should trigger auto-regeneration
+      const titleInput = screen.getByRole('textbox', { name: 'title' });
+      await user.type(titleInput, 'New Title');
+
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      await waitFor(() => expect(slugInput).toHaveValue('generated-2'));
+
+      jest.useRealTimers();
+    });
   });
 });
