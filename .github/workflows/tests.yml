@@ -601,14 +601,14 @@ jobs:
         run: find . -name "lcov.info" -type f
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v7
+        uses: SonarSource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
-        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+        uses: SonarSource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4
         timeout-minutes: 5
         continue-on-error: true
         env:
