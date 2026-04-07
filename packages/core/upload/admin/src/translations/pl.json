@@ -24,7 +24,7 @@
   "upload.progress.failed": "Przesyłanie nie powiodło się",
   "upload.progress.failed.subtitle": "Spróbuj przesłać pliki ponownie",
   "upload.progress.success": "Przesyłanie zakończone sukcesem!",
-  "upload.progress.success.subtitle": "{count, plural, jeden {# plik przesłany pomyślnie} other {# plików przesłane pomyślnie}}",
+  "upload.progress.success.subtitle": "{count, plural, one {# plik przesłany pomyślnie} other {# plików przesłane pomyślnie}}",
   "upload.progress.success.subtitle.withErrors": "{successCount} przesłano, {errorCount} nie powiodło się",
   "upload.progress.uploading.withCount": "Przesyłanie {total} elementów ({percentage}%)",
   "upload.progress.uploading-files": "Przesyłanie {count, plural, one {# pliku} other {# plików}}",
