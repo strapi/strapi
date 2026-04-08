@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'strapi/strapi'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup npmrc
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - run: yarn
-      - run: ./scripts/pre-publish.sh --yes
+      - run: ./scripts/pre-publish.sh
         env:
           VERSION: '0.0.0-experimental.${{ github.sha }}'
           DIST_TAG: ${{ github.event.inputs.dist-tag }}

@@ -5,7 +5,6 @@ on:
     paths:
       - '**/admin/src/**.js'
       - '**/ee/admin/**.js'
-      - '**/helper-plugin/src/**.js'
       - '**/translations/**.json'
 
       # Might be too broad, but it runs the action even if a
@@ -22,9 +21,9 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -38,8 +37,8 @@ jobs:
         with:
           build-script: 'build:size'
           pattern: '**/build/**/*.{js,css,html,svg}'
-          strip-hash: "\\.(?:(\\w{8})\\.chunk)|(?:\\.(\\w{8}))"
-          minimum-change-threshold: 10
+          strip-hash: "-([-\\w]{8})(\\.\\w+)$"
+          minimum-change-threshold: '5%'
 
           # FIXME: exclude unnamed webpack chunks - remove once webpack
           # does not create them anymore

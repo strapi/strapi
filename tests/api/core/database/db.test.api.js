@@ -16,40 +16,90 @@ const testCT = {
     name: {
       type: 'string',
     },
+    related: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'api::related.related',
+    },
+  },
+};
+
+const relatedCT = {
+  displayName: 'related',
+  singularName: 'related',
+  pluralName: 'relateds',
+  kind: 'collectionType',
+  attributes: {
+    title: {
+      type: 'string',
+    },
   },
 };
 
 const fixtures = {
-  test: [
+  test: ({ related }) => {
+    return [
+      {
+        name: 'Hugo LLORIS',
+        related: related[0].id,
+      },
+      {
+        name: 'Samuel UMTITI',
+        related: related[1].id,
+      },
+      {
+        name: 'Lucas HERNANDEZ',
+        related: related[0].id,
+      },
+    ];
+  },
+  related: [
     {
-      name: 'Hugo LLORIS',
+      title: 'Category A',
     },
     {
-      name: 'Samuel UMTITI',
-    },
-    {
-      name: 'Lucas HERNANDEZ',
+      title: 'Category B',
     },
   ],
 };
 
 describe('Deep Filtering API', () => {
-  beforeAll(async () => {
-    await builder.addContentType(testCT).build();
+  beforeEach(async () => {
+    await builder
+      .addContentTypes([relatedCT, testCT])
+      .addFixtures(relatedCT.singularName, fixtures.related)
+      .addFixtures(testCT.singularName, fixtures.test)
+      .build();
 
     strapi = await createStrapiInstance();
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await strapi.destroy();
     await builder.cleanup();
   });
 
   test('Return an array of ids on createMany', async () => {
-    const res = await strapi.db.query('api::test.test').createMany({ data: fixtures.test });
+    const res = await strapi.db
+      .query('api::test.test')
+      .createMany({ data: [{ name: 'foo' }, { name: 'bar' }] });
 
     expect(res).toMatchObject({ count: expect.any(Number) });
     expect(Array.isArray(res.ids)).toBe(true);
-    expect(res.ids.length > 0).toBe(true);
+    expect(res.ids.length).toBe(2);
+  });
+
+  test('Delete multiple entries with deep filtering', async () => {
+    const deleteRes = await strapi.db.query('api::test.test').deleteMany({
+      where: {
+        related: { title: 'Category A' },
+      },
+    });
+
+    expect(deleteRes.count).toBe(2);
+
+    const remainingEntries = await strapi.db.query('api::test.test').findMany();
+    expect(remainingEntries.length).toBe(1);
+    expect(remainingEntries[0].name).toBe('Samuel UMTITI');
   });
 });
