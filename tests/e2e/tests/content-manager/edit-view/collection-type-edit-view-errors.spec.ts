@@ -55,7 +55,7 @@ test.describe('Edit View', () => {
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved');
 
-      await page.getByRole('button', { name: /open user menu/i }).click();
+      await page.getByRole('button', { name: 'Open user menu' }).click();
       await page.getByRole('menuitem', { name: 'Log out' }).click();
 
       // As editor login and try to publish the entry

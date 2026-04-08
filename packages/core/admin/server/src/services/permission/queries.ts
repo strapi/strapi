@@ -1,4 +1,4 @@
-import { isNil, isArray, prop, xor, eq, map, differenceWith } from 'lodash/fp';
+import { isNil, isArray, prop, xor, eq, differenceWith } from 'lodash/fp';
 import pmap from 'p-map';
 import type { Data } from '@strapi/types';
 import { getService } from '../../utils';
@@ -149,8 +149,9 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
       (permission: any) => !permission.role && !permission.apiToken
     );
 
-    const allPermissionsToRemove = [...permissionsToRemove, ...orphanedPermissions];
-    const permissionsIdToRemove = map(prop('id'), allPermissionsToRemove);
+    const permissionsIdToRemove = Array.from(
+      new Set([...permissionsToRemove, ...orphanedPermissions].map((p) => p.id))
+    );
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
     const remainingPermissions = permissions.filter(

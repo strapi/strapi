@@ -206,6 +206,9 @@ const assertAdminPermissionsValidity = async (adminPermissions?: PermissionInput
  *
  * Returns the permissions with conditions enforced from the user's role.
  * Throws ValidationError if any permission exceeds the user's ceiling.
+ *
+ * Guaranteed postcondition: all returned permissions have conditions filtered to
+ * registered conditions only, regardless of the user type.
  */
 const enforceAdminPermissionsCeiling = async (
   user: AdminUser | undefined | null,
@@ -219,7 +222,17 @@ const enforceAdminPermissionsCeiling = async (
       'Admin permission ceiling cannot be enforced without an authenticated user'
     );
   }
-  if (isSuperAdmin(user)) return requestedPermissions;
+  if (isSuperAdmin(user)) {
+    // Sanitize conditions even for super-admins so this function is a complete boundary.
+    // createApiTokenAdminPermissions also sanitizes, but relying on that downstream
+    // is fragile — any future call path that skips it would store invalid conditions.
+    const { conditionProvider } = getService('permission');
+    const sanitize = permissionDomain.sanitizeConditions(conditionProvider as any);
+    return requestedPermissions.map((perm) => {
+      const sanitized = sanitize({ ...perm, actionParameters: {} } as Permission);
+      return { ...perm, conditions: sanitized.conditions };
+    });
+  }
 
   const userPermissions: Permission[] = await getService('permission').findUserPermissions(user);
 
@@ -541,6 +554,7 @@ type WhereParams = {
   lastUsedAt?: number;
   description?: string;
   accessKey?: string;
+  kind?: 'content-api' | 'admin';
 };
 
 type GetByOptions = {
@@ -848,6 +862,22 @@ const list = async <K extends AnyApiToken['kind']>(
  * Revoke (delete) a token
  */
 const revoke = async (id: string | number): Promise<AnyApiToken> => {
+  const token = await strapi.db.query('admin::api-token').findOne({
+    where: { id },
+    select: ['id'],
+    populate: ['adminPermissions'],
+  });
+
+  if (token !== null && token !== undefined) {
+    const permissionIds = ((token.adminPermissions as Array<{ id: Data.ID }>) ?? [])
+      .map((p) => p.id)
+      .filter((permId) => permId !== null && permId !== undefined);
+
+    if (permissionIds.length > 0) {
+      await getService('permission').deleteByIds(permissionIds);
+    }
+  }
+
   return strapi.db
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
@@ -1137,9 +1167,9 @@ function createTokenService(
       list: (callingUser: AdminUser) =>
         list(callingUser, { filter: { kind: 'content-api' } }) as Promise<ContentApiApiToken[]>,
       getById: (id: string | number, options?: GetByOptions) =>
-        getById(id, options) as Promise<ContentApiApiToken | null>,
+        getBy({ id, kind: 'content-api' }, options) as Promise<ContentApiApiToken | null>,
       getByName: (name: string, options?: GetByOptions) =>
-        getByName(name, options) as Promise<ContentApiApiToken | null>,
+        getBy({ name, kind: 'content-api' }, options) as Promise<ContentApiApiToken | null>,
       update: (id: string | number, attributes: Partial<ContentApiApiTokenBody>) =>
         update(id, attributes) as Promise<ContentApiApiToken>,
       revoke: (id: string | number) => revoke(id) as Promise<ContentApiApiToken>,
@@ -1157,9 +1187,9 @@ function createTokenService(
     list: (callingUser: AdminUser) =>
       list(callingUser, { filter: { kind: 'admin' } }) as Promise<AdminApiToken[]>,
     getById: (id: string | number, options?: GetByOptions) =>
-      getById(id, options) as Promise<AdminApiToken | null>,
+      getBy({ id, kind: 'admin' }, options) as Promise<AdminApiToken | null>,
     getByName: (name: string, options?: GetByOptions) =>
-      getByName(name, options) as Promise<AdminApiToken | null>,
+      getBy({ name, kind: 'admin' }, options) as Promise<AdminApiToken | null>,
     update: (id: string | number, attributes: Partial<AdminTokenBody>) =>
       update(id, attributes) as Promise<AdminApiToken>,
     revoke: (id: string | number) => revoke(id) as Promise<AdminApiToken>,
@@ -1191,6 +1221,7 @@ export {
   getByName,
   getBy,
   assignAdminPermissionsToToken,
+  enforceAdminPermissionsCeiling,
   reconcileTokenPermissionsToUserCeiling,
   syncApiTokenPermissionsForUser,
   syncApiTokenPermissionsForRole,

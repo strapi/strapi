@@ -162,42 +162,100 @@ describe('Admin Token Controller', () => {
   // Revoke
   // ---------------------------------------------------------------------------
   describe('Revoke', () => {
-    test('Revokes successfully', async () => {
+    test('Owner revokes successfully', async () => {
       const revoke = jest.fn().mockResolvedValue(baseAdminToken);
+      const getById = jest.fn().mockResolvedValue(baseAdminToken);
       const deleted = jest.fn();
-      const ctx = createContext({ params: { id: baseAdminToken.id } }, { deleted });
+      const ctx = createContext(
+        { params: { id: baseAdminToken.id } },
+        { deleted, state: { user: ownerUser } }
+      );
 
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': { revoke },
+            'api-token-admin': { revoke, getById },
           },
         },
       } as any;
 
       await adminTokenController.revoke(ctx as any);
 
+      expect(getById).toHaveBeenCalledWith(baseAdminToken.id);
       expect(revoke).toHaveBeenCalledWith(baseAdminToken.id);
       expect(deleted).toHaveBeenCalledWith({ data: baseAdminToken });
     });
 
-    test('Does not error when token does not exist', async () => {
-      const revoke = jest.fn().mockResolvedValue(null);
+    test('Super-admin revokes successfully', async () => {
+      const revoke = jest.fn().mockResolvedValue(baseAdminToken);
+      const getById = jest.fn().mockResolvedValue(baseAdminToken);
       const deleted = jest.fn();
-      const ctx = createContext({ params: { id: baseAdminToken.id } }, { deleted });
+      const ctx = createContext(
+        { params: { id: baseAdminToken.id } },
+        { deleted, state: { user: superAdmin } }
+      );
 
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': { revoke },
+            'api-token-admin': { revoke, getById },
           },
         },
       } as any;
 
       await adminTokenController.revoke(ctx as any);
 
+      expect(getById).toHaveBeenCalledWith(baseAdminToken.id);
       expect(revoke).toHaveBeenCalledWith(baseAdminToken.id);
-      expect(deleted).toHaveBeenCalledWith({ data: null });
+      expect(deleted).toHaveBeenCalledWith({ data: baseAdminToken });
+    });
+
+    test('Forbids revoke when caller is not owner and not super-admin', async () => {
+      const otherUser = { id: 77, roles: [{ code: 'strapi-editor' }] };
+      const revoke = jest.fn();
+      const forbidden = jest.fn();
+      const getById = jest.fn().mockResolvedValue(baseAdminToken);
+      const ctx = createContext(
+        { params: { id: baseAdminToken.id } },
+        { forbidden, state: { user: otherUser } }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { revoke, getById },
+          },
+        },
+      } as any;
+
+      await adminTokenController.revoke(ctx as any);
+
+      expect(forbidden).toHaveBeenCalled();
+      expect(revoke).not.toHaveBeenCalled();
+    });
+
+    test('Returns 404 when token not found', async () => {
+      const revoke = jest.fn();
+      const notFound = jest.fn();
+      const getById = jest.fn().mockResolvedValue(null);
+      const ctx = createContext(
+        { params: { id: baseAdminToken.id } },
+        { notFound, state: { user: ownerUser } }
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token-admin': { revoke, getById },
+          },
+        },
+      } as any;
+
+      await adminTokenController.revoke(ctx as any);
+
+      expect(getById).toHaveBeenCalledWith(baseAdminToken.id);
+      expect(notFound).toHaveBeenCalledWith('API Token not found');
+      expect(revoke).not.toHaveBeenCalled();
     });
   });
 

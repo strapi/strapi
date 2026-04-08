@@ -15,6 +15,7 @@ import {
   getByName,
   reconcileTokenPermissionsToUserCeiling,
   syncApiTokenPermissionsForUser,
+  enforceAdminPermissionsCeiling,
 } from '../api-token';
 import encryptionService from '../encryption';
 
@@ -706,18 +707,29 @@ describe('API Token', () => {
     };
 
     test('It deletes the token', async () => {
+      const mockedFindOne = jest.fn().mockResolvedValue({ id: token.id, adminPermissions: [] });
       const mockedDelete = jest.fn().mockResolvedValue(token);
 
       global.strapi = {
         db: {
           query() {
-            return { delete: mockedDelete };
+            return { findOne: mockedFindOne, delete: mockedDelete };
+          },
+        },
+        admin: {
+          services: {
+            permission: { deleteByIds: jest.fn() },
           },
         },
       } as any;
 
       const res = await revoke(token.id);
 
+      expect(mockedFindOne).toHaveBeenCalledWith({
+        where: { id: token.id },
+        select: ['id'],
+        populate: ['adminPermissions'],
+      });
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id: token.id },
@@ -727,18 +739,26 @@ describe('API Token', () => {
     });
 
     test('It returns `null` if the resource does not exist', async () => {
+      const mockedFindOne = jest.fn().mockResolvedValue(null);
       const mockedDelete = jest.fn().mockResolvedValue(null);
+      const mockedDeleteByIds = jest.fn();
 
       global.strapi = {
         db: {
           query() {
-            return { delete: mockedDelete };
+            return { findOne: mockedFindOne, delete: mockedDelete };
+          },
+        },
+        admin: {
+          services: {
+            permission: { deleteByIds: mockedDeleteByIds },
           },
         },
       } as any;
 
       const res = await revoke(42);
 
+      expect(mockedDeleteByIds).not.toHaveBeenCalled();
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id: 42 },
@@ -746,6 +766,31 @@ describe('API Token', () => {
       });
 
       expect(res).toEqual(null);
+    });
+
+    test('It deletes adminPermissions before the token for admin tokens', async () => {
+      const adminToken = { id: 5, adminPermissions: [{ id: 101 }, { id: 102 }] };
+      const mockedFindOne = jest.fn().mockResolvedValue(adminToken);
+      const mockedDelete = jest.fn().mockResolvedValue(adminToken);
+      const mockedDeleteByIds = jest.fn().mockResolvedValue({});
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne: mockedFindOne, delete: mockedDelete };
+          },
+        },
+        admin: {
+          services: {
+            permission: { deleteByIds: mockedDeleteByIds },
+          },
+        },
+      } as any;
+
+      await revoke(adminToken.id);
+
+      expect(mockedDeleteByIds).toHaveBeenCalledWith([101, 102]);
+      expect(mockedDelete).toHaveBeenCalled();
     });
   });
 
@@ -2046,6 +2091,86 @@ describe('API Token', () => {
 
       expect(deleteByIdsMock).not.toHaveBeenCalled();
       expect(updateMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('enforceAdminPermissionsCeiling — super-admin condition sanitization', () => {
+    const superAdmin = { id: 1, roles: [{ code: 'strapi-super-admin' }] } as any;
+
+    const makeStrapWithConditions = (knownConditions: string[]) => {
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              conditionProvider: {
+                has: (condition: string) => knownConditions.includes(condition),
+              },
+            },
+          },
+        },
+      } as any;
+    };
+
+    test('Returns permissions unchanged when all conditions are registered', async () => {
+      makeStrapWithConditions(['admin::is-creator']);
+
+      const permissions = [
+        {
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: ['admin::is-creator'],
+          properties: {},
+        },
+      ];
+
+      const result = await enforceAdminPermissionsCeiling(superAdmin, permissions);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].conditions).toEqual(['admin::is-creator']);
+    });
+
+    test('Strips unregistered conditions from super-admin permissions', async () => {
+      makeStrapWithConditions(['admin::is-creator']);
+
+      const permissions = [
+        {
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: ['admin::is-creator', 'plugin::unknown.bogus-condition'],
+          properties: {},
+        },
+      ];
+
+      const result = await enforceAdminPermissionsCeiling(superAdmin, permissions);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].conditions).toEqual(['admin::is-creator']);
+    });
+
+    test('Strips all conditions when none are registered', async () => {
+      makeStrapWithConditions([]);
+
+      const permissions = [
+        {
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: ['plugin::unknown.bogus-condition'],
+          properties: {},
+        },
+      ];
+
+      const result = await enforceAdminPermissionsCeiling(superAdmin, permissions);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].conditions).toEqual([]);
+    });
+
+    test('Returns empty array for empty input', async () => {
+      makeStrapWithConditions([]);
+
+      const result = await enforceAdminPermissionsCeiling(superAdmin, []);
+
+      expect(result).toEqual([]);
     });
   });
 });

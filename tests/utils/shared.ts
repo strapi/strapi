@@ -121,7 +121,11 @@ export const findAndClose = async (page: Page, text: string, options: FindAndClo
   const { role = ['status', 'alert'], closeLabel = 'Close', required = true } = options;
 
   const roles = Array.isArray(role) ? role : [role];
-  const toastSelector = roles.map((r) => `:has-text("${text}")[role="${r}"]`).join(', ');
+  // Sonner toasts use [data-sonner-toast]; legacy notifications used role="status" | "alert".
+  const toastSelector = [
+    `[data-sonner-toast]:has-text("${text}")`,
+    ...roles.map((r) => `:has-text("${text}")[role="${r}"]`),
+  ].join(', ');
 
   const elements = page.locator(toastSelector);
 
@@ -133,23 +137,30 @@ export const findAndClose = async (page: Page, text: string, options: FindAndClo
   for (let i = 0; i < count; i++) {
     const toast = elements.nth(i);
     if (await toast.isVisible()) {
+      // Prefer a close button nested inside the toast
       const innerClose = toast.getByRole('button', { name: closeLabel });
       if ((await innerClose.count()) > 0 && (await innerClose.first().isVisible())) {
         await innerClose
           .first()
           .click()
           .catch(() => {});
+        // Wait for the toast to be hidden
         await toast.waitFor({ state: 'hidden' }).catch(() => {});
       } else {
-        const siblingSelector = roles
-          .map((r) => `:has-text("${text}")[role="${r}"] ~ button:has-text("${closeLabel}")`)
-          .join(', ');
+        // Fall back to a sibling button (original strategy)
+        const siblingSelector = [
+          `[data-sonner-toast]:has-text("${text}") ~ button:has-text("${closeLabel}")`,
+          ...roles.map(
+            (r) => `:has-text("${text}")[role="${r}"] ~ button:has-text("${closeLabel}")`
+          ),
+        ].join(', ');
         const siblingClose = page.locator(siblingSelector);
         if ((await siblingClose.count()) > 0 && (await siblingClose.first().isVisible())) {
           await siblingClose
             .first()
             .click()
             .catch(() => {});
+          // Wait for the toast to be hidden
           await toast.waitFor({ state: 'hidden' }).catch(() => {});
         }
       }

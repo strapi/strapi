@@ -243,7 +243,7 @@ export const EditView = () => {
   const ownerUserId =
     apiToken !== null && apiToken.kind === 'admin' ? getOwnerId(apiToken.adminUserOwner) : null;
 
-  if (isLoading) {
+  if (isLoading || (!isCreating && apiToken === null)) {
     return <Page.Loading />;
   }
 
