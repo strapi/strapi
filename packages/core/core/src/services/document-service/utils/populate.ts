@@ -29,6 +29,11 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
           break;
         }
 
+        if ('unstable_virtual' in attribute && attribute.unstable_virtual) {
+          // skip relations not managed by the DB layer
+          break;
+        }
+
         // Include all non-morph relations (including visible: false) so publish / discardDraft /
         // clone preserve links—same idea as content-manager getPopulateForRelation for invisible attrs.
         acc[attributeName] = { select: opts.relationalFields };
