@@ -265,12 +265,13 @@ const documentApi = contentManagerApi.injectEndpoints({
         model: string;
         documentIds: string[];
         locale?: string;
+        sort?: string;
       }
     >({
-      query: ({ model, documentIds, locale }) => ({
+      query: ({ model, documentIds, locale, sort }) => ({
         url: `/content-manager/collection-types/${model}/actions/bulkFindForValidation`,
         method: 'POST',
-        data: { documentIds, locale },
+        data: { documentIds, locale, sort },
       }),
       transformResponse: (response: { results: Find.Response['results'] }) =>
         response?.results ?? [],

@@ -426,6 +426,7 @@ const SelectedEntriesModalContent = ({
       model,
       documentIds,
       locale: query.plugins?.i18n?.locale,
+      sort: query.sort,
     },
     { skip: documentIds.length === 0 }
   );
@@ -437,7 +438,20 @@ const SelectedEntriesModalContent = ({
       const validate = createYupSchema(schema.attributes, components, { status: 'published' });
       const transform = transformDocument(schema, components);
       const validationErrors: Record<TableRow['documentId'], FormErrors> = {};
-      const rows = documents.map((entry: Document) => {
+      // Re-order documents to match the list view selection order, and restore the
+      // correct status (draft fetch returns 'draft' even for 'modified' documents)
+      const documentsMap = new Map(documents.map((doc: Document) => [doc.documentId, doc]));
+      const listViewStatusMap = new Map(
+        listViewSelectedEntries.map(({ documentId, status }) => [documentId, status])
+      );
+      const orderedDocuments = documentIds
+        .map((id) => {
+          const doc = documentsMap.get(id);
+          if (!doc) return undefined;
+          return { ...doc, status: listViewStatusMap.get(id) ?? doc.status };
+        })
+        .filter((doc): doc is Document => doc !== undefined);
+      const rows = orderedDocuments.map((entry: Document) => {
         const transformed = transform(entry);
         try {
           validate.validateSync(transformed, { abortEarly: false });
@@ -452,7 +466,7 @@ const SelectedEntriesModalContent = ({
       return { rows, validationErrors };
     }
     return { rows: [], validationErrors: {} };
-  }, [components, documents, schema]);
+  }, [components, documents, documentIds, listViewSelectedEntries, schema]);
 
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 

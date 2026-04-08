@@ -632,7 +632,7 @@ export default {
   async bulkFindForValidation(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { documentIds, locale } = ctx.request.body;
+    const { documentIds, locale, sort } = ctx.request.body;
 
     await validateBulkActionInput(ctx.request.body);
 
@@ -652,6 +652,7 @@ export default {
       populate,
       filters: { documentId: { $in: documentIds } } as any,
       locale,
+      sort,
       status: 'draft',
     });
 
