@@ -134,7 +134,15 @@ const AdminLayout = () => {
                 }}
               >
                 <UpsellBanner />
-                <Outlet />
+                {/*
+                 * Nested Suspense so lazy route chunks (Home, plugins, settings, etc.) show
+                 * Page.Loading in the main column while LeftMenu stays mounted. Without this,
+                 * suspend can bubble to the root Suspense in App and produce a blank shell
+                 * (e.g. white viewport) until the chunk resolves.
+                 */}
+                <React.Suspense fallback={<Page.Loading />}>
+                  <Outlet />
+                </React.Suspense>
               </Flex>
             </Flex>
           </Box>

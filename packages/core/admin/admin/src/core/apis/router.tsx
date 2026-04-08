@@ -13,6 +13,10 @@ import { Theme } from '../../components/Theme';
 import { Permission } from '../../features/Auth';
 import { NotFoundPage } from '../../pages/NotFoundPage';
 import { getImmutableRoutes } from '../../router';
+import {
+  wrapRouteObjectLazyWithRetry,
+  wrapRouteObjectsLazyWithRetry,
+} from '../../utils/retryDynamicImport';
 
 import type { StrapiApp } from '../../StrapiApp';
 
@@ -90,6 +94,24 @@ class Router {
    * It should not be used by plugins, doing so will likely break the application.
    */
   createRouter(strapi: StrapiApp, { memory, ...opts }: RouterOptions = {}) {
+    const authenticatedLayoutRoute: RouteObject = {
+      path: '/*',
+      lazy: async () => {
+        const { PrivateAdminLayout } = await import('../../layouts/AuthenticatedLayout');
+
+        return {
+          Component: PrivateAdminLayout,
+        };
+      },
+      children: [
+        ...this.routes,
+        {
+          path: '*',
+          element: <NotFoundPage />,
+        },
+      ],
+    };
+
     const routes = [
       {
         path: '/*',
@@ -104,24 +126,8 @@ class Router {
         ),
         element: <App strapi={strapi} store={strapi.store!} />,
         children: [
-          ...getImmutableRoutes(),
-          {
-            path: '/*',
-            lazy: async () => {
-              const { PrivateAdminLayout } = await import('../../layouts/AuthenticatedLayout');
-
-              return {
-                Component: PrivateAdminLayout,
-              };
-            },
-            children: [
-              ...this.routes,
-              {
-                path: '*',
-                element: <NotFoundPage />,
-              },
-            ],
-          },
+          ...wrapRouteObjectsLazyWithRetry(getImmutableRoutes()),
+          wrapRouteObjectLazyWithRetry(authenticatedLayoutRoute),
         ],
       },
     ];
