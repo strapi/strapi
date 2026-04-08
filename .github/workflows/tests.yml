@@ -608,7 +608,7 @@ jobs:
 
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
-        uses: SonarSource/sonarqube-quality-gate-action@8e493e8274794e7b686b2f4f291079d8548174f8 # 1.2.1
+        uses: SonarSource/sonarqube-quality-gate-action@v1.2.1
         timeout-minutes: 5
         continue-on-error: true
         env:
