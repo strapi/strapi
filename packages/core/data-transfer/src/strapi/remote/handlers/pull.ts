@@ -9,6 +9,11 @@ import {
   transferAssetStreamChunkByteLength,
 } from '../../../utils/transfer-asset-chunk';
 import {
+  batchLimitsFromAgreedMaxBatchSize,
+  negotiateAgreedMaxBatchSize,
+  parseOptionalMaxBatchSize,
+} from '../../../utils/transfer-max-batch-size';
+import {
   createLocalStrapiSourceProvider,
   estimateAssetTotals,
   ILocalStrapiSourceProvider,
@@ -27,6 +32,11 @@ export interface PullHandler extends Handler {
 
   streams?: { [stage in TransferStage]?: Readable };
   checksumsEnabled?: boolean;
+
+  /** Negotiated per-message limits (set after init). */
+  assetBatchMaxBytes?: number;
+  jsonBatchMaxBytes?: number;
+  agreedMaxBatchSize?: number;
 
   assertValidTransferAction(action: string): asserts action is PullTransferAction;
 
@@ -53,6 +63,9 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     this.streams = {};
     this.checksumsEnabled = false;
+    delete this.assetBatchMaxBytes;
+    delete this.jsonBatchMaxBytes;
+    delete this.agreedMaxBatchSize;
 
     delete this.provider;
   },
@@ -185,7 +198,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
   async flush(this: PullHandler, stage: Client.TransferPullStep, id) {
     type Stage = typeof stage;
-    const batchSize = 1024 * 1024;
+    const jsonBatchMaxBytes = this.jsonBatchMaxBytes ?? 1024 * 1024;
     let batch = [] as Client.GetTransferPullStreamData<Stage>;
     const stream = this.streams?.[stage];
 
@@ -223,7 +236,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       for await (const chunk of stream) {
         if (stage !== 'assets') {
           batch.push(chunk);
-          if (batchLength() >= batchSize) {
+          if (batchLength() >= jsonBatchMaxBytes) {
             await sendBatch();
           }
         } else {
@@ -296,12 +309,11 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         const assets = this.provider?.createAssetsReadStream();
         let batch: Protocol.Client.TransferAssetFlow[] = [];
         const checksumsEnabled = this.checksumsEnabled === true;
+        const assetBatchMaxBytes = this.assetBatchMaxBytes ?? 1024 * 1024;
 
         const batchLength = () => {
           return batch.reduce((acc, chunk) => acc + transferAssetStreamChunkByteLength(chunk), 0);
         };
-
-        const BATCH_MAX_SIZE = 1024 * 1024; // 1MB
 
         if (!assets) {
           throw new Error('Assets read stream could not be created');
@@ -331,8 +343,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
               assetChecksum?.update(assetChunk);
               batch.push(createTransferAssetStreamChunk(assetID, assetChunk));
 
-              // if the batch size is bigger than BATCH_MAX_SIZE stream the batch
-              if (batchLength() >= BATCH_MAX_SIZE) {
+              if (batchLength() >= assetBatchMaxBytes) {
                 yield batch;
                 batch = [];
               }
@@ -378,6 +389,22 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     this.startedAt = Date.now();
     this.checksumsEnabled = params?.checksums === true;
 
+    const serverMiB = parseOptionalMaxBatchSize(
+      strapi.config.get('server.transfer.remote.maxBatchSize')
+    );
+    const clientMiB = parseOptionalMaxBatchSize(params?.maxBatchSize);
+    const agreed = negotiateAgreedMaxBatchSize(clientMiB, serverMiB);
+    const limits = batchLimitsFromAgreedMaxBatchSize(agreed);
+    this.assetBatchMaxBytes = limits.assetBatchMaxBytes;
+    this.jsonBatchMaxBytes = limits.jsonBatchMaxBytes;
+    this.agreedMaxBatchSize = agreed ?? undefined;
+
+    if (agreed != null) {
+      strapi.log.info(
+        `[Data transfer][pull] maxBatchSize: agreed ${agreed} MiB → assetBatchMaxBytes=${limits.assetBatchMaxBytes}, jsonBatchMaxBytes=${limits.jsonBatchMaxBytes}`
+      );
+    }
+
     this.streams = {};
 
     this.provider = createLocalStrapiSourceProvider({
@@ -385,7 +412,13 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       getStrapi: () => strapi as Core.Strapi,
     });
 
-    return { transferID: this.transferID, checksums: true };
+    return {
+      transferID: this.transferID,
+      checksums: true,
+      assetBatchMaxBytes: limits.assetBatchMaxBytes,
+      jsonBatchMaxBytes: limits.jsonBatchMaxBytes,
+      ...(agreed != null ? { maxBatchSize: agreed } : {}),
+    };
   },
 
   async end(

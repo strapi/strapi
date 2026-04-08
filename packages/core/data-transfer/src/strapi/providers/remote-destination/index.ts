@@ -23,6 +23,10 @@ import {
   createTransferAssetStreamChunk,
   transferAssetStreamChunkByteLength,
 } from '../../../utils/transfer-asset-chunk';
+import {
+  LEGACY_BATCH_BYTES,
+  parseOptionalMaxBatchSize,
+} from '../../../utils/transfer-max-batch-size';
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
@@ -34,6 +38,8 @@ export interface IRemoteStrapiDestinationProviderOptions
   };
   /** Include per-asset stream checksums and require peers to validate on receive. */
   verifyChecksums?: boolean;
+  /** Max batch size (MiB); negotiated with remote via init. See user docs. */
+  maxBatchSize?: number;
 }
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
@@ -57,6 +63,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   #checksumsEnabled = false;
 
+  #assetBatchMaxBytes = LEGACY_BATCH_BYTES;
+
+  #jsonBatchMaxBytes = LEGACY_BATCH_BYTES;
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
@@ -79,6 +89,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   async initTransfer(): Promise<string> {
     const { strategy, restore } = this.options;
     const wantsChecksums = this.options.verifyChecksums === true;
+    const maxBatchSizeMiB = parseOptionalMaxBatchSize(this.options.maxBatchSize);
 
     const query = this.dispatcher?.dispatchCommand({
       command: 'init',
@@ -86,6 +97,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         options: { strategy, restore },
         transfer: 'push',
         ...(wantsChecksums ? { checksums: true } : {}),
+        ...(maxBatchSizeMiB !== undefined ? { maxBatchSize: maxBatchSizeMiB } : {}),
       },
     });
 
@@ -95,6 +107,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
     }
+    this.#assetBatchMaxBytes = res.assetBatchMaxBytes ?? LEGACY_BATCH_BYTES;
+    this.#jsonBatchMaxBytes = res.jsonBatchMaxBytes ?? LEGACY_BATCH_BYTES;
     this.#checksumsEnabled = wantsChecksums && res.checksums === true;
     if (wantsChecksums && res.checksums !== true) {
       this.#reportWarning(
@@ -186,7 +200,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   #writeStream(step: Exclude<Client.TransferPushStep, 'assets'>): Writable {
     type Step = typeof step;
 
-    const batchSize = 1024 * 1024; // 1MB;
+    const batchSize = this.#jsonBatchMaxBytes;
     const startTransferOnce = this.#startStepOnce(step);
 
     let batch = [] as Client.GetTransferPushStreamData<Step>;
@@ -389,7 +403,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     let hasStarted = false;
     const verifyChecksums = this.#checksumsEnabled;
 
-    const batchSize = 1024 * 1024; // 1MB;
+    const batchSize = this.#assetBatchMaxBytes;
     const batchLength = () => {
       return batch.reduce((acc, chunk) => acc + transferAssetStreamChunkByteLength(chunk), 0);
     };

@@ -215,6 +215,50 @@ describe('Transfer', () => {
         mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
       ).toHaveBeenCalledWith(expect.not.objectContaining({ verifyChecksums: true }));
     });
+
+    it('passes server.transfer.remote.maxBatchSize to remote destination provider', async () => {
+      (dataTransferUtils.createStrapiInstance as jest.Mock).mockImplementationOnce(async () => ({
+        config: {
+          get: (key: string) => (key === 'server.transfer.remote.maxBatchSize' ? 256 : undefined),
+        },
+        telemetry: {
+          send: jest.fn(),
+        },
+      }));
+
+      await expectExit(0, async () => {
+        await transferAction({
+          from: undefined,
+          to: destinationUrl,
+          toToken: destinationToken,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxBatchSize: 256,
+        })
+      );
+    });
+
+    it('does not pass maxBatchSize to remote destination when omitted from config and CLI (non-breaking)', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          from: undefined,
+          to: destinationUrl,
+          toToken: destinationToken,
+        } as any);
+      });
+
+      const calls =
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider.mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+      for (const [opts] of calls) {
+        expect(opts).not.toHaveProperty('maxBatchSize');
+      }
+    });
   });
 
   describe('--from', () => {
@@ -320,6 +364,61 @@ describe('Transfer', () => {
       );
     });
 
+    it('passes server.transfer.remote.maxBatchSize to remote source provider', async () => {
+      (dataTransferUtils.createStrapiInstance as jest.Mock).mockImplementationOnce(async () => ({
+        config: {
+          get: (key: string) => (key === 'server.transfer.remote.maxBatchSize' ? 128 : undefined),
+        },
+        telemetry: {
+          send: jest.fn(),
+        },
+      }));
+
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxBatchSize: 128,
+        })
+      );
+    });
+
+    it('prefers CLI maxBatchSize over config for remote source', async () => {
+      (dataTransferUtils.createStrapiInstance as jest.Mock).mockImplementationOnce(async () => ({
+        config: {
+          get: (key: string) => (key === 'server.transfer.remote.maxBatchSize' ? 128 : undefined),
+        },
+        telemetry: {
+          send: jest.fn(),
+        },
+      }));
+
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+          maxBatchSize: 64,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxBatchSize: 64,
+        })
+      );
+    });
+
     it('uses local Strapi destination when to is not specified', async () => {
       await expectExit(0, async () => {
         await transferAction({
@@ -334,6 +433,22 @@ describe('Transfer', () => {
         mockDataTransfer.strapi.providers.createLocalStrapiDestinationProvider
       ).toHaveBeenCalled();
       expect(mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider).toHaveBeenCalled();
+    });
+
+    it('does not pass maxBatchSize to remote source when omitted from config and CLI (non-breaking)', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+        } as any);
+      });
+
+      const calls = mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider.mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+      for (const [opts] of calls) {
+        expect(opts).not.toHaveProperty('maxBatchSize');
+      }
     });
   });
 

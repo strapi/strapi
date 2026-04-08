@@ -42,6 +42,18 @@ const command = () => {
           'Disable end-to-end asset checksum verification for assets transfer'
         )
       )
+      .addOption(
+        new Option(
+          '--max-batch-size <number>',
+          'Maximum WebSocket batch size for remote transfer (negotiated with remote as the minimum of both sides; see documentation)'
+        ).argParser((v) => {
+          const n = Number(v);
+          if (!Number.isFinite(n) || n <= 0) {
+            throw new Error('--max-batch-size must be a positive number');
+          }
+          return n;
+        })
+      )
       .addOption(new Option('--verbose', 'Enable verbose logs'))
       .addOption(forceOption)
       .addOption(excludeOption)
