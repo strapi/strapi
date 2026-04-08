@@ -46,6 +46,12 @@ const load = async (
         continue;
       }
 
+      // Bidirectional inverse side (e.g. `children` mappedBy `parent`) shares the same physical
+      // join table as the owning attribute; processing both would duplicate rows and inserts.
+      if (attribute.mappedBy) {
+        continue;
+      }
+
       const joinTable = attribute.joinTable;
       if (!joinTable) {
         continue;
@@ -54,7 +60,7 @@ const load = async (
       const { name: sourceColumnName } = joinTable.joinColumn;
       const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
-      const sourceIds = sourceEntries.map((entry) => entry.id);
+      const sourceIds = sourceEntries.map((entry) => String(entry.id));
 
       // Load relations where both source and target are among the entries being processed.
       // These are the self-referential relations that would be lost during the
@@ -89,16 +95,18 @@ const sync = async (
 
   const targetEntriesByLocale = keyBy('locale', targetEntries);
 
-  // Map source entry IDs → target entry IDs based on locale
+  // Map source entry IDs → target entry IDs based on locale (string keys for DB/driver consistency)
   const idMapping = sourceEntries.reduce(
     (acc, sourceEntry) => {
       const targetEntry = targetEntriesByLocale[sourceEntry.locale];
       if (!targetEntry) return acc;
-      acc[sourceEntry.id] = targetEntry.id;
+      acc[String(sourceEntry.id)] = String(targetEntry.id);
       return acc;
     },
     {} as Record<string, string>
   );
+
+  const batchSize = strapi.db.dialect.getBatchInsertSize();
 
   await strapi.db.transaction(async ({ trx }) => {
     for (const { joinTable, relations } of relationData) {
@@ -107,8 +115,10 @@ const sync = async (
 
       const newRelations = relations
         .map((relation) => {
-          const newSourceId = idMapping[relation[sourceColumn] as string];
-          const newTargetId = idMapping[relation[targetColumn] as string];
+          const oldSourceId = String(relation[sourceColumn]);
+          const oldTargetId = String(relation[targetColumn]);
+          const newSourceId = idMapping[oldSourceId];
+          const newTargetId = idMapping[oldTargetId];
 
           // Both sides must map to new entries
           if (!newSourceId || !newTargetId) return null;
@@ -119,10 +129,30 @@ const sync = async (
             [targetColumn]: newTargetId,
           };
         })
-        .filter(Boolean);
+        .filter(Boolean) as Record<string, unknown>[];
 
-      if (newRelations.length > 0) {
-        await trx.batchInsert(joinTable.name, newRelations as any[], 1000);
+      const pairKey = (r: Record<string, unknown>) =>
+        `${String(r[sourceColumn])}:${String(r[targetColumn])}`;
+      const seenPairs = new Set<string>();
+      const deduped = newRelations.filter((r) => {
+        const key = pairKey(r);
+        if (seenPairs.has(key)) return false;
+        seenPairs.add(key);
+        return true;
+      });
+
+      if (deduped.length === 0) continue;
+
+      const newSourceIds = [...new Set(deduped.map((r) => String(r[sourceColumn])))];
+      const existingRows = await trx(joinTable.name)
+        .whereIn(sourceColumn, newSourceIds)
+        .select(sourceColumn, targetColumn);
+
+      const existingSet = new Set(existingRows.map((r: Record<string, unknown>) => pairKey(r)));
+      const toInsert = deduped.filter((r) => !existingSet.has(pairKey(r)));
+
+      if (toInsert.length > 0) {
+        await trx.batchInsert(joinTable.name, toInsert as any[], batchSize);
       }
     }
   });
