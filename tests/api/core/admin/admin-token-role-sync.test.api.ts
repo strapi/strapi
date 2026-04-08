@@ -11,7 +11,7 @@ import type { Core } from '@strapi/types';
  * admin token permissions are correctly reconciled (clamped, never expanded).
  *
  * Sync triggers:
- *  - T1: role.assignPermissions → syncPermissionsForRole (fires when permissionsToDelete.length > 0)
+ *  - T1: role.assignPermissions → syncPermissionsForRole (fires when permissionsToAdd.length > 0 || permissionsToDelete.length > 0)
  *  - T2: admin::user afterUpdate lifecycle → syncPermissionsForUser (fires when roles field changes)
  *  - T3: admin::role beforeDelete/afterDelete lifecycles → syncPermissionsForUser for each affected user
  */
@@ -109,7 +109,7 @@ describe('Admin Token Role Sync (api)', () => {
       roles: [roleA.id],
     });
     syncUserId = syncUser.id;
-    rqSync = await createAuthRequest({ strapi, userInfo: { email: 'sync-user@test.com' } });
+    rqSync = await createAuthRequest({ strapi, userInfo: { email: 'sync-user@test.com' } as any });
 
     // syncUserBoth: multi-role user (roleA + roleB)
     const syncUserBoth = await utils.createUser({
@@ -122,7 +122,7 @@ describe('Admin Token Role Sync (api)', () => {
     syncUserBothId = syncUserBoth.id;
     rqSyncBoth = await createAuthRequest({
       strapi,
-      userInfo: { email: 'sync-user-both@test.com' },
+      userInfo: { email: 'sync-user-both@test.com' } as any,
     });
 
     await deleteAllAdminTokens();
@@ -278,6 +278,90 @@ describe('Admin Token Role Sync (api)', () => {
       expect(syncPermReverted).toBeDefined();
       expect(syncPermReverted?.conditions).toStrictEqual([]);
     });
+
+    test('T1-5 Pure addition to second role triggers condition re-sync', async () => {
+      const utils = createUtils(strapi);
+
+      // roleX: SYNC_ACTION with condition + admin-token CRUD actions
+      // roleY: initially empty
+      const roleX = await utils.createRole({
+        name: 't1-5-role-x',
+        description: 'Role X for T1-5',
+      });
+      const roleY = await utils.createRole({
+        name: 't1-5-role-y',
+        description: 'Role Y for T1-5',
+      });
+
+      try {
+        await utils.assignPermissionsToRole(roleX.id, [
+          {
+            action: SYNC_ACTION,
+            subject: SYNC_SUBJECT,
+            conditions: ['admin::is-creator'],
+            properties: {},
+          },
+          ...ADMIN_TOKEN_PERMS,
+        ]);
+
+        const tempUser = await utils.createUser({
+          email: 't1-5-user@test.com',
+          firstname: 'T15',
+          lastname: 'User',
+          isActive: true,
+          roles: [roleX.id, roleY.id],
+        });
+
+        try {
+          const rqTemp = await createAuthRequest({
+            strapi,
+            userInfo: { email: 't1-5-user@test.com' } as any,
+          });
+
+          const resToken = await rqTemp({
+            url: '/admin/admin-tokens',
+            method: 'POST',
+            body: {
+              name: 't1-5-token',
+              adminPermissions: [
+                {
+                  action: SYNC_ACTION,
+                  subject: SYNC_SUBJECT,
+                  conditions: ['admin::is-creator'],
+                  properties: {},
+                },
+              ],
+            },
+          });
+          expect(resToken.status).toBe(201);
+          const tempToken: { id: number } = resToken.body.data;
+
+          // Baseline: token should have condition admin::is-creator
+          const baselinePerms = await getAdminPermissionsFromDB(tempToken.id);
+          const baselinePerm = baselinePerms.find((p) => p.action === SYNC_ACTION);
+          expect(baselinePerm).toBeDefined();
+          expect(baselinePerm?.conditions).toStrictEqual(['admin::is-creator']);
+
+          // Pure addition to roleY — no deletions in roleY
+          await utils.assignPermissionsToRole(roleY.id, [
+            { action: SYNC_ACTION, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+          ]);
+
+          // user has SYNC_ACTION from roleX (conditioned) AND roleY (unconditional)
+          // → anyUserPermIsUnconditional = true → enforcedConditions = [] → token updated
+          const afterPerms = await getAdminPermissionsFromDB(tempToken.id);
+          const afterPerm = afterPerms.find((p) => p.action === SYNC_ACTION);
+          expect(afterPerm).toBeDefined();
+          expect(afterPerm?.conditions).toStrictEqual([]);
+        } finally {
+          await strapi.db.query('admin::user').delete({ where: { id: tempUser.id } });
+        }
+      } finally {
+        await strapi.db.query('admin::api-token').deleteMany({ where: { kind: 'admin' } });
+        await strapi.db.query('admin::role').delete({ where: { id: roleX.id } });
+        await strapi.db.query('admin::role').delete({ where: { id: roleY.id } });
+      }
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -402,7 +486,7 @@ describe('Admin Token Role Sync (api)', () => {
         try {
           const tempRq = await createAuthRequest({
             strapi,
-            userInfo: { email: 'sync-temp-user@test.com' },
+            userInfo: { email: 'sync-temp-user@test.com' } as any,
           });
 
           // Create a token with both SYNC_ACTION and SYNC_ACTION_2
@@ -467,7 +551,7 @@ describe('Admin Token Role Sync (api)', () => {
       try {
         const saRq = await createAuthRequest({
           strapi,
-          userInfo: { email: 'sync-sa-user@test.com' },
+          userInfo: { email: 'sync-sa-user@test.com' } as any,
         });
 
         const createRes = await saRq({

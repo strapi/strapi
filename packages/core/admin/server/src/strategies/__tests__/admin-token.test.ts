@@ -9,6 +9,9 @@ describe('Admin Token Auth Strategy', () => {
     blocked: false,
   };
 
+  /** User row loaded with `populate: ['roles']` (see admin-token strategy). */
+  const activeUserWithRoles = { ...activeOwner, roles: [] as { code: string }[] };
+
   const adminTokenBase = {
     id: 2,
     kind: 'admin',
@@ -21,7 +24,10 @@ describe('Admin Token Auth Strategy', () => {
   const hash = jest.fn(() => 'api-token_tests-hashed-access-key');
   const generateTokenAbility = jest.fn(() => Promise.resolve({ can: jest.fn() }));
 
-  const makeStrapi = (getByAccessKey: jest.Mock) => ({
+  const makeStrapi = (
+    getByAccessKey: jest.Mock,
+    findOneUser: jest.Mock = jest.fn(() => activeUserWithRoles)
+  ) => ({
     admin: {
       services: {
         'api-token-admin': { getByAccessKey, hash },
@@ -29,7 +35,10 @@ describe('Admin Token Auth Strategy', () => {
       },
     },
     db: {
-      query() {
+      query(uid: string) {
+        if (uid === 'admin::user') {
+          return { findOne: findOneUser };
+        }
         return { update };
       },
     },
@@ -46,11 +55,12 @@ describe('Admin Token Auth Strategy', () => {
 
   describe('Authenticate an admin token', () => {
     test('Authenticates an admin token when owner is active and not blocked', async () => {
+      const findOneUser = jest.fn(() => activeUserWithRoles);
       const token = { ...adminTokenBase, adminUserOwner: activeOwner };
       const getByAccessKey = jest.fn(() => token);
       const ctx = adminRouteCtx();
 
-      global.strapi = makeStrapi(getByAccessKey) as any;
+      global.strapi = makeStrapi(getByAccessKey, findOneUser) as any;
 
       const response = (await adminTokenStrategy.authenticate(ctx)) as any;
 
@@ -58,7 +68,12 @@ describe('Admin Token Auth Strategy', () => {
       expect(response.credentials).toBe(token);
       expect(response.ability).toBeDefined();
       expect(ctx.state.userAbility).toBeDefined();
-      expect(ctx.state.user).toBe(activeOwner);
+      expect(ctx.state.user).toBe(activeUserWithRoles);
+      expect(findOneUser).toHaveBeenCalledWith({
+        where: { id: activeOwner.id },
+        populate: ['roles'],
+      });
+      expect(generateTokenAbility).toHaveBeenCalledWith([], activeUserWithRoles);
     });
 
     test('Fails to authenticate when owner isActive is false', async () => {

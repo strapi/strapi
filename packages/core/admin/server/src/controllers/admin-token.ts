@@ -118,8 +118,17 @@ export default {
   async revoke(ctx: Context) {
     const { id } = ctx.params as Revoke.Params;
     const apiTokenService = getService('api-token-admin');
-    const apiToken = await apiTokenService.revoke(id);
 
+    const existingToken = await apiTokenService.getById(id);
+    if (existingToken === null) {
+      return ctx.notFound('API Token not found');
+    }
+
+    if (canAccessAdminToken(ctx.state.user, existingToken) === false) {
+      return ctx.forbidden();
+    }
+
+    const apiToken = await apiTokenService.revoke(id);
     ctx.deleted({ data: apiToken } satisfies Revoke.Response);
   },
 
