@@ -448,7 +448,7 @@ const SelectedEntriesModalContent = ({
         .map((id) => {
           const doc = documentsMap.get(id);
           if (!doc) return undefined;
-          return { ...doc, status: listViewStatusMap.get(id) ?? doc.status };
+          return { ...doc, status: listViewStatusMap.get(id) ?? doc.status } as Document;
         })
         .filter((doc): doc is Document => doc !== undefined);
       const rows = orderedDocuments.map((entry: Document) => {

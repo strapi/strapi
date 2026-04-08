@@ -642,10 +642,6 @@ export default {
       return ctx.forbidden();
     }
 
-    if (documentIds.length > 100) {
-      return ctx.badRequest('documentIds must not exceed 100 items');
-    }
-
     const populate = await buildDeepPopulate(model as UID.CollectionType);
 
     const documents = await strapi.documents(model as UID.CollectionType).findMany({
