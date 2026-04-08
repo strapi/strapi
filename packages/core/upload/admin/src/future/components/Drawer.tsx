@@ -149,6 +149,7 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
     <Dialog.Content
       ref={ref}
       forceMount
+      asChild
       onPointerDownOutside={(e) => e.preventDefault()}
       onInteractOutside={(e) => e.preventDefault()}
       data-animation-direction={animationDirection}

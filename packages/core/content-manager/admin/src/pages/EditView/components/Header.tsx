@@ -5,6 +5,7 @@ import {
   useForm,
   BackButton,
   useNotification,
+  useClipboard,
   useStrapiApp,
   useQueryParams,
   useIsDesktop,
@@ -15,6 +16,7 @@ import {
 import {
   Box,
   Flex,
+  Menu,
   SingleSelect,
   SingleSelectOption,
   Typography,
@@ -22,7 +24,7 @@ import {
   Dialog,
   Popover,
 } from '@strapi/design-system';
-import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
+import { Duplicate, ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 
@@ -220,6 +222,8 @@ const HeaderDocumentActions = ({ activeTab, isCloning }: HeaderDocumentActionsPr
           return positions.includes('header');
         });
 
+        const documentId = document?.documentId ?? id;
+
         return (
           <DocumentActionsMenu
             actions={headerActions}
@@ -228,6 +232,7 @@ const HeaderDocumentActions = ({ activeTab, isCloning }: HeaderDocumentActionsPr
               defaultMessage: 'More actions',
             })}
           >
+            {collectionType !== SINGLE_TYPES && <CopyDocumentIdMenuItem documentId={documentId} />}
             <Information activeTab={activeTab} />
           </DocumentActionsMenu>
         );
@@ -274,15 +279,62 @@ const HeaderToolbar = ({ activeTab, isCloning }: HeaderDocumentActionsProps) => 
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * CopyDocumentIdMenuItem
+ * -----------------------------------------------------------------------------------------------*/
+
+interface CopyDocumentIdMenuItemProps {
+  documentId: string | undefined;
+}
+
+const CopyDocumentIdMenuItem = ({ documentId }: CopyDocumentIdMenuItemProps) => {
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { copy } = useClipboard();
+
+  if (!documentId) {
+    return null;
+  }
+
+  const handleCopy = async () => {
+    const didCopy = await copy(documentId);
+    if (didCopy) {
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'content-manager.actions.copy-documentId.success',
+          defaultMessage: 'Document ID copied to clipboard',
+        }),
+      });
+    }
+  };
+
+  return (
+    <>
+      <Menu.Separator />
+      <Menu.Item onSelect={handleCopy} startIcon={<Duplicate />}>
+        {formatMessage({
+          id: 'content-manager.actions.copy-documentId.label',
+          defaultMessage: 'Copy document ID',
+        })}
+      </Menu.Item>
+    </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Information
+ * -----------------------------------------------------------------------------------------------*/
+
 interface InformationProps {
   activeTab: 'draft' | 'published';
 }
 
 const Information = ({ activeTab }: InformationProps) => {
   const { formatMessage } = useIntl();
-  const { document, meta } = useDoc();
+  const { document, meta, id, collectionType } = useDoc();
 
-  if (!document || !document.id) {
+  if (!document?.id && !id) {
     return null;
   }
 
@@ -300,12 +352,12 @@ const Information = ({ activeTab }: InformationProps) => {
   const createAndUpdateDocument =
     activeTab === 'draft'
       ? document
-      : meta?.availableStatus.find((status) => status.publishedAt === null);
+      : meta?.availableStatus?.find((status) => status.publishedAt === null);
 
   const publishDocument =
     activeTab === 'published'
       ? document
-      : meta?.availableStatus.find((status) => status.publishedAt !== null);
+      : meta?.availableStatus?.find((status) => status.publishedAt !== null);
 
   const creator = createAndUpdateDocument?.[CREATED_BY_ATTRIBUTE_NAME]
     ? getDisplayName(createAndUpdateDocument[CREATED_BY_ATTRIBUTE_NAME])
@@ -382,6 +434,14 @@ const Information = ({ activeTab }: InformationProps) => {
         }
       ),
     },
+    {
+      isDisplayed: collectionType !== SINGLE_TYPES && !!(document?.documentId ?? id),
+      label: formatMessage({
+        id: 'content-manager.containers.edit.information.documentId.label',
+        defaultMessage: 'Document ID',
+      }),
+      value: document?.documentId ?? id ?? '',
+    },
   ].filter((info) => info.isDisplayed);
 
   return (
@@ -390,7 +450,7 @@ const Information = ({ activeTab }: InformationProps) => {
       borderStyle="solid"
       borderColor="neutral150"
       direction="column"
-      marginTop={2}
+      marginTop={1}
       tag="dl"
       padding={5}
       gap={3}
@@ -408,7 +468,12 @@ const Information = ({ activeTab }: InformationProps) => {
           <Typography tag="dt" variant="pi" fontWeight="bold">
             {info.label}
           </Typography>
-          <Typography tag="dd" variant="pi" textColor="neutral600">
+          <Typography
+            tag="dd"
+            variant="pi"
+            textColor="neutral600"
+            style={{ wordBreak: 'break-word' }}
+          >
             {info.value}
           </Typography>
         </Flex>

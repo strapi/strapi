@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "5.37.1",
+  "version": "5.41.1",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -10,6 +10,10 @@
     "migrate",
     "version"
   ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/strapi/strapi.git",
@@ -61,7 +65,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.37.1",
+    "@strapi/utils": "5.41.1",
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
@@ -75,15 +79,15 @@
     "ora": "5.4.1",
     "prompts": "2.4.2",
     "semver": "7.5.4",
-    "simple-git": "3.21.0",
-    "undici": "6.23.0"
+    "simple-git": "3.32.3",
+    "undici": "6.24.1"
   },
   "devDependencies": {
-    "@strapi/types": "5.37.1",
+    "@strapi/types": "5.41.1",
     "@types/fs-extra": "11.0.4",
-    "@types/jscodeshift": "0.12.0",
-    "eslint-config-custom": "5.37.1",
-    "rimraf": "5.0.5"
+    "@types/jscodeshift": "17.3.0",
+    "eslint-config-custom": "5.41.1",
+    "rimraf": "6.1.3"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
