@@ -49,7 +49,7 @@ const getAdminEE = () => {
       ...(isAIEnabled ? { ai: aiRoutes } : {}),
     },
     async register({ strapi }: { strapi: Core.Strapi }) {
-      // Run the the default registration
+      // Run the default registration
       await eeAdmin.register({ strapi });
 
       // Register internal ai service
