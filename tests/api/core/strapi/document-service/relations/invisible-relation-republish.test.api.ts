@@ -51,7 +51,6 @@ const legacyModel = {
   collectionName: '',
 };
 
-/** CTB adds `legacy` on article when legacy is created; CMS-150 uses visible: false on that inverse field. */
 const setArticleLegacyInvisible = () => {
   const schemaPath = path.join(
     process.cwd(),
@@ -66,7 +65,7 @@ const setArticleLegacyInvisible = () => {
   fs.writeFileSync(schemaPath, `${JSON.stringify(schema, null, 2)}\n`, 'utf8');
 };
 
-describe('Document Service invisible inverse oneToOne (CMS-150)', () => {
+describe('Document Service invisible inverse oneToOne', () => {
   beforeAll(async () => {
     await builder.addContentTypes([articleBaseModel, legacyModel]).build();
     setArticleLegacyInvisible();
