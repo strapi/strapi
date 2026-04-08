@@ -431,7 +431,12 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         );
 
         const movedContainerItems = produce(containersAsDictionary, (draft) => {
-          if (activeIndex !== overIndex && activeContainer === overContainer) {
+          if (
+            activeIndex >= 0 &&
+            overIndex >= 0 &&
+            activeIndex !== overIndex &&
+            activeContainer === overContainer
+          ) {
             // Move items around inside their own container
             draft[activeContainer].children = arraySwap(
               draft[activeContainer].children,
