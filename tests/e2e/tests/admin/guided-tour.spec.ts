@@ -197,6 +197,21 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
         })
     );
 
+    // Guided tour state is persisted in useEffect; clickAndWait can return before
+    // localStorage updates. A full reload must read the completed strapiCloud tour.
+    await page.waitForFunction(() => {
+      const raw = localStorage.getItem('STRAPI_GUIDED_TOUR');
+      if (!raw) return false;
+      try {
+        const parsed = JSON.parse(raw) as {
+          tours?: { strapiCloud?: { isCompleted?: boolean } };
+        };
+        return parsed.tours?.strapiCloud?.isCompleted === true;
+      } catch {
+        return false;
+      }
+    });
+
     await page.goto('/admin');
 
     await expect(

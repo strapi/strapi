@@ -96,7 +96,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
         }
       : 'off',
 
-    /* Use the storage state with localStorage set globally (port-specific for concurrent test-apps) */
+    /* Use the storage state with localStorage set globally; path includes port to match global-setup. */
     storageState: `./tests/e2e/playwright-storage-state-${port}.json`,
   },
 

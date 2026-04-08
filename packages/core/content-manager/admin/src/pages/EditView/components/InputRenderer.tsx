@@ -242,7 +242,7 @@ const BaseInputRenderer = ({
       );
     case 'uid':
       // These props are not needed for the generic form input renderer.
-      const { unique: _uniqueUID, ...restUIDProps } = props;
+      const { unique: _uniqueUID, attribute: _uidAttribute, ...restUIDProps } = props;
       return (
         <UIDInput
           key={`input-${props.name}-${localeKey}`}
@@ -255,22 +255,24 @@ const BaseInputRenderer = ({
     /**
      * Enumerations are a special case because they require options.
      */
-    case 'enumeration':
+    case 'enumeration': {
+      const { attribute, ...enumerationProps } = props;
       return (
         <FormInputRenderer
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...enumerationProps}
           {...previewProps}
           hint={hint}
-          options={props.attribute.enum.map((value) => ({ value }))}
+          options={attribute.enum.map((value) => ({ value }))}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}
           disabled={fieldIsDisabled}
         />
       );
+    }
     default:
       // These props are not needed for the generic form input renderer.
-      const { unique: _unique, mainField: _mainField, ...restProps } = props;
+      const { unique: _unique, mainField: _mainField, attribute: _attribute, ...restProps } = props;
       return (
         <FormInputRenderer
           key={`input-${props.name}-${localeKey}`}

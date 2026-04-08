@@ -167,7 +167,8 @@ export const GuidedTourHomepageOverview = () => {
 
     if (tourName === 'strapiCloud') {
       trackUsage('didCompleteGuidedTour', { name: tourName });
-      dispatch({ type: 'next_step', payload: tourName });
+      // strapiCloud has no guided steps (see Tours.tsx); complete the tour explicitly.
+      dispatch({ type: 'skip_tour', payload: tourName });
     }
   };
 
