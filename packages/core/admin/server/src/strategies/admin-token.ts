@@ -45,13 +45,27 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false, error: new UnauthorizedError('Token owner is deactivated') };
   }
 
+  // Token populate does not load `roles`; reload the user like session auth (`admin` strategy)
+  // so `isSuperAdmin` and permission ceiling logic see the full admin user.
+  const user = await strapi.db
+    .query('admin::user')
+    .findOne({ where: { id: owner.id }, populate: ['roles'] });
+
+  if (user === null || user === undefined) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
+  }
+
+  if (user.isActive !== true || user.blocked === true) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner is deactivated') };
+  }
+
   const ability = await getService('permission').engine.generateTokenAbility(
     apiToken.adminPermissions ?? [],
-    owner
+    user
   );
 
   ctx.state.userAbility = ability;
-  ctx.state.user = owner;
+  ctx.state.user = user;
 
   return { authenticated: true, credentials: apiToken, ability };
 };

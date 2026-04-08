@@ -375,7 +375,7 @@ const assignPermissions = async (
     await getService('metrics').sendDidUpdateRolePermissions();
   }
 
-  if (permissionsToDelete.length > 0) {
+  if (permissionsToAdd.length > 0 || permissionsToDelete.length > 0) {
     await getService('api-token-admin').syncPermissionsForRole(roleId);
   }
 

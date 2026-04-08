@@ -349,6 +349,37 @@ describe('Admin Admin Token CRUD (api)', () => {
       expect(names).toContain('admin-token_list-sa-a');
       expect(names).toContain('admin-token_list-sa-b');
     });
+
+    test('Bearer admin token — super admin lists all tokens (owner user has roles for isSuperAdmin)', async () => {
+      await createValidSuperAdminAdminToken({ name: 'admin-token_bearer-list-sa-a' });
+
+      // Token ability is scoped to adminPermissions; include read so hasPermissions allows the route.
+      // Listing another super-admin's token still requires isSuperAdmin(ctx.state.user) in api-token list().
+      const createOtherRes = await rqOther({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_bearer-list-sa-b',
+          adminPermissions: [
+            { action: 'admin::admin-tokens.read', subject: null, conditions: [], properties: {} },
+          ],
+        },
+      });
+      expect(createOtherRes.statusCode).toBe(201);
+      const accessKey: string = createOtherRes.body.data.accessKey;
+
+      const bearerRq = createAgent(strapi, { token: accessKey });
+
+      const res = await bearerRq({
+        url: '/admin/admin-tokens',
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toBe(200);
+      const names = res.body.data.map((t: { name: string }) => t.name);
+      expect(names).toContain('admin-token_bearer-list-sa-a');
+      expect(names).toContain('admin-token_bearer-list-sa-b');
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -411,14 +442,54 @@ describe('Admin Admin Token CRUD (api)', () => {
       expect(res.body.data.accessKey).toBeUndefined();
     });
 
-    test('Non-existent id → 200, data is null', async () => {
+    test('Non-owner super admin can revoke → 200', async () => {
+      const token = await createValidSuperAdminAdminToken({
+        name: 'admin-token_tests-delete-by-other-sa',
+      });
+
+      const res = await rqOther({
+        url: `/admin/admin-tokens/${token.id}`,
+        method: 'DELETE',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).not.toBeNull();
+      expect(res.body.data.id).toBe(token.id);
+    });
+
+    test('Returns 404 for missing id', async () => {
       const res = await rq({
         url: '/admin/admin-tokens/999999',
         method: 'DELETE',
       });
 
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toBeNull();
+      expect(res.statusCode).toBe(404);
+    });
+
+    test('Revoking an admin token with permissions deletes the permission rows', async () => {
+      const createRes = await rq({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_tests-revoke-permissions',
+          adminPermissions: [{ action: EDITOR_ACTION }],
+        },
+      });
+      expect(createRes.statusCode).toBe(201);
+      const tokenId = createRes.body.data.id;
+      const permissionIds = createRes.body.data.adminPermissions.map((p: { id: number }) => p.id);
+      expect(permissionIds.length).toBeGreaterThan(0);
+
+      const deleteRes = await rq({
+        url: `/admin/admin-tokens/${tokenId}`,
+        method: 'DELETE',
+      });
+      expect(deleteRes.statusCode).toBe(200);
+
+      const orphans = await strapi.db.query('admin::permission').findMany({
+        where: { id: { $in: permissionIds } },
+      });
+      expect(orphans).toHaveLength(0);
     });
   });
 
@@ -604,6 +675,17 @@ describe('Admin Admin Token CRUD (api)', () => {
 
       expect(res.statusCode).toBe(403);
     });
+
+    test('DELETE /admin/admin-tokens/:id — rqEditor (not owner) → 403', async () => {
+      const token = await createValidSuperAdminAdminToken({ name: 'admin-token_b-delete' });
+
+      const res = await rqEditor({
+        url: `/admin/admin-tokens/${token.id}`,
+        method: 'DELETE',
+      });
+
+      expect(res.statusCode).toBe(403);
+    });
   });
 
   describe('C — List ownership filter', () => {
@@ -734,6 +816,31 @@ describe('Admin Admin Token CRUD (api)', () => {
       });
 
       expect(res.statusCode).toBe(201);
+    });
+
+    test('Super-admin: unregistered condition is stripped, not persisted → 201 with empty conditions', async () => {
+      const res = await rq({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_d-sa-bogus-condition',
+          adminPermissions: [
+            {
+              action: EDITOR_ACTION,
+              subject: null,
+              conditions: ['plugin::unknown.bogus-condition'],
+              properties: {},
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      const perm = res.body.data.adminPermissions.find(
+        (p: { action: string }) => p.action === EDITOR_ACTION
+      );
+      expect(perm).toBeDefined();
+      expect(perm.conditions).toStrictEqual([]);
     });
   });
 
