@@ -18,11 +18,17 @@ const addFirstPublishedAtToDraft = async (
     return draft;
   }
 
-  return update(draft, {
+  const firstPublishedAt = Date.now();
+
+  // Update the DB but don't use its return value — it's a flat row
+  // that lacks populated relations and dynamic zones.
+  await update(draft, {
     data: {
-      firstPublishedAt: Date.now(),
+      firstPublishedAt,
     },
   });
+
+  return { ...draft, firstPublishedAt };
 };
 
 const filterDataFirstPublishedAt: ParamsTransform = (params) => {
