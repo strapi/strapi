@@ -69,7 +69,7 @@
     "@types/koa__router": "12.0.0",
     "@types/node-schedule": "2.1.7",
     "eslint-config-custom": "5.41.1",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "tsconfig": "5.41.1",
     "typescript": "5.4.4",
     "undici": "6.24.1"

@@ -58,7 +58,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@apollo/server": "4.13.0",
+    "@apollo/server": "5.5.0",
     "@as-integrations/koa": "1.1.1",
     "@graphql-tools/schema": "10.0.3",
     "@graphql-tools/utils": "^10.1.3",
@@ -72,7 +72,7 @@
     "graphql-scalars": "1.22.2",
     "koa-bodyparser": "4.4.1",
     "koa-compose": "^4.1.0",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "nexus": "1.3.0",
     "pluralize": "8.0.0"
   },

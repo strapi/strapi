@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "dotenv": "16.4.5",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "qs": "6.15.0",
     "supertest": "7.2.2"
   }

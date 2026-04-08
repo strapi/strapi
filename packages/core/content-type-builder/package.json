@@ -81,7 +81,7 @@
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
     "jszip": "^3.10.1",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "micromatch": "^4.0.8",
     "pluralize": "8.0.0",
     "qs": "6.15.0",

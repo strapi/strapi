@@ -64,7 +64,7 @@
     "@strapi/design-system": "2.2.0",
     "@strapi/icons": "2.2.0",
     "@strapi/utils": "5.41.1",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "qs": "6.15.0",
     "react-intl": "6.6.2",
     "react-redux": "8.1.3",
