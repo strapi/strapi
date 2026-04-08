@@ -103,7 +103,7 @@ const ListViewPage = () => {
   );
 
   const { collectionType, model, schema } = useDoc();
-  const { list } = useDocumentLayout(model);
+  const { list, listViewConversionContext } = useDocumentLayout(model);
 
   const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
     () => ({
