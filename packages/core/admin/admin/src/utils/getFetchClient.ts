@@ -150,6 +150,7 @@ const attemptTokenRefresh = async (): Promise<string> => {
 type FetchResponse<TData = any> = {
   data: TData;
   status?: number;
+  headers?: Headers;
 };
 
 type FetchOptions = {
@@ -157,6 +158,7 @@ type FetchOptions = {
   signal?: AbortSignal;
   headers?: Record<string, string>;
   validateStatus?: ((status: number) => boolean) | null;
+  responseType?: 'json' | 'blob' | 'text' | 'arrayBuffer';
 };
 
 type FetchConfig = {
@@ -207,7 +209,15 @@ const getToken = (): string | null => {
 };
 
 type FetchClient = {
-  get: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
+  get: {
+    (url: string, config: FetchOptions & { responseType: 'blob' }): Promise<FetchResponse<Blob>>;
+    (url: string, config: FetchOptions & { responseType: 'text' }): Promise<FetchResponse<string>>;
+    (
+      url: string,
+      config: FetchOptions & { responseType: 'arrayBuffer' }
+    ): Promise<FetchResponse<ArrayBuffer>>;
+    <TData = any>(url: string, config?: FetchOptions): Promise<FetchResponse<TData>>;
+  };
   put: <TData = any, TSend = any>(
     url: string,
     data?: TSend,
@@ -266,8 +276,28 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   // Add a response interceptor to return the response
   const responseInterceptor = async <TData = any>(
     response: Response,
-    validateStatus?: FetchOptions['validateStatus']
+    validateStatus?: FetchOptions['validateStatus'],
+    responseType: NonNullable<FetchOptions['responseType']> = 'json'
   ): Promise<FetchResponse<TData>> => {
+    if (responseType !== 'json') {
+      if (!response.ok && !validateStatus?.(response.status)) {
+        const fetchError = new FetchError('Server Error');
+        fetchError.status = response.status;
+        throw fetchError;
+      }
+
+      let result: Blob | string | ArrayBuffer;
+      if (responseType === 'blob') {
+        result = await response.blob();
+      } else if (responseType === 'text') {
+        result = await response.text();
+      } else {
+        result = await response.arrayBuffer();
+      }
+
+      return { data: result as TData, status: response.status, headers: response.headers };
+    }
+
     try {
       const result = await response.json();
 
@@ -359,10 +389,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const fetchClient: FetchClient = {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      const responseType = options?.responseType ?? 'json';
 
       const executeRequest = async () => {
+        const { Authorization } = getDefaultHeaders();
+
+        // For non-JSON response types, omit content negotiation headers that imply JSON
+        const defaultHeaders = responseType === 'json' ? getDefaultHeaders() : { Authorization };
+
         const headers = new Headers({
-          ...getDefaultHeaders(),
+          ...defaultHeaders,
           ...options?.headers,
         });
 
@@ -372,7 +408,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
           headers,
         });
 
-        return responseInterceptor<TData>(response, options?.validateStatus);
+        return responseInterceptor<TData>(response, options?.validateStatus, responseType);
       };
 
       return withTokenRefresh(url, executeRequest);
