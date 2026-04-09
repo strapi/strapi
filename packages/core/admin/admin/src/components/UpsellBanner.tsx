@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Box, Flex, LinkButton, Typography } from '@strapi/design-system';
+import { Box, Flex, IconButton, LinkButton, Typography } from '@strapi/design-system';
+import { Cross } from '@strapi/icons';
 import { isAfter, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -16,9 +17,16 @@ const BannerBackground = styled(Flex)`
     ${({ theme }) => theme.colors.primary600} 0%,
     ${({ theme }) => theme.colors.alternative600} 121.48%
   );
+  position: relative;
 `;
 
-const Banner = ({ isTrialEndedRecently }: { isTrialEndedRecently: boolean }) => {
+const Banner = ({
+  isTrialEndedRecently,
+  onDismiss,
+}: {
+  isTrialEndedRecently: boolean;
+  onDismiss: () => void;
+}) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -95,6 +103,18 @@ const Banner = ({ isTrialEndedRecently }: { isTrialEndedRecently: boolean }) => 
           </LinkButton>
         </Box>
       </Flex>
+      <Box position="absolute" right={4}>
+        <IconButton
+          withTooltip={false}
+          label={formatMessage({
+            id: 'app.components.UpsellBanner.close',
+            defaultMessage: 'Close',
+          })}
+          onClick={onDismiss}
+        >
+          <Cross />
+        </IconButton>
+      </Box>
     </BannerBackground>
   );
 };
@@ -104,6 +124,11 @@ const UpsellBanner = () => {
 
   const [cachedTrialEndsAt, setCachedTrialEndsAt] = useScopedPersistentState<string | undefined>(
     'STRAPI_FREE_TRIAL_ENDS_AT',
+    undefined
+  );
+
+  const [dismissedFor, setDismissedFor] = useScopedPersistentState<string | undefined>(
+    'STRAPI_UPSELL_BANNER_DISMISSED_FOR',
     undefined
   );
 
@@ -129,8 +154,12 @@ const UpsellBanner = () => {
       isAfter(new Date(cachedTrialEndsAt), sevenDaysAgo)
   );
 
-  if (timeLeftData.data?.trialEndsAt || isTrialEndedRecently) {
-    return <Banner isTrialEndedRecently={isTrialEndedRecently} />;
+  const isDismissed = Boolean(cachedTrialEndsAt && dismissedFor === cachedTrialEndsAt);
+
+  const handleDismiss = () => setDismissedFor(cachedTrialEndsAt);
+
+  if ((timeLeftData.data?.trialEndsAt || isTrialEndedRecently) && !isDismissed) {
+    return <Banner isTrialEndedRecently={isTrialEndedRecently} onDismiss={handleDismiss} />;
   }
 
   return null;
