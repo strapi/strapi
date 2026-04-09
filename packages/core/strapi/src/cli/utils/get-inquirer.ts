@@ -1,4 +1,4 @@
-type InquirerAPI = typeof import('inquirer').default;
+type InquirerAPI = typeof import('inquirer');
 
 let cached: Promise<InquirerAPI> | undefined;
 
