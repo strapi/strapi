@@ -368,20 +368,30 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             // If there is absolutely no space left in the target row and the
             // dragged item comes from a different row, add it to a new row
             if (canCreateNewRowForItem) {
-              const insertIndex = overContainerIndex + 1;
-              const existingRow = draft[insertIndex];
+              // Default: insert a new row after the row being hovered (between that row and the
+              // next). For row 0, use index 0 instead so fields that are not full-width can still
+              // be moved above the first row—there is no separate drop area above it in the UI.
+              const insertIndex = overContainerIndex === 0 ? 0 : overContainerIndex + 1;
 
-              if (existingRow) {
-                const nonTempChildren = existingRow.children.filter(
-                  (child) => child.name !== TEMP_FIELD_NAME
-                );
-                const isNextRowEmpty = nonTempChildren.length === 0;
+              /**
+               * When inserting *after* the hovered row, reuse the following row if it only
+               * contains spacers. Skip when inserting at index 0 — draft[0] is the hovered row.
+               */
+              if (insertIndex > overContainerIndex) {
+                const existingRow = draft[insertIndex];
 
-                // If the row directly after is empty (only spacers), reuse it
-                // instead of creating yet another row.
-                if (isNextRowEmpty) {
-                  existingRow.children = [draggedItem];
-                  return;
+                if (existingRow) {
+                  const nonTempChildren = existingRow.children.filter(
+                    (child) => child.name !== TEMP_FIELD_NAME
+                  );
+                  const isNextRowEmpty = nonTempChildren.length === 0;
+
+                  // If the row directly after is empty (only spacers), reuse it
+                  // instead of creating yet another row.
+                  if (isNextRowEmpty) {
+                    existingRow.children = [draggedItem];
+                    return;
+                  }
                 }
               }
 
