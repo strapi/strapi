@@ -25,19 +25,13 @@ const modulesRegistry = (strapi: Core.Strapi) => {
       return modules[namespace];
     },
     async bootstrap() {
-      for (const mod of Object.values(modules)) {
-        await mod.bootstrap();
-      }
+      await Promise.all(Object.values(modules).map((mod) => mod.bootstrap()));
     },
     async register() {
-      for (const mod of Object.values(modules)) {
-        await mod.register();
-      }
+      await Promise.all(Object.values(modules).map((mod) => mod.register()));
     },
     async destroy() {
-      for (const mod of Object.values(modules)) {
-        await mod.destroy();
-      }
+      await Promise.all(Object.values(modules).map((mod) => mod.destroy()));
     },
   };
 };
