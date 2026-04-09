@@ -39,7 +39,7 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
     data,
     isLoading: isLoadingUsers,
     isError,
-  } = useAdminUsers(undefined, {
+  } = useAdminUsers({ pageSize: 100 }, {
     skip: isLoadingPermissions || !canRead,
   });
   const { document } = unstable_useDocument(
