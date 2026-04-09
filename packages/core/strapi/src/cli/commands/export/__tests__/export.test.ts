@@ -1,4 +1,7 @@
-import { file as fileDataTransfer } from '@strapi/data-transfer';
+import {
+  file as fileDataTransfer,
+  directory as directoryDataTransfer,
+} from '@strapi/data-transfer';
 
 import exportAction from '../action';
 import * as mockUtils from '../../../utils/data-transfer';
@@ -51,6 +54,17 @@ jest.mock('@strapi/data-transfer', () => {
           .mockReturnValue({ name: 'testFileSource', type: 'source', getMetadata: jest.fn() }),
         createLocalFileDestinationProvider: jest.fn().mockReturnValue({
           name: 'testFileDestination',
+          type: 'destination',
+          getMetadata: jest.fn(),
+        }),
+      },
+    },
+    directory: {
+      ...actual.directory,
+      providers: {
+        ...actual.directory.providers,
+        createLocalDirectoryDestinationProvider: jest.fn().mockReturnValue({
+          name: 'testDirDestination',
           type: 'destination',
           getMetadata: jest.fn(),
         }),
@@ -170,6 +184,48 @@ describe('Export', () => {
         encryption: { enabled: encrypt, key },
       })
     );
+  });
+
+  it('uses directory destination when format is dir', async () => {
+    await expectExit(0, async () => {
+      await exportAction({ format: 'dir', file: '/tmp/strapi-export-dir-test', encrypt: false });
+    });
+
+    expect(
+      directoryDataTransfer.providers.createLocalDirectoryDestinationProvider
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        directory: { path: '/tmp/strapi-export-dir-test' },
+      })
+    );
+    expect(fileDataTransfer.providers.createLocalFileDestinationProvider).not.toHaveBeenCalled();
+  });
+
+  it('rejects when format is dir with encrypt enabled', async () => {
+    await expectExit(1, async () => {
+      await exportAction({ format: 'dir', file: '/tmp/x', encrypt: true });
+    });
+  });
+
+  it('rejects when format is dir without explicit encrypt false', async () => {
+    await expectExit(1, async () => {
+      await exportAction({ format: 'dir', file: '/tmp/x' });
+    });
+  });
+
+  it('allows format dir when compress is true (compression is ignored for directory exports)', async () => {
+    await expectExit(0, async () => {
+      await exportAction({
+        format: 'dir',
+        file: '/tmp/strapi-export-dir-test',
+        encrypt: false,
+        compress: true,
+      });
+    });
+
+    expect(
+      directoryDataTransfer.providers.createLocalDirectoryDestinationProvider
+    ).toHaveBeenCalled();
   });
 
   it('uses compress option', async () => {
