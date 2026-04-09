@@ -8,6 +8,7 @@ import {
 } from '../../utils/data-transfer';
 import { promptEncryptionKey } from '../../utils/commander';
 import action from './action';
+import { prepareExportDirFormatCli } from './validate-dir-format';
 
 /**
  * `$ strapi export`
@@ -32,12 +33,21 @@ const command = () => {
       )
     )
     .addOption(
-      new Option('-f, --file <file>', 'name to use for exported file (without extensions)')
+      new Option(
+        '-f, --file <file>',
+        'tar: base name without extensions; dir: output directory path (--format dir)'
+      )
+    )
+    .addOption(
+      new Option('--format <format>', 'export as tar archive or unpacked directory')
+        .choices(['tar', 'dir'])
+        .default('tar')
     )
     .addOption(excludeOption)
     .addOption(onlyOption)
     .addOption(throttleOption)
     .hook('preAction', validateExcludeOnly)
+    .hook('preAction', prepareExportDirFormatCli)
     .hook('preAction', promptEncryptionKey)
     .action(action);
 };
