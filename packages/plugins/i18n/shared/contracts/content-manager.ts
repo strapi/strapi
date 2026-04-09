@@ -25,7 +25,7 @@ export declare namespace GetNonLocalizedFields {
 }
 
 /**
- * GET /i18n/content-manager/actions/fill-from-locale - Get data from source locale to fill target locale
+ * GET /i18n/content-manager/get-fill-from-locale - Get data from source locale to fill target locale
  */
 export interface FillFromLocaleParams {
   model: string;

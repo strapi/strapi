@@ -75,7 +75,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/content-manager/actions/fill-from-locale/:model',
+      path: '/content-manager/get-fill-from-locale/:model',
       handler: 'content-types.getFillFromLocaleData',
       config: {
         policies: [

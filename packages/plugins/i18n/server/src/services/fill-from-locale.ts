@@ -205,9 +205,10 @@ const collectRelationsByUid = (
 };
 
 /**
- * Perform the 3 DB queries (resolve + status + labels) grouped by targetUid for optimal performance.
+ * Resolves all relation targets for the requested locale in batches (per related content-type UID):
+ * locale mapping, permissions, status, and labels.
  */
-const prefetchResolutionData = async (
+const resolveAllRelationsBatched = async (
   relationsByUid: RelationsByUid,
   targetLocale: string,
   userAbility: any
@@ -511,7 +512,7 @@ export const createFillFromLocaleService = ({ strapi }: { strapi: Core.Strapi })
       });
 
       const relsByUid = collectRelationsByUid(document, schema, components);
-      const preResolved = await prefetchResolutionData(relsByUid, targetLocale, userAbility);
+      const preResolved = await resolveAllRelationsBatched(relsByUid, targetLocale, userAbility);
       return processDocumentData(document, schema, components, preResolved);
     },
   };

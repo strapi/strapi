@@ -6,7 +6,7 @@ const fillFromLocaleApi = i18nApi.injectEndpoints({
   endpoints: (builder) => ({
     getFillFromLocaleData: builder.query<FillFromLocale.Response, FillFromLocale.Params>({
       query: ({ model, ...params }) => ({
-        url: `/i18n/content-manager/actions/fill-from-locale/${model}`,
+        url: `/i18n/content-manager/get-fill-from-locale/${model}`,
         config: { params },
       }),
     }),

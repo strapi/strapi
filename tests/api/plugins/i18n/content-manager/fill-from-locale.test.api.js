@@ -63,7 +63,7 @@ describe('i18n - fill-from-locale', () => {
     await builder.cleanup();
   });
 
-  describe('GET /i18n/content-manager/actions/fill-from-locale/api::article.article', () => {
+  describe('GET /i18n/content-manager/get-fill-from-locale/api::article.article', () => {
     beforeEach(async () => {
       await strapi.db.query('api::article.article').deleteMany({});
     });
@@ -71,7 +71,7 @@ describe('i18n - fill-from-locale', () => {
     test('returns 400 when required fields are missing', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        url: '/i18n/content-manager/get-fill-from-locale/api::article.article',
         qs: {
           documentId: 'doc-123',
           sourceLocale: 'en',
@@ -86,7 +86,7 @@ describe('i18n - fill-from-locale', () => {
     test('returns 400 when collectionType is invalid', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        url: '/i18n/content-manager/get-fill-from-locale/api::article.article',
         qs: {
           documentId: 'doc-123',
           sourceLocale: 'en',
@@ -101,7 +101,7 @@ describe('i18n - fill-from-locale', () => {
     test('returns 404 when document does not exist', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        url: '/i18n/content-manager/get-fill-from-locale/api::article.article',
         qs: {
           documentId: 'non-existent-doc-id',
           sourceLocale: 'en',
@@ -135,7 +135,7 @@ describe('i18n - fill-from-locale', () => {
 
       const res = await rq({
         method: 'GET',
-        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        url: '/i18n/content-manager/get-fill-from-locale/api::article.article',
         qs: {
           documentId,
           sourceLocale: 'en',
@@ -170,7 +170,7 @@ describe('i18n - fill-from-locale', () => {
 
       const res = await rq({
         method: 'GET',
-        url: '/i18n/content-manager/actions/fill-from-locale/api::article.article',
+        url: '/i18n/content-manager/get-fill-from-locale/api::article.article',
         qs: {
           documentId,
           sourceLocale: 'en',

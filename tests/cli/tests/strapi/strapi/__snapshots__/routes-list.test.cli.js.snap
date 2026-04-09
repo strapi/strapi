@@ -256,7 +256,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ PUT                │ /i18n/locales/:id                                                               │
 │ DELETE             │ /i18n/locales/:id                                                               │
 │ POST               │ /i18n/content-manager/actions/get-non-localized-fields                          │
-│ HEAD|GET           │ /i18n/content-manager/actions/fill-from-locale/:model                           │
+│ HEAD|GET           │ /i18n/content-manager/get-fill-from-locale/:model                               │
 │ HEAD|GET           │ /i18n/settings                                                                  │
 │ PUT                │ /i18n/settings                                                                  │
 │ HEAD|GET           │ /i18n/ai-localization-jobs/collection-types/:contentType/:documentId            │
