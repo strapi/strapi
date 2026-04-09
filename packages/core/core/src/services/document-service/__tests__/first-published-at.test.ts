@@ -40,6 +40,18 @@ describe('addFirstPublishedAtToDraft', () => {
     expect(update).not.toHaveBeenCalled();
   });
 
+  it('should not alter firstPublishedAt on a second publish', async () => {
+    const originalDate = new Date('2024-06-15T12:00:00.000Z');
+    const draft = { id: 1, firstPublishedAt: originalDate, blocks: [] };
+
+    const result = await addFirstPublishedAtToDraft(draft, update, contentType);
+
+    expect(result).toBe(draft);
+    expect(result.firstPublishedAt).toBe(originalDate);
+    expect(result.firstPublishedAt.toISOString()).toBe('2024-06-15T12:00:00.000Z');
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it('persists firstPublishedAt via entries.update and returns a new object preserving all populated fields', async () => {
     const dzArray = [{ __component: 'c.c', id: 1 }];
     const mediaObj = { id: 5 };
