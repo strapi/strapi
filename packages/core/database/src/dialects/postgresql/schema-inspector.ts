@@ -2,11 +2,8 @@ import type { Database } from '../..';
 import type { Schema, Column, Index, ForeignKey } from '../../schema/types';
 import type { SchemaInspector } from '../dialect';
 
-interface RawTable {
-  table_name: string;
-}
-
 interface RawColumn {
+  table_name: string;
   data_type: string;
   column_name: string;
   character_maximum_length: number;
@@ -15,6 +12,7 @@ interface RawColumn {
 }
 
 interface RawIndex {
+  table_name: string;
   indexrelid: string;
   index_name: string;
   column_name: string;
@@ -22,8 +20,8 @@ interface RawIndex {
   is_primary: boolean;
 }
 
-interface RawForeignKey {
-  constraint_name: string;
+interface RawTable {
+  table_name: string;
 }
 
 const SQL_QUERIES = {
@@ -36,13 +34,14 @@ const SQL_QUERIES = {
       AND table_name != 'geometry_columns'
       AND table_name != 'spatial_ref_sys';
   `,
-  LIST_COLUMNS: /* sql */ `
-    SELECT data_type, column_name, character_maximum_length, column_default, is_nullable
+  BULK_COLUMNS: /* sql */ `
+    SELECT table_name, data_type, column_name, character_maximum_length, column_default, is_nullable
     FROM information_schema.columns
-    WHERE table_schema = ? AND table_name = ?;
+    WHERE table_schema = ? AND table_name = ANY(?);
   `,
-  INDEX_LIST: /* sql */ `
+  BULK_INDEXES: /* sql */ `
     SELECT
+      t.relname as table_name,
       ix.indexrelid,
       i.relname as index_name,
       a.attname as column_name,
@@ -62,45 +61,32 @@ const SQL_QUERIES = {
       AND t.relkind = 'r'
       AND t.relnamespace = s.oid
       AND s.nspname = ?
-      AND t.relname = ?;
+      AND t.relname = ANY(?);
   `,
-  FOREIGN_KEY_LIST: /* sql */ `
+  BULK_FOREIGN_KEYS: /* sql */ `
     SELECT
-      tco."constraint_name" as constraint_name
+      tco.table_name,
+      tco.constraint_name,
+      kcu.column_name,
+      rco.update_rule as on_update,
+      rco.delete_rule as on_delete,
+      rel_kcu.table_name as foreign_table,
+      rel_kcu.column_name as fk_column_name
     FROM information_schema.table_constraints tco
-    WHERE
-      tco.constraint_type = 'FOREIGN KEY'
+    JOIN information_schema.key_column_usage kcu
+      ON tco.constraint_name = kcu.constraint_name
+      AND tco.constraint_schema = kcu.constraint_schema
+      AND tco.table_name = kcu.table_name
+    JOIN information_schema.referential_constraints rco
+      ON tco.constraint_name = rco.constraint_name
+      AND tco.constraint_schema = rco.constraint_schema
+    JOIN information_schema.key_column_usage rel_kcu
+      ON rco.unique_constraint_name = rel_kcu.constraint_name
+      AND rco.unique_constraint_schema = rel_kcu.constraint_schema
+    WHERE tco.constraint_type = 'FOREIGN KEY'
       AND tco.constraint_schema = ?
-      AND tco.table_name = ?
+      AND tco.table_name = ANY(?);
   `,
-  FOREIGN_KEY_REFERENCES: /* sql */ `
-    SELECT
-      kcu."constraint_name" as constraint_name,
-      kcu."column_name" as column_name
-
-    FROM information_schema.key_column_usage kcu
-    WHERE kcu.constraint_name=ANY(?)
-    AND kcu.table_schema = ?
-    AND kcu.table_name = ?;
-  `,
-
-  FOREIGN_KEY_REFERENCES_CONSTRAIN: /* sql */ `
-  SELECT
-  rco.update_rule as on_update,
-  rco.delete_rule as on_delete,
-  rco."unique_constraint_name" as unique_constraint_name
-  FROM information_schema.referential_constraints rco
-  WHERE rco.constraint_name=ANY(?)
-  AND rco.constraint_schema = ?
-`,
-  FOREIGN_KEY_REFERENCES_CONSTRAIN_RFERENCE: /* sql */ `
-  SELECT
-  rel_kcu."table_name" as foreign_table,
-  rel_kcu."column_name" as fk_column_name
-    FROM information_schema.key_column_usage rel_kcu
-    WHERE rel_kcu.constraint_name=?
-    AND rel_kcu.table_schema = ?
-`,
 };
 
 const toStrapiType = (column: RawColumn) => {
@@ -167,23 +153,27 @@ export default class PostgresqlSchemaInspector implements SchemaInspector {
 
   async getSchema() {
     const schema: Schema = { tables: [] };
+    const dbSchema = this.getDatabaseSchema();
 
     const tables = await this.getTables();
 
-    schema.tables = await Promise.all(
-      tables.map(async (tableName) => {
-        const columns = await this.getColumns(tableName);
-        const indexes = await this.getIndexes(tableName);
-        const foreignKeys = await this.getForeignKeys(tableName);
+    if (tables.length === 0) {
+      return schema;
+    }
 
-        return {
-          name: tableName,
-          columns,
-          indexes,
-          foreignKeys,
-        };
-      })
-    );
+    // Run 3 bulk queries in parallel instead of N+1 per-table queries
+    const [allColumns, allIndexes, allForeignKeys] = await Promise.all([
+      this.getBulkColumns(dbSchema, tables),
+      this.getBulkIndexes(dbSchema, tables),
+      this.getBulkForeignKeys(dbSchema, tables),
+    ]);
+
+    schema.tables = tables.map((tableName) => ({
+      name: tableName,
+      columns: allColumns.get(tableName) ?? [],
+      indexes: allIndexes.get(tableName) ?? [],
+      foreignKeys: allForeignKeys.get(tableName) ?? [],
+    }));
 
     return schema;
   }
@@ -200,19 +190,20 @@ export default class PostgresqlSchemaInspector implements SchemaInspector {
     return rows.map((row) => row.table_name);
   }
 
-  async getColumns(tableName: string): Promise<Column[]> {
-    const { rows } = await this.db.connection.raw<{ rows: RawColumn[] }>(SQL_QUERIES.LIST_COLUMNS, [
-      this.getDatabaseSchema(),
-      tableName,
+  async getBulkColumns(dbSchema: string, tableNames: string[]): Promise<Map<string, Column[]>> {
+    const { rows } = await this.db.connection.raw<{ rows: RawColumn[] }>(SQL_QUERIES.BULK_COLUMNS, [
+      dbSchema,
+      tableNames,
     ]);
 
-    return rows.map((row) => {
-      const { type, args = [], ...rest } = toStrapiType(row);
+    const result = new Map<string, Column[]>();
 
+    for (const row of rows) {
+      const { type, args = [], ...rest } = toStrapiType(row);
       const defaultTo =
         row.column_default && row.column_default.includes('nextval(') ? null : row.column_default;
 
-      return {
+      const column: Column = {
         type,
         args,
         defaultTo,
@@ -221,88 +212,122 @@ export default class PostgresqlSchemaInspector implements SchemaInspector {
         unsigned: false,
         ...rest,
       };
-    });
+
+      const existing = result.get(row.table_name);
+      if (existing) {
+        existing.push(column);
+      } else {
+        result.set(row.table_name, [column]);
+      }
+    }
+
+    return result;
   }
 
-  async getIndexes(tableName: string): Promise<Index[]> {
-    const { rows } = await this.db.connection.raw<{ rows: RawIndex[] }>(SQL_QUERIES.INDEX_LIST, [
-      this.getDatabaseSchema(),
-      tableName,
+  async getBulkIndexes(dbSchema: string, tableNames: string[]): Promise<Map<string, Index[]>> {
+    const { rows } = await this.db.connection.raw<{ rows: RawIndex[] }>(SQL_QUERIES.BULK_INDEXES, [
+      dbSchema,
+      tableNames,
     ]);
 
-    const ret: Record<RawIndex['indexrelid'], Index> = {};
+    // Group by table, then by indexrelid
+    const byTable = new Map<string, Map<string, Index>>();
 
     for (const index of rows) {
       if (index.column_name === 'id') {
         continue;
       }
 
-      if (!ret[index.indexrelid]) {
-        ret[index.indexrelid] = {
+      let tableIndexes = byTable.get(index.table_name);
+      if (!tableIndexes) {
+        tableIndexes = new Map();
+        byTable.set(index.table_name, tableIndexes);
+      }
+
+      const existing = tableIndexes.get(index.indexrelid);
+      if (existing) {
+        existing.columns.push(index.column_name);
+      } else {
+        tableIndexes.set(index.indexrelid, {
           columns: [index.column_name],
           name: index.index_name,
           type: getIndexType(index),
-        };
-      } else {
-        ret[index.indexrelid].columns.push(index.column_name);
+        });
       }
     }
 
-    return Object.values(ret);
+    const result = new Map<string, Index[]>();
+    for (const [tableName, tableIndexes] of byTable) {
+      result.set(tableName, Array.from(tableIndexes.values()));
+    }
+
+    return result;
+  }
+
+  async getIndexes(tableName: string): Promise<Index[]> {
+    const dbSchema = this.getDatabaseSchema();
+    const result = await this.getBulkIndexes(dbSchema, [tableName]);
+    return result.get(tableName) ?? [];
   }
 
   async getForeignKeys(tableName: string): Promise<ForeignKey[]> {
-    const { rows } = await this.db.connection.raw<{ rows: RawForeignKey[] }>(
-      SQL_QUERIES.FOREIGN_KEY_LIST,
-      [this.getDatabaseSchema(), tableName]
-    );
-
-    const ret: Record<RawForeignKey['constraint_name'], ForeignKey> = {};
-
-    for (const fk of rows) {
-      ret[fk.constraint_name] = {
-        name: fk.constraint_name,
-        columns: [],
-        referencedColumns: [],
-        referencedTable: null,
-        onUpdate: null,
-        onDelete: null,
-      } as unknown as ForeignKey;
-    }
-
-    const constraintNames = Object.keys(ret);
     const dbSchema = this.getDatabaseSchema();
-    if (constraintNames.length > 0) {
-      const { rows: fkReferences } = await this.db.connection.raw(
-        SQL_QUERIES.FOREIGN_KEY_REFERENCES,
-        [[constraintNames], dbSchema, tableName]
-      );
+    const result = await this.getBulkForeignKeys(dbSchema, [tableName]);
+    return result.get(tableName) ?? [];
+  }
 
-      for (const fkReference of fkReferences) {
-        ret[fkReference.constraint_name].columns.push(fkReference.column_name);
+  async getBulkForeignKeys(
+    dbSchema: string,
+    tableNames: string[]
+  ): Promise<Map<string, ForeignKey[]>> {
+    const { rows } = await this.db.connection.raw<{
+      rows: Array<{
+        table_name: string;
+        constraint_name: string;
+        column_name: string;
+        on_update: string;
+        on_delete: string;
+        foreign_table: string;
+        fk_column_name: string;
+      }>;
+    }>(SQL_QUERIES.BULK_FOREIGN_KEYS, [dbSchema, tableNames]);
 
-        const { rows: fkReferencesConstraint } = await this.db.connection.raw(
-          SQL_QUERIES.FOREIGN_KEY_REFERENCES_CONSTRAIN,
-          [[fkReference.constraint_name], dbSchema]
-        );
+    // Group by table_name, then by constraint_name
+    const byTable = new Map<string, Map<string, ForeignKey>>();
 
-        for (const fkReferenceC of fkReferencesConstraint) {
-          const { rows: fkReferencesConstraintReferece } = await this.db.connection.raw(
-            SQL_QUERIES.FOREIGN_KEY_REFERENCES_CONSTRAIN_RFERENCE,
-            [fkReferenceC.unique_constraint_name, dbSchema]
-          );
-          for (const fkReferenceConst of fkReferencesConstraintReferece) {
-            ret[fkReference.constraint_name].referencedTable = fkReferenceConst.foreign_table;
-            ret[fkReference.constraint_name].referencedColumns.push(
-              fkReferenceConst.fk_column_name
-            );
-          }
-          ret[fkReference.constraint_name].onUpdate = fkReferenceC.on_update.toUpperCase();
-          ret[fkReference.constraint_name].onDelete = fkReferenceC.on_delete.toUpperCase();
+    for (const row of rows) {
+      let tableFKs = byTable.get(row.table_name);
+      if (!tableFKs) {
+        tableFKs = new Map();
+        byTable.set(row.table_name, tableFKs);
+      }
+
+      let fk = tableFKs.get(row.constraint_name);
+      if (!fk) {
+        fk = {
+          name: row.constraint_name,
+          columns: [row.column_name],
+          referencedColumns: [row.fk_column_name],
+          referencedTable: row.foreign_table,
+          onUpdate: row.on_update?.toUpperCase() ?? null,
+          onDelete: row.on_delete?.toUpperCase() ?? null,
+        };
+        tableFKs.set(row.constraint_name, fk);
+      } else {
+        if (!fk.columns.includes(row.column_name)) {
+          fk.columns.push(row.column_name);
+        }
+        if (!fk.referencedColumns.includes(row.fk_column_name)) {
+          fk.referencedColumns.push(row.fk_column_name);
         }
       }
     }
 
-    return Object.values(ret);
+    const result = new Map<string, ForeignKey[]>();
+    for (const [tableName, tableFKs] of byTable) {
+      result.set(tableName, Array.from(tableFKs.values()));
+    }
+
+    return result;
   }
 }
