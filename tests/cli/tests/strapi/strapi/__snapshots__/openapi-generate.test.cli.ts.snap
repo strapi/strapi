@@ -26503,6 +26503,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
     },
   },
   "x-powered-by": "strapi",
-  "x-strapi-version": "5.41.1",
+  "x-strapi-version": "5.42.0",
 }
 `;
