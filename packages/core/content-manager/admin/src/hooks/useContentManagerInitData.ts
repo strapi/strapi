@@ -148,13 +148,15 @@ const useContentManagerInitData = (): AppState => {
       );
       const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
 
-      const authorizedCollectionTypeLinks = await authorizeLinks(
-        collectionTypeSectionLinks,
+      const authorizedLinks = await authorizeLinks(
+        [...collectionTypeSectionLinks, ...singleTypeSectionLinks],
         checkUserHasPermissions
       );
-      const authorizedSingleTypeLinks = await authorizeLinks(
-        singleTypeSectionLinks,
-        checkUserHasPermissions
+      const authorizedCollectionTypeLinks = authorizedLinks.filter(
+        (link) => link.kind === 'collectionType'
+      );
+      const authorizedSingleTypeLinks = authorizedLinks.filter(
+        (link) => link.kind === 'singleType'
       );
       const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
         ctLinks: authorizedCollectionTypeLinks,
