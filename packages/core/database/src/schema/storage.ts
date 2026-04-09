@@ -6,21 +6,24 @@ import type { Schema } from './types';
 const TABLE_NAME = 'strapi_database_schema';
 
 export default (db: Database) => {
-  const hasSchemaTable = () => db.getSchemaConnection().hasTable(TABLE_NAME);
-
-  const createSchemaTable = () => {
-    return db.getSchemaConnection().createTable(TABLE_NAME, (t) => {
-      t.increments('id');
-      t.json('schema');
-      t.datetime('time', { useTz: false });
-      t.string('hash');
-    });
-  };
+  let tableExists = false;
 
   const checkTableExists = async () => {
-    if (!(await hasSchemaTable())) {
-      await createSchemaTable();
+    if (tableExists) {
+      return;
     }
+
+    const exists = await db.getSchemaConnection().hasTable(TABLE_NAME);
+    if (!exists) {
+      await db.getSchemaConnection().createTable(TABLE_NAME, (t) => {
+        t.increments('id');
+        t.json('schema');
+        t.datetime('time', { useTz: false });
+        t.string('hash');
+      });
+    }
+
+    tableExists = true;
   };
 
   return {
@@ -65,7 +68,12 @@ export default (db: Database) => {
     },
 
     hashSchema(schema: Schema) {
-      return crypto.createHash('sha256').update(JSON.stringify(schema)).digest('hex');
+      // Sort tables by name for deterministic hashing regardless of insertion order
+      const sorted = {
+        ...schema,
+        tables: schema.tables.sort((a, b) => a.name.localeCompare(b.name)),
+      };
+      return crypto.createHash('sha256').update(JSON.stringify(sorted)).digest('hex');
     },
 
     async add(schema: Schema) {
