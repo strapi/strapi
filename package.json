@@ -64,6 +64,7 @@
     "test:cli": "node tests/scripts/run-cli-tests.js",
     "test:cli:clean": "node tests/scripts/run-cli-tests.js clean",
     "test:cli:debug": "node tests/scripts/run-cli-tests.js --debug",
+    "test:cli:update": "node tests/scripts/run-cli-tests.js -u",
     "test:e2e": "node tests/scripts/run-e2e-tests.js",
     "test:e2e:clean": "node tests/scripts/run-e2e-tests.js clean",
     "test:front": "cross-env IS_EE=true jest --config jest.config.front.js --runInBand",
