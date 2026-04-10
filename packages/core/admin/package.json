@@ -98,7 +98,7 @@
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.0",
     "@testing-library/user-event": "14.6.1",
-    "axios": "1.13.5",
+    "axios": "1.15.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "^4.1.2",
@@ -175,7 +175,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
     "styled-components": "6.1.8",
-    "vite": "5.4.21",
+    "vite": "6.4.2",
     "vite-plugin-dts": "^4.3.0"
   },
   "peerDependencies": {
