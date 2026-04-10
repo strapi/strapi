@@ -64,7 +64,7 @@
     "rollup": "4.59.0",
     "semver": "7.5.4",
     "sort-package-json": "2.10.0",
-    "tar": "7.5.11"
+    "tar": "7.5.13"
   },
   "devDependencies": {
     "@types/async-retry": "^1",
