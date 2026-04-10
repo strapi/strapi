@@ -434,6 +434,7 @@ class Strapi extends Container implements Core.Strapi {
     ];
 
     await this.db.init({ models });
+    await this.store.prefill();
 
     let oldContentTypes;
     if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
