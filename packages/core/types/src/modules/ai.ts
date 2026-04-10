@@ -18,9 +18,9 @@ export type AiAdminService = {
       currentTermEnd: string;
     };
   }>;
-  getAIFeatureConfig(): Promise<{
-    isAIi18nConfigured: boolean;
-    isAIMediaLibraryConfigured: boolean;
+  getAiFeatureConfig(): Promise<{
+    isAiI18nConfigured: boolean;
+    isAiMediaLibraryConfigured: boolean;
   }>;
 };
 

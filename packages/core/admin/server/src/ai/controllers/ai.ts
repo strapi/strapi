@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import { GetAiToken } from '../../../../shared/contracts/ai';
+import { GetAiFeatureConfig, GetAiToken } from '../../../../shared/contracts/ai';
 
 export default {
   async getAiToken(ctx: Context) {
@@ -39,15 +39,15 @@ export default {
     }
   },
 
-  async getAIFeatureConfig(ctx: Context) {
+  async getAiFeatureConfig(ctx: Context) {
     if (strapi.ai.admin.isEnabled() === false) {
       return ctx.notFound();
     }
 
-    const aiFeatureConfig = await strapi.ai.admin.getAIFeatureConfig();
+    const aiFeatureConfig = await strapi.ai.admin.getAiFeatureConfig();
 
     ctx.body = {
       data: aiFeatureConfig,
-    };
+    } satisfies GetAiFeatureConfig.Response;
   },
 };

@@ -14,7 +14,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       ...properties,
       eventProperties: {
         ...properties?.eventProperties,
-        ...(isAIAvailable ? { isAIMediaLibraryConfigured: Boolean(settings.aiMetadata) } : {}),
+        ...(isAIAvailable ? { isAiMediaLibraryConfigured: Boolean(settings.aiMetadata) } : {}),
       },
     });
   },

@@ -20,7 +20,7 @@ describe('createAiNamespace', () => {
         isEnabled: jest.fn().mockReturnValue(true),
         getAiToken: jest.fn(),
         getAiUsage: jest.fn(),
-        getAIFeatureConfig: jest.fn(),
+        getAiFeatureConfig: jest.fn(),
       };
 
       const ns = createAiNamespace(createMockStrapi(aiAdminService));

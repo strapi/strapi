@@ -35,7 +35,7 @@ describe('AI Controller', () => {
           isEnabled: jest.fn().mockReturnValue(aiEnabled),
           getAiToken: jest.fn(),
           getAiUsage: jest.fn(),
-          getAIFeatureConfig: jest.fn(),
+          getAiFeatureConfig: jest.fn(),
           ...adminService,
         },
       },
@@ -61,11 +61,11 @@ describe('AI Controller', () => {
       expect(ctx.notFound).toHaveBeenCalled();
     });
 
-    test('getAIFeatureConfig returns notFound', async () => {
+    test('getAiFeatureConfig returns notFound', async () => {
       const ctx = createMockContext();
       global.strapi = createMockStrapi({}, false) as any;
 
-      await aiController.getAIFeatureConfig(ctx as any);
+      await aiController.getAiFeatureConfig(ctx as any);
 
       expect(ctx.notFound).toHaveBeenCalled();
     });
@@ -149,18 +149,18 @@ describe('AI Controller', () => {
     });
   });
 
-  describe('getAIFeatureConfig', () => {
+  describe('getAiFeatureConfig', () => {
     test('Should delegate to admin service and set ctx.body', async () => {
       const ctx = createMockContext();
-      const mockConfig = { isAIi18nConfigured: true, isAIMediaLibraryConfigured: false };
+      const mockConfig = { isAiI18nConfigured: true, isAiMediaLibraryConfigured: false };
       const mockAdminService = {
-        getAIFeatureConfig: jest.fn().mockResolvedValue(mockConfig),
+        getAiFeatureConfig: jest.fn().mockResolvedValue(mockConfig),
       };
       global.strapi = createMockStrapi(mockAdminService) as any;
 
-      await aiController.getAIFeatureConfig(ctx as any);
+      await aiController.getAiFeatureConfig(ctx as any);
 
-      expect(mockAdminService.getAIFeatureConfig).toHaveBeenCalled();
+      expect(mockAdminService.getAiFeatureConfig).toHaveBeenCalled();
       expect(ctx.body).toEqual({ data: mockConfig });
     });
   });

@@ -17,14 +17,14 @@ const aiTokenCache = new Map<
   }
 >();
 
-const createAIAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
-  const getAIFeatureConfig = async () => {
+const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const getAiFeatureConfig = async () => {
     const i18nSettings = await strapi.plugin('i18n').service('settings').getSettings();
     const uploadSettings = await strapi.plugin('upload').service('upload').getSettings();
 
     return {
-      isAIi18nConfigured: Boolean(i18nSettings?.aiLocalizations),
-      isAIMediaLibraryConfigured: Boolean(uploadSettings?.aiMetadata),
+      isAiI18nConfigured: Boolean(i18nSettings?.aiLocalizations),
+      isAiMediaLibraryConfigured: Boolean(uploadSettings?.aiMetadata),
     };
   };
 
@@ -271,10 +271,10 @@ const createAIAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     isEnabled,
-    getAIFeatureConfig,
+    getAiFeatureConfig,
     getAiToken,
     getAiUsage,
   };
 };
 
-export { createAIAdminService };
+export { createAiAdminService };
