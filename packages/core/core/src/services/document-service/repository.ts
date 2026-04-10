@@ -1,4 +1,4 @@
-import { omit, assoc, merge, curry, isEmpty, pick } from 'lodash/fp';
+import { omit, assoc, curry, isEmpty, pick } from 'lodash/fp';
 
 import {
   async,
@@ -446,8 +446,13 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         omit(['id', 'createdAt', 'updatedAt']),
         // assign new documentId
         assoc('documentId', createDocumentId()),
-        // Merge new data into it
-        (data) => merge(data, queryParams.data),
+        // Shallow merge: relation fields from queryParams.data must replace the
+        // cloned entry's raw DB relation objects entirely (e.g. { id: 3 }).
+        // A deep merge (lodash merge) would preserve stale keys like `id` inside
+        // a relation even when the user explicitly disconnects it, causing the
+        // relation to be transferred to the clone instead of being removed.
+        // See: https://github.com/strapi/strapi/issues/25749
+        (data) => ({ ...data, ...queryParams.data }),
         (data) => entries.create({ ...queryParams, data, status: 'draft' })
       )
     );
