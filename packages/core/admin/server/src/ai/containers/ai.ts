@@ -2,7 +2,7 @@ import type { Core } from '@strapi/types';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import { AdminUser } from '../../../../../shared/contracts/shared';
+import { AdminUser } from '../../../../shared/contracts/shared';
 
 /**
  * In-memory cache for AI tokens
