@@ -1,4 +1,6 @@
-export default ({ env }) => {
+import type { Core } from '@strapi/strapi';
+
+const databaseConfig = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database => {
   const client = env('DATABASE_CLIENT', 'postgres');
 
   const connections = {
@@ -54,3 +56,5 @@ export default ({ env }) => {
     },
   };
 };
+
+export default databaseConfig;
