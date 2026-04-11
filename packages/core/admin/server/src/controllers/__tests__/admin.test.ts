@@ -30,7 +30,7 @@ describe('Admin Controller', () => {
       } as any;
     });
 
-    test('Returns the uuid and if the app has admins', async () => {
+    test('Returns the uuid, hasAdmin, and registerEnabled flag', async () => {
       const result = await adminController.init();
 
       expect(global.strapi.config.get).toHaveBeenCalledWith('uuid', false);
@@ -38,6 +38,7 @@ describe('Admin Controller', () => {
         'packageJsonStrapi.telemetryDisabled',
         null
       );
+      expect(global.strapi.config.get).toHaveBeenCalledWith('admin.register.enabled', true);
       expect(global.strapi.service('admin::user').exists).toHaveBeenCalled();
       expect(result.data).toBeDefined();
       expect(result.data).toStrictEqual({
@@ -45,6 +46,7 @@ describe('Admin Controller', () => {
         hasAdmin: true,
         menuLogo: null,
         authLogo: null,
+        registerEnabled: 'foo',
       });
     });
   });

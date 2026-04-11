@@ -45,6 +45,7 @@ export default {
     let uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();
     const { menuLogo, authLogo } = await getService('project-settings').getProjectSettings();
+    const registerEnabled = strapi.config.get('admin.register.enabled', true);
     // set to null if telemetryDisabled flag not avaialble in package.json
     const telemetryDisabled: boolean | null = strapi.config.get(
       'packageJsonStrapi.telemetryDisabled',
@@ -61,6 +62,7 @@ export default {
         hasAdmin,
         menuLogo: menuLogo ? menuLogo.url : null,
         authLogo: authLogo ? authLogo.url : null,
+        registerEnabled,
       },
     } satisfies Init.Response;
   },
