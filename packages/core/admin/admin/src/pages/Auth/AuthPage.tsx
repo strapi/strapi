@@ -16,7 +16,7 @@ const AuthPage = () => {
   const match = useMatch('/auth/:authType');
   const authType = match?.params.authType;
   const { data } = useInitQuery();
-  const { hasAdmin } = data ?? {};
+  const { hasAdmin, registerEnabled = true } = data ?? {};
   const Login = useEnterprise(
     LoginCE,
     async () => (await import('../../../../ee/admin/src/pages/AuthPage/components/Login')).LoginEE
@@ -43,10 +43,15 @@ const AuthPage = () => {
 
   const Component = forms[authType as keyof FormDictionary];
 
-  // Redirect the user to the login page if
-  // the endpoint does not exists
+  // Redirect the user to the login page if the endpoint does not exist
   if (!Component) {
     return <Navigate to="/" />;
+  }
+
+  // If register-admin is the requested page but self-registration is disabled,
+  // send the user to /auth/login regardless of whether an admin exists.
+  if (authType === 'register-admin' && !registerEnabled) {
+    return <Navigate to="/auth/login" />;
   }
 
   // User is already logged in
@@ -60,7 +65,9 @@ const AuthPage = () => {
   }
 
   // Redirect the user to the register-admin if it is the first user
-  if (!hasAdmin && authType !== 'register-admin') {
+  // AND self-registration is enabled. Otherwise leave them on whichever
+  // auth page they requested (typically /auth/login).
+  if (!hasAdmin && authType !== 'register-admin' && registerEnabled) {
     return (
       <Navigate
         to={{
