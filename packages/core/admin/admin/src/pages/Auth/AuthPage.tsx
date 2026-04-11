@@ -48,12 +48,6 @@ const AuthPage = () => {
     return <Navigate to="/" />;
   }
 
-  // If register-admin is the requested page but self-registration is disabled,
-  // send the user to /auth/login regardless of whether an admin exists.
-  if (authType === 'register-admin' && !registerEnabled) {
-    return <Navigate to="/auth/login" />;
-  }
-
   // User is already logged in
   if (authType !== 'register-admin' && authType !== 'register' && token) {
     return <Navigate to="/" />;
@@ -62,6 +56,14 @@ const AuthPage = () => {
   // there is already an admin user oo
   if (hasAdmin && authType === 'register-admin' && token) {
     return <Navigate to="/" />;
+  }
+
+  // If register-admin is the requested page but self-registration is disabled,
+  // send the user to /auth/login. The earlier token-based redirects have already
+  // sent logged-in users somewhere more appropriate, so by this point any user
+  // hitting this branch is effectively anonymous (no valid session home to go to).
+  if (authType === 'register-admin' && !registerEnabled) {
+    return <Navigate to="/auth/login" />;
   }
 
   // Redirect the user to the register-admin if it is the first user
