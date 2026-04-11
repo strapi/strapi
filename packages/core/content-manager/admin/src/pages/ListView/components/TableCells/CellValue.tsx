@@ -51,7 +51,7 @@ const CellValue = ({ type, value }: CellValueProps) => {
   }
 
   if (['integer', 'biginteger'].includes(type)) {
-    formattedValue = formatNumber(value, { maximumFractionDigits: 0 });
+    formattedValue = formatNumber(value, { maximumFractionDigits: 0, useGrouping: false });
   }
 
   return toString(formattedValue);
