@@ -175,6 +175,11 @@ export default {
   },
 
   async registerAdmin(ctx: Context) {
+    const registerEnabled = strapi.config.get('admin.register.enabled', true);
+    if (!registerEnabled) {
+      throw new ApplicationError('Admin registration is disabled');
+    }
+
     const input = ctx.request.body as Register.Request['body'];
 
     await validateAdminRegistrationInput(input);
