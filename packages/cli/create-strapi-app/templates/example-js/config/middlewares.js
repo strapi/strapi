@@ -1,3 +1,6 @@
+/**
+ * @type {import('@strapi/strapi').Core.Config.Middlewares}
+ */
 module.exports = [
   'strapi::logger',
   'strapi::errors',
