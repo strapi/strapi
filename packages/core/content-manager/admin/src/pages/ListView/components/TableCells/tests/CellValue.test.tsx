@@ -42,10 +42,16 @@ describe('CellValue', () => {
     expect(getByText('3')).toBeInTheDocument();
   });
 
-  it('should return a number with 0 decimals', () => {
+  it('should return a large integer without thousands separator', () => {
     const { getByText } = render(CellValueWithProvider('integer', 314159265359));
 
-    expect(getByText('314,159,265,359')).toBeInTheDocument();
+    expect(getByText('314159265359')).toBeInTheDocument();
+  });
+
+  it('should return a very large integer without thousands separator', () => {
+    const { getByText } = render(CellValueWithProvider('integer', 1000000000000));
+
+    expect(getByText('1000000000000')).toBeInTheDocument();
   });
 
   it('should return a number with 0 decimals', () => {
@@ -54,9 +60,15 @@ describe('CellValue', () => {
     expect(getByText('3')).toBeInTheDocument();
   });
 
-  it('should return a number with 0 decimals', () => {
+  it('should return a large biginteger without thousands separator', () => {
     const { getByText } = render(CellValueWithProvider('biginteger', 314159265359));
 
-    expect(getByText('314,159,265,359')).toBeInTheDocument();
+    expect(getByText('314159265359')).toBeInTheDocument();
+  });
+
+  it('should return a very large biginteger without thousands separator', () => {
+    const { getByText } = render(CellValueWithProvider('biginteger', 1000000000000));
+
+    expect(getByText('1000000000000')).toBeInTheDocument();
   });
 });
