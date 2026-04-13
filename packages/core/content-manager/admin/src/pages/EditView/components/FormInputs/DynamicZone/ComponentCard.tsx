@@ -35,7 +35,13 @@ const ComponentCard = ({ children, onClick, icon }: ComponentCardProps) => {
   );
 };
 
-const ComponentName = styled<TypographyComponent>(Typography)``;
+const ComponentName = styled<TypographyComponent>(Typography)`
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+`;
 
 const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   &:focus,
