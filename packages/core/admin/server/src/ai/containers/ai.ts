@@ -18,7 +18,20 @@ const aiTokenCache = new Map<
 >();
 
 const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const isEnabled = (): boolean => {
+    const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
+    const licenseEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
+    return configEnabled && licenseEnabled;
+  };
+
   const getAiFeatureConfig = async () => {
+    if (!isEnabled()) {
+      return {
+        isAiI18nConfigured: false,
+        isAiMediaLibraryConfigured: false,
+      };
+    }
+
     const i18nSettings = await strapi.plugin('i18n').service('settings').getSettings();
     const uploadSettings = await strapi.plugin('upload').service('upload').getSettings();
 
@@ -32,7 +45,12 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
    * Resolves the shared context required by both getAiToken and getAiUsage:
    * EE license, project ID, and AI server URL.
    */
-  const resolveAIContext = (errorPrefix: string) => {
+  const resolveAiContext = (errorPrefix: string) => {
+    if (!isEnabled()) {
+      strapi.log.error(`${errorPrefix} AI is not enabled`);
+      throw new Error(`${errorPrefix.replace(/:$/, '')}. Check server logs for details.`);
+    }
+
     if (!strapi.ee?.isEE) {
       strapi.log.error(`${errorPrefix} Enterprise Edition features are not enabled`);
       throw new Error(`${errorPrefix.replace(/:$/, '')}. Check server logs for details.`);
@@ -70,7 +88,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getAiToken = async () => {
     const ERROR_PREFIX = 'AI token request failed:';
 
-    const { eeLicense, projectId, aiServerUrl } = resolveAIContext(ERROR_PREFIX);
+    const { eeLicense, projectId, aiServerUrl } = resolveAiContext(ERROR_PREFIX);
 
     // Get the current user
     const user = strapi.requestContext.get()?.state?.user as AdminUser | undefined;
@@ -190,7 +208,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getAiUsage = async () => {
     const ERROR_PREFIX = 'AI usage data request failed:';
 
-    const { eeLicense, projectId, aiServerUrl } = resolveAIContext(ERROR_PREFIX);
+    const { eeLicense, projectId, aiServerUrl } = resolveAiContext(ERROR_PREFIX);
 
     strapi.log.http('Contacting AI Server for usage data');
 
@@ -261,12 +279,6 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       throw fetchError;
     }
-  };
-
-  const isEnabled = (): boolean => {
-    const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
-    const licenseEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
-    return configEnabled && licenseEnabled;
   };
 
   return {

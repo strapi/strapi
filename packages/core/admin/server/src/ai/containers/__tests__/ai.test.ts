@@ -33,11 +33,15 @@ describe('AI Container', () => {
 
   const createMockStrapi = (config = {}) => {
     return {
-      ee: { isEE: true },
+      ee: {
+        isEE: true,
+        features: { isEnabled: jest.fn().mockReturnValue(true) },
+      },
       dirs: { app: { root: '/app' } },
       config: {
         get: jest.fn((key: string, defaultValue?: unknown) => {
           if (key === 'uuid') return 'test-project-id';
+          if (key === 'admin.ai.enabled') return defaultValue ?? true;
           return defaultValue;
         }),
       },
@@ -74,7 +78,14 @@ describe('AI Container', () => {
 
   describe('resolveAIContext (shared by getAiToken and getAiUsage)', () => {
     test('Should throw when EE features are not enabled', async () => {
-      const mockStrapi = createMockStrapi({ ee: { isEE: false } }) as any;
+      // isEnabled() must pass (config + license feature ok) so resolveAiContext runs;
+      // the isEE: false guard inside resolveAiContext is what this test exercises.
+      const mockStrapi = createMockStrapi({
+        ee: {
+          isEE: false,
+          features: { isEnabled: jest.fn().mockReturnValue(true) },
+        },
+      }) as any;
       setupValidEnvironment();
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
 
@@ -104,7 +115,13 @@ describe('AI Container', () => {
 
     test('Should throw when project ID is not configured', async () => {
       const mockStrapi = createMockStrapi({
-        config: { get: jest.fn((key: string) => (key === 'uuid' ? null : undefined)) },
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'uuid') return null;
+            if (key === 'admin.ai.enabled') return defaultValue ?? true;
+            return undefined;
+          }),
+        },
       }) as any;
       setupValidEnvironment();
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
@@ -120,9 +137,14 @@ describe('AI Container', () => {
 
   describe('getAiToken', () => {
     test('Should throw error when EE features are not enabled', async () => {
+      // isEnabled() must pass so resolveAiContext runs; isEE: false is what resolveAiContext checks.
       const mockStrapi = createMockStrapi({
-        ee: { isEE: false },
+        ee: {
+          isEE: false,
+          features: { isEnabled: jest.fn().mockReturnValue(true) },
+        },
       }) as any;
+      setupValidEnvironment();
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
 
       await expect(aiContainer.getAiToken()).rejects.toThrow(
@@ -194,7 +216,11 @@ describe('AI Container', () => {
     test('Should throw error when project ID is not configured', async () => {
       const mockStrapi = createMockStrapi({
         config: {
-          get: jest.fn((key: string) => (key === 'uuid' ? null : 'default-value')),
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'uuid') return null;
+            if (key === 'admin.ai.enabled') return defaultValue ?? true;
+            return defaultValue;
+          }),
         },
       }) as any;
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
@@ -494,7 +520,7 @@ describe('AI Container', () => {
       const mockI18nSettings = { aiLocalizations: true };
       const mockUploadSettings = { aiMetadata: false };
 
-      const mockStrapi = {
+      const mockStrapi = createMockStrapi({
         plugin: jest.fn((pluginName: string) => {
           if (pluginName === 'i18n') {
             return {
@@ -512,7 +538,7 @@ describe('AI Container', () => {
           }
           return {};
         }),
-      } as any;
+      }) as any;
 
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
       const result = await aiContainer.getAiFeatureConfig();
