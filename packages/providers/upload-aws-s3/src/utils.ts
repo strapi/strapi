@@ -103,8 +103,8 @@ export const extractCredentials = (options: InitOptions): AwsCredentialIdentity 
   // compatibility. AWS SDK v3 requires these inside a `credentials` object;
   // passing them at the top level silently fails (Access Denied).
   if (s3Options?.accessKeyId && s3Options?.secretAccessKey) {
-    process.emitWarning(
-      "Passing 'accessKeyId' and 'secretAccessKey' directly in s3Options is deprecated. " +
+    console.warn(
+      "[upload-aws-s3] Passing 'accessKeyId' and 'secretAccessKey' directly in s3Options is deprecated. " +
         "Please wrap them in a 'credentials' object: s3Options: { credentials: { accessKeyId, secretAccessKey } }."
     );
     return {

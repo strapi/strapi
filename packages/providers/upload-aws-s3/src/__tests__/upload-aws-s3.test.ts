@@ -258,7 +258,7 @@ describe('AWS-S3 provider', () => {
       await providerInstance.upload(file);
 
       expect(file.url).toBeDefined();
-      expect(file.url).toBe('https://');
+      expect(file.url).toBe('https://test.s3.amazonaws.com/tmp/test.json');
     });
 
     test('should store ETag from upload response', async () => {

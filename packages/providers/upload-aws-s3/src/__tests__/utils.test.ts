@@ -85,7 +85,7 @@ describe('Utils', () => {
     });
 
     test('Extracts root-level accessKeyId/secretAccessKey from s3Options', () => {
-      const warningSpy = jest.spyOn(process, 'emitWarning').mockImplementation(() => {});
+      const warningSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const options: InitOptions = {
         s3Options: {
