@@ -486,8 +486,7 @@ class Strapi extends Container implements Core.Strapi {
 
     // Skip afterSync hooks and content type store write when nothing changed
     const contentTypesChanged =
-      !oldContentTypes ||
-      JSON.stringify(oldContentTypes) !== JSON.stringify(this.contentTypes);
+      !oldContentTypes || JSON.stringify(oldContentTypes) !== JSON.stringify(this.contentTypes);
 
     // Run afterSync/store.set and server init in parallel
     await Promise.all([
