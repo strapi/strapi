@@ -2,7 +2,7 @@ import type { Core } from '@strapi/types';
 import registerAdminPanelRoute from './routes/serve-admin-panel';
 import adminAuthStrategy from './strategies/admin';
 import apiTokenAuthStrategy from './strategies/api-token';
-import { createAiAdminService } from './ai/containers/ai';
+import { createAiAdminService } from './ai/services/ai';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const passportMiddleware = strapi.service('admin::passport').init();
