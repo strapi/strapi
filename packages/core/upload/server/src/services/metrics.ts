@@ -7,14 +7,14 @@ const isProviderPrivate = async () => strapi.plugin('upload').provider.isPrivate
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async trackUsage(event: string, properties?: Record<string, any>) {
     const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
-    const isAIAvailable =
+    const isAiAvailable =
       strapi.config.get('admin.ai.enabled', true) && strapi.ee.features.isEnabled('cms-ai');
 
     return strapi.telemetry.send(event, {
       ...properties,
       eventProperties: {
         ...properties?.eventProperties,
-        ...(isAIAvailable ? { isAiMediaLibraryConfigured: Boolean(settings.aiMetadata) } : {}),
+        ...(isAiAvailable ? { isAiMediaLibraryConfigured: Boolean(settings.aiMetadata) } : {}),
       },
     });
   },

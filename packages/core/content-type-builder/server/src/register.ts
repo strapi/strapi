@@ -2,9 +2,9 @@ import type { Core } from '@strapi/types';
 import { CSP_DEFAULTS, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  const isAIEnabled = strapi.ai.admin.isEnabled();
+  const isAiEnabled = strapi.ai.admin.isEnabled();
 
-  if (isAIEnabled) {
+  if (isAiEnabled) {
     const s3Domains = [
       'strapi-ai-staging.s3.us-east-1.amazonaws.com',
       'strapi-ai-production.s3.us-east-1.amazonaws.com',
