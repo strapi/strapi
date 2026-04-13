@@ -59,7 +59,7 @@
     "commander": "8.3.0",
     "fs-extra": "11.2.0",
     "inquirer": "9.3.8",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "ora": "5.4.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.5.4",
