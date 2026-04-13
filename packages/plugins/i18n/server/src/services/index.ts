@@ -8,6 +8,7 @@ import sanitize from './sanitize';
 import { createSettingsService } from './settings';
 import { createAILocalizationsService } from './ai-localizations';
 import { createAILocalizationJobsService } from './ai-localization-jobs';
+import { createFillFromLocaleService } from './fill-from-locale';
 
 export default {
   permissions,
@@ -20,4 +21,5 @@ export default {
   'ai-localizations': createAILocalizationsService,
   'ai-localization-jobs': createAILocalizationJobsService,
   settings: createSettingsService,
+  'fill-from-locale': createFillFromLocaleService,
 };

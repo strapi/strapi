@@ -41,7 +41,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "winston": "3.10.0"
   },
   "devDependencies": {
