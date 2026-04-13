@@ -70,6 +70,11 @@ const GlobalStyle = createGlobalStyle<{ $shouldOverrideInputFontSize: boolean }>
     background: ${({ theme }) => theme.colors.neutral100};
   }
 
+  /* Increase Combobox / relation dropdown max-height so more items are visible without scrolling */
+  [data-radix-popper-content-wrapper] [role="listbox"] {
+    max-height: 30rem !important;
+  }
+
   // Temporary fix override to fix iOS zoom due to the 14px input font size
   ${({ $shouldOverrideInputFontSize }) =>
     $shouldOverrideInputFontSize
