@@ -140,6 +140,35 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/**
+ * Pre-load state metadata for given teams in 2 parallel requests.
+ * Avoids N+1 `await issue.state` calls during issue list processing.
+ */
+async function preloadStateMetadata(
+  client: LinearClient,
+  teamIds: string[]
+): Promise<Map<string, { name: string; type: string }>> {
+  const map = new Map<string, { name: string; type: string }>();
+  const results = await Promise.all(
+    teamIds.map((teamId) =>
+      withRateLimit(() =>
+        client.workflowStates({ filter: { team: { id: { eq: teamId } } }, first: 50 })
+      )
+    )
+  );
+  for (const result of results) {
+    for (const state of result.nodes) {
+      map.set(state.id, { name: state.name, type: state.type });
+    }
+  }
+  return map;
+}
+
+/** Extract the state ID embedded in the issue fragment without an extra API call. */
+function getIssueStateId(issue: { stateId?: string | null }): string | undefined {
+  return issue.stateId ?? undefined;
+}
+
 function getRateLimitRetryAfter(err: unknown): number | null {
   const response = (err as any)?.response;
   if (!response) return null;
@@ -198,11 +227,17 @@ export interface PRTicketSummary {
 /**
  * Lightweight lookup: returns PR number -> ticket summary (team, identifier, status).
  * Searches CPR and CMS teams. Fast enough for dry-run previews.
+ *
+ * Optimized: pre-loads all state names in 2 requests instead of N+1 per issue.
+ * Uses issue.identifier (already in fragment) instead of fetching team key.
  */
 export async function fetchExistingPRSummary(
   client: LinearClient
 ): Promise<Map<number, PRTicketSummary>> {
   const result = new Map<number, PRTicketSummary>();
+
+  // Pre-load state names for both teams — 2 requests total instead of N+1
+  const stateById = await preloadStateMetadata(client, [LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID]);
 
   for (const teamId of [LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID]) {
     let hasNext = true;
@@ -217,12 +252,12 @@ export async function fetchExistingPRSummary(
       for (const issue of page.nodes) {
         const prNum = matchPRNumber(issue.title);
         if (!prNum) continue;
-        const state = await issue.state;
-        const team = await issue.team;
+        const stateId = getIssueStateId(issue);
+        const stateMeta = stateId ? stateById.get(stateId) : undefined;
         result.set(prNum, {
           teamId,
-          identifier: team ? `${team.key}-${issue.number}` : issue.id,
-          status: state?.name ?? 'Unknown',
+          identifier: issue.identifier, // Already "CPR-123" format — no team fetch needed
+          status: stateMeta?.name ?? 'Unknown',
           createdAt: issue.createdAt,
           updatedAt: issue.updatedAt,
         });
@@ -242,6 +277,9 @@ export async function fetchExistingPRIssues(
   const issueByPR = new Map<number, ExistingIssue>();
   const scoredPRNumbers = new Set(scoredPRs.map((s) => s.pr.number));
 
+  // Pre-load state types for both teams — 2 requests instead of N+1 per issue
+  const stateById = await preloadStateMetadata(client, [LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID]);
+
   // Query CPR then CMS teams directly — avoids global searchIssues + per-issue fetches.
   // CPR is processed first so its entries take priority if a PR appears in both teams.
   for (const teamId of [LINEAR_CPR_TEAM_ID, LINEAR_CMS_TEAM_ID]) {
@@ -258,27 +296,21 @@ export async function fetchExistingPRIssues(
         if (!prNum) continue;
         if (teamId === LINEAR_CMS_TEAM_ID && issueByPR.has(prNum)) continue; // CPR wins
 
-        const state = issue.state ? await withRateLimit(() => issue.state!) : undefined;
+        // State type from pre-loaded map — no API call needed
+        const stateId = getIssueStateId(issue);
+        const stateType = stateId ? (stateById.get(stateId)?.type ?? 'triage') : 'triage';
 
-        // Only fetch labels/attachments for CPR issues we'll actually update
-        let labelIds: string[] = [];
-        let attachmentUrls: string[] = [];
-        if (teamId === LINEAR_CPR_TEAM_ID && scoredPRNumbers.has(prNum)) {
-          const [labels, attachments] = await Promise.all([
-            withRateLimit(() => issue.labels()),
-            withRateLimit(() => issue.attachments()),
-          ]);
-          labelIds = labels.nodes.map((l) => l.id);
-          attachmentUrls = attachments.nodes.map((a) => a.url);
-        }
+        // labelIds is included in the IssueFragment — no API call needed
+        const labelIds =
+          teamId === LINEAR_CPR_TEAM_ID && scoredPRNumbers.has(prNum) ? issue.labelIds : [];
 
         issueByPR.set(prNum, {
           id: issue.id,
           number: issue.number,
           title: issue.title,
-          stateType: state?.type ?? 'triage',
+          stateType,
           labelIds,
-          attachmentUrls,
+          attachmentUrls: [], // Not fetched — attachment creation is skipped for existing issues
           teamId,
         });
       }
@@ -369,21 +401,7 @@ export async function syncToLinear(
         scored.pr.number,
         `https://linear.app/strapi/issue/${cprTeamKey}-${existing.number}`
       );
-      // Ensure PR attachment exists
-      if (!existing.attachmentUrls.some((url) => url.includes(`/pull/${scored.pr.number}`))) {
-        try {
-          await withRateLimit(() =>
-            client.createAttachment({
-              issueId: existing.id,
-              url: prUrl,
-              title: `PR #${scored.pr.number}: ${scored.pr.title}`,
-              iconUrl: 'https://github.githubassets.com/favicons/favicon.svg',
-            })
-          );
-        } catch {
-          // Attachment creation failed, non-critical
-        }
-      }
+      // Attachment was created at initial sync — skip re-creation to save API calls
       stats.updated++;
     } else {
       const result = await withRateLimit(() =>

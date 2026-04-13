@@ -237,7 +237,7 @@ export function formatProjectUpdate(
   const failing = scoredPRs.filter((p) => p.pr.ciStatus === 'failing').length;
   const pending = totalPRs - passing - failing;
 
-  const existingCount = totalPRs - categories.newSinceLastUpdate.length - categories.newPRs.length;
+  const existingCount = totalPRs - categories.newPRs.length;
 
   let md = `## Community PR Project Update — ${date}\n\n`;
 
@@ -248,7 +248,7 @@ export function formatProjectUpdate(
 
   // Sync Preview
   md += `## Sync Preview\n\n`;
-  md += `**${categories.newSinceLastUpdate.length}** new | **${existingCount}** existing | **${categories.pickedUp.length}** picked up by CMS\n\n`;
+  md += `**${categories.newPRs.length}** new | **${existingCount}** existing | **${categories.pickedUp.length}** picked up by CMS\n\n`;
 
   // Summary
   md += `## Summary\n\n`;
@@ -256,7 +256,7 @@ export function formatProjectUpdate(
   md += `- **${categories.pickedUp.length}** picked up by CMS team\n`;
   md += `- **${categories.merged.length}** merged\n`;
   md += `- **${categories.inProgress.length}** in progress (CPR)\n`;
-  md += `- **${categories.newSinceLastUpdate.length}** new PRs awaiting triage (since last update)\n`;
+  md += `- **${categories.newPRs.length}** new PRs awaiting triage (since last update)\n`;
   md += `- **${categories.closed.length}** closed (not merged)\n`;
   md += `- **${categories.stale.length}** stale (>14 days in Todo)\n\n`;
 

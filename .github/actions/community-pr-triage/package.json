@@ -1,22 +1,31 @@
 {
   "name": "community-pr-triage",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "tsup --entry.index src/index.action.ts --format cjs --target node20 --clean",
+    "sync": "tsx src/index.ts --sync",
+    "sync:dry": "tsx src/index.ts --sync --dry-run",
+    "check": "tsx src/index.ts --sync --dry-run --fresh",
+    "update": "tsx src/index.ts --update",
+    "update:dry": "tsx src/index.ts --update --dry-run",
+    "all": "tsx src/index.ts --sync --update",
+    "all:dry": "tsx src/index.ts --sync --update --dry-run",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
+    "@actions/core": "^3.0.0",
     "@anthropic-ai/sdk": "^0.78.0",
-    "@linear/sdk": "80.0.0"
+    "@linear/sdk": "^80.0.0"
   },
   "devDependencies": {
-    "tsup": "^8.3.0",
+    "@types/node": "^25.5.0",
+    "dotenv": "^16.4.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
-  }
+  },
+  "packageManager": "pnpm@9.8.0+sha512.8e4c3550fb500e808dbc30bb0ce4dd1eb614e30b1c55245f211591ec2cdf9c611cabd34e1364b42f564bd54b3945ed0f49d61d1bbf2ec9bd74b866fcdc723276"
 }

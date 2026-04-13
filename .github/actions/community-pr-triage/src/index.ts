@@ -50,14 +50,17 @@ async function main() {
   const doUpdate = process.argv.includes('--update');
   const dryRun = process.argv.includes('--dry-run') || (!doSync && !doUpdate);
   const autoYes = process.argv.includes('--yes') || process.argv.includes('-y');
+  // --fresh: force a live GitHub+Linear fetch even in dry-run mode (skips cache).
+  // Useful for diagnosing what's actually missing without triggering a sync.
+  const forceFresh = process.argv.includes('--fresh');
 
-  // --- Scored PRs: use cache if available (update-only mode), otherwise fetch fresh ---
+  // --- Scored PRs: use cache for dry-runs and update-only; always fetch fresh for actual sync ---
   let scoredPRs: ScoredPR[];
   let mergedPRNumbers: Set<number> | undefined;
   let cachedSyncStats: { createdPRNumbers: number[] } | undefined;
 
   const updateOnly = doUpdate && !doSync;
-  const cache = updateOnly ? readCache() : null;
+  const cache = !forceFresh && (dryRun || updateOnly) ? readCache() : null;
 
   if (cache) {
     scoredPRs = cache.scoredPRs;
