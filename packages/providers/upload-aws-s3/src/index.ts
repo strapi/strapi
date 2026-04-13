@@ -410,6 +410,14 @@ export default {
     /**
      * Constructs the correct file URL.
      * Handles S3-compatible providers that return incorrect Location formats.
+     *
+     * Some providers (IONOS, some MinIO configs) return malformed Location
+     * values like "bucket/key" without protocol or domain. For these, we
+     * fall back to constructing the URL from the endpoint config.
+     *
+     * Other providers (AWS, Scaleway, DigitalOcean, Backblaze) return
+     * correct Location URLs that should be trusted as-is, since they
+     * already use the correct URL style (virtual-hosted or path-style).
      */
     const constructFileUrl = (fileKey: string, uploadLocation: string): string => {
       // Priority 1: Use baseUrl if configured (CDN or custom domain)
@@ -418,9 +426,18 @@ export default {
         return `${cleanBase}/${fileKey}`;
       }
 
-      // Priority 2: Construct URL from endpoint if configured
-      // This fixes issues with S3-compatible providers (IONOS, MinIO, etc.)
-      // that return Location in incorrect format for multipart uploads
+      // Priority 2: Use the Location from S3 response if it's a valid URL.
+      // This preserves correct behavior for providers that return proper URLs
+      // (AWS, Scaleway, DigitalOcean, Backblaze, etc.), respecting their
+      // native URL format (virtual-hosted or path-style).
+      if (uploadLocation && assertUrlProtocol(uploadLocation)) {
+        return uploadLocation;
+      }
+
+      // Priority 3: Construct URL from endpoint if configured.
+      // This is a fallback for providers that return malformed Location values
+      // (e.g., IONOS returns "bucket/key" without protocol for multipart uploads,
+      // some MinIO configs return similar malformed values).
       const endpoint = config.endpoint?.toString();
       if (endpoint) {
         const endpointUrl = endpoint.startsWith('http') ? endpoint : `https://${endpoint}`;
@@ -428,13 +445,13 @@ export default {
         return `${cleanEndpoint}/${config.params.Bucket}/${fileKey}`;
       }
 
-      // Priority 3: Use the Location from S3 response
-      if (assertUrlProtocol(uploadLocation)) {
-        return uploadLocation;
+      // Priority 4: Prepend https if Location exists but lacks protocol
+      if (uploadLocation) {
+        return `https://${uploadLocation}`;
       }
 
-      // Priority 4: Prepend https if protocol is missing
-      return `https://${uploadLocation}`;
+      // Priority 5: Construct from AWS default pattern
+      return `https://${config.params.Bucket}.s3.amazonaws.com/${fileKey}`;
     };
 
     const upload = async (file: File, customParams: Partial<PutObjectCommandInput> = {}) => {
