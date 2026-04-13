@@ -124,6 +124,19 @@ describe('UpsellBanner', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
     expect(screen.queryByText('Access to Growth plan features:')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reopen banner' })).toBeInTheDocument();
+  });
+
+  it('should restore the full banner when "Reopen banner" is clicked', async () => {
+    jest.setSystemTime(new Date(2025, 4, 10));
+
+    const { user } = render(<UpsellBanner />, {
+      userEventOptions: { advanceTimers: jest.advanceTimersByTime.bind(jest) },
+    });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(screen.getByRole('button', { name: 'Reopen banner' }));
+
+    expect(screen.getByText('Access to Growth plan features:')).toBeInTheDocument();
   });
 
   it('should persist dismissal after remount', async () => {
@@ -140,10 +153,10 @@ describe('UpsellBanner', () => {
     expect(screen.queryByText('Access to Growth plan features:')).not.toBeInTheDocument();
   });
 
-  it('should show the banner again when a new trial starts', () => {
+  it('should re-show the banner when the current trial end date differs from the dismissed date', () => {
     jest.setSystemTime(new Date(2025, 4, 10));
 
-    // Simulate a previously dismissed trial with an old end date
+    // Banner was previously dismissed for an earlier trial end date
     localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT:test-uuid', '2026-08-01T00:00:00.000Z');
     localStorage.setItem(
       'STRAPI_UPSELL_BANNER_DISMISSED_FOR:test-uuid',

@@ -15,6 +15,7 @@ const CollapsedButton = styled.button`
   align-self: flex-end;
   width: 2.8rem;
   height: 2.8rem;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,7 +130,7 @@ const Banner = ({
           </LinkButton>
         </Box>
       </Flex>
-      <Box position="absolute" right={4}>
+      <Box position="absolute" right={4} top="50%" style={{ transform: 'translateY(-50%)' }}>
         <IconButton
           withTooltip={false}
           label={formatMessage({
@@ -183,9 +184,20 @@ const UpsellBanner = () => {
 
   const trialEndsAt = timeLeftData.data?.trialEndsAt ?? cachedTrialEndsAt;
 
-  const isDismissed = Boolean(trialEndsAt && dismissedFor === trialEndsAt);
+  const toCanonicalISO = (v: string | undefined): string | undefined => {
+    if (!v) return undefined;
+    try {
+      return new Date(v).toISOString();
+    } catch {
+      return v;
+    }
+  };
 
-  const handleDismiss = () => setDismissedFor(trialEndsAt);
+  const isDismissed = Boolean(
+    trialEndsAt && toCanonicalISO(dismissedFor) === toCanonicalISO(trialEndsAt)
+  );
+
+  const handleDismiss = () => setDismissedFor(toCanonicalISO(trialEndsAt));
   const handleReopen = () => setDismissedFor(undefined);
 
   if (!(timeLeftData.data?.trialEndsAt || isTrialEndedRecently)) {
