@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import { validateZod } from '@strapi/utils';
+import { z, validateZod } from '@strapi/utils';
 
 const MAX_IMAGE_WIDTH = 750;
 const MAX_IMAGE_HEIGHT = MAX_IMAGE_WIDTH;

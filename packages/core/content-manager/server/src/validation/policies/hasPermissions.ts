@@ -1,8 +1,8 @@
-import { yup, validateYupSchemaSync } from '@strapi/utils';
+import { z, validateZod } from '@strapi/utils';
 
-const hasPermissionsSchema = yup.object({
-  actions: yup.array().of(yup.string()),
-  hasAtLeastOne: yup.boolean(),
+const hasPermissionsSchema = z.object({
+  actions: z.array(z.string()).optional(),
+  hasAtLeastOne: z.boolean().optional(),
 });
 
-export const validateHasPermissionsInput = validateYupSchemaSync(hasPermissionsSchema);
+export const validateHasPermissionsInput = validateZod(hasPermissionsSchema);

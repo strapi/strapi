@@ -8,6 +8,7 @@ export { generateInstallId } from './install-id';
 export { createModelCache } from './model-cache';
 
 export { validateYupSchema, validateYupSchemaSync } from './validators';
+export { formatYupErrors } from './format-yup-error';
 export { isOperator, isOperatorOfType } from './operators';
 
 export * as queryParams from './convert-query-params';
@@ -32,7 +33,6 @@ export * as contentTypes from './content-types';
 export * as relations from './relations';
 export * as hooks from './hooks';
 export * from './zod';
-export { z } from './zod-schema';
 export * from './validation';
 export * from './route-serialization';
 

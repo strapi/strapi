@@ -812,14 +812,19 @@ export type Schema = {
   >;
 };
 
+const updateSchemaInput = z.object(
+  {
+    data: schemaSchema,
+  },
+  {
+    invalid_type_error: 'Invalid schema, expected an object with a data property',
+    required_error: 'Schema is required',
+  }
+);
+
+// TODO: Remove cast when content-type-builder migrates to Zod 4
 export const validateUpdateSchema = validateZod(
-  z.object(
-    {
-      data: schemaSchema,
-    },
-    {
-      invalid_type_error: 'Invalid schema, expected an object with a data property',
-      required_error: 'Schema is required',
-    }
-  )
+  updateSchemaInput as unknown as import('@strapi/utils').z.ZodType<
+    z.infer<typeof updateSchemaInput>
+  >
 );

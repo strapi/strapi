@@ -1,21 +1,17 @@
-import * as yup from 'yup';
 import { pick } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
-import { validateYupSchema, errors } from '@strapi/utils';
+import { z, validateZod, errors } from '@strapi/utils';
 
 import { Preview } from '../../../../../shared/contracts';
 import type { HandlerParams } from '../../services/preview-config';
 
-const getPreviewUrlSchema = yup
-  .object()
-  .shape({
-    // Will be undefined for single types
-    documentId: yup.string(),
-    locale: yup.string().nullable(),
-    status: yup.string(),
-  })
-  .required();
+const getPreviewUrlSchema = z.object({
+  // Will be undefined for single types
+  documentId: z.string().optional(),
+  locale: z.string().nullable().optional(),
+  status: z.string().optional(),
+});
 
 export const validatePreviewUrl = async (
   strapi: Core.Strapi,
@@ -23,7 +19,7 @@ export const validatePreviewUrl = async (
   params: Preview.GetPreviewUrl.Request['query']
 ): Promise<HandlerParams> => {
   // Validate the request parameters format
-  await validateYupSchema(getPreviewUrlSchema)(params);
+  validateZod(getPreviewUrlSchema)(params);
 
   const newParams = pick(['documentId', 'locale', 'status'], params) as HandlerParams;
   const model = strapi.getModel(uid);
