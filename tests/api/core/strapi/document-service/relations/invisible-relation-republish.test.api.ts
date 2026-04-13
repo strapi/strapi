@@ -2,14 +2,12 @@
  * visible: false relations must survive documents().update(..., status: 'published').
  * Internal publish load must populate invisible relations so the new published row re-attaches links.
  */
-import fs from 'node:fs';
-import path from 'node:path';
-
 import type { Core, UID } from '@strapi/types';
 import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
+const { getContentTypeSchema, modifyContentType } = require('api-tests/models');
 
 let strapi: Core.Strapi;
 const builder = createTestBuilder();
@@ -51,24 +49,18 @@ const legacyModel = {
   collectionName: '',
 };
 
-const setArticleLegacyInvisible = () => {
-  const schemaPath = path.join(
-    process.cwd(),
-    'test-apps/api/src/api/article/content-types/article/schema.json'
-  );
-  const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-  if (!schema.attributes?.legacy) {
-    throw new Error(`Expected legacy attribute in ${schemaPath}`);
-  }
-
-  schema.attributes.legacy.visible = false;
-  fs.writeFileSync(schemaPath, `${JSON.stringify(schema, null, 2)}\n`, 'utf8');
-};
-
 describe('Document Service invisible inverse oneToOne', () => {
   beforeAll(async () => {
     await builder.addContentTypes([articleBaseModel, legacyModel]).build();
-    setArticleLegacyInvisible();
+
+    // Set `visible: false` on the inverse relation via the content-type-builder service
+    const articleSchema = await getContentTypeSchema('article');
+    if (!articleSchema?.attributes?.legacy) {
+      throw new Error('Expected legacy attribute on article after setup');
+    }
+    articleSchema.attributes.legacy.visible = false;
+    await modifyContentType(articleSchema);
+
     strapi = await createStrapiInstance();
   });
 
