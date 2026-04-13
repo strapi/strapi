@@ -49,10 +49,18 @@ const ComponentCategory = ({
               shrink={0}
               borderColor="neutral200"
             >
-              <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
+              <Flex
+                direction="column"
+                gap={1}
+                alignItems="center"
+                justifyContent="center"
+                width="100%"
+                paddingLeft={2}
+                paddingRight={2}
+              >
                 <ComponentIcon color="currentColor" background="primary200" icon={icon} />
 
-                <Typography variant="pi" fontWeight="bold">
+                <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
                   {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
                 </Typography>
               </Flex>
