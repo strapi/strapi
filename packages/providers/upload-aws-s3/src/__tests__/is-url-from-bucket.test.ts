@@ -43,14 +43,26 @@ describe('Test for URLs', () => {
 
   describe('S3 Compatible', () => {
     describe('DO Spaces', () => {
-      test('is from same bucket', async () => {
+      test('virtual-hosted-style: is from same bucket', async () => {
         const url = 'https://bucket-name.nyc3.digitaloceanspaces.com/folder/img.png';
         const isFromBucket = isUrlFromBucket(url, 'bucket-name');
         expect(isFromBucket).toEqual(true);
       });
-      test('is not from same bucket', async () => {
+      test('virtual-hosted-style: is not from same bucket', async () => {
         const url = 'https://bucket-name.nyc3.digitaloceanspaces.com/folder/img.png';
         const isFromBucket = isUrlFromBucket(url, 'bucket');
+        expect(isFromBucket).toEqual(false);
+      });
+      test('CDN path-style (forcePathStyle:true): bucket in path, is from same bucket', async () => {
+        // URL generated when endpoint is set to the CDN and forcePathStyle:true
+        // e.g. https://fra1.cdn.digitaloceanspaces.com/pcstrapi/thumbnail_IMG_1351.jpg
+        const url = 'https://fra1.cdn.digitaloceanspaces.com/pcstrapi/thumbnail_IMG_1351.jpg';
+        const isFromBucket = isUrlFromBucket(url, 'pcstrapi');
+        expect(isFromBucket).toEqual(true);
+      });
+      test('CDN path-style (forcePathStyle:true): bucket in path, is not from same bucket', async () => {
+        const url = 'https://fra1.cdn.digitaloceanspaces.com/pcstrapi/thumbnail_IMG_1351.jpg';
+        const isFromBucket = isUrlFromBucket(url, 'other-bucket');
         expect(isFromBucket).toEqual(false);
       });
     });
