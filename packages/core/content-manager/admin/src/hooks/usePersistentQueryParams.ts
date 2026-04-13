@@ -21,6 +21,37 @@ const filterObjectKeys = (obj: object, keys: PropertyPath[]) => {
   return result;
 };
 
+/**
+ * Synchronously reads persisted query params from localStorage.
+ * Use this during render to seed `useQueryParams` initialParams so the first
+ * render already has the correct values (avoiding an extra request caused by
+ * the deferred useEffect restoration in `usePersistentPartialQueryParams`).
+ */
+export const readPersistedQueryParams = (
+  keyPrefix: string,
+  keysToPersist: PropertyPath[],
+  pathname: string,
+  pathnameInKey = true
+): Record<string, unknown> => {
+  const localStorageKey = `${keyPrefix}${pathnameInKey ? pathname : ''}`;
+  const saved = window.localStorage.getItem(localStorageKey);
+  if (!saved) {
+    return {};
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(saved);
+  } catch {
+    return {};
+  }
+  if (Object.keys(parsed).length === 0) {
+    return {};
+  }
+
+  return filterObjectKeys(parsed, keysToPersist);
+};
+
 export const usePersistentPartialQueryParams = (
   keyPrefix: string,
   keysToPersist: PropertyPath[],
