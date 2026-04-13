@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-aws-s3",
-  "version": "5.33.4",
+  "version": "5.42.0",
   "description": "AWS S3 provider for strapi upload",
   "keywords": [
     "upload",
@@ -14,7 +14,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/upload-aws-s3"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -47,16 +48,16 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.600.0",
-    "@aws-sdk/lib-storage": "3.433.0",
-    "@aws-sdk/s3-request-presigner": "3.433.0",
-    "@aws-sdk/types": "3.433.0",
-    "lodash": "4.17.23"
+    "@aws-sdk/client-s3": "3.995.0",
+    "@aws-sdk/lib-storage": "3.995.0",
+    "@aws-sdk/s3-request-presigner": "3.995.0",
+    "@aws-sdk/types": "3.973.1",
+    "lodash": "4.18.1"
   },
   "devDependencies": {
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "5.33.4",
-    "tsconfig": "5.33.4"
+    "eslint-config-custom": "5.42.0",
+    "tsconfig": "5.42.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

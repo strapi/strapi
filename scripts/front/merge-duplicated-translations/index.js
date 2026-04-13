@@ -4,7 +4,6 @@
 
 const path = require('path');
 const chalk = require('chalk');
-const inquirer = require('inquirer');
 const { kebabCase } = require('lodash');
 const FilesContentSearch = require('../utils/search-files-content');
 const { readAllTranslationFiles, writeAllTranslationFiles } = require('../utils/translation-files');
@@ -24,28 +23,6 @@ const mapDuplicateValues = async (pkgs, fn) => {
   Object.entries(pkgs).forEach(([packageName, keys]) => {
     keys.forEach((key) => fn(key, packageName));
   });
-};
-
-const promptShouldMerge = async () => {
-  return (
-    await inquirer.prompt({
-      type: 'confirm',
-      message: 'Should merge?',
-      name: 'shouldMerge',
-      default: false,
-    })
-  ).shouldMerge;
-};
-
-const promptTargetKey = async (valueGroup) => {
-  return (
-    await inquirer.prompt({
-      type: 'input',
-      name: 'targetKey',
-      message: 'Target key name:',
-      default: `global.${kebabCase(valueGroup[0].value)}`,
-    })
-  ).targetKey;
 };
 
 const printToMerge = (valueGroup) => {
@@ -121,7 +98,29 @@ const updateTranslationFiles = (keyGroup, targetKey) => {
 
 // Displays and prompt for every detected duplications
 // Triggers the merge if necessary
-const merge = async (valuesToMerge) => {
+const merge = async (inquirer, valuesToMerge) => {
+  const promptShouldMerge = async () => {
+    return (
+      await inquirer.prompt({
+        type: 'confirm',
+        message: 'Should merge?',
+        name: 'shouldMerge',
+        default: false,
+      })
+    ).shouldMerge;
+  };
+
+  const promptTargetKey = async (valueGroup) => {
+    return (
+      await inquirer.prompt({
+        type: 'input',
+        name: 'targetKey',
+        message: 'Target key name:',
+        default: `global.${kebabCase(valueGroup[0].value)}`,
+      })
+    ).targetKey;
+  };
+
   let current = 1;
   let mergedCount = 0;
 
@@ -147,11 +146,13 @@ const merge = async (valuesToMerge) => {
 };
 
 (async () => {
+  const { default: inquirer } = await import('inquirer');
+
   await fcs.loadFiles();
 
   const duplicates = findDuplicatedTranslations();
   const keyUsage = getKeysUsage(duplicates);
   const valuesToMerge = getValuesToMerge(keyUsage);
 
-  await merge(valuesToMerge);
+  await merge(inquirer, valuesToMerge);
 })();

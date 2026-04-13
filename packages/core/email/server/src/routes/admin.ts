@@ -31,5 +31,16 @@ export default {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/verify',
+      handler: 'email.verify',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { name: 'admin::hasPermissions', config: { actions: ['plugin::email.settings.read'] } },
+        ],
+      },
+    },
   ],
 };
