@@ -74,13 +74,13 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
       throw new Error(`${errorPrefix.replace(/:$/, '')}. Check server logs for details.`);
     }
 
-    const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
-
     const projectId = strapi.config.get('uuid');
     if (!projectId) {
       strapi.log.error(`${errorPrefix} Project ID not configured`);
       throw new Error(`${errorPrefix.replace(/:$/, '')}. Check server logs for details.`);
     }
+
+    const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
     return { eeLicense, projectId, aiServerUrl };
   };
