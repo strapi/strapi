@@ -1,5 +1,6 @@
 /**
- * AI service for the admin panel. Only present at runtime when EE + cms-ai feature is active
+ * Admin AI integration (tokens, usage, feature flags). Always registered on the container;
+ * call `isEnabled()` before relying on Enterprise AI behaviour.
  */
 export type AiAdminService = {
   isEnabled(): boolean;

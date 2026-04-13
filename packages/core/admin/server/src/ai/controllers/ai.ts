@@ -8,8 +8,10 @@ export default {
     }
 
     try {
-      // TODO: auth check is not necessary? Already protected by route middleware?
-      // Security check: Ensure user is authenticated and has proper permissions
+      // `admin::isAuthenticatedAdmin` only checks `ctx.state.isAuthenticated`, not `ctx.state.user`.
+      // With the current admin JWT strategy, a successful auth run always sets both; this handler
+      // still requires `user` because `getAiToken()` needs an admin identity. Keeps us safe if the
+      // strategy/policy contract ever diverges or this action is invoked outside the normal pipeline.
       if (!ctx.state.user) {
         return ctx.unauthorized('Authentication required');
       }
