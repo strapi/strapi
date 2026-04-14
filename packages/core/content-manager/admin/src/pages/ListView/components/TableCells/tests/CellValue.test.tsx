@@ -3,10 +3,14 @@ import { IntlProvider } from 'react-intl';
 
 import { CellValue, CellValueProps } from '../CellValue';
 
-const CellValueWithProvider = (type: CellValueProps['type'], value: CellValueProps['value']) => {
+const CellValueWithProvider = (
+  type: CellValueProps['type'],
+  value: CellValueProps['value'],
+  isIdColumn?: CellValueProps['isIdColumn']
+) => {
   return (
     <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-      <CellValue type={type} value={value} />
+      <CellValue isIdColumn={isIdColumn} type={type} value={value} />
     </IntlProvider>
   );
 };
@@ -42,14 +46,20 @@ describe('CellValue', () => {
     expect(getByText('3')).toBeInTheDocument();
   });
 
-  it('should return a large integer without thousands separator', () => {
+  it('should return a large integer with thousands separator', () => {
     const { getByText } = render(CellValueWithProvider('integer', 314159265359));
 
-    expect(getByText('314159265359')).toBeInTheDocument();
+    expect(getByText('314,159,265,359')).toBeInTheDocument();
   });
 
-  it('should return a very large integer without thousands separator', () => {
+  it('should return a very large integer with thousands separator', () => {
     const { getByText } = render(CellValueWithProvider('integer', 1000000000000));
+
+    expect(getByText('1,000,000,000,000')).toBeInTheDocument();
+  });
+
+  it('should return an ID column integer without thousands separator', () => {
+    const { getByText } = render(CellValueWithProvider('integer', 1000000000000, true));
 
     expect(getByText('1000000000000')).toBeInTheDocument();
   });
@@ -60,14 +70,20 @@ describe('CellValue', () => {
     expect(getByText('3')).toBeInTheDocument();
   });
 
-  it('should return a large biginteger without thousands separator', () => {
+  it('should return a large biginteger with thousands separator', () => {
     const { getByText } = render(CellValueWithProvider('biginteger', 314159265359));
 
-    expect(getByText('314159265359')).toBeInTheDocument();
+    expect(getByText('314,159,265,359')).toBeInTheDocument();
   });
 
-  it('should return a very large biginteger without thousands separator', () => {
+  it('should return a very large biginteger with thousands separator', () => {
     const { getByText } = render(CellValueWithProvider('biginteger', 1000000000000));
+
+    expect(getByText('1,000,000,000,000')).toBeInTheDocument();
+  });
+
+  it('should return an ID column biginteger without thousands separator', () => {
+    const { getByText } = render(CellValueWithProvider('biginteger', 1000000000000, true));
 
     expect(getByText('1000000000000')).toBeInTheDocument();
   });

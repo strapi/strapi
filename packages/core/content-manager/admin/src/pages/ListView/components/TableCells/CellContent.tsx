@@ -15,6 +15,8 @@ interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
 }
 
 const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
+  const isIdColumn = name === 'id';
+
   if (!hasContent(content, mainField, attribute)) {
     return (
       <Typography
@@ -54,7 +56,7 @@ const CellContent = ({ content, mainField, attribute, rowId, name }: CellContent
       return (
         <Tooltip label={content}>
           <Typography maxWidth="30rem" ellipsis textColor="neutral800">
-            <CellValue type={attribute.type} value={content} />
+            <CellValue isIdColumn={isIdColumn} type={attribute.type} value={content} />
           </Typography>
         </Tooltip>
       );
@@ -62,7 +64,7 @@ const CellContent = ({ content, mainField, attribute, rowId, name }: CellContent
     default:
       return (
         <Typography maxWidth="30rem" ellipsis textColor="neutral800">
-          <CellValue type={attribute.type} value={content} />
+          <CellValue isIdColumn={isIdColumn} type={attribute.type} value={content} />
         </Typography>
       );
   }
