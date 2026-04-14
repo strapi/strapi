@@ -1,10 +1,17 @@
 import { load, sync } from '../self-referential-relations';
 
 const ID_COLUMN = 'id';
+const BATCH_SIZE = 1000;
 
 const mockBatchInsert = jest.fn();
 
-const mockTrx = Object.assign(jest.fn(), {
+// Handles trx(tableName).whereIn(...).select(...) for the idempotency check in sync()
+const mockKnexChain = {
+  whereIn: jest.fn().mockReturnThis(),
+  select: jest.fn().mockResolvedValue([]),
+};
+
+const mockTrx = Object.assign(jest.fn().mockReturnValue(mockKnexChain), {
   batchInsert: mockBatchInsert,
 });
 
@@ -90,6 +97,7 @@ describe('self-referential-relations', () => {
       (global as any).strapi = {
         db: {
           metadata: { identifiers: { ID_COLUMN } },
+          dialect: { getBatchInsertSize: jest.fn().mockReturnValue(BATCH_SIZE) },
           transaction: createMockTransaction(),
         },
       };
@@ -120,6 +128,7 @@ describe('self-referential-relations', () => {
       (global as any).strapi = {
         db: {
           metadata: { identifiers: { ID_COLUMN } },
+          dialect: { getBatchInsertSize: jest.fn().mockReturnValue(BATCH_SIZE) },
           transaction: createMockTransaction(),
         },
       };
@@ -146,6 +155,7 @@ describe('self-referential-relations', () => {
       (global as any).strapi = {
         db: {
           metadata: { identifiers: { ID_COLUMN } },
+          dialect: { getBatchInsertSize: jest.fn().mockReturnValue(BATCH_SIZE) },
           transaction: createMockTransaction(),
         },
       };
