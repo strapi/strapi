@@ -211,19 +211,14 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
       tabIndex={sortable ? 0 : undefined}
       aria-sort={isSorted ? (sortOrder === 'ASC' ? 'ascending' : 'descending') : undefined}
       $sortable={!!sortable}
-      action={
-        isSorted &&
-        sortable && (
-          <IconButton label={sortLabel} onClick={handleClickSort} variant="ghost">
-            <SortIcon $isUp={sortOrder === 'ASC'} />
-          </IconButton>
-        )
-      }
     >
       <Tooltip label={sortable ? sortLabel : label}>
-        <Typography textColor="neutral600" tag="span" variant="sigma">
-          {label}
-        </Typography>
+        <Flex gap={1}>
+          <Typography textColor="neutral600" tag="span" variant="sigma">
+            {label}
+          </Typography>
+          {isSorted && sortable && <SortIcon $isUp={sortOrder === 'ASC'} />}
+        </Flex>
       </Tooltip>
     </SortableTh>
   );
