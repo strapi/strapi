@@ -84,6 +84,39 @@ await cache.get('my-feature', 'user:123', { provider: 'memory' });
 
 Types: [`packages/core/types/src/modules/cache.ts`](https://github.com/strapi/strapi/blob/main/packages/core/types/src/modules/cache.ts).
 
+## Official Redis provider
+
+Install the first-party package (naming pattern for cache backends: `@strapi/plugin-cache-provider-<name>`):
+
+```bash
+yarn add @strapi/plugin-cache-provider-redis
+```
+
+Enable it in `config/plugins` (plugin id `cache-provider-redis`), then point `server.cache` at Redis:
+
+```js
+// config/plugins.js
+module.exports = () => ({
+  'cache-provider-redis': { enabled: true },
+});
+
+// config/server.js
+module.exports = ({ env }) => ({
+  server: {
+    cache: {
+      defaultProvider: 'redis',
+      providers: {
+        redis: {
+          connection: { url: env('REDIS_URL', 'redis://127.0.0.1:6379') },
+        },
+      },
+    },
+  },
+});
+```
+
+See the package [README](https://github.com/strapi/strapi/blob/main/packages/plugins/caching-provider-redis/README.md) for `keyPrefix`, TLS, and uninstall notes.
+
 ## Registering a custom provider
 
 In the plugin **`register()`** hook, register a factory that receives `{ strapi, options }` and returns a `CacheProvider`:
@@ -91,16 +124,16 @@ In the plugin **`register()`** hook, register a factory that receives `{ strapi,
 ```ts
 export default {
   register({ strapi }: { strapi: Core.Strapi }) {
-    strapi.get('cacheProviderRegistry').register('redis', ({ strapi: s, options }) => {
-      return createRedisCacheProvider(s, options);
+    strapi.get('cacheProviderRegistry').register('my-provider', ({ options }) => {
+      return createMyCacheProvider(options);
     });
   },
 };
 ```
 
-`options` is `strapi.config.get('server.cache')?.providers?.redis ?? {}`.
+`options` is `strapi.config.get('server.cache')?.providers?.my-provider ?? {}`.
 
-Set `server.cache.defaultProvider` to `'redis'` and/or pass `{ provider: 'redis' }` on individual calls. Register **before** anything uses that provider as the default.
+Set `server.cache.defaultProvider` to your provider name and/or pass `{ provider: 'my-provider' }` on individual calls. Register **before** anything uses that provider as the default.
 
 ## Wiring in core
 
