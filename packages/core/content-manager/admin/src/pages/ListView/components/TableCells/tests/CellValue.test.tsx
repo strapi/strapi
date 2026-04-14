@@ -87,4 +87,18 @@ describe('CellValue', () => {
 
     expect(getByText('1000000000000')).toBeInTheDocument();
   });
+
+  it('should return a biginteger string without losing precision', () => {
+    const { getByText } = render(CellValueWithProvider('biginteger', '900719925474099312345'));
+
+    expect(getByText('900,719,925,474,099,312,345')).toBeInTheDocument();
+  });
+
+  it('should return an ID column biginteger string without losing precision', () => {
+    const { getByText } = render(
+      CellValueWithProvider('biginteger', '900719925474099312345', true)
+    );
+
+    expect(getByText('900719925474099312345')).toBeInTheDocument();
+  });
 });
