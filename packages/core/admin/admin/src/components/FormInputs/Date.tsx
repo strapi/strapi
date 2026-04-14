@@ -48,7 +48,10 @@ const DateInput = React.forwardRef<HTMLInputElement, InputProps>(
           onBlur={() => {
             // When the input is blurred, revert to the last valid date if the current value is invalid
             if (field.value && !value) {
-              field.onChange(name, lastValidDate ? lastValidDate.toISOString().split('T')[0] : null);
+              field.onChange(
+                name,
+                lastValidDate ? lastValidDate.toISOString().split('T')[0] : null
+              );
             }
           }}
           value={value}
