@@ -200,7 +200,10 @@ yargs
                   reportFileName: `playwright-${domain}-${port}.xml`,
                 });
 
+                // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
+                // canonical port is `8000 + j` above — same as baseURL / webServer; helpers read PORT.
                 const configFileTemplate = `
+process.env.PORT = ${JSON.stringify(String(port))};
 const config = ${JSON.stringify(config)}
 
 module.exports = config

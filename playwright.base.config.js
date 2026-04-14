@@ -32,6 +32,10 @@ const getEnvBool = (envVar, defaultValue) => {
  */
 
 /**
+ * Port comes from `tests/scripts/run-tests.js` (`8000 + testAppIndex`). Do not default to 8000 here:
+ * the second app uses 8001, etc. The generated `playwright.config.js` also assigns `process.env.PORT`
+ * so `globalSetup` and test helpers match `baseURL` / `webServer`.
+ *
  * @see https://playwright.dev/docs/test-configuration
  * @type {(options: ConfigOptions) => import('@playwright/test').PlaywrightTestConfig}
  */
