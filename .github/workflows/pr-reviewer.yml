@@ -21,6 +21,8 @@ jobs:
 
       - name: PR Review with Progress Tracking
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
         with:
           anthropic_api_key: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
 
