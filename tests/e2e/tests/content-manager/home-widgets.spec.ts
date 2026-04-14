@@ -9,28 +9,38 @@ import {
 } from '../../../utils/shared';
 
 /**
- * Homepage widgets use RTK Query (`recent-documents`, `count-documents`). After a long e2e run,
- * the admin SPA can still show cached widget data from earlier navigation unless we hard-refresh
- * and wait for those requests — same idea as the chart test below. This runs after every DTS import
- * so assertions match `with-admin` regardless of suite order.
+ * `waitForResponse` inherits `actionTimeout` (10s by default — see playwright.base.config.js). WebKit
+ * often needs a bit longer while homepage widget chunks load before those GETs fire; use a modest
+ * override so we do not fail on slow-but-healthy CI.
+ */
+const HOMEPAGE_WIDGET_RESPONSE_MS = 20_000;
+
+/**
+ * Homepage widgets use RTK Query (`recent-documents`, `count-documents`). Develop only did
+ * DTS + `/admin` + login; this suite also hard-refreshes after `sharedSetup` so RTK does not show
+ * stale widget data when the full content-manager run order varies. Register listeners, then reload.
  */
 async function waitForHomepageWidgetsReady(page: Page) {
+  const responseOpts = { timeout: HOMEPAGE_WIDGET_RESPONSE_MS };
   const recentEdited = page.waitForResponse(
     (r) =>
       r.url().includes('/content-manager/homepage/recent-documents') &&
       r.url().includes('action=update') &&
-      r.ok()
+      r.ok(),
+    responseOpts
   );
   const recentPublished = page.waitForResponse(
     (r) =>
       r.url().includes('/content-manager/homepage/recent-documents') &&
       r.url().includes('action=publish') &&
-      r.ok()
+      r.ok(),
+    responseOpts
   );
   const countDocuments = page.waitForResponse(
-    (r) => r.url().includes('/content-manager/homepage/count-documents') && r.ok()
+    (r) => r.url().includes('/content-manager/homepage/count-documents') && r.ok(),
+    responseOpts
   );
-  await page.reload();
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await Promise.all([recentEdited, recentPublished, countDocuments]);
 }
 
