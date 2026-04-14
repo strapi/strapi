@@ -621,6 +621,7 @@ const PublishAction: DocumentActionComponent = ({
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
+  const getValues = useForm('PublishAction', (state) => state.getValues);
   const formValues = useForm('PublishAction', ({ values }) => values);
   const initialValues = useForm('PublishAction', ({ initialValues }) => initialValues);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
@@ -762,12 +763,13 @@ const PublishAction: DocumentActionComponent = ({
     setSubmitting(true);
 
     try {
-      const { data: filteredData } = handleInvisibleAttributes(transformData(formValues), {
-        schema,
-        components,
-      });
+      /**
+       * Yield one microtask so React can flush any pending field updates from the same task
+       * (common with fast local runners / Playwright) before we read values and validate.
+       */
+      await Promise.resolve();
+
       const { errors } = await validate(true, {
-        ...filteredData,
         status: 'published',
       });
       if (errors) {
@@ -809,8 +811,11 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
-      // filteredData is already used for validation, so use it for publishing as well
-      const data = filteredData;
+
+      const { data } = handleInvisibleAttributes(transformData(getValues()), {
+        schema,
+        components,
+      });
       const res = await publish(
         {
           collectionType,
@@ -823,7 +828,7 @@ const PublishAction: DocumentActionComponent = ({
 
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
-        resetForm(formValues);
+        resetForm(getValues());
         dispatchGuidedTour({
           type: 'set_completed_actions',
           payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
@@ -1040,6 +1045,7 @@ const UpdateAction: DocumentActionComponent = ({
   const modified = useForm('UpdateAction', ({ modified }) => modified);
   const setSubmitting = useForm('UpdateAction', ({ setSubmitting }) => setSubmitting);
   const initialValues = useForm('UpdateAction', ({ initialValues }) => initialValues);
+  const getValues = useForm('UpdateAction', (state) => state.getValues);
   const document = useForm('UpdateAction', ({ values }) => values);
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
@@ -1095,6 +1101,15 @@ const UpdateAction: DocumentActionComponent = ({
         return;
       }
 
+      // Blur the active element so inputs that debounce into the form (e.g. blocks editor) flush
+      // before validate/getValues — on fast clients Save can otherwise read stale field state.
+      (document.activeElement as HTMLElement | null)?.blur();
+
+      // Let React run onBlur handlers (and any flushSync inside them) before we read the form.
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+
       const { errors } = await validate(true, {
         status: 'draft',
       });
@@ -1111,6 +1126,9 @@ const UpdateAction: DocumentActionComponent = ({
 
         return;
       }
+
+      const latestValues = getValues();
+
       if (isCloning) {
         const res = await clone(
           {
@@ -1118,7 +1136,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId: cloneMatch.params.origin!,
             params: currentDocumentMeta.params,
           },
-          transformData(document)
+          transformData(latestValues)
         );
 
         if ('data' in res) {
@@ -1137,7 +1155,7 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const { data } = handleInvisibleAttributes(transformData(document), {
+        const { data } = handleInvisibleAttributes(transformData(latestValues), {
           schema: fromRelationModal ? relationalModalSchema : schema,
           initialValues,
           components,
@@ -1155,10 +1173,10 @@ const UpdateAction: DocumentActionComponent = ({
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           setErrors(formatValidationErrors(res.error));
         } else {
-          resetForm(document);
+          resetForm(latestValues);
         }
       } else {
-        const { data } = handleInvisibleAttributes(transformData(document), {
+        const { data } = handleInvisibleAttributes(transformData(latestValues), {
           schema: fromRelationModal ? relationalModalSchema : schema,
           initialValues,
           components,
