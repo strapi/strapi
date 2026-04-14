@@ -260,7 +260,7 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
 
 interface DocumentActionButtonProps extends Omit<Action, 'type'> {
   buttonType?: 'button' | 'submit' | 'reset';
-  type?: string;
+  type?: DocumentActionDescription['type'];
 }
 
 const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActionButtonProps) => {
