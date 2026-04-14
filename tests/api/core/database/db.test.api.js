@@ -89,6 +89,19 @@ describe('Deep Filtering API', () => {
     expect(res.ids.length).toBe(2);
   });
 
+  /**
+   * createMany with 550 items (GH#25198): on SQLite, batching keeps each insert batch ≤500.
+   */
+  test('createMany with 550 items succeeds on all databases (batched insert)', async () => {
+    const count = 550;
+    const data = Array.from({ length: count }, (_, i) => ({ name: `item-${i}` }));
+    const res = await strapi.db.query('api::test.test').createMany({ data });
+
+    expect(res.count).toBe(count);
+    expect(Array.isArray(res.ids)).toBe(true);
+    expect(res.ids.length).toBe(count);
+  }, 120000);
+
   test('Delete multiple entries with deep filtering', async () => {
     const deleteRes = await strapi.db.query('api::test.test').deleteMany({
       where: {

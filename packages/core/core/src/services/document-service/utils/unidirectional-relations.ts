@@ -186,8 +186,8 @@ const sync = async (
         return { ...relation, [column]: newId };
       });
 
-      // Insert those relations into the join table
-      await trx.batchInsert(joinTable.name, newRelations, 1000);
+      const batchSize = strapi.db.dialect.getBatchInsertSize();
+      await trx.batchInsert(joinTable.name, newRelations, batchSize);
     }
   });
 };
