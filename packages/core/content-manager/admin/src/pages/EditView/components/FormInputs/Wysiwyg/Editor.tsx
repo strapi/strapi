@@ -41,6 +41,10 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
     const onChangeRef = React.useRef(onChange);
 
     React.useEffect(() => {
+      onChangeRef.current = onChange;
+    }, [onChange]);
+
+    React.useEffect(() => {
       if (editorRef.current) {
         // Ensure the editor and its wrapper are cleaned up whenever this view is re-rendered
         // e.g. in case of re-ordering wysiwyg components in a DynamicZone
@@ -63,14 +67,22 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
       // @ts-expect-error – doesn't think command exists?
       CodeMirror.commands.newlineAndIndentContinueMarkdownList =
         newlineAndIndentContinueMarkdownList;
-      editorRef.current.on('change', (doc) => {
-        onChangeRef.current(name, doc.getValue());
+      editorRef.current.on('change', (cm, change) => {
+        // setValue (prop sync) must not notify the form — parent already has the value.
+        if (change.origin === 'setValue') {
+          return;
+        }
+        onChangeRef.current(name, cm.getValue());
       });
     }, [editorRef, textareaRef, name, placeholder]);
 
     React.useEffect(() => {
-      if (value && !editorRef.current.hasFocus()) {
-        editorRef.current.setValue(value);
+      if (editorRef.current.hasFocus()) {
+        return;
+      }
+      const nextValue = value ?? '';
+      if (editorRef.current.getValue() !== nextValue) {
+        editorRef.current.setValue(nextValue);
       }
     }, [editorRef, value]);
 

@@ -946,7 +946,7 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
       },
     },
     layouts: {
-      list: ['id', 'categories', 'cover', 'postal_code'],
+      list: ['documentId', 'categories', 'cover', 'postal_code'],
       edit: [
         [{ name: 'dz', size: 12 }],
         [
