@@ -1,61 +1,13 @@
-import { test, expect, type Page } from '@playwright/test';
-import { sharedSetup } from '../../../utils/setup';
-import {
-  clickAndWait,
-  findAndClose,
-  navToHeader,
-  withContentManagerPublish,
-  withContentManagerSave,
-} from '../../../utils/shared';
-
-/**
- * `waitForResponse` inherits `actionTimeout` (10s by default — see playwright.base.config.js). WebKit
- * often needs a bit longer while homepage widget chunks load before those GETs fire; use a modest
- * override so we do not fail on slow-but-healthy CI.
- */
-const HOMEPAGE_WIDGET_RESPONSE_MS = 20_000;
-
-/**
- * Homepage widgets use RTK Query (`recent-documents`, `count-documents`). Develop only did
- * DTS + `/admin` + login; this suite also hard-refreshes after `sharedSetup` so RTK does not show
- * stale widget data when the full content-manager run order varies. Register listeners, then reload.
- */
-async function waitForHomepageWidgetsReady(page: Page) {
-  const responseOpts = { timeout: HOMEPAGE_WIDGET_RESPONSE_MS };
-  const recentEdited = page.waitForResponse(
-    (r) =>
-      r.url().includes('/content-manager/homepage/recent-documents') &&
-      r.url().includes('action=update') &&
-      r.ok(),
-    responseOpts
-  );
-  const recentPublished = page.waitForResponse(
-    (r) =>
-      r.url().includes('/content-manager/homepage/recent-documents') &&
-      r.url().includes('action=publish') &&
-      r.ok(),
-    responseOpts
-  );
-  const countDocuments = page.waitForResponse(
-    (r) => r.url().includes('/content-manager/homepage/count-documents') && r.ok(),
-    responseOpts
-  );
-  await page.reload({ waitUntil: 'domcontentloaded' });
-  await Promise.all([recentEdited, recentPublished, countDocuments]);
-}
+import { test, expect } from '@playwright/test';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Homepage - Content Manager Widgets', () => {
   test.beforeEach(async ({ page }) => {
-    // Same pattern as history.spec: resetFiles → DTS import on every test so schema + DB match
-    // `with-admin` after other specs may have mutated the test app (CTB, etc.). resetAlways is
-    // slower but avoids order-dependent failures in the full content-manager run.
-    await sharedSetup('home-widgets', page, {
-      login: true,
-      resetFiles: true,
-      importData: 'with-admin',
-      resetAlways: true,
-    });
-    await waitForHomepageWidgetsReady(page);
+    await resetDatabaseAndImportDataFromPath('with-admin');
+    await page.goto('/admin');
+    await login({ page });
   });
 
   test('a user should see the last edited entries', async ({ page }) => {
@@ -68,9 +20,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
 
     const nameBox = page.getByLabel(/name/i);
     await nameBox.fill('Nike Mens newer!');
-    await withContentManagerSave(page, async () => {
-      await page.getByRole('button', { name: /save/i }).click();
-    });
+    await page.getByRole('button', { name: /save/i }).click();
     await findAndClose(page, 'Saved document');
 
     // Go back to the home page, the updated entry should be the first in the table
@@ -90,9 +40,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
     // Make content update in the CM
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await withContentManagerPublish(page, async () => {
-      await page.getByRole('button', { name: /publish/i }).click();
-    });
+    await page.getByRole('button', { name: /publish/i }).click();
     await findAndClose(page, 'Published document');
 
     // Go back to the home page, the published entry should be the first in the table with published status
@@ -111,9 +59,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
     const title = page.getByLabel(/title/i);
     await title.fill('West Ham pre match pep talk');
-    await withContentManagerSave(page, async () => {
-      await page.getByRole('button', { name: /save/i }).click();
-    });
+    await page.getByRole('button', { name: /save/i }).click();
     await findAndClose(page, 'Saved document');
 
     // Go back to the home page, the published entry should be the first in the table with modified status
@@ -140,9 +86,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
     );
     const titleFieldEnglish = page.getByLabel(/title/i);
     await titleFieldEnglish.fill('West Ham Football Team');
-    await withContentManagerPublish(page, async () => {
-      await page.getByRole('button', { name: /publish/i }).click();
-    });
+    await page.getByRole('button', { name: /publish/i }).click();
     await findAndClose(page, 'Published document');
 
     // Create and publish a French entry
@@ -155,9 +99,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
     );
     const titleFieldFrench = page.getByLabel(/title/i);
     await titleFieldFrench.fill("L'équipe de West Ham");
-    await withContentManagerPublish(page, async () => {
-      await page.getByRole('button', { name: /publish/i }).click();
-    });
+    await page.getByRole('button', { name: /publish/i }).click();
     await findAndClose(page, 'Published document');
 
     // Go back to the home page, the recently published widget should show entries from different locales
@@ -177,13 +119,10 @@ test.describe('Homepage - Content Manager Widgets', () => {
 
     await expect(chartWidget).toBeVisible();
 
-    // Baseline should be drafts only (no published/modified). beforeEach already reloads and waits
-    // on homepage APIs; the chart can still repaint segment labels a tick late — poll until stable.
-    await expect(async () => {
-      await expect(chartWidget.getByText('Draft')).toBeVisible();
-      await expect(chartWidget.getByText('Modified')).not.toBeVisible();
-      await expect(chartWidget.getByText('Published')).not.toBeVisible();
-    }).toPass();
+    // By default, the chart should only show draft entries (no published/modified)
+    await expect(chartWidget.getByText('Draft')).toBeVisible();
+    await expect(chartWidget.getByText('Modified')).not.toBeVisible();
+    await expect(chartWidget.getByText('Published')).not.toBeVisible();
 
     const arcDraft = chartWidget.locator('circle').first();
     await arcDraft.focus();
@@ -200,9 +139,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
     // Publish an entry
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await withContentManagerPublish(page, async () => {
-      await page.getByRole('button', { name: /publish/i }).click();
-    });
+    await page.getByRole('button', { name: /publish/i }).click();
     await findAndClose(page, 'Published document');
 
     // Modify an entry
@@ -211,15 +148,11 @@ test.describe('Homepage - Content Manager Widgets', () => {
       page,
       page.getByRole('gridcell', { name: 'Why I prefer football over soccer' })
     );
-    await withContentManagerPublish(page, async () => {
-      await page.getByRole('button', { name: /publish/i }).click();
-    });
+    await page.getByRole('button', { name: /publish/i }).click();
     await findAndClose(page, 'Published document');
     const title = page.getByLabel(/title/i);
     await title.fill('West Ham pre match pep talk');
-    await withContentManagerSave(page, async () => {
-      await page.getByRole('button', { name: /save/i }).click();
-    });
+    await page.getByRole('button', { name: /save/i }).click();
     await findAndClose(page, 'Saved document');
 
     // Go back to the home page
@@ -231,23 +164,22 @@ test.describe('Homepage - Content Manager Widgets', () => {
     await expect(chartWidget.getByText('Published')).toBeVisible();
 
     const arcDraftUpdated = chartWidget.locator('circle').nth(0);
+    await arcDraftUpdated.focus();
+
+    await expect(tooltip).toBeVisible();
+    // Should be 2 less than initial (we published 2 entries)
+    await expect(tooltip).toContainText(`${initialDraftCount - 2} Draft`);
+
     const arcPublished = chartWidget.locator('circle').nth(1);
+    await arcPublished.focus();
+
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toContainText('1 Modified');
+
     const arcModified = chartWidget.locator('circle').nth(2);
+    await arcModified.focus();
 
-    // Tooltip text follows focus; on fast clients the segment can repaint a tick after focus.
-    await expect(async () => {
-      await arcDraftUpdated.focus();
-      await expect(tooltip).toContainText(`${initialDraftCount - 2} Draft`);
-    }).toPass();
-
-    await expect(async () => {
-      await arcPublished.focus();
-      await expect(tooltip).toContainText('1 Modified');
-    }).toPass();
-
-    await expect(async () => {
-      await arcModified.focus();
-      await expect(tooltip).toContainText('1 Published');
-    }).toPass();
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toContainText('1 Published');
   });
 });
