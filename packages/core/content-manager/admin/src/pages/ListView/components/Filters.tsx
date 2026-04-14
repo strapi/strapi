@@ -17,6 +17,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { Schema } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { getMainField } from '../../../utils/attributes';
+import { getTranslation } from '../../../utils/translations';
 import { getDisplayName } from '../../../utils/users';
 
 /**
@@ -40,9 +41,10 @@ const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 interface FiltersProps {
   disabled?: boolean;
   schema: Schema;
+  children: React.ReactNode;
 }
 
-const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
+const Root = ({ disabled, schema, children }: FiltersProps) => {
   const { attributes, uid: model, options } = schema;
   const { formatMessage, locale } = useIntl();
   const { trackUsage } = useTracking();
@@ -117,8 +119,59 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
         ...allowedFields,
         ...DEFAULT_ALLOWED_FILTERS,
         ...(canReadAdminUsers ? CREATOR_FIELDS : []),
+        ...(options?.draftAndPublish === true ? ['__status'] : []),
       ]
         .map((name) => {
+          if (name === '__status') {
+            return {
+              name: '__status',
+              type: 'enumeration',
+              label: formatMessage({
+                id: getTranslation('containers.list.filters.status'),
+                defaultMessage: 'Status',
+              }),
+              operators: [
+                {
+                  label: formatMessage({
+                    id: 'components.FilterOptions.FILTER_TYPES.$eq',
+                    defaultMessage: 'is',
+                  }),
+                  value: '$eq',
+                },
+              ],
+              options: [
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.statusFilter.draft'),
+                    defaultMessage: 'Draft (never published)',
+                  }),
+                  value: 'draft',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.statusFilter.published'),
+                    defaultMessage: 'Published (all)',
+                  }),
+                  value: 'published',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.statusFilter.publishedModified'),
+                    defaultMessage: 'Published (modified)',
+                  }),
+                  value: 'published-modified',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.statusFilter.publishedUnmodified'),
+                    defaultMessage: 'Published (unmodified)',
+                  }),
+                  value: 'published-unmodified',
+                },
+              ],
+            } satisfies Filters.Filter;
+          }
+
           const attribute = attributes[name];
 
           if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
@@ -131,8 +184,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
             name,
             label: label ?? '',
             mainField: getMainField(attribute, mainFieldName, { schemas, components: {} }),
-            // @ts-expect-error – TODO: this is filtered out above in the `allowedFields` call but TS complains, is there a better way to solve this?
-            type: attribute.type,
+            type: attribute.type as Filters.Filter['type'],
           };
 
           if (
@@ -219,9 +271,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
       onOpenChange={onOpenChange}
       onChange={handleFilterChange}
     >
-      <Filters.Trigger />
-      <Filters.Popover zIndex={499} />
-      <Filters.List />
+      {children}
     </Filters.Root>
   );
 };
@@ -279,5 +329,12 @@ const AdminUsersFilter = ({ name }: Filters.ValueInputProps) => {
   );
 };
 
-export { FiltersImpl as Filters };
+const listViewFilters = {
+  Root,
+  Trigger: Filters.Trigger,
+  Popover: Filters.Popover,
+  List: Filters.List,
+};
+
+export { listViewFilters };
 export type { FiltersProps };

@@ -6,25 +6,141 @@ const isLocalizedAttribute = (attribute: Schema.Attribute.Attribute | undefined)
   return (attribute?.pluginOptions as any)?.i18n?.localized === true;
 };
 
+const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = [
+  'media',
+  'relation',
+  'boolean',
+  'enumeration',
+];
+
+const IGNORED_FIELDS = [
+  'id',
+  'documentId',
+  'createdAt',
+  'updatedAt',
+  'publishedAt',
+  'locale',
+  'updatedBy',
+  'createdBy',
+  'localizations',
+];
+
+/**
+ * Deep merge where target values take priority over source values.
+ * Arrays are merged by index to align repeatable component / dynamic zone items.
+ */
+const deepMerge = (
+  source: Record<string, any>,
+  target: Record<string, any>
+): Record<string, any> => {
+  const result = { ...source };
+
+  for (const key of Object.keys(target)) {
+    const sourceVal = source[key];
+    const targetVal = target[key];
+
+    if (Array.isArray(targetVal) && Array.isArray(sourceVal)) {
+      result[key] = targetVal.map((item, i) => {
+        if (item && typeof item === 'object' && sourceVal[i] && typeof sourceVal[i] === 'object') {
+          return deepMerge(sourceVal[i], item);
+        }
+        return item;
+      });
+    } else if (
+      targetVal &&
+      typeof targetVal === 'object' &&
+      !Array.isArray(targetVal) &&
+      sourceVal &&
+      typeof sourceVal === 'object' &&
+      !Array.isArray(sourceVal)
+    ) {
+      result[key] = deepMerge(sourceVal, targetVal);
+    } else {
+      result[key] = targetVal;
+    }
+  }
+
+  return result;
+};
+
+/**
+ * Merges unsupported field types (media, boolean, enumeration, relation)
+ * from a source document into the target data object.
+ *
+ * Uses traverseEntity to walk the source document and extract only unsupported fields,
+ * then deep-merges the AI-translated target data on top so translated values take priority.
+ */
+const mergeUnsupportedFields = async (
+  targetData: Record<string, any>,
+  sourceDoc: Record<string, any> | null,
+  schema: Schema.Schema,
+  getModel: (uid: UID.Schema) => Schema.Schema | undefined
+): Promise<Record<string, any>> => {
+  if (!sourceDoc) {
+    return targetData;
+  }
+
+  // Track paths of relation/media fields so traverseEntity's recursion
+  // into those fields doesn't strip internal fields like `id` or `url`.
+  const preservedPaths = new Set<string>();
+
+  // Use traverseEntity to extract only unsupported fields from the source document.
+  // traverseEntity handles component and dynamic zone recursion automatically.
+  const unsupportedFieldsOnly = await traverseEntity(
+    ({ key, attribute, path }, { remove }) => {
+      // If we're inside a relation or media subtree, preserve everything.
+      // Use path-based prefix check instead of parent-based check because
+      // traverseEntity mutates `parent` across siblings at the same level,
+      // which would incorrectly mark sibling fields as inside a preserved subtree.
+      const isInsidePreservedSubtree =
+        path.raw && Array.from(preservedPaths).some((pp) => path.raw!.startsWith(`${pp}.`));
+      if (isInsidePreservedSubtree) {
+        preservedPaths.add(path.raw!);
+        return;
+      }
+
+      if (IGNORED_FIELDS.includes(key)) {
+        remove(key);
+        return;
+      }
+
+      // Keep fields with no schema attribute (e.g. __component in dynamic zones)
+      if (!attribute) {
+        return;
+      }
+
+      // Mark relation and media subtrees as preserved so their internal
+      // fields (id, url, etc.) are not removed during recursion
+      if (attribute.type === 'media' || attribute.type === 'relation') {
+        preservedPaths.add(path.raw!);
+        return;
+      }
+
+      // Keep other unsupported attribute types (boolean, enumeration)
+      if (UNSUPPORTED_ATTRIBUTE_TYPES.includes(attribute.type)) {
+        return;
+      }
+
+      // Keep components and dynamic zones — traverseEntity recurses into them
+      if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
+        return;
+      }
+
+      // Remove supported (translatable) fields
+      remove(key);
+    },
+    { schema, getModel: getModel as (uid: string) => Schema.Schema },
+    sourceDoc
+  );
+
+  // Deep merge: AI-translated target takes priority over source unsupported fields
+  return deepMerge(unsupportedFieldsOnly, targetData);
+};
+
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   // TODO: add a helper function to get the AI server URL
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
   const aiLocalizationJobsService = getService('ai-localization-jobs');
-
-  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = [
-    'media',
-    'relation',
-    'boolean',
-    'enumeration',
-  ];
-  const IGNORED_FIELDS = [
-    'id',
-    'documentId',
-    'createdAt',
-    'updatedAt',
-    'updatedBy',
-    'localizations',
-  ];
 
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
@@ -230,34 +346,44 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const aiResult = await response.json();
-      // Get all media field names dynamically from the schema
-      const mediaFields = Object.entries(schema.attributes)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .filter(([_, attr]) => attr.type === 'media')
-        .map(([key]) => key);
+
+      // Use populate-builder service for deep populate to fetch all nested fields
+      const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+      // @ts-expect-error - populate-builder service returns a callable function
+      const deepPopulate = await populateBuilderService(model).populateDeep(Infinity).build();
+      const getModelBound = strapi.getModel.bind(strapi);
+
+      // Fetch the source document with all fields populated (for new locales that don't exist yet)
+      const sourceDocWithAllFields = await strapi.documents(model).findOne({
+        documentId,
+        locale: document.locale,
+        populate: deepPopulate,
+      });
 
       try {
         await Promise.all(
           aiResult.localizations.map(async (localization: any) => {
             const { content, locale } = localization;
 
-            // Fetch the derived locale document
+            // Fetch the existing derived locale document with all fields populated
             const derivedDoc = await strapi.documents(model).findOne({
               documentId,
               locale,
-              populate: mediaFields,
+              populate: deepPopulate,
             });
 
-            // Merge AI content and media fields, works only on first level media fields (root level)
-            const mergedData = structuredClone(content);
-            for (const field of mediaFields) {
-              // Only copy media if not already set in derived locale
-              if (!derivedDoc || !derivedDoc[field]) {
-                mergedData[field] = document[field];
-              } else {
-                mergedData[field] = derivedDoc[field];
-              }
-            }
+            // Start with AI-translated content
+            let mergedData = structuredClone(content);
+
+            // Merge unsupported fields from existing derived doc (if exists) or source doc
+            // This preserves media, booleans, enumerations, and relations at all levels
+            const sourceForUnsupportedFields = derivedDoc || sourceDocWithAllFields;
+            mergedData = await mergeUnsupportedFields(
+              mergedData,
+              sourceForUnsupportedFields,
+              schema,
+              getModelBound
+            );
 
             await strapi.documents(model).update({
               documentId,
@@ -319,4 +445,4 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 };
 
-export { createAILocalizationsService };
+export { createAILocalizationsService, mergeUnsupportedFields };

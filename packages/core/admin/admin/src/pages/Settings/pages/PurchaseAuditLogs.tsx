@@ -5,8 +5,8 @@ import { useIntl } from 'react-intl';
 import { Layouts } from '../../../components/Layouts/Layout';
 import { RESPONSIVE_DEFAULT_SPACING } from '../../../constants/theme';
 import { useTypedSelector } from '../../../core/store/hooks';
-import darkIllustration from '../assets/purchase-page-audit-logs-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-audit-logs-illustration-light.svg';
+import darkIllustration from '../assets/purchase-page-audit-logs-illustration-dark.jpg';
+import lightIllustration from '../assets/purchase-page-audit-logs-illustration-light.jpg';
 
 const PurchaseAuditLogs = () => {
   const { formatMessage } = useIntl();

@@ -22,7 +22,7 @@ export default {
     },
     attributes: {
       name: {
-        type: 'text',
+        type: 'string',
         configurable: false,
         required: true,
       },
@@ -32,6 +32,10 @@ export default {
       },
       caption: {
         type: 'text',
+        configurable: false,
+      },
+      focalPoint: {
+        type: 'json',
         configurable: false,
       },
       width: {

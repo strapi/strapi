@@ -29,7 +29,7 @@ test.describe('RBAC - Full Role Management Flow', () => {
     await sharedSetup('rbac-full-role-flow', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
   });
 

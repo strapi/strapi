@@ -1,5 +1,4 @@
 import type { UID } from '@strapi/types';
-import { contentTypes } from '@strapi/utils';
 
 interface Options {
   /**
@@ -8,14 +7,20 @@ interface Options {
   relationalFields?: string[];
 }
 
-const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypes.constants;
+const deepPopulateCache = new Map<string, any>();
 
 // We want to build a populate object based on the schema
 export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
+  const cacheKey = `${uid}::${JSON.stringify(opts)}`;
+  const cached = deepPopulateCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const model = strapi.getModel(uid);
   const attributes = Object.entries(model.attributes);
 
-  return attributes.reduce((acc: any, [attributeName, attribute]) => {
+  const result = attributes.reduce((acc: any, [attributeName, attribute]) => {
     switch (attribute.type) {
       case 'relation': {
         // TODO: Support polymorphic relations
@@ -24,13 +29,14 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
           break;
         }
 
-        // Ignore not visible fields other than createdBy and updatedBy
-        const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
-        const isCreatorField = [CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE].includes(attributeName);
-
-        if (isVisible || isCreatorField) {
-          acc[attributeName] = { select: opts.relationalFields };
+        if ('unstable_virtual' in attribute && attribute.unstable_virtual) {
+          // skip relations not managed by the DB layer
+          break;
         }
+
+        // Include all non-morph relations (including visible: false) so publish / discardDraft /
+        // clone preserve links—same idea as content-manager getPopulateForRelation for invisible attrs.
+        acc[attributeName] = { select: opts.relationalFields };
 
         break;
       }
@@ -67,4 +73,7 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
 
     return acc;
   }, {});
+
+  deepPopulateCache.set(cacheKey, result);
+  return result;
 };
