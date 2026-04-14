@@ -136,6 +136,13 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
   webServer: {
     command: `cd ${appDir} && npm run develop -- --no-watch-admin`,
     url: `http://127.0.0.1:${port}`,
+    // Strapi reads PORT/HOST from env (see tests/app-template/config/server.js). Without this,
+    // `yarn playwright test --config test-apps/e2e/test-app-0/playwright.config.js` leaves PORT
+    // unset → default 1337 while baseURL/webServer.url expect 8000+ (browser-runner sets PORT).
+    env: {
+      PORT: String(port),
+      HOST: '127.0.0.1',
+    },
     /* default Strapi server startup timeout to 160s */
     timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
     reuseExistingServer: true,
