@@ -59,6 +59,16 @@ export interface Http {
   [key: string]: unknown;
 }
 
+/**
+ * Cache manager configuration (extensible object, not a bare provider string).
+ */
+export interface ServerCache {
+  /** Default provider name (e.g. `memory`, `database`). Defaults to `memory`. */
+  defaultProvider?: string;
+  /** Per-provider options passed to provider factories */
+  providers?: Record<string, Record<string, unknown>>;
+}
+
 export interface Server {
   // required
   host: string;
@@ -79,4 +89,5 @@ export interface Server {
   admin?: ServerAdmin;
   webhooks?: Webhooks;
   http?: Http;
+  cache?: ServerCache;
 }

@@ -1,4 +1,5 @@
 import admin from './admin';
+import caching from './caching';
 import coreStore from './coreStore';
 import cron from './cron';
 import registries from './registries';
@@ -12,6 +13,7 @@ export const providers: Provider[] = [
   registries,
   admin,
   coreStore,
+  caching,
   sessionManager,
   webhooks,
   telemetry,
