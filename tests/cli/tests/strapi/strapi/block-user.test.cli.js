@@ -21,7 +21,7 @@ describe('admin:block-user', () => {
     const testApps = utils.instances.getTestApps();
     appPath = testApps.at(0);
 
-    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'without-admin.tar');
+    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'without-admin');
 
     // Create a user to test block status changes
     await coffee
@@ -70,6 +70,7 @@ describe('admin:block-user', () => {
       expect(user.firstname).toBe(testFirstname);
       expect(user.lastname).toBe(testLastname);
       expect(user.blocked).toBe(true);
+      expect(typeof user.blocked).toBe('boolean');
     } finally {
       await app.destroy();
     }
@@ -97,6 +98,7 @@ describe('admin:block-user', () => {
       expect(user.firstname).toBe(testFirstname);
       expect(user.lastname).toBe(testLastname);
       expect(user.blocked).toBe(false);
+      expect(typeof user.blocked).toBe('boolean');
     } finally {
       await app.destroy();
     }

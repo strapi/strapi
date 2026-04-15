@@ -1,10 +1,11 @@
 import _ from 'lodash';
-import inquirer from 'inquirer';
+import type { DistinctQuestion } from 'inquirer';
 import { createCommand } from 'commander';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
+import { getInquirer } from '../../utils/get-inquirer';
 
 interface CmdOptions {
   email?: string;
@@ -16,7 +17,7 @@ interface Answers {
   block: string;
 }
 
-const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
+const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
   { type: 'input', name: 'email', message: 'User email?' },
   { type: 'input', name: 'block', message: 'User Blocked?' },
 ];
@@ -33,6 +34,8 @@ async function setBlock({ email, block }: CmdOptions) {
     process.exit(1);
   }
 
+  const blocked = cleanBlock === 'true';
+
   const user = await app.admin.services.user.findOneByEmail(cleanEmail);
 
   if (!user) {
@@ -41,7 +44,7 @@ async function setBlock({ email, block }: CmdOptions) {
   }
 
   try {
-    await app.admin!.services.user.updateById(user.id, { blocked: cleanBlock });
+    await app.admin!.services.user.updateById(user.id, { blocked });
   } catch (err: any) {
     console.error(err.message);
     process.exit(1);
@@ -58,6 +61,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
   const { email, block } = cmdOptions;
 
   if (_.isEmpty(email) && _.isEmpty(block) && process.stdin.isTTY) {
+    const inquirer = await getInquirer();
     const inquiry = await inquirer.prompt(promptQuestions);
 
     return setBlock(inquiry);

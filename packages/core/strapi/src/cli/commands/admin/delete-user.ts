@@ -1,10 +1,11 @@
 import { createCommand } from 'commander';
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-import inquirer from 'inquirer';
+import type { QuestionCollection } from 'inquirer';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
+import { getInquirer } from '../../utils/get-inquirer';
 import type { StrapiCommand } from '../../types';
 
 interface CmdOptions {
@@ -22,7 +23,11 @@ interface Answers {
   confirm: boolean;
 }
 
-const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
+/**
+ * Same as create-user: `QuestionCollection` so async `validate` matches Inquirer typings
+ * (not `ReadonlyArray<DistinctQuestion<Answers>>`).
+ */
+const promptQuestions: QuestionCollection<Answers> = [
   {
     type: 'input',
     name: 'email',
@@ -68,6 +73,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
   let { email } = cmdOptions;
 
   if (_.isEmpty(email) && process.stdin.isTTY) {
+    const inquirer = await getInquirer();
     const inquiry = await inquirer.prompt(promptQuestions);
 
     if (!inquiry.confirm) {

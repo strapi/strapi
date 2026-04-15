@@ -53,7 +53,8 @@ describe('admin:active-user command', () => {
     expect(consoleLog).toHaveBeenCalled();
     expect(load).toHaveBeenCalled();
     expect(findOneByEmail).toHaveBeenCalledWith(email);
-    expect(updateById).toHaveBeenCalledWith(1, { isActive: active });
+    expect(updateById).toHaveBeenCalledWith(1, { isActive: true });
+    expect(typeof updateById.mock.calls[0][1].isActive).toBe('boolean');
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
@@ -70,7 +71,8 @@ describe('admin:active-user command', () => {
     await activeUserCommand({ email, active });
 
     expect(mockExit).toHaveBeenCalledWith(0);
-    expect(updateById).toHaveBeenCalledWith(1, { isActive: active });
+    expect(updateById).toHaveBeenCalledWith(1, { isActive: false });
+    expect(typeof updateById.mock.calls[0][1].isActive).toBe('boolean');
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
@@ -162,7 +164,7 @@ describe('admin:active-user command', () => {
       expect(mockExit).toHaveBeenCalledWith(0);
       expect(consoleLog).toHaveBeenCalled();
       expect(load).toHaveBeenCalled();
-      expect(updateById).toHaveBeenCalledWith(1, { isActive: active });
+      expect(updateById).toHaveBeenCalledWith(1, { isActive: true });
 
       mockInquiry.mockRestore();
       mockExit.mockRestore();

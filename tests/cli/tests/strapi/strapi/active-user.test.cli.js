@@ -13,6 +13,8 @@ const { resetDatabaseAndImportDataFromPathProgrammatic } = require('../../../../
 describe('admin:active-user', () => {
   let appPath;
   const testEmail = 'test.active@strapi.io';
+  /** Second super admin so deactivating `testEmail` is allowed (cannot deactivate the only super admin). */
+  const secondAdminEmail = 'test.active.other@strapi.io';
   const testPassword = 'Testpassword1!';
   const testFirstname = 'ActiveTest';
   const testLastname = 'Admin';
@@ -21,31 +23,35 @@ describe('admin:active-user', () => {
     const testApps = utils.instances.getTestApps();
     appPath = testApps.at(0);
 
-    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'without-admin.tar');
+    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'without-admin');
 
-    // Create a user to test active status changes
-    await coffee
-      .spawn(
-        'npm',
-        [
-          'run',
-          '-s',
-          'strapi',
-          '--',
-          'admin:create-user',
-          '--email',
-          testEmail,
-          '--password',
-          testPassword,
-          '--firstname',
-          testFirstname,
-          '--lastname',
-          testLastname,
-        ],
-        { cwd: appPath }
-      )
-      .expect('code', 0)
-      .end();
+    const createAdmin = (email) =>
+      coffee
+        .spawn(
+          'npm',
+          [
+            'run',
+            '-s',
+            'strapi',
+            '--',
+            'admin:create-user',
+            '--email',
+            email,
+            '--password',
+            testPassword,
+            '--firstname',
+            testFirstname,
+            '--lastname',
+            testLastname,
+          ],
+          { cwd: appPath }
+        )
+        .expect('code', 0)
+        .end();
+
+    // Two super admins: otherwise deactivating the only one is rejected by the admin user service
+    await createAdmin(testEmail);
+    await createAdmin(secondAdminEmail);
   });
 
   it('should deactivate a user and persist to database', async () => {
@@ -80,6 +86,7 @@ describe('admin:active-user', () => {
       expect(user.firstname).toBe(testFirstname);
       expect(user.lastname).toBe(testLastname);
       expect(user.isActive).toBe(false);
+      expect(typeof user.isActive).toBe('boolean');
     } finally {
       await app.destroy();
     }
@@ -117,6 +124,7 @@ describe('admin:active-user', () => {
       expect(user.firstname).toBe(testFirstname);
       expect(user.lastname).toBe(testLastname);
       expect(user.isActive).toBe(true);
+      expect(typeof user.isActive).toBe('boolean');
     } finally {
       await app.destroy();
     }

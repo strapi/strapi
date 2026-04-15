@@ -21,7 +21,7 @@ describe('admin:delete-user', () => {
     const testApps = utils.instances.getTestApps();
     appPath = testApps.at(0);
 
-    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'without-admin.tar');
+    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'without-admin');
 
     // Create a second admin so that deleting the target user doesn't remove the last super admin
     await coffee

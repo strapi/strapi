@@ -53,7 +53,8 @@ describe('admin:block-user command', () => {
     expect(consoleLog).toHaveBeenCalled();
     expect(load).toHaveBeenCalled();
     expect(findOneByEmail).toHaveBeenCalledWith(email);
-    expect(updateById).toHaveBeenCalledWith(1, { blocked: block });
+    expect(updateById).toHaveBeenCalledWith(1, { blocked: true });
+    expect(typeof updateById.mock.calls[0][1].blocked).toBe('boolean');
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
@@ -70,7 +71,8 @@ describe('admin:block-user command', () => {
     await blockUserCommand({ email, block });
 
     expect(mockExit).toHaveBeenCalledWith(0);
-    expect(updateById).toHaveBeenCalledWith(1, { blocked: block });
+    expect(updateById).toHaveBeenCalledWith(1, { blocked: false });
+    expect(typeof updateById.mock.calls[0][1].blocked).toBe('boolean');
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
@@ -162,7 +164,7 @@ describe('admin:block-user command', () => {
       expect(mockExit).toHaveBeenCalledWith(0);
       expect(consoleLog).toHaveBeenCalled();
       expect(load).toHaveBeenCalled();
-      expect(updateById).toHaveBeenCalledWith(1, { blocked: block });
+      expect(updateById).toHaveBeenCalledWith(1, { blocked: true });
 
       mockInquiry.mockRestore();
       mockExit.mockRestore();
