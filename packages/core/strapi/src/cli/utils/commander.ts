@@ -2,11 +2,11 @@
  * This file includes hooks to use for commander.hook and argParsers for commander.argParser
  */
 
-import inquirer from 'inquirer';
 import { Command, InvalidOptionArgumentError, Option } from 'commander';
 import chalk from 'chalk';
 import { isNaN } from 'lodash/fp';
 import { exitWith } from './helpers';
+import { getInquirer } from './get-inquirer';
 
 /**
  * argParser: Parse a comma-delimited string as an array
@@ -80,12 +80,13 @@ const promptEncryptionKey = async (thisCommand: Command) => {
   // if encrypt==true but we have no key, prompt for it
   if (opts.encrypt && !(opts.key && opts.key.length > 0)) {
     try {
+      const inquirer = await getInquirer();
       const answers = await inquirer.prompt([
         {
           type: 'password',
           message: 'Please enter an encryption key',
           name: 'key',
-          validate(key) {
+          validate(key: string) {
             if (key.length > 0) return true;
 
             return 'Key must be present when using the encrypt option';
@@ -125,6 +126,7 @@ const confirmMessage = async (message: string, { force }: { force?: boolean } = 
     return true;
   }
 
+  const inquirer = await getInquirer();
   const answers = await inquirer.prompt([
     {
       type: 'confirm',
