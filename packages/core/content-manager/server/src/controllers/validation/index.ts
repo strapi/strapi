@@ -19,24 +19,19 @@ const bulkActionInputSchema = z.object({
 const generateUIDInputSchema = z.object({
   contentTypeUID: z.string(),
   field: z.string(),
-  data: z.object({}).passthrough(),
+  data: z.looseObject({}),
 });
 
-const createCheckUIDAvailabilityInputSchema = (regex?: string) =>
-  z.object({
+const createCheckUIDAvailabilityInputSchema = (regex?: string) => {
+  const pattern = regex ? new RegExp(regex) : /^[A-Za-z0-9-_.~]*$/;
+  return z.object({
     contentTypeUID: z.string(),
     field: z.string(),
-    value: z.string().refine(
-      (value) => {
-        if (value === '') return true;
-        const pattern = regex ? new RegExp(regex) : /^[A-Za-z0-9-_.~]*$/;
-        return pattern.test(value);
-      },
-      {
-        error: `Must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"`,
-      }
-    ),
+    value: z.string().refine((value) => value === '' || pattern.test(value), {
+      error: `Must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"`,
+    }),
   });
+};
 
 const validateUIDField = (contentTypeUID: any, field: any) => {
   const model = strapi.contentTypes[contentTypeUID];

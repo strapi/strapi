@@ -1,7 +1,7 @@
 import { pick } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
-import { z, validateZod, errors } from '@strapi/utils';
+import { z, validateZodSchema, errors } from '@strapi/utils';
 
 import { Preview } from '../../../../../shared/contracts';
 import type { HandlerParams } from '../../services/preview-config';
@@ -19,7 +19,7 @@ export const validatePreviewUrl = async (
   params: Preview.GetPreviewUrl.Request['query']
 ): Promise<HandlerParams> => {
   // Validate the request parameters format
-  validateZod(getPreviewUrlSchema)(params);
+  validateZodSchema(getPreviewUrlSchema)(params);
 
   const newParams = pick(['documentId', 'locale', 'status'], params) as HandlerParams;
   const model = strapi.getModel(uid);

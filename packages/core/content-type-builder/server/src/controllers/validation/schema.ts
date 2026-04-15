@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { strings, validateZod } from '@strapi/utils';
+import { strings, validateZodSchema } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
 import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
 
@@ -823,7 +823,7 @@ const updateSchemaInput = z.object(
 );
 
 // TODO: Remove cast when content-type-builder migrates to Zod 4
-export const validateUpdateSchema = validateZod(
+export const validateUpdateSchema = validateZodSchema(
   updateSchemaInput as unknown as import('@strapi/utils').z.ZodType<
     z.infer<typeof updateSchemaInput>
   >

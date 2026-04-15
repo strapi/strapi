@@ -1,7 +1,7 @@
-import { z, validateZod } from '@strapi/utils';
+import { z, validateZodSchema } from '@strapi/utils';
 
 const historyRestoreVersionSchema = z.object({
   contentType: z.string().trim(),
 });
 
-export const validateRestoreVersion = validateZod(historyRestoreVersionSchema);
+export const validateRestoreVersion = validateZodSchema(historyRestoreVersionSchema);

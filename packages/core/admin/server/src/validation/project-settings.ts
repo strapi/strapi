@@ -1,4 +1,4 @@
-import { z, validateZod } from '@strapi/utils';
+import { z, validateZodSchema } from '@strapi/utils';
 
 const MAX_IMAGE_WIDTH = 750;
 const MAX_IMAGE_HEIGHT = MAX_IMAGE_WIDTH;
@@ -36,9 +36,9 @@ const updateProjectSettingsImagesDimensions = z
   })
   .strict();
 
-export const validateUpdateProjectSettings = validateZod(updateProjectSettings);
-export const validateUpdateProjectSettingsFiles = validateZod(updateProjectSettingsFiles);
-export const validateUpdateProjectSettingsImagesDimensions = validateZod(
+export const validateUpdateProjectSettings = validateZodSchema(updateProjectSettings);
+export const validateUpdateProjectSettingsFiles = validateZodSchema(updateProjectSettingsFiles);
+export const validateUpdateProjectSettingsImagesDimensions = validateZodSchema(
   updateProjectSettingsImagesDimensions
 );
 

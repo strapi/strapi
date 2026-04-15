@@ -1,6 +1,4 @@
-import { z } from '@strapi/utils';
-
-import { getZodValidationErrors } from '../validationZod';
+import { z, getZodValidationErrors } from '@strapi/utils';
 
 describe('getZodValidationErrors', () => {
   it('returns empty object for error with no issues', () => {

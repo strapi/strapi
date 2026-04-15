@@ -19,7 +19,7 @@ import { ValidationError } from './errors';
  */
 export { z };
 
-export const validateZod =
+export const validateZodSchema =
   <T extends z.Schema>(schema: T) =>
   (data: unknown, errorMessage?: string): z.infer<T> => {
     try {
@@ -54,13 +54,14 @@ type FormErrors = Record<string, string>;
  *
  * Returns a flat object with dot-path keys and string error messages.
  * Only the first error per path is kept (matches Yup behavior).
+ * Root-level errors (path = []) are stored under the empty string key ''.
  */
 export const getZodValidationErrors = (error: z.ZodError): FormErrors => {
   const errors: FormErrors = {};
 
   for (const issue of error.issues) {
     const path = issue.path.join('.');
-    if (path && !(path in errors)) {
+    if (!(path in errors)) {
       errors[path] = issue.message;
     }
   }
