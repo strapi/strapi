@@ -766,6 +766,7 @@ const PublishAction: DocumentActionComponent = ({
       /**
        * Yield one microtask so React can flush any pending field updates from the same task
        * (common with fast local runners / Playwright) before we read values and validate.
+       * TODO: replace with an explicit form flush contract when we can (same concern as Save flow).
        */
       await Promise.resolve();
 
@@ -1046,7 +1047,6 @@ const UpdateAction: DocumentActionComponent = ({
   const setSubmitting = useForm('UpdateAction', ({ setSubmitting }) => setSubmitting);
   const initialValues = useForm('UpdateAction', ({ initialValues }) => initialValues);
   const getValues = useForm('UpdateAction', (state) => state.getValues);
-  const document = useForm('UpdateAction', ({ values }) => values);
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('UpdateAction', ({ resetForm }) => resetForm);
@@ -1103,12 +1103,14 @@ const UpdateAction: DocumentActionComponent = ({
 
       // Blur the active element so inputs that debounce into the form (e.g. blocks editor) flush
       // before validate/getValues — on fast clients Save can otherwise read stale field state.
-      (document.activeElement as HTMLElement | null)?.blur();
+      // Use the global DOM document — form values are not in scope here (avoid shadowing `document`).
+      (globalThis.document?.activeElement as HTMLElement | undefined)?.blur();
 
-      // Let React run onBlur handlers (and any flushSync inside them) before we read the form.
-      await new Promise<void>((resolve) => {
-        setTimeout(resolve, 0);
-      });
+      // Yield microtasks so batched React updates after blur/onChange can settle before validate
+      // (same idea as performPublish; two ticks vs one gives a bit more room after focus/blur).
+      // TODO: replace with an explicit field/form flush contract when available.
+      await Promise.resolve();
+      await Promise.resolve();
 
       const { errors } = await validate(true, {
         status: 'draft',
