@@ -4,6 +4,62 @@ import type { Schema } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from '../utils';
 
+const normalizeMediaIds = (
+  schema: Schema.ContentType | Schema.Component,
+  data: Record<string, any>
+) => {
+  if (!schema?.attributes || !data || typeof data !== 'object') {
+    return data;
+  }
+
+  Object.entries(schema.attributes).forEach(([attributeName, attribute]) => {
+    const value = data[attributeName];
+
+    if (value == null) {
+      return;
+    }
+
+    if (attribute.type === 'media') {
+      if (attribute.multiple) {
+        data[attributeName] = Array.isArray(value)
+          ? value.map((file: unknown) =>
+              file && typeof file === 'object' && 'id' in file ? file.id : file
+            )
+          : value;
+      } else {
+        data[attributeName] =
+          value && typeof value === 'object' && 'id' in value ? value.id : value;
+      }
+
+      return;
+    }
+
+    if (attribute.type === 'component') {
+      const componentSchema = strapi.getModel(attribute.component);
+
+      if (attribute.repeatable && Array.isArray(value)) {
+        value.forEach((componentValue: Record<string, any>) =>
+          normalizeMediaIds(componentSchema, componentValue)
+        );
+      } else {
+        normalizeMediaIds(componentSchema, value);
+      }
+
+      return;
+    }
+
+    if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
+      value.forEach((componentValue: Record<string, any>) => {
+        if (componentValue?.__component) {
+          normalizeMediaIds(strapi.getModel(componentValue.__component), componentValue);
+        }
+      });
+    }
+  });
+
+  return data;
+};
+
 /**
  * Update non localized fields of all the related localizations of an entry with the entry values
  */
@@ -14,6 +70,8 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
   if (isEmpty(nonLocalizedAttributes)) {
     return;
   }
+
+  normalizeMediaIds(model, nonLocalizedAttributes);
 
   const uid = model.uid;
   const documentId = sourceEntry.documentId;

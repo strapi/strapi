@@ -72,7 +72,12 @@ const registerModelsHooks = () => {
       });
 
     if (shouldSync) {
-      await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+      const syncSource =
+        originalData && originalData.locale !== populatedResult.locale
+          ? originalData
+          : populatedResult;
+
+      await getService('localizations').syncNonLocalizedAttributes(syncSource, schema);
     }
 
     return result;
