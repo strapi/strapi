@@ -471,7 +471,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         strapi.log.debug(
           `[Transfer destination] Asset start #${this.stats.assets.started} id=${assetID} filename=${filename}`
         );
-        writeAsync(assetsStream, this.assets[assetID]);
+        // Await so the assets Writable accepts each asset before chunk writes (parity with remote-source).
+        await writeAsync(assetsStream, this.assets[assetID]);
       }
 
       if (action === 'stream') {
