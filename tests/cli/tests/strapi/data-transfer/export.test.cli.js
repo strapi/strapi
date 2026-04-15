@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
@@ -16,7 +17,7 @@ describe('export', () => {
     appPath = testApps.at(0);
 
     // Load fixture so we have known data and predictable export output
-    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'with-admin.tar');
+    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'with-admin');
   });
 
   it('should export data with correct CLI table and tar contents', async () => {
@@ -64,6 +65,81 @@ describe('export', () => {
     const entityFiles = await testFs.tar(exportTar).readDir('entities');
     expect(schemaFiles.length).toBeGreaterThan(0);
     expect(entityFiles.length).toBeGreaterThan(0);
+  });
+
+  it('should export to directory with --format dir and expected layout', async () => {
+    const dirName = 'dir-export-output';
+    const exportDir = path.join(appPath, dirName);
+
+    if (fs.existsSync(exportDir)) {
+      fs.rmSync(exportDir, { recursive: true, force: true });
+    }
+
+    const result = spawnSync(
+      'npm',
+      ['run', '-s', 'strapi', '--', 'export', '--format', 'dir', '-f', dirName, '--no-encrypt'],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+    expect(fs.existsSync(exportDir)).toBe(true);
+
+    const metadata = JSON.parse(fs.readFileSync(path.join(exportDir, 'metadata.json'), 'utf8'));
+    expect(metadata).toHaveProperty('createdAt');
+    expect(metadata).toHaveProperty('strapi');
+    expect(metadata.strapi).toHaveProperty('version');
+
+    const schemaFiles = fs
+      .readdirSync(path.join(exportDir, 'schemas'))
+      .filter((f) => f.endsWith('.jsonl'));
+    const entityFiles = fs
+      .readdirSync(path.join(exportDir, 'entities'))
+      .filter((f) => f.endsWith('.jsonl'));
+    expect(schemaFiles.length).toBeGreaterThan(0);
+    expect(entityFiles.length).toBeGreaterThan(0);
+  });
+
+  it('should reject --format dir without --no-encrypt', () => {
+    const result = spawnSync(
+      'npm',
+      ['run', '-s', 'strapi', '--', 'export', '--format', 'dir', '-f', 'reject-dir-no-flag'],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+    expect(result.status).not.toBe(0);
+    const combined = `${result.stderr || ''}${result.stdout || ''}`;
+    expect(combined).toMatch(/require --no-encrypt/i);
+  });
+
+  it('should reject --format dir when --encrypt is used', () => {
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '--format',
+        'dir',
+        '-f',
+        'reject-dir-test',
+        '--encrypt',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+    expect(result.status).not.toBe(0);
   });
 
   test.todo('export from empty DB (schemas only, no entities)');

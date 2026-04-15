@@ -1,10 +1,11 @@
 import { createCommand } from 'commander';
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-import inquirer from 'inquirer';
+import type { QuestionCollection } from 'inquirer';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
+import { getInquirer } from '../../utils/get-inquirer';
 import type { StrapiCommand } from '../../types';
 
 interface CmdOptions {
@@ -49,11 +50,10 @@ interface Answers {
 
 /**
  * It's not an observable, in reality this is
- * `ReadOnlyArray<inquirer.DistinctQuestion<Answers>>`
+ * `ReadOnlyArray<DistinctQuestion<Answers>>`
  * but then the logic of the validate function needs to change.
  */
-// eslint-disable-next-line rxjs/finnish
-const promptQuestions: inquirer.QuestionCollection<Answers> = [
+const promptQuestions: QuestionCollection<Answers> = [
   {
     type: 'input',
     name: 'email',
@@ -120,6 +120,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     _.isEmpty(lastname) &&
     process.stdin.isTTY
   ) {
+    const inquirer = await getInquirer();
     const inquiry = await inquirer.prompt(promptQuestions);
 
     if (!inquiry.confirm) {

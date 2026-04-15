@@ -172,7 +172,7 @@ export const transformChatToCTB = (
     collectionName: pluralName,
     attributes: transformAttributesFromChatToCTB(schema, oldSchema),
     options: {
-      draftAndPublish: schema.options?.draftAndPublish ?? false,
+      draftAndPublish: schema.options?.draftAndPublish ?? true,
     },
     pluginOptions: {
       i18n: {

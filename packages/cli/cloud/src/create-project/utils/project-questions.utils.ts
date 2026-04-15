@@ -1,4 +1,4 @@
-import { DistinctQuestion } from 'inquirer';
+import type { DistinctQuestion } from 'inquirer';
 import type { ProjectAnswers } from '../../types';
 
 /**
