@@ -214,15 +214,25 @@ function runMigrationsOnce(db, hookOutputPath) {
   const env = {
     ...getDatabaseEnv(db),
     STRAPI_BENCH_HOOK_OUTPUT: hookOutputPath,
+    STRAPI_BENCH_HOOK_DEBUG: process.env.STRAPI_BENCH_HOOK_DEBUG || '',
     // Silence unrelated noise for cleaner logs; Strapi's own logger is still active.
     STRAPI_TELEMETRY_DISABLED: '1',
     STRAPI_DISABLE_UPDATE_NOTIFIER: '1',
   };
 
+  // Strapi configs in examples/complex are .ts — compile them to dist/ first
+  // (same path Strapi's own CLI uses via `strapi build` / `strapi develop`).
+  // Then boot Strapi pointing at the compiled output.
   const script = `
+    const tsUtils = require('@strapi/typescript-utils');
     const { createStrapi } = require('@strapi/strapi');
     (async () => {
-      const app = await createStrapi().load();
+      const cwd = process.cwd();
+      if (await tsUtils.isUsingTypeScript(cwd)) {
+        await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+      }
+      const distDir = await tsUtils.resolveOutDir(cwd);
+      const app = await createStrapi({ distDir }).load();
       // Migrations ran during load(). Tear down cleanly.
       await app.destroy();
     })().catch((err) => {

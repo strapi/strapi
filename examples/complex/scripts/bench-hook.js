@@ -65,6 +65,10 @@ function recordEnd(name) {
     durationMs,
   });
   debug(`recorded ${name}: ${durationMs.toFixed(2)}ms`);
+  // Flush incrementally — some Strapi shutdown paths bypass exit handlers
+  // (process.exit via signal or uncaught error), and we don't want to lose
+  // timing data we already collected.
+  flush();
 }
 
 /**
@@ -78,57 +82,61 @@ function getMigrationName(event) {
   return '<unknown>';
 }
 
-function instrumentUmzugModule(moduleExports) {
-  const Original = moduleExports && moduleExports.Umzug;
-  if (!Original || typeof Original !== 'function') {
-    return null;
+/**
+ * Patch the Umzug prototype in place so every instance auto-attaches our
+ * listeners the first time its `up()` runs. This avoids cache-aliasing issues
+ * the subclass-then-replace-export approach would hit — Node caches the
+ * original module object, so subsequent `require('umzug')` calls return the
+ * original class from cache, not our subclass wrapper.
+ */
+function instrumentUmzugClass(Umzug) {
+  if (!Umzug || typeof Umzug !== 'function' || Umzug.__strapiBenchHookPatched) {
+    return false;
   }
 
-  class InstrumentedUmzug extends Original {
-    constructor(...args) {
-      super(...args);
+  const originalUp = Umzug.prototype.up;
+  if (typeof originalUp !== 'function') {
+    debug('Umzug.prototype.up is not a function — cannot patch');
+    return false;
+  }
+
+  Umzug.prototype.up = async function patchedUp(...args) {
+    if (!this.__strapiBenchHookListeners) {
+      this.__strapiBenchHookListeners = true;
       umzugInstanceCount += 1;
       try {
-        // emittery-style .on() — attached synchronously in constructor so
-        // we catch events for every migration this instance runs.
-        this.on('migrating', (evt) => {
-          const name = getMigrationName(evt);
-          recordStart(name);
-        });
-        this.on('migrated', (evt) => {
-          const name = getMigrationName(evt);
-          recordEnd(name);
-        });
+        this.on('migrating', (evt) => recordStart(getMigrationName(evt)));
+        this.on('migrated', (evt) => recordEnd(getMigrationName(evt)));
         debug(`attached listeners to Umzug instance #${umzugInstanceCount}`);
       } catch (err) {
         debug('failed to attach listeners:', err.message);
       }
     }
-  }
+    return originalUp.apply(this, args);
+  };
 
-  return { ...moduleExports, Umzug: InstrumentedUmzug };
+  Object.defineProperty(Umzug, '__strapiBenchHookPatched', {
+    value: true,
+    enumerable: false,
+  });
+
+  return true;
 }
 
-// Intercept require('umzug') before Strapi imports it. Only match the top-level
-// package (request === 'umzug'); internal sub-requires inside the umzug package
-// (e.g. its own `require('./umzug')`) don't re-export the Umzug class and would
-// otherwise make us think we'd patched when we hadn't.
+/**
+ * Intercept require('umzug') to patch the class the moment it's first loaded —
+ * before Strapi calls `new Umzug(...)`. Since we mutate the class prototype
+ * in place, subsequent loads that hit the cache still see the patched class.
+ */
 const originalLoad = Module._load;
-let patched = false;
 
 Module._load = function patchedLoad(request, parent, ...rest) {
   const mod = originalLoad.call(this, request, parent, ...rest);
-  if (patched || request !== 'umzug') return mod;
-
-  const instrumented = instrumentUmzugModule(mod);
-  if (!instrumented) {
-    debug('umzug module loaded but has no Umzug class export — leaving as-is');
-    return mod;
+  if (request === 'umzug' && mod && mod.Umzug && !mod.Umzug.__strapiBenchHookPatched) {
+    const ok = instrumentUmzugClass(mod.Umzug);
+    if (ok) debug('patched umzug class prototype');
   }
-
-  patched = true;
-  debug('patched umzug module');
-  return instrumented;
+  return mod;
 };
 
 /**

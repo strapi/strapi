@@ -298,20 +298,35 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-function renderSvgBarChart(rows, candidateLabels, width = 760) {
+function renderSvgBarChart(rows, candidateLabels) {
   if (rows.length === 0) return '';
-  const barHeight = 18;
-  const gap = 6;
-  const labelColWidth = 220;
+
+  // Layout constants
+  const barHeight = 16;
+  const barGap = 2;
+  const rowGap = 10;
+  const leftPad = 8;
+  const rightPad = 80; // reserved for value labels ("857 ms" etc)
+
+  // Compute label column width from the longest migration name. Monospace
+  // char width ≈ 7.2px at 12px size; leave 16px padding. Round to keep
+  // the resulting viewBox dimensions integer-friendly.
+  const charWidth = 7.2;
+  const longestName = rows.reduce((a, r) => Math.max(a, r.name.length), 0);
+  const labelColWidth = Math.round(Math.min(Math.max(longestName * charWidth + 16, 180), 420));
+
   const seriesCount = 1 + candidateLabels.length;
-  const rowHeight = (barHeight + 2) * seriesCount + gap;
-  const chartHeight = rows.length * rowHeight + 40;
+  const rowHeight = (barHeight + barGap) * seriesCount + rowGap;
+  const chartHeight = rows.length * rowHeight + rowGap;
+
+  // Width sized so bars have at least 320px of drawing area
+  const barAreaWidth = 320;
+  const width = leftPad + labelColWidth + barAreaWidth + rightPad;
 
   const maxDuration = Math.max(
     ...rows.flatMap((r) => [r.baseline ?? 0, ...(r.candidates || []).map((c) => c ?? 0)]),
     1
   );
-  const barAreaWidth = width - labelColWidth - 20;
   const scale = (v) => (v == null ? 0 : (v / maxDuration) * barAreaWidth);
 
   const seriesColors = [
@@ -321,26 +336,35 @@ function renderSvgBarChart(rows, candidateLabels, width = 760) {
     'var(--candidate-3-color)',
   ];
 
-  let svg = `<svg viewBox="0 0 ${width} ${chartHeight}" role="img" aria-label="Per-migration duration bars">`;
-  svg += `<defs><style>.bar-label{font:12px var(--mono-font);fill:var(--text)}</style></defs>`;
+  // Inline font-family (CSS variables don't always cascade into SVG text
+  // across renderers — safer to hardcode the family).
+  const textStyle = 'font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+  const textStyleMuted = `${textStyle}; fill: var(--muted)`;
+  const textStyleFg = `${textStyle}; fill: var(--text)`;
+
+  let svg = `<svg viewBox="0 0 ${width} ${chartHeight}" width="100%" role="img" aria-label="Per-migration duration bars" style="max-width: ${width}px">`;
 
   rows.forEach((row, rowIdx) => {
-    const yBase = rowIdx * rowHeight + 10;
-    svg += `<text class="bar-label" x="0" y="${yBase + barHeight - 4}">${escapeHtml(row.name)}</text>`;
-
-    // Baseline
+    const yBase = rowIdx * rowHeight + rowGap / 2;
     const series = [row.baseline, ...(row.candidates || [])];
+    const nameYCenter = yBase + (seriesCount * (barHeight + barGap)) / 2 - barGap / 2;
+
+    // Vertically-centered migration name in the label column
+    svg += `<text x="${leftPad}" y="${nameYCenter}" dominant-baseline="middle" style="${textStyleFg}">${escapeHtml(row.name)}</text>`;
+
     series.forEach((value, i) => {
-      const y = yBase + i * (barHeight + 2);
-      const w = scale(value);
+      const y = yBase + i * (barHeight + barGap);
+      const textY = y + barHeight / 2;
       const color = seriesColors[i] || 'var(--baseline-color)';
+      const barX = leftPad + labelColWidth;
+
       if (value != null) {
-        svg += `<rect x="${labelColWidth}" y="${y}" width="${w.toFixed(1)}" height="${barHeight}" fill="${color}" rx="2"><title>${escapeHtml(
-          `${i === 0 ? 'baseline' : candidateLabels[i - 1]}: ${fmtMs(value)}`
-        )}</title></rect>`;
-        svg += `<text class="bar-label" x="${labelColWidth + w + 4}" y="${y + barHeight - 4}" fill="var(--muted)">${fmtMs(value)}</text>`;
+        const w = scale(value);
+        const title = `${i === 0 ? 'baseline' : candidateLabels[i - 1]}: ${fmtMs(value)}`;
+        svg += `<rect x="${barX}" y="${y}" width="${w.toFixed(1)}" height="${barHeight}" fill="${color}" rx="2"><title>${escapeHtml(title)}</title></rect>`;
+        svg += `<text x="${(barX + w + 4).toFixed(1)}" y="${textY}" dominant-baseline="middle" style="${textStyleMuted}">${fmtMs(value)}</text>`;
       } else {
-        svg += `<text class="bar-label" x="${labelColWidth}" y="${y + barHeight - 4}" fill="var(--muted)">—</text>`;
+        svg += `<text x="${barX}" y="${textY}" dominant-baseline="middle" style="${textStyleMuted}">—</text>`;
       }
     });
   });
