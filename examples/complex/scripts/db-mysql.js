@@ -149,7 +149,30 @@ switch (command) {
     {
       const containerName = getContainerName();
       try {
-        // Use information_schema for fast approximate counts
+        // Refresh information_schema.tables.table_rows with fresh stats.
+        // The default values can lag reality by hours, which is unacceptable
+        // for benchmark reports. ANALYZE TABLE triggers a stats refresh.
+        const analyzeQuery = `
+          SELECT CONCAT('ANALYZE TABLE ', table_name, ';') AS cmd
+          FROM information_schema.tables
+          WHERE table_schema = '${DB_NAME}';
+        `;
+        try {
+          const analyzeList = execSync(
+            `${containerCmd()} exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
+            { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+          );
+          const cmds = analyzeList.trim().split('\n').filter(Boolean).join(' ');
+          if (cmds) {
+            execSync(
+              `${containerCmd()} exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
+              { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+            );
+          }
+        } catch {
+          // Best-effort; fall through to stale stats rather than fail the check.
+        }
+
         const query = `
           SELECT
             table_name,

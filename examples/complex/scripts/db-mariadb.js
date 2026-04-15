@@ -149,6 +149,29 @@ switch (command) {
     {
       const containerName = getContainerName();
       try {
+        // Refresh information_schema.tables.table_rows via ANALYZE TABLE;
+        // without it, stats can lag reality by hours.
+        const analyzeQuery = `
+          SELECT CONCAT('ANALYZE TABLE ', table_name, ';') AS cmd
+          FROM information_schema.tables
+          WHERE table_schema = '${DB_NAME}';
+        `;
+        try {
+          const analyzeList = execSync(
+            `${containerCmd()} exec ${containerName} mariadb -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
+            { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+          );
+          const cmds = analyzeList.trim().split('\n').filter(Boolean).join(' ');
+          if (cmds) {
+            execSync(
+              `${containerCmd()} exec ${containerName} mariadb -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
+              { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+            );
+          }
+        } catch {
+          // Best-effort; fall through to stale stats rather than fail.
+        }
+
         const query = `
           SELECT
             table_name,

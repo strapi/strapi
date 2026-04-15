@@ -175,6 +175,15 @@ switch (command) {
     {
       const containerName = resolveContainerName();
       try {
+        // Refresh pg_stat_user_tables with fresh row-count estimates before
+        // reading — without ANALYZE the n_live_tup numbers can lag reality
+        // by minutes (autovacuum interval), which is unacceptable for a
+        // benchmark report that publishes row counts.
+        execSync(
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d ${DB_NAME} -c "ANALYZE;"`,
+          { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+        );
+
         // Use pg_stat_user_tables statistics for fast approximate counts
         const query = `
           SELECT
