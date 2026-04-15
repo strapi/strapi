@@ -7,6 +7,23 @@ import { Schema } from '../../types/schema';
 
 import type { ContentType, Component, AnyAttribute } from '../../../../../types';
 
+const isPluginContentTypeUid = (uid: string) => uid.startsWith('plugin::');
+
+/**
+ * Plugin / extension content-types use server-derived identity (globalId, collectionName, …).
+ * The AI chat uses a simplified shape that would otherwise overwrite those fields incorrectly.
+ */
+const isPluginContentType = (schema: Schema, oldSchema?: ContentType | Component): boolean => {
+  if (schema.plugin || isPluginContentTypeUid(schema.uid)) {
+    return true;
+  }
+  if (oldSchema && 'modelType' in oldSchema && oldSchema.modelType === 'contentType') {
+    const ct = oldSchema as ContentType;
+    return Boolean(ct.plugin) || isPluginContentTypeUid(String(ct.uid));
+  }
+  return false;
+};
+
 const ACTION_TO_STATUS: Record<Schema['action'], ContentType['status']> = {
   create: 'NEW',
   remove: 'REMOVED',
@@ -155,7 +172,7 @@ export const transformChatToCTB = (
     } satisfies Component;
   }
 
-  return {
+  const contentTypeBase = {
     uid: schema.uid as any,
     modelType: schema.modelType,
     modelName: singularName,
@@ -184,4 +201,49 @@ export const transformChatToCTB = (
     globalId: singularName,
     restrictRelationsTo: null, // TODO: not sure what this is about
   } satisfies ContentType;
+
+  if (
+    isPluginContentType(schema, oldSchema) &&
+    oldSchema &&
+    oldSchema.modelType === 'contentType'
+  ) {
+    const prev = oldSchema as ContentType;
+    return {
+      ...contentTypeBase,
+      plugin: prev.plugin ?? schema.plugin,
+      globalId: prev.globalId,
+      modelName: prev.modelName,
+      collectionName: prev.collectionName,
+      info: {
+        ...contentTypeBase.info,
+        singularName: prev.info.singularName,
+        pluralName: prev.info.pluralName,
+      },
+      options: {
+        ...prev.options,
+        ...contentTypeBase.options,
+        draftAndPublish: schema.options?.draftAndPublish ?? prev.options?.draftAndPublish ?? true,
+      },
+      pluginOptions: {
+        ...prev.pluginOptions,
+        ...contentTypeBase.pluginOptions,
+        i18n: {
+          ...prev.pluginOptions?.i18n,
+          ...contentTypeBase.pluginOptions?.i18n,
+          localized: schema.options?.localized ?? prev.pluginOptions?.i18n?.localized ?? false,
+        },
+      },
+      visible: prev.visible,
+      restrictRelationsTo: prev.restrictRelationsTo,
+    } satisfies ContentType;
+  }
+
+  if (isPluginContentType(schema, oldSchema) && schema.plugin) {
+    return {
+      ...contentTypeBase,
+      plugin: schema.plugin,
+    } satisfies ContentType;
+  }
+
+  return contentTypeBase;
 };
