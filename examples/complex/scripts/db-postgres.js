@@ -10,6 +10,7 @@ const {
   startContainer,
   COMPOSE_PROJECT_NAME,
 } = require('./db-utils');
+const { getComposeCommand, getContainerCommand } = require('./compose');
 
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
@@ -18,6 +19,22 @@ const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
 const DB_NAME = process.env.DATABASE_NAME || 'strapi';
 const DB_USER = process.env.DATABASE_USERNAME || 'strapi';
+
+/**
+ * Build a shell-safe compose command prefix string.
+ * e.g. "podman compose" or "docker-compose" or "docker compose"
+ */
+function composeCmd() {
+  const { exe, prefixArgs } = getComposeCommand();
+  return [exe, ...prefixArgs].join(' ');
+}
+
+/**
+ * Container runtime binary for `<runtime> exec <container> ...` invocations.
+ */
+function containerCmd() {
+  return getContainerCommand();
+}
 
 // Try to find the container name dynamically, fallback to expected name
 function resolveContainerName() {
@@ -39,11 +56,11 @@ function ensureSnapshotsDir() {
   }
 }
 
-function execDocker(command) {
+function execShell(cmd) {
   try {
-    execSync(command, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv() });
+    execSync(cmd, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv(), shell: '/bin/bash' });
   } catch (error) {
-    console.error(`Error executing: ${command}`);
+    console.error(`Error executing: ${cmd}`);
     process.exit(1);
   }
 }
@@ -51,13 +68,13 @@ function execDocker(command) {
 switch (command) {
   case 'start':
     console.log('Starting postgres container...');
-    execDocker(`docker-compose -f ${DOCKER_COMPOSE_FILE} up -d postgres`);
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} up -d postgres`);
     console.log('✅ Postgres started');
     break;
 
   case 'stop':
     console.log('Stopping postgres container...');
-    execDocker(`docker-compose -f ${DOCKER_COMPOSE_FILE} stop postgres`);
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} stop postgres`);
     console.log('✅ Postgres stopped');
     break;
 
@@ -74,8 +91,8 @@ switch (command) {
       const containerName = resolveContainerName();
       try {
         execSync(
-          `docker exec ${containerName} pg_dump -U ${DB_USER} -d ${DB_NAME} > ${snapshotPath}`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} pg_dump -U ${DB_USER} -d ${DB_NAME} > ${snapshotPath}`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot created: ${snapshotPath}`);
       } catch (error) {
@@ -102,17 +119,17 @@ switch (command) {
       try {
         // Drop and recreate database
         execSync(
-          `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         execSync(
-          `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         // Restore from snapshot
         execSync(
-          `docker exec -i ${containerName} psql -U ${DB_USER} -d ${DB_NAME} < ${restorePath}`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec -i ${containerName} psql -U ${DB_USER} -d ${DB_NAME} < ${restorePath}`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot restored: ${snapshotName}`);
       } catch (error) {
@@ -139,12 +156,12 @@ switch (command) {
       const containerName = resolveContainerName();
       try {
         execSync(
-          `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         execSync(
-          `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log('✅ Database wiped');
       } catch (error) {
@@ -160,7 +177,7 @@ switch (command) {
       try {
         // Use pg_stat_user_tables statistics for fast approximate counts
         const query = `
-          SELECT 
+          SELECT
             schemaname||'.'||relname as table_name,
             COALESCE(n_live_tup, 0)::text as row_count
           FROM pg_stat_user_tables
@@ -168,8 +185,8 @@ switch (command) {
         `;
 
         const output = execSync(
-          `docker exec ${containerName} psql -U ${DB_USER} -d ${DB_NAME} -t -c "${query.trim()}"`,
-          { encoding: 'utf8', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} psql -U ${DB_USER} -d ${DB_NAME} -t -c "${query.trim()}"`,
+          { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
 
         const lines = output

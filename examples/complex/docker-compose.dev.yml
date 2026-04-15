@@ -25,6 +25,20 @@ services:
     ports:
       - '${MYSQL_PORT:-3306}:3306'
 
+  mariadb:
+    image: mariadb:11
+    restart: always
+    environment:
+      MARIADB_DATABASE: strapi
+      MARIADB_USER: strapi
+      MARIADB_PASSWORD: strapi
+      MARIADB_ROOT_PASSWORD: strapi
+    volumes:
+      - mariadbdata:/var/lib/mysql
+    ports:
+      - '${MARIADB_PORT:-3307}:3306'
+
 volumes:
   pgdata:
   mysqldata:
+  mariadbdata:

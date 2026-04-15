@@ -10,6 +10,7 @@ const {
   startContainer,
   waitForPostgresReady,
   waitForMysqlReady,
+  waitForMariadbReady,
   getDatabaseEnv,
 } = require('./db-utils');
 
@@ -20,13 +21,11 @@ const UPLOADS_DIR = path.join(COMPLEX_DIR, 'public', 'uploads');
 
 const dbType = process.argv[2];
 
-if (!dbType || !['postgres', 'mysql'].includes(dbType)) {
+if (!dbType || !['postgres', 'mysql', 'mariadb', 'sqlite'].includes(dbType)) {
   console.error('Error: Database type is required');
-  console.error('Usage: node develop-with-db.js <postgres|mysql>');
+  console.error('Usage: node develop-with-db.js <postgres|mysql|mariadb|sqlite>');
   process.exit(1);
 }
-
-// db-utils provides container lookup/readiness helpers
 
 function ensureUploadsDir() {
   if (!fs.existsSync(UPLOADS_DIR)) {
@@ -34,19 +33,24 @@ function ensureUploadsDir() {
   }
 }
 
-// Start container if not running
+// Per-dialect readiness check map
+const readinessCheckers = {
+  postgres: waitForPostgresReady,
+  mysql: waitForMysqlReady,
+  mariadb: waitForMariadbReady,
+};
+
+// Start container if not running (no-op for sqlite)
 function ensureContainerRunning(serviceName) {
+  if (dbType === 'sqlite') return;
+
   const containerId = getContainerId(DOCKER_COMPOSE_FILE, COMPLEX_DIR, serviceName);
+  const waitForReady = readinessCheckers[dbType];
+
   if (containerId && isContainerRunning(containerId)) {
     console.log(`✅ ${serviceName} container is already running`);
-    if (dbType === 'postgres') {
-      console.log('Waiting for database to be ready...');
-      waitForPostgresReady(containerId);
-    }
-    if (dbType === 'mysql') {
-      console.log('Waiting for database to be ready...');
-      waitForMysqlReady(containerId);
-    }
+    console.log('Waiting for database to be ready...');
+    waitForReady(containerId);
     return;
   }
 
@@ -54,16 +58,8 @@ function ensureContainerRunning(serviceName) {
   try {
     startContainer(DOCKER_COMPOSE_FILE, COMPLEX_DIR, serviceName);
     console.log(`✅ ${serviceName} container started`);
-
-    // Wait a bit for the database to be ready
-    if (dbType === 'postgres') {
-      console.log('Waiting for database to be ready...');
-      waitForPostgresReady(getContainerId(DOCKER_COMPOSE_FILE, COMPLEX_DIR, serviceName));
-    }
-    if (dbType === 'mysql') {
-      console.log('Waiting for database to be ready...');
-      waitForMysqlReady(getContainerId(DOCKER_COMPOSE_FILE, COMPLEX_DIR, serviceName));
-    }
+    console.log('Waiting for database to be ready...');
+    waitForReady(getContainerId(DOCKER_COMPOSE_FILE, COMPLEX_DIR, serviceName));
   } catch (error) {
     console.error(`Error starting ${serviceName} container:`, error.message);
     process.exit(1);
@@ -72,10 +68,9 @@ function ensureContainerRunning(serviceName) {
 
 // Start Strapi develop
 function startStrapi() {
-  if (dbType === 'postgres') {
-    ensureContainerRunning('postgres');
-  } else if (dbType === 'mysql') {
-    ensureContainerRunning('mysql');
+  // For containerized dialects the service name equals the dbType.
+  if (['postgres', 'mysql', 'mariadb'].includes(dbType)) {
+    ensureContainerRunning(dbType);
   }
 
   const env = getDatabaseEnv(dbType);
@@ -83,8 +78,6 @@ function startStrapi() {
   ensureUploadsDir();
   console.log(`\n🚀 Starting Strapi with ${dbType} database...\n`);
 
-  // Spawn strapi develop process
-  // Use cross-platform approach
   const isWindows = process.platform === 'win32';
   const strapiProcess = spawn(isWindows ? 'yarn.cmd' : 'yarn', ['develop'], {
     cwd: COMPLEX_DIR,
@@ -93,22 +86,19 @@ function startStrapi() {
     shell: !isWindows,
   });
 
-  // Handle process termination
   let isShuttingDown = false;
 
   const cleanup = () => {
     if (isShuttingDown) return;
     isShuttingDown = true;
 
-    console.log('\n\n⏹️  Stopping Strapi server (database container will keep running)...');
+    console.log('\n\n⏹️  Stopping Strapi server (database container, if any, keeps running)...');
     strapiProcess.kill('SIGINT');
 
-    // Wait for process to exit
     strapiProcess.on('exit', () => {
       process.exit(0);
     });
 
-    // Force exit after 5 seconds if process doesn't exit
     setTimeout(() => {
       if (!strapiProcess.killed) {
         strapiProcess.kill('SIGKILL');
@@ -117,11 +107,9 @@ function startStrapi() {
     }, 5000);
   };
 
-  // Handle Ctrl+C
   process.on('SIGINT', cleanup);
   process.on('SIGTERM', cleanup);
 
-  // Handle strapi process exit
   strapiProcess.on('exit', (code) => {
     if (!isShuttingDown) {
       process.exit(code || 0);
