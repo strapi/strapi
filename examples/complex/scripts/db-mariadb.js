@@ -84,7 +84,7 @@ switch (command) {
       try {
         // `mariadb-dump` is the modern binary; older images fall back to `mysqldump` alias.
         execSync(
-          `${containerCmd()} exec ${containerName} mariadb-dump -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
+          `${containerCmd()} exec ${containerName} mariadb-dump -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot created: ${snapshotPath}`);
@@ -112,12 +112,12 @@ switch (command) {
       try {
         // Drop and recreate database
         execSync(
-          `${containerCmd()} exec ${containerName} mariadb -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         // Restore from snapshot
         execSync(
-          `${containerCmd()} exec -i ${containerName} mariadb -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
+          `${containerCmd()} exec -i ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot restored: ${snapshotName}`);
@@ -134,7 +134,7 @@ switch (command) {
       const containerName = getContainerName();
       try {
         execSync(
-          `${containerCmd()} exec ${containerName} mariadb -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log('✅ Database wiped');
@@ -158,13 +158,13 @@ switch (command) {
         `;
         try {
           const analyzeList = execSync(
-            `${containerCmd()} exec ${containerName} mariadb -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
+            `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
             { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
           );
           const cmds = analyzeList.trim().split('\n').filter(Boolean).join(' ');
           if (cmds) {
             execSync(
-              `${containerCmd()} exec ${containerName} mariadb -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
+              `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
               { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
             );
           }
@@ -182,7 +182,7 @@ switch (command) {
         `;
 
         const output = execSync(
-          `${containerCmd()} exec ${containerName} mariadb -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
           { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
 

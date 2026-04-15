@@ -98,7 +98,18 @@ function waitForMysqlReady(containerId, timeoutMs = 30000) {
   while (Date.now() - start < timeoutMs) {
     const result = spawnSync(
       require('./compose').getContainerCommand(),
-      ['exec', containerId, 'mysqladmin', 'ping', '-u', 'strapi', '-pstrapi', '--silent'],
+      [
+        'exec',
+        containerId,
+        'mysqladmin',
+        'ping',
+        '-h',
+        '127.0.0.1',
+        '-u',
+        'strapi',
+        '-pstrapi',
+        '--silent',
+      ],
       { stdio: 'ignore' }
     );
     if (result.status === 0) return true;
@@ -123,7 +134,18 @@ function assertMysqlReady(containerId) {
   }
   try {
     runContainer(
-      ['exec', containerId, 'mysqladmin', 'ping', '-u', 'strapi', '-pstrapi', '--silent'],
+      [
+        'exec',
+        containerId,
+        'mysqladmin',
+        'ping',
+        '-h',
+        '127.0.0.1',
+        '-u',
+        'strapi',
+        '-pstrapi',
+        '--silent',
+      ],
       { stdio: 'ignore' }
     );
   } catch (error) {
@@ -137,15 +159,38 @@ function assertMariadbReady(containerId) {
   }
   try {
     // mariadb ships `mariadb-admin` (preferred) and keeps `mysqladmin` as a legacy alias.
+    // Force TCP via -h 127.0.0.1 — the default socket path isn't populated in these images.
     runContainer(
-      ['exec', containerId, 'mariadb-admin', 'ping', '-u', 'strapi', '-pstrapi', '--silent'],
+      [
+        'exec',
+        containerId,
+        'mariadb-admin',
+        'ping',
+        '-h',
+        '127.0.0.1',
+        '-u',
+        'strapi',
+        '-pstrapi',
+        '--silent',
+      ],
       { stdio: 'ignore' }
     );
   } catch (error) {
     // Fall back to the mysqladmin alias for older mariadb images.
     try {
       runContainer(
-        ['exec', containerId, 'mysqladmin', 'ping', '-u', 'strapi', '-pstrapi', '--silent'],
+        [
+          'exec',
+          containerId,
+          'mysqladmin',
+          'ping',
+          '-h',
+          '127.0.0.1',
+          '-u',
+          'strapi',
+          '-pstrapi',
+          '--silent',
+        ],
         { stdio: 'ignore' }
       );
     } catch (innerError) {

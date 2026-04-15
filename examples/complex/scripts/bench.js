@@ -99,13 +99,28 @@ function captureEnv(db) {
       const idRaw = runContainer(containerLookup[db]).trim();
       const id = idRaw.split('\n').filter(Boolean)[0];
       if (id) {
+        // Force TCP (-h 127.0.0.1) for mysql/mariadb because their CLIs default
+        // to a unix-socket path that doesn't exist in the official images.
         const probeCmd = {
           postgres: ['exec', id, 'psql', '-U', 'strapi', '-t', '-c', 'SHOW server_version;'],
-          mysql: ['exec', id, 'mysql', '-ustrapi', '-pstrapi', '-sN', '-e', 'SELECT VERSION();'],
+          mysql: [
+            'exec',
+            id,
+            'mysql',
+            '-h',
+            '127.0.0.1',
+            '-ustrapi',
+            '-pstrapi',
+            '-sN',
+            '-e',
+            'SELECT VERSION();',
+          ],
           mariadb: [
             'exec',
             id,
             'mariadb',
+            '-h',
+            '127.0.0.1',
             '-ustrapi',
             '-pstrapi',
             '-sN',
