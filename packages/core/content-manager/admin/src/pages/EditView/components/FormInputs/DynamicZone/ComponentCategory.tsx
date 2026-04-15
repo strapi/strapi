@@ -53,7 +53,7 @@ const ComponentCategory = ({
                 <ComponentIcon color="currentColor" background="primary200" icon={icon} />
 
                 <Typography variant="pi" fontWeight="bold">
-                  {formatMessage({ id: uid, defaultMessage: displayName })}
+                  {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
                 </Typography>
               </Flex>
             </ComponentBox>

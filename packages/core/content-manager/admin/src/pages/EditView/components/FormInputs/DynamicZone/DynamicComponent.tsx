@@ -79,12 +79,13 @@ const DynamicComponent = ({
     const { icon, displayName } = (dynamicComponentsByCategory[category] ?? []).find(
       (component) => component.uid === componentUid
     ) ?? { icon: null, displayName: null };
-    const mainValue = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
     return {
-      mainValue,
       icon,
-      displayName: formatMessage({ id: componentUid, defaultMessage: displayName ?? '' }),
+      displayName: formatMessage({
+        id: componentUid,
+        defaultMessage: displayName || componentUid,
+      }),
     };
   }, [componentUid, dynamicComponentsByCategory, formatMessage]);
 
@@ -237,7 +238,7 @@ const DynamicComponent = ({
                   </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index)}>
-                      {formatMessage({ id: uid, defaultMessage: displayName })}
+                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
                     </Menu.Item>
                   ))}
                 </React.Fragment>
@@ -259,7 +260,7 @@ const DynamicComponent = ({
                   </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
-                      {formatMessage({ id: uid, defaultMessage: displayName })}
+                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
                     </Menu.Item>
                   ))}
                 </React.Fragment>
