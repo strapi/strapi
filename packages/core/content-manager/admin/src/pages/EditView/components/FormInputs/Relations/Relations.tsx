@@ -183,9 +183,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       setCurrentPage(1);
     }, [isSubmitting]);
 
-    const component = React.useMemo(() => {
-      return componentUID ? currentDocument.components[componentUID] : undefined;
-    }, [componentUID, currentDocument.components]);
+    const component = componentUID ? currentDocument.components[componentUID] : undefined;
 
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
