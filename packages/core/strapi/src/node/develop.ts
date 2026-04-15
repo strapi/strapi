@@ -145,9 +145,15 @@ const develop = async ({
       switch (message) {
         case 'reload': {
           if (tsconfig?.config) {
-            // Build without diagnostics in case schemas have changed
-            await cleanupDistDirectory({ tsconfig, logger, timer });
-            await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+            try {
+              // Build without diagnostics in case schemas have changed
+              await cleanupDistDirectory({ tsconfig, logger, timer });
+              await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : String(err);
+              logger.error(`Error during TypeScript compilation on reload: ${message}`);
+              process.exit(1);
+            }
           }
           logger.debug('cluster has the reload message, sending the worker kill message');
           worker.send('kill');
@@ -193,6 +199,14 @@ const develop = async ({
     const adminSpinner = logger.spinner(`Creating admin`);
     const generatingTsSpinner = logger.spinner(`Generating types`);
     const compilingTsSpinner = logger.spinner(`Compiling TS`);
+
+    let watcherStarted = false;
+    const ensureWatcher = () => {
+      if (!watcherStarted) {
+        watcherStarted = true;
+        startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
+      }
+    };
 
     try {
       if (watchAdmin) {
@@ -263,13 +277,17 @@ const develop = async ({
         compilingTsSpinner.succeed();
       }
 
-      startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
+      ensureWatcher();
 
       strapiInstance.start();
     } catch (err: unknown) {
-      logger.error(`Error during development: ${(err as Error).message}`);
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error(`Error during development: ${message}`);
 
-      // sill spinners.
+      if (loadStrapiSpinner.isSpinning) {
+        loadStrapiSpinner.fail();
+      }
+      // Fail any spinners that were left running.
       if (contextSpinner.isSpinning) {
         contextSpinner.fail();
       }
@@ -283,8 +301,7 @@ const develop = async ({
         generatingTsSpinner.fail();
       }
 
-      // still start watcher.
-      startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
+      ensureWatcher();
     }
   }
 };
