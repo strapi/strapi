@@ -153,6 +153,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('cacheProviderRegistry');
   }
 
+  get memoryCacheSync(): Modules.Cache.MemoryCacheSyncService {
+    return this.get('memoryCacheSync');
+  }
+
   get store(): Modules.CoreStore.CoreStore {
     return this.get('coreStore');
   }

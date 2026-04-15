@@ -5,7 +5,7 @@ describe('createMemoryCacheProvider', () => {
   let provider: Modules.Cache.CacheProvider;
 
   beforeEach(() => {
-    provider = createMemoryCacheProvider();
+    provider = createMemoryCacheProvider(new Map());
   });
 
   it('returns null for missing key', async () => {

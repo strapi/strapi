@@ -65,3 +65,18 @@ export interface CacheManagerService {
   set(namespace: string, key: string, value: unknown, options?: CacheSetOptions): Promise<void>;
   delete(namespace: string, key: string, options?: CacheGetOptions): Promise<void>;
 }
+
+/**
+ * Synchronous view of the process-local memory cache (same backing store as the `memory` provider).
+ * Registered on the Strapi instance by the core caching provider; use only where `await cacheManager` is not possible.
+ */
+export interface MemoryCacheSyncService {
+  get(namespace: string, key: string): CacheEntry | null;
+  set(
+    namespace: string,
+    key: string,
+    value: unknown,
+    options?: Pick<CacheSetOptions, 'expiresAt'>
+  ): void;
+  delete(namespace: string, key: string): void;
+}

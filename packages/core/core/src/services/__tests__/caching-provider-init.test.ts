@@ -18,6 +18,9 @@ describe('caching provider init', () => {
           const fn = resolvers.get('cacheManager') as (s: unknown) => unknown;
           return fn(strapi);
         }
+        if (name === 'memoryCacheSync') {
+          return resolvers.get('memoryCacheSync');
+        }
         throw new Error(`unexpected get ${name}`);
       },
       add(name: string, resolver: unknown) {
@@ -55,5 +58,11 @@ describe('caching provider init', () => {
     expect(typeof manager.get).toBe('function');
     expect(typeof manager.set).toBe('function');
     expect(typeof manager.delete).toBe('function');
+
+    const sync = strapi.get('memoryCacheSync');
+    expect(sync).toBeDefined();
+    expect(typeof sync.get).toBe('function');
+    expect(typeof sync.set).toBe('function');
+    expect(typeof sync.delete).toBe('function');
   });
 });

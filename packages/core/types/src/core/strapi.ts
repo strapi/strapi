@@ -95,6 +95,7 @@ export interface Strapi extends Container {
   sessionManager: Modules.SessionManager.SessionManagerService;
   cacheManager: Modules.Cache.CacheManagerService;
   cacheProviderRegistry: Modules.Cache.CacheProviderRegistry;
+  memoryCacheSync: Modules.Cache.MemoryCacheSyncService;
   load(): Promise<Strapi>;
   start(): Promise<Strapi>;
   destroy(): Promise<void>;

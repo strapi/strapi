@@ -47,7 +47,7 @@ const registerModelHooks = () => {
 
 const registerAdminAuthCacheInvalidation = () => {
   const invalidate = async () => {
-    clearAdminAuthAbilityCache();
+    await clearAdminAuthAbilityCache();
   };
 
   strapi.eventHub.on('permission.create', invalidate);
