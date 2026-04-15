@@ -33,7 +33,7 @@ import { Duplicate, Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
+import { useNavigate, Link as ReactRouterLink, useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
@@ -80,6 +80,7 @@ const ListViewPage = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
   const isDesktop = useIsDesktop();
+  const { pathname } = useLocation();
 
   const handleCopyDocumentId = React.useCallback(
     async (e: React.MouseEvent, documentId: string | undefined) => {
@@ -99,11 +100,16 @@ const ListViewPage = () => {
     [copy, formatMessage, toggleNotification]
   );
 
-  usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
-  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
-
   const { collectionType, model, schema } = useDoc();
   const { list, listViewConversionContext } = useDocumentLayout(model);
+
+  usePersistentPartialQueryParams(
+    `STRAPI_LIST_VIEW_SETTINGS:${model}:`,
+    ['sort', 'filters', 'pageSize'],
+    false,
+    { legacyKey: `STRAPI_LIST_VIEW_SETTINGS:${pathname}` }
+  );
+  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,

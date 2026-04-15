@@ -7,6 +7,10 @@ import { useLocation } from 'react-router-dom';
 
 type PropertyPath = Parameters<typeof get>[1];
 
+interface PersistentQueryParamsOptions {
+  legacyKey?: string;
+}
+
 const filterObjectKeys = (obj: object, keys: PropertyPath[]) => {
   const result: Record<string, unknown> = {};
 
@@ -24,11 +28,30 @@ const filterObjectKeys = (obj: object, keys: PropertyPath[]) => {
 export const usePersistentPartialQueryParams = (
   keyPrefix: string,
   keysToPersist: PropertyPath[],
-  pathnameInKey = true
+  pathnameInKey = true,
+  { legacyKey }: PersistentQueryParamsOptions = {}
 ) => {
   const { pathname } = useLocation();
   const [{ query }, setQuery] = useQueryParams();
   const localStorageKey = `${keyPrefix}${pathnameInKey ? pathname : ''}`;
+
+  // migrate query params from a previous key before loading them
+  useEffect(() => {
+    if (!legacyKey || legacyKey === localStorageKey) return;
+
+    try {
+      const savedQueryParams = window.localStorage.getItem(localStorageKey);
+      if (savedQueryParams) return;
+
+      const legacyQueryParams = window.localStorage.getItem(legacyKey);
+      if (!legacyQueryParams) return;
+
+      window.localStorage.setItem(localStorageKey, legacyQueryParams);
+      window.localStorage.removeItem(legacyKey);
+    } catch {
+      return;
+    }
+  }, [legacyKey, localStorageKey]);
 
   // load query params from local storge
   useEffect(() => {

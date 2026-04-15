@@ -153,4 +153,32 @@ describe('usePersistentPartialQueryParams', () => {
       expect(mockSetQuery).toHaveBeenCalledWith(params2, 'push', true);
     });
   });
+
+  it('should ignore the pathname when pathnameInKey is false', async () => {
+    const savedParams = { pageSize: 20, sort: 'name:asc' };
+    window.localStorage.setItem(keyPrefix, JSON.stringify(savedParams));
+
+    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist, false));
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true);
+    });
+  });
+
+  it('should migrate query params from a legacy key', async () => {
+    const legacyKey = `${keyPrefix}${pathname}`;
+    const scopedKey = 'scoped-key:';
+    const savedParams = { pageSize: 20, sort: 'name:asc' };
+    window.localStorage.setItem(legacyKey, JSON.stringify(savedParams));
+
+    renderHook(() =>
+      usePersistentPartialQueryParams(scopedKey, keysToPersist, false, { legacyKey })
+    );
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(scopedKey)).toBe(JSON.stringify(savedParams));
+      expect(window.localStorage.getItem(legacyKey)).toBeNull();
+      expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true);
+    });
+  });
 });
