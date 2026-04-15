@@ -379,14 +379,14 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         return this.streamAsset(msg.data);
       }
 
-      // For all other steps
-      await Promise.all(
-        msg.data.map(async (item) => {
-          this.stats[stage].started += 1;
-          await write(stream, item);
-          this.stats[stage].finished += 1;
-        })
-      );
+      // For all other steps: write sequentially so each `write()` completes (and drains) before the
+      // next — concurrent writes to one objectMode Writable violate the stream contract and can
+      // interleave poorly with backpressure.
+      for (const item of msg.data) {
+        this.stats[stage].started += 1;
+        await write(stream, item);
+        this.stats[stage].finished += 1;
+      }
     }
 
     if (msg.action === 'end') {

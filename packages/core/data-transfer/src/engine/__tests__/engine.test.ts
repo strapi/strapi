@@ -1317,6 +1317,36 @@ describe('Transfer engine', () => {
     }, 5000);
 
     /**
+     * Documents {@link TransferEngine}’s per-chunk progress rule: only `Buffer` chunks use
+     * `.length`; anything else counts as 1 byte (cosmetic for ETA when chunk shapes are odd).
+     */
+    test('progress byte totals: a non-Buffer chunk contributes 1 to the byte counter', async () => {
+      const assetData: IAsset[] = [
+        {
+          filename: 'odd-chunk.bin',
+          filepath: posix.join(__dirname, 'odd-chunk.bin'),
+          stats: { size: 3 },
+          stream: Readable.from([{ not: 'a buffer' }, Buffer.alloc(2)] as unknown[]),
+          metadata: {
+            hash: 'h2',
+            ext: '.bin',
+            id: 0,
+            name: '',
+            mime: 'application/octet-stream',
+            size: 0,
+            url: '',
+          },
+        },
+      ];
+
+      const source = createSource({ assets: assetData });
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+      await engine.transfer();
+
+      expect(engine.progress.data.assets?.bytes).toBe(3);
+    }, 5000);
+
+    /**
      * Ensures we are not buffering all asset data in memory: heap growth during
      * transfer should stay well below total bytes transferred (streaming behavior).
      */

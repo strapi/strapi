@@ -13,6 +13,8 @@ describe('Push + remote source — shared writable async write', () => {
     const pushSource = readFileSync(join(__dirname, '../push.ts'), 'utf8');
     expect(pushSource).toEqual(expect.stringMatching(UTIL_IMPORT));
     expect(pushSource).toContain('await write(stream, item)');
+    expect(pushSource).toContain('for (const item of msg.data)');
+    expect(pushSource).not.toMatch(/Promise\.all\(\s*\n?\s*msg\.data\.map\(async \(item\) =>/m);
     expect(pushSource).toContain('await write(assetsStream, this.assets[assetID]);');
     expect(pushSource).toContain('await write(this.assets[assetID].stream, chunk)');
     expect(pushSource).not.toMatch(/\bwriteWithBackpressure\b/);
