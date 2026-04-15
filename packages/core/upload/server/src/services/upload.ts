@@ -422,6 +422,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // clear old formats
       _.set(fileData, 'formats', {});
 
+      // Strapi-style preservation for custom providers
+      _.set(fileData, 'provider_metadata', dbFile.provider_metadata);
+
       if (await isImage(fileData)) {
         await uploadImage(fileData);
       } else {
