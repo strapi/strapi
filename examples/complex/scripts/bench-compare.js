@@ -2,17 +2,21 @@
 /* eslint-disable no-console */
 
 /**
- * Compare two or more benchmark result sets (produced by bench.js run)
- * and emit a markdown report to stdout + file, and a self-contained HTML
- * report to file.
+ * Compare benchmark result sets across multipliers and databases.
  *
  * Usage:
- *   node bench-compare.js <label1> <label2> [<label3> ...]
+ *   node bench-compare.js --baseline <label> --candidate <label>
+ *   node bench-compare.js <baseline-label> <candidate-label>     # legacy positional form
  *
- * Labels are matched against filenames in `results/`:
- *   results/<db>-<label>-<timestamp>.json
+ * Result files are loaded from `results/*.json` and indexed by:
+ *   { label, multiplier, dbEngine }
+ * taken from fields inside each JSON (not the filename), so the same
+ * canonical baseline/candidate label can span any number of (multiplier, db)
+ * combinations. Missing cells are rendered as "—" rather than errors.
  *
- * First label is the baseline, subsequent labels are candidates.
+ * Produces:
+ *   - Markdown report: stdout + results/compare-<timestamp>.md
+ *   - Self-contained HTML: results/compare-<timestamp>.html
  */
 
 const fs = require('fs');
@@ -24,72 +28,131 @@ const RESULTS_DIR = path.join(COMPLEX_DIR, 'results');
 
 // ─── argument parsing ────────────────────────────────────────────────────────
 
-const labels = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-if (labels.length < 2) {
-  console.error(
-    'Usage: node bench-compare.js <baseline-label> <candidate-label> [<candidate-label-2> ...]'
-  );
-  console.error('At least two labels are required (baseline + 1 candidate).');
+function parseArgs(argv) {
+  const flags = {};
+  const positional = [];
+  for (let i = 0; i < argv.length; i += 1) {
+    const a = argv[i];
+    if (a.startsWith('--')) {
+      const eq = a.indexOf('=');
+      if (eq !== -1) {
+        flags[a.slice(2, eq)] = a.slice(eq + 1);
+      } else {
+        const next = argv[i + 1];
+        if (next != null && !next.startsWith('--')) {
+          flags[a.slice(2)] = next;
+          i += 1;
+        } else {
+          flags[a.slice(2)] = true;
+        }
+      }
+    } else {
+      positional.push(a);
+    }
+  }
+  return { flags, positional };
+}
+
+const { flags, positional } = parseArgs(process.argv.slice(2));
+const baselineLabel = flags.baseline ?? positional[0];
+const candidateLabel = flags.candidate ?? positional[1];
+
+if (!baselineLabel || !candidateLabel) {
+  console.error('Usage: node bench-compare.js --baseline <label> --candidate <label>');
+  console.error('       node bench-compare.js <baseline-label> <candidate-label>');
   process.exit(1);
 }
-const baselineLabel = labels[0];
-const candidateLabels = labels.slice(1);
-
-// ─── result loading ──────────────────────────────────────────────────────────
 
 if (!fs.existsSync(RESULTS_DIR)) {
   console.error(`No results/ directory found at ${RESULTS_DIR}`);
   process.exit(1);
 }
 
+// ─── result loading ──────────────────────────────────────────────────────────
+
 /**
- * Find the most recent result file for each (label, db) pair.
- * Returns { [label]: { [db]: result } }.
+ * Strip a trailing `-m<N>` suffix from labels so older results (e.g.,
+ * "baseline-develop-m100") can be matched against canonical labels
+ * ("baseline-develop"). Leaves labels without the suffix untouched.
  */
-function loadResults(wantedLabels) {
-  const byLabel = {};
-  for (const label of wantedLabels) byLabel[label] = {};
-
-  const allFiles = fs
-    .readdirSync(RESULTS_DIR)
-    .filter((f) => f.endsWith('.json'))
-    .sort(); // lexicographic = chronological given ISO timestamps in filenames
-
-  for (const file of allFiles) {
-    // Parse `<db>-<label>-<timestamp>.json` — but label can contain hyphens so
-    // we anchor on db prefix and timestamp suffix.
-    const m = file.match(/^(postgres|mysql|mariadb|sqlite)-(.+)-(\d{4}-\d{2}-\d{2}T.+)\.json$/);
-    if (!m) continue;
-    const [, db, label] = m;
-    if (!byLabel[label]) continue;
-    try {
-      const contents = JSON.parse(fs.readFileSync(path.join(RESULTS_DIR, file), 'utf8'));
-      // Later (newer) files overwrite earlier — we want the most recent per (label, db).
-      byLabel[label][db] = { ...contents, __file: file };
-    } catch (err) {
-      console.error(`[bench-compare] failed to parse ${file}: ${err.message}`);
-    }
-  }
-
-  for (const label of wantedLabels) {
-    const dbs = Object.keys(byLabel[label]);
-    if (dbs.length === 0) {
-      console.error(`[bench-compare] no results found for label "${label}"`);
-      process.exit(1);
-    }
-  }
-
-  return byLabel;
+function normalizeLabel(raw) {
+  if (typeof raw !== 'string') return raw;
+  return raw.replace(/-m\d+$/, '');
 }
 
-const results = loadResults(labels);
+/**
+ * Load every result into a flat list, keeping only the most recent per
+ * (normalized-label, multiplier, dbEngine) triple.
+ */
+function loadResults() {
+  const files = fs
+    .readdirSync(RESULTS_DIR)
+    .filter((f) => f.endsWith('.json'))
+    .sort(); // lexicographic on ISO timestamps = chronological
 
-// ─── pairing + delta computation ─────────────────────────────────────────────
+  const byKey = new Map();
+  for (const file of files) {
+    let data;
+    try {
+      data = JSON.parse(fs.readFileSync(path.join(RESULTS_DIR, file), 'utf8'));
+    } catch (err) {
+      console.error(`[bench-compare] skipping unparseable ${file}: ${err.message}`);
+      continue;
+    }
+    const db = data?.env?.dbEngine;
+    const multiplier = data?.config?.multiplier;
+    const label = normalizeLabel(data?.label);
+    if (!db || multiplier == null || !label) continue;
+    byKey.set(`${label}::${multiplier}::${db}`, { ...data, __file: file });
+  }
+  return byKey;
+}
+
+const results = loadResults();
+
+/**
+ * Return the result for (label, multiplier, db) or undefined.
+ */
+function getResult(label, multiplier, db) {
+  return results.get(`${label}::${multiplier}::${db}`);
+}
+
+/**
+ * Collect every multiplier and dbEngine seen across baseline + candidate.
+ */
+function collectAxes() {
+  const multipliers = new Set();
+  const dbs = new Set();
+  for (const key of results.keys()) {
+    const [label, mult, db] = key.split('::');
+    if (label === baselineLabel || label === candidateLabel) {
+      multipliers.add(Number(mult));
+      dbs.add(db);
+    }
+  }
+  return {
+    multipliers: [...multipliers].sort((a, b) => a - b),
+    dbs: [...dbs].sort(),
+  };
+}
+
+const { multipliers, dbs } = collectAxes();
+
+if (multipliers.length === 0) {
+  console.error(
+    `[bench-compare] no results found for labels "${baselineLabel}" or "${candidateLabel}". Have you run bench:run yet?`
+  );
+  console.error('Available label/multiplier/db combos:');
+  for (const key of [...results.keys()].sort()) console.error(`  ${key}`);
+  process.exit(1);
+}
+
+// ─── formatting helpers ──────────────────────────────────────────────────────
 
 const REGRESSION_THRESHOLD_PCT = 5;
 
 function pctChange(baseline, candidate) {
-  if (baseline === 0) return null;
+  if (baseline === 0 || baseline == null || candidate == null) return null;
   return ((candidate - baseline) / baseline) * 100;
 }
 
@@ -103,8 +166,7 @@ function fmtMs(ms) {
 function fmtDelta(ms) {
   if (ms == null || Number.isNaN(ms)) return '—';
   const sign = ms > 0 ? '+' : ms < 0 ? '−' : '';
-  const abs = Math.abs(ms);
-  return `${sign}${fmtMs(abs)}`;
+  return `${sign}${fmtMs(Math.abs(ms))}`;
 }
 
 function fmtPct(pct) {
@@ -120,9 +182,42 @@ function fmtSpeedup(baseline, candidate) {
   return `${(1 / ratio).toFixed(2)}× slower`;
 }
 
-// ─── markdown report ─────────────────────────────────────────────────────────
+function pctClass(pct) {
+  if (pct == null) return '';
+  if (pct > REGRESSION_THRESHOLD_PCT) return 'regression';
+  if (pct < -REGRESSION_THRESHOLD_PCT) return 'improvement';
+  return '';
+}
 
-function renderSetupMd(result) {
+// ─── per-cell detail ─────────────────────────────────────────────────────────
+
+function pairedMigrationRows(baseline, candidate) {
+  const names = new Set();
+  (baseline?.migrations ?? []).forEach((m) => names.add(m.name));
+  (candidate?.migrations ?? []).forEach((m) => names.add(m.name));
+  return [...names].map((name) => ({
+    name,
+    baseline: baseline?.migrations?.find((m) => m.name === name)?.durationMs ?? null,
+    candidate: candidate?.migrations?.find((m) => m.name === name)?.durationMs ?? null,
+  }));
+}
+
+// ─── representative pick (for setup block) ───────────────────────────────────
+
+function pickRepresentative(label) {
+  for (const mult of multipliers) {
+    for (const db of dbs) {
+      const r = getResult(label, mult, db);
+      if (r) return r;
+    }
+  }
+  return null;
+}
+
+const baselineRep = pickRepresentative(baselineLabel);
+const candidateRep = pickRepresentative(candidateLabel);
+
+function renderSetupInline(result) {
   if (!result) return '_(no data)_';
   const src = result.strapiSource || 'unknown';
   const ver = result.strapiVersion || '?';
@@ -131,163 +226,121 @@ function renderSetupMd(result) {
   return `Strapi ${ver}${sha}${branch} [source: ${src}]`;
 }
 
-function renderEnvMd(result) {
+function renderEnvInline(result) {
   const e = result?.env;
   if (!e) return '_(no env info)_';
   return `Node ${e.nodeVersion} · ${e.platform}/${e.arch} · ${e.cpuModel} (${e.cpuCount} cores) · ${Math.round(
     e.totalMemMB / 1024
-  )} GB · ${e.dbEngine}${e.dbVersion ? ` ${e.dbVersion}` : ''} (${e.dbHostType})`;
+  )} GB`;
 }
 
-function buildDbTable(db, baseline, candidates) {
-  // Union of migration names across all result sets for this DB.
-  const allMigrationNames = new Set();
-  if (baseline?.migrations) baseline.migrations.forEach((m) => allMigrationNames.add(m.name));
-  for (const cand of candidates) {
-    cand?.migrations?.forEach((m) => allMigrationNames.add(m.name));
-  }
+// ─── markdown rendering ──────────────────────────────────────────────────────
 
-  const rows = [];
-  for (const name of allMigrationNames) {
-    const b = baseline?.migrations?.find((m) => m.name === name)?.durationMs ?? null;
-    const cs = candidates.map(
-      (cand) => cand?.migrations?.find((m) => m.name === name)?.durationMs ?? null
-    );
-    rows.push({ name, baseline: b, candidates: cs });
-  }
-
-  return rows;
-}
-
-function renderMarkdown(results) {
-  const allDbs = new Set();
-  for (const label of labels) {
-    Object.keys(results[label] || {}).forEach((db) => allDbs.add(db));
-  }
-
-  const baseline = results[baselineLabel];
-  const candidates = candidateLabels.map((l) => results[l]);
-
-  // Pick a representative run for the "setup" block (any DB). Prefer postgres.
-  const representativeDbs = ['postgres', 'mysql', 'mariadb', 'sqlite'];
-  const pickRep = (r) => {
-    if (!r) return null;
-    for (const d of representativeDbs) if (r[d]) return r[d];
-    return r[Object.keys(r)[0]];
-  };
-  const baselineRep = pickRep(baseline);
-  const candRep = candidates.map(pickRep);
-
+function renderMarkdown() {
   let out = '';
-  out += `## Migration benchmark: ${baselineLabel} vs ${candidateLabels.join(' vs ')}\n\n`;
+  out += `## Migration benchmark: ${baselineLabel} vs ${candidateLabel}\n\n`;
 
-  // Test setup block
+  // Test setup
   out += `### Test setup\n\n`;
-  out += `- **Baseline (${baselineLabel}):** ${renderSetupMd(baselineRep)}\n`;
-  candidateLabels.forEach((label, i) => {
-    out += `- **Candidate (${label}):** ${renderSetupMd(candRep[i])}\n`;
-  });
+  out += `- **Baseline (${baselineLabel}):** ${renderSetupInline(baselineRep)}\n`;
+  out += `- **Candidate (${candidateLabel}):** ${renderSetupInline(candidateRep)}\n`;
   if (baselineRep) {
-    out += `- **Env:** ${renderEnvMd(baselineRep)}\n`;
+    out += `- **Host env:** ${renderEnvInline(baselineRep)}\n`;
   }
   const cfg = baselineRep?.config;
   if (cfg) {
-    out += `- **Config:** multiplier=${cfg.multiplier}, seed=${cfg.seedMode}, hook=${cfg.hookMode}\n`;
+    out += `- **Config (representative):** seed=${cfg.seedMode}, hook=${cfg.hookMode}\n`;
   }
   out += `\n`;
 
-  // Per-DB detail table
-  for (const db of allDbs) {
-    const b = baseline?.[db];
-    const cs = candidates.map((c) => c?.[db]);
-    if (!b && cs.every((c) => !c)) continue;
-
-    const rows = buildDbTable(db, b, cs);
-
-    out += `### ${db}\n\n`;
-    if (!b) {
-      out += `_No baseline result._\n\n`;
-      continue;
+  // Cross-multiplier × cross-DB summary table
+  out += `### Speedup matrix (total migration time)\n\n`;
+  out += `Rows: multipliers · Columns: databases. Each cell shows ${'`baseline → candidate (% change)`'}.\n\n`;
+  const header = ['multiplier', ...dbs];
+  out += `| ${header.join(' | ')} |\n`;
+  out += `| ${header.map((_, i) => (i === 0 ? ':---' : '---:')).join(' | ')} |\n`;
+  for (const mult of multipliers) {
+    const cells = [`**m=${mult}**`];
+    for (const db of dbs) {
+      const b = getResult(baselineLabel, mult, db);
+      const c = getResult(candidateLabel, mult, db);
+      if (!b || !c) {
+        cells.push('—');
+        continue;
+      }
+      const bt = b.totalDurationMs;
+      const ct = c.totalDurationMs;
+      const pct = pctChange(bt, ct);
+      cells.push(`${fmtMs(bt)} → ${fmtMs(ct)} (${fmtPct(pct)})`);
     }
-    const rowCountTotal = Object.values(b.rowCount || {}).reduce(
-      (a, n) => (typeof n === 'number' ? a + n : a),
-      0
-    );
-    out += `Row count: ~${rowCountTotal.toLocaleString()}\n\n`;
+    out += `| ${cells.join(' | ')} |\n`;
+  }
+  out += `\n`;
 
-    const headerCells = ['Migration', 'Baseline'];
-    candidateLabels.forEach((label) => {
-      headerCells.push(label, 'Δ', '% change');
-    });
+  // Data-availability matrix (baseline/candidate presence)
+  out += `### Data points captured\n\n`;
+  const availHeader = ['multiplier', ...dbs];
+  out += `| ${availHeader.join(' | ')} |\n`;
+  out += `| ${availHeader.map((_, i) => (i === 0 ? ':---' : ':---:')).join(' | ')} |\n`;
+  for (const mult of multipliers) {
+    const cells = [`m=${mult}`];
+    for (const db of dbs) {
+      const b = getResult(baselineLabel, mult, db);
+      const c = getResult(candidateLabel, mult, db);
+      const hasB = b ? '✓' : ' ';
+      const hasC = c ? '✓' : ' ';
+      cells.push(`base:${hasB} pr:${hasC}`);
+    }
+    out += `| ${cells.join(' | ')} |\n`;
+  }
+  out += `\n`;
 
-    out += `| ${headerCells.join(' | ')} |\n`;
-    out += `| ${headerCells.map((_, i) => (i === 0 ? ':---' : '---:')).join(' | ')} |\n`;
+  // Per-cell detailed breakdowns
+  out += `### Per-migration detail\n\n`;
+  for (const mult of multipliers) {
+    for (const db of dbs) {
+      const b = getResult(baselineLabel, mult, db);
+      const c = getResult(candidateLabel, mult, db);
+      if (!b || !c) continue;
 
-    const regressionLines = [];
+      out += `#### ${db} @ m=${mult}\n\n`;
+      const rowCountTotal = Object.values(b.rowCount || {}).reduce(
+        (a, n) => (typeof n === 'number' ? a + n : a),
+        0
+      );
+      out += `Row count (baseline, after migration): ~${rowCountTotal.toLocaleString()}\n\n`;
 
-    for (const row of rows) {
-      const cells = [row.name, fmtMs(row.baseline)];
-      for (let i = 0; i < candidateLabels.length; i += 1) {
-        const c = row.candidates[i];
-        const delta = c != null && row.baseline != null ? c - row.baseline : null;
-        const pct = c != null && row.baseline != null ? pctChange(row.baseline, c) : null;
-        cells.push(fmtMs(c), fmtDelta(delta), fmtPct(pct));
+      const rows = pairedMigrationRows(b, c);
+      out += `| Migration | Baseline | Candidate | Δ | % change |\n`;
+      out += `| :--- | ---: | ---: | ---: | ---: |\n`;
+
+      const regressionLines = [];
+      for (const row of rows) {
+        const delta =
+          row.candidate != null && row.baseline != null ? row.candidate - row.baseline : null;
+        const pct = pctChange(row.baseline, row.candidate);
+        out += `| ${row.name} | ${fmtMs(row.baseline)} | ${fmtMs(row.candidate)} | ${fmtDelta(delta)} | ${fmtPct(pct)} |\n`;
         if (pct != null && pct > REGRESSION_THRESHOLD_PCT) {
-          regressionLines.push(
-            `  - \`${row.name}\` regressed by ${fmtPct(pct)} (${candidateLabels[i]})`
-          );
+          regressionLines.push(`  - \`${row.name}\` regressed by ${fmtPct(pct)}`);
         }
       }
-      out += `| ${cells.join(' | ')} |\n`;
-    }
 
-    // Total row
-    const btotal = b.totalDurationMs;
-    const cTotals = cs.map((c) => c?.totalDurationMs);
-    const totalCells = ['**Total**', `**${fmtMs(btotal)}**`];
-    for (let i = 0; i < candidateLabels.length; i += 1) {
-      const c = cTotals[i];
-      const delta = c != null && btotal != null ? c - btotal : null;
-      const pct = c != null && btotal != null ? pctChange(btotal, c) : null;
-      totalCells.push(`**${fmtMs(c)}**`, `**${fmtDelta(delta)}**`, `**${fmtPct(pct)}**`);
-    }
-    out += `| ${totalCells.join(' | ')} |\n`;
+      const totalDelta = c.totalDurationMs - b.totalDurationMs;
+      const totalPct = pctChange(b.totalDurationMs, c.totalDurationMs);
+      out += `| **Total** | **${fmtMs(b.totalDurationMs)}** | **${fmtMs(c.totalDurationMs)}** | **${fmtDelta(totalDelta)}** | **${fmtPct(totalPct)}** |\n`;
+      out += `\n**Speedup:** ${fmtSpeedup(b.totalDurationMs, c.totalDurationMs)}\n`;
 
-    // Speedup summary for first candidate
-    if (btotal && cTotals[0]) {
-      out += `\n**Speedup (${candidateLabels[0]} vs ${baselineLabel}):** ${fmtSpeedup(btotal, cTotals[0])}\n`;
-    }
-
-    if (regressionLines.length > 0) {
-      out += `\n⚠️ Regressions detected (>${REGRESSION_THRESHOLD_PCT}%):\n${regressionLines.join('\n')}\n`;
-    }
-
-    out += `\n`;
-  }
-
-  // Cross-DB summary
-  if (allDbs.size > 1) {
-    out += `### Per-DB summary\n\n`;
-    const sumHeader = ['DB', `Baseline (${baselineLabel}) total`];
-    candidateLabels.forEach((l) => sumHeader.push(`${l} total`, 'speedup'));
-    out += `| ${sumHeader.join(' | ')} |\n`;
-    out += `| ${sumHeader.map((_, i) => (i === 0 ? ':---' : '---:')).join(' | ')} |\n`;
-    for (const db of allDbs) {
-      const b = results[baselineLabel]?.[db]?.totalDurationMs;
-      const cells = [db, fmtMs(b)];
-      for (const label of candidateLabels) {
-        const c = results[label]?.[db]?.totalDurationMs;
-        cells.push(fmtMs(c), fmtSpeedup(b, c));
+      if (regressionLines.length) {
+        out += `\n⚠️ Per-migration regressions (>${REGRESSION_THRESHOLD_PCT}%):\n${regressionLines.join('\n')}\n`;
       }
-      out += `| ${cells.join(' | ')} |\n`;
+      out += `\n`;
     }
-    out += `\n`;
   }
 
   return out;
 }
 
-// ─── HTML report ─────────────────────────────────────────────────────────────
+// ─── HTML rendering ──────────────────────────────────────────────────────────
 
 function escapeHtml(str) {
   return String(str)
@@ -298,46 +351,28 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-function renderSvgBarChart(rows, candidateLabels) {
+function renderSvgBarChart(rows) {
   if (rows.length === 0) return '';
 
-  // Layout constants
   const barHeight = 16;
   const barGap = 2;
   const rowGap = 10;
   const leftPad = 8;
-  const rightPad = 80; // reserved for value labels ("857 ms" etc)
+  const rightPad = 80;
 
-  // Compute label column width from the longest migration name. Monospace
-  // char width ≈ 7.2px at 12px size; leave 16px padding. Round to keep
-  // the resulting viewBox dimensions integer-friendly.
   const charWidth = 7.2;
   const longestName = rows.reduce((a, r) => Math.max(a, r.name.length), 0);
   const labelColWidth = Math.round(Math.min(Math.max(longestName * charWidth + 16, 180), 420));
 
-  const seriesCount = 1 + candidateLabels.length;
+  const seriesCount = 2; // baseline + candidate
   const rowHeight = (barHeight + barGap) * seriesCount + rowGap;
   const chartHeight = rows.length * rowHeight + rowGap;
-
-  // Width sized so bars have at least 320px of drawing area
   const barAreaWidth = 320;
   const width = leftPad + labelColWidth + barAreaWidth + rightPad;
 
-  const maxDuration = Math.max(
-    ...rows.flatMap((r) => [r.baseline ?? 0, ...(r.candidates || []).map((c) => c ?? 0)]),
-    1
-  );
+  const maxDuration = Math.max(...rows.flatMap((r) => [r.baseline ?? 0, r.candidate ?? 0]), 1);
   const scale = (v) => (v == null ? 0 : (v / maxDuration) * barAreaWidth);
 
-  const seriesColors = [
-    'var(--baseline-color)',
-    'var(--candidate-1-color)',
-    'var(--candidate-2-color)',
-    'var(--candidate-3-color)',
-  ];
-
-  // Inline font-family (CSS variables don't always cascade into SVG text
-  // across renderers — safer to hardcode the family).
   const textStyle = 'font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
   const textStyleMuted = `${textStyle}; fill: var(--muted)`;
   const textStyleFg = `${textStyle}; fill: var(--text)`;
@@ -346,23 +381,23 @@ function renderSvgBarChart(rows, candidateLabels) {
 
   rows.forEach((row, rowIdx) => {
     const yBase = rowIdx * rowHeight + rowGap / 2;
-    const series = [row.baseline, ...(row.candidates || [])];
+    const series = [
+      { value: row.baseline, color: 'var(--baseline-color)', title: 'baseline' },
+      { value: row.candidate, color: 'var(--candidate-1-color)', title: 'candidate' },
+    ];
     const nameYCenter = yBase + (seriesCount * (barHeight + barGap)) / 2 - barGap / 2;
 
-    // Vertically-centered migration name in the label column
     svg += `<text x="${leftPad}" y="${nameYCenter}" dominant-baseline="middle" style="${textStyleFg}">${escapeHtml(row.name)}</text>`;
 
-    series.forEach((value, i) => {
+    series.forEach((s, i) => {
       const y = yBase + i * (barHeight + barGap);
       const textY = y + barHeight / 2;
-      const color = seriesColors[i] || 'var(--baseline-color)';
       const barX = leftPad + labelColWidth;
-
-      if (value != null) {
-        const w = scale(value);
-        const title = `${i === 0 ? 'baseline' : candidateLabels[i - 1]}: ${fmtMs(value)}`;
-        svg += `<rect x="${barX}" y="${y}" width="${w.toFixed(1)}" height="${barHeight}" fill="${color}" rx="2"><title>${escapeHtml(title)}</title></rect>`;
-        svg += `<text x="${(barX + w + 4).toFixed(1)}" y="${textY}" dominant-baseline="middle" style="${textStyleMuted}">${fmtMs(value)}</text>`;
+      if (s.value != null) {
+        const w = scale(s.value);
+        const title = `${s.title}: ${fmtMs(s.value)}`;
+        svg += `<rect x="${barX}" y="${y}" width="${w.toFixed(1)}" height="${barHeight}" fill="${s.color}" rx="2"><title>${escapeHtml(title)}</title></rect>`;
+        svg += `<text x="${(barX + w + 4).toFixed(1)}" y="${textY}" dominant-baseline="middle" style="${textStyleMuted}">${fmtMs(s.value)}</text>`;
       } else {
         svg += `<text x="${barX}" y="${textY}" dominant-baseline="middle" style="${textStyleMuted}">—</text>`;
       }
@@ -373,180 +408,117 @@ function renderSvgBarChart(rows, candidateLabels) {
   return svg;
 }
 
-function renderSetupHtml(result) {
-  if (!result) return '<em>(no data)</em>';
-  return escapeHtml(renderSetupMd(result));
-}
+function renderCellDetailHtml(mult, db, baseline, candidate) {
+  const rows = pairedMigrationRows(baseline, candidate);
+  const rowCountTotal = Object.values(baseline.rowCount || {}).reduce(
+    (a, n) => (typeof n === 'number' ? a + n : a),
+    0
+  );
 
-function renderHtml(results) {
-  const allDbs = new Set();
-  for (const label of labels) {
-    Object.keys(results[label] || {}).forEach((db) => allDbs.add(db));
-  }
-
-  const baseline = results[baselineLabel];
-  const candidates = candidateLabels.map((l) => results[l]);
-
-  const representativeDbs = ['postgres', 'mysql', 'mariadb', 'sqlite'];
-  const pickRep = (r) => {
-    if (!r) return null;
-    for (const d of representativeDbs) if (r[d]) return r[d];
-    return r[Object.keys(r)[0]];
-  };
-  const baselineRep = pickRep(baseline);
-  const candRep = candidates.map(pickRep);
-
-  // One-line verdict (use first candidate on postgres if present, else first available DB)
-  const verdictDb = allDbs.has('postgres') ? 'postgres' : allDbs.values().next().value;
-  const verdictBaseline = baseline?.[verdictDb]?.totalDurationMs;
-  const verdictCandidate = candidates[0]?.[verdictDb]?.totalDurationMs;
-  let verdict = '';
-  if (verdictBaseline && verdictCandidate) {
-    const ratio = verdictBaseline / verdictCandidate;
-    if (ratio > 1.05) {
-      verdict = `⚡ ${ratio.toFixed(2)}× faster on ${verdictDb}`;
-    } else if (ratio < 0.95) {
-      verdict = `⚠ ${(1 / ratio).toFixed(2)}× slower on ${verdictDb}`;
-    } else {
-      verdict = `≈ no change on ${verdictDb}`;
-    }
-  }
-
-  const dbSections = [];
-  for (const db of allDbs) {
-    const b = baseline?.[db];
-    const cs = candidates.map((c) => c?.[db]);
-    if (!b && cs.every((c) => !c)) continue;
-    const rows = buildDbTable(db, b, cs);
-
-    const rowCountTotal = b
-      ? Object.values(b.rowCount || {}).reduce((a, n) => (typeof n === 'number' ? a + n : a), 0)
-      : 0;
-
-    const tableHeaderCells = ['Migration', 'Baseline'];
-    candidateLabels.forEach((l) => tableHeaderCells.push(escapeHtml(l), 'Δ', '% change'));
-
-    const tableRows = rows
-      .map((row) => {
-        const cells = [
-          `<td>${escapeHtml(row.name)}</td>`,
-          `<td class="num">${fmtMs(row.baseline)}</td>`,
-        ];
-        row.candidates.forEach((c) => {
-          const delta = c != null && row.baseline != null ? c - row.baseline : null;
-          const pct = c != null && row.baseline != null ? pctChange(row.baseline, c) : null;
-          const pctClass =
-            pct == null
-              ? ''
-              : pct > REGRESSION_THRESHOLD_PCT
-                ? 'regression'
-                : pct < -REGRESSION_THRESHOLD_PCT
-                  ? 'improvement'
-                  : '';
-          cells.push(
-            `<td class="num">${fmtMs(c)}</td>`,
-            `<td class="num">${fmtDelta(delta)}</td>`,
-            `<td class="num ${pctClass}">${fmtPct(pct)}</td>`
-          );
-        });
-        return `<tr>${cells.join('')}</tr>`;
-      })
-      .join('\n');
-
-    // Total row
-    const btotal = b?.totalDurationMs;
-    const cTotals = cs.map((c) => c?.totalDurationMs);
-    const totalCells = [`<th>Total</th>`, `<th class="num">${fmtMs(btotal)}</th>`];
-    cTotals.forEach((c) => {
-      const delta = c != null && btotal != null ? c - btotal : null;
-      const pct = c != null && btotal != null ? pctChange(btotal, c) : null;
-      const pctClass =
-        pct == null
-          ? ''
-          : pct > REGRESSION_THRESHOLD_PCT
-            ? 'regression'
-            : pct < -REGRESSION_THRESHOLD_PCT
-              ? 'improvement'
-              : '';
-      totalCells.push(
-        `<th class="num">${fmtMs(c)}</th>`,
-        `<th class="num">${fmtDelta(delta)}</th>`,
-        `<th class="num ${pctClass}">${fmtPct(pct)}</th>`
-      );
-    });
-
-    const speedupLine =
-      btotal && cTotals[0]
-        ? `<p class="speedup">Speedup (${escapeHtml(candidateLabels[0])} vs ${escapeHtml(baselineLabel)}): <strong>${fmtSpeedup(btotal, cTotals[0])}</strong></p>`
-        : '';
-
-    const svg = renderSvgBarChart(rows, candidateLabels);
-
-    dbSections.push(`
-      <section class="db-card">
-        <h2>${escapeHtml(db)}</h2>
-        <p class="meta">Row count: ~${rowCountTotal.toLocaleString()}</p>
-        ${speedupLine}
-        <div class="chart-wrap">${svg}</div>
-        <table class="sortable">
-          <thead><tr>${tableHeaderCells.map((c) => `<th>${c}</th>`).join('')}</tr></thead>
-          <tbody>
-            ${tableRows}
-            <tr class="total-row">${totalCells.join('')}</tr>
-          </tbody>
-        </table>
-      </section>
-    `);
-  }
-
-  // Cross-DB summary
-  let crossDbSection = '';
-  if (allDbs.size > 1) {
-    const sumHeader = ['DB', `Baseline (${escapeHtml(baselineLabel)}) total`];
-    candidateLabels.forEach((l) => sumHeader.push(`${escapeHtml(l)} total`, 'speedup'));
-    const rows = [];
-    for (const db of allDbs) {
-      const b = results[baselineLabel]?.[db]?.totalDurationMs;
-      const cells = [escapeHtml(db), fmtMs(b)];
-      for (const label of candidateLabels) {
-        const c = results[label]?.[db]?.totalDurationMs;
-        cells.push(fmtMs(c), fmtSpeedup(b, c));
-      }
-      rows.push(
-        `<tr>${cells.map((c, i) => `<td class="${i === 0 ? '' : 'num'}">${c}</td>`).join('')}</tr>`
-      );
-    }
-    crossDbSection = `
-      <section class="cross-db">
-        <h2>Per-DB summary</h2>
-        <table>
-          <thead><tr>${sumHeader.map((h) => `<th>${h}</th>`).join('')}</tr></thead>
-          <tbody>${rows.join('')}</tbody>
-        </table>
-      </section>
-    `;
-  }
-
-  const rawDataBlocks = labels
-    .map((label) => {
-      const byDb = results[label] || {};
-      const blocks = Object.entries(byDb)
-        .map(
-          ([db, r]) =>
-            `<details><summary>${escapeHtml(label)} / ${escapeHtml(db)}</summary><pre>${escapeHtml(
-              JSON.stringify(r, null, 2)
-            )}</pre></details>`
-        )
-        .join('');
-      return blocks;
+  const tableRows = rows
+    .map((row) => {
+      const delta =
+        row.candidate != null && row.baseline != null ? row.candidate - row.baseline : null;
+      const pct = pctChange(row.baseline, row.candidate);
+      return `<tr>
+        <td>${escapeHtml(row.name)}</td>
+        <td class="num">${fmtMs(row.baseline)}</td>
+        <td class="num">${fmtMs(row.candidate)}</td>
+        <td class="num">${fmtDelta(delta)}</td>
+        <td class="num ${pctClass(pct)}">${fmtPct(pct)}</td>
+      </tr>`;
     })
     .join('');
+
+  const totalDelta = candidate.totalDurationMs - baseline.totalDurationMs;
+  const totalPct = pctChange(baseline.totalDurationMs, candidate.totalDurationMs);
+
+  const svg = renderSvgBarChart(rows);
+
+  return `
+    <details class="cell-detail">
+      <summary><strong>${escapeHtml(db)} @ m=${mult}</strong> — ${fmtMs(baseline.totalDurationMs)} → ${fmtMs(candidate.totalDurationMs)} (<span class="${pctClass(totalPct)}">${fmtPct(totalPct)}</span>), speedup ${fmtSpeedup(baseline.totalDurationMs, candidate.totalDurationMs)} · ~${rowCountTotal.toLocaleString()} rows</summary>
+      <div class="cell-body">
+        <div class="chart-wrap">${svg}</div>
+        <table class="sortable">
+          <thead>
+            <tr>
+              <th>Migration</th>
+              <th class="num">Baseline</th>
+              <th class="num">Candidate</th>
+              <th class="num">Δ</th>
+              <th class="num">% change</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+            <tr class="total-row">
+              <th>Total</th>
+              <th class="num">${fmtMs(baseline.totalDurationMs)}</th>
+              <th class="num">${fmtMs(candidate.totalDurationMs)}</th>
+              <th class="num">${fmtDelta(totalDelta)}</th>
+              <th class="num ${pctClass(totalPct)}">${fmtPct(totalPct)}</th>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  `;
+}
+
+function renderHtml() {
+  // Summary matrix cells
+  const matrixRows = multipliers
+    .map((mult) => {
+      const cells = [`<th>m=${mult}</th>`];
+      for (const db of dbs) {
+        const b = getResult(baselineLabel, mult, db);
+        const c = getResult(candidateLabel, mult, db);
+        if (!b || !c) {
+          cells.push('<td class="num muted">—</td>');
+          continue;
+        }
+        const pct = pctChange(b.totalDurationMs, c.totalDurationMs);
+        cells.push(
+          `<td class="num ${pctClass(pct)}" title="${escapeHtml(`${fmtMs(b.totalDurationMs)} → ${fmtMs(c.totalDurationMs)}`)}">${fmtMs(b.totalDurationMs)} → ${fmtMs(c.totalDurationMs)}<br><span class="delta">${fmtPct(pct)} · ${fmtSpeedup(b.totalDurationMs, c.totalDurationMs)}</span></td>`
+        );
+      }
+      return `<tr>${cells.join('')}</tr>`;
+    })
+    .join('');
+
+  const headerCells = ['<th>multiplier</th>', ...dbs.map((db) => `<th>${escapeHtml(db)}</th>`)];
+
+  // Per-cell details
+  const details = [];
+  for (const mult of multipliers) {
+    for (const db of dbs) {
+      const b = getResult(baselineLabel, mult, db);
+      const c = getResult(candidateLabel, mult, db);
+      if (b && c) details.push(renderCellDetailHtml(mult, db, b, c));
+    }
+  }
+
+  // Verdict (use postgres at the largest multiplier if available)
+  const verdictDb = dbs.includes('postgres') ? 'postgres' : dbs[0];
+  const verdictMult = multipliers[multipliers.length - 1];
+  const vB = getResult(baselineLabel, verdictMult, verdictDb);
+  const vC = getResult(candidateLabel, verdictMult, verdictDb);
+  let verdict = 'No data to summarize';
+  if (vB && vC) {
+    const ratio = vB.totalDurationMs / vC.totalDurationMs;
+    if (ratio > 1.05) {
+      verdict = `⚡ ${ratio.toFixed(2)}× faster on ${verdictDb} @ m=${verdictMult}`;
+    } else if (ratio < 0.95) {
+      verdict = `⚠ ${(1 / ratio).toFixed(2)}× slower on ${verdictDb} @ m=${verdictMult}`;
+    } else {
+      verdict = `≈ no change on ${verdictDb} @ m=${verdictMult}`;
+    }
+  }
 
   const cssVars = `
     --baseline-color: #888;
     --candidate-1-color: #2563eb;
-    --candidate-2-color: #0891b2;
-    --candidate-3-color: #9333ea;
     --regression-bg: #fee2e2;
     --regression-fg: #991b1b;
     --improvement-bg: #dcfce7;
@@ -557,7 +529,7 @@ function renderHtml(results) {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Migration benchmark: ${escapeHtml(baselineLabel)} vs ${escapeHtml(candidateLabels.join(', '))}</title>
+<title>Migration benchmark: ${escapeHtml(baselineLabel)} vs ${escapeHtml(candidateLabel)}</title>
 <style>
   :root {
     --bg: #ffffff;
@@ -577,8 +549,6 @@ function renderHtml(results) {
       --card-bg: #111827;
       --baseline-color: #6b7280;
       --candidate-1-color: #60a5fa;
-      --candidate-2-color: #22d3ee;
-      --candidate-3-color: #c084fc;
       --regression-bg: #450a0a;
       --regression-fg: #fca5a5;
       --improvement-bg: #052e16;
@@ -589,75 +559,62 @@ function renderHtml(results) {
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.5;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
   }
   h1 { margin-top: 0; }
-  h2 { border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
+  h2 { border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; margin-top: 2rem; }
   .verdict { font-size: 1.2rem; padding: 0.5rem 0.75rem; background: var(--card-bg); border-radius: 6px; border: 1px solid var(--border); }
   .setup dt { font-weight: 600; color: var(--muted); margin-top: 0.5rem; }
   .setup dd { margin-left: 0; }
-  .db-card, .cross-db { margin: 2rem 0; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; }
   table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
-  th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); text-align: left; }
-  th { cursor: pointer; user-select: none; }
-  th:hover { background: rgba(127,127,127,0.1); }
-  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono-font); }
+  th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { user-select: none; }
+  table.sortable th { cursor: pointer; }
+  table.sortable th:hover { background: rgba(127,127,127,0.1); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono-font); white-space: nowrap; }
+  td.num .delta { display: block; font-size: 0.85em; color: var(--muted); }
   tr.total-row th, tr.total-row td { border-top: 2px solid var(--border); font-weight: 600; }
   td.regression, th.regression { background: var(--regression-bg); color: var(--regression-fg); }
   td.improvement, th.improvement { background: var(--improvement-bg); color: var(--improvement-fg); }
-  .speedup { font-size: 1.05rem; margin: 0.5rem 0; }
+  td.muted { color: var(--muted); }
+  .cell-detail { margin: 0.5rem 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem 0.75rem; }
+  .cell-detail summary { cursor: pointer; padding: 0.25rem 0; }
+  .cell-detail .cell-body { padding-top: 0.5rem; }
   .chart-wrap { overflow-x: auto; padding: 0.5rem 0; }
-  details { margin: 0.5rem 0; }
-  details summary { cursor: pointer; padding: 0.25rem 0; color: var(--muted); }
-  details pre { background: var(--card-bg); padding: 0.75rem; border-radius: 4px; overflow-x: auto; font-family: var(--mono-font); font-size: 0.85rem; }
   footer { margin-top: 3rem; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 1rem; }
 </style>
 </head>
 <body>
-  <h1>Migration benchmark</h1>
-  <p class="verdict">${escapeHtml(verdict || 'No verdict available')}</p>
+  <h1>Migration benchmark: ${escapeHtml(baselineLabel)} vs ${escapeHtml(candidateLabel)}</h1>
+  <p class="verdict">${escapeHtml(verdict)}</p>
 
   <section class="setup">
     <h2>Test setup</h2>
     <dl>
       <dt>Baseline (${escapeHtml(baselineLabel)})</dt>
-      <dd>${renderSetupHtml(baselineRep)}</dd>
-      ${candidateLabels
-        .map(
-          (l, i) => `
-        <dt>Candidate (${escapeHtml(l)})</dt>
-        <dd>${renderSetupHtml(candRep[i])}</dd>
-      `
-        )
-        .join('')}
-      ${
-        baselineRep?.env
-          ? `
-        <dt>Environment</dt>
-        <dd>${escapeHtml(renderEnvMd(baselineRep))}</dd>
-      `
-          : ''
-      }
-      ${
-        baselineRep?.config
-          ? `
-        <dt>Config</dt>
-        <dd>multiplier=${baselineRep.config.multiplier}, seed=${baselineRep.config.seedMode}, hook=${baselineRep.config.hookMode}</dd>
-      `
-          : ''
-      }
+      <dd>${escapeHtml(renderSetupInline(baselineRep))}</dd>
+      <dt>Candidate (${escapeHtml(candidateLabel)})</dt>
+      <dd>${escapeHtml(renderSetupInline(candidateRep))}</dd>
+      ${baselineRep?.env ? `<dt>Host env</dt><dd>${escapeHtml(renderEnvInline(baselineRep))}</dd>` : ''}
+      ${baselineRep?.config ? `<dt>Config (representative)</dt><dd>seed=${escapeHtml(baselineRep.config.seedMode || '?')}, hook=${escapeHtml(baselineRep.config.hookMode || '?')}</dd>` : ''}
     </dl>
   </section>
 
-  ${dbSections.join('')}
-
-  ${crossDbSection}
+  <section>
+    <h2>Speedup matrix</h2>
+    <p>Rows: multipliers · Columns: databases. Each cell shows <code>baseline → candidate</code> with Δ% and speedup. Empty cells mean no data for that combination yet.</p>
+    <table>
+      <thead><tr>${headerCells.join('')}</tr></thead>
+      <tbody>${matrixRows}</tbody>
+    </table>
+  </section>
 
   <section>
-    <h2>Raw result JSONs</h2>
-    ${rawDataBlocks}
+    <h2>Per-migration detail</h2>
+    <p>Click a row to expand per-migration breakdown for that (database, multiplier) pair.</p>
+    ${details.join('')}
   </section>
 
   <footer>
@@ -665,7 +622,6 @@ function renderHtml(results) {
   </footer>
 
   <script>
-    // Minimal sortable-table helper (no deps).
     document.querySelectorAll('table.sortable').forEach((table) => {
       const headers = table.querySelectorAll('th');
       headers.forEach((th, colIdx) => {
@@ -698,17 +654,15 @@ function renderHtml(results) {
 
 // ─── emit ────────────────────────────────────────────────────────────────────
 
-const markdown = renderMarkdown(results);
-const html = renderHtml(results);
+const markdown = renderMarkdown();
+const html = renderHtml();
 
-// Write files
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const mdPath = path.join(RESULTS_DIR, `compare-${stamp}.md`);
 const htmlPath = path.join(RESULTS_DIR, `compare-${stamp}.html`);
 fs.writeFileSync(mdPath, markdown, 'utf8');
 fs.writeFileSync(htmlPath, html, 'utf8');
 
-// Print markdown to stdout for clipboard / PR commenting
 process.stdout.write(markdown);
 
 console.error(`\n[bench-compare] markdown: ${path.relative(COMPLEX_DIR, mdPath)}`);
