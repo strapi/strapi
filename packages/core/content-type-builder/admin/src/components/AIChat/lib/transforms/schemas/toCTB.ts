@@ -228,9 +228,12 @@ export const transformChatToCTB = (
         ...prev.pluginOptions,
         ...contentTypeBase.pluginOptions,
         i18n: {
-          ...prev.pluginOptions?.i18n,
-          ...contentTypeBase.pluginOptions?.i18n,
-          localized: schema.options?.localized ?? prev.pluginOptions?.i18n?.localized ?? false,
+          ...((prev.pluginOptions?.i18n as Record<string, unknown> | undefined) ?? {}),
+          ...((contentTypeBase.pluginOptions?.i18n as Record<string, unknown> | undefined) ?? {}),
+          localized:
+            schema.options?.localized ??
+            (prev.pluginOptions?.i18n as { localized?: boolean } | undefined)?.localized ??
+            false,
         },
       },
       visible: prev.visible,
