@@ -107,18 +107,16 @@ const buildTransferTable = (resultData: ResultData) => {
   return table;
 };
 
-const DEFAULT_IGNORED_CONTENT_TYPES = [
-  'admin::permission',
-  'admin::user',
-  'admin::role',
-  'admin::api-token',
-  'admin::api-token-permission',
-  'admin::transfer-token',
-  'admin::transfer-token-permission',
-  'admin::audit-log',
+const IGNORED_CONTENT_TYPE_PREFIXES = ['admin::'];
+
+const IGNORED_CONTENT_TYPES = [
   'plugin::content-releases.release',
   'plugin::content-releases.release-action',
 ];
+
+const isIgnoredContentType = (type: string) =>
+  IGNORED_CONTENT_TYPE_PREFIXES.some((prefix) => type.startsWith(prefix)) ||
+  IGNORED_CONTENT_TYPES.includes(type);
 
 const abortTransfer = async ({
   engine,
@@ -466,9 +464,15 @@ type RestoreConfig = NonNullable<
 >;
 
 // Based on exclude/only from options, create the restore object to match
-const parseRestoreFromOptions = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => {
+const parseRestoreFromOptions = (
+  opts: Partial<engineDataTransfer.ITransferEngineOptions>,
+  strapi: Core.Strapi
+) => {
   const entitiesOptions: RestoreConfig['entities'] = {
-    exclude: DEFAULT_IGNORED_CONTENT_TYPES,
+    exclude: [
+      ...Object.keys(strapi.contentTypes).filter(isIgnoredContentType),
+      ...IGNORED_CONTENT_TYPES,
+    ],
     include: undefined,
   };
 
@@ -495,7 +499,7 @@ export {
   buildTransferTable,
   getDefaultExportName,
   getTransferTelemetryPayload,
-  DEFAULT_IGNORED_CONTENT_TYPES,
+  isIgnoredContentType,
   createStrapiInstance,
   excludeOption,
   exitMessageText,
