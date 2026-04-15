@@ -44,6 +44,7 @@ const normalizeConfigEntry = (
 export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) => {
   const scope = usePersistentStateScope();
   const [{ query }, setQuery] = useQueryParams();
+  const clonedConfig = JSON.stringify(config);
 
   // load query params from local storge
   useEffect(() => {
@@ -71,7 +72,7 @@ export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) =
 
     setQuery({ ...mergedFilteredQuery, ...query }, 'push', true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, scope]);
+  }, [clonedConfig, scope]);
 
   // update local storage
   useEffect(() => {
@@ -83,5 +84,5 @@ export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) =
       window.localStorage.setItem(key, JSON.stringify(paramsToPersist));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, config, scope]);
+  }, [query, clonedConfig, scope]);
 };
