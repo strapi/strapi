@@ -44,7 +44,7 @@ module.exports = {
 
     // If the compilation failed and diagnostics are not ignored, exit early
     if (!ignoreDiagnostics && emitResults.emitSkipped) {
-      process.exit(1);
+      throw new Error('TypeScript compilation failed');
     }
   },
 };

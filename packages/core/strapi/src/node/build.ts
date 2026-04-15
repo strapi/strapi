@@ -49,7 +49,12 @@ const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
     timer.start('compilingTS');
     const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
 
-    tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+    try {
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+    } catch (err: unknown) {
+      // we exit here to maintain the same behavior as before.
+      process.exit(1);
+    }
 
     const compilingDuration = timer.end('compilingTS');
     compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
