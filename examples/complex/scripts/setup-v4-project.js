@@ -37,6 +37,10 @@ const CONTENT_TYPES = [
   'relation',
   'relation-dp',
   'relation-dp-i18n',
+  // Anti-pattern stress schemas — added to exercise specific v4→v5 migration
+  // code paths that the baseline 6 types don't reach.
+  'hc-m2m-source',
+  'hc-m2m-target',
 ];
 
 console.log('Setting up Strapi v4 project at:', V4_PROJECT_DIR);

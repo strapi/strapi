@@ -17,6 +17,13 @@ const BASE_COUNTS = {
   relationDp: { published: 5, drafts: 3 },
   relationDpI18n: { published: 5, drafts: 3 },
   mediaFiles: 10,
+  // Anti-pattern: high-cardinality M2M. At m=100 this produces ~2000 sources
+  // × ~2000 targets, crossing the 1000-row chunk boundary in v4→v5 migrations
+  // so cross-chunk code paths actually get exercised. Keep targets per source
+  // modest (10) to avoid quadratic blow-up on disk.
+  hcM2mSource: { published: 15, drafts: 5 },
+  hcM2mTarget: { published: 15, drafts: 5 },
+  hcM2mTargetsPerSource: 10,
 };
 
 function parseCliArgs(argv) {
@@ -74,6 +81,17 @@ function applyMultiplierToCounts(base, multiplier) {
       drafts: base.relationDpI18n.drafts * m,
     },
     mediaFiles: base.mediaFiles * m,
+    hcM2mSource: {
+      published: base.hcM2mSource.published * m,
+      drafts: base.hcM2mSource.drafts * m,
+    },
+    hcM2mTarget: {
+      published: base.hcM2mTarget.published * m,
+      drafts: base.hcM2mTarget.drafts * m,
+    },
+    // Targets-per-source is intentionally NOT multiplied — it stays a constant
+    // fan-out so the total join-row count scales with the source count only.
+    hcM2mTargetsPerSource: base.hcM2mTargetsPerSource,
   };
 }
 
@@ -821,6 +839,99 @@ class ContentSeeder {
   }
 
   // Run all seeders in sequence
+  // Seed the high-cardinality many-to-many pair. Anti-pattern by design:
+  // N sources × K targets-per-source join-table rows exercise the v4→v5
+  // `copyRelationTableRows` chunk-batched code path. With BASE=15/5 at m=100
+  // we get ~2000 sources × 2000 targets × 10 joins-per-source = 20K join
+  // rows, crossing the 1000-row chunk boundary multiple times.
+  async seedHcM2m() {
+    console.log('Seeding hc-m2m-target...');
+    const targets = { published: [], drafts: [] };
+    for (let i = 0; i < CONFIG.counts.hcM2mTarget.published; i += 1) {
+      try {
+        const entry = await this.strapi.entityService.create('api::hc-m2m-target.hc-m2m-target', {
+          data: {
+            label: `Target ${random.string(6)}`,
+            publishedAt: new Date(),
+          },
+        });
+        targets.published.push(entry);
+      } catch (error) {
+        this.logError('hc-m2m-target published', i, error);
+      }
+    }
+    for (let i = 0; i < CONFIG.counts.hcM2mTarget.drafts; i += 1) {
+      try {
+        const entry = await this.strapi.entityService.create('api::hc-m2m-target.hc-m2m-target', {
+          data: {
+            label: `Target draft ${random.string(6)}`,
+            publishedAt: null,
+          },
+        });
+        targets.drafts.push(entry);
+      } catch (error) {
+        this.logError('hc-m2m-target draft', i, error);
+      }
+    }
+
+    const allTargets = [...targets.published, ...targets.drafts];
+
+    console.log('Seeding hc-m2m-source...');
+    const sources = { published: [], drafts: [] };
+    const fanout = CONFIG.counts.hcM2mTargetsPerSource;
+
+    const pickTargetIds = (seedIdx) => {
+      if (!allTargets.length) return [];
+      const picks = [];
+      for (let j = 0; j < fanout; j += 1) {
+        picks.push(allTargets[(seedIdx + j) % allTargets.length].id);
+      }
+      // De-dup since modulo can repeat if fanout > allTargets.length.
+      return [...new Set(picks)];
+    };
+
+    for (let i = 0; i < CONFIG.counts.hcM2mSource.published; i += 1) {
+      try {
+        const entry = await this.strapi.entityService.create('api::hc-m2m-source.hc-m2m-source', {
+          data: {
+            label: `Source ${random.string(6)}`,
+            targets: pickTargetIds(i),
+            publishedAt: new Date(),
+          },
+        });
+        sources.published.push(entry);
+      } catch (error) {
+        this.logError('hc-m2m-source published', i, error);
+      }
+    }
+    for (let i = 0; i < CONFIG.counts.hcM2mSource.drafts; i += 1) {
+      try {
+        const entry = await this.strapi.entityService.create('api::hc-m2m-source.hc-m2m-source', {
+          data: {
+            label: `Source draft ${random.string(6)}`,
+            targets: pickTargetIds(i + CONFIG.counts.hcM2mSource.published),
+            publishedAt: null,
+          },
+        });
+        sources.drafts.push(entry);
+      } catch (error) {
+        this.logError('hc-m2m-source draft', i, error);
+      }
+    }
+
+    this.results.hcM2mTarget = {
+      published: targets.published,
+      drafts: targets.drafts,
+      all: allTargets,
+    };
+    this.results.hcM2mSource = {
+      published: sources.published,
+      drafts: sources.drafts,
+      all: [...sources.published, ...sources.drafts],
+    };
+    return this.results.hcM2mSource;
+  }
+
   async seedAll() {
     await this.seedBasic();
     await this.seedBasicDp();
@@ -829,6 +940,7 @@ class ContentSeeder {
     await this.seedRelation();
     await this.seedRelationDp();
     await this.seedRelationDpI18n();
+    await this.seedHcM2m();
     return this.results;
   }
 }
@@ -861,6 +973,12 @@ async function seed() {
     console.log(`  - ${results.relation?.length || 0} relation entries`);
     console.log(`  - ${results.relationDp?.all?.length || 0} relation-dp entries`);
     console.log(`  - ${results.relationDpI18n?.all?.length || 0} relation-dp-i18n entries`);
+    console.log(
+      `  - ${results.hcM2mSource?.all?.length || 0} hc-m2m-source entries (${results.hcM2mSource?.published?.length || 0} published, ${results.hcM2mSource?.drafts?.length || 0} drafts)`
+    );
+    console.log(
+      `  - ${results.hcM2mTarget?.all?.length || 0} hc-m2m-target entries (${results.hcM2mTarget?.published?.length || 0} published, ${results.hcM2mTarget?.drafts?.length || 0} drafts)`
+    );
     console.log(`  - ${mediaFiles.length} media files`);
   } catch (error) {
     console.error('\n❌ Error seeding data:', error.message);
