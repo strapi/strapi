@@ -12,7 +12,7 @@ import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useTracking } from '../../../hooks/useTracking';
 import { useUpload } from '../../../hooks/useUpload';
-import { createAssetUrl, getTrad, downloadFile } from '../../../utils';
+import { appendSearchParamsToUrl, createAssetUrl, getTrad, downloadFile } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton/CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress/UploadProgress';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
@@ -83,6 +83,19 @@ export const PreviewBox = ({
   const [hasCropIntent, setHasCropIntent] = React.useState<boolean | null>(null);
   const [assetUrl, setAssetUrl] = React.useState(createAssetUrl(asset, false));
   const [thumbnailUrl, setThumbnailUrl] = React.useState(createAssetUrl(asset, true));
+
+  // When loading a cross-origin image for cropping, append a cache-busting parameter
+  // so the browser makes a fresh request with CORS headers instead of serving a
+  // previously cached non-CORS response (which would taint the canvas and break
+  // cropping). Signed URLs are excluded because modifying them invalidates the signature.
+  const cropUrl = React.useMemo(() => {
+    if (!asset.isLocal && !asset.isUrlSigned && assetUrl) {
+      return appendSearchParamsToUrl({ url: assetUrl, params: { updatedAt: asset.updatedAt } });
+    }
+
+    return assetUrl;
+  }, [assetUrl, asset.isLocal, asset.isUrlSigned, asset.updatedAt]);
+
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
   const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
@@ -317,7 +330,7 @@ export const PreviewBox = ({
               ref={previewRef}
               mime={asset.mime!}
               name={asset.name}
-              url={hasCropIntent ? assetUrl! : thumbnailUrl!}
+              url={hasCropIntent ? cropUrl! : thumbnailUrl!}
               onLoad={() => {
                 if (asset.isLocal || hasCropIntent) {
                   setIsCropImageReady(true);

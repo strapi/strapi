@@ -22,25 +22,37 @@ const sortKeysDeep = (value: unknown): unknown => {
   return sorted;
 };
 
-/** OpenAPI generator fills `default` on datetime fields with "now", which changes every run. */
+/** Values that change between runs or releases; replaced before snapshot so CLI output stays stable. */
 const ISO_DATETIME_DEFAULT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-const replaceVolatileDatetimeDefaults = (value: unknown): unknown => {
+const volatileSnapshotReplacements: {
+  test: (key: string, value: unknown) => boolean;
+  placeholder: string;
+}[] = [
+  {
+    test: (key, value) =>
+      key === 'default' && typeof value === 'string' && ISO_DATETIME_DEFAULT.test(value),
+    placeholder: '<generated-at-runtime>',
+  },
+  {
+    test: (key, value) => key === 'x-strapi-version' && typeof value === 'string',
+    placeholder: '<current-strapi-version>',
+  },
+];
+
+const replaceVolatileSnapshotValues = (value: unknown): unknown => {
   if (value === null || typeof value !== 'object') {
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map(replaceVolatileDatetimeDefaults);
+    return value.map(replaceVolatileSnapshotValues);
   }
   const obj = value as Record<string, unknown>;
   const out: Record<string, unknown> = {};
   for (const key of Object.keys(obj)) {
     const v = obj[key];
-    if (key === 'default' && typeof v === 'string' && ISO_DATETIME_DEFAULT.test(v)) {
-      out[key] = '<generated-at-runtime>';
-    } else {
-      out[key] = replaceVolatileDatetimeDefaults(v);
-    }
+    const rule = volatileSnapshotReplacements.find((r) => r.test(key, v));
+    out[key] = rule ? rule.placeholder : replaceVolatileSnapshotValues(v);
   }
   return out;
 };
@@ -86,8 +98,8 @@ describe('openapi:generate', () => {
     expect(hasPathEndingWith('/users')).toBe(true);
     expect(hasPathEndingWith('/users/{id}')).toBe(true);
 
-    // Full document snapshot (stable key order, volatile datetime defaults normalized)
-    expect(sortKeysDeep(replaceVolatileDatetimeDefaults(spec))).toMatchSnapshot();
+    // Full document snapshot (stable key order, volatile fields normalized)
+    expect(sortKeysDeep(replaceVolatileSnapshotValues(spec))).toMatchSnapshot();
 
     const plainOut = stripAnsi(stdout);
     const plainErr = stripAnsi(stderr);
