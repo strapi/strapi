@@ -873,10 +873,16 @@ export default {
 
     if (permissionChecker.requiresEntity.read()) {
       // Only load what we need for access checks
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
+
       const entity = await documentManager.findOne(id, model, {
         locale,
         status,
-        populate: {},
+        populate,
       });
 
       if (!entity) {

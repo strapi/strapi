@@ -4,7 +4,7 @@ import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@str
 import {
   buildTransferTable,
   createStrapiInstance,
-  DEFAULT_IGNORED_CONTENT_TYPES,
+  isIgnoredContentType,
   formatDiagnostic,
   loadersFactory,
   exitMessageText,
@@ -103,7 +103,7 @@ export default async (opts: CmdOptions) => {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
       strategy: 'restore',
-      restore: parseRestoreFromOptions(opts),
+      restore: parseRestoreFromOptions(opts, strapi),
     });
   }
   // if URL provided, set up a remote destination provider
@@ -119,7 +119,7 @@ export default async (opts: CmdOptions) => {
         token: opts.toToken,
       },
       strategy: 'restore',
-      restore: parseRestoreFromOptions(opts),
+      restore: parseRestoreFromOptions(opts, strapi),
       ...(checksumsEnabled ? { verifyChecksums: true } : {}),
     });
   }
@@ -138,17 +138,14 @@ export default async (opts: CmdOptions) => {
       links: [
         {
           filter(link) {
-            return (
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
-            );
+            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
           },
         },
       ],
       entities: [
         {
           filter(entity) {
-            return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+            return !isIgnoredContentType(entity.type);
           },
         },
       ],

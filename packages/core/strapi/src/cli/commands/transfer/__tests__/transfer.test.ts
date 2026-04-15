@@ -17,6 +17,7 @@ jest.mock('../../../utils/data-transfer', () => {
       telemetry: {
         send: jest.fn(),
       },
+      contentTypes: {},
     })),
     getDefaultExportName: jest.fn(() => 'default'),
     buildTransferTable: jest.fn(() => {
@@ -103,6 +104,7 @@ describe('Transfer', () => {
       telemetry: {
         send: jest.fn(),
       },
+      contentTypes: {},
     }));
   });
 
@@ -300,6 +302,7 @@ describe('Transfer', () => {
         telemetry: {
           send: jest.fn(),
         },
+        contentTypes: {},
       }));
 
       await expectExit(0, async () => {

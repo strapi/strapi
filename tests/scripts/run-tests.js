@@ -100,9 +100,15 @@ yargs
             type: 'boolean',
             default: false,
           })
+          .option('updateSnapshot', {
+            alias: 'u',
+            describe: 'Pass -u to Jest to update snapshots',
+            type: 'boolean',
+            default: false,
+          })
           .parse();
 
-        const { concurrency, domains: selectedDomains, setup } = testYargs;
+        const { concurrency, domains: selectedDomains, setup, updateSnapshot } = testYargs;
 
         const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
 
@@ -435,7 +441,7 @@ module.exports = config
                     domainDir,
                     jestConfigPath,
                     testApps,
-                    testArgs: forwardedRunnerArgs,
+                    testArgs: [...(updateSnapshot ? ['-u'] : []), ...forwardedRunnerArgs],
                     domain,
                   });
                 } catch (err) {
