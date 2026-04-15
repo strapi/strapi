@@ -6,6 +6,7 @@ import type { TransferFlow, Step } from '../flows';
 import type { TransferStage, IAsset, Protocol } from '../../../../types';
 
 import { ProviderTransferError } from '../../../errors/providers';
+import { write } from '../../../utils/writable-async-write';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
 import { createLocalStrapiDestinationProvider } from '../../providers';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
@@ -113,18 +114,6 @@ export interface PushHandler extends Handler {
    */
   assertValidStreamTransferStep(stage: TransferStage): void;
 }
-
-const writeAsync = <T>(stream: Writable, data: T) => {
-  return new Promise<void>((resolve, reject) => {
-    stream.write(data, (error) => {
-      if (error) {
-        reject(error);
-      }
-
-      resolve();
-    });
-  });
-};
 
 export const createPushController = handlerControllerFactory<Partial<PushHandler>>((proto) => ({
   isTransferStarted(this: PushHandler) {
@@ -394,7 +383,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       await Promise.all(
         msg.data.map(async (item) => {
           this.stats[stage].started += 1;
-          await writeAsync(stream, item);
+          await write(stream, item);
           this.stats[stage].finished += 1;
         })
       );
@@ -471,14 +460,14 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         strapi.log.debug(
           `[Transfer destination] Asset start #${this.stats.assets.started} id=${assetID} filename=${filename}`
         );
-        // Await so the assets Writable accepts each asset before chunk writes (parity with remote-source).
-        await writeAsync(assetsStream, this.assets[assetID]);
+        // Await so the assets Writable accepts each asset before chunk writes (same helper as remote-source).
+        await write(assetsStream, this.assets[assetID]);
       }
 
       if (action === 'stream') {
         const chunk = decodeTransferAssetStreamItem(item);
         this.assetChecksums?.[assetID]?.update(chunk);
-        await writeAsync(this.assets[assetID].stream, chunk);
+        await write(this.assets[assetID].stream, chunk);
       }
 
       if (action === 'end') {

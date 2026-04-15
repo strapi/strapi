@@ -20,6 +20,7 @@ import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
+import { write } from '../../../utils/writable-async-write';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import {
   createDispatcher,
@@ -164,18 +165,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     return this.#createStageReadStream('links');
   }
 
-  writeAsync = <T>(stream: Writable, data: T) => {
-    return new Promise<void>((resolve, reject) => {
-      stream.write(data, (error) => {
-        if (error) {
-          reject(error);
-        }
-
-        resolve();
-      });
-    });
-  };
-
   async createAssetsReadStream(): Promise<Readable> {
     // Create the streams used to transfer the assets
     const stream = await this.#createStageReadStream('assets');
@@ -249,7 +238,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
           resetTimeout(assetID);
 
-          await this.writeAsync(pass, assets[assetID]);
+          await write(pass, assets[assetID]);
         } else if (action === 'stream' || action === 'end') {
           if (!assets[assetID]) {
             throw new Error(`No id matching ${assetID} for stream action`);
@@ -403,7 +392,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       const chunk = decodeTransferAssetStreamItem(item);
       asset.checksumHash?.update(chunk);
 
-      await this.writeAsync(asset.stream, chunk);
+      await write(asset.stream, chunk);
       // Count slow draining as progress so backpressure on large chunks does not trip the stall timer
       resetTimeout(id);
     };

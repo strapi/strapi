@@ -215,11 +215,11 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       batch = [];
     };
 
-    if (!stream) {
-      throw new ProviderTransferError(`No available stream found for ${stage}`);
-    }
-
     try {
+      if (!stream) {
+        throw new ProviderTransferError(`No available stream found for ${stage}`);
+      }
+
       for await (const chunk of stream) {
         if (stage !== 'assets') {
           batch.push(chunk);
@@ -263,7 +263,9 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       }
 
       await this.createReadableStreamForStep(step);
-      this.flush(step, flushUUID);
+      Promise.resolve(this.flush(step, flushUUID)).catch((err: unknown) => {
+        this.onError(err instanceof Error ? err : new Error(String(err)));
+      });
 
       return {
         ok: true,
