@@ -1,9 +1,9 @@
 /* eslint-env jest */
 /* eslint-disable import/no-relative-packages */
-// @ts-expect-error - test purposes
 import { INTERNAL_CACHE_NS } from '@strapi/utils';
+// @ts-expect-error - types are not generated for this file
 import createContext from '../../../../../../../tests/helpers/create-context';
-// @ts-expect-error - test purposes
+// @ts-expect-error - types are not generated for this file
 import { createMockSessionManager } from '../../../../../../../tests/helpers/create-session-manager-mock';
 import adminAuthStrategy, { clearAdminAuthAbilityCache } from '../admin';
 
