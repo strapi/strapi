@@ -18015,12 +18015,12 @@ __metadata:
   linkType: hard
 
 "follow-redirects@npm:^1.15.11, follow-redirects@npm:^1.15.2":
-  version: 1.15.11
-  resolution: "follow-redirects@npm:1.15.11"
+  version: 1.16.0
+  resolution: "follow-redirects@npm:1.16.0"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: 10c0/d301f430542520a54058d4aeeb453233c564aaccac835d29d15e050beb33f339ad67d9bddbce01739c5dc46a6716dbe3d9d0d5134b1ca203effa11a7ef092343
+  checksum: 10c0/a1e2900163e6f1b4d1ed5c221b607f41decbab65534c63fe7e287e40a5d552a6496e7d9d7d976fa4ba77b4c51c11e5e9f683f10b43011ea11e442ff128d0e181
   languageName: node
   linkType: hard
 
