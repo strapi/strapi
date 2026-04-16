@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const yargs = require('yargs');
 const chalk = require('chalk');
 const dotenv = require('dotenv');
-const execa = require('execa');
+
 const {
   publishYalc,
   setupTestApps,
@@ -198,6 +198,7 @@ yargs
                   port,
                   appDir: testAppPath,
                   reportFileName: `playwright-${domain}-${port}.xml`,
+                  domain,
                 });
 
                 // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
