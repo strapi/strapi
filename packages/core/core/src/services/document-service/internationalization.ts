@@ -1,4 +1,4 @@
-import type { Struct, Modules } from '@strapi/types';
+import type { Struct, Modules, Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { curry, assoc } from 'lodash/fp';
 
@@ -11,10 +11,6 @@ type AsyncTransform = (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
   params: Modules.Documents.Params.All
 ) => Promise<Modules.Documents.Params.All>;
-
-type SchemaWithAttributes = {
-  attributes?: Record<string, any>;
-};
 
 const getDefaultLocale = async (): Promise<string> => {
   return strapi.plugin('i18n').service('locales').getDefaultLocale();
@@ -96,7 +92,14 @@ const localeToData: Transform = (contentType, params) => {
   return params;
 };
 
-const normalizeMediaIds = (schema: SchemaWithAttributes, data: Record<string, any>) => {
+/**
+ * Mutates the provided data object in place and returns the same reference
+ * with populated media values replaced by their upload file IDs.
+ */
+const normalizeMediaIds = (
+  schema: Schema.ContentType | Schema.Component,
+  data: Record<string, any>
+) => {
   if (!schema?.attributes || !data || typeof data !== 'object') {
     return data;
   }
@@ -148,7 +151,6 @@ const normalizeMediaIds = (schema: SchemaWithAttributes, data: Record<string, an
 
   return data;
 };
-
 /**
  * Copy non-localized fields from an existing entry to a new entry being created
  * for a different locale of the same document. Returns a new object with the merged data.

@@ -4,6 +4,10 @@ import type { Schema } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from '../utils';
 
+/**
+ * Mutates the provided data object in place and returns the same reference
+ * with populated media values replaced by their upload file IDs.
+ */
 const normalizeMediaIds = (
   schema: Schema.ContentType | Schema.Component,
   data: Record<string, any>
@@ -71,7 +75,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
     return;
   }
 
-  normalizeMediaIds(model, nonLocalizedAttributes);
+  const normalizedNonLocalizedAttributes = normalizeMediaIds(model, nonLocalizedAttributes);
 
   const uid = model.uid;
   const documentId = sourceEntry.documentId;
@@ -89,11 +93,11 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
     select: ['locale', 'id'],
   });
 
-  const entryData = await strapi.documents(uid).omitComponentData(nonLocalizedAttributes);
+  const entryData = await strapi.documents(uid).omitComponentData(normalizedNonLocalizedAttributes);
 
   await async.map(localeEntriesToUpdate, async (entry: any) => {
     const transformedData = await strapi.documents.utils.transformData(
-      cloneDeep(nonLocalizedAttributes),
+      cloneDeep(normalizedNonLocalizedAttributes),
       {
         uid,
         status,

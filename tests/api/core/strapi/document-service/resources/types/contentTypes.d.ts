@@ -752,6 +752,64 @@ export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiMixedContentMixedContent extends Struct.CollectionTypeSchema {
+  collectionName: 'mixed_contents';
+  info: {
+    singularName: 'mixed-content';
+    pluralName: 'mixed-contents';
+    displayName: 'Mixed Content';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    localizedText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    sharedText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    sharedMedia: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<
+      'api::mixed-content.mixed-content',
+      'oneToOne',
+      'admin::user'
+    > &
+      Schema.Attribute.Private;
+    updatedBy: Schema.Attribute.Relation<
+      'api::mixed-content.mixed-content',
+      'oneToOne',
+      'admin::user'
+    > &
+      Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'api::mixed-content.mixed-content',
+      'oneToMany',
+      'api::mixed-content.mixed-content'
+    >;
+    locale: Schema.Attribute.String;
+  };
+}
+
 declare module '@strapi/types' {
   export module Public {
     export module Registries {
@@ -772,6 +830,7 @@ declare module '@strapi/types' {
         'api::article.article': ApiArticleArticle;
         'api::author.author': ApiAuthorAuthor;
         'api::category.category': ApiCategoryCategory;
+        'api::mixed-content.mixed-content': ApiMixedContentMixedContent;
       }
     }
   }
