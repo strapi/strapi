@@ -34,7 +34,7 @@ export function usePreviewInputManager(
 
     /**
      * Only send message if the field is not a data structure (component, dynamic zone)
-     * because we already send events for their fields
+     * because we already send events for their fields.
      */
     if (!['component', 'dynamiczone'].includes(type)) {
       const sendMessage = getSendMessage(iframe);

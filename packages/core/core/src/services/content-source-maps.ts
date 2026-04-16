@@ -21,7 +21,6 @@ const ENCODABLE_TYPES = [
   /**
    * We cannot modify the response shape, so types that aren't based on string cannot be encoded:
    * - json: object
-   * - blocks: object, will require a custom implementation in a dedicated PR
    * - integer, float and decimal: number
    * - boolean: boolean (believe it or not)
    * - uid: can be stringified but would mess up URLs
@@ -46,15 +45,33 @@ interface EncodingInfo {
   schema: Struct.Schema;
 }
 
+type EncodableFieldContentSourceMap = FieldContentSourceMap & {
+  fieldPath?: string;
+};
+
 const isObject = (value: unknown): value is Record<string, any> => {
   return typeof value === 'object' && value !== null;
+};
+
+const isBlocksLikeValue = (value: unknown): boolean => {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  return value.every((node) => {
+    if (!isObject(node)) {
+      return false;
+    }
+
+    return typeof node.type === 'string' && Array.isArray(node.children);
+  });
 };
 
 const createContentSourceMapsService = (strapi: Core.Strapi) => {
   return {
     encodeField(
       text: string,
-      { kind, model, documentId, type, path, locale }: FieldContentSourceMap
+      { kind, model, documentId, type, path, locale, fieldPath }: EncodableFieldContentSourceMap
     ) {
       /**
        * Combine all metadata into into a one string so we only have to deal with one data-atribute
@@ -75,8 +92,64 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
       if (locale) {
         strapiSource.set('locale', locale);
       }
+      if (fieldPath) {
+        strapiSource.set('fieldPath', fieldPath);
+      }
 
-      return vercelStegaCombine(text, { strapiSource: strapiSource.toString() });
+      const encoded = vercelStegaCombine(
+        text,
+        {
+          strapiSource: strapiSource.toString(),
+        },
+        false
+      );
+
+      return encoded;
+    },
+
+    encodeBlocks(
+      blocks: unknown,
+      metadata: Omit<EncodableFieldContentSourceMap, 'path' | 'type'> & {
+        path: string;
+        fieldPath: string;
+      }
+    ): unknown {
+      const visitNode = (node: unknown, currentPath: string): unknown => {
+        if (Array.isArray(node)) {
+          return node.map((child, index) => visitNode(child, `${currentPath}.${index}`));
+        }
+
+        if (!isObject(node)) {
+          return node;
+        }
+
+        return Object.entries(node).reduce(
+          (acc, [nodeKey, nodeValue]) => {
+            if (nodeKey === 'text' && typeof nodeValue === 'string') {
+              acc[nodeKey] = this.encodeField(nodeValue, {
+                ...metadata,
+                path: `${currentPath}.text`,
+                type: 'blocks',
+                fieldPath: metadata.fieldPath,
+              });
+              return acc;
+            }
+
+            if (nodeKey === 'children' && Array.isArray(nodeValue)) {
+              acc[nodeKey] = nodeValue.map((child, index) =>
+                visitNode(child, `${currentPath}.children.${index}`)
+              );
+              return acc;
+            }
+
+            acc[nodeKey] = nodeValue;
+            return acc;
+          },
+          {} as Record<string, unknown>
+        );
+      };
+
+      return visitNode(blocks, metadata.path);
     },
 
     async encodeEntry({ data, schema }: EncodingInfo): Promise<any> {
@@ -90,11 +163,65 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
             return;
           }
 
+          const fieldPath = path.rawWithIndices ?? key;
+
+          if (
+            (attribute.type === 'blocks' || attribute.type === 'json') &&
+            isBlocksLikeValue(value)
+          ) {
+            set(
+              key,
+              this.encodeBlocks(value, {
+                path: fieldPath,
+                fieldPath,
+                kind: schema.kind,
+                model: schema.uid as UID.Schema,
+                locale: data.locale,
+                documentId: data.documentId,
+              }) as any
+            );
+            return;
+          }
+
+          if (attribute.type === 'media' && isObject(value)) {
+            const encodeMediaItem = (item: any, index?: number) => {
+              if (!isObject(item) || typeof item.url !== 'string') {
+                return item;
+              }
+
+              let itemPath = fieldPath;
+              if (index !== undefined) {
+                itemPath = `${itemPath}.${index}`;
+              }
+
+              const encodedUrl = this.encodeField(item.url, {
+                path: `${itemPath}.url`,
+                type: attribute.type,
+                kind: schema.kind,
+                model: schema.uid as UID.Schema,
+                locale: data.locale,
+                documentId: data.documentId,
+              });
+
+              return {
+                ...item,
+                url: encodedUrl,
+              };
+            };
+
+            if (Array.isArray(value)) {
+              set(key, value.map((item, index) => encodeMediaItem(item, index)) as any);
+            } else {
+              set(key, encodeMediaItem(value));
+            }
+            return;
+          }
+
           if (ENCODABLE_TYPES.includes(attribute.type) && typeof value === 'string') {
             set(
               key,
               this.encodeField(value, {
-                path: path.rawWithIndices!,
+                path: fieldPath,
                 type: attribute.type,
                 kind: schema.kind,
                 model: schema.uid as UID.Schema,
