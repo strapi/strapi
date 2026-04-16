@@ -54,6 +54,15 @@ const createProvider = (emailConfig: EmailConfig) => {
 
 export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   const emailConfig: EmailConfig = strapi.config.get('plugin::email');
+
+  const providerName = emailConfig.provider.toLowerCase();
+  const isDev = process.env.NODE_ENV !== 'production';
+  if (providerName === 'sendmail' && isDev) {
+    strapi.log.warn(
+      '[email]: The "sendmail" email provider is still supported, but for most production setups that use a dedicated SMTP relay, consider switching to @strapi/provider-email-nodemailer (set `provider` to `"nodemailer"` in your email plugin config). This message is only shown in non-production environments.'
+    );
+  }
+
   strapi.plugin('email').provider = createProvider(emailConfig);
 
   // Add permissions

@@ -1,0 +1,208 @@
+import { resolveMx as dnsResolveMx } from 'dns/promises';
+import nodemailer from 'nodemailer';
+import type { SentMessageInfo, SendMailOptions } from 'nodemailer';
+
+import {
+  collectRecipients,
+  extractEmail,
+  getHostFromAddress,
+  groupRecipientsByDomain,
+} from './addressing';
+import { createLogger } from './logger';
+import type { ProviderSendmailOptions } from './types';
+
+/**
+ * Mirrors legacy `const devPort = options.devPort || -1` (guileen/node-sendmail).
+ * `0` is falsy → `-1` (MX mode). `true` is truthy and was passed to `createConnection` (Node
+ * coerces port `true` to `1`).
+ */
+function getEffectiveDevPort(options: ProviderSendmailOptions): number {
+  const v = options.devPort;
+  if (v === undefined || v === false || v === null) {
+    return -1;
+  }
+  if (v === true) {
+    return 1;
+  }
+  if (typeof v === 'number') {
+    return v || -1;
+  }
+  return -1;
+}
+
+/**
+ * Legacy `sendmail` connects with `createConnection(devPort, devHost)` in dev mode — the
+ * dev port is the SMTP port. Otherwise use `smtpPort` (default 25).
+ */
+function getOutboundSmtpPort(options: ProviderSendmailOptions): number {
+  const dev = getEffectiveDevPort(options);
+  if (dev !== -1) {
+    return dev;
+  }
+  return options.smtpPort || 25;
+}
+
+/**
+ * Build list of SMTP peers to try for a recipient domain (MX resolution or dev server),
+ * matching guileen/node-sendmail `connectMx` + `smtpHost` append behavior.
+ */
+export async function resolveMxHosts(
+  domain: string,
+  options: ProviderSendmailOptions
+): Promise<Array<{ exchange: string }>> {
+  const devPort = getEffectiveDevPort(options);
+  const devHost = options.devHost || 'localhost';
+
+  if (devPort !== -1) {
+    return [{ exchange: devHost }];
+  }
+
+  let records: Awaited<ReturnType<typeof dnsResolveMx>>;
+  try {
+    records = await dnsResolveMx(domain);
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error(String(err));
+    throw new Error(`can not resolve Mx of <${domain}>: ${e.message}`);
+  }
+
+  if (!records || records.length === 0) {
+    throw new Error(`can not resolve Mx of <${domain}>`);
+  }
+
+  records.sort((a, b) => a.priority - b.priority);
+
+  // Mirror legacy `const smtpHost = options.smtpHost || -1` behavior: falsy (eg 0) disables.
+  const smtpHost = options.smtpHost || -1;
+  if (smtpHost !== -1) {
+    records.push({ exchange: String(smtpHost), priority: 9999 });
+  }
+
+  return records.map((r) => ({
+    exchange: r.exchange.replace(/\.$/, ''),
+  }));
+}
+
+async function trySendViaHost(
+  exchange: string,
+  smtpPort: number,
+  srcHost: string,
+  fromEnvelope: string,
+  recipients: string[],
+  mail: SendMailOptions,
+  dkim: SendMailOptions['dkim'],
+  options: ProviderSendmailOptions
+): Promise<SentMessageInfo> {
+  const transporter = nodemailer.createTransport({
+    host: exchange,
+    port: smtpPort,
+    secure: false,
+    // Legacy sendmail@1.6.1 uses plain SMTP sockets and does not attempt STARTTLS.
+    ignoreTLS: true,
+    requireTLS: false,
+    name: srcHost,
+    tls: {
+      rejectUnauthorized: options.rejectUnauthorized,
+    },
+    connectionTimeout: 60_000,
+    greetingTimeout: 30_000,
+    socketTimeout: 60_000,
+  });
+
+  try {
+    return await transporter.sendMail({
+      ...mail,
+      envelope: {
+        from: fromEnvelope,
+        to: recipients,
+      },
+      dkim,
+    });
+  } finally {
+    transporter.close();
+  }
+}
+
+/**
+ * Direct SMTP delivery (per recipient domain, per MX with fallback), replacing the
+ * unmaintained `sendmail` npm package while preserving the same routing semantics.
+ */
+export async function sendDirectSmtp(
+  mail: SendMailOptions,
+  providerOptions: ProviderSendmailOptions
+): Promise<void> {
+  const logger = createLogger(providerOptions);
+  const smtpPort = getOutboundSmtpPort(providerOptions);
+
+  const fromHeader = String(mail.from || '');
+  const fromAddr = extractEmail(fromHeader);
+  const srcHost = String(getHostFromAddress(fromAddr));
+
+  const dkimOpt = providerOptions.dkim;
+  const dkim: SendMailOptions['dkim'] =
+    dkimOpt && typeof dkimOpt === 'object' && 'privateKey' in dkimOpt
+      ? {
+          domainName: srcHost,
+          keySelector: dkimOpt.keySelector || 'dkim',
+          privateKey: dkimOpt.privateKey,
+        }
+      : undefined;
+
+  const recipients = collectRecipients({
+    to: mail.to as string | string[] | undefined,
+    cc: mail.cc as string | string[] | undefined,
+    bcc: mail.bcc as string | string[] | undefined,
+  });
+
+  if (recipients.length === 0) {
+    throw new Error('No recipients defined');
+  }
+
+  const groups = groupRecipientsByDomain(recipients);
+  const fromEnvelope = fromAddr;
+
+  let anyDomainDelivered = false;
+
+  for (const domain of Object.keys(groups)) {
+    const domainRecipients = groups[domain];
+    let hosts: Array<{ exchange: string }>;
+    try {
+      hosts = await resolveMxHosts(domain, providerOptions);
+    } catch (err) {
+      logger.error('Sendmail provider: MX resolution failed', err);
+      throw err instanceof Error ? err : new Error(String(err));
+    }
+
+    let lastError: Error | undefined;
+    let sent = false;
+
+    for (const { exchange } of hosts) {
+      try {
+        await trySendViaHost(
+          exchange,
+          smtpPort,
+          srcHost,
+          fromEnvelope,
+          domainRecipients,
+          mail,
+          dkim,
+          providerOptions
+        );
+        sent = true;
+        break;
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        logger.error(`Sendmail provider: failed to send via ${exchange}:${smtpPort}`, lastError);
+      }
+    }
+
+    if (sent) {
+      anyDomainDelivered = true;
+    } else {
+      logger.error(`Sendmail provider: failed to deliver for domain ${domain}`, lastError);
+    }
+  }
+
+  if (!anyDomainDelivered) {
+    throw new Error('Failed to deliver mail for all recipient domains');
+  }
+}

@@ -75,7 +75,7 @@
     "nodemailer": "8.0.5"
   },
   "devDependencies": {
-    "@types/nodemailer": "7.0.10",
+    "@types/nodemailer": "7.0.11",
     "eslint-config-custom": "5.42.0",
     "tsconfig": "5.42.0"
   },

@@ -5566,13 +5566,13 @@ __metadata:
   linkType: hard
 
 "@octokit/plugin-paginate-rest@npm:^9.0.0":
-  version: 9.2.2
-  resolution: "@octokit/plugin-paginate-rest@npm:9.2.2"
+  version: 9.2.1
+  resolution: "@octokit/plugin-paginate-rest@npm:9.2.1"
   dependencies:
     "@octokit/types": "npm:^12.6.0"
   peerDependencies:
     "@octokit/core": 5
-  checksum: 10c0/e9c85b17064fe6b62f9af88dba008f3daef456b1195340ea0831990e9c4dbabe89be950b6e5dc924ebcca18ad1aaa0cf6df7d824dc8be26ce9a55f20336ff815
+  checksum: 10c0/1dc55032a9e0c3e6440080a319975c9e4f189913fbc8870a48048d0c712473ea3d902ba247a37a46d45d502859b2728731a0d285107e4b0fa628d380f87163b4
   languageName: node
   linkType: hard
 
@@ -9360,7 +9360,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
-    "@types/nodemailer": "npm:7.0.10"
+    "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.42.0"
     nodemailer: "npm:8.0.5"
     tsconfig: "npm:5.42.0"
@@ -9382,10 +9382,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
-    "@strapi/utils": "npm:5.42.0"
-    "@types/sendmail": "npm:1.4.4"
+    "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.42.0"
-    sendmail: "npm:^1.6.1"
+    nodemailer: "npm:8.0.5"
     tsconfig: "npm:5.42.0"
   languageName: unknown
   linkType: soft
@@ -11058,12 +11057,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/nodemailer@npm:7.0.10":
-  version: 7.0.10
-  resolution: "@types/nodemailer@npm:7.0.10"
+"@types/nodemailer@npm:7.0.11":
+  version: 7.0.11
+  resolution: "@types/nodemailer@npm:7.0.11"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10c0/14e4389a71a154cad898c6ad21fbf12309f86fa504c6d11bf0911190697164f1c3b0c0d9f6cb425c189af73137cc49eb10dbb41574174bf822cfe37755b87c03
+  checksum: 10c0/dc6472c26600e763c38721b0691fc3014eb868d20b97eb48cfbc4fe9a7a09f66c0ccd8d647033a4be91051cc3c7bdca73c006db2f7a9e8bdd1ce65bb5ec2599c
   languageName: node
   linkType: hard
 
@@ -11295,13 +11294,6 @@ __metadata:
     "@types/mime": "npm:^1"
     "@types/node": "npm:*"
   checksum: 10c0/1aad6bfafdaa3a3cadad1b441843dfd166821c0e93513daabe979de85b552a1298cfb6f07d40f80b5ecf14a3194dc148deb138605039841f1dadc7132c73e634
-  languageName: node
-  linkType: hard
-
-"@types/sendmail@npm:1.4.4":
-  version: 1.4.4
-  resolution: "@types/sendmail@npm:1.4.4"
-  checksum: 10c0/d1b15d78e0d17ec842ab0f8f3d60c2faf8235051d3dc351f61ccc6c4ed27abd2653a70f255c083d909d7cc4eaa23affc03092060864fbbb52c079486076315f6
   languageName: node
   linkType: hard
 
@@ -12495,13 +12487,6 @@ __metadata:
   version: 1.2.2
   resolution: "address@npm:1.2.2"
   checksum: 10c0/1c8056b77fb124456997b78ed682ecc19d2fd7ea8bd5850a2aa8c3e3134c913847c57bcae418622efd32ba858fa1e242a40a251ac31da0515664fc0ac03a047d
-  languageName: node
-  linkType: hard
-
-"addressparser@npm:1.0.1":
-  version: 1.0.1
-  resolution: "addressparser@npm:1.0.1"
-  checksum: 10c0/15a6b149c643e3fb0888bcad89aa385e7718714a33049b5f357063b64b84a2febd6a0775011783c25e6b161982663d38a84fd4522de69adb4779971b92b4ddb3
   languageName: node
   linkType: hard
 
@@ -13729,20 +13714,6 @@ __metadata:
     base64-js: "npm:^1.3.1"
     ieee754: "npm:^1.1.13"
   checksum: 10c0/27cac81cff434ed2876058d72e7c4789d11ff1120ef32c9de48f59eab58179b66710c488987d295ae89a228f835fc66d088652dffeb8e3ba8659f80eb091d55e
-  languageName: node
-  linkType: hard
-
-"buildmail@npm:3.10.0":
-  version: 3.10.0
-  resolution: "buildmail@npm:3.10.0"
-  dependencies:
-    addressparser: "npm:1.0.1"
-    libbase64: "npm:0.1.0"
-    libmime: "npm:2.1.0"
-    libqp: "npm:1.1.0"
-    nodemailer-fetch: "npm:1.6.0"
-    nodemailer-shared: "npm:1.1.0"
-  checksum: 10c0/1d816e1519a1c785b8d3c05c99db9925d5c421f51ed4d9621cea933ead620d4f91241a6c4eff08cbff406a5583693f12943a4fca65d061dd2aa8add22322e430
   languageName: node
   linkType: hard
 
@@ -15697,15 +15668,6 @@ __metadata:
   bin:
     direction: cli.js
   checksum: 10c0/2257006edba01b3294322311a212a3f0e7c656d710ab164fd95123a2a9daaec536252c60da6a9df5be2bb89e9030684e9d1c7804fe82c9b3f510c2f737adeada
-  languageName: node
-  linkType: hard
-
-"dkim-signer@npm:0.2.2":
-  version: 0.2.2
-  resolution: "dkim-signer@npm:0.2.2"
-  dependencies:
-    libmime: "npm:^2.0.3"
-  checksum: 10c0/f4268f812bfa34f714eefae33502e588f332db2e7f4e8f5df76852e6ad982660635076c78ffa4d48cd2406c90b2f76267fa5d65c541e9d6fedcad7ccc1bb6461
   languageName: node
   linkType: hard
 
@@ -19531,20 +19493,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:0.4.13":
-  version: 0.4.13
-  resolution: "iconv-lite@npm:0.4.13"
-  checksum: 10c0/9822d158a94cb7cbbf602d63a3eee231793319bc863229f7f0b96870078b95ead40ed222f291bd5418cd3a2ee29c4cf290bc19d6632f8b304fff0ac473cee227
-  languageName: node
-  linkType: hard
-
-"iconv-lite@npm:0.4.15":
-  version: 0.4.15
-  resolution: "iconv-lite@npm:0.4.15"
-  checksum: 10c0/25699b635722175ee6fa5e07872b1ee71d25d5f2fd800b6f9384cc3455a829a53e5a6bbbc946b6db5c6b707abdf5fcdba623aa29cf3ddc69c097e0f181202726
-  languageName: node
-  linkType: hard
-
 "iconv-lite@npm:0.6.3, iconv-lite@npm:^0.6.3":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
@@ -21866,42 +21814,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libbase64@npm:0.1.0":
-  version: 0.1.0
-  resolution: "libbase64@npm:0.1.0"
-  checksum: 10c0/e6a8b0f6b4bba81ba82064d14c472dc9a57f064ef14a7d05a9d85ebf15f51af0c63634eb59dc595fa7e39ad73a57c92b025e78aa9d5f9260c400f9c5398ac5d1
-  languageName: node
-  linkType: hard
-
-"libmime@npm:2.1.0":
-  version: 2.1.0
-  resolution: "libmime@npm:2.1.0"
-  dependencies:
-    iconv-lite: "npm:0.4.13"
-    libbase64: "npm:0.1.0"
-    libqp: "npm:1.1.0"
-  checksum: 10c0/49d1ae677f851aba40056ca50e4a53dc5c904f58e1fe6ca6f9375a88128864e3a55f60e939d38806f0cfe78de65be55fb37a5be064d522a5aa006d31f69b1abb
-  languageName: node
-  linkType: hard
-
-"libmime@npm:^2.0.3":
-  version: 2.1.3
-  resolution: "libmime@npm:2.1.3"
-  dependencies:
-    iconv-lite: "npm:0.4.15"
-    libbase64: "npm:0.1.0"
-    libqp: "npm:1.1.0"
-  checksum: 10c0/67959cf5fa99a0aaf158e1ca0deca0051619280cb7b17fb765c4fcc14e524e2fa3406e86150fa4f7904ce6a1b21051fa928c74af6832c93ee6c34517bb23d255
-  languageName: node
-  linkType: hard
-
-"libqp@npm:1.1.0":
-  version: 1.1.0
-  resolution: "libqp@npm:1.1.0"
-  checksum: 10c0/7be09651e4ad13faca701e0f34ea255b052fac01a347a82f1cf800c5db13879c00b5549332592c781d9f48d228b015d5d4df8a7f891c4139eca054202d450264
-  languageName: node
-  linkType: hard
-
 "lie@npm:3.1.1":
   version: 3.1.1
   resolution: "lie@npm:3.1.1"
@@ -22432,16 +22344,6 @@ __metadata:
   dependencies:
     "@jridgewell/sourcemap-codec": "npm:^1.5.5"
   checksum: 10c0/299378e38f9a270069fc62358522ddfb44e94244baa0d6a8980ab2a9b2490a1d03b236b447eee309e17eb3bddfa482c61259d47960eb018a904f0ded52780c4a
-  languageName: node
-  linkType: hard
-
-"mailcomposer@npm:3.12.0":
-  version: 3.12.0
-  resolution: "mailcomposer@npm:3.12.0"
-  dependencies:
-    buildmail: "npm:3.10.0"
-    libmime: "npm:2.1.0"
-  checksum: 10c0/282dd9b8f594e0840f20ceffafeed9b1ffb6de62d8c4b543c4d74b597628f6050fc013e6a3a7e1b8b2c33a6c8ad205dfed4ee807e5fc01a9e6802f57d09a69be
   languageName: node
   linkType: hard
 
@@ -23811,22 +23713,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer-fetch@npm:1.6.0":
-  version: 1.6.0
-  resolution: "nodemailer-fetch@npm:1.6.0"
-  checksum: 10c0/47b1aa2c7704582663b71b314251260bd9ceeb7f88cd016a27060a10dab41e21ad14e24a46fdbd1cf9a8c056824f99e56415653c6134b82e80c756baa67218b5
-  languageName: node
-  linkType: hard
-
-"nodemailer-shared@npm:1.1.0":
-  version: 1.1.0
-  resolution: "nodemailer-shared@npm:1.1.0"
-  dependencies:
-    nodemailer-fetch: "npm:1.6.0"
-  checksum: 10c0/15d19fb0d1b546527da4e2d443cd53e50c3a7638b5b33a1ccd7ddc401680bc9163337cf09f6fb4e76a5f12de42f5fadf85dad80e56378edc3c27dd641413b3f7
-  languageName: node
-  linkType: hard
-
 "nodemailer@npm:8.0.5":
   version: 8.0.5
   resolution: "nodemailer@npm:8.0.5"
@@ -25141,9 +25027,9 @@ __metadata:
   linkType: hard
 
 "picomatch@npm:^2.0.4, picomatch@npm:^2.2.1, picomatch@npm:^2.2.3, picomatch@npm:^2.3.1":
-  version: 2.3.2
-  resolution: "picomatch@npm:2.3.2"
-  checksum: 10c0/a554d1709e59be97d1acb9eaedbbc700a5c03dbd4579807baed95100b00420bc729335440ef15004ae2378984e2487a7c1cebd743cfdb72b6fa9ab69223c0d61
+  version: 2.3.1
+  resolution: "picomatch@npm:2.3.1"
+  checksum: 10c0/26c02b8d06f03206fc2ab8d16f19960f2ff9e81a658f831ecb656d8f17d9edc799e8364b1f4a7873e89d9702dff96204be0fa26fe4181f6843f040f819dac4be
   languageName: node
   linkType: hard
 
@@ -27232,16 +27118,6 @@ __metadata:
     range-parser: "npm:~1.2.1"
     statuses: "npm:~2.0.2"
   checksum: 10c0/20c2389fe0fdf3fc499938cac598bc32272287e993c4960717381a10de8550028feadfb9076f959a3a3ebdea42e1f690e116f0d16468fa56b9fd41866d3dc267
-  languageName: node
-  linkType: hard
-
-"sendmail@npm:^1.6.1":
-  version: 1.6.1
-  resolution: "sendmail@npm:1.6.1"
-  dependencies:
-    dkim-signer: "npm:0.2.2"
-    mailcomposer: "npm:3.12.0"
-  checksum: 10c0/093b3fb0d43b70e27536af2ee0873973c568b6fda472e9fc240010166d7880312be3ae710802faecadea7891b21616a26caa277392a678aece619d5bff50275d
   languageName: node
   linkType: hard
 
