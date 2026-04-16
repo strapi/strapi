@@ -4,20 +4,20 @@ import fs from 'fs';
 import path from 'path';
 import { AdminUser } from '../../../../shared/contracts/shared';
 
-/**
- * In-memory cache for AI tokens
- * Key format: `${projectId}:${userId}`
- */
-const aiTokenCache = new Map<
-  string,
-  {
-    token: string;
-    expiresAt?: string;
-    expiresAtMs?: number;
-  }
->();
-
 const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
+  /**
+   * In-memory cache for AI tokens
+   * Key format: `${projectId}:${userId}`
+   */
+  const aiTokenCache = new Map<
+    string,
+    {
+      token: string;
+      expiresAt?: string;
+      expiresAtMs?: number;
+    }
+  >();
+
   const isEnabled = (): boolean => {
     const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
     const licenseEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;

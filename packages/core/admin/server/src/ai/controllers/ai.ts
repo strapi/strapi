@@ -46,10 +46,17 @@ export default {
       return ctx.notFound();
     }
 
-    const aiFeatureConfig = await strapi.ai.admin.getAiFeatureConfig();
+    try {
+      const aiFeatureConfig = await strapi.ai.admin.getAiFeatureConfig();
 
-    ctx.body = {
-      data: aiFeatureConfig,
-    } satisfies GetAiFeatureConfig.Response;
+      ctx.body = {
+        data: aiFeatureConfig,
+      } satisfies GetAiFeatureConfig.Response;
+    } catch (error) {
+      strapi.log.error('AI feature config request failed', error);
+      return ctx.internalServerError(
+        'AI feature config request failed. Check server logs for details.'
+      );
+    }
   },
 };
