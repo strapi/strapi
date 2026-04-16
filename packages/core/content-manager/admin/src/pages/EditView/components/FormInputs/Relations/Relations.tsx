@@ -109,7 +109,8 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
  * RelationsField
  * -----------------------------------------------------------------------------------------------*/
 
-const RELATIONS_TO_DISPLAY = 5;
+const RELATIONS_TO_DISPLAY = 10;
+const MAX_VISIBLE_RELATIONS = 10;
 const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
 const EMPTY_RELATION_RESULTS: RelationResult[] = [];
 
@@ -1029,10 +1030,10 @@ const RelationsList = ({
   const canReorder = !ONE_WAY_RELATIONS.includes(relationType);
 
   const dynamicListHeight =
-    data.length > RELATIONS_TO_DISPLAY
-      ? Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
+    data.length > MAX_VISIBLE_RELATIONS
+      ? Math.min(data.length, MAX_VISIBLE_RELATIONS) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
         RELATION_ITEM_HEIGHT / 2
-      : Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
+      : Math.min(data.length, MAX_VISIBLE_RELATIONS) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
 
   const itemData = React.useMemo(
     () => ({
