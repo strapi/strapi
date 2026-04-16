@@ -39,6 +39,10 @@ const defaultConfig = {
         enabled: true,
       },
     },
+    cache: {
+      defaultProvider: 'memory',
+      providers: {},
+    },
   } satisfies Partial<Core.Config.Server>,
   admin: {} satisfies Partial<Core.Config.Admin>,
   api: {

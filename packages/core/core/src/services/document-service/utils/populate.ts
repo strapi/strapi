@@ -1,5 +1,8 @@
 import type { UID } from '@strapi/types';
 
+import { INTERNAL_CACHE_NS } from '../../caching/internal-cache-namespaces';
+import { memoryCacheSync } from '../../caching/memory-cache-provider';
+
 interface Options {
   /**
    * Fields to select when populating relations
@@ -7,14 +10,12 @@ interface Options {
   relationalFields?: string[];
 }
 
-const deepPopulateCache = new Map<string, any>();
-
 // We want to build a populate object based on the schema
 export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
   const cacheKey = `${uid}::${JSON.stringify(opts)}`;
-  const cached = deepPopulateCache.get(cacheKey);
-  if (cached) {
-    return cached;
+  const cached = memoryCacheSync.get(INTERNAL_CACHE_NS.DOCUMENT_DEEP_POPULATE, cacheKey);
+  if (cached?.value !== undefined && cached.value !== null) {
+    return cached.value;
   }
 
   const model = strapi.getModel(uid);
@@ -74,6 +75,6 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
     return acc;
   }, {});
 
-  deepPopulateCache.set(cacheKey, result);
+  memoryCacheSync.set(INTERNAL_CACHE_NS.DOCUMENT_DEEP_POPULATE, cacheKey, result);
   return result;
 };

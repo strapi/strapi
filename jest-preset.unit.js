@@ -2,7 +2,12 @@
 
 module.exports = {
   setupFilesAfterEnv: [__dirname + '/tests/setup/unit.setup.js'],
-  modulePathIgnorePatterns: ['.cache', 'dist'],
+  // Match only `.cache` / `dist` path segments. Plain `.cache` matches any char + "cache"
+  // (e.g. `strapi-cache-provider`) and breaks Jest when the repo path contains `-cache`.
+  modulePathIgnorePatterns: [
+    '(?:^|[\\\\/])\\.cache(?:[\\\\/]|$)',
+    '(?:^|[\\\\/])dist(?:[\\\\/]|$)',
+  ],
   testPathIgnorePatterns: [
     '.testdata.{js,ts}',
     '.test.utils.{js,ts}',

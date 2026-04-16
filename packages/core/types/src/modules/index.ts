@@ -3,6 +3,7 @@ export type * as EntityService from './entity-service';
 export type * as Documents from './documents';
 
 // individual files
+export type * as Cache from './cache';
 export type * as Auth from './auth';
 export type * as ContentAPI from './content-api';
 export type * as CoreStore from './core-store';
