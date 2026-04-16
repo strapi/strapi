@@ -89,7 +89,7 @@ export const RolesListPage = () => {
     } catch (error) {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
