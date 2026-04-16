@@ -10,6 +10,7 @@ import {
 
 import { reducer as appReducer, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
+import { getBasename } from '../utils/basename';
 
 /**
  * @description Static reducers are ones we know, they live in the admin package.
@@ -92,7 +93,8 @@ const rtkQueryUnauthorizedMiddleware: Middleware =
     // isRejectedWithValue Or isRejected
     if (isRejected(action) && action.payload?.status === 401) {
       dispatch(logout());
-      window.location.href = '/admin/auth/login';
+      const basename = getBasename();
+      window.location.href = `${basename}/auth/login`;
       return;
     }
 
