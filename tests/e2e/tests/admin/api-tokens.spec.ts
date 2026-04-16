@@ -23,7 +23,7 @@ test.describe('API Tokens', () => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
   });
 

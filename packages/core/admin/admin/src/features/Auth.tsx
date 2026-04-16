@@ -57,6 +57,23 @@ interface AuthContextValue {
   user?: User;
 }
 
+/**
+ * ensure the Auth context never exposes a non-function for checkUserHasPermissions.
+ * When this is undefined (e.g. context timing in production builds), consumers would throw
+ * "p is not a function" / "checkUserHasPermissions is not a function". By always passing
+ * a function here, all current and future consumers are protected without per-call-site guards.
+ *
+ * When would the fallback run? Only if the real checkUserHasPermissions were ever undefined
+ * when we pass to the Provider (e.g. a rare timing/build edge case). In normal runs it is
+ * always defined (useCallback), so the real function is passed and behavior is unchanged.
+ *
+ * If the fallback ever did run: it returns [] so consumers (which use .length > 0) treat it
+ * as "no permission" for that render—under-permissive. On the next AuthProvider re-render we
+ * pass the real function again, so the context updates and the view corrects quickly.
+ * @see https://github.com/strapi/strapi/issues/24384
+ */
+const NOOP_CHECK_USER_HAS_PERMISSIONS: AuthContextValue['checkUserHasPermissions'] = async () => [];
+
 const [Provider, useAuth] = createContext<AuthContextValue>('Auth');
 
 interface AuthProviderProps {
@@ -281,7 +298,7 @@ const AuthProvider = ({
       login={login}
       logout={logout}
       permissions={userPermissions}
-      checkUserHasPermissions={checkUserHasPermissions}
+      checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}
       refetchPermissions={refetchPermissions}
       isLoading={isLoading}
     >
