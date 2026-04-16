@@ -3100,6 +3100,11 @@ async function copyComponentRelations({
 
   const componentTargetDraftMapCache = new Map<string, Map<number, number> | null>();
   const componentTargetReverseMapCache = new Map<string, Map<number, number> | null>();
+  const componentHierarchyCaches: ComponentHierarchyCaches = {
+    parentInstanceCache: new Map(),
+    ancestorDpCache: new Map(),
+    parentDpCache: new Map(),
+  };
 
   for (const publishedIdsChunk of publishedIdsChunks) {
     // Get component relations for published entries
@@ -3113,11 +3118,6 @@ async function copyComponentRelations({
 
     const componentCloneCache = new Map<string, Map<string, number>>();
     const clonedComponentPairsCache: ClonedComponentPairsCache = new Map();
-    const componentHierarchyCaches: ComponentHierarchyCaches = {
-      parentInstanceCache: new Map(),
-      ancestorDpCache: new Map(),
-      parentDpCache: new Map(),
-    };
 
     // Filter component relations: only propagate if component's parent in the component hierarchy doesn't have draft/publish
     // This matches discardDraft() behavior via shouldPropagateComponentRelationToNewVersion
