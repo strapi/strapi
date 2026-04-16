@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Accordion, Box, Flex, FlexComponent, Typography } from '@strapi/design-system';
+import { Accordion, Box, Flex, FlexComponent, Tooltip, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -60,9 +60,11 @@ const ComponentCategory = ({
               >
                 <ComponentIcon color="currentColor" background="primary200" icon={icon} />
 
-                <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
-                  {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
-                </Typography>
+                <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
+                  <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
+                    {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
+                  </Typography>
+                </Tooltip>
               </Flex>
             </ComponentBox>
           ))}
