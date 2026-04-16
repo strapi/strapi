@@ -11,7 +11,7 @@ import {
 import { HOOKS } from '../constants/hooks';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 import { BaseQueryError } from '../utils/api';
-import { getMainField } from '../utils/attributes';
+import { getMainField, getMediaField, type MediaField } from '../utils/attributes';
 
 import { useContentTypeSchema } from './useContentTypeSchema';
 import {
@@ -58,6 +58,7 @@ interface EditFieldSharedProps
     Pick<Filters.Filter, 'mainField'> {
   hint?: string;
   label: string;
+  mediaField?: MediaField;
   size: number;
   unique?: boolean;
   visible?: boolean;
@@ -376,8 +377,11 @@ const convertEditLayoutToFieldLayouts = (
           hint: metadata.description,
           label: metadata.label ?? '',
           name: field.name,
-          // @ts-expect-error – mainField does exist on the metadata for a relation.
           mainField: getMainField(attribute, metadata.mainField || settings.mainField, {
+            schemas,
+            components: components?.schemas ?? {},
+          }),
+          mediaField: getMediaField(attribute, metadata.mediaField, {
             schemas,
             components: components?.schemas ?? {},
           }),

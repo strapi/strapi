@@ -128,6 +128,8 @@ const isCreatorField = (schema: any, name: any) => {
 
 const isRelation = (attribute: any) => attribute.type === 'relation';
 
+const isMedia = (attribute: any) => attribute.type === 'media';
+
 const hasRelationAttribute = (schema: any, name: any) => {
   if (!_.has(schema.attributes, name)) {
     return false;
@@ -199,6 +201,7 @@ export {
   isVisible,
   isSearchable,
   isRelation,
+  isMedia,
   isListable,
   hasEditableAttribute,
   hasRelationAttribute,
