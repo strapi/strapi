@@ -5,6 +5,7 @@ import {
   Box,
   Flex,
   FlexComponent,
+  Tooltip,
   Typography,
   TypographyComponent,
 } from '@strapi/design-system';
@@ -67,9 +68,11 @@ const ComponentCategory = ({
               >
                 <ComponentIcon color="currentColor" background="primary200" icon={icon} />
 
-                <ComponentName variant="pi" fontWeight="bold">
-                  {displayName}
-                </ComponentName>
+                <Tooltip label={displayName}>
+                  <ComponentName variant="pi" fontWeight="bold">
+                    {displayName}
+                  </ComponentName>
+                </Tooltip>
               </Flex>
             </ComponentBox>
           ))}
