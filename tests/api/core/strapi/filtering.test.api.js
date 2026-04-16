@@ -465,6 +465,42 @@ describe('Filtering API', () => {
       });
     });
 
+    describe('Scalar filter maps ($contains / $containsi)', () => {
+      test('content-API sanitize.query strips invalid keys next to operators under scalar fields', async () => {
+        const schema = strapi.getModel('api::product.product');
+        const sanitized = await strapi.contentAPI.sanitize.query(
+          {
+            filters: {
+              name: {
+                $containsi: 'oduct',
+                __invalidNestedFilterKey: 'should-be-removed',
+              },
+            },
+          },
+          schema,
+          {}
+        );
+
+        expect(sanitized.filters).toEqual({ name: { $containsi: 'oduct' } });
+      });
+
+      test('GET with filters[name][$containsi] matches (qs.stringify bracket keys, curl-equivalent)', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            'filters[name][$containsi]': 'oduct',
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.length).toBeGreaterThanOrEqual(1);
+        expect(res.body.data).toEqual(
+          expect.arrayContaining(data.product.map((o) => expect.objectContaining(o)))
+        );
+      });
+    });
+
     describe('Filter not contains insensitive', () => {
       test('Should return an array of entities on match', async () => {
         const res = await rq({

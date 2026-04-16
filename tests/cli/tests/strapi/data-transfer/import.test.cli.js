@@ -18,7 +18,7 @@ describe('import', () => {
     appPath = testApps.at(0);
 
     // Load fixture and capture expected DB state (so we can verify import restores it)
-    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'with-admin.tar');
+    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'with-admin');
     expectedDbState = utils.getDbState(appPath);
 
     // Export to create the file we will import in the tests
@@ -88,6 +88,58 @@ describe('import', () => {
     }
     expect(stateAfterImport.articles).toBe(expectedDbState.articles);
     expect(stateAfterImport.categories).toBe(expectedDbState.categories);
+  });
+
+  describe('import from unpacked directory', () => {
+    const dirExportName = 'cli-import-dir-fixture';
+
+    beforeAll(() => {
+      const result = spawnSync(
+        'npm',
+        [
+          'run',
+          '-s',
+          'strapi',
+          '--',
+          'export',
+          '--format',
+          'dir',
+          '-f',
+          dirExportName,
+          '--no-encrypt',
+        ],
+        {
+          cwd: appPath,
+          encoding: 'utf8',
+          maxBuffer: 1024 * 1024,
+        }
+      );
+      expect(result.status).toBe(0);
+    });
+
+    it('should import from directory and restore DB state', async () => {
+      const importDir = path.join(appPath, dirExportName);
+      const result = spawnSync(
+        'npm',
+        ['run', '-s', 'strapi', '--', 'import', '-f', importDir, '--force'],
+        {
+          cwd: appPath,
+          encoding: 'utf8',
+          maxBuffer: 1024 * 1024,
+        }
+      );
+
+      expect(result.status).toBe(0);
+      const stdout = String(result.stdout || '');
+      expect(stdout).toMatch(/Import process has been completed successfully!?/);
+
+      const stateAfterImport = utils.getDbState(appPath);
+      if (stateAfterImport.error) {
+        throw new Error(`Failed to read DB after import: ${stateAfterImport.error}`);
+      }
+      expect(stateAfterImport.articles).toBe(expectedDbState.articles);
+      expect(stateAfterImport.categories).toBe(expectedDbState.categories);
+    });
   });
 
   test.todo('import from .tar.gz (compressed) and verify DB state');

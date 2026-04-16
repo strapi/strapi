@@ -89,6 +89,12 @@ export interface EntityManager {
     options?: { transaction?: Knex.Transaction }
   ): Promise<any>;
   deleteRelations(uid: string, id: ID, options?: { transaction?: Knex.Transaction }): Promise<void>;
+  insertJoinTableRows(
+    joinTableName: string,
+    rows: Record<string, unknown>[],
+    trx: any,
+    options?: { onConflict?: string[]; merge?: string[]; ignore?: boolean }
+  ): Promise<void>;
   createQueryBuilder(uid: string): QueryBuilder;
   getRepository(uid: string): Repository;
 }

@@ -5,7 +5,7 @@ import { TITLE_LOGIN, TITLE_HOME } from '../../constants';
 
 test.describe('Legacy Admin Token Migration', () => {
   test.beforeEach(async ({ page, context }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await context.clearCookies();
     await page.goto('/admin');
   });

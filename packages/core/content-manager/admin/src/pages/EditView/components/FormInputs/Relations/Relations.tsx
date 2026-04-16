@@ -283,10 +283,24 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       const transformedRels = transformations([...serverData]);
 
       /**
+       * Connect items (e.g. from fill-from-locale) may lack href/label. Ensure they have them
+       * so ListItem's getCollectionType(href) and display work correctly.
+       */
+      const connectItems = (field.value?.connect ?? []).map((rel: Relation) => {
+        const urlLocaleParam = rel.locale ? `?plugins[i18n][locale]=${rel.locale}` : '';
+        if (rel.href) return rel;
+        return {
+          ...rel,
+          label: rel.label ?? getRelationLabel(rel, props.mainField),
+          href: `../${COLLECTION_TYPES}/${targetModel}/${rel.documentId}${urlLocaleParam}`,
+        };
+      });
+
+      /**
        * THIS IS CRUCIAL. If you don't sort by the __temp_key__ which comes from fractional indexing
        * then the list will be in the wrong order.
        */
-      return [...transformedRels, ...(field.value?.connect ?? [])].sort((a, b) => {
+      return [...transformedRels, ...connectItems].sort((a, b) => {
         if (a.__temp_key__ < b.__temp_key__) return -1;
         if (a.__temp_key__ > b.__temp_key__) return 1;
         return 0;
@@ -545,14 +559,13 @@ const RelationsInput = ({
 
   const hasNextPage = data?.pagination ? data.pagination.page < data.pagination.pageCount : false;
 
-  const options = data?.results ?? [];
-
   const handleChange = React.useCallback(
     (relationId?: string) => {
       if (!relationId) {
         return;
       }
 
+      const options = data?.results ?? [];
       const relation = options.find((opt) => opt.id.toString() === relationId);
 
       if (!relation) {
@@ -581,7 +594,7 @@ const RelationsInput = ({
        */
       onChange(relation);
     },
-    [formatMessage, onChange, options, toggleNotification]
+    [data, formatMessage, onChange, toggleNotification]
   );
 
   const relation = React.useMemo(
@@ -858,6 +871,11 @@ const RelationsList = ({
     };
   }, [isLoading, data.length]);
 
+  const getItemPos = React.useCallback(
+    (index: number) => `${index + 1} of ${data.length}`,
+    [data.length]
+  );
+
   const handleMoveItem = React.useCallback<NonNullable<UseDragAndDropOptions['onMoveItem']>>(
     (newIndex, oldIndex) => {
       const item = data[oldIndex];
@@ -870,7 +888,7 @@ const RelationsList = ({
           },
           {
             item: item.label ?? item.documentId,
-            position: `${newIndex + 1} of ${data.length}`,
+            position: getItemPos(newIndex),
           }
         )
       );
@@ -940,7 +958,7 @@ const RelationsList = ({
 
       field.onChange(`${name}.connect`, connectedRelations);
     },
-    [data, field, formatMessage, name, serverData]
+    [data, serverData, field, name, formatMessage, getItemPos]
   );
 
   const handleGrabItem = React.useCallback<NonNullable<UseDragAndDropOptions['onGrabItem']>>(
@@ -955,12 +973,12 @@ const RelationsList = ({
           },
           {
             item: item.label ?? item.documentId,
-            position: `${index + 1} of ${data.length}`,
+            position: getItemPos(index),
           }
         )
       );
     },
-    [data, formatMessage]
+    [data, formatMessage, getItemPos]
   );
 
   const handleDropItem = React.useCallback<NonNullable<UseDragAndDropOptions['onDropItem']>>(
@@ -975,12 +993,12 @@ const RelationsList = ({
           },
           {
             item: label ?? item.documentId,
-            position: `${index + 1} of ${data.length}`,
+            position: getItemPos(index),
           }
         )
       );
     },
-    [data, formatMessage]
+    [data, formatMessage, getItemPos]
   );
 
   const handleCancel = React.useCallback<NonNullable<UseDragAndDropOptions['onCancel']>>(
@@ -1145,7 +1163,7 @@ const RelationRow = styled<FlexComponent>(Flex)`
   }
 `;
 
-const ListItem = ({ data, index, style }: ListItemProps) => {
+const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
   const {
     ariaDescribedBy,
     canDrag = false,
@@ -1222,14 +1240,18 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
 
   const safeDocumentId = documentId ?? apiData?.documentId;
   const safeLocale = locale ?? apiData?.locale ?? null;
-  const documentMeta = {
-    documentId: safeDocumentId,
-    model: targetModel,
-    collectionType: getCollectionType(href)!,
-    params: {
-      locale: safeLocale,
-    },
-  } as DocumentMeta;
+  const documentMeta = React.useMemo(
+    () =>
+      ({
+        documentId: safeDocumentId,
+        model: targetModel,
+        collectionType: getCollectionType(href)!,
+        params: {
+          locale: safeLocale,
+        },
+      }) as DocumentMeta,
+    [safeDocumentId, href, safeLocale, targetModel]
+  );
 
   return (
     <Box
@@ -1297,7 +1319,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       )}
     </Box>
   );
-};
+});
 
 const FlexWrapper = styled<FlexComponent>(Flex)`
   width: 100%;

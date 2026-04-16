@@ -256,6 +256,36 @@ const documentApi = contentManagerApi.injectEndpoints({
         },
       }),
     }),
+    /**
+     * Fetches multiple documents with deep populate in a single request for bulk publish validation.
+     */
+    getDocumentsForValidation: builder.query<
+      Find.Response['results'],
+      {
+        model: string;
+        documentIds: string[];
+        locale?: string;
+        sort?: string;
+      }
+    >({
+      query: ({ model, documentIds, locale, sort }) => ({
+        url: `/content-manager/collection-types/${model}/actions/bulkFindForValidation`,
+        method: 'POST',
+        data: { documentIds, locale, sort },
+      }),
+      transformResponse: (response: { results: Find.Response['results'] }) =>
+        response?.results ?? [],
+      providesTags: (result, _error, { model }) =>
+        result
+          ? [
+              ...result.map((doc) => ({
+                type: 'Document' as const,
+                id: `${model}_${doc.documentId}`,
+              })),
+              { type: 'Document', id: `${model}_LIST` },
+            ]
+          : [],
+    }),
     getDocument: builder.query<
       FindOne.Response,
       Pick<FindOne.Params, 'model'> &
@@ -515,6 +545,7 @@ const {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery,
@@ -534,6 +565,7 @@ export {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery as useGetDraftRelationCountQuery,

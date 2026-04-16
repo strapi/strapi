@@ -43,6 +43,23 @@ const expectConsoleLinesToInclude = (received, expected) => {
   });
 };
 
+/** Lines Strapi logs to stdout during CLI (timestamps change every run). */
+const LOGGER_LINE =
+  /^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}\] (warn|info|error|debug|verbose):/;
+
+/**
+ * Normalize CLI table/list stdout for Jest snapshots (strip ANSI, trim lines, drop
+ * empty/garbled lines — same rules as expectConsoleLinesToInclude). Also drops
+ * Winston-style log lines so snapshots stay stable.
+ *
+ * @param {string} received
+ * @returns {string}
+ */
+const normalizeCliOutputForSnapshot = (received) =>
+  trimLines(received)
+    .filter((line) => !LOGGER_LINE.test(line))
+    .join('\n');
+
 /**
  * Load environment variables from a test app's .env file
  * This ensures consistent environment setup for both browser and CLI tests
@@ -79,4 +96,5 @@ module.exports = {
   expectConsoleLinesToEqual,
   expectConsoleLinesToInclude,
   loadTestAppEnv,
+  normalizeCliOutputForSnapshot,
 };
