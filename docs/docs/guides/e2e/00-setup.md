@@ -27,7 +27,7 @@ yarn test:e2e
 
 This will spawn by default a Strapi instance per testing domain (e.g. content-manager) in `test-apps` where the an individual `playwright.config` will start the instance and run tests against. It will automatically link the dependencies from the instance to the monorepo because `test-apps` are not considered part of the monorepo but we want to be using the most recent version of strapi (published or development) therefore meaning our most recent code changes can be tested against.
 
-If you need to clean the test-apps folder because they are not working as expected, you can run `yarn test:e2e clean` which will clean said directory.
+If you need to clean the test-apps folder because they are not working as expected, run `yarn test:e2e:clean` (that target invokes `run-e2e-tests.js clean`).
 
 ### Running specific tests
 
@@ -38,15 +38,17 @@ yarn test:e2e --domains=admin
 npm run test:e2e --domains=admin
 ```
 
-To run a specific file, you can pass arguments and options to playwright using `--` between the test:e2e options and the playwright options, such as:
+To pass file filters or Playwright-only flags (`--project`, `--grep`, `--reporter`, `--debug`, …), put them **after** a `--` that follows the runner options. With **npm**, you need an extra `--` so the script receives the rest: `npm run test:e2e -- --domains=admin -- login.spec.ts`.
 
 ```shell
-# to run just the login.spec.ts file in the admin domain
+# run only login.spec.ts in the admin domain
 yarn test:e2e --domains=admin -- login.spec.ts
-npm run test:e2e --domains=admin -- login.spec.ts
+npm run test:e2e -- --domains=admin -- login.spec.ts
 ```
 
-Note that you must still include a domain, otherwise playwright will attempt to run every domain filtering by that filename, and any domains that do not contain that filename will fail with "no tests found"
+You should still scope with `--domains` when filtering by file; otherwise every domain may be invoked and domains without that file can fail with "no tests found".
+
+For **CI, scripts, or automation**, prefer `--reporter=line` after the inner `--` so the run exits without waiting on the HTML reporter.
 
 ### Running specific browsers
 
@@ -67,31 +69,32 @@ yarn test:e2e --domains admin -- login.spec.ts --debug
 
 ### Concurrency / parallelization
 
-By default, every domain is run with its own test app in parallel with the other domains. The tests within a domain are run in series, one at a time.
-
-If you need an easier way to view the output, or have problems running multiple apps at once on your system, you can use the `-c` option
+The runner uses `min(number of selected domains, concurrency)` **test apps** (`test-apps/e2e/test-app-*`), each bound to a port `8000 + index` within a batch. **`concurrency` defaults** to the number of domain folders under `tests/e2e/tests/` (not the count after `--domains`). Domains are chunked into batches of that size: domains in a batch run **in parallel**, batches run **one after another**. Spec files **inside** a domain are **serial** (`workers: 1`, `fullyParallel: false` in `playwright.base.config.js`).
 
 ```shell
-# only run one domain at a time
+# run at most one domain at a time (simplest logs; fully serial domains)
 yarn test:e2e -c 1
+
+# example: at most three domains at once, then the next three, etc.
+yarn test:e2e -c 3
 ```
 
 ### Env Variables to Control Test Config
 
 Some helpers have been added to allow you to modify the playwright configuration on your own system without touching the playwright config file used by the test runner.
 
-| env var                      | Description                                  | Default            |
-| ---------------------------- | -------------------------------------------- | ------------------ |
-| PLAYWRIGHT_WEBSERVER_TIMEOUT | timeout for starting the Strapi server       | 16000 (160s)       |
-| PLAYWRIGHT_ACTION_TIMEOUT    | playwright action timeout (ie, click())      | 15000 (15s)        |
-| PLAYWRIGHT_EXPECT_TIMEOUT    | playwright expect waitFor timeout            | 10000 (10s)        |
-| PLAYWRIGHT_TIMEOUT           | playwright timeout, for each individual test | 30000 (30s)        |
-| PLAYWRIGHT_OUTPUT_DIR        | playwright output dir, such as trace files   | '../test-results/' |
-| PLAYWRIGHT_VIDEO             | set 'true' to save videos on failed tests    | false              |
+| env var                      | Description                                                                                                                                                                                                    | Default                                                        |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| PLAYWRIGHT_WEBSERVER_TIMEOUT | Timeout (ms) for starting the Strapi server                                                                                                                                                                    | 160000 (160s)                                                  |
+| PLAYWRIGHT_ACTION_TIMEOUT    | Playwright action timeout (e.g. `click()`)                                                                                                                                                                     | 10000 (10s)                                                    |
+| PLAYWRIGHT_EXPECT_TIMEOUT    | `expect()` assertion timeout                                                                                                                                                                                   | 10000 (10s)                                                    |
+| PLAYWRIGHT_TIMEOUT           | Per-test timeout                                                                                                                                                                                               | 90000 (90s)                                                    |
+| PLAYWRIGHT_OUTPUT_DIR        | Base for traces/screenshots/videos; each domain uses a subfolder `<domain>-<port>` under that base. Also used as the JUnit output directory when set; when unset, JUnit defaults to `test-apps/junit-reports`. | `../test-results` (relative to each generated test app config) |
+| PLAYWRIGHT_VIDEO             | Set `true` to save videos on failed tests                                                                                                                                                                      | false                                                          |
 
 ## Strapi Templates
 
-The test-app you create uses a [template](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/installation/templates.html) found at `e2e/app-template` in this folder we can store our premade content schemas & any customisations we may need such as other plugins / custom fields / endpoints etc.
+The test-app you create uses a [template](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/installation/templates.html) under `tests/app-template`. There we store premade content schemas and customisations such as other plugins, custom fields, or endpoints.
 
 If you add anything to the template, be sure to add this information to [the docs](/guides/e2e/app-template).
 

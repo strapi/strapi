@@ -13,12 +13,14 @@ The main difference is that e2e tests use Playwright for browser automation, whi
 
 ## Running the tests
 
-Run `yarn test:e2e` to begin. The command will generate test applications from the shared app-template and run Playwright tests.
+Run `yarn test:e2e` to begin. The command generates test applications from the shared app template under `test-apps/e2e/` and runs Playwright per **domain** (top-level folder under `tests/e2e/tests/`).
 
-The `-c X` option can be used to limit the number of concurrent test apps, where `X` is the number to be run simultaneously.
+**Concurrency (`-c` / `--concurrency`):** caps how many Strapi test apps run at once (`test-apps/e2e/test-app-0`, …). Defaults to the number of domain folders on disk. Domains are executed in **batches** of that size (parallel inside a batch, sequential across batches). Use `-c 1` if you need strictly serial domain runs or simpler logs.
 
-If any changes are made to the template, or other issues are being encountered, try removing and regenerating the test apps by using `yarn test:e2e:clean` before running the tests.
+**Runner vs Playwright args:** options for `tests/scripts/run-tests.js` (`--domains`, `-c`, `-f`, …) go **before** a `--`; everything after `--` is passed to `yarn playwright test` (e.g. a spec path, `--project=chromium`, `--reporter=line`). Use `--reporter=line` in CI or automation so the process exits cleanly (the default HTML reporter can block unattended runs).
 
-## Additional Documentation
+If you change the template or the generated apps get into a bad state, remove and regenerate them with `yarn test:e2e:clean` before running again.
 
-See contributor docs in `docs/docs/guides/e2e` for more detailed information about writing and maintaining e2e tests.
+## Additional documentation
+
+See contributor docs in [`docs/docs/guides/e2e/`](../../docs/docs/guides/e2e/) (setup, running subsets of tests, app template, writing tests).
