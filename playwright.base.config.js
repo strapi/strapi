@@ -164,7 +164,13 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
       },
       /* default Strapi server startup timeout to 160s */
       timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
-      reuseExistingServer: true,
+      // If true, Playwright skips `command` when `url` already responds — you may get the wrong
+      // edition or stale env (license / STRAPI_DISABLE_EE) vs this run. Default: never reuse;
+      // set PLAYWRIGHT_REUSE_EXISTING_SERVER=true locally when you intentionally keep a matching
+      // server up. CI always starts fresh.
+      reuseExistingServer: process.env.CI
+        ? false
+        : getEnvBool(process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER, false),
       stdout: 'pipe',
     },
   };

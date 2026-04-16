@@ -64,6 +64,11 @@ yargs
           dotenv.config({ path: path.join(testRoot, '.env') });
         }
 
+        if (type === 'e2e') {
+          const { applyE2eEditionEnv } = require('../utils/e2e-edition');
+          applyE2eEditionEnv();
+        }
+
         // Read domains
         const domains = await fs.readdir(testDomainRoot);
 
