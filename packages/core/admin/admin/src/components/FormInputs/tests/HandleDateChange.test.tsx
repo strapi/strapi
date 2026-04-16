@@ -33,7 +33,7 @@ describe('DateInput Component', () => {
     fireEvent.change(input, { target: { value: '12/07/2024' } });
     fireEvent.blur(input);
 
-    expect(mockField.onChange).toHaveBeenCalledWith('testDate', '2024-12-07T00:00:00.000Z');
+    expect(mockField.onChange).toHaveBeenCalledWith('testDate', '2024-12-07');
   });
 
   it('should handle clearing the date', () => {
@@ -62,7 +62,7 @@ describe('DateInput Component', () => {
 
     // Check final value
     const lastCall = mockField.onChange.mock.lastCall;
-    expect(lastCall).toEqual(['testDate', '2024-12-08T00:00:00.000Z']);
+    expect(lastCall).toEqual(['testDate', '2024-12-08']);
   });
 
   it('should revert to last valid date on blur if current value is invalid', () => {
@@ -73,6 +73,6 @@ describe('DateInput Component', () => {
     const input = screen.getByRole('combobox');
     fireEvent.change(input, { target: { value: 'invalid-date' } });
     fireEvent.blur(input);
-    expect(mockField.onChange).toHaveBeenCalledWith('testDate', '2024-12-07T00:00:00.000Z');
+    expect(mockField.onChange).toHaveBeenCalledWith('testDate', '2024-12-07');
   });
 });

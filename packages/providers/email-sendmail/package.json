@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendmail",
-  "version": "5.41.1",
+  "version": "5.42.0",
   "description": "Sendmail provider for strapi email",
   "keywords": [
     "email",
@@ -45,12 +45,12 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "nodemailer": "8.0.4"
+    "nodemailer": "8.0.5"
   },
   "devDependencies": {
     "@types/nodemailer": "7.0.11",
-    "eslint-config-custom": "5.41.1",
-    "tsconfig": "5.41.1"
+    "eslint-config-custom": "5.42.0",
+    "tsconfig": "5.42.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
