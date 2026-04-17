@@ -1,0 +1,21 @@
+{
+  "Plugin.name": "部署",
+  "Homepage.title": "免费使用 Strapi Cloud 进行部署！",
+  "Homepage.subTitle": "从我们的完全免费计划开始 - 无需信用卡，无时间限制。",
+  "Homepage.deploy.title": "选择您偏好的部署方式",
+  "Homepage.deploy.ariaLabel": "部署选项",
+  "Homepage.deploy.git.badge": "推荐",
+  "Homepage.deploy.git.title": "部署到 Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "直接在 Strapi Cloud 中部署 GitHub 或 GitLab 项目",
+  "Homepage.deploy.git.button": "部署到 Strapi Cloud",
+  "Homepage.deploy.cli.title": "通过 CLI 部署",
+  "Homepage.deploy.cli.subTitle": "使用命令行直接部署您的 Strapi 项目",
+  "Homepage.deploy.cli.ariaLabel": "包管理器",
+  "Homepage.deploy.cli.copy": "复制",
+  "Homepage.deploy.documentation": "遇到问题？查看我们的文档",
+  "Homepage.freePlan.api": "2500 次 API 请求",
+  "Homepage.freePlan.storage": "10 GB 存储空间",
+  "Homepage.freePlan.bandwidth": "10 GB 资产带宽",
+  "Homepage.freePlan.cdn": "全球 CDN",
+  "Homepage.freePlan.pushToDeploy": "推送即部署"
+}

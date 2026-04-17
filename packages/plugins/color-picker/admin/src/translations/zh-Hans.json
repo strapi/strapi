@@ -1,0 +1,15 @@
+{
+  "color-picker.description": "选择任意颜色",
+  "color-picker.input.aria-label": "颜色选择器输入框",
+  "color-picker.input.format": "HEX",
+  "color-picker.label": "颜色",
+  "color-picker.options.advanced.regex": "正则表达式模式",
+  "color-picker.options.advanced.regex.description": "提供正则表达式以验证 HEX 值",
+  "color-picker.options.advanced.requiredField": "必填字段",
+  "color-picker.options.advanced.requiredField.description": "如果此字段为空，您将无法创建条目",
+  "color-picker.settings": "设置",
+  "color-picker.toggle.aria-label": "颜色选择器开关",
+  "plugin.description.long": "由 Strapi 维护的颜色选择器自定义字段。使用饱和度和色相滑块选择颜色，并将值保存为 HEX 字符串。",
+  "plugin.description.short": "由 Strapi 维护的颜色选择器自定义字段。",
+  "plugin.name": "颜色选择器"
+}
