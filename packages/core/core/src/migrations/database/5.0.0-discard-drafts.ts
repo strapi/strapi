@@ -1327,6 +1327,41 @@ async function hasDraftPublishAncestorForComponent(
   return result;
 }
 
+const JSON_ATTRIBUTE_TYPES = new Set(['json', 'blocks']);
+
+/**
+ * Re-serializes any JSON/blocks columns in a row before INSERT.
+ *
+ * mysql2 automatically deserializes JSON columns on SELECT (returning JS objects),
+ * but knex does not re-serialize them on INSERT, causing failures.  This function
+ * inspects the metadata to find JSON-typed attributes and stringifies any values
+ * that are still objects.  On databases where JSON columns are returned as strings
+ * (e.g. SQLite, PostgreSQL) this is a no-op because the typeof check skips them.
+ */
+const serializeJsonColumns = (row: Record<string, any>, meta: any): Record<string, any> => {
+  if (!meta?.attributes) {
+    return row;
+  }
+
+  for (const attribute of Object.values(meta.attributes) as any[]) {
+    if (!JSON_ATTRIBUTE_TYPES.has(attribute.type)) {
+      continue;
+    }
+
+    const columnName = attribute.columnName;
+    if (!columnName || !(columnName in row)) {
+      continue;
+    }
+
+    const value = row[columnName];
+    if (value != null && typeof value === 'object') {
+      row[columnName] = JSON.stringify(value);
+    }
+  }
+
+  return row;
+};
+
 /**
  * Abstracts `NOW()` handling so that timestamps stay consistent across databases—
  * using Knex's native function when available and falling back to JS dates otherwise.
@@ -1734,6 +1769,10 @@ async function cloneComponentInstance({
       reverseMapCache
     );
   }
+
+  // mysql2 deserializes JSON columns on SELECT but knex does not re-serialize
+  // them on INSERT. Ensure any object values in JSON/blocks columns are stringified.
+  serializeJsonColumns(newComponentRow, componentMeta);
 
   let insertResult;
   if (supportsReturning(trx)) {
