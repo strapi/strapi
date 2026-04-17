@@ -9,7 +9,10 @@ const defaultConfig = {
   'plugin::upload': {
     breakpoints: {
       large: 1000,
+      large_webp: { breakpoint: 1000, format: 'webp' },
       medium: 750,
+      medium_webp: { breakpoint: 750, format: 'webp' },
+      medium_invalid_format: { breakpoint: 750, format: 'notwebp' },
     },
   },
 };
@@ -38,6 +41,7 @@ global.strapi = {
 const uploadService = createUploadService({} as any);
 
 const imageFilePath = path.join(__dirname, './image.png');
+const webpFilePath = path.join(__dirname, './image.webp');
 const tmpWorkingDirectory = path.join(__dirname, './tmp');
 
 function mockUploadProvider(uploadFunc: any, props?: any) {
@@ -90,7 +94,17 @@ describe('Upload image', () => {
     mockUploadProvider(upload, { responsiveDimensions: true });
 
     await uploadService._uploadImage(fileData);
-    // 1 for the original image, 1 for thumbnail, 2 for the responsive formats
+    // 1 for the original image, 1 for thumbnail, 4 for the responsive formats, faulty format is ignored
+    expect(upload).toHaveBeenCalledTimes(6);
+  });
+  test('Upload webp with new configuration options', async () => {
+    const fileData = getFileData(webpFilePath);
+    const upload = jest.fn();
+    mockUploadProvider(upload, {
+      responsiveDimensions: true,
+    });
+    await uploadService._uploadImage(fileData);
+    // 1 for the original image, 1 for thumbnail, 2 for the responsive formats, no webp format as original is webp, faulty format is ignored
     expect(upload).toHaveBeenCalledTimes(4);
   });
 });
