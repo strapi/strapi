@@ -41,7 +41,7 @@ const render = (
 const renderHook: typeof renderHookAdmin = (hook, options) =>
   renderHookAdmin(hook, {
     ...options,
-    providerOptions: { storeConfig: storeConfig() },
+    providerOptions: { ...options?.providerOptions, storeConfig: storeConfig() },
   });
 
 export { fireEvent, render, waitFor, act, screen, server, renderHook };
