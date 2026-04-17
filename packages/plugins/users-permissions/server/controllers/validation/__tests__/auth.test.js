@@ -725,4 +725,36 @@ describe('user-permissions auth', () => {
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('refresh', () => {
+    test('returns bad request when refresh token is missing', async () => {
+      global.strapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn((key, defaultValue) => {
+            if (key === 'plugin::users-permissions.jwtManagement') {
+              return 'refresh';
+            }
+            return defaultValue;
+          }),
+        },
+        sessionManager: jest.fn(() => ({
+          rotateRefreshToken: jest.fn(),
+          generateAccessToken: jest.fn(),
+        })),
+      };
+
+      const ctx = {
+        request: { body: {} },
+        badRequest: jest.fn(),
+        notFound: jest.fn(),
+      };
+
+      const authorization = auth({ strapi: global.strapi });
+
+      await authorization.refresh(ctx);
+
+      expect(ctx.badRequest).toHaveBeenCalledWith('Missing refresh token');
+    });
+  });
 });
