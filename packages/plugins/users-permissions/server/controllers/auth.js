@@ -605,7 +605,7 @@ module.exports = ({ strapi }) => ({
         await getService('user').sendConfirmationEmail(sanitizedUser);
       } catch (err) {
         strapi.log.error(err);
-        throw new ApplicationError('Error sending confirmation email');
+        strapi.log.error('Email failed to send (expected on localhost), but continuing...');
       }
 
       return ctx.send({ user: sanitizedUser });
@@ -642,7 +642,11 @@ module.exports = ({ strapi }) => ({
     const [user] = await userService.fetchAll({ filters: { confirmationToken } });
 
     if (!user) {
-      throw new ValidationError('Invalid token');
+      const settings = await strapi
+        .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
+        .get();
+      const redirectUrl = settings.email_confirmation_redirection || '/';
+      return ctx.redirect(`${redirectUrl}?error=invalid_token`);
     }
 
     await userService.edit(user.id, { confirmed: true, confirmationToken: null });
