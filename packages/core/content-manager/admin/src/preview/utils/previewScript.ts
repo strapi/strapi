@@ -111,7 +111,11 @@ const previewScript = (config: PreviewScriptConfig) => {
               }
             });
           }
-        } catch (error) {}
+        } catch {
+          // Stega decoding is expected to fail for most text nodes since only
+          // a small subset contain encoded data. Silencing these errors avoids
+          // flooding the user's site console with noise.
+        }
       }
     };
 
