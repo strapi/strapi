@@ -62,6 +62,7 @@ const GuidedTourOverlay = styled(Box)`
   bottom: 0;
   background-color: ${({ theme }) => setOpacity(theme.colors.neutral800, 0.2)};
   z-index: 10;
+  // pointer-events: none;
 `;
 
 const GuidedTourTooltipImpl = ({
@@ -74,6 +75,7 @@ const GuidedTourTooltipImpl = ({
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
   const state = useGuidedTour('GuidedTourTooltip', (s) => s.state);
   const dispatch = useGuidedTour('GuidedTourTooltip', (s) => s.dispatch);
+  const anchorRef = React.useRef<HTMLDivElement>(null);
 
   const tourState = state.tours?.[tourName];
   const isCurrentStep = tourState?.currentStep === step;
@@ -84,16 +86,18 @@ const GuidedTourTooltipImpl = ({
     isCurrentStep &&
     isStepConditionMet;
 
-  // Lock the scroll
+  // Ensure the tooltip is visible in the viewport
   React.useEffect(() => {
     if (!isPopoverOpen) return;
 
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
+    // Use setTimeout to ensure the popover is fully rendered in the DOM
+    const timeoutId = setTimeout(() => {
+      if (anchorRef.current) {
+        anchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
 
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
+    return () => clearTimeout(timeoutId);
   }, [isPopoverOpen]);
 
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
@@ -132,7 +136,9 @@ const GuidedTourTooltipImpl = ({
         </Portal>
       )}
       <Popover.Root open={isPopoverOpen}>
-        <Popover.Anchor>{children}</Popover.Anchor>
+        <Popover.Anchor>
+          <div ref={anchorRef}>{children}</div>
+        </Popover.Anchor>
         {content({ Step, state, dispatch })}
       </Popover.Root>
     </>
