@@ -19,11 +19,12 @@ import { Cog, Cross, Drag, Pencil, Plus } from '@strapi/icons';
 import { generateNKeysBetween as generateNKeysBetweenImpl } from 'fractional-indexing';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { getTranslation } from '../../utils/translations';
 import { ComponentIcon } from '../ComponentIcon';
+import { useDoc } from '../../hooks/useDocument';
 
 import { EditFieldForm, EditFieldFormProps } from './EditFieldForm';
 
@@ -112,6 +113,8 @@ const createDragAndDropContainersFromLayout = (layout: ConfigurationFormData['la
 
 const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
   const { formatMessage } = useIntl();
+  const { model } = useDoc();
+  const navigate = useNavigate();
 
   const layout = useForm<ConfigurationFormData['layout']>(
     'Fields',
@@ -538,22 +541,28 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
               <Menu.Trigger
                 startIcon={<Plus />}
                 endIcon={null}
-                disabled={remainingFields.length === 0}
                 fullWidth
                 variant="secondary"
+                onClick={() => {
+                  if (remainingFields.length === 0 && model) {
+                    navigate(`/plugins/content-type-builder/content-types/${model}`);
+                  }
+                }}
               >
                 {formatMessage({
                   id: getTranslation('containers.SettingPage.add.field'),
                   defaultMessage: 'Insert another field',
                 })}
               </Menu.Trigger>
-              <Menu.Content>
-                {remainingFields.map((field) => (
-                  <Menu.Item key={field.name} onSelect={handleAddField(field)}>
-                    {field.label}
-                  </Menu.Item>
-                ))}
-              </Menu.Content>
+              {remainingFields.length > 0 && (
+                <Menu.Content>
+                  {remainingFields.map((field) => (
+                    <Menu.Item key={field.name} onSelect={handleAddField(field)}>
+                      {field.label}
+                    </Menu.Item>
+                  ))}
+                </Menu.Content>
+              )}
             </Menu.Root>
           </Flex>
         </Box>
