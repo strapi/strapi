@@ -76,8 +76,14 @@ const hasContent = (
   if (attribute.type === 'component') {
     // Repeatable fields show the ID as fallback, in case the mainField
     // doesn't have any content
-    if (attribute.repeatable || !mainField) {
+
+    if (attribute.repeatable) {
       return content?.length > 0;
+    }
+
+    // Single component: if no mainField configured, check for title property
+    if (!mainField) {
+      return content?.title || typeof content === 'object';
     }
 
     const value = content?.[mainField.name];
