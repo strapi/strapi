@@ -50,6 +50,16 @@ export class Package implements PackageInterface {
     return Object.values(this.npmPackage.versions);
   }
 
+  private normalizeRegistry(registry: string): string | undefined {
+    const normalizedRegistry = registry.trim();
+
+    if (!normalizedRegistry || normalizedRegistry === 'undefined') {
+      return undefined;
+    }
+
+    return normalizedRegistry;
+  }
+
   findVersionsInRange(range: Version.Range) {
     const versions = this.getVersionsAsList();
 
@@ -70,18 +80,39 @@ export class Package implements PackageInterface {
       if (!packageManagerName) return undefined;
 
       const registryCommands = {
-        yarn: ['config', 'get', 'npmRegistryServer'],
-        npm: ['config', 'get', 'registry'],
+        yarn: [
+          ['config', 'get', 'npmRegistryServer'],
+          ['config', 'get', 'registry'],
+        ],
+        npm: [['config', 'get', 'registry']],
       } as const;
 
-      const command = registryCommands[packageManagerName as keyof typeof registryCommands];
-      if (!command) {
+      const commands = registryCommands[packageManagerName as keyof typeof registryCommands];
+      if (!commands) {
         this.logger.warn(`Unsupported package manager: ${packageManagerName}`);
         return undefined;
       }
 
-      const { stdout } = await execa(packageManagerName, command, { timeout: 10_000 });
-      return stdout.trim() || undefined;
+      let lastError: unknown;
+
+      for (const command of commands) {
+        try {
+          const { stdout } = await execa(packageManagerName, command, { timeout: 10_000 });
+          const registry = this.normalizeRegistry(stdout);
+
+          if (registry) {
+            return registry;
+          }
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      if (lastError) {
+        this.logger.warn('Failed to determine registry URL from package manager');
+      }
+
+      return undefined;
     } catch (error) {
       this.logger.warn('Failed to determine registry URL from package manager');
       return undefined;
