@@ -241,8 +241,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // create temporary folder to store files for stream manipulation
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
-    let uploadedFiles: any[] = [];
-
+    const uploadedFiles = [];
     try {
       const { fileInfo, ...metas } = data;
 
@@ -254,9 +253,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return uploadFileAndPersist(fileData, { user });
       };
 
-      uploadedFiles = await Promise.all(
-        fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
+      const concurrentUploadSize = Math.max(
+        1,
+        strapi.config.get<Config>('plugin::upload').concurrentUploadSize ?? 1
       );
+
+      const fileBatches = _.chunk(
+        fileArray.map((file, idx) => ({ file, fileInfo: fileInfoArray[idx] || {} })),
+        concurrentUploadSize
+      );
+
+      for (const batch of fileBatches) {
+        const results = await Promise.all(
+          batch.map(({ file, fileInfo }) => doUpload(file, fileInfo))
+        );
+        uploadedFiles.push(...results);
+      }
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);
