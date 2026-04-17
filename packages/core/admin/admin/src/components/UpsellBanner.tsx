@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Box, Flex, LinkButton, Typography } from '@strapi/design-system';
+import { Box, Flex, IconButton, LinkButton, Typography } from '@strapi/design-system';
+import { ArrowsOut, Cross } from '@strapi/icons';
 import { isAfter, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -10,15 +11,49 @@ import { useGetLicenseTrialTimeLeftQuery } from '../../src/services/admin';
 import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useScopedPersistentState } from '../hooks/usePersistentState';
 
+const CollapsedButton = styled.button`
+  align-self: flex-end;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    ${({ theme }) => theme.colors.primary600} 0%,
+    ${({ theme }) => theme.colors.alternative600} 121.48%
+  );
+  border: none;
+  cursor: pointer;
+  color: ${({ theme }) => theme.colors.neutral0};
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.neutral0};
+    outline-offset: -3px;
+  }
+`;
+
 const BannerBackground = styled(Flex)`
   background: linear-gradient(
     90deg,
     ${({ theme }) => theme.colors.primary600} 0%,
     ${({ theme }) => theme.colors.alternative600} 121.48%
   );
+  position: relative;
 `;
 
-const Banner = ({ isTrialEndedRecently }: { isTrialEndedRecently: boolean }) => {
+const Banner = ({
+  isTrialEndedRecently,
+  onDismiss,
+}: {
+  isTrialEndedRecently: boolean;
+  onDismiss: () => void;
+}) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -95,15 +130,33 @@ const Banner = ({ isTrialEndedRecently }: { isTrialEndedRecently: boolean }) => 
           </LinkButton>
         </Box>
       </Flex>
+      <Box position="absolute" right={4} top="50%" style={{ transform: 'translateY(-50%)' }}>
+        <IconButton
+          withTooltip={false}
+          label={formatMessage({
+            id: 'app.components.UpsellBanner.close',
+            defaultMessage: 'Close',
+          })}
+          onClick={onDismiss}
+        >
+          <Cross />
+        </IconButton>
+      </Box>
     </BannerBackground>
   );
 };
 
 const UpsellBanner = () => {
   const { license } = useLicenseLimits();
+  const { formatMessage } = useIntl();
 
   const [cachedTrialEndsAt, setCachedTrialEndsAt] = useScopedPersistentState<string | undefined>(
     'STRAPI_FREE_TRIAL_ENDS_AT',
+    undefined
+  );
+
+  const [dismissedFor, setDismissedFor] = useScopedPersistentState<string | undefined>(
+    'STRAPI_UPSELL_BANNER_DISMISSED_FOR',
     undefined
   );
 
@@ -129,11 +182,44 @@ const UpsellBanner = () => {
       isAfter(new Date(cachedTrialEndsAt), sevenDaysAgo)
   );
 
-  if (timeLeftData.data?.trialEndsAt || isTrialEndedRecently) {
-    return <Banner isTrialEndedRecently={isTrialEndedRecently} />;
+  const trialEndsAt = timeLeftData.data?.trialEndsAt ?? cachedTrialEndsAt;
+
+  const toCanonicalISO = (v: string | undefined): string | undefined => {
+    if (!v) return undefined;
+    try {
+      return new Date(v).toISOString();
+    } catch {
+      return v;
+    }
+  };
+
+  const isDismissed = Boolean(
+    trialEndsAt && toCanonicalISO(dismissedFor) === toCanonicalISO(trialEndsAt)
+  );
+
+  const handleDismiss = () => setDismissedFor(toCanonicalISO(trialEndsAt));
+  const handleReopen = () => setDismissedFor(undefined);
+
+  if (!(timeLeftData.data?.trialEndsAt || isTrialEndedRecently)) {
+    return null;
   }
 
-  return null;
+  if (isDismissed) {
+    return (
+      <CollapsedButton
+        type="button"
+        aria-label={formatMessage({
+          id: 'app.components.UpsellBanner.reopen',
+          defaultMessage: 'Reopen banner',
+        })}
+        onClick={handleReopen}
+      >
+        <ArrowsOut />
+      </CollapsedButton>
+    );
+  }
+
+  return <Banner isTrialEndedRecently={isTrialEndedRecently} onDismiss={handleDismiss} />;
 };
 
 export { UpsellBanner };
