@@ -23,7 +23,7 @@ import {
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
 } from './content-types';
-import { PaginationError } from './errors';
+import { PaginationError, ValidationError } from './errors';
 import { isOperator } from './operators';
 
 import parseType from './parse-type';
@@ -332,6 +332,15 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (_.isPlainObject(populate)) {
+      // Detect when qs converts a large array to an object with numeric keys
+      // (due to arrayLimit). See: https://github.com/strapi/strapi/issues/25632
+      const keys = Object.keys(populate);
+      if (keys.length > 0 && keys.every((k) => String(Number(k)) === k && Number(k) >= 0)) {
+        throw new ValidationError(
+          `Too many populate entries (${keys.length}). The maximum number of populate entries when using array notation is 100. ` +
+            'Consider using object notation (populate[field]=true), nested population, or reducing the number of fields.'
+        );
+      }
       return convertPopulateObject(populate, schema);
     }
 
