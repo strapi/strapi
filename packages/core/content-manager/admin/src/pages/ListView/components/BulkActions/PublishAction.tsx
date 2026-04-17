@@ -592,7 +592,7 @@ const PublishAction: BulkActionComponent = ({ documents, model }) => {
     dialog: {
       type: 'modal',
       title: formatMessage({
-        id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
+        id: getTranslation('containers.list.selectedEntriesModal.title'),
         defaultMessage: 'Publish entries',
       }),
       content: ({ onClose }) => {
