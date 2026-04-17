@@ -16,6 +16,7 @@ const BASE_COUNTS = {
   relation: 5,
   relationDp: { published: 5, drafts: 3 },
   relationDpI18n: { published: 5, drafts: 3 },
+  /** Upload plugin `files` rows — required so v5 internal migration 5.0.0-02 exercises the files table */
   mediaFiles: 10,
 };
 

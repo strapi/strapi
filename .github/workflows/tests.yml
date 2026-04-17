@@ -30,6 +30,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       e2e: ${{ steps.filter.outputs.e2e }}
       cli: ${{ steps.filter.outputs.cli }}
+      migrations: ${{ steps.filter.outputs.migrations }}
       docs: ${{ steps.filter.outputs.docs }}
       global: ${{ steps.filter.outputs.global }}
       is_local: ${{ github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
@@ -335,6 +336,24 @@ jobs:
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
 
+  migration_v5:
+    if: needs.conditions.outputs.migrations == 'true'
+    name: 'v4 → v5 migration test (sqlite, node: 20)'
+    runs-on: ubuntu-latest
+    needs: [conditions, build]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run migration integration test
+        run: yarn test:migrations:v5 --database sqlite --skip-build
+
   cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
     timeout-minutes: 60
@@ -632,6 +651,7 @@ jobs:
         e2e_ce,
         e2e_ee,
         cli,
+        migration_v5,
         api_ce_pg,
         api_ce_mysql,
         api_ce_sqlite,
