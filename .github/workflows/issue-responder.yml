@@ -1,0 +1,92 @@
+name: Suggest Response to Issue
+
+# Triggers when a maintainer adds the 'AI Response' label to an issue.
+# Claude drafts a single suggested response comment (similar to Dosu).
+# Claude has read-only access to the repository so it can reference code
+# and docs when answering.
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  suggest-response:
+    if: ${{ github.event.label.name == 'AI Response' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Draft suggested response with Claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            ISSUE NUMBER: ${{ github.event.issue.number }}
+
+            A maintainer has added the 'AI Response' label to this issue,
+            asking you to draft a suggested response (similar to how Dosu
+            works). Post a single helpful comment. The maintainer will review
+            it and decide whether to keep, edit, or delete it.
+
+            Assume the reporter is on Strapi 5.31.0 or later unless they
+            explicitly state otherwise.
+
+            ## Steps
+
+            1. Read the issue:
+               `gh issue view ${{ github.event.issue.number }} --json title,body,author,labels`
+
+            2. Search the repository for relevant code, docs, or prior art that
+               might help answer the issue. Use Grep, Glob, and Read. Keep this
+               exploration focused — don't exhaustively search, just gather
+               enough context to give a useful answer.
+
+            3. Post a single comment on the issue with:
+               `gh issue comment ${{ github.event.issue.number }} --body-file <path>`
+               (Write the body to a file first to preserve formatting.)
+
+            ## Required comment format
+
+            The comment MUST begin with this exact sentence, verbatim, as the
+            first line:
+
+            > Hi! I'm Claude and I'm helping the Strapi team, but I am an AI and often get things wrong, so please excuse me when I do!
+
+            Then a blank line, then your suggested response.
+
+            The comment MUST end with a confidence rating on its own line, in
+            this exact format:
+
+            > **Confidence: High | Medium | Low** — one-sentence justification.
+
+            Pick exactly one level:
+            - **High**: you found clear supporting evidence in the codebase or docs, and the issue is well-scoped.
+            - **Medium**: the answer is plausible but you could not fully verify it, or the issue is ambiguous.
+            - **Low**: you are guessing, the issue lacks reproduction details, or you could not find relevant code.
+
+            ## Response guidelines
+
+            - Be concise. A few paragraphs at most. Prefer linking to specific
+              files in the repo (with paths) over pasting long code blocks.
+            - If the issue looks like a bug, suggest likely causes or ask for
+              the specific reproduction info that is missing (version, steps,
+              minimal repro repo).
+            - If it is a feature request or question, answer it directly or
+              point to relevant docs/discussions.
+            - If you cannot confidently help, say so briefly and ask targeted
+              clarifying questions rather than speculating.
+            - Do NOT close the issue, apply labels, or take any action besides
+              posting the single comment.
+            - Do NOT claim the fix is in progress or promise maintainer action.
+              You are a suggestion from an AI, not a commitment from the team.
+
+          claude_args: |
+            --allowedTools "Bash(gh issue view:*),Bash(gh issue comment:*),Read,Grep,Glob"
