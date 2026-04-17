@@ -11,6 +11,7 @@ const {
   startContainer,
   assertPostgresReady,
   assertMysqlReady,
+  assertMariadbReady,
   getDatabaseEnv,
 } = require('./db-utils');
 
@@ -21,18 +22,26 @@ if (process.argv[multiplierArgIndex] === '--') {
 }
 const multiplier = process.argv[multiplierArgIndex] || '1';
 
-if (!dbType || !['postgres', 'mysql'].includes(dbType)) {
+if (!dbType || !['postgres', 'mysql', 'mariadb', 'sqlite'].includes(dbType)) {
   console.error('Error: Database type is required');
-  console.error('Usage: node scripts/seed-with-db.js <postgres|mysql> [multiplier]');
+  console.error('Usage: node scripts/seed-with-db.js <postgres|mysql|mariadb|sqlite> [multiplier]');
   process.exit(1);
 }
 
+const readinessCheckers = {
+  postgres: assertPostgresReady,
+  mysql: assertMysqlReady,
+  mariadb: assertMariadbReady,
+};
+
 function ensureContainerRunning(serviceName) {
+  if (dbType === 'sqlite') return;
+
+  const assertReady = readinessCheckers[dbType];
   const containerId = getContainerId(DOCKER_COMPOSE_FILE, PROJECT_DIR, serviceName);
   if (containerId && isContainerRunning(containerId)) {
     console.log(`✅ ${serviceName} container is already running`);
-    if (dbType === 'postgres') assertPostgresReady(containerId);
-    if (dbType === 'mysql') assertMysqlReady(containerId);
+    assertReady(containerId);
     return;
   }
 
@@ -41,8 +50,7 @@ function ensureContainerRunning(serviceName) {
     startContainer(DOCKER_COMPOSE_FILE, PROJECT_DIR, serviceName);
     console.log(`✅ ${serviceName} container started`);
     const newContainerId = getContainerId(DOCKER_COMPOSE_FILE, PROJECT_DIR, serviceName);
-    if (dbType === 'postgres') assertPostgresReady(newContainerId);
-    if (dbType === 'mysql') assertMysqlReady(newContainerId);
+    assertReady(newContainerId);
   } catch (error) {
     console.error(`Error starting ${serviceName} container: ${error.message}`);
     process.exit(1);
@@ -50,10 +58,8 @@ function ensureContainerRunning(serviceName) {
 }
 
 function runSeed() {
-  if (dbType === 'postgres') {
-    ensureContainerRunning('postgres');
-  } else if (dbType === 'mysql') {
-    ensureContainerRunning('mysql');
+  if (['postgres', 'mysql', 'mariadb'].includes(dbType)) {
+    ensureContainerRunning(dbType);
   }
 
   const env = getDatabaseEnv(dbType);

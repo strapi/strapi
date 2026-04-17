@@ -17,6 +17,13 @@ const BASE_COUNTS = {
   relationDp: { published: 5, drafts: 3 },
   relationDpI18n: { published: 5, drafts: 3 },
   mediaFiles: 10,
+  // Anti-pattern: high-cardinality M2M. At m=100 this produces ~2000 sources
+  // × ~2000 targets, crossing the 1000-row chunk boundary in v4→v5 migrations
+  // so cross-chunk code paths actually get exercised. Keep targets per source
+  // modest (10) to avoid quadratic blow-up on disk.
+  hcM2mSource: { published: 15, drafts: 5 },
+  hcM2mTarget: { published: 15, drafts: 5 },
+  hcM2mTargetsPerSource: 10,
 };
 
 function parseCliArgs(argv) {
@@ -74,6 +81,17 @@ function applyMultiplierToCounts(base, multiplier) {
       drafts: base.relationDpI18n.drafts * m,
     },
     mediaFiles: base.mediaFiles * m,
+    hcM2mSource: {
+      published: base.hcM2mSource.published * m,
+      drafts: base.hcM2mSource.drafts * m,
+    },
+    hcM2mTarget: {
+      published: base.hcM2mTarget.published * m,
+      drafts: base.hcM2mTarget.drafts * m,
+    },
+    // Targets-per-source is intentionally NOT multiplied — it stays a constant
+    // fan-out so the total join-row count scales with the source count only.
+    hcM2mTargetsPerSource: base.hcM2mTargetsPerSource,
   };
 }
 
@@ -98,6 +116,47 @@ const random = {
   date: () => new Date(2020 + Math.random() * 5, random.number(0, 11), random.number(1, 28)),
   pick: (arr) => arr[random.number(0, arr.length - 1)],
 };
+
+// ============================================================================
+// CONCURRENCY HELPER
+// ============================================================================
+
+// Default concurrency for entity creation. Strapi v4's default knex pool is
+// `{min: 2, max: 10}`, and relation-heavy entity creates (components + DZ +
+// localizations) can use multiple connections per call. 5 keeps us well under
+// the pool ceiling and still gives a meaningful speedup over strictly serial
+// inserts. Tune up via SEED_CONCURRENCY=<n> env var if you've also raised the
+// knex pool max in the v4 project's database config.
+const SEED_CONCURRENCY = Number(process.env.SEED_CONCURRENCY) || 5;
+
+/**
+ * Run `taskFn(i)` for i=0..count-1 with at most `concurrency` tasks in flight.
+ * Returns results in input order. Fails fast on the first task rejection.
+ */
+async function concurrentMap(count, concurrency, taskFn) {
+  const results = new Array(count);
+  let nextIndex = 0;
+  let firstError = null;
+
+  async function worker() {
+    while (firstError == null) {
+      const i = nextIndex;
+      if (i >= count) return;
+      nextIndex += 1;
+      try {
+        results[i] = await taskFn(i);
+      } catch (err) {
+        if (firstError == null) firstError = err;
+        return;
+      }
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrency, count) }, worker);
+  await Promise.all(workers);
+  if (firstError) throw firstError;
+  return results;
+}
 
 // ============================================================================
 // FIELD FACTORIES
@@ -282,11 +341,9 @@ class ContentSeeder {
   // Seed basic content type
   async seedBasic() {
     console.log('Seeding basic...');
-    const entries = [];
-
-    for (let i = 0; i < CONFIG.counts.basic; i++) {
+    const entries = await concurrentMap(CONFIG.counts.basic, SEED_CONCURRENCY, async (i) => {
       try {
-        const entry = await this.strapi.entityService.create('api::basic.basic', {
+        return await this.strapi.entityService.create('api::basic.basic', {
           data: {
             ...fields.basic(),
             textBlocks: [components.textBlock(), components.textBlock()],
@@ -297,12 +354,11 @@ class ContentSeeder {
             ],
           },
         });
-        entries.push(entry);
       } catch (error) {
         this.logError('basic', i + 1, error);
         throw error;
       }
-    }
+    });
 
     this.results.basic = entries;
     return entries;
@@ -311,63 +367,65 @@ class ContentSeeder {
   // Seed basic-dp content type
   async seedBasicDp() {
     console.log('Seeding basic-dp...');
-    const published = [];
-    const drafts = [];
 
-    // Create published entries
-    for (let i = 0; i < CONFIG.counts.basicDp.published; i++) {
-      try {
-        const mediaFile = this.pick(this.mediaFiles, i);
-        const logo = mediaFile ? components.logo(mediaFile.id) : null;
-        const header = logo ? components.header(logo) : null;
+    const published = await concurrentMap(
+      CONFIG.counts.basicDp.published,
+      SEED_CONCURRENCY,
+      async (i) => {
+        try {
+          const mediaFile = this.pick(this.mediaFiles, i);
+          const logo = mediaFile ? components.logo(mediaFile.id) : null;
+          const header = logo ? components.header(logo) : null;
 
-        const entry = await this.strapi.entityService.create('api::basic-dp.basic-dp', {
-          data: {
-            ...fields.basic(),
-            textBlocks: [components.textBlock(), components.textBlock()],
-            mediaBlock: components.mediaBlock(),
-            header: header,
-            sections: [
-              components.forDynamicZone(components.textBlock(), 'text-block'),
-              components.forDynamicZone(components.mediaBlock(), 'media-block'),
-              ...(header ? [components.forDynamicZone(components.header(logo), 'header')] : []),
-            ],
-            publishedAt: new Date(),
-          },
-        });
-        published.push(entry);
-      } catch (error) {
-        this.logError('basic-dp published', i + 1, error);
-        throw error;
+          return await this.strapi.entityService.create('api::basic-dp.basic-dp', {
+            data: {
+              ...fields.basic(),
+              textBlocks: [components.textBlock(), components.textBlock()],
+              mediaBlock: components.mediaBlock(),
+              header: header,
+              sections: [
+                components.forDynamicZone(components.textBlock(), 'text-block'),
+                components.forDynamicZone(components.mediaBlock(), 'media-block'),
+                ...(header ? [components.forDynamicZone(components.header(logo), 'header')] : []),
+              ],
+              publishedAt: new Date(),
+            },
+          });
+        } catch (error) {
+          this.logError('basic-dp published', i + 1, error);
+          throw error;
+        }
       }
-    }
+    );
 
-    // Create draft entries
-    for (let i = 0; i < CONFIG.counts.basicDp.drafts; i++) {
-      try {
-        const mediaFile = this.pick(this.mediaFiles, i + 3);
-        const logo = mediaFile ? components.logo(mediaFile.id) : null;
-        const header = logo ? components.header(logo) : null;
+    const drafts = await concurrentMap(
+      CONFIG.counts.basicDp.drafts,
+      SEED_CONCURRENCY,
+      async (i) => {
+        try {
+          const mediaFile = this.pick(this.mediaFiles, i + 3);
+          const logo = mediaFile ? components.logo(mediaFile.id) : null;
+          const header = logo ? components.header(logo) : null;
 
-        const entry = await this.strapi.entityService.create('api::basic-dp.basic-dp', {
-          data: {
-            ...fields.basic(),
-            textBlocks: [components.textBlock(), components.textBlock()],
-            mediaBlock: components.mediaBlock(),
-            header: header,
-            sections: [
-              components.forDynamicZone(components.textBlock(), 'text-block'),
-              components.forDynamicZone(components.mediaBlock(), 'media-block'),
-              ...(header ? [components.forDynamicZone(components.header(logo), 'header')] : []),
-            ],
-          },
-        });
-        drafts.push(entry);
-      } catch (error) {
-        this.logError('basic-dp draft', i + 1, error);
-        throw error;
+          return await this.strapi.entityService.create('api::basic-dp.basic-dp', {
+            data: {
+              ...fields.basic(),
+              textBlocks: [components.textBlock(), components.textBlock()],
+              mediaBlock: components.mediaBlock(),
+              header: header,
+              sections: [
+                components.forDynamicZone(components.textBlock(), 'text-block'),
+                components.forDynamicZone(components.mediaBlock(), 'media-block'),
+                ...(header ? [components.forDynamicZone(components.header(logo), 'header')] : []),
+              ],
+            },
+          });
+        } catch (error) {
+          this.logError('basic-dp draft', i + 1, error);
+          throw error;
+        }
       }
-    }
+    );
 
     this.results.basicDp = { published, drafts, all: [...published, ...drafts] };
     return this.results.basicDp;
@@ -380,8 +438,7 @@ class ContentSeeder {
 
     if (!basic?.length || !basicDp?.published?.length) return;
 
-    // Update basic entries to reference basicDp
-    for (let i = 0; i < basic.length; i++) {
+    await concurrentMap(basic.length, SEED_CONCURRENCY, async (i) => {
       const publishedTarget = this.pick(basicDp.published, i);
       const draftTarget = this.pick(basicDp.drafts, i, publishedTarget);
 
@@ -400,10 +457,9 @@ class ContentSeeder {
           ],
         },
       });
-    }
+    });
 
-    // Update basicDp entries to cross-reference
-    for (let i = 0; i < basicDp.published.length; i++) {
+    await concurrentMap(basicDp.published.length, SEED_CONCURRENCY, async (i) => {
       const target = this.pick(basicDp.published, i + 1);
       await this.strapi.entityService.update('api::basic-dp.basic-dp', basicDp.published[i].id, {
         data: {
@@ -413,9 +469,9 @@ class ContentSeeder {
           ],
         },
       });
-    }
+    });
 
-    for (let i = 0; i < basicDp.drafts.length; i++) {
+    await concurrentMap(basicDp.drafts.length, SEED_CONCURRENCY, async (i) => {
       const target = this.pick(basicDp.published, i);
       await this.strapi.entityService.update('api::basic-dp.basic-dp', basicDp.drafts[i].id, {
         data: {
@@ -425,7 +481,7 @@ class ContentSeeder {
           ],
         },
       });
-    }
+    });
   }
 
   // Seed basic-dp-i18n content type
@@ -435,50 +491,56 @@ class ContentSeeder {
     const drafts = [];
 
     for (const locale of CONFIG.locales) {
-      // Published
-      for (let i = 0; i < CONFIG.counts.basicDpI18n.published; i++) {
-        try {
-          const entry = await this.strapi.entityService.create('api::basic-dp-i18n.basic-dp-i18n', {
-            data: {
-              ...fields.basic(),
-              textBlocks: [components.textBlock(), components.textBlock()],
-              mediaBlock: components.mediaBlock(),
-              sections: [
-                components.forDynamicZone(components.textBlock(), 'text-block'),
-                components.forDynamicZone(components.mediaBlock(), 'media-block'),
-              ],
-              publishedAt: new Date(),
-            },
-            locale,
-          });
-          published.push(entry);
-        } catch (error) {
-          this.logError(`basic-dp-i18n published (${locale})`, i + 1, error);
-          throw error;
+      const pub = await concurrentMap(
+        CONFIG.counts.basicDpI18n.published,
+        SEED_CONCURRENCY,
+        async (i) => {
+          try {
+            return await this.strapi.entityService.create('api::basic-dp-i18n.basic-dp-i18n', {
+              data: {
+                ...fields.basic(),
+                textBlocks: [components.textBlock(), components.textBlock()],
+                mediaBlock: components.mediaBlock(),
+                sections: [
+                  components.forDynamicZone(components.textBlock(), 'text-block'),
+                  components.forDynamicZone(components.mediaBlock(), 'media-block'),
+                ],
+                publishedAt: new Date(),
+              },
+              locale,
+            });
+          } catch (error) {
+            this.logError(`basic-dp-i18n published (${locale})`, i + 1, error);
+            throw error;
+          }
         }
-      }
+      );
+      published.push(...pub);
 
-      // Drafts
-      for (let i = 0; i < CONFIG.counts.basicDpI18n.drafts; i++) {
-        try {
-          const entry = await this.strapi.entityService.create('api::basic-dp-i18n.basic-dp-i18n', {
-            data: {
-              ...fields.basic(),
-              textBlocks: [components.textBlock(), components.textBlock()],
-              mediaBlock: components.mediaBlock(),
-              sections: [
-                components.forDynamicZone(components.textBlock(), 'text-block'),
-                components.forDynamicZone(components.mediaBlock(), 'media-block'),
-              ],
-            },
-            locale,
-          });
-          drafts.push(entry);
-        } catch (error) {
-          this.logError(`basic-dp-i18n draft (${locale})`, i + 1, error);
-          throw error;
+      const drf = await concurrentMap(
+        CONFIG.counts.basicDpI18n.drafts,
+        SEED_CONCURRENCY,
+        async (i) => {
+          try {
+            return await this.strapi.entityService.create('api::basic-dp-i18n.basic-dp-i18n', {
+              data: {
+                ...fields.basic(),
+                textBlocks: [components.textBlock(), components.textBlock()],
+                mediaBlock: components.mediaBlock(),
+                sections: [
+                  components.forDynamicZone(components.textBlock(), 'text-block'),
+                  components.forDynamicZone(components.mediaBlock(), 'media-block'),
+                ],
+              },
+              locale,
+            });
+          } catch (error) {
+            this.logError(`basic-dp-i18n draft (${locale})`, i + 1, error);
+            throw error;
+          }
         }
-      }
+      );
+      drafts.push(...drf);
     }
 
     this.results.basicDpI18n = { published, drafts, all: [...published, ...drafts] };
@@ -488,16 +550,15 @@ class ContentSeeder {
   // Seed relation content type
   async seedRelation() {
     console.log('Seeding relation...');
-    const entries = [];
     const { basic, basicDp } = this.results;
 
-    for (let i = 0; i < CONFIG.counts.relation; i++) {
+    const entries = await concurrentMap(CONFIG.counts.relation, SEED_CONCURRENCY, async (i) => {
       try {
         const relatedBasics = [this.pick(basic, i), this.pick(basic, i + 1)].filter(Boolean);
         const publishedDp = this.pick(basicDp?.published, i);
         const draftDp = this.pick(basicDp?.drafts, i);
 
-        const entry = await this.strapi.entityService.create('api::relation.relation', {
+        return await this.strapi.entityService.create('api::relation.relation', {
           data: {
             name: `Relation ${random.string()}`,
             oneToOneBasic: relatedBasics[0]?.id || null,
@@ -527,22 +588,22 @@ class ContentSeeder {
             ],
           },
         });
-        entries.push(entry);
       } catch (error) {
         this.logError('relation', i + 1, error);
         throw error;
       }
-    }
+    });
 
-    // Add self-references
-    for (const entry of entries) {
+    // Add self-references (parallelizable — each entry's update is independent).
+    await concurrentMap(entries.length, SEED_CONCURRENCY, async (i) => {
+      const entry = entries[i];
       await this.strapi.entityService.update('api::relation.relation', entry.id, {
         data: {
           selfOne: entry.id,
           selfMany: [entry.id],
         },
       });
-    }
+    });
 
     this.results.relation = entries;
     return entries;
@@ -551,134 +612,140 @@ class ContentSeeder {
   // Seed relation-dp content type
   async seedRelationDp() {
     console.log('Seeding relation-dp...');
-    const published = [];
-    const drafts = [];
     const { basic, basicDp, relation } = this.results;
     const morphTargetsFor = (indices) =>
       (relation || [])
         .filter((_, j) => indices.includes(j))
         .map((r) => ({ __type: 'api::relation.relation', id: r.id }));
 
-    // Published
-    for (let i = 0; i < CONFIG.counts.relationDp.published; i++) {
-      try {
-        const relatedDp = [this.pick(basicDp?.published, i), this.pick(basicDp?.drafts, i)].filter(
-          Boolean
-        );
+    const published = await concurrentMap(
+      CONFIG.counts.relationDp.published,
+      SEED_CONCURRENCY,
+      async (i) => {
+        try {
+          const relatedDp = [
+            this.pick(basicDp?.published, i),
+            this.pick(basicDp?.drafts, i),
+          ].filter(Boolean);
 
-        const relatedBasic = [this.pick(basic, i), this.pick(basic, i + 1)].filter(Boolean);
+          const relatedBasic = [this.pick(basic, i), this.pick(basic, i + 1)].filter(Boolean);
 
-        const mediaFile = this.pick(this.mediaFiles, i);
-        const logo = mediaFile ? components.logo(mediaFile.id) : null;
-        const header = logo ? components.header(logo) : null;
+          const mediaFile = this.pick(this.mediaFiles, i);
+          const logo = mediaFile ? components.logo(mediaFile.id) : null;
+          const header = logo ? components.header(logo) : null;
 
-        const entry = await this.strapi.entityService.create('api::relation-dp.relation-dp', {
-          data: {
-            name: `Relation DP Published ${i + 1}`,
-            cover: mediaFile?.id ?? null,
-            morphTargets: morphTargetsFor([
-              i % (relation?.length || 1),
-              (i + 1) % (relation?.length || 1),
-            ]),
-            oneToOneBasic: relatedDp[0]?.id || null,
-            oneToManyBasics: relatedDp.map((b) => b.id),
-            manyToOneBasic: relatedDp[0]?.id || null,
-            manyToManyBasics: relatedDp.map((b) => b.id),
-            manyToOneBasicNoDp: relatedBasic[0]?.id || null,
-            manyToManyBasicsNoDp: relatedBasic.map((b) => b.id),
-            simpleInfo: components.simpleInfo(),
-            content: [
-              components.forDynamicZone(components.simpleInfo(), 'simple-info'),
-              components.forDynamicZone(components.imageBlock(), 'image-block'),
-            ],
-            textBlocks: [
-              components.textBlock({ basicDpId: relatedDp[0]?.id }),
-              components.textBlock({ basicDpId: relatedDp[1]?.id }),
-            ],
-            mediaBlock: components.mediaBlock(),
-            header: header,
-            sections: [
-              components.forDynamicZone(
-                components.textBlock({ basicDpId: relatedDp[1]?.id }),
-                'text-block'
-              ),
-              components.forDynamicZone(components.mediaBlock(), 'media-block'),
-              ...(header ? [components.forDynamicZone(components.header(logo), 'header')] : []),
-            ],
-            publishedAt: new Date(),
-          },
-        });
-        published.push(entry);
-      } catch (error) {
-        this.logError('relation-dp published', i + 1, error);
-        throw error;
-      }
-    }
-
-    // Drafts
-    for (let i = 0; i < CONFIG.counts.relationDp.drafts; i++) {
-      try {
-        const relatedDp = [this.pick(basicDp?.drafts, i), this.pick(basicDp?.published, i)].filter(
-          Boolean
-        );
-
-        const relatedBasic = [this.pick(basic, i), this.pick(basic, i + 1)].filter(Boolean);
-
-        const mediaFile = this.pick(this.mediaFiles, i + 5);
-        const logo = mediaFile ? components.logo(mediaFile.id) : null;
-        const header = logo ? components.header(logo) : null;
-
-        const entry = await this.strapi.entityService.create('api::relation-dp.relation-dp', {
-          data: {
-            name: `Relation DP Draft ${i + 1}`,
-            cover: mediaFile?.id ?? null,
-            morphTargets: morphTargetsFor([
-              i % (relation?.length || 1),
-              (i + 2) % (relation?.length || 1),
-            ]),
-            oneToOneBasic: relatedDp[0]?.id || null,
-            oneToManyBasics: relatedDp.map((b) => b.id),
-            manyToOneBasic: relatedDp[0]?.id || null,
-            manyToManyBasics: relatedDp.map((b) => b.id),
-            manyToOneBasicNoDp: relatedBasic[0]?.id || null,
-            manyToManyBasicsNoDp: relatedBasic.map((b) => b.id),
-            simpleInfo: components.simpleInfo(),
-            content: [
-              components.forDynamicZone(components.simpleInfo(), 'simple-info'),
-              components.forDynamicZone(components.imageBlock(), 'image-block'),
-            ],
-            textBlocks: [
-              components.textBlock({ basicDpId: relatedDp[0]?.id }),
-              components.textBlock({ basicDpId: relatedDp[1]?.id }),
-            ],
-            mediaBlock: components.mediaBlock(),
-            header: header,
-            sections: [
-              components.forDynamicZone(
+          return await this.strapi.entityService.create('api::relation-dp.relation-dp', {
+            data: {
+              name: `Relation DP Published ${i + 1}`,
+              cover: mediaFile?.id ?? null,
+              morphTargets: morphTargetsFor([
+                i % (relation?.length || 1),
+                (i + 1) % (relation?.length || 1),
+              ]),
+              oneToOneBasic: relatedDp[0]?.id || null,
+              oneToManyBasics: relatedDp.map((b) => b.id),
+              manyToOneBasic: relatedDp[0]?.id || null,
+              manyToManyBasics: relatedDp.map((b) => b.id),
+              manyToOneBasicNoDp: relatedBasic[0]?.id || null,
+              manyToManyBasicsNoDp: relatedBasic.map((b) => b.id),
+              simpleInfo: components.simpleInfo(),
+              content: [
+                components.forDynamicZone(components.simpleInfo(), 'simple-info'),
+                components.forDynamicZone(components.imageBlock(), 'image-block'),
+              ],
+              textBlocks: [
                 components.textBlock({ basicDpId: relatedDp[0]?.id }),
-                'text-block'
-              ),
-              components.forDynamicZone(components.mediaBlock(), 'media-block'),
-              ...(header ? [components.forDynamicZone(components.header(logo), 'header')] : []),
-            ],
-          },
-        });
-        drafts.push(entry);
-      } catch (error) {
-        this.logError('relation-dp draft', i + 1, error);
-        throw error;
+                components.textBlock({ basicDpId: relatedDp[1]?.id }),
+              ],
+              mediaBlock: components.mediaBlock(),
+              header: header,
+              sections: [
+                components.forDynamicZone(
+                  components.textBlock({ basicDpId: relatedDp[1]?.id }),
+                  'text-block'
+                ),
+                components.forDynamicZone(components.mediaBlock(), 'media-block'),
+                ...(header ? [components.forDynamicZone(components.header(logo), 'header')] : []),
+              ],
+              publishedAt: new Date(),
+            },
+          });
+        } catch (error) {
+          this.logError('relation-dp published', i + 1, error);
+          throw error;
+        }
       }
-    }
+    );
 
-    // Add self-references
-    for (const entry of [...published, ...drafts]) {
+    const drafts = await concurrentMap(
+      CONFIG.counts.relationDp.drafts,
+      SEED_CONCURRENCY,
+      async (i) => {
+        try {
+          const relatedDp = [
+            this.pick(basicDp?.drafts, i),
+            this.pick(basicDp?.published, i),
+          ].filter(Boolean);
+
+          const relatedBasic = [this.pick(basic, i), this.pick(basic, i + 1)].filter(Boolean);
+
+          const mediaFile = this.pick(this.mediaFiles, i + 5);
+          const logo = mediaFile ? components.logo(mediaFile.id) : null;
+          const header = logo ? components.header(logo) : null;
+
+          return await this.strapi.entityService.create('api::relation-dp.relation-dp', {
+            data: {
+              name: `Relation DP Draft ${i + 1}`,
+              cover: mediaFile?.id ?? null,
+              morphTargets: morphTargetsFor([
+                i % (relation?.length || 1),
+                (i + 2) % (relation?.length || 1),
+              ]),
+              oneToOneBasic: relatedDp[0]?.id || null,
+              oneToManyBasics: relatedDp.map((b) => b.id),
+              manyToOneBasic: relatedDp[0]?.id || null,
+              manyToManyBasics: relatedDp.map((b) => b.id),
+              manyToOneBasicNoDp: relatedBasic[0]?.id || null,
+              manyToManyBasicsNoDp: relatedBasic.map((b) => b.id),
+              simpleInfo: components.simpleInfo(),
+              content: [
+                components.forDynamicZone(components.simpleInfo(), 'simple-info'),
+                components.forDynamicZone(components.imageBlock(), 'image-block'),
+              ],
+              textBlocks: [
+                components.textBlock({ basicDpId: relatedDp[0]?.id }),
+                components.textBlock({ basicDpId: relatedDp[1]?.id }),
+              ],
+              mediaBlock: components.mediaBlock(),
+              header: header,
+              sections: [
+                components.forDynamicZone(
+                  components.textBlock({ basicDpId: relatedDp[0]?.id }),
+                  'text-block'
+                ),
+                components.forDynamicZone(components.mediaBlock(), 'media-block'),
+                ...(header ? [components.forDynamicZone(components.header(logo), 'header')] : []),
+              ],
+            },
+          });
+        } catch (error) {
+          this.logError('relation-dp draft', i + 1, error);
+          throw error;
+        }
+      }
+    );
+
+    // Add self-references (each entry's update is independent, parallelizable).
+    const allEntries = [...published, ...drafts];
+    await concurrentMap(allEntries.length, SEED_CONCURRENCY, async (i) => {
+      const entry = allEntries[i];
       await this.strapi.entityService.update('api::relation-dp.relation-dp', entry.id, {
         data: {
           selfOne: entry.id,
           selfMany: [entry.id],
         },
       });
-    }
+    });
 
     // Add nested component with relations (reference-list -> references -> article) to first published entry for migration test
     if (published.length >= 2) {
@@ -727,86 +794,91 @@ class ContentSeeder {
     for (const locale of CONFIG.locales) {
       const localeBasics = basicDpI18n?.all?.filter((b) => b.locale === locale) || [];
 
-      // Published
-      for (let i = 0; i < CONFIG.counts.relationDpI18n.published; i++) {
-        try {
-          const related = [this.pick(localeBasics, i), this.pick(localeBasics, i + 1)].filter(
-            Boolean
-          );
-
-          const entry = await this.strapi.entityService.create(
-            'api::relation-dp-i18n.relation-dp-i18n',
-            {
-              data: {
-                name: `Relation DP i18n Published ${i + 1}`,
-                oneToOneBasic: related[0]?.id || null,
-                oneToManyBasics: related.map((b) => b.id),
-                manyToOneBasic: related[0]?.id || null,
-                manyToManyBasics: related.map((b) => b.id),
-                simpleInfo: components.simpleInfo(),
-                content: [
-                  components.forDynamicZone(components.simpleInfo(), 'simple-info'),
-                  components.forDynamicZone(components.imageBlock(), 'image-block'),
-                ],
-                textBlocks: [components.textBlock(), components.textBlock()],
-                mediaBlock: components.mediaBlock(),
-                sections: [
-                  components.forDynamicZone(components.textBlock(), 'text-block'),
-                  components.forDynamicZone(components.mediaBlock(), 'media-block'),
-                ],
-                publishedAt: new Date(),
-              },
-              locale,
-            }
-          );
-          published.push(entry);
-        } catch (error) {
-          this.logError(`relation-dp-i18n published (${locale})`, i + 1, error);
-          throw error;
+      const pub = await concurrentMap(
+        CONFIG.counts.relationDpI18n.published,
+        SEED_CONCURRENCY,
+        async (i) => {
+          try {
+            const related = [this.pick(localeBasics, i), this.pick(localeBasics, i + 1)].filter(
+              Boolean
+            );
+            return await this.strapi.entityService.create(
+              'api::relation-dp-i18n.relation-dp-i18n',
+              {
+                data: {
+                  name: `Relation DP i18n Published ${i + 1}`,
+                  oneToOneBasic: related[0]?.id || null,
+                  oneToManyBasics: related.map((b) => b.id),
+                  manyToOneBasic: related[0]?.id || null,
+                  manyToManyBasics: related.map((b) => b.id),
+                  simpleInfo: components.simpleInfo(),
+                  content: [
+                    components.forDynamicZone(components.simpleInfo(), 'simple-info'),
+                    components.forDynamicZone(components.imageBlock(), 'image-block'),
+                  ],
+                  textBlocks: [components.textBlock(), components.textBlock()],
+                  mediaBlock: components.mediaBlock(),
+                  sections: [
+                    components.forDynamicZone(components.textBlock(), 'text-block'),
+                    components.forDynamicZone(components.mediaBlock(), 'media-block'),
+                  ],
+                  publishedAt: new Date(),
+                },
+                locale,
+              }
+            );
+          } catch (error) {
+            this.logError(`relation-dp-i18n published (${locale})`, i + 1, error);
+            throw error;
+          }
         }
-      }
+      );
+      published.push(...pub);
 
-      // Drafts
-      for (let i = 0; i < CONFIG.counts.relationDpI18n.drafts; i++) {
-        try {
-          const related = [this.pick(localeBasics, i), this.pick(localeBasics, i + 1)].filter(
-            Boolean
-          );
-
-          const entry = await this.strapi.entityService.create(
-            'api::relation-dp-i18n.relation-dp-i18n',
-            {
-              data: {
-                name: `Relation DP i18n Draft ${i + 1}`,
-                oneToOneBasic: related[0]?.id || null,
-                oneToManyBasics: related.map((b) => b.id),
-                manyToOneBasic: related[0]?.id || null,
-                manyToManyBasics: related.map((b) => b.id),
-                simpleInfo: components.simpleInfo(),
-                content: [
-                  components.forDynamicZone(components.simpleInfo(), 'simple-info'),
-                  components.forDynamicZone(components.imageBlock(), 'image-block'),
-                ],
-                textBlocks: [components.textBlock(), components.textBlock()],
-                mediaBlock: components.mediaBlock(),
-                sections: [
-                  components.forDynamicZone(components.textBlock(), 'text-block'),
-                  components.forDynamicZone(components.mediaBlock(), 'media-block'),
-                ],
-              },
-              locale,
-            }
-          );
-          drafts.push(entry);
-        } catch (error) {
-          this.logError(`relation-dp-i18n draft (${locale})`, i + 1, error);
-          throw error;
+      const drf = await concurrentMap(
+        CONFIG.counts.relationDpI18n.drafts,
+        SEED_CONCURRENCY,
+        async (i) => {
+          try {
+            const related = [this.pick(localeBasics, i), this.pick(localeBasics, i + 1)].filter(
+              Boolean
+            );
+            return await this.strapi.entityService.create(
+              'api::relation-dp-i18n.relation-dp-i18n',
+              {
+                data: {
+                  name: `Relation DP i18n Draft ${i + 1}`,
+                  oneToOneBasic: related[0]?.id || null,
+                  oneToManyBasics: related.map((b) => b.id),
+                  manyToOneBasic: related[0]?.id || null,
+                  manyToManyBasics: related.map((b) => b.id),
+                  simpleInfo: components.simpleInfo(),
+                  content: [
+                    components.forDynamicZone(components.simpleInfo(), 'simple-info'),
+                    components.forDynamicZone(components.imageBlock(), 'image-block'),
+                  ],
+                  textBlocks: [components.textBlock(), components.textBlock()],
+                  mediaBlock: components.mediaBlock(),
+                  sections: [
+                    components.forDynamicZone(components.textBlock(), 'text-block'),
+                    components.forDynamicZone(components.mediaBlock(), 'media-block'),
+                  ],
+                },
+                locale,
+              }
+            );
+          } catch (error) {
+            this.logError(`relation-dp-i18n draft (${locale})`, i + 1, error);
+            throw error;
+          }
         }
-      }
+      );
+      drafts.push(...drf);
     }
 
-    // Add self-references
-    for (const entry of [...published, ...drafts]) {
+    const allEntries = [...published, ...drafts];
+    await concurrentMap(allEntries.length, SEED_CONCURRENCY, async (i) => {
+      const entry = allEntries[i];
       await this.strapi.entityService.update('api::relation-dp-i18n.relation-dp-i18n', entry.id, {
         data: {
           selfOne: entry.id,
@@ -814,13 +886,128 @@ class ContentSeeder {
         },
         locale: entry.locale,
       });
-    }
+    });
 
     this.results.relationDpI18n = { published, drafts, all: [...published, ...drafts] };
     return this.results.relationDpI18n;
   }
 
   // Run all seeders in sequence
+  // Seed the high-cardinality many-to-many pair. Anti-pattern by design:
+  // N sources × K targets-per-source join-table rows exercise the v4→v5
+  // `copyRelationTableRows` chunk-batched code path. With BASE=15/5 at m=100
+  // we get ~2000 sources × 2000 targets × 10 joins-per-source = 20K join
+  // rows, crossing the 1000-row chunk boundary multiple times.
+  async seedHcM2m() {
+    console.log('Seeding hc-m2m-target...');
+    const targetsPub = await concurrentMap(
+      CONFIG.counts.hcM2mTarget.published,
+      SEED_CONCURRENCY,
+      async (i) => {
+        try {
+          return await this.strapi.entityService.create('api::hc-m2m-target.hc-m2m-target', {
+            data: {
+              label: `Target ${random.string(6)}`,
+              publishedAt: new Date(),
+            },
+          });
+        } catch (error) {
+          this.logError('hc-m2m-target published', i, error);
+          return null;
+        }
+      }
+    );
+    const targetsDrf = await concurrentMap(
+      CONFIG.counts.hcM2mTarget.drafts,
+      SEED_CONCURRENCY,
+      async (i) => {
+        try {
+          return await this.strapi.entityService.create('api::hc-m2m-target.hc-m2m-target', {
+            data: {
+              label: `Target draft ${random.string(6)}`,
+              publishedAt: null,
+            },
+          });
+        } catch (error) {
+          this.logError('hc-m2m-target draft', i, error);
+          return null;
+        }
+      }
+    );
+    const targets = {
+      published: targetsPub.filter(Boolean),
+      drafts: targetsDrf.filter(Boolean),
+    };
+
+    const allTargets = [...targets.published, ...targets.drafts];
+
+    console.log('Seeding hc-m2m-source...');
+    const fanout = CONFIG.counts.hcM2mTargetsPerSource;
+
+    const pickTargetIds = (seedIdx) => {
+      if (!allTargets.length) return [];
+      const picks = [];
+      for (let j = 0; j < fanout; j += 1) {
+        picks.push(allTargets[(seedIdx + j) % allTargets.length].id);
+      }
+      // De-dup since modulo can repeat if fanout > allTargets.length.
+      return [...new Set(picks)];
+    };
+
+    const sourcesPub = await concurrentMap(
+      CONFIG.counts.hcM2mSource.published,
+      SEED_CONCURRENCY,
+      async (i) => {
+        try {
+          return await this.strapi.entityService.create('api::hc-m2m-source.hc-m2m-source', {
+            data: {
+              label: `Source ${random.string(6)}`,
+              targets: pickTargetIds(i),
+              publishedAt: new Date(),
+            },
+          });
+        } catch (error) {
+          this.logError('hc-m2m-source published', i, error);
+          return null;
+        }
+      }
+    );
+    const sourcesDrf = await concurrentMap(
+      CONFIG.counts.hcM2mSource.drafts,
+      SEED_CONCURRENCY,
+      async (i) => {
+        try {
+          return await this.strapi.entityService.create('api::hc-m2m-source.hc-m2m-source', {
+            data: {
+              label: `Source draft ${random.string(6)}`,
+              targets: pickTargetIds(i + CONFIG.counts.hcM2mSource.published),
+              publishedAt: null,
+            },
+          });
+        } catch (error) {
+          this.logError('hc-m2m-source draft', i, error);
+          return null;
+        }
+      }
+    );
+    const sources = {
+      published: sourcesPub.filter(Boolean),
+      drafts: sourcesDrf.filter(Boolean),
+    };
+
+    this.results.hcM2mTarget = {
+      published: targets.published,
+      drafts: targets.drafts,
+      all: allTargets,
+    };
+    this.results.hcM2mSource = {
+      published: sources.published,
+      drafts: sources.drafts,
+      all: [...sources.published, ...sources.drafts],
+    };
+    return this.results.hcM2mSource;
+  }
+
   async seedAll() {
     await this.seedBasic();
     await this.seedBasicDp();
@@ -829,6 +1016,7 @@ class ContentSeeder {
     await this.seedRelation();
     await this.seedRelationDp();
     await this.seedRelationDpI18n();
+    await this.seedHcM2m();
     return this.results;
   }
 }
@@ -861,6 +1049,12 @@ async function seed() {
     console.log(`  - ${results.relation?.length || 0} relation entries`);
     console.log(`  - ${results.relationDp?.all?.length || 0} relation-dp entries`);
     console.log(`  - ${results.relationDpI18n?.all?.length || 0} relation-dp-i18n entries`);
+    console.log(
+      `  - ${results.hcM2mSource?.all?.length || 0} hc-m2m-source entries (${results.hcM2mSource?.published?.length || 0} published, ${results.hcM2mSource?.drafts?.length || 0} drafts)`
+    );
+    console.log(
+      `  - ${results.hcM2mTarget?.all?.length || 0} hc-m2m-target entries (${results.hcM2mTarget?.published?.length || 0} published, ${results.hcM2mTarget?.drafts?.length || 0} drafts)`
+    );
     console.log(`  - ${mediaFiles.length} media files`);
   } catch (error) {
     console.error('\n❌ Error seeding data:', error.message);
