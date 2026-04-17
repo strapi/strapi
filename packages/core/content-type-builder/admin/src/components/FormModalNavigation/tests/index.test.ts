@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 import { CTBSessionProvider } from '../../CTBSession/ctbSession';
 import {
@@ -35,7 +35,7 @@ describe('FromModalNavigationProvider', () => {
     expect(currentStateWithoutFunctions).toEqual(INITIAL_STATE_DATA);
   });
 
-  it('updates the state when selecting a custom field for a new attribute', async () => {
+  it('updates the state when selecting a custom field for a new attribute', () => {
     const Wrapper = ({ children }: { children?: React.ReactNode }) =>
       React.createElement(
         CTBSessionProvider,
@@ -47,7 +47,7 @@ describe('FromModalNavigationProvider', () => {
       wrapper: Wrapper,
     });
 
-    await waitFor(() => {
+    act(() => {
       result.current.onClickSelectCustomField({
         attributeType: 'text',
         customFieldUid: 'plugin::mycustomfields.color',
@@ -66,7 +66,7 @@ describe('FromModalNavigationProvider', () => {
     expect(currentStateWithoutFunctions).toEqual(expected);
   });
 
-  it('updates the state when editing a custom field attribute', async () => {
+  it('updates the state when editing a custom field attribute', () => {
     const Wrapper = ({ children }: { children?: React.ReactNode }) =>
       React.createElement(
         CTBSessionProvider,
@@ -78,7 +78,7 @@ describe('FromModalNavigationProvider', () => {
       wrapper: Wrapper,
     });
 
-    await waitFor(() => {
+    act(() => {
       result.current.onOpenModalEditCustomField({
         forTarget: 'contentType',
         targetUid: 'api::test.test',

@@ -68,7 +68,11 @@ export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useDebounce } from './hooks/useDebounce';
 export { useMediaQuery, useIsDesktop, useIsTablet, useIsMobile } from './hooks/useMediaQuery';
 export { useDeviceType } from './hooks/useDeviceType';
-export { usePersistentState, useScopedPersistentState } from './hooks/usePersistentState';
+export {
+  usePersistentState,
+  useScopedPersistentState,
+  usePersistentStateScope,
+} from './hooks/usePersistentState';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
 

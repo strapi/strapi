@@ -1,4 +1,4 @@
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, usePersistentStateScope } from '@strapi/admin/strapi-admin';
 import { renderHook, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
@@ -11,6 +11,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   useQueryParams: jest.fn(),
+  usePersistentStateScope: jest.fn(),
 }));
 
 const mockSetQuery = jest.fn();
@@ -19,25 +20,35 @@ describe('usePersistentPartialQueryParams', () => {
   const keyPrefix = 'test-prefix-';
   const keysToPersist = ['page', 'pageSize', 'sort'];
   const pathname = '/content-manager/collection-types/api::article.article';
+  const key = `${keyPrefix}${pathname}`;
 
   beforeEach(() => {
     jest.clearAllMocks();
     window.localStorage.clear();
     (useLocation as jest.Mock).mockReturnValue({ pathname });
     (useQueryParams as jest.Mock).mockReturnValue([{ query: {} }, mockSetQuery]);
+    (usePersistentStateScope as jest.Mock).mockReturnValue('test-uuid');
   });
 
   it('should not load query params if localStorage is empty', () => {
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
     expect(mockSetQuery).not.toHaveBeenCalled();
   });
 
   it('should load query params from localStorage on mount', async () => {
     const savedParams = { page: 2, pageSize: 20, sort: 'name:asc' };
-    window.localStorage.setItem(`${keyPrefix}${pathname}`, JSON.stringify(savedParams));
+    window.localStorage.setItem(key, JSON.stringify(savedParams));
 
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
     await waitFor(() => {
       expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true);
@@ -46,9 +57,13 @@ describe('usePersistentPartialQueryParams', () => {
 
   it('should only load persisted keys from localStorage', async () => {
     const savedParams = { page: 2, pageSize: 20, sort: 'name:asc', filters: { name: 'test' } };
-    window.localStorage.setItem(`${keyPrefix}${pathname}`, JSON.stringify(savedParams));
+    window.localStorage.setItem(key, JSON.stringify(savedParams));
 
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
     await waitFor(() => {
       expect(mockSetQuery).toHaveBeenCalledWith(
@@ -63,11 +78,15 @@ describe('usePersistentPartialQueryParams', () => {
     const savedParams = { page: 2, pageSize: 20 };
     const existingQuery = { filters: { name: 'test' } };
 
-    window.localStorage.setItem(`${keyPrefix}${pathname}`, JSON.stringify(savedParams));
+    window.localStorage.setItem(key, JSON.stringify(savedParams));
 
     (useQueryParams as jest.Mock).mockReturnValue([{ query: existingQuery }, mockSetQuery]);
 
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
     await waitFor(() => {
       expect(mockSetQuery).toHaveBeenCalledWith({ ...existingQuery, ...savedParams }, 'push', true);
@@ -79,10 +98,14 @@ describe('usePersistentPartialQueryParams', () => {
 
     (useQueryParams as jest.Mock).mockReturnValue([{ query }, mockSetQuery]);
 
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
     await waitFor(() => {
-      const saved = window.localStorage.getItem(`${keyPrefix}${pathname}`);
+      const saved = window.localStorage.getItem(key);
       expect(saved).toBe(JSON.stringify(query));
     });
   });
@@ -92,10 +115,14 @@ describe('usePersistentPartialQueryParams', () => {
 
     (useQueryParams as jest.Mock).mockReturnValue([{ query }, mockSetQuery]);
 
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
     await waitFor(() => {
-      const saved = window.localStorage.getItem(`${keyPrefix}${pathname}`);
+      const saved = window.localStorage.getItem(key);
       expect(saved).toBe(JSON.stringify({ page: 3, pageSize: 50, sort: 'createdAt:desc' }));
     });
   });
@@ -105,29 +132,41 @@ describe('usePersistentPartialQueryParams', () => {
 
     (useQueryParams as jest.Mock).mockReturnValue([{ query }, mockSetQuery]);
 
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
-    const saved = window.localStorage.getItem(`${keyPrefix}${pathname}`);
+    const saved = window.localStorage.getItem(key);
     expect(saved).toBeNull();
   });
 
   it('should handle invalid JSON in localStorage gracefully', () => {
-    window.localStorage.setItem(`${keyPrefix}${pathname}`, 'invalid-json');
+    window.localStorage.setItem(key, 'invalid-json');
 
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
     expect(mockSetQuery).not.toHaveBeenCalled();
   });
 
   it('should handle empty object in localStorage', () => {
-    window.localStorage.setItem(`${keyPrefix}${pathname}`, JSON.stringify({}));
+    window.localStorage.setItem(key, JSON.stringify({}));
 
-    renderHook(() => usePersistentPartialQueryParams(keyPrefix, keysToPersist));
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [key]: { paths: keysToPersist },
+      })
+    );
 
     expect(mockSetQuery).not.toHaveBeenCalled();
   });
 
-  it('should load different params for different pathnames', async () => {
+  it('should load different params for different pathnames/keys', async () => {
     const pathname1 = '/path1';
     const pathname2 = '/path2';
     const params1 = { page: 1 };
@@ -136,9 +175,10 @@ describe('usePersistentPartialQueryParams', () => {
     window.localStorage.setItem(`${keyPrefix}${pathname1}`, JSON.stringify(params1));
     window.localStorage.setItem(`${keyPrefix}${pathname2}`, JSON.stringify(params2));
 
-    (useLocation as jest.Mock).mockReturnValue({ pathname: pathname1 });
-    const { rerender } = renderHook(() =>
-      usePersistentPartialQueryParams(keyPrefix, keysToPersist)
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [`${keyPrefix}${pathname1}`]: { paths: keysToPersist },
+      })
     );
 
     await waitFor(() => {
@@ -146,11 +186,80 @@ describe('usePersistentPartialQueryParams', () => {
     });
 
     mockSetQuery.mockClear();
-    (useLocation as jest.Mock).mockReturnValue({ pathname: pathname2 });
-    rerender();
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [`${keyPrefix}${pathname2}`]: { paths: keysToPersist },
+      })
+    );
 
     await waitFor(() => {
       expect(mockSetQuery).toHaveBeenCalledWith(params2, 'push', true);
     });
+  });
+
+  it('should load and merge params from multiple configs', async () => {
+    const config = {
+      [`LIST_SETTINGS:${pathname}`]: { paths: ['page', 'pageSize', 'sort'] },
+      LOCALE: { paths: ['plugins.i18n.locale'] },
+    };
+
+    window.localStorage.setItem(
+      `LIST_SETTINGS:${pathname}`,
+      JSON.stringify({ page: 2, pageSize: 20, sort: 'name:asc' })
+    );
+    window.localStorage.setItem('LOCALE', JSON.stringify({ plugins: { i18n: { locale: 'en' } } }));
+
+    renderHook(() => usePersistentPartialQueryParams(config));
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        {
+          page: 2,
+          pageSize: 20,
+          sort: 'name:asc',
+          plugins: { i18n: { locale: 'en' } },
+        },
+        'push',
+        true
+      );
+    });
+  });
+
+  it('should load scoped config values from scoped localStorage key', async () => {
+    const config = {
+      'STRAPI_LIST_VIEW_SETTINGS:api::article.article': {
+        paths: ['pageSize', 'sort'],
+        scoped: true,
+      },
+    };
+
+    window.localStorage.setItem(
+      'STRAPI_LIST_VIEW_SETTINGS:api::article.article:test-uuid',
+      JSON.stringify({ pageSize: 20, sort: 'name:asc' })
+    );
+
+    renderHook(() => usePersistentPartialQueryParams(config));
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalledWith({ pageSize: 20, sort: 'name:asc' }, 'push', true);
+    });
+  });
+
+  it('should not load scoped values from unscoped key', () => {
+    const config = {
+      'STRAPI_LIST_VIEW_SETTINGS:api::article.article': {
+        paths: ['pageSize', 'sort'],
+        scoped: true,
+      },
+    };
+
+    window.localStorage.setItem(
+      'STRAPI_LIST_VIEW_SETTINGS:api::article.article',
+      JSON.stringify({ pageSize: 20, sort: 'name:asc' })
+    );
+
+    renderHook(() => usePersistentPartialQueryParams(config));
+
+    expect(mockSetQuery).not.toHaveBeenCalled();
   });
 });
