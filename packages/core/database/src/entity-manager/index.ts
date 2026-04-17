@@ -526,10 +526,8 @@ export const createEntityManager = (db: Database): EntityManager => {
     async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
-      const { where } = params;
-
       const deletedRows = await this.createQueryBuilder(uid)
-        .where(where)
+        .init(params)
         .delete()
         .execute<number>({ mapResults: false });
 
