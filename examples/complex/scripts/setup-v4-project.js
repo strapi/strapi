@@ -88,6 +88,7 @@ const packageJson = {
     entities: '2.2.0',
     mysql2: '3.20.0',
     pg: '8.20.0',
+    'better-sqlite3': '12.8.0',
     react: '^18.0.0',
     'react-dom': '^18.0.0',
     'react-is': '^18.0.0',

@@ -1,3 +1,5 @@
+import path from 'path';
+
 export default ({ env }) => {
   const client = env('DATABASE_CLIENT', 'postgres');
 
@@ -40,10 +42,24 @@ export default ({ env }) => {
       },
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
+    sqlite: {
+      connection: {
+        filename: (() => {
+          const f = env('DATABASE_FILENAME');
+          if (!f) {
+            return path.join(process.cwd(), '.tmp', 'data.db');
+          }
+          return path.isAbsolute(f) ? f : path.join(process.cwd(), f);
+        })(),
+      },
+      useNullAsDefault: true,
+    },
   };
 
   if (!connections[client]) {
-    throw new Error(`Unsupported DATABASE_CLIENT: ${client}. Use "postgres" or "mysql".`);
+    throw new Error(
+      `Unsupported DATABASE_CLIENT: ${client}. Use "postgres", "mysql", or "sqlite".`
+    );
   }
 
   return {

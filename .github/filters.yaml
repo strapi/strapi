@@ -27,6 +27,9 @@ cli:
   - 'tests/scripts/run-cli-tests.js'
   - 'tests/scripts/run-tests.js'
   - 'tests/cli/**'
+# DB / schema migration sources (Umzug internal, core discard-drafts, plugin migrations, etc.)
+migrations:
+  - 'packages/**/migrations/**'
 docs:
   - 'docs/**'
   - '**.mdx?'

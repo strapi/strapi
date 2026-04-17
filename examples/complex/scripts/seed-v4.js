@@ -16,6 +16,7 @@ const BASE_COUNTS = {
   relation: 5,
   relationDp: { published: 5, drafts: 3 },
   relationDpI18n: { published: 5, drafts: 3 },
+  /** Upload plugin `files` rows — required so v5 internal migration 5.0.0-02 exercises the files table */
   mediaFiles: 10,
   // Anti-pattern: high-cardinality M2M. At m=100 this produces ~2000 sources
   // × ~2000 targets, crossing the 1000-row chunk boundary in v4→v5 migrations

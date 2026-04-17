@@ -136,6 +136,8 @@ Snapshots live in `snapshots/` and are gitignored:
    yarn test:migration
    ```
 
+   This includes a **document_id backfill** check (internal migration `5.0.0-02-created-document-id`): every table with a `documentId` attribute, including upload **`files`**, must have no `NULL` `document_id` after migrations. The v4 seed always creates media files so the `files` table is populated before the v4→v5 upgrade.
+
 9. **Test and fix bugs** as needed
 
 10. **Restore snapshot** to reset database:
@@ -147,6 +149,46 @@ Snapshots live in `snapshots/` and are gitignored:
 11. **Repeat from step 7** to test fixes
 
 **Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. The complex example uses its own Compose project name (`strapi_complex`) so it does not collide with other containers.
+
+## Automated migration test (monorepo)
+
+From the **repository root** (quick smoke, ~1–2 min on a warm tree):
+
+```bash
+yarn test:migrations:smoke
+```
+
+Full flow after `yarn build` (or `--skip-build` when dist is current):
+
+```bash
+yarn test:migrations --initial 4.26.0 --database sqlite --skip-build
+```
+
+You must pass **`--initial <semver>`** (unless you use **`--scenario`**): baseline npm version (v4 or v5). Optional **`--via`** adds intermediate published Strapi boots. The **last step is always workspace** (this monorepo). There is **no** final Strapi version flag.
+
+This wipes `examples/complex/.migration-v5/`, scaffolds the baseline, seeds, optionally runs `--via` pinned releases, then validates on the same database. **`--initial` 4.x** = v4 scaffold + `seed.js`; **`--initial` 5.x** = pinned v5 + `seed-v5.js`. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial 4.26.0`.
+
+**CI:** [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job, Node 20, latest v4 from `@strapi/strapi@legacy`).
+
+Options:
+
+- `--initial <semver>` — required without `--scenario` (4.x = v4 scaffold; 5.x = pinned v5 + v5 seed)
+- `--via <semver>` / `-v` — repeatable pinned boots before workspace (`full-ladder` when any `--via`)
+- `--scenario <path>` — JSON scenario (overrides CLI flags)
+- `--validators` — e.g. `full-v4-origin`, `full-v5-origin`, `full-ladder` ([`validators.js`](../../tests/migration/framework/validators.js))
+- `--initial-node` / `--workspace-node` — optional Node major checks per phase
+- `--database sqlite` (default locally) | `postgres` | `mysql` | `mariadb` | `sqlite`
+- `--multiplier N`, `--build`, `--skip-build`
+
+Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20**.
+
+Examples:
+
+- `yarn test:migrations --initial 4.26.0 --via 5.30.0 --database sqlite`
+- `yarn test:migrations --initial 5.7.0 --database sqlite`
+- `yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json`
+
+Checkpoints: [`tests/migration/CHECKPOINTS.md`](../../tests/migration/CHECKPOINTS.md).
 
 ## Migration performance benchmark
 
