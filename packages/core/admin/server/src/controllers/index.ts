@@ -11,6 +11,7 @@ import user from './user';
 import webhooks from './webhooks';
 import contentApi from './content-api';
 import homepage from './homepage';
+import ai from '../ai/controllers/ai';
 
 export default {
   admin,
@@ -24,4 +25,5 @@ export default {
   webhooks,
   'content-api': contentApi,
   homepage,
+  ai,
 };

@@ -185,7 +185,7 @@ Once all stages have been completed, the transfer waits for all providers to clo
 
 A transfer engine object is created by using `createTransferEngine`, which accepts a [source provider](../02-providers/01-source-providers.md), a [destination provider](../02-providers/02-destination-providers.md), and an options object.
 
-Note: By default, a transfer engine will transfer ALL data, including admin data, api tokens, etc. Transform filters must be used if you wish to exclude, as seen in the example below. An array called `DEFAULT_IGNORED_CONTENT_TYPES` is available from @strapi/data-transfer containing the uids that are excluded by default from the import, export, and transfer commands. If you intend to transfer admin data, be aware that this behavior will likely change in the future to automatically exclude the entire `admin::` uid namespace and will instead require them to be explicitly included.
+Note: By default, a transfer engine will transfer ALL data, including admin data, api tokens, etc. Transform filters must be used if you wish to exclude, as seen in the example below. A helper function called `isIgnoredContentType` is available from the CLI utils and is used by the import, export, and transfer commands to exclude content types that should not be transferred. All content types in the `admin::` namespace are automatically excluded by prefix, along with certain explicitly listed types (such as content releases). If you need to transfer admin data, you must implement your own engine transforms without this filter.
 
 ```typescript
 const engine = createTransferEngine(source, destination, options);
@@ -209,19 +209,16 @@ const options = {
       {
         // exclude all relations to ignored content types
         filter(link) {
-          return (
-            !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
-            !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
-          );
+          return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
         },
       },
       // Note: map exists for links but is not recommended
     ],
     entities: [
       {
-        // exclude all ignored content types
+        // exclude all ignored content types (admin:: prefix and explicit list)
         filter(entity) {
-          return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+          return !isIgnoredContentType(entity.type);
         },
       },
       {
@@ -444,9 +441,9 @@ const options = {
   transforms: {
     entities: [
       {
-        // exclude all ignored admin content types
+        // exclude all ignored content types (admin:: prefix and explicit list)
         filter(entity) {
-          return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+          return !isIgnoredContentType(entity.type);
         },
       },
       {
@@ -460,10 +457,7 @@ const options = {
       {
         // exclude all relations to ignored content types
         filter(link) {
-          return (
-            !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
-            !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
-          );
+          return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
         },
       },
       {
@@ -491,9 +485,9 @@ const options = {
   transforms: {
     entities: [
       {
-        // exclude all ignored content types
+        // exclude all ignored content types (admin:: prefix and explicit list)
         filter(entity) {
-          return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+          return !isIgnoredContentType(entity.type);
         },
       },
       {

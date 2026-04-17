@@ -9,7 +9,7 @@ import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/c
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
-import { getPopulateForLocalizations } from '../services/utils/populate';
+import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -629,6 +629,34 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
+  async bulkFindForValidation(ctx: any) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { documentIds, locale, sort } = ctx.request.body;
+
+    await validateBulkActionInput(ctx.request.body);
+
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const populate = await buildDeepPopulate(model as UID.CollectionType);
+
+    const documents = await strapi.documents(model as UID.CollectionType).findMany({
+      populate,
+      filters: { documentId: { $in: documentIds } } as any,
+      locale,
+      sort,
+      status: 'draft',
+    });
+
+    const results = await Promise.all(documents.map(permissionChecker.sanitizeOutput));
+
+    ctx.body = { results };
+  },
+
   async bulkPublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
@@ -873,10 +901,16 @@ export default {
 
     if (permissionChecker.requiresEntity.read()) {
       // Only load what we need for access checks
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
+
       const entity = await documentManager.findOne(id, model, {
         locale,
         status,
-        populate: {},
+        populate,
       });
 
       if (!entity) {

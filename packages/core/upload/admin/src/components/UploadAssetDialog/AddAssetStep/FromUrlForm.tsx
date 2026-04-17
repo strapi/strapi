@@ -60,7 +60,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFor
               error={
                 error?.message ||
                 (errors.urls
-                  ? formatMessage({ id: errors.urls, defaultMessage: 'An error occured' })
+                  ? formatMessage({ id: errors.urls, defaultMessage: 'An error occurred' })
                   : undefined)
               }
             >

@@ -6,7 +6,7 @@ import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
