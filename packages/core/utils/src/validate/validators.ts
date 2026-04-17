@@ -272,6 +272,15 @@ export const validatePopulate = asyncCurry(
               throwInvalidKey({ key, path: path.raw });
             }
 
+            // Handle bracket notation wildcard: populate[field]=* gets parsed by qs as {field: {'*': ''}}
+            // Convert it to a wildcard string so the handlers process it correctly
+            if (isObject(value)) {
+              const keys = Object.keys(value);
+              if (keys.length === 1 && keys[0] === '*') {
+                set(key, '*');
+              }
+            }
+
             // Valid populatable attribute, so return
             return;
           }
@@ -300,6 +309,12 @@ export const validatePopulate = asyncCurry(
 
           // Ignore plain wildcards
           if (key === '' && value === '*') {
+            return;
+          }
+
+          // Handle bracket notation wildcard: when qs parses populate[field]=*, it creates {field: {'*': ''}}
+          // During traversal, the '*' key itself will be encountered - skip validation for it
+          if (key === '*') {
             return;
           }
 
