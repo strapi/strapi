@@ -141,7 +141,6 @@ describe('stream utils', () => {
       const source = Readable.from([1, 2, 3], { objectMode: true });
       const result = await collect<number>(source, { destroy: false });
       expect(result).toEqual([1, 2, 3]);
-      source.removeAllListeners();
     });
 
     test('resolves on close with chunks received so far', async () => {
