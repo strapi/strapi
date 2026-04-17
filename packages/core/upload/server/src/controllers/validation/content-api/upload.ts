@@ -14,6 +14,7 @@ const fileInfoSchema = yup
     alternativeText: yup.string().nullable(),
     caption: yup.string().nullable(),
     focalPoint: focalPointSchema,
+    folder: yup.number().nullable(),
   })
   .noUnknown();
 
