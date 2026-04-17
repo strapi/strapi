@@ -45,8 +45,8 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.42.1",
-    "node-ses": "^3.0.3"
+    "@aws-sdk/client-ses": "3.1023.0",
+    "@strapi/utils": "5.42.1"
   },
   "devDependencies": {
     "eslint-config-custom": "5.42.1",
