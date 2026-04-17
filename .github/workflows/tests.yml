@@ -34,7 +34,7 @@ jobs:
       global: ${{ steps.filter.outputs.global }}
       is_local: ${{ github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 2 # need to check out previous 2 commits to see what has changed
       - uses: dorny/paths-filter@v3
@@ -51,8 +51,8 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -69,8 +69,8 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
 
@@ -92,8 +92,8 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -109,13 +109,13 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0 # needed for nx-set-shas
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@3e9ad7370203c1e93d109be57f3b72eb0eb511b1 # v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -132,13 +132,13 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0 # needed for nx-set-shas
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@3e9ad7370203c1e93d109be57f3b72eb0eb511b1 # v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -161,13 +161,13 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0 # needed for nx-set-shas
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@3e9ad7370203c1e93d109be57f3b72eb0eb511b1 # v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -177,7 +177,7 @@ jobs:
 
       - name: Upload coverage artifacts
         if: matrix.node == 24 # Only upload from one node version to avoid conflicts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: unit-coverage-reports
           path: |
@@ -194,8 +194,8 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -215,13 +215,13 @@ jobs:
       matrix:
         node: [20]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0 # needed for nx-set-shas
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@3e9ad7370203c1e93d109be57f3b72eb0eb511b1 # v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -230,7 +230,7 @@ jobs:
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand --coverage
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: front-coverage-reports
           path: |
@@ -250,8 +250,8 @@ jobs:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: 22
       - name: Monorepo install
@@ -277,7 +277,7 @@ jobs:
         # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@v1
+        uses: trunk-io/analytics-uploader@0e6c416c9d47c105654657984e5e4f0506dd84aa # v1
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
@@ -298,9 +298,9 @@ jobs:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: 20
 
@@ -328,7 +328,7 @@ jobs:
       # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@v1
+        uses: trunk-io/analytics-uploader@0e6c416c9d47c105654657984e5e4f0506dd84aa # v1
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
@@ -345,9 +345,9 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
 
@@ -387,8 +387,8 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -426,8 +426,8 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -449,8 +449,8 @@ jobs:
         node: [20, 22, 24]
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -492,8 +492,8 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -534,8 +534,8 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -560,8 +560,8 @@ jobs:
         node: [20, 22, 24]
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -579,19 +579,19 @@ jobs:
     if: ${{ !github.event.pull_request.head.repo.fork && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
     needs: [conditions, unit_back, unit_front]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Download unit test coverage
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: unit-coverage-reports
           path: unit-coverage
         continue-on-error: true
 
       - name: Download frontend test coverage
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: front-coverage-reports
           path: front-coverage
@@ -601,14 +601,14 @@ jobs:
         run: find . -name "lcov.info" -type f
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v7
+        uses: SonarSource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4 # v7.1.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
-        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
         timeout-minutes: 5
         continue-on-error: true
         env:
