@@ -1376,7 +1376,8 @@ async function getDraftMapForTarget(
 async function getDraftToPublishedMap(
   trx: Knex,
   targetUid: string,
-  reverseMapCache: Map<string, Map<number, number> | null>
+  reverseMapCache: Map<string, Map<number, number> | null>,
+  draftMapCache?: Map<string, Map<number, number> | null>
 ): Promise<Map<number, number> | null> {
   if (reverseMapCache.has(targetUid)) {
     return reverseMapCache.get(targetUid) ?? null;
@@ -1389,7 +1390,7 @@ async function getDraftToPublishedMap(
   }
 
   const draftToPublishedMap = new Map<number, number>();
-  const draftMap = await getDraftMapForTarget(trx, targetUid, new Map());
+  const draftMap = await getDraftMapForTarget(trx, targetUid, draftMapCache ?? new Map());
   if (draftMap) {
     // Reverse the published->draft map to get draft->published
     for (const [publishedId, draftId] of draftMap.entries()) {
@@ -1458,7 +1459,12 @@ async function mapTargetId(
     }
     // For published entity, if we got a draft ID, find the published version
     const effectiveReverseCache = reverseMapCache ?? new Map();
-    const reverseMap = await getDraftToPublishedMap(trx, targetUid, effectiveReverseCache);
+    const reverseMap = await getDraftToPublishedMap(
+      trx,
+      targetUid,
+      effectiveReverseCache,
+      draftMapCache
+    );
     if (reverseMap) {
       return reverseMap.get(Number(originalId)) ?? originalId;
     }
@@ -1488,7 +1494,12 @@ async function mapTargetId(
   // For published entities: map draft targets to published targets
   if (targetState === 'draft') {
     const effectiveReverseCache = reverseMapCache ?? new Map();
-    const reverseMap = await getDraftToPublishedMap(trx, targetUid, effectiveReverseCache);
+    const reverseMap = await getDraftToPublishedMap(
+      trx,
+      targetUid,
+      effectiveReverseCache,
+      draftMapCache
+    );
     if (reverseMap) {
       return reverseMap.get(Number(originalId)) ?? originalId;
     }
@@ -3087,6 +3098,14 @@ async function copyComponentRelations({
   // Process in batches to avoid MySQL query size limits and SQLite expression tree limits
   const publishedIdsChunks = chunkArray(publishedIds, getBatchSize(trx, 1000));
 
+  const componentTargetDraftMapCache = new Map<string, Map<number, number> | null>();
+  const componentTargetReverseMapCache = new Map<string, Map<number, number> | null>();
+  const componentHierarchyCaches: ComponentHierarchyCaches = {
+    parentInstanceCache: new Map(),
+    ancestorDpCache: new Map(),
+    parentDpCache: new Map(),
+  };
+
   for (const publishedIdsChunk of publishedIdsChunks) {
     // Get component relations for published entries
     const componentRelations = await trx(joinTableName)
@@ -3099,13 +3118,6 @@ async function copyComponentRelations({
 
     const componentCloneCache = new Map<string, Map<string, number>>();
     const clonedComponentPairsCache: ClonedComponentPairsCache = new Map();
-    const componentTargetDraftMapCache = new Map<string, Map<number, number> | null>();
-    const componentTargetReverseMapCache = new Map<string, Map<number, number> | null>();
-    const componentHierarchyCaches: ComponentHierarchyCaches = {
-      parentInstanceCache: new Map(),
-      ancestorDpCache: new Map(),
-      parentDpCache: new Map(),
-    };
 
     // Filter component relations: only propagate if component's parent in the component hierarchy doesn't have draft/publish
     // This matches discardDraft() behavior via shouldPropagateComponentRelationToNewVersion
