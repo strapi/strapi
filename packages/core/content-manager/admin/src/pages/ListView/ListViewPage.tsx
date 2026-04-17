@@ -46,7 +46,10 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
-import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
+import {
+  type PersistentQueryConfig,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -103,13 +106,21 @@ const ListViewPage = () => {
   const { collectionType, model, schema } = useDoc();
   const { list, listViewConversionContext } = useDocumentLayout(model);
 
-  usePersistentPartialQueryParams(
-    `STRAPI_LIST_VIEW_SETTINGS:${model}:`,
-    ['sort', 'filters', 'pageSize'],
-    false,
-    { legacyKey: `STRAPI_LIST_VIEW_SETTINGS:${pathname}` }
+  const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
+    () => ({
+      [`STRAPI_LIST_VIEW_SETTINGS:${model}`]: {
+        paths: ['sort', 'filters', 'pageSize'],
+        scoped: true,
+        legacyKey: `STRAPI_LIST_VIEW_SETTINGS:${pathname}`,
+      },
+      STRAPI_LOCALE: {
+        paths: ['plugins.i18n.locale'],
+        scoped: false,
+      },
+    }),
+    [model, pathname]
   );
-  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
+  usePersistentPartialQueryParams(persistentQueryConfigs);
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,

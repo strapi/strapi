@@ -20,7 +20,7 @@ export default {
     {
       method: 'GET',
       path: '/ai-feature-config',
-      handler: 'ai.getAIFeatureConfig',
+      handler: 'ai.getAiFeatureConfig',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },

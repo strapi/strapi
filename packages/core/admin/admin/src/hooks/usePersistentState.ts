@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { useInitQuery } from '../services/admin';
 
@@ -27,8 +27,9 @@ const usePersistentState = <T>(key: string, defaultValue: T) => {
     // include defaultValue in case it changes across models
   }, [key, defaultValue]);
 
-  // persist whenever (key, value) change — but only for the active key
-  useEffect(() => {
+  // Persist synchronously after commit so values survive same-tab navigation (e.g. external
+  // links) before the next paint — useEffect can run after unload and skip writing.
+  useLayoutEffect(() => {
     if (currentKeyRef.current !== key) return; // safety guard
 
     window.localStorage.setItem(key, JSON.stringify(value));
@@ -37,14 +38,19 @@ const usePersistentState = <T>(key: string, defaultValue: T) => {
   return [value, setValue] as const;
 };
 
+const usePersistentStateScope = () => {
+  const { data: initData } = useInitQuery();
+
+  return initData?.uuid;
+};
+
 // Same as usePersistentState, but scoped to the current instance of Strapi
 // useful for storing state that should not be shared across different instances of Strapi running on localhost
 const useScopedPersistentState = <T>(key: string, defaultValue: T) => {
-  const { data: initData } = useInitQuery();
-  const { uuid } = initData ?? {};
+  const uuid = usePersistentStateScope();
 
   const namespacedKey = `${key}:${uuid}`;
   return usePersistentState<T>(namespacedKey, defaultValue);
 };
 
-export { usePersistentState, useScopedPersistentState };
+export { usePersistentState, useScopedPersistentState, usePersistentStateScope };
