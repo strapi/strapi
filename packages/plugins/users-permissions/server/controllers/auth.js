@@ -283,8 +283,13 @@ module.exports = ({ strapi }) => ({
       throw new ValidationError('Incorrect code provided');
     }
 
+    if (!user.resetPasswordTokenExpiry || Date.now() > Number(user.resetPasswordTokenExpiry)) {
+      throw new ValidationError("Reset token has expired");
+    }
+    
     await getService('user').edit(user.id, {
       resetPasswordToken: null,
+      resetPasswordTokenExpiry: null,
       password,
     });
 
@@ -476,6 +481,7 @@ module.exports = ({ strapi }) => ({
     const userInfo = await sanitizeUser(user, ctx);
 
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
+    const resetPasswordTokenExpiry = Date.now() + 15 * 60 * 1000 // 15 Minutes
 
     const resetPasswordSettings = _.get(emailSettings, 'reset_password.options', {});
     const emailBody = await getService('users-permissions').template(
@@ -509,7 +515,7 @@ module.exports = ({ strapi }) => ({
     };
 
     // NOTE: Update the user before sending the email so an Admin can generate the link if the email fails
-    await getService('user').edit(user.id, { resetPasswordToken });
+    await getService('user').edit(user.id, { resetPasswordToken, resetPasswordTokenExpiry });
 
     // Send an email to the user.
     await strapi.plugin('email').service('email').send(emailToSend);
