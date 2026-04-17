@@ -84,7 +84,7 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
     );
     return contentTypePermissions.reduce<Record<string, Permission[]>>((acc, permission) => {
       const [action] = permission.action.split('.').slice(-1);
-      return { ...acc, [action]: [permission] };
+      return { ...acc, [action]: [...(acc[action] ?? []), permission] };
     }, {});
   }, [contentTypeUid, userPermissions]);
 
@@ -165,13 +165,11 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
 /**
  * @internal it's really small, but it's used three times in a row and DRY for something this straight forward.
  */
-const extractAndDedupeFields = (permissions: Permission[] = []) =>
-  permissions
-    .flatMap((permission) => permission.properties?.fields)
-    .filter(
-      (field, index, arr): field is string =>
-        arr.indexOf(field) === index && typeof field === 'string'
-    );
+const extractAndDedupeFields = (permissions: Permission[] = []) => {
+  const allFields = permissions.flatMap((permission) => permission.properties?.fields);
+  if (allFields.some((field) => field === undefined)) return [];
+  return allFields.filter((field, index, arr): field is string => arr.indexOf(field) === index);
+};
 
 /**
  * @internal removes numerical strings from arrays.
