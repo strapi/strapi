@@ -46,8 +46,8 @@ describe('logger', () => {
 
   describe('formatDiagnostic', () => {
     it('only creates a single logger', () => {
-      const info = true; // so we info reports are called
-      const diagnosticReporter = formatDiagnostic('export', info);
+      const verbose = true;
+      const diagnosticReporter = formatDiagnostic('export', verbose);
 
       // Use the diagnostic reporter to log different levels of messages
       diagnosticReporter({
@@ -83,29 +83,12 @@ describe('logger', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Test error'));
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Test warning'));
-      expect(mockLogger.info).toHaveBeenCalledTimes(1);
-      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Test info'));
+      const infoMessages = mockLogger.info.mock.calls.map((c) => String(c[0]));
+      expect(infoMessages.some((m) => m.includes('Diagnostic log file'))).toBe(true);
+      expect(infoMessages.some((m) => m.includes('Test info'))).toBe(true);
     });
 
-    it('does not log info if info is false', () => {
-      const diagnosticReporter = formatDiagnostic('export');
-
-      diagnosticReporter({
-        kind: 'info',
-        details: {
-          message: 'Test info',
-          createdAt: new Date(),
-        },
-      });
-
-      // Verify createLogger is not called
-      expect(createLogger).not.toBeCalled();
-
-      // Verify the mock logger does not receive logs
-      expect(mockLogger.info).not.toBeCalled();
-    });
-
-    it('does not log info if info is false, but logs error and warning logs', () => {
+    it('writes error, warning, and info to the diagnostic file when verbose (console) is false', () => {
       const diagnosticReporter = formatDiagnostic('export');
 
       // Use the diagnostic reporter to log different levels of messages
@@ -143,8 +126,8 @@ describe('logger', () => {
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Test warning'));
 
-      // Verify the mock info logger does not receive logs
-      expect(mockLogger.info).not.toBeCalled();
+      const infoMessages = mockLogger.info.mock.calls.map((c) => String(c[0]));
+      expect(infoMessages.some((m) => m.includes('Test info'))).toBe(true);
     });
   });
 });

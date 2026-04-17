@@ -6,14 +6,19 @@ jest.mock('fs');
 import fs from 'fs-extra';
 import { Writable } from 'stream-chain';
 import { createLocalFileDestinationProvider, ILocalFileDestinationProviderOptions } from '..';
+import {
+  assertWriteStreamBackpressure,
+  createSlowWritable,
+} from '../../../../__tests__/test-utils';
 import * as encryption from '../../../../utils/encryption';
 import { createFilePathFactory, createTarEntryStream } from '../utils';
 
-fs.createWriteStream = jest.fn().mockReturnValue(
-  new Writable({
-    objectMode: true,
-    write() {},
-  })
+fs.createWriteStream = jest.fn().mockImplementation(
+  () =>
+    new Writable({
+      objectMode: true,
+      write() {},
+    })
 );
 
 const filePath = './test-file';
@@ -224,5 +229,32 @@ describe('Local File Destination Provider', () => {
 
       expect(configurationStream instanceof stream.Writable).toBeTruthy();
     });
+  });
+
+  describe('Backpressure', () => {
+    it('entities write stream applies backpressure when downstream is slow', async () => {
+      const { writable: slowWritable } = createSlowWritable<string>({
+        objectMode: true,
+        highWaterMark: 1,
+        delayMs: 12,
+      });
+      (createTarEntryStream as jest.Mock).mockImplementation(() => slowWritable);
+
+      const provider = createLocalFileDestinationProvider({
+        encryption: { enabled: false },
+        compression: { enabled: false },
+        file: { path: filePath },
+      });
+      await provider.bootstrap();
+
+      const writeStream = provider.createEntitiesWriteStream();
+      const chunks = Array.from({ length: 25 }, (_, i) => ({ id: i, title: `Item ${i}` }));
+
+      const { sourcePaused } = await assertWriteStreamBackpressure(writeStream, chunks, {
+        delayMs: 12,
+      });
+
+      expect(sourcePaused).toBe(true);
+    }, 5000);
   });
 });

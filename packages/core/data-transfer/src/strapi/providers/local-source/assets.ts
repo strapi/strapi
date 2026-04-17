@@ -41,7 +41,7 @@ function getFileStream(
   return readableStream;
 }
 
-function getFileStats(
+export function getFileStatsForTransfer(
   filepath: string,
   strapi: Core.Strapi,
   isLocal = false
@@ -71,19 +71,17 @@ function getFileStats(
   });
 }
 
-async function signFile(file: IFile) {
+export async function signUploadFileForTransfer(strapi: Core.Strapi, file: IFile) {
   const { provider } = strapi.plugins.upload;
   const { provider: providerName } = strapi.config.get('plugin.upload') as { provider: string };
   const isPrivate = await provider.isPrivate();
   if (file?.provider === providerName && isPrivate) {
-    const signUrl = async (file: IFile) => {
-      const signedUrl = await provider.getSignedUrl(file);
-      file.url = signedUrl.url;
+    const signUrl = async (f: IFile) => {
+      const signedUrl = await provider.getSignedUrl(f);
+      f.url = signedUrl.url;
     };
 
-    // Sign the original file
     await signUrl(file);
-    // Sign each file format
     if (file.formats) {
       for (const format of Object.keys(file.formats)) {
         await signUrl(file.formats[format]);
@@ -92,10 +90,23 @@ async function signFile(file: IFile) {
   }
 }
 
+const missingAssetWarningMessage = (file: IFile, filepath: string, format?: string): string => {
+  const formatPart = format ? ` (format: ${format})` : '';
+  return `[Data transfer] Media item ${file.id} (hash: ${file.hash}) exists in database but no corresponding file was found to transfer${formatPart}. Path: ${filepath}`;
+};
+
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
-export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
+export const createAssetsStream = (
+  strapi: Core.Strapi,
+  options: { onWarning?: (message: string) => void } = {}
+): Duplex => {
+  const warnMissingAsset = (message: string) => {
+    strapi.log.warn(message);
+    options.onWarning?.(message);
+  };
+
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const stream: Readable = strapi.db
       .queryBuilder('plugin::upload.file')
@@ -108,10 +119,23 @@ export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
     for await (const file of stream) {
       const isLocalProvider = file.provider === 'local';
       if (!isLocalProvider) {
-        await signFile(file);
+        await signUploadFileForTransfer(strapi, file);
       }
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
-      const stats = await getFileStats(filepath, strapi, isLocalProvider);
+      let stats: { size: number };
+      try {
+        stats = await getFileStatsForTransfer(filepath, strapi, isLocalProvider);
+      } catch (err: unknown) {
+        const code =
+          err && typeof err === 'object' && 'code' in err
+            ? (err as NodeJS.ErrnoException).code
+            : undefined;
+        if (code === 'ENOENT') {
+          warnMissingAsset(missingAssetWarningMessage(file, filepath));
+          continue;
+        }
+        throw err;
+      }
       const stream = getFileStream(filepath, strapi, isLocalProvider);
 
       yield {
@@ -128,7 +152,24 @@ export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
           const fileFormatFilepath = isLocalProvider
             ? join(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
-          const fileFormatStats = await getFileStats(fileFormatFilepath, strapi, isLocalProvider);
+          let fileFormatStats: { size: number };
+          try {
+            fileFormatStats = await getFileStatsForTransfer(
+              fileFormatFilepath,
+              strapi,
+              isLocalProvider
+            );
+          } catch (err: unknown) {
+            const code =
+              err && typeof err === 'object' && 'code' in err
+                ? (err as NodeJS.ErrnoException).code
+                : undefined;
+            if (code === 'ENOENT') {
+              warnMissingAsset(missingAssetWarningMessage(file, fileFormatFilepath, format));
+              continue;
+            }
+            throw err;
+          }
           const fileFormatStream = getFileStream(fileFormatFilepath, strapi, isLocalProvider);
           const metadata = { ...fileFormat, type: format, id: file.id, mainHash: file.hash };
           yield {

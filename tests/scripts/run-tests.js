@@ -16,6 +16,7 @@ const { runPlaywright } = require('../utils/runners/browser-runner');
 const {
   loadDomainConfigs,
   calculateTestAppsRequired,
+  buildForwardedRunnerArgs,
   runCLI,
 } = require('../utils/runners/cli-runner');
 const { createConfig } = require('../../playwright.base.config');
@@ -108,6 +109,8 @@ yargs
           .parse();
 
         const { concurrency, domains: selectedDomains, setup, updateSnapshot } = testYargs;
+
+        const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
 
         /**
          * Publishing all packages to the yalc store
@@ -396,7 +399,7 @@ module.exports = config
                   cwd,
                   port,
                   testAppPath,
-                  testArgs: testYargs._,
+                  testArgs: forwardedRunnerArgs,
                 });
               })
             );
@@ -438,7 +441,8 @@ module.exports = config
                     domainDir,
                     jestConfigPath,
                     testApps,
-                    testArgs: [...(updateSnapshot ? ['-u'] : []), ...testYargs._],
+                    testArgs: [...(updateSnapshot ? ['-u'] : []), ...forwardedRunnerArgs],
+                    domain,
                   });
                 } catch (err) {
                   console.error('Test suite failed for', domain);

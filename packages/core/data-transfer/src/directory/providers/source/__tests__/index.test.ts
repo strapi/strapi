@@ -4,6 +4,7 @@ import path from 'path';
 import { Readable } from 'stream';
 
 import { createLocalDirectorySourceProvider } from '..';
+import { assertReadStreamBackpressure } from '../../../../__tests__/test-utils';
 
 const minimalMetadata = { strapi: { version: '5.0.0' }, createdAt: new Date().toISOString() };
 
@@ -57,6 +58,28 @@ describe('Directory source provider', () => {
     expect(stream instanceof Readable).toBe(true);
     stream.destroy();
   });
+
+  test('entities read stream pauses under backpressure (slow consumer)', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-bp-'));
+    await fs.writeJson(path.join(dir, 'metadata.json'), minimalMetadata);
+    await fs.ensureDir(path.join(dir, 'entities'));
+    const entityLines = Array.from(
+      { length: 25 },
+      (_, i) => `${JSON.stringify({ type: 'api::test.test', id: i + 1, data: {} })}\n`
+    ).join('');
+    await fs.writeFile(path.join(dir, 'entities', 'entities_00000.jsonl'), entityLines);
+
+    const provider = createLocalDirectorySourceProvider({ directory: { path: dir } });
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const stream = provider.createEntitiesReadStream();
+    const { sourcePaused, chunks } = await assertReadStreamBackpressure(stream, {
+      delayMs: 12,
+    });
+
+    expect(sourcePaused).toBe(true);
+    expect(chunks).toHaveLength(25);
+  }, 8000);
 
   test('streams entities from jsonl shards in order', async () => {
     const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dir-'));

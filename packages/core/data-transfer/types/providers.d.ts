@@ -4,6 +4,8 @@ import type {
   IProviderTransferResults,
   ISourceProviderTransferResults,
   MaybePromise,
+  StageTotalsEstimate,
+  TransferStage,
 } from './utils';
 import type { IMetadata } from './common-entities';
 import type { IDiagnosticReporter } from '../src/utils/diagnostic';
@@ -30,6 +32,12 @@ export interface IProvider {
 
 export interface ISourceProvider extends IProvider {
   results?: ISourceProviderTransferResults;
+
+  /**
+   * Optional totals for a stage. Called by the engine after the stage read stream is created and before `stage::start`.
+   * Used for CLI progress (e.g. bytes/count remaining, ETA). Omit or return null when unknown (older remotes, file providers).
+   */
+  getStageTotals?(stage: TransferStage): MaybePromise<StageTotalsEstimate | null | undefined>;
 
   createEntitiesReadStream?(): MaybePromise<Readable>;
   createLinksReadStream?(): MaybePromise<Readable>;

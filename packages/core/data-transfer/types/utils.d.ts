@@ -63,19 +63,34 @@ export type TransferFilters = {
 /*
  * Progress
  */
-export type TransferProgress = {
-  [key in TransferStage]?: {
-    count: number;
-    bytes: number;
-    startTime: number;
-    endTime?: number;
-    aggregates?: {
-      [key: string]: {
-        count: number;
-        bytes: number;
-      };
+export type StageTotalsEstimate = {
+  totalBytes?: number;
+  totalCount?: number;
+};
+
+/**
+ * Per-stage running progress. For `assets`, optional totals describe the full transfer when known
+ * (same basis as streamed data: one count per IAsset including formats; bytes = sum of binary file sizes).
+ */
+export type StageProgress = {
+  count: number;
+  bytes: number;
+  startTime: number;
+  endTime?: number;
+  /** Present when the source can estimate full stage size before/during streaming (e.g. asset library). */
+  totalBytes?: number;
+  /** Present when the source can estimate how many items the stage will emit. */
+  totalCount?: number;
+  aggregates?: {
+    [key: string]: {
+      count: number;
+      bytes: number;
     };
   };
+};
+
+export type TransferProgress = {
+  [key in TransferStage]?: StageProgress;
 };
 
 export interface ITransferResults<S extends ISourceProvider, D extends IDestinationProvider> {

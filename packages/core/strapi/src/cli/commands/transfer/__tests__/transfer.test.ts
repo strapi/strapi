@@ -1,5 +1,6 @@
 import * as mockDataTransfer from '@strapi/data-transfer';
 
+import * as dataTransferUtils from '../../../utils/data-transfer';
 import transferAction from '../action';
 import { expectExit } from '../../__tests__/commands.test.utils';
 
@@ -9,14 +10,15 @@ jest.mock('../../../utils/data-transfer', () => {
     getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
-    createStrapiInstance() {
-      return {
-        telemetry: {
-          send: jest.fn(),
-        },
-        contentTypes: {},
-      };
-    },
+    createStrapiInstance: jest.fn(async () => ({
+      config: {
+        get: jest.fn(),
+      },
+      telemetry: {
+        send: jest.fn(),
+      },
+      contentTypes: {},
+    })),
     getDefaultExportName: jest.fn(() => 'default'),
     buildTransferTable: jest.fn(() => {
       return {
@@ -34,13 +36,13 @@ jest.mock('../../../utils/data-transfer', () => {
 
 // mock data transfer
 jest.mock('@strapi/data-transfer', () => {
-  const acutal = jest.requireActual('@strapi/data-transfer');
+  const actual = jest.requireActual('@strapi/data-transfer');
   return {
-    ...acutal,
+    ...actual,
     strapi: {
-      ...acutal.strapi,
+      ...actual.strapi,
       providers: {
-        ...acutal.strapi.providers,
+        ...actual.strapi.providers,
         createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
         createLocalStrapiDestinationProvider: jest.fn().mockReturnValue({ name: 'testLocalDest' }),
         createRemoteStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testRemoteSource' }),
@@ -50,19 +52,26 @@ jest.mock('@strapi/data-transfer', () => {
       },
     },
     engine: {
-      ...acutal.engine,
+      ...actual.engine,
       createTransferEngine() {
+        const handlers: Record<string, Array<(...args: unknown[]) => void>> = {};
+        const stream = {
+          on(event: string, fn: (...args: unknown[]) => void) {
+            (handlers[event] ||= []).push(fn);
+            return stream;
+          },
+        };
         return {
-          transfer: jest.fn(() => {
+          transfer: jest.fn(async () => {
+            // action.ts clears setInterval on this event; real stream emits after transfer.
+            handlers['transfer::finish']?.forEach((fn) => fn());
             return {
               engine: {},
             };
           }),
           progress: {
             on: jest.fn(),
-            stream: {
-              on: jest.fn(),
-            },
+            stream,
           },
           sourceProvider: { name: 'testSource' },
           destinationProvider: { name: 'testDestination' },
@@ -82,10 +91,16 @@ describe('Transfer', () => {
   // mock command utils
 
   // console spies
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'info').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  beforeAll(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'info').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
   const destinationUrl = new URL('http://one.localhost/admin');
   const destinationToken = 'test-token';
@@ -95,6 +110,15 @@ describe('Transfer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (dataTransferUtils.createStrapiInstance as jest.Mock).mockImplementation(async () => ({
+      config: {
+        get: jest.fn(),
+      },
+      telemetry: {
+        send: jest.fn(),
+      },
+      contentTypes: {},
+    }));
   });
 
   it('exits with error when no --to or --from is provided', async () => {
@@ -172,6 +196,40 @@ describe('Transfer', () => {
         mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
       ).toHaveBeenCalled();
     });
+
+    it('passes verifyChecksums to remote destination when --checksums is enabled', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          from: undefined,
+          to: destinationUrl,
+          toToken: destinationToken,
+          checksums: true,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          verifyChecksums: true,
+        })
+      );
+    });
+
+    it('does not pass verifyChecksums to remote destination when checksums are disabled', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          from: undefined,
+          to: destinationUrl,
+          toToken: destinationToken,
+          checksums: false,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
+      ).toHaveBeenCalledWith(expect.not.objectContaining({ verifyChecksums: true }));
+    });
   });
 
   describe('--from', () => {
@@ -206,6 +264,74 @@ describe('Transfer', () => {
             type: 'token',
             token: sourceToken,
           },
+        })
+      );
+    });
+
+    it('passes verifyChecksums to remote source when --checksums is enabled', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+          checksums: true,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          verifyChecksums: true,
+        })
+      );
+    });
+
+    it('does not pass verifyChecksums to remote source when checksums are disabled', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+          checksums: false,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          verifyChecksums: true,
+        })
+      );
+    });
+
+    it('passes server.transfer.remote.assetIdleTimeoutMs to remote source provider as streamTimeout', async () => {
+      (dataTransferUtils.createStrapiInstance as jest.Mock).mockImplementationOnce(async () => ({
+        config: {
+          get: (key: string) =>
+            key === 'server.transfer.remote.assetIdleTimeoutMs' ? 99_000 : undefined,
+        },
+        telemetry: {
+          send: jest.fn(),
+        },
+        contentTypes: {},
+      }));
+
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+        } as any);
+      });
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: sourceUrl,
+          streamTimeout: 99_000,
         })
       );
     });
