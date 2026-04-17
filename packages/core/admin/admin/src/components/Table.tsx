@@ -181,7 +181,10 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
   const isSorted = sortBy === name;
 
   const sortLabel = formatMessage(
-    { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
+    {
+      id: 'components.TableHeader.sort',
+      defaultMessage: 'Sort on {label}',
+    },
     { label }
   );
 

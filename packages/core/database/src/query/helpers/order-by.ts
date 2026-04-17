@@ -9,10 +9,37 @@ import type { Ctx } from '../types';
 
 type OrderByCtx = Ctx & { alias?: string };
 type OrderBy = string | { [key: string]: 'asc' | 'desc' } | OrderBy[];
-type OrderByValue = { column: string; order?: 'asc' | 'desc' };
+type OrderByColumnValue = { column: string; order?: 'asc' | 'desc' };
+type OrderByRawValue = { rawExpression: 'status'; isI18n?: boolean; order?: 'asc' | 'desc' };
+export type OrderByValue = OrderByColumnValue | OrderByRawValue;
 
 const COL_STRAPI_ROW_NUMBER = '__strapi_row_number';
 const COL_STRAPI_ORDER_BY_PREFIX = '__strapi_order_by';
+
+/**
+ * Builds a SQL CASE expression that maps each row to a numeric status rank:
+ *   0 = draft/created (no published sibling with same documentId [+ locale])
+ *   1 = modified (draft updated_at > published updated_at for same documentId [+ locale])
+ *   2 = published
+ *
+ * @param db - Database instance (used to access knex raw)
+ * @param tableName - Actual DB table name (used in correlated subqueries)
+ * @param tableAlias - Alias of the table in the outer query (e.g. "t0")
+ * @param isI18n - When true, adds a locale condition to avoid cross-locale contamination
+ */
+export const buildStatusSortExpression = (
+  db: { connection: { raw: (sql: string, bindings?: unknown[]) => knex.Knex.Raw } },
+  tableName: string,
+  tableAlias: string,
+  isI18n = false
+): knex.Knex.Raw => {
+  const localeCondition = isI18n ? ` AND sub.locale = ${tableAlias}.locale` : '';
+
+  return db.connection.raw(
+    `CASE WHEN NOT EXISTS(SELECT 1 FROM ?? sub WHERE sub.document_id = ${tableAlias}.document_id AND sub.published_at IS NOT NULL${localeCondition}) THEN 0 WHEN ${tableAlias}.updated_at > (SELECT MAX(sub.updated_at) FROM ?? sub WHERE sub.document_id = ${tableAlias}.document_id AND sub.published_at IS NOT NULL${localeCondition}) THEN 1 ELSE 2 END`,
+    [tableName, tableName]
+  );
+};
 
 export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[] => {
   const { db, uid, qb, alias } = ctx;
@@ -20,6 +47,16 @@ export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[
   const { attributes } = meta;
 
   if (typeof orderBy === 'string') {
+    if (orderBy === 'status') {
+      if (!attributes.publishedAt || !attributes.documentId) {
+        throw new Error(
+          `Cannot order by status on model ${uid}: missing publishedAt or documentId`
+        );
+      }
+      const isI18n = 'locale' in attributes;
+      return [{ rawExpression: 'status' as const, isI18n, order: undefined }];
+    }
+
     const attribute = attributes[orderBy];
 
     if (!attribute) {
@@ -38,6 +75,17 @@ export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[
   if (_.isPlainObject(orderBy)) {
     return Object.entries(orderBy).flatMap(([key, direction]) => {
       const value = orderBy[key];
+
+      if (key === 'status') {
+        if (!attributes.publishedAt || !attributes.documentId) {
+          throw new Error(
+            `Cannot order by status on model ${uid}: missing publishedAt or documentId`
+          );
+        }
+        const isI18n = 'locale' in attributes;
+        return [{ rawExpression: 'status' as const, isI18n, order: direction as 'asc' | 'desc' }];
+      }
+
       const attribute = attributes[key];
 
       if (!attribute) {
@@ -99,6 +147,10 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
   // The orderBy is cloned to avoid unwanted mutations of the original object
   const orderBy = _.cloneDeep<OrderByValue[]>(qb.state.orderBy);
 
+  // Separate column-based entries from raw-expression entries (e.g. status)
+  const columnOrderBy = orderBy.filter((ob): ob is OrderByColumnValue => 'column' in ob);
+  const rawExpressionOrderBy = orderBy.filter((ob): ob is OrderByRawValue => 'rawExpression' in ob);
+
   // 0. Init a new Knex query instance (referenced as resultQuery) using the DB connection
   //    The connection reuse the original table name (aliased if needed)
   const resultQueryAlias = qb.getAlias();
@@ -122,13 +174,14 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     .clear('offset');
 
   // Override the initial select and return only the columns needed for the partitioning.
+  // Only column-based orderBy entries are included here; raw expressions are applied later.
   baseQuery.select(
     // Always select the row id for future manipulation
     prefix(qb.alias, 'id'),
     // Select every column used in an order by clause, but alias it for future reference
     // i.e. if t2.name is present in an order by clause:
     //      Then, "t2.name" will become "t2.name as __strapi_order_by__t2_name"
-    ...orderBy.map((orderByClause) =>
+    ...columnOrderBy.map((orderByClause) =>
       alias(getStrapiOrderColumnAlias(orderByClause.column), orderByClause.column)
     )
   );
@@ -138,7 +191,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
 
   const selectRowsAsNumberedPartitions = (partitionedQuery: knex.Knex.QueryBuilder) => {
     // Transform order by clause to their alias to reference them from baseQuery
-    const prefixedOrderBy = orderBy.map((orderByClause) => ({
+    const prefixedOrderBy = columnOrderBy.map((orderByClause) => ({
       column: prefix(baseQueryAlias, getStrapiOrderColumnAlias(orderByClause.column)),
       order: orderByClause.order,
     }));
@@ -168,13 +221,15 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
 
   // 3. Create the final resultQuery query, that select and sort the wanted data using T
 
+  // Filter to string-only select items before diffing (Knex.Raw items are passed through as-is)
+  const stringSelect = qb.state.select.filter((s): s is string => typeof s === 'string');
   const originalSelect = _.difference(
-    qb.state.select,
-    // Remove order by columns from the initial select
-    qb.state.orderBy.map(_.prop('column'))
+    stringSelect,
+    // Remove column-based order by columns from the initial select (raw expressions are not in select)
+    columnOrderBy.map(_.prop('column'))
   )
     // Alias everything in resultQuery
-    .map(prefix(resultQueryAlias));
+    .map((col) => `${resultQueryAlias}.${col}`);
 
   resultQuery
     .select(originalSelect)
@@ -205,16 +260,23 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     resultQuery.first();
   }
 
-  // Re-apply the sort using T values
+  // Re-apply the sort using T values (column-based), then append raw expression sorts.
+  // Cast to any[] because Knex's TS types don't accept Knex.Raw in the column position,
+  // even though Knex supports it at runtime.
   resultQuery.orderBy([
-    // Transform "order by" clause to their T alias and prefix them with T alias
-    ...orderBy.map((orderByClause) => ({
+    // Transform column-based "order by" clause to their T alias and prefix them with T alias
+    ...columnOrderBy.map((orderByClause) => ({
       column: prefix(partitionedQueryAlias, getStrapiOrderColumnAlias(orderByClause.column)),
       order: orderByClause.order,
     })),
+    // Rebuild raw expression entries with the correct outer alias (resultQueryAlias)
+    ...rawExpressionOrderBy.map((entry) => ({
+      column: buildStatusSortExpression(db, tableName, resultQueryAlias, entry.isI18n),
+      order: entry.order,
+    })),
     // Add T.id to the order by clause to get consistent results in case several rows have the exact same order
     { column: `${partitionedQueryAlias}.id`, order: 'asc' },
-  ]);
+  ] as any);
 
   return resultQuery;
 };

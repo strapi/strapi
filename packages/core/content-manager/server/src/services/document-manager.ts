@@ -6,6 +6,30 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
 
+/**
+ * Converts a sort parameter (string, object, or array) to an array of
+ * { [field]: direction } objects that the DB query builder's processOrderBy accepts.
+ *
+ * Examples:
+ *   'name:ASC'            → [{ name: 'asc' }]
+ *   ['name:ASC', 'id']    → [{ name: 'asc' }, { id: 'asc' }]
+ *   { name: 'desc' }      → [{ name: 'desc' }]
+ */
+const convertSortToOrderBy = (sort: unknown): Record<string, 'asc' | 'desc'>[] => {
+  if (!sort) return [];
+  if (typeof sort === 'string') {
+    return sort.split(',').map((s) => {
+      const [field, dir] = s.trim().split(':');
+      return { [field.trim()]: dir?.toLowerCase() === 'desc' ? 'desc' : 'asc' };
+    });
+  }
+  if (Array.isArray(sort)) return sort.flatMap(convertSortToOrderBy);
+  if (typeof sort === 'object' && sort !== null) {
+    return [sort as Record<string, 'asc' | 'desc'>];
+  }
+  return [];
+};
+
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
@@ -77,6 +101,67 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         strapi.documents(uid).findMany(params),
         strapi.documents(uid).count(countParams),
       ]);
+
+      return {
+        results: documents,
+        pagination: pagination.transformPagedPaginationInfo(params, total),
+      };
+    },
+
+    /**
+     * Like findPage, but sorts results by the virtual `status` field at the DB level.
+     *
+     * The document service's validateParams rejects unknown sort keys (including `status`),
+     * so we bypass it here by calling strapi.db.query() directly for the findMany while
+     * still using strapi.documents().count() for accurate pagination totals.
+     */
+    async findPageWithStatusSort(
+      opts: DocServiceParams<'findMany'>,
+      uid: UID.CollectionType,
+      statusSortDirection: 'asc' | 'desc'
+    ) {
+      const params = pagination.withDefaultPagination(opts || {}, { maxLimit: 1000 });
+
+      // Count via document service — it correctly applies D&P and locale filters
+      const total = await strapi.documents(uid).count(params);
+
+      // Build where clause for the direct DB query
+      const where: Record<string, any> = {};
+
+      // Apply user/permission filters
+      if (params.filters) {
+        Object.assign(where, params.filters);
+      }
+
+      // Apply D&P status filter (document service does this internally via statusToLookup)
+      const model = strapi.getModel(uid);
+      if (contentTypes.hasDraftAndPublish(model)) {
+        const docStatus = params.status || 'draft';
+        where.publishedAt = docStatus === 'published' ? { $notNull: true } : null;
+      }
+
+      // Apply locale filter (document service does this internally via i18n.defaultLocale)
+      const locale = params.locale;
+      if (locale && locale !== '*') {
+        where.locale = locale;
+      }
+
+      // Convert existing sort to DB orderBy format and append status sort
+      const baseOrderBy = convertSortToOrderBy(params.sort);
+      const orderBy = [...baseOrderBy, { status: statusSortDirection }];
+
+      // withDefaultPagination normalizes page/pageSize → start/limit at the top level
+      // and removes the original page/pageSize keys, so read from params directly.
+      const limit = Number(params.limit) || 10;
+      const offset = Number(params.start) || 0;
+
+      const documents = await strapi.db.query(uid).findMany({
+        where,
+        orderBy,
+        populate: params.populate,
+        limit,
+        offset,
+      });
 
       return {
         results: documents,
