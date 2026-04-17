@@ -117,26 +117,53 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     },
     resolve: {
       // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
-      // Include design-system so plugin chunks use the same instance and inherit root context
+      // Include design-system so plugin chunks use the same instance and inherit root context.
+      // Also dedupe common plugin dependencies so local plugins don't bundle their own copies,
+      // which would significantly increase the admin panel build size.
       dedupe: [
         'react',
         'react-dom',
         'react-router-dom',
         'styled-components',
         '@strapi/design-system',
+        '@strapi/icons',
+        '@strapi/utils',
         '@radix-ui/react-tooltip',
+        '@reduxjs/toolkit',
         'lodash',
+        'react-intl',
+        'react-redux',
+        'react-query',
+        'formik',
+        'immer',
+        'yup',
+        'zod',
+        'qs',
+        'date-fns',
       ],
       // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
-      // where packages imported by plugins may not be resolvable from plugin chunks
+      // where packages imported by plugins may not be resolvable from plugin chunks.
+      // This list must stay in sync with `dedupe` above.
       alias: {
         react: getModulePath('react'),
         'react-dom': getModulePath('react-dom'),
         'react-router-dom': getModulePath('react-router-dom'),
         'styled-components': getModulePath('styled-components'),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
+        '@strapi/icons': getModulePath('@strapi/icons'),
+        '@strapi/utils': getModulePath('@strapi/utils'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
+        '@reduxjs/toolkit': getModulePath('@reduxjs/toolkit'),
         lodash: getModulePath('lodash'),
+        'react-intl': getModulePath('react-intl'),
+        'react-redux': getModulePath('react-redux'),
+        'react-query': getModulePath('react-query'),
+        formik: getModulePath('formik'),
+        immer: getModulePath('immer'),
+        yup: getModulePath('yup'),
+        zod: getModulePath('zod'),
+        qs: getModulePath('qs'),
+        'date-fns': getModulePath('date-fns'),
       },
     },
     plugins: [react(), buildFilesPlugin(ctx)],
@@ -162,6 +189,15 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       rollupOptions: {
         input: {
           strapi: ctx.entry,
+        },
+        output: {
+          // Split vendor dependencies into a separate chunk so local plugin code
+          // doesn't duplicate shared libraries in the output bundle.
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+          },
         },
       },
     },
