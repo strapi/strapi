@@ -25,6 +25,49 @@ export default {
       return ctx.forbidden();
     }
 
+    // Performance-optimized query pre-processor
+    const ctxQuery = ctx.query as Record<string, unknown>;
+
+    // Support folder filter without explicit $eq operator
+    if (ctxQuery.folder && typeof ctxQuery.folder !== 'object') {
+      ctxQuery.folder = { $eq: ctxQuery.folder };
+    }
+
+    // Recursively remove empty strings and empty objects (e.g. folderPath[$eq]=)
+    const cleanEmpty = (obj: any): void => {
+      if (!obj || typeof obj !== 'object') return;
+
+      if (Array.isArray(obj)) {
+        for (let i = obj.length - 1; i >= 0; i -= 1) {
+          const val = obj[i];
+          if (val === '') {
+            obj.splice(i, 1);
+          } else if (val !== null && typeof val === 'object') {
+            cleanEmpty(val);
+            if (Object.keys(val).length === 0) {
+              obj.splice(i, 1);
+            }
+          }
+        }
+      } else {
+        for (const key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const val = obj[key];
+            if (val === '') {
+              delete obj[key];
+            } else if (val !== null && typeof val === 'object') {
+              cleanEmpty(val);
+              if (Object.keys(val).length === 0) {
+                delete obj[key];
+              }
+            }
+          }
+        }
+      }
+    };
+
+    cleanEmpty(ctxQuery);
+
     // validate the incoming user query params
     await pm.validateQuery(ctx.query);
 
