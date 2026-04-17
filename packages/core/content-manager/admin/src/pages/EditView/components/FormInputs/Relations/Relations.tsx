@@ -218,6 +218,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
+    const relationsToDisplay: number = props.attribute?.relationsToDisplay || RELATIONS_TO_DISPLAY;
+
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
         model,
@@ -226,7 +228,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         id,
         params: {
           ...currentDocumentMeta.params,
-          pageSize: RELATIONS_TO_DISPLAY,
+          pageSize: relationsToDisplay,
           page: currentPage,
         },
       },
@@ -393,6 +395,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           serverData={serverData}
           disabled={isDisabled}
           name={props.name}
+          relationsToDisplay={relationsToDisplay}
           isLoading={isFetchingMoreRelations}
           relationType={props.attribute.relation}
           targetModel={targetModel}
@@ -813,6 +816,7 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
    * The existing relations connected on the server. We need these to diff against.
    */
   serverData: RelationResult[];
+  relationsToDisplay: number;
   targetModel: string;
   documentParams?: DocumentMeta['params'];
   mainField?: MainField;
@@ -825,6 +829,7 @@ const RelationsList = ({
   name,
   isLoading,
   relationType,
+  relationsToDisplay,
   targetModel,
   documentParams,
   mainField,
@@ -838,7 +843,7 @@ const RelationsList = ({
   const field = useField(name);
 
   React.useEffect(() => {
-    if (data.length <= RELATIONS_TO_DISPLAY) {
+    if (data.length <= relationsToDisplay) {
       return setOverflow(undefined);
     }
 
@@ -1029,10 +1034,10 @@ const RelationsList = ({
   const canReorder = !ONE_WAY_RELATIONS.includes(relationType);
 
   const dynamicListHeight =
-    data.length > RELATIONS_TO_DISPLAY
-      ? Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
+    data.length > relationsToDisplay
+      ? Math.min(data.length, relationsToDisplay) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
         RELATION_ITEM_HEIGHT / 2
-      : Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
+      : Math.min(data.length, relationsToDisplay) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
 
   const itemData = React.useMemo(
     () => ({
