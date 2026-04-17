@@ -174,5 +174,245 @@ describe('Document Service', () => {
         sharedText: 'Shared Content',
       });
     });
+
+    it('Preserves non-localized media fields when creating a new locale', async () => {
+      // Covers issue https://github.com/strapi/strapi/issues/25178
+      const MIXED_CONTENT_UID = 'api::mixed-content.mixed-content';
+      const uploadedFile = await strapi.db.query('plugin::upload.file').create({
+        data: {
+          name: 'shared-image.jpg',
+          alternativeText: 'shared image',
+          caption: 'shared image',
+          folderPath: '/',
+          hash: 'shared_image_hash',
+          ext: '.jpg',
+          mime: 'image/jpeg',
+          size: 1,
+          provider: 'local',
+          url: '/uploads/shared-image.jpg',
+          publishedAt: new Date(),
+        },
+      });
+
+      const originalDoc = await strapi.documents(MIXED_CONTENT_UID).create({
+        data: {
+          localizedText: 'Original Text',
+          sharedText: 'Shared Content',
+          sharedMedia: uploadedFile.id,
+          nestedSharedComponent: {
+            nestedLeaf: {
+              media: uploadedFile.id,
+            },
+          },
+        },
+        locale: 'en',
+        populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
+      });
+
+      expect(originalDoc.sharedMedia).toMatchObject({ id: uploadedFile.id });
+      expect(originalDoc.nestedSharedComponent).toMatchObject({
+        nestedLeaf: {
+          media: {
+            id: uploadedFile.id,
+          },
+        },
+      });
+
+      // Verify the raw DB entry persisted sharedMedia as a relation before testing locale creation.
+      const originalDocFromDb = await strapi.db.query(MIXED_CONTENT_UID).findOne({
+        where: { documentId: originalDoc.documentId, locale: 'en', publishedAt: null },
+        populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
+      });
+
+      expect(originalDocFromDb).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'en',
+        sharedMedia: {
+          id: uploadedFile.id,
+          documentId: uploadedFile.documentId,
+        },
+        nestedSharedComponent: {
+          nestedLeaf: {
+            media: {
+              id: uploadedFile.id,
+              documentId: uploadedFile.documentId,
+            },
+          },
+        },
+      });
+
+      const localizedDoc = await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: originalDoc.documentId,
+        locale: 'es',
+        data: {
+          localizedText: 'Texto Espanol',
+        },
+        populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
+      });
+
+      const [originalEnDoc, localizedEsDoc] = await Promise.all([
+        strapi.documents(MIXED_CONTENT_UID).findOne({
+          documentId: originalDoc.documentId,
+          locale: 'en',
+          populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
+        }),
+        strapi.documents(MIXED_CONTENT_UID).findOne({
+          documentId: originalDoc.documentId,
+          locale: 'es',
+          populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
+        }),
+      ]);
+
+      expect(originalEnDoc).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'en',
+        sharedMedia: {
+          id: uploadedFile.id,
+          documentId: uploadedFile.documentId,
+        },
+        nestedSharedComponent: {
+          nestedLeaf: {
+            media: {
+              id: uploadedFile.id,
+              documentId: uploadedFile.documentId,
+            },
+          },
+        },
+      });
+      expect(localizedEsDoc).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'es',
+        sharedMedia: {
+          id: uploadedFile.id,
+          documentId: uploadedFile.documentId,
+        },
+        nestedSharedComponent: {
+          nestedLeaf: {
+            media: {
+              id: uploadedFile.id,
+              documentId: uploadedFile.documentId,
+            },
+          },
+        },
+      });
+      expect(localizedDoc).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'es',
+        localizedText: 'Texto Espanol',
+        sharedText: 'Shared Content',
+        sharedMedia: {
+          id: uploadedFile.id,
+          documentId: uploadedFile.documentId,
+        },
+        nestedSharedComponent: {
+          nestedLeaf: {
+            media: {
+              id: uploadedFile.id,
+              documentId: uploadedFile.documentId,
+            },
+          },
+        },
+      });
+    });
+
+    it('Syncs non-localized media fields when updating an existing locale', async () => {
+      const MIXED_CONTENT_UID = 'api::mixed-content.mixed-content';
+      const initialFile = await strapi.db.query('plugin::upload.file').create({
+        data: {
+          name: 'initial-image.jpg',
+          alternativeText: 'initial image',
+          caption: 'initial image',
+          folderPath: '/',
+          hash: 'initial_image_hash',
+          ext: '.jpg',
+          mime: 'image/jpeg',
+          size: 1,
+          provider: 'local',
+          url: '/uploads/initial-image.jpg',
+          publishedAt: new Date(),
+        },
+      });
+      const replacementFile = await strapi.db.query('plugin::upload.file').create({
+        data: {
+          name: 'replacement-image.jpg',
+          alternativeText: 'replacement image',
+          caption: 'replacement image',
+          folderPath: '/',
+          hash: 'replacement_image_hash',
+          ext: '.jpg',
+          mime: 'image/jpeg',
+          size: 1,
+          provider: 'local',
+          url: '/uploads/replacement-image.jpg',
+          publishedAt: new Date(),
+        },
+      });
+
+      const originalDoc = await strapi.documents(MIXED_CONTENT_UID).create({
+        data: {
+          localizedText: 'Original Text',
+          sharedText: 'Shared Content',
+          sharedMedia: initialFile.id,
+        },
+        locale: 'en',
+      });
+
+      await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: originalDoc.documentId,
+        locale: 'es',
+        data: {
+          localizedText: 'Texto Espanol',
+        },
+      });
+
+      const updatedEnDoc = await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: originalDoc.documentId,
+        locale: 'en',
+        data: {
+          sharedMedia: replacementFile.id,
+        },
+        populate: ['sharedMedia'],
+      });
+
+      const [finalEnDoc, finalEsDoc] = await Promise.all([
+        strapi.documents(MIXED_CONTENT_UID).findOne({
+          documentId: originalDoc.documentId,
+          locale: 'en',
+          populate: ['sharedMedia'],
+        }),
+        strapi.documents(MIXED_CONTENT_UID).findOne({
+          documentId: originalDoc.documentId,
+          locale: 'es',
+          populate: ['sharedMedia'],
+        }),
+      ]);
+
+      expect(updatedEnDoc).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'en',
+        sharedMedia: {
+          id: replacementFile.id,
+          documentId: replacementFile.documentId,
+        },
+      });
+      expect(finalEnDoc).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'en',
+        localizedText: 'Original Text',
+        sharedMedia: {
+          id: replacementFile.id,
+          documentId: replacementFile.documentId,
+        },
+      });
+      expect(finalEsDoc).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'es',
+        localizedText: 'Texto Espanol',
+        sharedMedia: {
+          id: replacementFile.id,
+          documentId: replacementFile.documentId,
+        },
+      });
+    });
   });
 });

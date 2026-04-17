@@ -5,6 +5,66 @@ import { async } from '@strapi/utils';
 import { getService } from '../utils';
 
 /**
+ * Mutates the provided data object in place and returns the same reference
+ * with populated media values replaced by their upload file IDs.
+ */
+const normalizeMediaIds = (
+  schema: Schema.ContentType | Schema.Component,
+  data: Record<string, any>
+) => {
+  if (!schema?.attributes || !data || typeof data !== 'object') {
+    return data;
+  }
+
+  Object.entries(schema.attributes).forEach(([attributeName, attribute]) => {
+    const value = data[attributeName];
+
+    if (value == null) {
+      return;
+    }
+
+    if (attribute.type === 'media') {
+      if (attribute.multiple) {
+        data[attributeName] = Array.isArray(value)
+          ? value.map((file: unknown) =>
+              file && typeof file === 'object' && 'id' in file ? file.id : file
+            )
+          : value;
+      } else {
+        data[attributeName] =
+          value && typeof value === 'object' && 'id' in value ? value.id : value;
+      }
+
+      return;
+    }
+
+    if (attribute.type === 'component') {
+      const componentSchema = strapi.getModel(attribute.component);
+
+      if (attribute.repeatable && Array.isArray(value)) {
+        value.forEach((componentValue: Record<string, any>) =>
+          normalizeMediaIds(componentSchema, componentValue)
+        );
+      } else {
+        normalizeMediaIds(componentSchema, value);
+      }
+
+      return;
+    }
+
+    if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
+      value.forEach((componentValue: Record<string, any>) => {
+        if (componentValue?.__component) {
+          normalizeMediaIds(strapi.getModel(componentValue.__component), componentValue);
+        }
+      });
+    }
+  });
+
+  return data;
+};
+
+/**
  * Update non localized fields of all the related localizations of an entry with the entry values
  */
 const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.ContentType) => {
@@ -14,6 +74,8 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
   if (isEmpty(nonLocalizedAttributes)) {
     return;
   }
+
+  const normalizedNonLocalizedAttributes = normalizeMediaIds(model, nonLocalizedAttributes);
 
   const uid = model.uid;
   const documentId = sourceEntry.documentId;
@@ -31,11 +93,11 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
     select: ['locale', 'id'],
   });
 
-  const entryData = await strapi.documents(uid).omitComponentData(nonLocalizedAttributes);
+  const entryData = await strapi.documents(uid).omitComponentData(normalizedNonLocalizedAttributes);
 
   await async.map(localeEntriesToUpdate, async (entry: any) => {
     const transformedData = await strapi.documents.utils.transformData(
-      cloneDeep(nonLocalizedAttributes),
+      cloneDeep(normalizedNonLocalizedAttributes),
       {
         uid,
         status,

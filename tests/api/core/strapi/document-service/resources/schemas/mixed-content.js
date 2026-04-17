@@ -29,5 +29,24 @@ module.exports = {
         },
       },
     },
+    sharedMedia: {
+      type: 'media',
+      multiple: false,
+      pluginOptions: {
+        i18n: {
+          localized: false,
+        },
+      },
+    },
+    nestedSharedComponent: {
+      type: 'component',
+      component: 'mixed-content.mixed-content-nested-media-wrapper',
+      repeatable: false,
+      pluginOptions: {
+        i18n: {
+          localized: false,
+        },
+      },
+    },
   },
 };
