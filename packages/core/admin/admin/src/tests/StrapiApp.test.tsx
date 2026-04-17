@@ -527,6 +527,42 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.configurations.locales).toEqual(['en', 'fr']);
     });
 
+    it('should normalize locale tags to BCP 47 canonical casing', () => {
+      const app = new StrapiApp({ config: { locales: ['zh-hans', 'pt-br', 'en-gb'] } });
+
+      expect(app.configurations.locales).toEqual(['en', 'zh-Hans', 'pt-BR', 'en-GB']);
+    });
+
+    it('should leave correctly-cased locale tags unchanged', () => {
+      const app = new StrapiApp({ config: { locales: ['zh-Hans', 'pt-BR'] } });
+
+      expect(app.configurations.locales).toEqual(['en', 'zh-Hans', 'pt-BR']);
+    });
+
+    it('should include zh-Hans in render() localeNames when configured', () => {
+      const app = new StrapiApp({ config: { locales: ['zh-Hans'] } });
+      app.render();
+
+      const state = app.store!.getState();
+
+      expect(state.admin_app.language.localeNames).toEqual({
+        en: 'English',
+        'zh-Hans': '中文 (简体)',
+      });
+    });
+
+    it('should include zh-Hans in render() localeNames even when configured as zh-hans (lowercase)', () => {
+      const app = new StrapiApp({ config: { locales: ['zh-hans'] } });
+      app.render();
+
+      const state = app.store!.getState();
+
+      expect(state.admin_app.language.localeNames).toEqual({
+        en: 'English',
+        'zh-Hans': '中文 (简体)',
+      });
+    });
+
     it('should override the authLogo', () => {
       const app = new StrapiApp({ config: { auth: { logo: 'fr' } } });
 

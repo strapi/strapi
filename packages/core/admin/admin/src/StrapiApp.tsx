@@ -87,6 +87,18 @@ interface Library {
   components: Record<Component['name'], Component['Component']>;
 }
 
+/**
+ * Normalizes a BCP 47 locale tag to its canonical casing (e.g. "zh-hans" → "zh-Hans",
+ * "pt-br" → "pt-BR"). Falls back to the original string for unrecognized tags.
+ */
+const normalizeLocale = (locale: string): string => {
+  try {
+    return new Intl.Locale(locale).baseName;
+  } catch {
+    return locale;
+  }
+};
+
 class StrapiApp {
   appPlugins: Record<string, StrapiAppPlugin>;
   plugins: Record<string, Plugin> = {};
@@ -253,7 +265,7 @@ class StrapiApp {
     if (customConfig.locales) {
       this.configurations.locales = [
         'en',
-        ...(customConfig.locales?.filter((loc) => loc !== 'en') || []),
+        ...(customConfig.locales?.filter((loc) => loc !== 'en').map(normalizeLocale) || []),
       ];
     }
 
@@ -419,6 +431,9 @@ class StrapiApp {
    * with the default ones.
    */
   async loadTrads(customTranslations: Record<string, Record<string, string>> = {}) {
+    const normalizedCustomTranslations = Object.fromEntries(
+      Object.entries(customTranslations).map(([key, value]) => [normalizeLocale(key), value])
+    );
     const adminTranslations = await this.loadAdminTrads();
 
     const arrayOfPromises = Object.keys(this.appPlugins)
@@ -460,7 +475,7 @@ class StrapiApp {
       acc[current] = {
         ...adminTranslations[current],
         ...(mergedTrads[current] || {}),
-        ...(customTranslations[current] ?? {}),
+        ...(normalizedCustomTranslations[current] ?? {}),
       };
 
       return acc;
