@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import sharp from 'sharp';
 
 import { errors, file } from '@strapi/utils';
 import type { Core } from '@strapi/types';
@@ -18,7 +19,14 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   // Register AI metadata job model
   strapi.get('models').add(aiMetadataJob);
 
-  strapi.plugin('upload').provider = createProvider(strapi.config.get<Config>('plugin::upload'));
+  const uploadConfig = strapi.config.get<Config>('plugin::upload');
+
+  // Configure sharp memory management
+  const { sharpCache = false, sharpConcurrency = 1 } = uploadConfig;
+  sharp.cache(sharpCache);
+  sharp.concurrency(sharpConcurrency);
+
+  strapi.plugin('upload').provider = createProvider(uploadConfig);
 
   await registerUploadMiddleware({ strapi });
 
