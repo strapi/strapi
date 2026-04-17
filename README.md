@@ -156,3 +156,10 @@ See for yourself what's under the hood by getting access to a [hosted Strapi pro
 ## License
 
 See the [LICENSE](./LICENSE) file for licensing information.
+## 💡 Community Help
+
+If you need help or want to share ideas, you can reach us at:
+- 🗣 [Strapi Forum](https://forum.strapi.io/)
+- 💬 [Strapi Discord](https://discord.strapi.io/)
+- 📘 [Official Documentation](https://docs.strapi.io/)
+
