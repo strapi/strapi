@@ -171,6 +171,9 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/homepage/key-statistics                                                  │
 │ HEAD|GET           │ /admin/homepage/layout                                                          │
 │ PUT                │ /admin/homepage/layout                                                          │
+│ HEAD|GET           │ /admin/ai-usage                                                                 │
+│ HEAD|GET           │ /admin/ai-token                                                                 │
+│ HEAD|GET           │ /admin/ai-feature-config                                                        │
 │ HEAD|GET           │ /content-manager/init                                                           │
 │ HEAD|GET           │ /content-manager/content-types                                                  │
 │ HEAD|GET           │ /content-manager/content-types-settings                                         │
@@ -202,6 +205,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /content-manager/collection-types/:model/:id/actions/unpublish                  │
 │ POST               │ /content-manager/collection-types/:model/:id/actions/discard                    │
 │ POST               │ /content-manager/collection-types/:model/actions/bulkDelete                     │
+│ POST               │ /content-manager/collection-types/:model/actions/bulkFindForValidation          │
 │ POST               │ /content-manager/collection-types/:model/actions/bulkPublish                    │
 │ POST               │ /content-manager/collection-types/:model/actions/bulkUnpublish                  │
 │ HEAD|GET           │ /content-manager/collection-types/:model/:id/actions/countDraftRelations        │
@@ -256,6 +260,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ PUT                │ /i18n/locales/:id                                                               │
 │ DELETE             │ /i18n/locales/:id                                                               │
 │ POST               │ /i18n/content-manager/actions/get-non-localized-fields                          │
+│ HEAD|GET           │ /i18n/content-manager/get-fill-from-locale/:model                               │
 │ HEAD|GET           │ /i18n/settings                                                                  │
 │ PUT                │ /i18n/settings                                                                  │
 │ HEAD|GET           │ /i18n/ai-localization-jobs/collection-types/:contentType/:documentId            │
