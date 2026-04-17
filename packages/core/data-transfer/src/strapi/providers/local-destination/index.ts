@@ -19,6 +19,12 @@ import { assertValidStrapi } from '../../../utils/providers';
 export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
+const isAssetsBackupMoveError = (error: unknown): boolean => {
+  const err = error as NodeJS.ErrnoException;
+
+  return ['EBUSY', 'EXDEV'].includes(err.code ?? '');
+};
+
 export interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Core.Strapi | Promise<Core.Strapi>; // return an initialized instance of Strapi
 
@@ -264,8 +270,24 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         // eslint-disable-next-line no-bitwise
         await fse.access(path.join(assetsDirectory, '..'), fse.constants.W_OK | fse.constants.R_OK);
 
-        await fse.move(assetsDirectory, backupDirectory);
-        await fse.mkdir(assetsDirectory);
+        try {
+          await fse.move(assetsDirectory, backupDirectory);
+          await fse.mkdir(assetsDirectory);
+        } catch (error) {
+          if (!isAssetsBackupMoveError(error)) {
+            throw error;
+          }
+
+          // Mounted directories (e.g. Docker/Kubernetes volumes) cannot always be moved because the underlying rename can fail (e.g. EBUSY, EXDEV).
+          // In that case, back up the contents by copying and keep the uploads directory in place.
+          await fse.copy(assetsDirectory, backupDirectory, {
+            overwrite: false,
+            errorOnExist: true,
+          });
+
+          await fse.emptyDir(assetsDirectory);
+        }
+
         // Create a .gitkeep file to ensure the directory is not empty
         await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
         this.#reportInfo(`created assets backup directory ${backupDirectory}`);
