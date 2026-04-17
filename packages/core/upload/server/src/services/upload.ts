@@ -502,9 +502,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function findPage(query: any = {}) {
+    // Flatten nested pagination params to top-level for query-params transform.
+    // Content API sends pagination as { pagination: { page, pageSize, withCount } }
+    // but transformQueryParams expects { page, pageSize } at the top level.
+    // This mirrors how the Content API collection-type service extracts pagination
+    // via getPaginationInfo() before passing params to the document service.
+    const { pagination: paginationParams, ...rest } = query;
+    const flatQuery =
+      paginationParams && typeof paginationParams === 'object'
+        ? { ...rest, ...paginationParams }
+        : query;
+
     const result = await strapi.db
       .query(FILE_MODEL_UID)
-      .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
+      .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, flatQuery));
 
     // Sign file URLs if using private provider
     const signedResults = await async.map(result.results, (file: File) =>
