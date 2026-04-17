@@ -1,6 +1,14 @@
 import * as React from 'react';
 
-import { Accordion, Box, Flex, FlexComponent, Typography } from '@strapi/design-system';
+import {
+  Accordion,
+  Box,
+  Flex,
+  FlexComponent,
+  Tooltip,
+  Typography,
+  TypographyComponent,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -49,12 +57,22 @@ const ComponentCategory = ({
               shrink={0}
               borderColor="neutral200"
             >
-              <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
+              <Flex
+                direction="column"
+                gap={1}
+                alignItems="center"
+                justifyContent="center"
+                width="100%"
+                paddingLeft={2}
+                paddingRight={2}
+              >
                 <ComponentIcon color="currentColor" background="primary200" icon={icon} />
 
-                <Typography variant="pi" fontWeight="bold">
-                  {displayName}
-                </Typography>
+                <Tooltip label={displayName}>
+                  <ComponentName variant="pi" fontWeight="bold">
+                    {displayName}
+                  </ComponentName>
+                </Tooltip>
               </Flex>
             </ComponentBox>
           ))}
@@ -110,6 +128,14 @@ const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
     background: ${({ theme }) => theme.colors.primary100};
     color: ${({ theme }) => theme.colors.primary600};
   }
+`;
+
+const ComponentName = styled<TypographyComponent>(Typography)`
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
 `;
 
 export { ComponentCategory };

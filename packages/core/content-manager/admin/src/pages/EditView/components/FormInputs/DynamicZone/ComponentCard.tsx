@@ -1,12 +1,18 @@
 import * as React from 'react';
 
-import { Flex, FlexComponent, Typography, TypographyComponent } from '@strapi/design-system';
+import {
+  Flex,
+  FlexComponent,
+  Tooltip,
+  Typography,
+  TypographyComponent,
+} from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { ComponentIcon, ComponentIconProps } from '../../../../../components/ComponentIcon';
 
 interface ComponentCardProps extends Pick<ComponentIconProps, 'icon'> {
-  children: React.ReactNode;
+  children: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
 }
 
@@ -27,15 +33,23 @@ const ComponentCard = ({ children, onClick, icon }: ComponentCardProps) => {
       <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
         <ComponentIcon icon={icon} />
 
-        <ComponentName variant="pi" fontWeight="bold" textColor="neutral600">
-          {children}
-        </ComponentName>
+        <Tooltip label={children}>
+          <ComponentName variant="pi" fontWeight="bold" textColor="neutral600">
+            {children}
+          </ComponentName>
+        </Tooltip>
       </Flex>
     </ComponentBox>
   );
 };
 
-const ComponentName = styled<TypographyComponent>(Typography)``;
+const ComponentName = styled<TypographyComponent>(Typography)`
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+`;
 
 const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   &:focus,
