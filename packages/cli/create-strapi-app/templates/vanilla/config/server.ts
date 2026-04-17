@@ -6,6 +6,11 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server =>
   app: {
     keys: env.array('APP_KEYS'),
   },
+  webhooks: {
+    populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),
+  },
+  proxy: { koa: env('PROXY_KOA', true) },
+  url: env('PUBLIC_URL'),
 });
 
 export default config;
