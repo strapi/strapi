@@ -175,10 +175,12 @@ describe('usePersistentPartialQueryParams', () => {
       usePersistentPartialQueryParams(scopedKey, keysToPersist, false, { legacyKey })
     );
 
-    await waitFor(() => {
-      expect(window.localStorage.getItem(scopedKey)).toBe(JSON.stringify(savedParams));
-      expect(window.localStorage.getItem(legacyKey)).toBeNull();
-      expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true);
-    });
+    await waitFor(() =>
+      expect(window.localStorage.getItem(scopedKey)).toBe(JSON.stringify(savedParams))
+    );
+
+    expect(window.localStorage.getItem(legacyKey)).toBeNull();
+
+    await waitFor(() => expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true));
   });
 });

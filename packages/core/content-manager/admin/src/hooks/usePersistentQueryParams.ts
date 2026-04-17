@@ -53,7 +53,7 @@ export const usePersistentPartialQueryParams = (
     }
   }, [legacyKey, localStorageKey]);
 
-  // load query params from local storge
+  // load query params from local storage
   useEffect(() => {
     const savedQueryParams = window.localStorage.getItem(localStorageKey);
     if (!savedQueryParams) return;
