@@ -340,7 +340,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
          * It's considered a breaking change because it impacts any API request, including the user's custom code
          */
         const serializedParams = qs.stringify(params, { encode: false });
-        return `${url}?${serializedParams}`;
+        if (serializedParams) {
+          return `${url}?${serializedParams}`;
+        }
+        return url;
       }
       return url;
     };
