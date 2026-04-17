@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Typography } from '@strapi/design-system';
 import { BulletList, NumberList } from '@strapi/icons';
 import { Schema } from '@strapi/types';
-import { type Text, Editor, Node, Transforms, Path, Element } from 'slate';
+import { type Text, Editor, Node, Transforms, Path, Element, Range } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled, type CSSProperties, css } from 'styled-components';
 
@@ -277,6 +277,21 @@ const handleEnterKeyOnList = (editor: Editor) => {
  * Common handler for converting a node to a list
  */
 const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) => {
+  if (!editor.selection) return;
+
+  // if multiple block
+  if (!Range.isCollapsed(editor.selection)) {
+    Transforms.setNodes(editor, { type: 'list-item' } as Partial<Node>, {
+      at: editor.selection,
+      match: (node) => Element.isElement(node) && node.type !== 'list' && node.type !== 'list-item',
+    });
+
+    Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: editor.selection });
+
+    return;
+  }
+
+  //if single block
   const convertedPath = baseHandleConvert<Block<'list-item'>>(editor, { type: 'list-item' });
 
   if (!convertedPath) return;

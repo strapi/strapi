@@ -1440,6 +1440,55 @@ describe('List', () => {
       },
     ];
 
+    //for multiple selected block
+    it('converts multiple selected blocks into a single list', () => {
+      const editor = createEditor();
+
+      editor.children = [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Line one' }],
+        },
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Line two' }],
+        },
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Line three' }],
+        },
+      ];
+
+      // Select from first block to last block
+      Transforms.select(editor, {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [2, 0], offset: 9 },
+      });
+
+      listBlocks['list-unordered'].handleConvert!(editor);
+
+      expect(editor.children).toEqual([
+        {
+          type: 'list',
+          format: 'unordered',
+          children: [
+            {
+              type: 'list-item',
+              children: [{ type: 'text', text: 'Line one' }],
+            },
+            {
+              type: 'list-item',
+              children: [{ type: 'text', text: 'Line two' }],
+            },
+            {
+              type: 'list-item',
+              children: [{ type: 'text', text: 'Line three' }],
+            },
+          ],
+        },
+      ]);
+    });
+
     // Set the cursor on the heading
     Transforms.select(baseEditor, {
       anchor: { path: [0, 0, 0], offset: 0 },
