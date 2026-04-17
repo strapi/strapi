@@ -25,7 +25,8 @@ type CustomFieldOptionInput =
   | 'select-date'
   | 'text-area-enum'
   | 'select-number'
-  | 'radio-group';
+  | 'radio-group'
+  | (string & {});
 
 type CustomFieldOptionName =
   | 'min'
@@ -37,7 +38,8 @@ type CustomFieldOptionName =
   | 'enum'
   | 'unique'
   | 'private'
-  | 'default';
+  | 'default'
+  | `options.${string}`;
 
 interface CustomFieldOption {
   intlLabel: MessageDescriptor & {
