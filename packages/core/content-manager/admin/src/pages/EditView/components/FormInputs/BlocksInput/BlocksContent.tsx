@@ -544,6 +544,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       // Check if there's a modifier to toggle
       Object.values(modifiers).forEach((value) => {
         if (value.isValidEventKey(event)) {
+          event.preventDefault();
           value.handleToggle(editor);
           return;
         }
