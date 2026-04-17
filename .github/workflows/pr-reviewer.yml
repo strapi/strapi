@@ -3,11 +3,11 @@ name: PR Review with Progress Tracking
 # This workflow triggers an AI-powered code review when the 'AI Review' label is added to a pull request.
 on:
   pull_request:
-    types: [labeled]
+    types: [opened]
 
 jobs:
   review-with-tracking:
-    if: ${{ github.event.label.name == 'AI Review' }}
+    if: ${{ github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'OWNER' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,6 +21,8 @@ jobs:
 
       - name: PR Review with Progress Tracking
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
         with:
           anthropic_api_key: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
 
