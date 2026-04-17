@@ -23,6 +23,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const displayedContentTypes = getService('content-types').findDisplayedContentTypes();
     const contentTypesUids = displayedContentTypes.map(prop('uid'));
 
+    const allContentTypesUids = getService('content-types').findAllContentTypes().map(prop('uid'));
+
     const actions = [
       {
         section: 'contentTypes',
@@ -39,7 +41,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         displayName: 'Read',
         uid: 'explorer.read',
         pluginName: 'content-manager',
-        subjects: contentTypesUids,
+        subjects: allContentTypesUids,
         options: {
           applyToProperties: ['fields'],
         },
