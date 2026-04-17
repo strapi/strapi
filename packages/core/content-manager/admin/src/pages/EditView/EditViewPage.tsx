@@ -24,7 +24,10 @@ import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
-import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
+import {
+  readPersistedQueryParams,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
@@ -40,6 +43,13 @@ import { handleInvisibleAttributes } from './utils/data';
 
 const EditViewPage = () => {
   const location = useLocation();
+  // Read persisted locale synchronously so the first document fetch
+  // already includes the locale param, avoiding a duplicate request when the
+  // usePersistentPartialQueryParams effect restores it post-render.
+  const persistedLocale = React.useMemo(
+    () => readPersistedQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], '', false),
+    []
+  );
   const [
     {
       query: { status },
@@ -47,6 +57,7 @@ const EditViewPage = () => {
     setQuery,
   ] = useQueryParams<{ status: 'draft' | 'published' }>({
     status: 'draft',
+    ...persistedLocale,
   });
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
