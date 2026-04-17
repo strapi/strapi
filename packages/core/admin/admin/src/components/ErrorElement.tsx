@@ -7,13 +7,14 @@ import {
   Link,
   TypographyComponent,
 } from '@strapi/design-system';
-import { Duplicate, WarningCircle } from '@strapi/icons';
+import { Clock, Duplicate, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useRouteError } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useClipboard } from '../hooks/useClipboard';
+import { isChunkLoadError } from '../utils/retryDynamicImport';
 
 /**
  * @description this stops the app from going white, and instead shows the error message.
@@ -27,13 +28,77 @@ const ErrorElement = () => {
   if (error instanceof Error) {
     console.error(error);
 
-    const handleClick = async () => {
+    const handleCopy = async () => {
       await copy(`
 \`\`\`
 ${error.stack}
 \`\`\`
       `);
     };
+
+    if (isChunkLoadError(error)) {
+      return (
+        <Main height="100%">
+          <Flex
+            alignItems="center"
+            height="100%"
+            justifyContent="center"
+            paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+            paddingRight={RESPONSIVE_DEFAULT_SPACING}
+          >
+            <Flex
+              gap={7}
+              padding={{
+                initial: 6,
+                small: 7,
+                medium: 8,
+              }}
+              direction="column"
+              width="100%"
+              maxWidth="512px"
+              shadow="tableShadow"
+              borderColor="neutral150"
+              background="neutral0"
+              hasRadius
+            >
+              <Flex direction="column" gap={2}>
+                <Clock width="32px" height="32px" fill="primary600" />
+                <Typography fontSize={4} fontWeight="bold" textAlign="center">
+                  {formatMessage({
+                    id: 'app.error.chunk.title',
+                    defaultMessage: 'Taking longer than expected',
+                  })}
+                </Typography>
+                <Typography variant="omega" textAlign="center">
+                  {formatMessage({
+                    id: 'app.error.chunk.message',
+                    defaultMessage:
+                      'The admin could not load a screen. This often happens when the server is starting or the connection was interrupted. Reload the page to try again. If you recently deployed, you may need a full refresh to load the latest version.',
+                  })}
+                </Typography>
+              </Flex>
+              <Flex gap={4} direction="column" width="100%">
+                <Button onClick={() => window.location.reload()} fullWidth>
+                  {formatMessage({
+                    id: 'app.error.chunk.reload',
+                    defaultMessage: 'Reload the page',
+                  })}
+                </Button>
+                <StyledAlert onClose={() => {}} width="100%" closeLabel="" variant="warning">
+                  <ChunkErrorType>{error.message}</ChunkErrorType>
+                </StyledAlert>
+                <Button onClick={handleCopy} variant="tertiary" startIcon={<Duplicate />}>
+                  {formatMessage({
+                    id: 'app.error.copy',
+                    defaultMessage: 'Copy to clipboard',
+                  })}
+                </Button>
+              </Flex>
+            </Flex>
+          </Flex>
+        </Main>
+      );
+    }
 
     return (
       <Main height="100%">
@@ -91,7 +156,7 @@ ${error.stack}
               <StyledAlert onClose={() => {}} width="100%" closeLabel="" variant="danger">
                 <ErrorType>{error.message}</ErrorType>
               </StyledAlert>
-              <Button onClick={handleClick} variant="tertiary" startIcon={<Duplicate />}>
+              <Button onClick={handleCopy} variant="tertiary" startIcon={<Duplicate />}>
                 {formatMessage({
                   id: 'app.error.copy',
                   defaultMessage: 'Copy to clipboard',
@@ -120,6 +185,11 @@ const StyledAlert = styled(Alert)`
 const ErrorType = styled<TypographyComponent>(Typography)`
   word-break: break-all;
   color: ${({ theme }) => theme.colors.danger600};
+`;
+
+const ChunkErrorType = styled<TypographyComponent>(Typography)`
+  word-break: break-all;
+  color: ${({ theme }) => theme.colors.warning600};
 `;
 
 export { ErrorElement };
