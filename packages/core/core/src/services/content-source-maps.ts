@@ -76,7 +76,15 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
         strapiSource.set('locale', locale);
       }
 
-      return vercelStegaCombine(text, { strapiSource: strapiSource.toString() });
+      const encoded = vercelStegaCombine(
+        text,
+        {
+          strapiSource: strapiSource.toString(),
+        },
+        false
+      );
+
+      return encoded;
     },
 
     async encodeEntry({ data, schema }: EncodingInfo): Promise<any> {
