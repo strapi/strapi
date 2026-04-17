@@ -41,6 +41,7 @@ export const transformCTBToChat = (schema: ContentType | Component): Schema => {
     action: 'create',
     name: schema.info.pluralName,
     uid: schema.uid as any,
+    ...(schema.plugin ? { plugin: schema.plugin } : {}),
     attributes: transformAttributesFromCTBToChat(schema.attributes),
     // @ts-expect-error - injected from previous ai messages
     sources: schema.sources,

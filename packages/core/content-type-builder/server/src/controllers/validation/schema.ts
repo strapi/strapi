@@ -682,6 +682,7 @@ const baseContentTypeSchema = z.object({
 
 const baseCreateContentTypeSchema = baseContentTypeSchema.extend({
   action: z.literal('create'),
+  plugin: z.string().optional(),
   collectionName: z.string().regex(COLLECTION_NAME_REGEX).optional(),
   singularName: z
     .string()

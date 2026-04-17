@@ -5,6 +5,8 @@ export type Schema = {
   action: 'create' | 'update' | 'remove';
   kind?: 'singleType' | 'collectionType';
   uid: string;
+  /** Set for plugin content-types (`plugin::…`) */
+  plugin?: string;
   modelType: 'component' | 'contentType';
   category?: string; // Only for components
   description?: string;
