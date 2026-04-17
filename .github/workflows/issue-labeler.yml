@@ -20,7 +20,7 @@ jobs:
       - name: Auto-label issue with Claude
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
+          anthropic_api_key: ${{ secrets.ISSUE_AUTO_LABELLER }}
 
           prompt: |
             REPO: ${{ github.repository }}
