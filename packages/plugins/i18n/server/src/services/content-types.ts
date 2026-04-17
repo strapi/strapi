@@ -40,7 +40,9 @@ const isLocalizedAttribute = (attribute: any) => {
   return (
     hasLocalizedOption(attribute) ||
     isRelationalAttribute(attribute) ||
-    isTypedAttribute(attribute, 'uid')
+    isTypedAttribute(attribute, 'uid') ||
+    isTypedAttribute(attribute, 'component') ||
+    isTypedAttribute(attribute, 'dynamiczone')
   );
 };
 
