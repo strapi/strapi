@@ -103,27 +103,58 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi.documents(uid).update({ ...params, documentId: id });
     },
 
+    // async clone(
+    //   id: Modules.Documents.ID,
+    //   body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
+    //   uid: UID.CollectionType
+    // ) {
+    //   const populate = await buildDeepPopulate(uid);
+
+    //   // Extract the locale to pass it as a plain param
+    //   const locale = body?.locale;
+    //   const params = {
+    //     // Ensure id and documentId are not copied to the clone
+    //     data: omit(['id', 'documentId'], body),
+    //     locale,
+    //     populate,
+    //   };
+
+    //   return strapi
+    //     .documents(uid)
+    //     .clone({ ...params, documentId: id })
+    //     .then((result) => result?.entries.at(0));
+    // },
+
     async clone(
-      id: Modules.Documents.ID,
-      body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
-      uid: UID.CollectionType
-    ) {
-      const populate = await buildDeepPopulate(uid);
+  id: Modules.Documents.ID,
+  body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
+  uid: UID.CollectionType
+) {
+  const populate = await buildDeepPopulate(uid);
 
-      // Extract the locale to pass it as a plain param
-      const locale = body?.locale;
-      const params = {
-        // Ensure id and documentId are not copied to the clone
-        data: omit(['id', 'documentId'], body),
-        locale,
-        populate,
-      };
+  // 1. EXTRA STEP: Fetch the original document to get the non-localized fields
+  const sourceDocument = await strapi.documents(uid).findOne({
+    documentId: id,
+    populate, 
+  });
 
-      return strapi
-        .documents(uid)
-        .clone({ ...params, documentId: id })
-        .then((result) => result?.entries.at(0));
+  const locale = body?.locale;
+  
+  const params = {
+    // 2. MERGE: Combine original data with the new body data
+    data: {
+      ...omit(['id', 'documentId'], sourceDocument), // Keep original fields (like cover)
+      ...omit(['id', 'documentId'], body),           // Overwrite with new UI data
     },
+    locale,
+    populate,
+  };
+
+  return strapi
+    .documents(uid)
+    .clone({ ...params, documentId: id })
+    .then((result) => result?.entries.at(0));
+},
 
     /**
      *  Check if a document exists
