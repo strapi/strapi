@@ -87,10 +87,10 @@ const createEntriesService = (
     return doc;
   }
 
-  async function deleteEntry(id: number) {
+  async function deleteEntry(id: number, query = {} as any) {
     const componentsToDelete = await components.getComponents(uid, { id });
 
-    const deletedEntry = await strapi.db.query(uid).delete({ where: { id } });
+    const deletedEntry = await strapi.db.query(uid).delete({ ...query, where: { id } });
 
     await components.deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
 
