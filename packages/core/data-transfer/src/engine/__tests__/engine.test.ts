@@ -930,7 +930,7 @@ describe('Transfer engine', () => {
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, completeDestination, options);
+          const engine = createTransferEngine(source, createDestination(), options);
           expect(
             (async () => {
               await engine.transfer();
@@ -952,7 +952,7 @@ describe('Transfer engine', () => {
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, completeDestination, options);
+          const engine = createTransferEngine(source, createDestination(), options);
           expect(
             (async () => {
               await engine.transfer();
@@ -965,7 +965,7 @@ describe('Transfer engine', () => {
           modifiedMetadata.strapi.version = version;
           const source = createSource();
           source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-          const engine = createTransferEngine(source, completeDestination, options);
+          const engine = createTransferEngine(source, createDestination(), options);
           expect(
             (async () => {
               await engine.transfer();
@@ -988,7 +988,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1003,7 +1003,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1027,7 +1027,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1042,7 +1042,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1066,7 +1066,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1081,7 +1081,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();
@@ -1104,7 +1104,7 @@ describe('Transfer engine', () => {
             modifiedMetadata.strapi.version = version;
             const source = createSource();
             source.getMetadata = jest.fn().mockResolvedValue(modifiedMetadata);
-            const engine = createTransferEngine(source, completeDestination, options);
+            const engine = createTransferEngine(source, createDestination(), options);
             await expect(
               (async () => {
                 await engine.transfer();

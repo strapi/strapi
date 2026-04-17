@@ -3,6 +3,14 @@ import { Writable } from 'stream';
 import { write } from '../writable-async-write';
 
 describe('writable-async-write (write)', () => {
+  const created: Writable[] = [];
+
+  afterEach(() => {
+    while (created.length) {
+      created.pop()?.destroy();
+    }
+  });
+
   test('waits for drain when write returns false (slow consumer, low highWaterMark)', async () => {
     let drainCount = 0;
     const dest = new Writable({
@@ -12,6 +20,7 @@ describe('writable-async-write (write)', () => {
         setTimeout(callback, 2);
       },
     });
+    created.push(dest);
     dest.on('drain', () => {
       drainCount += 1;
     });
@@ -31,6 +40,7 @@ describe('writable-async-write (write)', () => {
         callback();
       },
     });
+    created.push(dest);
 
     await expect(write(dest, { x: 1 })).resolves.toBeUndefined();
   });
@@ -42,6 +52,7 @@ describe('writable-async-write (write)', () => {
         callback(new Error('sink error'));
       },
     });
+    created.push(dest);
 
     await expect(write(dest, { x: 1 })).rejects.toThrow('sink error');
   });
@@ -54,6 +65,7 @@ describe('writable-async-write (write)', () => {
         setTimeout(callback, 2);
       },
     });
+    created.push(dest);
 
     const run = async () => {
       for (let i = 0; i < 30; i += 1) {

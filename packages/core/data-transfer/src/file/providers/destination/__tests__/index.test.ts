@@ -13,11 +13,12 @@ import {
 import * as encryption from '../../../../utils/encryption';
 import { createFilePathFactory, createTarEntryStream } from '../utils';
 
-fs.createWriteStream = jest.fn().mockReturnValue(
-  new Writable({
-    objectMode: true,
-    write() {},
-  })
+fs.createWriteStream = jest.fn().mockImplementation(
+  () =>
+    new Writable({
+      objectMode: true,
+      write() {},
+    })
 );
 
 const filePath = './test-file';

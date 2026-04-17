@@ -141,7 +141,7 @@ describe('stream utils', () => {
       const source = Readable.from([1, 2, 3], { objectMode: true });
       const result = await collect<number>(source, { destroy: false });
       expect(result).toEqual([1, 2, 3]);
-      // collect() does not call stream.destroy() when destroy: false; the stream impl may still close itself
+      source.removeAllListeners();
     });
 
     test('resolves on close with chunks received so far', async () => {

@@ -379,9 +379,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         return this.streamAsset(msg.data);
       }
 
-      // For all other steps: write sequentially so each `write()` completes (and drains) before the
-      // next — concurrent writes to one objectMode Writable violate the stream contract and can
-      // interleave poorly with backpressure.
+      // One objectMode Writable: do not overlap writes.
       for (const item of msg.data) {
         this.stats[stage].started += 1;
         await write(stream, item);
@@ -460,50 +458,58 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         strapi.log.debug(
           `[Transfer destination] Asset start #${this.stats.assets.started} id=${assetID} filename=${filename}`
         );
-        // Await so the assets Writable accepts each asset before chunk writes (same helper as remote-source).
+        // Wait for the assets stage to accept this row (same pattern as remote-source).
         await write(assetsStream, this.assets[assetID]);
-      }
-
-      if (action === 'stream') {
-        const chunk = decodeTransferAssetStreamItem(item);
-        this.assetChecksums?.[assetID]?.update(chunk);
-        await write(this.assets[assetID].stream, chunk);
-      }
-
-      if (action === 'end') {
-        if (this.checksumsEnabled) {
-          if (!item.checksum) {
-            throw new ProviderTransferError(`Missing checksum for asset "${assetID}"`);
-          }
-          if (item.checksum.algorithm !== 'sha256') {
-            throw new ProviderTransferError(
-              `Unsupported checksum algorithm "${item.checksum.algorithm}" for asset ${assetID}`
-            );
-          }
-          const checksum = this.assetChecksums?.[assetID]?.digest('hex');
-          if (!checksum || checksum !== item.checksum.value) {
-            throw new ProviderTransferError(
-              `Checksum mismatch for asset "${assetID}" (expected ${item.checksum.value}, got ${checksum ?? 'none'})`
-            );
-          }
+      } else if (action === 'stream' || action === 'end') {
+        if (!this.assets[assetID]) {
+          throw new ProviderTransferError(
+            `No asset "${assetID}" for ${action} action; send start before stream/end`
+          );
         }
-        if (this.assetChecksums?.[assetID]) {
-          delete this.assetChecksums[assetID];
+
+        if (action === 'stream') {
+          const chunk = decodeTransferAssetStreamItem(item);
+          this.assetChecksums?.[assetID]?.update(chunk);
+          await write(this.assets[assetID].stream, chunk);
+        } else {
+          if (this.checksumsEnabled) {
+            if (!item.checksum) {
+              throw new ProviderTransferError(`Missing checksum for asset "${assetID}"`);
+            }
+            if (item.checksum.algorithm !== 'sha256') {
+              throw new ProviderTransferError(
+                `Unsupported checksum algorithm "${item.checksum.algorithm}" for asset ${assetID}`
+              );
+            }
+            const checksum = this.assetChecksums?.[assetID]?.digest('hex');
+            if (!checksum || checksum !== item.checksum.value) {
+              throw new ProviderTransferError(
+                `Checksum mismatch for asset "${assetID}" (expected ${item.checksum.value}, got ${checksum ?? 'none'})`
+              );
+            }
+          }
+          if (this.assetChecksums?.[assetID]) {
+            delete this.assetChecksums[assetID];
+          }
+          strapi.log.debug(
+            `[Transfer destination] Asset end id=${assetID} (finished=${this.stats.assets.finished + 1}/${this.stats.assets.started})`
+          );
+          await new Promise<void>((resolve, reject) => {
+            const { stream: assetStream } = this.assets[assetID];
+            assetStream
+              .on('close', () => {
+                this.stats.assets.finished += 1;
+                delete this.assets[assetID];
+                resolve();
+              })
+              .on('error', reject)
+              .end();
+          });
         }
-        strapi.log.debug(
-          `[Transfer destination] Asset end id=${assetID} (finished=${this.stats.assets.finished + 1}/${this.stats.assets.started})`
+      } else {
+        throw new ProviderTransferError(
+          `Invalid asset flow action: ${String((item as { action?: unknown }).action)}`
         );
-        await new Promise<void>((resolve, reject) => {
-          const { stream: assetStream } = this.assets[assetID];
-          assetStream
-            .on('close', () => {
-              this.stats.assets.finished += 1;
-              delete this.assets[assetID];
-              resolve();
-            })
-            .on('error', reject)
-            .end();
-        });
       }
     }
   },

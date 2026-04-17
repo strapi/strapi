@@ -54,17 +54,24 @@ jest.mock('@strapi/data-transfer', () => {
     engine: {
       ...actual.engine,
       createTransferEngine() {
+        const handlers: Record<string, Array<(...args: unknown[]) => void>> = {};
+        const stream = {
+          on(event: string, fn: (...args: unknown[]) => void) {
+            (handlers[event] ||= []).push(fn);
+            return stream;
+          },
+        };
         return {
-          transfer: jest.fn(() => {
+          transfer: jest.fn(async () => {
+            // action.ts clears setInterval on this event; real stream emits after transfer.
+            handlers['transfer::finish']?.forEach((fn) => fn());
             return {
               engine: {},
             };
           }),
           progress: {
             on: jest.fn(),
-            stream: {
-              on: jest.fn(),
-            },
+            stream,
           },
           sourceProvider: { name: 'testSource' },
           destinationProvider: { name: 'testDestination' },
