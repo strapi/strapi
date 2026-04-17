@@ -786,6 +786,12 @@ export interface ApiMixedContentMixedContent extends Struct.CollectionTypeSchema
           localized: false;
         };
       }>;
+    nestedSharedComponent: Schema.Attribute.Component<'mixed-content.mixed-content-nested-media-wrapper'> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     publishedAt: Schema.Attribute.DateTime;

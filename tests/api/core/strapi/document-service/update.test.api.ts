@@ -199,17 +199,29 @@ describe('Document Service', () => {
           localizedText: 'Original Text',
           sharedText: 'Shared Content',
           sharedMedia: uploadedFile.id,
+          nestedSharedComponent: {
+            nestedLeaf: {
+              media: uploadedFile.id,
+            },
+          },
         },
         locale: 'en',
-        populate: ['sharedMedia'],
+        populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
       });
 
       expect(originalDoc.sharedMedia).toMatchObject({ id: uploadedFile.id });
+      expect(originalDoc.nestedSharedComponent).toMatchObject({
+        nestedLeaf: {
+          media: {
+            id: uploadedFile.id,
+          },
+        },
+      });
 
       // Verify the raw DB entry persisted sharedMedia as a relation before testing locale creation.
       const originalDocFromDb = await strapi.db.query(MIXED_CONTENT_UID).findOne({
         where: { documentId: originalDoc.documentId, locale: 'en', publishedAt: null },
-        populate: ['sharedMedia'],
+        populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
       });
 
       expect(originalDocFromDb).toMatchObject({
@@ -219,6 +231,14 @@ describe('Document Service', () => {
           id: uploadedFile.id,
           documentId: uploadedFile.documentId,
         },
+        nestedSharedComponent: {
+          nestedLeaf: {
+            media: {
+              id: uploadedFile.id,
+              documentId: uploadedFile.documentId,
+            },
+          },
+        },
       });
 
       const localizedDoc = await strapi.documents(MIXED_CONTENT_UID).update({
@@ -227,19 +247,19 @@ describe('Document Service', () => {
         data: {
           localizedText: 'Texto Espanol',
         },
-        populate: ['sharedMedia'],
+        populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
       });
 
       const [originalEnDoc, localizedEsDoc] = await Promise.all([
         strapi.documents(MIXED_CONTENT_UID).findOne({
           documentId: originalDoc.documentId,
           locale: 'en',
-          populate: ['sharedMedia'],
+          populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
         }),
         strapi.documents(MIXED_CONTENT_UID).findOne({
           documentId: originalDoc.documentId,
           locale: 'es',
-          populate: ['sharedMedia'],
+          populate: ['sharedMedia', 'nestedSharedComponent.nestedLeaf.media'],
         }),
       ]);
 
@@ -250,6 +270,14 @@ describe('Document Service', () => {
           id: uploadedFile.id,
           documentId: uploadedFile.documentId,
         },
+        nestedSharedComponent: {
+          nestedLeaf: {
+            media: {
+              id: uploadedFile.id,
+              documentId: uploadedFile.documentId,
+            },
+          },
+        },
       });
       expect(localizedEsDoc).toMatchObject({
         documentId: originalDoc.documentId,
@@ -257,6 +285,14 @@ describe('Document Service', () => {
         sharedMedia: {
           id: uploadedFile.id,
           documentId: uploadedFile.documentId,
+        },
+        nestedSharedComponent: {
+          nestedLeaf: {
+            media: {
+              id: uploadedFile.id,
+              documentId: uploadedFile.documentId,
+            },
+          },
         },
       });
       expect(localizedDoc).toMatchObject({
@@ -267,6 +303,14 @@ describe('Document Service', () => {
         sharedMedia: {
           id: uploadedFile.id,
           documentId: uploadedFile.documentId,
+        },
+        nestedSharedComponent: {
+          nestedLeaf: {
+            media: {
+              id: uploadedFile.id,
+              documentId: uploadedFile.documentId,
+            },
+          },
         },
       });
     });
