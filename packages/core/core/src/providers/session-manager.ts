@@ -11,8 +11,7 @@ export default defineProvider({
     );
   },
 
-  async register(strapi) {
-    // Get JWT secret from admin auth settings (same as admin token service)
+  async bootstrap(strapi) {
     const adminAuth = strapi.config.get<Core.Config.Admin['auth']>('admin.auth');
     const jwtSecret = adminAuth?.secret;
 
