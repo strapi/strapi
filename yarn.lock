@@ -9363,7 +9363,7 @@ __metadata:
     "@aws-sdk/types": "npm:3.973.6"
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.42.1"
-    lodash: "npm:4.17.23"
+    lodash: "npm:4.18.1"
     tsconfig: "npm:5.42.1"
   languageName: unknown
   linkType: soft
