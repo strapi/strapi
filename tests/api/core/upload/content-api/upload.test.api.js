@@ -160,12 +160,17 @@ describe('Upload plugin', () => {
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.anything(),
-            url: expect.any(String),
+        expect.objectContaining({
+          data: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.anything(),
+              url: expect.any(String),
+            }),
+          ]),
+          meta: expect.objectContaining({
+            pagination: expect.any(Object),
           }),
-        ])
+        })
       );
     });
 
@@ -204,6 +209,78 @@ describe('Upload plugin', () => {
       await strapi.db
         .query('plugin::upload.file')
         .delete({ where: { id: dogEntity.profilePicture.id } });
+    });
+
+    test('Get files with pagination', async () => {
+      // Upload multiple files for pagination test
+      await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          ],
+        },
+      });
+
+      // Test page size
+      const res1 = await rq({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          pagination: {
+            pageSize: 2,
+          },
+        },
+      });
+
+      expect(res1.statusCode).toBe(200);
+      expect(res1.body.data).toHaveLength(2);
+      expect(res1.body.meta.pagination).toEqual(
+        expect.objectContaining({
+          page: expect.any(Number),
+          pageSize: 2,
+          pageCount: expect.any(Number),
+          total: expect.any(Number),
+        })
+      );
+
+      // Test second page
+      const res2 = await rq({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          pagination: {
+            pageSize: 2,
+            page: 2,
+          },
+        },
+      });
+
+      expect(res2.statusCode).toBe(200);
+      expect(res2.body.meta.pagination).toEqual(
+        expect.objectContaining({
+          page: 2,
+          pageSize: 2,
+        })
+      );
+
+      // Test withCount
+      const res3 = await rq({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          pagination: {
+            pageSize: 2,
+            withCount: true,
+          },
+        },
+      });
+
+      expect(res3.statusCode).toBe(200);
+      expect(res3.body.meta.pagination).toHaveProperty('total');
     });
   });
 
