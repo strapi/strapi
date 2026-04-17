@@ -20,10 +20,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async registerPermissions() {
-    const displayedContentTypes = getService('content-types').findDisplayedContentTypes();
-    const contentTypesUids = displayedContentTypes.map(prop('uid'));
-
-    const allContentTypesUids = getService('content-types').findAllContentTypes().map(prop('uid'));
+    const allContentTypes = getService('content-types').findAllContentTypes();
+    const allContentTypesUids = allContentTypes.map(prop('uid'));
+    const contentTypesUids = allContentTypes
+      .filter(({ isDisplayed }: { isDisplayed: boolean }) => isDisplayed)
+      .map(prop('uid'));
 
     const actions = [
       {
