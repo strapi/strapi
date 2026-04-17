@@ -1,3 +1,5 @@
+import { ContentApiApiToken } from '../../../shared/contracts/api-token';
+
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 const constants = {
@@ -27,6 +29,7 @@ const constants = {
       name: 'Read Only',
       description:
         'A default API token with read-only permissions, only used for accessing resources',
+      kind: 'content-api',
       type: 'read-only',
       lifespan: null,
     },
@@ -34,10 +37,14 @@ const constants = {
       name: 'Full Access',
       description:
         'A default API token with full access permissions, used for accessing or modifying resources',
+      kind: 'content-api',
       type: 'full-access',
       lifespan: null,
     },
-  ] as const,
+  ] satisfies Omit<
+    ContentApiApiToken,
+    'id' | 'createdAt' | 'updatedAt' | 'lastUsedAt' | 'expiresAt' | 'permissions'
+  >[],
   TRANSFER_TOKEN_TYPE: {
     PUSH: 'push',
     PULL: 'pull',

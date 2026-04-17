@@ -16,4 +16,5 @@
 
 export { default as admin } from './admin';
 export { default as dataTransfer } from './data-transfer';
-export { default as apiToken } from './api-token';
+export { default as contentApiToken } from './content-api-token';
+export { default as adminToken } from './admin-token';

@@ -112,6 +112,7 @@ export const server: SetupServer = setupServer(
       return res(
         ctx.json({
           data: {
+            id: 1,
             email: 'michka@michka.fr',
             firstname: 'michoko',
             lastname: 'ronronscelestes',
@@ -171,33 +172,41 @@ export const server: SetupServer = setupServer(
     rest.get('/admin/permissions', (req, res, ctx) => {
       const role = req.url.searchParams.get('role');
 
-      if (role !== '1') {
-        return res(ctx.status(404));
+      const permissionsData = {
+        conditions: [
+          {
+            id: 'admin::is-creator',
+            displayName: 'Is creator',
+            category: 'default',
+          },
+        ],
+        sections: {
+          collectionTypes: {
+            actions: [],
+            subjects: [],
+          },
+          singleTypes: {
+            actions: [],
+            subjects: [],
+          },
+          plugins: [],
+          settings: [
+            {
+              displayName: 'Access the Email Settings page',
+              category: 'email',
+              subCategory: 'general',
+              action: 'plugin::email.settings.read',
+            },
+          ],
+        },
+      };
+
+      // role === '' is used by AdminPermissions (token permission layout, no role scoping)
+      if (role === '1' || role === '') {
+        return res(ctx.json({ data: permissionsData }));
       }
 
-      return res(
-        ctx.json({
-          data: {
-            conditions: [
-              {
-                id: 'admin::is-creator',
-                displayName: 'Is creator',
-                category: 'default',
-              },
-            ],
-            sections: {
-              settings: [
-                {
-                  displayName: 'Access the Email Settings page',
-                  category: 'email',
-                  subCategory: 'general',
-                  action: 'plugin::email.settings.read',
-                },
-              ],
-            },
-          },
-        })
-      );
+      return res(ctx.status(404));
     }),
     /**
      *
@@ -534,6 +543,7 @@ export const server: SetupServer = setupServer(
               id: '1',
               name: 'My super token',
               description: 'This describe my super token',
+              kind: 'content-api',
               type: 'read-only',
               createdAt: '2021-11-15T00:00:00.000Z',
               permissions: [],
@@ -543,18 +553,90 @@ export const server: SetupServer = setupServer(
       );
     }),
     rest.get('/admin/api-tokens/:id', (req, res, ctx) => {
+      const { id } = req.params;
+
+      if (id === '2') {
+        return res(
+          ctx.json({
+            data: {
+              id: '2',
+              name: 'My admin token',
+              description: 'This is an admin token',
+              kind: 'admin',
+              adminPermissions: [],
+              adminUserOwner: {
+                id: 1,
+                firstname: 'John',
+                lastname: 'Doe',
+                email: 'john@example.com',
+              },
+              createdAt: '2021-11-15T00:00:00.000Z',
+            },
+          })
+        );
+      }
+
       return res(
         ctx.json({
           data: {
             id: '1',
             name: 'My super token',
             description: 'This describe my super token',
+            kind: 'content-api',
             type: 'read-only',
             createdAt: '2021-11-15T00:00:00.000Z',
             permissions: [],
           },
         })
       );
+    }),
+    /**
+     * ADMIN TOKENS
+     */
+    rest.get('/admin/admin-tokens', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: [
+            {
+              id: '1',
+              name: 'My admin token',
+              description: 'This is an admin token',
+              kind: 'admin',
+              adminPermissions: [],
+              adminUserOwner: {
+                id: 1,
+                firstname: 'John',
+                lastname: 'Doe',
+                email: 'john@example.com',
+              },
+              createdAt: '2021-11-15T00:00:00.000Z',
+            },
+          ],
+        })
+      );
+    }),
+    rest.get('/admin/admin-tokens/:id', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            id: '1',
+            name: 'My admin token',
+            description: 'This is an admin token',
+            kind: 'admin',
+            adminPermissions: [],
+            adminUserOwner: {
+              id: 1,
+              firstname: 'John',
+              lastname: 'Doe',
+              email: 'john@example.com',
+            },
+            createdAt: '2021-11-15T00:00:00.000Z',
+          },
+        })
+      );
+    }),
+    rest.get('/admin/admin-tokens/:id/owner-permissions', (req, res, ctx) => {
+      return res(ctx.json({ data: [] }));
     }),
     /**
      * Audit Logs

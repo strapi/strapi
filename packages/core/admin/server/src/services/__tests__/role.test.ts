@@ -739,6 +739,7 @@ describe('Role', () => {
             condition: { isValidCondition },
             'content-type': { getPermissionsWithNestedFields },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole: jest.fn() },
           },
         },
         eventHub: {
@@ -775,6 +776,7 @@ describe('Role', () => {
             metrics: { sendDidUpdateRolePermissions },
             permission: { findMany, createMany, actionProvider: { values }, deleteByIds },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole: jest.fn() },
           },
         },
         eventHub: {
@@ -798,12 +800,14 @@ describe('Role', () => {
       const findMany = jest.fn(() => Promise.resolve([]));
       const values = jest.fn(() => permissions.map((perm) => ({ actionId: perm.action })));
       const conditionProviderHas = jest.fn((cond) => cond === 'cond');
+      const syncPermissionsForRole = jest.fn();
 
       global.strapi = {
         admin: {
           services: {
             metrics: { sendDidUpdateRolePermissions },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole },
             permission: {
               findMany,
               createMany,
@@ -871,6 +875,8 @@ describe('Role', () => {
           subject: null,
         },
       ]);
+      expect(syncPermissionsForRole).toHaveBeenCalledTimes(1);
+      expect(syncPermissionsForRole).toHaveBeenCalledWith(1);
     });
 
     test('Filter internal permissions on create', async () => {
@@ -890,12 +896,14 @@ describe('Role', () => {
         { actionId: 'action-internal', section: 'internal' },
       ]);
       const conditionProviderHas = jest.fn((cond) => cond === 'cond');
+      const syncPermissionsForRole = jest.fn();
 
       global.strapi = {
         admin: {
           services: {
             metrics: { sendDidUpdateRolePermissions },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole },
             permission: {
               findMany,
               createMany,
@@ -933,6 +941,8 @@ describe('Role', () => {
           subject: null,
         },
       ]);
+      expect(syncPermissionsForRole).toHaveBeenCalledTimes(1);
+      expect(syncPermissionsForRole).toHaveBeenCalledWith(1);
     });
 
     test('Filter internal permissions on delete', async () => {
@@ -945,6 +955,7 @@ describe('Role', () => {
         Promise.resolve([{ action: 'action-internal', id: 1, properties: {} }])
       );
       const deleteByIds = jest.fn();
+      const syncPermissionsForRole = jest.fn();
       const values = jest.fn(() => [
         { actionId: 'action-0', section: 'plugins' },
         { actionId: 'action-1', section: 'plugins' },
@@ -957,6 +968,7 @@ describe('Role', () => {
           services: {
             metrics: { sendDidUpdateRolePermissions },
             role: { getSuperAdmin },
+            'api-token-admin': { syncPermissionsForRole },
             permission: {
               deleteByIds,
               findMany,

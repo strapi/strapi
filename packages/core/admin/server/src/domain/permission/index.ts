@@ -33,6 +33,7 @@ export const permissionFields = [
   'properties',
   'conditions',
   'role',
+  'apiToken',
 ];
 export const sanitizedPermissionFields = [
   'id',
