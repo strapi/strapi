@@ -25,13 +25,12 @@ const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
 
   const setQuery = useCallback(
     (nextParams: TQuery, method: 'push' | 'remove' = 'push', replace = false) => {
-      let nextQuery = { ...query };
+      let nextQuery: Partial<TQuery> = { ...query };
 
       if (method === 'remove') {
         Object.keys(nextParams).forEach((key) => {
           if (Object.prototype.hasOwnProperty.call(nextQuery, key)) {
-            // @ts-expect-error – this is fine, if you want to fix it, please do.
-            delete nextQuery[key];
+            delete nextQuery[key as keyof TQuery];
           }
         });
       } else {
