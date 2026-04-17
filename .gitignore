@@ -94,6 +94,12 @@ package-lock.json
 *.heapsnapshot
 
 ############################
+# Local environment
+############################
+# Ignore real env files anywhere; tracked templates use other names (e.g. `.env.example`).
+**/.env
+
+############################
 # Tests
 ############################
 
@@ -148,9 +154,6 @@ npm-debug.log
 playwright-report
 tests/e2e/playwright-storage-state.json
 test-results
-tests/e2e/.env
-!tests/cli/data/*.tar.gz
-tests/cli/.env
 
 ############################
 # AI tools

@@ -3,7 +3,7 @@
 const { createStrapi, compileStrapi } = require('@strapi/strapi');
 const path = require('path');
 
-// Expected counts per run (kept small for example seeding in this repo)
+// Expected row counts for the example seed
 const EXPECTED_COUNTS_PER_RUN = {
   basic: 5,
   basicDp: { published: 3, drafts: 2, total: 5 },
@@ -81,6 +81,40 @@ function parseCountResult(countResult) {
   if (countResult['count(*)'] !== undefined) return Number(countResult['count(*)']) || 0;
   const first = Object.values(countResult)[0];
   return Number(first) || 0;
+}
+
+async function validateDocumentIdBackfill(strapi) {
+  const errors = [];
+  const conn = strapi.db.connection;
+
+  for (const meta of strapi.db.metadata.values()) {
+    if (!('documentId' in (meta.attributes || {}))) {
+      continue;
+    }
+
+    const hasTable = await conn.schema.hasTable(meta.tableName);
+    if (!hasTable) {
+      continue;
+    }
+
+    const hasCol = await conn.schema.hasColumn(meta.tableName, 'document_id');
+    if (!hasCol) {
+      errors.push(
+        `${meta.uid} (table ${meta.tableName}): expected document_id column after v5 migration`
+      );
+      continue;
+    }
+
+    const countRes = await conn(meta.tableName).whereNull('document_id').count('* as c');
+    const n = parseCountResult(countRes[0] || countRes);
+    if (n > 0) {
+      errors.push(
+        `${meta.uid} (table ${meta.tableName}): ${n} row(s) still have NULL document_id after migration`
+      );
+    }
+  }
+
+  return { errors };
 }
 
 async function validateCounts(strapi, expected) {
@@ -522,9 +556,22 @@ function areRelationSummariesEqual(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-/**
- * Collect all media (file) ids from an entry recursively (direct media + component/dz media).
- */
+function describeRelationSummaryDiff(publishedSummary, draftSummary) {
+  const keys = new Set([
+    ...Object.keys(publishedSummary || {}),
+    ...Object.keys(draftSummary || {}),
+  ]);
+  const parts = [];
+  for (const k of keys) {
+    const pj = JSON.stringify(publishedSummary?.[k]);
+    const dj = JSON.stringify(draftSummary?.[k]);
+    if (pj !== dj) {
+      parts.push(`${k}: published=${pj} draft=${dj}`);
+    }
+  }
+  return parts.length > 0 ? parts.join(' | ') : 'summaries differ';
+}
+
 function collectMediaIds(value, path = '') {
   const ids = [];
   if (!value) return ids;
@@ -551,9 +598,6 @@ function collectMediaIds(value, path = '') {
   return ids;
 }
 
-/**
- * Bug 1: Ensure draft has same media as published (catches missing files_related_morphs for drafts).
- */
 async function validateMediaParityForDp(strapi) {
   const errors = [];
   const dpUids = [
@@ -593,12 +637,9 @@ async function validateMediaParityForDp(strapi) {
   return { errors };
 }
 
-/**
- * Bug 2: Ensure nested component relations (e.g. reference-list.references[].article) resolve on both draft and published.
- */
 async function validateNestedComponentRelationParity(strapi) {
   const errors = [];
-  // Dynamic zones (sections) only allow populate: '*' — no nested field targeting
+  // Sections/header: populate '*' only (no nested field paths)
   const populate = { sections: { populate: '*' }, header: { populate: '*' } };
   const entries = await strapi.documents('api::relation-dp.relation-dp').findMany({ populate });
   const byDoc = new Map();
@@ -644,12 +685,6 @@ async function validateNestedComponentRelationParity(strapi) {
   return { errors };
 }
 
-/**
- * Optional DB-level verification that the migration fixes are in effect.
- * Runs only when all validations pass. Prints evidence without failing the run.
- * - Bug 1: Morph rows for media: (1) relation-dp direct (none in this seed), (2) component media (e.g. shared.logo) under relation-dp.
- * - Bug 2: Draft and published use distinct nested component IDs for the same document.
- */
 async function verifyMigrationFixAtDbLevel(strapi) {
   const out = [];
   const errors = [];
@@ -657,7 +692,7 @@ async function verifyMigrationFixAtDbLevel(strapi) {
     const conn = strapi.db.connection;
     const meta = strapi.db.metadata;
 
-    // --- Morph table (Bug 1) ---
+    // Upload morph table — relation-dp direct media
     const fileMeta = meta.get('plugin::upload.file');
     const relatedAttr = fileMeta?.attributes?.related;
     const morphJoin = relatedAttr?.joinTable;
@@ -699,16 +734,16 @@ async function verifyMigrationFixAtDbLevel(strapi) {
 
       const morphNote =
         countPub === 0 && countDraft === 0
-          ? ' (relation-dp has no direct media field in this schema)'
+          ? ' (no direct media on relation-dp in this seed)'
           : countPub > 0 && countDraft > 0
-            ? ' (draft has media morph rows; fix verified)'
-            : ' (without fix draft would be 0 when published have media)';
+            ? ' (draft rows present)'
+            : ' (draft count lower than published)';
       out.push(
         `  Morph (relation-dp direct): ${countPub} published, ${countDraft} draft${morphNote}.`
       );
     }
 
-    // --- Morph for component media (Bug 1): shared.logo under relation-dp (header.logo). This actually exercises the migration's component morph copy.
+    // Component media: shared.logo via header under relation-dp
     if (morphJoin?.morphColumn) {
       const morphTable = morphJoin.name;
       const relatedIdCol = morphJoin.morphColumn.idColumn.name;
@@ -726,7 +761,7 @@ async function verifyMigrationFixAtDbLevel(strapi) {
       const cmpTypeCol = rdCmps?.morphColumn?.typeColumn?.name;
       if (!rdCmpsTable || !entityIdCol || !cmpIdCol || !cmpTypeCol) return out;
 
-      // Header component IDs under relation_dp (first-level sections include header)
+      // Header blocks in sections dynamic zone
       const headerType = 'shared.header';
       const headerRows = await conn(rdCmpsTable)
         .where(cmpTypeCol, headerType)
@@ -739,8 +774,7 @@ async function verifyMigrationFixAtDbLevel(strapi) {
         headerIdsByRelDp.get(eid).push(r[cmpIdCol]);
       }
 
-      // Logo component IDs: from header join table (shared.header has headerlogo -> shared.logo).
-      // Component->component uses joinColumn (parent entity_id) and inverseJoinColumn (child cmp_id), not morphColumn.
+      // Logo components linked from shared.header
       let headerLogoJoinTable;
       let headerEntityCol;
       let logoCmpCol;
@@ -809,9 +843,9 @@ async function verifyMigrationFixAtDbLevel(strapi) {
               );
         const logoNote =
           countPubLogo > 0 && countDraftLogo === 0
-            ? ' (BUG: draft would have 0 without migration fix)'
+            ? ' (draft morph rows missing)'
             : countPubLogo > 0 && countDraftLogo > 0
-              ? ' (draft clones have media morph rows; fix verified)'
+              ? ' (draft rows present)'
               : ' (no logo media on relation-dp in this seed)';
         out.push(
           `  Morph (shared.logo under relation-dp): ${countPubLogo} published, ${countDraftLogo} draft${logoNote}.`
@@ -819,7 +853,7 @@ async function verifyMigrationFixAtDbLevel(strapi) {
       }
     }
 
-    // --- Source-side morph (universal fix): relation-dp.morphTargets (morphMany) ---
+    // relation-dp.morphTargets (source-side morph)
     const relationDpMeta = meta.get('api::relation-dp.relation-dp');
     const morphTargetsAttr = relationDpMeta?.attributes?.morphTargets;
     const morphTargetsJoin = morphTargetsAttr?.joinTable;
@@ -844,16 +878,16 @@ async function verifyMigrationFixAtDbLevel(strapi) {
             );
       const note =
         countPub > 0 && countDraft > 0
-          ? ' (source-side morph copied to drafts; universal fix verified)'
+          ? ' (draft rows present)'
           : countPub > 0 && countDraft === 0
-            ? ' (BUG: draft would have 0 without fix)'
+            ? ' (draft morph rows missing)'
             : '';
       out.push(
         `  Morph (relation-dp morphTargets, source-side): ${countPub} published, ${countDraft} draft${note}.`
       );
     }
 
-    // --- Nested component IDs (Bug 2) ---
+    // Dynamic zone: nested component ids per document
     const sectionsAttr = relationDpMeta?.attributes?.sections;
     const dzJoin = sectionsAttr?.joinTable;
     if (
@@ -933,6 +967,65 @@ async function verifyMigrationFixAtDbLevel(strapi) {
   return { lines: out, errors };
 }
 
+async function validateJoinTableSourceParityForDp(strapi, uid) {
+  const errors = [];
+  const contentType = strapi.contentTypes[uid];
+  if (!contentType?.options?.draftAndPublish) return { errors };
+
+  const meta = strapi.db.metadata.get(uid);
+  if (!meta) return { errors };
+
+  const conn = strapi.db.connection;
+  const table = meta.tableName;
+  const localized = Boolean(contentType.pluginOptions?.i18n?.localized);
+
+  const hasTable = await conn.schema.hasTable(table);
+  if (!hasTable) return { errors };
+
+  const selectCols = ['id', 'document_id', 'published_at'];
+  if (localized) selectCols.push('locale');
+
+  const rows = await conn(table).select(selectCols).whereNotNull('document_id');
+  const pairMap = new Map();
+  for (const r of rows) {
+    const key = localized ? `${r.document_id}::${r.locale || ''}` : r.document_id;
+    const bucket = pairMap.get(key) || { pub: null, draft: null };
+    if (r.published_at != null) bucket.pub = r.id;
+    else bucket.draft = r.id;
+    pairMap.set(key, bucket);
+  }
+
+  for (const [attrName, attribute] of Object.entries(meta.attributes || {})) {
+    if (attribute.type !== 'relation' || !attribute.joinTable || attribute.joinTable.morphColumn) {
+      continue;
+    }
+    const jt = attribute.joinTable;
+    if (jt.name.includes('_cmps')) continue;
+
+    const jtName = jt.name;
+    const sourceCol = jt.joinColumn?.name;
+    if (!sourceCol) continue;
+
+    if (!(await conn.schema.hasTable(jtName))) continue;
+
+    for (const [docKey, pair] of pairMap.entries()) {
+      if (pair.pub == null || pair.draft == null) continue;
+
+      const cPub = await conn(jtName).where(sourceCol, pair.pub).count('* as c');
+      const cDraft = await conn(jtName).where(sourceCol, pair.draft).count('* as c');
+      const nPub = parseCountResult(cPub[0] || cPub);
+      const nDraft = parseCountResult(cDraft[0] || cDraft);
+      if (nPub !== nDraft) {
+        errors.push(
+          `${uid} (document ${docKey}) — relation "${attrName}": published row id=${pair.pub} has ${nPub} outgoing row(s) in join table "${jtName}" (column "${sourceCol}"), but draft row id=${pair.draft} has ${nDraft}. After discard-drafts, those counts must match (draft should get copies of published links). A lower draft count means relation rows were not cloned to the draft entry.`
+        );
+      }
+    }
+  }
+
+  return { errors };
+}
+
 async function validateRelationParityForDp(strapi, uid) {
   const errors = [];
   const contentType = strapi.contentTypes[uid];
@@ -962,7 +1055,12 @@ async function validateRelationParityForDp(strapi, uid) {
     const publishedSummary = summarizeRelations(pair.published, relationFields);
     const draftSummary = summarizeRelations(pair.draft, relationFields);
     if (!areRelationSummariesEqual(publishedSummary, draftSummary)) {
-      errors.push(`${uid} ${key}: draft/published relations diverge`);
+      errors.push(
+        `${uid} (document ${key}): draft vs published relation populate mismatch (Document API). ${describeRelationSummaryDiff(
+          publishedSummary,
+          draftSummary
+        )}. Same documentId should yield equivalent related targets for each field.`
+      );
     }
   }
 
@@ -981,13 +1079,17 @@ async function run() {
   const strapi = await createStrapi(appContext).load();
   strapi.log.level = 'error';
 
-  // Log which DB we use (same config as config/database.ts + .env when run from examples/complex)
   const dbConfig = strapi.config.get('database');
   const conn = dbConfig?.connection?.connection || {};
   const client = dbConfig?.connection?.client || '?';
-  const dbDesc = conn.connectionString
-    ? `${client} (from DATABASE_URL)`
-    : `${client} ${conn.host || 'localhost'}:${conn.port ?? (client === 'postgres' ? 5432 : 3306)}/${conn.database || 'strapi'}`;
+  let dbDesc;
+  if (conn.connectionString) {
+    dbDesc = `${client} (from DATABASE_URL)`;
+  } else if (client === 'sqlite' && conn.filename) {
+    dbDesc = `sqlite ${conn.filename}`;
+  } else {
+    dbDesc = `${client} ${conn.host || 'localhost'}:${conn.port ?? (client === 'postgres' ? 5432 : 3306)}/${conn.database || 'strapi'}`;
+  }
   console.log(`  database: ${dbDesc}`);
 
   try {
@@ -998,6 +1100,13 @@ async function run() {
     results.checks.push(...countsResult.checks);
     results.sections.push({ name: 'Counts', errors: countsResult.errors });
 
+    const documentIdBackfill = await validateDocumentIdBackfill(strapi);
+    results.errors.push(...documentIdBackfill.errors);
+    results.sections.push({
+      name: 'document_id backfill',
+      errors: documentIdBackfill.errors,
+    });
+
     const docStruct = await validateDocumentStructure(strapi, expected);
     results.errors.push(...docStruct.errors);
     results.sections.push({ name: 'Draft/publish pairing', errors: docStruct.errors });
@@ -1005,6 +1114,20 @@ async function run() {
     const relPresence = await validateRelationsPresence(strapi);
     results.errors.push(...relPresence.errors);
     results.sections.push({ name: 'Relation targets', errors: relPresence.errors });
+
+    const joinTableParity = await validateJoinTableSourceParityForDp(
+      strapi,
+      'api::relation-dp.relation-dp'
+    );
+    const joinTableParityI18n = await validateJoinTableSourceParityForDp(
+      strapi,
+      'api::relation-dp-i18n.relation-dp-i18n'
+    );
+    results.errors.push(...joinTableParity.errors, ...joinTableParityI18n.errors);
+    results.sections.push({
+      name: 'DP join-table source parity',
+      errors: [...joinTableParity.errors, ...joinTableParityI18n.errors],
+    });
 
     const relationParity = await validateRelationParityForDp(
       strapi,
@@ -1017,7 +1140,7 @@ async function run() {
     );
     results.errors.push(...relationParityI18n.errors);
     results.sections.push({
-      name: 'DP relation parity',
+      name: 'DP relation parity (API)',
       errors: [...relationParity.errors, ...relationParityI18n.errors],
     });
 
@@ -1039,7 +1162,6 @@ async function run() {
       errors: nestedComponentParity.errors,
     });
 
-    // Optional DB-level verification (evidence that migration fixes are in effect)
     const verification = await verifyMigrationFixAtDbLevel(strapi);
     if (verification.errors.length > 0) {
       results.errors.push(...verification.errors);
@@ -1048,7 +1170,6 @@ async function run() {
       results.sections.push({ name: 'DB-level verification', errors: [] });
     }
 
-    // Summarize
     console.log('\n✅ Validation summary:');
     if (results.errors.length === 0) {
       console.log('  All checks passed (no errors)');
@@ -1058,13 +1179,11 @@ async function run() {
       if (results.errors.length > 50) console.log(`   ...and ${results.errors.length - 50} more`);
     }
 
-    // Print detailed checks
     console.log('\n📊 Count checks:');
     for (const c of results.checks) {
       console.log(`  - ${c.type}: actual=${c.actual} expected=${c.expected}`);
     }
 
-    // Print per-section status
     console.log('\n🧪 Validation sections:');
     for (const section of results.sections) {
       const status = section.errors.length === 0 ? 'ok' : `errors=${section.errors.length}`;
@@ -1072,8 +1191,14 @@ async function run() {
     }
 
     if (verification.lines.length > 0) {
-      console.log('\n🔬 DB-level verification (migration fix evidence):');
+      console.log('\n🔬 DB-level verification:');
       for (const line of verification.lines) console.log(line);
+    }
+
+    if (results.errors.length > 0) {
+      console.log(
+        '\nExiting with code 2 (validation failed). Code 1 means this script crashed before finishing.'
+      );
     }
 
     process.exit(results.errors.length === 0 ? 0 : 2);
@@ -1087,7 +1212,6 @@ async function run() {
   }
 }
 
-// Run if invoked directly
 if (require.main === module) {
   run();
 }

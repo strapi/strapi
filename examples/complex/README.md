@@ -187,6 +187,8 @@ This displays a table showing how many records are in each table, useful for qui
    yarn test:migration
    ```
 
+   This includes a **document_id backfill** check (internal migration `5.0.0-02-created-document-id`): every table with a `documentId` attribute, including upload **`files`**, must have no `NULL` `document_id` after migrations. The v4 seed always creates media files so the `files` table is populated before the v4→v5 upgrade.
+
 9. **Test and fix bugs** as needed
 
 10. **Restore snapshot** to reset database:
@@ -198,6 +200,28 @@ yarn db:restore:postgres mybackup
 11. **Repeat from step 7** to test fixes
 
 **Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. The complex example uses its own Compose project name (`strapi_complex`) so it does not collide with other containers.
+
+### Automated migration test (monorepo)
+
+From the **repository root**, after a full `yarn build`:
+
+```bash
+yarn test:migrations:v5
+```
+
+This wipes isolated state under `examples/complex/.migration-v5/`, scaffolds a pinned Strapi v4 app, seeds it, and runs `yarn test:migration` (v5) against the same database. Uses Compose project `strapi_migration_v5` by default so it does not reuse `strapi_complex` containers.
+
+Options:
+
+- `--database postgres` (default) | `mysql` | `sqlite`
+- `--multiplier N` — scale seed and validation expectations
+- `--build` — run `yarn build` first; omit if you already built
+
+Optional env: copy [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example) to `tests/migration/v5/.env` to set ports or `DATABASE_CLIENT`. By default the script picks a **free host port** (preferring 5432 / 3306) so it works alongside another local Postgres; set `POSTGRES_PORT` and `DATABASE_PORT` to the same value to pin a port.
+
+Strapi v4 in the scaffold targets **Node ≤ 20**; use Node 20 if install or seed fails on newer Node.
+
+Use `yarn test:migrations:v5 --database sqlite` (pass flags after the script name; avoid an extra `--` before `--database` or Yarn may not forward options correctly).
 
 ### Snapshots
 

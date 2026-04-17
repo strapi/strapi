@@ -79,6 +79,7 @@ const packageJson = {
     entities: '2.2.0',
     mysql2: '3.20.0',
     pg: '8.20.0',
+    'better-sqlite3': '12.8.0',
     react: '^18.0.0',
     'react-dom': '^18.0.0',
     'react-is': '^18.0.0',
@@ -114,6 +115,8 @@ if (!fs.existsSync(configDir)) {
 // Write database.js
 const databaseConfig = `'use strict';
 
+const path = require('path');
+
 module.exports = ({ env }) => {
   const client = env('DATABASE_CLIENT', 'postgres');
 
@@ -131,6 +134,19 @@ module.exports = ({ env }) => {
             ? { rejectUnauthorized: false }
             : false,
         },
+      },
+    };
+  }
+
+  if (client === 'sqlite') {
+    const filename = env('DATABASE_FILENAME');
+    return {
+      connection: {
+        client: 'sqlite',
+        connection: {
+          filename: filename ? filename : path.join(__dirname, '..', '.tmp', 'data.db'),
+        },
+        useNullAsDefault: true,
       },
     };
   }
