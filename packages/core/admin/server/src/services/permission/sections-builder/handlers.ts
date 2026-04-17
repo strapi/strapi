@@ -103,6 +103,14 @@ const subjectsHandlerFor =
       .map(resolveContentType)
       // Only keep specific kind of content-types
       .filter(isOfKind(kind))
+      // Exclude content types hidden from the content manager (e.g. plugin::users-permissions.role).
+      // Those types are valid explorer.read subjects so that super admin can read relation targets,
+      // but they should not appear as configurable permissions in the roles UI.
+      .filter(
+        (ct) =>
+          (ct?.pluginOptions?.['content-manager'] as { visible?: boolean } | undefined)?.visible !==
+          false
+      )
       // Transform the content-types into section's subjects
       .map(toSubjectTemplate);
 
