@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-import { Duration, intervalToDuration, isPast } from 'date-fns';
+import { Duration, intervalToDuration, isPast, isValid } from 'date-fns';
 import { useIntl } from 'react-intl';
+
+import { Typography } from '@strapi/design-system';
 
 const intervals: Array<keyof Duration> = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'];
 
@@ -33,6 +35,14 @@ interface RelativeTimeProps extends React.ComponentPropsWithoutRef<'time'> {
 const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
   ({ timestamp, customIntervals = [], ...restProps }, forwardedRef) => {
     const { formatRelativeTime, formatDate, formatTime } = useIntl();
+
+    if (!isValid(timestamp)) {
+      return (
+        <Typography variant="omega" textColor="neutral600" {...restProps} ref={forwardedRef}>
+          -
+        </Typography>
+      );
+    }
 
     /**
      * TODO: make this auto-update, like a clock.
