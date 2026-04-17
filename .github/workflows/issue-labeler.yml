@@ -1,0 +1,89 @@
+name: Auto-label New Issues
+
+# Triggers when a new issue is opened and uses Claude to analyze the issue
+# content, then apply appropriate labels from the repository's existing label set.
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Auto-label issue with Claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ISSUE_AUTO_LABELLER }}
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            ISSUE NUMBER: ${{ github.event.issue.number }}
+
+            A new issue has just been opened. Your task is to analyze the issue
+            and apply the appropriate labels according to the Strapi labeling
+            conventions below.
+
+            Steps:
+
+            1. Fetch the issue details:
+               `gh issue view ${{ github.event.issue.number }} --json title,body,author`
+
+            2. List all available labels in this repository:
+               `gh label list --limit 200`
+
+            3. Determine which labels apply based on the labeling conventions.
+
+            4. Apply the labels with:
+               `gh issue edit ${{ github.event.issue.number }} --add-label "label1,label2,..."`
+
+            ## Labeling conventions
+
+            Assume the reporter is on Strapi 5.31.0 or later unless they
+            explicitly state otherwise.
+
+            Every valid issue should receive:
+
+            - **Exactly one `issue:` type** — `issue: bug` is by far the most
+              common; others include things like `issue: feature request`,
+              `issue: question`, `issue: documentation`. Pick the single best fit.
+            - **Exactly one `source:` label** — identifies the affected area of
+              code (e.g. `source: content-manager`, `source: admin`,
+              `source: upload`, `source: i18n`). Infer from the issue content;
+              if the issue spans multiple areas, pick the most central one.
+            - **A `version:` label** — `version: 5` if the reporter mentions
+              v5 or a version >= 5.0.0, `version: 4` if they explicitly mention
+              v4 or a 4.x version. If no version is mentioned, default to
+              `version: 5` (current supported major).
+            - **`status: pending reproduction`** — apply this on any new bug
+              issue by default, since it has not yet been reproduced by a
+              maintainer. Do NOT apply `status: confirmed` — that is a
+              maintainer judgement.
+            - **`scope: relations`** — only if the issue is clearly about the
+              relations initiative. This is currently the only `scope:` label.
+
+            Do NOT apply:
+
+            - `severity: *` labels — these require maintainer judgement.
+            - `status: confirmed` or any other triage status.
+            - Any `priority:` label.
+            - `flag: invalid template` — leave this to the template validation
+              automation; applying it triggers issue closure.
+            - Any label that does not already exist in the repository.
+
+            Additional rules:
+
+            - Only apply labels that already exist. Do not create new labels.
+            - If you cannot confidently determine a `source:` or `issue:` type
+              from the content, apply whatever you CAN determine and skip the
+              rest rather than guessing.
+            - Do not post a comment on the issue. Only apply labels.
+
+          claude_args: |
+            --allowedTools "Bash(gh issue view:*),Bash(gh label list:*),Bash(gh issue edit:*)"
