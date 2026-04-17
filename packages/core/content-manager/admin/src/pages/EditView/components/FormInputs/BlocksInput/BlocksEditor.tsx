@@ -24,6 +24,7 @@ import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
+import { sanitizeBlocks } from './utils/sanitize';
 import { isNonNullable } from './utils/types';
 
 import type { Schema } from '@strapi/types';
@@ -326,7 +327,9 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         <Slate
           editor={editor}
           initialValue={
-            value?.length ? value : [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
+            value?.length
+              ? sanitizeBlocks(value)
+              : [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
           }
           onChange={handleSlateChange}
           key={key}
