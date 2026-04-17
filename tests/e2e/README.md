@@ -11,14 +11,28 @@ E2E tests use Playwright to test Strapi's browser-based functionality. They shar
 
 The main difference is that e2e tests use Playwright for browser automation, while CLI tests use Jest for command-line testing.
 
+### Enterprise (EE) — where to put `STRAPI_LICENSE`
+
+Create **`tests/e2e/.env`** relative to the monorepo root (copy **`tests/e2e/.env.example`**). Set **`STRAPI_LICENSE`** there for local EE runs. The runner loads **only** this file for e2e — **not** `.env` at the repo root.
+
+Authoritative documentation: [`docs/docs/guides/e2e/00-setup.md`](../../docs/docs/guides/e2e/00-setup.md) (command-line options, env vars, CE vs EE).
+
 ## Running the tests
 
-Run `yarn test:e2e` to begin. The command will generate test applications from the shared app-template and run Playwright tests.
+| Command            | Use when                                                                                                                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `yarn test:e2e`    | Default: **auto** — EE in the runner if `STRAPI_LICENSE` is set (e.g. in `tests/e2e/.env`), otherwise CE. (Clears a stray `STRAPI_E2E_EDITION` from your shell for this run.) |
+| `yarn test:e2e:ce` | Always **Community Edition**; `STRAPI_LICENSE` is removed from the runner env so Strapi cannot start as EE.                                                                   |
+| `yarn test:e2e:ee` | **Exits with an error** if `STRAPI_LICENSE` is missing; otherwise **Enterprise** runner mode (Strapi still needs a valid license to boot as EE).                              |
 
-The `-c X` option can be used to limit the number of concurrent test apps, where `X` is the number to be run simultaneously.
+The command generates test applications from the shared app template under `test-apps/e2e/` and runs Playwright per **domain** (top-level folder under `tests/e2e/tests/`).
 
-If any changes are made to the template, or other issues are being encountered, try removing and regenerating the test apps by using `yarn test:e2e:clean` before running the tests.
+**Concurrency (`-c` / `--concurrency`):** caps how many Strapi test apps run at once (`test-apps/e2e/test-app-0`, …). Defaults to the number of domain folders on disk. Domains are executed in **batches** of that size (parallel inside a batch, sequential across batches). Use `-c 1` if you need strictly serial domain runs or simpler logs.
 
-## Additional Documentation
+**Runner vs Playwright args:** options for `tests/scripts/run-tests.js` (`--domains`, `-c`, `-f`, …) go **before** a `--`; everything after `--` is passed to `yarn playwright test` (e.g. a spec path, `--project=chromium`, `--reporter=line`). Use `--reporter=line` in CI or automation so the process exits cleanly (the default HTML reporter can block unattended runs).
 
-See contributor docs in `docs/docs/guides/e2e` for more detailed information about writing and maintaining e2e tests.
+If you change the template or the generated apps get into a bad state, remove and regenerate them with `yarn test:e2e:clean` before running again.
+
+## Additional documentation
+
+See contributor docs in [`docs/docs/guides/e2e/`](../../docs/docs/guides/e2e/) (setup, app template, data transfer, writing tests). Optional backlog: [`docs/docs/guides/e2e/FOLLOW_UP.md`](../../docs/docs/guides/e2e/FOLLOW_UP.md).

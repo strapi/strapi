@@ -20,6 +20,21 @@ interface RestoreConfiguration {
 }
 
 /**
+ * Base URL for the Strapi instance under test (HTTP DTS). **Requires `process.env.PORT`.**
+ * No implicit default here — callers must set it (`yarn test:e2e` does; the manual CLI entry
+ * `importData()` sets `PORT=8000` only when you run `dts-import.ts` directly and omit `PORT`).
+ */
+const getStrapiTestBaseUrl = () => {
+  const port = process.env.PORT?.trim();
+  if (!port) {
+    throw new Error(
+      'getStrapiTestBaseUrl: PORT is not set. Use `yarn test:e2e` (runner sets PORT), or set PORT yourself (e.g. `PORT=8000` for the first e2e test app).'
+    );
+  }
+  return `http://127.0.0.1:${port}`;
+};
+
+/**
  * Reset the DB and import data from a DTS backup
  * This function ensures we keep all admin user's and roles in the DB
  * see: https://docs.strapi.io/developer-docs/latest/developer-resources/data-management.html
@@ -70,7 +85,7 @@ export const resetDatabaseAndImportDataFromPath = async (
 
   try {
     // reset the transfer token to allow the transfer if it's been wiped (that is, not included in previous import data)
-    await fetch(`http://127.0.0.1:${process.env.PORT ?? 1337}/api/config/resettransfertoken`, {
+    await fetch(new URL('/api/config/resettransfertoken', getStrapiTestBaseUrl()), {
       method: 'POST',
     });
   } catch (err) {
@@ -176,6 +191,11 @@ const importData = async () => {
     process.exit(1);
   }
 
+  // Manual CLI only: default to the first e2e test app port so `getStrapiTestBaseUrl` does not guess.
+  if (!process.env.PORT?.trim()) {
+    process.env.PORT = '8000';
+  }
+
   await resetDatabaseAndImportDataFromPath(filePath);
   console.log('Data transfer succeeded');
   process.exit(0);
@@ -216,7 +236,7 @@ const createRemoteDestinationProvider = (
   configuration: RestoreConfiguration
 ) => {
   return createRemoteStrapiDestinationProvider({
-    url: new URL(`http://127.0.0.1:${process.env.PORT ?? 1337}/admin`),
+    url: new URL('/admin', getStrapiTestBaseUrl()),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
     strategy: 'restore',
     restore: {

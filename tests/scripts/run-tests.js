@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const yargs = require('yargs');
 const chalk = require('chalk');
 const dotenv = require('dotenv');
-const execa = require('execa');
+
 const {
   publishYalc,
   setupTestApps,
@@ -62,6 +62,11 @@ yargs
         // Load dotenv for e2e tests
         if (type === 'e2e' && (await pathExists(path.join(testRoot, '.env')))) {
           dotenv.config({ path: path.join(testRoot, '.env') });
+        }
+
+        if (type === 'e2e') {
+          const { applyE2eEditionEnv } = require('../utils/e2e-edition');
+          applyE2eEditionEnv();
         }
 
         // Read domains
@@ -150,6 +155,7 @@ yargs
           setup,
           currentTestApps: currentTestApps.map((appPath) => path.basename(appPath)),
           setupTestEnvironment: type === 'e2e' ? setupTestEnvironment : null,
+          commitE2eBaseline: type === 'e2e',
         });
 
         if (wasSetup) {
@@ -168,167 +174,9 @@ yargs
          * Run the appropriate test runner
          */
         if (type === 'e2e') {
-          // Playwright orchestration: init git and start Strapi once per test app, then run tests for each domain
+          // Git baseline: single commit during `setupTestApps` when apps are generated (`commitE2eBaseline`).
+          // Between tests, `resetFiles` → `git reset --hard` + `git clean -fd` only. No commits here.
           const testAppsToSpawn = testAppPaths.length;
-          const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
-
-          // Initialize git and start Strapi once per test app (not per domain)
-          // Start sequentially to avoid port conflicts with internal services (e.g., Vite on 5173)
-          // eslint-disable-next-line no-plusplus
-          for (let j = 0; j < testAppPaths.length; j++) {
-            const testAppPath = testAppPaths[j];
-            await (async () => {
-              const port = 8000 + j;
-
-              // Store the filesystem state with git so it can be reset between tests
-              console.log(`Initializing git for test app ${j} at ${testAppPath}`);
-
-              // Check if git repo already exists
-              const gitDir = path.join(testAppPath, '.git');
-              const gitExists = await pathExists(gitDir);
-
-              if (!gitExists) {
-                await execa('git', [...gitUser, 'init'], {
-                  stdio: 'inherit',
-                  cwd: testAppPath,
-                });
-              }
-
-              await execa('git', [...gitUser, 'add', '-A', '.'], {
-                stdio: 'inherit',
-                cwd: testAppPath,
-              });
-
-              // Check if there are changes to commit
-              try {
-                await execa('git', [...gitUser, 'diff', '--cached', '--quiet'], {
-                  cwd: testAppPath,
-                });
-                // If exit code is 0, there are no changes, skip commit
-              } catch (err) {
-                // Exit code 1 means there are changes, proceed with commit
-                await execa(
-                  'git',
-                  [...gitUser, '-c', 'commit.gpgsign=false', 'commit', '-m', 'initial commit'],
-                  {
-                    stdio: 'inherit',
-                    cwd: testAppPath,
-                  }
-                );
-              }
-
-              // Start Strapi and wait for it to be ready to generate files
-              console.log(`Starting Strapi for test app ${j} to generate files...`);
-              const strapiProcess = execa('npm', ['run', 'develop'], {
-                cwd: testAppPath,
-                env: {
-                  PORT: port,
-                  STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
-                },
-                detached: true,
-              });
-
-              await new Promise((resolve, reject) => {
-                const startTime = Date.now();
-                const timeout = 160 * 1000;
-                const checkInterval = 1000;
-
-                const checkServer = async () => {
-                  try {
-                    const response = await fetch(`http://127.0.0.1:${port}/_health`);
-                    if (response.ok) {
-                      console.log(`Strapi is ready for test app ${j}, shutting down...`);
-                      if (process.env.CI) {
-                        process.kill(-strapiProcess.pid, 'SIGINT');
-                      } else {
-                        strapiProcess.kill('SIGINT');
-                      }
-                      resolve();
-                      return;
-                    }
-                  } catch (err) {
-                    // Server not ready yet, continue checking
-                  }
-
-                  if (Date.now() - startTime > timeout) {
-                    console.log('Timeout reached, forcing shutdown...');
-                    if (process.env.CI) {
-                      process.kill(-strapiProcess.pid, 'SIGKILL');
-                    } else {
-                      strapiProcess.kill('SIGKILL');
-                    }
-                    reject(new Error('Strapi failed to start within timeout period'));
-                    return;
-                  }
-
-                  setTimeout(checkServer, checkInterval);
-                };
-
-                checkServer();
-
-                strapiProcess.stdout.on('data', (data) => {
-                  console.log(`[stdout] ${data.toString().trim()}`);
-                });
-
-                strapiProcess.stderr.on('data', (data) => {
-                  console.error(`[stderr] ${data.toString().trim()}`);
-                });
-
-                strapiProcess.on('error', (err) => {
-                  console.error(`[Strapi ERROR] Process error:`, err);
-                  reject(err);
-                });
-
-                strapiProcess.on('exit', (code) => {
-                  console.log(`Strapi process exited with code ${code}`);
-                });
-              });
-
-              // Wait for Strapi to fully shut down
-              await new Promise((resolve) => {
-                const checkPort = async () => {
-                  try {
-                    await fetch(`http://127.0.0.1:${port}/_health`);
-                    setTimeout(checkPort, 1000);
-                  } catch (err) {
-                    resolve();
-                  }
-                };
-                checkPort();
-              });
-
-              // Commit the generated files
-              await execa('git', [...gitUser, 'add', '-A', '.'], {
-                stdio: 'inherit',
-                cwd: testAppPath,
-              });
-
-              // Check if there are changes to commit
-              try {
-                await execa('git', [...gitUser, 'diff', '--cached', '--quiet'], {
-                  cwd: testAppPath,
-                });
-                // If exit code is 0, there are no changes, skip commit
-              } catch (err) {
-                // Exit code 1 means there are changes, proceed with commit
-                await execa(
-                  'git',
-                  [
-                    ...gitUser,
-                    '-c',
-                    'commit.gpgsign=false',
-                    'commit',
-                    '-m',
-                    'commit generated files',
-                  ],
-                  {
-                    stdio: 'inherit',
-                    cwd: testAppPath,
-                  }
-                );
-              }
-            })();
-          }
 
           // Now chunk domains and run tests
           const chunkedDomains = selectedDomains.reduce((acc, _, i) => {
@@ -355,38 +203,19 @@ yargs
                   port,
                   appDir: testAppPath,
                   reportFileName: `playwright-${domain}-${port}.xml`,
+                  domain,
                 });
 
+                // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
+                // canonical port is `8000 + j` above — same as baseURL / webServer; helpers read PORT.
                 const configFileTemplate = `
+process.env.PORT = ${JSON.stringify(String(port))};
 const config = ${JSON.stringify(config)}
 
 module.exports = config
                 `;
 
                 await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
-
-                // Add the config file to git so it persists through git clean
-                await execa('git', [...gitUser, 'add', pathToPlaywrightConfig], {
-                  stdio: 'inherit',
-                  cwd: testAppPath,
-                });
-                await execa(
-                  'git',
-                  [
-                    ...gitUser,
-                    '-c',
-                    'commit.gpgsign=false',
-                    'commit',
-                    '-m',
-                    'Add playwright config',
-                  ],
-                  {
-                    stdio: 'inherit',
-                    cwd: testAppPath,
-                  }
-                ).catch(() => {
-                  // Ignore error if there's nothing to commit (file already tracked)
-                });
 
                 console.log(`Running ${domain} e2e tests`);
 

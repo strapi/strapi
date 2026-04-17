@@ -117,6 +117,8 @@ yarn-error.log
 
 coverage
 
+playwright.config.js
+
 ############################
 # Strapi
 ############################

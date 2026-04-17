@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Locator } from '@playwright/test';
+import { test, expect, type Page, type Locator, type Response } from '@playwright/test';
 
 type NavItem = string | [string, string] | Locator | { text: string; exact?: boolean };
 
@@ -106,6 +106,145 @@ export const clickAndWait = async (page: Page, locator: Locator) => {
   await locator.click();
   await page.waitForLoadState('networkidle');
 };
+
+// ---------------------------------------------------------------------------
+// E2E timing / sync (toast vs API, SPA navigations, guided tour)
+//
+// Playwright already waits on locators; these helpers cover **ordering** (toast before API, etc.).
+// See `tests/e2e/LOCAL_E2E.md` (“race synchronization”). Prefer `withContentManagerSave` /
+// `withContentManagerPublish` when you click Save/Publish so the listener is always registered first.
+// ---------------------------------------------------------------------------
+
+/** What to wait for after a Content Manager write (see `waitForContentManagerMutation`). */
+export type ContentManagerWritePhase = 'save' | 'publish';
+
+/**
+ * Wait until the matching Content Manager HTTP response succeeds.
+ *
+ * - **`save`**: draft document PUT to `/content-manager/…/collection-types|single-types/…`
+ * - **`publish`**: POST to `…/actions/publish`
+ *
+ * On fast machines the success toast can appear before the API finishes; list/home queries may stay
+ * stale until this resolves.
+ */
+export const waitForContentManagerMutation = (
+  page: Page,
+  phase: ContentManagerWritePhase
+): Promise<Response> => {
+  if (phase === 'save') {
+    return page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PUT' &&
+        response.url().includes('/content-manager/') &&
+        (response.url().includes('/collection-types/') ||
+          response.url().includes('/single-types/')) &&
+        response.ok()
+    );
+  }
+  return page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/actions/publish') &&
+      response.ok()
+  );
+};
+
+/** Same as `waitForContentManagerMutation(page, 'save')`. */
+export const waitForContentManagerDocumentPut = (page: Page) =>
+  waitForContentManagerMutation(page, 'save');
+
+/** Same as `waitForContentManagerMutation(page, 'publish')`. */
+export const waitForContentManagerPublish = (page: Page) =>
+  waitForContentManagerMutation(page, 'publish');
+
+/**
+ * Registers the save-PUT listener, runs `act` (e.g. click Save), then awaits the PUT. Use this so
+ * you never forget to `await` the listener after the click.
+ */
+export const withContentManagerSave = async (
+  page: Page,
+  act: () => Promise<void>
+): Promise<void> => {
+  const done = waitForContentManagerMutation(page, 'save');
+  await act();
+  await done;
+};
+
+/**
+ * Same as `withContentManagerSave` for the publish POST (pair with `findAndClose(…, 'Published document')`).
+ */
+export const withContentManagerPublish = async (
+  page: Page,
+  act: () => Promise<void>
+): Promise<void> => {
+  const done = waitForContentManagerMutation(page, 'publish');
+  await act();
+  await done;
+};
+
+/**
+ * Navigate to a path in the admin SPA when auth/session may have changed (cookies, localStorage, tokens).
+ *
+ * Uses `waitUntil: 'domcontentloaded'` instead of Playwright’s default `load`: a client-side redirect
+ * to login can overlap a full navigation; waiting for `load` then races (Firefox: `NS_BINDING_ABORTED`).
+ * Subsequent `expect()` calls still wait for the UI.
+ */
+export const gotoAdminPath = async (page: Page, path: string): Promise<void> => {
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
+};
+
+/**
+ * Waits until the homepage guided tour card is rendered (depends on guided-tour-meta and dev mode).
+ * Call before interacting with tour links to avoid racing login / RTK hydration.
+ */
+export const waitForGuidedTourOverviewReady = async (page: Page): Promise<void> => {
+  await expect(page.getByRole('heading', { name: 'Discover your application!' })).toBeVisible();
+};
+
+/**
+ * Clicks "Next" in a guided-tour step (`role="dialog"`).
+ * Tour popovers are often fixed to the viewport edge; Playwright may report the button as visible but
+ * still refuse to click with "outside of the viewport" after scroll (differs from headless CI vs local
+ * window chrome, DPI, or panel height). `force` skips the viewport intersection check while still hitting
+ * the real element.
+ */
+export const clickGuidedTourDialogNext = async (page: Page, dialogAccessibleName: string) => {
+  await page
+    .getByRole('dialog', { name: dialogAccessibleName })
+    .getByRole('button', { name: 'Next' })
+    .click({ force: true });
+};
+
+const STRAPI_GUIDED_TOUR_KEY = 'STRAPI_GUIDED_TOUR';
+
+/**
+ * Wait until the guided tour state in localStorage marks a tour completed.
+ * Use before `page.goto('/admin')` (or any full reload): the UI can show "Done" from React
+ * while `usePersistentState` is still flushing; reloading rehydrates from storage and can
+ * briefly (or persistently) show stale progress if this wait is skipped.
+ */
+export const waitForGuidedTourCompletedInStorage = async (
+  page: Page,
+  tourName: 'strapiCloud' | 'contentTypeBuilder' | 'contentManager' | 'apiTokens'
+): Promise<void> => {
+  await page.waitForFunction(
+    ({ key, name }) => {
+      const raw = localStorage.getItem(key);
+      if (!raw) return false;
+      try {
+        const parsed = JSON.parse(raw) as { tours?: Record<string, { isCompleted?: boolean }> };
+        return parsed.tours?.[name]?.isCompleted === true;
+      } catch {
+        return false;
+      }
+    },
+    { key: STRAPI_GUIDED_TOUR_KEY, name: tourName },
+    { timeout: 15_000 }
+  );
+};
+
+/** @deprecated Renamed to `waitForGuidedTourCompletedInStorage`. */
+export const waitForGuidedTourTourCompletedInStorage = waitForGuidedTourCompletedInStorage;
 
 /**
  * Look for an element containing text, and then click a sibling close button
