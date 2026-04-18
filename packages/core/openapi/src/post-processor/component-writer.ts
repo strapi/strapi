@@ -12,6 +12,11 @@ export class ComponentsWriter implements PostProcessor {
       uri: toComponentsPath,
     }) as OpenAPIV3_1.ComponentsObject;
 
-    output.data.components = { schemas };
+    const existingComponents = output.data.components || {};
+
+    output.data.components = {
+      ...existingComponents,
+      schemas,
+    };
   }
 }

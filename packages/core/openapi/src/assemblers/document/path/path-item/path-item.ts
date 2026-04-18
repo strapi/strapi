@@ -63,7 +63,9 @@ export class PathItemAssembler implements Assembler.Path {
   }
 
   private _formatPath(path: string): string {
-    return path.replace(/:([^/]+)/g, '{$1}');
+    // Convert :id to :documentId for consistency with Strapi's documentId usage
+    const convertedPath = path.replace(/:id(?=\/|$)/g, ':documentId');
+    return convertedPath.replace(/:([^/]+)/g, '{$1}');
   }
 
   private _groupRoutesByPath(routes: Core.Route[]): Record<string, Core.Route[]> {
