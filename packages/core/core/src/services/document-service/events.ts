@@ -24,6 +24,20 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
   const populate = getDeepPopulate(uid, {});
   const model = strapi.getModel(uid);
 
+  /**
+   * Populates, sanitizes, and emits an event for the given entry.
+   *
+   * Population and sanitization are performed within the current
+   * transaction context so the data is always visible.  The actual
+   * event-hub emission is deferred until the transaction commits so
+   * that webhook consumers always see fully committed data.
+   *
+   * Previously, the findOne re-fetch happened inside the onCommit
+   * callback (i.e. after the transaction had committed).  On some
+   * databases the newly-created row was not yet visible to the fresh
+   * connection used by that query, causing publish webhooks to receive
+   * a null entry.  See https://github.com/strapi/strapi/issues/25387
+   */
   const emitEvent = async (eventName: EventName, entry: Modules.Documents.AnyDocument) => {
     // There is no need to populate the entry if it has been deleted
     let populatedEntry = entry;
@@ -39,23 +53,23 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
       populatedEntry
     );
 
-    await strapi.eventHub.emit(eventName, {
-      model: model.modelName,
-      uid: model.uid,
-      entry: sanitizedEntry,
+    /**
+     * Defer the actual emission until the enclosing transaction commits
+     * so that webhook consumers always observe fully committed state.
+     */
+    strapi.db.transaction(({ onCommit }) => {
+      onCommit(() =>
+        strapi.eventHub.emit(eventName, {
+          model: model.modelName,
+          uid: model.uid,
+          entry: sanitizedEntry,
+        })
+      );
     });
   };
 
   return {
-    /**
-     * strapi.db.query might reuse the transaction used in the doc service request,
-     * so this is executed after that transaction is committed.
-     */
-    emitEvent(eventName: EventName, entry: Modules.Documents.AnyDocument) {
-      strapi.db.transaction(({ onCommit }) => {
-        onCommit(() => emitEvent(eventName, entry));
-      });
-    },
+    emitEvent,
   };
 };
 
