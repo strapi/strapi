@@ -163,7 +163,7 @@
     "resolve-from": "5.0.0",
     "semver": "7.5.4",
     "style-loader": "3.3.4",
-    "typescript": "5.4.4",
+    "typescript": "6.0.2",
     "vite": "5.4.21",
     "webpack": "^5.90.3",
     "webpack-bundle-analyzer": "^4.10.1",

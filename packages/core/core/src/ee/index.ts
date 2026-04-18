@@ -256,7 +256,7 @@ const getTrialEndDate = async ({
     );
   });
 
-  const data = await res.json();
+  const data = (await res.json()) as { trialEndsAt: string } | null;
 
   return data;
 };

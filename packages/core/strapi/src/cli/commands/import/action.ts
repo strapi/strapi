@@ -89,14 +89,14 @@ export default async (opts: CmdOptions) => {
     transforms: {
       links: [
         {
-          filter(link) {
+          filter(link: engineDataTransfer.ILink) {
             return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
           },
         },
       ],
       entities: [
         {
-          filter: (entity) => !isIgnoredContentType(entity.type),
+          filter: (entity: engineDataTransfer.IEntity) => !isIgnoredContentType(entity.type),
         },
       ],
     },

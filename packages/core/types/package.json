@@ -71,7 +71,7 @@
     "eslint-config-custom": "5.42.1",
     "lodash": "4.18.1",
     "tsconfig": "5.42.1",
-    "typescript": "5.4.4",
+    "typescript": "6.0.2",
     "undici": "6.25.0"
   },
   "engines": {

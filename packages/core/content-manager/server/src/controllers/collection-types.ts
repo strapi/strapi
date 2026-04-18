@@ -737,7 +737,7 @@ export default {
       }
     }
 
-    const entitiesIds = entities.map((document) => document.documentId);
+    const entitiesIds = entities.map((document: any) => document.documentId);
 
     const { count } = await documentManager.unpublishMany(entitiesIds, model, { locale });
 
@@ -879,7 +879,7 @@ export default {
     }
 
     // We filter out documentsIds that maybe doesn't exist in a specific locale
-    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
+    const localeDocumentsIds = documentLocales.map((document: any) => document.documentId);
 
     const { count } = await documentManager.deleteMany(localeDocumentsIds, model, { locale });
 

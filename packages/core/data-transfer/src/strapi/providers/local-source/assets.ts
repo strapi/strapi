@@ -21,7 +21,7 @@ function getFileStream(
   // fetch the image from remote url and stream it
   strapi
     .fetch(filepath)
-    .then((res: Response) => {
+    .then((res) => {
       if (res.status !== 200) {
         readableStream.emit('error', new Error(`Request failed with status code ${res.status}`));
         return;
@@ -52,7 +52,7 @@ function getFileStats(
   return new Promise((resolve, reject) => {
     strapi
       .fetch(filepath)
-      .then((res: Response) => {
+      .then((res) => {
         if (res.status !== 200) {
           reject(new Error(`Request failed with status code ${res.status}`));
           return;
