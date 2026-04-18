@@ -875,5 +875,8 @@
   "widget.last-edited.single-type": "Tipo singolo",
   "widget.last-edited.no-data": "Nessun elemento modificato",
   "widget.last-published.title": "Ultimi elementi pubblicati",
-  "widget.last-published.no-data": "Nessun elemento pubblicato"
+  "widget.last-published.no-data": "Nessun elemento pubblicato",
+  "HomePage.widget.deploy-now.title": "Pronto per andare in produzione?",
+  "HomePage.widget.deploy-now.description": "Distribuisci il tuo progetto.",
+  "HomePage.widget.deploy-now.button": "Distribuisci ora"
 }
