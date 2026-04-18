@@ -26,4 +26,5 @@ export interface CoreStore {
   get(params: GetParams): Promise<unknown>;
   set(params: SetParams): Promise<void>;
   delete(params: GetParams): Promise<void>;
+  prefill(): Promise<void>;
 }

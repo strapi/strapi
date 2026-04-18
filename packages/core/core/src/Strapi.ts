@@ -34,7 +34,6 @@ import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 import { createContentSourceMapsService } from './services/content-source-maps';
 
-import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
@@ -438,14 +437,29 @@ class Strapi extends Container implements Core.Strapi {
     ];
 
     await this.db.init({ models });
+    await this.store.prefill();
+
+    // Start license check early - it's a network call independent of everything else
+    const licenseCheckPromise = this.EE
+      ? (async () => {
+          const start = Date.now();
+          await utils.ee.checkLicense({ strapi: this });
+          this.log.debug(`License check finished (${Date.now() - start}ms)`);
+        })()
+      : Promise.resolve();
 
     let oldContentTypes;
-    if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
+
+    // Try to read directly instead of checking hasTable first (saves a query)
+    try {
       oldContentTypes = await this.store.get({
         type: 'strapi',
         name: 'content_types',
         key: 'schema',
       });
+    } catch {
+      // Table doesn't exist yet (first run)
+      oldContentTypes = undefined;
     }
 
     await this.hook('strapi::content-types.beforeSync').call({
@@ -453,12 +467,8 @@ class Strapi extends Container implements Core.Strapi {
       contentTypes: this.contentTypes,
     });
 
-    // NOTE: commenting out repair logic for now as it is causing relationship loss in some cases
-    // will revisit soon in the future PR
-
     const status = await this.db.schema.sync();
 
-    // // if schemas have changed, run repairs
     if (status === 'CHANGED') {
       await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
       await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
@@ -478,32 +488,39 @@ class Strapi extends Container implements Core.Strapi {
       });
     }
 
-    if (this.EE) {
-      await utils.ee.checkLicense({ strapi: this });
-    }
+    // Skip afterSync hooks and content type store write when nothing changed
+    const contentTypesChanged =
+      !oldContentTypes || JSON.stringify(oldContentTypes) !== JSON.stringify(this.contentTypes);
 
-    await this.hook('strapi::content-types.afterSync').call({
-      oldContentTypes,
-      contentTypes: this.contentTypes,
-    });
+    // Run afterSync/store.set and server init in parallel
+    await Promise.all([
+      contentTypesChanged
+        ? (async () => {
+            await this.hook('strapi::content-types.afterSync').call({
+              oldContentTypes,
+              contentTypes: this.contentTypes,
+            });
+            await this.store.set({
+              type: 'strapi',
+              name: 'content_types',
+              key: 'schema',
+              value: this.contentTypes,
+            });
+          })()
+        : Promise.resolve(),
+      (async () => {
+        await this.server.initMiddlewares();
+        this.server.initRouting();
+        await this.contentAPI.permissions.registerActions();
+      })(),
+    ]);
 
-    await this.store.set({
-      type: 'strapi',
-      name: 'content_types',
-      key: 'schema',
-      value: this.contentTypes,
-    });
-
-    await this.server.initMiddlewares();
-    this.server.initRouting();
-
-    await this.contentAPI.permissions.registerActions();
+    // Await license check before plugin bootstraps (some plugins may need EE status)
+    await licenseCheckPromise;
 
     await this.runPluginsLifecycles(utils.LIFECYCLES.BOOTSTRAP);
 
-    for (const provider of providers) {
-      await provider.bootstrap?.(this);
-    }
+    await Promise.all(providers.map((provider) => provider.bootstrap?.(this)));
 
     await this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP);
 

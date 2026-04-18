@@ -165,22 +165,25 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const tokenService = getService('token');
 
   await roleService.createRolesIfNoneExist();
-  await roleService.resetSuperAdminPermissions();
-  await roleService.displayWarningIfNoSuperAdmin();
+  // After roles exist, run permission operations and independent checks in parallel
+  await Promise.all([
+    // Permission operations (sequential — both write to permissions table)
+    (async () => {
+      await roleService.resetSuperAdminPermissions();
+      await permissionService.cleanPermissionsInDatabase();
+    })(),
+    // Independent read-only checks and config sync
+    roleService.displayWarningIfNoSuperAdmin(),
+    userService.displayWarningIfUsersDontHaveRole(),
+    syncAuthSettings(),
+    syncAPITokensPermissions(),
+    createDefaultAPITokensIfNeeded(),
+  ]);
 
-  await permissionService.cleanPermissionsInDatabase();
-
-  await userService.displayWarningIfUsersDontHaveRole();
-
-  await syncAuthSettings();
-  await syncAPITokensPermissions();
-
-  await getService('metrics').sendUpdateProjectInformation(strapi);
+  getService('metrics').sendUpdateProjectInformation(strapi);
   getService('metrics').startCron(strapi);
 
   apiTokenService.checkSaltIsDefined();
   transferService.token.checkSaltIsDefined();
   tokenService.checkSecretIsDefined();
-
-  await createDefaultAPITokensIfNeeded();
 };
