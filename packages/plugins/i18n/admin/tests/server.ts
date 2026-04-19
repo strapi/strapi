@@ -66,7 +66,7 @@ export const server = setupServer(
     http.put('/i18n/locales/:id', () => {
       return HttpResponse.json({});
     }),
-    http.delete('/i18n/locales/:id', ({ params }) => {
+    http.delete<{ id: string }>('/i18n/locales/:id', ({ params }) => {
       if (params.id === '1') {
         return HttpResponse.json({});
       }

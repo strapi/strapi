@@ -15,45 +15,51 @@ export const handlers: HttpHandler[] = [
   http.put('/content-manager/content-types/:model/configuration', () => {
     return HttpResponse.json({});
   }),
-  http.get('/content-manager/content-types/:model/configuration', ({ params }) => {
-    const configuration =
-      params.model === 'api::homepage.homepage'
-        ? mockData.contentManager.singleTypeConfiguration
-        : mockData.contentManager.collectionTypeConfiguration;
+  http.get<{ model: string }>(
+    '/content-manager/content-types/:model/configuration',
+    ({ params }) => {
+      const configuration =
+        params.model === 'api::homepage.homepage'
+          ? mockData.contentManager.singleTypeConfiguration
+          : mockData.contentManager.collectionTypeConfiguration;
 
-    return HttpResponse.json({
-      data: configuration,
-    });
-  }),
-  http.get('/content-manager/:collectionType/:uid/:id', ({ params }) => {
-    const { id, collectionType, uid } = params;
-
-    if (id === 'configuration') {
-      return;
-    }
-
-    if (
-      id === '12345' &&
-      collectionType === COLLECTION_TYPES &&
-      uid === mockData.contentManager.contentType
-    ) {
       return HttpResponse.json({
-        data: {
-          documentId: id,
-          id: 1,
-          name: 'Entry 1',
-          createdAt: '',
-          updatedAt: '',
-          publishedAt: '',
-        },
+        data: configuration,
       });
-    } else {
-      return HttpResponse.json(
-        { error: new errors.NotFoundError('Document not found') },
-        { status: 404 }
-      );
     }
-  }),
+  ),
+  http.get<{ collectionType: string; uid: string; id: string }>(
+    '/content-manager/:collectionType/:uid/:id',
+    ({ params }) => {
+      const { id, collectionType, uid } = params;
+
+      if (id === 'configuration') {
+        return;
+      }
+
+      if (
+        id === '12345' &&
+        collectionType === COLLECTION_TYPES &&
+        uid === mockData.contentManager.contentType
+      ) {
+        return HttpResponse.json({
+          data: {
+            documentId: id,
+            id: 1,
+            name: 'Entry 1',
+            createdAt: '',
+            updatedAt: '',
+            publishedAt: '',
+          },
+        });
+      } else {
+        return HttpResponse.json(
+          { error: new errors.NotFoundError('Document not found') },
+          { status: 404 }
+        );
+      }
+    }
+  ),
   http.put<{ collectionType: string; uid: string; id: string }, Record<string, unknown>>(
     '/content-manager/:collectionType/:uid/:id',
     async ({ request, params }) => {
@@ -118,62 +124,71 @@ export const handlers: HttpHandler[] = [
       });
     }
   ),
-  http.post('/content-manager/:collectionType/:uid/:id/actions/discard', ({ params }) => {
-    const { id } = params;
+  http.post<{ collectionType: string; uid: string; id: string }>(
+    '/content-manager/:collectionType/:uid/:id/actions/discard',
+    ({ params }) => {
+      const { id } = params;
 
-    if (id === '12345') {
-      return HttpResponse.json({
-        documentId: id,
-        id: 1,
-        title: 'test',
-      });
+      if (id === '12345') {
+        return HttpResponse.json({
+          documentId: id,
+          id: 1,
+          title: 'test',
+        });
+      }
+
+      return HttpResponse.json(
+        {
+          error: new errors.NotFoundError('Document not found'),
+        },
+        { status: 404 }
+      );
     }
+  ),
+  http.post<{ collectionType: string; uid: string; id: string }>(
+    '/content-manager/:collectionType/:uid/:id/actions/publish',
+    ({ params }) => {
+      const { id } = params;
 
-    return HttpResponse.json(
-      {
-        error: new errors.NotFoundError('Document not found'),
-      },
-      { status: 404 }
-    );
-  }),
-  http.post('/content-manager/:collectionType/:uid/:id/actions/publish', ({ params }) => {
-    const { id } = params;
+      if (id === '12345') {
+        return HttpResponse.json({
+          documentId: id,
+          id: 1,
+          title: 'test',
+          publishedAt: '2024-01-23T16:23:38.948Z',
+        });
+      }
 
-    if (id === '12345') {
-      return HttpResponse.json({
-        documentId: id,
-        id: 1,
-        title: 'test',
-        publishedAt: '2024-01-23T16:23:38.948Z',
-      });
+      return HttpResponse.json(
+        {
+          error: new errors.NotFoundError('Document not found'),
+        },
+        { status: 404 }
+      );
     }
+  ),
+  http.post<{ collectionType: string; uid: string; id: string }>(
+    '/content-manager/:collectionType/:uid/:id/actions/unpublish',
+    ({ params }) => {
+      const { id } = params;
 
-    return HttpResponse.json(
-      {
-        error: new errors.NotFoundError('Document not found'),
-      },
-      { status: 404 }
-    );
-  }),
-  http.post('/content-manager/:collectionType/:uid/:id/actions/unpublish', ({ params }) => {
-    const { id } = params;
+      if (id === '12345') {
+        return HttpResponse.json({
+          documentId: id,
+          id: 1,
+          title: 'test',
+          publishedAt: null,
+        });
+      }
 
-    if (id === '12345') {
-      return HttpResponse.json({
-        documentId: id,
-        id: 1,
-        title: 'test',
-        publishedAt: null,
-      });
+      return HttpResponse.json(
+        {
+          error: new errors.NotFoundError('Document not found'),
+        },
+        { status: 404 }
+      );
     }
-
-    return HttpResponse.json(
-      {
-        error: new errors.NotFoundError('Document not found'),
-      },
-      { status: 404 }
-    );
-  }),
+  ),
   http.post<{ uid: string }, { documentIds: string[] }>(
     '/content-manager/collection-types/:uid/actions/bulkUnpublish',
     async ({ request }) => {
@@ -193,24 +208,27 @@ export const handlers: HttpHandler[] = [
       );
     }
   ),
-  http.delete('/content-manager/:collectionType/:uid/:id', ({ params }) => {
-    const { id } = params;
+  http.delete<{ collectionType: string; uid: string; id: string }>(
+    '/content-manager/:collectionType/:uid/:id',
+    ({ params }) => {
+      const { id } = params;
 
-    if (id === '12345') {
-      return HttpResponse.json({
-        documentId: id,
-        id: 1,
-        title: 'test',
-      });
+      if (id === '12345') {
+        return HttpResponse.json({
+          documentId: id,
+          id: 1,
+          title: 'test',
+        });
+      }
+
+      return HttpResponse.json(
+        {
+          error: new errors.NotFoundError('Document not found'),
+        },
+        { status: 404 }
+      );
     }
-
-    return HttpResponse.json(
-      {
-        error: new errors.NotFoundError('Document not found'),
-      },
-      { status: 404 }
-    );
-  }),
+  ),
   http.post<{ uid: string }, { documentIds: string[] }>(
     '/content-manager/collection-types/:uid/actions/bulkDelete',
     async ({ request }) => {
