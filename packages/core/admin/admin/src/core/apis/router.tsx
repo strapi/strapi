@@ -137,7 +137,7 @@ class Router {
 
   public addMenuLink = (
     link: Omit<MenuItem, 'Component'> & {
-      Component: () => Promise<{ default: React.ComponentType }>;
+      Component?: () => Promise<{ default: React.ComponentType }>;
     }
   ) => {
     invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
@@ -157,11 +157,10 @@ class Router {
     );
 
     if (
-      !link.Component ||
-      (link.Component &&
-        typeof link.Component === 'function' &&
-        // @ts-expect-error – shh
-        link.Component[Symbol.toStringTag] === 'AsyncFunction')
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
       console.warn(
         `
@@ -280,11 +279,10 @@ class Router {
     );
 
     if (
-      !link.Component ||
-      (link.Component &&
-        typeof link.Component === 'function' &&
-        // @ts-expect-error – shh
-        link.Component[Symbol.toStringTag] === 'AsyncFunction')
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
       console.warn(
         `
