@@ -239,7 +239,9 @@ const EditViewPage = () => {
                 </Grid.Item>
                 {isDesktop && (
                   <Grid.Item col={3} direction="column" alignItems="stretch">
-                    <Panels />
+                    <Box position="sticky" top={5} width="100%">
+                      <Panels />
+                    </Box>
                   </Grid.Item>
                 )}
               </Grid.Root>
