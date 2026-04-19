@@ -9657,7 +9657,7 @@ __metadata:
     lodash: "npm:4.18.1"
     node-schedule: "npm:2.1.1"
     tsconfig: "npm:5.42.1"
-    typedoc: "npm:0.25.13"
+    typedoc: "npm:0.25.10"
     typedoc-github-wiki-theme: "npm:1.1.0"
     typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.4.4"
@@ -29503,19 +29503,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc@npm:0.25.13":
-  version: 0.25.13
-  resolution: "typedoc@npm:0.25.13"
+"typedoc@npm:0.25.10":
+  version: 0.25.10
+  resolution: "typedoc@npm:0.25.10"
   dependencies:
     lunr: "npm:^2.3.9"
     marked: "npm:^4.3.0"
     minimatch: "npm:^9.0.3"
     shiki: "npm:^0.14.7"
   peerDependencies:
-    typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x
+    typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x || 5.3.x
   bin:
     typedoc: bin/typedoc
-  checksum: 10c0/13878e6a9fc2b65d65e3b514efa11b43bdfd57149861cefc4a969ec213f4bc4b36ee9239d0b654ae18bcbbd5174206d409383f9000b7bdea22da1945f7ac91de
+  checksum: 10c0/b2a100c35ffcabc4cb356a04bf58e88255840a750fa84a4bbd52d5dd1244d4669cc61bdccf115e4164b0fb343d6bb76f6792e7922d86a642567879a50ca7a05d
   languageName: node
   linkType: hard
 
