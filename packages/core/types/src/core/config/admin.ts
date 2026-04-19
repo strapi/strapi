@@ -66,6 +66,10 @@ export interface ForgotPassword {
   replyTo?: string;
 }
 
+export interface Register {
+  enabled?: boolean;
+}
+
 export interface RateLimit {
   enabled?: boolean;
   interval?: number;
@@ -136,6 +140,7 @@ export interface Admin {
   preview?: Preview;
   ai?: Ai;
   forgotPassword?: ForgotPassword;
+  register?: Register;
   rateLimit?: RateLimit;
   firstPublishedAtField?: FirstPublisedAtField;
   flags?: Flags;

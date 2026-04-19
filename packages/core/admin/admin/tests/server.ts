@@ -3,6 +3,19 @@ import { type SetupServer, setupServer } from 'msw/node';
 
 import { mockData } from './mockData';
 
+export const initOverrides: {
+  hasAdmin: boolean;
+  registerEnabled: boolean;
+} = {
+  hasAdmin: true,
+  registerEnabled: true,
+};
+
+export const resetInitOverrides = () => {
+  initOverrides.hasAdmin = true;
+  initOverrides.registerEnabled = true;
+};
+
 export const server: SetupServer = setupServer(
   ...[
     /**
@@ -207,7 +220,13 @@ export const server: SetupServer = setupServer(
     rest.get('/admin/init', (req, res, ctx) => {
       return res(
         ctx.json({
-          data: {},
+          data: {
+            uuid: 'test-uuid',
+            hasAdmin: initOverrides.hasAdmin,
+            menuLogo: null,
+            authLogo: null,
+            registerEnabled: initOverrides.registerEnabled,
+          },
         })
       );
     }),

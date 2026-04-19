@@ -25,6 +25,7 @@ export declare namespace Init {
       hasAdmin: boolean;
       menuLogo: string | null;
       authLogo: string | null;
+      registerEnabled: boolean;
     };
     error?: errors.ApplicationError;
   }
