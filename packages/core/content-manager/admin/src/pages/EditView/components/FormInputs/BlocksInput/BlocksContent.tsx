@@ -375,7 +375,7 @@ interface BlocksContentProps {
 }
 
 const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
-  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
+  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode, flushPendingFormSync } =
     useBlocksEditorContext('BlocksContent');
   const isMobile = useIsMobile();
   const blocksRef = React.useRef<HTMLDivElement>(null);
@@ -526,8 +526,13 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       return;
     }
 
-    if (selectedBlock.handleTab) {
-      event.preventDefault();
+    event.preventDefault();
+
+    if (event.shiftKey && selectedBlock.handleShiftTab) {
+      // Handle Shift+Tab (unindent)
+      selectedBlock.handleShiftTab(editor);
+    } else if (!event.shiftKey && selectedBlock.handleTab) {
+      // Handle Tab (indent)
       selectedBlock.handleTab(editor);
     }
   };
@@ -621,6 +626,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
+        onBlur={flushPendingFormSync}
         // As we have our own handler to drag and drop the elements returing true will skip slate's own event handler
         onDrop={dragNoop}
         onDragStart={dragNoop}

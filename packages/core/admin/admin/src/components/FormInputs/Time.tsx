@@ -8,6 +8,12 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
+const formatTimeForTimePicker = (value: string | null | undefined): string => {
+  if (!value) return '';
+  const [hours, minutes] = value.split(':');
+  return hours && minutes ? `${hours}:${minutes}` : value;
+};
+
 const TimeInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
@@ -26,7 +32,7 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
             field.onChange(name, `${time}:00.000`);
           }}
           onClear={() => field.onChange(name, null)}
-          value={field.value ?? ''}
+          value={formatTimeForTimePicker(field.value)}
           {...props}
         />
         <Field.Hint />

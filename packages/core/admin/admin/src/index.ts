@@ -68,7 +68,11 @@ export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useDebounce } from './hooks/useDebounce';
 export { useMediaQuery, useIsDesktop, useIsTablet, useIsMobile } from './hooks/useMediaQuery';
 export { useDeviceType } from './hooks/useDeviceType';
-export { usePersistentState, useScopedPersistentState } from './hooks/usePersistentState';
+export {
+  usePersistentState,
+  useScopedPersistentState,
+  usePersistentStateScope,
+} from './hooks/usePersistentState';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
 
@@ -97,6 +101,7 @@ export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
 export * from './utils/rulesEngine';
+export * from './utils/users';
 export * from './services/api';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
 

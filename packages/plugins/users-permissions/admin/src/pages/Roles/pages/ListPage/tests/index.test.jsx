@@ -49,14 +49,21 @@ describe('Roles – ListPage', () => {
   });
 
   it('renders as expected with headers, actions and a table', async () => {
-    const { getByRole, queryByText, getByText } = render();
+    const { getByRole, queryByRole, queryByText, getByText } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
     expect(getByRole('heading', { name: 'Roles' })).toBeInTheDocument();
     expect(getByText('List of roles')).toBeInTheDocument();
     expect(getByRole('link', { name: 'Add new role' })).toBeInTheDocument();
-    expect(getByRole('button', { name: 'Search' })).toBeInTheDocument();
+    // Desktop: SearchInput renders an IconButton. Mobile: SearchInput renders the searchbox directly.
+    const searchButton = queryByRole('button', { name: 'Search' });
+
+    if (searchButton) {
+      expect(searchButton).toBeInTheDocument();
+    } else {
+      expect(getByRole('searchbox', { name: 'Search' })).toBeInTheDocument();
+    }
 
     expect(getByRole('grid')).toBeInTheDocument();
     expect(getByRole('gridcell', { name: 'Authenticated' })).toBeInTheDocument();

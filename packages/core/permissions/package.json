@@ -1,10 +1,15 @@
 {
   "name": "@strapi/permissions",
-  "version": "5.35.0",
+  "version": "5.42.1",
   "description": "Strapi's permission layer.",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/permissions"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -38,15 +43,15 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@casl/ability": "6.5.0",
-    "@strapi/utils": "5.35.0",
-    "lodash": "4.17.21",
-    "qs": "6.14.1",
+    "@casl/ability": "6.7.5",
+    "@strapi/utils": "5.42.1",
+    "lodash": "4.18.1",
+    "qs": "6.15.0",
     "sift": "16.0.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.35.0",
-    "tsconfig": "5.35.0"
+    "eslint-config-custom": "5.42.1",
+    "tsconfig": "5.42.1"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
