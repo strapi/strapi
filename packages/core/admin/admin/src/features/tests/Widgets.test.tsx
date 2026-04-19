@@ -1,6 +1,6 @@
 import { server } from '@tests/server';
 import { waitFor, renderHook, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import {
   calculateWidgetRows,
@@ -118,8 +118,8 @@ describe('useWidgets', () => {
 
     // Setup MSW handlers
     server.use(
-      rest.put('/admin/homepage/layout', (req, res, ctx) => {
-        return res(ctx.json({ success: true }));
+      http.put('/admin/homepage/layout', () => {
+        return HttpResponse.json({ success: true });
       })
     );
   });
@@ -343,8 +343,8 @@ describe('useWidgets', () => {
     it('should handle API errors gracefully', async () => {
       // Mock API error
       server.use(
-        rest.put('/admin/homepage/layout', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: { message: 'Server error' } }));
+        http.put('/admin/homepage/layout', () => {
+          return HttpResponse.json({ error: { message: 'Server error' } }, { status: 500 });
         })
       );
 
@@ -366,8 +366,8 @@ describe('useWidgets', () => {
     it('should handle network errors gracefully', async () => {
       // Mock network error
       server.use(
-        rest.put('/admin/homepage/layout', (req, res, _ctx) => {
-          return res.networkError('Network error');
+        http.put('/admin/homepage/layout', () => {
+          return HttpResponse.error();
         })
       );
 

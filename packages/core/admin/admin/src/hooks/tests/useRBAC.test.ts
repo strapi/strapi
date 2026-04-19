@@ -1,5 +1,5 @@
 import { renderHook, server, waitFor } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { useRBAC } from '../useRBAC';
 
@@ -115,9 +115,7 @@ describe('useRBAC', () => {
     });
 
     it("should return falsey values if the permissions condition doesn't pass", async () => {
-      server.use(
-        rest.post('/admin/permissions/check', (req, res, ctx) => res(ctx.json({ data: [false] })))
-      );
+      server.use(http.post('/admin/permissions/check', () => HttpResponse.json({ data: [false] })));
 
       const { result } = renderHook(
         () => {
@@ -157,18 +155,18 @@ describe('useRBAC', () => {
 
     it('should check all the conditions and return their values in order', async () => {
       server.use(
-        rest.post('/admin/permissions/check', async (req, res, ctx) => {
-          const { permissions } = await req.json();
+        http.post<never, { permissions: Array<{ action: string }> }>(
+          '/admin/permissions/check',
+          async ({ request }) => {
+            const body = await request.json();
 
-          return res(
-            ctx.json({
-              // @ts-expect-error – shhh
-              data: permissions.map(({ action }) =>
+            return HttpResponse.json({
+              data: body.permissions.map(({ action }) =>
                 action === 'admin::roles.create' ? false : true
               ),
-            })
-          );
-        })
+            });
+          }
+        )
       );
 
       const { result } = renderHook(
