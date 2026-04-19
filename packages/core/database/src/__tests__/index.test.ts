@@ -1,5 +1,7 @@
 import knex from 'knex';
 import { Database, DatabaseConfig } from '../index';
+import createQueryBuilder from '../query/query-builder';
+import type { Model } from '../types';
 
 // create an in-memory db connection to test
 jest.mock('../connection', () => ({
@@ -41,6 +43,7 @@ jest.mock('../dialects', () => ({
   getDialect: jest.fn(() => ({
     configure: jest.fn(),
     initialize: jest.fn(),
+    useReturning: () => false,
   })),
 }));
 
@@ -199,5 +202,84 @@ describe('Database', () => {
         await db.destroy();
       });
     });
+  });
+});
+
+const articleModelForPaginationTests: Model = {
+  uid: 'api::article.article',
+  singularName: 'article',
+  tableName: 'articles',
+  attributes: {
+    id: { type: 'integer' },
+    title: { type: 'string' },
+  },
+};
+
+const paginationQueryBuilderConfig: DatabaseConfig = {
+  connection: {
+    client: 'sqlite',
+    connection: { filename: ':memory:' },
+    useNullAsDefault: true,
+  },
+  settings: { migrations: { dir: 'migrations' } },
+};
+
+describe('Query builder pagination order stability (GH #26030)', () => {
+  let db: Database;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'debug').mockImplementation(() => {});
+
+    db = new Database(paginationQueryBuilderConfig);
+    await db.init({ models: [articleModelForPaginationTests] });
+  });
+
+  it('appends primary key ASC to ORDER BY when using LIMIT/OFFSET without deep sort', () => {
+    const qb = createQueryBuilder(articleModelForPaginationTests.uid, db)
+      .init({
+        limit: 10,
+        offset: 20,
+        orderBy: { title: 'asc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+
+    expect(lower).toContain('order by');
+    expect(lower).toContain('`t0`.`id` asc');
+  });
+
+  it('appends primary key when there is no user order (empty orderBy)', () => {
+    const qb = createQueryBuilder(articleModelForPaginationTests.uid, db)
+      .init({
+        limit: 10,
+        offset: 0,
+        orderBy: [],
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+
+    expect(lower).toContain('order by');
+    expect(lower).toContain('`t0`.`id` asc');
+  });
+
+  it('does not duplicate id when orderBy already ends with id', () => {
+    const qb = createQueryBuilder(articleModelForPaginationTests.uid, db)
+      .init({
+        limit: 5,
+        offset: 0,
+        orderBy: { id: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const idAscMatches = sql.match(/`t0`\.`id` asc/gi) ?? [];
+    expect(idAscMatches.length).toBeLessThanOrEqual(1);
   });
 });

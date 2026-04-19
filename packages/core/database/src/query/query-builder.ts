@@ -109,6 +109,8 @@ export interface QueryBuilder {
 
   processState(): void;
 
+  ensurePaginationOrderStability(): void;
+
   shouldUseDistinct(): boolean;
 
   shouldUseDeepSort(): boolean;
@@ -447,9 +449,48 @@ const createQueryBuilder = (
 
       state.data = helpers.toRow(meta, state.data);
 
+      this.ensurePaginationOrderStability();
+
       this.processSelect();
 
       this.state.processed = true;
+    },
+
+    /**
+     * OFFSET/LIMIT without a unique ORDER BY is undefined behavior on SQL databases (notably MySQL).
+     * That can repeat or skip rows across pages. Deep sort already appends a primary-key tie-breaker;
+     * for all other paginated selects, append id ASC when it is not already the last sort key.
+     */
+    ensurePaginationOrderStability() {
+      if (state.type !== 'select' || state.first) {
+        return;
+      }
+
+      if (state.limit === null && state.offset === null) {
+        return;
+      }
+
+      if (state.limit === -1) {
+        return;
+      }
+
+      if (this.shouldUseDeepSort()) {
+        return;
+      }
+
+      if (!meta.attributes.id) {
+        return;
+      }
+
+      const idColumnName = helpers.toColumnName(meta, 'id');
+      const aliasedId = this.aliasColumn(idColumnName);
+      const lastOrder = state.orderBy[state.orderBy.length - 1];
+
+      if (lastOrder && lastOrder.column === aliasedId) {
+        return;
+      }
+
+      state.orderBy = [...state.orderBy, { column: aliasedId, order: 'asc' }];
     },
 
     shouldUseDistinct() {
