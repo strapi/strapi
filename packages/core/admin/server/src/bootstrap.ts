@@ -111,7 +111,12 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_SESSION_LIFESPAN;
 
   // Warn if using deprecated legacy expiresIn for new session settings
-  const hasLegacyExpires = options?.expiresIn != null;
+  // Read the raw user config (not the merged defaults) to avoid false positives
+  const userAuthOptions = strapi.config.get<Core.Config.Admin['auth']>(
+    'admin.auth',
+    {} as Core.Config.Admin['auth']
+  )?.options;
+  const hasLegacyExpires = userAuthOptions?.expiresIn != null;
   const hasNewMaxRefresh = strapi.config.get('admin.auth.sessions.maxRefreshTokenLifespan') != null;
   const hasNewMaxSession = strapi.config.get('admin.auth.sessions.maxSessionLifespan') != null;
 
