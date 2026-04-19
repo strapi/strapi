@@ -1,7 +1,11 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "5.31.3",
+  "version": "5.42.1",
   "description": "Strapi maintained Custom Fields",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/strapi/strapi.git",
@@ -57,18 +61,18 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.1",
-    "@strapi/icons": "2.0.1",
+    "@strapi/design-system": "2.2.0",
+    "@strapi/icons": "2.2.0",
     "react-colorful": "5.6.1",
     "react-intl": "6.6.2"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.31.3",
+    "@strapi/strapi": "5.42.1",
     "@testing-library/react": "16.3.0",
     "@testing-library/user-event": "14.6.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.22.3",
+    "react-router-dom": "6.30.3",
     "styled-components": "6.1.8",
     "typescript": "5.4.4"
   },
@@ -76,7 +80,7 @@
     "@strapi/strapi": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^6.0.0",
+    "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
   },
   "engines": {

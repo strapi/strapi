@@ -2,13 +2,14 @@ import * as React from 'react';
 
 import { Typography } from '@strapi/design-system';
 import { BulletList, NumberList } from '@strapi/icons';
-import { type Text, Editor, Node, Transforms, Path } from 'slate';
+import { Schema } from '@strapi/types';
+import { type Text, Editor, Node, Transforms, Path, Element } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled, type CSSProperties, css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
-import { isListNode, type Block } from '../utils/types';
+import { type Block } from '../utils/types';
 
 const listStyle = css`
   display: flex;
@@ -41,6 +42,10 @@ const Unorderedlist = styled.ul<{ $listStyleType: CSSProperties['listStyleType']
 
 const orderedStyles = ['decimal', 'lower-alpha', 'upper-roman'];
 const unorderedStyles = ['disc', 'circle', 'square'];
+
+const isListNode = (element: Element): element is Schema.Attribute.ListBlockNode => {
+  return element.type === 'list';
+};
 
 const List = ({ attributes, children, element }: RenderElementProps) => {
   if (!isListNode(element)) {
@@ -323,35 +328,111 @@ const handleTabOnList = (editor: Editor) => {
   }
 };
 
+/**
+ * Common handler for the shift+tab key on ordered and unordered lists (un-indentation)
+ */
+
+const hasChildren = (node: any): node is { children: unknown[] } => {
+  return typeof node === 'object' && node !== null && 'children' in node;
+};
+
+const handleShiftTabOnList = (editor: Editor) => {
+  const currentListItemEntry = Editor.above(editor, {
+    match: (node) => !Editor.isEditor(node) && 'type' in node && node.type === 'list-item',
+  });
+
+  if (!currentListItemEntry || !editor.selection) {
+    return;
+  }
+
+  const [, currentListItemPath] = currentListItemEntry;
+
+  const [currentList] = Editor.parent(editor, currentListItemPath);
+
+  if (
+    !Editor.isEditor(currentList) &&
+    hasChildren(currentList) &&
+    (currentList as any).type === 'list'
+  ) {
+    const parentListPath = Path.parent(currentListItemPath);
+
+    const [parentList] = Editor.parent(editor, parentListPath);
+
+    // Case 1: The parent of the current list is the editor itself.
+    if (Editor.isEditor(parentList)) {
+      // Lift the list item to the top level of the editor's children.
+      Transforms.liftNodes(editor, {
+        at: currentListItemPath,
+        match: (node) => !Editor.isEditor(node) && 'type' in node && node.type === 'list-item',
+      });
+      // Change the type of the newly lifted node from 'list-item' to 'paragraph'.
+      Transforms.setNodes(editor, { type: 'paragraph' });
+      return;
+    }
+
+    // Case 2: The parent of the current list is another list.
+    if (hasChildren(parentList) && (parentList as any).type === 'list') {
+      Transforms.liftNodes(editor, {
+        at: currentListItemPath,
+        match: (node) => !Editor.isEditor(node) && 'type' in node && node.type === 'list-item',
+      });
+
+      try {
+        const [remainingList, remainingListPath] = Editor.node(editor, parentListPath);
+
+        if (
+          hasChildren(remainingList) &&
+          (remainingList as any).type === 'list' &&
+          remainingList.children.length === 0
+        ) {
+          Transforms.removeNodes(editor, { at: remainingListPath });
+        }
+      } catch (error) {
+        // The path might no longer exist if the structure changed, which is fine
+      }
+    }
+  }
+};
+
+// All that's in common between ordered and unordered list blocks
+const baseListBlock = {
+  renderElement: (props) => <List {...props} />,
+  isInBlocksSelector: true,
+  handleEnterKey: handleEnterKeyOnList,
+  handleBackspaceKey: handleBackspaceKeyOnList,
+  handleTab: handleTabOnList,
+  isDraggable: (element) => {
+    if (!isListNode(element)) {
+      throw Error();
+    }
+    const indentLevel = element.indentLevel ?? 0;
+    return indentLevel === 0;
+  },
+} satisfies Partial<BlocksStore['list-ordered' | 'list-unordered']>;
+
 const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-item'> = {
   'list-ordered': {
-    renderElement: (props) => <List {...props} />,
+    ...baseListBlock,
     label: {
       id: 'components.Blocks.blocks.orderedList',
       defaultMessage: 'Numbered list',
     },
     icon: NumberList,
     matchNode: (node) => node.type === 'list' && node.format === 'ordered',
-    isInBlocksSelector: true,
     handleConvert: (editor) => handleConvertToList(editor, 'ordered'),
-    handleEnterKey: handleEnterKeyOnList,
-    handleBackspaceKey: handleBackspaceKeyOnList,
-    handleTab: handleTabOnList,
+    handleShiftTab: handleShiftTabOnList,
     snippets: ['1.'],
   },
   'list-unordered': {
-    renderElement: (props) => <List {...props} />,
+    ...baseListBlock,
     label: {
       id: 'components.Blocks.blocks.unorderedList',
       defaultMessage: 'Bulleted list',
     },
     icon: BulletList,
     matchNode: (node) => node.type === 'list' && node.format === 'unordered',
-    isInBlocksSelector: true,
     handleConvert: (editor) => handleConvertToList(editor, 'unordered'),
-    handleEnterKey: handleEnterKeyOnList,
-    handleBackspaceKey: handleBackspaceKeyOnList,
-    handleTab: handleTabOnList,
+    handleShiftTab: handleShiftTabOnList,
     snippets: ['-', '*', '+'],
   },
   'list-item': {
@@ -364,6 +445,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     matchNode: (node) => node.type === 'list-item',
     isInBlocksSelector: false,
     dragHandleTopMargin: '-2px',
+    isDraggable: () => false,
   },
 };
 

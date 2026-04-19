@@ -177,6 +177,7 @@ export const RolesListPage = () => {
               onClick={() => trackUsage('willCreateRole')}
               startIcon={<Plus />}
               size="S"
+              fullWidth
             >
               {formatMessage({
                 id: getTrad('List.button.roles'),

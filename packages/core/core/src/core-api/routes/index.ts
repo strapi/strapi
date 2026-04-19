@@ -143,12 +143,25 @@ const getCollectionTypeRoutes = (
   };
 };
 
+/**
+ * Query params that are conditionally part of this route's contract (and OpenAPI spec)
+ * based on the content type: e.g. locale only for localized types, status only for draft & publish.
+ *
+ * This is separate from the runtime allowlist used when api.rest.strictParams is on
+ * (ALLOWED_QUERY_PARAM_KEYS + registerQueryParam in @strapi/utils). That allowlist is global
+ * (locale and status are always allowed); validate/sanitize then pass them through and the
+ * document service or i18n layer ignores them when not applicable.
+ *
+ * So the two can differ: a non-localized route will not declare "locale" here (OpenAPI says
+ * no locale param), but the runtime allowlist still allows the key and downstream ignores it.
+ * That is intentional: this drives the route contract/docs; the allowlist drives enforcement.
+ */
 const getConditionalQueryParams = (schema: Schema.ContentType) => {
   const isLocalized = strapi.plugin('i18n').service('content-types').isLocalizedContentType(schema);
   const hasDraftAndPublish = contentTypes.hasDraftAndPublish(schema);
 
   return [
     ...(isLocalized ? ['locale'] : []),
-    ...(hasDraftAndPublish ? ['status'] : []),
+    ...(hasDraftAndPublish ? ['status', 'hasPublishedVersion'] : []),
   ] as QueryParam[];
 };

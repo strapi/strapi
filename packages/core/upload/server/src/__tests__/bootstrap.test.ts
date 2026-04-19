@@ -36,6 +36,13 @@ describe('Upload plugin bootstrap function', () => {
       admin: {
         services: { permission: { actionProvider: { registerMany } } },
       },
+      ai: {
+        admin: {
+          isEnabled() {
+            return false;
+          },
+        },
+      },
       log: {
         error() {},
       },
@@ -53,6 +60,9 @@ describe('Upload plugin bootstrap function', () => {
               sendUploadPluginMetrics() {},
             },
             weeklyMetrics: {
+              registerCron() {},
+            },
+            aiMetadataJobs: {
               registerCron() {},
             },
             extensions: {

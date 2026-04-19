@@ -1,5 +1,5 @@
 import type { AwsCredentialIdentity } from '@aws-sdk/types';
-import type { InitOptions } from '.';
+import type { DefaultOptions, InitOptions } from '.';
 
 const ENDPOINT_PATTERN = /^(.+\.)?s3[.-]([a-z0-9-]+)\./;
 
@@ -9,25 +9,23 @@ interface BucketInfo {
 }
 
 export function isUrlFromBucket(fileUrl: string, bucketName: string, baseUrl = ''): boolean {
-  const url = new URL(fileUrl);
+  try {
+    const url = new URL(fileUrl);
 
-  // Check if the file URL is using a base URL (e.g. a CDN).
-  // In this case do not sign the URL.
-  if (baseUrl) {
+    if (baseUrl) {
+      return false;
+    }
+
+    const { bucket } = getBucketFromAwsUrl(fileUrl);
+
+    if (bucket) {
+      return bucket === bucketName;
+    }
+
+    return url.host.startsWith(`${bucketName}.`) || url.pathname.includes(`/${bucketName}/`);
+  } catch {
     return false;
   }
-
-  const { bucket } = getBucketFromAwsUrl(fileUrl);
-
-  if (bucket) {
-    return bucket === bucketName;
-  }
-
-  // File URL might be of an S3-compatible provider. (or an invalid URL)
-  // In this case, check if the bucket name appears in the URL host or path.
-  // e.g. https://minio.example.com/bucket-name/object-key
-  // e.g. https://bucket.nyc3.digitaloceanspaces.com/folder/img.png
-  return url.host.startsWith(`${bucketName}.`) || url.pathname.includes(`/${bucketName}/`);
 }
 
 /**
@@ -89,11 +87,31 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
 }
 
 export const extractCredentials = (options: InitOptions): AwsCredentialIdentity | null => {
-  if (options.s3Options?.credentials) {
+  const s3Options = (options as { s3Options?: DefaultOptions }).s3Options;
+
+  if (s3Options?.credentials) {
     return {
-      accessKeyId: options.s3Options.credentials.accessKeyId,
-      secretAccessKey: options.s3Options.credentials.secretAccessKey,
+      accessKeyId: s3Options.credentials.accessKeyId,
+      secretAccessKey: s3Options.credentials.secretAccessKey,
+      ...(s3Options.credentials.sessionToken
+        ? { sessionToken: s3Options.credentials.sessionToken }
+        : {}),
     };
   }
+
+  // Support root-level accessKeyId/secretAccessKey in s3Options for backwards
+  // compatibility. AWS SDK v3 requires these inside a `credentials` object;
+  // passing them at the top level silently fails (Access Denied).
+  if (s3Options?.accessKeyId && s3Options?.secretAccessKey) {
+    console.warn(
+      "[upload-aws-s3] Passing 'accessKeyId' and 'secretAccessKey' directly in s3Options is deprecated. " +
+        "Please wrap them in a 'credentials' object: s3Options: { credentials: { accessKeyId, secretAccessKey } }."
+    );
+    return {
+      accessKeyId: s3Options.accessKeyId,
+      secretAccessKey: s3Options.secretAccessKey,
+    };
+  }
+
   return null;
 };

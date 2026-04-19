@@ -4,7 +4,9 @@ import { IntlProvider } from 'react-intl';
 
 import { EmptyOrNoPermissions } from '../EmptyOrNoPermissions';
 
-const setup = (props: object) =>
+import type { EmptyOrNoPermissionsProps } from '../EmptyOrNoPermissions';
+
+const setup = (props: Partial<EmptyOrNoPermissionsProps>) =>
   render(
     <DesignSystemProvider>
       <IntlProvider locale="en" messages={{}}>

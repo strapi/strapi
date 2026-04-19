@@ -54,20 +54,10 @@ Strapi Community Edition is a free and open-source headless CMS enabling you to 
 
 ### ⏳ Installation
 
-Install Strapi with this **Quickstart** command to create a Strapi project instantly:
-
-- (Use **yarn** to install the Strapi project (recommended). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
+Use the **Quickstart** command below to create a new Strapi project instantly:
 
 ```bash
-yarn create strapi
-```
-
-**or**
-
-- (Using npx to install the Strapi project.)
-
-```bash
-npx create-strapi@latest
+npx create-strapi@latest my-project
 ```
 
 This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
@@ -156,9 +146,8 @@ Check out our [roadmap](https://feedback.strapi.io) to get informed of the lates
 
 See our dedicated [repository](https://github.com/strapi/documentation) for the Strapi documentation, or view our documentation live:
 
-- [Developer docs](https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html)
-- [User guide](https://docs.strapi.io/user-docs/latest/getting-started/introduction.html)
-- [Cloud guide](https://docs.strapi.io/cloud/intro)
+- [CMS docs](https://docs.strapi.io/cms/intro)
+- [Cloud docs](https://docs.strapi.io/cloud/intro)
 
 ## Try live demo
 

@@ -57,6 +57,7 @@ const renderAdmin = async (
       nps: false,
       promoteEE: true,
     },
+    // @ts-expect-error – there's pollution from the global scope of Node.
     ai: {
       enabled: true,
     },
@@ -90,7 +91,7 @@ const renderAdmin = async (
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
     };
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
-    window.strapi.aiLicenseKey = process.env.STRAPI_ADMIN_AI_API_KEY;
+    // @ts-expect-error – there's pollution from the global scope of Node.
     window.strapi.ai = ai;
   } catch (err) {
     /**

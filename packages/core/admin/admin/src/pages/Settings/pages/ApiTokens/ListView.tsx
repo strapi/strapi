@@ -161,6 +161,7 @@ export const ListView = () => {
                 })
               }
               to="/settings/api-tokens/create"
+              fullWidth
             >
               {formatMessage({
                 id: 'Settings.apiTokens.create',

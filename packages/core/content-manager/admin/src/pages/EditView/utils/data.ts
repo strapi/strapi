@@ -27,6 +27,33 @@ type AnyData = Omit<Document, 'id'>;
 const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
 
 /**
+ * @internal
+ * @description Returns the direct parent object for a dot-separated path.
+ */
+const getDirectParent = (data: unknown, path: string): unknown => {
+  if (!path) return undefined;
+  const isNumericIndex = (value: string) => /^\d+$/.test(value);
+  const segments = path.split('.');
+  const parentPath = segments.slice(0, -1);
+  let current: unknown = data;
+
+  for (const segment of parentPath) {
+    if (current == null) return undefined;
+
+    if (isNumericIndex(segment)) {
+      if (!Array.isArray(current)) return undefined;
+      current = current[Number(segment)];
+      continue;
+    }
+
+    if (typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+
+  return current;
+};
+
+/**
  * @internal This function is used to traverse the data and transform the values.
  * Given a predicate function, it will transform the value (using the given transform function)
  * if the predicate returns true. If it finds that the attribute is a component or dynamiczone,
@@ -35,7 +62,7 @@ const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
  * It is possible to break the ContentManager by using this function incorrectly, for example,
  * if you transform a number into a string but the attribute type is a number, the ContentManager
  * will not be able to save the data and the Form will likely crash because the component it's
- * passing the data too won't succesfully be able to handle the value.
+ * passing the data too won't successfully be able to handle the value.
  */
 const traverseData =
   (predicate: Predicate, transform: Transform) =>
@@ -492,5 +519,6 @@ export {
   removeFieldsThatDontExistOnSchema,
   transformDocument,
   handleInvisibleAttributes,
+  getDirectParent,
 };
 export type { AnyData };

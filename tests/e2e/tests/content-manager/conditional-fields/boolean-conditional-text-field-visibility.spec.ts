@@ -6,7 +6,7 @@ import { navToHeader } from '../../../../utils/shared';
 
 test.describe('Conditional Fields - Boolean-controlled conditional text fields', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
 

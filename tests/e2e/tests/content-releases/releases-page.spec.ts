@@ -16,7 +16,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await sharedSetup('history-spec', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       resetAlways: true, // NOTE: this makes tests extremely slow, but it's necessary to ensure isolation between tests
     });
   });

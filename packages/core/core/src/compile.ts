@@ -11,9 +11,14 @@ export default async function compile(options?: Options) {
   const outDir = await tsUtils.resolveOutDir(appDir);
 
   if (isTSProject) {
-    await tsUtils.compile(appDir, {
-      configOptions: { options: { incremental: true }, ignoreDiagnostics },
-    });
+    try {
+      await tsUtils.compile(appDir, {
+        configOptions: { options: { incremental: true }, ignoreDiagnostics },
+      });
+    } catch (err: unknown) {
+      // we exit here to maintain the same behavior as before.
+      process.exit(1);
+    }
   }
 
   const distDir = isTSProject ? outDir : appDir;

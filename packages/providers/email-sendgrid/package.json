@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendgrid",
-  "version": "5.31.3",
+  "version": "5.42.1",
   "description": "Sendgrid provider for strapi email",
   "keywords": [
     "email",
@@ -13,7 +13,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/email-sendgrid"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -45,11 +46,11 @@
   },
   "dependencies": {
     "@sendgrid/mail": "8.1.3",
-    "@strapi/utils": "5.31.3"
+    "@strapi/utils": "5.42.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.31.3",
-    "tsconfig": "5.31.3"
+    "eslint-config-custom": "5.42.1",
+    "tsconfig": "5.42.1"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

@@ -3,7 +3,12 @@ import { MessageDescriptor } from 'react-intl';
 
 import { previewScript } from './previewScript';
 
-const scriptResponse = previewScript(false);
+export const PREVIEW_HIGHLIGHT_COLORS = {
+  highlightHoverColor: 'transparent',
+  highlightActiveColor: 'transparent',
+} as const;
+
+const scriptResponse = previewScript({ shouldRun: false, colors: PREVIEW_HIGHLIGHT_COLORS });
 
 /**
  * These events can be changed safely. They're used by the content manager admin on one side, and by

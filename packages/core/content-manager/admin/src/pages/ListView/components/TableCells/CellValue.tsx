@@ -5,12 +5,13 @@ import { useIntl } from 'react-intl';
 import type { Schema } from '@strapi/types';
 
 interface CellValueProps {
+  isIdColumn?: boolean;
   type: Schema.Attribute.Kind | 'custom';
   value: any;
 }
 
-const CellValue = ({ type, value }: CellValueProps) => {
-  const { formatDate, formatTime, formatNumber } = useIntl();
+const CellValue = ({ isIdColumn = false, type, value }: CellValueProps) => {
+  const { formatDate, formatTime, formatNumber, formatMessage } = useIntl();
   let formattedValue = value;
 
   if (type === 'date') {
@@ -41,8 +42,17 @@ const CellValue = ({ type, value }: CellValueProps) => {
     });
   }
 
+  if (type === 'boolean') {
+    formattedValue = formatMessage({
+      id: value
+        ? 'app.components.ToggleCheckbox.on-label'
+        : 'app.components.ToggleCheckbox.off-label',
+      defaultMessage: value ? 'true' : 'false',
+    });
+  }
+
   if (['integer', 'biginteger'].includes(type)) {
-    formattedValue = formatNumber(value, { maximumFractionDigits: 0 });
+    formattedValue = formatNumber(value, { maximumFractionDigits: 0, useGrouping: !isIdColumn });
   }
 
   return toString(formattedValue);
