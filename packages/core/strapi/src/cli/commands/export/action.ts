@@ -14,7 +14,7 @@ import {
 import {
   getDefaultExportName,
   buildTransferTable,
-  DEFAULT_IGNORED_CONTENT_TYPES,
+  isIgnoredContentType,
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
@@ -83,17 +83,14 @@ export default async (opts: CmdOptions) => {
       links: [
         {
           filter(link) {
-            return (
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
-            );
+            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
           },
         },
       ],
       entities: [
         {
           filter(entity) {
-            return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+            return !isIgnoredContentType(entity.type);
           },
         },
       ],
