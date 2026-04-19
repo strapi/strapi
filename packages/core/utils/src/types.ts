@@ -94,16 +94,51 @@ declare module 'koa' {
   }
 
   interface ExtendableContext {
-    ok: (response?: string | object, details?: object) => Koa.Context;
-    created: (response?: string | object, details?: object) => Koa.Context;
-    noContent: (response?: string | object, details?: object) => Koa.Context;
-    badRequest: (response?: string | object, details?: object) => Koa.Context;
-    unauthorized: (response?: string | object, details?: object) => Koa.Context;
-    forbidden: (response?: string | object, details?: object) => Koa.Context;
-    notFound: (response?: string | object, details?: object) => Koa.Context;
-    locked: (response?: string | object, details?: object) => Koa.Context;
-    internalServerError: (response?: string | object, details?: object) => Koa.Context;
-    notImplemented: (response?: string | object, data?: Record<string, unknown>) => Koa.Context;
+    /* 400 */ badRequest(response?: string | object, details?: object): void;
+    /* 401 */ unauthorized(response?: string | object, details?: object): void;
+    /* 402 */ paymentRequired(response?: string | object, details?: object): void;
+    /* 403 */ forbidden(response?: string | object, details?: object): void;
+    /* 404 */ notFound(response?: string | object, details?: object): void;
+    /* 405 */ methodNotAllowed(response?: string | object, details?: object): void;
+    /* 406 */ notAcceptable(response?: string | object, details?: object): void;
+    /* 407 */ proxyAuthenticationRequired(response?: string | object, details?: object): void;
+    /* 408 */ requestTimeout(response?: string | object, details?: object): void;
+    /* 409 */ conflict(response?: string | object, details?: object): void;
+    /* 410 */ gone(response?: string | object, details?: object): void;
+    /* 411 */ lengthRequired(response?: string | object, details?: object): void;
+    /* 412 */ preconditionFailed(response?: string | object, details?: object): void;
+    /* 413 */ payloadTooLarge(response?: string | object, details?: object): void;
+    /* 414 */ uriTooLong(response?: string | object, details?: object): void;
+    /* 415 */ unsupportedMediaType(response?: string | object, details?: object): void;
+    /* 416 */ rangeNotSatisfiable(response?: string | object, details?: object): void;
+    /* 417 */ expectationFailed(response?: string | object, details?: object): void;
+    /* 418 */ imATeapot(response?: string | object, details?: object): void;
+    /* 421 */ misdirectedRequest(response?: string | object, details?: object): void;
+    /* 422 */ unprocessableEntity(response?: string | object, details?: object): void;
+    /* 423 */ locked(response?: string | object, details?: object): void;
+    /* 424 */ failedDependency(response?: string | object, details?: object): void;
+    /* 425 */ tooEarly(response?: string | object, details?: object): void;
+    /* 426 */ upgradeRequired(response?: string | object, details?: object): void;
+    /* 428 */ preconditionRequired(response?: string | object, details?: object): void;
+    /* 429 */ tooManyRequests(response?: string | object, details?: object): void;
+    /* 431 */ requestHeaderFieldsTooLarge(response?: string | object, details?: object): void;
+    /* 451 */ unavailableForLegalReasons(response?: string | object, details?: object): void;
+    /* 500 */ internalServerError(response?: string | object, details?: object): void;
+    /* 501 */ notImplemented(response?: string | object, details?: object): void;
+    /* 502 */ badGateway(response?: string | object, details?: object): void;
+    /* 503 */ serviceUnavailable(response?: string | object, details?: object): void;
+    /* 504 */ gatewayTimeout(response?: string | object, details?: object): void;
+    /* 505 */ httpVersionNotSupported(response?: string | object, details?: object): void;
+    /* 506 */ variantAlsoNegotiates(response?: string | object, details?: object): void;
+    /* 507 */ insufficientStorage(response?: string | object, details?: object): void;
+    /* 508 */ loopDetected(response?: string | object, details?: object): void;
+    /* 509 */ bandwidthLimitExceeded(response?: string | object, details?: object): void;
+    /* 510 */ notExtended(response?: string | object, details?: object): void;
+    /* 511 */ networkAuthenticationRequired(response?: string | object, details?: object): void;
+
+    /* 200 */ send(response: unknown, status?: number): void;
+    /* 201 */ created(response?: unknown): void;
+    /* 204 | 200 */ deleted(response?: unknown): void;
   }
 }
 
