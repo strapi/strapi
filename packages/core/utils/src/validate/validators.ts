@@ -267,6 +267,23 @@ export const validatePopulate = asyncCurry(
               'media',
             ].includes(attribute.type);
 
+            const isMorphLikeAttribute =
+              attribute.type === 'dynamiczone' ||
+              (attribute.type === 'relation' &&
+                typeof attribute.relation === 'string' &&
+                ['morphToOne', 'morphToMany'].includes(attribute.relation));
+
+            if (isMorphLikeAttribute && isObject(value) && 'populate' in value) {
+              const populateValue = (value as Record<string, unknown>).populate;
+
+              const isValidPopulate =
+                populateValue === '*' || (isObject(populateValue) && !Array.isArray(populateValue));
+
+              if (!isValidPopulate) {
+                throwInvalidKey({ key: 'populate', path: path.raw });
+              }
+            }
+
             // Throw on non-populate attributes
             if (!isPopulatableAttribute) {
               throwInvalidKey({ key, path: path.raw });
@@ -372,6 +389,23 @@ export const validatePopulate = asyncCurry(
 
           // Handle recursive nested `populate` validation with the same include object
           if (key === 'populate') {
+            const isPolymorphicAttribute =
+              attribute?.type === 'dynamiczone' ||
+              (attribute?.type === 'relation' &&
+                typeof attribute.relation === 'string' &&
+                ['morphToOne', 'morphToMany'].includes(attribute.relation));
+
+            if (isPolymorphicAttribute) {
+              const isValidPopulate =
+                value === '*' ||
+                value === undefined ||
+                value === null ||
+                (isObject(value) && !Array.isArray(value));
+
+              if (!isValidPopulate) {
+                throwInvalidKey({ key, path: path.raw });
+              }
+            }
             set(
               key,
               await validatePopulate(

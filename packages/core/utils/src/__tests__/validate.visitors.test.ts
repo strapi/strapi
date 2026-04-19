@@ -254,6 +254,106 @@ describe('Validate visitors util', () => {
         ValidationError
       );
     });
+
+    test('throws ValidationError for invalid populate in polymorphic structures (dynamic zone)', async () => {
+      const dynamicZoneModel: any = {
+        uid: 'api::article.article',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+        options: {},
+        attributes: {
+          id: { type: 'integer' },
+          contentBlocks: {
+            type: 'dynamiczone',
+            components: ['default.component'],
+          },
+        },
+      };
+
+      const componentModel = {
+        uid: 'default.component',
+        modelType: 'component',
+        info: { singularName: 'component', pluralName: 'components' },
+        options: {},
+        attributes: {
+          title: { type: 'string' },
+        },
+      };
+
+      const models = {
+        'api::article.article': dynamicZoneModel,
+        'default.component': componentModel,
+      };
+
+      const getModelMock = (uid: string) => models[uid];
+
+      const ctxDynamic: any = {
+        schema: dynamicZoneModel,
+        getModel: getModelMock,
+      };
+
+      const invalidPopulate = {
+        contentBlocks: {
+          populate: 'deep',
+        },
+      };
+
+      await expect(validators.defaultValidatePopulate(ctxDynamic, invalidPopulate)).rejects.toThrow(
+        ValidationError
+      );
+    });
+
+    test('throws ValidationError for invalid populate in polymorphic structures (morphTo relation without on)', async () => {
+      const morphTargetModel: any = {
+        uid: 'api::target.target',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: { singularName: 'target', pluralName: 'targets', displayName: 'Target' },
+        options: {},
+        attributes: {
+          id: { type: 'integer' },
+        },
+      };
+
+      const morphHostModel: any = {
+        uid: 'api::host.host',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: { singularName: 'host', pluralName: 'hosts', displayName: 'Host' },
+        options: {},
+        attributes: {
+          id: { type: 'integer' },
+          morphLink: {
+            type: 'relation',
+            relation: 'morphToOne',
+            target: 'api::target.target',
+          },
+        },
+      };
+
+      const models = {
+        'api::host.host': morphHostModel,
+        'api::target.target': morphTargetModel,
+      };
+
+      const getModelMock = (uid: string) => models[uid];
+
+      const ctxMorph: any = {
+        schema: morphHostModel,
+        getModel: getModelMock,
+      };
+
+      const invalidPopulate = {
+        morphLink: {
+          populate: 'deep',
+        },
+      };
+
+      await expect(validators.defaultValidatePopulate(ctxMorph, invalidPopulate)).rejects.toThrow(
+        ValidationError
+      );
+    });
   });
 
   describe('throwRestrictedRelations', () => {
