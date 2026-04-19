@@ -2,6 +2,7 @@ import pagination from './pagination';
 import buildResponseCollectionMeta from './response-collection-meta';
 import buildDeleteMutationResponse from './delete-mutation-response';
 import publicationStatus from './publication-status';
+import publicationFilter from './publication-filter';
 import filters from './filters';
 import error from './error';
 import type { Context } from '../../types';
@@ -21,6 +22,7 @@ export default (context: Context) => () => {
 
     [KINDS.enum]: {
       publicationStatus: publicationStatus(context),
+      publicationFilter: publicationFilter(context),
     },
 
     [KINDS.filtersInput]: {

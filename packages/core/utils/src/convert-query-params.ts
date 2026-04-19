@@ -80,9 +80,18 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
+  publicationFilter?:
+    | 'never-published'
+    | 'has-published-version'
+    | 'modified'
+    | 'unmodified'
+    | 'never-published-document'
+    | 'has-published-version-document'
+    | 'published-without-draft'
+    | 'published-with-draft';
   /**
-   * Filter documents by whether they have a published version.
-   * Use with `status: 'draft'` to find documents that have never been published.
+   * @deprecated Replaced by `publicationFilter` (`never-published`, `has-published-version`, …).
+   * Retained for backward compatibility with existing REST and GraphQL clients.
    */
   hasPublishedVersion?: boolean | 'true' | 'false';
 }

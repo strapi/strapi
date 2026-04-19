@@ -41,17 +41,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // builders/resolvers/association.ts + rootQueryArgs). Omitting them broke draft/published
       // control for populated relations (e.g. github.com/strapi/strapi/issues/25746).
       //
-      // Future direction: add `status` / `hasPublishedVersion` to GraphQL args on nested
+      // Future direction: add `status` / `hasPublishedVersion` / `publicationFilter` to GraphQL args on nested
       // to-many (and to-one) relation fields when the *target* content type has D&P, instead
       // of relying on root-level “context” that is easy to misread (args on User affecting
       // Articles). That would allow different publication settings per relation branch, match
       // how developers think about the graph, and let non-DP roots drop these args if desired.
       // Would require extending getContentTypeArgs(..., { isNested: true }) for D&P targets
-      // and teaching association.ts to honor args.hasPublishedVersion on nested fields, not
+      // and teaching association.ts to honor args.publicationFilter on nested fields, not
       // only root inheritance.
       const publicationArgs = {
         status: args.PublicationStatusArg,
+        // Deprecated: prefer `publicationFilter` (enum cohorts).
         hasPublishedVersion: args.HasPublishedVersionArg,
+        publicationFilter: args.PublicationFilterArg,
       };
 
       // Collection Types

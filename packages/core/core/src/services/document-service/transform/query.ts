@@ -1,25 +1,50 @@
 import type { UID } from '@strapi/types';
 
-import { curry, assoc } from 'lodash/fp';
-import { parseHasPublishedVersion, getHasPublishedVersionCondition } from '../draft-and-publish';
+import { curry, assoc, omit } from 'lodash/fp';
+import {
+  parseHasPublishedVersionQueryParam,
+  hasPublishedVersionBooleanToPublicationFilterMode,
+  type PublicationFilterMode,
+} from '@strapi/utils';
+
+import { parsePublicationFilter, getPublicationFilterCondition } from '../publication-filter';
 
 import { pickAllowedQueryParams } from '../params';
 
 const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
-  const allowlisted = pickAllowedQueryParams(params ?? {});
+  const rawParams = (params ?? {}) as Record<string, unknown>;
+  const allowlisted = pickAllowedQueryParams(rawParams);
   const query = strapi.get('query-params').transform(uid, allowlisted);
 
-  // Parse and validate hasPublishedVersion if provided (from allowlisted params only)
-  const hasPublishedVersion = parseHasPublishedVersion(allowlisted?.hasPublishedVersion);
+  const explicitPublicationFilter = parsePublicationFilter(allowlisted.publicationFilter);
+  const legacyHasPublishedVersion = parseHasPublishedVersionQueryParam(
+    rawParams.hasPublishedVersion
+  );
 
-  // If hasPublishedVersion is set, wrap the existing filters function to also
-  // apply the hasPublishedVersion condition. This ensures the condition is
-  // applied to both root and nested (populate) queries.
-  if (hasPublishedVersion !== undefined) {
+  let effectivePublicationFilter: PublicationFilterMode | undefined = explicitPublicationFilter;
+  if (effectivePublicationFilter === undefined && legacyHasPublishedVersion !== undefined) {
+    effectivePublicationFilter =
+      hasPublishedVersionBooleanToPublicationFilterMode(legacyHasPublishedVersion);
+  }
+
+  const status: 'draft' | 'published' = allowlisted.status === 'published' ? 'published' : 'draft';
+
+  const baseWhere = { ...params?.lookup, ...query.where };
+
+  // `transformQueryParams` leaves `publicationFilter` / `hasPublishedVersion` on the query object
+  // via `...rest`; the DB layer must not receive them as extra top-level keys.
+  const stripPublicationParamsFromQuery = omit([
+    'publicationFilter',
+    'hasPublishedVersion',
+  ] as const);
+
+  // Publication filtering must go through `query.filters`, not only `where`, so the same
+  // cohort logic applies to nested populate queries (each sub-query uses `meta.uid`).
+  // Merging into `where` alone breaks populate cascade — see has-published-version API tests.
+  if (effectivePublicationFilter !== undefined) {
     const existingFilters = query.filters;
 
-    query.filters = ({ meta, ...rest }: { meta: { uid: UID.Schema } }) => {
-      // Get the existing filters result (from status param)
+    const wrappedFilters = ({ meta, ...rest }: { meta: { uid: UID.Schema } }) => {
       let existingResult = {};
       if (typeof existingFilters === 'function') {
         existingResult = existingFilters({ meta, ...rest }) || {};
@@ -27,12 +52,14 @@ const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
         existingResult = existingFilters;
       }
 
-      // Get the hasPublishedVersion condition for this specific model
-      const hasPublishedCondition = getHasPublishedVersionCondition(meta.uid, hasPublishedVersion);
+      const publicationCondition = getPublicationFilterCondition(
+        meta.uid,
+        effectivePublicationFilter,
+        status
+      );
 
-      // Merge both conditions
-      if (hasPublishedCondition) {
-        const conditions = [existingResult, hasPublishedCondition].filter(
+      if (publicationCondition && Object.keys(publicationCondition).length > 0) {
+        const conditions = [existingResult, publicationCondition].filter(
           (c) => Object.keys(c).length
         );
         return { $and: conditions };
@@ -40,9 +67,17 @@ const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
 
       return existingResult;
     };
+
+    const queryWithoutPublicationParams = stripPublicationParamsFromQuery(query);
+
+    return assoc(
+      'where',
+      baseWhere,
+      assoc('filters', wrappedFilters, queryWithoutPublicationParams)
+    );
   }
 
-  return assoc('where', { ...params?.lookup, ...query.where }, query);
+  return assoc('where', baseWhere, stripPublicationParamsFromQuery(query));
 });
 
 export { transformParamsToQuery };

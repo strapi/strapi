@@ -1,6 +1,13 @@
 import { isNil, omit } from 'lodash/fp';
 
-import { setCreatorFields, async, contentTypes, errors } from '@strapi/utils';
+import {
+  setCreatorFields,
+  async,
+  contentTypes,
+  errors,
+  parseHasPublishedVersionQueryParam,
+  hasPublishedVersionBooleanToPublicationFilterMode,
+} from '@strapi/utils';
 import type { Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
@@ -68,14 +75,14 @@ const getDocumentIdsByDraftPublishRelation = async (
 
 /** Map from __status filter value to top-level query fields (mirrors client STATUS_PARAMS). */
 const STATUS_QUERY_FROM_FILTER: Record<string, Record<string, string>> = {
-  draft: { status: 'draft', hasPublishedVersion: 'false' },
+  draft: { status: 'draft', publicationFilter: 'never-published-document' },
   published: { status: 'published' },
   'published-modified': { publicationStatusFilter: 'published-modified' },
   'published-unmodified': { publicationStatusFilter: 'published-unmodified' },
 };
 
 /**
- * Extracts __status from query.filters.$and into top-level status, hasPublishedVersion,
+ * Extracts __status from query.filters.$and into top-level status, publicationFilter,
  * and publicationStatusFilter so list works with either transformed params or raw filter params.
  */
 const normalizeStatusFromFilters = (query: Record<string, unknown>): void => {
@@ -283,9 +290,14 @@ export default {
       status,
     };
 
-    // Pass through hasPublishedVersion so "Draft" filter returns only drafts with no published version
-    if (query.hasPublishedVersion !== undefined) {
-      findPageParams.hasPublishedVersion = query.hasPublishedVersion;
+    if (query.publicationFilter !== undefined) {
+      findPageParams.publicationFilter = query.publicationFilter;
+    } else {
+      const legacy = parseHasPublishedVersionQueryParam(query.hasPublishedVersion);
+      if (legacy !== undefined) {
+        findPageParams.publicationFilter =
+          hasPublishedVersionBooleanToPublicationFilterMode(legacy);
+      }
     }
 
     if (

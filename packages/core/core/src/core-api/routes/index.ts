@@ -162,6 +162,13 @@ const getConditionalQueryParams = (schema: Schema.ContentType) => {
 
   return [
     ...(isLocalized ? ['locale'] : []),
-    ...(hasDraftAndPublish ? ['status', 'hasPublishedVersion'] : []),
+    ...(hasDraftAndPublish
+      ? [
+          'status',
+          'publicationFilter',
+          // Deprecated: replaced by `publicationFilter`; kept for OpenAPI/clients still using the boolean.
+          'hasPublishedVersion',
+        ]
+      : []),
   ] as QueryParam[];
 };
