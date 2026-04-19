@@ -1,6 +1,7 @@
 export interface FeaturesConfig {
   future?: {
     unstableMediaLibrary?: boolean;
+    unstableContentTypeBuilderIndexing?: boolean;
   };
 }
 

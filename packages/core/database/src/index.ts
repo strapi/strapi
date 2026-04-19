@@ -163,6 +163,14 @@ class Database {
     return !!transactionCtx.get();
   }
 
+  /**
+   * Returns the current transaction if the caller is running inside a transaction callback.
+   * Use this to run ad-hoc queries (e.g. on non-entity tables) in the same transaction.
+   */
+  getTransaction(): Knex.Transaction | undefined {
+    return transactionCtx.get() ?? undefined;
+  }
+
   transaction(): Promise<TransactionObject>;
   transaction<TCallback extends Callback>(c: TCallback): Promise<ReturnType<TCallback>>;
   async transaction<TCallback extends Callback>(

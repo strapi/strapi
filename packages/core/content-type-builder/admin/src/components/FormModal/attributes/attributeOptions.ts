@@ -90,4 +90,16 @@ export const attributeOptions = {
         "You won't be able to create an entry if there is an existing entry with identical content",
     },
   },
+  indexed: {
+    name: 'indexed',
+    type: 'checkbox',
+    intlLabel: {
+      id: getTrad('form.attribute.item.indexed'),
+      defaultMessage: 'Add database index',
+    },
+    description: {
+      id: getTrad('form.attribute.item.indexed.description'),
+      defaultMessage: 'Creates a database index on this column to speed up queries.',
+    },
+  },
 };

@@ -8,6 +8,71 @@ import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
 
+const enforceUniqueAttributesForUniqueIndexes = (contentType: any) => {
+  if (!Array.isArray(contentType?.indexes) || !Array.isArray(contentType?.attributes)) {
+    return;
+  }
+
+  const uniqueIndexedAttributes = new Set(
+    contentType.indexes
+      .filter((index: any) => index?.type === 'unique')
+      .flatMap((index: any) => {
+        if (!Array.isArray(index?.attributes) || index.attributes.length !== 1) {
+          return [];
+        }
+
+        return [index.attributes[0]];
+      })
+  );
+
+  if (uniqueIndexedAttributes.size === 0) {
+    return;
+  }
+
+  contentType.attributes.forEach((attribute: any) => {
+    if (
+      attribute?.action !== 'delete' &&
+      uniqueIndexedAttributes.has(attribute?.name) &&
+      attribute?.properties
+    ) {
+      attribute.properties.unique = true;
+    }
+  });
+};
+
+const dedupeManagedSingleAttributeIndexes = (contentType: any) => {
+  if (!Array.isArray(contentType?.indexes)) {
+    return;
+  }
+
+  const seen = new Set<string>();
+
+  contentType.indexes = contentType.indexes.filter((index: any) => {
+    const hasLegacyColumns = Array.isArray(index?.columns) && index.columns.length > 0;
+    const hasSingleAttribute =
+      Array.isArray(index?.attributes) &&
+      index.attributes.length === 1 &&
+      typeof index.attributes[0] === 'string';
+
+    // Preserve legacy and multi-attribute indexes exactly as-is.
+    if (hasLegacyColumns || !hasSingleAttribute) {
+      return true;
+    }
+
+    const attribute = index.attributes[0];
+    const type = index?.type ?? 'index';
+    const scope = index?.scope ?? 'global';
+    const signature = `${attribute}::${type}::${scope}`;
+
+    if (seen.has(signature)) {
+      return false;
+    }
+
+    seen.add(signature);
+    return true;
+  });
+};
+
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
   schema.components.forEach((component) => {
     if (component.action === 'delete') {
@@ -113,6 +178,7 @@ export const getSchema = async () => {
       info,
       modelType,
       attributes: formatAttributes(contentType),
+      indexes: (contentType as any).indexes,
       visible: isContentTypeVisible(contentType),
       restrictRelationsTo: getRestrictRelationsTo(contentType),
     };
@@ -171,6 +237,11 @@ export const updateSchema = async (schema: CTBSchema) => {
 
   for (const contentType of contentTypes) {
     const { action, uid } = contentType;
+
+    if (action === 'create' || action === 'update') {
+      dedupeManagedSingleAttributeIndexes(contentType);
+      enforceUniqueAttributesForUniqueIndexes(contentType);
+    }
 
     if (action === 'create') {
       builder.createContentTypeAttributes(
