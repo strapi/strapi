@@ -1,8 +1,11 @@
-export default ({ env }) => {
+import type { Core } from '@strapi/strapi';
+
+const databaseConfig = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database => {
   const client = env('DATABASE_CLIENT', 'postgres');
 
-  const connections = {
+  const connections: Record<string, Core.Config.Database['connection']> = {
     mysql: {
+      client: 'mysql',
       connection: {
         host: env('DATABASE_HOST', 'localhost'),
         port: env.int('DATABASE_PORT', 3306),
@@ -21,6 +24,7 @@ export default ({ env }) => {
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
     postgres: {
+      client: 'postgres',
       connection: {
         connectionString: env('DATABASE_URL'),
         host: env('DATABASE_HOST', 'localhost'),
@@ -48,9 +52,10 @@ export default ({ env }) => {
 
   return {
     connection: {
-      client,
       ...connections[client],
       acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
     },
   };
 };
+
+export default databaseConfig;

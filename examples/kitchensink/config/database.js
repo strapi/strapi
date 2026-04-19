@@ -1,5 +1,9 @@
 const path = require('path');
 
+/**
+ * @param {import('@strapi/strapi').Core.Config.Shared.ConfigParams} param0
+ * @returns {import('@strapi/strapi').Core.Config.Database<'sqlite'>}
+ */
 module.exports = ({ env }) => ({
   connection: {
     client: 'sqlite',

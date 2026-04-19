@@ -2,6 +2,9 @@
 
 const responseHandlers = require('./src/response-handlers');
 
+/**
+ * @type {import('@strapi/strapi').Core.Config.Middlewares}
+ */
 module.exports = [
   'strapi::logger',
   'strapi::errors',

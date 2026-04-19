@@ -1,3 +1,5 @@
+import type { winston } from '@strapi/logger';
+
 export interface App {
   keys: string[];
 }
@@ -12,6 +14,7 @@ export interface Dirs {
 }
 
 export interface Logger {
+  config?: winston.LoggerOptions | undefined;
   updates?:
     | {
         enabled?: boolean;
