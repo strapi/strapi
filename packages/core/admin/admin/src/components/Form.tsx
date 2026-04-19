@@ -172,10 +172,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     // We expose `getValues` as a stable callback so consumers (e.g. conditional/rules logic)
     // can call it without causing extra rerenders from changing function references.
     const valuesRef = React.useRef(state.values);
-
-    React.useEffect(() => {
-      valuesRef.current = state.values;
-    }, [state.values]);
+    /**
+     * Keep the ref aligned with `state.values` during render (not only in an effect) so
+     * `getValues()` / `validate()` always see the latest committed values. Effects run too late
+     * for back-to-back user actions (e.g. fast e2e) where the next handler runs before the
+     * effect has fired.
+     */
+    valuesRef.current = state.values;
 
     const getValues = React.useCallback(() => valuesRef.current, []);
 
@@ -239,16 +242,18 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       async (shouldSetErrors: boolean = true, options: Record<string, string> = {}) => {
         setErrors({});
 
+        const valuesToValidate = valuesRef.current;
+
         if (!props.validationSchema && !props.validate) {
-          return { data: state.values };
+          return { data: valuesToValidate };
         }
 
         try {
           let data;
           if (props.validationSchema) {
-            data = await props.validationSchema.validate(state.values, { abortEarly: false });
+            data = await props.validationSchema.validate(valuesToValidate, { abortEarly: false });
           } else if (props.validate) {
-            data = await props.validate(state.values, options);
+            data = await props.validate(valuesToValidate, options);
           } else {
             throw new Error('No validation schema or validate function provided');
           }
@@ -276,7 +281,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           }
         }
       },
-      [props, setErrors, state.values]
+      [props, setErrors]
     );
 
     const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
