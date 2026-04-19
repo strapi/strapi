@@ -62,7 +62,7 @@ const getDirectParent = (data: unknown, path: string): unknown => {
  * It is possible to break the ContentManager by using this function incorrectly, for example,
  * if you transform a number into a string but the attribute type is a number, the ContentManager
  * will not be able to save the data and the Form will likely crash because the component it's
- * passing the data too won't succesfully be able to handle the value.
+ * passing the data too won't successfully be able to handle the value.
  */
 const traverseData =
   (predicate: Predicate, transform: Transform) =>

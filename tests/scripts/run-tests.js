@@ -99,9 +99,15 @@ yargs
             type: 'boolean',
             default: false,
           })
+          .option('updateSnapshot', {
+            alias: 'u',
+            describe: 'Pass -u to Jest to update snapshots',
+            type: 'boolean',
+            default: false,
+          })
           .parse();
 
-        const { concurrency, domains: selectedDomains, setup } = testYargs;
+        const { concurrency, domains: selectedDomains, setup, updateSnapshot } = testYargs;
 
         /**
          * Publishing all packages to the yalc store
@@ -432,7 +438,7 @@ module.exports = config
                     domainDir,
                     jestConfigPath,
                     testApps,
-                    testArgs: testYargs._,
+                    testArgs: [...(updateSnapshot ? ['-u'] : []), ...testYargs._],
                   });
                 } catch (err) {
                   console.error('Test suite failed for', domain);

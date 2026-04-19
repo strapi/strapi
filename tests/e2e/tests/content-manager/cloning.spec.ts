@@ -17,7 +17,7 @@ const CREATE_URL_TEAM = /\/admin\/content-manager\/collection-types\/api::team.t
 
 test.describe('Cloning', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });

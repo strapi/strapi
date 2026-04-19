@@ -23,6 +23,7 @@
     "db:check:mysql": "node scripts/db-mysql.js check",
     "start": "strapi start",
     "setup:v4": "node scripts/setup-v4-project.js",
+    "seed:v5": "node scripts/seed-v5.js",
     "test:migration": "node scripts/validate-migration.js"
   },
   "dependencies": {

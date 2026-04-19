@@ -76,6 +76,88 @@ describe('create-strapi-app', () => {
     }
   });
 
+  it('writes a Yarn node-modules linker config for Yarn projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
+        npm_config_user_agent: 'yarn/4.12.0 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      expect(fs.readFileSync(path.join(projectDir, '.yarnrc.yml'), 'utf8')).toBe(
+        'nodeLinker: node-modules\n'
+      );
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not write a Yarn config for Yarn classic projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
+        npm_config_user_agent: 'yarn/1.22.22 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      expect(fs.existsSync(path.join(projectDir, '.yarnrc.yml'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not write a Yarn config for npm projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-npm'])
+        .expect('code', 0)
+        .end();
+
+      expect(fs.existsSync(path.join(projectDir, '.yarnrc.yml'))).toBe(false);
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('scaffolds inside an existing Yarn workspace monorepo', async () => {
+    const monorepoDir = mkProjectDir();
+    const projectDir = path.join(monorepoDir, 'packages', 'strapi-app');
+
+    try {
+      fs.mkdirSync(path.dirname(projectDir), { recursive: true });
+      fs.writeFileSync(
+        path.join(monorepoDir, 'package.json'),
+        JSON.stringify(
+          {
+            private: true,
+            packageManager: 'yarn@4.12.0',
+            workspaces: ['packages/*'],
+          },
+          null,
+          2
+        )
+      );
+      fs.writeFileSync(path.join(monorepoDir, '.yarnrc.yml'), 'nodeLinker: pnp\n');
+
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-yarn'], {
+        npm_config_user_agent: 'yarn/4.12.0 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      expect(fs.readFileSync(path.join(projectDir, '.yarnrc.yml'), 'utf8')).toBe(
+        'nodeLinker: node-modules\n'
+      );
+      expect(fs.readFileSync(path.join(monorepoDir, '.yarnrc.yml'), 'utf8')).toBe(
+        'nodeLinker: pnp\n'
+      );
+    } finally {
+      fs.rmSync(monorepoDir, { recursive: true, force: true });
+    }
+  });
+
   it('fails when --non-interactive is used without a directory', async () => {
     const { stderr, stdout } = await spawnCsa(['--non-interactive', '--skip-cloud'])
       .expect('code', 1)
