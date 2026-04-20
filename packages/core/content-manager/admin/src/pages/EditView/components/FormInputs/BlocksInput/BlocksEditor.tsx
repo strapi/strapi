@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createContext, type FieldValue, useIsMobile } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
+import { flushSync } from 'react-dom';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
 import { withHistory } from 'slate-history';
@@ -97,6 +98,8 @@ interface BlocksEditorContextValue {
   name: string;
   setLiveText: (text: string) => void;
   isExpandedMode: boolean;
+  /** Push debounced Slate → form sync immediately (e.g. on Editable blur before Save). */
+  flushPendingFormSync: () => void;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -236,6 +239,22 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
+    const flushPendingFormSync = React.useCallback(() => {
+      if (!debounceTimeout.current) {
+        return;
+      }
+      clearTimeout(debounceTimeout.current);
+      debounceTimeout.current = null;
+      incrementSlateUpdatesCount();
+      // Ensure Strapi Form state updates before the next event (e.g. Save click) reads values.
+      flushSync(() => {
+        onChange(
+          name,
+          normalizeBlocksState(editor, editor.children) as Schema.Attribute.BlocksValue
+        );
+      });
+    }, [editor, incrementSlateUpdatesCount, name, onChange]);
+
     const handleSlateChange = React.useCallback(
       (state: Descendant[]) => {
         const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
@@ -319,6 +338,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             name={name}
             setLiveText={setLiveText}
             isExpandedMode={isExpandedMode}
+            flushPendingFormSync={flushPendingFormSync}
           >
             <EditorLayout
               error={error}

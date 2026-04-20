@@ -62,6 +62,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('admin');
   }
 
+  get ai(): Modules.AI.AiNamespace {
+    return this.get('ai');
+  }
+
   get EE(): boolean {
     return utils.ee.isEE;
   }

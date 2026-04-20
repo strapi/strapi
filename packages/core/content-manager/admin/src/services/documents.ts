@@ -181,9 +181,10 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, params }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/discard`
-          : `/content-manager/${collectionType}/${model}/actions/discard`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/discard`
+            : `/content-manager/${collectionType}/${model}/actions/discard`,
         method: 'POST',
         config: {
           params,
@@ -247,9 +248,10 @@ const documentApi = contentManagerApi.injectEndpoints({
       }
     >({
       query: ({ collectionType, model, documentId, params }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/countDraftRelations`
-          : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/countDraftRelations`
+            : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
         method: 'GET',
         config: {
           params,
@@ -302,7 +304,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         baseQuery
       ) => {
         const res = await baseQuery({
-          url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
+          url: `/content-manager/${collectionType}/${model}${
+            documentId && collectionType !== SINGLE_TYPES ? `/${documentId}` : ''
+          }`,
           method: 'GET',
           config: {
             params,
@@ -366,9 +370,10 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, params, data }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/publish`
-          : `/content-manager/${collectionType}/${model}/actions/publish`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/publish`
+            : `/content-manager/${collectionType}/${model}/actions/publish`,
         method: 'POST',
         data,
         config: {
@@ -424,7 +429,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, data, params }) => ({
-        url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
+        url: `/content-manager/${collectionType}/${model}${
+          documentId && collectionType !== SINGLE_TYPES ? `/${documentId}` : ''
+        }`,
         method: 'PUT',
         data,
         config: {
@@ -491,9 +498,10 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, params, data }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/unpublish`
-          : `/content-manager/${collectionType}/${model}/actions/unpublish`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/unpublish`
+            : `/content-manager/${collectionType}/${model}/actions/unpublish`,
         method: 'POST',
         data,
         config: {

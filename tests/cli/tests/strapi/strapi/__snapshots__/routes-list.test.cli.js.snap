@@ -171,6 +171,9 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/homepage/key-statistics                                                  │
 │ HEAD|GET           │ /admin/homepage/layout                                                          │
 │ PUT                │ /admin/homepage/layout                                                          │
+│ HEAD|GET           │ /admin/ai-usage                                                                 │
+│ HEAD|GET           │ /admin/ai-token                                                                 │
+│ HEAD|GET           │ /admin/ai-feature-config                                                        │
 │ HEAD|GET           │ /content-manager/init                                                           │
 │ HEAD|GET           │ /content-manager/content-types                                                  │
 │ HEAD|GET           │ /content-manager/content-types-settings                                         │
