@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: strapi
+    runtime: node
+    plan: starter
+    buildCommand: yarn install && yarn build
+    startCommand: yarn start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: DATABASE_CLIENT
+        value: postgres
+      - key: DATABASE_URL
+        fromDatabase:
+          name: strapi-db
+          property: connectionString
+      - key: APP_KEYS
+        generateValue: true
+      - key: API_TOKEN_SALT
+        generateValue: true
+      - key: ADMIN_JWT_SECRET
+        generateValue: true
+      - key: TRANSFER_TOKEN_SALT
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+
+databases:
+  - name: strapi-db
+    databaseName: strapi
+    plan: free

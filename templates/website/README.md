@@ -36,6 +36,18 @@ yarn build
 
 Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
 
+### Deploy to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://dashboard.render.com/blueprint/new?repo=https://github.com/strapi/strapi&branch=develop&rootDir=templates/website)
+
+This template includes a `render.yaml` Blueprint that provisions:
+- A Node.js web service running Strapi (Starter plan)
+- A PostgreSQL database (Free plan)
+
+All required secrets (`APP_KEYS`, `JWT_SECRET`, etc.) are auto-generated during deployment.
+
+### Deploy to Strapi Cloud
+
 ```
 yarn strapi deploy
 ```
