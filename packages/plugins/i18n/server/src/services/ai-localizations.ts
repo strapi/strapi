@@ -145,25 +145,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
     async isEnabled() {
-      // Check if user disabled AI features globally
-      const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
-      if (!isAIEnabled) {
+      if (strapi.ai.admin.isEnabled() === false) {
         return false;
       }
-
-      // Check if the user's license grants access to AI features
-      const hasAccess = strapi.ee.features.isEnabled('cms-ai');
-      if (!hasAccess) {
-        return false;
-      }
-
       const settings = getService('settings');
       const aiSettings = await settings.getSettings();
-      if (!aiSettings?.aiLocalizations) {
-        return false;
-      }
-
-      return true;
+      return aiSettings?.aiLocalizations === true;
     },
 
     /**
@@ -273,7 +260,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       let token: string;
       try {
-        const tokenData = await strapi.get('ai').getAiToken();
+        const tokenData = await strapi.ai.admin.getAiToken();
         token = tokenData.token;
       } catch (error) {
         await aiLocalizationJobsService.upsertJobForDocument({
@@ -283,7 +270,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           targetLocales,
           status: 'failed',
         });
-
         throw new Error('Failed to retrieve AI token', {
           cause: error instanceof Error ? error : undefined,
         });

@@ -16,6 +16,7 @@ const { runPlaywright } = require('../utils/runners/browser-runner');
 const {
   loadDomainConfigs,
   calculateTestAppsRequired,
+  buildForwardedRunnerArgs,
   runCLI,
 } = require('../utils/runners/cli-runner');
 const { createConfig } = require('../../playwright.base.config');
@@ -99,9 +100,17 @@ yargs
             type: 'boolean',
             default: false,
           })
+          .option('updateSnapshot', {
+            alias: 'u',
+            describe: 'Pass -u to Jest to update snapshots',
+            type: 'boolean',
+            default: false,
+          })
           .parse();
 
-        const { concurrency, domains: selectedDomains, setup } = testYargs;
+        const { concurrency, domains: selectedDomains, setup, updateSnapshot } = testYargs;
+
+        const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
 
         /**
          * Publishing all packages to the yalc store
@@ -390,7 +399,7 @@ module.exports = config
                   cwd,
                   port,
                   testAppPath,
-                  testArgs: testYargs._,
+                  testArgs: forwardedRunnerArgs,
                 });
               })
             );
@@ -432,7 +441,8 @@ module.exports = config
                     domainDir,
                     jestConfigPath,
                     testApps,
-                    testArgs: testYargs._,
+                    testArgs: [...(updateSnapshot ? ['-u'] : []), ...forwardedRunnerArgs],
+                    domain,
                   });
                 } catch (err) {
                   console.error('Test suite failed for', domain);

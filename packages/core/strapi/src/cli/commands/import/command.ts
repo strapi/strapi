@@ -1,3 +1,4 @@
+import { statSync } from 'fs';
 import path from 'path';
 import { createCommand, Option } from 'commander';
 import {
@@ -21,7 +22,7 @@ const command = () => {
       .allowExcessArguments(false)
       .requiredOption(
         '-f, --file <file>',
-        'path and filename for the Strapi export file you want to import'
+        'path to a Strapi export (.tar[.gz][.enc]) or to an unpacked export directory'
       )
       .addOption(
         new Option(
@@ -57,13 +58,27 @@ const command = () => {
           }
         }
       })
-      // set decrypt and decompress options based on filename
+      // set decrypt and decompress options based on filename (archive only)
       .hook('preAction', (thisCommand) => {
         const opts = thisCommand.opts();
+        const filePath = String(opts.file);
+
+        let isDirectory = false;
+        try {
+          isDirectory = statSync(filePath).isDirectory();
+        } catch {
+          // missing path or unreadable — let the transfer fail later with a clear error
+        }
+
+        if (isDirectory) {
+          thisCommand.opts().decrypt = false;
+          thisCommand.opts().decompress = false;
+          return;
+        }
 
         const { extname, parse } = path;
 
-        let file = opts.file;
+        let file = filePath;
 
         if (extname(file) === '.enc') {
           file = parse(file).name; // trim the .enc extension
@@ -82,7 +97,7 @@ const command = () => {
         if (extname(file) !== '.tar') {
           exitWith(
             1,
-            `The file '${opts.file}' does not appear to be a valid Strapi data file. It must have an extension ending in .tar[.gz][.enc]`
+            `The file '${opts.file}' does not appear to be a valid Strapi data file. Use a path ending in .tar[.gz][.enc], or an existing directory that contains an unpacked export (e.g. metadata.json).`
           );
         }
       })

@@ -140,7 +140,10 @@ const useDocument: UseDocument = (args, opts) => {
 
       // When it's a singleType without a mainField, use the contentType displayName
       if (schema?.kind === 'singleType' && schema.info.displayName) {
-        return schema.info.displayName;
+        return formatMessage({
+          id: schema.info.displayName,
+          defaultMessage: schema.info.displayName,
+        });
       }
 
       // Otherwise, use a fallback

@@ -86,7 +86,7 @@ const promptEncryptionKey = async (thisCommand: Command) => {
           type: 'password',
           message: 'Please enter an encryption key',
           name: 'key',
-          validate(key) {
+          validate(key: string) {
             if (key.length > 0) return true;
 
             return 'Key must be present when using the encrypt option';

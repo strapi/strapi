@@ -101,6 +101,7 @@ const Wrapper = ({
         name="blocks"
         setLiveText={jest.fn()}
         isExpandedMode={false}
+        flushPendingFormSync={jest.fn()}
       >
         {children}
       </BlocksEditorProvider>
