@@ -1,27 +1,50 @@
 import type { Plugin, UserConfig } from 'vite';
 
 /**
- * Dev-only helpers to exercise admin dynamic-import behavior (Suspense + retry).
+ * Testing lazy admin chunks (delay / synthetic failure)
+ * -----------------------------------------------------
+ * In dev, this plugin can slow down or fail specific JavaScript chunk responses so you can watch
+ * Suspense loading states and chunk retry behavior in the browser.
  *
- * Usage from `examples/complex` (after `yarn dev` / `strapi develop`):
+ * Easiest way to try it
+ * ---------------------
+ * From this repo's `examples/complex` folder. The match string below is a leaf route (Settings
+ * plugins list), not a layout shell such as `AuthenticatedLayout` or the settings `Layout` chunk:
  *
- * 1) Slow chunk (Suspense stays on loading ~10s, then the page loads)
- *    STRAPI_ADMIN_TEST_CHUNK_DELAY_MS=10000 yarn dev
+ *   STRAPI_ADMIN_TEST_CHUNK_MATCH=InstalledPlugins STRAPI_ADMIN_TEST_CHUNK_DELAY_MS=5000 yarn develop
  *
- * 2) Flaky chunk (first N matching requests return 503 → triggers retry, then succeeds)
- *    STRAPI_ADMIN_TEST_CHUNK_FAIL_COUNT=2 STRAPI_ADMIN_TEST_CHUNK_MATCH=HomePage yarn dev
+ * Log in to the admin, then open Settings → Plugins (sidebar). You should see the loading
+ * state for a few seconds, then the Plugins screen. Nothing here matches until you visit that page,
+ * so the rest of the admin works normally until you navigate there.
  *
- * 3) Combine both (fail twice, then a slow success)
- *    STRAPI_ADMIN_TEST_CHUNK_FAIL_COUNT=2 STRAPI_ADMIN_TEST_CHUNK_DELAY_MS=3000 yarn dev
+ * Flaky chunks (retry path):
  *
- * `STRAPI_ADMIN_TEST_CHUNK_MATCH` is a substring of the dev request URL (default `HomePage`).
- * Use DevTools → Network to see exact URLs if a match fails.
+ *   STRAPI_ADMIN_TEST_CHUNK_MATCH=InstalledPlugins STRAPI_ADMIN_TEST_CHUNK_FAIL_COUNT=2 yarn develop
  *
- * Example: delay only the Content Manager shell (admin layout + home load; CM chunk waits):
- *   STRAPI_ADMIN_TEST_CHUNK_DELAY_MS=10000 STRAPI_ADMIN_TEST_CHUNK_MATCH=content-manager yarn develop
- * Then open Content Manager from the sidebar after login.
+ * Same navigation: Settings → Plugins. The first requests for the matching chunk return 503; after
+ * the failures are used up, the chunk loads.
  *
- * This plugin is registered first so its middleware runs before Vite serves the module.
+ * Stack failure then slow success (same navigation):
+ *
+ *   STRAPI_ADMIN_TEST_CHUNK_MATCH=InstalledPlugins STRAPI_ADMIN_TEST_CHUNK_FAIL_COUNT=2 STRAPI_ADMIN_TEST_CHUNK_DELAY_MS=2000 yarn develop
+ *
+ * Environment variables
+ * ---------------------
+ * - `STRAPI_ADMIN_TEST_CHUNK_DELAY_MS` — milliseconds to wait before serving a matching chunk (optional).
+ * - `STRAPI_ADMIN_TEST_CHUNK_FAIL_COUNT` — number of matching requests that return 503 before
+ *   normal serving (optional). Use 0 or unset to disable failures.
+ * - `STRAPI_ADMIN_TEST_CHUNK_MATCH` — substring of the chunk request URL. Defaults to
+ *   `InstalledPlugins` (lazy module for Settings → Plugins). Prefer a leaf screen like this, not a
+ *   wrapper chunk (`AuthenticatedLayout`, settings `Layout`, etc.). Override if your Vite URLs differ.
+ *
+ * If nothing happens, open DevTools → Network, filter JS, trigger the navigation, and copy a short
+ * substring from the failing chunk URL into `STRAPI_ADMIN_TEST_CHUNK_MATCH`.
+ *
+ * Picking a target: use a screen you open after the shell is up (e.g. Settings → Plugins). Avoid
+ * using the home dashboard or huge shell chunks for slow delays; the main area stays blank until
+ * those chunks finish, which looks broken even when it is working.
+ *
+ * Implementation: registered first so this middleware runs before Vite serves modules.
  */
 const testChunkPlugin = (): Plugin => ({
   name: 'strapi-admin-test-chunk',
@@ -29,7 +52,7 @@ const testChunkPlugin = (): Plugin => ({
   configureServer(server) {
     const delayMs = Number(process.env.STRAPI_ADMIN_TEST_CHUNK_DELAY_MS || 0);
     const failCount = Number(process.env.STRAPI_ADMIN_TEST_CHUNK_FAIL_COUNT || 0);
-    const match = process.env.STRAPI_ADMIN_TEST_CHUNK_MATCH || 'HomePage';
+    const match = process.env.STRAPI_ADMIN_TEST_CHUNK_MATCH || 'InstalledPlugins';
 
     if (!delayMs && !failCount) {
       return;
