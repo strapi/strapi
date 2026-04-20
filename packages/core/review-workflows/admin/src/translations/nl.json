@@ -1,0 +1,17 @@
+{
+  "settings.not-available": "Beoordelingsworkflows zijn alleen beschikbaar als onderdeel van de Enterprise Edition. Upgrade om workflows aan te maken en te beheren.",
+  "settings.page.delete.confirm.body": "Alle items die aan verwijderde fasen zijn toegewezen, worden verplaatst naar de vorige fase. Weet je zeker dat je wilt opslaan?",
+  "settings.page.isLoading": "Workflow wordt geladen",
+  "settings.page.purchase.description": "Beheer je beoordelingsproces voor inhoud",
+  "settings.page.purchase.perks1": "Aanpasbare beoordelingsfasen",
+  "settings.page.purchase.perks2": "Gebruikersrechten beheren",
+  "settings.page.purchase.perks3": "Ondersteuning voor webhooks",
+  "settings.page.subtitle": "{count, plural, one {# fase} other {# fasen}}",
+  "settings.page.title": "Beoordelingsworkflows",
+  "settings.review-workflows.workflow.stageRequiredToPublish.any": "Elke fase",
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Voorkomt dat items worden gepubliceerd als ze niet in de vereiste fase zijn.",
+  "settings.review-workflows.workflow.stageRequiredToPublish.label": "Vereiste fase voor publicatie",
+  "settings.stage.name.label": "Fasenaam",
+  "widget.assigned.no-data": "Geen items",
+  "widget.assigned.title": "Aan mij toegewezen"
+}
