@@ -523,6 +523,7 @@
   "app.static.links.cheatsheet": "CheatSheet",
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.add-filter": "Add filter",
+  "app.utils.update-filter": "Update filter",
   "app.utils.close-label": "Close",
   "app.utils.defaultMessage": " ",
   "app.utils.delete": "Delete",

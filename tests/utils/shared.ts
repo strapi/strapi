@@ -352,15 +352,28 @@ export const ensureElementsInViewport = async (page, source, target) => {
 };
 
 /**
+ * Wait for layout to settle by running a few animation frames (for use after drag start).
+ */
+const waitForLayoutFrames = async (page: Page, frames = 3) => {
+  for (let i = 0; i < frames; i++) {
+    await page.evaluate(
+      () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))
+    );
+  }
+};
+
+/**
  * Smoothly drags a draggable element within a source <li> to just above a target <li>.
  * Automatically detects WebKit and uses a WebKit-specific implementation if needed.
+ * In Chromium, re-resolves the target position after mousedown so the drop uses the
+ * target's position after the source row collapses (avoids dragging to a stale offset).
  *
  * @param {object} page - The Playwright page instance.
  * @param {object} options - Options for the drag operation.
  * @param {object} options.source - Locator for the source <li> (containing the draggable element).
  * @param {object} options.target - Locator for the target <li> (drop destination).
  * @param {number} [options.steps=5] - Number of steps for smooth movement.
- * @param {number} [options.delay=10] - Delay in milliseconds between steps.
+ * @param {number} [options.delay=20] - Delay in milliseconds between steps.
  */
 export const dragElementAbove = async (page, options) => {
   // Extract options
@@ -374,26 +387,70 @@ export const dragElementAbove = async (page, options) => {
 
   // Get bounding boxes of the draggable button and target <li>
   const sourceBox = await draggable.boundingBox();
-  const targetBox = await target.boundingBox();
+  let targetBox = await target.boundingBox();
 
   if (sourceBox && targetBox) {
-    // Calculate start and end positions
+    // Calculate start position
     const startX = sourceBox.x + sourceBox.width / 2;
     const startY = sourceBox.y + sourceBox.height / 2;
-    const endX = targetBox.x + targetBox.width / 2;
-    const endY = targetBox.y - 1; // 1 pixel above the target
 
     // Move to the starting position and press the mouse
     await page.mouse.move(startX, startY);
     await page.mouse.down();
 
-    // Incrementally move the mouse for smooth dragging
-    for (let i = 1; i <= steps; i++) {
-      const intermediateX = startX + (endX - startX) * (i / steps);
-      const intermediateY = startY + (endY - startY) * (i / steps);
-      await page.mouse.move(intermediateX, intermediateY);
-      await page.waitForTimeout(delay);
+    const browserType = page.context().browser()?.browserType().name() ?? '';
+
+    // In Chromium the source collapses into a floating drag preview; the target's position
+    // can change. Never use the pre-mousedown target position for the move — wait for layout
+    // to settle, then resolve the target's current position (via getBoundingClientRect in page)
+    // so we use the real post-collapse coordinates.
+    if (browserType === 'chromium') {
+      await page.waitForTimeout(100);
+      await waitForLayoutFrames(page, 6);
+      const freshTargetBox = await target.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, width: r.width, height: r.height };
+      });
+      if (!freshTargetBox || freshTargetBox.width === 0) {
+        await page.mouse.up();
+        throw new Error(
+          'Chromium: target bounding box could not be resolved after drag start (layout may still be settling).'
+        );
+      }
+      targetBox = freshTargetBox;
     }
+
+    // Resolve drop coordinates from the current target box (post-collapse in Chromium)
+    let endX = targetBox.x + targetBox.width / 2;
+    let endY = targetBox.y + targetBox.height * 0.35;
+
+    if (browserType === 'chromium') {
+      // Move in steps so dragover events fire; re-query target position right before final move
+      // so we end at the actual current drop zone (layout can shift during the move).
+      const stepDelay = Math.max(delay, 15);
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        const x = startX + (endX - startX) * t;
+        const y = startY + (endY - startY) * t;
+        await page.mouse.move(x, y);
+        await page.waitForTimeout(stepDelay);
+      }
+      // Final position: re-resolve target so we release over the current drop area
+      const finalBox = await target.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, width: r.width, height: r.height };
+      });
+      if (finalBox && finalBox.width > 0) {
+        endX = finalBox.x + finalBox.width / 2;
+        endY = finalBox.y + finalBox.height * 0.35;
+        await page.mouse.move(endX, endY);
+      }
+    } else {
+      await page.mouse.move(endX, endY, { steps: steps });
+    }
+
+    // Brief pause at drop position so react-dnd can set isOver before release
+    await page.waitForTimeout(100);
 
     // Release the mouse to drop the element
     await page.mouse.up();

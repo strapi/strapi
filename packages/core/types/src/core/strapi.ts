@@ -19,13 +19,19 @@ export interface Strapi extends Container {
   cron: Modules.Cron.CronService;
   store: Modules.CoreStore.CoreStore;
   /**
-   * @deprecated will be removed in the next major
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */
   entityValidator: Modules.EntityValidator.EntityValidator;
+  /**
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
+   * @see {@link https://docs.strapi.io/dev-docs/api/document-service} Document Service API
+   */
   entityService: Modules.EntityService.EntityService;
   /**
-   * @description interact with documents within Strapi, this API is currently in beta and is subject to change in the future
-   * @beta
+   * The Document Service is the primary API to interact with content in Strapi v5+.
+   * It replaces the deprecated `entityService` and provides full support for Draft & Publish and internationalization.
+   *
+   * @see {@link https://docs.strapi.io/dev-docs/api/document-service} Document Service API
    */
   documents: Modules.Documents.Service;
   telemetry: Modules.Metrics.TelemetryService;
@@ -38,9 +44,7 @@ export interface Strapi extends Container {
   db: Database;
   app: any;
   EE?: boolean;
-  ai?: {
-    enabled: boolean;
-  };
+  ai: Modules.AI.AiNamespace;
   ee: {
     seats: number | null | undefined;
     type: string | null | undefined;
@@ -82,6 +86,7 @@ export interface Strapi extends Container {
   apis: Record<string, Core.Module>;
   api(name: string): Core.Module;
   auth: Modules.Auth.AuthenticationService;
+  /** Content API: permissions, route map, sanitize/validate, and registration of extra query/input params (see addQueryParams, addInputParams). */
   contentAPI: Modules.ContentAPI.ContentApi;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;
   validators: Modules.Validators.ValidatorsRegistry;

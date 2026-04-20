@@ -443,17 +443,14 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c1 {
   width: 100%;
-  height: calc(100dvh - 6.4rem - 1px);
+  height: 100%;
   overflow: hidden;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
   border-right: 0;
   box-shadow: none;
-  position: fixed;
-  top: calc(6.4rem + 1px);
-  left: 0;
-  z-index: 2;
+  position: relative;
 }
 
 .c42 {
@@ -645,12 +642,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
     position: sticky;
     top: 0;
     border-right: 1px solid #eaeaef;
-  }
-}
-
-@media (min-width: 1080px) {
-  .c1 {
-    height: 100dvh;
+    overscroll-behavior: contain;
   }
 }
 

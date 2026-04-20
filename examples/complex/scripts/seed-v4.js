@@ -9,18 +9,79 @@ const os = require('os');
 // CONFIGURATION
 // ============================================================================
 
+const BASE_COUNTS = {
+  basic: 5,
+  basicDp: { published: 3, drafts: 2 },
+  basicDpI18n: { published: 3, drafts: 2 },
+  relation: 5,
+  relationDp: { published: 5, drafts: 3 },
+  relationDpI18n: { published: 5, drafts: 3 },
+  mediaFiles: 10,
+};
+
+function parseCliArgs(argv) {
+  const opts = { multiplier: 1 };
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === '--multiplier' && argv[i + 1] != null) {
+      opts.multiplier = Number(argv[i + 1]);
+      i += 1;
+      continue;
+    }
+
+    if (arg?.startsWith('--multiplier=')) {
+      opts.multiplier = Number(arg.split('=')[1]);
+      continue;
+    }
+
+    if (!Number.isNaN(Number(arg))) {
+      opts.multiplier = Number(arg);
+    }
+  }
+
+  const envMultiplier = process.env.SEED_MULTIPLIER;
+  if (!Number.isNaN(Number(envMultiplier))) {
+    opts.multiplier = Number(envMultiplier);
+  }
+
+  if (!Number.isFinite(opts.multiplier) || opts.multiplier <= 0) {
+    opts.multiplier = 1;
+  }
+
+  return opts;
+}
+
+function applyMultiplierToCounts(base, multiplier) {
+  const m = Number(multiplier) || 1;
+  return {
+    basic: base.basic * m,
+    basicDp: {
+      published: base.basicDp.published * m,
+      drafts: base.basicDp.drafts * m,
+    },
+    basicDpI18n: {
+      published: base.basicDpI18n.published * m,
+      drafts: base.basicDpI18n.drafts * m,
+    },
+    relation: base.relation * m,
+    relationDp: {
+      published: base.relationDp.published * m,
+      drafts: base.relationDp.drafts * m,
+    },
+    relationDpI18n: {
+      published: base.relationDpI18n.published * m,
+      drafts: base.relationDpI18n.drafts * m,
+    },
+    mediaFiles: base.mediaFiles * m,
+  };
+}
+
+const { multiplier } = parseCliArgs(process.argv.slice(2));
+
 const CONFIG = {
-  counts: {
-    basic: 5,
-    basicDp: { published: 3, drafts: 2 },
-    basicDpI18n: { published: 3, drafts: 2 },
-    relation: 5,
-    relationDp: { published: 5, drafts: 3 },
-    relationDpI18n: { published: 5, drafts: 3 },
-    mediaFiles: 10,
-  },
+  counts: applyMultiplierToCounts(BASE_COUNTS, multiplier),
   locales: ['en', 'fr'],
-  invalidFkId: 987654321,
 };
 
 // ============================================================================
@@ -107,6 +168,16 @@ const components = {
   header: (logoComponent) => ({
     title: `Header ${random.string()}`,
     headerlogo: logoComponent,
+  }),
+
+  reference: (articleId) => ({
+    label: `Ref ${random.string()}`,
+    article: articleId || null,
+  }),
+
+  referenceList: (references = []) => ({
+    title: `RefList ${random.string()}`,
+    references: Array.isArray(references) ? references : [references],
   }),
 
   // Dynamic zone wrappers
@@ -433,6 +504,10 @@ class ContentSeeder {
             oneToManyBasics: relatedBasics.map((b) => b.id),
             manyToOneBasic: relatedBasics[0]?.id || null,
             manyToManyBasics: relatedBasics.map((b) => b.id),
+            morph_to_one: relatedBasics[0]
+              ? { __type: 'api::basic.basic', id: relatedBasics[0].id }
+              : null,
+            morph_to_many: relatedBasics.map((b) => ({ __type: 'api::basic.basic', id: b.id })),
             simpleInfo: components.simpleInfo(),
             content: [
               components.forDynamicZone(components.simpleInfo(), 'simple-info'),
@@ -478,7 +553,11 @@ class ContentSeeder {
     console.log('Seeding relation-dp...');
     const published = [];
     const drafts = [];
-    const { basic, basicDp } = this.results;
+    const { basic, basicDp, relation } = this.results;
+    const morphTargetsFor = (indices) =>
+      (relation || [])
+        .filter((_, j) => indices.includes(j))
+        .map((r) => ({ __type: 'api::relation.relation', id: r.id }));
 
     // Published
     for (let i = 0; i < CONFIG.counts.relationDp.published; i++) {
@@ -496,6 +575,11 @@ class ContentSeeder {
         const entry = await this.strapi.entityService.create('api::relation-dp.relation-dp', {
           data: {
             name: `Relation DP Published ${i + 1}`,
+            cover: mediaFile?.id ?? null,
+            morphTargets: morphTargetsFor([
+              i % (relation?.length || 1),
+              (i + 1) % (relation?.length || 1),
+            ]),
             oneToOneBasic: relatedDp[0]?.id || null,
             oneToManyBasics: relatedDp.map((b) => b.id),
             manyToOneBasic: relatedDp[0]?.id || null,
@@ -547,6 +631,11 @@ class ContentSeeder {
         const entry = await this.strapi.entityService.create('api::relation-dp.relation-dp', {
           data: {
             name: `Relation DP Draft ${i + 1}`,
+            cover: mediaFile?.id ?? null,
+            morphTargets: morphTargetsFor([
+              i % (relation?.length || 1),
+              (i + 2) % (relation?.length || 1),
+            ]),
             oneToOneBasic: relatedDp[0]?.id || null,
             oneToManyBasics: relatedDp.map((b) => b.id),
             manyToOneBasic: relatedDp[0]?.id || null,
@@ -587,6 +676,39 @@ class ContentSeeder {
         data: {
           selfOne: entry.id,
           selfMany: [entry.id],
+        },
+      });
+    }
+
+    // Add nested component with relations (reference-list -> references -> article) to first published entry for migration test
+    if (published.length >= 2) {
+      const relatedDpForFirst = [
+        this.pick(basicDp?.published, 0),
+        this.pick(basicDp?.drafts, 0),
+      ].filter(Boolean);
+      const mediaFileForFirst = this.pick(this.mediaFiles, 0);
+      const logoForFirst = mediaFileForFirst ? components.logo(mediaFileForFirst.id) : null;
+      const headerForFirst = logoForFirst ? components.header(logoForFirst) : null;
+      const refListSection = components.forDynamicZone(
+        components.referenceList([
+          components.reference(published[1]?.id),
+          components.reference(published[0]?.id),
+        ]),
+        'reference-list'
+      );
+      await this.strapi.entityService.update('api::relation-dp.relation-dp', published[0].id, {
+        data: {
+          sections: [
+            components.forDynamicZone(
+              components.textBlock({ basicDpId: relatedDpForFirst[0]?.id }),
+              'text-block'
+            ),
+            components.forDynamicZone(components.mediaBlock(), 'media-block'),
+            ...(headerForFirst
+              ? [components.forDynamicZone(components.header(logoForFirst), 'header')]
+              : []),
+            refListSection,
+          ],
         },
       });
     }

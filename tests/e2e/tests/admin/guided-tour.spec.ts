@@ -14,7 +14,7 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
     await sharedSetup('guided-tour', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
   });
 

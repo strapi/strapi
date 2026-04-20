@@ -28,6 +28,8 @@ import { usePersistentState } from '../hooks/usePersistentState';
 const FieldWrapper = styled(Field.Root)`
   height: 3.2rem;
   width: 3.2rem;
+  align-items: center;
+  justify-content: center;
 
   > label,
   ~ input {

@@ -315,7 +315,8 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c0 {
-  max-width: 100%;
+  width: 100%;
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr;
   padding: 0;
@@ -468,6 +469,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 @media (min-width: 768px) {
   .c0 {
+    overflow: hidden;
     grid-template-columns: 1fr;
   }
 }

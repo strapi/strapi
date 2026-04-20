@@ -156,7 +156,7 @@ switch (command) {
 
   case 'check':
     {
-      const containerName = getContainerName();
+      const containerName = resolveContainerName();
       try {
         // Use pg_stat_user_tables statistics for fast approximate counts
         const query = `

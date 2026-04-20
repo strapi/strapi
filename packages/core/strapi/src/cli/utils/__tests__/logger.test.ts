@@ -101,7 +101,7 @@ describe('logger', () => {
       // Verify createLogger is not called
       expect(createLogger).not.toBeCalled();
 
-      // Verify the mock logger does not recieve logs
+      // Verify the mock logger does not receive logs
       expect(mockLogger.info).not.toBeCalled();
     });
 
@@ -143,7 +143,7 @@ describe('logger', () => {
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Test warning'));
 
-      // Verify the mock info logger does not recieve logs
+      // Verify the mock info logger does not receive logs
       expect(mockLogger.info).not.toBeCalled();
     });
   });

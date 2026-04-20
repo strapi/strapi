@@ -99,9 +99,15 @@ yargs
             type: 'boolean',
             default: false,
           })
+          .option('updateSnapshot', {
+            alias: 'u',
+            describe: 'Pass -u to Jest to update snapshots',
+            type: 'boolean',
+            default: false,
+          })
           .parse();
 
-        const { concurrency, domains: selectedDomains, setup } = testYargs;
+        const { concurrency, domains: selectedDomains, setup, updateSnapshot } = testYargs;
 
         /**
          * Publishing all packages to the yalc store
@@ -119,13 +125,18 @@ yargs
           testAppsRequired = Math.min(selectedDomains.length, concurrency);
         }
 
+        // CLI domains may use testApps: 0 (e.g. create-strapi-app scaffolds to tmp, not TEST_APPS).
+        let testAppPaths;
         if (testAppsRequired === 0) {
-          throw new Error('No test apps to spawn');
+          if (type !== 'cli') {
+            throw new Error('No test apps to spawn');
+          }
+          testAppPaths = [];
+        } else {
+          testAppPaths = Array.from({ length: testAppsRequired }, (_, i) =>
+            path.join(testAppDirectory, `test-app-${i}`)
+          );
         }
-
-        const testAppPaths = Array.from({ length: testAppsRequired }, (_, i) =>
-          path.join(testAppDirectory, `test-app-${i}`)
-        );
 
         const currentTestApps = await getCurrentTestApps(testAppDirectory);
 
@@ -407,13 +418,16 @@ module.exports = config
             await Promise.all(
               batch.map(async (domain) => {
                 const config = domainConfigs[domain];
+                // Must not call splice(0): that deletes the entire pool. Use splice only when n > 0.
+                const neededApps =
+                  typeof config.testApps === 'number' && config.testApps >= 0 ? config.testApps : 1;
 
-                if (availableTestApps.length < config.testApps) {
+                if (availableTestApps.length < neededApps) {
                   console.error('Not enough test apps available; aborting');
                   process.exit(1);
                 }
 
-                const testApps = availableTestApps.splice(-1 * config.testApps);
+                const testApps = neededApps > 0 ? availableTestApps.splice(-neededApps) : [];
 
                 try {
                   const domainDir = path.join(testDomainRoot, domain);
@@ -424,7 +438,7 @@ module.exports = config
                     domainDir,
                     jestConfigPath,
                     testApps,
-                    testArgs: testYargs._,
+                    testArgs: [...(updateSnapshot ? ['-u'] : []), ...testYargs._],
                   });
                 } catch (err) {
                   console.error('Test suite failed for', domain);

@@ -1,6 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import chalk from 'chalk';
-import inquirer from 'inquirer';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
 import type { CloudCliConfig, CLIContext } from '../types';
 import { apiConfig } from '../config/api';
@@ -10,6 +9,7 @@ import { setContext } from '../services/context';
 const openModule = import('open');
 
 export async function promptLogin(ctx: CLIContext) {
+  const { default: inquirer } = await import('inquirer');
   const response = await inquirer.prompt([
     {
       type: 'confirm',

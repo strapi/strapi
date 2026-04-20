@@ -44,11 +44,11 @@ export interface Auth {
 }
 
 export interface TransferToken {
-  salt: string;
+  salt?: string;
 }
 
 export interface Secrets {
-  encryptionKey: string;
+  encryptionKey?: string;
 }
 
 export interface AuditLogs {
@@ -78,7 +78,7 @@ export interface RateLimit {
 }
 
 export interface Transfer {
-  token: TransferToken;
+  token?: TransferToken;
 }
 
 export interface FirstPublisedAtField {
@@ -99,7 +99,10 @@ export interface PreviewHandlerParams {
 
 export interface PreviewConfig {
   allowedOrigins?: string[];
-  handler: (uid: string, params: PreviewHandlerParams) => string | null | undefined;
+  handler: (
+    uid: string,
+    params: PreviewHandlerParams
+  ) => string | null | undefined | Promise<string | null | undefined>;
 }
 
 export interface Preview {
@@ -114,7 +117,6 @@ export interface Ai {
 export interface Admin {
   // required
   apiToken: ApiToken;
-  transfer: Transfer;
   auth: Auth;
 
   // optional - server configuration
@@ -137,4 +139,5 @@ export interface Admin {
   rateLimit?: RateLimit;
   firstPublishedAtField?: FirstPublisedAtField;
   flags?: Flags;
+  transfer?: Transfer;
 }

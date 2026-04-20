@@ -1,9 +1,13 @@
+import { statSync } from 'fs';
 import { resolve } from 'path';
 import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../e2e/constants';
 
 const {
   file: {
     providers: { createLocalFileSourceProvider },
+  },
+  directory: {
+    providers: { createLocalDirectorySourceProvider },
   },
   strapi: {
     providers: { createRemoteStrapiDestinationProvider, createLocalStrapiDestinationProvider },
@@ -89,7 +93,7 @@ export const resetDatabaseAndImportDataFromPath = async (
  * The function handles loading and destroying the Strapi instance internally
  *
  * @param appPath - Path to the Strapi app directory
- * @param file - Path to the DTS backup file (relative to tests/e2e/data or absolute)
+ * @param file - Name or path of an unpacked export directory or `.tar` under tests/e2e/data (or absolute)
  * @param modifiedContentTypesFn - Optional function to modify content types
  * @param configuration - Restore configuration
  */
@@ -193,12 +197,19 @@ if (isDirectExecution) {
   importData();
 }
 
-const createSourceProvider = (filePath: string) =>
-  createLocalFileSourceProvider({
+const createSourceProvider = (filePath: string) => {
+  const st = statSync(filePath);
+  if (st.isDirectory()) {
+    return createLocalDirectorySourceProvider({
+      directory: { path: filePath },
+    });
+  }
+  return createLocalFileSourceProvider({
     file: { path: filePath },
     encryption: { enabled: false },
     compression: { enabled: false },
   });
+};
 
 const createRemoteDestinationProvider = (
   includedTypes: any[] = [],

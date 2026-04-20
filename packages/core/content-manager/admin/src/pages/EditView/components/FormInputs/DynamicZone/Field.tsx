@@ -65,14 +65,9 @@ const DynamicZone = ({
   } = useDocumentContext('DynamicZone');
 
   const disabled = disabledProp || isLoading;
-  const { addFieldRow, removeFieldRow, moveFieldRow } = useForm(
-    'DynamicZone',
-    ({ addFieldRow, removeFieldRow, moveFieldRow }) => ({
-      addFieldRow,
-      removeFieldRow,
-      moveFieldRow,
-    })
-  );
+  const addFieldRow = useForm('DynamicZone', (state) => state.addFieldRow);
+  const removeFieldRow = useForm('DynamicZone', (state) => state.removeFieldRow);
+  const moveFieldRow = useForm('DynamicZone', (state) => state.moveFieldRow);
 
   type DzWithTempKey =
     Schema.Attribute.GetDynamicZoneValue<Schema.Attribute.DynamicZone>[number] & {
@@ -105,20 +100,23 @@ const DynamicZone = ({
 
   const dynamicDisplayedComponentsLength = value.length;
 
-  const handleAddComponent = (uid: string, position?: number) => {
-    setAddComponentIsOpen(false);
+  const handleAddComponent = React.useCallback(
+    (uid: string, position?: number) => {
+      setAddComponentIsOpen(false);
 
-    const schema = components[uid];
-    const form = createDefaultForm(schema, components);
-    const transformations = pipe(transformDocument(schema, components), (data) => ({
-      ...data,
-      __component: uid,
-    }));
+      const schema = components[uid];
+      const form = createDefaultForm(schema, components);
+      const transformations = pipe(transformDocument(schema, components), (data) => ({
+        ...data,
+        __component: uid,
+      }));
 
-    const data = transformations(form);
+      const data = transformations(form);
 
-    addFieldRow(name, data, position);
-  };
+      addFieldRow(name, data, position);
+    },
+    [addFieldRow, components, name]
+  );
 
   const handleClickOpenPicker = () => {
     if (dynamicDisplayedComponentsLength < max) {
@@ -133,72 +131,85 @@ const DynamicZone = ({
     }
   };
 
-  const handleMoveComponent = (newIndex: number, currentIndex: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.reorder'),
-          defaultMessage: '{item}, moved. New position in list: {position}.',
-        },
-        {
-          item: `${name}.${currentIndex}`,
-          position: getItemPos(newIndex),
-        }
-      )
-    );
+  const handleMoveComponent = React.useCallback(
+    (newIndex: number, currentIndex: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.reorder'),
+            defaultMessage: '{item}, moved. New position in list: {position}.',
+          },
+          {
+            item: `${name}.${currentIndex}`,
+            position: `${newIndex + 1} of ${value.length}`,
+          }
+        )
+      );
 
-    moveFieldRow(name, currentIndex, newIndex);
-  };
+      moveFieldRow(name, currentIndex, newIndex);
+    },
+    [formatMessage, moveFieldRow, name, value.length]
+  );
 
-  const getItemPos = (index: number) => `${index + 1} of ${value.length}`;
+  const handleCancel = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.cancel-item'),
+            defaultMessage: '{item}, dropped. Re-order cancelled.',
+          },
+          {
+            item: `${name}.${index}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name]
+  );
 
-  const handleCancel = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.cancel-item'),
-          defaultMessage: '{item}, dropped. Re-order cancelled.',
-        },
-        {
-          item: `${name}.${index}`,
-        }
-      )
-    );
-  };
+  const handleGrabItem = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.grab-item'),
+            defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+          },
+          {
+            item: `${name}.${index}`,
+            position: `${index + 1} of ${value.length}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name, value.length]
+  );
 
-  const handleGrabItem = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.grab-item'),
-          defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
-        },
-        {
-          item: `${name}.${index}`,
-          position: getItemPos(index),
-        }
-      )
-    );
-  };
+  const handleDropItem = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.drop-item'),
+            defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+          },
+          {
+            item: `${name}.${index}`,
+            position: `${index + 1} of ${value.length}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name, value.length]
+  );
 
-  const handleDropItem = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.drop-item'),
-          defaultMessage: `{item}, dropped. Final position in list: {position}.`,
-        },
-        {
-          item: `${name}.${index}`,
-          position: getItemPos(index),
-        }
-      )
-    );
-  };
-
-  const handleRemoveComponent = (name: string, currentIndex: number) => () => {
-    removeFieldRow(name, currentIndex);
-  };
+  const handleRemoveComponent = React.useCallback(
+    (currentIndex: number) => {
+      removeFieldRow(name, currentIndex);
+    },
+    [name, removeFieldRow]
+  );
 
   const hasError = error !== undefined;
 
@@ -246,7 +257,7 @@ const DynamicZone = ({
 
   return (
     <DynamicZoneProvider isInDynamicZone>
-      <Flex direction="column" alignItems="stretch" gap={6}>
+      <Flex direction="column" alignItems="stretch" gap={{ initial: 4, medium: 6 }}>
         {dynamicDisplayedComponentsLength > 0 && (
           <Box>
             <DynamicZoneLabel
@@ -280,7 +291,7 @@ const DynamicZone = ({
                     index={index}
                     componentUid={field.__component}
                     onMoveComponent={handleMoveComponent}
-                    onRemoveComponentClick={handleRemoveComponent(name, index)}
+                    onRemoveComponentClick={handleRemoveComponent}
                     onCancel={handleCancel}
                     onDropItem={handleDropItem}
                     onGrabItem={handleGrabItem}

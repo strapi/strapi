@@ -8,7 +8,7 @@ import { createComponent, addAttributesToContentType } from '../../../../utils/c
 
 test.describe('Conditional Fields - Enum-controlled conditional text fields and value are cleared when hidden', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });

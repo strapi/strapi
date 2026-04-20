@@ -4,6 +4,7 @@ import { setCreatorFields, async, errors } from '@strapi/utils';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { getService } from '../utils';
 import { formatDocumentWithMetadata } from './utils/metadata';
+import { getPopulateForLocalizations } from '../services/utils/populate';
 
 type OptionsWithPopulate = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
@@ -12,6 +13,7 @@ const buildPopulateFromQuery = async (query: any, model: any) => {
     .populateFromQuery(query)
     .populateDeep(Infinity)
     .countRelations()
+    .withPopulateOverride(getPopulateForLocalizations(model))
     .build();
 };
 
@@ -191,7 +193,7 @@ export default {
   async publish(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { query = {} } = ctx.request;
+    const { body, query = {} } = ctx.request;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -203,8 +205,23 @@ export default {
     const publishedDocument = await strapi.db.transaction(async () => {
       const sanitizedQuery = await permissionChecker.sanitizedQuery.publish(query);
       const populate = await buildPopulateFromQuery(sanitizedQuery, model);
-      const document = await createOrUpdateDocument(ctx, { populate });
+      const { locale } = await getDocumentLocaleAndStatus(body, model);
 
+      // Find the existing document
+      let document = await findDocument(sanitizedQuery, model, { locale, status: 'draft' });
+
+      // If document exists and user can update it, update it before publishing
+      const shouldUpdate = document && permissionChecker.can.update(document);
+      // If document doesn't exist and user can create it, create it before publishing
+      const shouldCreate = !document && permissionChecker.can.create();
+      if (shouldUpdate || shouldCreate) {
+        document = await createOrUpdateDocument(ctx, { populate });
+      } else if (!document) {
+        // Document doesn't exist and user can't create it
+        throw new errors.ForbiddenError();
+      }
+
+      // If document doesn't exist, throw an error
       if (!document) {
         throw new errors.NotFoundError();
       }
@@ -213,7 +230,6 @@ export default {
         throw new errors.ForbiddenError();
       }
 
-      const { locale } = await getDocumentLocaleAndStatus(document, model);
       const publishResult = await documentManager.publish(document.documentId, model, { locale });
 
       return publishResult.at(0);

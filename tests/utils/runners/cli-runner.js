@@ -74,7 +74,7 @@ const runCLI = async ({ domainDir, jestConfigPath, testApps, testArgs }) => {
       stdio: 'inherit',
       cwd: domainDir, // run from the domain directory
       env, // pass it our custom env values
-      timeout: 2 * 60 * 1000, // 2 minutes
+      timeout: 5 * 60 * 1000, // 5 minutes
     }
   );
 };

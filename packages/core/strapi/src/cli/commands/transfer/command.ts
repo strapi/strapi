@@ -1,6 +1,6 @@
-import inquirer from 'inquirer';
 import { createCommand, Option } from 'commander';
 import { getCommanderConfirmMessage, forceOption, parseURL } from '../../utils/commander';
+import { getInquirer } from '../../utils/get-inquirer';
 import { exitWith, assertUrlHasProtocol, ifOptions } from '../../utils/helpers';
 import {
   excludeOption,
@@ -108,6 +108,7 @@ const command = () => {
                 return 'to';
               }
 
+              const inquirer = await getInquirer();
               const { dir } = await inquirer.prompt([
                 {
                   type: 'list',
@@ -132,6 +133,7 @@ const command = () => {
                 return new URL(process.env.STRAPI_TRANSFER_URL);
               }
 
+              const inquirer = await getInquirer();
               const answer = await inquirer.prompt([
                 {
                   type: 'input',
@@ -164,6 +166,7 @@ const command = () => {
                 return process.env.STRAPI_TRANSFER_TOKEN;
               }
 
+              const inquirer = await getInquirer();
               const answer = await inquirer.prompt([
                 {
                   type: 'password',
@@ -196,6 +199,7 @@ const command = () => {
           async (thisCommand) => {
             assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:']);
             if (!thisCommand.opts().fromToken) {
+              const inquirer = await getInquirer();
               const answers = await inquirer.prompt([
                 {
                   type: 'password',
@@ -224,6 +228,7 @@ const command = () => {
           async (thisCommand) => {
             assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:']);
             if (!thisCommand.opts().toToken) {
+              const inquirer = await getInquirer();
               const answers = await inquirer.prompt([
                 {
                   type: 'password',

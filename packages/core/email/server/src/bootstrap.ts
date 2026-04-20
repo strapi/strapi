@@ -1,8 +1,13 @@
 import type { Core } from '@strapi/types';
+import type { ProviderCapabilities } from '../../shared/types';
 import type { EmailConfig, SendOptions } from './types';
 
 interface EmailProvider {
   send: (options: SendOptions) => Promise<any>;
+  verify?: () => Promise<boolean>;
+  isIdle?: () => boolean;
+  close?: () => void;
+  getCapabilities?: () => ProviderCapabilities;
 }
 
 interface EmailProviderModule {

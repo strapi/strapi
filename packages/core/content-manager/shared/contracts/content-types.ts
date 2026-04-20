@@ -2,6 +2,8 @@ import type { Struct } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { ComponentConfiguration } from './components';
 
+export type RelationOpenMode = 'modal' | 'page' | 'newTab';
+
 export type Settings = {
   bulkable: boolean;
   filterable: boolean;
@@ -10,6 +12,7 @@ export type Settings = {
   mainField: string;
   defaultSortBy: string;
   defaultSortOrder: string;
+  relationOpenMode?: RelationOpenMode;
 };
 
 export type Metadatas = {
