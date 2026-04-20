@@ -46,12 +46,12 @@ const config = {
     }),
     [
       'docusaurus-plugin-typedoc',
-      // Plugin / TypeDoc options
       {
         entryPoints: ['../packages/core/strapi/src/admin.ts'],
         tsconfig: '../packages/core/strapi/tsconfig.build.json',
         entryDocument: null,
-        out: 'exports',
+        // Under classic preset `docs` path so sidebars pick up `exports/`.
+        out: 'docs/exports',
         watch: process.env.TYPEDOC_WATCH,
       },
     ],
