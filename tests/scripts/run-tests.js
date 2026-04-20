@@ -208,8 +208,10 @@ yargs
 
                 // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
                 // canonical port is `8000 + j` above — same as baseURL / webServer; helpers read PORT.
+                // `port` is always a safe integer here (never user-controlled). `JSON.stringify(port)`
+                // embeds a numeric literal; Node coerces env values to strings on read.
                 const configFileTemplate = `
-process.env.PORT = ${JSON.stringify(String(port))};
+process.env.PORT = ${JSON.stringify(port)};
 const config = ${JSON.stringify(config)}
 
 module.exports = config
