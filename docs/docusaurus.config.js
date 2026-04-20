@@ -49,7 +49,12 @@ const config = {
       {
         entryPoints: ['../packages/core/strapi/src/admin.ts'],
         tsconfig: '../packages/core/strapi/tsconfig.build.json',
-        entryDocument: null,
+        // `readme: 'none'` uses a single project page (no separate index). Together with
+        // `entryDocument: 'modules.md'` this avoids generating `index.md` (invalid MDX: bare `<br>` tags).
+        // Do not set `entryDocument: null` — it becomes an empty URL and TypeDoc tries to write
+        // to the output directory (EISDIR: "Could not write .../exports").
+        readme: 'none',
+        entryDocument: 'modules.md',
         // Plugin output is under the docs content root (`site/docs/`); use `exports`, not `docs/exports`.
         out: 'exports',
         watch: process.env.TYPEDOC_WATCH,
@@ -71,6 +76,7 @@ const config = {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/strapi/strapi/tree/main/docs/',
+          remarkPlugins: [require('./remark-design-system-links')],
         },
         blog: false,
       },
