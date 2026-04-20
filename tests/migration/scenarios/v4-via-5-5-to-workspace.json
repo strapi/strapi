@@ -1,0 +1,22 @@
+{
+  "$schema": "../scenario-schema.json",
+  "id": "v4-via-5-5-to-workspace",
+  "description": "v4 seed → Strapi 5.5.0 → workspace. Uses full-ladder after a pinned v5 step.",
+  "dataOrigin": "v4",
+  "baseline": {
+    "type": "v4-scaffold",
+    "initialVersion": "4.26.0"
+  },
+  "stages": [
+    {
+      "id": "pinned-5-5-0",
+      "type": "strapi-pinned",
+      "version": "5.5.0"
+    },
+    {
+      "id": "workspace",
+      "type": "workspace",
+      "validate": ["full-ladder"]
+    }
+  ]
+}

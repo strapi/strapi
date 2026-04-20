@@ -84,6 +84,19 @@ Snapshots live in `snapshots/` and are gitignored:
 - MariaDB: `snapshots/mariadb-<name>.sql`
 - SQLite: `snapshots/sqlite-<name>.db` (raw file copy; fast)
 
+#### MariaDB (MySQL-compatible; Strapi uses `DATABASE_CLIENT=mysql`)
+
+Same UX as MySQL; Compose maps host **`MARIADB_PORT` → container 3306** (default host port **3307** so it can run beside MySQL on **3306**).
+
+```bash
+yarn db:start:mariadb
+yarn db:stop:mariadb
+yarn db:snapshot:mariadb <name>
+yarn db:restore:mariadb <name>
+yarn db:wipe:mariadb
+yarn db:check:mariadb
+```
+
 ### Typical Migration Testing Workflow
 
 1. **Setup v4 project** (if not already done):
@@ -173,7 +186,7 @@ This wipes `examples/complex/.migration-v5/`, scaffolds the baseline, seeds, opt
 Options:
 
 - `--initial <semver>` — required without `--scenario` (4.x = v4 scaffold; 5.x = pinned v5 + v5 seed)
-- `--via <semver>` / `-v` — repeatable pinned boots before workspace (`full-ladder` when any `--via`)
+- `--via <semver>` / `-v` — repeatable pinned boots before workspace (`full-ladder` when any `--via`; `full-v5-origin` for 5.x baseline without `--via`; `full-v4-origin` for 4.x)
 - `--scenario <path>` — JSON scenario (overrides CLI flags)
 - `--validators` — e.g. `full-v4-origin`, `full-v5-origin`, `full-ladder` ([`validators.js`](../../tests/migration/framework/validators.js))
 - `--initial-node` / `--workspace-node` — optional Node major checks per phase
@@ -182,10 +195,13 @@ Options:
 
 Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20**.
 
+Pass flags after the script name (avoid an extra `--` before `--database` or Yarn may not forward options).
+
 Examples:
 
-- `yarn test:migrations --initial 4.26.0 --via 5.30.0 --database sqlite`
-- `yarn test:migrations --initial 5.7.0 --database sqlite`
+- `yarn test:migrations --initial 4.26.0 --via 5.30.0 --database sqlite` — see `tests/migration/scenarios/v4-via-5-30-0-to-head.json`
+- `yarn test:migrations --initial 5.7.0 --database sqlite` — see `tests/migration/scenarios/v5-5-7-to-workspace.json`
+- `yarn test:migrations --initial-node 20` — fail fast if Node major ≠ 20
 - `yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json`
 
 Checkpoints: [`tests/migration/CHECKPOINTS.md`](../../tests/migration/CHECKPOINTS.md).
@@ -270,7 +286,7 @@ These commands:
 
 - PostgreSQL: `5432` (override with `POSTGRES_PORT`)
 - MySQL: `3306` (override with `MYSQL_PORT`)
-- MariaDB: `3307` (override with `MARIADB_PORT`)
+- MariaDB: `3307` (override with `MARIADB_PORT`; maps to container `3306`)
 
 Set the override env var if you have a local DB already bound to the default port:
 

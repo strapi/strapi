@@ -92,7 +92,9 @@
     "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch",
-    "test:migrations:v5": "node tests/migration/scripts/run-v5.js"
+    "test:migrations": "node tests/migration/scripts/run-migration-scenario.js",
+    "test:migrations:plan": "node tests/migration/scripts/run-migration-scenario.js --print-plan",
+    "test:migrations:v5": "node tests/migration/scripts/run-migration-scenario.js"
   },
   "resolutions": {
     "webpack": "5.106.2",

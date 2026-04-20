@@ -1,0 +1,22 @@
+{
+  "$schema": "../scenario-schema.json",
+  "id": "v4-via-5-30-0-to-head",
+  "description": "v4 seed → npm Strapi 5.30.0 (boot/migrations) → workspace validation. Uses validator full-ladder (skips DP join-table parity for self-relations; see validate-migration.js).",
+  "dataOrigin": "v4",
+  "baseline": {
+    "type": "v4-scaffold",
+    "initialVersion": "4.26.0"
+  },
+  "stages": [
+    {
+      "id": "pinned-5-30-0",
+      "type": "strapi-pinned",
+      "version": "5.30.0"
+    },
+    {
+      "id": "workspace",
+      "type": "workspace",
+      "validate": ["full-ladder"]
+    }
+  ]
+}

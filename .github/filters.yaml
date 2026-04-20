@@ -27,9 +27,15 @@ cli:
   - 'tests/scripts/run-cli-tests.js'
   - 'tests/scripts/run-tests.js'
   - 'tests/cli/**'
-# DB / schema migration sources (Umzug internal, core discard-drafts, plugin migrations, etc.)
+# DB / schema migration sources (Umzug, internal migrations) + monorepo v4→v5 integration harness (examples/complex)
 migrations:
   - 'packages/**/migrations/**'
+  - 'tests/migration/**'
+  - 'examples/complex/docker-compose.dev.yml'
+  - 'examples/complex/scripts/**'
+  - 'examples/complex/config/**'
+  - 'examples/complex/src/**'
+  - 'examples/complex/package.json'
 docs:
   - 'docs/**'
   - '**.mdx?'
