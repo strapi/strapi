@@ -2,12 +2,13 @@ import { Readable } from 'stream';
 import { chain } from 'stream-chain';
 import type { Core, Struct } from '@strapi/types';
 
-import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
+import type { IMetadata, ISourceProvider, ProviderType, TransferStage } from '../../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
 import { createAssetsStream } from './assets';
+import { estimateAssetTotals } from './estimate-asset-totals';
 import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
 
@@ -50,6 +51,17 @@ class LocalStrapiSourceProvider implements ISourceProvider {
         origin: 'local-source-provider',
       },
       kind: 'info',
+    });
+  }
+
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'local-source-provider',
+      },
+      kind: 'warning',
     });
   }
 
@@ -97,7 +109,8 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   getMetadata(): IMetadata {
     this.#reportInfo('getting metadata');
-    const strapiVersion = strapi.config.get<string>('info.strapi');
+    assertValidStrapi(this.strapi);
+    const strapiVersion = this.strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
 
     return {
@@ -152,13 +165,25 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     assertValidStrapi(this.strapi, 'Not able to stream assets');
     this.#reportInfo('creating assets read stream');
 
-    const stream = createAssetsStream(this.strapi);
+    const stream = createAssetsStream(this.strapi, {
+      onWarning: (message) => this.#reportWarning(message),
+    });
     stream.on('error', (err) => {
       this.#handleStreamError('assets', err);
     });
 
     return stream;
   }
+
+  async getStageTotals(stage: TransferStage) {
+    if (stage !== 'assets') {
+      return null;
+    }
+    assertValidStrapi(this.strapi, 'Not able to estimate asset totals');
+    return estimateAssetTotals(this.strapi);
+  }
 }
 
 export type ILocalStrapiSourceProvider = InstanceType<typeof LocalStrapiSourceProvider>;
+
+export { estimateAssetTotals } from './estimate-asset-totals';
