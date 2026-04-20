@@ -8,7 +8,7 @@ test.describe('Legacy Admin Token Migration', () => {
   test.beforeEach(async ({ page, context }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await context.clearCookies();
-    await gotoAdminPath(page, '/admin');
+    await gotoAdminPath(page);
   });
 
   test('should force logout on first interaction with legacy token', async ({ page }) => {
@@ -19,7 +19,7 @@ test.describe('Legacy Admin Token Migration', () => {
     });
 
     // Try to access admin - should be redirected to login
-    await gotoAdminPath(page, '/admin');
+    await gotoAdminPath(page);
 
     // Should be redirected to login page
     await expect(page).toHaveTitle(TITLE_LOGIN);
@@ -34,7 +34,7 @@ test.describe('Legacy Admin Token Migration', () => {
     });
 
     // Navigate to login page
-    await gotoAdminPath(page, '/admin');
+    await gotoAdminPath(page);
     await expect(page).toHaveTitle(TITLE_LOGIN);
 
     // Perform fresh login
@@ -66,7 +66,7 @@ test.describe('Legacy Admin Token Migration', () => {
     });
 
     // Navigate to trigger authentication check - should redirect to login
-    await gotoAdminPath(page, '/admin/settings');
+    await gotoAdminPath(page, 'settings');
     await expect(page).toHaveTitle(TITLE_LOGIN);
     await expect(page.getByText('Log in to your Strapi account')).toBeVisible();
   });
