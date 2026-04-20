@@ -27,6 +27,17 @@ const {
   },
 } = strapiDataTransfer;
 
+const resolveRemotePullAssetIdleTimeoutMs = (value: unknown): number | undefined => {
+  if (value == null || value === '') {
+    return undefined;
+  }
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n) || n <= 0) {
+    return undefined;
+  }
+  return n;
+};
+
 interface CmdOptions {
   from?: URL;
   fromToken: string;
@@ -37,6 +48,7 @@ interface CmdOptions {
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   throttle?: number;
   force?: boolean;
+  checksums?: boolean;
 }
 /**
  * Transfer command.
@@ -54,6 +66,7 @@ export default async (opts: CmdOptions) => {
   }
 
   const strapi = await createStrapiInstance();
+  const checksumsEnabled = opts.checksums !== false;
   let source;
   let destination;
 
@@ -69,6 +82,10 @@ export default async (opts: CmdOptions) => {
       exitWith(1, 'Missing token for remote destination');
     }
 
+    const assetIdleTimeoutMs = resolveRemotePullAssetIdleTimeoutMs(
+      strapi.config.get('server.transfer.remote.assetIdleTimeoutMs')
+    );
+
     source = createRemoteStrapiSourceProvider({
       getStrapi: () => strapi,
       url: opts.from,
@@ -76,6 +93,8 @@ export default async (opts: CmdOptions) => {
         type: 'token',
         token: opts.fromToken,
       },
+      ...(assetIdleTimeoutMs !== undefined ? { streamTimeout: assetIdleTimeoutMs } : {}),
+      ...(checksumsEnabled ? { verifyChecksums: true } : {}),
     });
   }
 
@@ -101,6 +120,7 @@ export default async (opts: CmdOptions) => {
       },
       strategy: 'restore',
       restore: parseRestoreFromOptions(opts, strapi),
+      ...(checksumsEnabled ? { verifyChecksums: true } : {}),
     });
   }
 
@@ -145,6 +165,19 @@ export default async (opts: CmdOptions) => {
     getAssetsBackupHandler(engine, { force: opts.force, action: 'transfer' })
   );
 
+  // Update more frequently to ensure elapsed time is accurate even if the stage is not progressing
+  const activeStages = new Set<string>();
+  const lastStageData: Record<string, any> = {};
+  const interval = setInterval(() => {
+    for (const stage of activeStages) {
+      if (lastStageData[stage]) {
+        // Clone the lastStageData and ensure endTime is undefined so elapsed uses Date.now()
+        const dataCopy = { ...lastStageData[stage], endTime: undefined };
+        updateLoader(stage as any, { [stage]: dataCopy });
+      }
+    }
+  }, 100);
+
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
   });
@@ -154,12 +187,17 @@ export default async (opts: CmdOptions) => {
   });
 
   progress.on('stage::progress', ({ stage, data }) => {
+    lastStageData[stage] = data[stage];
+    activeStages.add(stage);
     updateLoader(stage, data);
   });
 
   progress.on('stage::error', ({ stage, data }) => {
     updateLoader(stage, data).fail();
   });
+
+  progress.on('transfer::finish', () => clearInterval(interval));
+  progress.on('transfer::error', () => clearInterval(interval));
 
   progress.on('transfer::start', async () => {
     console.log(`Starting transfer...`);
