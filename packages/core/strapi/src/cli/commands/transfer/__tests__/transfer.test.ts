@@ -14,6 +14,7 @@ jest.mock('../../../utils/data-transfer', () => {
         telemetry: {
           send: jest.fn(),
         },
+        contentTypes: {},
       };
     },
     getDefaultExportName: jest.fn(() => 'default'),

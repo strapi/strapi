@@ -24,7 +24,17 @@ The `openapi:generate` test compares the generated OpenAPI document to a **Jest 
 
    You can omit `test:cli:clean` if you only need to refresh snapshots and the test app is already up to date.
 
-2. **Regenerate the snapshot** with Jest’s update flag. The CLI runner sets `TEST_APPS` and `JWT_SECRET`; you must pass the same when running Jest alone:
+2. **Regenerate the snapshot** with Jest’s update flag.
+
+   **Using the CLI test runner** (recommended; it sets `TEST_APPS`, `JWT_SECRET`, and yalc like a normal run):
+
+   ```bash
+   yarn test:cli -d strapi -u -- --testPathPattern=openapi-generate
+   ```
+
+   Or run all snapshot tests in every domain: `yarn test:cli:update` (same as `yarn test:cli -u`).
+
+   **Using Jest alone:** the runner sets `TEST_APPS` and `JWT_SECRET`; you must pass the same when running Jest directly:
 
    ```bash
    TEST_APPS="$PWD/test-apps/cli/test-app-0" JWT_SECRET=test-jwt-secret \
@@ -61,7 +71,13 @@ You can skip `test:cli:clean` if the app is already current and you only need to
 
 **Regenerating snapshots**
 
-The CLI runner sets `TEST_APPS` and `JWT_SECRET`; pass the same when running Jest alone from the **repository root**:
+From the repo root, `yarn test:cli -u` (or `yarn test:cli:update`) forwards `-u` to Jest. Narrow the run with domains and extra Jest args after `--`:
+
+```bash
+yarn test:cli -d strapi -u -- --testPathPattern='openapi-generate'
+```
+
+The CLI runner sets `TEST_APPS` and `JWT_SECRET`. If you use **Jest alone** instead, pass the same env vars:
 
 ```bash
 TEST_APPS="$PWD/test-apps/cli/test-app-0" JWT_SECRET=test-jwt-secret \

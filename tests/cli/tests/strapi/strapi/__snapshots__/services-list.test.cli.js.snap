@@ -44,6 +44,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::i18n.ai-localizations                        │
 │ plugin::i18n.ai-localization-jobs                    │
 │ plugin::i18n.settings                                │
+│ plugin::i18n.fill-from-locale                        │
 │ plugin::documentation.documentation                  │
 │ plugin::documentation.override                       │
 │ plugin::graphql.builders                             │

@@ -7,7 +7,7 @@ import {
   type TrackingEvent,
   useAPIErrorHandler,
 } from '@strapi/admin/strapi-admin';
-import { useGetAIFeatureConfigQuery, useAIAvailability } from '@strapi/admin/strapi-admin/ee';
+import { useGetAiFeatureConfigQuery, useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -200,7 +200,7 @@ const useDocumentActions: UseDocumentActions = () => {
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const { data: aiFeatureConfig } = useGetAIFeatureConfigQuery();
+  const { data: aiFeatureConfig } = useGetAiFeatureConfigQuery();
   const isAiAvailable = useAIAvailability();
 
   // Get metadata from context providers for tracking purposes
@@ -370,7 +370,7 @@ const useDocumentActions: UseDocumentActions = () => {
           fromPreview,
           fromRelationModal,
           ...(isAiAvailable
-            ? { isAIi18nConfigured: Boolean(aiFeatureConfig?.isAIi18nConfigured) }
+            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
             : {}),
         });
 
@@ -473,7 +473,7 @@ const useDocumentActions: UseDocumentActions = () => {
           fromPreview,
           fromRelationModal,
           ...(isAiAvailable
-            ? { isAIi18nConfigured: Boolean(aiFeatureConfig?.isAIi18nConfigured) }
+            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
             : {}),
         });
         toggleNotification({
@@ -620,7 +620,7 @@ const useDocumentActions: UseDocumentActions = () => {
           fromPreview,
           fromRelationModal,
           ...(isAiAvailable
-            ? { isAIi18nConfigured: Boolean(aiFeatureConfig?.isAIi18nConfigured) }
+            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
             : {}),
         });
 
@@ -722,7 +722,7 @@ const useDocumentActions: UseDocumentActions = () => {
         trackUsage('didCreateEntry', {
           ...trackerProperty,
           ...(isAiAvailable
-            ? { isAIi18nConfigured: Boolean(aiFeatureConfig?.isAIi18nConfigured) }
+            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
             : {}),
         });
         toggleNotification({
