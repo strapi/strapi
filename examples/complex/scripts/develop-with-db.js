@@ -20,9 +20,9 @@ const UPLOADS_DIR = path.join(COMPLEX_DIR, 'public', 'uploads');
 
 const dbType = process.argv[2];
 
-if (!dbType || !['postgres', 'mysql'].includes(dbType)) {
+if (!dbType || !['postgres', 'mysql', 'mariadb'].includes(dbType)) {
   console.error('Error: Database type is required');
-  console.error('Usage: node develop-with-db.js <postgres|mysql>');
+  console.error('Usage: node develop-with-db.js <postgres|mysql|mariadb>');
   process.exit(1);
 }
 
@@ -43,7 +43,7 @@ function ensureContainerRunning(serviceName) {
       console.log('Waiting for database to be ready...');
       waitForPostgresReady(containerId);
     }
-    if (dbType === 'mysql') {
+    if (dbType === 'mysql' || dbType === 'mariadb') {
       console.log('Waiting for database to be ready...');
       waitForMysqlReady(containerId);
     }
@@ -60,7 +60,7 @@ function ensureContainerRunning(serviceName) {
       console.log('Waiting for database to be ready...');
       waitForPostgresReady(getContainerId(DOCKER_COMPOSE_FILE, COMPLEX_DIR, serviceName));
     }
-    if (dbType === 'mysql') {
+    if (dbType === 'mysql' || dbType === 'mariadb') {
       console.log('Waiting for database to be ready...');
       waitForMysqlReady(getContainerId(DOCKER_COMPOSE_FILE, COMPLEX_DIR, serviceName));
     }
@@ -76,6 +76,8 @@ function startStrapi() {
     ensureContainerRunning('postgres');
   } else if (dbType === 'mysql') {
     ensureContainerRunning('mysql');
+  } else if (dbType === 'mariadb') {
+    ensureContainerRunning('mariadb');
   }
 
   const env = getDatabaseEnv(dbType);

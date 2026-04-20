@@ -1,0 +1,17 @@
+{
+  "$schema": "../scenario-schema.json",
+  "id": "v5-5-7-to-workspace",
+  "description": "Canonical v5 seed (seed-v5.js) at published Strapi 5.7.0, then workspace — no v4 step.",
+  "dataOrigin": "v5",
+  "baseline": {
+    "type": "v5-pinned",
+    "initialVersion": "5.7.0"
+  },
+  "stages": [
+    {
+      "id": "workspace",
+      "type": "workspace",
+      "validate": ["full-v5-origin"]
+    }
+  ]
+}

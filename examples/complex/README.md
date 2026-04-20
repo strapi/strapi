@@ -135,6 +135,19 @@ yarn db:check:mysql
 
 This displays a table showing how many records are in each table, useful for quickly seeing if the database is empty, has data, etc.
 
+#### MariaDB (MySQL-compatible; Strapi uses `DATABASE_CLIENT=mysql`)
+
+Same UX as MySQL; Compose maps host **`MARIADB_PORT` → container 3306** (default host port **3307** so it can run beside MySQL on **3306**).
+
+```bash
+yarn db:start:mariadb
+yarn db:stop:mariadb
+yarn db:snapshot:mariadb <name>
+yarn db:restore:mariadb <name>
+yarn db:wipe:mariadb
+yarn db:check:mariadb
+```
+
 ### Typical Migration Testing Workflow
 
 1. **Setup v4 project** (if not already done):
@@ -206,22 +219,40 @@ yarn db:restore:postgres mybackup
 From the **repository root**, after a full `yarn build`:
 
 ```bash
-yarn test:migrations:v5
+yarn test:migrations --initial 4.26.0
 ```
 
-This wipes isolated state under `examples/complex/.migration-v5/`, scaffolds a pinned Strapi v4 app, seeds it, and runs `yarn test:migration` (v5) against the same database. Uses Compose project `strapi_migration_v5` by default so it does not reuse `strapi_complex` containers.
+You must pass **`--initial <semver>`** (unless you use **`--scenario`**): that is the **only** explicit Strapi/npm version you choose for the baseline (v4 or v5). **Optional `--via`** adds intermediate published Strapi boots. The **last step is always workspace** — the current monorepo (`examples/complex` + workspace packages). There is **no** final Strapi version flag.
+
+This wipes isolated state under `examples/complex/.migration-v5/`, scaffolds the baseline app, seeds it, optionally runs `--via` pinned releases, then validates against **workspace** on the same database. **`--initial` 4.x** = v4 scaffold + `scripts/seed.js`; **`--initial` 5.x** = pinned v5 + `scripts/seed-v5.js`. Uses Compose project `strapi_migration_v5` by default. A typical run with `sqlite` and `--skip-build` is often **about 1–4 minutes**. **Instant dry-run:** `yarn test:migrations:plan --initial 4.26.0` (or `--print-plan`).
+
+**CI, path filters, matrix:** see [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job).
 
 Options:
 
-- `--database postgres` (default) | `mysql` | `sqlite`
+- `--initial <semver>` — **Required** when not using `--scenario`. Explicit starting npm version: **4.x** = v4 scaffold; **5.x** (e.g. `5.7.0`) = pinned v5 + v5 seed. **Final Strapi is always workspace** (not configurable).
+- `--via <semver>` / `-v` — repeatable; extra Strapi version(s) to boot **after** the baseline seed, before workspace (e.g. `5.30.0` after a v4 baseline, or a newer 5.x after a v5-only baseline). With any `--via`, validation defaults to `full-ladder`. With a **5.x** baseline and **no** `--via`, it defaults to `full-v5-origin` (v5 data expectations; see `tests/migration/framework/validators.js`). With a **4.x** baseline and no `--via`, it defaults to `full-v4-origin` (aliased as `full`).
+- `--scenario <path>` — JSON scenario file (overrides `--initial` / `--via` / `--validators`).
+- `--validators` — comma-separated list (e.g. `full-v4-origin`, `full-v5-origin`, `full-ladder`); see [`tests/migration/framework/validators.js`](../../tests/migration/framework/validators.js).
+- `--initial-node` / `--workspace-node` (alias `--final-node`) — optional Node major checks for the baseline phase vs the **workspace** validation phase only (not a Strapi version).
+- `--database postgres` (default) | `mysql` | `mariadb` (MySQL protocol; `DATABASE_CLIENT=mysql` against the MariaDB service) | `sqlite`
 - `--multiplier N` — scale seed and validation expectations
 - `--build` — run `yarn build` first; omit if you already built
 
-Optional env: copy [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example) to `tests/migration/v5/.env` to set ports or `DATABASE_CLIENT`. By default the script picks a **free host port** (preferring 5432 / 3306) so it works alongside another local Postgres; set `POSTGRES_PORT` and `DATABASE_PORT` to the same value to pin a port.
+Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example) → `tests/migration/v5/.env` (ports, compose project, seed scale; migration harness picks free ports when unset).
 
 Strapi v4 in the scaffold targets **Node ≤ 20**; use Node 20 if install or seed fails on newer Node.
 
-Use `yarn test:migrations:v5 --database sqlite` (pass flags after the script name; avoid an extra `--` before `--database` or Yarn may not forward options correctly).
+Use `yarn test:migrations --initial 4.26.0 --database sqlite` (pass flags after the script name; avoid an extra `--` before `--database` or Yarn may not forward options correctly).
+
+CLI examples:
+
+- `yarn test:migrations --initial 4.26.0 --via 5.30.0 --database sqlite` — v4 seed, boot Strapi `5.30.0`, then workspace (see `tests/migration/scenarios/v4-via-5-30-0-to-head.json`).
+- `yarn test:migrations --initial 5.7.0 --database sqlite` — v5-only path: `5.7.0` + `seed-v5.js`, then workspace (see `tests/migration/scenarios/v5-5-7-to-workspace.json`).
+- `yarn test:migrations --initial-node 20` — fail fast if the current Node major is not 20 (useful for the v4 scaffold).
+- `yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json` — JSON scenario.
+
+Optional: local DB checkpoint tips in [`tests/migration/CHECKPOINTS.md`](../../tests/migration/CHECKPOINTS.md).
 
 ### Snapshots
 
@@ -229,6 +260,7 @@ Database snapshots are stored in the `snapshots/` directory:
 
 - PostgreSQL: `snapshots/postgres-<name>.sql`
 - MySQL: `snapshots/mysql-<name>.sql`
+- MariaDB: `snapshots/mariadb-<name>.sql`
 
 Snapshots are gitignored and should not be committed to the repository.
 
@@ -250,6 +282,12 @@ yarn develop:postgres
 yarn develop:mysql
 ```
 
+**Start with MariaDB:**
+
+```bash
+yarn develop:mariadb
+```
+
 These commands will:
 
 - ✅ Automatically start the database container if it's not already running
@@ -261,6 +299,7 @@ These commands will:
 
 - PostgreSQL: port `5432` (override with `POSTGRES_PORT`)
 - MySQL: port `3306` (override with `MYSQL_PORT`)
+- MariaDB: host port `3307` by default (override with `MARIADB_PORT`; maps to container `3306`)
 
 ### Standard Strapi Commands
 

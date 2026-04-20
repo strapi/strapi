@@ -125,13 +125,23 @@ function assertMysqlReady(containerId) {
 function getDatabaseEnv(dbType) {
   const env = { ...process.env };
 
-  if (!dbType || !['postgres', 'mysql'].includes(dbType)) {
+  if (!dbType || !['postgres', 'mysql', 'mariadb'].includes(dbType)) {
     throw new Error(`Unsupported database type: ${dbType}`);
   }
 
   const postgresPort = env.POSTGRES_PORT || '5432';
   const mysqlPort = env.MYSQL_PORT || '3306';
-  const databasePort = env.DATABASE_PORT || (dbType === 'postgres' ? postgresPort : mysqlPort);
+  const mariadbPort = env.MARIADB_PORT || '3307';
+
+  let databasePort;
+  if (dbType === 'postgres') {
+    databasePort = env.DATABASE_PORT || postgresPort;
+  } else if (dbType === 'mysql') {
+    databasePort = env.DATABASE_PORT || mysqlPort;
+  } else {
+    // Strapi client is still `mysql` (mysql2); MariaDB service maps a host port (default 3307 in compose).
+    databasePort = env.DATABASE_PORT || mariadbPort;
+  }
 
   env.DATABASE_CLIENT = dbType === 'postgres' ? 'postgres' : 'mysql';
   env.DATABASE_HOST = env.DATABASE_HOST || 'localhost';

@@ -338,10 +338,14 @@ jobs:
 
   migration_v5:
     if: needs.conditions.outputs.migrations == 'true'
-    name: 'v4 → v5 migration test (sqlite, node: 20)'
+    name: 'v4 → workspace migration test (latest v4, ${{ matrix.database }}, node: 20)'
     runs-on: ubuntu-latest
     needs: [conditions, build]
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres, mysql, mariadb]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -351,8 +355,16 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
+      # Latest Strapi v4 line: npm dist-tag `legacy` on @strapi/strapi (see tests/migration/README.md).
+      - name: Resolve latest Strapi v4 from npm
+        id: strapi_v4
+        run: |
+          VERSION="$(npm view @strapi/strapi@legacy version)"
+          echo "Resolved @strapi/strapi@legacy → ${VERSION}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+      # `timeout` avoids a hung install/boot blocking the runner until the job's 30m cap (ubuntu images ship coreutils `timeout`).
       - name: Run migration integration test
-        run: yarn test:migrations:v5 --database sqlite --skip-build
+        run: timeout 25m yarn test:migrations --initial "${{ steps.strapi_v4.outputs.version }}" --database ${{ matrix.database }} --skip-build
 
   cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'

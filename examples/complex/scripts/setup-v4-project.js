@@ -30,6 +30,9 @@ function findDockerComposeFile(v4ProjectDir) {
   return complexDockerCompose;
 }
 
+/** Pinned Strapi v4 app versions (npm), e.g. 4.26.0 — set by migration tests via STRAPI_V4_VERSION */
+const STRAPI_V4_VERSION = process.env.STRAPI_V4_VERSION || '4.26.0';
+
 const CONTENT_TYPES = [
   'basic',
   'basic-dp',
@@ -40,6 +43,7 @@ const CONTENT_TYPES = [
 ];
 
 console.log('Setting up Strapi v4 project at:', V4_PROJECT_DIR);
+console.log('Strapi v4 package version:', STRAPI_V4_VERSION);
 console.log('⚠️  Note: This will overwrite existing files in the v4 project.\n');
 
 // Ensure the v4 project directory exists
@@ -73,9 +77,9 @@ const packageJson = {
     'seed:mysql': 'node scripts/seed-with-db.js mysql',
   },
   dependencies: {
-    '@strapi/plugin-i18n': '4.26.0',
-    '@strapi/plugin-users-permissions': '4.26.0',
-    '@strapi/strapi': '4.26.0',
+    '@strapi/plugin-i18n': STRAPI_V4_VERSION,
+    '@strapi/plugin-users-permissions': STRAPI_V4_VERSION,
+    '@strapi/strapi': STRAPI_V4_VERSION,
     entities: '2.2.0',
     mysql2: '3.20.0',
     pg: '8.20.0',
