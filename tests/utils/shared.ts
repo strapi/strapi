@@ -182,15 +182,39 @@ export const withContentManagerPublish = async (
   await done;
 };
 
+/** Map a segment under `/admin` (or legacy `/admin/…`) to a pathname. */
+function resolveAdminUrl(adminPath: string): string {
+  let s = adminPath.trim();
+  if (s === '' || s === '/') {
+    return '/admin';
+  }
+  s = s.replace(/^\/+/, '');
+  if (s === 'admin' || s.startsWith('admin/')) {
+    s = s.replace(/^admin\/?/, '');
+  }
+  return s === '' ? '/admin' : `/admin/${s}`;
+}
+
 /**
- * Navigate to a path in the admin SPA when auth/session may have changed (cookies, localStorage, tokens).
+ * Navigate within the admin SPA when auth/session may have changed (cookies, localStorage, tokens).
  *
- * Uses `waitUntil: 'domcontentloaded'` instead of Playwright’s default `load`: a client-side redirect
- * to login can overlap a full navigation; waiting for `load` then races (Firefox: `NS_BINDING_ABORTED`).
- * Subsequent `expect()` calls still wait for the UI.
+ * **`adminPath`** — path after `/admin`: omit or `''` for `/admin`; `'settings'` → `/admin/settings`.
+ * You do not repeat the `/admin` prefix (legacy strings starting with `/admin` are still accepted).
+ *
+ * **`options`** — forwarded to `page.goto` (default `waitUntil: 'domcontentloaded'` unless overridden).
+ * We default to `domcontentloaded` instead of Playwright’s `load`: a client-side redirect to login can
+ * overlap a full navigation; waiting for `load` then races (Firefox: `NS_BINDING_ABORTED`).
  */
-export const gotoAdminPath = async (page: Page, path: string): Promise<void> => {
-  await page.goto(path, { waitUntil: 'domcontentloaded' });
+export const gotoAdminPath = async (
+  page: Page,
+  adminPath: string = '',
+  options?: Parameters<Page['goto']>[1]
+): Promise<void> => {
+  const href = resolveAdminUrl(adminPath);
+  await page.goto(href, {
+    ...options,
+    waitUntil: options?.waitUntil ?? 'domcontentloaded',
+  });
 };
 
 /**
