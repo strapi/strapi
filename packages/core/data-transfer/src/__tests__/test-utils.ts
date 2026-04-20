@@ -40,7 +40,7 @@ export const assertReadStreamBackpressure = async <T = unknown>(
   const { delayMs = 10, minChunksForBackpressure } = options;
   let sourcePaused = false;
   const originalPause = stream.pause.bind(stream);
-  stream.pause = function (this: Readable) {
+  stream.pause = function pauseWithBackpressureTracking(this: Readable) {
     sourcePaused = true;
     return originalPause();
   };
@@ -71,7 +71,7 @@ export const assertWriteStreamBackpressure = async <T = unknown>(
   const source = Readable.from(chunks, { objectMode: true });
   let sourcePaused = false;
   const originalPause = source.pause.bind(source);
-  source.pause = function (this: Readable) {
+  source.pause = function pauseWithBackpressureTracking(this: Readable) {
     sourcePaused = true;
     return originalPause();
   };

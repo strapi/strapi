@@ -11,7 +11,7 @@ describe('stream utils', () => {
 
       const source = Readable.from(data, { objectMode: true });
       const originalPause = source.pause.bind(source);
-      source.pause = function () {
+      source.pause = function trackPauseForBackpressureTest() {
         sourcePaused = true;
         return originalPause();
       };
@@ -75,7 +75,7 @@ describe('stream utils', () => {
 
       const source = Readable.from(data, { objectMode: true });
       const originalPause = source.pause.bind(source);
-      source.pause = function () {
+      source.pause = function trackPauseForBackpressureTest() {
         sourcePaused = true;
         return originalPause();
       };
