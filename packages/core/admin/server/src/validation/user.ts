@@ -1,5 +1,6 @@
 import { isUndefined } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
+import { mergeValidatedBody } from '../utils/merge-validated-body';
 import validators from './common-validators';
 
 const userCreationSchema = yup
@@ -52,8 +53,22 @@ const usersDeleteSchema = yup
   .noUnknown();
 
 export const validateUserCreationInput = validateYupSchema(userCreationSchema);
-export const validateProfileUpdateInput = validateYupSchema(profileUpdateSchema);
-export const validateUserUpdateInput = validateYupSchema(userUpdateSchema);
+
+const runProfileUpdateValidation = validateYupSchema(profileUpdateSchema);
+const runUserUpdateValidation = validateYupSchema(userUpdateSchema);
+
+/** Yup output merged onto the raw body so controllers see the same transforms as persistence (e.g. lowercased email). */
+export const validateProfileUpdateInput = async (input: unknown) => {
+  const validated = await runProfileUpdateValidation(input);
+  return mergeValidatedBody(input as object, validated);
+};
+
+/** Same merge behavior as {@link validateProfileUpdateInput} for admin user CRUD updates. */
+export const validateUserUpdateInput = async (input: unknown) => {
+  const validated = await runUserUpdateValidation(input);
+  return mergeValidatedBody(input as object, validated);
+};
+
 export const validateUsersDeleteInput = validateYupSchema(usersDeleteSchema);
 export const schemas = {
   userCreationSchema,

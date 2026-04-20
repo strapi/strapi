@@ -95,12 +95,12 @@ export default {
     const { id } = ctx.params as Update.Params;
     const { body: input } = ctx.request as Update.Request;
 
-    await validateUserUpdateInput(input);
+    const data = (await validateUserUpdateInput(input)) as typeof input;
 
-    if (_.has(input, 'email')) {
+    if (_.has(data, 'email')) {
       const uniqueEmailCheck = await getService('user').exists({
         id: { $ne: id },
-        email: input.email,
+        email: data.email,
       });
 
       if (uniqueEmailCheck) {
@@ -108,7 +108,7 @@ export default {
       }
     }
 
-    const updatedUser = await getService('user').updateById(id, input);
+    const updatedUser = await getService('user').updateById(id, data);
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');

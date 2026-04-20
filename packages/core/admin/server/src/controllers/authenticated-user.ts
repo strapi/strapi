@@ -18,12 +18,12 @@ export default {
   async updateMe(ctx: Context) {
     const input = ctx.request.body as UpdateMe.Request['body'];
 
-    await validateProfileUpdateInput(input);
+    const data = (await validateProfileUpdateInput(input)) as UpdateMe.Request['body'];
 
     const userService = getService('user');
     const authServer = getService('auth');
 
-    const { currentPassword, ...userInfo } = input;
+    const { currentPassword, ...userInfo } = data;
 
     if (currentPassword && userInfo.password) {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);

@@ -67,12 +67,12 @@ export default {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
 
-    await validateUserUpdateInput(input);
+    const data = (await validateUserUpdateInput(input)) as typeof input;
 
-    if (_.has(input, 'email')) {
+    if (_.has(data, 'email')) {
       const uniqueEmailCheck = await getService('user').exists({
         id: { $ne: id },
-        email: input.email,
+        email: data.email,
       });
 
       if (uniqueEmailCheck) {
@@ -82,11 +82,11 @@ export default {
 
     const user = await getService('user').findOne(id, null);
 
-    if (!(await hasAdminSeatsAvaialble()) && !user.isActive && input.isActive) {
+    if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');
     }
 
-    const updatedUser = await getService('user').updateById(id, input);
+    const updatedUser = await getService('user').updateById(id, data);
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');
