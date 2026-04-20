@@ -50,8 +50,8 @@ const config = {
         entryPoints: ['../packages/core/strapi/src/admin.ts'],
         tsconfig: '../packages/core/strapi/tsconfig.build.json',
         entryDocument: null,
-        // Under classic preset `docs` path so sidebars pick up `exports/`.
-        out: 'docs/exports',
+        // Plugin output is under the docs content root (`site/docs/`); use `exports`, not `docs/exports`.
+        out: 'exports',
         watch: process.env.TYPEDOC_WATCH,
       },
     ],
