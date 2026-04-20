@@ -9,7 +9,7 @@ export const server: SetupServer = setupServer(
      * TRACKING
      */
     http.post('https://analytics.strapi.io/api/v2/track', () => {
-      return HttpResponse.json({});
+      return new HttpResponse();
     }),
     /**
      *
@@ -388,7 +388,7 @@ export const server: SetupServer = setupServer(
      *
      */
     http.post('https://analytics.strapi.io/submit-nps', () => {
-      return HttpResponse.json({});
+      return new HttpResponse();
     }),
     /**
      * CONTENT-API (API TOKENS)
@@ -635,7 +635,7 @@ export const server: SetupServer = setupServer(
       });
     }),
     http.get('/test-fetch-client', () => {
-      return HttpResponse.json({});
+      return new HttpResponse();
     }),
   ]
 );

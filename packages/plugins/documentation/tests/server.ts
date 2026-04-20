@@ -15,13 +15,13 @@ const handlers = [
     });
   }),
   http.post('*/regenerateDoc', () => {
-    return HttpResponse.json({});
+    return new HttpResponse();
   }),
   http.delete('*/deleteDoc/:version', () => {
-    return HttpResponse.json({});
+    return new HttpResponse();
   }),
   http.put('*/updateSettings', () => {
-    return HttpResponse.json({});
+    return new HttpResponse();
   }),
 ];
 

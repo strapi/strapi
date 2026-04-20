@@ -290,8 +290,14 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       return { data: result };
     } catch (error) {
-      if (error instanceof SyntaxError && response.ok) {
-        // Making sure that a SyntaxError doesn't throw if it's successful
+      // An empty 200 body causes `response.json()` to throw a `SyntaxError`. We treat
+      // it as success and return an empty payload. We match on `error.name` rather
+      // than `instanceof SyntaxError` because constructor identity differs across JS
+      // realms — a Response from a different realm (e.g. undici under jsdom in tests,
+      // a service worker or iframe in browsers) throws a `SyntaxError` whose
+      // constructor is not the same identity as the one this module closes over. Name
+      // comparison is realm-agnostic.
+      if ((error as Error | null)?.name === 'SyntaxError' && response.ok) {
         return { data: [], status: response.status } as FetchResponse<any>;
       } else {
         throw error;

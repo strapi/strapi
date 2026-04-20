@@ -13,7 +13,7 @@ export const handlers: HttpHandler[] = [
    *
    */
   http.put('/content-manager/content-types/:model/configuration', () => {
-    return HttpResponse.json({});
+    return new HttpResponse();
   }),
   http.get<{ model: string }>(
     '/content-manager/content-types/:model/configuration',

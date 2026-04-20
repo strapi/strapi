@@ -72,7 +72,7 @@ export const HANDLERS: HttpHandler[] = [
     })
   ),
   http.put('/review-workflows/content-manager/collection-types/:contentType/:id/assignee', () => {
-    return HttpResponse.json({});
+    return new HttpResponse();
   }),
   http.get('/review-workflows/content-manager/:collectionType/:contentType/:id/stages', () =>
     HttpResponse.json({

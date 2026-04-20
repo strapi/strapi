@@ -22,7 +22,7 @@ const handlers: HttpHandler[] = [
     });
   }),
   http.put('/upload/configuration', () => {
-    return HttpResponse.json({});
+    return new HttpResponse();
   }),
   http.get('/upload/folders/:id', () => {
     return HttpResponse.json({
