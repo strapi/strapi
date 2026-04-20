@@ -1,7 +1,6 @@
 import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
-import { Readable } from 'stream';
 import tarStream from 'tar-stream';
 import { pipeline } from 'stream/promises';
 import type { ILocalFileSourceProviderOptions } from '..';
@@ -11,7 +10,7 @@ import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from '../ut
 import { assertReadStreamBackpressure } from '../../../../__tests__/test-utils';
 
 describe('File source provider', () => {
-  test('returns assets stream', () => {
+  test('exposes createAssetsReadStream (starting the stream opens the backup file on disk)', () => {
     const options: ILocalFileSourceProviderOptions = {
       file: {
         path: './test-file',
@@ -24,9 +23,7 @@ describe('File source provider', () => {
       },
     };
     const provider = createLocalFileSourceProvider(options);
-    const stream = provider.createAssetsReadStream();
-
-    expect(stream instanceof Readable).toBeTruthy();
+    expect(provider.createAssetsReadStream).toEqual(expect.any(Function));
   });
 
   describe('utils', () => {

@@ -37,7 +37,7 @@ export const assertReadStreamBackpressure = async <T = unknown>(
   stream: Readable,
   options: { delayMs?: number; minChunksForBackpressure?: number } = {}
 ): Promise<{ sourcePaused: boolean; chunks: T[] }> => {
-  const { delayMs = 10 } = options;
+  const { delayMs = 10, minChunksForBackpressure } = options;
   let sourcePaused = false;
   const originalPause = stream.pause.bind(stream);
   stream.pause = function (this: Readable) {
@@ -47,6 +47,13 @@ export const assertReadStreamBackpressure = async <T = unknown>(
 
   const { writable, chunks } = createSlowWritable<T>({ delayMs, highWaterMark: 1 });
   await pipeline(stream, writable);
+
+  if (minChunksForBackpressure !== undefined && chunks.length < minChunksForBackpressure) {
+    throw new Error(
+      `assertReadStreamBackpressure: need at least ${minChunksForBackpressure} chunk(s) to meaningfully test backpressure, got ${chunks.length}`
+    );
+  }
+
   return {
     sourcePaused,
     chunks,

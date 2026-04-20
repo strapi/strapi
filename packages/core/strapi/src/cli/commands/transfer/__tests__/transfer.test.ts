@@ -17,6 +17,7 @@ jest.mock('../../../utils/data-transfer', () => {
       telemetry: {
         send: jest.fn(),
       },
+      contentTypes: {},
     })),
     getDefaultExportName: jest.fn(() => 'default'),
     buildTransferTable: jest.fn(() => {
@@ -53,17 +54,24 @@ jest.mock('@strapi/data-transfer', () => {
     engine: {
       ...actual.engine,
       createTransferEngine() {
+        const handlers: Record<string, Array<(...args: unknown[]) => void>> = {};
+        const stream = {
+          on(event: string, fn: (...args: unknown[]) => void) {
+            (handlers[event] ||= []).push(fn);
+            return stream;
+          },
+        };
         return {
-          transfer: jest.fn(() => {
+          transfer: jest.fn(async () => {
+            // action.ts clears setInterval on this event; real stream emits after transfer.
+            handlers['transfer::finish']?.forEach((fn) => fn());
             return {
               engine: {},
             };
           }),
           progress: {
             on: jest.fn(),
-            stream: {
-              on: jest.fn(),
-            },
+            stream,
           },
           sourceProvider: { name: 'testSource' },
           destinationProvider: { name: 'testDestination' },
@@ -83,10 +91,16 @@ describe('Transfer', () => {
   // mock command utils
 
   // console spies
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'info').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  beforeAll(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'info').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
   const destinationUrl = new URL('http://one.localhost/admin');
   const destinationToken = 'test-token';
@@ -103,6 +117,7 @@ describe('Transfer', () => {
       telemetry: {
         send: jest.fn(),
       },
+      contentTypes: {},
     }));
   });
 
@@ -300,6 +315,7 @@ describe('Transfer', () => {
         telemetry: {
           send: jest.fn(),
         },
+        contentTypes: {},
       }));
 
       await expectExit(0, async () => {

@@ -61,7 +61,18 @@ const calculateTestAppsRequired = (domainConfigs, concurrency) => {
  */
 const buildForwardedRunnerArgs = (testYargs) => {
   /** Keys owned by tests/scripts/run-tests.js (not for Jest). */
-  const runnerKeys = new Set(['_', '$0', 'concurrency', 'c', 'domains', 'd', 'setup', 'f']);
+  const runnerKeys = new Set([
+    '_',
+    '$0',
+    'concurrency',
+    'c',
+    'domains',
+    'd',
+    'setup',
+    'f',
+    'updateSnapshot',
+    'u',
+  ]);
 
   const args = [...testYargs._];
 
