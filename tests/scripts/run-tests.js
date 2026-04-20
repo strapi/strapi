@@ -112,8 +112,6 @@ yargs
 
         const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
 
-        const forwardedRunnerArgs = buildForwardedRunnerArgs(testYargs);
-
         /**
          * Publishing all packages to the yalc store
          */
