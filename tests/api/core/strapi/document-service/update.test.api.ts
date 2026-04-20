@@ -4,10 +4,43 @@ import { omit } from 'lodash/fp';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { setupDatabaseReset } from '../../../utils/index';
-import resources from './resources/index';
+import baseResources from './resources/index';
+import nestedMediaLeaf from './resources/schemas/mixed-content-nested-media-leaf';
+import nestedMediaWrapper from './resources/schemas/mixed-content-nested-media-wrapper';
 import { ARTICLE_UID, findArticleDb } from './utils';
 
 let strapi: Core.Strapi;
+
+const resources = {
+  ...baseResources,
+  schemas: {
+    ...baseResources.schemas,
+    components: {
+      ...baseResources.schemas.components,
+      'mixed-content.mixed-content-nested-media-leaf': nestedMediaLeaf,
+      'mixed-content.mixed-content-nested-media-wrapper': nestedMediaWrapper,
+    },
+    'content-types': {
+      ...baseResources.schemas['content-types'],
+      'api::mixed-content.mixed-content': {
+        ...baseResources.schemas['content-types']['api::mixed-content.mixed-content'],
+        attributes: {
+          ...baseResources.schemas['content-types']['api::mixed-content.mixed-content'].attributes,
+          nestedSharedComponent: {
+            type: 'component',
+            component: 'mixed-content.mixed-content-nested-media-wrapper',
+            repeatable: false,
+            pluginOptions: {
+              i18n: {
+                localized: false,
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
 
 const updateArticle = async (params: Modules.Documents.ServiceParams['update']) => {
   return strapi.documents(ARTICLE_UID).update({ ...params });
