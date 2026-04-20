@@ -6,6 +6,8 @@ function hasStrapiLicense() {
   return Boolean(process.env.STRAPI_LICENSE?.trim());
 }
 
+/** @typedef {'ce' | 'ee'} E2eEdition */
+
 /**
  * CE vs EE for e2e: one resolution path for local runs, CI, and Playwright config.
  *
@@ -21,6 +23,13 @@ function hasStrapiLicense() {
  * Mutates `process.env`: sets `STRAPI_E2E_EDITION`; sets or clears `STRAPI_DISABLE_EE` for Strapi
  * (`packages/core/core/src/ee/index.ts` treats only `'true'` as force-CE); clears `STRAPI_LICENSE`
  * when edition is CE so child processes cannot boot as EE.
+ *
+ * This file lives next to Playwright `.ts` helpers but is loaded via `require('../utils/e2e-edition.ts')`
+ * from `tests/scripts/run-tests.js` (plain Node, not Playwright). Node resolves `.ts` when the extension
+ * is explicit; **body stays JS-parseable** so Node 20 (supported by `package.json` engines) does not
+ * need type stripping or SWC. Node 22+ would accept TypeScript syntax here too.
+ *
+ * @returns {E2eEdition}
  */
 function resolveE2eEdition() {
   const lifecycle = process.env.npm_lifecycle_event;
@@ -47,6 +56,9 @@ function resolveE2eEdition() {
   return hasStrapiLicense() ? 'ee' : 'ce';
 }
 
+/**
+ * @returns {E2eEdition}
+ */
 function applyE2eEditionEnv() {
   const lifecycle = process.env.npm_lifecycle_event;
   const explicitBefore = process.env.STRAPI_E2E_EDITION?.trim().toLowerCase();

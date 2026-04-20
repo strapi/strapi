@@ -122,7 +122,7 @@ If you add anything to the template, be sure to add this information to [the doc
 
 ## Running tests with environment variables (needed to run EE tests) {#e2e-ce-ee-env}
 
-Create **`tests/e2e/.env`** next to the e2e tests (see **`tests/e2e/.env.example`**). **`tests/scripts/run-tests.js`** loads that file with `dotenv` when it exists, then **`tests/utils/e2e-edition.js`** applies CE vs EE so the runner, Playwright, and Strapi agree. Do not rely on the **repository root** `.env` for e2e — it is not loaded unless you change the runner.
+Create **`tests/e2e/.env`** next to the e2e tests (see **`tests/e2e/.env.example`**). **`tests/scripts/run-tests.js`** loads that file with `dotenv` when it exists, then **`tests/utils/e2e-edition.ts`** applies CE vs EE so the runner, Playwright, and Strapi agree. Do not rely on the **repository root** `.env` for e2e — it is not loaded unless you change the runner.
 
 Optional: **`STRAPI_DISABLE_LICENSE_PING=true`** in the same file can match CI EE jobs when your license is offline-only (see `.github/actions/run-e2e-tests/script.sh`).
 
@@ -133,7 +133,7 @@ Optional: **`STRAPI_DISABLE_LICENSE_PING=true`** in the same file can match CI E
 | `ce`  | Community Edition: `STRAPI_DISABLE_EE=true` for Strapi; `STRAPI_LICENSE` is stripped from the runner env so children cannot boot as EE; EE-only specs are skipped. |
 | `ee`  | Enterprise: `STRAPI_DISABLE_EE` cleared; `STRAPI_LICENSE` must be present (and valid for Strapi to boot as EE).                                                    |
 
-**Resolution order** (see `tests/utils/e2e-edition.js`):
+**Resolution order** (see `tests/utils/e2e-edition.ts`):
 
 1. **`yarn test:e2e:ce`** → always CE (license removed from env for this process).
 2. **`yarn test:e2e:ee`** → EE; **exits with an error** if `STRAPI_LICENSE` is missing.
@@ -157,7 +157,7 @@ The composite action still exports `STRAPI_E2E_EDITION`, but the **`yarn test:e2
 
 To force CE or EE for a run, use **`yarn test:e2e:ce`** or **`yarn test:e2e:ee`** (do not rely on `STRAPI_E2E_EDITION=… yarn test:e2e` — the `test:e2e` script clears that variable via `cross-env` so auto-detection from `STRAPI_LICENSE` works).
 
-Playwright’s `reuseExistingServer` is **off by default** (see **`PLAYWRIGHT_REUSE_EXISTING_SERVER`** in the **Env Variables to Control Test Config** table) so a process already listening on the test port is not mistaken for this run’s Strapi — edition and env match what `e2e-edition.js` applied.
+Playwright’s `reuseExistingServer` is **off by default** (see **`PLAYWRIGHT_REUSE_EXISTING_SERVER`** in the **Env Variables to Control Test Config** table) so a process already listening on the test port is not mistaken for this run’s Strapi — edition and env match what `e2e-edition.ts` applied.
 
 ## Running tests with future flags
 

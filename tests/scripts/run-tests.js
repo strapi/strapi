@@ -65,7 +65,7 @@ yargs
         }
 
         if (type === 'e2e') {
-          const { applyE2eEditionEnv } = require('../utils/e2e-edition');
+          const { applyE2eEditionEnv } = require('../utils/e2e-edition.ts');
           applyE2eEditionEnv();
         }
 
