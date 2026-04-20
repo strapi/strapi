@@ -20,9 +20,16 @@ interface RestoreConfiguration {
 }
 
 /**
- * Base URL for the Strapi instance under test (HTTP DTS). **Requires `process.env.PORT`.**
- * No implicit default here — callers must set it (`yarn test:e2e` does; the manual CLI entry
- * `importData()` sets `PORT=8000` only when you run `dts-import.ts` directly and omit `PORT`).
+ * Base URL for the Strapi instance under test (HTTP DTS). **Requires a non-empty `process.env.PORT`.**
+ *
+ * **Normal e2e (`yarn test:e2e`):** `tests/utils/runners/browser-runner.js` passes `PORT` (and
+ * `HOST`, `TEST_APP_PATH`) into the Playwright subprocess **before** config loads; the generated
+ * per-app `playwright.config.js` assigns `process.env.PORT` again (`tests/scripts/run-tests.js`).
+ * `tests/utils/global-setup.ts` also fails fast if `PORT` is missing — same contract.
+ *
+ * **Manual CLI:** only `importData()` at the bottom of this file defaults `PORT` to `8000` when unset
+ * (first test-app slot). Other programmatic callers must set `PORT` themselves — we deliberately
+ * removed `?? 1337` so we never silently hit Strapi’s dev default while the runner uses `8000 + index`.
  */
 const getStrapiTestBaseUrl = () => {
   const port = process.env.PORT?.trim();
