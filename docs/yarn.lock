@@ -6734,6 +6734,7 @@ __metadata:
     typedoc: "npm:0.25.10"
     typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.4.4"
+    unist-util-visit: "npm:5.0.0"
   languageName: unknown
   linkType: soft
 
@@ -13713,7 +13714,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unist-util-visit@npm:^5.0.0":
+"unist-util-visit@npm:5.0.0, unist-util-visit@npm:^5.0.0":
   version: 5.0.0
   resolution: "unist-util-visit@npm:5.0.0"
   dependencies:

@@ -42,13 +42,13 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "unist-util-visit": "5.0.0",
     "@docusaurus/module-type-aliases": "3.10.0",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
     "docusaurus-plugin-typedoc": "0.22.0",
     "typedoc": "0.25.10",
     "typedoc-plugin-markdown": "3.17.1",
-    "typescript": "5.4.4"
+    "typescript": "5.4.4",
+    "unist-util-visit": "5.0.0"
   }
 }
