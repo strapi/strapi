@@ -256,7 +256,7 @@ export const handlers: HttpHandler[] = [
       },
     });
   }),
-  http.post<never, { data?: { target?: string } }>(
+  http.post<Record<string, never>, { data?: { target?: string } }>(
     '/content-manager/uid/generate',
     async ({ request }) => {
       const body = await request.json();
@@ -266,7 +266,7 @@ export const handlers: HttpHandler[] = [
       });
     }
   ),
-  http.post<never, { value?: string }>(
+  http.post<Record<string, never>, { value?: string }>(
     '/content-manager/uid/check-availability',
     async ({ request }) => {
       const body = await request.json();

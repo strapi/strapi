@@ -131,7 +131,7 @@ const handlers: HttpHandler[] = [
     });
   }),
 
-  http.post<never, { name: string; parent: number | null }>(
+  http.post<Record<string, never>, { name: string; parent: number | null }>(
     '/upload/folders',
     async ({ request }) => {
       const body = await request.json();

@@ -48,7 +48,7 @@ export const server = setupServer(
     http.get('/i18n/locales', () => {
       return HttpResponse.json(LOCALES);
     }),
-    http.post<never, Pick<Locale, 'code' | 'name' | 'isDefault'>>(
+    http.post<Record<string, never>, Pick<Locale, 'code' | 'name' | 'isDefault'>>(
       '/i18n/locales',
       async ({ request }) => {
         const body = await request.json();

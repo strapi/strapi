@@ -155,7 +155,7 @@ describe('useRBAC', () => {
 
     it('should check all the conditions and return their values in order', async () => {
       server.use(
-        http.post<never, { permissions: Array<{ action: string }> }>(
+        http.post<Record<string, never>, { permissions: Array<{ action: string }> }>(
           '/admin/permissions/check',
           async ({ request }) => {
             const body = await request.json();

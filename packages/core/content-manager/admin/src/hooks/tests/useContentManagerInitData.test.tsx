@@ -68,7 +68,7 @@ describe('useContentManagerInitData', () => {
           data: [],
         })
       ),
-      http.post<never, { permissions: Array<{ action: string }> }>(
+      http.post<Record<string, never>, { permissions: Array<{ action: string }> }>(
         '/admin/permissions/check',
         async ({ request }) => {
           permissionCheckCalls += 1;
@@ -123,7 +123,7 @@ describe('useContentManagerInitData', () => {
           data: [],
         })
       ),
-      http.post<never, { permissions: Array<{ subject: string }> }>(
+      http.post<Record<string, never>, { permissions: Array<{ subject: string }> }>(
         '/admin/permissions/check',
         async ({ request }) => {
           permissionCheckCalls += 1;

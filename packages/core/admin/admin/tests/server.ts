@@ -295,13 +295,16 @@ export const server: SetupServer = setupServer(
         data: mockData.webhooks,
       });
     }),
-    http.post<never, { ids: number[] }>('/admin/webhooks/batch-delete', async ({ request }) => {
-      const { ids } = await request.json();
+    http.post<Record<string, never>, { ids: number[] }>(
+      '/admin/webhooks/batch-delete',
+      async ({ request }) => {
+        const { ids } = await request.json();
 
-      return HttpResponse.json({
-        data: mockData.webhooks.filter((webhook) => !ids.includes(webhook.id)),
-      });
-    }),
+        return HttpResponse.json({
+          data: mockData.webhooks.filter((webhook) => !ids.includes(webhook.id)),
+        });
+      }
+    ),
     http.put<{ id: string }, { isEnabled: boolean }>(
       '/admin/webhooks/:id',
       async ({ request, params }) => {
