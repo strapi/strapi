@@ -16,9 +16,10 @@ function hasStrapiLicense() {
  * - `yarn test:e2e:ee` → EE; **process exits** if `STRAPI_LICENSE` is missing.
  * - `yarn test:e2e` → auto: EE if a license string is present, else CE (safe).
  *
- * **Explicit `STRAPI_E2E_EDITION`** (CI `run-e2e-tests`, shell, or `.env` when not cleared by
- * `cross-env`): `ce` forces CE; `ee` requires a license (falls back to CE with a warning when
- * running under `test:e2e` without one — only `test:e2e:ee` hard-fails).
+ * **Explicit `STRAPI_E2E_EDITION`** (CI `run-e2e-tests` / `script.sh`, your shell, or `.env`):
+ * `ce` forces CE; `ee` requires a license (falls back to CE with a warning when
+ * running under `test:e2e` without one — only `test:e2e:ee` hard-fails). Unset the variable for
+ * pure **auto** (license-based) on `yarn test:e2e`.
  *
  * Mutates `process.env`: sets `STRAPI_E2E_EDITION`; sets or clears `STRAPI_DISABLE_EE` for Strapi
  * (`packages/core/core/src/ee/index.ts` treats only `'true'` as force-CE); clears `STRAPI_LICENSE`
