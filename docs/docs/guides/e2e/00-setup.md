@@ -56,15 +56,13 @@ To run only one domain, meaning a top-level directory in e2e/tests such as "admi
 
 ```shell
 yarn test:e2e --domains=admin
-npm run test:e2e -- --domains=admin
 ```
 
-To pass file filters or Playwright-only flags (`--project`, `--grep`, `--reporter`, `--debug`, …), put them **after** a `--` that follows the runner options. With **npm**, you need an extra `--` so the script receives the rest: `npm run test:e2e -- --domains=admin -- login.spec.ts`.
+To pass file filters or Playwright-only flags (`--project`, `--grep`, `--reporter`, `--debug`, …), put them **after** a `--` that follows the runner options. (If you use **npm** instead of yarn, add one more `--` before those args: `npm run test:e2e -- --domains=admin -- login.spec.ts`.)
 
 ```shell
 # run only login.spec.ts in the admin domain
 yarn test:e2e --domains=admin -- login.spec.ts
-npm run test:e2e -- --domains=admin -- login.spec.ts
 ```
 
 You should still scope with `--domains` when filtering by file; otherwise every domain may be invoked and domains without that file can fail with "no tests found".
@@ -77,7 +75,6 @@ To run only a specific browser (to speed up test development, for example) you c
 
 ```shell
 yarn test:e2e --domains=admin -- login.spec.ts --project=chromium
-npm run test:e2e -- --domains=admin -- login.spec.ts --project=chromium
 ```
 
 To debug your tests with a browser instance and the playwright debugger, you can pass the
