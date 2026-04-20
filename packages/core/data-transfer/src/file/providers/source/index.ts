@@ -15,6 +15,7 @@ import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '..
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
+import { write } from '../../../utils/writable-async-write';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
 
@@ -77,6 +78,29 @@ class LocalFileSourceProvider implements ISourceProvider {
       },
       kind: 'info',
     });
+  }
+
+  /**
+   * tar `Parser` invokes the pipeline completion callback when the archive ends, but it does not
+   * reliably await async `onReadEntry` — defer `end` until outstanding async entry work is done.
+   */
+  #endPassThroughWhenTarIdle(
+    outStream: PassThrough,
+    activeAsyncEntries: () => number,
+    err?: Error | null
+  ) {
+    if (err) {
+      outStream.destroy(err);
+      return;
+    }
+    const tick = () => {
+      if (activeAsyncEntries() === 0) {
+        outStream.end();
+      } else {
+        setImmediate(tick);
+      }
+    };
+    tick();
   }
 
   /**
@@ -167,6 +191,16 @@ class LocalFileSourceProvider implements ISourceProvider {
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
     this.#reportInfo('creating assets read stream');
 
+    let activeAsyncEntries = 0;
+    const runReadEntry = async (fn: () => Promise<void>) => {
+      activeAsyncEntries += 1;
+      try {
+        await fn();
+      } finally {
+        activeAsyncEntries -= 1;
+      }
+    };
+
     pipeline(
       [
         inStream,
@@ -179,27 +213,29 @@ class LocalFileSourceProvider implements ISourceProvider {
             return isFilePathInDirname('assets/uploads', filePath);
           },
           async onReadEntry(entry: ReadEntry) {
-            const { path: filePath, size = 0 } = entry;
-            const normalizedPath = unknownPathToPosix(filePath);
-            const file = path.basename(normalizedPath);
-            let metadata;
-            try {
-              metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
-            } catch (error) {
-              throw new Error(`Failed to read metadata for ${file}`);
-            }
-            const asset: IAsset = {
-              metadata,
-              filename: file,
-              filepath: normalizedPath,
-              stats: { size },
-              stream: entry as unknown as Readable,
-            };
-            outStream.write(asset);
+            await runReadEntry(async () => {
+              const { path: filePath, size = 0 } = entry;
+              const normalizedPath = unknownPathToPosix(filePath);
+              const file = path.basename(normalizedPath);
+              let metadata;
+              try {
+                metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
+              } catch (error) {
+                throw new Error(`Failed to read metadata for ${file}`);
+              }
+              const asset: IAsset = {
+                metadata,
+                filename: file,
+                filepath: normalizedPath,
+                stats: { size },
+                stream: entry as unknown as Readable,
+              };
+              await write(outStream, asset);
+            });
           },
         }),
       ],
-      () => outStream.end()
+      (err) => this.#endPassThroughWhenTarIdle(outStream, () => activeAsyncEntries, err)
     );
 
     return outStream;
@@ -233,6 +269,16 @@ class LocalFileSourceProvider implements ISourceProvider {
 
     const outStream = new PassThrough({ objectMode: true });
 
+    let activeAsyncEntries = 0;
+    const runReadEntry = async (fn: () => Promise<void>) => {
+      activeAsyncEntries += 1;
+      try {
+        await fn();
+      } finally {
+        activeAsyncEntries -= 1;
+      }
+    };
+
     pipeline(
       [
         inStream,
@@ -246,43 +292,41 @@ class LocalFileSourceProvider implements ISourceProvider {
           },
 
           async onReadEntry(entry: ReadEntry) {
-            const transforms = [
-              // JSONL parser to read the data chunks one by one (line by line)
-              parser({
-                checkErrors: true,
-              }),
-              // The JSONL parser returns each line as key/value
-              (line: { key: string; value: object }) => line.value,
-            ];
+            await runReadEntry(async () => {
+              const transforms = [
+                // JSONL parser to read the data chunks one by one (line by line)
+                parser({
+                  checkErrors: true,
+                }),
+                // The JSONL parser returns each line as key/value
+                (line: { key: string; value: object }) => line.value,
+              ];
 
-            const stream = entry.pipe(chain(transforms));
+              const stream = entry.pipe(chain(transforms));
 
-            try {
-              for await (const chunk of stream) {
-                outStream.write(chunk);
+              try {
+                for await (const chunk of stream) {
+                  await write(outStream, chunk);
+                }
+              } catch (e: unknown) {
+                outStream.destroy(
+                  new ProviderTransferError(
+                    `Error parsing backup files from backup file ${entry.path}: ${
+                      (e as Error).message
+                    }`,
+                    {
+                      details: {
+                        error: e,
+                      },
+                    }
+                  )
+                );
               }
-            } catch (e: unknown) {
-              outStream.destroy(
-                new ProviderTransferError(
-                  `Error parsing backup files from backup file ${entry.path}: ${
-                    (e as Error).message
-                  }`,
-                  {
-                    details: {
-                      error: e,
-                    },
-                  }
-                )
-              );
-            }
+            });
           },
         }),
       ],
-      async () => {
-        // Manually send the 'end' event to the out stream
-        // once every entry has finished streaming its content
-        outStream.end();
-      }
+      (err) => this.#endPassThroughWhenTarIdle(outStream, () => activeAsyncEntries, err)
     );
 
     return outStream;

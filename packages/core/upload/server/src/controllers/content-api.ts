@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils, { errors } from '@strapi/utils';
+import utils, { async, errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -41,7 +41,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const files = await getService('upload').findMany(sanitizedQuery);
 
-      ctx.body = await sanitizeOutput(files, ctx);
+      const signedFiles = await async.map(files, getService('file').signFileUrls);
+
+      ctx.body = await sanitizeOutput(signedFiles, ctx);
     },
 
     async findOne(ctx: Context) {
@@ -58,7 +60,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.notFound('file.notFound');
       }
 
-      ctx.body = await sanitizeOutput(file, ctx);
+      const signedFile = await getService('file').signFileUrls(file);
+
+      ctx.body = await sanitizeOutput(signedFile, ctx);
     },
 
     async destroy(ctx: Context) {
@@ -74,7 +78,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       await getService('upload').remove(file);
 
-      ctx.body = await sanitizeOutput(file, ctx);
+      const signedFile = await getService('file').signFileUrls(file);
+
+      ctx.body = await sanitizeOutput(signedFile, ctx);
     },
 
     async updateFileInfo(ctx: Context) {
@@ -90,7 +96,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const result = await getService('upload').updateFileInfo(id, data.fileInfo as any);
 
-      ctx.body = await sanitizeOutput(result, ctx);
+      const signedResult = await getService('file').signFileUrls(result);
+
+      ctx.body = await sanitizeOutput(signedResult, ctx);
     },
 
     async replaceFile(ctx: Context) {
@@ -121,7 +129,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const replacedFiles = await getService('upload').replace(id, { data, file: validFiles[0] });
 
-      ctx.body = await sanitizeOutput(replacedFiles, ctx);
+      const signedFiles = await getService('file').signFileUrls(replacedFiles);
+
+      ctx.body = await sanitizeOutput(signedFiles, ctx);
     },
 
     async uploadFiles(ctx: Context) {
@@ -160,7 +170,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         files: validFiles,
       });
 
-      ctx.body = await sanitizeOutput(uploadedFiles as any, ctx);
+      const signedFiles = await async.map(uploadedFiles as any[], getService('file').signFileUrls);
+
+      ctx.body = await sanitizeOutput(signedFiles, ctx);
       ctx.status = 201;
     },
 
