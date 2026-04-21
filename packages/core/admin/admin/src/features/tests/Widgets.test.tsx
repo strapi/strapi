@@ -1,5 +1,5 @@
 import { server } from '@tests/server';
-import { waitFor, renderHook, screen } from '@tests/utils';
+import { waitFor, renderHook } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import {
@@ -359,8 +359,12 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for error notification to prevent act warnings from Sonner
-      await screen.findByText('Server error');
+      // Wait for a Sonner toast to render. Asserting the container (rather
+      // than the message text) keeps the test stable across copy changes and
+      // across msw v1/v2 fetch-error message differences.
+      await waitFor(() => {
+        expect(document.querySelector('[data-sonner-toast]')).toBeInTheDocument();
+      });
     });
 
     it('should handle network errors gracefully', async () => {
@@ -382,10 +386,10 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for error notification to prevent act warnings from Sonner.
-      // MSW v2's `HttpResponse.error()` surfaces as undici's `TypeError: Failed to fetch`
-      // (no custom message, unlike v1's `res.networkError('Network error')`).
-      await screen.findByText('Failed to fetch');
+      // Wait for a Sonner toast to render (see note above).
+      await waitFor(() => {
+        expect(document.querySelector('[data-sonner-toast]')).toBeInTheDocument();
+      });
     });
   });
 
