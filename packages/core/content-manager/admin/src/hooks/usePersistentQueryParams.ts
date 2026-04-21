@@ -9,6 +9,7 @@ type PropertyPath = Parameters<typeof get>[1];
 interface PersistentQueryConfigEntry {
   paths: PropertyPath[];
   scoped?: boolean;
+  legacyKey?: string;
 }
 
 const filterObjectKeys = (obj: object, keys: PropertyPath[]) => {
@@ -32,11 +33,12 @@ const normalizeConfigEntry = (
   entry: PersistentQueryConfigEntry,
   scope: string | false | undefined
 ) => {
-  const { paths } = entry;
+  const { paths, legacyKey } = entry;
   const isScoped = entry.scoped === true && !!scope;
 
   return {
     key: isScoped ? `${key}:${scope}` : key,
+    legacyKey,
     paths,
   };
 };
@@ -46,7 +48,29 @@ export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) =
   const [{ query }, setQuery] = useQueryParams();
   const clonedConfig = JSON.stringify(config);
 
-  // load query params from local storge
+  // migrate query params from previous keys before loading them
+  useEffect(() => {
+    for (const [keyPrefix, entry] of Object.entries(config)) {
+      const { key, legacyKey } = normalizeConfigEntry(keyPrefix, entry, scope);
+      if (!legacyKey || legacyKey === key) continue;
+
+      try {
+        const savedQueryParams = window.localStorage.getItem(key);
+        if (savedQueryParams) continue;
+
+        const legacyQueryParams = window.localStorage.getItem(legacyKey);
+        if (!legacyQueryParams) continue;
+
+        window.localStorage.setItem(key, legacyQueryParams);
+        window.localStorage.removeItem(legacyKey);
+      } catch {
+        continue;
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clonedConfig, scope]);
+
+  // load query params from local storage
   useEffect(() => {
     const mergedFilteredQuery: Record<string, unknown> = {};
 
