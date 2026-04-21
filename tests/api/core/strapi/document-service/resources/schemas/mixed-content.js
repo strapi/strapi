@@ -29,5 +29,14 @@ module.exports = {
         },
       },
     },
+    sharedMedia: {
+      type: 'media',
+      multiple: false,
+      pluginOptions: {
+        i18n: {
+          localized: false,
+        },
+      },
+    },
   },
 };
