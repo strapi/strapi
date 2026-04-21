@@ -360,6 +360,172 @@ describe('Release service', () => {
       expect(mockPublish).toHaveBeenCalledTimes(2);
       expect(mockUnpublish).toHaveBeenCalledTimes(2);
     });
+
+    it('publishes content types in dependency order so relations are resolved correctly', async () => {
+      const ARTICLE_UID = 'api::article.article';
+      const CATEGORY_UID = 'api::category.category';
+
+      mockExecute.mockReturnValueOnce({ id: 1, releasedAt: null });
+
+      const documentsCallOrder: string[] = [];
+      const documentsMock = jest.fn((contentType: string) => {
+        documentsCallOrder.push(contentType);
+        return {
+          findFirst: jest.fn().mockReturnValue({ id: 1 }),
+          publish: mockPublish,
+          unpublish: mockUnpublish,
+        };
+      });
+
+      const articleModel = {
+        info: { displayName: 'Article' },
+        options: { draftAndPublish: true },
+        attributes: {
+          category: { type: 'relation', target: CATEGORY_UID },
+        },
+      };
+
+      const categoryModel = {
+        info: { displayName: 'Category' },
+        options: { draftAndPublish: true },
+        attributes: {},
+      };
+
+      const getModelMock = jest.fn((uid: string) => {
+        if (uid === ARTICLE_UID) return articleModel;
+        if (uid === CATEGORY_UID) return categoryModel;
+        return null;
+      });
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        getModel: getModelMock,
+        contentTypes: {
+          [ARTICLE_UID]: {},
+          [CATEGORY_UID]: {},
+        },
+        documents: documentsMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockImplementation((modelUid: string) => {
+            if (modelUid === 'plugin::content-releases.release-action') {
+              return {
+                findMany: jest.fn().mockResolvedValue([
+                  { contentType: ARTICLE_UID, type: 'publish', entryDocumentId: 'doc1' },
+                  { contentType: CATEGORY_UID, type: 'publish', entryDocumentId: 'doc2' },
+                ]),
+              };
+            }
+            return {
+              update: jest
+                .fn()
+                .mockResolvedValue({ id: 1, status: 'done', releasedAt: new Date() }),
+            };
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await releaseService.publish(1);
+
+      // Category (relation target) must be published before Article (relation source)
+      const categoryIndex = documentsCallOrder.indexOf(CATEGORY_UID);
+      const articleIndex = documentsCallOrder.indexOf(ARTICLE_UID);
+      expect(categoryIndex).toBeGreaterThanOrEqual(0);
+      expect(articleIndex).toBeGreaterThanOrEqual(0);
+      expect(categoryIndex).toBeLessThan(articleIndex);
+    });
+
+    it('publishes in dependency order when relation is in a component', async () => {
+      const ARTICLE_UID = 'api::article.article';
+      const CATEGORY_UID = 'api::category.category';
+      const BLOCK_UID = 'basic.block';
+
+      mockExecute.mockReturnValueOnce({ id: 1, releasedAt: null });
+
+      const documentsCallOrder: string[] = [];
+      const documentsMock = jest.fn((contentType: string) => {
+        documentsCallOrder.push(contentType);
+        return {
+          findFirst: jest.fn().mockReturnValue({ id: 1 }),
+          publish: mockPublish,
+          unpublish: mockUnpublish,
+        };
+      });
+
+      const blockComponent = {
+        info: { displayName: 'Block' },
+        attributes: {
+          category: { type: 'relation', target: CATEGORY_UID },
+        },
+      };
+
+      const articleModel = {
+        info: { displayName: 'Article' },
+        options: { draftAndPublish: true },
+        attributes: {
+          block: { type: 'component', component: BLOCK_UID },
+        },
+      };
+
+      const categoryModel = {
+        info: { displayName: 'Category' },
+        options: { draftAndPublish: true },
+        attributes: {},
+      };
+
+      const getModelMock = jest.fn((uid: string) => {
+        if (uid === ARTICLE_UID) return articleModel;
+        if (uid === CATEGORY_UID) return categoryModel;
+        if (uid === BLOCK_UID) return blockComponent;
+        return null;
+      });
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        getModel: getModelMock,
+        contentTypes: {
+          [ARTICLE_UID]: {},
+          [CATEGORY_UID]: {},
+        },
+        components: {
+          [BLOCK_UID]: blockComponent,
+        },
+        documents: documentsMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockImplementation((modelUid: string) => {
+            if (modelUid === 'plugin::content-releases.release-action') {
+              return {
+                findMany: jest.fn().mockResolvedValue([
+                  { contentType: ARTICLE_UID, type: 'publish', entryDocumentId: 'doc1' },
+                  { contentType: CATEGORY_UID, type: 'publish', entryDocumentId: 'doc2' },
+                ]),
+              };
+            }
+            return {
+              update: jest
+                .fn()
+                .mockResolvedValue({ id: 1, status: 'done', releasedAt: new Date() }),
+            };
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await releaseService.publish(1);
+
+      // Category must be published before Article (relation is in Article's component)
+      const categoryIndex = documentsCallOrder.indexOf(CATEGORY_UID);
+      const articleIndex = documentsCallOrder.indexOf(ARTICLE_UID);
+      expect(categoryIndex).toBeGreaterThanOrEqual(0);
+      expect(articleIndex).toBeGreaterThanOrEqual(0);
+      expect(categoryIndex).toBeLessThan(articleIndex);
+    });
   });
 
   describe('delete', () => {

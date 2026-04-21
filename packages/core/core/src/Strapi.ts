@@ -1,4 +1,4 @@
-import * as globalAgent from 'global-agent';
+import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -60,6 +60,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get admin(): Core.Module {
     return this.get('admin');
+  }
+
+  get ai(): Modules.AI.AiNamespace {
+    return this.get('ai');
   }
 
   get EE(): boolean {
@@ -515,7 +519,7 @@ class Strapi extends Container implements Core.Strapi {
       return;
     }
 
-    globalAgent.bootstrap();
+    bootstrapGlobalAgent();
 
     if (httpProxy) {
       this.log.info(`Using HTTP proxy: ${httpProxy}`);

@@ -28,6 +28,12 @@ export interface ServerTransfer {
   remote?:
     | {
         enabled?: boolean;
+        /**
+         * Max milliseconds without forward progress while pulling assets from a remote instance
+         * (`strapi transfer --from …`). Maps to the remote source provider stall timeout.
+         * Omit to use the package default (typically several minutes for large files over JSON/WS).
+         */
+        assetIdleTimeoutMs?: number;
       }
     | undefined;
 }
@@ -41,6 +47,7 @@ export interface Proxy {
   http?: string;
   https?: string;
   fetch?: string;
+  koa?: boolean;
 }
 
 export interface Webhooks {

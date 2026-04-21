@@ -47,15 +47,18 @@ setLogger({
 });
 
 /**
- * Rendered children are provided through context so they can update across RTL `rerender()`
- * without needing to recreate the data router (which can be unstable for React Router).
+ * RTL's `rerender()` updates the `children` passed to our test `render()` helper.
+ * However, we keep a stable `routerRef` to avoid recreating the data router (which
+ * can crash React Router). That means the route element tree would otherwise keep
+ * rendering the initial children forever.
+ *
+ * We solve this by passing `children` via React context, so consumers inside the
+ * router element tree still update on rerenders without recreating the router.
  */
 const TestChildrenContext = React.createContext<React.ReactNode>(null);
 
-const TestChildren = () => {
-  const children = React.useContext(TestChildrenContext);
-
-  return <>{children}</>;
+const TestChildrenOutlet = () => {
+  return <>{React.useContext(TestChildrenContext)}</>;
 };
 
 interface ProvidersProps {
@@ -212,7 +215,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                                   communityEdition
                                   shouldUpdateStrapi={false}
                                 >
-                                  <TestChildren />
+                                  <TestChildrenOutlet />
                                 </AppInfoProvider>
                               </ConfigurationContextProvider>
                             </GuidedTourContext>

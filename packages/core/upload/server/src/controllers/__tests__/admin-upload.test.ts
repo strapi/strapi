@@ -12,6 +12,7 @@ jest.mock('../../utils/mime-validation', () => ({
   prepareUploadRequest: jest.fn(() => ({
     validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
     filteredBody: {},
+    errors: [],
   })),
 }));
 
@@ -48,6 +49,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     mockPrepareUploadRequest.mockResolvedValue({
       validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
       filteredBody: {},
+      errors: [],
     });
 
     mockAiMetadataService = {
@@ -206,6 +208,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         filteredBody: {
           fileInfo: '{"name":"allowed.jpg","folder":null}',
         },
+        errors: [],
       });
 
       mockContext.request!.body = {
@@ -238,6 +241,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         filteredBody: {
           fileInfo: '{"name":"test.jpg","folder":null}',
         },
+        errors: [],
       });
 
       mockContext.request!.body = {
@@ -276,6 +280,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
             { name: 'file2.png', folder: null, caption: '', alternativeText: '' },
           ],
         },
+        errors: [],
       });
 
       mockContext.request!.body = {
@@ -314,6 +319,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       mockPrepareUploadRequest.mockResolvedValue({
         validFiles,
         filteredBody: {},
+        errors: [],
       });
 
       mockValidateUploadBody.mockResolvedValue({
@@ -348,6 +354,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         filteredBody: {
           fileInfo: '{"name":"single.jpg","folder":null}',
         },
+        errors: [],
       });
 
       mockContext.request!.body = {

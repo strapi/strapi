@@ -143,6 +143,25 @@ const handlers = [
     );
   }),
 
+  rest.post('/upload/folders', async (req, res, ctx) => {
+    const body = await req.json<{ name: string; parent: number | null }>();
+    return res(
+      ctx.json({
+        data: {
+          id: 10,
+          name: body.name,
+          pathId: 10,
+          path: '/10',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          parent: body.parent ? { id: body.parent } : null,
+          children: { count: 0 },
+          files: { count: 0 },
+        },
+      })
+    );
+  }),
+
   rest.get('*/some/file', async (req, res, ctx) => {
     const file = new File([new Blob(['1'.repeat(1024 * 1024 + 1)])], 'image.png', {
       type: 'image/png',

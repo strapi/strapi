@@ -38,14 +38,14 @@
     "@mdx-js/react": "^3.0.0",
     "clsx": "^1.1.1",
     "prism-react-renderer": "^2.4.1",
-    "react": "18.3.0",
-    "react-dom": "18.3.0"
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
     "docusaurus-plugin-typedoc": "0.22.0",
-    "typedoc": "0.25.9",
+    "typedoc": "0.25.10",
     "typedoc-plugin-markdown": "3.17.1",
-    "typescript": "5.3.3"
+    "typescript": "5.4.4"
   }
 }
