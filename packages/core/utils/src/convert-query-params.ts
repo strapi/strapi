@@ -27,6 +27,7 @@ import { PaginationError } from './errors';
 import { isOperator } from './operators';
 
 import parseType from './parse-type';
+import type { PublicationFilterMode } from './publication-filter';
 import { Model } from './types';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE } = constants;
@@ -80,15 +81,7 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
-  publicationFilter?:
-    | 'never-published'
-    | 'has-published-version'
-    | 'modified'
-    | 'unmodified'
-    | 'never-published-document'
-    | 'has-published-version-document'
-    | 'published-without-draft'
-    | 'published-with-draft';
+  publicationFilter?: PublicationFilterMode;
   /**
    * @deprecated Replaced by `publicationFilter` (`never-published`, `has-published-version`, …).
    * Retained for backward compatibility with existing REST and GraphQL clients.
