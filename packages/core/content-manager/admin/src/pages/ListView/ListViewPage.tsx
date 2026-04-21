@@ -47,7 +47,6 @@ import {
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
 import {
-  readPersistedQueryParams,
   type PersistentQueryConfig,
   usePersistentPartialQueryParams,
 } from '../../hooks/usePersistentQueryParams';
@@ -106,23 +105,6 @@ const ListViewPage = () => {
   const { collectionType, model, schema } = useDoc();
   const { list, listViewConversionContext, isLoading: isLoadingLayout } = useDocumentLayout(model);
 
-  // Read persisted params synchronously so the first render already has
-  // the correct values. Without this, the useEffect in usePersistentPartialQueryParams
-  // restores them post-render, changing the query args and triggering extra requests.
-  const persistedSettings = React.useMemo(
-    () =>
-      readPersistedQueryParams(`STRAPI_LIST_VIEW_SETTINGS:${model}`, [
-        'sort',
-        'filters',
-        'pageSize',
-      ]),
-    [model]
-  );
-  const persistedLocale = React.useMemo(
-    () => readPersistedQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale']),
-    []
-  );
-
   const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
     () => ({
       [`STRAPI_LIST_VIEW_SETTINGS:${model}`]: {
@@ -136,7 +118,7 @@ const ListViewPage = () => {
     }),
     [model]
   );
-  usePersistentPartialQueryParams(persistentQueryConfigs);
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
@@ -203,44 +185,28 @@ const ListViewPage = () => {
     }
   }, [displayedHeaderNames]);
 
-  const initialQueryParams = React.useMemo(
-    () => ({
-      page: '1',
-      pageSize: list.settings.pageSize.toString(),
-      sort: list.settings.defaultSortBy
-        ? `${list.settings.defaultSortBy}:${list.settings.defaultSortOrder}`
-        : '',
-      ...persistedSettings,
-      ...persistedLocale,
-    }),
-    [
-      list.settings.pageSize,
-      list.settings.defaultSortBy,
-      list.settings.defaultSortOrder,
-      persistedSettings,
-      persistedLocale,
-    ]
-  );
-
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
     page?: string;
     pageSize?: string;
     sort?: string;
-  }>(initialQueryParams);
+  }>({
+    page: '1',
+    pageSize: list.settings.pageSize.toString(),
+    sort: list.settings.defaultSortBy
+      ? `${list.settings.defaultSortBy}:${list.settings.defaultSortOrder}`
+      : '',
+  });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const hasAppliedFilters = Boolean((query as any)?.filters?.$and?.length);
 
-  // Skip the query while layout config is loading. Before this fix the
-  // query fired immediately with DEFAULT_SETTINGS params (pageSize=10, sort=''),
-  // then re-fired with the real params once config arrived.
   const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
       model,
       params,
     },
-    { skip: isLoadingLayout }
+    { skip: isLoadingLayout || !isHydrated }
   );
 
   /**
@@ -332,7 +298,7 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isLoadingLayout || isLoading) {
+  if (isLoadingLayout || !isHydrated || isLoading) {
     return <Page.Loading />;
   }
 
