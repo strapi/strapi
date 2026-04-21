@@ -17,6 +17,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { Schema } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { getMainField } from '../../../utils/attributes';
+import { getTranslation } from '../../../utils/translations';
 import { getDisplayName } from '../../../utils/users';
 
 /**
@@ -118,8 +119,59 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
         ...allowedFields,
         ...DEFAULT_ALLOWED_FILTERS,
         ...(canReadAdminUsers ? CREATOR_FIELDS : []),
+        ...(options?.draftAndPublish === true ? ['__status'] : []),
       ]
         .map((name) => {
+          if (name === '__status') {
+            return {
+              name: '__status',
+              type: 'enumeration',
+              label: formatMessage({
+                id: getTranslation('containers.list.filters.status'),
+                defaultMessage: 'Status',
+              }),
+              operators: [
+                {
+                  label: formatMessage({
+                    id: 'components.FilterOptions.FILTER_TYPES.$eq',
+                    defaultMessage: 'is',
+                  }),
+                  value: '$eq',
+                },
+              ],
+              options: [
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.statusFilter.draft'),
+                    defaultMessage: 'Draft (never published)',
+                  }),
+                  value: 'draft',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.statusFilter.published'),
+                    defaultMessage: 'Published (all)',
+                  }),
+                  value: 'published',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.statusFilter.publishedModified'),
+                    defaultMessage: 'Published (modified)',
+                  }),
+                  value: 'published-modified',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.statusFilter.publishedUnmodified'),
+                    defaultMessage: 'Published (unmodified)',
+                  }),
+                  value: 'published-unmodified',
+                },
+              ],
+            } satisfies Filters.Filter;
+          }
+
           const attribute = attributes[name];
 
           if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {

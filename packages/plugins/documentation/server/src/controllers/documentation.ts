@@ -59,8 +59,13 @@ export default {
           ? `${major}.${minor}.${patch}`
           : getService('documentation').getDocumentationVersion();
 
+      const extensionsDir =
+        strapi.config.environment === 'production'
+          ? strapi.dirs.dist.extensions
+          : strapi.dirs.app.extensions;
+
       const openAPISpecsPath = path.join(
-        strapi.dirs.app.extensions,
+        extensionsDir,
         'documentation',
         'documentation',
         version,
@@ -78,12 +83,7 @@ export default {
         });
 
         try {
-          const layoutPath = path.resolve(
-            strapi.dirs.app.extensions,
-            'documentation',
-            'public',
-            'index.html'
-          );
+          const layoutPath = path.resolve(extensionsDir, 'documentation', 'public', 'index.html');
           await fs.ensureFile(layoutPath);
           await fs.writeFile(layoutPath, filledLayout);
 
@@ -91,11 +91,7 @@ export default {
           ctx.url = path.basename(`${ctx.url}/index.html`);
 
           try {
-            const staticFolder = path.resolve(
-              strapi.dirs.app.extensions,
-              'documentation',
-              'public'
-            );
+            const staticFolder = path.resolve(extensionsDir, 'documentation', 'public');
             return koaStatic(staticFolder)(ctx, next);
           } catch (e) {
             strapi.log.error(e);

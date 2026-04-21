@@ -9,7 +9,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
   'Media Library - Grid View',
   () => {
     test.beforeEach(async ({ page }) => {
-      await resetDatabaseAndImportDataFromPath('with-admin.tar');
+      await resetDatabaseAndImportDataFromPath('with-admin');
       await page.goto('/admin');
       await login({ page });
     });

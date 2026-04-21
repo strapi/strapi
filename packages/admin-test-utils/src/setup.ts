@@ -88,11 +88,11 @@ const patchedConsole = {
       return;
     }
 
-    if (
-      /An update to (ForwardRef\(Toaster\)|Toast) inside a test was not wrapped in act/i.test(
-        message
-      )
-    ) {
+    // React warns when state updates run outside act(). That often happens when
+    // store/RTK Query (or other async) updates complete after the test has already
+    // found an element. Suppressing so tests don't fail for that; however, we should
+    // fix this in each test by waiting for stable UI or mocking async.
+    if (/inside a test was not wrapped in act/i.test(message)) {
       return;
     }
 

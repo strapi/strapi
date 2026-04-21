@@ -19,18 +19,6 @@ describe('hooks:list', () => {
       .expect('code', 0)
       .end();
 
-    const output = stdout.trim();
-
-    const expected = `
-    ┌──────────────────────────────────┐
-    │ Name                             │
-    ├──────────────────────────────────┤
-    │ strapi::content-types.beforeSync │
-    ├──────────────────────────────────┤
-    │ strapi::content-types.afterSync  │
-    └──────────────────────────────────┘
-    `;
-
-    utils.helpers.expectConsoleLinesToInclude(output, expected);
+    expect(utils.helpers.normalizeCliOutputForSnapshot(stdout)).toMatchSnapshot();
   });
 });

@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import path from 'node:path';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
 import { configs, createLogger, type winston, formats } from '@strapi/logger';
@@ -8,7 +9,12 @@ import { merge } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
-import { readableBytes, exitWith } from './helpers';
+import {
+  readableBytes,
+  formatElapsedAndMaybeRemainingLabel,
+  TRANSFER_PROGRESS_FIELD_SEP,
+  exitWith,
+} from './helpers';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
 
 const {
@@ -107,18 +113,16 @@ const buildTransferTable = (resultData: ResultData) => {
   return table;
 };
 
-const DEFAULT_IGNORED_CONTENT_TYPES = [
-  'admin::permission',
-  'admin::user',
-  'admin::role',
-  'admin::api-token',
-  'admin::api-token-permission',
-  'admin::transfer-token',
-  'admin::transfer-token-permission',
-  'admin::audit-log',
+const IGNORED_CONTENT_TYPE_PREFIXES = ['admin::'];
+
+const IGNORED_CONTENT_TYPES = [
   'plugin::content-releases.release',
   'plugin::content-releases.release-action',
 ];
+
+const isIgnoredContentType = (type: string) =>
+  IGNORED_CONTENT_TYPE_PREFIXES.some((prefix) => type.startsWith(prefix)) ||
+  IGNORED_CONTENT_TYPES.includes(type);
 
 const abortTransfer = async ({
   engine,
@@ -211,23 +215,35 @@ const errorColors = {
 
 const formatDiagnostic = (
   operation: string,
-  info?: boolean
+  verbose?: boolean
 ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] => {
-  // Create log file for all incoming diagnostics
   let logger: undefined | winston.Logger;
+  let logFileBasename: string | undefined;
+
   const getLogger = () => {
     if (!logger) {
+      logFileBasename = `${operation}_${Date.now()}.log`;
+      const absoluteLogPath = path.resolve(process.cwd(), logFileBasename);
+
       logger = createLogger(
-        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, {
-          level: 'info',
-          format: formats?.detailedLogs,
-        })
+        configs.createOutputFileConfiguration(
+          logFileBasename,
+          {
+            level: 'info',
+            format: formats?.detailedLogs,
+          },
+          {
+            consoleLevel: verbose ? 'info' : 'warn',
+          }
+        )
+      );
+
+      logger.info(
+        `[${operation}] Diagnostic log file: ${absoluteLogPath} (info-level messages are written here even without --verbose)`
       );
     }
     return logger;
   };
-
-  // We don't want to write a log file until there is something to be logged
 
   return ({ details, kind }) => {
     try {
@@ -239,7 +255,7 @@ const formatDiagnostic = (
 
         getLogger().error(errorMessage);
       }
-      if (kind === 'info' && info) {
+      if (kind === 'info') {
         const { message, params, origin } = details;
 
         const msg = `[${origin ?? 'transfer'}] ${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
@@ -267,7 +283,34 @@ type Data = {
     endTime?: number;
     bytes?: number;
     count?: number;
+    totalBytes?: number;
+    totalCount?: number;
   };
+};
+
+/** Stages where throughput is dominated by DB work; items/s is more meaningful than JSON byte rate. */
+const STAGES_WITH_ITEM_THROUGHPUT = new Set<engineDataTransfer.TransferStage>([
+  'entities',
+  'links',
+]);
+
+const MAX_ETA_MS = 86_400_000;
+
+/**
+ * Linear ETA from completed amount vs total, using average rate so far (done / elapsedMs).
+ * Returns null when progress or totals are not usable yet.
+ */
+const estimateEtaMs = (elapsedMs: number, done: number, total: number): number | null => {
+  if (elapsedMs < 500 || done <= 0 || total <= 0 || done >= total) {
+    return null;
+  }
+  const ratePerMs = done / elapsedMs;
+  const remaining = total - done;
+  const etaMs = remaining / ratePerMs;
+  if (!Number.isFinite(etaMs) || etaMs <= 0 || etaMs >= MAX_ETA_MS) {
+    return null;
+  }
+  return etaMs;
 };
 
 const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
@@ -281,14 +324,40 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
     const elapsedTime = stageData?.startTime
       ? (stageData?.endTime || Date.now()) - stageData.startTime
       : 0;
-    const size = `size: ${readableBytes(stageData?.bytes ?? 0)}`;
-    const elapsed = `elapsed: ${elapsedTime} ms`;
-    const speed =
-      elapsedTime > 0 ? `(${readableBytes(((stageData?.bytes ?? 0) * 1000) / elapsedTime)}/s)` : '';
+    const bytes = stageData?.bytes ?? 0;
+    const count = stageData?.count ?? 0;
+    const totalBytes = stageData?.totalBytes;
+    const totalCount = stageData?.totalCount;
 
-    loaders[stage].text = `${stage}: ${stageData?.count ?? 0} transferred (${size}) (${elapsed}) ${
-      !stageData?.endTime ? speed : ''
-    }`;
+    const countLabel =
+      totalCount != null && totalCount > 0 ? `${count} / ${totalCount}` : String(count);
+    const sizeCompact =
+      totalBytes != null && totalBytes > 0
+        ? `${readableBytes(bytes)} / ${readableBytes(totalBytes)}`
+        : readableBytes(bytes);
+
+    const parts: string[] = [`${stage}: ${countLabel} transferred`, sizeCompact];
+
+    if (elapsedTime > 0 && !stageData?.endTime) {
+      if (STAGES_WITH_ITEM_THROUGHPUT.has(stage)) {
+        const itemsPerSec = (count * 1000) / elapsedTime;
+        parts.push(`${itemsPerSec.toFixed(1)} items/s`);
+      } else {
+        parts.push(`${readableBytes((bytes * 1000) / elapsedTime)}/s`);
+      }
+    }
+
+    let etaMs: number | null = null;
+    if (!stageData?.endTime) {
+      if (STAGES_WITH_ITEM_THROUGHPUT.has(stage) && totalCount != null) {
+        etaMs = estimateEtaMs(elapsedTime, count, totalCount);
+      } else if (totalBytes != null) {
+        etaMs = estimateEtaMs(elapsedTime, bytes, totalBytes);
+      }
+    }
+    parts.push(formatElapsedAndMaybeRemainingLabel(elapsedTime ?? 0, etaMs));
+
+    loaders[stage].text = parts.join(TRANSFER_PROGRESS_FIELD_SEP);
 
     return loaders[stage];
   };
@@ -466,9 +535,15 @@ type RestoreConfig = NonNullable<
 >;
 
 // Based on exclude/only from options, create the restore object to match
-const parseRestoreFromOptions = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => {
+const parseRestoreFromOptions = (
+  opts: Partial<engineDataTransfer.ITransferEngineOptions>,
+  strapi: Core.Strapi
+) => {
   const entitiesOptions: RestoreConfig['entities'] = {
-    exclude: DEFAULT_IGNORED_CONTENT_TYPES,
+    exclude: [
+      ...Object.keys(strapi.contentTypes).filter(isIgnoredContentType),
+      ...IGNORED_CONTENT_TYPES,
+    ],
     include: undefined,
   };
 
@@ -495,7 +570,7 @@ export {
   buildTransferTable,
   getDefaultExportName,
   getTransferTelemetryPayload,
-  DEFAULT_IGNORED_CONTENT_TYPES,
+  isIgnoredContentType,
   createStrapiInstance,
   excludeOption,
   exitMessageText,

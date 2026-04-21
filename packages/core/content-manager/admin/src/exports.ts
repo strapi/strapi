@@ -27,6 +27,7 @@ export type {
   BulkActionComponent,
   BulkActionComponentProps,
   BulkActionDescription,
+  ContentManagerPlugin,
   DescriptionComponent,
   DescriptionReducer,
   PanelComponentProps,

@@ -83,7 +83,7 @@ describe('Transform relational data', () => {
       });
     });
 
-    it('Connect to to both draft and publish by default', async () => {
+    it('Connect to both draft and publish by default', async () => {
       // Should connect to the default locale if not provided in the relation
       const { data } = await transformParamsDocumentId(SHOP_UID, {
         data: {

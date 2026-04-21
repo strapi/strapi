@@ -94,7 +94,7 @@ const ProfilePage = () => {
     } else {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   }, [formatMessage, notifyStatus, toggleNotification, user]);
@@ -165,7 +165,7 @@ const ProfilePage = () => {
       } else {
         toggleNotification({
           type: 'danger',
-          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }
     }

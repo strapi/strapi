@@ -4,7 +4,6 @@ import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
-import { getPopulateForValidation } from './utils/populate';
 
 const { getScalarAttributes, getMediaAttributes } = contentTypes;
 
@@ -17,13 +16,23 @@ export interface DocumentVersion {
   publishedAt?: string | null | Date;
 }
 
-const AVAILABLE_STATUS_FIELDS = [
+// Scalar fields that can be used in a DB `select`
+const AVAILABLE_STATUS_SCALAR_FIELDS = [
   'id',
   'documentId',
   'locale',
   'updatedAt',
   'createdAt',
   'publishedAt',
+];
+// Relation populate shared by both the fast path and the full path
+const AVAILABLE_STATUS_POPULATE = {
+  createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+  updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+};
+// All fields to pick from a hydrated result (scalars + populated relations + virtual)
+const AVAILABLE_STATUS_FIELDS = [
+  ...AVAILABLE_STATUS_SCALAR_FIELDS,
   'createdBy',
   'updatedBy',
   'status',
@@ -35,8 +44,11 @@ const AVAILABLE_LOCALES_FIELDS = [
   'updatedAt',
   'createdAt',
   'publishedAt',
-  'documentId',
 ];
+
+/** Returns a DB filter that matches the opposite publish status. */
+const oppositePublishStatus = (publishedAt: unknown) =>
+  publishedAt !== null ? { $null: true } : { $notNull: true };
 
 const CONTENT_MANAGER_STATUS = {
   PUBLISHED: 'published',
@@ -174,7 +186,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     return strapi.query(uid).findMany({
       where,
-      select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
+      select: AVAILABLE_STATUS_SCALAR_FIELDS,
     });
   },
 
@@ -214,9 +226,42 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     version: DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
+    const model = strapi.getModel(uid);
+    const hasDnP = contentTypes.hasDraftAndPublish(model);
+    const isLocalized = (model.pluginOptions?.i18n as any)?.localized === true;
+
+    if (!availableLocales && !availableStatus) {
+      // Nothing to compute.
+      return { availableLocales: [], availableStatus: [], versions: [] as DocumentVersion[] };
+    }
+    if (!isLocalized && !hasDnP) {
+      // If there are no locales and no draft/publish, there's only ever 1 version of any document.
+      return { availableLocales: [], availableStatus: [], versions: [] as DocumentVersion[] };
+    }
+
+    const onlyStatusIsRelevant = hasDnP && (!isLocalized || !availableLocales);
+    if (onlyStatusIsRelevant) {
+      const otherVersion = availableStatus
+        ? await strapi.db.query(uid).findOne({
+            where: {
+              documentId: version.documentId,
+              ...(version.locale ? { locale: version.locale } : {}),
+              publishedAt: oppositePublishStatus(version.publishedAt),
+            },
+            select: AVAILABLE_STATUS_SCALAR_FIELDS,
+            populate: AVAILABLE_STATUS_POPULATE,
+          })
+        : null;
+      return {
+        availableLocales: [],
+        availableStatus: otherVersion ? [pick(AVAILABLE_STATUS_FIELDS, otherVersion)] : [],
+        versions: [] as DocumentVersion[],
+      };
+    }
+
+    // Full path for localized content types
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
     // i18n is disabled
-    const { populate = {}, fields = [] } = getPopulateForValidation(uid);
 
     // Include non-translatable scalar and media fields in availableLocales for i18n prefilling
     let nonLocalizedFields: string[] = [];
@@ -226,7 +271,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       if (i18nPlugin) {
         const i18nService = i18nPlugin.service('content-types');
         if (i18nService?.getNonLocalizedAttributes) {
-          const model = strapi.getModel(uid);
           if (model?.attributes) {
             const allNonLocalized = i18nService.getNonLocalizedAttributes(model);
             // Get scalar and media attributes separately
@@ -262,17 +306,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const params = {
       populate: {
-        ...populate,
         ...mediaPopulate,
-        // NOTE: creator fields are selected in this way to avoid exposing sensitive data
-        createdBy: {
-          select: ['id', 'firstname', 'lastname', 'email'],
-        },
-        updatedBy: {
-          select: ['id', 'firstname', 'lastname', 'email'],
-        },
+        ...AVAILABLE_STATUS_POPULATE,
       },
-      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...fields, ...nonLocalizedFields]),
+      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),
       filters: {
         documentId: version.documentId,
       },
@@ -293,6 +330,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return {
       availableLocales: availableLocalesResult,
       availableStatus: availableStatusResult ? [availableStatusResult] : [],
+      versions,
     };
   },
 
@@ -323,19 +361,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       opts.availableStatus = false;
     }
 
-    const meta = await this.getMetadata(uid, document, opts);
+    const { versions, ...meta } = await this.getMetadata(uid, document, opts);
 
     // Populate localization statuses
-    if (document.localizations) {
-      const otherStatus = await this.getManyAvailableStatus(uid, document.localizations);
-
+    if (document.localizations?.length) {
       document.localizations = document.localizations.map((d) => {
-        const status = otherStatus.find(
-          (s) => s.documentId === d.documentId && s.locale === d.locale
+        // Find the counterpart version (same documentId + locale, opposite publishedAt) from
+        // the already-fetched versions array, avoiding an extra DB query.
+        const counterpart = versions.find(
+          (v) =>
+            v.documentId === d.documentId &&
+            v.locale === d.locale &&
+            (d.publishedAt === null) !== (v.publishedAt === null)
         );
         return {
           ...d,
-          status: this.getStatus(d, status ? [status] : []),
+          status: this.getStatus(d, counterpart ? [counterpart] : []),
         };
       });
     }

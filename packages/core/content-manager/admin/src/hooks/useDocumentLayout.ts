@@ -92,6 +92,16 @@ interface EditLayout {
   settings: LayoutSettings;
 }
 
+/**
+ * Data required to resolve `mainField` when converting list column names to field layouts for
+ * component and relation attributes; mirrors the fourth and fifth arguments of `formatListLayout`.
+ */
+type ListViewConversionContext = {
+  componentConfigurations: FindContentTypeConfiguration.Response['data']['components'];
+  componentSchemas: ComponentsDictionary;
+  contentTypeSchemas: Schema[];
+};
+
 type UseDocumentLayout = (model: string) => {
   error?: BaseQueryError | SerializedError;
   isLoading: boolean;
@@ -100,6 +110,11 @@ type UseDocumentLayout = (model: string) => {
    */
   edit: EditLayout;
   list: ListLayout;
+  /**
+   * Populated when configuration is loaded; pass into `convertListLayoutToFieldLayouts` with
+   * `list.metadatas` when mapping persisted list column names (e.g. custom displayed headers).
+   */
+  listViewConversionContext: ListViewConversionContext | null;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -196,11 +211,24 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
     [editLayout, query, runHookWaterfall]
   );
 
+  const listViewConversionContext = React.useMemo((): ListViewConversionContext | null => {
+    if (!data || isLoading) {
+      return null;
+    }
+
+    return {
+      componentConfigurations: data.components,
+      componentSchemas: components,
+      contentTypeSchemas: schemas,
+    };
+  }, [data, isLoading, components, schemas]);
+
   return {
     error,
     isLoading,
     edit,
     list: listLayout,
+    listViewConversionContext,
   } satisfies ReturnType<UseDocumentLayout>;
 };
 
