@@ -8,7 +8,9 @@ import reviewWorkflowsWeeklyMetrics from './metrics/weekly-metrics';
 import documentServiceMiddleware from './document-service-middleware';
 import homepage from '../homepage';
 
-export default {
+type ReviewWorkflowsServices = Record<string, unknown>;
+
+const services: ReviewWorkflowsServices = {
   workflows,
   stages,
   'stage-permissions': stagePermissions,
@@ -19,3 +21,5 @@ export default {
   'workflow-weekly-metrics': reviewWorkflowsWeeklyMetrics,
   ...homepage.services,
 };
+
+export default services;

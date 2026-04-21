@@ -1,5 +1,9 @@
 import sentry from './sentry';
 
-export default {
+type SentryServices = Record<string, unknown>;
+
+const services: SentryServices = {
   sentry,
 };
+
+export default services;

@@ -2,6 +2,7 @@ export interface Options {
   useNpm?: boolean;
   usePnpm?: boolean;
   useYarn?: boolean;
+  useBun?: boolean;
   quickstart?: boolean;
   run?: boolean;
   dbclient?: DBClient;
@@ -40,7 +41,7 @@ export type DBConfig = {
   };
 };
 
-export type PackageManager = 'npm' | 'yarn' | 'pnpm';
+export type PackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';
 
 export interface Scope {
   name: string;

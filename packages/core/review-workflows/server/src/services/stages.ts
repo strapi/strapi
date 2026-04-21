@@ -12,11 +12,13 @@ interface PopulatedPermission {
   actionParameters?: { from?: number; to?: number };
 }
 
+type StagesServiceFactory = (args: { strapi: Core.Strapi }) => Record<string, unknown>;
+
 const { ApplicationError, ValidationError } = errors;
 const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
 const sanitizeStageFields = pick(sanitizedStageFields);
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+const createStagesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('workflow-metrics', { strapi });
   const stagePermissionsService = getService('stage-permissions', { strapi });
   const workflowValidator = getService('validation', { strapi });
@@ -369,6 +371,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
   };
 };
+
+export default createStagesService as StagesServiceFactory;
 
 const normalizeStageForDiff = (stage: {
   name?: string;

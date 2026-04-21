@@ -11,6 +11,16 @@ interface Log extends Omit<Event, 'userId'> {
   user: string | number;
 }
 
+interface AuditLogsService {
+  saveEvent(event: Event): Promise<AuditLogsService>;
+  findMany(query: unknown): Promise<{
+    results: Record<string, unknown>[];
+    pagination: Record<string, unknown>;
+  }>;
+  findOne(id: unknown): Promise<Record<string, unknown> | null>;
+  deleteExpiredEvents(expirationDate: Date): Promise<unknown>;
+}
+
 const getSanitizedUser = (user: any) => {
   let displayName = user.email;
 
@@ -31,7 +41,7 @@ const getSanitizedUser = (user: any) => {
  * @description
  * Manages audit logs interaction with the database. Accessible via strapi.get('audit-logs')
  */
-const createAuditLogsService = (strapi: Core.Strapi) => {
+const createAuditLogsService = (strapi: Core.Strapi): AuditLogsService => {
   return {
     async saveEvent(event: Event) {
       const { userId, ...rest } = event;

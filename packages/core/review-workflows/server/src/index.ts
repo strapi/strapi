@@ -6,7 +6,17 @@ import routes from './routes';
 import services from './services';
 import controllers from './controllers';
 
-const getPlugin = () => {
+type ReviewWorkflowsPlugin = {
+  register?: unknown;
+  bootstrap?: unknown;
+  destroy?: unknown;
+  contentTypes: unknown;
+  services?: unknown;
+  controllers?: unknown;
+  routes?: unknown;
+};
+
+const getPlugin = (): ReviewWorkflowsPlugin => {
   if (strapi.ee.features.isEnabled('review-workflows')) {
     return {
       register,
@@ -26,4 +36,6 @@ const getPlugin = () => {
   };
 };
 
-export default getPlugin();
+const plugin: ReviewWorkflowsPlugin = getPlugin();
+
+export default plugin;

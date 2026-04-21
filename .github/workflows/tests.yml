@@ -60,6 +60,28 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
+  bun_smoke:
+    name: 'bun smoke (${{ github.event_name }})'
+    runs-on: ubuntu-latest
+    needs: [build]
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Bun smoke (examples/getstarted — build, start, GET /_health)
+        run: yarn test:bun:smoke
+        env:
+          STRAPI_TELEMETRY_DISABLED: 'true'
+
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
@@ -624,6 +646,7 @@ jobs:
         pretty,
         lint,
         build,
+        bun_smoke,
         docs_build,
         typescript,
         unit_back,

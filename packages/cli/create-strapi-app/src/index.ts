@@ -34,6 +34,7 @@ const command = new commander.Command('create-strapi-app')
   .option('--use-npm', 'Use npm as the project package manager')
   .option('--use-yarn', 'Use yarn as the project package manager')
   .option('--use-pnpm', 'Use pnpm as the project package manager')
+  .option('--use-bun', 'Use bun as the project package manager')
 
   // dependencies options
   .option('--install', 'Install dependencies')
@@ -107,9 +108,11 @@ async function run(args: string[]): Promise<void> {
     logger.fatal(`Template name ${chalk.bold(`"${options.template}"`)} is invalid`);
   }
 
-  if ([options.useNpm, options.usePnpm, options.useYarn].filter(Boolean).length > 1) {
+  if (
+    [options.useNpm, options.usePnpm, options.useYarn, options.useBun].filter(Boolean).length > 1
+  ) {
     logger.fatal(
-      `You cannot specify multiple package managers at the same time ${chalk.bold('(--use-npm, --use-pnpm, --use-yarn)')}`
+      `You cannot specify multiple package managers at the same time ${chalk.bold('(--use-npm, --use-pnpm, --use-yarn, --use-bun)')}`
     );
   }
 
@@ -254,6 +257,10 @@ function getPkgManager(options: Options) {
     return 'yarn';
   }
 
+  if (options.useBun === true) {
+    return 'bun';
+  }
+
   const userAgent = process.env.npm_config_user_agent || '';
 
   if (userAgent.startsWith('yarn')) {
@@ -262,6 +269,14 @@ function getPkgManager(options: Options) {
 
   if (userAgent.startsWith('pnpm')) {
     return 'pnpm';
+  }
+
+  if (userAgent.startsWith('bun')) {
+    return 'bun';
+  }
+
+  if (process.versions.bun) {
+    return 'bun';
   }
 
   return 'npm';

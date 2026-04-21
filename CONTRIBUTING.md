@@ -55,6 +55,15 @@ The Strapi core team will review your pull request and either merge it, request 
 - You have [Node.js](https://nodejs.org/en/) at version `>= v20 and <= v24` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
+### Optional: [Bun](https://bun.sh) (runtime and lockfile)
+
+Bun is not required for the main workflow, but you can use it to install dependencies and run app scripts (e.g. `bun run develop` in an example) after the monorepo is built with Yarn + Nx.
+
+1. Install Bun: see [bun.sh](https://bun.sh) (e.g. `curl -fsSL https://bun.sh/install | bash`) and ensure `bun` is on your `PATH` (often `~/.bun/bin`).
+2. At the repository root, run `bun install`. This uses `bun.lock` and may show a notice that the Yarn 4 `yarn.lock` could not be migrated; that is expected. The primary, CI-driven install path remains `yarn install` with `yarn.lock`.
+3. Build packages as usual: `yarn build` (or `yarn setup` for a full first-time setup). Then, in an example app: `bun run develop` or `bun run start` (after `bun run build` for production).
+4. To verify that Strapi starts under Bun, from the repo root: `yarn test:bun:smoke` (builds the default `examples/getstarted` app with Bun, starts it, checks `GET /_health`).
+
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
 - Fork the repository and create your new branch from `develop`.
