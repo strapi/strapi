@@ -382,8 +382,10 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for error notification to prevent act warnings from Sonner
-      await screen.findByText('Network error');
+      // Wait for error notification to prevent act warnings from Sonner.
+      // MSW v2's `HttpResponse.error()` surfaces as undici's `TypeError: Failed to fetch`
+      // (no custom message, unlike v1's `res.networkError('Network error')`).
+      await screen.findByText('Failed to fetch');
     });
   });
 
