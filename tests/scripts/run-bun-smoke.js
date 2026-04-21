@@ -11,6 +11,9 @@
  * Env:
  * - BUN_SMOKE_APP_DIR — absolute or repo-relative path to the Strapi app (default: examples/getstarted)
  * - PORT / HOST — bind address (default PORT 4310, HOST 127.0.0.1)
+ *
+ * Secrets: `examples/getstarted/.env` is gitignored, so CI has no JWT_SECRET. This script sets safe
+ * defaults (override with env) — same idea as tests/scripts/run-api-tests.js (`JWT_SECRET`).
  */
 
 const { spawn } = require('child_process');
@@ -120,8 +123,13 @@ async function main() {
     ...process.env,
     HOST: host,
     PORT: String(port),
-    STRAPI_TELEMETRY_DISABLED: 'true',
-    NODE_ENV: 'production',
+    STRAPI_TELEMETRY_DISABLED: process.env.STRAPI_TELEMETRY_DISABLED ?? 'true',
+    NODE_ENV: process.env.NODE_ENV ?? 'production',
+    // Required by @strapi/plugin-users-permissions bootstrap when no .env is present (e.g. GitHub Actions).
+    JWT_SECRET: process.env.JWT_SECRET ?? 'aSecret',
+    STRAPI_DISABLE_EE: process.env.STRAPI_DISABLE_EE ?? 'true',
+    STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE:
+      process.env.STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE ?? 'true',
   };
 
   console.error(`bun smoke: building app at ${appDir}`);
