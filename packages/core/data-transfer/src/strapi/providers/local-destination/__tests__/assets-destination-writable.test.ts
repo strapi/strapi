@@ -6,11 +6,14 @@ import { createTransaction } from '../../../../utils/transaction';
 import { createAssetsDestinationWritable } from '../assets-destination-writable';
 
 /**
- * Push may send start + chunks + end in one batch; `write()` must return before `uploadStream`
- * resolves so the PassThrough is not read-only until upload completes (avoids assets-step deadlock).
+ * Push sends start + chunks + end in one batch; `write()` must return immediately so the
+ * PassThrough can be fed in the same batch (avoids deadlock).  uploadStream is intentionally
+ * deferred until the PassThrough ends — this ensures the provider receives a fully-populated
+ * synchronous Readable instead of a lazy async wrapper (fixes Buffer.from(undefined) crashes
+ * seen with certain upload providers when stream.read() is called before data is buffered).
  */
-describe('createAssetsDestinationWritable (push transfer regression)', () => {
-  test('invokes write callback before uploadStream completes (PassThrough can be fed in the same batch)', async () => {
+describe('createAssetsDestinationWritable (push transfer)', () => {
+  test('write() callback fires immediately; uploadStream is called only after the PassThrough ends', async () => {
     let releaseUpload!: (value?: unknown) => void;
     const uploadBlocked = new Promise((resolve) => {
       releaseUpload = resolve;
@@ -64,11 +67,13 @@ describe('createAssetsDestinationWritable (push transfer regression)', () => {
       removeAssetsBackup: async () => Promise.resolve(),
     });
 
+    const assetStream = Readable.from([Buffer.from('hello')]);
+
     const file: IAsset = {
       filename: 'a.jpg',
       filepath: '/a',
       stats: { size: 10 },
-      stream: Readable.from([Buffer.from('hello')]),
+      stream: assetStream,
       metadata: {
         hash: 'h',
         name: 'a',
@@ -79,6 +84,7 @@ describe('createAssetsDestinationWritable (push transfer regression)', () => {
       },
     };
 
+    // write() must resolve quickly (no deadlock) even though the upload is blocked.
     const writeSettled = new Promise<void>((resolve, reject) => {
       stream.write(file, (err) => {
         if (err) {
@@ -97,9 +103,7 @@ describe('createAssetsDestinationWritable (push transfer regression)', () => {
           timeoutId = setTimeout(
             () =>
               reject(
-                new Error(
-                  'Timed out waiting for assets Writable write() callback (uploadStream must not block the write callback when start and chunks arrive in one batch)'
-                )
+                new Error('Timed out: write() callback did not fire promptly — possible deadlock')
               ),
             200
           );
@@ -110,6 +114,16 @@ describe('createAssetsDestinationWritable (push transfer regression)', () => {
         clearTimeout(timeoutId);
       }
     }
+
+    // uploadStream is deferred until the PassThrough ends (async), so it may not have been
+    // called at the exact moment the write callback fires. Yield to let pending microtasks
+    // and stream events settle.
+    await new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
+    await new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
 
     expect(uploadStream).toHaveBeenCalled();
     expect(uploadFinished).toBe(false);
