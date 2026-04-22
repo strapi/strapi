@@ -524,10 +524,10 @@ const shouldSkipStage = (
   opts: Partial<engineDataTransfer.ITransferEngineOptions>,
   dataKind: engineDataTransfer.TransferFilterPreset
 ) => {
-  if (opts.exclude?.includes(dataKind)) {
+  if (opts.exclude?.length && opts.exclude.includes(dataKind)) {
     return true;
   }
-  if (opts.only) {
+  if (opts.only?.length) {
     return !opts.only.includes(dataKind);
   }
 
@@ -583,10 +583,6 @@ const parseRestoreFromOptions = (
   // if content is not included, send an empty array for include
   if ((opts.only && !opts.only.includes('content')) || opts.exclude?.includes('content')) {
     entitiesOptions.include = [];
-  }
-
-  if (shouldSkipFilesContent(opts)) {
-    entitiesOptions.exclude.push(...FILES_CONTENT_TYPES);
   }
 
   const restoreConfig: strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore'] =
