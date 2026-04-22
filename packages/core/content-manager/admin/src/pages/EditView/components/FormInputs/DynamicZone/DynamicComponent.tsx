@@ -98,6 +98,15 @@ const DynamicComponent = ({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
+  // Capture the component's height before it's replaced by the Preview so the
+  // drop indicator fills the same space and the drop position stays visible.
+  const previewHeightRef = React.useRef<number | undefined>(undefined);
+  React.useLayoutEffect(() => {
+    if (!isDragging && boxRef.current) {
+      previewHeightRef.current = (boxRef.current as HTMLElement).offsetHeight;
+    }
+  });
+
   /**
    * We don't need the accordion's to communicate with each other,
    * so a unique value for their state is enough.
@@ -267,7 +276,7 @@ const DynamicComponent = ({
       </Flex>
       <StyledBox ref={composedBoxRefs} hasRadius>
         {isDragging ? (
-          <Preview />
+          <Preview $height={previewHeightRef.current} />
         ) : (
           <Accordion.Root value={collapseToOpen} onValueChange={setCollapseToOpen}>
             <Accordion.Item value={accordionValue}>
@@ -320,12 +329,14 @@ const Rectangle = styled<BoxComponent>(Box)`
   height: ${({ theme }) => theme.spaces[4]};
 `;
 
-const Preview = styled.span`
+const Preview = styled.span<{ $height?: number }>`
   display: block;
   background-color: ${({ theme }) => theme.colors.primary100};
-  outline: 1px dashed ${({ theme }) => theme.colors.primary500};
+  outline: 1px dashed ${({ theme }) => theme.colors.primary600};
   outline-offset: -1px;
-  padding: ${({ theme }) => theme.spaces[6]};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  ${({ $height, theme }) =>
+    $height !== undefined ? `height: ${$height}px;` : `padding: ${theme.spaces[6]};`}
 `;
 
 const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
