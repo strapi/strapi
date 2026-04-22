@@ -105,7 +105,8 @@ describe('ConfirmDialogPublishAll', () => {
             },
             { status: 200 }
           );
-        }
+        },
+        { once: true }
       )
     );
 
@@ -127,7 +128,8 @@ describe('ConfirmDialogPublishAll', () => {
             },
             { status: 200 }
           );
-        }
+        },
+        { once: true }
       )
     );
 
@@ -151,7 +153,8 @@ describe('ConfirmDialogPublishAll', () => {
             },
             { status: 500 }
           );
-        }
+        },
+        { once: true }
       )
     );
 
@@ -180,7 +183,8 @@ describe('ConfirmDialogPublishAll', () => {
           return HttpResponse.json({
             data: 2,
           });
-        }
+        },
+        { once: true }
       )
     );
 

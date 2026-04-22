@@ -1,5 +1,5 @@
 import { server } from '@tests/server';
-import { waitFor, renderHook } from '@tests/utils';
+import { waitFor, renderHook, screen } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import {
@@ -359,12 +359,7 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for a Sonner toast to render. Asserting the container (rather
-      // than the message text) keeps the test stable across copy changes and
-      // across msw v1/v2 fetch-error message differences.
-      await waitFor(() => {
-        expect(document.querySelector('[data-sonner-toast]')).toBeInTheDocument();
-      });
+      await screen.findByText('Server error');
     });
 
     it('should handle network errors gracefully', async () => {
@@ -386,10 +381,11 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for a Sonner toast to render (see note above).
-      await waitFor(() => {
-        expect(document.querySelector('[data-sonner-toast]')).toBeInTheDocument();
-      });
+      // Under msw v1 the network-error message was the string passed to
+      // `res.networkError(...)`. Under msw v2 + undici the thrown `TypeError`
+      // surfaces with messages like "Failed to fetch" / "fetch failed" /
+      // "Network Error" depending on how axios wraps it. Match any of them.
+      await screen.findByText(/failed to fetch|fetch failed|network ?error/i);
     });
   });
 

@@ -7,5 +7,5 @@ module.exports = {
   },
   testMatch: ['<rootDir>/**/__tests__/*.test.ts'],
   displayName: 'Core content-type-builder',
-  testEnvironment: '@strapi/admin-test-utils/environment',
+  testEnvironment: 'jsdom',
 };
