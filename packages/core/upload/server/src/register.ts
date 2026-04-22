@@ -19,7 +19,14 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   // Register AI metadata job model
   strapi.get('models').add(aiMetadataJob);
 
-  const uploadConfig = strapi.config.get<Config>('plugin::upload');
+  const raw = strapi.config.get<Partial<Config> | null | undefined>('plugin::upload') ?? {};
+  // createProvider needs a provider; empty get() (e.g. in tests) still has defaults.
+  const uploadConfig = {
+    provider: 'local' as const,
+    providerOptions: {} as Config['providerOptions'],
+    actionOptions: {} as Config['actionOptions'],
+    ...raw,
+  } as Config;
 
   // Configure sharp memory management
   const { sharpCache = false, sharpConcurrency = 1 } = uploadConfig;
