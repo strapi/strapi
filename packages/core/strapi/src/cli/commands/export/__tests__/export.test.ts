@@ -1,4 +1,5 @@
 import {
+  engine as engineDataTransfer,
   file as fileDataTransfer,
   directory as directoryDataTransfer,
 } from '@strapi/data-transfer';
@@ -211,6 +212,36 @@ describe('Export', () => {
     await expectExit(1, async () => {
       await exportAction({ format: 'dir', file: '/tmp/x' });
     });
+  });
+
+  it('filters upload entities and links when files are excluded', async () => {
+    await expectExit(0, async () => {
+      await exportAction({ exclude: ['files'] });
+    });
+
+    expect(engineDataTransfer.createTransferEngine).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        transforms: expect.objectContaining({
+          entities: [expect.objectContaining({ filter: expect.any(Function) })],
+          links: [expect.objectContaining({ filter: expect.any(Function) })],
+        }),
+      })
+    );
+
+    const [, , options] = (engineDataTransfer.createTransferEngine as jest.Mock).mock.calls.at(-1);
+    const entityFilter = options.transforms.entities[0].filter;
+    const linkFilter = options.transforms.links[0].filter;
+
+    expect(entityFilter({ type: 'plugin::upload.file' })).toBe(false);
+    expect(entityFilter({ type: 'api::article.article' })).toBe(true);
+    expect(
+      linkFilter({
+        left: { type: 'plugin::upload.file' },
+        right: { type: 'api::article.article' },
+      })
+    ).toBe(false);
   });
 
   it('allows format dir when compress is true (compression is ignored for directory exports)', async () => {

@@ -179,4 +179,27 @@ describe('Import', () => {
     );
     expect(fileDataTransfer.providers.createLocalFileSourceProvider).not.toHaveBeenCalled();
   });
+
+  it('excludes upload models from restore when files are excluded', async () => {
+    const options = {
+      file: 'test.tar',
+      exclude: ['files'],
+      only: [],
+    };
+
+    await expectExit(0, async () => {
+      await importAction(options);
+    });
+
+    expect(strapiDataTransfer.providers.createLocalStrapiDestinationProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        restore: expect.objectContaining({
+          assets: false,
+          entities: expect.objectContaining({
+            exclude: expect.arrayContaining(['plugin::upload.file', 'plugin::upload.folder']),
+          }),
+        }),
+      })
+    );
+  });
 });

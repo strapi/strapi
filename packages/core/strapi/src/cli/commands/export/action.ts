@@ -14,8 +14,9 @@ import {
 import {
   getDefaultExportName,
   buildTransferTable,
-  isIgnoredContentType,
   createStrapiInstance,
+  createEntityFilter,
+  createLinkFilter,
   formatDiagnostic,
   loadersFactory,
   exitMessageText,
@@ -82,16 +83,12 @@ export default async (opts: CmdOptions) => {
     transforms: {
       links: [
         {
-          filter(link) {
-            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
-          },
+          filter: createLinkFilter(opts),
         },
       ],
       entities: [
         {
-          filter(entity) {
-            return !isIgnoredContentType(entity.type);
-          },
+          filter: createEntityFilter(opts),
         },
       ],
     },

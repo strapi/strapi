@@ -146,7 +146,53 @@ describe('import', () => {
   test.todo('import from .tar.gz.enc (encrypted) with correct key and verify DB state');
   test.todo('import with wrong decryption key fails with clear error');
   test.todo('import with --only filter and verify only those types in DB');
-  test.todo('import with --exclude filter and verify excluded types not in DB');
+  it('should not restore upload records when importing an export created with --exclude files', async () => {
+    const excludedFilename = 'output-no-files';
+    const exportResult = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '--no-encrypt',
+        '--no-compress',
+        '-f',
+        excludedFilename,
+        '--exclude',
+        'files',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+    expect(exportResult.status).toBe(0);
+
+    const importTar = path.join(appPath, `${excludedFilename}.tar`);
+    const result = spawnSync(
+      'npm',
+      ['run', '-s', 'strapi', '--', 'import', '-f', importTar, '--force', '--exclude', 'files'],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+    const stateAfterImport = utils.getDbState(appPath);
+    if (stateAfterImport.error) {
+      throw new Error(`Failed to read DB after import: ${stateAfterImport.error}`);
+    }
+
+    expect(stateAfterImport.articles).toBe(expectedDbState.articles);
+    expect(stateAfterImport.categories).toBe(expectedDbState.categories);
+    expect(stateAfterImport.uploadFiles).toBe(0);
+    expect(stateAfterImport.uploadFolders).toBe(0);
+  });
   test.todo(
     'import when schema differs (e.g. version mismatch) and verify diff handling / --force'
   );

@@ -144,7 +144,54 @@ describe('export', () => {
 
   test.todo('export from empty DB (schemas only, no entities)');
   test.todo('export with --only filter and verify tar contains only those types');
-  test.todo('export with --exclude filter and verify excluded types missing from tar');
+  it('should exclude upload entities, upload links, and asset files with --exclude files', async () => {
+    const excludedFilename = 'output-no-files';
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '-f',
+        excludedFilename,
+        '--no-encrypt',
+        '--no-compress',
+        '--exclude',
+        'files',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+
+    const exportTar = path.join(appPath, `${excludedFilename}.tar`);
+    const { fs: testFs } = utils;
+    const entities = await testFs.tar(exportTar).readJSONLDir('entities');
+    const links = await testFs.tar(exportTar).readJSONLDir('links');
+    const assetMetadata = await testFs.tar(exportTar).readDir('assets/metadata');
+    const assetUploads = await testFs.tar(exportTar).readDir('assets/uploads');
+
+    expect(
+      entities.some((entity) =>
+        ['plugin::upload.file', 'plugin::upload.folder'].includes(entity.type)
+      )
+    ).toBe(false);
+    expect(
+      links.some(
+        (link) =>
+          ['plugin::upload.file', 'plugin::upload.folder'].includes(link.left.type) ||
+          ['plugin::upload.file', 'plugin::upload.folder'].includes(link.right.type)
+      )
+    ).toBe(false);
+    expect(assetMetadata).toHaveLength(0);
+    expect(assetUploads).toHaveLength(0);
+  });
   test.todo('export with compression (.tar.gz) and verify tar contents');
   test.todo('export with encryption (.tar.gz.enc) and verify prompt/key and tar not plaintext');
   test.todo('export table counts match actual tar entry counts per stage');
