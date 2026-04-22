@@ -12,7 +12,7 @@ test.describe('Create collection type with all field types', () => {
     await sharedSetup('ctb-edit-ct', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));

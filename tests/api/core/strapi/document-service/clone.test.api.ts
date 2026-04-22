@@ -128,5 +128,49 @@ describe('Document Service', () => {
         entries: [],
       });
     });
+
+    /**
+     * Simulate params that content-manager sends for auto-clone (minimal body after sanitize).
+     * Ensures clone works with strictParams and does not reject valid controller-style params.
+     */
+    testInTransaction(
+      'clone with strictParams true and minimal params (like auto-clone)',
+      async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+        strapi.config.set('api.documents.strictParams', true);
+        try {
+          const result = await strapi.documents(ARTICLE_UID).clone({
+            documentId: articleDb.documentId,
+            data: {},
+            populate: [],
+          });
+          expect(result).not.toBeNull();
+          expect(result.entries.length).toBeGreaterThanOrEqual(1);
+        } finally {
+          strapi.config.set('api.documents.strictParams', undefined);
+        }
+      }
+    );
+
+    testInTransaction(
+      'clone with strictParams true and locale (like clone with locale)',
+      async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+        strapi.config.set('api.documents.strictParams', true);
+        try {
+          const result = await strapi.documents(ARTICLE_UID).clone({
+            documentId: articleDb.documentId,
+            locale: 'en',
+            data: { title: 'Cloned with strict' },
+            populate: [],
+          });
+          expect(result).not.toBeNull();
+          expect(result.entries).toHaveLength(1);
+          expect(result.entries[0]).toMatchObject({ locale: 'en', title: 'Cloned with strict' });
+        } finally {
+          strapi.config.set('api.documents.strictParams', undefined);
+        }
+      }
+    );
   });
 });

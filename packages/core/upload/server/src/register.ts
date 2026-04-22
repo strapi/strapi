@@ -6,6 +6,7 @@ import type { Core } from '@strapi/types';
 import registerUploadMiddleware from './middlewares/upload';
 import spec from '../../documentation/content-api.json';
 import type { Config, File, InputFile } from './types';
+import { aiMetadataJob } from './models/ai-metadata-job';
 
 const { PayloadTooLargeError } = errors;
 const { bytesToHumanReadable, kbytesToBytes } = file;
@@ -14,6 +15,9 @@ const { bytesToHumanReadable, kbytesToBytes } = file;
  * Register upload plugin
  */
 export async function register({ strapi }: { strapi: Core.Strapi }) {
+  // Register AI metadata job model
+  strapi.get('models').add(aiMetadataJob);
+
   strapi.plugin('upload').provider = createProvider(strapi.config.get<Config>('plugin::upload'));
 
   await registerUploadMiddleware({ strapi });

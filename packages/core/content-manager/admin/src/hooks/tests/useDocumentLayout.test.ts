@@ -22,9 +22,12 @@ describe('useDocumentLayout', () => {
         mainField: 'id',
         pageSize: 10,
         pagination: false,
+        relationOpenMode: 'modal',
         searchable: false,
       },
     });
+
+    expect(result.current.listViewConversionContext).toBeNull();
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -328,23 +331,28 @@ describe('useDocumentLayout', () => {
         mainField: 'id',
         pageSize: 10,
         pagination: false,
+        relationOpenMode: 'modal',
         searchable: false,
       },
     });
+
+    expect(result.current.listViewConversionContext).toBeNull();
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     // list layouts don't need the components.
     expect(result.current.list.components).toBeUndefined();
 
+    expect(result.current.listViewConversionContext).not.toBeNull();
+
     const expectedListLayout = [
       {
         attribute: {
           type: 'string',
         },
-        label: 'id',
+        label: 'documentId',
         mainField: undefined,
-        name: 'id',
+        name: 'documentId',
         searchable: true,
         sortable: true,
       },

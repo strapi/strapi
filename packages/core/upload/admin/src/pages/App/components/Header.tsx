@@ -87,15 +87,20 @@ export const Header = ({
       }
       primaryAction={
         canCreate && (
-          <Flex gap={2}>
-            <Button startIcon={<Plus />} variant="secondary" onClick={onToggleEditFolderDialog}>
+          <Flex gap={2} width="100%">
+            <Button
+              startIcon={<Plus />}
+              variant="secondary"
+              onClick={onToggleEditFolderDialog}
+              fullWidth
+            >
               {formatMessage({
                 id: getTrad('header.actions.add-folder'),
                 defaultMessage: 'Add new folder',
               })}
             </Button>
 
-            <Button startIcon={<Plus />} onClick={onToggleUploadAssetDialog}>
+            <Button startIcon={<Plus />} onClick={onToggleUploadAssetDialog} fullWidth>
               {formatMessage({
                 id: getTrad('header.actions.add-assets'),
                 defaultMessage: 'Add new assets',

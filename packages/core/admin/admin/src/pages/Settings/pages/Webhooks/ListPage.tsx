@@ -197,7 +197,14 @@ const ListPage = () => {
           primaryAction={
             canCreate &&
             !isLoading && (
-              <LinkButton tag={NavLink} startIcon={<Plus />} variant="default" to="create" size="S">
+              <LinkButton
+                tag={NavLink}
+                startIcon={<Plus />}
+                variant="default"
+                to="create"
+                size="S"
+                fullWidth
+              >
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
                   defaultMessage: 'Create new webhook',

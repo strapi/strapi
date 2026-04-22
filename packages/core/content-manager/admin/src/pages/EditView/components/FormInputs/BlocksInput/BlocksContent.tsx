@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Box,
   BoxComponent,
@@ -23,7 +24,7 @@ import { decorateCode } from './Blocks/Code';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
-import { getEntries, isLinkNode, isListNode } from './utils/types';
+import { getEntries } from './utils/types';
 
 const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
@@ -35,7 +36,11 @@ const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // For fullscreen align input in the center with fixed width
   width: ${(props) => (props.$isExpandedMode ? '512px' : '100%')};
   margin: auto;
+  font-size: 1.6rem;
 
+  ${({ theme }) => theme.breakpoints.medium} {
+    font-size: 1.4rem;
+  }
   > *:last-child {
     padding-bottom: ${({ theme }) => theme.spaces[3]};
   }
@@ -133,9 +138,10 @@ const DragAndDropElement = ({
   dragDirection,
   dragHandleTopMargin,
 }: DragAndDropElementProps) => {
-  const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
+  const { editor, disabled, name, setLiveText } = useBlocksEditorContext('DragAndDropElement');
   const { formatMessage } = useIntl();
   const [dragVisibility, setDragVisibility] = React.useState<CSSProperties['visibility']>('hidden');
+  const isDragAndDropEnabled = !disabled;
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
@@ -165,7 +171,7 @@ const DragAndDropElement = ({
   );
 
   const [{ handlerId, isDragging, isOverDropTarget, direction }, blockRef, dropRef, dragRef] =
-    useDragAndDrop(!disabled, {
+    useDragAndDrop(isDragAndDropEnabled, {
       type: `${ItemTypes.BLOCKS}_${name}`,
       index,
       item: {
@@ -214,24 +220,33 @@ const DragAndDropElement = ({
           gap={2}
           paddingLeft={2}
           alignItems="start"
-          onDragStart={(event) => {
-            const target = event.target as HTMLElement;
-            const currentTarget = event.currentTarget as HTMLElement;
+          onDragStart={
+            isDragAndDropEnabled
+              ? (event) => {
+                  const target = event.target as HTMLElement;
+                  const currentTarget = event.currentTarget as HTMLElement;
 
-            // Dragging action should only trigger drag event when button is dragged, however update styles on the whole dragItem.
-            if (target.getAttribute('role') !== 'button') {
-              event.preventDefault();
-            } else {
-              // Setting styles using dragging state is not working, so set it on current target element as nodes get dragged
-              currentTarget.style.opacity = '0.5';
-            }
-          }}
-          onDragEnd={(event) => {
-            const currentTarget = event.currentTarget as HTMLElement;
-            currentTarget.style.opacity = '1';
-          }}
-          onMouseMove={() => setDragVisibility('visible')}
-          onSelect={() => setDragVisibility('visible')}
+                  // Dragging action should only trigger drag event when button is dragged, however update styles on the whole dragItem.
+                  if (target.getAttribute('role') !== 'button') {
+                    event.preventDefault();
+                  } else {
+                    // Setting styles using dragging state is not working, so set it on current target element as nodes get dragged
+                    currentTarget.style.opacity = '0.5';
+                  }
+                }
+              : undefined
+          }
+          onDragEnd={
+            isDragAndDropEnabled
+              ? (event) => {
+                  const currentTarget = event.currentTarget as HTMLElement;
+                  currentTarget.style.opacity = '1';
+                }
+              : undefined
+          }
+          onMouseEnter={() => setDragVisibility('visible')}
+          onFocusCapture={() => setDragVisibility('visible')}
+          onBlurCapture={() => setDragVisibility('hidden')}
           onMouseLeave={() => setDragVisibility('hidden')}
           aria-disabled={disabled}
           $dragVisibility={dragVisibility}
@@ -246,10 +261,10 @@ const DragAndDropElement = ({
               id: getTranslation('components.DragHandle-label'),
               defaultMessage: 'Drag',
             })}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
             aria-disabled={disabled}
             disabled={disabled}
-            draggable
+            draggable={isDragAndDropEnabled}
             // For some blocks top margin added to drag handle to align at the text level
             $dragHandleTopMargin={dragHandleTopMargin}
           >
@@ -317,14 +332,16 @@ type BaseRenderElementProps = Direction & {
   props: RenderElementProps['children'];
   blocks: BlocksStore;
   editor: Editor;
+  isMobile: boolean;
 };
 
 const baseRenderElement = ({
   props,
   blocks,
   editor,
-  setDragDirection,
   dragDirection,
+  setDragDirection,
+  isMobile,
 }: BaseRenderElementProps) => {
   const { element } = props;
 
@@ -332,13 +349,9 @@ const baseRenderElement = ({
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, element);
 
-  // Link is inline block so it cannot be dragged
-  // List items and nested list blocks i.e. lists with indent level higher than 0 are skipped from dragged items
-  if (
-    isLinkNode(element) ||
-    (isListNode(element) && element.indentLevel && element.indentLevel > 0) ||
-    element.type === 'list-item'
-  ) {
+  const isDraggable = block.isDraggable?.(element) ?? true;
+
+  if (!isDraggable || isMobile) {
     return block.renderElement(props);
   }
 
@@ -362,8 +375,9 @@ interface BlocksContentProps {
 }
 
 const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
-  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
+  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode, flushPendingFormSync } =
     useBlocksEditorContext('BlocksContent');
+  const isMobile = useIsMobile();
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
@@ -417,8 +431,8 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
     (props: RenderElementProps) =>
-      baseRenderElement({ props, blocks, editor, dragDirection, setDragDirection }),
-    [blocks, editor, dragDirection, setDragDirection]
+      baseRenderElement({ props, blocks, editor, dragDirection, setDragDirection, isMobile }),
+    [blocks, editor, dragDirection, isMobile, setDragDirection]
   );
 
   const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -512,8 +526,13 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       return;
     }
 
-    if (selectedBlock.handleTab) {
-      event.preventDefault();
+    event.preventDefault();
+
+    if (event.shiftKey && selectedBlock.handleShiftTab) {
+      // Handle Shift+Tab (unindent)
+      selectedBlock.handleShiftTab(editor);
+    } else if (!event.shiftKey && selectedBlock.handleTab) {
+      // Handle Tab (indent)
       selectedBlock.handleTab(editor);
     }
   };
@@ -592,6 +611,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       background="neutral0"
       color="neutral800"
       lineHeight={6}
+      paddingLeft={{ initial: 4, medium: 0 }}
       paddingRight={7}
       paddingTop={6}
       paddingBottom={3}
@@ -606,6 +626,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
+        onBlur={flushPendingFormSync}
         // As we have our own handler to drag and drop the elements returing true will skip slate's own event handler
         onDrop={dragNoop}
         onDragStart={dragNoop}

@@ -178,6 +178,33 @@ const CodeEditor = (props: RenderElementProps) => {
   );
 };
 
+const withCode = (editor: Editor) => {
+  const { insertData } = editor;
+
+  editor.insertData = (data) => {
+    const pastedText = data.getData('text/plain');
+
+    if (pastedText && editor.selection) {
+      // Check if we're currently inside a code block
+      const codeBlockEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'code',
+      });
+
+      if (codeBlockEntry) {
+        // We're inside a code block, handle the paste specially
+        // Replace the selected content with the pasted text, preserving newlines
+        Transforms.insertText(editor, pastedText);
+        return;
+      }
+    }
+
+    // For non-code blocks, use the default behavior
+    insertData(data);
+  };
+
+  return editor;
+};
+
 const codeBlocks: Pick<BlocksStore, 'code'> = {
   code: {
     renderElement: (props) => <CodeEditor {...props} />,
@@ -195,6 +222,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       pressEnterTwiceToExit(editor);
     },
     snippets: ['```'],
+    plugin: withCode,
   },
 };
 

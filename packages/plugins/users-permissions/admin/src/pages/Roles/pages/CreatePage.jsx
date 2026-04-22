@@ -93,7 +93,12 @@ export const CreatePage = () => {
             <Layouts.Header
               primaryAction={
                 !isLoadingPlugins && (
-                  <Button type="submit" loading={mutation.isLoading} startIcon={<Check />}>
+                  <Button
+                    type="submit"
+                    loading={mutation.isLoading}
+                    startIcon={<Check />}
+                    fullWidth
+                  >
                     {formatMessage({
                       id: 'global.save',
                       defaultMessage: 'Save',

@@ -18,7 +18,7 @@ export default (
       items: {
         type: 'object',
         properties: {
-          id: { type: 'number' },
+          id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
           documentId: { type: 'string' },
           ...attributes,
         },
@@ -29,7 +29,7 @@ export default (
   return {
     type: 'object',
     properties: {
-      id: { type: 'number' },
+      id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
       documentId: { type: 'string' },
       ...attributes,
     },

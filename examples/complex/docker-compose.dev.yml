@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi
+      POSTGRES_DB: strapi
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+
+  mysql:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_DATABASE: strapi
+      MYSQL_USER: strapi
+      MYSQL_PASSWORD: strapi
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: strapi
+    volumes:
+      - mysqldata:/var/lib/mysql
+    ports:
+      - '${MYSQL_PORT:-3306}:3306'
+
+volumes:
+  pgdata:
+  mysqldata:

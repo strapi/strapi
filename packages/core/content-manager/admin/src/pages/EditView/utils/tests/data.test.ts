@@ -1,5 +1,5 @@
 import { testData } from '../../../../tests/data';
-import { handleInvisibleAttributes, removeProhibitedFields } from '../data';
+import { getDirectParent, handleInvisibleAttributes, removeProhibitedFields } from '../data';
 
 const defaultFieldsValues = {
   name: 'name',
@@ -7,6 +7,40 @@ const defaultFieldsValues = {
 };
 
 describe('data', () => {
+  describe('getDirectParent', () => {
+    const values = {
+      title: 'hello',
+      conditional: [
+        {
+          name: 'wow',
+          url: 'some',
+          nested: {
+            name: 'name',
+            test: '',
+          },
+        },
+      ],
+    };
+
+    it('should return the root object for a top-level path', () => {
+      expect(getDirectParent(values, 'title')).toBe(values);
+    });
+
+    it('should return the array item parent for dynamic zone fields', () => {
+      expect(getDirectParent(values, 'conditional.0.url')).toEqual(values.conditional[0]);
+    });
+
+    it('should return the nested object for deep fields', () => {
+      expect(getDirectParent(values, 'conditional.0.nested.test')).toEqual(
+        values.conditional[0].nested
+      );
+    });
+
+    it('should return undefined for invalid paths', () => {
+      expect(getDirectParent(values, 'conditional.foo.url')).toBeUndefined();
+    });
+  });
+
   describe('removeProhibitedFields', () => {
     it('should return an empty object', () => {
       const { components, contentType } = testData;

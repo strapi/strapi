@@ -1,10 +1,10 @@
-import { StrapiAppPlugin } from './StrapiApp';
-
 /**
  * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
  */
 export * from './render';
+
+import { StrapiAppPlugin } from './StrapiApp';
 
 /**
  * components
@@ -32,7 +32,12 @@ export { useGuidedTour } from './components/GuidedTour/Context';
 /** @internal */
 export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
 
-export { RESPONSIVE_DEFAULT_SPACING } from './constants/theme';
+export {
+  RESPONSIVE_DEFAULT_SPACING,
+  HEIGHT_TOP_NAVIGATION,
+  HEIGHT_TOP_NAVIGATION_MEDIUM,
+  WIDTH_SIDE_NAVIGATION,
+} from './constants/theme';
 
 /**
  * Features
@@ -63,6 +68,11 @@ export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useDebounce } from './hooks/useDebounce';
 export { useMediaQuery, useIsDesktop, useIsTablet, useIsMobile } from './hooks/useMediaQuery';
 export { useDeviceType } from './hooks/useDeviceType';
+export {
+  usePersistentState,
+  useScopedPersistentState,
+  usePersistentStateScope,
+} from './hooks/usePersistentState';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
 
@@ -91,13 +101,13 @@ export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
 export * from './utils/rulesEngine';
+export * from './utils/users';
 export * from './services/api';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
 
 /**
  * Components
  */
-
 export { Layouts, type LayoutProps } from './components/Layouts/Layout';
 
 export type PluginDefinition = StrapiAppPlugin;

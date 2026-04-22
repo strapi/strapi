@@ -73,7 +73,7 @@ type EditFieldLayout = {
 }[Attribute.Kind];
 ```
 
-The excluded `type` values are unique to the content-manager and as such aren't expected to be rendered as universal form inputs. This data-structure is passed to the `InputRenderer` component to render any form input (previously known as `GenericInputs` from the helper-plugin). Notice how these inputs don't recieve their `value`, `onChange` or `error` prop. These are extracted from the `Form` using `useField(name)`:
+The excluded `type` values are unique to the content-manager and as such aren't expected to be rendered as universal form inputs. This data-structure is passed to the `InputRenderer` component to render any form input (previously known as `GenericInputs` from the helper-plugin). Notice how these inputs don't receive their `value`, `onChange` or `error` prop. These are extracted from the `Form` using `useField(name)`:
 
 ```ts
 export const StringInput = forwardRef<HTMLInputElement, InputProps>(
