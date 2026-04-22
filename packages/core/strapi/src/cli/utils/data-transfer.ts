@@ -120,9 +120,13 @@ const IGNORED_CONTENT_TYPES = [
   'plugin::content-releases.release-action',
 ];
 
+const FILES_CONTENT_TYPES = ['plugin::upload.file', 'plugin::upload.folder'];
+
 const isIgnoredContentType = (type: string) =>
   IGNORED_CONTENT_TYPE_PREFIXES.some((prefix) => type.startsWith(prefix)) ||
   IGNORED_CONTENT_TYPES.includes(type);
+
+const isFilesContentType = (type: string) => FILES_CONTENT_TYPES.includes(type);
 
 const abortTransfer = async ({
   engine,
@@ -159,7 +163,7 @@ const createStrapiInstance = async (opts: { logLevel?: string } = {}): Promise<C
     const app = createStrapi({ ...opts, ...appContext });
 
     app.log.level = opts.logLevel || 'error';
-    return await app.load();
+    return app.load();
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'ECONNREFUSED') {
       throw new Error('Process failed. Check the database connection with your Strapi project.');
@@ -530,6 +534,35 @@ const shouldSkipStage = (
   return false;
 };
 
+const shouldSkipFilesContent = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) =>
+  shouldSkipStage(opts, 'files');
+
+const createContentTypeFilter =
+  (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => (type: string) => {
+    if (isIgnoredContentType(type)) {
+      return false;
+    }
+
+    if (shouldSkipFilesContent(opts) && isFilesContentType(type)) {
+      return false;
+    }
+
+    return true;
+  };
+
+const createEntityFilter = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => {
+  const filterContentType = createContentTypeFilter(opts);
+
+  return (entity: { type: string }) => filterContentType(entity.type);
+};
+
+const createLinkFilter = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => {
+  const filterContentType = createContentTypeFilter(opts);
+
+  return (link: { left: { type: string }; right: { type: string } }) =>
+    filterContentType(link.left.type) && filterContentType(link.right.type);
+};
+
 type RestoreConfig = NonNullable<
   strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore']
 >;
@@ -550,6 +583,10 @@ const parseRestoreFromOptions = (
   // if content is not included, send an empty array for include
   if ((opts.only && !opts.only.includes('content')) || opts.exclude?.includes('content')) {
     entitiesOptions.include = [];
+  }
+
+  if (shouldSkipFilesContent(opts)) {
+    entitiesOptions.exclude.push(...FILES_CONTENT_TYPES);
   }
 
   const restoreConfig: strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore'] =
@@ -583,5 +620,7 @@ export {
   getDiffHandler,
   getAssetsBackupHandler,
   shouldSkipStage,
+  createEntityFilter,
+  createLinkFilter,
   parseRestoreFromOptions,
 };
