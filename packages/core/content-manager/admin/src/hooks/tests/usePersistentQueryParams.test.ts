@@ -1,13 +1,7 @@
-import { useQueryParams, usePersistentStateScope } from '@strapi/admin/strapi-admin';
+import { usePersistentStateScope, useQueryParams } from '@strapi/admin/strapi-admin';
 import { renderHook, waitFor } from '@tests/utils';
-import { useLocation } from 'react-router-dom';
 
 import { usePersistentPartialQueryParams } from '../usePersistentQueryParams';
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-}));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   useQueryParams: jest.fn(),
@@ -25,7 +19,6 @@ describe('usePersistentPartialQueryParams', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     window.localStorage.clear();
-    (useLocation as jest.Mock).mockReturnValue({ pathname });
     (useQueryParams as jest.Mock).mockReturnValue([{ query: {} }, mockSetQuery]);
     (usePersistentStateScope as jest.Mock).mockReturnValue('test-uuid');
   });
@@ -261,5 +254,56 @@ describe('usePersistentPartialQueryParams', () => {
     renderHook(() => usePersistentPartialQueryParams(config));
 
     expect(mockSetQuery).not.toHaveBeenCalled();
+  });
+
+  it('should migrate query params from a legacy key', async () => {
+    const legacyKey = `${keyPrefix}${pathname}`;
+    const scopedKey = 'scoped-key';
+    const savedParams = { pageSize: 20, sort: 'name:asc' };
+    window.localStorage.setItem(legacyKey, JSON.stringify(savedParams));
+
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [scopedKey]: {
+          paths: keysToPersist,
+          legacyKey,
+        },
+      })
+    );
+
+    await waitFor(() =>
+      expect(window.localStorage.getItem(scopedKey)).toBe(JSON.stringify(savedParams))
+    );
+
+    expect(window.localStorage.getItem(legacyKey)).toBeNull();
+
+    await waitFor(() => expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true));
+  });
+
+  it('should migrate query params from a legacy key to a scoped key', async () => {
+    const legacyKey = `${keyPrefix}${pathname}`;
+    const scopedKey = 'scoped-key';
+    const savedParams = { pageSize: 20, sort: 'name:asc' };
+    window.localStorage.setItem(legacyKey, JSON.stringify(savedParams));
+
+    renderHook(() =>
+      usePersistentPartialQueryParams({
+        [scopedKey]: {
+          paths: keysToPersist,
+          scoped: true,
+          legacyKey,
+        },
+      })
+    );
+
+    await waitFor(() =>
+      expect(window.localStorage.getItem(`${scopedKey}:test-uuid`)).toBe(
+        JSON.stringify(savedParams)
+      )
+    );
+
+    expect(window.localStorage.getItem(legacyKey)).toBeNull();
+
+    await waitFor(() => expect(mockSetQuery).toHaveBeenCalledWith(savedParams, 'push', true));
   });
 });

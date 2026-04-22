@@ -33,7 +33,7 @@ import { Duplicate, Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
+import { useNavigate, Link as ReactRouterLink, useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
@@ -83,6 +83,7 @@ const ListViewPage = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
   const isDesktop = useIsDesktop();
+  const { pathname } = useLocation();
 
   const handleCopyDocumentId = React.useCallback(
     async (e: React.MouseEvent, documentId: string | undefined) => {
@@ -110,13 +111,14 @@ const ListViewPage = () => {
       [`STRAPI_LIST_VIEW_SETTINGS:${model}`]: {
         paths: ['sort', 'filters', 'pageSize'],
         scoped: true,
+        legacyKey: `STRAPI_LIST_VIEW_SETTINGS:${pathname}`,
       },
       STRAPI_LOCALE: {
         paths: ['plugins.i18n.locale'],
         scoped: false,
       },
     }),
-    [model]
+    [model, pathname]
   );
   usePersistentPartialQueryParams(persistentQueryConfigs);
 

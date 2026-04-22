@@ -5,4 +5,5 @@ export const useMediaLibraryPermissions = jest.fn().mockReturnValue({
   canUpdate: true,
   canCopyLink: true,
   canDownload: true,
+  canSettings: true,
 });
