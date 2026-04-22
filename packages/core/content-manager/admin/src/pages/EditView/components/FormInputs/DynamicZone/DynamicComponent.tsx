@@ -89,9 +89,8 @@ const DynamicComponent = ({
     };
   }, [componentUid, dynamicComponentsByCategory, formatMessage]);
 
-  const tempKey = useForm(
-    'DynamicComponent',
-    (state) => getIn(state.values, `${name}.${index}.__temp_key__`)
+  const tempKey = useForm('DynamicComponent', (state) =>
+    getIn(state.values, `${name}.${index}.__temp_key__`)
   ) as string | undefined;
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =

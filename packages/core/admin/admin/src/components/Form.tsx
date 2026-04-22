@@ -622,21 +622,15 @@ const reducer = <TFormValues extends FormValues = FormValues>(
 
         // Generate a unique key, retrying if there's a collision
         let key: string;
-        let attempts = 0;
+        let lowerBound = existingKeys.size > 0 ? Array.from(existingKeys).sort().pop() : null;
         do {
-          // Use null as lower bound to generate keys at the "end" of the keyspace
-          // This reduces collision likelihood with existing unsorted keys
-          [key] = generateNKeysBetween(
-            existingKeys.size > 0 ? Array.from(existingKeys).sort().pop() : null,
-            null,
-            1
-          );
-          // If collision, add the key to existing set to get next one
+          [key] = generateNKeysBetween(lowerBound, null, 1);
+          // If collision, advance the lower bound so the next iteration
+          // generates a key strictly after this one.
           if (existingKeys.has(key)) {
-            existingKeys.add(key);
+            lowerBound = key;
           }
-          attempts++;
-        } while (existingKeys.has(key) && attempts < 100);
+        } while (existingKeys.has(key));
 
         draft.values = setIn(
           state.values,
