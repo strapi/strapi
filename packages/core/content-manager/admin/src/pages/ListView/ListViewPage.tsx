@@ -17,6 +17,7 @@ import {
   useTable,
   useIsMobile,
   useIsDesktop,
+  useClipboard,
   tours,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -26,8 +27,9 @@ import {
   ButtonProps,
   Box,
   EmptyStateLayout,
+  IconButton,
 } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
+import { Duplicate, Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -44,7 +46,10 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
-import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
+import {
+  type PersistentQueryConfig,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -74,15 +79,46 @@ const ListViewPage = () => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const { copy } = useClipboard();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
   const isDesktop = useIsDesktop();
 
-  usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
-  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
+  const handleCopyDocumentId = React.useCallback(
+    async (e: React.MouseEvent, documentId: string | undefined) => {
+      e.stopPropagation();
+      if (!documentId) return;
+      const didCopy = await copy(documentId);
+      if (didCopy) {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'content-manager.actions.copy-documentId.success',
+            defaultMessage: 'Document ID copied to clipboard',
+          }),
+        });
+      }
+    },
+    [copy, formatMessage, toggleNotification]
+  );
 
   const { collectionType, model, schema } = useDoc();
-  const { list } = useDocumentLayout(model);
+  const { list, listViewConversionContext, isLoading: isLoadingLayout } = useDocumentLayout(model);
+
+  const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
+    () => ({
+      [`STRAPI_LIST_VIEW_SETTINGS:${model}`]: {
+        paths: ['sort', 'filters', 'pageSize'],
+        scoped: true,
+      },
+      STRAPI_LOCALE: {
+        paths: ['plugins.i18n.locale'],
+        scoped: false,
+      },
+    }),
+    [model]
+  );
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
@@ -96,12 +132,22 @@ const ListViewPage = () => {
       !displayedHeaderNames ||
       !list.metadatas ||
       Object.keys(list.metadatas).length <= 0 ||
-      !schema?.attributes
+      !schema?.attributes ||
+      !listViewConversionContext
     )
       return [];
 
-    return convertListLayoutToFieldLayouts(displayedHeaderNames, schema.attributes, list.metadatas);
-  }, [displayedHeaderNames, schema, list]);
+    return convertListLayoutToFieldLayouts(
+      displayedHeaderNames,
+      schema.attributes,
+      list.metadatas,
+      {
+        configurations: listViewConversionContext.componentConfigurations,
+        schemas: listViewConversionContext.componentSchemas,
+      },
+      listViewConversionContext.contentTypeSchemas
+    );
+  }, [displayedHeaderNames, schema, list, listViewConversionContext]);
 
   const handleSetHeaders = (headers: string[]) => {
     setDisplayedHeaderNames(headers);
@@ -155,10 +201,13 @@ const ListViewPage = () => {
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const hasAppliedFilters = Boolean((query as any)?.filters?.$and?.length);
 
-  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery({
-    model,
-    params,
-  });
+  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
+    {
+      model,
+      params,
+    },
+    { skip: isLoadingLayout || !isHydrated }
+  );
 
   /**
    * If the API returns an error, display a notification
@@ -249,7 +298,7 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isLoading) {
+  if (isLoadingLayout || !isHydrated || isLoading) {
     return <Page.Loading />;
   }
 
@@ -420,6 +469,30 @@ const ListViewPage = () => {
                                       ? getDisplayName(row[header.name.split('.')[0]])
                                       : '-'}
                                   </Typography>
+                                </Table.Cell>
+                              );
+                            }
+                            if (header.name === 'documentId') {
+                              return (
+                                <Table.Cell key={header.name}>
+                                  <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
+                                    <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
+                                      {row.documentId || '-'}
+                                    </Typography>
+                                    {row.documentId && (
+                                      <IconButton
+                                        variant="ghost"
+                                        size="S"
+                                        label={formatMessage({
+                                          id: 'content-manager.actions.copy-documentId.label',
+                                          defaultMessage: 'Copy',
+                                        })}
+                                        onClick={(e) => handleCopyDocumentId(e, row.documentId)}
+                                      >
+                                        <Duplicate />
+                                      </IconButton>
+                                    )}
+                                  </Flex>
                                 </Table.Cell>
                               );
                             }

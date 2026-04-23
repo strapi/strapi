@@ -7,7 +7,7 @@ import { useDocumentActions } from '../useDocumentActions';
 
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useGetAIFeatureConfigQuery: () => ({ data: undefined }),
+  useGetAiFeatureConfigQuery: () => ({ data: undefined }),
   useAIAvailability: () => false,
 }));
 

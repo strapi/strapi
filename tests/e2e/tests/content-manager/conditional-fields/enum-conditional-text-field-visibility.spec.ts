@@ -8,7 +8,7 @@ import { createComponent, addAttributesToContentType } from '../../../../utils/c
 
 test.describe('Conditional Fields - Enum-controlled conditional text fields and value are cleared when hidden', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -149,9 +149,13 @@ test.describe('Conditional Fields - Enum-controlled conditional text fields and 
 
     await page.getByRole('combobox', { name: 'target' }).click();
     await page.getByRole('option', { name: 'Same window' }).click();
-    await expect(page.getByLabel('linkInternal*')).toBeVisible();
+    const linkInternalInput = page.getByLabel('linkInternal*');
+    await expect(linkInternalInput).toBeVisible();
     await expect(page.getByLabel('linkExternal')).toBeHidden();
-    await page.getByLabel('linkInternal*').fill('/internal-link');
+    await linkInternalInput.fill('/internal-link');
+    // Ensure the controlled field has committed before Publish (avoids Yup seeing an empty value when the DOM already shows text)
+    await expect(linkInternalInput).toHaveValue('/internal-link');
+    await linkInternalInput.blur();
 
     await page.getByRole('button', { name: 'Publish' }).click();
 
