@@ -197,30 +197,36 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (sortable && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      handleClickSort();
+    }
+  };
+
   return (
-    <Th
-      action={
-        isSorted &&
-        sortable && (
-          <IconButton label={sortLabel} onClick={handleClickSort} variant="ghost">
-            <SortIcon $isUp={sortOrder === 'ASC'} />
-          </IconButton>
-        )
-      }
+    <SortableTh
+      onClick={sortable ? handleClickSort : undefined}
+      onKeyDown={sortable ? handleKeyDown : undefined}
+      tabIndex={sortable ? 0 : undefined}
+      aria-sort={isSorted ? (sortOrder === 'ASC' ? 'ascending' : 'descending') : undefined}
+      $sortable={!!sortable}
     >
       <Tooltip label={sortable ? sortLabel : label}>
-        <Typography
-          textColor="neutral600"
-          tag={!isSorted && sortable ? 'button' : 'span'}
-          onClick={handleClickSort}
-          variant="sigma"
-        >
-          {label}
-        </Typography>
+        <Flex gap={1}>
+          <Typography textColor="neutral600" tag="span" variant="sigma">
+            {label}
+          </Typography>
+          {isSorted && sortable && <SortIcon $isUp={sortOrder === 'ASC'} />}
+        </Flex>
       </Tooltip>
-    </Th>
+    </SortableTh>
   );
 };
+
+const SortableTh = styled(Th)<{ $sortable: boolean }>`
+  cursor: ${({ $sortable }) => ($sortable ? 'pointer' : 'default')};
+`;
 
 const SortIcon = styled(CaretDown)<{
   $isUp: boolean;
