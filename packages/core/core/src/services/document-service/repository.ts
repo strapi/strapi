@@ -367,7 +367,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function deleteDocument(opts = {} as any) {
     const { documentId, ...params } = opts;
 
-    const query = await async.pipe(
+    const lookupQuery = await async.pipe(
       validateParams,
       omit('status'),
       i18n.defaultLocale(contentType),
@@ -376,15 +376,21 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
 
+    const selectionQuery = await async.pipe(
+      validateParams,
+      omit('status'),
+      pickSelectionParams,
+      transformParamsToQuery(uid)
+    )(params);
+
     if (hasDraftAndPublish && params.status === 'draft') {
       throw new Error('Cannot delete a draft document');
     }
 
-    const entriesToDelete = await strapi.db.query(uid).findMany(query);
+    const entriesToDelete = await strapi.db.query(uid).findMany(lookupQuery);
 
-    // Delete all matched entries and its components
     const deletedEntries = await async.map(entriesToDelete, (entryToDelete: any) =>
-      entries.delete(entryToDelete.id)
+      entries.delete(entryToDelete.id, selectionQuery)
     );
 
     entriesToDelete.forEach(emitEvent('entry.delete'));
