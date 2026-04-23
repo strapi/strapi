@@ -1,0 +1,26 @@
+{
+  "name": "tmp-markdown-it-compare",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "markdown-it-abbr": "^1.0.4",
+    "markdown-it-container": "^3.0.0",
+    "markdown-it-deflist": "^2.1.0",
+    "markdown-it-emoji": "^2.0.2",
+    "markdown-it-footnote": "^3.0.3",
+    "markdown-it-ins": "^3.0.1",
+    "markdown-it-mark": "^3.0.1",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "^1.0.0",
+    "markdown-it13": "npm:markdown-it@^13.0.2",
+    "markdown-it14": "npm:markdown-it@^14.1.1"
+  }
+}

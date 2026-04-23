@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`mdRenderer escapes inline html inside image alt text 1`] = `
+"<p><img src="https://example.com/x.png" alt="A &lt;em&gt;tag&lt;/em&gt; and  break"></p>
+"
+`;
+
+exports[`mdRenderer renders common rich text preview markdown consistently 1`] = `
+"<h1>Title</h1>
+<p>Paragraph with <a href="https://example.com">link</a>, emoji 😄, and <mark>mark</mark>.</p>
+<div class="warning">
+<p>Warning text</p>
+</div>
+<p>Footnote here<sup class="footnote-ref"><span>[1]</span></sup></p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>Footnote <em>value</em>. <span class="footnote-backref">↩︎</span></p>
+</li>
+</ol>
+</section>
+"
+`;
