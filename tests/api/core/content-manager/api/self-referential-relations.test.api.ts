@@ -3,7 +3,7 @@ import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
 
 interface CategoryRelation {
-  documentId: string;
+  count: number;
 }
 
 interface CategoryEntry {
@@ -98,7 +98,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
 
     // Verify draft has the self-relation
     const draftBefore = await getCategory(catA.documentId, 'draft');
-    expect(draftBefore.parent).toMatchObject({ documentId: catA.documentId });
+    expect(draftBefore.parent).toMatchObject({ count: 1 });
 
     // Publish
     await rq({
@@ -108,7 +108,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
 
     // Verify published version has the self-relation
     const published = await getCategory(catA.documentId, 'published');
-    expect(published.parent).toMatchObject({ documentId: catA.documentId });
+    expect(published.parent).toMatchObject({ count: 1 });
   });
 
   test('Self-referential relation between two entries is preserved after publish', async () => {
@@ -132,7 +132,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
 
     // Verify published catB has the relation to catA
     const published = await getCategory(catB.documentId, 'published');
-    expect(published.parent).toMatchObject({ documentId: catA.documentId });
+    expect(published.parent).toMatchObject({ count: 1 });
   });
 
   test('Self-referential relation (entry to itself) is preserved after discard draft', async () => {
@@ -156,6 +156,6 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
 
     // Verify the reverted draft still has the self-relation
     const draft = await getCategory(catA.documentId, 'draft');
-    expect(draft.parent).toMatchObject({ documentId: catA.documentId });
+    expect(draft.parent).toMatchObject({ count: 1 });
   });
 });
