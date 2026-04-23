@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { usePersistentStateScope, useQueryParams } from '@strapi/admin/strapi-admin';
 import get from 'lodash/get';
@@ -45,6 +45,7 @@ export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) =
   const scope = usePersistentStateScope();
   const [{ query }, setQuery] = useQueryParams();
   const clonedConfig = JSON.stringify(config);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // load query params from local storge
   useEffect(() => {
@@ -68,9 +69,10 @@ export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) =
       Object.assign(mergedFilteredQuery, filteredQuery);
     }
 
-    if (Object.keys(mergedFilteredQuery).length === 0) return;
-
-    setQuery({ ...mergedFilteredQuery, ...query }, 'push', true);
+    if (Object.keys(mergedFilteredQuery).length > 0) {
+      setQuery({ ...mergedFilteredQuery, ...query }, 'push', true);
+    }
+    setIsHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clonedConfig, scope]);
 
@@ -85,4 +87,6 @@ export const usePersistentPartialQueryParams = (config: PersistentQueryConfig) =
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, clonedConfig, scope]);
+
+  return { isHydrated };
 };

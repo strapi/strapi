@@ -7490,12 +7490,12 @@ __metadata:
   linkType: hard
 
 "follow-redirects@npm:^1.0.0":
-  version: 1.15.1
-  resolution: "follow-redirects@npm:1.15.1"
+  version: 1.16.0
+  resolution: "follow-redirects@npm:1.16.0"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: 10c0/ea21337fe38eac8d75f5af12c425cc40e0bb44dcc3091fd0bde1c828596251a7a9638b5720fee5a0a5c62524450cbe16c52aae1dce88c6aee68577e441842e7f
+  checksum: 10c0/a1e2900163e6f1b4d1ed5c221b607f41decbab65534c63fe7e287e40a5d552a6496e7d9d7d976fa4ba77b4c51c11e5e9f683f10b43011ea11e442ff128d0e181
   languageName: node
   linkType: hard
 
@@ -9085,9 +9085,9 @@ __metadata:
   linkType: hard
 
 "lodash-es@npm:^4.17.21":
-  version: 4.17.23
-  resolution: "lodash-es@npm:4.17.23"
-  checksum: 10c0/3150fb6660c14c7a6b5f23bd11597d884b140c0e862a17fdb415aaa5ef7741523182904a6b7929f04e5f60a11edb5a79499eb448734381c99ffb3c4734beeddd
+  version: 4.18.1
+  resolution: "lodash-es@npm:4.18.1"
+  checksum: 10c0/35d4dcf87ef07f8d090f409447575800108057e360b445f590d0d25d09e3d1e33a163d2fc100d4d072b0f901d5e2fc533cd7c4bfd8eeb38a06abec693823c8b8
   languageName: node
   linkType: hard
 
@@ -9113,9 +9113,9 @@ __metadata:
   linkType: hard
 
 "lodash@npm:^4.17.20, lodash@npm:^4.17.21":
-  version: 4.17.23
-  resolution: "lodash@npm:4.17.23"
-  checksum: 10c0/1264a90469f5bb95d4739c43eb6277d15b6d9e186df4ac68c3620443160fc669e2f14c11e7d8b2ccf078b81d06147c01a8ccced9aab9f9f63d50dcf8cace6bf6
+  version: 4.18.1
+  resolution: "lodash@npm:4.18.1"
+  checksum: 10c0/757228fc68805c59789e82185135cf85f05d0b2d3d54631d680ca79ec21944ec8314d4533639a14b8bcfbd97a517e78960933041a5af17ecb693ec6eecb99a27
   languageName: node
   linkType: hard
 
