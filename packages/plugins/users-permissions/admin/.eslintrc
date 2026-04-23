@@ -1,0 +1,19 @@
+{
+  "root": true,
+  "extends": ["custom/front/typescript"],
+  "parserOptions": {
+    "project": ["./admin/tsconfig.json"]
+  },
+  "rules": {
+    "testing-library/prefer-find-by": "warn",
+    "testing-library/prefer-query-by-disappearance": "warn",
+    "testing-library/no-wait-for-multiple-assertions": "warn",
+    "jest-dom/prefer-to-have-text-content": "warn",
+
+    "import/no-default-export": "warn",
+    "import/default": "warn",
+
+    "check-file/no-index": "off",
+    "check-file/filename-naming-convention": "off"
+  }
+}

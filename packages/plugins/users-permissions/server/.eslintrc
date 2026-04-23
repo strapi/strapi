@@ -1,0 +1,11 @@
+{
+  "root": true,
+  "extends": ["custom/back/typescript"],
+  "parserOptions": {
+    "project": ["./server/tsconfig.json"]
+  },
+  "rules": {
+    "strict": "warn",
+    "@typescript-eslint/no-var-requires": "warn"
+  }
+}

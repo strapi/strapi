@@ -26,13 +26,15 @@
   ],
   "exports": {
     "./strapi-admin": {
-      "source": "./admin/src/index.js",
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "source": "./server/src/index.js",
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
@@ -40,8 +42,11 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "run -T npm-run-all clean build:code",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
     "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -75,7 +80,9 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
+    "@strapi/admin": "5.42.1",
     "@strapi/strapi": "5.42.1",
+    "@strapi/types": "5.42.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.0",
     "@testing-library/user-event": "14.6.1",
