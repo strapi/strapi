@@ -22,6 +22,7 @@ jest.mock('../../../utils/data-transfer', () => {
         send: jest.fn(),
       },
       destroy: jest.fn(),
+      contentTypes: {},
     }),
     buildTransferTable: jest.fn(() => {
       return {

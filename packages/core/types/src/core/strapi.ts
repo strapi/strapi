@@ -44,9 +44,7 @@ export interface Strapi extends Container {
   db: Database;
   app: any;
   EE?: boolean;
-  ai?: {
-    enabled: boolean;
-  };
+  ai: Modules.AI.AiNamespace;
   ee: {
     seats: number | null | undefined;
     type: string | null | undefined;

@@ -74,10 +74,20 @@ const DynamicComponent = ({
   const displayedValue = mainField === 'id' || !mainFieldValue ? '' : String(mainFieldValue).trim();
   const displayTitle = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
-  const [category] = componentUid.split('.');
-  const { icon, displayName } = (dynamicComponentsByCategory[category] ?? []).find(
-    (component) => component.uid === componentUid
-  ) ?? { icon: null, displayName: null };
+  const { icon, displayName } = React.useMemo(() => {
+    const [category] = componentUid.split('.');
+    const { icon, displayName } = (dynamicComponentsByCategory[category] ?? []).find(
+      (component) => component.uid === componentUid
+    ) ?? { icon: null, displayName: null };
+
+    return {
+      icon,
+      displayName: formatMessage({
+        id: componentUid,
+        defaultMessage: displayName || componentUid,
+      }),
+    };
+  }, [componentUid, dynamicComponentsByCategory, formatMessage]);
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!disabled, {
@@ -223,10 +233,12 @@ const DynamicComponent = ({
             <Menu.SubContent>
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
-                  <Menu.Label>{category}</Menu.Label>
+                  <Menu.Label>
+                    {formatMessage({ id: category, defaultMessage: category })}
+                  </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index)}>
-                      {displayName}
+                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
                     </Menu.Item>
                   ))}
                 </React.Fragment>
@@ -243,10 +255,12 @@ const DynamicComponent = ({
             <Menu.SubContent>
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
-                  <Menu.Label>{category}</Menu.Label>
+                  <Menu.Label>
+                    {formatMessage({ id: category, defaultMessage: category })}
+                  </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
-                      {displayName}
+                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
                     </Menu.Item>
                   ))}
                 </React.Fragment>
