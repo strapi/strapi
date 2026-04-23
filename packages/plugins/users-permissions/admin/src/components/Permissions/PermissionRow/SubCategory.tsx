@@ -3,7 +3,6 @@ import React, { useCallback, useMemo } from 'react';
 import { Box, Checkbox, Flex, Typography, Grid, VisuallyHidden } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -11,13 +10,29 @@ import { useUsersPermissions } from '../../../contexts/UsersPermissionsContext';
 
 import CheckboxWrapper from './CheckboxWrapper';
 
+interface SubCategoryAction {
+  name: string;
+  label: string;
+  enabled?: boolean;
+}
+
+export interface SubCategoryShape {
+  name: string;
+  label: string;
+  actions: SubCategoryAction[];
+}
+
+interface SubCategoryProps {
+  subCategory: SubCategoryShape;
+}
+
 const Border = styled.div`
   flex: 1;
   align-self: center;
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const SubCategory = ({ subCategory }) => {
+const SubCategory = ({ subCategory }: SubCategoryProps) => {
   const { formatMessage } = useIntl();
   const { onChange, onChangeSelectAll, onSelectedAction, selectedAction, modifiedData } =
     useUsersPermissions();
@@ -27,25 +42,25 @@ const SubCategory = ({ subCategory }) => {
   }, [modifiedData, subCategory]);
 
   const hasAllActionsSelected = useMemo(() => {
-    return Object.values(currentScopedModifiedData).every((action) => action.enabled === true);
+    return Object.values(currentScopedModifiedData).every((action: any) => action.enabled === true);
   }, [currentScopedModifiedData]);
 
   const hasSomeActionsSelected = useMemo(() => {
     return (
-      Object.values(currentScopedModifiedData).some((action) => action.enabled === true) &&
+      Object.values(currentScopedModifiedData).some((action: any) => action.enabled === true) &&
       !hasAllActionsSelected
     );
   }, [currentScopedModifiedData, hasAllActionsSelected]);
 
   const handleChangeSelectAll = useCallback(
-    ({ target: { name } }) => {
+    ({ target: { name } }: { target: { name: string } }) => {
       onChangeSelectAll({ target: { name, value: !hasAllActionsSelected } });
     },
     [hasAllActionsSelected, onChangeSelectAll]
   );
 
   const isActionSelected = useCallback(
-    (actionName) => {
+    (actionName: string) => {
       return selectedAction === actionName;
     },
     [selectedAction]
@@ -65,7 +80,7 @@ const SubCategory = ({ subCategory }) => {
             name={subCategory.name}
             checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
             onCheckedChange={(value) =>
-              handleChangeSelectAll({ target: { name: subCategory.name, value } })
+              handleChangeSelectAll({ target: { name: subCategory.name, value } } as any)
             }
           >
             {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
@@ -120,10 +135,6 @@ const SubCategory = ({ subCategory }) => {
       </Flex>
     </Box>
   );
-};
-
-SubCategory.propTypes = {
-  subCategory: PropTypes.object.isRequired,
 };
 
 export default SubCategory;

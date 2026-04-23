@@ -2,10 +2,25 @@ import * as React from 'react';
 
 import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
+
+interface Role {
+  id: number | string;
+  name: string;
+  description?: string;
+  nb_users?: number;
+  type?: string;
+}
+
+interface TableBodyProps {
+  sortedRoles: Role[];
+  canDelete?: boolean;
+  canUpdate?: boolean;
+  setRoleToDelete: (id: string) => void;
+  onDelete: [boolean, (value: boolean) => void];
+}
 
 const EditLink = styled(Link)`
   align-items: center;
@@ -34,15 +49,21 @@ const EditLink = styled(Link)`
   }
 `;
 
-const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelete }) => {
+const TableBody = ({
+  sortedRoles,
+  canDelete = false,
+  canUpdate = false,
+  setRoleToDelete,
+  onDelete,
+}: TableBodyProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const [showConfirmDelete, setShowConfirmDelete] = onDelete;
 
-  const checkCanDeleteRole = (role) =>
-    canDelete && !['public', 'authenticated'].includes(role.type);
+  const checkCanDeleteRole = (role: Role) =>
+    canDelete && !['public', 'authenticated'].includes(role.type ?? '');
 
-  const handleClickDelete = (id) => {
+  const handleClickDelete = (id: string) => {
     setRoleToDelete(id);
     setShowConfirmDelete(!showConfirmDelete);
   };
@@ -104,16 +125,3 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
 };
 
 export default TableBody;
-
-TableBody.defaultProps = {
-  canDelete: false,
-  canUpdate: false,
-};
-
-TableBody.propTypes = {
-  onDelete: PropTypes.array.isRequired,
-  setRoleToDelete: PropTypes.func.isRequired,
-  sortedRoles: PropTypes.array.isRequired,
-  canDelete: PropTypes.bool,
-  canUpdate: PropTypes.bool,
-};

@@ -2,13 +2,33 @@ import * as React from 'react';
 
 import { Button, Grid, Modal, Breadcrumbs, Crumb, VisuallyHidden } from '@strapi/design-system';
 import { Form, InputRenderer } from '@strapi/strapi/admin';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 import schema from '../utils/schema';
 
-const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
+interface EmailTemplate {
+  display?: string;
+  icon?: string;
+  options?: {
+    from?: {
+      name?: string;
+      email?: string;
+    };
+    message?: string;
+    object?: string;
+    response_email?: string;
+  };
+}
+
+interface EmailFormProps {
+  template?: EmailTemplate;
+  open: boolean;
+  onSubmit: (values: any) => void;
+  onToggle: () => void;
+}
+
+const EmailForm = ({ template = {}, onToggle, open, onSubmit }: EmailFormProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -49,8 +69,8 @@ const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
             </Modal.Title>
           </VisuallyHidden>
         </Modal.Header>
-        <Form onSubmit={onSubmit} initialValues={template} validationSchema={schema}>
-          {({ isSubmitting }) => {
+        <Form method="PUT" onSubmit={onSubmit} initialValues={template} validationSchema={schema}>
+          {({ isSubmitting }: { isSubmitting: boolean }) => {
             return (
               <>
                 <Modal.Body>
@@ -109,7 +129,7 @@ const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
                         direction="column"
                         alignItems="stretch"
                       >
-                        <InputRenderer {...field} />
+                        <InputRenderer {...(field as any)} />
                       </Grid.Item>
                     ))}
                   </Grid.Root>
@@ -129,29 +149,6 @@ const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
       </Modal.Content>
     </Modal.Root>
   );
-};
-
-EmailForm.defaultProps = {
-  template: {},
-};
-
-EmailForm.propTypes = {
-  template: PropTypes.shape({
-    display: PropTypes.string,
-    icon: PropTypes.string,
-    options: PropTypes.shape({
-      from: PropTypes.shape({
-        name: PropTypes.string,
-        email: PropTypes.string,
-      }),
-      message: PropTypes.string,
-      object: PropTypes.string,
-      response_email: PropTypes.string,
-    }),
-  }),
-  open: PropTypes.bool.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  onToggle: PropTypes.func.isRequired,
 };
 
 export default EmailForm;

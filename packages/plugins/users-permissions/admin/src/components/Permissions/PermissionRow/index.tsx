@@ -1,18 +1,24 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { Box } from '@strapi/design-system';
 import sortBy from 'lodash/sortBy';
-import PropTypes from 'prop-types';
 
-import SubCategory from './SubCategory';
+import SubCategory, { SubCategoryShape } from './SubCategory';
 
-const PermissionRow = ({ name, permissions }) => {
+interface PermissionRowProps {
+  name: string;
+  permissions: {
+    controllers: Record<string, Record<string, SubCategoryShape>>;
+  };
+}
+
+const PermissionRow = ({ name, permissions }: PermissionRowProps) => {
   const subCategories = useMemo(() => {
     return sortBy(
-      Object.values(permissions.controllers).reduce((acc, curr, index) => {
+      Object.values(permissions.controllers).reduce<SubCategoryShape[]>((acc, curr, index) => {
         const currentName = `${name}.controllers.${Object.keys(permissions.controllers)[index]}`;
         const actions = sortBy(
-          Object.keys(curr).reduce((acc, current) => {
+          Object.keys(curr).reduce<SubCategoryShape[]>((acc, current) => {
             return [
               ...acc,
               {
@@ -45,11 +51,6 @@ const PermissionRow = ({ name, permissions }) => {
       ))}
     </Box>
   );
-};
-
-PermissionRow.propTypes = {
-  name: PropTypes.string.isRequired,
-  permissions: PropTypes.object.isRequired,
 };
 
 export default PermissionRow;
