@@ -152,8 +152,8 @@ const DynamicComponent = ({
           behavior: 'smooth',
           block: 'center',
         });
+        onForceOpenHandled?.();
       });
-      onForceOpenHandled?.();
     }
   }, [forceOpen, accordionValue, onForceOpenHandled]);
 

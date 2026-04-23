@@ -92,8 +92,18 @@ const DynamicZone = ({
       if (newItem) {
         setOpenComponentKey(newItem.__temp_key__);
       }
+    } else if (openComponentKey !== null) {
+      // Component was removed before forceOpen was handled — clear stale key
+      const currentKeys = new Set(value.map((v) => v.__temp_key__));
+      if (!currentKeys.has(openComponentKey)) {
+        setOpenComponentKey(null);
+      }
     }
-  }, [value, prevValue]);
+  }, [value, prevValue, openComponentKey]);
+
+  const handleForceOpenHandled = React.useCallback(() => {
+    setOpenComponentKey(null);
+  }, []);
 
   const dynamicComponentsByCategory = React.useMemo(() => {
     return attribute.components.reduce<
@@ -318,11 +328,7 @@ const DynamicZone = ({
                     dynamicComponentsByCategory={dynamicComponentsByCategory}
                     totalLength={dynamicDisplayedComponentsLength}
                     forceOpen={openComponentKey === field.__temp_key__}
-                    onForceOpenHandled={() => {
-                      if (openComponentKey === field.__temp_key__) {
-                        setOpenComponentKey(null);
-                      }
-                    }}
+                    onForceOpenHandled={handleForceOpenHandled}
                   >
                     {children}
                   </DynamicComponent>
