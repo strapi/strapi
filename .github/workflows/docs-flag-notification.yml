@@ -15,16 +15,15 @@ jobs:
       - name: Notify Slack
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_DOCUMENTATION_OPS }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          ACTOR: ${{ github.actor }}
         run: |
           if [ -z "$SLACK_WEBHOOK" ]; then
             echo "No Slack webhook configured, skipping"
             exit 0
           fi
-
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_URL="${{ github.event.pull_request.html_url }}"
-          ACTOR="${{ github.actor }}"
 
           TEXT=":label: *Docs flag added* on strapi/strapi\n<${PR_URL}|#${PR_NUMBER} — ${PR_TITLE}>\nFlagged by @${ACTOR}"
 
