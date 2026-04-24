@@ -6,16 +6,13 @@ As of October 2025 (and until this document is updated), v5.x.x _GA_ or _STABLE_
 
 **Note**: The v4.x.x LTS version will only receive high/critical severity **SECURITY** fixes until April 2026. No further bug fixes releases will be made.
 
-| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes         |
-| ------- | ----------- | -------------- | -------------- | ---------------------- | ------------- |
-| 5.x.x   | GA / Stable | September 2024 | Further Notice | Further Notice         | LTS           |
-| 5.x.x   | RC          | N/A            | September 2024 | N/A                    | End Of Life   |
-| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life   |
-| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life   |
-| 4.x.x   | GA / Stable | November 2021  | October 2025   | April 2026             | Security Only |
-| 4.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life   |
-| 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life   |
-| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life   |
+| Version | Support Starts | Support Ends   | Security Updates Until | Notes         |
+| ------- | -------------- | -------------- | ---------------------- | ------------- |
+| 5.x.x   | September 2024 |                |                        | LTS           |
+| 4.x.x   | November 2021  | October 2025   | April 2026             | Security Only |
+| 3.x.x   | May 2020       | February 2022  | February 2022          | End Of Life   |
+
+Non-stable releases (RC, Beta, Alpha) are considered End Of Life once the corresponding GA/Stable version is released.
 
 ## Reporting a Vulnerability
 
