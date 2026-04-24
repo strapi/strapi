@@ -16,6 +16,19 @@ const articleModel = {
     // Polymorphic relations that can point to any content type
     related: { type: 'relation' as const, relation: 'morphToOne' as const },
     relatedMany: { type: 'relation' as const, relation: 'morphToMany' as const },
+    // Inverse polymorphic (storage still lives on the morphTo* owner side; must be included in deep populate)
+    fromRelated: {
+      type: 'relation' as const,
+      relation: 'morphOne' as const,
+      target: ARTICLE_UID,
+      morphBy: 'related' as const,
+    },
+    fromRelatedMany: {
+      type: 'relation' as const,
+      relation: 'morphMany' as const,
+      target: ARTICLE_UID,
+      morphBy: 'relatedMany' as const,
+    },
     // Regular relation with a fixed target
     category: {
       type: 'relation' as const,
@@ -46,6 +59,14 @@ describe('getDeepPopulate', () => {
 
   it('includes morphToMany relations', () => {
     expect(result).toHaveProperty('relatedMany');
+  });
+
+  it('includes morphOne relations (inverse of morphToOne / morphToMany on the target)', () => {
+    expect(result).toHaveProperty('fromRelated');
+  });
+
+  it('includes morphMany relations (inverse of morphToMany on the target)', () => {
+    expect(result).toHaveProperty('fromRelatedMany');
   });
 
   it('includes regular relations', () => {
