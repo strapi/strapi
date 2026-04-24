@@ -1,0 +1,12 @@
+{
+  "extends": "tsconfig/client.json",
+  "include": ["./src"],
+  "compilerOptions": {
+    "rootDir": "../",
+    "outDir": "../dist",
+    "noEmit": true,
+
+    // TODO: Remove this when all files are migrated to TypeScript
+    "allowJs": true
+  }
+}

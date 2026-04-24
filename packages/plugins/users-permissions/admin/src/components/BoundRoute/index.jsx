@@ -14,7 +14,7 @@ const MethodBox = styled(Box)`
   border-radius: ${({ theme }) => theme.spaces[1]} 0 0 ${({ theme }) => theme.spaces[1]};
 `;
 
-function BoundRoute({ route }) {
+const BoundRoute = ({ route }) => {
   const { formatMessage } = useIntl();
 
   const { method, handler: title, path } = route;
@@ -51,7 +51,7 @@ function BoundRoute({ route }) {
       </Flex>
     </Flex>
   );
-}
+};
 
 BoundRoute.defaultProps = {
   route: {
