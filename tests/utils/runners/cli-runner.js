@@ -2,6 +2,7 @@
 
 const path = require('path');
 const execa = require('execa');
+const { runnerTimeoutMs } = require('../cli-transfer-remote-e2e/timeouts');
 
 /**
  * Load domain-specific configuration
@@ -50,14 +51,59 @@ const calculateTestAppsRequired = (domainConfigs, concurrency) => {
 };
 
 /**
- * Run Jest test command
+ * The test runner parses CLI flags with yargs before invoking Jest. Unknown options (e.g.
+ * `--testPathPattern=…`) become plain properties on the parsed object and are omitted from `_`,
+ * so they never reached Jest unless the user put them after `--`. Re-serialize those properties
+ * as argv fragments for Jest.
+ *
+ * @param {Record<string, unknown>} testYargs - yargs parse() result for args after `--type`
+ * @returns {string[]}
  */
-const runCLI = async ({ domainDir, jestConfigPath, testApps, testArgs }) => {
-  const env = {
-    TEST_APPS: testApps.join(','),
-    JWT_SECRET: 'test-jwt-secret',
-  };
+const buildForwardedRunnerArgs = (testYargs) => {
+  /** Keys owned by tests/scripts/run-tests.js (not for Jest). */
+  const runnerKeys = new Set([
+    '_',
+    '$0',
+    'concurrency',
+    'c',
+    'domains',
+    'd',
+    'setup',
+    'f',
+    'updateSnapshot',
+    'u',
+  ]);
 
+  const args = [...testYargs._];
+
+  for (const key of Object.keys(testYargs)) {
+    if (runnerKeys.has(key) || key.startsWith('$')) {
+      continue;
+    }
+    const value = testYargs[key];
+    if (value === undefined || value === false) {
+      continue;
+    }
+    const flag = `--${key}`;
+    if (value === true) {
+      args.push(flag);
+    } else if (Array.isArray(value)) {
+      for (const item of value) {
+        args.push(flag, String(item));
+      }
+    } else {
+      args.push(`${flag}=${String(value)}`);
+    }
+  }
+
+  return args;
+};
+
+/**
+ * Run Jest test command
+ * @param {{ domainDir: string, jestConfigPath: string, testApps: string[], testArgs: string[], domain?: string }} opts
+ */
+const runCLI = async ({ domainDir, jestConfigPath, testApps, testArgs, domain }) => {
   await execa(
     'jest',
     [
@@ -73,8 +119,14 @@ const runCLI = async ({ domainDir, jestConfigPath, testApps, testArgs }) => {
     {
       stdio: 'inherit',
       cwd: domainDir, // run from the domain directory
-      env, // pass it our custom env values
-      timeout: 5 * 60 * 1000, // 5 minutes
+      // Only set what the runner owns; execa merges with process.env by default (extendEnv: true),
+      // so e.g. TRANSFER_CLI_MEDIA_* from the shell still reach Jest.
+      env: {
+        TEST_APPS: testApps.join(','),
+        JWT_SECRET: process.env.JWT_SECRET || 'test-jwt-secret',
+      },
+      // strapi domain includes remote transfer e2e; longer budget than other domains (see cli-transfer-remote-e2e/timeouts.js).
+      timeout: runnerTimeoutMs(domain),
     }
   );
 };
@@ -82,5 +134,6 @@ const runCLI = async ({ domainDir, jestConfigPath, testApps, testArgs }) => {
 module.exports = {
   loadDomainConfigs,
   calculateTestAppsRequired,
+  buildForwardedRunnerArgs,
   runCLI,
 };

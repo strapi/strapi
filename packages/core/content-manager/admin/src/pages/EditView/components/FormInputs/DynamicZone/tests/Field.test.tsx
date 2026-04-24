@@ -275,7 +275,7 @@ describe('DynamicZone', () => {
       await user.keyboard('[ArrowDown]');
       await user.keyboard('[Space]');
 
-      expect(screen.getByText(/New position in list/)).toBeInTheDocument();
+      expect(screen.getByText(/dropped/)).toBeInTheDocument();
     });
 
     it('should change the live text after the reordering interaction has been cancelled', async () => {
