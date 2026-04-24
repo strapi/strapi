@@ -273,6 +273,29 @@ describe('transactions', () => {
       }
       expect(count).toEqual(2);
     });
+
+    /**
+     * If the success path also called `commit` after the callback, calling `await rollback()` then
+     * returning (like `testInTransaction` in tests/api/utils) would finalise the transactor twice.
+     * Core uses Knex `isCompleted()` to skip. See @strapi/database `transactionContext.commit`.
+     */
+    test('completes when the callback calls rollback() and returns (no second commit on transactor)', async () => {
+      await strapi.db.transaction(async ({ rollback }) => {
+        await rollback();
+      });
+    });
+
+    test('query with trx, then rollback and return (wrapInTransaction pattern)', async () => {
+      await strapi.db.transaction(async ({ trx, rollback }) => {
+        await strapi.db
+          .queryBuilder('strapi::core-store')
+          .select(['id'])
+          .where({ id: 1 })
+          .transacting(trx)
+          .execute();
+        await rollback();
+      });
+    });
   });
 
   describe('using a transaction object', () => {
