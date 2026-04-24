@@ -7,11 +7,15 @@ const jwkToPem = require('jwk-to-pem');
 
 const getCognitoPayload = async ({ idToken, jwksUrl, purest }) => {
   const {
-    header: { kid },
+    header: { kid, alg },
     payload,
   } = jwt.decode(idToken, { complete: true });
 
   if (!payload || !kid) {
+    throw new Error('The provided token is not valid');
+  }
+
+  if (alg !== 'RS256') {
     throw new Error('The provided token is not valid');
   }
 
