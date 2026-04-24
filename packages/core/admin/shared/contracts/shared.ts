@@ -73,4 +73,10 @@ export interface FieldContentSourceMap {
   locale: string | null;
   model?: UID.Schema;
   kind?: Struct.ContentTypeKind;
+  /**
+   * Marks the field as the root of a non-string field (e.g. a media object or blocks wrapper).
+   * Set when the metadata is emitted as a separate marker property rather than stega-embedded
+   * inside a string value.
+   */
+  root?: boolean;
 }

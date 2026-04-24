@@ -17,7 +17,15 @@ import {
 import { ChevronDown, ChevronRight } from '@strapi/icons';
 
 const filterAttributes = (item) => {
-  const excludedKeys = ['documentId', 'id', 'createdAt', 'updatedAt', 'publishedAt'];
+  const excludedKeys = [
+    'documentId',
+    'id',
+    'createdAt',
+    'updatedAt',
+    'publishedAt',
+    // Internal live-preview marker added by the content source maps service; not content.
+    '_strapiSource',
+  ];
   return Object.entries(item).filter(([key]) => !excludedKeys.includes(key));
 };
 
@@ -55,6 +63,20 @@ const ToggleableContainer = ({ headerText, children, isEmpty = false }) => {
   );
 };
 
+const isImageMedia = (value) =>
+  value &&
+  typeof value === 'object' &&
+  typeof value.url === 'string' &&
+  typeof value.mime === 'string' &&
+  value.mime.startsWith('image/');
+
+const isVideoMedia = (value) =>
+  value &&
+  typeof value === 'object' &&
+  typeof value.url === 'string' &&
+  typeof value.mime === 'string' &&
+  value.mime.startsWith('video/');
+
 const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = undefined }) => {
   if (fieldName === 'blocks') {
     return (
@@ -70,6 +92,35 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
       <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
         {value}
       </Button>
+    );
+  }
+
+  // Render media fields as real <img>/<video> so live-preview can patch them in place.
+  // The server tags media objects with a `_strapiSource` marker that we forward as
+  // `data-strapi-source` on the rendered element — that's what the preview script looks for.
+  if (isImageMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <img
+          src={value.url}
+          alt={value.alternativeText ?? ''}
+          data-strapi-source={value._strapiSource}
+          style={{ maxWidth: '320px', borderRadius: 4 }}
+        />
+      </Flex>
+    );
+  }
+
+  if (isVideoMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <video
+          src={value.url}
+          controls
+          data-strapi-source={value._strapiSource}
+          style={{ maxWidth: '320px', borderRadius: 4 }}
+        />
+      </Flex>
     );
   }
 

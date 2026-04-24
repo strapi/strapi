@@ -48,13 +48,96 @@ const previewScript = (config: PreviewScriptConfig) => {
     STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
   } as const;
 
+  /* -----------------------------------------------------------------------------------------------
+   * Pure helpers (no closure dependencies beyond their own arguments)
+   *
+   * Exposed via the no-run return so they can be unit-tested in jsdom without invoking the full
+   * IIFE. Keep them here, at the top of the function, so they're reachable before the no-run
+   * early return below.
+   * ---------------------------------------------------------------------------------------------*/
+
+  const MEDIA_TAGS = ['img', 'video', 'picture'] as const;
+
+  type MediaValue = {
+    url?: string | null;
+    mime?: string | null;
+    alternativeText?: string | null;
+    previewUrl?: string | null;
+  };
+
+  const getMimePrefix = (mime: unknown): string => {
+    if (typeof mime !== 'string') return '';
+    const slashIndex = mime.indexOf('/');
+    return slashIndex > 0 ? mime.slice(0, slashIndex) : mime;
+  };
+
+  const findMediaTarget = (root: Element | null): Element | null => {
+    if (!root) return null;
+    const tag = root.tagName.toLowerCase();
+    if ((MEDIA_TAGS as readonly string[]).includes(tag)) {
+      return root;
+    }
+    return root.querySelector(MEDIA_TAGS.join(','));
+  };
+
+  const patchMediaElement = (target: Element | null, value: MediaValue | null): boolean => {
+    if (!target || !value || typeof value !== 'object') return false;
+    const newUrl = typeof value.url === 'string' ? value.url : '';
+    if (!newUrl) return false;
+
+    const tag = target.tagName.toLowerCase();
+    const newMimePrefix = getMimePrefix(value.mime);
+
+    if (tag === 'img') {
+      if (newMimePrefix && newMimePrefix !== 'image') return false;
+      target.setAttribute('src', newUrl);
+      target.removeAttribute('srcset');
+      if (typeof value.alternativeText === 'string') {
+        target.setAttribute('alt', value.alternativeText);
+      }
+      return true;
+    }
+
+    if (tag === 'video') {
+      if (newMimePrefix && newMimePrefix !== 'video') return false;
+      target.setAttribute('src', newUrl);
+      if (typeof value.previewUrl === 'string') {
+        target.setAttribute('poster', value.previewUrl);
+      }
+      return true;
+    }
+
+    if (tag === 'picture') {
+      if (newMimePrefix && newMimePrefix !== 'image') return false;
+      const sources = target.querySelectorAll('source');
+      sources.forEach((source) => source.setAttribute('srcset', newUrl));
+      const img = target.querySelector('img');
+      if (img) {
+        img.setAttribute('src', newUrl);
+        if (typeof value.alternativeText === 'string') {
+          img.setAttribute('alt', value.alternativeText);
+        }
+      }
+      return true;
+    }
+
+    return false;
+  };
+
   /**
    * Calling the function in no-run mode lets us retrieve the constants from other files and keep
    * a single source of truth for them. It's the only way to do this because this script can't
    * refer to any variables outside of its own scope, because it's stringified before it's run.
    */
   if (!shouldRun) {
-    return { INTERNAL_EVENTS };
+    return {
+      INTERNAL_EVENTS,
+      helpers: {
+        getMimePrefix,
+        findMediaTarget,
+        patchMediaElement,
+      },
+    };
   }
 
   /* -----------------------------------------------------------------------------------------------
@@ -535,12 +618,33 @@ const previewScript = (config: PreviewScriptConfig) => {
 
       // The user typed in an input, reflect the change in the preview
       if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
-        const { field, value } = event.data.payload;
+        const { field, value, type } = event.data.payload as {
+          field?: string;
+          value?: unknown;
+          type?: string;
+        };
         if (!field) return;
 
-        getElementsByPath(field).forEach((element) => {
+        const elements = getElementsByPath(field);
+
+        // Media fields: patch attributes on the nearest media element in place.
+        // Shape-changing edits (cross-kind swap, empty transitions) are handled by the full-page
+        // refresh that runs on save, until the scoped-refresh primitive lands in a later phase.
+        if (type === 'media') {
+          if (value == null) return;
+          elements.forEach((element) => {
+            if (!(element instanceof HTMLElement)) return;
+            const target = findMediaTarget(element);
+            patchMediaElement(target, value as MediaValue);
+          });
+          highlightManager.updateAllHighlights();
+          return;
+        }
+
+        // Default: string-like fields (text, richtext, etc.) patch textContent.
+        elements.forEach((element) => {
           if (element instanceof HTMLElement) {
-            element.textContent = value || '';
+            element.textContent = (value as string) || '';
           }
         });
 

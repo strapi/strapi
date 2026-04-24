@@ -126,6 +126,7 @@ export function parseFieldMetaData(strapiSource: string): FieldContentSourceMap 
   const locale = searchParams.get('locale');
   const model = searchParams.get('model');
   const kind = searchParams.get('kind');
+  const root = searchParams.get('root');
 
   if (!path || !type || !documentId || !model) {
     return null;
@@ -138,5 +139,6 @@ export function parseFieldMetaData(strapiSource: string): FieldContentSourceMap 
     locale: locale ?? null,
     model: model as UID.Schema | undefined,
     kind: kind ? (kind as Struct.ContentTypeKind) : undefined,
+    root: root === 'true' ? true : undefined,
   };
 }

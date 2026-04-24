@@ -444,5 +444,31 @@ describe('fieldUtils', () => {
         expect(result?.kind).toBe(kind);
       });
     });
+
+    it('should parse root=true into the root flag', () => {
+      const strapiSource =
+        'path=image&type=media&documentId=doc-1&model=api::article.article&root=true';
+
+      const result = parseFieldMetaData(strapiSource);
+
+      expect(result?.root).toBe(true);
+    });
+
+    it('should leave root undefined when the param is absent', () => {
+      const strapiSource = 'path=title&type=text&documentId=doc-1&model=api::article.article';
+
+      const result = parseFieldMetaData(strapiSource);
+
+      expect(result?.root).toBeUndefined();
+    });
+
+    it('should treat root values other than "true" as undefined', () => {
+      const strapiSource =
+        'path=title&type=text&documentId=doc-1&model=api::article.article&root=false';
+
+      const result = parseFieldMetaData(strapiSource);
+
+      expect(result?.root).toBeUndefined();
+    });
   });
 });
