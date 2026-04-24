@@ -60,7 +60,7 @@ const DynamicZone = ({
 
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
   const [liveText, setLiveText] = React.useState('');
-  const [openComponentKey, setOpenComponentKey] = React.useState<number | null>(null);
+  const [openComponentKey, setOpenComponentKey] = React.useState<string | null>(null);
 
   const {
     currentDocument: { components, isLoading },
