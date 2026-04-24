@@ -326,6 +326,35 @@ describe('previewScript helpers', () => {
     });
   });
 
+  describe('isReactManagedElement', () => {
+    it('returns false for a plain element', () => {
+      const el = document.createElement('div');
+      expect(getHelpers().isReactManagedElement(el)).toBe(false);
+    });
+
+    it('returns true when the element carries a React fiber property', () => {
+      const el = document.createElement('img');
+      (el as unknown as Record<string, unknown>).__reactFiber$xyz123 = {};
+      expect(getHelpers().isReactManagedElement(el)).toBe(true);
+    });
+
+    it('returns true when an ancestor carries a React fiber property', () => {
+      const parent = document.createElement('section');
+      (parent as unknown as Record<string, unknown>).__reactFiber$abc = {};
+      const child = document.createElement('img');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      expect(getHelpers().isReactManagedElement(child)).toBe(true);
+
+      document.body.removeChild(parent);
+    });
+
+    it('returns false for a null input', () => {
+      expect(getHelpers().isReactManagedElement(null)).toBe(false);
+    });
+  });
+
   describe('BUILT_IN_MEDIA_HANDLER', () => {
     const meta = { path: 'hero.image', type: 'media' };
 
@@ -364,6 +393,30 @@ describe('previewScript helpers', () => {
       expect(video!).toHaveAttribute('class', 'hero-class');
       expect(video!).toHaveAttribute('width', '640');
       expect(wrapper.querySelector('img')).toBeNull();
+    });
+
+    it('falls through on cross-kind when the target is React-managed', () => {
+      // Simulate a React-owned <img> by attaching a fiber property. The built-in must NOT
+      // call replaceWith on this node — doing so leaves React's fiber pointing at a detached
+      // node and its next reconciliation throws
+      //   "Node.removeChild: The node to be removed is not a child of this node"
+      const wrapper = document.createElement('div');
+      const img = document.createElement('img');
+      img.setAttribute('src', 'https://example.com/old.jpg');
+      (img as unknown as Record<string, unknown>).__reactFiber$abc = {};
+      wrapper.appendChild(img);
+
+      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
+        { url: 'https://example.com/clip.mp4', mime: 'video/mp4' },
+        wrapper,
+        meta
+      );
+
+      expect(handled).toBe(false);
+      // The DOM must be untouched — the original <img> stays exactly as it was
+      expect(wrapper.querySelector('video')).toBeNull();
+      expect(wrapper.querySelector('img')).toBe(img);
+      expect(img).toHaveAttribute('src', 'https://example.com/old.jpg');
     });
 
     it('swaps <video> to <img> on video → image cross-kind change', () => {

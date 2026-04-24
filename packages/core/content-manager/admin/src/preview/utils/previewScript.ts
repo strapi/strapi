@@ -120,6 +120,28 @@ const previewScript = (config: PreviewScriptConfig) => {
   };
 
   /**
+   * Detect whether an element (or any ancestor) is owned by React. React attaches fiber
+   * references to its managed DOM nodes as properties prefixed with `__reactFiber$` and
+   * `__reactProps$`. If we replace a React-managed node via replaceWith(), React's next
+   * reconciliation still holds a pointer to the old node and throws
+   *   "Node.removeChild: The node to be removed is not a child of this node"
+   * when it tries to unmount it. We use this check to skip node-replacing behaviors on
+   * React-managed subtrees, falling through to the full-page-refresh fallback instead.
+   */
+  const isReactManagedElement = (element: Element | null): boolean => {
+    let current: Element | null = element;
+    while (current) {
+      for (const key in current) {
+        if (key.startsWith('__reactFiber') || key.startsWith('__reactProps')) {
+          return true;
+        }
+      }
+      current = current.parentElement;
+    }
+    return false;
+  };
+
+  /**
    * Resolve a media URL from the admin's payload against the current element's attribute so
    * relative paths (e.g. `/uploads/photo.jpg` from Strapi's local upload provider) keep working
    * when the preview iframe lives on a different origin than the Strapi server.
@@ -271,6 +293,18 @@ const previewScript = (config: PreviewScriptConfig) => {
       return patchMediaElement(target, value as MediaValue);
     }
 
+    // Cross-kind swap requires replacing the DOM node. Bail if React (or a framework using
+    // the same fiber-property convention) owns the subtree — otherwise its next reconciliation
+    // will try to remove the old node we already detached and throw
+    //   "Node.removeChild: The node to be removed is not a child of this node"
+    // Returning false propagates upward to the unhandled signal. The admin intentionally does
+    // NOT respond by forcing a full-page refresh — doing so would re-fetch the server's last
+    // saved draft and wipe the user's in-flight edits. Integrators can ship a framework-aware
+    // handler via window.strapiPreview.onType('media', ...) for this case.
+    if (isReactManagedElement(target)) {
+      return false;
+    }
+
     // Cross-kind: replace the element with a fresh one of the right tag.
     const newEl = document.createElement(desiredTag);
     const rawUrl = typeof (value as MediaValue).url === 'string' ? (value as MediaValue).url! : '';
@@ -348,6 +382,7 @@ const previewScript = (config: PreviewScriptConfig) => {
         findMediaTarget,
         patchMediaElement,
         resolveMediaUrl,
+        isReactManagedElement,
         BUILT_IN_MEDIA_HANDLER,
         resolveHandlerChain,
         runHandlerChain,

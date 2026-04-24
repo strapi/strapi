@@ -36,7 +36,7 @@ import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
-import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
+import { PUBLIC_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
 import { previewScript } from '../utils/previewScript';
 
@@ -159,16 +159,12 @@ const PreviewPage = () => {
         sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
       }
 
-      // A field change couldn't be resolved in place and no scoped-refresh handler was
-      // registered. Fall back to the existing full-page refresh (strapiUpdate) so the preview
-      // stays consistent with the admin form.
-      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_REPLACE_UNHANDLED) {
-        iframeRef.current?.contentWindow?.postMessage(
-          { type: PUBLIC_EVENTS.STRAPI_UPDATE },
-          // Safe to use because the iframe origin is pinned via allowedOrigins config
-          new URL(iframeRef.current.src).origin
-        );
-      }
+      // Intentionally NOT dispatching strapiUpdate in response to STRAPI_FIELD_REPLACE_UNHANDLED:
+      // a full-page refresh re-fetches the server's last-saved draft, which would wipe any
+      // in-place live-preview patches the user has made since their last save. Leaving the
+      // preview stale for the unhandled change is a better UX than regressing to a stale server
+      // state. Integrators can ship a scoped-refresh handler via window.strapiPreview.onType()
+      // for smoother behavior on cross-kind / empty-transition edits.
     };
 
     window.addEventListener('message', handleMessage);

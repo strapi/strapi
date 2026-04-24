@@ -61,26 +61,29 @@ The first end-to-end vertical slice. An editor who changes the alt text of an im
 
 ### What to build
 
-Complete the media story. Introduce the public `window.strapiPreview` API and the scoped-refresh primitive. Use both to cover the media cases Phase 1 deferred: swapping an image for a video, emptying a populated field, and populating an empty field — all without a full page reload.
+Complete the media story. Introduce the public `window.strapiPreview` API and the scoped-refresh primitive. Cover the media cases Phase 1 deferred: swapping an image for a video, emptying a populated field, and populating an empty field.
+
+**Hard constraint discovered during Phase 2:** we cannot fall back to a full-page refresh when the in-place path can't handle a change. A refresh re-fetches the server's last saved draft, which would roll back any in-flight live-preview patches the user has made since their last save. Falling back silently (preview stays stale for that change until save) is the correct behavior.
 
 - **Public API.** `window.strapiPreview` is exposed inside the preview iframe with `version` (numeric, starts at 1), `onType(type, handler)`, `onField(path, handler)`, and `off(key)`. Handlers registered here participate in the resolution order defined in the architectural decisions.
-- **Scoped-refresh primitive.** When a field change cannot be patched in place, the preview script invokes the resolved handler (per-field → per-type → built-in default). The handler receives the new field value and the matched wrapper element, and is responsible for replacing the wrapper's subtree. If no handler is found, the preview script sends a new internal "unhandled" message to the admin, which triggers the existing full-page refresh. This keeps the fallback safe and behavior-preserving.
-- **Built-in media default.** A default type handler for `media` is registered on `window.strapiPreview` at script start. It handles cross-kind swaps, empty↔populated transitions, and any case the Phase 1 in-place path defers. Integrators can override via `onType('media', ...)` or `onField(path, ...)`.
-- **Admin listener.** The admin listens for the new "unhandled" message and dispatches the existing `strapiUpdate` full-page refresh in response.
-- **LaunchPad.** No new code changes required — the existing `StrapiImage` marker rendering from Phase 1 is sufficient. LaunchPad exercises the new cases as part of QA.
-- **Tests.** Preview-script unit coverage is extended for the handler-resolution dispatcher and the built-in media default. No new server-side tests required.
+- **Scoped-refresh primitive.** When a field change cannot be patched in place, the preview script invokes the resolved handler (per-field → per-type → built-in default). The handler receives the new field value and the matched wrapper element, and is responsible for updating the wrapper's subtree. If no handler is found or the built-in defers, the preview script emits an internal "unhandled" message for telemetry — the admin does not full-refresh in response.
+- **Built-in media default.** A default type handler for `media` is registered on `window.strapiPreview` at script start. It handles cross-kind swaps (image↔video) via DOM node replacement, and populated→empty transitions via attribute clearing. Node replacement is **skipped on framework-managed subtrees** (e.g. React, detected via fiber-property convention) because replacing a node out from under a framework's reconciler corrupts its virtual DOM and crashes on the next render. Integrators whose sites are framework-managed can register their own `onType('media', ...)` for live cross-kind behavior.
+- **Empty→populated limitation.** With no marker element in the DOM, there is nothing for the scoped-refresh handler to target. This case falls through to "unhandled" — the preview stays at its current state until the user saves.
+- **LaunchPad.** No new code changes required — the existing `StrapiImage` marker rendering from Phase 1 is sufficient.
+- **Tests.** Preview-script unit coverage is extended for the handler-resolution dispatcher, the built-in media default, and the React-managed guard. No new server-side tests required.
 
 ### Acceptance criteria
 
 - [ ] `window.strapiPreview` is present inside the preview iframe once the injected script runs, with a `version` of 1 and the documented method surface.
 - [ ] `onType('media', handler)` replaces the built-in default for media field changes; `off` deregisters it and restores the default.
 - [ ] `onField(path, handler)` takes precedence over `onType` for that specific path.
-- [ ] Swapping an image for a video in a media field that allows both updates the preview to the correct element type without a full reload.
-- [ ] Clearing a populated media field updates the preview to the empty state without a full reload.
-- [ ] Populating a previously empty media field updates the preview to show the new media without a full reload.
-- [ ] When no handler is registered for a field type and no built-in default covers the change, the admin receives the "unhandled" message and triggers a full-page refresh — never leaves the preview in a broken state.
+- [ ] On a non-framework-managed site, swapping an image for a video updates the DOM in place (img → video) without a full reload and with the marker preserved.
+- [ ] On a framework-managed site, the cross-kind swap is skipped and the preview stays at its current state; no crash and no rollback of other pending edits.
+- [ ] Clearing a populated media field clears the element's `src`/`srcset`/`alt`/`poster` attributes in place.
+- [ ] Populating a previously empty media field falls through to unhandled; the preview stays stale until save; the admin does not issue a full-page refresh that would discard in-flight edits.
+- [ ] `STRAPI_FIELD_REPLACE_UNHANDLED` is emitted when no handler resolves a change; the admin listens but takes no action by default (room for future UX hints like "save to preview this change").
 - [ ] All Phase 1 acceptance criteria still pass.
-- [ ] LaunchPad QA covers each of the above transitions with scroll preservation.
+- [ ] LaunchPad QA covers each of the above with no crashes and no preview rollbacks.
 
 ---
 
