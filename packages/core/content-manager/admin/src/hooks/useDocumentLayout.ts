@@ -285,6 +285,10 @@ const formatEditLayout = (
 
   const componentEditAttributes = Object.entries(data.components).reduce<EditLayout['components']>(
     (acc, [uid, configuration]) => {
+      if (!components[uid]) {
+        return acc;
+      }
+
       acc[uid] = {
         layout: convertEditLayoutToFieldLayouts(
           configuration.layouts.edit,
