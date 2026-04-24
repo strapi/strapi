@@ -103,7 +103,7 @@ const ListViewPage = () => {
   );
 
   const { collectionType, model, schema } = useDoc();
-  const { list, listViewConversionContext } = useDocumentLayout(model);
+  const { list, listViewConversionContext, isLoading: isLoadingLayout } = useDocumentLayout(model);
 
   const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
     () => ({
@@ -118,7 +118,7 @@ const ListViewPage = () => {
     }),
     [model]
   );
-  usePersistentPartialQueryParams(persistentQueryConfigs);
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
@@ -201,10 +201,13 @@ const ListViewPage = () => {
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const hasAppliedFilters = Boolean((query as any)?.filters?.$and?.length);
 
-  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery({
-    model,
-    params,
-  });
+  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
+    {
+      model,
+      params,
+    },
+    { skip: isLoadingLayout || !isHydrated }
+  );
 
   /**
    * If the API returns an error, display a notification
@@ -295,7 +298,7 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isLoading) {
+  if (isLoadingLayout || !isHydrated || isLoading) {
     return <Page.Loading />;
   }
 

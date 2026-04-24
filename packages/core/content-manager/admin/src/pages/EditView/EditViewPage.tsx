@@ -68,9 +68,9 @@ const EditViewPage = () => {
     []
   );
 
-  usePersistentPartialQueryParams(persistentQueryConfigs);
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
 
-  const doc = useDoc();
+  const doc = useDoc({ skip: !isHydrated });
   const {
     document,
     meta,
@@ -124,7 +124,8 @@ const EditViewPage = () => {
 
   const { isLazyLoading } = useLazyComponents([]);
 
-  const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
+  const isLoading =
+    !isHydrated || isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
   const initialValues = getInitialFormValues(isCreatingDocument);
 
