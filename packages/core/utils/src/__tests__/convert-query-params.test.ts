@@ -1,4 +1,5 @@
 import { createTransformer } from '../convert-query-params';
+import { ValidationError } from '../errors';
 import { Model } from '../types';
 
 const models = {
@@ -284,6 +285,14 @@ describe('convert-query-params', () => {
         );
 
         expect(newPopulate).toStrictEqual({ [key]: { count: true } });
+      });
+
+      it('throws ValidationError when polymorphic nested populate is not wildcard', () => {
+        const populate = { dz: { populate: 'deep' } };
+
+        expect(() =>
+          transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
+        ).toThrow(ValidationError);
       });
     });
   });
