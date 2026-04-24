@@ -80,17 +80,46 @@ const previewScript = (config: PreviewScriptConfig) => {
     return root.querySelector(MEDIA_TAGS.join(','));
   };
 
+  /**
+   * Resolve a media URL from the admin's payload against the current element's attribute so
+   * relative paths (e.g. `/uploads/photo.jpg` from Strapi's local upload provider) keep working
+   * when the preview iframe lives on a different origin than the Strapi server.
+   *
+   * Rules:
+   *   - payload URL is absolute / data-url → use as-is
+   *   - payload URL is relative AND current attribute is absolute → prepend current origin
+   *   - otherwise → use as-is (best effort; the browser may 404 but we don't guess)
+   */
+  const resolveMediaUrl = (newUrl: string, currentAttrValue: string | null): string => {
+    if (!newUrl) return newUrl;
+    if (
+      newUrl.startsWith('http://') ||
+      newUrl.startsWith('https://') ||
+      newUrl.startsWith('//') ||
+      newUrl.startsWith('data:') ||
+      newUrl.startsWith('blob:')
+    ) {
+      return newUrl;
+    }
+    if (!currentAttrValue) return newUrl;
+    const match = /^(https?:)?\/\/[^/]+/.exec(currentAttrValue);
+    if (!match) return newUrl;
+    // Ensure the relative URL starts with a leading slash so the join is unambiguous.
+    return match[0] + (newUrl.startsWith('/') ? newUrl : `/${newUrl}`);
+  };
+
   const patchMediaElement = (target: Element | null, value: MediaValue | null): boolean => {
     if (!target || !value || typeof value !== 'object') return false;
-    const newUrl = typeof value.url === 'string' ? value.url : '';
-    if (!newUrl) return false;
+    const rawUrl = typeof value.url === 'string' ? value.url : '';
+    if (!rawUrl) return false;
 
     const tag = target.tagName.toLowerCase();
     const newMimePrefix = getMimePrefix(value.mime);
 
     if (tag === 'img') {
       if (newMimePrefix && newMimePrefix !== 'image') return false;
-      target.setAttribute('src', newUrl);
+      const resolved = resolveMediaUrl(rawUrl, target.getAttribute('src'));
+      target.setAttribute('src', resolved);
       target.removeAttribute('srcset');
       if (typeof value.alternativeText === 'string') {
         target.setAttribute('alt', value.alternativeText);
@@ -100,9 +129,11 @@ const previewScript = (config: PreviewScriptConfig) => {
 
     if (tag === 'video') {
       if (newMimePrefix && newMimePrefix !== 'video') return false;
-      target.setAttribute('src', newUrl);
+      const resolved = resolveMediaUrl(rawUrl, target.getAttribute('src'));
+      target.setAttribute('src', resolved);
       if (typeof value.previewUrl === 'string') {
-        target.setAttribute('poster', value.previewUrl);
+        const poster = resolveMediaUrl(value.previewUrl, target.getAttribute('poster'));
+        target.setAttribute('poster', poster);
       }
       return true;
     }
@@ -110,10 +141,14 @@ const previewScript = (config: PreviewScriptConfig) => {
     if (tag === 'picture') {
       if (newMimePrefix && newMimePrefix !== 'image') return false;
       const sources = target.querySelectorAll('source');
-      sources.forEach((source) => source.setAttribute('srcset', newUrl));
+      sources.forEach((source) => {
+        const resolved = resolveMediaUrl(rawUrl, source.getAttribute('srcset'));
+        source.setAttribute('srcset', resolved);
+      });
       const img = target.querySelector('img');
       if (img) {
-        img.setAttribute('src', newUrl);
+        const resolved = resolveMediaUrl(rawUrl, img.getAttribute('src'));
+        img.setAttribute('src', resolved);
         if (typeof value.alternativeText === 'string') {
           img.setAttribute('alt', value.alternativeText);
         }
@@ -136,6 +171,7 @@ const previewScript = (config: PreviewScriptConfig) => {
         getMimePrefix,
         findMediaTarget,
         patchMediaElement,
+        resolveMediaUrl,
       },
     };
   }

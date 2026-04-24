@@ -62,6 +62,49 @@ describe('previewScript helpers', () => {
     });
   });
 
+  describe('resolveMediaUrl', () => {
+    it('returns absolute URLs unchanged', () => {
+      expect(
+        getHelpers().resolveMediaUrl('https://example.com/new.jpg', 'https://example.com/old.jpg')
+      ).toBe('https://example.com/new.jpg');
+    });
+
+    it('returns protocol-relative URLs unchanged', () => {
+      expect(
+        getHelpers().resolveMediaUrl('//cdn.example.com/new.jpg', 'https://other/old.jpg')
+      ).toBe('//cdn.example.com/new.jpg');
+    });
+
+    it('returns data and blob URLs unchanged', () => {
+      expect(getHelpers().resolveMediaUrl('data:image/png;base64,abc', null)).toBe(
+        'data:image/png;base64,abc'
+      );
+      expect(getHelpers().resolveMediaUrl('blob:http://foo/bar', null)).toBe('blob:http://foo/bar');
+    });
+
+    it('prepends the origin from the current attribute when the new URL is relative', () => {
+      expect(
+        getHelpers().resolveMediaUrl('/uploads/new.jpg', 'http://localhost:1337/uploads/old.jpg')
+      ).toBe('http://localhost:1337/uploads/new.jpg');
+    });
+
+    it('returns the relative URL unchanged when there is no current attribute', () => {
+      expect(getHelpers().resolveMediaUrl('/uploads/new.jpg', null)).toBe('/uploads/new.jpg');
+    });
+
+    it('returns the relative URL unchanged when the current attribute is itself relative', () => {
+      expect(getHelpers().resolveMediaUrl('/uploads/new.jpg', '/uploads/old.jpg')).toBe(
+        '/uploads/new.jpg'
+      );
+    });
+
+    it('adds a leading slash when the relative URL is missing one', () => {
+      expect(
+        getHelpers().resolveMediaUrl('uploads/new.jpg', 'http://localhost:1337/uploads/old.jpg')
+      ).toBe('http://localhost:1337/uploads/new.jpg');
+    });
+  });
+
   describe('patchMediaElement — <img>', () => {
     it('updates src and alt on a same-kind image swap', () => {
       const img = document.createElement('img');
@@ -77,6 +120,19 @@ describe('previewScript helpers', () => {
       expect(result).toBe(true);
       expect(img).toHaveAttribute('src', 'https://example.com/new.jpg');
       expect(img).toHaveAttribute('alt', 'new');
+    });
+
+    it('resolves a relative payload URL against the current absolute src', () => {
+      const img = document.createElement('img');
+      img.setAttribute('src', 'http://localhost:1337/uploads/old.jpg');
+
+      const result = getHelpers().patchMediaElement(img, {
+        url: '/uploads/new.jpg',
+        mime: 'image/jpeg',
+      });
+
+      expect(result).toBe(true);
+      expect(img).toHaveAttribute('src', 'http://localhost:1337/uploads/new.jpg');
     });
 
     it('clears a stale srcset when patching src', () => {
