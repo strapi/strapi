@@ -172,10 +172,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     // We expose `getValues` as a stable callback so consumers (e.g. conditional/rules logic)
     // can call it without causing extra rerenders from changing function references.
     const valuesRef = React.useRef(state.values);
-
-    React.useEffect(() => {
-      valuesRef.current = state.values;
-    }, [state.values]);
+    /**
+     * Keep the ref aligned with `state.values` during render (not only in an effect) so
+     * `getValues()` / `validate()` always see the latest committed values. Effects run too late
+     * for back-to-back user actions (e.g. fast e2e) where the next handler runs before the
+     * effect has fired.
+     */
+    valuesRef.current = state.values;
 
     const getValues = React.useCallback(() => valuesRef.current, []);
 
@@ -239,16 +242,18 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       async (shouldSetErrors: boolean = true, options: Record<string, string> = {}) => {
         setErrors({});
 
+        const valuesToValidate = valuesRef.current;
+
         if (!props.validationSchema && !props.validate) {
-          return { data: state.values };
+          return { data: valuesToValidate };
         }
 
         try {
           let data;
           if (props.validationSchema) {
-            data = await props.validationSchema.validate(state.values, { abortEarly: false });
+            data = await props.validationSchema.validate(valuesToValidate, { abortEarly: false });
           } else if (props.validate) {
-            data = await props.validate(state.values, options);
+            data = await props.validate(valuesToValidate, options);
           } else {
             throw new Error('No validation schema or validate function provided');
           }
@@ -276,7 +281,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           }
         }
       },
-      [props, setErrors, state.values]
+      [props, setErrors]
     );
 
     const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
@@ -610,11 +615,22 @@ const reducer = <TFormValues extends FormValues = FormValues>(
           position = 0;
         }
 
-        const [key] = generateNKeysBetween(
-          position > 0 ? currentField.at(position - 1)?.__temp_key__ : null,
-          currentField.at(position)?.__temp_key__,
-          1
-        );
+        // Collect all existing keys to ensure uniqueness.
+        // Keys may be out of order after drag-and-drop moves, so we can't rely
+        // on fractional indexing alone to avoid collisions.
+        const existingKeys = new Set(currentField.map((item) => item.__temp_key__).filter(Boolean));
+
+        // Generate a unique key, retrying if there's a collision
+        let key: string;
+        let lowerBound = existingKeys.size > 0 ? Array.from(existingKeys).sort().pop() : null;
+        do {
+          [key] = generateNKeysBetween(lowerBound, null, 1);
+          // If collision, advance the lower bound so the next iteration
+          // generates a key strictly after this one.
+          if (existingKeys.has(key)) {
+            lowerBound = key;
+          }
+        } while (existingKeys.has(key));
 
         draft.values = setIn(
           state.values,
@@ -635,18 +651,10 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         const currentField = [...(getIn(state.values, field, []) as Array<any>)];
         const currentRow = currentField[fromIndex];
 
-        const startKey =
-          fromIndex > toIndex
-            ? currentField[toIndex - 1]?.__temp_key__
-            : currentField[toIndex]?.__temp_key__;
-        const endKey =
-          fromIndex > toIndex
-            ? currentField[toIndex]?.__temp_key__
-            : currentField[toIndex + 1]?.__temp_key__;
-        const [newKey] = generateNKeysBetween(startKey, endKey, 1);
-
+        // Preserve the original __temp_key__ to maintain stable identity during drag-and-drop.
+        // The array order determines display order, so fractional key ordering isn't needed.
         currentField.splice(fromIndex, 1);
-        currentField.splice(toIndex, 0, { ...currentRow, __temp_key__: newKey });
+        currentField.splice(toIndex, 0, currentRow);
 
         draft.values = setIn(state.values, field, currentField);
 

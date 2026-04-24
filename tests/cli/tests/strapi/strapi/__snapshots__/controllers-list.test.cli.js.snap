@@ -62,5 +62,6 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ admin::user                                          │
 │ admin::webhooks                                      │
 │ admin::content-api                                   │
-│ admin::homepage                                      │"
+│ admin::homepage                                      │
+│ admin::ai                                            │"
 `;
