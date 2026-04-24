@@ -249,4 +249,178 @@ describe('previewScript helpers', () => {
       expect(getHelpers().patchMediaElement(null, { url: 'x', mime: 'image/jpeg' })).toBe(false);
     });
   });
+
+  describe('resolveHandlerChain', () => {
+    const meta = { path: 'hero.image', type: 'media' };
+    const makeRegistries = () => ({
+      fieldHandlers: new Map<string, any>(),
+      typeHandlers: new Map<string, any>(),
+      builtInTypeHandlers: new Map<string, any>(),
+    });
+
+    it('orders handlers: field → type → built-in', () => {
+      const r = makeRegistries();
+      const a = jest.fn();
+      const b = jest.fn();
+      const c = jest.fn();
+      r.fieldHandlers.set('hero.image', a);
+      r.typeHandlers.set('media', b);
+      r.builtInTypeHandlers.set('media', c);
+
+      const chain = getHelpers().resolveHandlerChain('hero.image', 'media', r);
+      expect(chain).toEqual([a, b, c]);
+    });
+
+    it('omits handlers that are not registered', () => {
+      const r = makeRegistries();
+      const builtIn = jest.fn();
+      r.builtInTypeHandlers.set('media', builtIn);
+
+      const chain = getHelpers().resolveHandlerChain('hero.image', 'media', r);
+      expect(chain).toEqual([builtIn]);
+    });
+
+    it('returns an empty chain when nothing is registered', () => {
+      const chain = getHelpers().resolveHandlerChain('x', 'y', makeRegistries());
+      expect(chain).toEqual([]);
+    });
+  });
+
+  describe('runHandlerChain', () => {
+    const meta = { path: 'hero.image', type: 'media' };
+    const element = document.createElement('img');
+
+    it('stops at the first handler that does not return false', () => {
+      const first = jest.fn(() => true);
+      const second = jest.fn();
+      const handled = getHelpers().runHandlerChain([first, second], {}, element, meta);
+      expect(handled).toBe(true);
+      expect(first).toHaveBeenCalledTimes(1);
+      expect(second).not.toHaveBeenCalled();
+    });
+
+    it('treats undefined return as handled (same as true)', () => {
+      const h = jest.fn(() => undefined);
+      const handled = getHelpers().runHandlerChain([h], {}, element, meta);
+      expect(handled).toBe(true);
+    });
+
+    it('falls through to the next handler when one returns false', () => {
+      const first = jest.fn(() => false);
+      const second = jest.fn(() => true);
+      const handled = getHelpers().runHandlerChain([first, second], {}, element, meta);
+      expect(handled).toBe(true);
+      expect(first).toHaveBeenCalled();
+      expect(second).toHaveBeenCalled();
+    });
+
+    it('returns false when every handler returns false', () => {
+      const h = jest.fn(() => false);
+      const handled = getHelpers().runHandlerChain([h, h, h], {}, element, meta);
+      expect(handled).toBe(false);
+    });
+
+    it('returns false for an empty chain', () => {
+      const handled = getHelpers().runHandlerChain([], {}, element, meta);
+      expect(handled).toBe(false);
+    });
+  });
+
+  describe('BUILT_IN_MEDIA_HANDLER', () => {
+    const meta = { path: 'hero.image', type: 'media' };
+
+    it('delegates to the in-place patch when old and new are the same kind', () => {
+      const img = document.createElement('img');
+      img.setAttribute('src', 'https://example.com/old.jpg');
+      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
+        { url: 'https://example.com/new.jpg', mime: 'image/jpeg' },
+        img,
+        meta
+      );
+      expect(handled).toBe(true);
+      expect(img).toHaveAttribute('src', 'https://example.com/new.jpg');
+    });
+
+    it('swaps <img> to <video> on image → video cross-kind change, preserving marker', () => {
+      const wrapper = document.createElement('div');
+      const img = document.createElement('img');
+      img.setAttribute('src', 'https://example.com/old.jpg');
+      img.setAttribute('data-strapi-source', 'path=hero.image&type=media');
+      img.setAttribute('class', 'hero-class');
+      img.setAttribute('width', '640');
+      wrapper.appendChild(img);
+
+      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
+        { url: 'https://example.com/clip.mp4', mime: 'video/mp4' },
+        wrapper,
+        meta
+      );
+
+      expect(handled).toBe(true);
+      const video = wrapper.querySelector('video');
+      expect(video).not.toBeNull();
+      expect(video!).toHaveAttribute('src', 'https://example.com/clip.mp4');
+      expect(video!).toHaveAttribute('data-strapi-source', 'path=hero.image&type=media');
+      expect(video!).toHaveAttribute('class', 'hero-class');
+      expect(video!).toHaveAttribute('width', '640');
+      expect(wrapper.querySelector('img')).toBeNull();
+    });
+
+    it('swaps <video> to <img> on video → image cross-kind change', () => {
+      const wrapper = document.createElement('div');
+      const video = document.createElement('video');
+      video.setAttribute('src', 'https://example.com/old.mp4');
+      video.setAttribute('data-strapi-source', 'path=hero.media&type=media');
+      wrapper.appendChild(video);
+
+      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
+        { url: 'https://example.com/photo.jpg', mime: 'image/jpeg', alternativeText: 'A photo' },
+        wrapper,
+        meta
+      );
+
+      expect(handled).toBe(true);
+      const img = wrapper.querySelector('img');
+      expect(img).not.toBeNull();
+      expect(img!).toHaveAttribute('src', 'https://example.com/photo.jpg');
+      expect(img!).toHaveAttribute('alt', 'A photo');
+      expect(wrapper.querySelector('video')).toBeNull();
+    });
+
+    it('clears attributes on populated → empty', () => {
+      const img = document.createElement('img');
+      img.setAttribute('src', 'https://example.com/old.jpg');
+      img.setAttribute('alt', 'old');
+      img.setAttribute('srcset', 'https://example.com/old.jpg 1x');
+
+      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(null, img, meta);
+
+      expect(handled).toBe(true);
+      expect(img).not.toHaveAttribute('src');
+      expect(img).not.toHaveAttribute('srcset');
+      expect(img).not.toHaveAttribute('alt');
+    });
+
+    it('returns false when no media target is in the subtree', () => {
+      const wrapper = document.createElement('div');
+      wrapper.appendChild(document.createElement('span'));
+      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
+        { url: 'https://example.com/new.jpg', mime: 'image/jpeg' },
+        wrapper,
+        meta
+      );
+      expect(handled).toBe(false);
+    });
+
+    it('returns false for unknown mime types (fall through to unhandled)', () => {
+      const img = document.createElement('img');
+      img.setAttribute('src', 'https://example.com/old.jpg');
+      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
+        { url: 'https://example.com/file.pdf', mime: 'application/pdf' },
+        img,
+        meta
+      );
+      expect(handled).toBe(false);
+    });
+  });
 });

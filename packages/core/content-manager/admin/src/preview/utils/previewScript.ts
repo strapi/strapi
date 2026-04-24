@@ -2,10 +2,43 @@
 declare global {
   interface Window {
     __strapi_previewCleanup?: () => void;
+    /** Handler registries preserved across re-injections of the preview script. */
+    __strapiPreviewRegistries?: {
+      fieldHandlers: Map<string, StrapiPreviewFieldHandler>;
+      typeHandlers: Map<string, StrapiPreviewFieldHandler>;
+    };
     STRAPI_HIGHLIGHT_HOVER_COLOR?: string;
     STRAPI_HIGHLIGHT_ACTIVE_COLOR?: string;
     STRAPI_DISABLE_STEGA_DECODING?: boolean;
+    /**
+     * Public Strapi live-preview API exposed inside the preview iframe.
+     *
+     * Integrators register handlers to customize how field changes are reflected
+     * in the preview. Resolution order for every field-change event:
+     *
+     *   1. onField(path) — most specific
+     *   2. onType(type) — for all fields of a type
+     *   3. built-in default for the type (Strapi ships one for `media`)
+     *   4. full-page refresh fallback (signaled via an internal message)
+     *
+     * Handlers return `false` to pass through to the next handler in the chain.
+     * Anything else means the change was handled.
+     */
+    strapiPreview?: {
+      /** Public API version. Integrators can check this to gate on capabilities. */
+      version: number;
+      onType(type: string, handler: StrapiPreviewFieldHandler): void;
+      onField(path: string, handler: StrapiPreviewFieldHandler): void;
+      /** Deregister a handler by its path (onField key) or type (onType key). */
+      off(key: string): void;
+    };
   }
+
+  type StrapiPreviewFieldHandler = (
+    value: unknown,
+    element: Element,
+    meta: { path: string; type: string }
+  ) => boolean | void;
 }
 
 /**
@@ -46,6 +79,12 @@ const previewScript = (config: PreviewScriptConfig) => {
     STRAPI_FIELD_CHANGE: 'strapiFieldChange',
     STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
     STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
+    /**
+     * Iframe → admin. Signals that a field change could not be resolved in-place and no
+     * scoped-refresh handler was registered. The admin responds with the existing strapiUpdate
+     * full-page refresh so the preview never gets stuck in a stale state.
+     */
+    STRAPI_FIELD_REPLACE_UNHANDLED: 'strapiFieldReplaceUnhandled',
   } as const;
 
   /* -----------------------------------------------------------------------------------------------
@@ -164,6 +203,143 @@ const previewScript = (config: PreviewScriptConfig) => {
    * a single source of truth for them. It's the only way to do this because this script can't
    * refer to any variables outside of its own scope, because it's stringified before it's run.
    */
+  /* -----------------------------------------------------------------------------------------------
+   * Handler chain (scoped-refresh primitive)
+   *
+   * The dispatch chain is resolution-order independent of any registries — it takes them as an
+   * argument. The runtime portion of the IIFE wires up the actual `fieldHandlers` / `typeHandlers`
+   * Maps (preserved on `window` across re-injections) and the built-in type defaults.
+   * ---------------------------------------------------------------------------------------------*/
+
+  type FieldHandler = StrapiPreviewFieldHandler;
+
+  /**
+   * Built-in default for `media` fields. Handles:
+   *   - populated → populated, same-kind: delegates to patchMediaElement
+   *   - populated → populated, cross-kind (image↔video): replaces the DOM element, preserving
+   *     marker + class + width/height so the wrapper stays locatable and layout is stable
+   *   - populated → empty: clears src / srcset / alt / poster on the target
+   *
+   * Empty → populated cannot be handled here (no marker element exists in the DOM), and falls
+   * through to the full-page refresh fallback.
+   */
+  const BUILT_IN_MEDIA_HANDLER: FieldHandler = (value, element) => {
+    if (!(element instanceof HTMLElement)) return false;
+    const target = findMediaTarget(element);
+    if (!target) return false;
+
+    const currentTag = target.tagName.toLowerCase();
+
+    // Populated → empty: clear attributes rather than removing the element so the marker stays
+    // in the DOM and future changes can still find a target.
+    if (value == null) {
+      if (currentTag === 'img') {
+        target.removeAttribute('src');
+        target.removeAttribute('srcset');
+        target.removeAttribute('alt');
+      } else if (currentTag === 'video') {
+        target.removeAttribute('src');
+        target.removeAttribute('poster');
+      } else if (currentTag === 'picture') {
+        target.querySelectorAll('source').forEach((s) => s.removeAttribute('srcset'));
+        const img = target.querySelector('img');
+        if (img) {
+          img.removeAttribute('src');
+          img.removeAttribute('alt');
+        }
+      }
+      return true;
+    }
+
+    if (typeof value !== 'object') return false;
+    const mime = typeof (value as MediaValue).mime === 'string' ? (value as MediaValue).mime! : '';
+    const mimePrefix = getMimePrefix(mime);
+
+    const desiredTag: 'img' | 'video' | null =
+      mimePrefix === 'image' ? 'img' : mimePrefix === 'video' ? 'video' : null;
+    if (!desiredTag) return false;
+
+    const currentKind: 'image' | 'video' | null =
+      currentTag === 'img' || currentTag === 'picture'
+        ? 'image'
+        : currentTag === 'video'
+          ? 'video'
+          : null;
+
+    if (currentKind === mimePrefix) {
+      // Same kind — in-place attribute patch
+      return patchMediaElement(target, value as MediaValue);
+    }
+
+    // Cross-kind: replace the element with a fresh one of the right tag.
+    const newEl = document.createElement(desiredTag);
+    const rawUrl = typeof (value as MediaValue).url === 'string' ? (value as MediaValue).url! : '';
+    if (!rawUrl) return false;
+    newEl.setAttribute('src', resolveMediaUrl(rawUrl, target.getAttribute('src')));
+
+    if (desiredTag === 'img') {
+      const alt = (value as MediaValue).alternativeText;
+      if (typeof alt === 'string') newEl.setAttribute('alt', alt);
+    } else {
+      (newEl as HTMLVideoElement).controls = true;
+      const preview = (value as MediaValue).previewUrl;
+      if (typeof preview === 'string') {
+        newEl.setAttribute('poster', resolveMediaUrl(preview, target.getAttribute('poster')));
+      }
+    }
+
+    // Preserve the marker so the new element keeps participating in live-preview.
+    const marker = target.getAttribute(SOURCE_ATTRIBUTE);
+    if (marker) newEl.setAttribute(SOURCE_ATTRIBUTE, marker);
+    // Preserve class + layout attributes so the swap doesn't break the integrator's styling.
+    const className = target.getAttribute('class');
+    if (className) newEl.setAttribute('class', className);
+    const width = target.getAttribute('width');
+    if (width) newEl.setAttribute('width', width);
+    const height = target.getAttribute('height');
+    if (height) newEl.setAttribute('height', height);
+
+    target.replaceWith(newEl);
+    return true;
+  };
+
+  /**
+   * Resolve the ordered list of handlers to try for a given (field, type) pair.
+   * Order: onField (most specific) → onType → built-in type default.
+   */
+  const resolveHandlerChain = (
+    field: string,
+    type: string,
+    registries: {
+      fieldHandlers: Map<string, FieldHandler>;
+      typeHandlers: Map<string, FieldHandler>;
+      builtInTypeHandlers: Map<string, FieldHandler>;
+    }
+  ): FieldHandler[] => {
+    return [
+      registries.fieldHandlers.get(field),
+      registries.typeHandlers.get(type),
+      registries.builtInTypeHandlers.get(type),
+    ].filter(Boolean) as FieldHandler[];
+  };
+
+  /**
+   * Walks the handler chain, stopping at the first one that doesn't return `false`.
+   * Returns true if any handler claimed the change; false otherwise.
+   */
+  const runHandlerChain = (
+    handlers: FieldHandler[],
+    value: unknown,
+    element: Element,
+    meta: { path: string; type: string }
+  ): boolean => {
+    for (let i = 0; i < handlers.length; i += 1) {
+      const result = handlers[i](value, element, meta);
+      if (result !== false) return true;
+    }
+    return false;
+  };
+
   if (!shouldRun) {
     return {
       INTERNAL_EVENTS,
@@ -172,6 +348,9 @@ const previewScript = (config: PreviewScriptConfig) => {
         findMediaTarget,
         patchMediaElement,
         resolveMediaUrl,
+        BUILT_IN_MEDIA_HANDLER,
+        resolveHandlerChain,
+        runHandlerChain,
       },
     };
   }
@@ -189,6 +368,66 @@ const previewScript = (config: PreviewScriptConfig) => {
 
   const getElementsByPath = (path: string) => {
     return document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
+  };
+
+  /* -----------------------------------------------------------------------------------------------
+   * Public API setup (window.strapiPreview)
+   *
+   * Registries live on `window` so user-registered handlers survive preview-script re-injection
+   * (e.g. when the admin navigates between entries).
+   * ---------------------------------------------------------------------------------------------*/
+
+  const registries = window.__strapiPreviewRegistries ?? {
+    fieldHandlers: new Map<string, FieldHandler>(),
+    typeHandlers: new Map<string, FieldHandler>(),
+  };
+  window.__strapiPreviewRegistries = registries;
+
+  // Built-in defaults are always re-bound from code (they come from this script's closure).
+  const builtInTypeHandlers = new Map<string, FieldHandler>([['media', BUILT_IN_MEDIA_HANDLER]]);
+
+  window.strapiPreview = {
+    version: 1,
+    onType: (type, handler) => {
+      registries.typeHandlers.set(type, handler);
+    },
+    onField: (path, handler) => {
+      registries.fieldHandlers.set(path, handler);
+    },
+    off: (key) => {
+      registries.fieldHandlers.delete(key);
+      registries.typeHandlers.delete(key);
+    },
+  };
+
+  const signalUnhandled = (field: string, type: string) => {
+    sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_REPLACE_UNHANDLED, { field, type });
+  };
+
+  const dispatchScopedRefresh = (
+    field: string,
+    value: unknown,
+    type: string,
+    elements: NodeListOf<Element>
+  ) => {
+    const handlers = resolveHandlerChain(field, type, {
+      ...registries,
+      builtInTypeHandlers,
+    });
+    if (handlers.length === 0 || elements.length === 0) {
+      signalUnhandled(field, type);
+      return;
+    }
+    const meta = { path: field, type };
+    let anyHandled = false;
+    elements.forEach((element) => {
+      if (runHandlerChain(handlers, value, element, meta)) {
+        anyHandled = true;
+      }
+    });
+    if (!anyHandled) {
+      signalUnhandled(field, type);
+    }
   };
 
   /* -----------------------------------------------------------------------------------------------
@@ -663,16 +902,17 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         const elements = getElementsByPath(field);
 
-        // Media fields: patch attributes on the nearest media element in place.
-        // Shape-changing edits (cross-kind swap, empty transitions) are handled by the full-page
-        // refresh that runs on save, until the scoped-refresh primitive lands in a later phase.
-        if (type === 'media') {
-          if (value == null) return;
-          elements.forEach((element) => {
-            if (!(element instanceof HTMLElement)) return;
-            const target = findMediaTarget(element);
-            patchMediaElement(target, value as MediaValue);
-          });
+        // If any handler (user-registered or built-in) applies to this (field, type), route
+        // through the scoped-refresh dispatcher. This covers media today; future phases will
+        // add built-ins for blocks.
+        const hasHandler =
+          !!type &&
+          (registries.fieldHandlers.has(field) ||
+            registries.typeHandlers.has(type) ||
+            builtInTypeHandlers.has(type));
+
+        if (hasHandler) {
+          dispatchScopedRefresh(field, value, type!, elements);
           highlightManager.updateAllHighlights();
           return;
         }
