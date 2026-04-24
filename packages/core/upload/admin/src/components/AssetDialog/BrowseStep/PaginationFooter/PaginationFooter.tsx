@@ -61,15 +61,13 @@ const linkWrapperStyles = css<{ $active?: boolean }>`
   }
 `;
 
-const LinkWrapperButton = styled.button<{ $active?: boolean }>`
+const LinkWrapperButton = styled.button.attrs({ type: 'button' })<{ $active?: boolean }>`
   ${linkWrapperStyles}
 `;
 
 const LinkWrapperDiv = styled.div<{ $active?: boolean }>`
   ${linkWrapperStyles}
 `;
-
-LinkWrapperButton.defaultProps = { type: 'button' };
 
 const PageLinkWrapper = styled(LinkWrapperButton)`
   color: ${({ theme, $active }) => ($active ? theme.colors.primary700 : theme.colors.neutral800)};

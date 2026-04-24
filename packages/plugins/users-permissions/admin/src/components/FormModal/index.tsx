@@ -8,21 +8,34 @@ import * as React from 'react';
 
 import { Button, Flex, Grid, Modal, Breadcrumbs, Crumb } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import Input from './Input';
 
+interface FormModalProps {
+  headerBreadcrumbs: string[];
+  initialData?: Record<string, any> | null;
+  isSubmiting: boolean;
+  layout: {
+    form: any[][];
+    schema: any;
+  };
+  isOpen: boolean;
+  onSubmit: (values: any) => void;
+  onToggle: () => void;
+  providerToEditName?: string | null;
+}
+
 const FormModal = ({
   headerBreadcrumbs,
-  initialData,
+  initialData = null,
   isSubmiting,
   layout,
   isOpen,
   onSubmit,
   onToggle,
-  providerToEditName,
-}) => {
+  providerToEditName = null,
+}: FormModalProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -39,7 +52,7 @@ const FormModal = ({
         </Modal.Header>
         <Formik
           onSubmit={(values) => onSubmit(values)}
-          initialValues={initialData}
+          initialValues={initialData as any}
           validationSchema={layout.schema}
           validateOnChange={false}
         >
@@ -61,10 +74,10 @@ const FormModal = ({
                             >
                               <Input
                                 {...input}
-                                error={errors[input.name]}
+                                error={(errors as Record<string, string>)[input.name]}
                                 onChange={handleChange}
-                                value={values[input.name]}
-                                providerToEditName={providerToEditName}
+                                value={(values as Record<string, any>)[input.name]}
+                                providerToEditName={providerToEditName as string}
                               />
                             </Grid.Item>
                           );
@@ -91,25 +104,6 @@ const FormModal = ({
       </Modal.Content>
     </Modal.Root>
   );
-};
-
-FormModal.defaultProps = {
-  initialData: null,
-  providerToEditName: null,
-};
-
-FormModal.propTypes = {
-  headerBreadcrumbs: PropTypes.arrayOf(PropTypes.string).isRequired,
-  initialData: PropTypes.object,
-  layout: PropTypes.shape({
-    form: PropTypes.arrayOf(PropTypes.array),
-    schema: PropTypes.object,
-  }).isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  isSubmiting: PropTypes.bool.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  onToggle: PropTypes.func.isRequired,
-  providerToEditName: PropTypes.string,
 };
 
 export default FormModal;

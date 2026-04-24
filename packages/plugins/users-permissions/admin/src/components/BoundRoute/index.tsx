@@ -3,18 +3,33 @@ import * as React from 'react';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import getMethodColor from './getMethodColor';
+
+interface Route {
+  handler?: string;
+  method?: string;
+  path?: string;
+}
+
+interface BoundRouteProps {
+  route?: Route;
+}
 
 const MethodBox = styled(Box)`
   margin: -1px;
   border-radius: ${({ theme }) => theme.spaces[1]} 0 0 ${({ theme }) => theme.spaces[1]};
 `;
 
-function BoundRoute({ route }) {
+const BoundRoute = ({
+  route = {
+    handler: 'Nocontroller.error',
+    method: 'GET',
+    path: '/there-is-no-path',
+  },
+}: BoundRouteProps) => {
   const { formatMessage } = useIntl();
 
   const { method, handler: title, path } = route;
@@ -51,22 +66,6 @@ function BoundRoute({ route }) {
       </Flex>
     </Flex>
   );
-}
-
-BoundRoute.defaultProps = {
-  route: {
-    handler: 'Nocontroller.error',
-    method: 'GET',
-    path: '/there-is-no-path',
-  },
-};
-
-BoundRoute.propTypes = {
-  route: PropTypes.shape({
-    handler: PropTypes.string,
-    method: PropTypes.string,
-    path: PropTypes.string,
-  }),
 };
 
 export default BoundRoute;

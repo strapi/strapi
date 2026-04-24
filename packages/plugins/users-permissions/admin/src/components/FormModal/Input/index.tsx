@@ -7,21 +7,37 @@
 import * as React from 'react';
 
 import { TextInput, Toggle, Field } from '@strapi/design-system';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+import { useIntl, type MessageDescriptor } from 'react-intl';
+
+interface IntlMessage extends MessageDescriptor {
+  values?: Record<string, React.ReactNode>;
+}
+
+interface InputProps {
+  description?: IntlMessage | null;
+  disabled?: boolean;
+  error?: string;
+  intlLabel: IntlMessage;
+  name: string;
+  onChange: (event: { target: { name: string; value: string | boolean } }) => void;
+  placeholder?: IntlMessage | null;
+  providerToEditName: string;
+  type: string;
+  value?: boolean | string;
+}
 
 const Input = ({
-  description,
-  disabled,
+  description = null,
+  disabled = false,
   intlLabel,
-  error,
+  error = '',
   name,
   onChange,
-  placeholder,
+  placeholder = null,
   providerToEditName,
   type,
-  value,
-}) => {
+  value = '',
+}: InputProps) => {
   const { formatMessage } = useIntl();
   const inputValue =
     name === 'noName'
@@ -45,7 +61,7 @@ const Input = ({
         <Field.Label>{label}</Field.Label>
         <Toggle
           aria-label={name}
-          checked={value}
+          checked={value as boolean}
           disabled={disabled}
           offLabel={formatMessage({
             id: 'app.components.ToggleCheckbox.off-label',
@@ -65,10 +81,10 @@ const Input = ({
   }
 
   const formattedPlaceholder = placeholder
-    ? formatMessage(
+    ? (formatMessage(
         { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
         { ...placeholder.values }
-      )
+      ) as string)
     : '';
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
@@ -81,44 +97,11 @@ const Input = ({
         onChange={onChange}
         placeholder={formattedPlaceholder}
         type={type}
-        value={inputValue}
+        value={inputValue as string}
       />
       <Field.Error />
     </Field.Root>
   );
-};
-
-Input.defaultProps = {
-  description: null,
-  disabled: false,
-  error: '',
-  placeholder: null,
-  value: '',
-};
-
-Input.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  disabled: PropTypes.bool,
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  placeholder: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  providerToEditName: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
 };
 
 export default Input;
