@@ -126,4 +126,25 @@ describe('morphToOne populate', () => {
     expect(results[0][ATTRIBUTE_NAME]).toEqual({ __type: TARGET_TYPE, ...targetRow });
     expect(results[1][ATTRIBUTE_NAME]).toBeNull();
   });
+
+  it('morph type UID overwrites a same-named key on the target row (fromRow output)', async () => {
+    const targetRow = {
+      id: 10,
+      name: 'Category A',
+      // Same key as the default typeField: must not hide the real morph target type UID
+      __type: 'unrelated-user-value',
+    };
+    const { ctx } = buildCtx([targetRow]);
+
+    const results: Record<string, unknown>[] = [
+      { id: 1, related_id: 10, related_type: TARGET_TYPE },
+    ];
+
+    await applyPopulate(results, { [ATTRIBUTE_NAME]: {} }, ctx as any);
+
+    expect(results[0][ATTRIBUTE_NAME]).toEqual({
+      ...targetRow,
+      __type: TARGET_TYPE,
+    });
+  });
 });
