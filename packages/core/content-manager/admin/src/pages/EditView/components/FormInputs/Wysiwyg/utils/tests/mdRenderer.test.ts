@@ -19,7 +19,7 @@ Footnote here[^1]
     expect(md.render(source)).toMatchSnapshot();
   });
 
-  it('escapes inline html inside image alt text', () => {
+  it('normalizes image alt text with inline html (per markdown-it / CommonMark rules)', () => {
     const source = '![A <em>tag</em> and  \\nbreak](https://example.com/x.png)';
 
     expect(md.render(source)).toMatchSnapshot();

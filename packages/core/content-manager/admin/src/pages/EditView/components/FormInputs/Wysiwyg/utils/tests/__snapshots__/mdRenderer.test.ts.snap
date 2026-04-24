@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`mdRenderer escapes inline html inside image alt text 1`] = `
-"<p><img src="https://example.com/x.png" alt="A &lt;em&gt;tag&lt;/em&gt; and  break"></p>
+exports[`mdRenderer normalizes image alt text with inline html (per markdown-it / CommonMark rules) 1`] = `
+"<p><img src="https://example.com/x.png" alt="A tag and  break"></p>
 "
 `;
 
