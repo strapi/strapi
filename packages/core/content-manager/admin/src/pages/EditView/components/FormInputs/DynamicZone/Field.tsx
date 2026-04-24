@@ -73,7 +73,7 @@ const DynamicZone = ({
 
   type DzWithTempKey =
     Schema.Attribute.GetDynamicZoneValue<Schema.Attribute.DynamicZone>[number] & {
-      __temp_key__: number;
+      __temp_key__: string;
     };
 
   const { value = [], error } = useField<Array<DzWithTempKey>>(name);
