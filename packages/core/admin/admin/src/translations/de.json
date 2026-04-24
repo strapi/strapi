@@ -842,5 +842,8 @@
   "HomePage.addWidget.noWidgetsAvailable": "Keine Widgets zum Hinzufügen verfügbar",
   "HomePage.addWidget.button": "Widget hinzufügen",
   "HomePage.widget.delete": "Löschen",
-  "HomePage.widget.drag": "Ziehen zum Verschieben"
+  "HomePage.widget.drag": "Ziehen zum Verschieben",
+  "HomePage.widget.deploy-now.title": "Bereit zum Veröffentlichen?",
+  "HomePage.widget.deploy-now.description": "Stellen Sie Ihr Projekt bereit.",
+  "HomePage.widget.deploy-now.button": "Jetzt deployen"
 }
