@@ -84,6 +84,13 @@ const addMaxLengthValidator = (
       | Schema.Attribute.UID;
   }
 ) => {
+  // apply default max length for short text (string)
+  if (attr.type === 'string') {
+    const max: number = _.isInteger(attr.maxLength) ? attr.maxLength! : 255;
+    return validator.max(max);
+  }
+
+  // keep existing behavior for other types
   return attr.maxLength && _.isInteger(attr.maxLength) ? validator.max(attr.maxLength) : validator;
 };
 
