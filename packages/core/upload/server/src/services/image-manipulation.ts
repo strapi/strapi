@@ -13,7 +13,7 @@ type Dimensions = {
   height: number | null;
 };
 
-// pageHeight is returned by sharp for animated images but missing from OutputInfo types (present in Metadata)
+// TODO: remove after upgrading sharp to >=0.34.2 (pageHeight added to OutputInfo types)
 declare module 'sharp' {
   interface OutputInfo {
     pageHeight?: number;
