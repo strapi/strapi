@@ -58,6 +58,16 @@ const validImage = [
     },
   },
 ];
+const validImageWithNullFormats = [
+  {
+    type: 'image',
+    children: [{ type: 'text', text: '' }],
+    image: {
+      ...validImage[0].image,
+      formats: null,
+    },
+  },
+];
 const validQuote = [
   {
     type: 'quote',
@@ -353,6 +363,17 @@ describe('Blocks validator', () => {
         )
       );
       expect(await validator(validImage)).toEqual(validImage);
+    });
+    it('Should accept an image with null formats (small image without responsive formats)', async () => {
+      const validator = strapiUtils.validateYupSchema(
+        Validators.blocks(
+          {
+            attr: { type: 'blocks' },
+          },
+          { isDraft: false }
+        )
+      );
+      expect(await validator(validImageWithNullFormats)).toEqual(validImageWithNullFormats);
     });
     it('Should throw an error given an invalid image schema', async () => {
       const validator = strapiUtils.validateYupSchema(
