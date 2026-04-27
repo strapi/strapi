@@ -23,7 +23,6 @@ const UPDATED_BY_ATTRIBUTE = 'updatedBy';
 
 const CREATED_AT_ATTRIBUTE = 'createdAt';
 const UPDATED_AT_ATTRIBUTE = 'updatedAt';
-const STATUS_ATTRIBUTE = 'status';
 
 const constants = {
   ID_ATTRIBUTE,
@@ -35,7 +34,6 @@ const constants = {
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
   SINGLE_TYPE,
-  STATUS_ATTRIBUTE,
   COLLECTION_TYPE,
 };
 
