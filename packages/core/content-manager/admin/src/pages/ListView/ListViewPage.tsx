@@ -218,7 +218,7 @@ const ListViewPage = () => {
         .join(',');
       setQuery({ sort: cleaned || undefined }, 'push', true);
     }
-  }, [hasStatusFilter]);
+  }, [hasStatusFilter, query.sort, setQuery]);
 
   const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
