@@ -37,7 +37,7 @@ import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
-  document: ReturnType<UseDocument>;
+  document?: ReturnType<UseDocument>;
 };
 
 /**
@@ -51,11 +51,15 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
 const BaseInputRenderer = ({
   visible,
   hint: providedHint,
-  document,
+  document: providedDocument,
   ...inputProps
 }: InputRendererProps) => {
+  const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  // Most edit-view fields can read the document from context, which avoids threading a
+  // frequently-changing `document` prop through nested component/DZ trees and reduces churn.
+  // Keep `providedDocument` as an explicit override for callers outside that default flow.
+  const document = providedDocument ?? currentDocument;
   const localeKey = document?.document?.locale || 'default';
-  const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);
@@ -98,6 +102,15 @@ const BaseInputRenderer = ({
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const renderComponentInput = React.useCallback(
+    (componentInputProps: InputRendererProps) => (
+      <MemoizedInputRenderer
+        key={`input-${componentInputProps.name}-${localeKey}`}
+        {...componentInputProps}
+      />
+    ),
+    [localeKey]
+  );
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
@@ -181,27 +194,29 @@ const BaseInputRenderer = ({
         />
       );
     case 'component':
+      // Preview focus/blur handlers are not used for data-structure roots (component/dynamic zone).
+      // Dropping them avoids unstable function props cascading through memoized component trees.
+      const { onBlur: _onComponentBlur, onFocus: _onComponentFocus, ...componentProps } = props;
+
       return (
         <ComponentInput
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...componentProps}
           hint={hint}
           layout={components[props.attribute.component].layout}
           disabled={fieldIsDisabled}
         >
-          {(componentInputProps) => (
-            <MemoizedInputRenderer
-              key={`input-${componentInputProps.name}-${localeKey}`}
-              {...componentInputProps}
-            />
-          )}
+          {renderComponentInput}
         </ComponentInput>
       );
     case 'dynamiczone':
+      // Same rationale as `component` above: keep data-structure root props stable.
+      const { onBlur: _onDzBlur, onFocus: _onDzFocus, ...dynamicZoneProps } = props;
+
       return (
         <DynamicZone
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...dynamicZoneProps}
           hint={hint}
           disabled={fieldIsDisabled}
         />

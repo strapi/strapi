@@ -1,6 +1,6 @@
 import { isNil, omit } from 'lodash/fp';
 
-import { setCreatorFields, async, errors, contentTypes } from '@strapi/utils';
+import { setCreatorFields, async, contentTypes, errors } from '@strapi/utils';
 import type { Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
@@ -9,6 +9,7 @@ import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/c
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
+import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -339,6 +340,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
       .countRelations({ toOne: false, toMany: true })
+      .withPopulateOverride(getPopulateForLocalizations(model))
       .build();
 
     // "Modified" is a UI-only filter; not a real document status. Read and strip it
@@ -394,13 +396,11 @@ export default {
     //   model
     // );
 
-    // TODO: Skip this part if not necessary (if D&P disabled or columns not displayed in the view)
-    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
-      model,
-      documents
-    );
+    const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(model));
 
-    const statusByDocumentId = indexByDocumentId(documentsAvailableStatus);
+    const statusByDocumentId = hasDraftAndPublish
+      ? indexByDocumentId(await documentMetadata.getManyAvailableStatus(model, documents))
+      : new Map();
 
     const setStatus = (document: any) => {
       // Available status of document
@@ -433,10 +433,12 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
       .countRelations()
+      .withPopulateOverride(getPopulateForLocalizations(model))
       .build();
 
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
@@ -635,10 +637,12 @@ export default {
     const publishedDocument = await strapi.db.transaction(async () => {
       // Create or update document
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
+
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
         .populateDeep(Infinity)
         .countRelations()
+        .withPopulateOverride(getPopulateForLocalizations(model))
         .build();
 
       let document: any;
@@ -712,6 +716,34 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
+  async bulkFindForValidation(ctx: any) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { documentIds, locale, sort } = ctx.request.body;
+
+    await validateBulkActionInput(ctx.request.body);
+
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const populate = await buildDeepPopulate(model as UID.CollectionType);
+
+    const documents = await strapi.documents(model as UID.CollectionType).findMany({
+      populate,
+      filters: { documentId: { $in: documentIds } } as any,
+      locale,
+      sort,
+      status: 'draft',
+    });
+
+    const results = await Promise.all(documents.map(permissionChecker.sanitizeOutput));
+
+    ctx.body = { results };
+  },
+
   async bulkPublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
@@ -738,10 +770,11 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { populate, locale, isPublished: false })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      populate,
+      locale,
+      isPublished: false,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -776,10 +809,10 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { locale, isPublished: true })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      locale,
+      isPublished: true,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -955,10 +988,16 @@ export default {
 
     if (permissionChecker.requiresEntity.read()) {
       // Only load what we need for access checks
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
+
       const entity = await documentManager.findOne(id, model, {
         locale,
         status,
-        populate: {},
+        populate,
       });
 
       if (!entity) {
@@ -990,17 +1029,11 @@ export default {
       return ctx.forbidden();
     }
 
-    const documents = await documentManager.findMany(
-      {
-        filters: {
-          documentId: ids,
-        },
-        locale,
-      },
-      model
-    );
+    const count = await strapi.db.query(model).count({
+      where: { documentId: ids },
+    });
 
-    if (!documents) {
+    if (count === 0) {
       return ctx.notFound();
     }
 

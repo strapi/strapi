@@ -11,7 +11,7 @@ export type Message<T = unknown> = {
 
 // Successful
 export type OKMessage = Message<{ ok: true }>;
-export type InitMessage = Message<{ transferID: string }>;
+export type InitMessage = Message<{ transferID: string; checksums?: boolean }>;
 export type EndMessage = OKMessage;
 export type StatusMessage = Message<
   | { active: true; kind: TransferKind; startedAt: number; elapsed: number }

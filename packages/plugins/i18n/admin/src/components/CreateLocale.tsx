@@ -397,6 +397,9 @@ const EnumerationInput = ({
     }
   };
 
+  // Find the label for the current value to display in the combobox
+  const selectedOption = options.find((option) => option.value === value);
+
   return (
     <Field.Root error={error} hint={hint} name={name} required={required}>
       <Field.Label>{label}</Field.Label>
@@ -406,6 +409,7 @@ const EnumerationInput = ({
         onClear={() => handleChange('')}
         placeholder={placeholder}
         value={value}
+        textValue={selectedOption?.label}
         autocomplete={{ type: 'list', filter: 'contains' }}
       >
         {options.map((option) => (

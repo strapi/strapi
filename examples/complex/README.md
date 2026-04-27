@@ -244,3 +244,23 @@ These commands will:
 - `yarn build` - Build for production
 - `yarn start` - Start production server
 - `yarn strapi` - Run Strapi CLI commands
+
+## V5 Seeding (Large Dataset)
+
+Use the v5 seeder in this project to generate a large dataset for homepage perf testing:
+
+```bash
+yarn seed:v5
+```
+
+You can scale the volume with a multiplier:
+
+```bash
+yarn seed:v5 -- --multiplier 20
+```
+
+Or:
+
+```bash
+SEED_MULTIPLIER=20 yarn seed:v5
+```

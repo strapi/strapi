@@ -6,6 +6,7 @@ const http = require('http');
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
+const { withMockedFetch, createMockResponse } = require('api-tests/mock-fetch');
 
 let strapi;
 let rq;
@@ -458,32 +459,35 @@ describe('Upload SSE Streaming', () => {
           return;
         }
 
-        // Use a URL that will likely fail but still trigger the event flow
-        const res = await makeRawRequest(strapi, {
-          method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: { urls: ['https://example.com/nonexistent-image.jpg'] },
-        });
+        const url = 'https://example.com/nonexistent-image.jpg';
+        await withMockedFetch(
+          (u) => (u === url ? createMockResponse({ status: 404, body: '' }) : undefined),
+          async () => {
+            const res = await makeRawRequest(strapi, {
+              method: 'POST',
+              path: '/upload/unstable/stream-from-urls',
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: { urls: [url] },
+            });
 
-        expect(res.statusCode).toBe(200);
-        expect(res.headers['content-type']).toBe('text/event-stream');
+            expect(res.statusCode).toBe(200);
+            expect(res.headers['content-type']).toBe('text/event-stream');
 
-        // Should have file:fetching event
-        const fetchingEvent = res.events.find((e) => e.event === 'file:fetching');
-        expect(fetchingEvent).toBeDefined();
-        expect(fetchingEvent.data).toMatchObject({
-          url: 'https://example.com/nonexistent-image.jpg',
-          index: 0,
-          total: 1,
-        });
+            const fetchingEvent = res.events.find((e) => e.event === 'file:fetching');
+            expect(fetchingEvent).toBeDefined();
+            expect(fetchingEvent.data).toMatchObject({
+              url,
+              index: 0,
+              total: 1,
+            });
 
-        // Should have stream:complete event
-        const completeEvent = res.events.find((e) => e.event === 'stream:complete');
-        expect(completeEvent).toBeDefined();
+            const completeEvent = res.events.find((e) => e.event === 'stream:complete');
+            expect(completeEvent).toBeDefined();
+          }
+        );
       });
 
       test('Streams file:error event for invalid URL protocol', async () => {
@@ -520,28 +524,31 @@ describe('Upload SSE Streaming', () => {
           'https://example.com/image3.jpg',
         ];
 
-        const res = await makeRawRequest(strapi, {
-          method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: { urls },
-        });
+        await withMockedFetch(
+          (u) => (urls.includes(u) ? createMockResponse({ status: 404, body: '' }) : undefined),
+          async () => {
+            const res = await makeRawRequest(strapi, {
+              method: 'POST',
+              path: '/upload/unstable/stream-from-urls',
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: { urls },
+            });
 
-        expect(res.statusCode).toBe(200);
+            expect(res.statusCode).toBe(200);
 
-        // Should have file:fetching events for each URL
-        const fetchingEvents = res.events.filter((e) => e.event === 'file:fetching');
-        expect(fetchingEvents.length).toBe(3);
+            const fetchingEvents = res.events.filter((e) => e.event === 'file:fetching');
+            expect(fetchingEvents.length).toBe(3);
 
-        // Verify indices and totals
-        for (let i = 0; i < 3; i++) {
-          expect(fetchingEvents[i].data.index).toBe(i);
-          expect(fetchingEvents[i].data.total).toBe(3);
-          expect(fetchingEvents[i].data.url).toBe(urls[i]);
-        }
+            for (let i = 0; i < 3; i++) {
+              expect(fetchingEvents[i].data.index).toBe(i);
+              expect(fetchingEvents[i].data.total).toBe(3);
+              expect(fetchingEvents[i].data.url).toBe(urls[i]);
+            }
+          }
+        );
       });
     });
 
@@ -565,21 +572,27 @@ describe('Upload SSE Streaming', () => {
           return;
         }
 
-        const res = await makeRawRequest(strapi, {
-          method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: { urls: ['https://example.com/definitely-does-not-exist-12345.jpg'] },
-        });
+        const url = 'https://example.com/definitely-does-not-exist-12345.jpg';
+        await withMockedFetch(
+          (u) => (u === url ? createMockResponse({ status: 404, body: '' }) : undefined),
+          async () => {
+            const res = await makeRawRequest(strapi, {
+              method: 'POST',
+              path: '/upload/unstable/stream-from-urls',
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: { urls: [url] },
+            });
 
-        expect(res.statusCode).toBe(200);
+            expect(res.statusCode).toBe(200);
 
-        const completeEvent = res.events.find((e) => e.event === 'stream:complete');
-        expect(completeEvent).toBeDefined();
-        expect(completeEvent.data.errors.length).toBeGreaterThan(0);
+            const completeEvent = res.events.find((e) => e.event === 'stream:complete');
+            expect(completeEvent).toBeDefined();
+            expect(completeEvent.data.errors.length).toBeGreaterThan(0);
+          }
+        );
       });
 
       test('Continues processing remaining URLs after one fails', async () => {
@@ -592,21 +605,25 @@ describe('Upload SSE Streaming', () => {
           'https://example.com/another-image.jpg', // Will be attempted
         ];
 
-        const res = await makeRawRequest(strapi, {
-          method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: { urls },
-        });
+        await withMockedFetch(
+          (u) => (u === urls[1] ? createMockResponse({ status: 404, body: '' }) : undefined),
+          async () => {
+            const res = await makeRawRequest(strapi, {
+              method: 'POST',
+              path: '/upload/unstable/stream-from-urls',
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: { urls },
+            });
 
-        expect(res.statusCode).toBe(200);
+            expect(res.statusCode).toBe(200);
 
-        // Should have processed both URLs
-        const fetchingEvents = res.events.filter((e) => e.event === 'file:fetching');
-        expect(fetchingEvents.length).toBe(2);
+            const fetchingEvents = res.events.filter((e) => e.event === 'file:fetching');
+            expect(fetchingEvents.length).toBe(2);
+          }
+        );
       });
     });
 
@@ -638,23 +655,39 @@ describe('Upload SSE Streaming', () => {
         // Set a very small size limit (100 bytes)
         strapi.config.set('plugin::upload.sizeLimit', 100);
 
-        // Use httpbin which returns proper Content-Length headers
-        const res = await makeRawRequest(strapi, {
-          method: 'POST',
-          path: '/upload/unstable/stream-from-urls',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
+        // Use a URL that resolves to a public IP (example.com) so SSRF check passes.
+        // Mock fetch so we don't rely on remote servers; mock returns 200 + Content-Length: 1000
+        // so the upload service rejects based on size limit.
+        const sizeLimitTestUrl = 'https://example.com/bytes/1000';
+        await withMockedFetch(
+          (url) => {
+            if (url === sizeLimitTestUrl) {
+              return createMockResponse({
+                status: 200,
+                headers: { 'Content-Length': '1000' },
+                body: Buffer.alloc(1000),
+              });
+            }
+            return undefined;
           },
-          body: { urls: ['https://httpbin.org/bytes/1000'] }, // 1000 bytes > 100 byte limit
-        });
+          async () => {
+            const res = await makeRawRequest(strapi, {
+              method: 'POST',
+              path: '/upload/unstable/stream-from-urls',
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: { urls: [sizeLimitTestUrl] }, // 1000 bytes > 100 byte limit
+            });
 
-        expect(res.statusCode).toBe(200);
+            expect(res.statusCode).toBe(200);
 
-        // Should have file:error event for size limit
-        const errorEvent = res.events.find((e) => e.event === 'file:error');
-        expect(errorEvent).toBeDefined();
-        expect(errorEvent.data.message).toMatch(/too large|size/i);
+            const errorEvent = res.events.find((e) => e.event === 'file:error');
+            expect(errorEvent).toBeDefined();
+            expect(errorEvent.data.message).toMatch(/too large|size/i);
+          }
+        );
       });
     });
   });

@@ -4,6 +4,7 @@ import { setCreatorFields, async, errors } from '@strapi/utils';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { getService } from '../utils';
 import { formatDocumentWithMetadata } from './utils/metadata';
+import { getPopulateForLocalizations } from '../services/utils/populate';
 
 type OptionsWithPopulate = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
@@ -12,6 +13,7 @@ const buildPopulateFromQuery = async (query: any, model: any) => {
     .populateFromQuery(query)
     .populateDeep(Infinity)
     .countRelations()
+    .withPopulateOverride(getPopulateForLocalizations(model))
     .build();
 };
 
