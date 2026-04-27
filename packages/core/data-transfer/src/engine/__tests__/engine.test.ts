@@ -1356,8 +1356,8 @@ describe('Transfer engine', () => {
     }, 5000);
 
     /**
-     * Smoke check that we are not holding the whole payload many times over in heap.
-     * (See {@link expectHeapGrowthWithinNoise} — absolute noise dominates small transfers.)
+     * Ensures we are not buffering all asset data in memory: heap growth during transfer should stay
+     * within a loose smoke bound (see {@link expectHeapGrowthWithinNoise}).
      */
     test('heap growth during asset transfer stays bounded (streaming, not buffering)', async () => {
       const assetCount = 15;
@@ -1477,7 +1477,6 @@ describe('Transfer engine', () => {
       const maxHeap = Math.max(...memorySamples);
       const heapGrowth = maxHeap - initialHeap;
       const totalBytes = assetCount * bytesPerAsset;
-
       expectHeapGrowthWithinNoise(heapGrowth, totalBytes);
 
       expect(writeOrder).toHaveLength(assetCount);
@@ -1525,7 +1524,7 @@ describe('Transfer engine', () => {
         createSchemasReadStream() {
           const stream = getSchemasMockSourceStream(schemaChunks);
           const originalPause = stream.pause.bind(stream);
-          stream.pause = function () {
+          stream.pause = function trackSchemasStreamPause() {
             sourcePaused = true;
             return originalPause();
           };
@@ -1564,7 +1563,7 @@ describe('Transfer engine', () => {
         createLinksReadStream() {
           const stream = getLinksMockSourceStream(linksData);
           const originalPause = stream.pause.bind(stream);
-          stream.pause = function () {
+          stream.pause = function trackLinksStreamPause() {
             sourcePaused = true;
             return originalPause();
           };
@@ -1608,7 +1607,7 @@ describe('Transfer engine', () => {
         createConfigurationReadStream() {
           const stream = getConfigurationMockSourceStream(configData);
           const originalPause = stream.pause.bind(stream);
-          stream.pause = function () {
+          stream.pause = function trackConfigurationStreamPause() {
             sourcePaused = true;
             return originalPause();
           };

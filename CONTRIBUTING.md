@@ -66,6 +66,7 @@ The Strapi core team will review your pull request and either merge it, request 
   - `yarn test:front`
   - `yarn test:e2e --setup --concurrency=1`
     - you **_may_** need to install Playwright browsers first: `yarn playwright install`
+    - Enterprise (EE) e2e: set `STRAPI_LICENSE` in **`tests/e2e/.env`** (see [`docs/docs/guides/e2e/00-setup.md`](docs/docs/guides/e2e/00-setup.md))
 - Make sure your code lints by running `yarn lint`.
 - If your contribution fixes an existing issue, please make sure to link it in your pull request.
 

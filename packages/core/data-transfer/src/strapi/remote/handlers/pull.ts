@@ -261,7 +261,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       if (step === 'assets') {
         totals = await estimateAssetTotals(strapi as Core.Strapi);
       }
-
       await this.createReadableStreamForStep(step);
       Promise.resolve(this.flush(step, flushUUID)).catch((err: unknown) => {
         this.onError(err instanceof Error ? err : new Error(String(err)));
