@@ -318,15 +318,13 @@ export default {
     // Extract and remove 'status' sort before sanitization/validation, since status
     // is not a real schema attribute and would be rejected by the permission checker.
     // It is re-added after sanitization so the DB layer can handle it via a CASE expression.
-    // If a publication status filter is active, disable status sort — all results share the
-    // same status so the sort is a no-op, and findPageWithStatusSort would ignore the filter.
     const hasPublicationStatusFilter =
       query.status !== undefined ||
       query.hasPublishedVersion !== undefined ||
       query.publicationStatusFilter !== undefined;
     const rawStatusSortOrder = extractStatusSortOrder(query.sort);
     // Disable status sort when a publication status filter is active — all results share the
-    // same status so the sort is a no-op, and findPageWithStatusSort would ignore the filter.
+    // same status, making the sort a no-op.
     const statusSortOrder = hasPublicationStatusFilter ? null : rawStatusSortOrder;
     // Always strip 'status' from the sort before passing to the document service / permission
     // checker — it is not a real schema attribute and would be rejected by validation.
@@ -383,18 +381,24 @@ export default {
       };
     }
 
-    const { results: documents, pagination } = statusSortOrder
-      ? await documentManager.findPageWithStatusSort(
-          { ...permissionQuery, populate, locale, status },
-          model,
-          statusSortOrder.toLowerCase() as 'asc' | 'desc'
-        )
-      : await documentManager.findPage({ ...permissionQuery, populate, locale, status }, model);
+    if (statusSortOrder) {
+      const s = findPageParams.sort;
+      const statusSort = `status:${statusSortOrder}`;
+      if (!s) {
+        findPageParams.sort = statusSort;
+      } else if (Array.isArray(s)) {
+        findPageParams.sort = [...s, statusSort];
+      } else if (typeof s === 'string') {
+        findPageParams.sort = `${s},${statusSort}`;
+      } else {
+        findPageParams.sort = { ...(s as object), status: statusSortOrder };
+      }
+    }
 
-    // const { results: documents, pagination } = await documentManager.findPage(
-    //   findPageParams as Parameters<typeof documentManager.findPage>[0],
-    //   model
-    // );
+    const { results: documents, pagination } = await documentManager.findPage(
+      findPageParams as Parameters<typeof documentManager.findPage>[0],
+      model
+    );
 
     const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(model));
 
