@@ -24,6 +24,7 @@ import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolb
 import { insertLink } from './Blocks/Link';
 import {
   type BlocksStore,
+  type SelectorBlock,
   type SelectorBlockKey,
   isSelectorBlockKey,
   useBlocksEditorContext,
@@ -189,17 +190,17 @@ const BlocksDropdown = () => {
   const { modalElement, handleConversionResult } = useConversionModal();
   const isMobile = useIsMobile();
 
-  const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
-    ReturnType<typeof getEntries>
-  >((currentKeys, entry) => {
-    const [key, block] = entry;
-    return block?.isInBlocksSelector ? [...currentKeys, key] : currentKeys;
-  }, []);
+  const blockKeysToInclude: string[] = getEntries(blocks).reduce<string[]>(
+    (currentKeys, [key, block]) => {
+      return block?.isInBlocksSelector ? [...currentKeys, key] : currentKeys;
+    },
+    []
+  );
 
-  const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
+  const [blockSelected, setBlockSelected] = React.useState<string>('paragraph');
 
   const handleSelect = (optionKey: unknown) => {
-    if (!isSelectorBlockKey(optionKey)) {
+    if (typeof optionKey !== 'string' || !blocks[optionKey]) {
       return;
     }
 
@@ -305,7 +306,7 @@ const BlocksDropdown = () => {
 
       // Change the value selected in the dropdown if it doesn't match the anchor block key
       if (anchorBlockKey && anchorBlockKey !== blockSelected) {
-        setBlockSelected(anchorBlockKey as SelectorBlockKey);
+        setBlockSelected(anchorBlockKey);
       }
     }
   }, [editor.selection, editor, blocks, blockSelected]);
@@ -321,7 +322,8 @@ const BlocksDropdown = () => {
     return null;
   }
 
-  const Icon = blocks[blockSelected]!.icon;
+  const selectedBlock = blocks[blockSelected] as SelectorBlock;
+  const Icon = selectedBlock.icon;
 
   return (
     <>
@@ -338,15 +340,18 @@ const BlocksDropdown = () => {
           })}
           disabled={disabled}
         >
-          {blockKeysToInclude.map((key) => (
-            <BlockOption
-              key={key}
-              value={key}
-              label={blocks[key]!.label}
-              icon={blocks[key]!.icon}
-              blockSelected={blockSelected}
-            />
-          ))}
+          {blockKeysToInclude.map((key) => {
+            const selectorBlock = blocks[key] as SelectorBlock;
+            return (
+              <BlockOption
+                key={key}
+                value={key}
+                label={selectorBlock.label}
+                icon={selectorBlock.icon}
+                blockSelected={blockSelected}
+              />
+            );
+          })}
         </SingleSelect>
       </SelectWrapper>
       {modalElement}

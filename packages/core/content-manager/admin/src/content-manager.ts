@@ -141,7 +141,13 @@ class ContentManagerPlugin {
   addRichTextBlocks(blocks: DescriptionObjReducer<RichTextBlocksStore>): void;
   addRichTextBlocks(blocks: RichTextBlocksStore | DescriptionObjReducer<RichTextBlocksStore>) {
     if (typeof blocks === 'function') {
-      this.richTextBlocksStore = blocks(this.richTextBlocksStore);
+      const result = blocks(this.richTextBlocksStore);
+      if (typeof result !== 'object' || result === null) {
+        throw new Error(
+          `Expected the \`blocks\` passed to \`addRichTextBlocks\` to be an object or a function, but received ${getPrintableType(result)}`
+        );
+      }
+      this.richTextBlocksStore = result;
     } else if (typeof blocks === 'object') {
       this.richTextBlocksStore = { ...this.richTextBlocksStore, ...blocks };
     } else {
@@ -251,7 +257,7 @@ class ContentManagerPlugin {
         },
         getEditViewSidePanels: () => this.editViewSidePanels,
         getHeaderActions: () => this.headerActions,
-        getRichTextBlocks: () => this.richTextBlocksStore,
+        getRichTextBlocks: () => ({ ...this.richTextBlocksStore }),
       },
     } satisfies PluginConfig;
   }

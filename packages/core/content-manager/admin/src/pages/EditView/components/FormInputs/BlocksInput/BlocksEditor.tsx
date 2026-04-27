@@ -52,11 +52,11 @@ interface BaseBlock {
   isDraggable?: (element: Element) => boolean;
 }
 
-interface NonSelectorBlock extends BaseBlock {
+export interface NonSelectorBlock extends BaseBlock {
   isInBlocksSelector?: false;
 }
 
-interface SelectorBlock extends BaseBlock {
+export interface SelectorBlock extends BaseBlock {
   isInBlocksSelector: true;
   icon?: React.ComponentType;
   label: MessageDescriptor;
@@ -91,11 +91,10 @@ type BlocksStore = {
   [K in NonSelectorBlockKey]: NonSelectorBlock;
 };
 
-type RichTextBlocksStore = Partial<BlocksStore> & {
-  [key: string]: SelectorBlock | NonSelectorBlock;
-};
+type RichTextBlocksStore = Partial<BlocksStore> & Record<string, SelectorBlock | NonSelectorBlock>;
 
 interface BlocksEditorContextValue {
+  blocks: RichTextBlocksStore;
   modifiers: ModifiersStore;
   disabled: boolean;
   name: string;
@@ -110,21 +109,12 @@ const [BlocksEditorProvider, usePartialBlocksEditorContext] =
 
 function useBlocksEditorContext(consumerName: string): BlocksEditorContextValue & {
   editor: Editor;
-  blocks: RichTextBlocksStore;
 } {
   const context = usePartialBlocksEditorContext(consumerName, (state) => state);
-  const apis = useStrapiApp(
-    'useBlocksEditorContext',
-    (state) => state.plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-  );
-
-  const blocks = apis.getRichTextBlocks();
-
   const editor = useSlate();
 
   return {
     ...context,
-    blocks,
     editor,
   };
 }
@@ -208,22 +198,20 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     const { formatMessage } = useIntl();
     const isMobile = useIsMobile();
 
-    const blocks = React.useMemo(
-      () => ({
-        ...paragraphBlocks,
-        ...headingBlocks,
-        ...listBlocks,
-        ...linkBlocks,
-        ...imageBlocks,
-        ...quoteBlocks,
-        ...codeBlocks,
-      }),
-      []
-    ) satisfies BlocksStore;
+    const blocks = useStrapiApp(
+      'BlocksEditor',
+      (state) =>
+        (
+          state.plugins['content-manager']?.apis as
+            | ContentManagerPlugin['config']['apis']
+            | undefined
+        )?.getRichTextBlocks() ?? ({} as RichTextBlocksStore)
+    );
 
     const blockRegisteredPlugins = Object.values(blocks)
       .map((block) => block.plugin)
       .filter(isNonNullable);
+
 
     const [editor] = React.useState(() =>
       pipe(withHistory, withStrapiSchema, withReact, ...blockRegisteredPlugins)(createEditor())
@@ -345,6 +333,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           key={key}
         >
           <BlocksEditorProvider
+            blocks={blocks}
             modifiers={modifiers}
             disabled={disabled}
             name={name}
