@@ -326,35 +326,6 @@ describe('previewScript helpers', () => {
     });
   });
 
-  describe('isReactManagedElement', () => {
-    it('returns false for a plain element', () => {
-      const el = document.createElement('div');
-      expect(getHelpers().isReactManagedElement(el)).toBe(false);
-    });
-
-    it('returns true when the element carries a React fiber property', () => {
-      const el = document.createElement('img');
-      (el as unknown as Record<string, unknown>).__reactFiber$xyz123 = {};
-      expect(getHelpers().isReactManagedElement(el)).toBe(true);
-    });
-
-    it('returns true when an ancestor carries a React fiber property', () => {
-      const parent = document.createElement('section');
-      (parent as unknown as Record<string, unknown>).__reactFiber$abc = {};
-      const child = document.createElement('img');
-      parent.appendChild(child);
-      document.body.appendChild(parent);
-
-      expect(getHelpers().isReactManagedElement(child)).toBe(true);
-
-      document.body.removeChild(parent);
-    });
-
-    it('returns false for a null input', () => {
-      expect(getHelpers().isReactManagedElement(null)).toBe(false);
-    });
-  });
-
   describe('BUILT_IN_MEDIA_HANDLER', () => {
     const meta = { path: 'hero.image', type: 'media' };
 
@@ -370,77 +341,40 @@ describe('previewScript helpers', () => {
       expect(img).toHaveAttribute('src', 'https://example.com/new.jpg');
     });
 
-    it('swaps <img> to <video> on image → video cross-kind change, preserving marker', () => {
-      const wrapper = document.createElement('div');
+    it('defers to an integrator handler on cross-kind (image → video)', () => {
+      // The built-in never replaces a DOM node for cross-kind swaps. Doing so would
+      // crash framework-managed subtrees. Returning false tells the dispatcher to
+      // signal unhandled; integrators should ship their own onType('media', ...).
       const img = document.createElement('img');
       img.setAttribute('src', 'https://example.com/old.jpg');
-      img.setAttribute('data-strapi-source', 'path=hero.image&type=media');
-      img.setAttribute('class', 'hero-class');
-      img.setAttribute('width', '640');
-      wrapper.appendChild(img);
 
       const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
         { url: 'https://example.com/clip.mp4', mime: 'video/mp4' },
-        wrapper,
-        meta
-      );
-
-      expect(handled).toBe(true);
-      const video = wrapper.querySelector('video');
-      expect(video).not.toBeNull();
-      expect(video!).toHaveAttribute('src', 'https://example.com/clip.mp4');
-      expect(video!).toHaveAttribute('data-strapi-source', 'path=hero.image&type=media');
-      expect(video!).toHaveAttribute('class', 'hero-class');
-      expect(video!).toHaveAttribute('width', '640');
-      expect(wrapper.querySelector('img')).toBeNull();
-    });
-
-    it('falls through on cross-kind when the target is React-managed', () => {
-      // Simulate a React-owned <img> by attaching a fiber property. The built-in must NOT
-      // call replaceWith on this node — doing so leaves React's fiber pointing at a detached
-      // node and its next reconciliation throws
-      //   "Node.removeChild: The node to be removed is not a child of this node"
-      const wrapper = document.createElement('div');
-      const img = document.createElement('img');
-      img.setAttribute('src', 'https://example.com/old.jpg');
-      (img as unknown as Record<string, unknown>).__reactFiber$abc = {};
-      wrapper.appendChild(img);
-
-      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
-        { url: 'https://example.com/clip.mp4', mime: 'video/mp4' },
-        wrapper,
+        img,
         meta
       );
 
       expect(handled).toBe(false);
-      // The DOM must be untouched — the original <img> stays exactly as it was
-      expect(wrapper.querySelector('video')).toBeNull();
-      expect(wrapper.querySelector('img')).toBe(img);
+      // DOM left untouched
       expect(img).toHaveAttribute('src', 'https://example.com/old.jpg');
+      expect(img.parentElement?.querySelector('video')).toBeFalsy();
     });
 
-    it('swaps <video> to <img> on video → image cross-kind change', () => {
-      const wrapper = document.createElement('div');
+    it('defers to an integrator handler on cross-kind (video → image)', () => {
       const video = document.createElement('video');
       video.setAttribute('src', 'https://example.com/old.mp4');
-      video.setAttribute('data-strapi-source', 'path=hero.media&type=media');
-      wrapper.appendChild(video);
 
       const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(
-        { url: 'https://example.com/photo.jpg', mime: 'image/jpeg', alternativeText: 'A photo' },
-        wrapper,
+        { url: 'https://example.com/photo.jpg', mime: 'image/jpeg' },
+        video,
         meta
       );
 
-      expect(handled).toBe(true);
-      const img = wrapper.querySelector('img');
-      expect(img).not.toBeNull();
-      expect(img!).toHaveAttribute('src', 'https://example.com/photo.jpg');
-      expect(img!).toHaveAttribute('alt', 'A photo');
-      expect(wrapper.querySelector('video')).toBeNull();
+      expect(handled).toBe(false);
+      expect(video).toHaveAttribute('src', 'https://example.com/old.mp4');
     });
 
-    it('clears attributes on populated → empty', () => {
+    it('clears attributes on populated → empty (<img>)', () => {
       const img = document.createElement('img');
       img.setAttribute('src', 'https://example.com/old.jpg');
       img.setAttribute('alt', 'old');
@@ -452,6 +386,18 @@ describe('previewScript helpers', () => {
       expect(img).not.toHaveAttribute('src');
       expect(img).not.toHaveAttribute('srcset');
       expect(img).not.toHaveAttribute('alt');
+    });
+
+    it('clears attributes on populated → empty (<video>)', () => {
+      const video = document.createElement('video');
+      video.setAttribute('src', 'https://example.com/clip.mp4');
+      video.setAttribute('poster', 'https://example.com/poster.jpg');
+
+      const handled = getHelpers().BUILT_IN_MEDIA_HANDLER(null, video, meta);
+
+      expect(handled).toBe(true);
+      expect(video).not.toHaveAttribute('src');
+      expect(video).not.toHaveAttribute('poster');
     });
 
     it('returns false when no media target is in the subtree', () => {

@@ -206,12 +206,105 @@ const Entry = ({ data }) => {
   );
 };
 
+/**
+ * Read a value by dot-path (e.g. "components.0.hero") from a nested object tree.
+ * Returns undefined if any segment along the path is missing.
+ */
+const getByPath = (data, path) => {
+  if (!data) return undefined;
+  const parts = path.split('.');
+  let cursor = data;
+  for (let i = 0; i < parts.length; i++) {
+    if (cursor == null) return undefined;
+    cursor = cursor[parts[i]];
+  }
+  return cursor;
+};
+
+/**
+ * Merge live-preview field overrides into a fetched entry. Callers pass the raw data (from
+ * useLoaderData) and an `{ [path]: value }` map of changes received from the admin. Each path
+ * is dot-separated and may include array indices (e.g. "components.0.hero").
+ *
+ * Critical detail: the admin's form-state payload does NOT include the `_strapiSource`
+ * source-map marker that the server stamps on media objects (the admin's fetch doesn't set
+ * the `strapi-encode-source-maps` header). If we overrode a media object with the bare form
+ * value we'd lose the marker, the new <img>/<video> would render without `data-strapi-source`,
+ * and subsequent field-change events would find zero elements to target. So we carry the
+ * marker forward from the original fetched value whenever the override itself lacks one.
+ *
+ * Ancestors are shallow-cloned so React sees fresh references along the path and re-renders.
+ */
+const applyFieldOverrides = (data, overrides) => {
+  if (!data || !overrides || Object.keys(overrides).length === 0) return data;
+  const result = { ...data };
+  for (const [path, rawValue] of Object.entries(overrides)) {
+    // Preserve _strapiSource from the original server value so the rendered element keeps
+    // its source-map marker across state-driven re-renders.
+    const original = getByPath(data, path);
+    const value =
+      rawValue &&
+      typeof rawValue === 'object' &&
+      !Array.isArray(rawValue) &&
+      !rawValue._strapiSource &&
+      original &&
+      typeof original === 'object' &&
+      original._strapiSource
+        ? { ...rawValue, _strapiSource: original._strapiSource }
+        : rawValue;
+
+    const parts = path.split('.');
+    let cursor = result;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const key = parts[i];
+      const next = parts[i + 1];
+      const isNumericNext = /^\d+$/.test(next);
+      if (cursor[key] == null) {
+        cursor[key] = isNumericNext ? [] : {};
+      } else if (Array.isArray(cursor[key])) {
+        cursor[key] = [...cursor[key]];
+      } else {
+        cursor[key] = { ...cursor[key] };
+      }
+      cursor = cursor[key];
+    }
+    cursor[parts[parts.length - 1]] = value;
+  }
+  return result;
+};
+
 const PreviewComponent = () => {
   const { apiName, documentId, locale, status: documentStatus } = useParams();
   const { main, unrelated } = useLoaderData();
   const revalidator = useRevalidator();
 
+  /**
+   * Live-preview field overrides. The built-in Strapi media handler covers same-kind swaps
+   * and empty transitions safely (attribute-only mutation), but cross-kind changes
+   * (image ↔ video) need to change the rendered tag. That requires re-running the React
+   * render, not DOM surgery — so we intercept media changes via window.strapiPreview.onType
+   * and push the new value into state here.
+   */
+  const [fieldOverrides, setFieldOverrides] = React.useState({});
+
+  // Reset overrides when the server responds with fresh data after a save — at that point
+  // the overrides are redundant with the fetched data.
   React.useEffect(() => {
+    setFieldOverrides({});
+  }, [main]);
+
+  React.useEffect(() => {
+    const registerMediaHandler = () => {
+      // window.strapiPreview is created by the preview script when it's injected. We register
+      // our handler after injection (see 'strapiScript' branch below) so this is only called
+      // once strapiPreview exists. Map.set() overwrites by key, so re-registration on script
+      // re-injection is safe.
+      window.strapiPreview?.onType('media', (value, _element, meta) => {
+        setFieldOverrides((prev) => ({ ...prev, [meta.path]: value }));
+        return true; // handled — don't fall through to the built-in
+      });
+    };
+
     const handleMessage = (event) => {
       const { origin, data } = event;
 
@@ -231,6 +324,9 @@ const PreviewComponent = () => {
         const script = window.document.createElement('script');
         script.textContent = data.payload.script;
         window.document.head.appendChild(script);
+        // Inline <script> execution is synchronous, so window.strapiPreview is set by the
+        // time we return from appendChild. Register our media override handler now.
+        registerMediaHandler();
       }
     };
 
@@ -240,8 +336,14 @@ const PreviewComponent = () => {
 
     return () => {
       window.removeEventListener('message', handleMessage);
+      window.strapiPreview?.off('media');
     };
   }, []);
+
+  const mergedMain = React.useMemo(
+    () => applyFieldOverrides(main, fieldOverrides),
+    [main, fieldOverrides]
+  );
 
   return (
     <Box
@@ -313,10 +415,10 @@ const PreviewComponent = () => {
                 Rest API data
               </Typography>
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
-              {main ? (
+              {mergedMain ? (
                 <>
-                  <Entry data={main} />
-                  <JSONInput value={JSON.stringify(main, null, 2)} disabled />
+                  <Entry data={mergedMain} />
+                  <JSONInput value={JSON.stringify(mergedMain, null, 2)} disabled />
                 </>
               ) : (
                 <Typography textColor="neutral600">No data found</Typography>
