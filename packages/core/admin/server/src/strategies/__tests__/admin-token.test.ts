@@ -32,8 +32,16 @@ describe('Admin Token Auth Strategy', () => {
 
   const makeStrapi = (
     getByAccessKey: jest.Mock,
-    findOneUser: jest.Mock = jest.fn(() => activeUserWithRoles)
+    findOneUser: jest.Mock = jest.fn(() => activeUserWithRoles),
+    adminTokensEnabled = true
   ) => ({
+    features: {
+      future: {
+        isEnabled: jest.fn((featureName: string) => {
+          return featureName === 'adminTokens' ? adminTokensEnabled : false;
+        }),
+      },
+    },
     admin: {
       services: {
         'api-token-admin': { getByAccessKey, hash },
@@ -80,6 +88,22 @@ describe('Admin Token Auth Strategy', () => {
         populate: ['roles'],
       });
       expect(generateTokenAbility).toHaveBeenCalledWith([], activeUserWithRoles);
+    });
+
+    test('Rejects admin token authentication when the future flag is disabled', async () => {
+      const getByAccessKey = jest.fn();
+      const ctx = adminRouteCtx();
+
+      global.strapi = makeStrapi(
+        getByAccessKey,
+        jest.fn(() => activeUserWithRoles),
+        false
+      ) as any;
+
+      const response = await adminTokenStrategy.authenticate(ctx);
+
+      expect(response).toStrictEqual({ authenticated: false });
+      expect(getByAccessKey).not.toHaveBeenCalled();
     });
 
     test('Fails to authenticate when loaded owner isActive is false', async () => {

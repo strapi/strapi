@@ -75,7 +75,12 @@ describe('Admin Token Role Sync (api)', () => {
       })
       .build();
 
-    strapi = await createStrapiInstance();
+    // @ts-expect-error - the JS test helper supports `register`, but its TS type is incomplete
+    strapi = await createStrapiInstance({
+      register({ strapi: instance }) {
+        instance.config.set('features.future.adminTokens', true);
+      },
+    });
     strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key');
 
     const utils = createUtils(strapi);

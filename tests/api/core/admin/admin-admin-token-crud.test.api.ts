@@ -26,7 +26,12 @@ describe('Admin Admin Token CRUD (api)', () => {
   };
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance();
+    strapi = await createStrapiInstance({
+      // @ts-expect-error - the JS test helper supports `register`, but its TS type is incomplete
+      register({ strapi: instance }) {
+        instance.config.set('features.future.adminTokens', true);
+      },
+    });
     strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key');
 
     rq = await createAuthRequest({ strapi });
@@ -44,7 +49,15 @@ describe('Admin Admin Token CRUD (api)', () => {
       roles: [superAdminRole.id],
     });
     saOtherUserId = saOtherUser.id;
-    rqOther = await createAuthRequest({ strapi, userInfo: { email: 'sa-other@test.com' } });
+    rqOther = await createAuthRequest({
+      strapi,
+      userInfo: {
+        email: 'sa-other@test.com',
+        firstname: 'Other',
+        lastname: 'SA',
+        password: 'Password123',
+      },
+    });
 
     // Create a custom role with one known action for ceiling tests.
     const editorRole = await utils.createRole({
@@ -69,7 +82,15 @@ describe('Admin Admin Token CRUD (api)', () => {
       roles: [editorRole.id],
     });
     editorUserId = editorUser.id;
-    rqEditor = await createAuthRequest({ strapi, userInfo: { email: 'editor@test.com' } });
+    rqEditor = await createAuthRequest({
+      strapi,
+      userInfo: {
+        email: 'editor@test.com',
+        firstname: 'Editor',
+        lastname: 'User',
+        password: 'Password123',
+      },
+    });
 
     await deleteAllAdminTokens();
   });
@@ -918,7 +939,12 @@ describe('Admin Admin Token CRUD (api)', () => {
 
       const tempRq = await createAuthRequest({
         strapi,
-        userInfo: { email: 'temp-deletable@test.com' },
+        userInfo: {
+          email: 'temp-deletable@test.com',
+          firstname: 'Temp',
+          lastname: 'Delete',
+          password: 'Password123',
+        },
       });
 
       const createRes = await tempRq({
@@ -952,7 +978,12 @@ describe('Admin Admin Token CRUD (api)', () => {
 
       const blockedRq = await createAuthRequest({
         strapi,
-        userInfo: { email: 'temp-blocked@test.com' },
+        userInfo: {
+          email: 'temp-blocked@test.com',
+          firstname: 'Blocked',
+          lastname: 'User',
+          password: 'Password123',
+        },
       });
 
       // Create an admin token while still active — store the raw accessKey
