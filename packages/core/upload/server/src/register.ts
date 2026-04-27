@@ -29,9 +29,9 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   } as Config;
 
   // Configure sharp memory management
-  const { sharpCache = false, sharpConcurrency = 1 } = uploadConfig;
-  sharp.cache(sharpCache);
-  sharp.concurrency(sharpConcurrency);
+  const { cache = false, concurrency = 1 } = uploadConfig.sharp ?? {};
+  sharp.cache(cache);
+  sharp.concurrency(concurrency);
 
   strapi.plugin('upload').provider = createProvider(uploadConfig);
 

@@ -92,7 +92,7 @@ describe('Upload plugin register', () => {
       jest.clearAllMocks();
     });
 
-    test('uses sharpCache false and sharpConcurrency 1 from defaults', async () => {
+    test('uses sharp.cache false and sharp.concurrency 1 from defaults', async () => {
       const registerRoute = jest.fn();
 
       global.strapi = {
@@ -113,7 +113,7 @@ describe('Upload plugin register', () => {
       expect(sharp.concurrency).toHaveBeenCalledWith(1);
     });
 
-    test('forwards plugin::upload sharpCache and sharpConcurrency to sharp', async () => {
+    test('forwards plugin::upload sharp.cache and sharp.concurrency to sharp', async () => {
       const registerRoute = jest.fn();
 
       global.strapi = {
@@ -124,7 +124,7 @@ describe('Upload plugin register', () => {
         config: {
           get: jest
             .fn()
-            .mockReturnValue({ provider: 'local', sharpCache: true, sharpConcurrency: 4 }),
+            .mockReturnValue({ provider: 'local', sharp: { cache: true, concurrency: 4 } }),
           set: jest.fn(),
         },
         get: jest.fn().mockReturnValue({ add: jest.fn() }),

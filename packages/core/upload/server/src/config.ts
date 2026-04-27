@@ -4,8 +4,10 @@ export const config = {
     provider: 'local',
     sizeLimit: 1000000000, // 1GB
     actionOptions: {},
-    sharpCache: false,
-    sharpConcurrency: 1,
+    sharp: {
+      cache: false,
+      concurrency: 1,
+    },
   },
   validator() {},
 };
