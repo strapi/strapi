@@ -29,12 +29,11 @@ function containerCmd() {
   return getContainerCommand();
 }
 
-// Try to find the container name dynamically, fallback to expected name
 function getContainerName() {
-  const name = getComposeContainerName(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'mysql');
+  const name = getComposeContainerName(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'mariadb');
   if (!name) {
     throw new Error(
-      `MySQL container not found. Start it with "yarn db:start:mysql" (COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}).`
+      `MariaDB container not found. Start it with "yarn db:start:mariadb" (COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}).`
     );
   }
   return name;
@@ -60,31 +59,32 @@ function execShell(cmd) {
 
 switch (command) {
   case 'start':
-    console.log('Starting mysql container...');
-    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} up -d mysql`);
-    console.log('✅ MySQL started');
+    console.log('Starting mariadb container...');
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} up -d mariadb`);
+    console.log('✅ MariaDB started');
     break;
 
   case 'stop':
-    console.log('Stopping mysql container...');
-    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} stop mysql`);
-    console.log('✅ MySQL stopped');
+    console.log('Stopping mariadb container...');
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} stop mariadb`);
+    console.log('✅ MariaDB stopped');
     break;
 
   case 'snapshot':
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-mysql.js snapshot <name>');
+      console.error('Usage: node db-mariadb.js snapshot <name>');
       process.exit(1);
     }
     ensureSnapshotsDir();
-    const snapshotPath = path.join(SNAPSHOTS_DIR, `mysql-${snapshotName}.sql`);
+    const snapshotPath = path.join(SNAPSHOTS_DIR, `mariadb-${snapshotName}.sql`);
     console.log(`Creating snapshot: ${snapshotName}...`);
     {
       const containerName = getContainerName();
       try {
+        // `mariadb-dump` is the modern binary; older images fall back to `mysqldump` alias.
         execSync(
-          `${containerCmd()} exec ${containerName} mysqldump -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
+          `${containerCmd()} exec ${containerName} mariadb-dump -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot created: ${snapshotPath}`);
@@ -98,10 +98,10 @@ switch (command) {
   case 'restore':
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-mysql.js restore <name>');
+      console.error('Usage: node db-mariadb.js restore <name>');
       process.exit(1);
     }
-    const restorePath = path.join(SNAPSHOTS_DIR, `mysql-${snapshotName}.sql`);
+    const restorePath = path.join(SNAPSHOTS_DIR, `mariadb-${snapshotName}.sql`);
     if (!fs.existsSync(restorePath)) {
       console.error(`Error: Snapshot not found: ${restorePath}`);
       process.exit(1);
@@ -112,12 +112,12 @@ switch (command) {
       try {
         // Drop and recreate database
         execSync(
-          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         // Restore from snapshot
         execSync(
-          `${containerCmd()} exec -i ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
+          `${containerCmd()} exec -i ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot restored: ${snapshotName}`);
@@ -129,12 +129,12 @@ switch (command) {
     break;
 
   case 'wipe':
-    console.log('Wiping mysql database...');
+    console.log('Wiping mariadb database...');
     {
       const containerName = getContainerName();
       try {
         execSync(
-          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
           { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log('✅ Database wiped');
@@ -149,9 +149,8 @@ switch (command) {
     {
       const containerName = getContainerName();
       try {
-        // Refresh information_schema.tables.table_rows with fresh stats.
-        // The default values can lag reality by hours, which is unacceptable
-        // for benchmark reports. ANALYZE TABLE triggers a stats refresh.
+        // Refresh information_schema.tables.table_rows via ANALYZE TABLE;
+        // without it, stats can lag reality by hours.
         const analyzeQuery = `
           SELECT CONCAT('ANALYZE TABLE ', table_name, ';') AS cmd
           FROM information_schema.tables
@@ -159,18 +158,18 @@ switch (command) {
         `;
         try {
           const analyzeList = execSync(
-            `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
+            `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
             { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
           );
           const cmds = analyzeList.trim().split('\n').filter(Boolean).join(' ');
           if (cmds) {
             execSync(
-              `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
+              `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
               { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
             );
           }
         } catch {
-          // Best-effort; fall through to stale stats rather than fail the check.
+          // Best-effort; fall through to stale stats rather than fail.
         }
 
         const query = `
@@ -183,7 +182,7 @@ switch (command) {
         `;
 
         const output = execSync(
-          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
           { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
 
@@ -215,6 +214,6 @@ switch (command) {
 
   default:
     console.error('Error: Unknown command');
-    console.error('Usage: node db-mysql.js <start|stop|snapshot|restore|wipe|check> [name]');
+    console.error('Usage: node db-mariadb.js <start|stop|snapshot|restore|wipe|check> [name]');
     process.exit(1);
 }
