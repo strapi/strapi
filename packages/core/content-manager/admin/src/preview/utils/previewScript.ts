@@ -73,7 +73,78 @@ const previewScript = (config: PreviewScriptConfig) => {
   };
 
   const isMediaElement = (element: Element): boolean => {
-    return element.tagName === 'IMG' || element.tagName === 'VIDEO';
+    return element.tagName === 'IMG' || element.tagName === 'VIDEO' || element.tagName === 'AUDIO';
+  };
+
+  /**
+   * When a media field's mime type changes (e.g. image -> video), we can't
+   * swap the rendered DOM tag in place — the host framework (e.g. React)
+   * owns the original element and throws on removeChild if we replaceChild
+   * it. Instead we leave the original where it is, hide it, and insert our
+   * own sibling element of the correct tag. The injection lives outside the
+   * host framework's virtual DOM, so reconciliation never touches it.
+   *
+   * On save the host framework re-renders with the saved data and unmounts
+   * the original, leaving our injection orphaned next to its replacement —
+   * which is what was producing duplicate previews. The childList observer
+   * below uses these maps to drop the injection whenever its associated
+   * original is removed.
+   */
+  const originalToInjection = new Map<HTMLElement, HTMLElement>();
+  const injectionToOriginal = new Map<HTMLElement, HTMLElement>();
+
+  const trackInjection = (original: HTMLElement, injection: HTMLElement) => {
+    originalToInjection.set(original, injection);
+    injectionToOriginal.set(injection, original);
+  };
+
+  const untrackInjection = (injection: HTMLElement) => {
+    const original = injectionToOriginal.get(injection);
+    if (original) originalToInjection.delete(original);
+    injectionToOriginal.delete(injection);
+  };
+
+  /**
+   * Form values for media fields carry the raw Strapi URL (often relative,
+   * e.g. "/uploads/foo.jpg"). The host framework typically renders the
+   * original element with an absolute URL (resolved against the Strapi
+   * backend, not the iframe origin). If we naively set the relative form
+   * value as src, the browser resolves it against the iframe origin and
+   * fails to load. Resolve against the original element's existing src
+   * origin so the swap targets the same backend.
+   */
+  const resolveMediaUrl = (originalEl: HTMLElement, rawUrl: string): string => {
+    if (/^(?:[a-z]+:)?\/\//i.test(rawUrl) || rawUrl.startsWith('data:')) {
+      return rawUrl;
+    }
+    const currentSrc = originalEl.getAttribute('src');
+    if (!currentSrc) return rawUrl;
+    try {
+      const currentUrl = new URL(currentSrc, window.location.href);
+      return new URL(rawUrl, currentUrl.origin).href;
+    } catch {
+      return rawUrl;
+    }
+  };
+
+  /**
+   * Extract a recognizable media filename from a URL string. Works for
+   * direct backend URLs, relative paths, and proxy URLs that embed the
+   * real path in a query parameter (e.g. Next.js's "/_next/image?url=...").
+   * Used to detect whether the rendered element already shows the same
+   * asset as the form value, so we can skip src updates that would only
+   * substitute one URL representation for another.
+   */
+  const getMediaFilename = (raw: string): string => {
+    if (!raw) return '';
+    let decoded = raw;
+    try {
+      decoded = decodeURIComponent(raw);
+    } catch {}
+    const match = decoded.match(
+      /([^/?#&=\s]+\.(?:jpg|jpeg|png|gif|webp|avif|svg|mp4|mov|webm|ogg|m4v|mp3|wav|m4a|aac|flac|opus))(?:[?#&]|$)/i
+    );
+    return match ? match[1].toLowerCase() : '';
   };
 
   /**
@@ -599,6 +670,20 @@ const previewScript = (config: PreviewScriptConfig) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as Element;
               highlightManager.removeHighlightForElement(element);
+
+              // If a tracked media original (or its ancestor) was removed —
+              // typically when the host framework re-renders after save and
+              // unmounts the previous element — drop our matching injection
+              // so we don't end up with duplicate previews next to the new one.
+              originalToInjection.forEach((injection, original) => {
+                if (element === original || element.contains(original)) {
+                  untrackInjection(injection);
+                  injection.remove();
+                } else if (element === injection || element.contains(injection)) {
+                  // Our injection itself was removed (e.g. parent unmounted)
+                  untrackInjection(injection);
+                }
+              });
             }
           });
         }
@@ -620,6 +705,114 @@ const previewScript = (config: PreviewScriptConfig) => {
   };
 
   const setupEventHandlers = (highlightManager: HighlightManager) => {
+    const setMediaElement = (el: HTMLElement, url: string | null, mime?: string) => {
+      const original = injectionToOriginal.get(el) ?? el;
+      const injection = originalToInjection.get(original) ?? null;
+
+      const removeInjection = () => {
+        if (!injection) return;
+        // Move the source attribute back to the original so highlights track it again
+        const sourceAttr = injection.getAttribute(SOURCE_ATTRIBUTE);
+        if (sourceAttr) original.setAttribute(SOURCE_ATTRIBUTE, sourceAttr);
+        untrackInjection(injection);
+        injection.remove();
+      };
+
+      if (!url) {
+        removeInjection();
+        original.style.display = 'none';
+        original.removeAttribute('src');
+        return;
+      }
+
+      const desiredTag = mime?.startsWith('image/')
+        ? 'IMG'
+        : mime?.startsWith('video/')
+          ? 'VIDEO'
+          : mime?.startsWith('audio/')
+            ? 'AUDIO'
+            : null;
+
+      // If the rendered element already shows the same media file as the
+      // form value, do nothing. Compare by filename so we're agnostic to
+      // URL representation — the host framework may have rendered a proxy
+      // URL (e.g. Next.js's "/_next/image?url=...") that wouldn't match a
+      // raw form-value URL string-wise but resolves to the same asset.
+      const active = injection ?? original;
+      const newFilename = getMediaFilename(url);
+      const currentFilename = getMediaFilename(active.getAttribute('src') ?? '');
+      const tagAlreadyMatches = !desiredTag || active.tagName === desiredTag;
+      if (tagAlreadyMatches && newFilename && newFilename === currentFilename) {
+        active.style.display = '';
+        return;
+      }
+
+      // Resolve relative form-value URLs against the existing src's origin
+      // so the swap targets the Strapi backend, not the iframe origin.
+      const resolvedUrl = resolveMediaUrl(original, url);
+
+      // No mime info — fall back to updating whatever's active
+      if (!desiredTag) {
+        if (active.getAttribute('src') !== resolvedUrl) {
+          active.setAttribute('src', resolvedUrl);
+        }
+        active.style.display = '';
+        return;
+      }
+
+      // Original's tag matches: restore it (removing any previous injection)
+      if (original.tagName === desiredTag) {
+        removeInjection();
+        if (original.getAttribute('src') !== resolvedUrl) {
+          original.setAttribute('src', resolvedUrl);
+        }
+        original.style.display = '';
+        return;
+      }
+
+      // Existing injection of the right tag: just update its src
+      if (injection && injection.tagName === desiredTag) {
+        if (injection.getAttribute('src') !== resolvedUrl) {
+          injection.setAttribute('src', resolvedUrl);
+        }
+        return;
+      }
+
+      // Need a fresh injection of the correct tag
+      removeInjection();
+
+      const newInjection = document.createElement(desiredTag) as HTMLElement;
+      // Mirror the original's attributes so styling/classes carry over.
+      // Skip src/srcset — those carry the *previous* media's URL and would
+      // make the new element try to load it (a video element fed an image
+      // URL renders a permanent "No supported format" error). We set src
+      // explicitly below.
+      // For audio, skip visual-sizing attributes too — image/video classes
+      // (e.g. aspect-square, h-96) don't suit a horizontal audio control
+      // and produce a giant empty box around the player.
+      const isAudio = desiredTag === 'AUDIO';
+      const skipForAudio = new Set(['class', 'style', 'width', 'height']);
+      Array.from(original.attributes).forEach((attr) => {
+        if (attr.name === 'id' || attr.name === 'src' || attr.name === 'srcset') return;
+        if (isAudio && skipForAudio.has(attr.name)) return;
+        newInjection.setAttribute(attr.name, attr.value);
+      });
+      newInjection.setAttribute('src', resolvedUrl);
+      if (desiredTag === 'VIDEO' || desiredTag === 'AUDIO') {
+        newInjection.setAttribute('controls', '');
+      }
+      if (!isAudio) {
+        newInjection.style.cssText = original.style.cssText;
+      }
+      newInjection.style.display = '';
+
+      // Hide the host-framework-managed original and let highlights track our injection
+      original.style.display = 'none';
+      original.removeAttribute(SOURCE_ATTRIBUTE);
+      original.parentNode?.insertBefore(newInjection, original.nextSibling);
+      trackInjection(original, newInjection);
+    };
+
     const handleMessage = (event: MessageEvent) => {
       if (!event.data?.type) return;
 
@@ -630,65 +823,13 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         getElementsByPath(field).forEach((element) => {
           if (element instanceof HTMLElement) {
-            // For img/video elements, update the src attribute instead of text content
             if (isMediaElement(element)) {
-              // Value can be a media object with url property, or a string URL
               const url = typeof value === 'object' && value !== null ? value.url : value;
-              const mime = typeof value === 'object' && value !== null ? value.mime : undefined;
-
-              if (url) {
-                // Check if the media type matches the element type
-                const isImage = element.tagName === 'IMG';
-                const isVideo = element.tagName === 'VIDEO';
-                const isImageMime = mime?.startsWith('image/');
-                const isVideoMime = mime?.startsWith('video/');
-
-                // Check if we need to replace the element due to media type mismatch
-                const needsReplacement =
-                  mime && ((isImage && isVideoMime) || (isVideo && isImageMime));
-
-                if (needsReplacement) {
-                  // Create a new element of the correct type
-                  const newTagName = isImageMime ? 'IMG' : 'VIDEO';
-                  const newElement = document.createElement(newTagName);
-
-                  // Copy all attributes from the old element
-                  Array.from(element.attributes).forEach((attr) => {
-                    newElement.setAttribute(attr.name, attr.value);
-                  });
-
-                  // Set the new src
-                  newElement.setAttribute('src', url);
-
-                  // Copy inline styles
-                  newElement.style.cssText = element.style.cssText;
-                  newElement.style.display = '';
-
-                  // For video elements, add common attributes
-                  if (newTagName === 'VIDEO') {
-                    newElement.setAttribute('controls', '');
-                  }
-
-                  // Replace the old element with the new one
-                  element.parentNode?.replaceChild(newElement, element);
-                } else {
-                  // Same media type, just update the src
-                  const shouldShow = !mime || (isImage && isImageMime) || (isVideo && isVideoMime);
-
-                  if (shouldShow) {
-                    element.setAttribute('src', url);
-                    element.style.display = '';
-                  } else {
-                    // Hide if no mime info and types don't match (shouldn't happen)
-                    element.style.display = 'none';
-                    element.removeAttribute('src');
-                  }
-                }
-              } else {
-                // Hide element when media is deleted/empty instead of showing broken media
-                element.style.display = 'none';
-                element.removeAttribute('src');
-              }
+              const mime =
+                typeof value === 'object' && value !== null
+                  ? (value.mime as string | undefined)
+                  : undefined;
+              setMediaElement(element, url || null, mime);
             } else {
               element.textContent = value || '';
             }

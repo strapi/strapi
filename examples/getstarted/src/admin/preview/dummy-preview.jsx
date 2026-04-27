@@ -57,6 +57,12 @@ const isVideoMedia = (value) => {
   );
 };
 
+const isAudioMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('audio/')
+  );
+};
+
 const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = undefined }) => {
   if (fieldName === 'blocks') {
     return (
@@ -112,6 +118,22 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
           borderRadius="4px"
         >
           Your browser does not support the video tag.
+        </Box>
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  // Handle audio media fields
+  if (isAudioMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box tag="audio" src={value.url} controls>
+          Your browser does not support the audio tag.
         </Box>
         {value.caption && (
           <Typography variant="pi" textColor="neutral600">
