@@ -913,7 +913,7 @@ class ContentSeeder {
           });
         } catch (error) {
           this.logError('hc-m2m-target published', i, error);
-          return null;
+          throw error;
         }
       }
     );
@@ -930,7 +930,7 @@ class ContentSeeder {
           });
         } catch (error) {
           this.logError('hc-m2m-target draft', i, error);
-          return null;
+          throw error;
         }
       }
     );
@@ -968,7 +968,7 @@ class ContentSeeder {
           });
         } catch (error) {
           this.logError('hc-m2m-source published', i, error);
-          return null;
+          throw error;
         }
       }
     );
@@ -986,7 +986,7 @@ class ContentSeeder {
           });
         } catch (error) {
           this.logError('hc-m2m-source draft', i, error);
-          return null;
+          throw error;
         }
       }
     );
