@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-import { createContext, useStrapiApp, type FieldValue, useIsMobile } from '@strapi/admin/strapi-admin';
+import {
+  createContext,
+  useStrapiApp,
+  type FieldValue,
+  useIsMobile,
+} from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { flushSync } from 'react-dom';
@@ -212,7 +217,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       .map((block) => block.plugin)
       .filter(isNonNullable);
 
-
     const [editor] = React.useState(() =>
       pipe(withHistory, withStrapiSchema, withReact, ...blockRegisteredPlugins)(createEditor())
     );
@@ -313,7 +317,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         Transforms.deselect(editor);
       }
     }, [editor, value]);
-
 
     return (
       <>
