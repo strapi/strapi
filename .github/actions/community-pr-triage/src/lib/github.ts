@@ -34,6 +34,7 @@ function mapPRToCommunityPR(pr: {
   created_at: string;
   updated_at: string;
   html_url: string;
+  head: { sha: string };
 }): CommunityPR {
   return {
     number: pr.number,
@@ -48,6 +49,7 @@ function mapPRToCommunityPR(pr: {
     createdAt: pr.created_at,
     updatedAt: pr.updated_at,
     url: pr.html_url,
+    headSha: pr.head.sha,
   };
 }
 
@@ -85,6 +87,7 @@ export async function fetchOpenCommunityPRs(internalAuthors: Set<string>): Promi
         createdAt: pr.created_at,
         updatedAt: pr.updated_at,
         url: pr.html_url,
+        headSha: pr.head.sha,
       });
     }
 
@@ -214,6 +217,17 @@ export async function closePR(prNumber: number): Promise<void> {
     pull_number: prNumber,
     state: 'closed',
   });
+}
+
+// Returns true if all commit status checks have passed (covers CLA bot).
+// PRs with no status checks (total_count === 0) are treated as passing.
+export async function fetchCIStatus(sha: string): Promise<boolean> {
+  const { data } = await octokit.rest.repos.getCombinedStatusForRef({
+    owner: OWNER,
+    repo: REPO,
+    ref: sha,
+  });
+  return data.state === 'success' || data.total_count === 0;
 }
 
 export async function appendToPRBody(prNumber: number, appendText: string): Promise<void> {

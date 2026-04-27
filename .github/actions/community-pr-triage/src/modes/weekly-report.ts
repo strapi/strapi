@@ -86,12 +86,24 @@ export async function weeklyReport(inputs: ActionInputs): Promise<void> {
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
   const cmsPickups = await linear.fetchCMSPickups(inputs.cmsTeamId, since);
 
+  const quickWinCandidates = analyses.filter((a) => a.isQuickWin);
+  const ciResults = await Promise.all(
+    quickWinCandidates.map(async (a) => {
+      try {
+        return await github.fetchCIStatus(a.pr.headSha);
+      } catch {
+        return false;
+      }
+    })
+  );
+  const quickWins = quickWinCandidates.filter((_, i) => ciResults[i]).slice(0, 5);
+
   const stats: WeeklyStats = {
     totalOpen: analyses.length,
     newThisWeek: analyses.filter((a) => analyzer.isNewThisWeek(a.pr)),
     pickedUpByCMS: cmsPickups,
     stalePRs: analyses.filter((a) => a.isStale),
-    quickWins: analyses.filter((a) => a.isQuickWin).slice(0, 5),
+    quickWins,
   };
 
   // Refresh labels on CPR-owned tickets only (CMS tickets use a different team context)

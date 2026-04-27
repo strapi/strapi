@@ -11,6 +11,7 @@ export interface CommunityPR {
   createdAt: string; // ISO-8601
   updatedAt: string; // ISO-8601
   url: string;
+  headSha: string;
 }
 
 export interface PRAnalysis {
