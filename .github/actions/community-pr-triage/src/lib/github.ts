@@ -74,6 +74,8 @@ export async function fetchOpenCommunityPRs(internalAuthors: Set<string>): Promi
       const login = pr.user?.login ?? '';
       if (isBot(login)) continue;
       if (internalAuthors.has(login)) continue;
+      // author_association covers org members with private membership (not in listMembers)
+      if (pr.author_association === 'MEMBER' || pr.author_association === 'OWNER') continue;
       allPRs.push({
         number: pr.number,
         title: pr.title,
