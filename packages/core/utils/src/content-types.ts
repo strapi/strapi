@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { has, getOr, union } from 'lodash/fp';
+import { has, getOr, union, snakeCase } from 'lodash/fp';
 import type {
   Model,
   Kind,
@@ -45,6 +45,107 @@ const MORPH_TO_KEYS: string[] = ['__type'];
 const DYNAMIC_ZONE_KEYS: string[] = ['__component'];
 /** Relation operation keys (connect, disconnect, set, options). */
 const RELATION_OPERATION_KEYS: string[] = ['connect', 'disconnect', 'set', 'options'];
+
+/**
+ * Reserved attribute names that cannot be used by user-defined content-type fields.
+ * Stored in snake_case so we compare against normalised database column names.
+ * Entries ending with `*` are treated as prefix matchers (e.g. `strapi*` blocks `strapi_foo`).
+ */
+const RESERVED_ATTRIBUTE_NAMES: string[] = [
+  // ID fields
+  'id',
+  'document_id',
+  // Creator fields
+  'created_at',
+  'updated_at',
+  'published_at',
+  // V6: add first_published_at when it becomes the default behaviour
+  'created_by_id',
+  'updated_by_id',
+  'created_by',
+  'updated_by',
+  // Strapi internals
+  'entry_id',
+  'localizations',
+  'meta',
+  'locale',
+  '__component',
+  '__contentType',
+  // Prefix matchers
+  'strapi*',
+  '_strapi*',
+  '__strapi*',
+];
+
+/**
+ * Reserved attribute names that only conflict when draftAndPublish is enabled.
+ * `status` is the v5 Document Service / REST query parameter for draft/published filtering.
+ */
+const RESERVED_ATTRIBUTE_NAMES_DRAFT_PUBLISH: string[] = ['status'];
+
+/** Reserved model (collection) names that cannot be used by user-defined content-types. */
+const RESERVED_MODEL_NAMES: string[] = [
+  'boolean',
+  'date',
+  'date_time',
+  'time',
+  'upload',
+  'document',
+  'then', // JS reserved-ish keyword retained for safety
+  'strapi*',
+  '_strapi*',
+  '__strapi*',
+];
+
+const matchesReservedName = (snakeCaseName: string, list: string[]): boolean => {
+  if (list.includes(snakeCaseName)) {
+    return true;
+  }
+
+  return list
+    .filter((entry) => entry.endsWith('*'))
+    .map((entry) => entry.slice(0, -1))
+    .some((prefix) => snakeCaseName.startsWith(prefix));
+};
+
+interface IsReservedAttributeNameOptions {
+  /** When true, draft-and-publish-specific names (e.g. `status`) are also reserved. Defaults to true. */
+  draftAndPublish?: boolean;
+}
+
+const isReservedAttributeName = (
+  name: string,
+  { draftAndPublish = true }: IsReservedAttributeNameOptions = {}
+): boolean => {
+  const snakeCaseName = snakeCase(name);
+
+  if (matchesReservedName(snakeCaseName, RESERVED_ATTRIBUTE_NAMES)) {
+    return true;
+  }
+
+  if (
+    draftAndPublish &&
+    matchesReservedName(snakeCaseName, RESERVED_ATTRIBUTE_NAMES_DRAFT_PUBLISH)
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+const isReservedModelName = (name: string): boolean => {
+  return matchesReservedName(snakeCase(name), RESERVED_MODEL_NAMES);
+};
+
+const getReservedAttributeNames = ({
+  draftAndPublish = true,
+}: IsReservedAttributeNameOptions = {}): string[] => {
+  return draftAndPublish
+    ? [...RESERVED_ATTRIBUTE_NAMES, ...RESERVED_ATTRIBUTE_NAMES_DRAFT_PUBLISH]
+    : [...RESERVED_ATTRIBUTE_NAMES];
+};
+
+const getReservedModelNames = (): string[] => [...RESERVED_MODEL_NAMES];
 
 const getTimestamps = (model: Model) => {
   const attributes: string[] = [];
@@ -298,6 +399,13 @@ export {
   MORPH_TO_KEYS,
   DYNAMIC_ZONE_KEYS,
   RELATION_OPERATION_KEYS,
+  RESERVED_ATTRIBUTE_NAMES,
+  RESERVED_ATTRIBUTE_NAMES_DRAFT_PUBLISH,
+  RESERVED_MODEL_NAMES,
+  isReservedAttributeName,
+  isReservedModelName,
+  getReservedAttributeNames,
+  getReservedModelNames,
   getNonWritableAttributes,
   getComponentAttributes,
   getMediaAttributes,
