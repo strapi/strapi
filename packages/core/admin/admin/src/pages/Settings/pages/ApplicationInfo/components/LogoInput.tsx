@@ -251,9 +251,10 @@ const URLForm = () => {
 
     try {
       const res = await axios.get(url.toString(), { responseType: 'blob', timeout: 8000 });
+      const contentType = res.headers['content-type'];
 
       const file = new File([res.data], res.config.url ?? '', {
-        type: res.headers['content-type'],
+        type: typeof contentType === 'string' ? contentType : undefined,
       });
 
       const asset = await parseFileMetadatas(file);
