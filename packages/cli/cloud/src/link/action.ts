@@ -33,10 +33,9 @@ type ProjectsList = {
   };
 }[];
 
-type Project = {
+type ProjectFromApi = {
   name: string;
-  displayName: string;
-  isMaintainer: boolean;
+  displayName?: string;
 };
 
 async function promptForRelink(
@@ -80,22 +79,23 @@ async function getProjectsList(
   try {
     const {
       data: { data: projectList },
-    } = await cloudApiService.listLinkProjects();
+    } = await cloudApiService.listProjects();
     spinner.succeed();
 
     if (!Array.isArray(projectList)) {
       ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud.");
       return null;
     }
-    const projects: ProjectsList = (projectList as unknown as Project[])
+    const projects: ProjectsList = (projectList as unknown as ProjectFromApi[])
       .filter(
-        (project: Project) =>
-          !(project.isMaintainer || project.name === existingConfig?.project?.name)
+        (project) =>
+          typeof project?.name === 'string' && project.name !== existingConfig?.project?.name
       )
-      .map((project: Project) => {
+      .map((project) => {
+        const displayName = project.displayName ?? project.name;
         return {
-          name: project.displayName,
-          value: { name: project.name, displayName: project.displayName },
+          name: displayName,
+          value: { name: project.name, displayName },
         };
       });
     if (projects.length === 0) {
