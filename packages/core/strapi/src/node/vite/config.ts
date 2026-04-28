@@ -163,7 +163,24 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
         input: {
           strapi: ctx.entry,
         },
-      },
+        // Optimize chunk splitting for better lazy loading
+        // Split vendor code into separate chunks to reduce initial bundle size
+        output: {
+          manualChunks: {
+            // Core React ecosystem - loaded in initial bundle
+            'vendor-react': [
+              'react',
+              'react-dom',
+              'react-router-dom',
+              'react-router',
+            ],
+            // UI library - can be lazy loaded
+            'vendor-ui': [
+              '@strapi/design-system',
+              'styled-components',
+            ],
+          },
+        },
     },
   };
 };

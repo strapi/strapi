@@ -5,7 +5,6 @@ import { RouteObject } from 'react-router-dom';
 import { getEERoutes as getBaseEERoutes } from '../../ee/admin/src/constants';
 import { getEERoutes as getSettingsEERoutes } from '../../ee/admin/src/pages/SettingsPage/constants';
 
-import { AuthPage } from './pages/Auth/AuthPage';
 import { ROUTES_CE } from './pages/Settings/constants';
 
 /**
@@ -26,7 +25,13 @@ const getImmutableRoutes = (): RouteObject[] => [
   ...getBaseEERoutes(),
   {
     path: 'auth/:authType',
-    element: <AuthPage />,
+    lazy: async () => {
+      const { AuthPage } = await import('./pages/Auth/AuthPage');
+
+      return {
+        Component: AuthPage,
+      };
+    },
   },
 ];
 
