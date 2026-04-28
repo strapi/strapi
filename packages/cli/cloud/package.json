@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@strapi/utils": "4.26.1",
-    "axios": "1.8.2",
+    "axios": "1.15.2",
     "chalk": "4.1.2",
     "cli-progress": "3.12.0",
     "commander": "8.3.0",
@@ -56,7 +56,7 @@
     "inquirer": "8.2.5",
     "jsonwebtoken": "9.0.0",
     "jwks-rsa": "3.1.0",
-    "lodash": "4.17.21",
+    "lodash": "4.18.1",
     "minimatch": "9.0.3",
     "open": "8.4.0",
     "ora": "5.4.1",

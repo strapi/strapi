@@ -51,10 +51,10 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/types": "4.26.1",
     "@strapi/utils": "4.26.1",
-    "koa": "2.16.1",
+    "koa": "2.16.4",
     "koa-bodyparser": "4.4.1",
-    "lodash": "4.17.21",
-    "qs": "6.11.1"
+    "lodash": "4.18.1",
+    "qs": "6.15.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",

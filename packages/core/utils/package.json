@@ -47,7 +47,7 @@
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "2.30.0",
     "http-errors": "1.8.1",
-    "lodash": "4.17.21",
+    "lodash": "4.18.1",
     "p-map": "4.0.0",
     "yup": "0.32.9"
   },
@@ -57,7 +57,7 @@
     "@types/koa": "2.15.0",
     "@types/node": "18.18.4",
     "eslint-config-custom": "4.26.1",
-    "koa": "2.16.1",
+    "koa": "2.16.4",
     "koa-body": "4.2.0",
     "tsconfig": "4.26.1"
   },

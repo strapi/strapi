@@ -55,7 +55,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "lodash": "4.17.21",
+    "lodash": "4.18.1",
     "nodemailer": "6.9.1"
   },
   "devDependencies": {

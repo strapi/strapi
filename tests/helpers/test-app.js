@@ -2,7 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const rimraf = require('rimraf');
+const { rimraf } = require('rimraf');
 const execa = require('execa');
 const generateNew = require('@strapi/generate-new/dist/generate-new');
 
@@ -11,12 +11,7 @@ const generateNew = require('@strapi/generate-new/dist/generate-new');
  * @param {string} appPath - name of the app / folder where the app is located
  */
 const cleanTestApp = (appPath) => {
-  return new Promise((resolve, reject) => {
-    rimraf(path.resolve(appPath), (err) => {
-      if (err) reject(err);
-      resolve();
-    });
-  });
+  return rimraf(path.resolve(appPath));
 };
 
 /**
