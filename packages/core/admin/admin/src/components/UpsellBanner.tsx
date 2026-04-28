@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import { Box, Flex, IconButton, LinkButton, Typography } from '@strapi/design-system';
 import { ArrowsOut, Cross } from '@strapi/icons';
-import { isAfter, subDays } from 'date-fns';
+import { isAfter, isValid, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -159,11 +159,8 @@ const UpsellBanner = () => {
 
   const toCanonicalISO = (v: string | undefined): string | undefined => {
     if (!v) return undefined;
-    try {
-      return new Date(v).toISOString();
-    } catch {
-      return v;
-    }
+    const date = new Date(v);
+    return isValid(date) ? date.toISOString() : undefined;
   };
 
   const isDismissed = Boolean(
