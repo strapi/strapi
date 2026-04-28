@@ -50,12 +50,12 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "axios": "1.8.2",
+    "axios": "1.15.2",
     "date-fns": "2.30.0",
     "formik": "2.4.0",
     "immer": "9.0.19",
-    "lodash": "4.17.21",
-    "qs": "6.11.1",
+    "lodash": "4.18.1",
+    "qs": "6.15.1",
     "react-helmet": "6.1.0",
     "react-intl": "6.4.1",
     "react-query": "3.39.3",
@@ -83,11 +83,11 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
-    "rimraf": "3.0.2",
+    "rimraf": "5.0.10",
     "storybook": "7.5.3",
     "styled-components": "5.3.3",
     "typescript": "5.2.2",
-    "vite": "5.1.8",
+    "vite": "5.4.21",
     "yup": "0.32.9"
   },
   "peerDependencies": {
