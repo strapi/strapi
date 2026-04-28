@@ -11,33 +11,6 @@ import { useGetLicenseTrialTimeLeftQuery } from '../../src/services/admin';
 import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useScopedPersistentState } from '../hooks/usePersistentState';
 
-const CollapsedButton = styled.button`
-  align-self: flex-end;
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    135deg,
-    ${({ theme }) => theme.colors.primary600} 0%,
-    ${({ theme }) => theme.colors.alternative600} 121.48%
-  );
-  border: none;
-  cursor: pointer;
-  color: ${({ theme }) => theme.colors.neutral0};
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.neutral0};
-    outline-offset: -3px;
-  }
-`;
-
 const BannerBackground = styled(Flex)`
   background: linear-gradient(
     90deg,
@@ -206,16 +179,18 @@ const UpsellBanner = () => {
 
   if (isDismissed) {
     return (
-      <CollapsedButton
-        type="button"
-        aria-label={formatMessage({
-          id: 'app.components.UpsellBanner.reopen',
-          defaultMessage: 'Reopen banner',
-        })}
-        onClick={handleReopen}
-      >
-        <ArrowsOut />
-      </CollapsedButton>
+      <Flex justifyContent="flex-end" paddingTop={2} paddingBottom={2} paddingRight={4}>
+        <IconButton
+          withTooltip={false}
+          label={formatMessage({
+            id: 'app.components.UpsellBanner.reopen',
+            defaultMessage: 'Reopen banner',
+          })}
+          onClick={handleReopen}
+        >
+          <ArrowsOut />
+        </IconButton>
+      </Flex>
     );
   }
 
