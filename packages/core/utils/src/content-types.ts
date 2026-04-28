@@ -48,30 +48,34 @@ const RELATION_OPERATION_KEYS: string[] = ['connect', 'disconnect', 'set', 'opti
 
 /**
  * Reserved attribute names that cannot be used by user-defined content-type fields.
- * Stored in snake_case so we compare against normalised database column names.
  * Entries ending with `*` are treated as prefix matchers (e.g. `strapi*` blocks `strapi_foo`).
  */
+// use snake_case
 const RESERVED_ATTRIBUTE_NAMES: string[] = [
   // ID fields
   'id',
   'document_id',
+
   // Creator fields
   'created_at',
   'updated_at',
   'published_at',
-  // V6: add first_published_at when it becomes the default behaviour
+  // V6: we will need to add first_published_at when it becomes the default behaviour
   'created_by_id',
   'updated_by_id',
+  // does not actually conflict because the fields are called *_by_id but we'll leave it to avoid confusion
   'created_by',
   'updated_by',
-  // Strapi internals
+
+  // Used for Strapi functionality
   'entry_id',
   'localizations',
   'meta',
   'locale',
   '__component',
   '__contentType',
-  // Prefix matchers
+
+  // We support ending with * to denote prefixes
   'strapi*',
   '_strapi*',
   '__strapi*',
@@ -81,9 +85,11 @@ const RESERVED_ATTRIBUTE_NAMES: string[] = [
  * Reserved attribute names that only conflict when draftAndPublish is enabled.
  * `status` is the v5 Document Service / REST query parameter for draft/published filtering.
  */
+// use snake_case
 const RESERVED_ATTRIBUTE_NAMES_DRAFT_PUBLISH: string[] = ['status'];
 
 /** Reserved model (collection) names that cannot be used by user-defined content-types. */
+// use snake_case
 const RESERVED_MODEL_NAMES: string[] = [
   'boolean',
   'date',
@@ -91,7 +97,9 @@ const RESERVED_MODEL_NAMES: string[] = [
   'time',
   'upload',
   'document',
-  'then', // JS reserved-ish keyword retained for safety
+  'then', // no longer an issue but still restricting for being a javascript keyword
+
+  // We support ending with * to denote prefixes
   'strapi*',
   '_strapi*',
   '__strapi*',
@@ -113,6 +121,7 @@ interface IsReservedAttributeNameOptions {
   draftAndPublish?: boolean;
 }
 
+// compare snake case to check the actual column names that will be used in the database
 const isReservedAttributeName = (
   name: string,
   { draftAndPublish = true }: IsReservedAttributeNameOptions = {}
@@ -133,6 +142,7 @@ const isReservedAttributeName = (
   return false;
 };
 
+// compare snake case to check the actual column names that will be used in the database
 const isReservedModelName = (name: string): boolean => {
   return matchesReservedName(snakeCase(name), RESERVED_MODEL_NAMES);
 };
