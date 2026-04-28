@@ -13,7 +13,7 @@ import {
 
 import {
   buildTransferTable,
-  DEFAULT_IGNORED_CONTENT_TYPES,
+  isIgnoredContentType,
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
@@ -88,16 +88,13 @@ export default async (opts: CmdOptions) => {
       links: [
         {
           filter(link) {
-            return (
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
-            );
+            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
           },
         },
       ],
       entities: [
         {
-          filter: (entity) => !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type),
+          filter: (entity) => !isIgnoredContentType(entity.type),
         },
       ],
     },
@@ -109,7 +106,7 @@ export default async (opts: CmdOptions) => {
     },
     autoDestroy: false,
     strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
-    restore: parseRestoreFromOptions(engineOptions),
+    restore: parseRestoreFromOptions(engineOptions, strapiInstance),
   };
 
   const destination = createLocalStrapiDestinationProvider(destinationOptions);

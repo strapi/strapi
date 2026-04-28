@@ -67,7 +67,7 @@ const BulkActionsRenderer = () => {
         ).getBulkActions()}
       >
         {(actions) =>
-          actions.map((action) => {
+          actions.map(({ type: _bulkType, ...action }) => {
             return list.settings.bulkable && <DocumentActionButton key={action.id} {...action} />;
           })
         }

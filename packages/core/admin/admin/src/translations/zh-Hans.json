@@ -650,5 +650,8 @@
   "request.error.model.unknown": "此模型不存在",
   "selectButtonTitle": "选择",
   "skipToContent": "跳至内容",
-  "submit": "提交"
+  "submit": "提交",
+  "HomePage.widget.deploy-now.title": "准备上线了吗？",
+  "HomePage.widget.deploy-now.description": "部署您的项目。",
+  "HomePage.widget.deploy-now.button": "立即部署"
 }
