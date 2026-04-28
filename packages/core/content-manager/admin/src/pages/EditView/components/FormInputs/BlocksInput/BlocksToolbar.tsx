@@ -331,7 +331,7 @@ const BlocksDropdown = () => {
         <SingleSelect
           startIcon={Icon && <Icon />}
           onChange={handleSelect}
-          customizeContent={() => (isMobile ? '' : formatMessage(blocks[blockSelected]!.label))}
+          customizeContent={() => (isMobile ? '' : formatMessage(selectedBlock.label))}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
           aria-label={formatMessage({
@@ -486,7 +486,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
 
     return (
       <StyledMenuItem
-        startIcon={<Icon />}
+        startIcon={Icon && <Icon />}
         onSelect={() => toggleList(format)}
         isActive={isListActive()}
         disabled={isListDisabled()}
@@ -824,8 +824,8 @@ const BlocksToolbar = () => {
           <ToolbarSeparator style={{ marginLeft: '0.4rem' }} />
           <Toolbar.ToggleGroup type="single" asChild>
             <Flex gap={1}>
-              <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
-              <ListButton block={blocks['list-ordered']} format="ordered" location="toolbar" />
+              <ListButton block={blocks['list-unordered']!} format="unordered" location="toolbar" />
+              <ListButton block={blocks['list-ordered']!} format="ordered" location="toolbar" />
             </Flex>
           </Toolbar.ToggleGroup>
         </Flex>
@@ -833,8 +833,8 @@ const BlocksToolbar = () => {
       menu: (
         <>
           <Menu.Separator />
-          <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
-          <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
+          <ListButton block={blocks['list-unordered']!} format="unordered" location="menu" />
+          <ListButton block={blocks['list-ordered']!} format="ordered" location="menu" />
         </>
       ),
       key: 'block.list',
