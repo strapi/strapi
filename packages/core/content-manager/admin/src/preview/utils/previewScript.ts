@@ -353,65 +353,120 @@ const previewScript = (config: PreviewScriptConfig) => {
     handler: EventListener;
   }>;
 
+  /**
+   * Group all elements that share the exact same `data-strapi-source` value
+   * under one highlight. This is what makes a multi-media field render as a
+   * single bounding box in the preview (and what makes the popover open the
+   * multi-media input rather than treating each item as its own field). The
+   * grouping is keyed off the source string so other accidental same-source
+   * renders (e.g. the title rendered twice) also collapse to one highlight,
+   * which matches how the focused state already behaves.
+   */
+  type HighlightGroup = {
+    highlight: HTMLElement;
+    elements: Set<HTMLElement>;
+  };
+
   const createHighlightManager = (overlay: HTMLElement) => {
-    const elementsToHighlight = new Map<Element, HTMLElement>();
+    const groups = new Map<string, HighlightGroup>();
+    const elementToGroupKey = new Map<HTMLElement, string>();
     const eventListeners: EventListenersList = [];
     const focusedHighlights: HTMLElement[] = [];
-    const pendingClicks = new Map<Element, number>(); // number is timeout id
+    const pendingClicks = new Map<HighlightGroup, number>();
     let focusedField: string | null = null;
 
-    const drawHighlight = (target: Element, highlight: HTMLElement) => {
-      if (!highlight) return;
+    const computeGroupRect = (group: HighlightGroup) => {
+      let minLeft = Infinity;
+      let minTop = Infinity;
+      let maxRight = -Infinity;
+      let maxBottom = -Infinity;
+      let any = false;
+      group.elements.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) return;
+        any = true;
+        if (r.left < minLeft) minLeft = r.left;
+        if (r.top < minTop) minTop = r.top;
+        if (r.right > maxRight) maxRight = r.right;
+        if (r.bottom > maxBottom) maxBottom = r.bottom;
+      });
+      if (!any) return null;
+      return {
+        left: minLeft,
+        top: minTop,
+        width: maxRight - minLeft,
+        height: maxBottom - minTop,
+      };
+    };
 
-      const rect = target.getBoundingClientRect();
-      highlight.style.width = `${rect.width + HIGHLIGHT_PADDING * 2}px`;
-      highlight.style.height = `${rect.height + HIGHLIGHT_PADDING * 2}px`;
-      highlight.style.transform = `translate(${rect.left - HIGHLIGHT_PADDING}px, ${rect.top - HIGHLIGHT_PADDING}px)`;
+    const drawGroup = (group: HighlightGroup) => {
+      const rect = computeGroupRect(group);
+      if (!rect) {
+        group.highlight.style.display = 'none';
+        return;
+      }
+      group.highlight.style.display = '';
+      group.highlight.style.width = `${rect.width + HIGHLIGHT_PADDING * 2}px`;
+      group.highlight.style.height = `${rect.height + HIGHLIGHT_PADDING * 2}px`;
+      group.highlight.style.transform = `translate(${rect.left - HIGHLIGHT_PADDING}px, ${rect.top - HIGHLIGHT_PADDING}px)`;
     };
 
     const updateAllHighlights = () => {
-      elementsToHighlight.forEach((highlight, element) => {
-        drawHighlight(element, highlight);
-      });
+      groups.forEach(drawGroup);
     };
 
-    const createHighlightForElement = (element: HTMLElement) => {
-      if (elementsToHighlight.has(element)) {
-        // Already has a highlight
-        return;
+    /**
+     * Pick the underlying source element under the pointer so single-click
+     * redispatch hits the specific item the user clicked, even when the group
+     * highlight covers several elements (multi-media gallery).
+     */
+    const pickElementAtPoint = (
+      group: HighlightGroup,
+      x: number,
+      y: number
+    ): HTMLElement | null => {
+      for (const el of group.elements) {
+        const r = el.getBoundingClientRect();
+        if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+          return el;
+        }
       }
+      const first = group.elements.values().next().value;
+      return first ?? null;
+    };
 
+    const createGroup = (groupKey: string): HighlightGroup => {
       const highlight = document.createElement('div');
       highlight.className = 'strapi-highlight';
+      const group: HighlightGroup = { highlight, elements: new Set() };
+
       const clickHandler = (event: MouseEvent) => {
-        // Skip if this is a re-dispatched event from our delayed handler to avoid infinite loops
         if ((event as any).__strapi_redispatched) {
           return;
         }
 
-        // Prevent the immediate action for interactive elements
         event.preventDefault();
         event.stopPropagation();
 
-        // Clear any existing timeout for this element
-        const existingTimeout = pendingClicks.get(element);
+        const existingTimeout = pendingClicks.get(group);
         if (existingTimeout) {
           window.clearTimeout(existingTimeout);
-          pendingClicks.delete(element);
+          pendingClicks.delete(group);
         }
 
-        // Set up a delayed single-click handler
         const timeout = window.setTimeout(() => {
-          pendingClicks.delete(element);
+          pendingClicks.delete(group);
 
-          // Send single-click hint notification
           sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_SINGLE_CLICK_HINT, null);
 
-          // For img/video elements, find the nearest interactive parent since media
-          // elements themselves aren't interactive - their behavior comes from parents
-          let targetElement: HTMLElement = element;
-          if (isMediaElement(element)) {
-            let parent = element.parentElement;
+          // Pick the specific underlying element under the pointer so the
+          // redispatched click targets the right item in a multi-element group
+          const underlying = pickElementAtPoint(group, event.clientX, event.clientY);
+          if (!underlying) return;
+
+          let targetElement: HTMLElement = underlying;
+          if (isMediaElement(underlying)) {
+            let parent = underlying.parentElement;
             while (parent) {
               if (
                 parent.tagName === 'A' ||
@@ -427,8 +482,6 @@ const previewScript = (config: PreviewScriptConfig) => {
             }
           }
 
-          // Re-trigger the click on the underlying element after the double-click timeout
-          // Create a new event to dispatch with a marker to prevent re-handling
           const newEvent = new MouseEvent('click', {
             bubbles: true,
             cancelable: true,
@@ -447,41 +500,40 @@ const previewScript = (config: PreviewScriptConfig) => {
           targetElement.dispatchEvent(newEvent);
         }, DOUBLE_CLICK_TIMEOUT);
 
-        pendingClicks.set(element, timeout);
+        pendingClicks.set(group, timeout);
       };
 
       const doubleClickHandler = (event: MouseEvent) => {
-        // Prevent the default behavior on double-click
         event.preventDefault();
         event.stopPropagation();
 
-        // Clear any pending single-click action
-        const existingTimeout = pendingClicks.get(element);
+        const existingTimeout = pendingClicks.get(group);
         if (existingTimeout) {
           clearTimeout(existingTimeout);
-          pendingClicks.delete(element);
+          pendingClicks.delete(group);
         }
 
-        const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
-        if (sourceAttribute) {
-          const path = getFieldPathForMedia(sourceAttribute, element);
-          const rect = element.getBoundingClientRect();
-          sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
-            path,
-            position: {
-              top: rect.top,
-              left: rect.left,
-              right: rect.right,
-              bottom: rect.bottom,
-              width: rect.width,
-              height: rect.height,
-            },
-          });
-        }
+        const anchor = pickElementAtPoint(group, event.clientX, event.clientY);
+        if (!anchor) return;
+        const sourceAttribute = anchor.getAttribute(SOURCE_ATTRIBUTE);
+        if (!sourceAttribute) return;
+        const path = getFieldPathForMedia(sourceAttribute, anchor);
+        const rect = computeGroupRect(group);
+        if (!rect) return;
+        sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
+          path,
+          position: {
+            top: rect.top,
+            left: rect.left,
+            right: rect.left + rect.width,
+            bottom: rect.top + rect.height,
+            width: rect.width,
+            height: rect.height,
+          },
+        });
       };
 
       const mouseDownHandler = (event: MouseEvent) => {
-        // Prevent default multi click to select behavior
         if (event.detail >= 2) {
           event.preventDefault();
         }
@@ -491,45 +543,93 @@ const previewScript = (config: PreviewScriptConfig) => {
       highlight.addEventListener('dblclick', doubleClickHandler);
       highlight.addEventListener('mousedown', mouseDownHandler);
 
-      // Store event listeners for cleanup
       eventListeners.push(
         { element: highlight, type: 'click', handler: clickHandler as EventListener },
         { element: highlight, type: 'dblclick', handler: doubleClickHandler as EventListener },
         { element: highlight, type: 'mousedown', handler: mouseDownHandler as EventListener }
       );
 
-      elementsToHighlight.set(element, highlight);
       overlay.appendChild(highlight);
-      drawHighlight(element, highlight);
+      groups.set(groupKey, group);
+      return group;
     };
 
-    const removeHighlightForElement = (element: Element) => {
-      const highlight = elementsToHighlight.get(element);
-
-      if (!highlight) return;
-
-      // Clear any pending click timeout for this element
-      const pendingTimeout = pendingClicks.get(element);
+    const destroyGroup = (groupKey: string, group: HighlightGroup) => {
+      const pendingTimeout = pendingClicks.get(group);
       if (pendingTimeout) {
         window.clearTimeout(pendingTimeout);
-        pendingClicks.delete(element);
+        pendingClicks.delete(group);
       }
 
-      highlight.remove();
-      elementsToHighlight.delete(element);
+      const focusedIndex = focusedHighlights.indexOf(group.highlight);
+      if (focusedIndex !== -1) {
+        focusedHighlights.splice(focusedIndex, 1);
+      }
 
-      // Remove event listeners for this highlight
-      const listenersToRemove = eventListeners.filter((listener) => listener.element === highlight);
+      group.highlight.remove();
+
+      const listenersToRemove = eventListeners.filter(
+        (listener) => listener.element === group.highlight
+      );
       listenersToRemove.forEach(({ element, type, handler }) => {
         element.removeEventListener(type, handler);
       });
-
-      // Mutate eventListeners to remove listeners for this highlight
       eventListeners.splice(
         0,
         eventListeners.length,
-        ...eventListeners.filter((listener) => listener.element !== highlight)
+        ...eventListeners.filter((listener) => listener.element !== group.highlight)
       );
+
+      groups.delete(groupKey);
+    };
+
+    const createHighlightForElement = (element: HTMLElement) => {
+      if (elementToGroupKey.has(element)) {
+        return;
+      }
+      const groupKey = element.getAttribute(SOURCE_ATTRIBUTE);
+      if (!groupKey) return;
+
+      let group = groups.get(groupKey);
+      if (!group) {
+        group = createGroup(groupKey);
+      }
+      group.elements.add(element);
+      elementToGroupKey.set(element, groupKey);
+      drawGroup(group);
+    };
+
+    const removeHighlightForElement = (element: Element) => {
+      const groupKey = elementToGroupKey.get(element as HTMLElement);
+      if (!groupKey) return;
+      const group = groups.get(groupKey);
+      if (!group) return;
+
+      group.elements.delete(element as HTMLElement);
+      elementToGroupKey.delete(element as HTMLElement);
+
+      if (group.elements.size === 0) {
+        destroyGroup(groupKey, group);
+      } else {
+        drawGroup(group);
+      }
+    };
+
+    /**
+     * Resolve groups whose elements match a focused field path. We delegate
+     * to `getElementsByPath` so this preserves the same loose substring match
+     * the highlight system has always used (e.g. focusing `hero` matches
+     * `hero.caption` too).
+     */
+    const findGroupForPath = (path: string): HighlightGroup[] => {
+      const matched = new Set<HighlightGroup>();
+      getElementsByPath(path).forEach((el) => {
+        const key = elementToGroupKey.get(el as HTMLElement);
+        if (!key) return;
+        const group = groups.get(key);
+        if (group) matched.add(group);
+      });
+      return Array.from(matched);
     };
 
     // Process all existing elements with source attributes
@@ -542,16 +642,17 @@ const previewScript = (config: PreviewScriptConfig) => {
 
     return {
       get elements() {
-        return Array.from(elementsToHighlight.keys());
+        return Array.from(elementToGroupKey.keys());
       },
-      get highlights() {
-        return Array.from(elementsToHighlight.values());
+      get groups() {
+        return Array.from(groups.values());
       },
       updateAllHighlights,
       eventListeners,
       focusedHighlights,
       createHighlightForElement,
       removeHighlightForElement,
+      findGroupForPath,
       setFocusedField: (field: string | null) => {
         focusedField = field;
       },
@@ -821,8 +922,29 @@ const previewScript = (config: PreviewScriptConfig) => {
         const { field, value } = event.data.payload;
         if (!field) return;
 
-        getElementsByPath(field).forEach((element) => {
-          if (element instanceof HTMLElement) {
+        const matchedElements = Array.from(getElementsByPath(field)).filter(
+          (el): el is HTMLElement => el instanceof HTMLElement
+        );
+
+        // Multi-media field: value is an array of media items. After the
+        // server change, every item shares `path=<field>`, so we map array
+        // items to media elements in DOM order. (Adding/removing items
+        // requires the host framework to re-render the gallery; we only
+        // update the swappable bits in place here.)
+        if (Array.isArray(value)) {
+          const mediaEls = matchedElements.filter(isMediaElement);
+          mediaEls.forEach((el, index) => {
+            const item = value[index];
+            if (item && typeof item === 'object') {
+              const url = (item as any).url as string | undefined;
+              const mime = (item as any).mime as string | undefined;
+              setMediaElement(el, url || null, mime);
+            } else {
+              setMediaElement(el, null);
+            }
+          });
+        } else {
+          matchedElements.forEach((element) => {
             if (isMediaElement(element)) {
               const url = typeof value === 'object' && value !== null ? value.url : value;
               const mime =
@@ -833,12 +955,12 @@ const previewScript = (config: PreviewScriptConfig) => {
             } else {
               element.textContent = value || '';
             }
-          }
-        });
+          });
+        }
 
         // Handle nested media asset fields (caption, alt, etc.)
         // These are identified by model=plugin::upload.file in the source attribute
-        if (typeof value === 'object' && value !== null) {
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
           const allSourceElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
 
           allSourceElements.forEach((element) => {
@@ -881,18 +1003,16 @@ const previewScript = (config: PreviewScriptConfig) => {
         });
         highlightManager.focusedHighlights.length = 0;
 
-        // Set new focused field and highlight matching elements
+        // Set new focused field and highlight matching groups
         highlightManager.setFocusedField(field);
-        getElementsByPath(field).forEach((element, index) => {
+        const matchingGroups = highlightManager.findGroupForPath(field);
+        matchingGroups.forEach((group, index) => {
           if (index === 0) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const first = group.elements.values().next().value;
+            first?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-          const highlight =
-            highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];
-          if (highlight) {
-            highlight.classList.add('strapi-highlight-focused');
-            highlightManager.focusedHighlights.push(highlight);
-          }
+          group.highlight.classList.add('strapi-highlight-focused');
+          highlightManager.focusedHighlights.push(group.highlight);
         });
         return;
       }
