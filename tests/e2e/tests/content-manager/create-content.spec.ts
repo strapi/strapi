@@ -5,14 +5,14 @@ import {
   findAndClose,
   isElementBefore,
   navToHeader,
-} from '../../utils/shared';
-import { createContent, FieldValue, verifyFields } from '../../utils/content-creation';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
+} from '../../../utils/shared';
+import { createContent, FieldValue, verifyFields } from '../../../utils/content-creation';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
 
 test.describe('Adding content', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
 

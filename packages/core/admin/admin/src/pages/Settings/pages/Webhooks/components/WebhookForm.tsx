@@ -89,7 +89,7 @@ const WebhookForm = ({
         <>
           <Layouts.Header
             primaryAction={
-              <Flex gap={2}>
+              <Flex width="100%" gap={2}>
                 <Button
                   onClick={() => {
                     triggerWebhook();
@@ -98,6 +98,7 @@ const WebhookForm = ({
                   variant="tertiary"
                   startIcon={<Publish />}
                   disabled={isCreating || isTriggering}
+                  fullWidth
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.trigger',
@@ -109,6 +110,7 @@ const WebhookForm = ({
                   type="submit"
                   disabled={!modified}
                   loading={isSubmitting}
+                  fullWidth
                 >
                   {formatMessage({
                     id: 'global.save',
@@ -169,6 +171,7 @@ const WebhookForm = ({
                       <Grid.Item
                         key={field.name}
                         col={size}
+                        xs={12}
                         direction="column"
                         alignItems="stretch"
                       >

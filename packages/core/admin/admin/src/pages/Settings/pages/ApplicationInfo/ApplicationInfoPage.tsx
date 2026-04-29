@@ -144,7 +144,7 @@ const ApplicationInfoPage = () => {
             })}
             primaryAction={
               canUpdate && (
-                <Button disabled={isSaveDisabled} type="submit" startIcon={<Check />}>
+                <Button disabled={isSaveDisabled} type="submit" startIcon={<Check />} fullWidth>
                   {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                 </Button>
               )
@@ -172,7 +172,7 @@ const ApplicationInfoPage = () => {
                 </Typography>
 
                 <Grid.Root gap={5} tag="dl">
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.strapiVersion',
@@ -194,7 +194,7 @@ const ApplicationInfoPage = () => {
                       )}
                     </Flex>
                   </Grid.Item>
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.edition-title',
@@ -221,7 +221,7 @@ const ApplicationInfoPage = () => {
                     </Flex>
                   </Grid.Item>
 
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.node-version',
@@ -261,7 +261,7 @@ const ApplicationInfoPage = () => {
                     )}
                   </Typography>
                   <Grid.Root paddingTop={4} gap={4}>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <LogoInput
                         canUpdate={canUpdate}
                         customLogo={logos.menu.custom}
@@ -277,7 +277,7 @@ const ApplicationInfoPage = () => {
                         onChangeLogo={handleChangeLogo('menu')}
                       />
                     </Grid.Item>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <LogoInput
                         canUpdate={canUpdate}
                         customLogo={logos.auth.custom}

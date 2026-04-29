@@ -30,7 +30,7 @@ export const ImagePreviewGroup = ({ images, onSelectionChange }: ImagePreviewGro
       {images.map((frame, index) => {
         const isSelected = selectedFrames.includes(frame.id);
         return (
-          <Grid.Item key={frame.id} col={6} padding={'1px'}>
+          <Grid.Item key={frame.id} col={6} xs={12} padding={'1px'}>
             <ImagePreview
               imageUrl={frame.url}
               imageName={frame.filename || `Frame ${index + 1}`}

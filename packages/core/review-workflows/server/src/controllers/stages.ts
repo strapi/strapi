@@ -122,6 +122,11 @@ export default {
     const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
     workflowService.assertStageBelongsToWorkflow(stageId, workflow);
 
+    const canTransitionTo = await stagePermissions.canTransitionToStage(stageId);
+    if (!canTransitionTo) {
+      ctx.throw(403, 'Forbidden stage transition');
+    }
+
     const updatedEntity = await stagesService.updateEntity(entity, modelUID, stageId);
 
     ctx.body = { data: await sanitizeOutput(updatedEntity) };
@@ -129,7 +134,7 @@ export default {
 
   /**
    * List all the stages that are available for a user to transition an entity to.
-   * If the user has permission to change the current stage of the entity every other stage in the workflow is returned
+   * Stages are filtered by both "from" permission on the current stage AND "to" permission on each target stage.
    * @async
    * @param {*} ctx
    * @param {string} ctx.params.model_uid - The model UID of the entity.
@@ -171,7 +176,7 @@ export default {
     const [workflowCount, workflowResult] = await Promise.all([
       workflowService.count(),
       workflowService.getAssignedWorkflow(modelUID, {
-        populate: 'stages',
+        populate: { stages: { populate: { permissions: { populate: ['role'] } } } },
       }),
     ]);
 
@@ -191,7 +196,14 @@ export default {
       return;
     }
 
-    const data = workflowStages.filter((stage: any) => stage.id !== entityStageId);
+    const otherStages = workflowStages.filter(
+      (stage: { id: number; permissions?: unknown[] }) => stage.id !== entityStageId
+    );
+
+    const data = otherStages.filter((stage: { id: number; permissions?: unknown[] }) =>
+      stagePermissions.canTransitionToStageWithPermissions(stage)
+    );
+
     ctx.body = {
       data,
       meta,

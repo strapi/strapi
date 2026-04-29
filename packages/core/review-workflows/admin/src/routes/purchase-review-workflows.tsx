@@ -3,8 +3,8 @@ import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-sy
 import { ExternalLink, Check, SealCheck } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import darkIllustration from '../assets/purchase-page-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-illustration-light.svg';
+import darkIllustration from '../assets/purchase-page-illustration-dark.jpg';
+import lightIllustration from '../assets/purchase-page-illustration-light.jpg';
 import { useTypedSelector } from '../modules/hooks';
 
 const PurchaseReviewWorkflows = () => {
@@ -31,7 +31,7 @@ const PurchaseReviewWorkflows = () => {
           overflow={'hidden'}
         >
           <Grid.Root>
-            <Grid.Item col={6} s={12} alignItems={'flex-start'}>
+            <Grid.Item col={6} xs={12} alignItems={'flex-start'}>
               <Flex direction="column" alignItems="flex-start" padding={7} width={'100%'}>
                 <Flex>
                   <SealCheck fill="primary600" width={`24px`} height={`24px`} />
@@ -115,7 +115,7 @@ const PurchaseReviewWorkflows = () => {
                 </Flex>
               </Flex>
             </Grid.Item>
-            <Grid.Item col={6} s={12} background="primary100" minHeight={'280px'}>
+            <Grid.Item col={6} xs={12} background="primary100" minHeight={'280px'}>
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <img
                   src={illustration}

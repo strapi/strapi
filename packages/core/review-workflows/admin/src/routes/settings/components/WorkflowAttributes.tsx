@@ -30,7 +30,7 @@ const WorkflowAttributes = ({ canUpdate = true }: WorkflowAttributesProps) => {
 
   return (
     <Grid.Root background="neutral0" hasRadius gap={4} padding={6} shadow="tableShadow">
-      <Grid.Item col={6} direction="column" alignItems="stretch">
+      <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
         <InputRenderer
           disabled={!canUpdate}
           label={formatMessage({
@@ -42,10 +42,10 @@ const WorkflowAttributes = ({ canUpdate = true }: WorkflowAttributesProps) => {
           type="text"
         />
       </Grid.Item>
-      <Grid.Item col={6} direction="column" alignItems="stretch">
+      <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
         <ContentTypesSelector disabled={!canUpdate} />
       </Grid.Item>
-      <Grid.Item col={6} direction="column" alignItems="stretch">
+      <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
         <StageSelector disabled={!canUpdate} />
       </Grid.Item>
     </Grid.Root>

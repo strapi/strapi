@@ -5,3 +5,7 @@ build
 .strapi
 /.nx/cache
 /.nx/workspace-data
+# Strapi DTS dump fixtures: entire per-fixture dirs (JSONL, metadata.json, assets/metadata, assets/uploads, …)
+tests/e2e/data/**
+# Local DTS export trees (e.g. examples/complex/tmp-dts-export) — same layout; avoid Prettier EOF/newline churn
+**/tmp-dts-export/**

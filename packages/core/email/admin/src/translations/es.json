@@ -1,4 +1,5 @@
 {
+  "link": "Enlace",
   "Settings.email.plugin.button.test-email": "Enviar email de prueba",
   "Settings.email.plugin.label.defaultFrom": "Email del remitente predeterminado",
   "Settings.email.plugin.label.defaultReplyTo": "Email de respuesta predeterminado",

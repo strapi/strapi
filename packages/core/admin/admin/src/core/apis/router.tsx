@@ -13,7 +13,8 @@ import { Theme } from '../../components/Theme';
 import { Permission } from '../../features/Auth';
 import { NotFoundPage } from '../../pages/NotFoundPage';
 import { getImmutableRoutes } from '../../router';
-import { StrapiApp } from '../../StrapiApp';
+
+import type { StrapiApp } from '../../StrapiApp';
 
 type IRouter = ReturnType<typeof createBrowserRouter> | ReturnType<typeof createMemoryRouter>;
 
@@ -21,6 +22,7 @@ type Reducer<Config extends object> = (prev: Config[]) => Config[];
 
 interface MenuItem {
   to: string;
+  target?: string;
   icon: React.ElementType;
   intlLabel: MessageDescriptor & { values?: Record<string, PrimitiveType> };
   permissions: Permission[];

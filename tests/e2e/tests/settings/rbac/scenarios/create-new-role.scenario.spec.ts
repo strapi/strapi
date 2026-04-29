@@ -1,7 +1,7 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
 
-import { sharedSetup } from '../../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 // Constants for the scenario
 const OLD_ROLE = { name: 'Editor' };
@@ -29,7 +29,7 @@ test.describe('RBAC - Full Role Management Flow', () => {
     await sharedSetup('rbac-full-role-flow', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
   });
 

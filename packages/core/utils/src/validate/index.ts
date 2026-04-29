@@ -1,7 +1,14 @@
 import { CurriedFunction1 } from 'lodash';
 import { isArray, isObject } from 'lodash/fp';
+import type { z } from 'zod/v4';
 
 import { getNonWritableAttributes, constants } from '../content-types';
+import { ALLOWED_QUERY_PARAM_KEYS } from '../content-api-constants';
+import {
+  type RouteLike,
+  getExtraQueryKeysFromRoute,
+  getExtraRootKeysFromRouteBody,
+} from '../content-api-route-params';
 import { pipe as pipeAsync } from '../async';
 import { throwInvalidKey } from './utils';
 
@@ -18,6 +25,16 @@ const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
 export interface Options {
   auth?: unknown;
+  /**
+   * If true, validateQuery throws when the query has any top-level key not in the allowed list.
+   * Defaults to false for backward compatibility.
+   */
+  strictParams?: boolean;
+  /**
+   * When set, extra query/input params are derived from the route's request schema (and validated with Zod).
+   * When absent, no extra params are allowed in strict mode.
+   */
+  route?: RouteLike;
 }
 
 export interface Validator {
@@ -26,6 +43,18 @@ export interface Validator {
 export interface ValidateFunc {
   (data: unknown, schema: Model, options?: Options): Promise<void>;
 }
+
+export type ValidateQueryParamHandler = (
+  value: unknown,
+  schema: Model,
+  options?: Options
+) => Promise<void>;
+
+export type ValidateBodyParamHandler = (
+  value: unknown,
+  schema: Model,
+  options?: Options
+) => Promise<void>;
 
 interface APIOptions {
   validators?: Validators;
@@ -39,15 +68,18 @@ export interface Validators {
 const createAPIValidators = (opts: APIOptions) => {
   const { getModel } = opts || {};
 
-  const validateInput: ValidateFunc = async (data: unknown, schema: Model, { auth } = {}) => {
+  const validateInput: ValidateFunc = async (data: unknown, schema: Model, options = {}) => {
+    const { auth, route } = options;
     if (!schema) {
       throw new Error('Missing schema in validateInput');
     }
 
     if (isArray(data)) {
-      await Promise.all(data.map((entry) => validateInput(entry, schema, { auth })));
+      await Promise.all(data.map((entry) => validateInput(entry, schema, options)));
       return;
     }
+
+    const allowedExtraRootKeys = getExtraRootKeysFromRouteBody(route);
 
     const nonWritableAttributes = getNonWritableAttributes(schema);
 
@@ -66,8 +98,12 @@ const createAPIValidators = (opts: APIOptions) => {
       },
       // non-writable attributes
       traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema, getModel }),
-      // unrecognized attributes
-      traverseEntity(visitors.throwUnrecognizedFields, { schema, getModel }),
+      // unrecognized attributes (allowedExtraRootKeys = registered input param keys)
+      traverseEntity(visitors.throwUnrecognizedFields, {
+        schema,
+        getModel,
+        allowedExtraRootKeys,
+      }),
     ];
 
     if (auth) {
@@ -85,6 +121,35 @@ const createAPIValidators = (opts: APIOptions) => {
 
     try {
       await pipeAsync(...transforms)(data as Data);
+
+      // Validate extra root keys from route's body schema with Zod (throw on failure).
+      //
+      // Content-api sends the document payload as body.data; the controller calls validateInput(body.data, ctx),
+      // so the input we receive here is the inner payload (keys like "relatedMedia", "name"), not the full body.
+      // The route's body schema is z.object({ data: ... }), so its shape includes "data". We skip "data" because
+      // the main document payload is already validated above by traverseEntity (throwUnrecognizedFields, etc.);
+      // relation ops (connect/disconnect/set) are handled there, not by the route's Zod schema. We only run
+      // Zod here for truly extra root keys added via addInputParams (e.g. clientMutationId).
+      if (isObject(data) && route?.request?.body?.['application/json']) {
+        const bodySchema = route.request.body['application/json'];
+        if (typeof bodySchema === 'object' && 'shape' in bodySchema) {
+          const shape = (bodySchema as { shape: Record<string, z.ZodTypeAny> }).shape;
+          const dataObj = data as Record<string, unknown>;
+          for (const key of Object.keys(shape)) {
+            if (key === 'data' || !(key in dataObj)) continue;
+            const zodSchema = shape[key];
+            if (zodSchema && typeof (zodSchema as z.ZodTypeAny).parse === 'function') {
+              const result = (zodSchema as z.ZodTypeAny).safeParse(dataObj[key]);
+              if (!result.success) {
+                throw new ValidationError(
+                  (result.error?.message as string) ?? 'Validation failed',
+                  { key, path: null, source: 'body', param: key }
+                );
+              }
+            }
+          }
+        }
+      }
     } catch (e) {
       if (e instanceof ValidationError) {
         e.details.source = 'body';
@@ -96,11 +161,48 @@ const createAPIValidators = (opts: APIOptions) => {
   const validateQuery = async (
     query: Record<string, unknown>,
     schema: Model,
-    { auth }: Options = {}
+    { auth, strictParams = false, route }: Options = {}
   ) => {
     if (!schema) {
       throw new Error('Missing schema in validateQuery');
     }
+
+    if (strictParams) {
+      const extraQueryKeys = getExtraQueryKeysFromRoute(route);
+      const allowedKeys = [...ALLOWED_QUERY_PARAM_KEYS, ...extraQueryKeys];
+      for (const key of Object.keys(query)) {
+        if (!allowedKeys.includes(key)) {
+          try {
+            throwInvalidKey({ key, path: null });
+          } catch (e) {
+            if (e instanceof ValidationError) {
+              e.details.source = 'query';
+              e.details.param = key;
+            }
+            throw e;
+          }
+        }
+      }
+      // Validate extra query keys from route's request schema with Zod (throw on failure)
+      const routeQuerySchema = route?.request?.query;
+      if (routeQuerySchema) {
+        for (const key of extraQueryKeys) {
+          if (key in query) {
+            const zodSchema = routeQuerySchema[key];
+            if (zodSchema && typeof (zodSchema as z.ZodTypeAny).parse === 'function') {
+              const result = (zodSchema as z.ZodTypeAny).safeParse(query[key]);
+              if (!result.success) {
+                throw new ValidationError(
+                  (result.error?.message as string) ?? 'Invalid query param',
+                  { key, path: null, source: 'query', param: key }
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+
     const { filters, sort, fields, populate } = query;
 
     if (filters) {

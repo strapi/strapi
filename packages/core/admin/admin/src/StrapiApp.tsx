@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { Clock, User, TrendUp } from '@strapi/icons';
+import { Cloud, Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -42,7 +42,6 @@ const {
 interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>> {
   config?: {
     auth?: { logo: string };
-    head?: { favicon: string };
     locales?: string[];
     menu?: { logo: string };
     notifications?: { releases: boolean };
@@ -101,7 +100,6 @@ class StrapiApp {
 
   configurations = {
     authLogo: Logo,
-    head: { favicon: '' },
     locales: ['en'],
     menuLogo: Logo,
     notifications: { releases: true },
@@ -267,10 +265,6 @@ class StrapiApp {
       this.configurations.menuLogo = customConfig.menu.logo;
     }
 
-    if (customConfig.head?.favicon) {
-      this.configurations.head.favicon = customConfig.head.favicon;
-    }
-
     if (customConfig.theme) {
       const darkTheme = customConfig.theme.dark;
       const lightTheme = customConfig.theme.light;
@@ -352,6 +346,19 @@ class StrapiApp {
         pluginId: 'admin',
         id: 'key-statistics',
         roles: ['strapi-super-admin'],
+      },
+      {
+        icon: Cloud,
+        title: {
+          id: 'widget.deploy-now.title',
+          defaultMessage: 'Deploy',
+        },
+        component: async () => {
+          const { DeployNowWidget } = await import('./components/Widgets');
+          return DeployNowWidget;
+        },
+        pluginId: 'admin',
+        id: 'deploy-now',
       },
     ]);
 

@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "hc_m2m_sources",
+  "info": {
+    "singularName": "hc-m2m-source",
+    "pluralName": "hc-m2m-sources",
+    "displayName": "HC M2M Source",
+    "description": "High-cardinality many-to-many source for stressing join-table batch processing in v4\u2192v5 discard-drafts migration. Paired with hc-m2m-target via a many-to-many relation that produces N\u00d7M join rows."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "targets": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::hc-m2m-target.hc-m2m-target",
+      "inversedBy": "sources"
+    }
+  }
+}
