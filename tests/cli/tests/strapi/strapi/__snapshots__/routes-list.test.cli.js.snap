@@ -36,6 +36,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ DELETE             │ /api/conditions/:id                                                             │
 │ POST               │ /api/config/ratelimit/enable                                                    │
 │ POST               │ /api/config/permissions/prune                                                   │
+│ POST               │ /api/config/permissions/resync-super-admin                                      │
 │ POST               │ /api/config/resettransfertoken                                                  │
 │ HEAD|GET           │ /api/countries                                                                  │
 │ HEAD|GET           │ /api/countries/:id                                                              │
