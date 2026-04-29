@@ -89,7 +89,6 @@
     "@testing-library/user-event": "14.6.1",
     "@types/fs-extra": "11.0.4",
     "@types/koa": "2.13.4",
-    "@types/koa-session": "6.4.5",
     "@types/swagger-ui-dist": "3.30.4",
     "koa": "2.16.4",
     "koa-body": "6.0.1",

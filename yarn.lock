@@ -8938,7 +8938,6 @@ __metadata:
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.13.4"
     "@types/koa-compress": "npm:4.0.3"
-    "@types/koa-session": "npm:6.4.5"
     "@types/koa-static": "npm:4.0.2"
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
@@ -9339,7 +9338,6 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/koa": "npm:2.13.4"
-    "@types/koa-session": "npm:6.4.5"
     "@types/swagger-ui-dist": "npm:3.30.4"
     bcryptjs: "npm:2.4.3"
     cheerio: "npm:^1.0.0"
@@ -10988,16 +10986,6 @@ __metadata:
   dependencies:
     "@types/koa": "npm:*"
   checksum: 10c0/f9b6556c15ef06f3cbcd5c296f9b6836feb3f7f08eb9c4523bfca294ad48f2e4ecde4438bb662ca191baae15aecccb9907f870d55e27ae2fd619095693852496
-  languageName: node
-  linkType: hard
-
-"@types/koa-session@npm:6.4.5":
-  version: 6.4.5
-  resolution: "@types/koa-session@npm:6.4.5"
-  dependencies:
-    "@types/cookies": "npm:*"
-    "@types/koa": "npm:*"
-  checksum: 10c0/2d490c6ef7b1f1f154ee753610dac5cce375f3703b6c3ba19d3e22dec8c352119433d0a370449589abe3d555aebbfe9ce0df86fb04afb52c27185042749440fe
   languageName: node
   linkType: hard
 
