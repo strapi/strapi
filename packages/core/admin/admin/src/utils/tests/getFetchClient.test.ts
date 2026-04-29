@@ -1,4 +1,9 @@
-import { getFetchClient, setOnTokenUpdate } from '../getFetchClient';
+import {
+  getFetchClient,
+  setOnSessionExpired,
+  setOnTokenUpdate,
+  triggerSessionExpired,
+} from '../getFetchClient';
 
 describe('getFetchClient', () => {
   const originalLocalStorage = window.localStorage;
@@ -486,6 +491,38 @@ describe('getFetchClient', () => {
 
       expect(data).toEqual({ data: 'upload success' });
       expect(window.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('session-expired callback', () => {
+    afterEach(() => {
+      setOnSessionExpired(null);
+    });
+
+    it('should invoke the registered callback when triggerSessionExpired is called', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      triggerSessionExpired();
+
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should be a no-op when no callback is registered', () => {
+      // Explicit clear in case any prior test left one set.
+      setOnSessionExpired(null);
+
+      expect(() => triggerSessionExpired()).not.toThrow();
+    });
+
+    it('should clear the callback when set to null', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+      setOnSessionExpired(null);
+
+      triggerSessionExpired();
+
+      expect(callback).not.toHaveBeenCalled();
     });
   });
 });
