@@ -84,7 +84,7 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
     );
     return contentTypePermissions.reduce<Record<string, Permission[]>>((acc, permission) => {
       const [action] = permission.action.split('.').slice(-1);
-      return { ...acc, [action]: [permission] };
+      return { ...acc, [action]: [...(acc[action] ?? []), permission] };
     }, {});
   }, [contentTypeUid, userPermissions]);
 
