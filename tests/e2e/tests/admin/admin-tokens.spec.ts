@@ -108,6 +108,7 @@ test.describe('Admin Tokens — Create & List', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin',
+      resyncSuperAdminPermissions: true,
     });
   });
 
@@ -157,6 +158,7 @@ test.describe('Admin Tokens — Ownership', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin',
+      resyncSuperAdminPermissions: true,
       afterSetup: grantEditorAdminTokenPermissions,
     });
   });
@@ -220,6 +222,7 @@ test.describe('Admin Tokens — Permission Ceiling', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin',
+      resyncSuperAdminPermissions: true,
       afterSetup: grantEditorAdminTokenPermissions,
     });
   });

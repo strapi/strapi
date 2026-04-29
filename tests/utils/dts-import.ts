@@ -2,12 +2,6 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../e2e/constants';
 
-/** E2E test-app helper (not shipped in product); path is stable relative to this file. */
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const resyncSuperAdminAfterImport = require(
-  resolve(__dirname, '../app-template/src/api/config/utils/resync-super-admin-after-import.js')
-) as (strapi: any) => Promise<void>;
-
 const {
   file: {
     providers: { createLocalFileSourceProvider },
@@ -45,6 +39,24 @@ const getStrapiTestBaseUrl = () => {
     );
   }
   return `http://127.0.0.1:${port}`;
+};
+
+export const resyncSuperAdminPermissionsAfterImport = async () => {
+  try {
+    const resyncRes = await fetch(
+      new URL('/api/config/permissions/resync-super-admin', getStrapiTestBaseUrl()),
+      { method: 'POST' }
+    );
+    if (!resyncRes.ok) {
+      console.error(
+        `Super Admin permission resync failed: HTTP ${resyncRes.status} ${await resyncRes.text()}`
+      );
+      process.exit(1);
+    }
+  } catch (err) {
+    console.error('Super Admin permission resync failed.' + JSON.stringify(err, null, 2));
+    process.exit(1);
+  }
 };
 
 /**
@@ -110,22 +122,6 @@ export const resetDatabaseAndImportDataFromPath = async (
     await engine.transfer();
   } catch {
     console.error('Import process failed.');
-    process.exit(1);
-  }
-
-  try {
-    const resyncRes = await fetch(
-      new URL('/api/config/permissions/resync-super-admin', getStrapiTestBaseUrl()),
-      { method: 'POST' }
-    );
-    if (!resyncRes.ok) {
-      console.error(
-        `Super Admin permission resync failed: HTTP ${resyncRes.status} ${await resyncRes.text()}`
-      );
-      process.exit(1);
-    }
-  } catch (err) {
-    console.error('Super Admin permission resync failed.' + JSON.stringify(err, null, 2));
     process.exit(1);
   }
 };
@@ -202,8 +198,6 @@ export const resetDatabaseAndImportDataFromPathProgrammatic = async (
     });
 
     await engine.transfer();
-
-    await resyncSuperAdminAfterImport(strapiInstance);
   } catch (err) {
     console.error('Import process failed:', err);
     throw err;
