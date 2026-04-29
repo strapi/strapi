@@ -11,7 +11,7 @@ As of April 2026 (and until this document is updated), v5.x.x _GA_ or _STABLE_ r
 | 5.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life |
 | 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life |
 | 4.x.x   | GA / Stable | November 2021  | October 2025   | April 2026             | End Of Life |
-| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life |
+| 3.x.x   | GA / Stable | May 2020       | November 2022  | November 2022          | End Of Life |
 
 ## Reporting a Vulnerability
 
