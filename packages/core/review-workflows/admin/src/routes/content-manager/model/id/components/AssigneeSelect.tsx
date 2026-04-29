@@ -6,6 +6,7 @@ import {
   useRBAC,
   useAdminUsers,
   useQueryParams,
+  useDebounce,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import { Combobox, ComboboxOption, Field, VisuallyHidden } from '@strapi/design-system';
@@ -18,6 +19,8 @@ import { buildValidParams } from '../../../../../utils/api';
 import { getDisplayName } from '../../../../../utils/users';
 
 import { ASSIGNEE_ATTRIBUTE_NAME } from './constants';
+
+const PAGE_SIZE = 10;
 
 const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const {
@@ -35,13 +38,21 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
   } = useRBAC(permissions.settings?.users);
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
+
+  const [pageSize, setPageSize] = React.useState(PAGE_SIZE);
+  const [search, setSearch] = React.useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
   const {
     data,
     isLoading: isLoadingUsers,
     isError,
-  } = useAdminUsers({ pageSize: 100 }, {
-    skip: isLoadingPermissions || !canRead,
-  });
+  } = useAdminUsers(
+    { pageSize, _q: debouncedSearch },
+    {
+      skip: isLoadingPermissions || !canRead,
+    }
+  );
   const { document } = unstable_useDocument(
     {
       collectionType,
@@ -53,9 +64,32 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
     }
   );
 
-  const users = data?.users || [];
+  const users = React.useMemo(() => data?.users ?? [], [data?.users]);
+  const { pageCount = 1, page = 1 } = data?.pagination ?? {};
 
   const currentAssignee = document ? document[ASSIGNEE_ATTRIBUTE_NAME] : null;
+
+  // Keep the currently assigned user in the options even when they fall outside
+  // the loaded page or the active search — otherwise the Combobox loses its value.
+  const options = React.useMemo(() => {
+    if (!currentAssignee) return users;
+    return users.some((u) => u.id === currentAssignee.id) ? users : [currentAssignee, ...users];
+  }, [users, currentAssignee]);
+
+  const handleOpenChange = (isOpen?: boolean) => {
+    if (!isOpen) {
+      setPageSize(PAGE_SIZE);
+      setSearch('');
+    }
+  };
+
+  const handleLoadMore = () => {
+    setPageSize(pageSize + PAGE_SIZE);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.currentTarget.value);
+  };
 
   const [updateAssignee, { error, isLoading: isMutating }] = useUpdateAssigneeMutation();
 
@@ -100,6 +134,7 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const isDisabled =
     (!isLoadingPermissions && !isLoadingUsers && users.length === 0) || !document.documentId;
   const isLoading = isLoadingUsers || isLoadingPermissions || isMutating;
+  const hasMoreItems = page < pageCount;
 
   const assigneeLabel = formatMessage({
     id: 'content-manager.reviewWorkflows.assignee.label',
@@ -126,11 +161,15 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
           value={currentAssignee ? currentAssignee.id.toString() : null}
           onChange={handleChange}
           onClear={() => handleChange(null)}
+          onOpenChange={handleOpenChange}
+          onLoadMore={handleLoadMore}
+          hasMoreItems={hasMoreItems}
+          onInputChange={handleInputChange}
           placeholder={assigneePlaceholder}
           loading={isLoading || isLoadingPermissions || isMutating}
           size="S"
         >
-          {users.map((user) => {
+          {options.map((user) => {
             return (
               <ComboboxOption
                 key={user.id}
@@ -170,10 +209,14 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
         value={currentAssignee ? currentAssignee.id.toString() : null}
         onChange={handleChange}
         onClear={() => handleChange(null)}
+        onOpenChange={handleOpenChange}
+        onLoadMore={handleLoadMore}
+        hasMoreItems={hasMoreItems}
+        onInputChange={handleInputChange}
         placeholder={assigneePlaceholder}
         loading={isLoading || isLoadingPermissions || isMutating}
       >
-        {users.map((user) => {
+        {options.map((user) => {
           return (
             <ComboboxOption
               key={user.id}
