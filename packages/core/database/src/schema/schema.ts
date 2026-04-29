@@ -118,7 +118,9 @@ const createTable = (meta: Meta): Table => {
         });
       }
 
-      if (column.primary) {
+      // Support primary from attribute (e.g. documents table document_id) since getColumnType doesn't set it for string
+      const isPrimary = column.primary || ('primary' in attribute && attribute.primary);
+      if (isPrimary) {
         table.indexes.push({
           type: 'primary',
           name: identifiers.getPrimaryIndexName([table.name, column.name]),

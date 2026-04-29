@@ -677,6 +677,29 @@ const baseContentTypeSchema = z.object({
   draftAndPublish: z.boolean(),
   options: z.record(z.unknown()).optional().default({}),
   pluginOptions: z.record(z.unknown()).optional().default({}),
+  indexes: z
+    .array(
+      z
+        .object({
+          name: z.string().optional(),
+          type: z.enum(['index', 'unique']).optional(),
+          columns: z.array(z.string()).optional(),
+          attributes: z.array(z.string()).optional(),
+          scope: z.enum(['global', 'variant']).optional(),
+        })
+        .superRefine((value, ctx) => {
+          const hasColumns = Array.isArray(value.columns) && value.columns.length > 0;
+          const hasAttributes = Array.isArray(value.attributes) && value.attributes.length > 0;
+
+          if (!hasColumns && !hasAttributes) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Index must define either columns or attributes',
+            });
+          }
+        })
+    )
+    .optional(),
   kind: z.enum([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE]).optional(),
 });
 

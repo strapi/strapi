@@ -13,6 +13,7 @@ const dtoFields = [
   'options',
   'pluginOptions',
   'attributes',
+  'indexes', // required for unique-index fields so admin can show availability check
   'pluginOptions',
 ];
 

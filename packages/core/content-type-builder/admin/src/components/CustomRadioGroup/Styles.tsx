@@ -4,14 +4,21 @@ import { styled } from 'styled-components';
 const Wrapper = styled(Flex)`
   position: relative;
   align-items: stretch;
+  flex-wrap: wrap;
 
   label {
-    max-width: 50%;
     cursor: pointer;
     user-select: none;
-    flex: 1;
+    flex: 1 1 calc(50% - ${({ theme }) => theme.spaces[2]});
+    min-width: 220px;
 
     ${inputFocusStyle() as any}
+  }
+
+  @media (max-width: 62rem) {
+    label {
+      flex-basis: 100%;
+    }
   }
 
   input {

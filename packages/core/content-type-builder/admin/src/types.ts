@@ -82,6 +82,7 @@ export type ContentType = Omit<Struct.ContentTypeSchema, 'attributes'> & {
   visible: boolean;
   status: Status;
   restrictRelationsTo: Schema.Attribute.RelationKind.Any[] | null;
+  indexes?: unknown[];
   attributes: Array<AnyAttribute>;
 };
 

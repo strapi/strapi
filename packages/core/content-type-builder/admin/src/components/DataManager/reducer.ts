@@ -163,6 +163,11 @@ type UpdateSchemaPayload = {
   uid: string;
 };
 
+type SetContentTypeIndexesPayload = {
+  uid: string;
+  indexes?: unknown[];
+};
+
 type MoveAttributePayload = {
   forTarget: Struct.ModelType;
   targetUid: string;
@@ -559,6 +564,20 @@ const slice = createUndoRedoSlice(
         });
 
         removeAttributeAt(type, attributeToRemoveIndex);
+
+        if (forTarget === 'contentType' && 'indexes' in type) {
+          const indexes =
+            ((type as ContentType).indexes as { attributes?: string[] }[] | undefined) ?? [];
+          (type as ContentType).indexes = indexes.filter(
+            (idx) =>
+              !Array.isArray(idx.attributes) ||
+              idx.attributes.length !== 1 ||
+              idx.attributes[0] !== attributeToRemoveName
+          ) as ContentType['indexes'];
+          if ((type as ContentType).indexes?.length === 0) {
+            delete (type as ContentType).indexes;
+          }
+        }
       },
       // only edits a component in practice
       updateComponentSchema: (state, action: PayloadAction<UpdateComponentSchemaPayload>) => {
@@ -646,6 +665,17 @@ const slice = createUndoRedoSlice(
           },
           pluginOptions,
         });
+      },
+      setContentTypeIndexes: (state, action: PayloadAction<SetContentTypeIndexesPayload>) => {
+        const { uid, indexes } = action.payload;
+        const contentType = state.contentTypes[uid];
+
+        if (!contentType) {
+          return;
+        }
+
+        contentType.indexes = indexes;
+        setStatus(contentType, 'CHANGED');
       },
       deleteComponent: (state, action: PayloadAction<Internal.UID.Component>) => {
         const uid = action.payload;

@@ -31,4 +31,15 @@ export type Service = {
    *  })
    */
   use: (cb: Middleware.Middleware) => Service;
+
+  /**
+   * Check if a value for a unique-index attribute is available (not taken by another published document).
+   * Used by the content-manager for the "Available" / "Unavailable" badge.
+   */
+  checkUniqueAttributeAvailability(
+    uid: UID.ContentType,
+    attributeName: string,
+    value: unknown,
+    options?: { documentId?: string; locale?: string }
+  ): Promise<boolean>;
 };
