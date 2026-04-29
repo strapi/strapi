@@ -1,0 +1,100 @@
+# SECURITY (read before editing):
+# Both jobs checkout the BASE branch only — PR head code is never executed.
+# run: steps only use env vars — no ${{ }} interpolation of user-controlled data.
+
+name: Community PR Lifecycle
+
+on:
+  pull_request_target:
+    types: [labeled]
+  schedule:
+    - cron: '0 10 * * *' # Daily at 10am UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — report what would change without making changes'
+        type: boolean
+        default: true
+
+env:
+  WAITING_ON_AUTHOR_DAYS: ${{ vars.WAITING_ON_AUTHOR_DAYS || '14' }}
+  STALE_DAYS: ${{ vars.STALE_DAYS || '7' }}
+
+permissions: {}
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # Job 1: "waiting on author" label added → sync Linear + comment on PR
+  # ──────────────────────────────────────────────────────────────────────────
+  waiting-on-author:
+    name: Sync "waiting on author" to Linear
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request_target' &&
+      github.event.label.name == 'waiting on author'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Verify run context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" != "pull_request_target" ]; then
+            echo "::error::Expected pull_request_target, got $EVENT_NAME"
+            exit 1
+          fi
+          echo "Running from base branch; PR head code is never executed."
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+
+      - name: Load Linear config
+        run: grep -v '^#' .github/scripts/.env | grep -v '^$' >> "$GITHUB_ENV"
+
+      - name: Install and build scripts
+        run: cd .github/scripts && npm install && npx tsup community-pr-lifecycle.ts --format cjs --target node20 --out-dir dist --no-splitting
+
+      - name: Sync to Linear and comment
+        uses: actions/github-script@v7
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_CMS_TEAM_ID: ${{ secrets.LINEAR_CMS_TEAM_ID }}
+        with:
+          script: |
+            const { syncWaitingOnAuthor } = require('./.github/scripts/dist/community-pr-lifecycle.js')
+            await syncWaitingOnAuthor({ github, context, core })
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Job 2: daily cron — advance waiting → stale → closed
+  # ──────────────────────────────────────────────────────────────────────────
+  lifecycle-check:
+    name: Advance stale / close lifecycle
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+
+      - name: Load Linear config
+        run: grep -v '^#' .github/scripts/.env | grep -v '^$' >> "$GITHUB_ENV"
+
+      - name: Install and build scripts
+        run: cd .github/scripts && npm install && npx tsup community-pr-lifecycle.ts --format cjs --target node20 --out-dir dist --no-splitting
+
+      - name: Process community PR lifecycle
+        uses: actions/github-script@v7
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_CMS_TEAM_ID: ${{ secrets.LINEAR_CMS_TEAM_ID }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        with:
+          script: |
+            const { processLifecycle } = require('./.github/scripts/dist/community-pr-lifecycle.js')
+            await processLifecycle({ github, context, core })
