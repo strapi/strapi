@@ -20,7 +20,13 @@ import { getDisplayName } from '../../../../../utils/users';
 
 import { ASSIGNEE_ATTRIBUTE_NAME } from './constants';
 
+import type { Modules } from '@strapi/types';
+
 const PAGE_SIZE = 10;
+
+type AdminUserFilters = Modules.EntityService.Params.Pick<'admin::user', 'filters'>['filters'];
+
+const contains = (value: string) => ({ $containsi: value });
 
 const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const {
@@ -42,13 +48,48 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const [pageSize, setPageSize] = React.useState(PAGE_SIZE);
   const [search, setSearch] = React.useState('');
   const debouncedSearch = useDebounce(search, 300);
+  const searchFilters = React.useMemo(() => {
+    const value = debouncedSearch.trim();
+
+    if (!value) {
+      return undefined;
+    }
+
+    const [firstTerm, ...restTerms] = value.split(/\s+/);
+    const rest = restTerms.join(' ');
+    const filters: AdminUserFilters = {
+      $or: [
+        { firstname: contains(value) },
+        { lastname: contains(value) },
+        { username: contains(value) },
+        { email: contains(value) },
+      ],
+    };
+
+    if (rest) {
+      filters.$or = [
+        ...(filters.$or ?? []),
+        {
+          $and: [{ firstname: contains(firstTerm) }, { lastname: contains(rest) }],
+        },
+        {
+          $and: [{ firstname: contains(rest) }, { lastname: contains(firstTerm) }],
+        },
+      ];
+    }
+
+    return filters;
+  }, [debouncedSearch]);
 
   const {
     data,
     isLoading: isLoadingUsers,
     isError,
   } = useAdminUsers(
-    { pageSize, _q: debouncedSearch },
+    {
+      pageSize,
+      filters: searchFilters,
+    },
     {
       skip: isLoadingPermissions || !canRead,
     }
@@ -89,6 +130,7 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.currentTarget.value);
+    setPageSize(PAGE_SIZE);
   };
 
   const [updateAssignee, { error, isLoading: isMutating }] = useUpdateAssigneeMutation();
