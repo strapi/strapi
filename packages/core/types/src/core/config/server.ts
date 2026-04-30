@@ -65,6 +65,10 @@ export interface Http {
   [key: string]: unknown;
 }
 
+export interface McpConfig {
+  enabled: boolean;
+}
+
 export interface Server {
   // required
   host: string;
@@ -85,4 +89,5 @@ export interface Server {
   admin?: ServerAdmin;
   webhooks?: Webhooks;
   http?: Http;
+  mcp: McpConfig;
 }
