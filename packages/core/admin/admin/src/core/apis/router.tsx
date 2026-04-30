@@ -157,15 +157,14 @@ class Router {
     );
 
     if (
-      !link.Component ||
-      (link.Component &&
-        typeof link.Component === 'function' &&
-        // @ts-expect-error – shh
-        link.Component[Symbol.toStringTag] === 'AsyncFunction')
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
       console.warn(
         `
-      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". Component loaders should return a dynamic import with a default export shape, e.g. \`Component: () => import(path).then((mod) => ({ default: mod.Component }))\`. Async wrapper functions will stop being supported in a future version.
       `.trim()
       );
     }
@@ -280,15 +279,14 @@ class Router {
     );
 
     if (
-      !link.Component ||
-      (link.Component &&
-        typeof link.Component === 'function' &&
-        // @ts-expect-error – shh
-        link.Component[Symbol.toStringTag] === 'AsyncFunction')
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
       console.warn(
         `
-      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". Component loaders should return a dynamic import with a default export shape, e.g. \`Component: () => import(path).then((mod) => ({ default: mod.Component }))\`. Async wrapper functions will stop being supported in a future version.
       `.trim()
       );
     }
