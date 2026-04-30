@@ -388,7 +388,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       if (item.action !== 'stream') {
         throw new Error(`Expected stream queue item for "${id}"`);
       }
-
       const chunk = decodeTransferAssetStreamItem(item);
       asset.checksumHash?.update(chunk);
 

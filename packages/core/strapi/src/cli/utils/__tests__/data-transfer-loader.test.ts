@@ -27,7 +27,7 @@ describe('loadersFactory / updateLoader (transfer progress line)', () => {
 
     const text = getLoader('assets').text;
     expect(text).toContain('1 / 4');
-    expect(text).toMatch(/size:.*\/.*400/);
+    expect(text).toMatch(/400\.0 B/);
 
     dateSpy.mockRestore();
   });
@@ -47,7 +47,49 @@ describe('loadersFactory / updateLoader (transfer progress line)', () => {
       },
     });
 
-    expect(getLoader('assets').text).toContain('eta ~');
+    const line = getLoader('assets').text;
+    expect(line).toContain(', ~');
+    expect(line).toContain('remaining');
+
+    dateSpy.mockRestore();
+  });
+
+  test('shows items/s for entities (not byte rate)', () => {
+    const { updateLoader, getLoader } = loadersFactory();
+    const t0 = 1_700_000_000_000;
+    const dateSpy = jest.spyOn(Date, 'now').mockReturnValue(t0 + 2000);
+
+    updateLoader('entities', {
+      entities: {
+        startTime: t0,
+        bytes: 50_000,
+        count: 20,
+      },
+    });
+
+    expect(getLoader('entities').text).toContain('10.0 items/s');
+
+    dateSpy.mockRestore();
+  });
+
+  test('shows count-based eta for entities when totalCount is known', () => {
+    const { updateLoader, getLoader } = loadersFactory();
+    const t0 = 1_700_000_000_000;
+    const dateSpy = jest.spyOn(Date, 'now').mockReturnValue(t0 + 1000);
+
+    updateLoader('entities', {
+      entities: {
+        startTime: t0,
+        bytes: 100,
+        count: 50,
+        totalCount: 150,
+      },
+    });
+
+    const line = getLoader('entities').text;
+    expect(line).toContain('50 / 150');
+    expect(line).toContain(', ~');
+    expect(line).toContain('remaining');
 
     dateSpy.mockRestore();
   });
@@ -68,7 +110,7 @@ describe('loadersFactory / updateLoader (transfer progress line)', () => {
       },
     });
 
-    expect(getLoader('assets').text).not.toContain('eta ~');
+    expect(getLoader('assets').text).not.toContain(' remaining');
 
     dateSpy.mockRestore();
   });
