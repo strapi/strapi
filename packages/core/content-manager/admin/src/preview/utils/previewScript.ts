@@ -105,6 +105,45 @@ const previewScript = (config: PreviewScriptConfig) => {
   };
 
   /**
+   * When a media field is cleared, the original media element gets hidden and
+   * has no bounding box, so the highlight system stops drawing a clickable
+   * area for it. That leaves the user no way to re-add media from the preview.
+   * We insert a sized placeholder div carrying the original's source attribute
+   * so the highlight system keeps tracking the spot. The placeholder is
+   * tracked in the same injection maps as a real injection, so the next
+   * `setMediaElement` call (when the user picks new media) tears it down and
+   * restores/replaces the original element via the existing flow.
+   */
+  const PLACEHOLDER_ATTRIBUTE = 'data-strapi-media-placeholder';
+  /**
+   * When the host framework unmounts a placeholder's tracked original
+   * (typically after a save commits a null value), the placeholder is
+   * promoted to standalone — kept in the DOM but no longer paired. We stash
+   * the original's last src on it so future relative URLs from the form
+   * still resolve against the right backend origin.
+   */
+  const PLACEHOLDER_ORIGIN_ATTRIBUTE = 'data-strapi-media-origin';
+  const createMediaPlaceholder = (sourceAttr: string, rect: DOMRect): HTMLElement => {
+    const placeholder = document.createElement('div');
+    placeholder.setAttribute(PLACEHOLDER_ATTRIBUTE, '');
+    placeholder.setAttribute(SOURCE_ATTRIBUTE, sourceAttr);
+
+    const width = rect.width > 0 ? rect.width : 200;
+    const height = rect.height > 0 ? rect.height : 200;
+    placeholder.style.cssText = `
+      display: inline-block;
+      width: ${width}px;
+      height: ${height}px;
+      background-color: rgba(0, 0, 0, 0.04);
+      border: 2px dashed rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      box-sizing: border-box;
+      vertical-align: top;
+    `;
+    return placeholder;
+  };
+
+  /**
    * Form values for media fields carry the raw Strapi URL (often relative,
    * e.g. "/uploads/foo.jpg"). The host framework typically renders the
    * original element with an absolute URL (resolved against the Strapi
@@ -117,7 +156,10 @@ const previewScript = (config: PreviewScriptConfig) => {
     if (/^(?:[a-z]+:)?\/\//i.test(rawUrl) || rawUrl.startsWith('data:')) {
       return rawUrl;
     }
-    const currentSrc = originalEl.getAttribute('src');
+    // Placeholders carry the origin in a data attribute (no real src),
+    // because they survive past the original element's unmount.
+    const currentSrc =
+      originalEl.getAttribute('src') ?? originalEl.getAttribute(PLACEHOLDER_ORIGIN_ATTRIBUTE);
     if (!currentSrc) return rawUrl;
     try {
       const currentUrl = new URL(currentSrc, window.location.href);
@@ -150,12 +192,13 @@ const previewScript = (config: PreviewScriptConfig) => {
   /**
    * Get the field path to use for focusing a media field.
    * - For IMG/VIDEO elements: the path was already normalized (stripped of .url) during stega decoding
+   * - For tracked injections (e.g., placeholder divs we insert when media is cleared): the source
+   *   attribute was copied from the post-normalization media element, so it's already correct
    * - For non-media elements with model=plugin::upload.file (e.g., caption text): strip the last
    *   segment to focus the parent media field (e.g., "hero.caption" -> "hero")
    */
   const getFieldPathForMedia = (sourceAttr: string, element: Element): string => {
-    // IMG/VIDEO elements already have the correct path from stega decoding
-    if (isMediaElement(element)) {
+    if (isMediaElement(element) || injectionToOriginal.has(element as HTMLElement)) {
       return sourceAttr;
     }
 
@@ -591,6 +634,39 @@ const previewScript = (config: PreviewScriptConfig) => {
       if (!groupKey) return;
 
       let group = groups.get(groupKey);
+
+      // When a framework-rendered media element joins a group that still
+      // holds stale ghosts from a previous clear (a standalone placeholder,
+      // or our injection paired with a hidden placeholder), sweep the
+      // ghosts so we don't end up with two visible elements stacked on top
+      // of each other after a save commits a real value.
+      if (group && isMediaElement(element) && !injectionToOriginal.has(element)) {
+        const ghostInjections: HTMLElement[] = [];
+        const ghostPlaceholders: HTMLElement[] = [];
+        group.elements.forEach((el) => {
+          if (injectionToOriginal.has(el)) {
+            ghostInjections.push(el);
+          } else if (el.hasAttribute(PLACEHOLDER_ATTRIBUTE)) {
+            ghostPlaceholders.push(el);
+          }
+        });
+        ghostInjections.forEach((injection) => {
+          const orig = injectionToOriginal.get(injection);
+          untrackInjection(injection);
+          if (orig && orig.hasAttribute(PLACEHOLDER_ATTRIBUTE)) {
+            orig.remove();
+          }
+          group?.elements.delete(injection);
+          elementToGroupKey.delete(injection);
+          injection.remove();
+        });
+        ghostPlaceholders.forEach((placeholder) => {
+          group?.elements.delete(placeholder);
+          elementToGroupKey.delete(placeholder);
+          placeholder.remove();
+        });
+      }
+
       if (!group) {
         group = createGroup(groupKey);
       }
@@ -778,8 +854,20 @@ const previewScript = (config: PreviewScriptConfig) => {
               // so we don't end up with duplicate previews next to the new one.
               originalToInjection.forEach((injection, original) => {
                 if (element === original || element.contains(original)) {
-                  untrackInjection(injection);
-                  injection.remove();
+                  // Placeholders survive a framework unmount: that's the only
+                  // anchor the user has to re-add media via the preview after
+                  // saving a cleared field. Stash the original's last src on
+                  // the placeholder so future relative URLs still resolve.
+                  if (injection.hasAttribute(PLACEHOLDER_ATTRIBUTE)) {
+                    const lastSrc = original.getAttribute('src');
+                    if (lastSrc && !injection.hasAttribute(PLACEHOLDER_ORIGIN_ATTRIBUTE)) {
+                      injection.setAttribute(PLACEHOLDER_ORIGIN_ATTRIBUTE, lastSrc);
+                    }
+                    untrackInjection(injection);
+                  } else {
+                    untrackInjection(injection);
+                    injection.remove();
+                  }
                 } else if (element === injection || element.contains(injection)) {
                   // Our injection itself was removed (e.g. parent unmounted)
                   untrackInjection(injection);
@@ -820,9 +908,43 @@ const previewScript = (config: PreviewScriptConfig) => {
       };
 
       if (!url) {
+        // Capture rect from whatever's currently visible before any DOM
+        // changes, so the placeholder can be sized to match.
+        const visibleEl = injection ?? original;
+        const rect = visibleEl.getBoundingClientRect();
+
+        // removeInjection moves the source attr back to original, so we read
+        // it after.
         removeInjection();
+
+        const sourceAttr = original.getAttribute(SOURCE_ATTRIBUTE);
+        if (!sourceAttr) {
+          original.style.display = 'none';
+          return;
+        }
+
+        // If the "original" is itself a placeholder (a previous standalone
+        // placeholder that's served as the original for an injected media
+        // element), just keep it visible — no need to hide it and create
+        // yet another placeholder next to it.
+        if (original.hasAttribute(PLACEHOLDER_ATTRIBUTE)) {
+          original.style.display = '';
+          return;
+        }
+
+        // Hide the host-framework-managed original. We deliberately keep
+        // its `src` attribute around so `resolveMediaUrl` can still derive
+        // the backend origin when the user later picks a new media file
+        // with a relative URL.
         original.style.display = 'none';
-        original.removeAttribute('src');
+
+        // Move the source attr onto a placeholder div so the highlight
+        // system keeps tracking the spot and the user can click to re-add
+        // media.
+        original.removeAttribute(SOURCE_ATTRIBUTE);
+        const placeholder = createMediaPlaceholder(sourceAttr, rect);
+        original.parentNode?.insertBefore(placeholder, original.nextSibling);
+        trackInjection(original, placeholder);
         return;
       }
 
@@ -893,16 +1015,27 @@ const previewScript = (config: PreviewScriptConfig) => {
       // and produce a giant empty box around the player.
       const isAudio = desiredTag === 'AUDIO';
       const skipForAudio = new Set(['class', 'style', 'width', 'height']);
+      // If the original is itself a placeholder (the framework unmounted
+      // the real media element after a save), skip its bookkeeping
+      // attributes and dashed-box styling so the new injection looks like a
+      // proper media element rather than a styled placeholder.
+      const isFromPlaceholder = original.hasAttribute(PLACEHOLDER_ATTRIBUTE);
+      const skipForPlaceholder = new Set([
+        PLACEHOLDER_ATTRIBUTE,
+        PLACEHOLDER_ORIGIN_ATTRIBUTE,
+        'style',
+      ]);
       Array.from(original.attributes).forEach((attr) => {
         if (attr.name === 'id' || attr.name === 'src' || attr.name === 'srcset') return;
         if (isAudio && skipForAudio.has(attr.name)) return;
+        if (isFromPlaceholder && skipForPlaceholder.has(attr.name)) return;
         newInjection.setAttribute(attr.name, attr.value);
       });
       newInjection.setAttribute('src', resolvedUrl);
       if (desiredTag === 'VIDEO' || desiredTag === 'AUDIO') {
         newInjection.setAttribute('controls', '');
       }
-      if (!isAudio) {
+      if (!isAudio && !isFromPlaceholder) {
         newInjection.style.cssText = original.style.cssText;
       }
       newInjection.style.display = '';
@@ -926,13 +1059,25 @@ const previewScript = (config: PreviewScriptConfig) => {
           (el): el is HTMLElement => el instanceof HTMLElement
         );
 
+        // A cleared media field is represented by a placeholder div sitting
+        // where the (hidden or unmounted) original used to be. Treat it like
+        // a media element here so the next change routes through
+        // setMediaElement and tears the placeholder down. Standalone
+        // placeholders (those whose original was unmounted by the host
+        // framework after save) are not in the injection maps but still
+        // need to be matchable.
+        const isMediaTarget = (el: Element) =>
+          isMediaElement(el) ||
+          injectionToOriginal.has(el as HTMLElement) ||
+          el.hasAttribute(PLACEHOLDER_ATTRIBUTE);
+
         // Multi-media field: value is an array of media items. After the
         // server change, every item shares `path=<field>`, so we map array
         // items to media elements in DOM order. (Adding/removing items
         // requires the host framework to re-render the gallery; we only
         // update the swappable bits in place here.)
         if (Array.isArray(value)) {
-          const mediaEls = matchedElements.filter(isMediaElement);
+          const mediaEls = matchedElements.filter(isMediaTarget);
           mediaEls.forEach((el, index) => {
             const item = value[index];
             if (item && typeof item === 'object') {
@@ -945,7 +1090,7 @@ const previewScript = (config: PreviewScriptConfig) => {
           });
         } else {
           matchedElements.forEach((element) => {
-            if (isMediaElement(element)) {
+            if (isMediaTarget(element)) {
               const url = typeof value === 'object' && value !== null ? value.url : value;
               const mime =
                 typeof value === 'object' && value !== null
