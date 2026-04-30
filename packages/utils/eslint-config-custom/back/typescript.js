@@ -1,5 +1,7 @@
 module.exports = {
   root: true,
+  // `.eslintrc.js` is not in tsconfig.eslint.json `include`; typed parsing would fail.
+  ignorePatterns: ['**/.eslintrc.js'],
   extends: [
     '@strapi/eslint-config/back/typescript' /*'plugin:@typescript-eslint/recommended-requiring-type-checking'*/,
   ],

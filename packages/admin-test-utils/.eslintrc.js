@@ -3,5 +3,6 @@ module.exports = {
   extends: ['custom/back/typescript'],
   parserOptions: {
     project: ['./tsconfig.json'],
+    tsconfigRootDir: __dirname,
   },
 };
