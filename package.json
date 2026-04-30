@@ -28,8 +28,7 @@
     "examples/plugins/*",
     "examples/*/src/plugins/*",
     ".github/actions/*",
-    "scripts/*",
-    "docs"
+    "scripts/*"
   ],
   "scripts": {
     "build": "nx run-many --targets build:code,build:types --nx-ignore-cycles",
