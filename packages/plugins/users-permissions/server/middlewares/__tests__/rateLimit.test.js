@@ -2,7 +2,16 @@
 
 /* eslint-env jest */
 
-const { buildPrefixKey, ROUTES_WITHOUT_IDENTIFIER } = require('../rateLimit');
+const utils = require('@strapi/utils');
+
+const { RateLimitError } = utils.errors;
+
+const {
+  buildPrefixKey,
+  ROUTES_WITHOUT_IDENTIFIER,
+  normalizeRequestPathForRateLimit,
+  buildRateLimitLoadConfig,
+} = require('../rateLimit');
 
 const makeCtx = ({ path: requestPath, ip = '203.0.113.1', body = {} } = {}) => ({
   request: {
@@ -21,9 +30,7 @@ describe('users-permissions rateLimit middleware', () => {
           body: { email: 'User@Example.com' },
         });
 
-        expect(buildPrefixKey(ctx)).toBe(
-          'user@example.com:/api/auth/local/register:203.0.113.1'
-        );
+        expect(buildPrefixKey(ctx)).toBe('user@example.com:/api/auth/local/register:203.0.113.1');
       });
 
       it('includes email from body for /auth/forgot-password', () => {
@@ -43,9 +50,25 @@ describe('users-permissions rateLimit middleware', () => {
           body: {},
         });
 
-        expect(buildPrefixKey(ctx)).toBe(
-          'unknownIdentifier:/api/auth/forgot-password:203.0.113.1'
-        );
+        expect(buildPrefixKey(ctx)).toBe('unknownIdentifier:/api/auth/forgot-password:203.0.113.1');
+      });
+
+      it('falls back to unknownIdentifier when email is not a string', () => {
+        const ctx = makeCtx({
+          path: '/api/auth/forgot-password',
+          body: { email: { nested: true } },
+        });
+
+        expect(buildPrefixKey(ctx)).toBe('unknownIdentifier:/api/auth/forgot-password:203.0.113.1');
+      });
+
+      it('falls back to unknownIdentifier when email is a number', () => {
+        const ctx = makeCtx({
+          path: '/api/auth/forgot-password',
+          body: { email: 99 },
+        });
+
+        expect(buildPrefixKey(ctx)).toBe('unknownIdentifier:/api/auth/forgot-password:203.0.113.1');
       });
     });
 
@@ -71,9 +94,21 @@ describe('users-permissions rateLimit middleware', () => {
         const prefixed = makeCtx({ path: '/api/auth/local' });
 
         expect(buildPrefixKey(bare)).toBe('noIdentifier:/auth/local:203.0.113.1');
-        expect(buildPrefixKey(prefixed)).toBe(
-          'noIdentifier:/api/auth/local:203.0.113.1'
-        );
+        expect(buildPrefixKey(prefixed)).toBe('noIdentifier:/api/auth/local:203.0.113.1');
+      });
+
+      it('treats paths with a trailing slash like their canonical form (no email bypass)', () => {
+        const withSlash = makeCtx({
+          path: '/api/auth/local/',
+          body: { email: 'a@a.com' },
+        });
+        const noSlash = makeCtx({
+          path: '/api/auth/local',
+          body: { email: 'b@b.com' },
+        });
+
+        expect(buildPrefixKey(withSlash)).toBe(buildPrefixKey(noSlash));
+        expect(buildPrefixKey(withSlash)).toBe('noIdentifier:/api/auth/local:203.0.113.1');
       });
 
       it('treats OAuth callback paths (/connect/*) as identifier-less', () => {
@@ -82,9 +117,40 @@ describe('users-permissions rateLimit middleware', () => {
           body: { email: 'attacker@example.com' },
         });
 
-        expect(buildPrefixKey(ctx)).toBe(
-          'noIdentifier:/api/connect/google/callback:203.0.113.1'
-        );
+        expect(buildPrefixKey(ctx)).toBe('noIdentifier:/api/connect/google/callback:203.0.113.1');
+      });
+
+      it('strips trailing slashes on connect paths for stable keys', () => {
+        const a = makeCtx({
+          path: '/api/connect/google/callback/',
+          body: { email: 'x@x.com' },
+        });
+        const b = makeCtx({
+          path: '/api/connect/google/callback',
+          body: { email: 'y@y.com' },
+        });
+
+        expect(buildPrefixKey(a)).toBe(buildPrefixKey(b));
+      });
+    });
+
+    describe('path normalization (.. segments and duplicate slashes)', () => {
+      it('classifies /auth/reset-password/../local as the login route (no identifier)', () => {
+        const ctx = makeCtx({
+          path: '/api/auth/reset-password/../local',
+          body: { email: 'roll@dice.com' },
+        });
+
+        expect(buildPrefixKey(ctx)).toBe('noIdentifier:/api/auth/local:203.0.113.1');
+      });
+
+      it('collapses duplicate slashes before matching routes', () => {
+        const ctx = makeCtx({
+          path: '//api//auth//local',
+          body: { email: 'trick@example.com' },
+        });
+
+        expect(buildPrefixKey(ctx)).toBe('noIdentifier:/api/auth/local:203.0.113.1');
       });
     });
 
@@ -101,9 +167,7 @@ describe('users-permissions rateLimit middleware', () => {
       it('lowercases the request path', () => {
         const ctx = makeCtx({ path: '/API/Auth/Forgot-Password', body: { email: 'a@b.com' } });
 
-        expect(buildPrefixKey(ctx)).toBe(
-          'a@b.com:/api/auth/forgot-password:203.0.113.1'
-        );
+        expect(buildPrefixKey(ctx)).toBe('a@b.com:/api/auth/forgot-password:203.0.113.1');
       });
 
       it('keys vary by IP for the same email', () => {
@@ -120,6 +184,49 @@ describe('users-permissions rateLimit middleware', () => {
 
         expect(buildPrefixKey(a)).not.toBe(buildPrefixKey(b));
       });
+    });
+  });
+
+  describe('normalizeRequestPathForRateLimit', () => {
+    it('removes trailing slashes except preserves root', () => {
+      expect(normalizeRequestPathForRateLimit('/api/auth/local/')).toBe('/api/auth/local');
+      expect(normalizeRequestPathForRateLimit('/')).toBe('/');
+    });
+  });
+
+  describe('buildRateLimitLoadConfig', () => {
+    it('always sets prefixKey from buildPrefixKey so plugin config cannot override it', () => {
+      const ctx = makeCtx({
+        path: '/api/auth/local',
+        body: { email: 'inject@example.com' },
+      });
+
+      const loadConfig = buildRateLimitLoadConfig(
+        ctx,
+        {
+          prefixKey: 'hijacked-from-strapi-config',
+          max: 42,
+          interval: { min: 1 },
+        },
+        {
+          prefixKey: 'hijacked-from-route-config',
+        }
+      );
+
+      expect(loadConfig.prefixKey).toBe(buildPrefixKey(ctx));
+      expect(loadConfig.prefixKey).toBe('noIdentifier:/api/auth/local:203.0.113.1');
+      expect(loadConfig.max).toBe(42);
+      expect(loadConfig.interval).toEqual({ min: 1 });
+    });
+
+    it('always sets handler last so user config cannot replace the RateLimitError handler', () => {
+      const ctx = makeCtx({ path: '/api/auth/forgot-password', body: { email: 'a@b.com' } });
+      const evilHandler = jest.fn();
+
+      const loadConfig = buildRateLimitLoadConfig(ctx, { handler: evilHandler }, {});
+
+      expect(loadConfig.handler).not.toBe(evilHandler);
+      expect(() => loadConfig.handler()).toThrow(RateLimitError);
     });
   });
 });

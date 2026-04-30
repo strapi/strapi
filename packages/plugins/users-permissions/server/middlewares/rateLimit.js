@@ -22,12 +22,13 @@ const { RateLimitError } = utils.errors;
  * mount prefix (e.g. `/api/auth/local`).
  *
  * @see https://github.com/strapi/strapi/security/advisories/GHSA-7mqx-wwh4-f9fw
+ *
+ * When adding a new `rateLimit`-protected auth route whose body does not
+ * use `email` as the real identifier, add its path suffix here (or an
+ * equivalent `routeUsesEmailIdentifier` rule) so the key cannot be split
+ * with arbitrary `body.email` values.
  */
-const ROUTES_WITHOUT_IDENTIFIER = [
-  '/auth/local',
-  '/auth/reset-password',
-  '/auth/change-password',
-];
+const ROUTES_WITHOUT_IDENTIFIER = ['/auth/local', '/auth/reset-password', '/auth/change-password'];
 
 const isOAuthCallbackPath = (requestPath) => requestPath.includes('/connect/');
 
@@ -39,17 +40,55 @@ const routeUsesEmailIdentifier = (requestPath) => {
   return !ROUTES_WITHOUT_IDENTIFIER.some((route) => requestPath.endsWith(route));
 };
 
+/**
+ * Paths suitable for route matching and prefix keys: POSIX-normalized,
+ * lower-cased, trailing slashes removed so `/api/auth/local` and
+ * `/api/auth/local/` share one bucket.
+ */
+const normalizeRequestPathForRateLimit = (requestPath) => {
+  const normalized = path.normalize(requestPath);
+  const lower = toLower(normalized);
+  return lower.replace(/\/+$/, '') || '/';
+};
+
+const getEmailIdentifierForKey = (body) => {
+  if (!body || !isString(body.email) || body.email === '') {
+    return 'unknownIdentifier';
+  }
+
+  return toLower(body.email);
+};
+
 const buildPrefixKey = (ctx) => {
-  const requestPath = isString(ctx.request.path)
-    ? toLower(path.normalize(ctx.request.path))
-    : 'invalidPath';
+  let requestPath;
+  if (!isString(ctx.request.path)) {
+    requestPath = 'invalidPath';
+  } else {
+    requestPath = normalizeRequestPathForRateLimit(ctx.request.path);
+    if (requestPath === '.' || requestPath === '..') {
+      requestPath = 'invalidPath';
+    }
+  }
 
   if (!routeUsesEmailIdentifier(requestPath)) {
     return `noIdentifier:${requestPath}:${ctx.request.ip}`;
   }
 
-  const userIdentifier = toLower(ctx.request.body.email) || 'unknownIdentifier';
+  const userIdentifier = getEmailIdentifierForKey(ctx.request.body);
   return `${userIdentifier}:${requestPath}:${ctx.request.ip}`;
+};
+
+const buildRateLimitLoadConfig = (ctx, rateLimitConfig, routeMiddlewareConfig) => {
+  return {
+    interval: { min: 5 },
+    max: 5,
+    ...rateLimitConfig,
+    ...routeMiddlewareConfig,
+    handler() {
+      throw new RateLimitError();
+    },
+    prefixKey: buildPrefixKey(ctx),
+  };
 };
 
 module.exports =
@@ -70,16 +109,7 @@ module.exports =
     if (rateLimitConfig.enabled === true) {
       const rateLimit = require('koa2-ratelimit').RateLimit;
 
-      const loadConfig = {
-        interval: { min: 5 },
-        max: 5,
-        prefixKey: buildPrefixKey(ctx),
-        handler() {
-          throw new RateLimitError();
-        },
-        ...rateLimitConfig,
-        ...config,
-      };
+      const loadConfig = buildRateLimitLoadConfig(ctx, rateLimitConfig, config);
 
       return rateLimit.middleware(loadConfig)(ctx, next);
     }
@@ -89,3 +119,5 @@ module.exports =
 
 module.exports.buildPrefixKey = buildPrefixKey;
 module.exports.ROUTES_WITHOUT_IDENTIFIER = ROUTES_WITHOUT_IDENTIFIER;
+module.exports.normalizeRequestPathForRateLimit = normalizeRequestPathForRateLimit;
+module.exports.buildRateLimitLoadConfig = buildRateLimitLoadConfig;
