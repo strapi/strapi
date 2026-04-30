@@ -11,23 +11,32 @@ const {
   startContainer,
   assertPostgresReady,
   assertMysqlReady,
+  assertMariadbReady,
   getDatabaseEnv,
 } = require('./db-utils');
 
 const dbType = process.argv[2];
 
-if (!dbType || !['postgres', 'mysql'].includes(dbType)) {
+if (!dbType || !['postgres', 'mysql', 'mariadb', 'sqlite'].includes(dbType)) {
   console.error('Error: Database type is required');
-  console.error('Usage: node scripts/develop-with-db.js <postgres|mysql>');
+  console.error('Usage: node scripts/develop-with-db.js <postgres|mysql|mariadb|sqlite>');
   process.exit(1);
 }
 
+const readinessCheckers = {
+  postgres: assertPostgresReady,
+  mysql: assertMysqlReady,
+  mariadb: assertMariadbReady,
+};
+
 function ensureContainerRunning(serviceName) {
+  if (dbType === 'sqlite') return;
+
+  const assertReady = readinessCheckers[dbType];
   const containerId = getContainerId(DOCKER_COMPOSE_FILE, PROJECT_DIR, serviceName);
   if (containerId && isContainerRunning(containerId)) {
     console.log(`✅ ${serviceName} container is already running`);
-    if (dbType === 'postgres') assertPostgresReady(containerId);
-    if (dbType === 'mysql') assertMysqlReady(containerId);
+    assertReady(containerId);
     return;
   }
 
@@ -36,8 +45,7 @@ function ensureContainerRunning(serviceName) {
     startContainer(DOCKER_COMPOSE_FILE, PROJECT_DIR, serviceName);
     console.log(`✅ ${serviceName} container started`);
     const newContainerId = getContainerId(DOCKER_COMPOSE_FILE, PROJECT_DIR, serviceName);
-    if (dbType === 'postgres') assertPostgresReady(newContainerId);
-    if (dbType === 'mysql') assertMysqlReady(newContainerId);
+    assertReady(newContainerId);
   } catch (error) {
     console.error(`Error starting ${serviceName} container: ${error.message}`);
     process.exit(1);
@@ -45,10 +53,8 @@ function ensureContainerRunning(serviceName) {
 }
 
 function startStrapi() {
-  if (dbType === 'postgres') {
-    ensureContainerRunning('postgres');
-  } else if (dbType === 'mysql') {
-    ensureContainerRunning('mysql');
+  if (['postgres', 'mysql', 'mariadb'].includes(dbType)) {
+    ensureContainerRunning(dbType);
   }
 
   const env = getDatabaseEnv(dbType);
@@ -69,7 +75,7 @@ function startStrapi() {
     if (isShuttingDown) return;
     isShuttingDown = true;
 
-    console.log('\n\n⏹️  Stopping Strapi server (database container will keep running)...');
+    console.log('\n\n⏹️  Stopping Strapi server (database container, if any, keeps running)...');
     strapiProcess.kill('SIGINT');
 
     strapiProcess.on('exit', () => {
