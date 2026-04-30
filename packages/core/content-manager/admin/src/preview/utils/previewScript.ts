@@ -123,6 +123,24 @@ const previewScript = (config: PreviewScriptConfig) => {
    * still resolve against the right backend origin.
    */
   const PLACEHOLDER_ORIGIN_ATTRIBUTE = 'data-strapi-media-origin';
+  /**
+   * For a multi-media field, growing the rendered DOM (e.g. 1 image → 2)
+   * needs a slot for the new item, but the host framework only re-renders
+   * the gallery on save. We synthesize the missing slots by cloning the
+   * last rendered item and marking each clone with this attribute so the
+   * ghost-sweep below can drop them once the framework eventually re-renders
+   * with the saved value.
+   */
+  const CLONE_ATTRIBUTE = 'data-strapi-media-clone';
+  /**
+   * Galleries commonly wrap each media element in its own layout cell
+   * (e.g. `<div class="grid"><div><img/></div><div><img/></div></div>`),
+   * so cloning just the IMG makes the new item stack inside the existing
+   * wrapper. We walk up to the closest ancestor whose parent uses a sibling
+   * layout (flex/grid) and clone that instead, marking the cloned wrapper
+   * so cleanup removes the wrapper rather than leaving an empty cell.
+   */
+  const CLONE_WRAPPER_ATTRIBUTE = 'data-strapi-media-clone-wrapper';
   const createMediaPlaceholder = (sourceAttr: string, rect: DOMRect): HTMLElement => {
     const placeholder = document.createElement('div');
     placeholder.setAttribute(PLACEHOLDER_ATTRIBUTE, '');
@@ -637,15 +655,24 @@ const previewScript = (config: PreviewScriptConfig) => {
 
       // When a framework-rendered media element joins a group that still
       // holds stale ghosts from a previous clear (a standalone placeholder,
-      // or our injection paired with a hidden placeholder), sweep the
-      // ghosts so we don't end up with two visible elements stacked on top
-      // of each other after a save commits a real value.
-      if (group && isMediaElement(element) && !injectionToOriginal.has(element)) {
+      // our injection paired with a hidden placeholder, or a clone we
+      // synthesized to give an added array item a slot), sweep the ghosts
+      // so we don't end up with two visible elements stacked on top of
+      // each other after a save commits a real value.
+      if (
+        group &&
+        isMediaElement(element) &&
+        !injectionToOriginal.has(element) &&
+        !element.hasAttribute(CLONE_ATTRIBUTE)
+      ) {
         const ghostInjections: HTMLElement[] = [];
         const ghostPlaceholders: HTMLElement[] = [];
+        const ghostClones: HTMLElement[] = [];
         group.elements.forEach((el) => {
           if (injectionToOriginal.has(el)) {
             ghostInjections.push(el);
+          } else if (el.hasAttribute(CLONE_ATTRIBUTE)) {
+            ghostClones.push(el);
           } else if (el.hasAttribute(PLACEHOLDER_ATTRIBUTE)) {
             ghostPlaceholders.push(el);
           }
@@ -653,7 +680,13 @@ const previewScript = (config: PreviewScriptConfig) => {
         ghostInjections.forEach((injection) => {
           const orig = injectionToOriginal.get(injection);
           untrackInjection(injection);
-          if (orig && orig.hasAttribute(PLACEHOLDER_ATTRIBUTE)) {
+          if (orig?.hasAttribute(CLONE_ATTRIBUTE)) {
+            // Tag-swap injection of a clone (e.g. user added a video as
+            // the new item, swapping our cloned IMG for a VIDEO). Remove
+            // the wrapper so we don't leave an empty layout cell behind.
+            const wrapper = orig.closest(`[${CLONE_WRAPPER_ATTRIBUTE}]`) as HTMLElement | null;
+            (wrapper ?? orig).remove();
+          } else if (orig?.hasAttribute(PLACEHOLDER_ATTRIBUTE)) {
             orig.remove();
           }
           group?.elements.delete(injection);
@@ -664,6 +697,16 @@ const previewScript = (config: PreviewScriptConfig) => {
           group?.elements.delete(placeholder);
           elementToGroupKey.delete(placeholder);
           placeholder.remove();
+        });
+        // Remove the wrapper if we cloned an ancestor for layout — falling
+        // back to the clone itself when it's its own root. Removing via
+        // .remove() also triggers the mutation observer's removedNodes
+        // branch, which untracks any injection paired with descendants.
+        ghostClones.forEach((clone) => {
+          group?.elements.delete(clone);
+          elementToGroupKey.delete(clone);
+          const wrapper = clone.closest(`[${CLONE_WRAPPER_ATTRIBUTE}]`) as HTMLElement | null;
+          (wrapper ?? clone).remove();
         });
       }
 
@@ -1073,11 +1116,48 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         // Multi-media field: value is an array of media items. After the
         // server change, every item shares `path=<field>`, so we map array
-        // items to media elements in DOM order. (Adding/removing items
-        // requires the host framework to re-render the gallery; we only
-        // update the swappable bits in place here.)
+        // items to media elements in DOM order. Removing items reuses
+        // existing elements (extras get cleared into placeholders); adding
+        // items synthesizes new slots by cloning the last rendered element,
+        // since the host framework only re-renders the gallery on save.
         if (Array.isArray(value)) {
           const mediaEls = matchedElements.filter(isMediaTarget);
+          if (mediaEls.length > 0 && mediaEls.length < value.length) {
+            const lastEl = mediaEls[mediaEls.length - 1];
+            // Walk up until we reach an ancestor whose parent lays out
+            // children as siblings (flex/grid). Record indices so we can
+            // re-find the media element inside each cloned wrapper.
+            const indices: number[] = [];
+            let template: HTMLElement = lastEl;
+            let parent = template.parentElement;
+            const SIBLING_LAYOUTS = new Set(['flex', 'inline-flex', 'grid', 'inline-grid']);
+            const MAX_DEPTH = 5;
+            for (let depth = 0; parent && depth < MAX_DEPTH; depth++) {
+              if (SIBLING_LAYOUTS.has(window.getComputedStyle(parent).display)) {
+                break;
+              }
+              indices.push(Array.prototype.indexOf.call(parent.children, template));
+              template = parent;
+              parent = parent.parentElement;
+            }
+
+            let insertAfter: HTMLElement = template;
+            for (let i = mediaEls.length; i < value.length; i++) {
+              const wrapperClone = template.cloneNode(true) as HTMLElement;
+              let cloneMedia: HTMLElement = wrapperClone;
+              for (let j = indices.length - 1; j >= 0; j--) {
+                cloneMedia = cloneMedia.children[indices[j]] as HTMLElement;
+              }
+              cloneMedia.setAttribute(CLONE_ATTRIBUTE, '');
+              cloneMedia.removeAttribute('id');
+              if (wrapperClone !== cloneMedia) {
+                wrapperClone.setAttribute(CLONE_WRAPPER_ATTRIBUTE, '');
+              }
+              insertAfter.parentNode?.insertBefore(wrapperClone, insertAfter.nextSibling);
+              mediaEls.push(cloneMedia);
+              insertAfter = wrapperClone;
+            }
+          }
           mediaEls.forEach((el, index) => {
             const item = value[index];
             if (item && typeof item === 'object') {
