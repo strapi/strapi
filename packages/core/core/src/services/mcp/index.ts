@@ -1,4 +1,5 @@
 import type { Core, Modules } from '@strapi/types';
+import { createMcpAdminTokenAuthenticator } from './authentication';
 import { createDeleteHandler } from './handlers/handleDelete';
 import { createGetHandler } from './handlers/handleGet';
 import { createPostHandler } from './handlers/handlePost';
@@ -20,6 +21,8 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
   // Initialize session manager
   const sessionManager = new McpSessionManager(config, strapi);
+
+  const authenticationStrategy = createMcpAdminTokenAuthenticator(strapi);
 
   // Status tracking
   let serverStatus: Modules.MCP.McpServiceStatus = 'idle';
@@ -46,6 +49,7 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
   // Prepare handler dependencies
   const handlerDependencies: McpHandlerDependencies = {
     strapi,
+    authenticationStrategy,
     sessionManager,
     config,
     createServerWithRegistries: createMcpServerWithRegistries,
@@ -89,11 +93,7 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
           '[MCP] Prompts must be registered before MCP server starts. Register during plugin register().'
         );
       }
-      const { argsSchema, ...rest } = prompt;
-      promptDefinitions.define({
-        ...rest,
-        argsSchema,
-      });
+      promptDefinitions.define(prompt);
     },
 
     registerResource(resource) {

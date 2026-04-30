@@ -2,12 +2,18 @@ import type { Core } from '@strapi/types';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { McpConfiguration } from '../../internal/McpConfiguration';
 import { McpSessionManager } from '../../internal/McpSessionManager';
-import { McpSession } from '../../session';
+import { McpSession } from '../../internal/McpSession';
+import { JSON_RPC_ERRORS } from '../../utils/jsonRpcErrors';
+import { syncMcpSessionCapabilities } from '../../internal/syncMcpSessionCapabilities';
 import { createPostHandler } from '../handlePost';
 import type { McpHandlerDependencies } from '../types';
 
 jest.mock('../../utils/withTimeout', () => ({
   withTimeout: jest.fn((promise) => promise),
+}));
+
+jest.mock('../../internal/syncMcpSessionCapabilities', () => ({
+  syncMcpSessionCapabilities: jest.fn(),
 }));
 
 jest.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
@@ -18,6 +24,7 @@ describe('handlePost', () => {
   let mockStrapi: Partial<Core.Strapi>;
   let mockConfig: McpConfiguration;
   let mockSessionManager: McpSessionManager;
+  let mockAuthenticationStrategy: McpHandlerDependencies['authenticationStrategy'];
   let logErrorSpy: jest.Mock;
   let logInfoSpy: jest.Mock;
 
@@ -35,6 +42,66 @@ describe('handlePost', () => {
     };
     mockConfig = new McpConfiguration(mockStrapi as Core.Strapi);
     mockSessionManager = new McpSessionManager(mockConfig, mockStrapi as Core.Strapi);
+    mockAuthenticationStrategy = {
+      authenticate: jest.fn().mockResolvedValue({
+        authenticated: true,
+        credentials: { id: 1 },
+        ability: { can: jest.fn(() => true) },
+      }),
+    };
+    jest.mocked(syncMcpSessionCapabilities).mockClear();
+  });
+
+  test('should return error when authentication fails', async () => {
+    mockAuthenticationStrategy.authenticate = jest.fn().mockResolvedValue({
+      authenticated: false,
+      credentials: null,
+      ability: null,
+      error: null,
+    });
+
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      sessionManager: mockSessionManager,
+      config: mockConfig,
+      createServerWithRegistries: jest.fn(),
+      capabilityDefinitions: {} as any,
+    };
+
+    const handler = createPostHandler(deps);
+
+    const req = {
+      headers: {},
+    } as unknown as IncomingMessage;
+
+    const writeHeadSpy = jest.fn();
+    const endSpy = jest.fn();
+    const res = {
+      headersSent: false,
+      writeHead: writeHeadSpy,
+      end: endSpy,
+    } as unknown as ServerResponse;
+
+    const ctx = {
+      req,
+      res,
+      request: {},
+    } as any;
+
+    await handler(ctx, () => Promise.resolve());
+
+    expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
+    expect(endSpy).toHaveBeenCalledWith(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        error: {
+          code: JSON_RPC_ERRORS.SESSION_REQUIRED.code,
+          message: JSON_RPC_ERRORS.SESSION_REQUIRED.message,
+        },
+        id: null,
+      })
+    );
   });
 
   describe('existing session', () => {
@@ -46,6 +113,7 @@ describe('handlePost', () => {
       const mockSession = {
         lastActivity: Date.now(),
         updateActivity: updateActivitySpy,
+        adminTokenId: 1,
         transport: {
           handleRequest: handleRequestSpy,
         },
@@ -55,6 +123,7 @@ describe('handlePost', () => {
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),
@@ -85,12 +154,22 @@ describe('handlePost', () => {
       await handler(ctx, () => Promise.resolve());
 
       expect(updateActivitySpy).toHaveBeenCalled();
+      expect(syncMcpSessionCapabilities).toHaveBeenCalledWith({
+        session: mockSession,
+        definitions: deps.capabilityDefinitions,
+        ability: expect.objectContaining({ can: expect.any(Function) }),
+        isDevMode: mockConfig.isDevMode(),
+      });
+      expect(jest.mocked(syncMcpSessionCapabilities).mock.invocationCallOrder[0]).toBeLessThan(
+        handleRequestSpy.mock.invocationCallOrder[0]
+      );
       expect(handleRequestSpy).toHaveBeenCalledWith(req, res, requestBody);
     });
 
     test('should return error when session is invalid', async () => {
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),
@@ -121,8 +200,76 @@ describe('handlePost', () => {
 
       await handler(ctx, () => Promise.resolve());
 
-      expect(writeHeadSpy).toHaveBeenCalledWith(400, { 'Content-Type': 'application/json' });
-      expect(endSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid session'));
+      expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
+      expect(endSpy).toHaveBeenCalledWith(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          error: {
+            code: JSON_RPC_ERRORS.INVALID_SESSION.code,
+            message: JSON_RPC_ERRORS.INVALID_SESSION.message,
+          },
+          id: null,
+        })
+      );
+    });
+
+    test('should return error when session admin token does not match credentials', async () => {
+      const sessionId = '12345678-1234-1234-1234-123456789abc';
+      const mockSession = {
+        lastActivity: Date.now(),
+        updateActivity: jest.fn(),
+        adminTokenId: 999,
+        transport: {
+          handleRequest: jest.fn(),
+        },
+      } as unknown as McpSession;
+
+      mockSessionManager.set(sessionId, mockSession);
+
+      const deps: McpHandlerDependencies = {
+        strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
+        sessionManager: mockSessionManager,
+        config: mockConfig,
+        createServerWithRegistries: jest.fn(),
+        capabilityDefinitions: {} as any,
+      };
+
+      const handler = createPostHandler(deps);
+
+      const req = {
+        headers: {
+          'mcp-session-id': sessionId,
+        },
+      } as unknown as IncomingMessage;
+
+      const writeHeadSpy = jest.fn();
+      const endSpy = jest.fn();
+      const res = {
+        headersSent: false,
+        writeHead: writeHeadSpy,
+        end: endSpy,
+      } as unknown as ServerResponse;
+
+      const ctx = {
+        req,
+        res,
+        request: {},
+      } as any;
+
+      await handler(ctx, () => Promise.resolve());
+
+      expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
+      expect(endSpy).toHaveBeenCalledWith(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          error: {
+            code: JSON_RPC_ERRORS.INVALID_SESSION.code,
+            message: JSON_RPC_ERRORS.INVALID_SESSION.message,
+          },
+          id: null,
+        })
+      );
     });
   });
 
@@ -163,6 +310,7 @@ describe('handlePost', () => {
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries,
@@ -198,6 +346,7 @@ describe('handlePost', () => {
         strapi: mockStrapi,
         definitions: deps.capabilityDefinitions,
         isDevMode: mockConfig.isDevMode(),
+        ability: expect.objectContaining({ can: expect.any(Function) }),
       });
       expect(mockMcpServer.connect).toHaveBeenCalledWith(mockTransport);
       expect(mockTransport.handleRequest).toHaveBeenCalledWith(req, res, requestBody);
@@ -214,6 +363,7 @@ describe('handlePost', () => {
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),
@@ -244,7 +394,14 @@ describe('handlePost', () => {
 
       expect(writeHeadSpy).toHaveBeenCalledWith(503, { 'Content-Type': 'application/json' });
       expect(endSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Maximum number of sessions reached')
+        JSON.stringify({
+          jsonrpc: '2.0',
+          error: {
+            code: JSON_RPC_ERRORS.MAX_SESSIONS_REACHED.code,
+            message: JSON_RPC_ERRORS.MAX_SESSIONS_REACHED.message,
+          },
+          id: null,
+        })
       );
     });
   });
@@ -258,6 +415,7 @@ describe('handlePost', () => {
       const mockSession = {
         lastActivity: Date.now(),
         updateActivity: jest.fn(),
+        adminTokenId: 1,
         transport: {
           handleRequest: handleRequestSpy,
         },
@@ -267,6 +425,7 @@ describe('handlePost', () => {
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),
@@ -313,6 +472,7 @@ describe('handlePost', () => {
       const mockSession = {
         lastActivity: Date.now(),
         updateActivity: jest.fn(),
+        adminTokenId: 1,
         transport: {
           handleRequest: handleRequestSpy,
         },
@@ -322,6 +482,7 @@ describe('handlePost', () => {
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthenticationStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),

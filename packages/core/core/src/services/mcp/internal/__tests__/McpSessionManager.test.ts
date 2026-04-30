@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { McpSession } from '../../session';
+import { McpSession } from '../McpSession';
 import { McpConfiguration } from '../McpConfiguration';
 import { McpSessionManager } from '../McpSessionManager';
 

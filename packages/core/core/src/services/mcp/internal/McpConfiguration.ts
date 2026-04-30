@@ -26,11 +26,7 @@ export class McpConfiguration {
   }
 
   isEnabled(): boolean {
-    return (
-      this.#strapi.config.get('server.mcp.enabled', false) &&
-      // Only enabled in development mode until Auth is implemented
-      this.#strapi.config.get('autoReload') === true
-    );
+    return this.#strapi.config.get<boolean>('server.mcp.enabled', false) === true;
   }
 
   isDevMode(): boolean {

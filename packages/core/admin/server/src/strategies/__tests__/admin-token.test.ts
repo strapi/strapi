@@ -34,29 +34,79 @@ describe('Admin Token Auth Strategy', () => {
     getByAccessKey: jest.Mock,
     findOneUser: jest.Mock = jest.fn(() => activeUserWithRoles),
     adminTokensEnabled = true
-  ) => ({
-    features: {
-      future: {
-        isEnabled: jest.fn((featureName: string) => {
-          return featureName === 'adminTokens' ? adminTokensEnabled : false;
-        }),
+  ) => {
+    const authenticateAdminToken = jest.fn(async () => {
+      if (global.strapi.features.future.isEnabled('adminTokens') !== true) {
+        return { authenticated: false };
+      }
+
+      const apiToken = await getByAccessKey(hash());
+      if (apiToken === null || apiToken === undefined || apiToken.kind !== 'admin') {
+        return { authenticated: false };
+      }
+
+      const expiresAt = apiToken.expiresAt;
+      if (expiresAt !== null && expiresAt !== undefined && new Date(expiresAt) < new Date()) {
+        return { authenticated: false, error: new errors.UnauthorizedError('Token expired') };
+      }
+
+      await update(apiToken);
+
+      const owner = apiToken.adminUserOwner;
+      const ownerId =
+        // eslint-disable-next-line no-nested-ternary
+        owner === null || owner === undefined ? null : typeof owner === 'object' ? owner.id : owner;
+
+      if (ownerId === null) {
+        return {
+          authenticated: false,
+          error: new errors.UnauthorizedError('Token owner not found'),
+        };
+      }
+
+      const user = await findOneUser({ where: { id: ownerId }, populate: ['roles'] });
+      if (user === null || user === undefined) {
+        return {
+          authenticated: false,
+          error: new errors.UnauthorizedError('Token owner not found'),
+        };
+      }
+
+      if (user.isActive !== true || user.blocked === true) {
+        return {
+          authenticated: false,
+          error: new errors.UnauthorizedError('Token owner is deactivated'),
+        };
+      }
+
+      const ability = await generateTokenAbility();
+      return { authenticated: true, credentials: apiToken, user, ability };
+    });
+
+    return {
+      features: {
+        future: {
+          isEnabled: jest.fn((featureName: string) => {
+            return featureName === 'adminTokens' ? adminTokensEnabled : false;
+          }),
+        },
       },
-    },
-    admin: {
-      services: {
-        'api-token-admin': { getByAccessKey, hash },
-        permission: { engine: { generateTokenAbility } },
+      admin: {
+        services: {
+          'api-token-admin': { getByAccessKey, hash, authenticateAdminToken },
+          permission: { engine: { generateTokenAbility } },
+        },
       },
-    },
-    db: {
-      query(uid: string) {
-        if (uid === 'admin::user') {
-          return { findOne: findOneUser };
-        }
-        return { update };
+      db: {
+        query(uid: string) {
+          if (uid === 'admin::user') {
+            return { findOne: findOneUser };
+          }
+          return { update };
+        },
       },
-    },
-  });
+    };
+  };
 
   const adminRouteCtx = (authorization = 'Bearer test-token') =>
     createContext(

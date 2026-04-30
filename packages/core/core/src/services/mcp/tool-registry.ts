@@ -9,22 +9,42 @@ import {
 } from './internal/McpCapabilityRegistry';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 
-export const makeMcpToolDefinition = <
+export function makeMcpToolDefinition<
   Name extends string,
   Title extends string,
   Description extends string,
   OutputSchema extends z.ZodObject<z.ZodRawShape>,
-  InputSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
->(tool: {
-  name: Name;
-  title: Title;
-  description: Description;
-  inputSchema?: InputSchema;
-  outputSchema: OutputSchema;
-  devModeOnly: boolean;
-  createHandler: (strapi: Core.Strapi) => Modules.MCP.McpToolCallback<InputSchema, OutputSchema>;
-}): Modules.MCP.McpToolDefinition<Name, InputSchema, OutputSchema, Title, Description> =>
-  tool as Modules.MCP.McpToolDefinition<Name, InputSchema, OutputSchema, Title, Description>;
+  InputSchema extends z.ZodObject<z.ZodRawShape>,
+  Access extends Modules.MCP.McpCapabilityAccess,
+>(
+  tool: {
+    name: Name;
+    title: Title;
+    description: Description;
+    inputSchema: InputSchema;
+    outputSchema: OutputSchema;
+    createHandler: (strapi: Core.Strapi) => Modules.MCP.McpToolCallback<InputSchema, OutputSchema>;
+  } & Access
+): Modules.MCP.McpToolDefinition<Name, InputSchema, OutputSchema, Title, Description> & Access;
+export function makeMcpToolDefinition<
+  Name extends string,
+  Title extends string,
+  Description extends string,
+  OutputSchema extends z.ZodObject<z.ZodRawShape>,
+  Access extends Modules.MCP.McpCapabilityAccess,
+>(
+  tool: {
+    name: Name;
+    title: Title;
+    description: Description;
+    inputSchema?: undefined;
+    outputSchema: OutputSchema;
+    createHandler: (strapi: Core.Strapi) => Modules.MCP.McpToolCallback<undefined, OutputSchema>;
+  } & Access
+): Modules.MCP.McpToolDefinition<Name, undefined, OutputSchema, Title, Description> & Access;
+export function makeMcpToolDefinition(tool: Modules.MCP.McpToolDefinition) {
+  return tool;
+}
 
 export class McpToolRegistry
   extends McpCapabilityRegistryBase<'tool', Modules.MCP.McpToolDefinition, RegisteredTool>
