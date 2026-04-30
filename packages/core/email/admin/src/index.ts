@@ -1,8 +1,7 @@
-import { StrapiApp } from '@strapi/admin/strapi-admin';
-
 import { PERMISSIONS } from './constants';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 const admin: Plugin.Config.AdminInput = {
@@ -10,26 +9,24 @@ const admin: Plugin.Config.AdminInput = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: StrapiApp) {
     // Create the email settings section
-    app.createSettingSection(
+    app.addSettingsLink(
       {
         id: 'email',
         intlLabel: { id: 'email.SettingsNav.section-label', defaultMessage: 'Email Plugin' },
       },
-      [
-        {
-          intlLabel: {
-            id: 'email.Settings.email.plugin.title',
-            defaultMessage: 'Settings',
-          },
-          id: 'settings',
-          to: 'email',
-          Component: () =>
-            import('./pages/Settings').then((mod) => ({
-              default: mod.ProtectedSettingsPage,
-            })),
-          permissions: PERMISSIONS.settings,
+      {
+        intlLabel: {
+          id: 'email.Settings.email.plugin.title',
+          defaultMessage: 'Settings',
         },
-      ]
+        id: 'settings',
+        to: 'email',
+        Component: () =>
+          import('./pages/Settings').then((mod) => ({
+            default: mod.ProtectedSettingsPage,
+          })),
+        permissions: PERMISSIONS.settings,
+      }
     );
     app.registerPlugin({
       id: 'email',

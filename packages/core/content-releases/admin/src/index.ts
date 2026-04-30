@@ -69,9 +69,10 @@ const admin: Plugin.Config.AdminInput = {
         },
         licenseOnly: true,
         permissions: [],
-        async Component() {
-          const { ProtectedReleasesSettingsPage } = await import('./pages/ReleasesSettingsPage');
-          return { default: ProtectedReleasesSettingsPage };
+        Component() {
+          return import('./pages/ReleasesSettingsPage').then((mod) => ({
+            default: mod.ProtectedReleasesSettingsPage,
+          }));
         },
       });
 

@@ -1,11 +1,12 @@
 /* eslint-disable check-file/filename-naming-convention */
 
-import { StrapiApp } from '@strapi/admin/strapi-admin';
 import { Cloud } from '@strapi/icons';
 
 import { Initializer } from './components/Initializer';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
+
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
 
 const pluginName = 'Deploy';
 

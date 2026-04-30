@@ -1,9 +1,9 @@
-import { StrapiApp } from '@strapi/strapi/admin';
-
 import pluginPkg from '../../package.json';
 
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
+
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
 
 const name = pluginPkg.strapi.name;
 
