@@ -15,7 +15,8 @@ const pluginTypedocOptions = {
   // to the output directory (EISDIR: "Could not write .../exports").
   readme: 'none',
   entryFileName: 'modules.md',
-  // Plugin output is under the docs content root (`site/docs/`); use `exports`, not `docs/exports`.
+  // `docusaurus-plugin-typedoc` v1 writes to `out` directly; v0 prefixed it with the docs root.
+  // So `out` must now include `docs/` itself for the generated pages to be picked up by Docusaurus.
   out: 'docs/exports',
   watch: !!process.env.TYPEDOC_WATCH,
 };
