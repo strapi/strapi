@@ -7,6 +7,13 @@ export const HOOKS = {
   INJECT_COLUMN_IN_TABLE: 'Admin/CM/pages/ListView/inject-column-in-table',
 
   /**
+   * Hook that allows to mutate the displayed filters of the list view
+   * @constant
+   * @type {string}
+   */
+  INJECT_LIST_VIEW_FILTERS: 'Admin/CM/pages/ListView/inject-in-filters',
+
+  /**
    * Hook that allows to mutate the CM's collection types links pre-set filters
    * @constant
    * @type {string}
