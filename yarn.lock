@@ -8602,7 +8602,6 @@ __metadata:
     "@types/markdown-it-footnote": "npm:3.0.3"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
-    "@types/punycode": "npm:2.1.4"
     "@types/react-window": "npm:1.8.8"
     "@types/sanitize-html": "npm:2.13.0"
     "@vitejs/plugin-react-swc": "npm:3.6.0"
@@ -8638,7 +8637,6 @@ __metadata:
     p-map: "npm:4.0.0"
     passport-local: "npm:1.0.0"
     pluralize: "npm:8.0.0"
-    punycode: "npm:2.3.1"
     qs: "npm:6.15.0"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
@@ -11276,13 +11274,6 @@ __metadata:
   version: 15.7.5
   resolution: "@types/prop-types@npm:15.7.5"
   checksum: 10c0/648aae41423821c61c83823ae36116c8d0f68258f8b609bdbc257752dcd616438d6343d554262aa9a7edaee5a19aca2e028a74fa2d0f40fffaf2816bc7056857
-  languageName: node
-  linkType: hard
-
-"@types/punycode@npm:2.1.4":
-  version: 2.1.4
-  resolution: "@types/punycode@npm:2.1.4"
-  checksum: 10c0/0472cc871783a22859ad83fe7cb62d23226ff78694b9807d2a3ec37571d46b05409ca9282c8ccedfb59e58e4a4561b27463623ce95bcfd6bd9c11ac1ef3cd0d1
   languageName: node
   linkType: hard
 
@@ -25918,7 +25909,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"punycode@npm:2.3.1, punycode@npm:^2.1.0, punycode@npm:^2.1.1":
+"punycode@npm:^2.1.0, punycode@npm:^2.1.1":
   version: 2.3.1
   resolution: "punycode@npm:2.3.1"
   checksum: 10c0/14f76a8206bc3464f794fb2e3d3cc665ae416c01893ad7a02b23766eb07159144ee612ad67af5e84fa4479ccfe67678c4feb126b0485651b302babf66f04f9e9
