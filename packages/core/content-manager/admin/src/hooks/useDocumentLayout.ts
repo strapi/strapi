@@ -360,9 +360,13 @@ const convertEditLayoutToFieldLayouts = (
 
         const { edit: metadata } = metadatas[field.name];
 
+        // Defensive: a component attribute can reference a configuration that is not present in
+        // `components.configurations` (for example after a partial schema upgrade or when a referenced
+        // component has been renamed/removed). Optional-chain so the layout still renders instead of
+        // throwing `Cannot read properties of undefined (reading 'settings')`.
         const settings: Partial<Settings> =
           attribute.type === 'component' && components
-            ? components.configurations[attribute.component].settings
+            ? (components.configurations[attribute.component]?.settings ?? {})
             : {};
 
         return {
