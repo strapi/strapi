@@ -24,6 +24,7 @@ import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
+import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
@@ -367,7 +368,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function deleteDocument(opts = {} as any) {
     const { documentId, ...params } = opts;
 
-    const query = await async.pipe(
+    const lookupQuery = await async.pipe(
       validateParams,
       omit('status'),
       i18n.defaultLocale(contentType),
@@ -376,15 +377,21 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
 
+    const selectionQuery = await async.pipe(
+      validateParams,
+      omit('status'),
+      pickSelectionParams,
+      transformParamsToQuery(uid)
+    )(params);
+
     if (hasDraftAndPublish && params.status === 'draft') {
       throw new Error('Cannot delete a draft document');
     }
 
-    const entriesToDelete = await strapi.db.query(uid).findMany(query);
+    const entriesToDelete = await strapi.db.query(uid).findMany(lookupQuery);
 
-    // Delete all matched entries and its components
     const deletedEntries = await async.map(entriesToDelete, (entryToDelete: any) =>
-      entries.delete(entryToDelete.id)
+      entries.delete(entryToDelete.id, selectionQuery)
     );
 
     await Promise.all(entriesToDelete.map(emitEvent('entry.delete')));
@@ -577,6 +584,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
+    // Load self-referential relations from draft entries before publishing
+    const selfRelationsToSync = await selfReferentialRelations.load(uid, draftsToPublish);
+
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
@@ -673,6 +683,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
+    // Load self-referential relations from published entries before discarding
+    const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft);
+
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
 
@@ -694,7 +707,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       bidirectionalRelationsToSync
     );
 
-    await Promise.all(draftEntries.map(emitEvent('entry.draft-discard')));
+    // Sync self-referential relations with the new draft entries
+    await selfReferentialRelations.sync(versionsToDraft, draftEntries, selfRelationsToSync);
+
+    draftEntries.forEach(emitEvent('entry.draft-discard'));
     return { documentId, entries: draftEntries };
   }
 

@@ -184,6 +184,10 @@ export default {
   },
 
   async getLatestAIMetadataJob(ctx: Context) {
+    if ((await getService('aiMetadata').isEnabled()) === false) {
+      return ctx.notFound();
+    }
+
     const jobService = getService('aiMetadataJobs');
     const job = await jobService.getLatestActiveJob();
 
