@@ -115,9 +115,9 @@ const EMPTY_RELATION_RESULTS: RelationResult[] = [];
 
 type RelationPosition =
   | (Pick<RelationResult, 'status' | 'locale'> & {
-      before: string;
-      end?: never;
-    })
+    before: string;
+    end?: never;
+  })
   | { end: boolean; before?: never; status?: never; locale?: never };
 
 interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> {
@@ -137,7 +137,7 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
 
 interface RelationsFieldProps
   extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
-    Pick<InputProps, 'hint'> {}
+  Pick<InputProps, 'hint'> { }
 
 export interface RelationsFormValue {
   connect?: Relation[];
@@ -429,25 +429,25 @@ interface TransformationContext extends Pick<RelationsFieldProps, 'mainField'> {
  */
 const removeConnected =
   ({ field }: TransformationContext) =>
-  (relations: RelationResult[]) => {
-    return relations.filter((relation) => {
-      const connectedRelations = field?.connect ?? [];
+    (relations: RelationResult[]) => {
+      return relations.filter((relation) => {
+        const connectedRelations = field?.connect ?? [];
 
-      return connectedRelations.findIndex((rel) => rel.id === relation.id) === -1;
-    });
-  };
+        return connectedRelations.findIndex((rel) => rel.id === relation.id) === -1;
+      });
+    };
 
 /**
  * @description Removes relations that are in the `disconnect` array of the field
  */
 const removeDisconnected =
   ({ field }: TransformationContext) =>
-  (relations: RelationResult[]): RelationResult[] =>
-    relations.filter((relation) => {
-      const disconnectedRelations = field?.disconnect ?? [];
+    (relations: RelationResult[]): RelationResult[] =>
+      relations.filter((relation) => {
+        const disconnectedRelations = field?.disconnect ?? [];
 
-      return disconnectedRelations.findIndex((rel) => rel.id === relation.id) === -1;
-    });
+        return disconnectedRelations.findIndex((rel) => rel.id === relation.id) === -1;
+      });
 
 /**
  * @description Adds a label and href to the relation object we use this to render
@@ -455,16 +455,16 @@ const removeDisconnected =
  */
 const addLabelAndHref =
   ({ mainField, href }: TransformationContext) =>
-  (relations: RelationResult[]): Relation[] =>
-    relations.map((relation) => {
-      return {
-        ...relation,
-        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `documentId` property with the exact same data.
-        [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
-        label: getRelationLabel(relation, mainField),
-        href: `${href}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
-      };
-    });
+    (relations: RelationResult[]): Relation[] =>
+      relations.map((relation) => {
+        return {
+          ...relation,
+          // Fallback to `id` if there is no `mainField` value, which will overwrite the above `documentId` property with the exact same data.
+          [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
+          label: getRelationLabel(relation, mainField),
+          href: `${href}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
+        };
+      });
 
 /* -------------------------------------------------------------------------------------------------
  * RelationsInput
@@ -927,13 +927,13 @@ const RelationsList = ({
           if (!relationOnServer || relationOnServer.__temp_key__ !== relation.__temp_key__) {
             const position = relationInFront
               ? {
-                  before: relationInFront.documentId,
-                  locale: relationInFront.locale,
-                  status:
-                    'publishedAt' in relationInFront && relationInFront.publishedAt
-                      ? ('published' as Relation['status'])
-                      : ('draft' as Relation['status']),
-                }
+                before: relationInFront.documentId,
+                locale: relationInFront.locale,
+                status:
+                  'publishedAt' in relationInFront && relationInFront.publishedAt
+                    ? ('published' as Relation['status'])
+                    : ('draft' as Relation['status']),
+              }
               : { end: true };
 
             const relationWithPosition: Relation = {
@@ -1031,7 +1031,7 @@ const RelationsList = ({
   const dynamicListHeight =
     data.length > RELATIONS_TO_DISPLAY
       ? Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
-        RELATION_ITEM_HEIGHT / 2
+      RELATION_ITEM_HEIGHT / 2
       : Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
 
   const itemData = React.useMemo(
@@ -1095,7 +1095,7 @@ const RelationsList = ({
 
 const MemoizedRelationsList = React.memo(RelationsList);
 
-const ShadowBox = styled<BoxComponent>(Box)<{
+const ShadowBox = styled<BoxComponent>(Box) <{
   $overflowDirection?: 'top-bottom' | 'top' | 'bottom';
 }>`
   position: relative;
@@ -1116,7 +1116,7 @@ const ShadowBox = styled<BoxComponent>(Box)<{
     background: linear-gradient(rgba(3, 3, 5, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
     top: 0;
     opacity: ${({ $overflowDirection }) =>
-      $overflowDirection === 'top-bottom' || $overflowDirection === 'top' ? 1 : 0};
+    $overflowDirection === 'top-bottom' || $overflowDirection === 'top' ? 1 : 0};
     transition: opacity 0.2s ease-in-out;
   }
 
@@ -1126,7 +1126,7 @@ const ShadowBox = styled<BoxComponent>(Box)<{
     background: linear-gradient(0deg, rgba(3, 3, 5, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
     bottom: 0;
     opacity: ${({ $overflowDirection }) =>
-      $overflowDirection === 'top-bottom' || $overflowDirection === 'bottom' ? 1 : 0};
+    $overflowDirection === 'top-bottom' || $overflowDirection === 'bottom' ? 1 : 0};
     transition: opacity 0.2s ease-in-out;
   }
 `;
@@ -1331,15 +1331,15 @@ const FlexWrapper = styled<FlexComponent>(Flex)`
   }
 `;
 
-const DisconnectButton = styled.button`
+const DisconnectButton = styled.button<{ $disabled?: boolean }>`
   svg path {
-    fill: ${({ theme, disabled }) =>
-      disabled ? theme.colors.neutral600 : theme.colors.neutral500};
+    fill: ${({ theme, $disabled }) =>
+    $disabled ? theme.colors.neutral600 : theme.colors.neutral500};
   }
 
   &:hover svg path,
   &:focus svg path {
-    fill: ${({ theme, disabled }) => !disabled && theme.colors.neutral600};
+    fill: ${({ theme, $disabled }) => !$disabled && theme.colors.neutral600};
   }
 `;
 
