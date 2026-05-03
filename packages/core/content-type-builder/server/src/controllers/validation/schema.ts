@@ -210,7 +210,7 @@ const basePropertiesSchema = z.object({
   ]),
   configurable: z.boolean().nullish(),
   private: z.boolean().nullish(),
-  pluginOptions: z.record(z.unknown()).optional(),
+  pluginOptions: z.record(z.string(), z.unknown()).optional(),
   conditions: z.preprocess((val) => {
     return val;
   }, conditionSchema.optional()),
@@ -238,7 +238,7 @@ const baseRelationSchema = z.object({
   ]),
   configurable: z.boolean().nullish(),
   private: z.boolean().nullish(),
-  pluginOptions: z.record(z.unknown()).optional(),
+  pluginOptions: z.record(z.string(), z.unknown()).optional(),
   conditions: z.preprocess((val) => {
     return val;
   }, conditionSchema.optional()),
@@ -675,8 +675,8 @@ const baseContentTypeSchema = z.object({
   displayName: z.string().min(1),
   description: z.string().optional(),
   draftAndPublish: z.boolean(),
-  options: z.record(z.unknown()).optional().default({}),
-  pluginOptions: z.record(z.unknown()).optional().default({}),
+  options: z.record(z.string(), z.unknown()).optional().default({}),
+  pluginOptions: z.record(z.string(), z.unknown()).optional().default({}),
   kind: z.enum([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE]).optional(),
 });
 

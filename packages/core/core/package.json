@@ -110,7 +110,7 @@
     "typescript": "5.4.5",
     "undici": "6.25.0",
     "yup": "0.32.9",
-    "zod": "3.25.67"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@strapi/ts-zen": "^0.2.0",
