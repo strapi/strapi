@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod/v4';
 import { strings, validateZodSchema } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
 import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
@@ -23,17 +23,19 @@ type SchemaMeta =
       modelType: 'component';
     };
 
-const uniqueAttributeName: z.SuperRefinement<{ name: string }[]> = (attributes, ctx) => {
+type SuperRefinement<T> = (value: T, ctx: z.RefinementCtx<T>) => void;
+
+const uniqueAttributeName: SuperRefinement<{ name: string }[]> = (attributes, ctx) => {
   const names = new Set(attributes.map((attribute) => snakeCase(attribute.name)));
   if (names.size !== attributes.length) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: 'Attributes must have unique names',
     });
   }
 };
 
-const verifyUidTargetField: z.SuperRefinement<
+const verifyUidTargetField: SuperRefinement<
   {
     action: 'create' | 'update' | 'delete';
     name: string;
@@ -57,7 +59,7 @@ const verifyUidTargetField: z.SuperRefinement<
         // NOTE: on update we are setting it to undefined later in the process instead to handle renames
         if (action === 'create') {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: 'Target does not exist',
           });
         }
@@ -65,7 +67,7 @@ const verifyUidTargetField: z.SuperRefinement<
         !VALID_UID_TARGETS.some((validUIdTarget) => validUIdTarget === targetAttr.properties?.type)
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           message: 'Invalid target type',
         });
       }
@@ -73,7 +75,7 @@ const verifyUidTargetField: z.SuperRefinement<
   });
 };
 
-const verifySingularAndPluralNames: z.SuperRefinement<Record<string, unknown>> = (obj, ctx) => {
+const verifySingularAndPluralNames: SuperRefinement<Record<string, unknown>> = (obj, ctx) => {
   // singular and plural can only be provided on creation
   if (obj.action !== 'create') {
     return;
@@ -81,14 +83,14 @@ const verifySingularAndPluralNames: z.SuperRefinement<Record<string, unknown>> =
 
   if (obj.singularName === obj.pluralName) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: 'Singular and plural names must be different',
       path: ['singularName'],
     });
   }
 };
 
-export const maxLengthGreaterThanMinLength: z.SuperRefinement<Record<string, unknown>> = (
+export const maxLengthGreaterThanMinLength: SuperRefinement<Record<string, unknown>> = (
   value,
   ctx
 ) => {
@@ -100,7 +102,7 @@ export const maxLengthGreaterThanMinLength: z.SuperRefinement<Record<string, unk
   ) {
     if (value.maxLength < value.minLength) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: 'maxLength must be greater or equal to minLength',
         path: ['maxLength'],
       });
@@ -108,11 +110,11 @@ export const maxLengthGreaterThanMinLength: z.SuperRefinement<Record<string, unk
   }
 };
 
-export const maxGreaterThanMin: z.SuperRefinement<Record<string, unknown>> = (value, ctx) => {
+export const maxGreaterThanMin: SuperRefinement<Record<string, unknown>> = (value, ctx) => {
   if (!isNil(value.max) && !isNil(value.min) && isNumber(value.max) && isNumber(value.min)) {
     if (value.max < value.min) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: 'max must be greater or equal to min',
         path: ['max'],
       });
@@ -120,7 +122,7 @@ export const maxGreaterThanMin: z.SuperRefinement<Record<string, unknown>> = (va
   }
 };
 
-const checkUserTarget: z.SuperRefinement<{
+const checkUserTarget: SuperRefinement<{
   type: string;
   target?: string;
   relation?: string;
@@ -141,28 +143,28 @@ const checkUserTarget: z.SuperRefinement<{
     (!STRAPI_USER_RELATIONS.includes(relation) || !isUndefined(targetAttribute))
   ) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       path: ['relation'],
       message: `Relations to ${coreUids.STRAPI_USER} must be one of the following values: ${STRAPI_USER_RELATIONS.join(', ')} without targetAttribute`,
     });
   }
 };
 
-const uidRefinement: z.SuperRefinement<{
+const uidRefinement: SuperRefinement<{
   type: string;
   default?: unknown;
   targetField?: string | null;
 }> = (value, ctx) => {
   if (!isNil(value.targetField) && !isNil(value.default)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: 'Cannot define a default UID if the targetField is set',
       path: ['default'],
     });
   }
 };
 
-const enumRefinement: z.SuperRefinement<{
+const enumRefinement: SuperRefinement<{
   type: string;
   default?: unknown;
   enum?: string[];
@@ -170,7 +172,7 @@ const enumRefinement: z.SuperRefinement<{
   if (value.type === 'enumeration' && !isNil(value.default) && !isNil(value.enum)) {
     if (value.default === '' || !value.enum.some((v) => v === value.default)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: 'Default value must be one of the enum values',
         path: ['default'],
       });
@@ -818,14 +820,11 @@ const updateSchemaInput = z.object(
     data: schemaSchema,
   },
   {
-    invalid_type_error: 'Invalid schema, expected an object with a data property',
-    required_error: 'Schema is required',
+    error: (issue) =>
+      issue.input === undefined
+        ? 'Schema is required'
+        : 'Invalid schema, expected an object with a data property',
   }
 );
 
-// TODO: Remove cast when content-type-builder migrates to Zod 4
-export const validateUpdateSchema = validateZodSchema(
-  updateSchemaInput as unknown as import('@strapi/utils').z.ZodType<
-    z.infer<typeof updateSchemaInput>
-  >
-);
+export const validateUpdateSchema = validateZodSchema(updateSchemaInput);
