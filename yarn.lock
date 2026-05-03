@@ -9058,8 +9058,8 @@ __metadata:
     zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/data-transfer": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9177,8 +9177,8 @@ __metadata:
     zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/admin": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9224,8 +9224,8 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9285,8 +9285,8 @@ __metadata:
     zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/admin": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9523,8 +9523,8 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     koa: ^2.15.2
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9623,8 +9623,8 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9706,8 +9706,8 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9738,8 +9738,8 @@ __metadata:
     vitest-config: "npm:5.50.2"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9791,8 +9791,8 @@ __metadata:
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9838,8 +9838,8 @@ __metadata:
     typescript: "npm:5.9.3"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9862,8 +9862,8 @@ __metadata:
     styled-components: "npm:6.4.1"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -9904,8 +9904,8 @@ __metadata:
     zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -10065,8 +10065,8 @@ __metadata:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
     "@strapi/types": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
@@ -10152,8 +10152,8 @@ __metadata:
     yalc: "npm:1.0.0-pre.53"
     yup: "npm:0.32.9"
   peerDependencies:
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   bin:
@@ -10339,8 +10339,8 @@ __metadata:
     zod: "npm:3.25.76"
   peerDependencies:
     "@strapi/admin": ^5.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
