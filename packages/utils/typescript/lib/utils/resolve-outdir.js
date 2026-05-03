@@ -2,7 +2,7 @@
 
 const path = require('path');
 const resolveConfigOptions = require('./resolve-config-options');
-const isUsingTypescript = require('./is-using-typescript');
+const isUsingTypeScript = require('./is-using-typescript');
 
 const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
 /**
@@ -12,7 +12,7 @@ const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
  * @returns {Promise<string | undefined>}
  */
 module.exports = async (dir, configFilename = DEFAULT_TS_CONFIG_FILENAME) => {
-  return (await isUsingTypescript(dir))
+  return (await isUsingTypeScript(dir))
     ? resolveConfigOptions(path.join(dir, configFilename)).options.outDir
     : undefined;
 };

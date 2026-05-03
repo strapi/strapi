@@ -16,18 +16,18 @@ async function directory() {
 
 async function typescript() {
   const { default: inquirer } = await import('inquirer');
-  const { useTypescript } = await inquirer.prompt<{
-    useTypescript: boolean;
+  const { useTypeScript } = await inquirer.prompt<{
+    useTypeScript: boolean;
   }>([
     {
       type: 'confirm',
-      name: 'useTypescript',
-      message: 'Start with Typescript?',
+      name: 'useTypeScript',
+      message: 'Start with TypeScript?',
       default: true,
     },
   ]);
 
-  return useTypescript;
+  return useTypeScript;
 }
 
 async function example() {

@@ -33,10 +33,10 @@ const getProperties = (scope: Scope, error?: TrackError) => {
     useYarn: scope.packageManager === 'yarn',
     packageManager: scope.packageManager,
     /** @deprecated */
-    useTypescriptOnServer: boolToString(scope.useTypescript),
+    useTypeScriptOnServer: boolToString(scope.useTypeScript),
     /** @deprecated */
-    useTypescriptOnAdmin: boolToString(scope.useTypescript),
-    useTypescript: boolToString(scope.useTypescript),
+    useTypeScriptOnAdmin: boolToString(scope.useTypeScript),
+    useTypeScript: boolToString(scope.useTypeScript),
     isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
     noRun: boolToString(scope.runApp),
     projectId: scope.uuid,

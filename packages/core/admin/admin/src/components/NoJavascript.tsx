@@ -23,7 +23,7 @@ const styles = `
  *
  * @description this belongs to our default document that we render.
  */
-const NoJavascript = () => {
+const NoJavaScript = () => {
   return (
     <noscript>
       <div className="strapi--root">
@@ -40,4 +40,4 @@ const NoJavascript = () => {
   );
 };
 
-export { NoJavascript };
+export { NoJavaScript };

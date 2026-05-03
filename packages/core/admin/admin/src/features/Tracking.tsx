@@ -11,8 +11,8 @@ import { useAuth } from './Auth';
 import { useStrapiApp } from './StrapiApp';
 
 export interface TelemetryProperties {
-  useTypescriptOnServer?: boolean;
-  useTypescriptOnAdmin?: boolean;
+  useTypeScriptOnServer?: boolean;
+  useTypeScriptOnAdmin?: boolean;
   isHostedOnStrapiCloud?: boolean;
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;

@@ -69,7 +69,7 @@ async function createStrapi(scope: Scope) {
 async function createApp(scope: Scope) {
   const {
     rootPath,
-    useTypescript,
+    useTypeScript,
     useExample,
     installDependencies,
     isQuickstart,
@@ -94,7 +94,7 @@ async function createApp(scope: Scope) {
   if (!template) {
     let templateName = useExample ? 'example' : 'vanilla';
 
-    if (!useTypescript) {
+    if (!useTypeScript) {
       templateName = `${templateName}-js`;
     }
 

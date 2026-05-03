@@ -58,8 +58,8 @@ export default (strapi: Core.Strapi): Sender => {
     docker: process.env.DOCKER || isDocker(),
     isCI: ciEnv.isCI,
     version: strapi.config.get('info.strapi'),
-    useTypescriptOnServer: tsUtils.isUsingTypeScriptSync(serverRootPath),
-    useTypescriptOnAdmin: tsUtils.isUsingTypeScriptSync(adminRootPath),
+    useTypeScriptOnServer: tsUtils.isUsingTypeScriptSync(serverRootPath),
+    useTypeScriptOnAdmin: tsUtils.isUsingTypeScriptSync(adminRootPath),
     projectId: uuid,
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
   };

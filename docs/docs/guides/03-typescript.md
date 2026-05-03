@@ -1,5 +1,5 @@
 ---
-title: Typescript
+title: TypeScript
 ---
 
 🚧 coming soon 🚧
