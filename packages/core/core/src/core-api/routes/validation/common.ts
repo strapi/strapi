@@ -1,7 +1,7 @@
 import type { Core, UID } from '@strapi/types';
 
 import { contentTypes, AbstractRouteValidator } from '@strapi/utils';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 /**
  * AbstractCoreRouteValidator provides the foundation for validating and managing core routes within a Strapi context for a specific model.

@@ -1,6 +1,6 @@
 import { CurriedFunction1 } from 'lodash';
 import { isArray, isObject } from 'lodash/fp';
-import type { z } from 'zod/v4';
+import type { z } from 'zod';
 
 import { getNonWritableAttributes, constants } from '../content-types';
 import { ALLOWED_QUERY_PARAM_KEYS } from '../content-api-constants';

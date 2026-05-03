@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';

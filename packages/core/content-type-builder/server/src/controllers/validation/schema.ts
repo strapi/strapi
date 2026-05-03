@@ -1,4 +1,4 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 import { strings, validateZodSchema } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
 import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
