@@ -10,6 +10,11 @@ const schema = yup.object().shape({
     then: yup.string().matches(URL_REGEX).required(),
     otherwise: yup.string().nullable(),
   }),
+  email_confirmation_error_redirection: yup.mixed().when('email_confirmation_error', {
+    is: true,
+    then: yup.string().matches(URL_REGEX).required(),
+    otherwise: yup.string().nullable(),
+  }),
   email_reset_password: yup
     .string(translatedErrors.string)
     .matches(URL_REGEX, {
