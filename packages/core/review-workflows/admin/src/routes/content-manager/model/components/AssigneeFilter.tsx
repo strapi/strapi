@@ -12,9 +12,9 @@ const AssigneeFilter = ({ name }: Filters.ValueInputProps) => {
   const [page, setPage] = React.useState(1);
   const [hasOpened, setHasOpened] = React.useState(false);
   const { formatMessage } = useIntl();
-  const { data, isLoading } = useAdminUsers({ page }, { skip: !hasOpened });
-
   const field = useField(name);
+  const shouldFetch = hasOpened || Boolean(field.value);
+  const { data, isLoading } = useAdminUsers({ page }, { skip: !shouldFetch });
 
   const handleChange = (value?: string) => {
     setPage(1);
