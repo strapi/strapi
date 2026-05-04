@@ -11656,6 +11656,32 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
+    "/config/permissions/resync-super-admin": {
+      "post": {
+        "operationId": "config/post/config_permissions_resync_super_admin",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "config",
+        ],
+      },
+    },
     "/config/ratelimit/enable": {
       "post": {
         "operationId": "config/post/config_ratelimit_enable",

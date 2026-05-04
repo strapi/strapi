@@ -1,4 +1,6 @@
 import { isObject } from 'lodash/fp';
+import ora from 'ora';
+import type { Ora } from 'ora';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
 import {
@@ -15,7 +17,11 @@ import {
   getAssetsBackupHandler,
   parseRestoreFromOptions,
 } from '../../utils/data-transfer';
-import { exitWith } from '../../utils/helpers';
+import {
+  exitWith,
+  formatElapsedAndMaybeRemainingLabel,
+  TRANSFER_PROGRESS_FIELD_SEP,
+} from '../../utils/helpers';
 
 const { createTransferEngine } = engineDataTransfer;
 const {
@@ -56,6 +62,10 @@ interface CmdOptions {
  * Transfers data between local Strapi and remote Strapi instances
  */
 export default async (opts: CmdOptions) => {
+  // Avoid DeprecationWarning lines on stderr (e.g. pg `client.query()` while a query is in flight)
+  // interleaving with ora spinners during transfer. (Runtime API; not on all @types/node Process typings.)
+  (process as NodeJS.Process & { noDeprecation: boolean }).noDeprecation = true;
+
   // Validate inputs from Commander
   if (!isObject(opts)) {
     exitWith(1, 'Could not parse command arguments');
@@ -98,12 +108,20 @@ export default async (opts: CmdOptions) => {
     });
   }
 
+  /** Wired after `engine` exists so destination prep can update the CLI spinner. */
+  const transferPhaseBridge: { emit: (message: string) => void } = {
+    emit() {
+      /* replaced below once `progress` exists */
+    },
+  };
+
   // if no URL provided, use local Strapi
   if (!opts.to) {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
       strategy: 'restore',
       restore: parseRestoreFromOptions(opts, strapi),
+      onTransferPhase: (message: string) => transferPhaseBridge.emit(message),
     });
   }
   // if URL provided, set up a remote destination provider
@@ -120,6 +138,7 @@ export default async (opts: CmdOptions) => {
       },
       strategy: 'restore',
       restore: parseRestoreFromOptions(opts, strapi),
+      onTransferPhase: (message: string) => transferPhaseBridge.emit(message),
       ...(checksumsEnabled ? { verifyChecksums: true } : {}),
     });
   }
@@ -156,7 +175,51 @@ export default async (opts: CmdOptions) => {
 
   const progress = engine.progress.stream;
 
+  /** Shown until destination prep emits a step; then we keep this prefix and append the step after " — ". */
+  const STARTING_TRANSFER_PREFIX = 'Starting transfer…';
+  let prepStepDetail: string | null = null;
+
+  const formatPrepSpinnerLine = () =>
+    prepStepDetail != null && prepStepDetail !== ''
+      ? `${STARTING_TRANSFER_PREFIX} — ${prepStepDetail}`
+      : STARTING_TRANSFER_PREFIX;
+
+  transferPhaseBridge.emit = (message: string) => {
+    prepStepDetail = message;
+    progress.emit('transfer::phase', { message: formatPrepSpinnerLine() });
+  };
+
   const { updateLoader } = loadersFactory();
+
+  let startingSpinner: Ora | null = null;
+  let startingElapsedInterval: ReturnType<typeof setInterval> | null = null;
+  /** Set when `transfer::start` fires so we can print a final persisted line with elapsed time. */
+  let transferPrepStartedAt: number | null = null;
+
+  /**
+   * Stops the "starting transfer" spinner and **leaves a finished line** in the console (like stage
+   * `succeed`/`fail`), so the next stage spinner starts on a new line instead of replacing this one.
+   */
+  const finishStartingSpinner = (outcome: 'done' | 'fail' = 'done') => {
+    if (startingElapsedInterval) {
+      clearInterval(startingElapsedInterval);
+      startingElapsedInterval = null;
+    }
+    if (startingSpinner) {
+      const elapsed = transferPrepStartedAt != null ? Date.now() - transferPrepStartedAt : 0;
+      const line = `${formatPrepSpinnerLine()}${TRANSFER_PROGRESS_FIELD_SEP}${formatElapsedAndMaybeRemainingLabel(
+        elapsed,
+        null
+      )}`;
+      if (outcome === 'fail') {
+        startingSpinner.fail(line);
+      } else {
+        startingSpinner.succeed(line);
+      }
+      startingSpinner = null;
+      transferPrepStartedAt = null;
+    }
+  };
 
   engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force, action: 'transfer' }));
 
@@ -179,6 +242,7 @@ export default async (opts: CmdOptions) => {
   }, 100);
 
   progress.on(`stage::start`, ({ stage, data }) => {
+    finishStartingSpinner('done');
     updateLoader(stage, data).start();
   });
 
@@ -196,11 +260,28 @@ export default async (opts: CmdOptions) => {
     updateLoader(stage, data).fail();
   });
 
-  progress.on('transfer::finish', () => clearInterval(interval));
-  progress.on('transfer::error', () => clearInterval(interval));
+  progress.on('transfer::finish', () => {
+    finishStartingSpinner('done');
+    clearInterval(interval);
+  });
+  progress.on('transfer::error', () => {
+    finishStartingSpinner('fail');
+    clearInterval(interval);
+  });
 
   progress.on('transfer::start', async () => {
-    console.log(`Starting transfer...`);
+    transferPrepStartedAt = Date.now();
+    prepStepDetail = null;
+    startingSpinner = ora(formatPrepSpinnerLine()).start();
+    startingElapsedInterval = setInterval(() => {
+      if (startingSpinner && transferPrepStartedAt != null) {
+        const elapsed = Date.now() - transferPrepStartedAt;
+        startingSpinner.text = `${formatPrepSpinnerLine()}${TRANSFER_PROGRESS_FIELD_SEP}${formatElapsedAndMaybeRemainingLabel(
+          elapsed,
+          null
+        )}`;
+      }
+    }, 100);
 
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
   });

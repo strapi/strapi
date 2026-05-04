@@ -262,4 +262,46 @@ describe('usePersistentPartialQueryParams', () => {
 
     expect(mockSetQuery).not.toHaveBeenCalled();
   });
+
+  describe('isHydrated', () => {
+    it('flips to true after the hydration effect runs when localStorage is populated', async () => {
+      window.localStorage.setItem(key, JSON.stringify({ page: 2, pageSize: 20, sort: 'name:asc' }));
+
+      const { result } = renderHook(() =>
+        usePersistentPartialQueryParams({
+          [key]: { paths: keysToPersist },
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+    });
+
+    it('flips to true even when localStorage is empty', async () => {
+      const { result } = renderHook(() =>
+        usePersistentPartialQueryParams({
+          [key]: { paths: keysToPersist },
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+    });
+
+    it('flips to true even when localStorage holds invalid JSON', async () => {
+      window.localStorage.setItem(key, 'invalid-json');
+
+      const { result } = renderHook(() =>
+        usePersistentPartialQueryParams({
+          [key]: { paths: keysToPersist },
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+    });
+  });
 });

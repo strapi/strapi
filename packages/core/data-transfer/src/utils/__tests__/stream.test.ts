@@ -11,7 +11,7 @@ describe('stream utils', () => {
 
       const source = Readable.from(data, { objectMode: true });
       const originalPause = source.pause.bind(source);
-      source.pause = function () {
+      source.pause = function trackPauseForBackpressureTest() {
         sourcePaused = true;
         return originalPause();
       };
@@ -75,7 +75,7 @@ describe('stream utils', () => {
 
       const source = Readable.from(data, { objectMode: true });
       const originalPause = source.pause.bind(source);
-      source.pause = function () {
+      source.pause = function trackPauseForBackpressureTest() {
         sourcePaused = true;
         return originalPause();
       };
@@ -141,6 +141,7 @@ describe('stream utils', () => {
       const source = Readable.from([1, 2, 3], { objectMode: true });
       const result = await collect<number>(source, { destroy: false });
       expect(result).toEqual([1, 2, 3]);
+      // collect() does not call stream.destroy() when destroy: false; the stream impl may still close itself
     });
 
     test('resolves on close with chunks received so far', async () => {
