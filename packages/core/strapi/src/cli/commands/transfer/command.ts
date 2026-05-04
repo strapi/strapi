@@ -36,6 +36,12 @@ const command = () => {
       .addOption(
         new Option('--to-token <token>', `Transfer token for the remote Strapi destination`)
       )
+      .addOption(
+        new Option(
+          '--no-checksums',
+          'Disable end-to-end asset checksum verification for assets transfer'
+        )
+      )
       .addOption(new Option('--verbose', 'Enable verbose logs'))
       .addOption(forceOption)
       .addOption(excludeOption)
