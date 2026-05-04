@@ -3,7 +3,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`, `flag: documentation`];
+const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`];
 
 async function main() {
   try {

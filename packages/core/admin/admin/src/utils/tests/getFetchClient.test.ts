@@ -57,6 +57,22 @@ describe('getFetchClient', () => {
     );
   });
 
+  it('should not append a trailing ? when params is an empty object', async () => {
+    (window.fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        status: 200,
+        ok: true,
+        json: () => Promise.resolve({ data: 'success response' }),
+      })
+    );
+    const fetchClient = getFetchClient();
+    await fetchClient.get('test-fetch-client', { params: {} });
+    expect(window.fetch).toHaveBeenCalledWith(
+      'http://localhost:1337/test-fetch-client',
+      expect.anything()
+    );
+  });
+
   it('should serialize a params object to a string', async () => {
     (window.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
