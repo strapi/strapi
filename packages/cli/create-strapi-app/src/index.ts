@@ -28,7 +28,7 @@ const command = new commander.Command('create-strapi-app')
 
   // setup options
   .option('--ts, --typescript', 'Initialize the project with TypeScript (default)')
-  .option('--js, --javascript', 'Initialize the project with Javascript')
+  .option('--js, --javascript', 'Initialize the project with JavaScript')
 
   // Package manager options
   .option('--use-npm', 'Use npm as the project package manager')
@@ -189,18 +189,18 @@ async function run(args: string[]): Promise<void> {
   }
 
   if (options.javascript === true) {
-    scope.useTypescript = false;
+    scope.useTypeScript = false;
   } else if (options.typescript === true || skipPrompts) {
-    scope.useTypescript = true;
+    scope.useTypeScript = true;
   } else if (!options.template) {
-    scope.useTypescript = await prompts.typescript();
+    scope.useTypeScript = await prompts.typescript();
   }
 
   scope.installDependencies = await resolveOption(options.install, skipPrompts, true, () =>
     prompts.installDependencies(scope.packageManager)
   );
 
-  if (scope.useTypescript) {
+  if (scope.useTypeScript) {
     scope.devDependencies = {
       ...scope.devDependencies,
       typescript: '^5',

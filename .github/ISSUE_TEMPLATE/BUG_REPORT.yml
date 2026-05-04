@@ -81,12 +81,12 @@ body:
   - type: dropdown
     id: codeType
     attributes:
-      label: Javascript or Typescript
+      label: JavaScript or TypeScript
       description: Select the code language your project is using.
       multiple: false
       options:
-        - Javascript
-        - Typescript
+        - JavaScript
+        - TypeScript
         - Other
     validations:
       required: true

@@ -101,8 +101,8 @@ export declare namespace TelemetryProperties {
   }
   export interface Response {
     data: {
-      useTypescriptOnServer: boolean;
-      useTypescriptOnAdmin: boolean;
+      useTypeScriptOnServer: boolean;
+      useTypeScriptOnAdmin: boolean;
       isHostedOnStrapiCloud: boolean;
       numberOfAllContentTypes: number;
       numberOfComponents: number;

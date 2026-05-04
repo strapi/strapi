@@ -2,7 +2,7 @@
 
 const path = require('path');
 const resolveConfigOptions = require('./resolve-config-options');
-const isUsingTypescriptSync = require('./is-using-typescript-sync');
+const isUsingTypeScriptSync = require('./is-using-typescript-sync');
 
 const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
 /**
@@ -12,7 +12,7 @@ const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
  * @returns {string | undefined}
  */
 module.exports = (dir, configFilename = DEFAULT_TS_CONFIG_FILENAME) => {
-  return isUsingTypescriptSync(dir)
+  return isUsingTypeScriptSync(dir)
     ? resolveConfigOptions(path.join(dir, configFilename)).options.outDir
     : undefined;
 };

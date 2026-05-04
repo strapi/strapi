@@ -61,6 +61,6 @@ export interface Database<TClient extends ClientKind = ClientKind> {
   settings?: {
     forceMigration?: boolean;
     runMigrations?: boolean;
-    useTypescriptMigrations?: boolean;
+    useTypeScriptMigrations?: boolean;
   };
 }

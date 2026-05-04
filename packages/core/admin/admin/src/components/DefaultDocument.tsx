@@ -1,4 +1,4 @@
-import { NoJavascript } from './NoJavascript';
+import { NoJavaScript } from './NoJavaScript';
 
 const globalStyles = `
   html,
@@ -33,7 +33,7 @@ const DefaultDocument = ({ entryPath }: DefaultDocumentProps) => {
       </head>
       <body>
         <div id="strapi" />
-        <NoJavascript />
+        <NoJavaScript />
         {entryPath ? <script type="module" src={entryPath} /> : null}
       </body>
     </html>

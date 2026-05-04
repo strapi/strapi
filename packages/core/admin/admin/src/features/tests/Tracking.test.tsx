@@ -21,7 +21,7 @@ jest.mock('../../services/admin', () => ({
   }),
   useTelemetryPropertiesQuery: jest.fn().mockReturnValue({
     data: {
-      useTypescriptOnServer: true,
+      useTypeScriptOnServer: true,
     },
   }),
 }));
@@ -69,7 +69,7 @@ describe('useTracking', () => {
           event: 'didSaveContentType',
           eventProperties: {},
           groupProperties: {
-            useTypescriptOnServer: true,
+            useTypeScriptOnServer: true,
             projectId: '1',
             projectType: 'Community',
           },

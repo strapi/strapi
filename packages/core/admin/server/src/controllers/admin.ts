@@ -97,8 +97,8 @@ export default {
       return;
     }
 
-    const useTypescriptOnServer = await isUsingTypeScript(strapi.dirs.app.root);
-    const useTypescriptOnAdmin = await isUsingTypeScript(
+    const useTypeScriptOnServer = await isUsingTypeScript(strapi.dirs.app.root);
+    const useTypeScriptOnAdmin = await isUsingTypeScript(
       path.join(strapi.dirs.app.root, 'src', 'admin')
     );
     const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
@@ -117,8 +117,8 @@ export default {
 
     return {
       data: {
-        useTypescriptOnServer,
-        useTypescriptOnAdmin,
+        useTypeScriptOnServer,
+        useTypeScriptOnAdmin,
         isHostedOnStrapiCloud,
         numberOfAllContentTypes, // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents,

@@ -162,7 +162,7 @@ If you are writing tests for an unstable future feature you will need to add `ap
 
 ## What is Playwright?
 
-Playwright enables reliable end-to-end testing for modern web apps. It's cross browser, cross platform and cross language. At Strapi we use it for Javascript automated testing.
+Playwright enables reliable end-to-end testing for modern web apps. It's cross browser, cross platform and cross language. At Strapi we use it for JavaScript automated testing.
 
 For more information check out their [docs](https://playwright.dev/docs/intro). If you're struggling with their APIs, then check out their specific [API documentation](https://playwright.dev/docs/api/class-playwright).
 

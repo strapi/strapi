@@ -61,7 +61,7 @@ export interface Scope {
   database: DatabaseInfo;
   tmpPath?: string;
   packageJsonStrapi?: Record<string, unknown>;
-  useTypescript?: boolean;
+  useTypeScript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
   shouldCreateGrowthSsoTrial: boolean;
