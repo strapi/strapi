@@ -140,7 +140,10 @@ const useDocument: UseDocument = (args, opts) => {
 
       // When it's a singleType without a mainField, use the contentType displayName
       if (schema?.kind === 'singleType' && schema.info.displayName) {
-        return schema.info.displayName;
+        return formatMessage({
+          id: schema.info.displayName,
+          defaultMessage: schema.info.displayName,
+        });
       }
 
       // Otherwise, use a fallback
@@ -259,7 +262,7 @@ const useDocument: UseDocument = (args, opts) => {
  * @internal this hook uses the router to extract the model, collection type & id from the url.
  * therefore, it shouldn't be used outside of the content-manager because it won't work as intended.
  */
-const useDoc = () => {
+const useDoc = (opts?: UseDocumentOpts) => {
   const { id, slug, collectionType, origin } = useParams<{
     id: string;
     origin: string;
@@ -280,7 +283,8 @@ const useDoc = () => {
   const document = useDocument(
     { documentId: origin || id, model: slug, collectionType, params },
     {
-      skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
+      ...opts,
+      skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES) || opts?.skip,
     }
   );
 

@@ -4,7 +4,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 
 test.describe('List View', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -31,7 +31,7 @@ test.describe('List View', () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: 'Article' }).click();
 
-      // with-admin.tar: Article has 2 entries, both draft initially
+      // with-admin: Article has 2 entries, both draft initially
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
 
       await page.getByRole('button', { name: 'Filters' }).click();

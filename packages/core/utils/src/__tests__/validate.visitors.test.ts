@@ -141,6 +141,14 @@ describe('Validate visitors util', () => {
         validators.validateFilters(ctx, filters, filtersValidationsWithoutPrivate)
       ).resolves.not.toThrow();
     });
+
+    test('throws when scalar field filter map contains an invalid nested key', async () => {
+      const filters = { title: { totallyUnknownNestedKey: 'x' } };
+
+      await expect(
+        validators.validateFilters(ctx, filters, ['nonAttributesOperators'])
+      ).rejects.toThrow(ValidationError);
+    });
   });
 
   describe('defaultValidatePopulate - nested filters/sort/fields within populate', () => {

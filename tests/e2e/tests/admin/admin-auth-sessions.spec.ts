@@ -1,13 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { gotoAdminPath } from '../../../utils/shared';
 import { login } from '../../../utils/login';
 import { TITLE_LOGIN, TITLE_HOME } from '../../constants';
 
 test.describe('Legacy Admin Token Migration', () => {
   test.beforeEach(async ({ page, context }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await context.clearCookies();
-    await page.goto('/admin');
+    await gotoAdminPath(page);
   });
 
   test('should force logout on first interaction with legacy token', async ({ page }) => {
@@ -18,7 +19,7 @@ test.describe('Legacy Admin Token Migration', () => {
     });
 
     // Try to access admin - should be redirected to login
-    await page.goto('/admin');
+    await gotoAdminPath(page);
 
     // Should be redirected to login page
     await expect(page).toHaveTitle(TITLE_LOGIN);
@@ -33,7 +34,7 @@ test.describe('Legacy Admin Token Migration', () => {
     });
 
     // Navigate to login page
-    await page.goto('/admin');
+    await gotoAdminPath(page);
     await expect(page).toHaveTitle(TITLE_LOGIN);
 
     // Perform fresh login
@@ -65,7 +66,7 @@ test.describe('Legacy Admin Token Migration', () => {
     });
 
     // Navigate to trigger authentication check - should redirect to login
-    await page.goto('/admin/settings');
+    await gotoAdminPath(page, 'settings');
     await expect(page).toHaveTitle(TITLE_LOGIN);
     await expect(page.getByText('Log in to your Strapi account')).toBeVisible();
   });

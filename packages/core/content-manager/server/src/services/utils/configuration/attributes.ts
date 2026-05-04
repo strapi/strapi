@@ -184,8 +184,9 @@ const getSortableAttributes = (schema: any) => {
     getWritableAttributes(model)
   );
 
+  const identifierField = _.has(schema.attributes, 'documentId') ? 'documentId' : 'id';
   return [
-    'id',
+    identifierField,
     ...validAttributes,
     ...nonVisibleWritableAttributes,
     CREATED_BY_ATTRIBUTE,

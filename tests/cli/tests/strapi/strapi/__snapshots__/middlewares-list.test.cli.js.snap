@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`middlewares:list should output list of middlewares 1`] = `
+"│ Name                                           │
+│ strapi::compression                            │
+│ strapi::cors                                   │
+│ strapi::errors                                 │
+│ strapi::favicon                                │
+│ strapi::ip                                     │
+│ strapi::logger                                 │
+│ strapi::poweredBy                              │
+│ strapi::body                                   │
+│ strapi::query                                  │
+│ strapi::responseTime                           │
+│ strapi::responses                              │
+│ strapi::security                               │
+│ strapi::session                                │
+│ strapi::public                                 │
+│ plugin::content-type-builder.isDevelopmentMode │
+│ plugin::email.rateLimit                        │
+│ plugin::users-permissions.rateLimit            │
+│ admin::rateLimit                               │
+│ admin::data-transfer                           │"
+`;

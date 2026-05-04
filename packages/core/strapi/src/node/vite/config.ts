@@ -199,7 +199,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
   };
 };
 
-const USER_CONFIGS = ['vite.config.js', 'vite.config.mjs', 'vite.config.ts'];
+const USER_CONFIGS = ['vite.config.js', 'vite.config.mjs', 'vite.config.ts', 'vite.config.mts'];
 
 type UserViteConfig = (config: UserConfig) => UserConfig;
 
