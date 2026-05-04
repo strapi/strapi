@@ -1,5 +1,5 @@
 import type { Model } from './types';
-import { ValidationError } from './errors';
+import { ApplicationError, ValidationError } from './errors';
 import { hasDraftAndPublish } from './content-types';
 
 export type PublicationFilterMode =
@@ -64,11 +64,18 @@ export const validatePublicationFilterQueryParam = (value: unknown): void => {
 };
 
 const columnName = (meta: any, attr: string): string => {
-  const a = meta.attributes[attr];
+  const a = meta?.attributes?.[attr];
   if (!a) {
-    return attr;
+    throw new ApplicationError(
+      `Cannot build publicationFilter SQL: attribute '${attr}' is missing from metadata for table '${meta?.tableName ?? '<unknown>'}'.`
+    );
   }
-  return ('columnName' in a && a.columnName) || attr;
+  if (!('columnName' in a) || !a.columnName) {
+    throw new ApplicationError(
+      `Cannot build publicationFilter SQL: attribute '${attr}' on table '${meta?.tableName ?? '<unknown>'}' has no resolved columnName.`
+    );
+  }
+  return a.columnName as string;
 };
 
 const emptyIdSelection = (knex: any, table: string, idCol: string) =>

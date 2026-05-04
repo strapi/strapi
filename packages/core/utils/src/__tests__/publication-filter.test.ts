@@ -1,5 +1,10 @@
-import { ValidationError } from '../errors';
-import { parsePublicationFilter, validatePublicationFilterQueryParam } from '../publication-filter';
+import { ApplicationError, ValidationError } from '../errors';
+import type { Model } from '../types';
+import {
+  buildPublicationFilterWhere,
+  parsePublicationFilter,
+  validatePublicationFilterQueryParam,
+} from '../publication-filter';
 
 const ALLOWED_VALUES = [
   'never-published',
@@ -53,13 +58,59 @@ describe('validatePublicationFilterQueryParam', () => {
   });
 
   it('throws ValidationError with query source and param for invalid values', () => {
+    expect(() => validatePublicationFilterQueryParam('bad-value')).toThrow(ValidationError);
     try {
       validatePublicationFilterQueryParam('bad-value');
-      expect.fail('expected throw');
     } catch (e: any) {
-      expect(e).toBeInstanceOf(ValidationError);
       expect(e.details?.source).toBe('query');
       expect(e.details?.param).toBe('publicationFilter');
     }
+  });
+});
+
+describe('buildPublicationFilterWhere', () => {
+  const draftPublishModel = {
+    modelType: 'contentType' as const,
+    uid: 'api::article.article',
+    attributes: {},
+    options: { draftAndPublish: true },
+  } as Model;
+
+  /** Not used when columnName throws first; satisfies knex param type. */
+  const knexStub = {} as any;
+
+  it('throws ApplicationError when a required attribute is missing from metadata', () => {
+    const meta = {
+      tableName: 'articles',
+      attributes: {
+        id: { type: 'integer', columnName: 'id' },
+      },
+    };
+
+    expect(() =>
+      buildPublicationFilterWhere(knexStub, meta, draftPublishModel, 'never-published', 'draft')
+    ).toThrow(ApplicationError);
+    expect(() =>
+      buildPublicationFilterWhere(knexStub, meta, draftPublishModel, 'never-published', 'draft')
+    ).toThrow(/attribute 'documentId' is missing from metadata/);
+  });
+
+  it('throws ApplicationError when an attribute has no resolved columnName', () => {
+    const meta = {
+      tableName: 'articles',
+      attributes: {
+        id: { type: 'integer' },
+        documentId: { type: 'string', columnName: 'document_id' },
+        publishedAt: { type: 'datetime', columnName: 'published_at' },
+        updatedAt: { type: 'datetime', columnName: 'updated_at' },
+      },
+    };
+
+    expect(() =>
+      buildPublicationFilterWhere(knexStub, meta, draftPublishModel, 'never-published', 'draft')
+    ).toThrow(ApplicationError);
+    expect(() =>
+      buildPublicationFilterWhere(knexStub, meta, draftPublishModel, 'never-published', 'draft')
+    ).toThrow(/attribute 'id' on table 'articles' has no resolved columnName/);
   });
 });
