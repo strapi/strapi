@@ -285,17 +285,23 @@ const formatEditLayout = (
 
   const componentEditAttributes = Object.entries(data.components).reduce<EditLayout['components']>(
     (acc, [uid, configuration]) => {
+      const component = components[uid];
+
+      if (!component) {
+        return acc;
+      }
+
       acc[uid] = {
         layout: convertEditLayoutToFieldLayouts(
           configuration.layouts.edit,
-          components[uid].attributes,
+          component.attributes,
           configuration.metadatas,
           { configurations: data.components, schemas: components }
         ),
         settings: {
           ...configuration.settings,
-          icon: components[uid].info.icon,
-          displayName: components[uid].info.displayName,
+          icon: component.info.icon,
+          displayName: component.info.displayName,
         },
       };
       return acc;
