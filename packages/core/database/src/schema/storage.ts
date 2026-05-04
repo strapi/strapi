@@ -68,7 +68,7 @@ export default (db: Database) => {
       // Sort tables by name for deterministic hashing regardless of insertion order
       const sorted = {
         ...schema,
-        tables: schema.tables.sort((a, b) => a.name.localeCompare(b.name)),
+        tables: schema.tables.toSorted((a, b) => a.name.localeCompare(b.name)),
       };
       return crypto.createHash('sha256').update(JSON.stringify(sorted)).digest('hex');
     },
