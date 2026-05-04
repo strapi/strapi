@@ -394,7 +394,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       entries.delete(entryToDelete.id, selectionQuery)
     );
 
-    entriesToDelete.forEach(emitEvent('entry.delete'));
+    await Promise.all(entriesToDelete.map(emitEvent('entry.delete')));
 
     return { documentId, entries: deletedEntries };
   }
@@ -413,7 +413,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const doc = await entries.create(queryParams);
 
-    emitEvent('entry.create', doc);
+    await emitEvent('entry.create', doc);
 
     if (hasDraftAndPublish && params.status === 'published') {
       return publish({
@@ -459,7 +459,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       )
     );
 
-    clonedEntries.forEach(emitEvent('entry.create'));
+    await Promise.all(clonedEntries.map(emitEvent('entry.create')));
 
     return { documentId: clonedEntries.at(0)?.documentId, entries: clonedEntries };
   }
@@ -492,7 +492,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     let updatedDraft = null;
     if (entryToUpdate) {
       updatedDraft = await entries.update(entryToUpdate, queryParams);
-      emitEvent('entry.update', updatedDraft);
+      await emitEvent('entry.update', updatedDraft);
     }
 
     if (!updatedDraft) {
@@ -510,7 +510,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           ...queryParams,
           data: mergedData,
         });
-        emitEvent('entry.create', updatedDraft);
+        await emitEvent('entry.create', updatedDraft);
       }
     }
 
@@ -613,10 +613,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       bidirectionalRelationsToSync
     );
 
-    // Sync self-referential relations with the new published entries
-    await selfReferentialRelations.sync(draftsToPublish, publishedEntries, selfRelationsToSync);
-
-    publishedEntries.forEach(emitEvent('entry.publish'));
+    await Promise.all(publishedEntries.map(emitEvent('entry.publish')));
 
     return { documentId, entries: publishedEntries };
   }
@@ -636,7 +633,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const versionsToDelete = await strapi.db.query(uid).findMany(query);
     await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
-    versionsToDelete.forEach(emitEvent('entry.unpublish'));
+    await Promise.all(versionsToDelete.map(emitEvent('entry.unpublish')));
     return { documentId, entries: versionsToDelete };
   }
 
