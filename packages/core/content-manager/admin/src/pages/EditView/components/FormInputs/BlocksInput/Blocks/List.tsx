@@ -9,6 +9,7 @@ import { styled, type CSSProperties, css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
+import { getAttributesToClear } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
 const listStyle = css`
@@ -274,19 +275,66 @@ const handleEnterKeyOnList = (editor: Editor) => {
 };
 
 /**
- * Common handler for converting a node to a list
+ * Converts the current selection into a list.
+ *
+ * - Supports both single-block and multi-block selections.
+ * - Ensures consistency with single-block behavior by clearing
+ *   block-specific attributes (e.g., heading level) when converting.
  */
 const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) => {
-  if (!editor.selection) return;
+  /**
+   * Ensure there is a valid selection before applying transformations.
+   * If no selection exists:
+   * - For non-empty editors, move the cursor to the last block.
+   * - For empty editors, place the cursor at the start.
+   */
+  if (!editor.selection) {
+    const editorIsEmpty =
+      editor.children.length === 1 && Editor.isEmpty(editor, editor.children[0]);
 
-  // if multiple block
-  if (!Range.isCollapsed(editor.selection)) {
-    Transforms.setNodes(editor, { type: 'list-item' } as Partial<Node>, {
-      at: editor.selection,
-      match: (node) => Element.isElement(node) && node.type !== 'list' && node.type !== 'list-item',
-    });
+    if (!editorIsEmpty) {
+      const [_, lastPath] = Editor.last(editor, []);
+      Transforms.select(editor, Editor.start(editor, lastPath));
+    } else {
+      Transforms.select(editor, Editor.start(editor, [0, 0]));
+    }
+  }
 
-    Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: editor.selection });
+  const selection = editor.selection;
+  if (!selection) return;
+
+  // multi block selection
+  if (!Range.isCollapsed(selection)) {
+    const nodes = Array.from(
+      Editor.nodes(editor, {
+        at: selection,
+        match: (node) =>
+          Element.isElement(node) && node.type !== 'list' && node.type !== 'list-item',
+      })
+    );
+
+    // any block-specific attributes to match single-block behavior.
+    for (const [node, path] of nodes) {
+      const attrsToClear = getAttributesToClear(node as any);
+
+      Transforms.setNodes(
+        editor,
+        {
+          ...attrsToClear,
+          type: 'list-item',
+        },
+        { at: path }
+      );
+    }
+
+    Transforms.wrapNodes(
+      editor,
+      { type: 'list', format, children: [] },
+      {
+        at: selection,
+        match: (node) => Element.isElement(node) && node.type === 'list-item',
+      }
+    );
 
     return;
   }
