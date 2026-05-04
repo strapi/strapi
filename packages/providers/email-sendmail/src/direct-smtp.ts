@@ -1,4 +1,5 @@
 import { resolveMx as dnsResolveMx } from 'dns/promises';
+import { hostname as osHostname } from 'os';
 import nodemailer from 'nodemailer';
 import type { SentMessageInfo, SendMailOptions } from 'nodemailer';
 
@@ -135,7 +136,8 @@ export async function sendDirectSmtp(
 
   const fromHeader = String(mail.from || '');
   const fromAddr = extractEmail(fromHeader);
-  const srcHost = String(getHostFromAddress(fromAddr));
+  const fromHost = getHostFromAddress(fromAddr);
+  const srcHost = fromHost || osHostname() || 'localhost';
 
   const dkimOpt = providerOptions.dkim;
   const dkim: SendMailOptions['dkim'] =

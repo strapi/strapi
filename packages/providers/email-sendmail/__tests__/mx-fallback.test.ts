@@ -1,4 +1,5 @@
 import { resolveMx } from 'dns/promises';
+import { hostname as osHostname } from 'os';
 import nodemailer from 'nodemailer';
 
 import { sendDirectSmtp } from '../src/direct-smtp';
@@ -7,9 +8,14 @@ jest.mock('dns/promises', () => ({
   resolveMx: jest.fn(),
 }));
 
+jest.mock('os', () => ({
+  hostname: jest.fn(() => 'test-host.fallback'),
+}));
+
 jest.mock('nodemailer');
 
 const mockedResolveMx = resolveMx as jest.MockedFunction<typeof resolveMx>;
+const mockedOsHostname = osHostname as jest.MockedFunction<typeof osHostname>;
 const mockedCreateTransport = nodemailer.createTransport as jest.MockedFunction<
   typeof nodemailer.createTransport
 >;
@@ -20,11 +26,55 @@ describe('sendDirectSmtp MX fallback and transport options', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedOsHostname.mockReturnValue('test-host.fallback');
     sendMail.mockResolvedValue({ messageId: '<id@test>' });
     close.mockImplementation(() => {});
     mockedCreateTransport.mockReturnValue({ sendMail, close } as unknown as ReturnType<
       typeof nodemailer.createTransport
     >);
+  });
+
+  it('uses os.hostname as SMTP client name when From has no domain part', async () => {
+    await sendDirectSmtp(
+      { from: 'not-an-email', to: 'user@to.com', subject: 's', text: 't' },
+      { devPort: 1025, devHost: '127.0.0.1', silent: true }
+    );
+
+    expect(mockedOsHostname).toHaveBeenCalled();
+    expect(mockedCreateTransport).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'test-host.fallback' })
+    );
+  });
+
+  it('uses localhost when From has no domain and os.hostname() is empty', async () => {
+    mockedOsHostname.mockReturnValueOnce('');
+
+    await sendDirectSmtp(
+      { from: 'not-an-email', to: 'user@to.com', subject: 's', text: 't' },
+      { devPort: 1025, devHost: '127.0.0.1', silent: true }
+    );
+
+    expect(mockedCreateTransport).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'localhost' })
+    );
+  });
+
+  it('uses os.hostname for DKIM domainName when From has no domain part', async () => {
+    await sendDirectSmtp(
+      { from: 'not-an-email', to: 'user@to.com', subject: 's', text: 't' },
+      {
+        devPort: 1025,
+        devHost: '127.0.0.1',
+        silent: true,
+        dkim: { privateKey: 'test-key', keySelector: 'default' },
+      }
+    );
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dkim: expect.objectContaining({ domainName: 'test-host.fallback' }),
+      })
+    );
   });
 
   it('passes tls.rejectUnauthorized to createTransport', async () => {
