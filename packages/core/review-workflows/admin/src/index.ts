@@ -32,9 +32,10 @@ const admin: Plugin.Config.AdminInput = {
         },
         licenseOnly: true,
         permissions: [],
-        async Component() {
-          const { Router } = await import('./router');
-          return { default: Router };
+        Component() {
+          return import('./router').then((mod) => ({
+            default: mod.Router,
+          }));
         },
       });
 
@@ -66,9 +67,10 @@ const admin: Plugin.Config.AdminInput = {
         },
         licenseOnly: true,
         permissions: [],
-        async Component() {
-          const { PurchaseReviewWorkflows } = await import('./routes/purchase-review-workflows');
-          return { default: PurchaseReviewWorkflows };
+        Component() {
+          return import('./routes/purchase-review-workflows').then((mod) => ({
+            default: mod.PurchaseReviewWorkflows,
+          }));
         },
       });
     }
