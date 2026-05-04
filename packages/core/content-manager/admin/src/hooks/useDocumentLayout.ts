@@ -362,7 +362,7 @@ const convertEditLayoutToFieldLayouts = (
 
         const settings: Partial<Settings> =
           attribute.type === 'component' && components
-            ? components.configurations[attribute.component].settings
+            ? (components.configurations[attribute.component]?.settings ?? {})
             : {};
 
         return {
@@ -471,7 +471,7 @@ const convertListLayoutToFieldLayouts = (
 
       const settings: Partial<Settings> =
         attribute.type === 'component' && components
-          ? components.configurations[attribute.component].settings
+          ? (components.configurations[attribute.component]?.settings ?? {})
           : {};
 
       return {
