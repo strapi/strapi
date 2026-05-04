@@ -65,7 +65,12 @@ export default (db: Database) => {
     },
 
     hashSchema(schema: Schema) {
-      return crypto.createHash('sha256').update(JSON.stringify(schema)).digest('hex');
+      // Sort tables by name for deterministic hashing regardless of insertion order
+      const sorted = {
+        ...schema,
+        tables: schema.tables.sort((a, b) => a.name.localeCompare(b.name)),
+      };
+      return crypto.createHash('sha256').update(JSON.stringify(sorted)).digest('hex');
     },
 
     async add(schema: Schema) {
