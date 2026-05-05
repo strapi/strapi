@@ -41,6 +41,7 @@ const SideNavContainer = styled(Flex)`
 `;
 
 const OverflowingItem = styled(Box)`
+  position: relative;
   overflow-x: hidden;
 
   ${({ theme }) => theme.breakpoints.medium} {
