@@ -29,14 +29,13 @@ describe('Code', () => {
         {
           type: 'code',
           language: 'javascript',
-          children: [{ text: 'const a = 1' }],
+          children: [{ type: 'text', text: 'const a = 1' }],
         },
         [0],
       ];
 
       beforeEach(() => {
-        const w = globalThis as Window & { Prism?: unknown };
-        delete w.Prism;
+        delete (globalThis as unknown as { Prism?: unknown }).Prism;
       });
 
       it('should not throw when prismjs resolves like a Vite prebundle', () => {

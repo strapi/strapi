@@ -65,14 +65,24 @@ import 'prismjs/components/prism-tsx';
 import 'prismjs/components/prism-vbnet';
 import 'prismjs/components/prism-yaml';
 
-// prismjs is UMD and may not expose a namespace when bundled by Vite; the content-manager
-// index preloads it so 'window.Prism' is set. Use that when the module import is empty.
-const Prism =
-  typeof PrismModule !== 'undefined' && PrismModule?.languages
-    ? PrismModule
-    : typeof window !== 'undefined'
-      ? (window as Window & { Prism: typeof PrismModule }).Prism
-      : undefined;
+/**
+ * prismjs is UMD and may not expose a namespace when bundled by Vite; the content-manager
+ * index preloads it so `window.Prism` is set. Use that when the module import is empty.
+ */
+function resolvePrism(): typeof PrismModule | undefined {
+  if (typeof PrismModule !== 'undefined' && PrismModule?.languages) {
+    return PrismModule;
+  }
+
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const globalPrism = (window as Window & { Prism?: typeof PrismModule }).Prism;
+  return globalPrism;
+}
+
+const Prism = resolvePrism();
 
 type BaseRangeCustom = BaseRange & { className: string };
 
