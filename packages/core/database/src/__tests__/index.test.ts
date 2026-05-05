@@ -215,6 +215,29 @@ const articleModelForPaginationTests: Model = {
   },
 };
 
+/** Draft & publish fields required for `orderBy: { status }` (virtual sort → CASE expression). */
+const articleWithStatusSortModel: Model = {
+  uid: 'api::articlestatus.articlestatus',
+  singularName: 'articlestatus',
+  tableName: 'article_statuses',
+  attributes: {
+    id: { type: 'integer' },
+    documentId: { type: 'string' },
+    publishedAt: { type: 'datetime' },
+    title: { type: 'string' },
+  },
+};
+
+/** Synthetic table without PK `id` — documents `ensurePaginationOrderStability` early-return. */
+const modelWithoutIdAttribute: Model = {
+  uid: 'internal::noid.entry',
+  singularName: 'noidentry',
+  tableName: 'noid_entries',
+  attributes: {
+    slug: { type: 'string' },
+  },
+};
+
 const paginationQueryBuilderConfig: DatabaseConfig = {
   connection: {
     client: 'sqlite',
@@ -281,5 +304,74 @@ describe('Query builder pagination order stability (GH #26030)', () => {
     const { sql } = qb.toSQL();
     const idAscMatches = sql.match(/`t0`\.`id` asc/gi) ?? [];
     expect(idAscMatches.length).toBeLessThanOrEqual(1);
+  });
+
+  it('emits join order columns before root id tie-break (relation-style loads)', () => {
+    const qb = createQueryBuilder(articleModelForPaginationTests.uid, db)
+      .init({
+        limit: 10,
+        offset: 0,
+        orderBy: [],
+      })
+      .join({
+        alias: 't1',
+        referencedTable: 'articles_shops_lnk',
+        referencedColumn: 'article_id',
+        rootColumn: 'id',
+        rootTable: 't0',
+        orderBy: { link_ord: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+
+    const pivotIdx = lower.indexOf('`t1`.`link_ord` desc');
+    const idIdx = lower.indexOf('`t0`.`id` asc');
+    expect(pivotIdx).toBeGreaterThan(-1);
+    expect(idIdx).toBeGreaterThan(-1);
+    expect(pivotIdx).toBeLessThan(idIdx);
+  });
+
+  it('appends id tie-break after status (CASE) sort when paginated', async () => {
+    const dbWithStatus = new Database(paginationQueryBuilderConfig);
+    await dbWithStatus.init({ models: [articleWithStatusSortModel] });
+
+    const qb = createQueryBuilder(articleWithStatusSortModel.uid, dbWithStatus)
+      .init({
+        limit: 5,
+        offset: 0,
+        orderBy: { status: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+
+    expect(lower).toContain('case when');
+    expect(lower).toContain('`t0`.`id` asc');
+    expect(lower.indexOf('case when')).toBeLessThan(lower.indexOf('`t0`.`id` asc'));
+
+    await dbWithStatus.destroy();
+  });
+
+  it('does not append id tie-break when the model has no id attribute', async () => {
+    const dbNoId = new Database(paginationQueryBuilderConfig);
+    await dbNoId.init({ models: [modelWithoutIdAttribute] });
+
+    const qb = createQueryBuilder(modelWithoutIdAttribute.uid, dbNoId)
+      .init({
+        limit: 10,
+        offset: 0,
+        orderBy: { slug: 'asc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+    expect(lower).toContain('order by');
+    expect(lower).not.toContain('`t0`.`id`');
+
+    await dbNoId.destroy();
   });
 });

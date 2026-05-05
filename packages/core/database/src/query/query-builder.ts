@@ -8,6 +8,7 @@ import { transactionCtx } from '../transaction-context';
 import { isKnexQuery } from '../utils/knex';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
+import type { OrderByValue } from './helpers/order-by';
 
 interface State {
   type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
@@ -650,21 +651,6 @@ const createQueryBuilder = (
         qb.offset(state.offset);
       }
 
-      if (state.orderBy.length > 0) {
-        // Convert raw-expression entries (e.g. status) to Knex.Raw before passing to orderBy.
-        // Knex's TS types don't accept Raw in the column position, so cast to any[].
-        const knexOrderBy = state.orderBy.map((entry: any) => {
-          if ('rawExpression' in entry && entry.rawExpression === 'status') {
-            return {
-              column: helpers.buildStatusSortExpression(db, tableName, this.alias, entry.isI18n),
-              order: entry.order,
-            };
-          }
-          return entry;
-        });
-        qb.orderBy(knexOrderBy);
-      }
-
       if (state.first) {
         qb.first();
       }
@@ -685,8 +671,23 @@ const createQueryBuilder = (
         });
       }
 
+      /**
+       * Join `orderBy` (e.g. join-table ordinal for relations) must precede root `state.orderBy`
+       * when both are emitted. Otherwise pagination stability (`ensurePaginationOrderStability`)
+       * appending `id ASC` on the root alias wins over distinct target ids and breaks relation ordering.
+       */
       if (state.joins.length > 0) {
         helpers.applyJoins(qb, state.joins);
+      }
+
+      if (state.orderBy.length > 0) {
+        // `processState` normalizes entries to OrderByValue[] (string/object input from `.init()`).
+        const knexOrderBy: helpers.KnexOrderByColumnDescriptor[] = (
+          state.orderBy as OrderByValue[]
+        ).map((entry) => helpers.toKnexOrderByDescriptor(db, tableName, this.alias, entry));
+        // Knex compound `orderBy` typings list `column: string | QueryBuilder` — `Knex.Raw` works at runtime
+        // (e.g. `status` sort). See helpers.toKnexOrderByDescriptor / buildStatusSortExpression.
+        qb.orderBy(knexOrderBy as never);
       }
 
       if (this.shouldUseDeepSort()) {
