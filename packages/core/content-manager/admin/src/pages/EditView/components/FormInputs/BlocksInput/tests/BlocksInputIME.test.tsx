@@ -100,4 +100,3 @@ describe('BlocksInput IME', () => {
     expect(preventDefaultSpy).toHaveBeenCalled();
   });
 });
-
