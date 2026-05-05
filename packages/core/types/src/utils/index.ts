@@ -1,3 +1,5 @@
+import type { Strapi } from '../core';
+
 export * as Constants from './constants';
 export * as Array from './array';
 export * as Guard from './guard';
@@ -234,3 +236,8 @@ export type OneOf<T, U> = (T & { [K in keyof U]?: never }) | (U & { [K in keyof 
  * ```
  */
 export type Pretty<T> = { [K in keyof T]: T[K] } & unknown;
+
+export type StrapiFactory<T> = ({ strapi }: { strapi: Strapi }) => T;
+export type MaybeStrapiFactory<T> = T | StrapiFactory<T>;
+export type StrapiFactoryAsync<T> = ({ strapi }: { strapi: Strapi }) => Promise<T>;
+export type MaybeStrapiFactoryAsync<T> = StrapiFactoryAsync<T> | MaybeStrapiFactory<T>;
