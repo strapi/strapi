@@ -1,6 +1,6 @@
 import { transformUidToValidOpenApiName } from '@strapi/utils';
 import type { Internal } from '@strapi/types';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 // Schema generation happens on-demand when schemas don't exist in the registry
 

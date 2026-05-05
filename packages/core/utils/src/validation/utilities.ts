@@ -4,7 +4,7 @@
  * and to safely register and create schemas within Zod's global registry.
  */
 
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 /**
  * Transforms a Strapi UID into an OpenAPI-compliant component name.

@@ -8663,7 +8663,7 @@ __metadata:
     vite: "npm:5.4.21"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   peerDependencies:
     "@strapi/data-transfer": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -8870,7 +8870,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -8963,7 +8963,7 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.44.0"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -9089,7 +9089,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     koa: ^2.15.2
@@ -9181,7 +9181,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
@@ -9222,7 +9222,7 @@ __metadata:
     "@types/debug": "npm:^4"
     debug: "npm:4.3.4"
     openapi-types: "npm:12.1.3"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -9437,7 +9437,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9740,7 +9740,7 @@ __metadata:
     typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.4.5"
     undici: "npm:6.25.0"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -9871,7 +9871,7 @@ __metadata:
     sharp: "npm:0.33.5"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9901,7 +9901,7 @@ __metadata:
     preferred-pm: "npm:3.1.3"
     tsconfig: "npm:5.44.0"
     yup: "npm:0.32.9"
-    zod: "npm:3.25.67"
+    zod: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -31439,7 +31439,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:3.25.67, zod@npm:^3.19.1, zod@npm:^3.22.4":
+"zod@npm:4.4.2":
+  version: 4.4.2
+  resolution: "zod@npm:4.4.2"
+  checksum: 10c0/aa5097464c41cf22d715cbc29873ae6feaaf56e687b81d140458d7c01201e7b9de1ee46c8567b5458ee3c0068b8a82b2652535b5d39589fcb5562d861c83ded3
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.19.1, zod@npm:^3.22.4":
   version: 3.25.67
   resolution: "zod@npm:3.25.67"
   checksum: 10c0/80a0cab3033272c4ab9312198081f0c4ea88e9673c059aa36dc32024906363729db54bdb78f3dc9d5529bd1601f74974d5a56c0a23e40c6f04a9270c9ff22336

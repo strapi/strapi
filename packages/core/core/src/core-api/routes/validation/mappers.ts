@@ -4,7 +4,7 @@
  */
 
 import type { Schema } from '@strapi/types';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 // eslint-disable-next-line import/no-cycle
 import * as attributes from './attributes';

@@ -1,4 +1,4 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 import { createAPISanitizers } from '../sanitize';
 import { articleModel, getModel } from './test-fixtures';
 

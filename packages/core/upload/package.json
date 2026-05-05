@@ -98,7 +98,7 @@
     "react-select": "5.8.0",
     "sharp": "0.33.5",
     "yup": "0.32.9",
-    "zod": "3.25.67"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@strapi/admin": "5.44.0",

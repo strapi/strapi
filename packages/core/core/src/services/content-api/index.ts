@@ -6,7 +6,7 @@ import {
   ALLOWED_QUERY_PARAM_KEYS,
   RESERVED_INPUT_PARAM_KEYS,
 } from '@strapi/utils';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 import type { Core, Modules, UID } from '@strapi/types';
 
@@ -30,9 +30,9 @@ const filterContentAPI = (route: Core.Route) => route.info.type === 'content-api
  * any, or schema from another Zod instance); (2) it gives a clear, immediate error at registration
  * time instead of a later failure in validate/sanitize. This list is intentionally tied to Zod v4
  * constructor names; if Zod changes internals, this may need updating.
- * Compatibility: Zod 3 and Zod 4 Classic (zod/v4) both use these constructor names and
- * expose ._def with .innerType / .element for Optional/Default/Array. Zod 4 Core/Mini use
- * ._zod.def instead; we only accept schemas from the same zod/v4 instance used here.
+ * Compatibility: Zod 4 Classic uses these constructor names and exposes
+ * ._def with .innerType / .element for Optional/Default/Array. Zod 4 Core/Mini use
+ * ._zod.def instead; we only accept schemas from the same zod instance used here.
  */
 const ALLOWED_QUERY_SCHEMA_NAMES = new Set([
   'ZodString',

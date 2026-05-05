@@ -1,6 +1,6 @@
 import { CurriedFunction1 } from 'lodash';
 import { isArray, cloneDeep, omit, pick } from 'lodash/fp';
-import type { z } from 'zod/v4';
+import type { z } from 'zod';
 
 import { constants, getNonWritableAttributes } from '../content-types';
 import { ALLOWED_QUERY_PARAM_KEYS } from '../content-api-constants';

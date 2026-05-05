@@ -70,7 +70,7 @@
     "react-intl": "6.6.2",
     "react-query": "3.39.3",
     "yup": "0.32.9",
-    "zod": "3.25.67"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@strapi/admin": "5.44.0",

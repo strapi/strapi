@@ -1,4 +1,4 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 /**
  * Standard query parameter validators that can be reused across different route validators

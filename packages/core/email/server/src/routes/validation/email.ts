@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 export class EmailRouteValidator {
   protected readonly _strapi: Core.Strapi;

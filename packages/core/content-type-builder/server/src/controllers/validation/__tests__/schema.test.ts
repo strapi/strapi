@@ -1,14 +1,16 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import { maxGreaterThanMin, maxLengthGreaterThanMinLength } from '../schema';
 
 describe('Schema', () => {
-  let ctx: z.RefinementCtx & { addIssue: jest.Mock };
+  let ctx: z.RefinementCtx<Record<string, unknown>> & { addIssue: jest.Mock };
   let expectAddIssue: (shouldAddIssue: boolean) => void;
 
   beforeEach(() => {
     ctx = {
       addIssue: jest.fn(),
-    } as unknown as z.RefinementCtx & { addIssue: jest.Mock };
+      issues: [],
+      value: {},
+    } as unknown as z.RefinementCtx<Record<string, unknown>> & { addIssue: jest.Mock };
 
     expectAddIssue = (shouldAddIssue: boolean) => {
       if (shouldAddIssue) {
