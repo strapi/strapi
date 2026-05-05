@@ -1,0 +1,57 @@
+# Runs every Monday at 9am UTC (also manually triggerable).
+# Generates a Linear project status update and a full Notion report page.
+
+name: Community PR — Weekly Report
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Monday 9am UTC — runs weekly-report + posts to Notion
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Report type'
+        required: true
+        type: choice
+        options:
+          - linear-weekly-report
+          - linear-weekly-report-notion
+          - notion-report
+        default: linear-weekly-report
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install action dependencies
+        run: npm ci
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Build action
+        run: npm run build
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Run report
+        uses: ./.github/actions/community-pr-triage
+        with:
+          mode: ${{ github.event_name == 'schedule' && 'linear-weekly-report' || (inputs.mode == 'notion-report' && 'notion-report' || 'linear-weekly-report') }}
+          post-to-notion: ${{ github.event_name == 'schedule' || inputs.mode == 'linear-weekly-report-notion' || inputs.mode == 'notion-report' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          linear-api-key: ${{ secrets.LINEAR_API_KEY }}
+          linear-cpr-team-id: ${{ vars.LINEAR_CPR_TEAM_ID }}
+          linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
+          linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
+          linear-triage-view-url: 'https://linear.app/strapi/team/CPR/triage'
+          linear-labels: ${{ vars.LINEAR_LABELS }}
+          notion-api-key: ${{ secrets.NOTION_API_KEY }}
+          notion-database-id: ${{ vars.NOTION_DATABASE_ID }}
