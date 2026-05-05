@@ -84,21 +84,39 @@ export function setupDatabaseReset() {
  * testInTransaction
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Thrown at the end of a successful test to force the Strapi `transaction` catch path
+ * (single `rollback()`) and avoid a second `commit()` on an already-rolled-back Knex
+ * transactor. See `test-in-transaction-strapi-db.md`.
+ */
+const testInTransactionRollback = Symbol('testInTransaction.rollback');
+
 export const wrapInTransaction = (test) => {
   return async (...args) => {
-    await strapi.db.transaction(async ({ trx, rollback }) => {
-      await test(trx, ...args);
-      await rollback();
-    });
+    try {
+      await strapi.db.transaction(async ({ trx }) => {
+        await test(trx, ...args);
+        // Do not `await rollback()` and return: Strapi's transaction() always calls
+        // `commit()` on successful return, which double-finalises the transactor
+        // (hang / "Transaction query already complete").
+        throw testInTransactionRollback;
+      });
+    } catch (e) {
+      if (e === testInTransactionRollback) {
+        return;
+      }
+      throw e;
+    }
   };
 };
 
 /**
- * Resets the database by leveragin a transaction rollback
+ * Resets the database by rolling back a transaction after each test.
  *
- * NOTE:
- * Alternatively, use setupDatabaseReset() which is slower but avoids errors thrown by asnyc operations
- * executed after the test's transaction context has closed.
+ * See `test-in-transaction-strapi-db.md` for how this interacts with `strapi.db.transaction`.
+ *
+ * NOTE: Alternatively, use `setupDatabaseReset()` which is slower but avoids async work
+ * that runs after the test's transaction context has closed.
  */
 export const testInTransaction = (...args: Parameters<jest.It>) => {
   if (args.length > 1) {
