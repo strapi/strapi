@@ -42,6 +42,62 @@ describe('retryDynamicImport', () => {
       ).rejects.toThrow('nope');
       expect(calls).toBe(1);
     });
+
+    describe('chunk load retries', () => {
+      const chromeChunkMessage =
+        'Failed to fetch dynamically imported module: https://cdn.example/chunk.js';
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+        jest.restoreAllMocks();
+      });
+
+      it('succeeds after prior chunk errors once the importer resolves', async () => {
+        let calls = 0;
+        const chunkError = new TypeError(chromeChunkMessage);
+
+        const resultPromise = retryDynamicImport(
+          () => {
+            calls += 1;
+            if (calls < 3) {
+              return Promise.reject(chunkError);
+            }
+            return Promise.resolve('module');
+          },
+          { initialDelayMs: 10, maxDelayMs: 80 }
+        );
+
+        await jest.runOnlyPendingTimersAsync();
+        await jest.runOnlyPendingTimersAsync();
+
+        await expect(resultPromise).resolves.toBe('module');
+        expect(calls).toBe(3);
+      });
+
+      it('rejects with the last chunk error after maxAttempts importer failures', async () => {
+        let calls = 0;
+        const chunkError = new TypeError(chromeChunkMessage);
+
+        const resultPromise = retryDynamicImport(
+          () => {
+            calls += 1;
+            return Promise.reject(chunkError);
+          },
+          { maxAttempts: 3, initialDelayMs: 10, maxDelayMs: 80 }
+        );
+
+        await jest.runOnlyPendingTimersAsync();
+        await jest.runOnlyPendingTimersAsync();
+
+        await expect(resultPromise).rejects.toBe(chunkError);
+        expect(calls).toBe(3);
+      });
+    });
   });
 
   describe('wrapRouteObjectLazyWithRetry', () => {
