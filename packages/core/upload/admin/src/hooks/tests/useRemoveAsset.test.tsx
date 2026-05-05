@@ -98,7 +98,7 @@ describe('useRemoveAsset', () => {
     const { removeAsset } = current;
 
     try {
-      await act(async () => {
+      await waitFor(async () => {
         await removeAsset(ASSET_FIXTURE);
       });
     } catch (err) {
@@ -118,7 +118,7 @@ describe('useRemoveAsset', () => {
     } = (await setup(jest.fn)) as { result: { current: any } };
     const { removeAsset } = current;
 
-    await act(async () => {
+    await waitFor(async () => {
       await removeAsset(ASSET_FIXTURE);
     });
 
@@ -147,7 +147,7 @@ describe('useRemoveAsset', () => {
     const { removeAsset } = current;
 
     try {
-      await act(async () => {
+      await waitFor(async () => {
         await removeAsset(ASSET_FIXTURE);
       });
     } catch (err) {

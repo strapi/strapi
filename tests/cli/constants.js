@@ -1,7 +1,8 @@
 'use strict';
 
-const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('./app-template/src/constants');
+// Re-export from shared constants
+const sharedConstants = require('../e2e/constants');
 
 module.exports = {
-  CUSTOM_TRANSFER_TOKEN_ACCESS_KEY,
+  CUSTOM_TRANSFER_TOKEN_ACCESS_KEY: sharedConstants.CUSTOM_TRANSFER_TOKEN_ACCESS_KEY,
 };

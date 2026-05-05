@@ -10,8 +10,6 @@ import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
 import { createAuditLogsLifecycleService } from './audit-logs/services/lifecycles';
 import { auditLog } from './audit-logs/content-types/audit-log';
-import aiRoutes from './ai/routes/ai';
-import aiController from './ai/controllers/ai';
 import type { Core } from '@strapi/types';
 
 const getAdminEE = () => {
@@ -29,8 +27,6 @@ const getAdminEE = () => {
     routes,
   };
 
-  const isAIEnabled =
-    strapi.config.get('admin.ai.enabled', true) && strapi.ee.features.isEnabled('cms-ai');
   const isAuditLogsEnabled =
     strapi.config.get('admin.auditLogs.enabled', true) &&
     strapi.ee.features.isEnabled('audit-logs');
@@ -39,16 +35,15 @@ const getAdminEE = () => {
     controllers: {
       ...eeAdmin.controllers,
       ...(isAuditLogsEnabled ? { 'audit-logs': auditLogsController } : {}),
-      ...(isAIEnabled ? { ai: aiController } : {}),
     },
     routes: {
       ...eeAdmin.routes,
       ...(isAuditLogsEnabled ? { 'audit-logs': auditLogsRoutes } : {}),
-      ...(isAIEnabled ? { ai: aiRoutes } : {}),
     },
     async register({ strapi }: { strapi: Core.Strapi }) {
-      // Run the the default registration
+      // Run the default registration
       await eeAdmin.register({ strapi });
+
       if (isAuditLogsEnabled) {
         // Register an internal audit logs service
         strapi.add('audit-logs', createAuditLogsService(strapi));

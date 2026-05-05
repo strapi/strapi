@@ -1,5 +1,8 @@
 export interface FeaturesConfig {
-  future?: object;
+  future?: {
+    adminTokens?: boolean;
+    unstableMediaLibrary?: boolean;
+  };
 }
 
 export interface FeaturesService {

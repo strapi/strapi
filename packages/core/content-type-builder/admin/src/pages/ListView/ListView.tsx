@@ -1,5 +1,5 @@
 /* eslint-disable import/no-default-export */
-import { useTracking, Layouts, tours } from '@strapi/admin/strapi-admin';
+import { Layouts, tours } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { Information, Pencil, Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
@@ -7,6 +7,7 @@ import { useIntl } from 'react-intl';
 import { Navigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useCTBTracking } from '../../components/CTBSession/ctbSession';
 import { useDataManager } from '../../components/DataManager/useDataManager';
 import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
 import { List } from '../../components/List';
@@ -25,7 +26,7 @@ const LayoutsHeaderCustom = styled(Layouts.Header)`
 const ListView = () => {
   const { isInDevelopmentMode, contentTypes, components, isLoading } = useDataManager();
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
 
   const { contentTypeUid, componentUid } = useParams<{
     contentTypeUid: Internal.UID.ContentType;
@@ -56,6 +57,12 @@ const ListView = () => {
     }
 
     return <Navigate to="/plugins/content-type-builder/content-types/create-content-type" />;
+  }
+
+  if (contentTypeUid && type.modelType === 'contentType' && type.visible === false) {
+    return (
+      <Navigate to="/plugins/content-type-builder/content-types/create-content-type" replace />
+    );
   }
 
   const isFromPlugin = 'plugin' in type && type?.plugin !== undefined;

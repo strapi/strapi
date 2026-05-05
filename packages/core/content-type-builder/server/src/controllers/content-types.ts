@@ -8,6 +8,7 @@ import {
   validateUpdateContentTypeInput,
   validateKind,
 } from './validation/content-type';
+import { isContentTypeVisible } from '../services/content-types';
 
 export default {
   async getContentTypes(ctx: Context) {
@@ -43,6 +44,10 @@ export default {
     const contentType = strapi.contentTypes[uid];
 
     if (!contentType) {
+      return ctx.send({ error: 'contentType.notFound' }, 404);
+    }
+
+    if (!isContentTypeVisible(contentType)) {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 

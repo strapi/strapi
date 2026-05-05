@@ -394,6 +394,21 @@ export default {
     },
     {
       method: 'POST',
+      path: '/collection-types/:model/actions/bulkFindForValidation',
+      handler: 'collection-types.bulkFindForValidation',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
       path: '/collection-types/:model/actions/bulkPublish',
       handler: 'collection-types.bulkPublish',
       config: {

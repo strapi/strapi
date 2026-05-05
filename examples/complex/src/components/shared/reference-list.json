@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_shared_reference_lists",
+  "info": {
+    "displayName": "reference-list",
+    "description": "Repeatable references (nested component with relations for migration test)"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "references": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.reference"
+    }
+  }
+}

@@ -53,6 +53,9 @@ const createCronService = () => {
 
         // const job = new Job(null, fnWithStrapi);
         const job = new Job(fnWithStrapi);
+        job.on('error', (error) => {
+          strapi.log.error(`Cron job "${taskName ?? taskExpression}" failed`, error);
+        });
         jobsSpecs.push({ job, options, name: taskName });
 
         if (running) {

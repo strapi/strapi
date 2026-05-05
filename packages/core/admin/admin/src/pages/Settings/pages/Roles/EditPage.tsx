@@ -189,19 +189,18 @@ const EditPage = () => {
           <form onSubmit={handleSubmit}>
             <Layouts.Header
               primaryAction={
-                <Flex gap={2}>
-                  <Button
-                    type="submit"
-                    startIcon={<Check />}
-                    disabled={role.code === 'strapi-super-admin'}
-                    loading={isSubmitting}
-                  >
-                    {formatMessage({
-                      id: 'global.save',
-                      defaultMessage: 'Save',
-                    })}
-                  </Button>
-                </Flex>
+                <Button
+                  type="submit"
+                  startIcon={<Check />}
+                  disabled={role.code === 'strapi-super-admin'}
+                  loading={isSubmitting}
+                  fullWidth
+                >
+                  {formatMessage({
+                    id: 'global.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
               }
               title={formatMessage({
                 id: 'Settings.roles.edit.title',

@@ -14,13 +14,26 @@ declare global {
  * It's why many functions are defined within previewScript, it's the only way to avoid going full spaghetti.
  * To get a better overview of everything previewScript does, go to the orchestration part at its end.
  */
-const previewScript = (shouldRun = true) => {
+type PreviewScriptColors = {
+  highlightHoverColor: string;
+  highlightActiveColor: string;
+};
+
+type PreviewScriptConfig = {
+  shouldRun?: boolean;
+  colors: PreviewScriptColors;
+};
+
+const previewScript = (config: PreviewScriptConfig) => {
+  const { shouldRun = true, colors } = config;
+
   /* -----------------------------------------------------------------------------------------------
    * Params
    * ---------------------------------------------------------------------------------------------*/
   const HIGHLIGHT_PADDING = 2; // in pixels
-  const HIGHLIGHT_HOVER_COLOR = window.STRAPI_HIGHLIGHT_HOVER_COLOR ?? '#4945ff'; // dark primary500
-  const HIGHLIGHT_ACTIVE_COLOR = window.STRAPI_HIGHLIGHT_ACTIVE_COLOR ?? '#7b79ff'; // dark primary600
+  const HIGHLIGHT_HOVER_COLOR = window.STRAPI_HIGHLIGHT_HOVER_COLOR ?? colors.highlightHoverColor;
+  const HIGHLIGHT_ACTIVE_COLOR =
+    window.STRAPI_HIGHLIGHT_ACTIVE_COLOR ?? colors.highlightActiveColor;
   const HIGHLIGHT_STYLES_ID = 'strapi-preview-highlight-styles';
   const DOUBLE_CLICK_TIMEOUT = 300; // milliseconds to wait for potential double-click
 

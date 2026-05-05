@@ -12,9 +12,9 @@ export type MiddlewareFactory<T = any> = (
 export type MiddlewareName = UID.Middleware | string;
 
 export type MiddlewareConfig = {
-  name?: MiddlewareName;
-  resolve?: string;
-  config?: unknown;
+  name?: MiddlewareName | undefined;
+  resolve?: string | undefined;
+  config?: unknown | undefined;
 };
 
 export type MiddlewareHandler = Koa.Middleware;

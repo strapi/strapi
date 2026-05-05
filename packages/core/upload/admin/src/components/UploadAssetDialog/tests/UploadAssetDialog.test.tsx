@@ -102,7 +102,7 @@ describe('UploadAssetDialog', () => {
        */
       fireEvent.click(getByRole('button', { name: 'Next' }));
 
-      await screen.findByText('An error occured');
+      await screen.findByText('An error occurred');
     }, 10000);
 
     /**
