@@ -9910,6 +9910,11 @@ __metadata:
     tsconfig: "npm:5.52.2"
     vitest: "catalog:"
     vitest-config: "npm:5.52.2"
+  peerDependencies:
+    "@strapi/types": ^5.0.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10066,7 +10071,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     "@types/node-schedule": "npm:2.1.7"
     commander: "npm:8.3.0"
-    eslint-config-custom: "workspace:*"
+    eslint-config-custom: "npm:5.52.2"
     json-logic-js: "npm:2.0.5"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
@@ -10225,10 +10230,14 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@strapi/admin": ^5.0.0
+    "@strapi/types": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -16994,7 +17003,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-custom@npm:5.52.2, eslint-config-custom@workspace:*, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
+"eslint-config-custom@npm:5.52.2, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
   languageName: unknown
