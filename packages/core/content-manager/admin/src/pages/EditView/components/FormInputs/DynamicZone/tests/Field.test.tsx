@@ -15,12 +15,57 @@ jest.mock('../../../InputRenderer', () => ({
   InputRenderer: () => 'INPUTS',
 }));
 
+const useDocMock = jest.fn();
+const useDocumentMock = jest.fn();
+
+jest.mock('../../../../../../hooks/useDocument', () => ({
+  useDoc: (...args: unknown[]) => useDocMock(...args),
+  useDocument: (...args: unknown[]) => useDocumentMock(...args),
+}));
+
+jest.mock('../../../../../../hooks/useDocumentLayout', () => ({
+  useDocumentLayout: () => ({
+    edit: {
+      components: {
+        'blog.test-como': { settings: { mainField: 'name' } },
+      },
+    },
+  }),
+}));
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useIsDesktop: jest.fn().mockReturnValue(true),
 }));
 
 describe('DynamicZone', () => {
+  beforeEach(() => {
+    // Keep DocumentContext deterministic by avoiding RTK-query / schema fetch timing.
+    useDocMock.mockReturnValue({
+      collectionType: 'collectionType',
+      model: 'api::address.address',
+      id: 'create',
+    });
+
+    useDocumentMock.mockReturnValue({
+      isLoading: false,
+      components: {
+        'blog.test-como': {
+          category: 'blog',
+          info: { displayName: 'test comp' },
+          attributes: {
+            name: { type: 'string', default: 'toto' },
+          },
+        },
+        'seo.metadata': {
+          category: 'seo',
+          info: { displayName: 'metadata' },
+          attributes: {},
+        },
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -61,9 +106,9 @@ describe('DynamicZone', () => {
   });
 
   const waitForQueryToFinish = async () => {
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeEnabled()
-    );
+    // Wait for the button to be rendered (DocumentContext is mocked to be "ready").
+    const addComponentButton = await screen.findByRole('button', { name: /Add a component to/i });
+    expect(addComponentButton).toBeEnabled();
   };
 
   describe('rendering', () => {
