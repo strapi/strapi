@@ -459,9 +459,9 @@ const createQueryBuilder = (
     shouldUseDeepSort() {
       return (
         state.orderBy
-          .filter(({ column }) => column.indexOf('.') >= 0)
-          .filter(({ column }) => {
-            const col = column.split('.');
+          .filter((ob: any) => 'column' in ob && ob.column.indexOf('.') >= 0)
+          .filter((ob: any) => {
+            const col = ob.column.split('.');
 
             for (let i = 0; i < col.length - 1; i += 1) {
               const el = col[i];
@@ -497,7 +497,10 @@ const createQueryBuilder = (
         const joinsOrderByColumns = state.joins.flatMap((join) => {
           return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
         });
-        const orderByColumns = state.orderBy.map(({ column }) => column);
+        // Only include column-based orderBy entries (skip raw expressions like status)
+        const orderByColumns = state.orderBy
+          .filter((ob: any) => 'column' in ob)
+          .map((ob: any) => ob.column);
 
         state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
       }
@@ -607,7 +610,18 @@ const createQueryBuilder = (
       }
 
       if (state.orderBy.length > 0) {
-        qb.orderBy(state.orderBy);
+        // Convert raw-expression entries (e.g. status) to Knex.Raw before passing to orderBy.
+        // Knex's TS types don't accept Raw in the column position, so cast to any[].
+        const knexOrderBy = state.orderBy.map((entry: any) => {
+          if ('rawExpression' in entry && entry.rawExpression === 'status') {
+            return {
+              column: helpers.buildStatusSortExpression(db, tableName, this.alias, entry.isI18n),
+              order: entry.order,
+            };
+          }
+          return entry;
+        });
+        qb.orderBy(knexOrderBy);
       }
 
       if (state.first) {

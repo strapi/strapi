@@ -692,5 +692,8 @@
   "notification.success.apitokencreated": "Jeton d'API créé avec succès",
   "notification.success.apitokenedited": "Jeton d'API édité avec succès",
   "notification.success.transfertokencreated": "Jeton de transfert créé avec succès",
-  "notification.success.transfertokenedited": "Jeton de transfert édité avec succès"
+  "notification.success.transfertokenedited": "Jeton de transfert édité avec succès",
+  "HomePage.widget.deploy-now.title": "Prêt à mettre en ligne ?",
+  "HomePage.widget.deploy-now.description": "Déployez votre projet.",
+  "HomePage.widget.deploy-now.button": "Déployer maintenant"
 }
