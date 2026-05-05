@@ -590,7 +590,7 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
   const { db } = ctx;
 
   const { morphColumn } = attribute;
-  const { idColumn, typeColumn } = morphColumn;
+  const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
   // make a map for each type what ids to return
   // make a nested map per id
@@ -649,7 +649,8 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
     const fromTargetRow = (rowOrRows: Row | Row[] | undefined) =>
       fromRow(db.metadata.get(type), rowOrRows);
 
-    result[attributeName] = fromTargetRow(_.first(matchingRows));
+    const row = fromTargetRow(_.first(matchingRows));
+    result[attributeName] = row ? { [typeField]: type, ...row } : row;
   });
 };
 
