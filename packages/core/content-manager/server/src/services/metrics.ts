@@ -28,11 +28,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    try {
-      strapi.telemetry.send('didConfigureListView', data);
-    } catch (e) {
-      // silence
-    }
+    strapi.telemetry.send('didConfigureListView', data).catch(() => {});
   };
 
   return {
