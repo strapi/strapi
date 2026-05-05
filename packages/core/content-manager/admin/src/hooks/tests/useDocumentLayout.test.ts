@@ -3,6 +3,7 @@ import { renderHook, screen, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
+import { extractContentTypeComponents } from '../useContentTypeSchema';
 import { useDocumentLayout } from '../useDocumentLayout';
 
 describe('useDocumentLayout', () => {
@@ -422,5 +423,117 @@ describe('useDocumentLayout', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await screen.findByText('Error fetching configuration');
+  });
+
+  it('does not crash when persisted configuration references component layouts without matching `/init` schemas (regression gh#26206)', async () => {
+    const orphanModelUid = 'api::orphan.footer';
+
+    server.use(
+      rest.get('/content-manager/init', (req, res, ctx) =>
+        res(
+          ctx.json({
+            data: {
+              components: mockData.contentManager.components,
+              contentTypes: [
+                ...mockData.contentManager.contentTypes,
+                {
+                  uid: orphanModelUid,
+                  isDisplayed: true,
+                  apiID: 'footer',
+                  kind: 'singleType',
+                  info: {
+                    singularName: 'footer',
+                    pluralName: 'footers',
+                    displayName: 'Footer',
+                    name: 'Footer',
+                    description: '',
+                  },
+                  options: {},
+                  pluginOptions: {},
+                  attributes: {},
+                },
+              ],
+            },
+          })
+        )
+      ),
+      rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
+        if (req.params.model !== orphanModelUid) {
+          const configuration =
+            req.params.model === 'api::homepage.homepage'
+              ? mockData.contentManager.singleTypeConfiguration
+              : mockData.contentManager.collectionTypeConfiguration;
+
+          return res(ctx.json({ data: configuration }));
+        }
+
+        return res(
+          ctx.json({
+            data: {
+              contentType: {
+                uid: orphanModelUid,
+                settings: {
+                  bulkable: false,
+                  filterable: false,
+                  searchable: false,
+                  pageSize: 10,
+                  mainField: 'title',
+                  defaultSortBy: '',
+                  defaultSortOrder: 'ASC',
+                },
+                metadatas: {},
+                options: {},
+                layouts: {
+                  edit: [],
+                  list: [],
+                },
+              },
+              components: {
+                'orphan.ghost': {
+                  layouts: {
+                    edit: [[{ name: 'field', size: 12 }]],
+                  },
+                  metadatas: {
+                    field: {
+                      edit: {
+                        label: 'field',
+                        description: '',
+                        placeholder: '',
+                        visible: true,
+                        editable: true,
+                      },
+                    },
+                  },
+                  settings: {},
+                  isComponent: true,
+                },
+              },
+            },
+          })
+        );
+      })
+    );
+
+    const { result } = renderHook(() => useDocumentLayout(orphanModelUid));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.edit.components).toEqual({});
+  });
+});
+
+describe('extractContentTypeComponents', () => {
+  it('omits component UIDs that are referenced but missing from the catalog', () => {
+    const attributes = {
+      footer: {
+        type: 'component' as const,
+        repeatable: false,
+        component: 'missing.catalog.component',
+        pluginOptions: {},
+        required: false,
+      },
+    };
+
+    expect(extractContentTypeComponents(attributes, {})).toEqual({});
   });
 });
