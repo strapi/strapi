@@ -1,16 +1,33 @@
-import { z } from 'zod';
+import * as z from 'zod/v4';
 
 import { ValidationError } from './errors';
 
-export const validateZod =
-  <T extends z.ZodTypeAny>(schema: T) =>
-  (data: unknown): z.TypeOf<T> => {
+/**
+ * Re-export of the Zod v4 schema builder from the same version Strapi uses
+ * internally. Use this for building schemas passed to content API param
+ * registration (addQueryParams / addInputParams) so your code stays compatible
+ * across Strapi minor/patch updates.
+ *
+ * @example
+ * import { z } from '@strapi/utils';
+ * strapi.contentAPI.addQueryParams({
+ *   search: {
+ *     schema: z.string().max(200).optional(),
+ *     matchRoute: (route) => route.path.includes('articles'),
+ *   },
+ * });
+ */
+export { z };
+
+export const validateZodSchema =
+  <T extends z.Schema>(schema: T) =>
+  (data: unknown, errorMessage?: string): z.infer<T> => {
     try {
       return schema.parse(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const { message, errors } = formatZodErrors(error);
-        throw new ValidationError(message, { errors });
+        throw new ValidationError(errorMessage || message, { errors });
       }
 
       throw error;
@@ -20,10 +37,34 @@ export const validateZod =
 const formatZodErrors = (zodError: z.ZodError) => ({
   errors: zodError.issues.map((issue) => {
     return {
-      path: issue.path,
+      path: issue.path.map(String),
       message: issue.message,
       name: 'ValidationError',
+      value: undefined,
     };
   }),
-  message: 'Validation error',
+  message: zodError.issues[0]?.message ?? 'Validation error',
 });
+
+type FormErrors = Record<string, string>;
+
+/**
+ * Converts a ZodError into form-compatible errors matching
+ * getYupValidationErrors from @strapi/admin Form component.
+ *
+ * Returns a flat object with dot-path keys and string error messages.
+ * Only the first error per path is kept (matches Yup behavior).
+ * Root-level errors (path = []) are stored under the empty string key ''.
+ */
+export const getZodValidationErrors = (error: z.ZodError): FormErrors => {
+  const errors: FormErrors = {};
+
+  for (const issue of error.issues) {
+    const path = issue.path.join('.');
+    if (!(path in errors)) {
+      errors[path] = issue.message;
+    }
+  }
+
+  return errors;
+};

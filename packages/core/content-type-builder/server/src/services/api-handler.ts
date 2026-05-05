@@ -9,6 +9,9 @@ export async function clear(uid: Internal.UID.ContentType) {
   // TODO double check if this is the correct way to get the apiName
   const { apiName, modelName } = strapi.contentTypes[uid] as any;
 
+  // Opt out if the content type is not linked to an API (e.g. plugin content type)
+  if (!apiName) return;
+
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
 
   await recursiveRemoveFiles(apiFolder, createDeleteApiFunction(modelName));
@@ -22,6 +25,9 @@ export async function clear(uid: Internal.UID.ContentType) {
 export async function backup(uid: Internal.UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid] as any;
 
+  // Opt out if the content type is not linked to an API (e.g. plugin content type)
+  if (!apiName) return;
+
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
   const backupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
 
@@ -34,6 +40,9 @@ export async function backup(uid: Internal.UID.ContentType) {
  */
 async function deleteBackup(uid: Internal.UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid] as any;
+
+  // Opt out if the content type is not linked to an API (e.g. plugin content type)
+  if (!apiName) return;
 
   const backupFolder = path.join(strapi.dirs.app.api, '.backup');
   const apiBackupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
@@ -51,6 +60,9 @@ async function deleteBackup(uid: Internal.UID.ContentType) {
  */
 export async function rollback(uid: Internal.UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid] as any;
+
+  // Opt out if the content type is not linked to an API (e.g. plugin content type)
+  if (!apiName) return;
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
   const backupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
