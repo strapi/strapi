@@ -218,7 +218,7 @@ describe('getFetchClient', () => {
         name: 'FetchError',
         status: 502,
         message: 'Server Error',
-        response: { data: { error: { name: 'Error', message: 'Bad Gateway', status: 502 } } },
+        response: { data: { error: { name: 'ApplicationError', message: 'Bad Gateway', status: 502 } } },
       });
     });
 

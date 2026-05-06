@@ -297,7 +297,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         } catch {
           parsedError = {
             error: {
-              name: 'Error',
+              name: 'ApplicationError',
               message: text,
               status: response.status,
             },
