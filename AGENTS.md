@@ -1,7 +1,7 @@
 # Strapi Monorepo — Agent Guide
 
 Strapi is an open-source headless CMS.
-Yarn workspaces + Nx monorepo. Node ≥20 ≤24, Yarn 4.
+Yarn workspaces + Nx monorepo. Node ≥20 ≤26, Yarn 4.
 Target branch: `develop` (not `main`). All PRs go to `develop`.
 
 ---
