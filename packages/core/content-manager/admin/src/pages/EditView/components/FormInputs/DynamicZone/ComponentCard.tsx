@@ -12,7 +12,7 @@ import { styled } from 'styled-components';
 import { ComponentIcon, ComponentIconProps } from '../../../../../components/ComponentIcon';
 
 interface ComponentCardProps extends Pick<ComponentIconProps, 'icon'> {
-  children: string;
+  children: React.ReactNode | string;
   onClick?: React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
 }
 
@@ -34,7 +34,13 @@ const ComponentCard = ({ children, onClick, icon }: ComponentCardProps) => {
         <ComponentIcon icon={icon} />
 
         <Tooltip label={children}>
-          <ComponentName variant="pi" fontWeight="bold" textColor="neutral600">
+          <ComponentName
+            variant="pi"
+            fontWeight="bold"
+            ellipsis
+            width="100%"
+            textColor="neutral600"
+          >
             {children}
           </ComponentName>
         </Tooltip>
@@ -43,13 +49,7 @@ const ComponentCard = ({ children, onClick, icon }: ComponentCardProps) => {
   );
 };
 
-const ComponentName = styled<TypographyComponent>(Typography)`
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
-`;
+const ComponentName = styled<TypographyComponent>(Typography)``;
 
 const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   &:focus,
