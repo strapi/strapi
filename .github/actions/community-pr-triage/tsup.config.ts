@@ -5,5 +5,6 @@ export default defineConfig({
   format: ['cjs'],
   outDir: 'dist',
   splitting: false,
+  noExternal: [/.*/],
   outExtension: () => ({ js: '.cjs' }),
 });
