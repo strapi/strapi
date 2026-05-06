@@ -6,6 +6,7 @@ import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
+import { useIdleSessionLogout } from '../hooks/useIdleSessionLogout';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { login as loginAction, logout as logoutAction, setLocale, setToken } from '../reducer';
 import { adminApi } from '../services/api';
@@ -90,28 +91,6 @@ interface AuthProviderProps {
 const STORAGE_KEYS = {
   TOKEN: 'jwtToken',
   STATUS: 'isLoggedIn',
-};
-
-/**
- * Decode the `exp` claim of an admin access JWT and return it as milliseconds
- * since the epoch. Returns `null` if the token can't be parsed or has no
- * numeric `exp`. We do not verify the signature — the server is the source of
- * truth; this is purely to schedule a client-side idle timer.
- */
-const decodeAccessTokenExpiry = (token: string): number | null => {
-  const parts = token.split('.');
-  if (parts.length < 2) {
-    return null;
-  }
-
-  try {
-    // base64url → base64
-    const padded = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(window.atob(padded));
-    return typeof payload?.exp === 'number' ? payload.exp * 1000 : null;
-  } catch {
-    return null;
-  }
 };
 
 const AuthProvider = ({
@@ -200,46 +179,15 @@ const AuthProvider = ({
   }, [clearStateAndLogout]);
 
   /**
-   * Proactive idle-session detection.
-   *
-   * Schedule a one-shot timer for the access token's `exp` claim. While the
-   * user is active, every API call that hits a 401 transparently refreshes
-   * the access token (see `withTokenRefresh` in getFetchClient.ts), which
-   * updates the token in Redux and re-runs this effect with the new exp,
-   * pushing the deadline forward. If no API activity occurs during the
-   * access token lifespan, the token in Redux never changes, the timer
-   * fires, and we log the user out — matching the configured server-side
-   * idle behavior without needing a separate activity tracker.
-   *
-   * If the JWT can't be decoded (malformed, missing exp), we skip the
-   * timer; the active-tab redirect on 401 still covers the symptom.
+   * Proactive idle-session detection. See `useIdleSessionLogout` for the full
+   * rationale and the UX trade-off (a user actively typing in a form with no
+   * outgoing API calls will still be logged out at `exp`).
    */
-  React.useEffect(() => {
-    if (!token || _disableRenewToken) {
-      return undefined;
-    }
-
-    const expiry = decodeAccessTokenExpiry(token);
-    if (expiry === null) {
-      return undefined;
-    }
-
-    // Small buffer past `exp` to avoid firing in the same tick the server
-    // would still consider the token valid (clock skew tolerance).
-    const SESSION_EXPIRY_BUFFER_MS = 1000;
-    const msUntilExpiry = expiry - Date.now() + SESSION_EXPIRY_BUFFER_MS;
-
-    const timeoutId = window.setTimeout(
-      () => {
-        clearStateAndLogout();
-      },
-      Math.max(msUntilExpiry, 0)
-    );
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [token, clearStateAndLogout, _disableRenewToken]);
+  useIdleSessionLogout({
+    token,
+    onExpired: clearStateAndLogout,
+    disabled: _disableRenewToken,
+  });
 
   React.useEffect(() => {
     /**
