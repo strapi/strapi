@@ -1,0 +1,39 @@
+name: 'Community PR Triage'
+description: 'Sync community PRs to Linear and generate reports'
+inputs:
+  mode:
+    description: 'sync-pr | sync-all | linear-weekly-report | notion-report'
+    required: true
+  pr-number:
+    description: 'PR number (sync-pr mode only)'
+    required: false
+  trigger-label:
+    description: 'Label that triggered sync-pr (e.g. "community")'
+    required: false
+  github-token:
+    required: true
+  linear-api-key:
+    required: true
+  linear-cpr-team-id:
+    required: true
+  linear-cms-team-id:
+    required: true
+  linear-project-id:
+    required: true
+  linear-triage-view-url:
+    description: 'Hardcoded URL to CPR triage view in Linear'
+    required: false
+  linear-labels:
+    description: 'JSON map of label name → ID (skips team labels API call)'
+    required: false
+  post-to-notion:
+    description: 'Also post to Notion when running weekly-report (true/false)'
+    required: false
+    default: 'false'
+  notion-api-key:
+    required: false
+  notion-database-id:
+    required: false
+runs:
+  using: 'node24'
+  main: 'dist/index.cjs'
