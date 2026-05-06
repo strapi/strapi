@@ -3,15 +3,11 @@ import {
   REVIEW_WORKFLOW_FILTERS,
 } from '../routes/content-manager/model/constants';
 
-import type { Filters } from '@strapi/admin/strapi-admin';
-import type { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
-import type { MessageDescriptor } from 'react-intl';
-
-/** Matches CM list-view injectable filters (`Filters.tsx`): labels may be intl descriptors. */
-type InjectableListViewFilter = Omit<Filters.Filter, 'label' | 'operators'> & {
-  label: string | MessageDescriptor;
-  operators?: Array<{ value: string; label: string | MessageDescriptor }>;
-};
+import type {
+  InjectableListViewFilter,
+  ListFieldLayout,
+  ListLayout,
+} from '@strapi/content-manager/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
  * addColumnToTableHook

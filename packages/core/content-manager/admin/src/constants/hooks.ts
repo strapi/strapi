@@ -1,3 +1,19 @@
+import type { Filters } from '@strapi/admin/strapi-admin';
+import type { MessageDescriptor } from 'react-intl';
+
+/**
+ * Shape of a filter passed through the `INJECT_LIST_VIEW_FILTERS` hook.
+ *
+ * Plugin-injected filters may use react-intl `MessageDescriptor` labels so
+ * they carry their own translations. The list view consumer resolves them to
+ * plain strings (which is what the underlying `Filters.Filter` contract
+ * expects) before rendering.
+ */
+export type InjectableListViewFilter = Omit<Filters.Filter, 'label' | 'operators'> & {
+  label: string | MessageDescriptor;
+  operators?: Array<{ value: string; label: string | MessageDescriptor }>;
+};
+
 export const HOOKS = {
   /**
    * Hook that allows to mutate the displayed headers of the list view table

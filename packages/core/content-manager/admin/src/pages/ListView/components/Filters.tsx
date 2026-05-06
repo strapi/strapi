@@ -22,19 +22,10 @@ import { getMainField } from '../../../utils/attributes';
 import { getTranslation } from '../../../utils/translations';
 import { getDisplayName } from '../../../utils/users';
 
+import type { InjectableListViewFilter } from '../../../constants/hooks';
 import type { ListLayout } from '../../../hooks/useDocumentLayout';
 
 const { INJECT_LIST_VIEW_FILTERS } = HOOKS;
-
-/**
- * Plugin-injected filters may use react-intl `MessageDescriptor` labels so they
- * carry their own translations. Convert them to strings here, since the
- * underlying `Filters.Filter` contract expects plain strings.
- */
-type InjectableFilter = Omit<Filters.Filter, 'label' | 'operators'> & {
-  label: string | MessageDescriptor;
-  operators?: Array<{ value: string; label: string | MessageDescriptor }>;
-};
 
 /**
  * If new attributes are added, this list needs to be updated.
@@ -257,7 +248,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     // `layout.options` is a merge of schema/pluginOptions/contentType options —
     // mirrors the column-injection hook contract.
     const { displayedFilters: extendedFilters } = runHookWaterfall(INJECT_LIST_VIEW_FILTERS, {
-      displayedFilters: baseFilters as InjectableFilter[],
+      displayedFilters: baseFilters as InjectableListViewFilter[],
       layout,
     });
 
