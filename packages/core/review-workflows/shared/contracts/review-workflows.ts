@@ -56,7 +56,7 @@ namespace GetStages {
 
   export interface Response {
     data: Stage[];
-    meta?: { workflowCount: number };
+    meta?: { workflowCount: number; stageCount?: number };
     error?: errors.ApplicationError;
   }
 }

@@ -293,7 +293,6 @@
   "relation.notAvailable": "Žádné relace nejsou dostupné",
   "relation.publicationState.draft": "Draft",
   "relation.publicationState.published": "Published",
-  "reviewWorkflows.stage.label": "Fáze schvalování",
   "select.currently.selected": "aktuálně vybráno: {count}",
   "success.record.clone": "Dokument byl duplikován",
   "success.record.discard": "Změny zahozeny",
