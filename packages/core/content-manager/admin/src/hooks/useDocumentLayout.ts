@@ -159,9 +159,14 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { isLoading: isLoadingSchemas, schemas } = useContentTypeSchema();
 
-  const { data, isLoading: isLoadingConfigs, error } = useGetContentTypeConfigurationQuery(model);
+  const {
+    data,
+    isLoading: isLoadingConfigs,
+    error,
+    isFetching: isFetchingConfigs,
+  } = useGetContentTypeConfigurationQuery(model);
 
-  const isLoading = isLoadingSchemas || isLoadingConfigs;
+  const isLoading = isLoadingSchemas || isFetchingConfigs || isLoadingConfigs;
 
   React.useEffect(() => {
     if (error) {
