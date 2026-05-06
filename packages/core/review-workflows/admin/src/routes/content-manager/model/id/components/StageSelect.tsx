@@ -286,15 +286,16 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
   // showing a hint to the user saying that they don't have the permission to update this stage.
   // Adding a check on the total number of stages in the workflow to show a more accurate message instead.
   const totalWorkflowStages = meta?.stageCount ?? 0;
+  const canTransition = meta?.canTransition ?? true;
   let reviewStageHint: string | false = false;
   if (!isLoading && stages.length === 0) {
-    if (totalWorkflowStages === 1) {
+    if (canTransition && totalWorkflowStages === 1) {
       reviewStageHint = formatMessage({
         id: 'review-workflows.stages.single-stage',
         defaultMessage:
           'This workflow only has one stage. Add more stages to be able to update it here.',
       });
-    } else if (totalWorkflowStages > 1) {
+    } else {
       reviewStageHint = formatMessage({
         id: 'review-workflows.stages.no-transition',
         defaultMessage: 'You don’t have the permission to update this stage.',
