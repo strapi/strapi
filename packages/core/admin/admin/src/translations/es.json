@@ -510,6 +510,7 @@
   "app.components.PluginCard.compatible": "Compatible con su aplicación",
   "app.components.PluginCard.compatibleCommunity": "Compatible con la comunidad",
   "app.components.PluginCard.more-details": "Más detalles",
+  "app.components.Select.placeholder": "Seleccionar",
   "app.components.ToggleCheckbox.off-label": "Apagado",
   "app.components.ToggleCheckbox.on-label": "Encendido",
   "app.components.Users.MagicLink.connect": "Envíe este enlace al usuario para que se conecte.",
