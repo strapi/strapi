@@ -78,21 +78,6 @@ jobs:
         with:
           ref: ${{ github.event.repository.default_branch }}
 
-      - uses: actions/setup-node@v4
-        if: steps.check-label.outputs.labeled == 'true'
-        with:
-          node-version: '24'
-
-      - name: Install action dependencies
-        if: steps.check-label.outputs.labeled == 'true'
-        run: npm ci
-        working-directory: .github/actions/community-pr-triage
-
-      - name: Build action
-        if: steps.check-label.outputs.labeled == 'true'
-        run: npm run build
-        working-directory: .github/actions/community-pr-triage
-
       - name: Sync PR to Linear
         if: steps.check-label.outputs.labeled == 'true'
         uses: ./.github/actions/community-pr-triage
@@ -123,18 +108,6 @@ jobs:
         # SECURITY: always checkout the base branch (default_branch), never the PR head.
         with:
           ref: ${{ github.event.repository.default_branch }}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-
-      - name: Install action dependencies
-        run: npm ci
-        working-directory: .github/actions/community-pr-triage
-
-      - name: Build action
-        run: npm run build
-        working-directory: .github/actions/community-pr-triage
 
       - name: Sync PR to Linear
         uses: ./.github/actions/community-pr-triage
