@@ -5,15 +5,27 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@tests/utils';
 
 import { BlocksInput } from '../BlocksInput';
+import { defaultBlocksStore } from '../DefaultBlocksStore';
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useStrapiApp: jest
+    .fn()
+    .mockImplementation((_name: string, selector: (state: unknown) => unknown) =>
+      selector({
+        plugins: {
+          'content-manager': {
+            apis: { getRichTextBlocks: () => ({ ...defaultBlocksStore }) },
+          },
+        },
+      })
+    ),
+  useIsMobile: jest.fn().mockReturnValue(false),
+}));
 
 import { blocksData } from './mock-schema';
 
 type BlocksEditorProps = React.ComponentProps<typeof BlocksInput>;
-
-jest.mock('@strapi/admin/strapi-admin', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin'),
-  useIsMobile: jest.fn().mockReturnValue(false),
-}));
 
 const setup = ({
   initialValues = {
