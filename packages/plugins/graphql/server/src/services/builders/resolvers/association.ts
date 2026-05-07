@@ -38,7 +38,7 @@ export default ({ strapi }: Context) => {
 
       const targetContentType = strapi.getModel(targetUID);
 
-      return async (parent: any, args: any = {}, context: any = {}) => {
+      return async (parent: any, args: any, context: any, info: any) => {
         const { auth } = context.state;
 
         const transformedArgs = transformArgs(args, {
@@ -69,12 +69,19 @@ export default ({ strapi }: Context) => {
           return graphqlService.isBuiltInQueryField(fieldName);
         };
 
+        // Walk back to the root of info.path so we pick up the args of *our* query branch
+        let rootPath = info?.path;
+        while (rootPath?.prev) {
+          rootPath = rootPath.prev;
+        }
+        const rootQueryArgs = rootPath ? context.rootQueryArgsByPath?.get(rootPath.key) : undefined;
+
         // Only inherit status from built-in queries to avoid conflicts with custom resolvers
         const inheritedStatus =
-          context.rootQueryArgs?.status &&
-          context.rootQueryArgs?._originField &&
-          isBuiltInQueryField(context.rootQueryArgs._originField)
-            ? context.rootQueryArgs.status
+          rootQueryArgs?.status &&
+          rootQueryArgs?._originField &&
+          isBuiltInQueryField(rootQueryArgs._originField)
+            ? rootQueryArgs.status
             : null;
 
         const statusToApply = args.status || inheritedStatus;
@@ -90,10 +97,10 @@ export default ({ strapi }: Context) => {
 
         // Inherit hasPublishedVersion from root query (same pattern as status)
         const inheritedHasPublishedVersion =
-          context.rootQueryArgs?.hasPublishedVersion !== undefined &&
-          context.rootQueryArgs?._originField &&
-          isBuiltInQueryField(context.rootQueryArgs._originField)
-            ? context.rootQueryArgs.hasPublishedVersion
+          rootQueryArgs?.hasPublishedVersion !== undefined &&
+          rootQueryArgs?._originField &&
+          isBuiltInQueryField(rootQueryArgs._originField)
+            ? rootQueryArgs.hasPublishedVersion
             : undefined;
 
         // Build hasPublishedVersion condition for this relation's model
