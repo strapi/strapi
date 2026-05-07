@@ -167,6 +167,11 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
 
   const isConfigResolvedForModel = data?.contentType?.uid === model;
   const isLoading = isLoadingSchemas || isLoadingConfigs || (!error && !isConfigResolvedForModel);
+  const lastStableLayoutRef = React.useRef<{
+    edit: EditLayout;
+    list: ListLayout;
+    listViewConversionContext: ListViewConversionContext | null;
+  } | null>(null);
 
   React.useEffect(() => {
     if (error) {
@@ -177,30 +182,48 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
     }
   }, [error, formatAPIError, toggleNotification]);
 
-  const editLayout = React.useMemo(
-    () =>
-      data && !isLoading
-        ? formatEditLayout(data, { schemas, schema, components })
-        : ({
-            layout: [],
-            components: {},
-            metadatas: {},
-            options: {},
-            settings: DEFAULT_SETTINGS,
-          } as EditLayout),
-    [data, isLoading, schemas, schema, components]
-  );
+  const resolvedLayouts = React.useMemo(() => {
+    if (!data || isLoading) {
+      return null;
+    }
 
-  const listLayout = React.useMemo(() => {
-    return data && !isLoading
-      ? formatListLayout(data, { schemas, schema, components })
-      : ({
-          layout: [],
-          metadatas: {},
-          options: {},
-          settings: DEFAULT_SETTINGS,
-        } as ListLayout);
+    const edit = formatEditLayout(data, { schemas, schema, components });
+    const list = formatListLayout(data, { schemas, schema, components });
+    const listViewConversionContext: ListViewConversionContext = {
+      componentConfigurations: data.components,
+      componentSchemas: components,
+      contentTypeSchemas: schemas,
+    };
+
+    return { edit, list, listViewConversionContext };
   }, [data, isLoading, schemas, schema, components]);
+
+  React.useEffect(() => {
+    if (resolvedLayouts) {
+      lastStableLayoutRef.current = resolvedLayouts;
+    }
+  }, [resolvedLayouts]);
+
+  const stableLayouts = resolvedLayouts ?? lastStableLayoutRef.current;
+
+  const editLayout =
+    stableLayouts?.edit ??
+    ({
+      layout: [],
+      components: {},
+      metadatas: {},
+      options: {},
+      settings: DEFAULT_SETTINGS,
+    } as EditLayout);
+
+  const listLayout =
+    stableLayouts?.list ??
+    ({
+      layout: [],
+      metadatas: {},
+      options: {},
+      settings: DEFAULT_SETTINGS,
+    } as ListLayout);
 
   const { layout: edit } = React.useMemo(
     () =>
@@ -211,17 +234,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
     [editLayout, query, runHookWaterfall]
   );
 
-  const listViewConversionContext = React.useMemo((): ListViewConversionContext | null => {
-    if (!data || isLoading) {
-      return null;
-    }
-
-    return {
-      componentConfigurations: data.components,
-      componentSchemas: components,
-      contentTypeSchemas: schemas,
-    };
-  }, [data, isLoading, components, schemas]);
+  const listViewConversionContext = stableLayouts?.listViewConversionContext ?? null;
 
   return {
     error,
