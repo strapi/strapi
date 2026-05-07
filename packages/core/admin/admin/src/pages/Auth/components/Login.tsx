@@ -122,7 +122,7 @@ const Login = ({ children }: LoginProps) => {
                     defaultMessage: 'kai@doe.com',
                   }),
                   required: true,
-                  type: 'string' as const,
+                  type: 'email' as const,
                 },
                 {
                   label: formatMessage({

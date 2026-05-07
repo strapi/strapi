@@ -20,10 +20,12 @@ api:
   - 'tests/api/**'
 e2e:
   - 'tests/scripts/run-e2e-tests.js'
+  - 'tests/scripts/run-tests.js'
   - 'tests/e2e/**'
   - 'playwright.base.config.js'
 cli:
   - 'tests/scripts/run-cli-tests.js'
+  - 'tests/scripts/run-tests.js'
   - 'tests/cli/**'
 docs:
   - 'docs/**'

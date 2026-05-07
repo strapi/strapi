@@ -1,14 +1,14 @@
 import { adminApi } from '../../../../admin/src/services/api';
-import { GetAiUsage, GetAiToken } from '../../../../shared/contracts/ai';
+import { GetAiUsage, GetAiToken, GetAiFeatureConfig } from '../../../../shared/contracts/ai';
 
 const aiService = adminApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAIUsage: builder.query<GetAiUsage.Response, void>({
+    getAiUsage: builder.query<GetAiUsage.Response, void>({
       query: () => ({
         method: 'GET',
         url: `/admin/ai-usage`,
       }),
-      providesTags: ['AIUsage'],
+      providesTags: ['AiUsage'],
     }),
     getAiToken: builder.query<GetAiToken.Response['data'], void>({
       query: () => ({
@@ -19,10 +19,30 @@ const aiService = adminApi.injectEndpoints({
         return res.data;
       },
     }),
+    getAiFeatureConfig: builder.query<GetAiFeatureConfig.Response['data'], void>({
+      query: () => ({
+        method: 'GET',
+        url: '/admin/ai-feature-config',
+      }),
+      transformResponse(res: GetAiFeatureConfig.Response) {
+        return res.data;
+      },
+      providesTags: ['AiFeatureConfig'],
+    }),
   }),
   overrideExisting: true,
 });
 
-const { useGetAIUsageQuery, useGetAiTokenQuery, useLazyGetAiTokenQuery } = aiService;
+const {
+  useGetAiUsageQuery,
+  useGetAiTokenQuery,
+  useLazyGetAiTokenQuery,
+  useGetAiFeatureConfigQuery,
+} = aiService;
 
-export { useGetAIUsageQuery, useGetAiTokenQuery, useLazyGetAiTokenQuery };
+export {
+  useGetAiUsageQuery,
+  useGetAiTokenQuery,
+  useLazyGetAiTokenQuery,
+  useGetAiFeatureConfigQuery,
+};

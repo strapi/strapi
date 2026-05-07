@@ -139,8 +139,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model }) => [
+      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => [
         { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_LIST` : model },
+        {
+          type: 'Document',
+          id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+        },
+        { type: 'Document', id: `${model}_ALL_ITEMS` },
         'RecentDocumentList',
         'CountDocuments',
         'UpcomingReleasesList',
@@ -176,9 +181,10 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, params }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/discard`
-          : `/content-manager/${collectionType}/${model}/actions/discard`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/discard`
+            : `/content-manager/${collectionType}/${model}/actions/discard`,
         method: 'POST',
         config: {
           params,
@@ -242,14 +248,45 @@ const documentApi = contentManagerApi.injectEndpoints({
       }
     >({
       query: ({ collectionType, model, documentId, params }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/countDraftRelations`
-          : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/countDraftRelations`
+            : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
         method: 'GET',
         config: {
           params,
         },
       }),
+    }),
+    /**
+     * Fetches multiple documents with deep populate in a single request for bulk publish validation.
+     */
+    getDocumentsForValidation: builder.query<
+      Find.Response['results'],
+      {
+        model: string;
+        documentIds: string[];
+        locale?: string;
+        sort?: string;
+      }
+    >({
+      query: ({ model, documentIds, locale, sort }) => ({
+        url: `/content-manager/collection-types/${model}/actions/bulkFindForValidation`,
+        method: 'POST',
+        data: { documentIds, locale, sort },
+      }),
+      transformResponse: (response: { results: Find.Response['results'] }) =>
+        response?.results ?? [],
+      providesTags: (result, _error, { model }) =>
+        result
+          ? [
+              ...result.map((doc) => ({
+                type: 'Document' as const,
+                id: `${model}_${doc.documentId}`,
+              })),
+              { type: 'Document', id: `${model}_LIST` },
+            ]
+          : [],
     }),
     getDocument: builder.query<
       FindOne.Response,
@@ -267,7 +304,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         baseQuery
       ) => {
         const res = await baseQuery({
-          url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
+          url: `/content-manager/${collectionType}/${model}${
+            documentId && collectionType !== SINGLE_TYPES ? `/${documentId}` : ''
+          }`,
           method: 'GET',
           config: {
             params,
@@ -331,9 +370,10 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, params, data }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/publish`
-          : `/content-manager/${collectionType}/${model}/actions/publish`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/publish`
+            : `/content-manager/${collectionType}/${model}/actions/publish`,
         method: 'POST',
         data,
         config: {
@@ -351,6 +391,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           'RecentDocumentList',
           'CountDocuments',
           'UpcomingReleasesList',
+          {
+            type: 'AILocalizationJobs',
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+          },
         ];
       },
     }),
@@ -385,7 +429,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, data, params }) => ({
-        url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
+        url: `/content-manager/${collectionType}/${model}${
+          documentId && collectionType !== SINGLE_TYPES ? `/${documentId}` : ''
+        }`,
         method: 'PUT',
         data,
         config: {
@@ -403,6 +449,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           'RecentDocumentList',
           'CountDocuments',
           'UpcomingReleasesList',
+          {
+            type: 'AILocalizationJobs',
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+          },
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
@@ -448,9 +498,10 @@ const documentApi = contentManagerApi.injectEndpoints({
         }
     >({
       query: ({ collectionType, model, documentId, params, data }) => ({
-        url: documentId
-          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/unpublish`
-          : `/content-manager/${collectionType}/${model}/actions/unpublish`,
+        url:
+          documentId && collectionType !== SINGLE_TYPES
+            ? `/content-manager/${collectionType}/${model}/${documentId}/actions/unpublish`
+            : `/content-manager/${collectionType}/${model}/actions/unpublish`,
         method: 'POST',
         data,
         config: {
@@ -502,6 +553,7 @@ const {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery,
@@ -521,6 +573,7 @@ export {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery as useGetDraftRelationCountQuery,

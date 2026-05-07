@@ -1,5 +1,8 @@
 export interface FeaturesConfig {
-  future?: Record<string, unknown>;
+  future?: {
+    adminTokens?: boolean;
+    unstableMediaLibrary?: boolean;
+  };
 }
 
 export interface FeaturesService {

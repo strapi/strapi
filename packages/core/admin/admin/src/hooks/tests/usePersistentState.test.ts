@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { usePersistentState, useScopedPersistentState } from '../usePersistentState';
 
@@ -16,7 +16,7 @@ describe('usePersistentState', () => {
     const [value, setValue] = result.current;
     expect(value).toBe(0);
 
-    act(() => {
+    await waitFor(() => {
       setValue(1);
     });
     const [updatedValue] = result.current;
@@ -30,7 +30,7 @@ describe('useScopedPersistentState', () => {
     const [value, setValue] = result.current;
     expect(value).toBe(0);
 
-    act(() => {
+    await waitFor(() => {
       setValue(1);
     });
     const [updatedValue] = result.current;

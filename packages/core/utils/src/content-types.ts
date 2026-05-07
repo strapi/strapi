@@ -37,6 +37,15 @@ const constants = {
   COLLECTION_TYPE,
 };
 
+/** ID-like fields accepted at root level and on relations/media/components (validate/sanitize traversal). */
+const ID_FIELDS: string[] = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
+/** Keys accepted on morphTo relation payloads (e.g. __type). */
+const MORPH_TO_KEYS: string[] = ['__type'];
+/** Keys accepted on dynamic zone component payloads (e.g. __component). */
+const DYNAMIC_ZONE_KEYS: string[] = ['__component'];
+/** Relation operation keys (connect, disconnect, set, options). */
+const RELATION_OPERATION_KEYS: string[] = ['connect', 'disconnect', 'set', 'options'];
+
 const getTimestamps = (model: Model) => {
   const attributes: string[] = [];
 
@@ -99,7 +108,13 @@ const getNonVisibleAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
+  return _.uniq([
+    ID_ATTRIBUTE,
+    DOC_ID_ATTRIBUTE,
+    PUBLISHED_AT_ATTRIBUTE,
+    ...getTimestamps(model),
+    ...nonVisibleAttributes,
+  ]);
 };
 
 const getVisibleAttributes = (model: Model) => {
@@ -188,9 +203,9 @@ const hasRelationReordering = (attribute?: Attribute) =>
   isRelationalAttribute(attribute) && HAS_RELATION_REORDERING.includes(attribute.relation);
 
 const isComponentAttribute = (
-  attribute: Attribute
+  attribute?: Attribute
 ): attribute is ComponentAttribute | DynamicZoneAttribute =>
-  ['component', 'dynamiczone'].includes(attribute?.type);
+  !!attribute && ['component', 'dynamiczone'].includes(attribute.type);
 
 const isDynamicZoneAttribute = (attribute?: Attribute): attribute is DynamicZoneAttribute =>
   !!attribute && attribute.type === 'dynamiczone';
@@ -205,6 +220,17 @@ const getComponentAttributes = (schema: Model) => {
     schema.attributes,
     (acc, attr, attrName) => {
       if (isComponentAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    [] as string[]
+  );
+};
+
+const getMediaAttributes = (schema: Model) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isMediaAttribute(attr)) acc.push(attrName);
       return acc;
     },
     [] as string[]
@@ -268,8 +294,13 @@ export {
   getPrivateAttributes,
   isPrivateAttribute,
   constants,
+  ID_FIELDS,
+  MORPH_TO_KEYS,
+  DYNAMIC_ZONE_KEYS,
+  RELATION_OPERATION_KEYS,
   getNonWritableAttributes,
   getComponentAttributes,
+  getMediaAttributes,
   getScalarAttributes,
   getRelationalAttributes,
   getWritableAttributes,

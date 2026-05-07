@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { findAndClose, clickAndWait } from '../../utils/shared';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { findAndClose, clickAndWait } from '../../../utils/shared';
 
 type Field = {
   name: string;
@@ -15,7 +15,7 @@ type Field = {
 test.describe('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
 
     await page.goto('/admin');
     await login({ page });

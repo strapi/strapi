@@ -6,11 +6,17 @@ export type InputFile = FormidableFile & {
   provider?: string;
 };
 
+export interface FocalPoint {
+  x: number;
+  y: number;
+}
+
 export interface File {
   id: number;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
+  focalPoint?: FocalPoint | null;
   width?: number;
   height?: number;
   formats?: Record<string, unknown>;
@@ -59,6 +65,10 @@ export interface Config {
   sizeLimit?: number;
   providerOptions: Record<string, unknown>;
   actionOptions: Record<string, unknown>;
+  sharp?: {
+    cache?: boolean;
+    concurrency?: number;
+  };
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {
@@ -73,5 +83,6 @@ export type FileInfo = {
   name?: string | null;
   alternativeText?: string | null;
   caption?: string | null;
+  focalPoint?: FocalPoint | null;
   folder?: number;
 };

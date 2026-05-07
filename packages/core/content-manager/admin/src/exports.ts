@@ -27,6 +27,7 @@ export type {
   BulkActionComponent,
   BulkActionComponentProps,
   BulkActionDescription,
+  ContentManagerPlugin,
   DescriptionComponent,
   DescriptionReducer,
   PanelComponentProps,
@@ -39,3 +40,8 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './content-manager';
+export type {
+  RichTextBlocksStore,
+  SelectorBlock,
+  NonSelectorBlock,
+} from './pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';

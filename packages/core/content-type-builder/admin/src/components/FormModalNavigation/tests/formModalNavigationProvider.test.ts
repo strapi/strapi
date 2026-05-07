@@ -1,5 +1,8 @@
+import * as React from 'react';
+
 import { act, renderHook } from '@testing-library/react';
 
+import { CTBSessionProvider } from '../../CTBSession/ctbSession';
 import {
   FormModalNavigationProvider,
   State,
@@ -16,8 +19,15 @@ const removeFunctionsFromObject = (state: State) => {
 
 describe('FromModalNavigationProvider', () => {
   it('sets the initial state', () => {
+    const Wrapper = ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(
+        CTBSessionProvider,
+        null,
+        React.createElement(FormModalNavigationProvider, null, children)
+      );
+
     const { result } = renderHook(() => useFormModalNavigation(), {
-      wrapper: FormModalNavigationProvider,
+      wrapper: Wrapper,
     });
 
     const currentStateWithoutFunctions = removeFunctionsFromObject(result.current);
@@ -25,12 +35,19 @@ describe('FromModalNavigationProvider', () => {
   });
 
   it('updates the state when selecting a custom field for a new attribute', () => {
+    const Wrapper = ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(
+        CTBSessionProvider,
+        null,
+        React.createElement(FormModalNavigationProvider, null, children)
+      );
+
     const { result } = renderHook(() => useFormModalNavigation(), {
-      wrapper: FormModalNavigationProvider,
+      wrapper: Wrapper,
     });
 
     act(() => {
-      (result.current as any).onClickSelectCustomField({
+      result.current.onClickSelectCustomField({
         attributeType: 'text',
         customFieldUid: 'plugin::mycustomfields.color',
       });
@@ -49,12 +66,19 @@ describe('FromModalNavigationProvider', () => {
   });
 
   it('updates the state when editing a custom field attribute', () => {
+    const Wrapper = ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(
+        CTBSessionProvider,
+        null,
+        React.createElement(FormModalNavigationProvider, null, children)
+      );
+
     const { result } = renderHook(() => useFormModalNavigation(), {
-      wrapper: FormModalNavigationProvider,
+      wrapper: Wrapper,
     });
 
     act(() => {
-      (result.current as any).onOpenModalEditCustomField({
+      result.current.onOpenModalEditCustomField({
         forTarget: 'contentType',
         targetUid: 'api::test.test',
         attributeName: 'color',

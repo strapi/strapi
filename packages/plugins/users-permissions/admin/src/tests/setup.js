@@ -3,6 +3,29 @@ import { setupServer } from 'msw/node';
 
 import pluginId from '../pluginId';
 
+const role = {
+  id: 1,
+  name: 'Authenticated',
+  description: 'Default role given to authenticated user.',
+  type: 'authenticated',
+  createdAt: '2021-09-08T16:26:18.061Z',
+  updatedAt: '2021-09-08T16:26:18.061Z',
+  permissions: {
+    'api::address': {
+      controllers: {
+        address: {
+          create: {
+            enabled: false,
+            policy: '',
+          },
+        },
+      },
+    },
+  },
+};
+
+let roleVersion = 0;
+
 const handlers = [
   // Mock get role route
   rest.get(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
@@ -10,24 +33,14 @@ const handlers = [
       ctx.status(200),
       ctx.json({
         role: {
-          id: req.params.roleId,
-          name: 'Authenticated',
-          description: 'Default role given to authenticated user.',
-          type: 'authenticated',
-          createdAt: '2021-09-08T16:26:18.061Z',
-          updatedAt: '2021-09-08T16:26:18.061Z',
-          permissions: {
-            'api::address': {
-              controllers: {
-                address: {
-                  create: {
-                    enabled: false,
-                    policy: '',
-                  },
-                },
-              },
-            },
-          },
+          ...role,
+          id: Number(req.params.roleId),
+          /**
+           * @note React Query will bail out of notifying listeners if the response deep-equals
+           * the previous response. Bump a version to ensure a new reference so Formik can
+           * reinitialize its values during tests.
+           */
+          version: ++roleVersion,
         },
       })
     );

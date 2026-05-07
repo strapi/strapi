@@ -1,0 +1,123 @@
+# SECURITY (read before editing):
+# Do NOT add actions/checkout of the PR head or it could expose repo secrets.
+#
+# Triggered automatically when a PR is labeled "community".
+# Creates a Linear ticket in the CPR team and links it back to the PR.
+
+name: Community PR — Create Linear Ticket
+
+on:
+  pull_request_target:
+    types: [opened, labeled]
+
+permissions: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request_target' &&
+      github.event.action == 'opened' &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Verify run context
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request_target" ]; then
+            echo "::error::Expected pull_request_target, got ${{ github.event_name }}"
+            exit 1
+          fi
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          DEFAULT_REF="${{ github.event.repository.default_branch }}"
+          if [ "$BASE_REF" != "$DEFAULT_REF" ]; then
+            echo "::error::Refusing to run when PR targets branch '$BASE_REF' (only default '$DEFAULT_REF' is allowed)."
+            exit 1
+          fi
+          echo "Running from default branch; PR head code is never executed."
+
+      - name: Check org membership and label
+        id: check-label
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { login } = context.payload.pull_request.user;
+            const association = context.payload.pull_request.author_association;
+
+            // Skip bot users
+            if (login && login.includes('[bot]')) {
+              core.info(`Skipped — ${login} is a bot`);
+              core.setOutput('labeled', 'false');
+              return;
+            }
+
+            if (!['MEMBER', 'OWNER', 'FIRST_TIME_CONTRIBUTOR', 'CONTRIBUTOR'].includes(association)) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: ['community']
+              });
+              core.info(`Added "community" label — ${login} has association "${association}"`);
+              core.setOutput('labeled', 'true');
+            } else {
+              core.info(`Skipped — ${login} is a ${association.toLowerCase()}`);
+              core.setOutput('labeled', 'false');
+            }
+
+      # GITHUB_TOKEN cannot trigger new workflow runs, so when the label job adds
+      # the community label it won't fire a separate labeled event. Run triage here
+      # immediately after auto-labeling instead.
+      - name: Checkout base branch
+        if: steps.check-label.outputs.labeled == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Sync PR to Linear
+        if: steps.check-label.outputs.labeled == 'true'
+        uses: ./.github/actions/community-pr-triage
+        with:
+          mode: sync-pr
+          pr-number: ${{ github.event.pull_request.number }}
+          trigger-label: community
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          linear-api-key: ${{ secrets.LINEAR_API_KEY }}
+          linear-cpr-team-id: ${{ vars.LINEAR_CPR_TEAM_ID }}
+          linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
+          linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
+          linear-labels: ${{ vars.LINEAR_LABELS }}
+
+  triage:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request_target' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'community' &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        # SECURITY: always checkout the base branch (default_branch), never the PR head.
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Sync PR to Linear
+        uses: ./.github/actions/community-pr-triage
+        with:
+          mode: sync-pr
+          pr-number: ${{ github.event.pull_request.number }}
+          trigger-label: ${{ github.event.label.name }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          linear-api-key: ${{ secrets.LINEAR_API_KEY }}
+          linear-cpr-team-id: ${{ vars.LINEAR_CPR_TEAM_ID }}
+          linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
+          linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
+          linear-labels: ${{ vars.LINEAR_LABELS }}

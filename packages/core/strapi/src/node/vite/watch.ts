@@ -97,6 +97,12 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
         koaCtx.path = `${prefix}${koaCtx.path}`;
       }
 
+      // Set cache-control headers to prevent caching issues during development restarts
+      koaCtx.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      koaCtx.set('Pragma', 'no-cache');
+      koaCtx.set('Expires', '0');
+      koaCtx.set('Surrogate-Control', 'no-store');
+
       vite.middlewares(koaCtx.req, koaCtx.res, (err: unknown) => {
         if (err) {
           reject(err);
@@ -124,14 +130,35 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
 
     const url = koaCtx.originalUrl;
 
-    let template = await fs.readFile(path.relative(ctx.cwd, '.strapi/client/index.html'), 'utf-8');
-    template = await vite.transformIndexHtml(url, template);
+    try {
+      let template = await fs.readFile(
+        path.relative(ctx.cwd, '.strapi/client/index.html'),
+        'utf-8'
+      );
+      template = await vite.transformIndexHtml(url, template);
 
-    koaCtx.type = 'html';
-    koaCtx.body = template;
+      koaCtx.type = 'html';
+      koaCtx.body = template;
+    } catch (error) {
+      ctx.logger.error('Failed to serve admin panel in development mode:', error);
+      // Don't fallback to other handlers in development mode to prevent MIME type conflicts
+      koaCtx.status = 500;
+      koaCtx.body = 'Admin panel temporarily unavailable during server restart';
+    }
   };
 
   const adminRoute = `${ctx.adminPath}/:path*`;
+
+  // Remove any existing admin routes to prevent conflicts during restart
+  const existingRoutes = ctx.strapi.server.router.stack.filter(
+    (layer) => layer.path === adminRoute
+  );
+  existingRoutes.forEach((route) => {
+    const index = ctx.strapi.server.router.stack.indexOf(route);
+    if (index > -1) {
+      ctx.strapi.server.router.stack.splice(index, 1);
+    }
+  });
 
   ctx.strapi.server.router.get(adminRoute, serveAdmin);
   ctx.strapi.server.router.use(adminRoute, viteMiddlewares);

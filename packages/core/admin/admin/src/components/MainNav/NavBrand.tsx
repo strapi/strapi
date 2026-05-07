@@ -20,32 +20,34 @@ export const NavBrand = () => {
     logos: { menu },
   } = useConfiguration('LeftMenu');
   return (
-    <Box padding={3}>
-      <BrandIconWrapper direction="column" justifyContent="center" width="3.2rem" height="3.2rem">
-        <img
-          src={menu.custom?.url || menu.default}
-          alt={formatMessage({
-            id: 'app.components.LeftMenu.logo.alt',
-            defaultMessage: 'Application logo',
-          })}
-          width="100%"
-          height="100%"
-        />
-        <VisuallyHidden>
-          <span>
-            {formatMessage({
-              id: 'app.components.LeftMenu.navbrand.title',
-              defaultMessage: 'Strapi Dashboard',
+    <Flex alignItems="center" padding={3}>
+      <Box padding={{ initial: 1, medium: 0 }}>
+        <BrandIconWrapper direction="column" justifyContent="center" width="3.2rem" height="3.2rem">
+          <img
+            src={menu.custom?.url || menu.default}
+            alt={formatMessage({
+              id: 'app.components.LeftMenu.logo.alt',
+              defaultMessage: 'Application logo',
             })}
-          </span>
-          <span>
-            {formatMessage({
-              id: 'app.components.LeftMenu.navbrand.workplace',
-              defaultMessage: 'Workplace',
-            })}
-          </span>
-        </VisuallyHidden>
-      </BrandIconWrapper>
-    </Box>
+            width="100%"
+            height="100%"
+          />
+          <VisuallyHidden>
+            <span>
+              {formatMessage({
+                id: 'app.components.LeftMenu.navbrand.title',
+                defaultMessage: 'Strapi Dashboard',
+              })}
+            </span>
+            <span>
+              {formatMessage({
+                id: 'app.components.LeftMenu.navbrand.workplace',
+                defaultMessage: 'Workplace',
+              })}
+            </span>
+          </VisuallyHidden>
+        </BrandIconWrapper>
+      </Box>
+    </Flex>
   );
 };

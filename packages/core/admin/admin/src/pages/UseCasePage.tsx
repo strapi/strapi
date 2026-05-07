@@ -148,7 +148,11 @@ const UseCasePage = () => {
                   <Field.Label>
                     {formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
                   </Field.Label>
-                  <TextInput value={otherRole} onChange={(e) => setOtherRole(e.target.value)} />
+                  <TextInput
+                    type="text"
+                    value={otherRole}
+                    onChange={(e) => setOtherRole(e.target.value)}
+                  />
                 </Field.Root>
               )}
               <Button type="submit" size="L" fullWidth disabled={!role}>

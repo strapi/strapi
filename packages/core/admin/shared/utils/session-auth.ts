@@ -8,8 +8,10 @@ export const DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN = 14 * 24 * 60 * 60;
 export const DEFAULT_MAX_SESSION_LIFESPAN = 1 * 24 * 60 * 60;
 export const DEFAULT_IDLE_SESSION_LIFESPAN = 2 * 60 * 60;
 
-export const getRefreshCookieOptions = () => {
-  const isProduction = strapi.config.get('environment') === 'production';
+export const getRefreshCookieOptions = (secureRequest?: boolean) => {
+  const configuredSecure = strapi.config.get('admin.auth.cookie.secure');
+  const isProduction = process.env.NODE_ENV === 'production';
+
   const domain: string | undefined =
     strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
   const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
@@ -17,9 +19,18 @@ export const getRefreshCookieOptions = () => {
   const sameSite: boolean | 'lax' | 'strict' | 'none' =
     strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
 
+  let isSecure: boolean;
+  if (typeof configuredSecure === 'boolean') {
+    isSecure = configuredSecure;
+  } else if (secureRequest !== undefined) {
+    isSecure = isProduction && secureRequest;
+  } else {
+    isSecure = isProduction;
+  }
+
   return {
     httpOnly: true,
-    secure: isProduction,
+    secure: isSecure,
     overwrite: true,
     domain,
     path,
@@ -60,9 +71,10 @@ const getLifespansForType = (
 
 export const buildCookieOptionsWithExpiry = (
   type: 'refresh' | 'session',
-  absoluteExpiresAtISO?: string
+  absoluteExpiresAtISO?: string,
+  secureRequest?: boolean
 ) => {
-  const base = getRefreshCookieOptions();
+  const base = getRefreshCookieOptions(secureRequest);
   if (type === 'session') {
     return base;
   }

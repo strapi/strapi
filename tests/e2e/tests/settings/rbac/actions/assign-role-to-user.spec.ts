@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
-import { sharedSetup } from '../../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 // Constants for the created role
 const TARGET_USER = { firstName: 'Editor', lastName: 'Testing' };
@@ -14,7 +14,7 @@ test.describe('RBAC - Assign Role to Users', () => {
     await sharedSetup('rbac-assign-roles-to-user', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Navigate to the Users management page

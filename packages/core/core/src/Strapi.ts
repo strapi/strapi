@@ -1,4 +1,4 @@
-import * as globalAgent from 'global-agent';
+import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -37,7 +37,7 @@ import { createContentSourceMapsService } from './services/content-source-maps';
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
-// import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -60,6 +60,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get admin(): Core.Module {
     return this.get('admin');
+  }
+
+  get ai(): Modules.AI.AiNamespace {
+    return this.get('ai');
   }
 
   get EE(): boolean {
@@ -457,21 +461,22 @@ class Strapi extends Container implements Core.Strapi {
     // // if schemas have changed, run repairs
     if (status === 'CHANGED') {
       await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+      await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
     }
 
-    // const alreadyRanComponentRepair = await this.store.get({
-    //   type: 'strapi',
-    //   key: 'unidirectional-join-table-repair-ran',
-    // });
+    const alreadyRanComponentRepair = await this.store.get({
+      type: 'strapi',
+      key: 'unidirectional-join-table-repair-ran',
+    });
 
-    // if (!alreadyRanComponentRepair) {
-    //   await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
-    //   await this.store.set({
-    //     type: 'strapi',
-    //     key: 'unidirectional-join-table-repair-ran',
-    //     value: true,
-    //   });
-    // }
+    if (!alreadyRanComponentRepair) {
+      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
+      await this.store.set({
+        type: 'strapi',
+        key: 'unidirectional-join-table-repair-ran',
+        value: true,
+      });
+    }
 
     if (this.EE) {
       await utils.ee.checkLicense({ strapi: this });
@@ -514,7 +519,7 @@ class Strapi extends Container implements Core.Strapi {
       return;
     }
 
-    globalAgent.bootstrap();
+    bootstrapGlobalAgent();
 
     if (httpProxy) {
       this.log.info(`Using HTTP proxy: ${httpProxy}`);

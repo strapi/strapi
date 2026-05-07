@@ -8,7 +8,7 @@ const CloudFree = () => {
   const { formatMessage } = useIntl();
 
   const features = [
-    { id: 'api', message: '10K API requests' },
+    { id: 'api', message: '2.5K API requests' },
     { id: 'storage', message: '10 GB storage' },
     { id: 'bandwidth', message: '10 GB asset bandwidth' },
     { id: 'cdn', message: 'Global CDN' },

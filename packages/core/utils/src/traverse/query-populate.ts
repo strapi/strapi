@@ -145,10 +145,18 @@ const populate = traverseFactory()
       return data[key];
     },
   }))
-  .ignore(({ key, attribute }) => {
-    // we don't want to recurse using traversePopulate and instead let
-    // the visitors recurse with the appropriate traversal (sort, filters, etc...)
-    return ['sort', 'filters', 'fields'].includes(key) && !attribute;
+  .ignore(({ key, attribute, parent }) => {
+    // We don't want to recurse using traversePopulate for query keywords.
+    // Instead, the visitors handle them with the appropriate traversal (sort, filters, etc.).
+    //
+    // When a keyword name (e.g. 'filters') also exists as an attribute in the schema,
+    // we still treat it as a keyword if we're inside a nested populate context
+    // (parent is an attribute). This prevents the traverse from recursing into
+    // component/relation attributes named 'filters' with query filter data,
+    // which would cause "Invalid key" validation errors (issue #21338).
+    //
+    // The attribute can still be populated explicitly via `populate: { filters: true }`.
+    return ['sort', 'filters', 'fields'].includes(key) && (!attribute || !!parent?.attribute);
   })
   .on(
     // Handle recursion on populate."populate"

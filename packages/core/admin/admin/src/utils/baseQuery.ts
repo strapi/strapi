@@ -1,7 +1,7 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
-import { login as loginAction, logout as logoutAction } from '../reducer';
+import { logout as logoutAction } from '../reducer';
 import { getFetchClient, type FetchOptions, ApiError, isFetchError } from '../utils/getFetchClient';
 
 interface QueryArguments {
@@ -19,8 +19,6 @@ interface UnknownApiError {
 }
 
 type BaseQueryError = ApiError | UnknownApiError;
-
-let refreshPromise: Promise<string> | null = null;
 
 const isAuthPath = (url: string) => /^\/admin\/(login|logout|access-token)\b/.test(url);
 
@@ -57,50 +55,20 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
     // Handle error of type FetchError
 
     if (isFetchError(err)) {
-      // Attempt auto-refresh on 401 then retry once
+      // If we receive a 401 here, getFetchClient already tried to refresh and failed.
+      // Log the user out since their session is no longer valid.
       if (err.status === 401) {
         const url = typeof query === 'string' ? query : query.url;
 
         if (!isAuthPath(url)) {
-          if (!refreshPromise) {
-            async function refreshAccessToken(): Promise<string> {
-              const { post } = getFetchClient();
-
-              const res = await post('/admin/access-token');
-              const token = res?.data?.data?.token as string | undefined;
-              if (!token) {
-                throw new Error('access_token_exchange_failed');
-              }
-
-              // Persist according to previous choice: localStorage presence implies persist
-              const persist = Boolean(localStorage.getItem('jwtToken'));
-              dispatch(loginAction({ token, persist }));
-
-              return token;
-            }
-
-            refreshPromise = refreshAccessToken().finally(() => {
-              refreshPromise = null;
-            });
-          }
-
           try {
-            await refreshPromise;
-            // Retry original request once with updated Authorization
-            const retry = await executeQuery(query);
-
-            return { data: retry.data };
-          } catch (refreshError) {
-            try {
-              const { post } = getFetchClient();
-              await post('/admin/logout');
-            } catch {
-              // no-op
-            }
-
-            dispatch(logoutAction());
-            // Fall through to return the original 401 error shape
+            const { post } = getFetchClient();
+            await post('/admin/logout');
+          } catch {
+            // no-op
           }
+
+          dispatch(logoutAction());
         }
       }
 

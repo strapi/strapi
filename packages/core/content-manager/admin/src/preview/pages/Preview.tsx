@@ -21,7 +21,7 @@ import {
 import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
-import { styled } from 'styled-components';
+import { styled, useTheme } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
@@ -105,6 +105,7 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
+  const theme = useTheme();
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
@@ -133,6 +134,11 @@ const PreviewPage = () => {
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
+  const previewHighlightColors = {
+    highlightHoverColor: theme.colors.primary500,
+    highlightActiveColor: theme.colors.primary600,
+  };
+
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -145,7 +151,10 @@ const PreviewPage = () => {
       }
 
       if (event.data?.type === PUBLIC_EVENTS.PREVIEW_READY) {
-        const script = `(${previewScript.toString()})()`;
+        const script = `(${previewScript.toString()})(${JSON.stringify({
+          shouldRun: true,
+          colors: previewHighlightColors,
+        })})`;
         const sendMessage = getSendMessage(iframeRef);
         sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
       }
@@ -156,7 +165,7 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [documentId, toggleNotification]);
+  }, [documentId, toggleNotification, theme]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');

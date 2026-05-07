@@ -72,7 +72,7 @@ export const ListView = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
-    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
+    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) }, { replace: true });
   }, [navigate]);
 
   const headers = TABLE_HEADERS.map((header) => ({
@@ -86,7 +86,7 @@ export const ListView = () => {
     });
   });
 
-  const { data: apiTokens = [], isLoading, error } = useGetAPITokensQuery();
+  const { data: apiTokens = [], isLoading, error } = useGetAPITokensQuery({ kind: 'content-api' });
 
   React.useEffect(() => {
     if (error) {
@@ -155,11 +155,7 @@ export const ListView = () => {
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="S"
-              onClick={() =>
-                trackUsage('willAddTokenFromList', {
-                  tokenType: API_TOKEN_TYPE,
-                })
-              }
+              onClick={() => trackUsage('willAddTokenFromList', { tokenType: API_TOKEN_TYPE })}
               to="/settings/api-tokens/create"
             >
               {formatMessage({

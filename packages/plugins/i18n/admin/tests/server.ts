@@ -20,6 +20,22 @@ const LOCALES = [
     createdAt: '',
     updatedAt: '',
   },
+  {
+    id: 3,
+    code: 'de',
+    name: 'Deutsch',
+    isDefault: false,
+    createdAt: '',
+    updatedAt: '',
+  },
+  {
+    id: 4,
+    code: 'es',
+    name: 'Español',
+    isDefault: false,
+    createdAt: '',
+    updatedAt: '',
+  },
 ] satisfies GetLocales.Response;
 
 export const server = setupServer(

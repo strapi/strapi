@@ -1,0 +1,72 @@
+name: 'Publish to npm'
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: choice
+        description: 'The version you want to publish to NPM'
+        options:
+          - patch
+          - minor
+          - prepatch
+          - preminor
+      tag:
+        type: choice
+        description: 'NPM dist-tag'
+        default: 'experimental'
+        options:
+          - latest
+          - beta
+          - rc
+          - alpha
+          - experimental
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish packages
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: ${{ (inputs.tag == 'experimental') && 1 || 0 }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - run: yarn
+
+      - name: Publish packages (run publish scripts)
+        env:
+          TAG: ${{ inputs.tag }}
+          VERSION: ${{ inputs.version }}
+          REGISTRY: https://registry.npmjs.org/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          echo "Publish flow: $TYPE"
+          # Ensure registry is set
+          npm config set registry "$REGISTRY"
+
+          DIST_TAG="$TAG"
+
+          # Decide flow based on DIST_TAG: experimental => prerelease, otherwise release
+          if [ "$DIST_TAG" = "experimental" ]; then
+            echo "Running prerelease flow (DIST_TAG=experimental): ./scripts/pre-publish.sh"
+            export VERSION='0.0.0-experimental.${{ github.sha }}'
+            export DIST_TAG
+            ./scripts/pre-publish.sh
+          else
+            echo "Running release flow: ./scripts/publish.sh (DIST_TAG=$DIST_TAG)"
+          fi

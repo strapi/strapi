@@ -1,8 +1,7 @@
 import { rest } from 'msw';
 import { type SetupServer, setupServer } from 'msw/node';
-import * as qs from 'qs';
 
-import { MockData, mockData } from './mockData';
+import { mockData } from './mockData';
 
 export const server: SetupServer = setupServer(
   ...[
@@ -113,6 +112,7 @@ export const server: SetupServer = setupServer(
       return res(
         ctx.json({
           data: {
+            id: 1,
             email: 'michka@michka.fr',
             firstname: 'michoko',
             lastname: 'ronronscelestes',
@@ -172,33 +172,41 @@ export const server: SetupServer = setupServer(
     rest.get('/admin/permissions', (req, res, ctx) => {
       const role = req.url.searchParams.get('role');
 
-      if (role !== '1') {
-        return res(ctx.status(404));
+      const permissionsData = {
+        conditions: [
+          {
+            id: 'admin::is-creator',
+            displayName: 'Is creator',
+            category: 'default',
+          },
+        ],
+        sections: {
+          collectionTypes: {
+            actions: [],
+            subjects: [],
+          },
+          singleTypes: {
+            actions: [],
+            subjects: [],
+          },
+          plugins: [],
+          settings: [
+            {
+              displayName: 'Access the Email Settings page',
+              category: 'email',
+              subCategory: 'general',
+              action: 'plugin::email.settings.read',
+            },
+          ],
+        },
+      };
+
+      // role === '' is used by AdminPermissions (token permission layout, no role scoping)
+      if (role === '1' || role === '') {
+        return res(ctx.json({ data: permissionsData }));
       }
 
-      return res(
-        ctx.json({
-          data: {
-            conditions: [
-              {
-                id: 'admin::is-creator',
-                displayName: 'Is creator',
-                category: 'default',
-              },
-            ],
-            sections: {
-              settings: [
-                {
-                  displayName: 'Access the Email Settings page',
-                  category: 'email',
-                  subCategory: 'general',
-                  action: 'plugin::email.settings.read',
-                },
-              ],
-            },
-          },
-        })
-      );
+      return res(ctx.status(404));
     }),
     /**
      *
@@ -429,101 +437,6 @@ export const server: SetupServer = setupServer(
     ),
     /**
      *
-     * MARKETPLACE
-     *
-     */
-    rest.get('https://market-api.strapi.io/providers', (req, res, ctx) => {
-      const { collections = [], search = '' } = qs.parse(req.url.searchParams.toString()) as {
-        collections: Array<keyof MockData['marketplace']['providers']>;
-        search: string;
-      };
-
-      const [madeByStrapi, verified] = collections;
-
-      let responseData;
-
-      const providerResponses = mockData.marketplace.providers;
-
-      if (madeByStrapi && verified) {
-        responseData = {
-          data: [...providerResponses[madeByStrapi].data, ...providerResponses[verified].data],
-          meta: providerResponses.providers.meta,
-        };
-      } else if (collections.length) {
-        responseData = providerResponses[collections[0]];
-      } else {
-        responseData = providerResponses.providers;
-      }
-
-      const filteredResponse = {
-        ...responseData,
-        data: responseData.data.filter((provider) => {
-          const nameMatch = provider.attributes.name.toLowerCase().includes(search.toLowerCase());
-          const descriptionMatch = provider.attributes.description
-            .toLowerCase()
-            .includes(search.toLowerCase());
-
-          return nameMatch || descriptionMatch;
-        }),
-      };
-
-      return res(ctx.status(200), ctx.json(filteredResponse));
-    }),
-    rest.get('https://market-api.strapi.io/plugins', (req, res, ctx) => {
-      const {
-        collections = [],
-        categories = [],
-        search = '',
-      } = qs.parse(req.url.searchParams.toString()) as {
-        collections: Array<keyof MockData['marketplace']['plugins']>;
-        categories: Array<keyof MockData['marketplace']['plugins']>;
-        search: string;
-      };
-      const [madeByStrapi, verified] = collections;
-      const [customFields, monitoring] = categories;
-
-      let responseData;
-      const pluginResponses = mockData.marketplace.plugins;
-
-      if (categories.length && collections.length) {
-        responseData = {
-          data: [...pluginResponses[collections[0]].data, ...pluginResponses[categories[0]].data],
-          meta: pluginResponses.plugins.meta,
-        };
-      } else if (madeByStrapi && verified) {
-        responseData = {
-          data: [...pluginResponses[madeByStrapi].data, ...pluginResponses[verified].data],
-          meta: pluginResponses.plugins.meta,
-        };
-      } else if (customFields && monitoring) {
-        responseData = {
-          data: [...pluginResponses[customFields].data, ...pluginResponses[monitoring].data],
-          meta: pluginResponses.plugins.meta,
-        };
-      } else if (collections.length) {
-        responseData = pluginResponses[collections[0]];
-      } else if (categories.length) {
-        responseData = pluginResponses[categories[0]];
-      } else {
-        responseData = pluginResponses.plugins;
-      }
-
-      const filteredResponse = {
-        ...responseData,
-        data: responseData.data.filter((plugin) => {
-          const nameMatch = plugin.attributes.name.toLowerCase().includes(search.toLowerCase());
-          const descriptionMatch = plugin.attributes.description
-            .toLowerCase()
-            .includes(search.toLowerCase());
-
-          return nameMatch || descriptionMatch;
-        }),
-      };
-
-      return res(ctx.status(200), ctx.json(filteredResponse));
-    }),
-    /**
-     *
      * NPS SURVEY
      *
      */
@@ -630,6 +543,7 @@ export const server: SetupServer = setupServer(
               id: '1',
               name: 'My super token',
               description: 'This describe my super token',
+              kind: 'content-api',
               type: 'read-only',
               createdAt: '2021-11-15T00:00:00.000Z',
               permissions: [],
@@ -639,18 +553,90 @@ export const server: SetupServer = setupServer(
       );
     }),
     rest.get('/admin/api-tokens/:id', (req, res, ctx) => {
+      const { id } = req.params;
+
+      if (id === '2') {
+        return res(
+          ctx.json({
+            data: {
+              id: '2',
+              name: 'My admin token',
+              description: 'This is an admin token',
+              kind: 'admin',
+              adminPermissions: [],
+              adminUserOwner: {
+                id: 1,
+                firstname: 'John',
+                lastname: 'Doe',
+                email: 'john@example.com',
+              },
+              createdAt: '2021-11-15T00:00:00.000Z',
+            },
+          })
+        );
+      }
+
       return res(
         ctx.json({
           data: {
             id: '1',
             name: 'My super token',
             description: 'This describe my super token',
+            kind: 'content-api',
             type: 'read-only',
             createdAt: '2021-11-15T00:00:00.000Z',
             permissions: [],
           },
         })
       );
+    }),
+    /**
+     * ADMIN TOKENS
+     */
+    rest.get('/admin/admin-tokens', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: [
+            {
+              id: '1',
+              name: 'My admin token',
+              description: 'This is an admin token',
+              kind: 'admin',
+              adminPermissions: [],
+              adminUserOwner: {
+                id: 1,
+                firstname: 'John',
+                lastname: 'Doe',
+                email: 'john@example.com',
+              },
+              createdAt: '2021-11-15T00:00:00.000Z',
+            },
+          ],
+        })
+      );
+    }),
+    rest.get('/admin/admin-tokens/:id', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            id: '1',
+            name: 'My admin token',
+            description: 'This is an admin token',
+            kind: 'admin',
+            adminPermissions: [],
+            adminUserOwner: {
+              id: 1,
+              firstname: 'John',
+              lastname: 'Doe',
+              email: 'john@example.com',
+            },
+            createdAt: '2021-11-15T00:00:00.000Z',
+          },
+        })
+      );
+    }),
+    rest.get('/admin/admin-tokens/:id/owner-permissions', (req, res, ctx) => {
+      return res(ctx.json({ data: [] }));
     }),
     /**
      * Audit Logs

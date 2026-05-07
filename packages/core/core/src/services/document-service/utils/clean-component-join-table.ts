@@ -20,6 +20,15 @@ export const cleanComponentJoinTable = async (
       return 0;
     }
 
+    // Check if source supports draft/publish, if it doesnt it should contain duplicate states
+    const sourceContentType = strapi.contentTypes[sourceModel.uid];
+    // It could be a model, which does not have the draftAndPublish option
+    const sourceSupportsDraftPublish = sourceContentType?.options?.draftAndPublish;
+
+    if (sourceContentType && !sourceSupportsDraftPublish) {
+      return 0;
+    }
+
     // Check if target supports draft/publish using schema-based approach (like prevention fix)
     const targetContentType =
       strapi.contentTypes[relation.target as keyof typeof strapi.contentTypes];

@@ -4,7 +4,7 @@ import { adminApi } from './api';
 
 const homepageService = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['CountDocuments'],
+    addTagTypes: ['CountDocuments', 'HomepageLayout'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -21,13 +21,15 @@ const homepageService = adminApi
       getHomepageLayout: builder.query<Homepage.GetHomepageLayout.Response['data'], void>({
         query: () => '/admin/homepage/layout',
         transformResponse: (r: Homepage.GetHomepageLayout.Response) => r.data,
+        providesTags: ['HomepageLayout'],
       }),
       updateHomepageLayout: builder.mutation<
         Homepage.UpdateHomepageLayout.Response['data'],
         Homepage.UpdateHomepageLayout.Request['body']
       >({
-        query: (body) => ({ url: '/admin/homepage/layout', method: 'PUT', body }),
+        query: (body) => ({ url: '/admin/homepage/layout', method: 'PUT', data: body }),
         transformResponse: (r: Homepage.UpdateHomepageLayout.Response) => r.data,
+        invalidatesTags: ['HomepageLayout'],
       }),
     }),
   });

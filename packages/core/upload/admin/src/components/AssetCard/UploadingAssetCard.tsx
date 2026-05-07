@@ -15,7 +15,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../constants';
+import { AssetType } from '../../enums';
 import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
 import { UploadProgress } from '../UploadProgress/UploadProgress';
@@ -142,7 +142,7 @@ export const UploadingAssetCard = ({
                 }
               : {
                   id: getTrad('upload.generic-error'),
-                  defaultMessage: 'An error occured while uploading the file.',
+                  defaultMessage: 'An error occurred while uploading the file.',
                 }
           )}
         </Typography>

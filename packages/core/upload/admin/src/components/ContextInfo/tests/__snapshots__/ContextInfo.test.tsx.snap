@@ -2,12 +2,12 @@
 
 exports[`ContextInfo renders 1`] = `
 .c0 {
-  padding-block-start: 16px;
+  background: #f6f6f9;
+  border-radius: 4px;
   padding-block-end: 16px;
   padding-inline-start: 24px;
   padding-inline-end: 24px;
-  background: #f6f6f9;
-  border-radius: 4px;
+  padding-block-start: 16px;
 }
 
 .c2 {
@@ -25,9 +25,9 @@ exports[`ContextInfo renders 1`] = `
 
 .c5 {
   font-weight: 600;
+  text-transform: uppercase;
   font-size: 1.1rem;
   line-height: 1.45;
-  text-transform: uppercase;
   color: #666687;
 }
 

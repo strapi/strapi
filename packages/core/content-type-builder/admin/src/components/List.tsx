@@ -3,6 +3,7 @@ import { useState } from 'react';
 import {
   DndContext,
   closestCenter,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -12,9 +13,14 @@ import {
   UniqueIdentifier,
 } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { tours, useTracking } from '@strapi/admin/strapi-admin';
+import { tours } from '@strapi/admin/strapi-admin';
 import { Box, Button, EmptyStateLayout } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -25,6 +31,7 @@ import { styled } from 'styled-components';
 import { getTrad } from '../utils/getTrad';
 
 import { AttributeRow, type AttributeRowProps } from './AttributeRow';
+import { useCTBTracking } from './CTBSession/ctbSession';
 import { useDataManager } from './DataManager/useDataManager';
 import { NestedTFooter, TFooter } from './Footers';
 import { useFormModalNavigation } from './FormModalNavigation/useFormModalNavigation';
@@ -99,7 +106,7 @@ export const List = ({
   type,
 }: ListProps) => {
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const { isInDevelopmentMode, moveAttribute } = useDataManager();
   const { onOpenModalAddField } = useFormModalNavigation();
 
@@ -115,7 +122,12 @@ export const List = ({
 
   const isDeleted = type?.status === 'REMOVED';
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   function handlerDragStart({ active }: DragStartEvent) {
     if (!active) {

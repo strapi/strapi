@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_default_organizations",
+  "info": {
+    "displayName": "organization"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "coverPhotoOrganization": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images", "files", "videos", "audios"]
+    }
+  },
+  "config": {}
+}

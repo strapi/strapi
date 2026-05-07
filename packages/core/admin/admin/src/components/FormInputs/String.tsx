@@ -20,6 +20,7 @@ const StringInput = forwardRef<HTMLInputElement, InputProps>(
           onChange={field.onChange}
           value={field.value ?? ''}
           {...props}
+          type="text"
         />
         <Field.Hint />
         <Field.Error />

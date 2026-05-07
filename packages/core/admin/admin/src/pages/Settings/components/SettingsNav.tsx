@@ -1,4 +1,4 @@
-import { Badge, Divider } from '@strapi/design-system';
+import { Badge, Divider, Typography } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -79,7 +79,12 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
         </>
       )}
       <SubNav.Content>
-        {isFullPage && <SubNav.Header label={label} />}
+        {isFullPage && (
+          <>
+            <SubNav.Header label={label} />
+            <Divider />
+          </>
+        )}
         <SubNav.Sections>
           {sections.map((section) => (
             <SubNav.Section key={section.id} label={formatMessage(section.intlLabel)}>

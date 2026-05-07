@@ -207,8 +207,10 @@ describe('Releases Settings page', () => {
     const saveButton = await screen.findByText('Save');
     fireEvent.click(saveButton);
 
-    // Wait for the error message
-    const errorMessage = await screen.findAllByText('The value provided is not valid');
-    expect(errorMessage).toHaveLength(2);
+    // Wait for the error message (field error and notification with animation)
+    await waitFor(async () => {
+      const errorMessage = await screen.findAllByText('The value provided is not valid');
+      expect(errorMessage).toHaveLength(2);
+    });
   });
 });

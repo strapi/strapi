@@ -1,0 +1,84 @@
+{
+  "kind": "collectionType",
+  "collectionName": "basic_dps",
+  "info": {
+    "singularName": "basic-dp",
+    "pluralName": "basic-dps",
+    "displayName": "Basic DP"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "stringField": {
+      "type": "string",
+      "required": true
+    },
+    "textField": {
+      "type": "text"
+    },
+    "richText": {
+      "type": "richtext"
+    },
+    "integerField": {
+      "type": "integer"
+    },
+    "bigintegerField": {
+      "type": "biginteger"
+    },
+    "decimalField": {
+      "type": "decimal"
+    },
+    "floatField": {
+      "type": "float"
+    },
+    "booleanField": {
+      "type": "boolean"
+    },
+    "dateField": {
+      "type": "date"
+    },
+    "datetimeField": {
+      "type": "datetime"
+    },
+    "timeField": {
+      "type": "time"
+    },
+    "emailField": {
+      "type": "email"
+    },
+    "uidField": {
+      "type": "uid",
+      "targetField": "stringField"
+    },
+    "passwordField": {
+      "type": "password"
+    },
+    "jsonField": {
+      "type": "json"
+    },
+    "enumerationField": {
+      "type": "enumeration",
+      "enum": ["one", "two", "three"]
+    },
+    "textBlocks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.text-block"
+    },
+    "mediaBlock": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.media-block"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["shared.text-block", "shared.media-block", "shared.header"]
+    },
+    "header": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.header"
+    }
+  }
+}

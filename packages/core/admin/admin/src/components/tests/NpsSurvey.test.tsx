@@ -140,12 +140,12 @@ describe('NPS survey', () => {
 
     expect(queryByText(/thank you very much for your feedback!/i)).not.toBeInTheDocument();
 
-    await act(async () => {
-      await jest.runAllTimersAsync();
-    });
+    jest.useRealTimers();
 
+    // Wait for the error notification to appear (with animation)
     await findByText('An error occurred');
 
+    jest.useFakeTimers();
     console.error = originalError;
   });
 

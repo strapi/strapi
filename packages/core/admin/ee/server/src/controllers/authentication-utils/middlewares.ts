@@ -131,11 +131,14 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
 
     const { token: accessToken } = accessResult;
 
-    const isProduction = strapi.config.get('environment') === 'production';
+    const configuredSecure = strapi.config.get('admin.auth.cookie.secure');
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
+
     const domain: string | undefined = strapi.config.get('admin.auth.domain');
     ctx.cookies.set('jwtToken', accessToken, {
       httpOnly: false,
-      secure: isProduction,
+      secure: isSecure,
       overwrite: true,
       domain,
     });

@@ -88,7 +88,7 @@ function createCoreRouter<T extends UID.ContentType>(
   return {
     type,
     prefix,
-    get routes() {
+    get routes(): Core.CoreAPI.Router.Route[] {
       if (!routes) {
         const contentType = strapi.contentType(uid);
 

@@ -48,7 +48,7 @@ export interface DocumentServicePluginParams {}
  *
  * @remark This type needs to be reviewed since it's not augmented anywhere yet
  *
- * @deprecated The entity service is deprecated and will be removed in v6. Use the document service instead.
+ * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
  */
 export interface EntityServicePluginParams {}
 
