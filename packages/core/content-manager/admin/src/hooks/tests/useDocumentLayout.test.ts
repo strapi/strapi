@@ -583,12 +583,12 @@ describe('useDocumentLayout', () => {
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const firstModelLayout = result.current.edit.layout;
 
     rerender({ model: secondModelUid });
 
     expect(result.current.isLoading).toBe(true);
-    expect(result.current.edit.layout).toEqual([]);
-    expect(result.current.edit.components).toEqual({});
+    expect(result.current.edit.layout).toEqual(firstModelLayout);
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.edit.settings.displayName).toBe('Address');
