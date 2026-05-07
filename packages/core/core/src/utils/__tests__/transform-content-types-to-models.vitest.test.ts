@@ -235,7 +235,7 @@ const expectedModels = [
     },
     indexes: [
       {
-        name: 'countries_documents_index',
+        name: 'countries_document_id_index',
         columns: ['document_id'],
       },
     ],
@@ -252,7 +252,7 @@ const expectedModels = [
     },
     indexes: [
       {
-        name: 'categories_documents_index',
+        name: 'categories_document_id_index',
         columns: ['document_id'],
       },
     ],
@@ -342,5 +342,27 @@ describe('transformContentTypesToModels', () => {
         );
       }
     );
+
+    it('adds document_id btree plus full composite when locale and publishedAt are on the model', () => {
+      const patched = patchContentTypes('countries', {
+        attributes: {
+          locale: { type: 'string' },
+          publishedAt: { type: 'datetime' },
+        },
+      });
+      const models = transformContentTypesToModels(patched, identifiers);
+      const country = models.find((m) => m.uid === 'api::countries.countries');
+
+      expect(country?.indexes).toEqual(
+        expect.arrayContaining([
+          { name: 'countries_document_id_index', columns: ['document_id'] },
+          {
+            name: 'countries_documents_index',
+            columns: ['document_id', 'locale', 'published_at'],
+          },
+        ])
+      );
+      expect(country?.indexes).toHaveLength(2);
+    });
   });
 });
