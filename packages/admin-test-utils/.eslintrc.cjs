@@ -11,6 +11,7 @@ const config = {
     'rollup.config.mjs',
   ],
   parserOptions: {
+    tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
   },
 };

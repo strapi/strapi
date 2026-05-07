@@ -4,6 +4,9 @@
 const config = {
   root: true,
   extends: ['eslint-config-custom/back/typescript'],
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+  },
   ignorePatterns: [
     'node_modules/',
     'dist/',

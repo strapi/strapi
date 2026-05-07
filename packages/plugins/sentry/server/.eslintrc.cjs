@@ -6,7 +6,8 @@ const config = {
   extends: ['eslint-config-custom/back/typescript'],
   ignorePatterns: ['.eslintrc.cjs'],
   parserOptions: {
-    project: ['./server/tsconfig.eslint.json'],
+    tsconfigRootDir: __dirname,
+    project: ['./tsconfig.eslint.json'],
   },
 };
 
