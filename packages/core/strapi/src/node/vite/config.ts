@@ -187,12 +187,21 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
     },
     server: {
       cors: false,
+      /**
+       * In middleware mode Strapi forwards the browser Host from reverse proxies (nginx, Traefik).
+       * Vite 5+ blocks unknown hosts unless explicitly allowed (#23491).
+       */
+      allowedHosts: true,
       middlewareMode: true,
       open: ctx.options.open,
       hmr: {
         overlay: false,
+        /**
+         * Use Strapi's http.Server so HMR websockets reuse the app's listen port. A separate listener
+         * plus clientPort pushes browsers toward host:5173-style URLs that fail behind proxies that
+         * only expose the Strapi server port (#23491, #23008).
+         */
         server: ctx.options.hmrServer,
-        clientPort: ctx.options.hmrClientPort,
       },
     },
     appType: 'custom',

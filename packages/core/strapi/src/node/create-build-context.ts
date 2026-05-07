@@ -20,7 +20,6 @@ interface BaseOptions {
   bundler?: 'webpack' | 'vite';
   open?: boolean;
   hmrServer?: Server;
-  hmrClientPort?: number;
 }
 
 interface BuildContext<TOptions = unknown> extends BaseContext {
