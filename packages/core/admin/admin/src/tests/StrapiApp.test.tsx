@@ -476,7 +476,7 @@ describe('ADMIN | new StrapiApp', () => {
         icon: jest.fn(),
       };
 
-      app.addMenuLink(link as Parameters<typeof app.addMenuLink>[0]);
+      app.addMenuLink(link);
 
       expect(app.router.menu[0]).toEqual({
         icon: expect.any(Function),
