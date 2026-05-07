@@ -2,7 +2,7 @@ import { Flex, Typography, Grid, ProgressBar } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useGetAIUsageQuery } from '../../../../../services/ai';
+import { useGetAiUsageQuery } from '../../../../../services/ai';
 
 const StyledProgressBar = styled(ProgressBar)`
   width: 100%;
@@ -20,7 +20,7 @@ const StyledGridItem = styled(Grid.Item)`
 
 export const AIUsage = () => {
   const { formatMessage } = useIntl();
-  const { data, isLoading, error } = useGetAIUsageQuery(undefined, {
+  const { data, isLoading, error } = useGetAiUsageQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
 

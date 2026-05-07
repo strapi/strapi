@@ -173,6 +173,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
       collectionType,
       model,
       documentId: id,
+      params,
     },
     {
       skip: !id && collectionType !== 'single-types',

@@ -9,6 +9,7 @@ const {
   getComposeEnv,
   COMPOSE_PROJECT_NAME,
 } = require('./db-utils');
+const { getComposeCommand, getContainerCommand } = require('./compose');
 
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
@@ -18,6 +19,15 @@ const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 const DB_NAME = process.env.DATABASE_NAME || 'strapi';
 const DB_USER = process.env.DATABASE_USERNAME || 'strapi';
 const DB_PASSWORD = process.env.DATABASE_PASSWORD || 'strapi';
+
+function composeCmd() {
+  const { exe, prefixArgs } = getComposeCommand();
+  return [exe, ...prefixArgs].join(' ');
+}
+
+function containerCmd() {
+  return getContainerCommand();
+}
 
 function getContainerName() {
   const name = getComposeContainerName(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'mariadb');
@@ -38,9 +48,9 @@ function ensureSnapshotsDir() {
   }
 }
 
-function execDocker(cmd) {
+function execShell(cmd) {
   try {
-    execSync(cmd, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv() });
+    execSync(cmd, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv(), shell: '/bin/bash' });
   } catch (error) {
     console.error(`Error executing: ${cmd}`);
     process.exit(1);
@@ -50,13 +60,13 @@ function execDocker(cmd) {
 switch (command) {
   case 'start':
     console.log('Starting mariadb container...');
-    execDocker(`docker-compose -f ${DOCKER_COMPOSE_FILE} up -d mariadb`);
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} up -d mariadb`);
     console.log('✅ MariaDB started');
     break;
 
   case 'stop':
     console.log('Stopping mariadb container...');
-    execDocker(`docker-compose -f ${DOCKER_COMPOSE_FILE} stop mariadb`);
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} stop mariadb`);
     console.log('✅ MariaDB stopped');
     break;
 
@@ -72,9 +82,10 @@ switch (command) {
     {
       const containerName = getContainerName();
       try {
+        // `mariadb-dump` is the modern binary; older images fall back to `mysqldump` alias.
         execSync(
-          `docker exec ${containerName} mysqldump -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} mariadb-dump -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot created: ${snapshotPath}`);
       } catch (error) {
@@ -99,13 +110,15 @@ switch (command) {
     {
       const containerName = getContainerName();
       try {
+        // Drop and recreate database
         execSync(
-          `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
+        // Restore from snapshot
         execSync(
-          `docker exec -i ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec -i ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot restored: ${snapshotName}`);
       } catch (error) {
@@ -116,13 +129,13 @@ switch (command) {
     break;
 
   case 'wipe':
-    console.log('Wiping MariaDB database...');
+    console.log('Wiping mariadb database...');
     {
       const containerName = getContainerName();
       try {
         execSync(
-          `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log('✅ Database wiped');
       } catch (error) {
@@ -136,8 +149,31 @@ switch (command) {
     {
       const containerName = getContainerName();
       try {
+        // Refresh information_schema.tables.table_rows via ANALYZE TABLE;
+        // without it, stats can lag reality by hours.
+        const analyzeQuery = `
+          SELECT CONCAT('ANALYZE TABLE ', table_name, ';') AS cmd
+          FROM information_schema.tables
+          WHERE table_schema = '${DB_NAME}';
+        `;
+        try {
+          const analyzeList = execSync(
+            `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
+            { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+          );
+          const cmds = analyzeList.trim().split('\n').filter(Boolean).join(' ');
+          if (cmds) {
+            execSync(
+              `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
+              { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+            );
+          }
+        } catch {
+          // Best-effort; fall through to stale stats rather than fail.
+        }
+
         const query = `
-          SELECT 
+          SELECT
             table_name,
             table_rows
           FROM information_schema.tables
@@ -146,8 +182,8 @@ switch (command) {
         `;
 
         const output = execSync(
-          `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
-          { encoding: 'utf8', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} mariadb -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
+          { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
 
         const lines = output
