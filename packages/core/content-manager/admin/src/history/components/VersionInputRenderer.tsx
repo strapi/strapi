@@ -12,7 +12,6 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { HistoryVersionDataResponse } from '../../../../shared/contracts/history-versions';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -79,9 +78,24 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       : field.value;
   }
 
+  // Be defensive about the shape: admin-user relations are sanitized to a
+  // plain user object on the server, and historical version data can carry
+  // shapes that pre-date the `{ results, meta }` contract. Treat anything
+  // without an array `results` as "no relations".
+  const hasResultsShape =
+    !!formattedFieldValue &&
+    typeof formattedFieldValue === 'object' &&
+    Array.isArray((formattedFieldValue as { results?: unknown }).results);
+  const missingCount =
+    hasResultsShape &&
+    typeof (formattedFieldValue as { meta?: { missingCount?: number } }).meta?.missingCount ===
+      'number'
+      ? (formattedFieldValue as { meta: { missingCount: number } }).meta.missingCount
+      : 0;
+
   if (
-    !formattedFieldValue ||
-    (formattedFieldValue.results.length === 0 && formattedFieldValue.meta.missingCount === 0)
+    !hasResultsShape ||
+    ((formattedFieldValue as { results: unknown[] }).results.length === 0 && missingCount === 0)
   ) {
     return (
       <>
@@ -98,7 +112,10 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
     );
   }
 
-  const { results, meta } = formattedFieldValue;
+  const { results, meta } = formattedFieldValue as {
+    results: RelationResult[];
+    meta: { missingCount: number };
+  };
 
   return (
     <Box>
@@ -548,4 +565,4 @@ const attributeHasCustomFieldProperty = (
   'customField' in attribute && typeof attribute.customField === 'string';
 
 export type { VersionInputRendererProps };
-export { VersionInputRenderer };
+export { VersionInputRenderer, CustomRelationInput };
