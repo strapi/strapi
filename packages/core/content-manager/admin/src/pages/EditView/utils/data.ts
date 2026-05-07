@@ -81,6 +81,15 @@ const traverseData =
           return acc;
         }
 
+        // The schema may not contain the attribute when historical data references a
+        // component or field that no longer exists (e.g. a component detached from a
+        // dynamic zone via the content-type-builder). Pass the value through so the
+        // History view can still render the rest of the document.
+        if (!attribute) {
+          acc[key] = value;
+          return acc;
+        }
+
         if (attribute.type === 'component') {
           if (attribute.repeatable) {
             const componentValue = (
