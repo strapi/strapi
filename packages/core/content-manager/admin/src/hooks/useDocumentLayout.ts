@@ -331,7 +331,7 @@ const formatEditLayout = (
     metadatas: editMetadatas,
     settings: {
       ...data.contentType.settings,
-      displayName: schema?.info.displayName,
+      displayName: schema?.info?.displayName,
     },
     options: {
       ...schema?.options,
@@ -370,7 +370,12 @@ const convertEditLayoutToFieldLayouts = (
           return null;
         }
 
-        const { edit: metadata } = metadatas[field.name];
+        const fieldMetadata = metadatas[field.name];
+        if (!fieldMetadata) {
+          return null;
+        }
+
+        const { edit: metadata } = fieldMetadata;
 
         const settings: Partial<Settings> =
           attribute.type === 'component' && components
@@ -440,7 +445,7 @@ const formatListLayout = (
 
   return {
     layout: listAttributes,
-    settings: { ...data.contentType.settings, displayName: schema?.info.displayName },
+    settings: { ...data.contentType.settings, displayName: schema?.info?.displayName },
     metadatas: listMetadatas,
     options: {
       ...schema?.options,
@@ -480,6 +485,9 @@ const convertListLayoutToFieldLayouts = (
       }
 
       const metadata = metadatas[name];
+      if (!metadata) {
+        return null;
+      }
 
       const settings: Partial<Settings> =
         attribute.type === 'component' && components
