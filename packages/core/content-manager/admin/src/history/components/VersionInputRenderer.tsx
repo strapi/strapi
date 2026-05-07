@@ -311,6 +311,34 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
 };
 
 /**
+ * Resolve the layout, configuration metadata and schema attributes needed to
+ * render a component field on the history page. Returns `null` when any of
+ * those are missing — happens when the component schema referenced by the
+ * version was deleted via the Content-Type Builder, in which case the caller
+ * should render a fallback instead of crashing on the destructuring.
+ */
+const resolveComponentRenderResources = (
+  componentUID: string,
+  componentsLayout: { [uid: string]: { layout: unknown } | undefined },
+  configurationComponents: { [uid: string]: { metadatas: unknown } | undefined },
+  components: { [uid: string]: { attributes: unknown } | undefined }
+) => {
+  const componentLayout = componentsLayout[componentUID];
+  const componentConfiguration = configurationComponents[componentUID];
+  const componentSchema = components[componentUID];
+
+  if (!componentLayout || !componentConfiguration || !componentSchema) {
+    return null;
+  }
+
+  return {
+    layout: componentLayout.layout,
+    metadatas: componentConfiguration.metadatas,
+    schemaAttributes: componentSchema.attributes,
+  };
+};
+
+/**
  * @internal
  *
  * @description An abstraction around the regular form input renderer designed specifically
@@ -467,14 +495,33 @@ const VersionInputRenderer = ({
   switch (props.type) {
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
-    case 'component':
-      const { layout } = componentsLayout[props.attribute.component];
+    case 'component': {
+      const renderResources = resolveComponentRenderResources(
+        props.attribute.component,
+        componentsLayout,
+        configuration.components,
+        components
+      );
+
+      // The component schema referenced by this version is no longer present
+      // (deleted via the Content-Type Builder). Render the label only so the
+      // rest of the page still loads instead of crashing on the lookups below.
+      if (!renderResources) {
+        return <Field.Label>{props.label}</Field.Label>;
+      }
+
+      const { layout, metadatas, schemaAttributes } = renderResources as {
+        layout: Array<EditFieldLayout[]>;
+        metadatas: Parameters<typeof getRemaingFieldsLayout>[0]['metadatas'];
+        schemaAttributes: Parameters<typeof getRemaingFieldsLayout>[0]['schemaAttributes'];
+      };
+
       // Components can only have one panel, so only save the first layout item
       const [remainingFieldsLayout] = getRemaingFieldsLayout({
         layout: [layout],
-        metadatas: configuration.components[props.attribute.component].metadatas,
+        metadatas,
         fieldSizes,
-        schemaAttributes: components[props.attribute.component].attributes,
+        schemaAttributes,
       });
 
       return (
@@ -488,6 +535,7 @@ const VersionInputRenderer = ({
           {(inputProps) => <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />}
         </ComponentInput>
       );
+    }
     case 'dynamiczone':
       return (
         <DynamicZone
@@ -565,4 +613,4 @@ const attributeHasCustomFieldProperty = (
   'customField' in attribute && typeof attribute.customField === 'string';
 
 export type { VersionInputRendererProps };
-export { VersionInputRenderer, CustomRelationInput };
+export { VersionInputRenderer, CustomRelationInput, resolveComponentRenderResources };

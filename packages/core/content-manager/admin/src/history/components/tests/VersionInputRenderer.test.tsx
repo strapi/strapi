@@ -14,7 +14,7 @@
 import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, screen } from '@tests/utils';
 
-import { CustomRelationInput } from '../VersionInputRenderer';
+import { CustomRelationInput, resolveComponentRenderResources } from '../VersionInputRenderer';
 
 import type { RelationsFieldProps } from '../../../pages/EditView/components/FormInputs/Relations/Relations';
 
@@ -98,5 +98,65 @@ describe('CustomRelationInput (history)', () => {
     });
     // Renders the relation label rather than the empty-state copy.
     expect(screen.queryByText(/No relations/i)).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * Regression tests for the helper that resolves a component's render resources
+ * on the history page. When a component schema is deleted via the Content-Type
+ * Builder while a historical version still references it, the destructure
+ * `const { layout } = componentsLayout[uid]` used to crash. The helper now
+ * returns `null` so the caller can fall back to a label-only render.
+ */
+describe('resolveComponentRenderResources', () => {
+  const componentsLayout = {
+    'default.kept': { layout: [[{ name: 'title' }]] },
+  };
+  const configurationComponents = {
+    'default.kept': { metadatas: { title: { edit: { label: 'Title', visible: true } } } },
+  };
+  const components = {
+    'default.kept': { attributes: { title: { type: 'string' } } },
+  };
+
+  it('returns layout/metadatas/schemaAttributes when the component is fully present', () => {
+    const result = resolveComponentRenderResources(
+      'default.kept',
+      componentsLayout,
+      configurationComponents,
+      components
+    );
+    expect(result).toEqual({
+      layout: componentsLayout['default.kept'].layout,
+      metadatas: configurationComponents['default.kept'].metadatas,
+      schemaAttributes: components['default.kept'].attributes,
+    });
+  });
+
+  it('returns null when the component is missing from the layout dict (deleted via CTB)', () => {
+    expect(
+      resolveComponentRenderResources(
+        'default.gone',
+        componentsLayout,
+        configurationComponents,
+        components
+      )
+    ).toBeNull();
+  });
+
+  it('returns null when the component is missing from the configuration dict', () => {
+    expect(
+      resolveComponentRenderResources('default.kept', componentsLayout, {}, components)
+    ).toBeNull();
+  });
+
+  it('returns null when the component is missing from the schemas dict', () => {
+    expect(
+      resolveComponentRenderResources('default.kept', componentsLayout, configurationComponents, {})
+    ).toBeNull();
+  });
+
+  it('returns null when all three dicts are empty', () => {
+    expect(resolveComponentRenderResources('default.kept', {}, {}, {})).toBeNull();
   });
 });
