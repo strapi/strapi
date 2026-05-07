@@ -88,6 +88,7 @@ export class Project {
       runInBand: true,
       babel: true,
       extensions: constants.PROJECT_CODE_EXTENSIONS.join(','),
+      projectRoot: this.cwd,
       // Don't output any log coming from the runner
       print: false,
       silent: true,
