@@ -490,6 +490,7 @@
   "app.components.ToggleCheckbox.enabled-label": "Enabled",
   "app.components.ToggleCheckbox.disabled-label": "Disabled",
   "app.components.UpsellBanner.button": "Upgrade now",
+  "app.components.UpsellBanner.close": "Close the banner. ",
   "app.components.UpsellBanner.intro": "Access to Growth plan features: ",
   "app.components.UpsellBanner.reopen": "Reopen the banner. ",
   "app.components.UpsellBanner.text": "As part of your trial, you can explore premium tools such as Content History, Releases, and Single Sign-On (SSO).",

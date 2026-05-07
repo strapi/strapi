@@ -512,6 +512,7 @@
   "app.components.PluginCard.more-details": "Más detalles",
   "app.components.ToggleCheckbox.off-label": "Apagado",
   "app.components.ToggleCheckbox.on-label": "Encendido",
+  "app.components.UpsellBanner.close": "Cerrar el banner.",
   "app.components.UpsellBanner.reopen": "Volver a abrir el banner.",
   "app.components.Users.MagicLink.connect": "Envíe este enlace al usuario para que se conecte.",
   "app.components.Users.MagicLink.connect.sso": "Envíe este enlace al usuario, el primer inicio de sesión se puede realizar a través de un proveedor de SSO",

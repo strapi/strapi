@@ -490,6 +490,7 @@
   "app.components.ToggleCheckbox.enabled-label": "Aktiviert",
   "app.components.ToggleCheckbox.disabled-label": "Deaktiviert",
   "app.components.UpsellBanner.button": "Jetzt upgraden",
+  "app.components.UpsellBanner.close": "Das Banner schließen.",
   "app.components.UpsellBanner.intro": "Zugang zu Growth-Plan-Features: ",
   "app.components.UpsellBanner.reopen": "Das Banner erneut öffnen.",
   "app.components.UpsellBanner.text": "Als Teil deiner Testphase kannst du Premium-Tools wie Inhalts-Historie, Releases und Single Sign-On (SSO) erkunden.",
