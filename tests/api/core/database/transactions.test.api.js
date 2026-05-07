@@ -296,6 +296,18 @@ describe('transactions', () => {
         await rollback();
       });
     });
+
+    test('query with trx, direct trx.rollback(), then return (no second commit attempt)', async () => {
+      await strapi.db.transaction(async ({ trx }) => {
+        await strapi.db
+          .queryBuilder('strapi::core-store')
+          .select(['id'])
+          .where({ id: 1 })
+          .transacting(trx)
+          .execute();
+        await trx.rollback();
+      });
+    });
   });
 
   describe('using a transaction object', () => {
