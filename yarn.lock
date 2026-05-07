@@ -9112,6 +9112,7 @@ __metadata:
     "@strapi/database": "npm:5.45.0"
     "@strapi/generators": "npm:5.45.0"
     "@strapi/logger": "npm:5.45.0"
+    "@strapi/openapi": "npm:5.45.0"
     "@strapi/permissions": "npm:5.45.0"
     "@strapi/ts-zen": "npm:^0.2.0"
     "@strapi/types": "npm:5.45.0"

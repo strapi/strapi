@@ -1,3 +1,5 @@
+import type { OpenAPI } from './openapi';
+
 export interface App {
   keys: string[];
 }
@@ -83,6 +85,7 @@ export interface Server {
   logger?: Logger;
   transfer?: ServerTransfer;
   admin?: ServerAdmin;
+  openapi?: OpenAPI;
   webhooks?: Webhooks;
   http?: Http;
 }

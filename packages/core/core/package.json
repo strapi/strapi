@@ -63,6 +63,7 @@
     "@strapi/database": "5.45.0",
     "@strapi/generators": "5.45.0",
     "@strapi/logger": "5.45.0",
+    "@strapi/openapi": "5.45.0",
     "@strapi/permissions": "5.45.0",
     "@strapi/types": "5.45.0",
     "@strapi/typescript-utils": "5.45.0",

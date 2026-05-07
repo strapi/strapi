@@ -18,28 +18,60 @@ dotenv.config({ path: process.env.ENV_PATH });
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
+const defaultServerConfig = {
+  host: process.env.HOST || os.hostname() || 'localhost',
+  port: Number(process.env.PORT) || 1337,
+  proxy: false,
+  cron: { enabled: false },
+  admin: { autoOpen: false },
+  dirs: { public: './public' },
+  transfer: {
+    remote: {
+      enabled: true,
+    },
+  },
+  logger: {
+    updates: {
+      enabled: true,
+    },
+    startup: {
+      enabled: true,
+    },
+  },
+  openapi: {
+    'content-api': {
+      enabled: false,
+      route: {
+        path: '/openapi.json',
+      },
+      access: {
+        mode: 'authenticated',
+      },
+      cache: {
+        enabled: true,
+        maxAgeMs: 60_000,
+        filePath: '.strapi/openapi/content-api.json',
+      },
+    },
+    admin: {
+      enabled: false,
+      route: {
+        path: '/openapi.json',
+      },
+      access: {
+        mode: 'authenticated',
+      },
+      cache: {
+        enabled: true,
+        maxAgeMs: 60_000,
+        filePath: '.strapi/openapi/admin.json',
+      },
+    },
+  },
+};
+
 const defaultConfig = {
-  server: {
-    host: process.env.HOST || os.hostname() || 'localhost',
-    port: Number(process.env.PORT) || 1337,
-    proxy: false,
-    cron: { enabled: false },
-    admin: { autoOpen: false },
-    dirs: { public: './public' },
-    transfer: {
-      remote: {
-        enabled: true,
-      },
-    },
-    logger: {
-      updates: {
-        enabled: true,
-      },
-      startup: {
-        enabled: true,
-      },
-    },
-  } satisfies Partial<Core.Config.Server>,
+  server: defaultServerConfig as Partial<Core.Config.Server>,
   admin: {} satisfies Partial<Core.Config.Admin>,
   api: {
     rest: {
