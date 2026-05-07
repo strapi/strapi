@@ -12,8 +12,6 @@ import type { Schema } from '@strapi/types';
  * useContentTypeSchema
  * -----------------------------------------------------------------------------------------------*/
 type ComponentsDictionary = Record<string, Component>;
-const CONTENT_MANAGER_SCHEMA_VERSION_KEY = 'STRAPI_CONTENT_MANAGER_SCHEMA_VERSION';
-let lastKnownSchemaVersion: string | null = null;
 
 /**
  * @internal
@@ -28,7 +26,7 @@ const useContentTypeSchema = (model?: string) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { data, error, isLoading, isFetching, refetch } = useGetInitialDataQuery(undefined);
+  const { data, error, isLoading, isFetching } = useGetInitialDataQuery(undefined);
 
   const { components, contentType, contentTypes } = React.useMemo(() => {
     const contentType = data?.contentTypes.find((ct) => ct.uid === model);
@@ -56,19 +54,6 @@ const useContentTypeSchema = (model?: string) => {
       });
     }
   }, [toggleNotification, error, formatAPIError]);
-
-  React.useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const schemaVersion = window.localStorage.getItem(CONTENT_MANAGER_SCHEMA_VERSION_KEY);
-
-    if (schemaVersion && schemaVersion !== lastKnownSchemaVersion) {
-      lastKnownSchemaVersion = schemaVersion;
-      void refetch();
-    }
-  }, [refetch]);
 
   return {
     // This must be memoized to avoid inifiinite re-renders where the empty object is different everytime.

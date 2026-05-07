@@ -167,11 +167,16 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
 
   const isConfigResolvedForModel = data?.contentType?.uid === model;
   const isLoading = isLoadingSchemas || isLoadingConfigs || (!error && !isConfigResolvedForModel);
-  const lastStableLayoutRef = React.useRef<{
-    edit: EditLayout;
-    list: ListLayout;
-    listViewConversionContext: ListViewConversionContext | null;
-  } | null>(null);
+  const stableLayoutsByModelRef = React.useRef(
+    new Map<
+      string,
+      {
+        edit: EditLayout;
+        list: ListLayout;
+        listViewConversionContext: ListViewConversionContext | null;
+      }
+    >()
+  );
 
   React.useEffect(() => {
     if (error) {
@@ -200,30 +205,36 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
 
   React.useEffect(() => {
     if (resolvedLayouts) {
-      lastStableLayoutRef.current = resolvedLayouts;
+      stableLayoutsByModelRef.current.set(model, resolvedLayouts);
     }
-  }, [resolvedLayouts]);
+  }, [model, resolvedLayouts]);
 
-  const stableLayouts = resolvedLayouts ?? lastStableLayoutRef.current;
+  const stableLayouts = resolvedLayouts ?? stableLayoutsByModelRef.current.get(model) ?? null;
 
-  const editLayout =
-    stableLayouts?.edit ??
-    ({
-      layout: [],
-      components: {},
-      metadatas: {},
-      options: {},
-      settings: DEFAULT_SETTINGS,
-    } as EditLayout);
+  const editLayout = React.useMemo(
+    () =>
+      stableLayouts?.edit ??
+      ({
+        layout: [],
+        components: {},
+        metadatas: {},
+        options: {},
+        settings: DEFAULT_SETTINGS,
+      } as EditLayout),
+    [stableLayouts]
+  );
 
-  const listLayout =
-    stableLayouts?.list ??
-    ({
-      layout: [],
-      metadatas: {},
-      options: {},
-      settings: DEFAULT_SETTINGS,
-    } as ListLayout);
+  const listLayout = React.useMemo(
+    () =>
+      stableLayouts?.list ??
+      ({
+        layout: [],
+        metadatas: {},
+        options: {},
+        settings: DEFAULT_SETTINGS,
+      } as ListLayout),
+    [stableLayouts]
+  );
 
   const { layout: edit } = React.useMemo(
     () =>
