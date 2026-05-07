@@ -180,16 +180,20 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
     }
   );
 
+  // Fall back to the URL `id` so the stages endpoint is still queried when the
+  // selected locale has no entry yet. The backend returns workflow metadata
+  // even when the entity for `documentId + locale` does not exist.
+  const stagesDocumentId = document?.documentId ?? id;
+
   const { data, isLoading: isLoadingStages } = useGetStagesQuery(
     {
       slug: collectionType,
       model: model,
-      // @ts-expect-error – `id` is not correctly typed in the DS.
-      id: document?.documentId,
+      id: stagesDocumentId,
       params,
     },
     {
-      skip: !document?.documentId,
+      skip: !stagesDocumentId || stagesDocumentId === 'create',
     }
   );
 
@@ -281,14 +285,27 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
     id: 'content-manager.reviewWorkflows.stage.label',
     defaultMessage: 'Review stage',
   });
-  const reviewStageHint =
-    !isLoading &&
-    stages.length === 0 &&
-    // TODO: Handle errors and hints
-    formatMessage({
-      id: 'content-manager.reviewWorkflows.stages.no-transition',
-      defaultMessage: 'You don’t have the permission to update this stage.',
-    });
+
+  // The Edit View renders the Review Workflows panel even when the user
+  // switches to a locale that has not been saved yet. In that case the
+  // document for the selected locale does not exist and we cannot transition
+  // any stage until the entry is first saved, so surface a dedicated hint
+  // rather than the misleading "no permission" message.
+  const hasDocumentForLocale = Boolean(document?.documentId);
+
+  const reviewStageHint = !isLoading
+    ? !hasDocumentForLocale
+      ? formatMessage({
+          id: 'content-manager.reviewWorkflows.stage.save-first',
+          defaultMessage: 'Save this entry to assign a workflow stage.',
+        })
+      : stages.length === 0
+        ? formatMessage({
+            id: 'content-manager.reviewWorkflows.stages.no-transition',
+            defaultMessage: 'You don’t have the permission to update this stage.',
+          })
+        : undefined
+    : undefined;
 
   if (isCompact) {
     return (
