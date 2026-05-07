@@ -520,6 +520,80 @@ describe('useDocumentLayout', () => {
 
     expect(result.current.edit.components).toEqual({});
   });
+
+  it('waits for the active model configuration when switching single types and handles missing component settings safely (regression gh#26206)', async () => {
+    const firstModelUid = 'api::homepage.homepage';
+    const secondModelUid = 'api::address.address';
+
+    server.use(
+      rest.get('/content-manager/init', (req, res, ctx) =>
+        res(
+          ctx.json({
+            data: {
+              components: mockData.contentManager.components,
+              contentTypes: mockData.contentManager.contentTypes,
+            },
+          })
+        )
+      ),
+      rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
+        if (req.params.model === firstModelUid) {
+          return res(ctx.json({ data: mockData.contentManager.singleTypeConfiguration }));
+        }
+
+        if (req.params.model === secondModelUid) {
+          return res(
+            ctx.delay(75),
+            ctx.json({
+              data: {
+                contentType: {
+                  uid: secondModelUid,
+                  settings: {
+                    bulkable: true,
+                    filterable: true,
+                    searchable: true,
+                    pageSize: 10,
+                    mainField: 'id',
+                    defaultSortBy: 'id',
+                    defaultSortOrder: 'ASC',
+                  },
+                  metadatas:
+                    mockData.contentManager.collectionTypeConfiguration.contentType.metadatas,
+                  options: {},
+                  layouts: {
+                    edit: mockData.contentManager.collectionTypeConfiguration.contentType.layouts
+                      .edit,
+                    list: mockData.contentManager.collectionTypeConfiguration.contentType.layouts
+                      .list,
+                  },
+                },
+                // Simulate mismatch where component settings map is not ready/available yet.
+                components: {},
+              },
+            })
+          );
+        }
+
+        return res(ctx.json({ data: mockData.contentManager.collectionTypeConfiguration }));
+      })
+    );
+
+    const { result, rerender } = renderHook(({ model }) => useDocumentLayout(model), {
+      initialProps: { model: firstModelUid },
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    rerender({ model: secondModelUid });
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.edit.layout).toEqual([]);
+    expect(result.current.edit.components).toEqual({});
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.edit.settings.displayName).toBe('Address');
+    expect(result.current.edit.layout.length).toBeGreaterThan(0);
+  });
 });
 
 describe('extractContentTypeComponents', () => {
@@ -528,7 +602,7 @@ describe('extractContentTypeComponents', () => {
       footer: {
         type: 'component' as const,
         repeatable: false,
-        component: 'missing.catalog.component',
+        component: 'missing.catalog.component' as const,
         pluginOptions: {},
         required: false,
       },

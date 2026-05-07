@@ -159,9 +159,14 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { isLoading: isLoadingSchemas, schemas } = useContentTypeSchema();
 
-  const { data, isLoading: isLoadingConfigs, error } = useGetContentTypeConfigurationQuery(model);
+  const {
+    currentData: data,
+    isLoading: isLoadingConfigs,
+    error,
+  } = useGetContentTypeConfigurationQuery(model);
 
-  const isLoading = isLoadingSchemas || isLoadingConfigs;
+  const isConfigResolvedForModel = data?.contentType?.uid === model;
+  const isLoading = isLoadingSchemas || isLoadingConfigs || (!error && !isConfigResolvedForModel);
 
   React.useEffect(() => {
     if (error) {
@@ -369,7 +374,7 @@ const convertEditLayoutToFieldLayouts = (
 
         const settings: Partial<Settings> =
           attribute.type === 'component' && components
-            ? components.configurations[attribute.component].settings
+            ? (components.configurations[attribute.component]?.settings ?? {})
             : {};
 
         return {
@@ -478,7 +483,7 @@ const convertListLayoutToFieldLayouts = (
 
       const settings: Partial<Settings> =
         attribute.type === 'component' && components
-          ? components.configurations[attribute.component].settings
+          ? (components.configurations[attribute.component]?.settings ?? {})
           : {};
 
       return {

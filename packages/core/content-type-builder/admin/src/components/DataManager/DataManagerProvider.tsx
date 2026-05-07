@@ -41,6 +41,7 @@ interface DataManagerProviderProps {
 
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_dataManagerProvider'] || initialState) as State;
+const CONTENT_MANAGER_SCHEMA_VERSION_KEY = 'STRAPI_CONTENT_MANAGER_SCHEMA_VERSION';
 
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
@@ -81,7 +82,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const isInDevelopmentMode = autoReload;
 
-  const getDataRef = React.useRef<any>();
+  const getDataRef = React.useRef<() => Promise<void>>(async () => undefined);
 
   getDataRef.current = async () => {
     try {
@@ -219,6 +220,10 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await getDataRef.current();
       // Update the app's permissions
       await updatePermissions();
+      // Signal other admin areas (e.g. content-manager) to refresh schema caches.
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(CONTENT_MANAGER_SCHEMA_VERSION_KEY, String(Date.now()));
+      }
     } catch (err) {
       console.error({ err });
       toggleNotification({
