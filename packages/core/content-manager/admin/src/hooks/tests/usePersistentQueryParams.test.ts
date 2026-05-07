@@ -142,6 +142,34 @@ describe('usePersistentPartialQueryParams', () => {
     expect(saved).toBeNull();
   });
 
+  it('should remove persisted params from localStorage when persisted keys are cleared', async () => {
+    window.localStorage.setItem(key, JSON.stringify({ page: 1, pageSize: 10, sort: 'name:asc' }));
+
+    type Props = { query: Record<string, unknown> };
+
+    const { rerender } = renderHook(
+      ({ query }: Props) => {
+        (useQueryParams as jest.Mock).mockReturnValue([{ query }, mockSetQuery]);
+        return usePersistentPartialQueryParams({
+          [key]: { paths: keysToPersist },
+        });
+      },
+      { initialProps: { query: { page: 1, pageSize: 10, sort: 'name:asc' } } as Props }
+    );
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(key)).toBe(
+        JSON.stringify({ page: 1, pageSize: 10, sort: 'name:asc' })
+      );
+    });
+
+    rerender({ query: {} } as Props);
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(key)).toBeNull();
+    });
+  });
+
   it('should handle invalid JSON in localStorage gracefully', () => {
     window.localStorage.setItem(key, 'invalid-json');
 
