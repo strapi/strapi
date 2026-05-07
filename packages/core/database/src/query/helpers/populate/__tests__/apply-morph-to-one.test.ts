@@ -148,3 +148,115 @@ describe('morphToOne populate', () => {
     });
   });
 });
+
+const MORPH_TO_MANY_ATTRIBUTE_NAME = 'relatedMany';
+
+const buildMorphToManyAttribute = () => ({
+  type: 'relation' as const,
+  relation: 'morphToMany' as const,
+  joinTable: {
+    name: 'articles_related_links',
+    joinColumn: {
+      name: 'article_id',
+      referencedColumn: 'id',
+    },
+    morphColumn: {
+      idColumn: {
+        name: 'related_id',
+        referencedColumn: 'id',
+      },
+      typeColumn: {
+        name: 'related_type',
+      },
+    },
+  },
+});
+
+const buildMorphToManyCtx = (
+  joinRows: Record<string, unknown>[],
+  targetRows: Record<string, unknown>[]
+) => {
+  const joinQb = {
+    where: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    execute: jest.fn().mockResolvedValue(joinRows),
+  };
+
+  const targetQb = {
+    alias: 't',
+    init: jest.fn().mockReturnThis(),
+    addSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    execute: jest.fn().mockResolvedValue(targetRows),
+  };
+
+  const db = {
+    metadata: {
+      get: jest.fn((uid: string) => {
+        if (uid === SOURCE_UID) {
+          return {
+            attributes: {
+              [MORPH_TO_MANY_ATTRIBUTE_NAME]: buildMorphToManyAttribute(),
+            },
+          };
+        }
+
+        if (uid === TARGET_TYPE) {
+          return { columnToAttribute: {}, attributes: {} };
+        }
+
+        return undefined;
+      }),
+    },
+    entityManager: {
+      createQueryBuilder: jest.fn((uid: string) => {
+        if (uid === 'articles_related_links') {
+          return joinQb;
+        }
+
+        return targetQb;
+      }),
+    },
+  };
+
+  const ctx = {
+    db,
+    uid: SOURCE_UID,
+    qb: { state: { filters: {} } },
+  };
+
+  return { ctx };
+};
+
+describe('morphToMany populate', () => {
+  it('morph type UID overwrites a same-named key on each target row (fromRow output)', async () => {
+    const targetRow = {
+      id: 10,
+      name: 'Category A',
+      __type: 'unrelated-user-value',
+    };
+
+    const { ctx } = buildMorphToManyCtx(
+      [
+        {
+          article_id: 1,
+          related_id: 10,
+          related_type: TARGET_TYPE,
+          order: 1,
+        },
+      ],
+      [targetRow]
+    );
+
+    const results: Record<string, unknown>[] = [{ id: 1 }];
+
+    await applyPopulate(results, { [MORPH_TO_MANY_ATTRIBUTE_NAME]: {} }, ctx as any);
+
+    expect(results[0][MORPH_TO_MANY_ATTRIBUTE_NAME]).toEqual([
+      {
+        ...targetRow,
+        __type: TARGET_TYPE,
+      },
+    ]);
+  });
+});
