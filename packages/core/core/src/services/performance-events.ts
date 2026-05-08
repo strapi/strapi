@@ -14,6 +14,28 @@ const DB_ERROR_EVENT = 'performance.db.query.error';
 
 const shouldLog = (output?: string) => output === 'log' || output === 'both';
 
+const formatDbPerfLogLine = (eventName: string, event: DatabaseQueryPerfEvent): string => {
+  const payload: Record<string, unknown> = {
+    durationMs: event.durationMs,
+    dbClient: event.dbClient,
+    queryType: event.queryType,
+    queryFingerprint: event.queryFingerprint,
+    requestId: event.requestId,
+    success: event.success,
+    errorCode: event.errorCode,
+  };
+
+  if (event.sql !== undefined) {
+    payload.sql = event.sql;
+  }
+
+  if (event.bindings !== undefined) {
+    payload.bindings = event.bindings;
+  }
+
+  return `${eventName} ${JSON.stringify(payload)}`;
+};
+
 export const bridgeDatabasePerformanceEvents = ({
   db,
   eventHub,
@@ -27,16 +49,8 @@ export const bridgeDatabasePerformanceEvents = ({
     });
 
     if (shouldLog(output)) {
-      logger.warn({
-        event: eventName,
-        durationMs: event.durationMs,
-        dbClient: event.dbClient,
-        queryType: event.queryType,
-        queryFingerprint: event.queryFingerprint,
-        requestId: event.requestId,
-        success: event.success,
-        errorCode: event.errorCode,
-      });
+      /* Winston pretty-print transports only stringify `message`, not metadata objects */
+      logger.warn(formatDbPerfLogLine(eventName, event));
     }
   });
 };

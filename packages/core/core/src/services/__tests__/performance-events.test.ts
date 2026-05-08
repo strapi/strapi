@@ -64,12 +64,10 @@ describe('Performance events bridge', () => {
     });
 
     expect(eventHub.emit).toHaveBeenCalledWith('performance.db.query.error', expect.any(Object));
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: 'performance.db.query.error',
-        durationMs: 140,
-        errorCode: 'SQLITE_ERROR',
-      })
-    );
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    const line = logger.warn.mock.calls[0][0] as string;
+    expect(line).toContain('performance.db.query.error');
+    expect(line).toContain('"durationMs":140');
+    expect(line).toContain('"errorCode":"SQLITE_ERROR"');
   });
 });
