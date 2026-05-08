@@ -19,6 +19,7 @@ module.exports = {
   instances: {
     getTestApps,
   },
+  getDbState: require('./get-db-state').getDbState,
   get helpers() {
     return getHelpers();
   },

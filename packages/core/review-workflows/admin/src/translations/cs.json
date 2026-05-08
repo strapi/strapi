@@ -1,0 +1,17 @@
+{
+  "settings.page.title": "Revizní workflow",
+  "settings.page.subtitle": "{count, plural, one {# fáze} few {# fáze} other {# fází}}",
+  "settings.page.isLoading": "Workflow se načítá",
+  "settings.page.delete.confirm.body": "Všechny záznamy přiřazené k odstraněným fázím budou přesunuty do předchozí fáze. Opravdu chcete uložit změny?",
+  "settings.stage.name.label": "Název fáze",
+  "settings.not-available": "Revizní workflow je dostupné pouze jako součást edice Enterprise. Upgradujte a vytvářejte a spravujte workflow.",
+  "settings.review-workflows.workflow.stageRequiredToPublish.label": "Požadovaná fáze pro publikaci",
+  "settings.review-workflows.workflow.stageRequiredToPublish.any": "Jakákoli fáze",
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Zabraňuje publikaci záznamů, pokud nejsou v požadované fázi.",
+  "settings.page.purchase.description": "Spravujte proces revize obsahu",
+  "settings.page.purchase.perks1": "Přizpůsobitelné revizní fáze",
+  "settings.page.purchase.perks2": "Správa uživatelských oprávnění",
+  "settings.page.purchase.perks3": "Podpora webhooků",
+  "widget.assigned.title": "Přiřazeno mně",
+  "widget.assigned.no-data": "Žádné záznamy"
+}

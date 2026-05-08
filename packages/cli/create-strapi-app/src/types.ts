@@ -20,7 +20,6 @@ export interface Options {
   install?: boolean;
   example?: boolean;
   gitInit?: boolean;
-  enableAbTests?: boolean;
   nonInteractive?: boolean;
   templateBranch?: string;
   templatePath?: string;
@@ -66,7 +65,6 @@ export interface Scope {
   useExample?: boolean;
   gitInit?: boolean;
   shouldCreateGrowthSsoTrial: boolean;
-  isABTestEnabled: boolean;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';

@@ -263,6 +263,88 @@ describe('Float validator', () => {
 
         expect(await validator(4)).toBe(4);
       });
+
+      test('it fails the validation if the float is lower than a negative min', async () => {
+        expect.assertions(1);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.float(
+            {
+              attr: { type: 'float', min: -1 },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrFloatUnique', value: -15 },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        try {
+          await validator(-15);
+        } catch (err) {
+          expect(err).toBeInstanceOf(errors.YupValidationError);
+        }
+      });
+
+      test('it validates the min constraint if the float is higher than a negative min', async () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.float(
+            {
+              attr: { type: 'float', min: -1 },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrFloatUnique', value: 0 },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        expect(await validator(0)).toBe(0);
+      });
+
+      test('it fails the validation if the float is lower than min of 0', async () => {
+        expect.assertions(1);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.float(
+            {
+              attr: { type: 'float', min: 0 },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrFloatUnique', value: -1 },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        try {
+          await validator(-1);
+        } catch (err) {
+          expect(err).toBeInstanceOf(errors.YupValidationError);
+        }
+      });
+
+      test('it handles min provided as a string value', async () => {
+        expect.assertions(1);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.float(
+            {
+              attr: { type: 'float', min: '-1' as any },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrFloatUnique', value: -15 },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        try {
+          await validator(-15);
+        } catch (err) {
+          expect(err).toBeInstanceOf(errors.YupValidationError);
+        }
+      });
     });
   });
 
@@ -307,6 +389,28 @@ describe('Float validator', () => {
         );
 
         expect(await validator(2)).toBe(2);
+      });
+
+      test('it validates the max constraint if the float exceeds max of 0', async () => {
+        expect.assertions(1);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.float(
+            {
+              attr: { type: 'float', max: 0 },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrFloatUnique', value: 1 },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        try {
+          await validator(1);
+        } catch (err) {
+          expect(err).toBeInstanceOf(errors.YupValidationError);
+        }
       });
     }
   );

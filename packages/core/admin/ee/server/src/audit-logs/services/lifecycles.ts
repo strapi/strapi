@@ -65,7 +65,7 @@ const getRetentionDays = (strapi: Core.Strapi) => {
 
 /**
  * @description
- * Manages the the lifecycle of audit logs. Accessible via strapi.get('audit-logs-lifecycles')
+ * Manages the lifecycle of audit logs. Accessible via strapi.get('audit-logs-lifecycles')
  */
 const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
   // Manage internal service state privately
@@ -160,7 +160,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
         deleteExpiredAuditLogs: {
           task: async () => {
             const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-            auditLogsService.deleteExpiredEvents(expirationDate);
+            await auditLogsService.deleteExpiredEvents(expirationDate);
           },
           options: '0 0 * * *',
         },

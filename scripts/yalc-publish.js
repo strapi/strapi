@@ -1,10 +1,8 @@
 'use strict';
 
 const { join } = require('path');
-const { promisify } = require('util');
 const execa = require('execa');
 const fs = require('fs-extra');
-const glob = promisify(require('glob').glob);
 
 async function run() {
   const proc = await execa('yarn', ['workspaces', 'list', '--json', '--no-private'], {

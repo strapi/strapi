@@ -19,7 +19,7 @@ import type { Params } from '..';
 
 type Pagination = { page: number; pageSize: number; pageCount: number; total: number };
 
-export type AnyDocument = { documentId: string; id: number } & { [key: string]: any };
+export type AnyDocument = { documentId: string; id: Data.ID } & { [key: string]: any };
 
 export type Result<
   TSchemaUID extends UID.Schema,

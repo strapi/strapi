@@ -5,6 +5,8 @@ import pluginPkg from '../../package.json';
 import { MediaLibraryDialog } from './components/MediaLibraryDialog/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput/MediaLibraryInput';
 import { PERMISSIONS } from './constants';
+import { UploadProgressDialog } from './future/components/UploadProgressDialog';
+import { uploadProgressReducer } from './future/store/uploadProgress';
 import { pluginId } from './pluginId';
 import { getTrad, prefixPluginTranslations } from './utils';
 
@@ -32,6 +34,15 @@ const admin: Plugin.Config.AdminInput = {
     });
 
     if (window.strapi.future.isEnabled('unstableMediaLibrary')) {
+      app.addReducers({ uploadProgress: uploadProgressReducer });
+
+      app.addComponents([
+        {
+          name: 'future-global::upload-progress',
+          Component: UploadProgressDialog,
+        },
+      ]);
+
       app.addMenuLink({
         to: `plugins/unstable-${pluginId}`,
         icon: WarningCircle,
@@ -56,9 +67,10 @@ const admin: Plugin.Config.AdminInput = {
         id: getTrad('plugin.name'),
         defaultMessage: 'Media Library',
       },
-      async Component() {
-        const { ProtectedSettingsPage } = await import('./pages/SettingsPage/SettingsPage');
-        return { default: ProtectedSettingsPage };
+      Component() {
+        return import('./pages/SettingsPage/SettingsPage').then((mod) => ({
+          default: mod.ProtectedSettingsPage,
+        }));
       },
       permissions: PERMISSIONS.settings,
     });
