@@ -13,7 +13,7 @@ jobs:
     outputs:
       isTeamMember: ${{ steps.get-user-teams-membership.outputs.isTeamMember }}
     steps:
-      - uses: tspascoal/get-user-teams-membership@v3
+      - uses: tspascoal/get-user-teams-membership@57e9f42acd78f4d0f496b3be4368fc5f62696662 # v3
         id: get-user-teams-membership
         with:
           GITHUB_TOKEN: ${{ secrets.CHECK_OWNERSHIP_TOKEN }}
@@ -27,7 +27,7 @@ jobs:
     needs: [check-ownership]
     if: ${{ needs.check-ownership.outputs.isTeamMember == 'false' && vars.CHANGE_FREEZE_ENABLED == 'true' }}
     steps:
-      - uses: thollander/actions-comment-pull-request@v2
+      - uses: thollander/actions-comment-pull-request@fabd468d3a1a0b97feee5f6b9e499eab0dd903f6 # v2
         with:
           message: |
             This repo is currently under a community change freeze. Please see any pinned issues for more information.
