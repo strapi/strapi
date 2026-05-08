@@ -913,6 +913,16 @@ async function verifyMigrationFixAtDbLevel(strapi) {
       const entityIdCol = dzJoin.joinColumn.name;
       const componentIdCol = dzJoin.morphColumn.idColumn.name;
       const componentTypeCol = dzJoin.morphColumn.typeColumn.name;
+      // Strapi's `*_cmps` table is shared across every component-bearing field
+      // (DZ + nested + repeatable). We filter by the DZ attribute's DB field
+      // value so we don't count rows from other fields as "dynamic zone".
+      // Also use a (component_type, cmp_id) composite key for the overlap
+      // check: each component schema has its own table with its own
+      // auto-increment, so a bare cmp_id is only unique within a component
+      // type — comparing across types yields false positives.
+      const fieldCol = strapi.db.metadata.identifiers.FIELD_COLUMN;
+      const dzFieldName = 'sections';
+      const cmpKey = (row) => `${row[componentTypeCol]}::${row[componentIdCol]}`;
 
       const relTable = relationDpMeta.tableName;
       const relRows = await conn(relTable).select('id', 'document_id', 'published_at');
@@ -935,18 +945,17 @@ async function verifyMigrationFixAtDbLevel(strapi) {
         if (!pair.published || !pair.draft) continue;
         const dzRows = await conn(joinTableName)
           .whereIn(entityIdCol, [pair.published, pair.draft])
+          .where(fieldCol, dzFieldName)
           .select(entityIdCol, componentIdCol, componentTypeCol);
         const pubDz = new Set(
-          dzRows
-            .filter((row) => row[entityIdCol] === pair.published)
-            .map((row) => row[componentIdCol])
+          dzRows.filter((row) => row[entityIdCol] === pair.published).map(cmpKey)
         );
         const draftDz = new Set(
-          dzRows.filter((row) => row[entityIdCol] === pair.draft).map((row) => row[componentIdCol])
+          dzRows.filter((row) => row[entityIdCol] === pair.draft).map(cmpKey)
         );
         if (pubDz.size === 0 && draftDz.size === 0) continue;
         docsWithDz += 1;
-        const overlaps = [...pubDz].filter((id) => draftDz.has(id));
+        const overlaps = [...pubDz].filter((key) => draftDz.has(key));
         if (overlaps.length > 0) {
           docsWithOverlap += 1;
           errors.push(
@@ -956,16 +965,14 @@ async function verifyMigrationFixAtDbLevel(strapi) {
 
         const refRows = dzRows.filter((row) => row[componentTypeCol] === refListType);
         const pubCmps = new Set(
-          refRows
-            .filter((row) => row[entityIdCol] === pair.published)
-            .map((row) => row[componentIdCol])
+          refRows.filter((row) => row[entityIdCol] === pair.published).map(cmpKey)
         );
         const draftCmps = new Set(
-          refRows.filter((row) => row[entityIdCol] === pair.draft).map((row) => row[componentIdCol])
+          refRows.filter((row) => row[entityIdCol] === pair.draft).map(cmpKey)
         );
         if (pubCmps.size === 0 && draftCmps.size === 0) continue;
         docsWithRefList += 1;
-        const disjoint = [...pubCmps].every((id) => !draftCmps.has(id));
+        const disjoint = [...pubCmps].every((key) => !draftCmps.has(key));
         if (disjoint && pubCmps.size > 0) docsWithDistinctCmpIds += 1;
       }
       out.push(
