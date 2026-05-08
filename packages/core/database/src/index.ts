@@ -20,6 +20,8 @@ import {
   DatabasePerformanceConfig,
   DatabasePerformanceSubscriber,
   DatabaseQueryPerfEvent,
+  DatabaseQueryTelemetryInfo,
+  DatabaseResolvedPerformanceConfig,
   DEFAULT_DATABASE_PERFORMANCE_CONFIG,
   normalizeSqlFingerprint,
   toQueryType,
@@ -81,7 +83,11 @@ class Database {
 
   logger: Logger;
 
-  performance: Required<DatabasePerformanceConfig>;
+  performance: DatabaseResolvedPerformanceConfig;
+
+  private getRequestId?: () => string | undefined;
+
+  private notifyQueryTelemetry?: (info: DatabaseQueryTelemetryInfo) => void;
 
   private performanceSubscribers = new Set<DatabasePerformanceSubscriber>();
 
@@ -99,6 +105,12 @@ class Database {
     const perfFromUser = { ...(config.performance ?? {}) };
     // Sink-only keys (read by core) must not live on `@strapi/database` runtime perf config.
     delete (perfFromUser as DatabasePerformanceConfig & { output?: unknown }).output;
+    const getRequestId = perfFromUser.getRequestId;
+    delete perfFromUser.getRequestId;
+    const notifyQueryTelemetry = perfFromUser.notifyQueryTelemetry;
+    delete perfFromUser.notifyQueryTelemetry;
+    this.getRequestId = getRequestId;
+    this.notifyQueryTelemetry = notifyQueryTelemetry;
     this.performance = {
       ...DEFAULT_DATABASE_PERFORMANCE_CONFIG,
       ...perfFromUser,
@@ -178,27 +190,20 @@ class Database {
     });
 
     this.connection.on('query-response', (_response: unknown, queryData: any) => {
-      const event = this.buildPerformanceEvent({ inflightQueries, queryData, success: true });
-      if (event) {
-        this.emitPerformance(event);
-      }
+      this.finalizeQueryTrace({ inflightQueries, queryData, success: true });
     });
 
     this.connection.on('query-error', (error: any, queryData: any) => {
-      const event = this.buildPerformanceEvent({
+      this.finalizeQueryTrace({
         inflightQueries,
         queryData,
         success: false,
         errorCode: error?.code,
       });
-
-      if (event) {
-        this.emitPerformance(event);
-      }
     });
   }
 
-  private buildPerformanceEvent({
+  private finalizeQueryTrace({
     inflightQueries,
     queryData,
     success,
@@ -217,19 +222,63 @@ class Database {
     queryData: any;
     success: boolean;
     errorCode?: string;
-  }): DatabaseQueryPerfEvent | null {
+  }) {
     const queryId = queryData?.__knexQueryUid;
     if (!queryId) {
-      return null;
+      return;
     }
 
     const state = inflightQueries.get(queryId);
     if (!state) {
-      return null;
+      return;
     }
 
     inflightQueries.delete(queryId);
+
     const durationMs = Math.max(0, performance.now() - state.startedAt);
+    const queryContextRequestId = state.requestId;
+    const contextualRequestId = queryContextRequestId ?? this.getRequestId?.();
+
+    const event = this.buildPerformanceEventPayload({
+      state,
+      durationMs,
+      contextualRequestId,
+      success,
+      errorCode,
+    });
+
+    let slowOrErrorEventEmitted = false;
+
+    if (event) {
+      this.emitPerformance(event);
+      slowOrErrorEventEmitted = true;
+    }
+
+    this.notifyQueryTelemetry?.({
+      durationMs,
+      requestId: contextualRequestId,
+      slowOrErrorEventEmitted,
+    });
+  }
+
+  private buildPerformanceEventPayload({
+    state,
+    durationMs,
+    contextualRequestId,
+    success,
+    errorCode,
+  }: {
+    state: {
+      startedAt: number;
+      sql?: string;
+      bindings?: unknown[];
+      method?: string;
+    };
+    durationMs: number;
+    contextualRequestId?: string;
+    success: boolean;
+    errorCode?: string;
+  }): DatabaseQueryPerfEvent | null {
     const isSlowOrFailed = !success || durationMs >= this.performance.slowQueryMs;
 
     if (!isSlowOrFailed) {
@@ -250,7 +299,7 @@ class Database {
       dbClient: this.dialect.client,
       queryFingerprint: normalizeSqlFingerprint(sql),
       queryType: toQueryType(method),
-      requestId: state.requestId,
+      requestId: contextualRequestId,
       success,
       errorCode,
     };
@@ -427,4 +476,9 @@ class Database {
 
 export { Database, errors };
 export type { Model, JoinTable, Identifiers, Migration };
-export type { DatabaseQueryPerfEvent, DatabasePerformanceConfig, DatabasePerformanceSubscriber };
+export type {
+  DatabaseQueryPerfEvent,
+  DatabaseQueryTelemetryInfo,
+  DatabasePerformanceConfig,
+  DatabasePerformanceSubscriber,
+};

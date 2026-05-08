@@ -70,5 +70,10 @@ export interface Database<TClient extends ClientKind = ClientKind> {
     captureSqlText?: boolean;
     captureBindings?: boolean;
     output?: 'none' | 'log' | 'artifact' | 'both';
+    /** Append-only JSON artifact path (used when `output` is `artifact` or `both`) */
+    artifactPath?: string;
+    artifactFlushIntervalMs?: number;
+    /** Max DB performance events kept in memory before each flush (rolling window) */
+    artifactMaxEvents?: number;
   };
 }

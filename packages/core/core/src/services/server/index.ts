@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import Router from '@koa/router';
 import type { Core, Modules } from '@strapi/types';
 
@@ -21,7 +23,53 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     keys: strapi.config.get('server.app.keys'),
   });
 
-  app.use((ctx, next) => requestCtx.run(ctx, () => next()));
+  app.use((ctx, next) =>
+    requestCtx.run(ctx, async () => {
+      const requestSummaryEnabled =
+        strapi.config.get('server.performance.requestSummaryEnabled') === true;
+
+      if (requestSummaryEnabled) {
+        ctx.state.strapiPerfRequestId = randomUUID();
+      }
+
+      const requestId = ctx.state.strapiPerfRequestId as string | undefined;
+      const startedAt = Date.now();
+
+      let summaryTracked = false;
+      const trackSummary = () => {
+        if (!requestSummaryEnabled || !requestId || summaryTracked) {
+          return;
+        }
+        summaryTracked = true;
+
+        type PerfAgg = { count: number; totalMs: number; slowOrErrorEvents: number };
+        const statsMap = strapi.get('perfQueryStats') as Map<string, PerfAgg>;
+        const dbStats = statsMap.get(requestId);
+        statsMap.delete(requestId);
+
+        strapi.eventHub
+          .emit('performance.request.summary', {
+            requestId,
+            durationMs: Date.now() - startedAt,
+            method: ctx.method,
+            path: ctx.path,
+            dbQueryCount: dbStats?.count ?? 0,
+            dbTotalMs: dbStats?.totalMs ?? 0,
+            slowOrErrorQueryEvents: dbStats?.slowOrErrorEvents ?? 0,
+          })
+          .catch(() => {
+            /* fail-open */
+          });
+      };
+
+      if (requestSummaryEnabled && requestId) {
+        ctx.res.once('finish', trackSummary);
+        ctx.res.once('close', trackSummary);
+      }
+
+      await next();
+    })
+  );
 
   const router = new Router();
 

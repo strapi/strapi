@@ -1,9 +1,19 @@
+export interface DatabaseQueryTelemetryInfo {
+  durationMs: number;
+  requestId?: string;
+  /** True when this query emitted a `query.slow` or `query.error` performance event */
+  slowOrErrorEventEmitted: boolean;
+}
+
 export interface DatabasePerformanceConfig {
   enabled?: boolean;
   slowQueryMs?: number;
   sampleRate?: number;
   captureSqlText?: boolean;
   captureBindings?: boolean;
+  /** Optional ALS / context hook injected by runtime (e.g. Strapi) for HTTP correlation */
+  getRequestId?: () => string | undefined;
+  notifyQueryTelemetry?: (info: DatabaseQueryTelemetryInfo) => void;
 }
 
 export interface DatabaseQueryPerfEvent {
@@ -22,7 +32,11 @@ export interface DatabaseQueryPerfEvent {
 
 export type DatabasePerformanceSubscriber = (event: DatabaseQueryPerfEvent) => void | Promise<void>;
 
-export const DEFAULT_DATABASE_PERFORMANCE_CONFIG: Required<DatabasePerformanceConfig> = {
+export type DatabaseResolvedPerformanceConfig = Required<
+  Omit<DatabasePerformanceConfig, 'getRequestId' | 'notifyQueryTelemetry'>
+>;
+
+export const DEFAULT_DATABASE_PERFORMANCE_CONFIG: DatabaseResolvedPerformanceConfig = {
   enabled: false,
   slowQueryMs: 100,
   sampleRate: 1,

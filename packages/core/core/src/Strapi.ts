@@ -3,7 +3,7 @@ import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
-import { Database } from '@strapi/database';
+import { Database, type DatabaseQueryTelemetryInfo } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
@@ -281,6 +281,10 @@ class Strapi extends Container implements Core.Strapi {
       .add('requestContext', requestContext)
       .add('customFields', createCustomFields(this))
       .add('entityValidator', entityValidator)
+      .add(
+        'perfQueryStats',
+        () => new Map<string, { count: number; totalMs: number; slowOrErrorEvents: number }>()
+      )
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
       .add('db', () => {
@@ -288,15 +292,61 @@ class Strapi extends Container implements Core.Strapi {
         const tsMigrationsEnabled =
           this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
+        const requestSummaryEnabled =
+          this.config.get('server.performance.requestSummaryEnabled') === true;
+
+        /* eslint-disable object-shorthand -- arrows preserve outer Strapi `this`; method shorthand binds wrong `this` */
+        const perfRequestHooks = requestSummaryEnabled
+          ? {
+              performance: {
+                getRequestId: () => {
+                  const ctx = requestContext.get();
+                  return (ctx?.state as { strapiPerfRequestId?: string }).strapiPerfRequestId;
+                },
+                notifyQueryTelemetry: ({
+                  durationMs,
+                  requestId,
+                  slowOrErrorEventEmitted,
+                }: DatabaseQueryTelemetryInfo) => {
+                  if (!requestId) {
+                    return;
+                  }
+
+                  type PerfAgg = { count: number; totalMs: number; slowOrErrorEvents: number };
+                  const statsMap = this.get('perfQueryStats') as Map<string, PerfAgg>;
+                  const bucket = statsMap.get(requestId) ?? {
+                    count: 0,
+                    totalMs: 0,
+                    slowOrErrorEvents: 0,
+                  };
+
+                  bucket.count += 1;
+                  bucket.totalMs += durationMs;
+                  if (slowOrErrorEventEmitted) {
+                    bucket.slowOrErrorEvents += 1;
+                  }
+
+                  statsMap.set(requestId, bucket);
+                },
+              },
+            }
+          : {};
+        /* eslint-enable object-shorthand */
+
         const db = new Database(
-          _.merge(this.config.get('database'), {
-            logger,
-            settings: {
-              migrations: {
-                dir: path.join(projectDir, 'database/migrations'),
+          _.merge(
+            {},
+            this.config.get('database'),
+            {
+              logger,
+              settings: {
+                migrations: {
+                  dir: path.join(projectDir, 'database/migrations'),
+                },
               },
             },
-          })
+            perfRequestHooks
+          )
         );
 
         const perfOutput = this.config.get('database.performance.output', 'none');

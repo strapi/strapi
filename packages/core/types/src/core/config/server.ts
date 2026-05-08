@@ -65,6 +65,14 @@ export interface Http {
   [key: string]: unknown;
 }
 
+export interface ServerPerformance {
+  /**
+   * When true, assigns a per-request id, aggregates DB query timings, and emits
+   * `performance.request.summary` on the event hub when the HTTP response finishes.
+   */
+  requestSummaryEnabled?: boolean;
+}
+
 export interface Server {
   // required
   host: string;
@@ -85,4 +93,5 @@ export interface Server {
   admin?: ServerAdmin;
   webhooks?: Webhooks;
   http?: Http;
+  performance?: ServerPerformance;
 }

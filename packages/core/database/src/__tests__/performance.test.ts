@@ -124,6 +124,115 @@ describe('Database performance events', () => {
     await db.destroy();
   });
 
+  it('resolves request id from getRequestId when queryContext lacks it', async () => {
+    const getRequestId = jest.fn(() => 'als-req');
+    const notify = jest.fn();
+    const db = new Database({
+      ...baseConfig,
+      performance: {
+        enabled: true,
+        slowQueryMs: 0,
+        sampleRate: 1,
+        getRequestId,
+        notifyQueryTelemetry: notify,
+      },
+    });
+
+    const subscriber = jest.fn();
+    db.subscribeToPerformanceEvents(subscriber);
+
+    const queryData = {
+      __knexQueryUid: 'query-ctx-less',
+      sql: 'select 1',
+      method: 'select',
+    };
+
+    (db.connection as any).emit('query', queryData);
+    (db.connection as any).emit('query-response', [], queryData);
+    await waitForSubscribers();
+
+    expect(getRequestId).toHaveBeenCalled();
+    expect(subscriber.mock.calls[0][0].requestId).toBe('als-req');
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: 'als-req',
+        slowOrErrorEventEmitted: true,
+      })
+    );
+
+    await db.destroy();
+  });
+
+  it('prefers Knex queryContext.requestId over getRequestId', async () => {
+    const getRequestId = jest.fn(() => 'als-req');
+    const db = new Database({
+      ...baseConfig,
+      performance: {
+        enabled: true,
+        slowQueryMs: 0,
+        getRequestId,
+      },
+    });
+
+    const subscriber = jest.fn();
+    db.subscribeToPerformanceEvents(subscriber);
+
+    const queryData = {
+      __knexQueryUid: 'query-prefers-ctx',
+      sql: 'select 1',
+      method: 'select',
+      queryContext: { requestId: 'ctx-req' },
+    };
+
+    (db.connection as any).emit('query', queryData);
+    (db.connection as any).emit('query-response', [], queryData);
+    await waitForSubscribers();
+
+    expect(subscriber.mock.calls[0][0].requestId).toBe('ctx-req');
+    expect(getRequestId).not.toHaveBeenCalled();
+
+    await db.destroy();
+  });
+
+  it('reports slowOrErrorEventEmitted false when sampling skips emission', async () => {
+    const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.999);
+    const notify = jest.fn();
+    const db = new Database({
+      ...baseConfig,
+      performance: {
+        enabled: true,
+        slowQueryMs: 0,
+        sampleRate: 0.1,
+        notifyQueryTelemetry: notify,
+      },
+    });
+
+    const subscriber = jest.fn();
+    db.subscribeToPerformanceEvents(subscriber);
+
+    const queryData = {
+      __knexQueryUid: 'query-sample-skip',
+      sql: 'select 1',
+      method: 'select',
+    };
+
+    try {
+      (db.connection as any).emit('query', queryData);
+      (db.connection as any).emit('query-response', [], queryData);
+      await waitForSubscribers();
+
+      expect(subscriber).not.toHaveBeenCalled();
+      expect(notify).toHaveBeenCalledWith(
+        expect.objectContaining({
+          slowOrErrorEventEmitted: false,
+        })
+      );
+    } finally {
+      randomSpy.mockRestore();
+      await db.destroy();
+    }
+  });
+
   it('does not store sink-only keys like output on Database.performance', async () => {
     const db = new Database({
       ...baseConfig,
@@ -134,6 +243,26 @@ describe('Database performance events', () => {
     });
 
     expect((db.performance as any).output).toBeUndefined();
+
+    await db.destroy();
+  });
+
+  it('does not store runtime hook keys on Database.performance', async () => {
+    const db = new Database({
+      ...baseConfig,
+      performance: {
+        enabled: false,
+        output: 'log',
+        getRequestId() {
+          return undefined;
+        },
+        notifyQueryTelemetry() {},
+      } as any,
+    });
+
+    expect((db.performance as any).output).toBeUndefined();
+    expect((db.performance as any).getRequestId).toBeUndefined();
+    expect((db.performance as any).notifyQueryTelemetry).toBeUndefined();
 
     await db.destroy();
   });
