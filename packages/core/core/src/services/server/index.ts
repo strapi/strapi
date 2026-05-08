@@ -25,10 +25,11 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
 
   app.use((ctx, next) =>
     requestCtx.run(ctx, async () => {
+      const dbPerformanceEnabled = strapi.config.get('database.performance.enabled') === true;
       const requestSummaryEnabled =
         strapi.config.get('server.performance.requestSummaryEnabled') === true;
 
-      if (requestSummaryEnabled) {
+      if (dbPerformanceEnabled || requestSummaryEnabled) {
         ctx.state.strapiPerfRequestId = randomUUID();
       }
 

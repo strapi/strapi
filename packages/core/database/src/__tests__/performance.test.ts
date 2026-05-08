@@ -233,6 +233,42 @@ describe('Database performance events', () => {
     }
   });
 
+  it('mergeKnexQueryContext forwards getRequestId into the Knex queryContext', async () => {
+    const qc = jest.fn();
+
+    const db = new Database({
+      ...baseConfig,
+      performance: {
+        enabled: true,
+        getRequestId: () => 'corr-merge',
+      },
+    });
+
+    db.mergeKnexQueryContext({ queryContext: qc } as any);
+
+    expect(qc).toHaveBeenCalledWith({ requestId: 'corr-merge' });
+
+    await db.destroy();
+  });
+
+  it('mergeKnexQueryContext does nothing when performance monitoring is disabled', async () => {
+    const qc = jest.fn();
+
+    const db = new Database({
+      ...baseConfig,
+      performance: {
+        enabled: false,
+        getRequestId: () => 'ignored',
+      },
+    });
+
+    db.mergeKnexQueryContext({ queryContext: qc } as any);
+
+    expect(qc).not.toHaveBeenCalled();
+
+    await db.destroy();
+  });
+
   it('does not store sink-only keys like output on Database.performance', async () => {
     const db = new Database({
       ...baseConfig,

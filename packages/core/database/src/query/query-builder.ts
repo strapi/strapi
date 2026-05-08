@@ -418,9 +418,14 @@ const createQueryBuilder = (
       const subQB = this.getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
+      db.mergeKnexQueryContext(nestedSubQuery);
+
       const connection = db.getConnection(tableName);
 
-      return (connection[originalType] as Knex)().whereIn('id', nestedSubQuery);
+      const outer = (connection[originalType] as Knex)().whereIn('id', nestedSubQuery);
+      db.mergeKnexQueryContext(outer);
+
+      return outer;
     },
 
     processState() {
@@ -647,6 +652,8 @@ const createQueryBuilder = (
       if (state.joins.length > 0) {
         helpers.applyJoins(qb, state.joins);
       }
+
+      db.mergeKnexQueryContext(qb);
 
       if (this.shouldUseDeepSort()) {
         return helpers.wrapWithDeepSort(qb, { qb: this, db, uid });

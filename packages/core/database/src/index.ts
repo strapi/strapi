@@ -323,6 +323,28 @@ class Database {
     };
   }
 
+  /**
+   * Merges `requestId` from {@link DatabasePerformanceConfig.getRequestId} into the Knex
+   * `queryContext` so slow/error perf events correlate without re-reading ALS in the Knex adapter.
+   */
+  mergeKnexQueryContext(qb: Knex.QueryBuilder): void {
+    if (!this.performance.enabled || typeof qb.queryContext !== 'function') {
+      return;
+    }
+
+    const resolveRequestId = this.getRequestId;
+    if (!resolveRequestId) {
+      return;
+    }
+
+    const requestId = resolveRequestId();
+    if (!requestId) {
+      return;
+    }
+
+    qb.queryContext({ requestId });
+  }
+
   private emitPerformance(event: DatabaseQueryPerfEvent) {
     for (const subscriber of this.performanceSubscribers) {
       try {

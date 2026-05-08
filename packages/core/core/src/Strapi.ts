@@ -292,45 +292,55 @@ class Strapi extends Container implements Core.Strapi {
         const tsMigrationsEnabled =
           this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
+        const dbPerformanceEnabled = this.config.get('database.performance.enabled') === true;
         const requestSummaryEnabled =
           this.config.get('server.performance.requestSummaryEnabled') === true;
 
         /* eslint-disable object-shorthand -- arrows preserve outer Strapi `this`; method shorthand binds wrong `this` */
-        const perfRequestHooks = requestSummaryEnabled
-          ? {
-              performance: {
-                getRequestId: () => {
-                  const ctx = requestContext.get();
-                  return (ctx?.state as { strapiPerfRequestId?: string }).strapiPerfRequestId;
+        const perfRequestHooks =
+          dbPerformanceEnabled || requestSummaryEnabled
+            ? {
+                performance: {
+                  getRequestId: () => {
+                    const ctx = requestContext.get();
+                    return (ctx?.state as { strapiPerfRequestId?: string }).strapiPerfRequestId;
+                  },
+                  ...(requestSummaryEnabled
+                    ? {
+                        notifyQueryTelemetry: ({
+                          durationMs,
+                          requestId,
+                          slowOrErrorEventEmitted,
+                        }: DatabaseQueryTelemetryInfo) => {
+                          if (!requestId) {
+                            return;
+                          }
+
+                          type PerfAgg = {
+                            count: number;
+                            totalMs: number;
+                            slowOrErrorEvents: number;
+                          };
+                          const statsMap = this.get('perfQueryStats') as Map<string, PerfAgg>;
+                          const bucket = statsMap.get(requestId) ?? {
+                            count: 0,
+                            totalMs: 0,
+                            slowOrErrorEvents: 0,
+                          };
+
+                          bucket.count += 1;
+                          bucket.totalMs += durationMs;
+                          if (slowOrErrorEventEmitted) {
+                            bucket.slowOrErrorEvents += 1;
+                          }
+
+                          statsMap.set(requestId, bucket);
+                        },
+                      }
+                    : {}),
                 },
-                notifyQueryTelemetry: ({
-                  durationMs,
-                  requestId,
-                  slowOrErrorEventEmitted,
-                }: DatabaseQueryTelemetryInfo) => {
-                  if (!requestId) {
-                    return;
-                  }
-
-                  type PerfAgg = { count: number; totalMs: number; slowOrErrorEvents: number };
-                  const statsMap = this.get('perfQueryStats') as Map<string, PerfAgg>;
-                  const bucket = statsMap.get(requestId) ?? {
-                    count: 0,
-                    totalMs: 0,
-                    slowOrErrorEvents: 0,
-                  };
-
-                  bucket.count += 1;
-                  bucket.totalMs += durationMs;
-                  if (slowOrErrorEventEmitted) {
-                    bucket.slowOrErrorEvents += 1;
-                  }
-
-                  statsMap.set(requestId, bucket);
-                },
-              },
-            }
-          : {};
+              }
+            : {};
         /* eslint-enable object-shorthand */
 
         const db = new Database(
