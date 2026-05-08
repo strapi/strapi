@@ -1,0 +1,96 @@
+# Docker Compose stack for the v4 → v5 migration test framework.
+#
+# Services:
+#   postgres / mysql / mariadb — DB engines for migration tests, only one is
+#                                started per scenario by the orchestrator.
+#   runner                     — Node 20 + yarn 4 + build deps. Used to run
+#                                the v4 baseline and pinned-v5 stages so the
+#                                test is fully decoupled from the host's Node
+#                                version. Invoked one-shot via `compose run`.
+#
+# Bind mounts:
+#   - $REPO_ROOT (host monorepo root) → /repo  (read-only). Source of truth
+#     for the orchestrator, schemas, components, seed-v4.js, seed-v5.js.
+#   - $MIGRATION_STATE_DIR              → /work. Disposable per-stage Strapi
+#     apps live here; the host can inspect them with normal tools.
+#
+# Networking: all services share the default compose network. Inside `runner`
+# you reach `postgres`, `mysql`, `mariadb` by name (no host-port juggling).
+# The orchestrator never publishes DB ports — they are private to the network.
+
+name: ${COMPOSE_PROJECT_NAME:-strapi_migration_v5}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi
+      POSTGRES_DB: strapi
+    # Expose to host so the workspace validation step (which runs on the host)
+    # can reach the same database the runner used. Non-standard host port to
+    # avoid clashing with the user's local Postgres.
+    ports:
+      - '${POSTGRES_HOST_PORT:-15432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U strapi -d strapi']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_USER: strapi
+      MYSQL_PASSWORD: strapi
+      MYSQL_DATABASE: strapi
+      MYSQL_ROOT_PASSWORD: strapi
+    ports:
+      - '${MYSQL_HOST_PORT:-13306}:3306'
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 -u strapi -pstrapi --silent']
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    tmpfs:
+      - /var/lib/mysql
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_USER: strapi
+      MARIADB_PASSWORD: strapi
+      MARIADB_DATABASE: strapi
+      MARIADB_ROOT_PASSWORD: strapi
+    ports:
+      - '${MARIADB_HOST_PORT:-13307}:3306'
+    healthcheck:
+      test: ['CMD-SHELL', 'mariadb-admin ping -h 127.0.0.1 -u strapi -pstrapi --silent']
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    tmpfs:
+      - /var/lib/mysql
+
+  runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.runner
+    image: strapi-migration-runner:node20
+    working_dir: /work
+    user: '${RUNNER_UID:-0}:${RUNNER_GID:-0}'
+    volumes:
+      - ${REPO_ROOT:-../../..}:/repo:ro
+      - ${MIGRATION_STATE_DIR:-../../../examples/complex/.migration-v5}:/work
+    environment:
+      # HOME + yarn cache live inside the bind-mounted state dir so they
+      # persist across `compose run` invocations (faster yarn install on warm
+      # runs) without needing a docker-managed volume with awkward perms.
+      HOME: /work/.runner-home
+      YARN_CACHE_FOLDER: /work/.yarn-cache
+      YARN_ENABLE_GLOBAL_CACHE: 'true'
+    # No top-level command — orchestrator overrides via `compose run --rm runner ...`.
+    # Default behaviour if invoked without a command (handy for shelling in):
+    command: ['bash', '-lc', 'echo "runner: idle"; exec sleep infinity']

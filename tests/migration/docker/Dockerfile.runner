@@ -1,0 +1,28 @@
+# syntax=docker/dockerfile:1.6
+#
+# Migration-test runner image.
+#
+# Pinned to Node 20 because that is the highest major Strapi v4 supports
+# (engines: ">=18.0.0 <=20.x.x"). The same image is reused for pinned-v5 and
+# v4 stages so we get a single source of truth for the runtime, regardless of
+# what Node version the host happens to have installed.
+#
+# build-essential + python3 are required by `better-sqlite3@9.x` (used by the
+# v4 baseline) when no prebuilt binary is available for the platform.
+
+FROM node:20-bookworm
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential python3 ca-certificates git curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# The disposable v4 / pinned-v5 apps don't declare `packageManager`, so we use
+# the yarn 1.22 that ships with `node:20-bookworm` (no corepack indirection).
+# This keeps the install simple and predictable across versions.
+
+ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV CI=1
+
+WORKDIR /work
+
+CMD ["bash", "-lc", "echo 'runner image: pass a command via `compose run --rm runner ...`'"]

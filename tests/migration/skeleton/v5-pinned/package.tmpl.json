@@ -1,0 +1,36 @@
+{
+  "name": "__APP_NAME__",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pinned Strapi v5 copy of examples/complex (migration tests only, auto-generated)",
+  "scripts": {
+    "build": "strapi build",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "@strapi/plugin-users-permissions": "__STRAPI_VERSION__",
+    "@strapi/strapi": "__STRAPI_VERSION__",
+    "better-sqlite3": "12.8.0",
+    "mysql2": "3.20.0",
+    "pg": "8.20.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.30.3",
+    "styled-components": "6.1.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "__APP_NAME__"
+  }
+}

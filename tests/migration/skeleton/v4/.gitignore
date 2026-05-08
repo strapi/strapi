@@ -1,0 +1,12 @@
+node_modules
+.tmp
+.cache
+build
+dist
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+yarn.lock
+package-lock.json
