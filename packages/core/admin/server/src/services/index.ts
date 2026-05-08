@@ -11,7 +11,7 @@ import * as contentType from './content-type';
 import * as constants from './constants';
 import * as condition from './condition';
 import * as action from './action';
-import * as apiToken from './api-token';
+import { createTokenService } from './api-token';
 import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
@@ -29,7 +29,8 @@ export default {
   constants,
   condition,
   action,
-  'api-token': apiToken,
+  'api-token-content-api': createTokenService('content-api'),
+  'api-token-admin': createTokenService('admin'),
   transfer,
   'project-settings': projectSettings,
   encryption,

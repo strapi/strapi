@@ -70,6 +70,14 @@ export const ADMIN_PERMISSIONS_CE = {
       ],
       update: [{ action: 'admin::webhooks.update', subject: null }],
     },
+    'admin-tokens': {
+      main: [{ action: 'admin::admin-tokens.access', subject: null }],
+      create: [{ action: 'admin::admin-tokens.create', subject: null }],
+      delete: [{ action: 'admin::admin-tokens.delete', subject: null }],
+      read: [{ action: 'admin::admin-tokens.read', subject: null }],
+      update: [{ action: 'admin::admin-tokens.update', subject: null }],
+      regenerate: [{ action: 'admin::admin-tokens.regenerate', subject: null }],
+    },
     'api-tokens': {
       main: [{ action: 'admin::api-tokens.access', subject: null }],
       create: [{ action: 'admin::api-tokens.create', subject: null }],
@@ -136,6 +144,8 @@ export type SettingsMenu = {
   admin: SettingsMenuLink[];
   global: SettingsMenuLink[];
 };
+
+const isAdminTokensFutureEnabled = () => window.strapi.future.isEnabled('adminTokens') === true;
 
 export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
   global: [
@@ -204,6 +214,15 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
     },
+    ...(isAdminTokensFutureEnabled() === true
+      ? [
+          {
+            intlLabel: { id: 'Settings.adminTokens.title', defaultMessage: 'Admin Tokens' },
+            to: '/settings/admin-tokens',
+            id: 'admin-tokens',
+          },
+        ]
+      : []),
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
     window.strapi?.flags?.promoteEE
       ? [

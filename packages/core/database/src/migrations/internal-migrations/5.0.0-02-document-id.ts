@@ -143,10 +143,25 @@ const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
   } while (updatedRows > 0);
 };
 
+const isDuplicateColumnError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  const e = error as { code?: string; errno?: number; message?: string };
+  if (e.code === '42701') return true;
+  if (e.errno === 1060) return true;
+  if (typeof e.message === 'string' && /duplicate column/i.test(e.message)) return true;
+  return false;
+};
+
 const createDocumentIdColumn = async (knex: Knex, tableName: string) => {
-  await knex.schema.alterTable(tableName, (table) => {
-    table.string('document_id');
-  });
+  try {
+    await knex.schema.alterTable(tableName, (table) => {
+      table.string('document_id');
+    });
+  } catch (error) {
+    if (!isDuplicateColumnError(error)) {
+      throw error;
+    }
+  }
 };
 
 const hasLocalizationsJoinTable = async (knex: Knex, tableName: string) => {
@@ -166,14 +181,11 @@ export const createdDocumentId: Migration = {
       }
 
       if ('documentId' in meta.attributes) {
-        // add column if doesn't exist
         const hasDocumentIdColumn = await knex.schema.hasColumn(meta.tableName, 'document_id');
 
-        if (hasDocumentIdColumn) {
-          continue;
+        if (!hasDocumentIdColumn) {
+          await createDocumentIdColumn(knex, meta.tableName);
         }
-
-        await createDocumentIdColumn(knex, meta.tableName);
 
         if (await hasLocalizationsJoinTable(knex, meta.tableName)) {
           await migrateDocumentIdsWithLocalizations(db, knex, meta);
