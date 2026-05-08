@@ -38,7 +38,7 @@ export default ({ strapi }: Context) => {
 
       const targetContentType = strapi.getModel(targetUID);
 
-      return async (parent: any, args: any = {}, context: any = {}) => {
+      return async (parent: any, args: any, context: any, info: any) => {
         const { auth } = context.state;
 
         const transformedArgs = transformArgs(args, {
@@ -69,12 +69,19 @@ export default ({ strapi }: Context) => {
           return graphqlService.isBuiltInQueryField(fieldName);
         };
 
+        // Walk back to the root of info.path so we pick up the args of *our* query branch
+        let rootPath = info?.path;
+        while (rootPath?.prev) {
+          rootPath = rootPath.prev;
+        }
+        const rootQueryArgs = rootPath ? context.rootQueryArgsByPath?.get(rootPath.key) : undefined;
+
         // Only inherit status from built-in queries to avoid conflicts with custom resolvers
         const inheritedStatus =
-          context.rootQueryArgs?.status &&
-          context.rootQueryArgs?._originField &&
-          isBuiltInQueryField(context.rootQueryArgs._originField)
-            ? context.rootQueryArgs.status
+          rootQueryArgs?.status &&
+          rootQueryArgs?._originField &&
+          isBuiltInQueryField(rootQueryArgs._originField)
+            ? rootQueryArgs.status
             : null;
 
         const statusToApply = args.status || inheritedStatus;
@@ -88,7 +95,39 @@ export default ({ strapi }: Context) => {
               }
             : {};
 
-        const dbQuery = merge(defaultFilters, transformedQuery);
+        // Inherit hasPublishedVersion from root query (same pattern as status)
+        const inheritedHasPublishedVersion =
+          rootQueryArgs?.hasPublishedVersion !== undefined &&
+          rootQueryArgs?._originField &&
+          isBuiltInQueryField(rootQueryArgs._originField)
+            ? rootQueryArgs.hasPublishedVersion
+            : undefined;
+
+        // Build hasPublishedVersion condition for this relation's model
+        let hasPublishedVersionFilters: Record<string, any> = {};
+        if (isTargetDraftAndPublishContentType && inheritedHasPublishedVersion !== undefined) {
+          const meta = strapi.db.metadata.get(targetUID);
+          const tableName = meta.tableName;
+          const documentIdAttr = meta.attributes.documentId;
+          const publishedAtAttr = meta.attributes.publishedAt;
+          const documentIdColumn =
+            ('columnName' in documentIdAttr && documentIdAttr.columnName) || 'document_id';
+          const publishedAtColumn =
+            ('columnName' in publishedAtAttr && publishedAtAttr.columnName) || 'published_at';
+
+          const knex = strapi.db.connection;
+          const subquery = knex(tableName)
+            .distinct(documentIdColumn)
+            .whereNotNull(publishedAtColumn);
+
+          hasPublishedVersionFilters = {
+            where: {
+              documentId: inheritedHasPublishedVersion ? { $in: subquery } : { $notIn: subquery },
+            },
+          };
+        }
+
+        const dbQuery = merge(merge(defaultFilters, hasPublishedVersionFilters), transformedQuery);
 
         // Sign media URLs if upload plugin is available and using private provider
         const data = await (async () => {

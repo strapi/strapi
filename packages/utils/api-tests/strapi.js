@@ -21,6 +21,7 @@ const createStrapiInstance = async ({
   logLevel = 'warn',
   bypassAuth = true,
   bootstrap,
+  register,
   strapiOptions = {},
   /** When false (default), opts out of deprecated expiresIn so tests use new session config defaults. Set true to test legacy/deprecation behavior. */
   skipDefaultSessionConfig = false,
@@ -76,6 +77,14 @@ const createStrapiInstance = async ({
     modules.bootstrap = async () => {
       await bootstrap({ strapi: instance });
       await originalBootstrap();
+    };
+  }
+
+  if (register) {
+    const originalRegister = instance.register.bind(instance);
+    instance.register = async function () {
+      await register({ strapi: instance });
+      return originalRegister();
     };
   }
 

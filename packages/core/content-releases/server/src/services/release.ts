@@ -14,7 +14,7 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
-import { getService } from '../utils';
+import { getService, getPublishOrderForContentTypes } from '../utils';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -294,19 +294,24 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             const formattedActions = await getFormattedActions(releaseId);
 
-            await strapi.db.transaction(async () =>
-              Promise.all(
-                Object.keys(formattedActions).map(async (contentTypeUid) => {
-                  const contentType = contentTypeUid as UID.ContentType;
-                  const { publish, unpublish } = formattedActions[contentType];
-
-                  return Promise.all([
-                    ...publish.map((params) => strapi.documents(contentType).publish(params)),
-                    ...unpublish.map((params) => strapi.documents(contentType).unpublish(params)),
-                  ]);
-                })
-              )
+            // Publish content types in dependency order so that when entity A has a relation
+            // to entity B, B is published first to keep this relation.
+            const contentTypeUids = getPublishOrderForContentTypes(
+              Object.keys(formattedActions) as UID.ContentType[],
+              { strapi }
             );
+
+            await strapi.db.transaction(async () => {
+              for (const contentTypeUid of contentTypeUids) {
+                const contentType = contentTypeUid as UID.ContentType;
+                const { publish, unpublish } = formattedActions[contentType];
+
+                await Promise.all([
+                  ...publish.map((params) => strapi.documents(contentType).publish(params)),
+                  ...unpublish.map((params) => strapi.documents(contentType).unpublish(params)),
+                ]);
+              }
+            });
 
             const release = await strapi.db.query(RELEASE_MODEL_UID).update({
               where: {

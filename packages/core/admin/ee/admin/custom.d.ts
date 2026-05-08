@@ -29,6 +29,9 @@ declare global {
       };
       projectType: 'Community' | 'Enterprise';
       telemetryDisabled: boolean;
+      ai: {
+        enabled: boolean;
+      };
     };
   }
 }

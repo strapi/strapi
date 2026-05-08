@@ -60,12 +60,12 @@ describe('UploadProgressDialog', () => {
   describe('Dialog visibility', () => {
     it('renders the dialog when isVisible is true', () => {
       setup(createMockState({ isVisible: true }));
-      expect(screen.getByTestId('upload-progress-dialog')).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: /upload/i })).toBeInTheDocument();
     });
 
     it('does not render the dialog when isVisible is false', () => {
       setup(createMockState({ isVisible: false }));
-      expect(screen.queryByTestId('upload-progress-dialog')).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: /upload/i })).not.toBeInTheDocument();
     });
   });
 

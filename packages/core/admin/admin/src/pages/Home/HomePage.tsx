@@ -17,7 +17,11 @@ import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useWidgets } from '../../features/Widgets';
-import { useGetHomepageLayoutQuery } from '../../services/homepage';
+import {
+  useGetCountDocumentsQuery,
+  useGetHomepageLayoutQuery,
+  useGetKeyStatisticsQuery,
+} from '../../services/homepage';
 import {
   getWidgetElement,
   WIDGET_DATA_ATTRIBUTES,
@@ -33,6 +37,22 @@ import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';
+
+type WidgetPermissionStatus = 'allowed' | 'denied' | 'loading';
+
+const getWidgetPermissionsCacheKey = (permissions: NonNullable<WidgetWithUID['permissions']>) => {
+  return permissions
+    .map((permission) =>
+      JSON.stringify({
+        action: permission.action,
+        subject: permission.subject,
+        conditions: permission.conditions ?? [],
+        properties: permission.properties ?? {},
+      })
+    )
+    .sort()
+    .join('|');
+};
 
 // Styled wrapper for the drag preview
 const DragPreviewWrapper = styled.div<{ $maxWidth: string }>`
@@ -87,11 +107,22 @@ const HomePageCE = () => {
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
+  const allWidgets = React.useMemo(() => getAllWidgets(), [getAllWidgets]);
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
   const { data: homepageLayout, isLoading: _isLoadingLayout } = useGetHomepageLayoutQuery();
+  // Prefetch expensive widget data as soon as the homepage route is active.
+  useGetCountDocumentsQuery();
+  useGetKeyStatisticsQuery();
   const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
-  const [allAvailableWidgets, setAllAvailableWidgets] = React.useState<WidgetWithUID[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [widgetPermissionStatus, setWidgetPermissionStatus] = React.useState<
+    Record<string, WidgetPermissionStatus>
+  >(() =>
+    allWidgets.reduce<Record<string, WidgetPermissionStatus>>((acc, widget) => {
+      acc[widget.uid] =
+        !widget.permissions || widget.permissions.length === 0 ? 'allowed' : 'loading';
+      return acc;
+    }, {})
+  );
   const [isAddWidgetModalOpen, setIsAddWidgetModalOpen] = React.useState(false);
 
   // Use custom hook for widget management
@@ -114,31 +145,102 @@ const HomePageCE = () => {
   });
 
   React.useEffect(() => {
-    const checkWidgetsPermissions = async () => {
-      const allWidgets = getAllWidgets();
-      const authorizedWidgets = await Promise.all(
-        allWidgets.map(async (widget) => {
-          if (!widget.permissions || widget.permissions.length === 0) return true;
-          const matchingPermissions = await checkUserHasPermissions(widget.permissions);
-          return matchingPermissions.length >= widget.permissions.length;
-        })
-      );
-      const authorizedWidgetsList = allWidgets.filter((_, i) => authorizedWidgets[i]);
+    const initialPermissionStatus = allWidgets.reduce<Record<string, WidgetPermissionStatus>>(
+      (acc, widget) => {
+        acc[widget.uid] =
+          !widget.permissions || widget.permissions.length === 0 ? 'allowed' : 'loading';
+        return acc;
+      },
+      {}
+    );
 
-      setAllAvailableWidgets(authorizedWidgetsList);
-      setLoading(false);
+    setWidgetPermissionStatus(initialPermissionStatus);
+
+    const widgetsWithPermissions = allWidgets.filter(
+      (widget) => widget.permissions && widget.permissions.length > 0
+    );
+
+    if (widgetsWithPermissions.length === 0) {
+      return;
+    }
+
+    const groupedPermissions = widgetsWithPermissions.reduce<
+      Map<string, { permissions: NonNullable<WidgetWithUID['permissions']>; uids: string[] }>
+    >((acc, widget) => {
+      const permissions = widget.permissions ?? [];
+      const key = getWidgetPermissionsCacheKey(permissions);
+      const existingGroup = acc.get(key);
+
+      if (existingGroup) {
+        existingGroup.uids.push(widget.uid);
+      } else {
+        acc.set(key, { permissions, uids: [widget.uid] });
+      }
+
+      return acc;
+    }, new Map());
+
+    let isMounted = true;
+
+    const checkWidgetsPermissions = async () => {
+      try {
+        const permissionResults = await Promise.all(
+          Array.from(groupedPermissions.values()).map(async ({ permissions, uids }) => {
+            const matchingPermissions = await checkUserHasPermissions(permissions);
+            const status: WidgetPermissionStatus =
+              matchingPermissions.length >= permissions.length ? 'allowed' : 'denied';
+
+            return { uids, status };
+          })
+        );
+
+        if (!isMounted) return;
+
+        setWidgetPermissionStatus((prev) => {
+          const next = { ...prev };
+
+          permissionResults.forEach(({ uids, status }) => {
+            uids.forEach((uid) => {
+              next[uid] = status;
+            });
+          });
+
+          return next;
+        });
+      } catch {
+        if (!isMounted) return;
+
+        // Keep the UI responsive even when permission checks fail.
+        setWidgetPermissionStatus((prev) => {
+          const next = { ...prev };
+          widgetsWithPermissions.forEach((widget) => {
+            next[widget.uid] = 'denied';
+          });
+          return next;
+        });
+      }
     };
 
     checkWidgetsPermissions();
-  }, [checkUserHasPermissions, getAllWidgets]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [allWidgets, checkUserHasPermissions]);
+
+  const allAvailableWidgets = React.useMemo(() => {
+    return allWidgets.filter((widget) => widgetPermissionStatus[widget.uid] === 'allowed');
+  }, [allWidgets, widgetPermissionStatus]);
+
+  const renderableWidgets = React.useMemo(() => {
+    return allWidgets.filter((widget) => widgetPermissionStatus[widget.uid] !== 'denied');
+  }, [allWidgets, widgetPermissionStatus]);
 
   React.useEffect(() => {
-    if (allAvailableWidgets.length === 0) return;
-
     // If user has customized the homepage layout, apply it
     if (homepageLayout && homepageLayout.widgets) {
       const { filteredWidgets, widths: homepageWidths } = applyHomepageLayout(
-        allAvailableWidgets,
+        renderableWidgets,
         homepageLayout
       );
 
@@ -146,10 +248,10 @@ const HomePageCE = () => {
       setColumnWidths(homepageWidths);
     } else {
       // Set default layout when no custom layout exists
-      setFilteredWidgets(allAvailableWidgets);
-      setColumnWidths(createDefaultWidgetWidths(allAvailableWidgets));
+      setFilteredWidgets(renderableWidgets);
+      setColumnWidths(createDefaultWidgetWidths(renderableWidgets));
     }
-  }, [homepageLayout, allAvailableWidgets, setColumnWidths]);
+  }, [homepageLayout, renderableWidgets, setColumnWidths]);
 
   const widgetLayout = React.useMemo(() => {
     return filteredWidgets.map((widget, index) => {
@@ -213,75 +315,73 @@ const HomePageCE = () => {
         <Layouts.Content>
           <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
             <GuidedTourHomepageOverview />
-            {loading ? (
-              <Box position="absolute" top={0} left={0} right={0} bottom={0}>
-                <Page.Loading />
-              </Box>
-            ) : (
-              <Box position="relative" {...{ [WIDGET_DATA_ATTRIBUTES.GRID_CONTAINER]: true }}>
-                <Grid.Root gap={5}>
-                  {widgetLayout.map(
-                    ({
-                      widget,
-                      isLastInRow,
-                      rightWidgetId,
-                      widgetWidth,
-                      rightWidgetWidth,
-                      canResize,
-                    }) => (
-                      <React.Fragment key={widget.uid}>
-                        <Grid.Item col={widgetWidth} xs={12}>
-                          <WidgetRoot
-                            uid={widget.uid}
-                            title={widget.title}
-                            icon={widget.icon}
-                            link={widget.link}
-                            findWidget={findWidget}
-                            deleteWidget={deleteWidget}
-                            onDragStart={handleDragStart}
-                            onDragEnd={handleDragEnd}
-                            component={widget.component}
-                          >
+            <Box position="relative" {...{ [WIDGET_DATA_ATTRIBUTES.GRID_CONTAINER]: true }}>
+              <Grid.Root gap={5}>
+                {widgetLayout.map(
+                  ({
+                    widget,
+                    isLastInRow,
+                    rightWidgetId,
+                    widgetWidth,
+                    rightWidgetWidth,
+                    canResize,
+                  }) => (
+                    <React.Fragment key={widget.uid}>
+                      <Grid.Item col={widgetWidth} xs={12}>
+                        <WidgetRoot
+                          uid={widget.uid}
+                          title={widget.title}
+                          icon={widget.icon}
+                          link={widget.link}
+                          findWidget={findWidget}
+                          deleteWidget={deleteWidget}
+                          onDragStart={handleDragStart}
+                          onDragEnd={handleDragEnd}
+                          component={widget.component}
+                        >
+                          {widgetPermissionStatus[widget.uid] === 'loading' ? (
+                            <Widget.Loading />
+                          ) : (
                             <WidgetComponent
                               component={widget.component}
                               columnWidth={widgetWidth}
                             />
-                          </WidgetRoot>
-                        </Grid.Item>
+                          )}
+                        </WidgetRoot>
+                      </Grid.Item>
 
-                        {!isLastInRow && canResize && rightWidgetId && (
-                          <WidgetResizeHandle
-                            key={`resize-${widget.uid}`}
-                            leftWidgetId={widget.uid}
-                            rightWidgetId={rightWidgetId}
-                            leftWidgetWidth={widgetWidth}
-                            rightWidgetWidth={rightWidgetWidth}
-                            onResize={handleWidgetResize}
-                            saveLayout={saveLayout}
-                            filteredWidgets={filteredWidgets}
-                          />
-                        )}
-                      </React.Fragment>
-                    )
-                  )}
-                </Grid.Root>
-
-                {isDraggingWidget && (
-                  <GapDropZoneManager
-                    filteredWidgets={filteredWidgets}
-                    columnWidths={columnWidths}
-                    draggedWidgetId={draggedWidgetId}
-                    moveWidget={moveWidget}
-                  />
+                      {!isLastInRow && canResize && rightWidgetId && (
+                        <WidgetResizeHandle
+                          key={`resize-${widget.uid}`}
+                          leftWidgetId={widget.uid}
+                          rightWidgetId={rightWidgetId}
+                          leftWidgetWidth={widgetWidth}
+                          rightWidgetWidth={rightWidgetWidth}
+                          onResize={handleWidgetResize}
+                          saveLayout={saveLayout}
+                          filteredWidgets={filteredWidgets}
+                        />
+                      )}
+                    </React.Fragment>
+                  )
                 )}
-              </Box>
-            )}
+              </Grid.Root>
+
+              {isDraggingWidget && (
+                <GapDropZoneManager
+                  filteredWidgets={filteredWidgets}
+                  columnWidths={columnWidths}
+                  draggedWidgetId={draggedWidgetId}
+                  moveWidget={moveWidget}
+                />
+              )}
+            </Box>
           </Flex>
         </Layouts.Content>
 
         {/* Add the DragLayer to handle custom drag previews */}
         <DragLayer
-          renderItem={({ type, item }) => {
+          renderItem={({ type: _type, item }) => {
             if (!isWidgetDragItem(item)) {
               return null;
             }

@@ -366,3 +366,16 @@ export declare namespace GenerateAIMetadata {
     error?: errors.ApplicationError;
   }
 }
+
+/** User object returned when createdBy is populated (GET /upload/files/:id) */
+export interface PopulatedCreatedBy {
+  id: number;
+  firstname?: string;
+  lastname?: string;
+  username?: string | null;
+  email?: string;
+}
+
+export type AssetWithPopulatedCreatedBy = Omit<File, 'createdBy'> & {
+  createdBy?: PopulatedCreatedBy | null;
+};
