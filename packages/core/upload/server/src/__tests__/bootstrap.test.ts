@@ -36,6 +36,13 @@ describe('Upload plugin bootstrap function', () => {
       admin: {
         services: { permission: { actionProvider: { registerMany } } },
       },
+      ai: {
+        admin: {
+          isEnabled() {
+            return false;
+          },
+        },
+      },
       log: {
         error() {},
       },

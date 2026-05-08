@@ -3467,15 +3467,7 @@ export async function* getBatchToDiscard({
   uid: string;
   defaultBatchSize?: number;
 }) {
-  const client = db.config.connection.client;
-  const isSQLite =
-    typeof client === 'string' && ['sqlite', 'sqlite3', 'better-sqlite3'].includes(client);
-
-  // The SQLite documentation states that the maximum number of terms in a
-  // compound SELECT statement is 500 by default.
-  // See: https://www.sqlite.org/limits.html
-  // To ensure a successful migration, we limit the batch size to 500 for SQLite.
-  const batchSize = isSQLite ? Math.min(defaultBatchSize, 500) : defaultBatchSize;
+  const batchSize = Math.min(defaultBatchSize, db.dialect.getBatchInsertSize());
   let offset = 0;
   let hasMore = true;
 

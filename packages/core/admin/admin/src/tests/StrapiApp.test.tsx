@@ -216,7 +216,7 @@ describe('ADMIN | new StrapiApp', () => {
 
       expect(consoleSpy.mock.calls).toHaveLength(1);
       expect(consoleSpy.mock.calls[0][0]).toBe(
-        '[bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: `Component: () => import(path)` ensuring you return a default export instead.'
+        '[bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". Component loaders should return a dynamic import with a default export shape, e.g. `Component: () => import(path).then((mod) => ({ default: mod.Component }))`. Async wrapper functions will stop being supported in a future version.'
       );
 
       console.warn = originalWarn;
@@ -467,6 +467,28 @@ describe('ADMIN | new StrapiApp', () => {
       expect(typeof app.router.menu[0].icon).toBe('function');
     });
 
+    it('addMenuLink should allow a menu-only link', () => {
+      const app = new StrapiApp();
+      const link = {
+        to: 'content-manager',
+        intlLabel: { id: 'content-manager.plugin.name', defaultMessage: 'Content Manager' },
+        permissions: [],
+        icon: jest.fn(),
+      };
+
+      app.addMenuLink(link);
+
+      expect(app.router.menu[0]).toEqual({
+        icon: expect.any(Function),
+        intlLabel: {
+          defaultMessage: 'Content Manager',
+          id: 'content-manager.plugin.name',
+        },
+        permissions: [],
+        to: 'content-manager',
+      });
+    });
+
     it('should warn if a user supplies an absolute link', () => {
       const originalWarn = console.warn;
       const consoleSpy = jest.fn();
@@ -513,7 +535,7 @@ describe('ADMIN | new StrapiApp', () => {
 
       expect(consoleSpy.mock.calls).toHaveLength(1);
       expect(consoleSpy.mock.calls[0][0]).toBe(
-        '[bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: `Component: () => import(path)` ensuring you return a default export instead.'
+        '[bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". Component loaders should return a dynamic import with a default export shape, e.g. `Component: () => import(path).then((mod) => ({ default: mod.Component }))`. Async wrapper functions will stop being supported in a future version.'
       );
 
       console.warn = originalWarn;
