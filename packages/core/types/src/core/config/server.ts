@@ -73,6 +73,37 @@ export interface ServerPerformance {
   requestSummaryEnabled?: boolean;
 }
 
+export interface ServerObservabilityTracingOtlp {
+  /** When true and `url` is set, exports spans to an OTLP/HTTP traces endpoint (e.g. collector). */
+  enabled?: boolean;
+  /** OTLP traces endpoint URL, typically `http://localhost:4318/v1/traces`. */
+  url?: string;
+  /** Optional exporter headers (e.g. `{ Authorization: 'Bearer …' }`). */
+  headers?: Record<string, string>;
+}
+
+export interface ServerObservabilityTracing {
+  /**
+   * Enables OpenTelemetry tracing in core: HTTP server spans and Knex query child spans.
+   * Distinct from Strapi product telemetry and from `database.performance` query logging.
+   */
+  enabled?: boolean;
+  /** Resource attribute `service.name`; defaults to `strapi`. */
+  serviceName?: string;
+  /**
+   * Root sampling ratio in `[0, 1]`. `1` (default) keeps all traces; lower values randomly drop
+   * new root spans (child spans still follow active context when a trace is sampled in).
+   */
+  sampleRate?: number;
+  /** Log completed spans to the console (development / debugging only). */
+  consoleExporter?: boolean;
+  otlp?: ServerObservabilityTracingOtlp;
+}
+
+export interface ServerObservability {
+  tracing?: ServerObservabilityTracing;
+}
+
 export interface Server {
   // required
   host: string;
@@ -94,4 +125,5 @@ export interface Server {
   webhooks?: Webhooks;
   http?: Http;
   performance?: ServerPerformance;
+  observability?: ServerObservability;
 }

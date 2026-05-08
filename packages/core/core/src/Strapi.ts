@@ -303,7 +303,8 @@ class Strapi extends Container implements Core.Strapi {
                 performance: {
                   getRequestId: () => {
                     const ctx = requestContext.get();
-                    return (ctx?.state as { strapiPerfRequestId?: string }).strapiPerfRequestId;
+                    return (ctx?.state as { strapiPerfRequestId?: string } | undefined)
+                      ?.strapiPerfRequestId;
                   },
                   ...(requestSummaryEnabled
                     ? {

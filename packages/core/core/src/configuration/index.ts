@@ -39,6 +39,16 @@ const defaultConfig = {
         enabled: true,
       },
     },
+    observability: {
+      tracing: {
+        enabled: false,
+        serviceName: 'strapi',
+        consoleExporter: false,
+        otlp: {
+          enabled: false,
+        },
+      },
+    },
   } satisfies Partial<Core.Config.Server>,
   admin: {} satisfies Partial<Core.Config.Admin>,
   api: {

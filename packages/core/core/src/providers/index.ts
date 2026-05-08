@@ -3,6 +3,7 @@ import ai from './ai';
 import coreStore from './coreStore';
 import cron from './cron';
 import performanceMonitor from './performance-monitor';
+import observabilityTracing from './observability-tracing';
 import registries from './registries';
 import sessionManager from './session-manager';
 import telemetry from './telemetry';
@@ -13,6 +14,7 @@ import type { Provider } from './provider';
 export const providers: Provider[] = [
   registries,
   performanceMonitor,
+  observabilityTracing,
   admin,
   ai,
   coreStore,
