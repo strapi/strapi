@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const { execSync } = require('child_process');
+const path = require('path');
 const execa = require('execa');
 
 function composeEnv(ctx, extra = {}) {
@@ -14,8 +14,13 @@ function composeEnv(ctx, extra = {}) {
 }
 
 async function dockerComposeDownVolumes(ctx) {
+  // Use the auto-detected compose runtime via execFileSync (no shell). This avoids
+  // CodeQL's "Shell command built from environment values" warning that fires when
+  // an absolute path is template-interpolated into an execSync shell string, and
+  // matches what examples/complex/scripts/db-*.js use.
+  const { runCompose } = require(path.join(ctx.COMPLEX_DIR, 'scripts', 'compose'));
   try {
-    execSync(`docker-compose -f ${ctx.DOCKER_COMPOSE_FILE} down -v`, {
+    runCompose(['-f', ctx.DOCKER_COMPOSE_FILE, 'down', '-v'], {
       cwd: ctx.COMPLEX_DIR,
       stdio: 'pipe',
       env: composeEnv(ctx),
@@ -143,19 +148,21 @@ DATABASE_PASSWORD=${dbEnv.DATABASE_PASSWORD}
 }
 
 async function prepareDockerDatabase(ctx, client) {
-  const dbUtils = require(require('path').join(ctx.COMPLEX_DIR, 'scripts', 'db-utils.js'));
-  const { startContainer, getContainerId, waitForPostgresReady, waitForMysqlReady } = dbUtils;
+  const dbUtils = require(path.join(ctx.COMPLEX_DIR, 'scripts', 'db-utils.js'));
+  const {
+    startContainer,
+    getContainerId,
+    waitForPostgresReady,
+    waitForMysqlReady,
+    waitForMariadbReady,
+  } = dbUtils;
 
   if (client === 'postgres') {
-    await execa(
-      'node',
-      [require('path').join(ctx.COMPLEX_DIR, 'scripts', 'db-postgres.js'), 'wipe'],
-      {
-        cwd: ctx.COMPLEX_DIR,
-        stdio: 'inherit',
-        env: composeEnv(ctx),
-      }
-    );
+    await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'db-postgres.js'), 'wipe'], {
+      cwd: ctx.COMPLEX_DIR,
+      stdio: 'inherit',
+      env: composeEnv(ctx),
+    });
     const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'postgres');
     if (cid) {
       waitForPostgresReady(cid);
@@ -169,7 +176,7 @@ async function prepareDockerDatabase(ctx, client) {
     if (cid) {
       waitForMysqlReady(cid);
     }
-    await execa('node', [require('path').join(ctx.COMPLEX_DIR, 'scripts', 'db-mysql.js'), 'wipe'], {
+    await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'db-mysql.js'), 'wipe'], {
       cwd: ctx.COMPLEX_DIR,
       stdio: 'inherit',
       env: composeEnv(ctx),
@@ -180,17 +187,13 @@ async function prepareDockerDatabase(ctx, client) {
     startContainer(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mariadb');
     const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mariadb');
     if (cid) {
-      waitForMysqlReady(cid);
+      waitForMariadbReady(cid);
     }
-    await execa(
-      'node',
-      [require('path').join(ctx.COMPLEX_DIR, 'scripts', 'db-mariadb.js'), 'wipe'],
-      {
-        cwd: ctx.COMPLEX_DIR,
-        stdio: 'inherit',
-        env: composeEnv(ctx),
-      }
-    );
+    await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'db-mariadb.js'), 'wipe'], {
+      cwd: ctx.COMPLEX_DIR,
+      stdio: 'inherit',
+      env: composeEnv(ctx),
+    });
   }
 }
 
