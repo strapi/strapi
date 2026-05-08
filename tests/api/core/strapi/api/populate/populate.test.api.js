@@ -250,4 +250,102 @@ describe('Populate', () => {
       expect.arrayContaining([expect.objectContaining({ shirtId: 'A', name: 'Shirt A' })])
     );
   });
+
+  describe('Polymorphic populate — valid queries return 200; invalid nested populate returns 400', () => {
+    test('morphToMany accepts populate * at polymorphic root', async () => {
+      const qs = { populate: { morph_to_many: { populate: '*' } } };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(3);
+    });
+
+    test('morphToMany accepts count only', async () => {
+      const qs = { populate: { morph_to_many: { count: true } } };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(3);
+    });
+
+    test('morphToMany accepts on fragment with nested populate *', async () => {
+      const qs = {
+        populate: {
+          morph_to_many: {
+            on: {
+              'api::shirt.shirt': { populate: '*' },
+            },
+          },
+        },
+      };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(3);
+    });
+
+    test('morphToOne accepts on fragment', async () => {
+      const qs = {
+        populate: {
+          morph_to_one: {
+            on: {
+              'api::shirt.shirt': true,
+            },
+          },
+        },
+      };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(3);
+    });
+
+    test('non-polymorphic relation still accepts nested populate object (regression)', async () => {
+      const qs = {
+        populate: {
+          variantOf: {
+            populate: {
+              variants: true,
+            },
+          },
+        },
+      };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(3);
+      const shirtB = body.data.find((item) => item.name === 'Shirt B');
+      expect(shirtB.variantOf).toStrictEqual(
+        expect.objectContaining({ shirtId: 'A', name: 'Shirt A' })
+      );
+    });
+
+    test('morphToMany rejects invalid nested populate string with 400', async () => {
+      const qs = { populate: { morph_to_many: { populate: 'deep' } } };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+      expect(status).toBe(400);
+      expect(body.error?.name).toBe('ValidationError');
+    });
+
+    test('morphToMany rejects invalid nested object populate with 400', async () => {
+      const qs = {
+        populate: {
+          morph_to_many: { populate: { morph_one: true } },
+        },
+      };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+      expect(status).toBe(400);
+      expect(body.error?.name).toBe('ValidationError');
+    });
+
+    test('morphToOne rejects invalid nested populate string with 400', async () => {
+      const qs = { populate: { morph_to_one: { populate: 'deep' } } };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+      expect(status).toBe(400);
+      expect(body.error?.name).toBe('ValidationError');
+    });
+  });
 });

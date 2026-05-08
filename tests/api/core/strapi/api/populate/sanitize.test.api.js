@@ -216,6 +216,106 @@ describe('Sanitize populated entries', () => {
     });
   });
 
+  describe('Polymorphic populate validation (dynamic zone)', () => {
+    test('accepts dz with nested populate *', async () => {
+      const { status } = await contentAPIRequest.get(`/${schemas.contentTypes.b.pluralName}`, {
+        qs: {
+          populate: {
+            dz: { populate: '*' },
+          },
+        },
+      });
+
+      expect(status).toBe(200);
+    });
+
+    test('accepts dz with on fragment', async () => {
+      const { status } = await contentAPIRequest.get(`/${schemas.contentTypes.b.pluralName}`, {
+        qs: {
+          populate: {
+            dz: {
+              on: {
+                'default.cp-a': true,
+              },
+            },
+          },
+        },
+      });
+
+      expect(status).toBe(200);
+    });
+
+    test('accepts dz on fragment with nested populate *', async () => {
+      const { status } = await contentAPIRequest.get(`/${schemas.contentTypes.b.pluralName}`, {
+        qs: {
+          populate: {
+            dz: {
+              on: {
+                'default.cp-a': { populate: '*' },
+              },
+            },
+          },
+        },
+      });
+
+      expect(status).toBe(200);
+    });
+
+    test('rejects dz with invalid nested populate string (400)', async () => {
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.b.pluralName}`,
+        {
+          qs: {
+            populate: {
+              dz: { populate: 'deep' },
+            },
+          },
+        }
+      );
+
+      expect(status).toBe(400);
+      expect(body.error?.name).toBe('ValidationError');
+    });
+
+    test('rejects dz with invalid nested object populate (400)', async () => {
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.b.pluralName}`,
+        {
+          qs: {
+            populate: {
+              dz: { populate: { notAllowed: true } },
+            },
+          },
+        }
+      );
+
+      expect(status).toBe(400);
+      expect(body.error?.name).toBe('ValidationError');
+    });
+  });
+
+  describe('Non-polymorphic nested populate regression', () => {
+    test('oneToOne relation still accepts nested populate object', async () => {
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.b.pluralName}`,
+        {
+          qs: {
+            populate: {
+              relA: {
+                populate: {
+                  cover: true,
+                },
+              },
+            },
+          },
+        }
+      );
+
+      expect(status).toBe(200);
+      expect(body.data[0].relA).toBeDefined();
+    });
+  });
+
   describe('Output Sanitization', () => {
     describe('Content type output sanitization', () => {
       test('restricted (private) fields are excluded from output', async () => {

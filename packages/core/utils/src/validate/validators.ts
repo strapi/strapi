@@ -282,7 +282,7 @@ export const validatePopulate = asyncCurry(
               const populateValue = (value as Record<string, unknown>).populate;
 
               const isValidPopulate =
-                populateValue === '*' || (isObject(populateValue) && !Array.isArray(populateValue));
+                populateValue === '*' || populateValue === undefined || populateValue === null;
 
               if (!isValidPopulate) {
                 throwInvalidKey({ key: 'populate', path: path.raw });
@@ -401,11 +401,7 @@ export const validatePopulate = asyncCurry(
                 ['morphToOne', 'morphToMany'].includes(attribute.relation));
 
             if (isPolymorphicAttribute) {
-              const isValidPopulate =
-                value === '*' ||
-                value === undefined ||
-                value === null ||
-                (isObject(value) && !Array.isArray(value));
+              const isValidPopulate = value === '*' || value === undefined || value === null;
 
               if (!isValidPopulate) {
                 throwInvalidKey({ key, path: path.raw });
