@@ -92,9 +92,9 @@
     "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch",
-    "test:migrations": "node tests/migration/scripts/run-migration-scenario.js",
-    "test:migrations:plan": "node tests/migration/scripts/run-migration-scenario.js --print-plan",
-    "test:migrations:v5": "node tests/migration/scripts/run-migration-scenario.js"
+    "test:migrations": "node tests/migration/scripts/run.js",
+    "test:migrations:plan": "node tests/migration/scripts/run.js --print-plan",
+    "test:migrations:v5": "node tests/migration/scripts/run.js"
   },
   "resolutions": {
     "@types/koa": "2.13.4",

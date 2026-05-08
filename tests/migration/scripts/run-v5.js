@@ -4,4 +4,4 @@
 /**
  * @deprecated Use `yarn test:migrations --initial <semver>` or `--scenario` (same entrypoint).
  */
-require('./run-migration-scenario.js');
+require('./run.js');

@@ -353,6 +353,11 @@ jobs:
           node-version: 20
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      # The host runs the orchestrator + workspace validation step, so the
+      # workspace `@strapi/strapi` must be built. The v4 baseline + pinned-v5
+      # stages run inside a Node 20 Docker runner image (built by the
+      # orchestrator on first invocation), so the host's Node version no
+      # longer constrains which Strapi versions we can boot.
       - name: Monorepo build
         uses: ./.github/actions/run-build
       # Latest Strapi v4 line: npm dist-tag `legacy` on @strapi/strapi (see tests/migration/README.md).
@@ -364,7 +369,7 @@ jobs:
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
       # `timeout` avoids a hung install/boot blocking the runner until the job's 30m cap (ubuntu images ship coreutils `timeout`).
       - name: Run migration integration test
-        run: timeout 25m yarn test:migrations --initial "${{ steps.strapi_v4.outputs.version }}" --database ${{ matrix.database }} --skip-build
+        run: timeout 25m yarn test:migrations --initial "${{ steps.strapi_v4.outputs.version }}" --database ${{ matrix.database }}
 
   cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
