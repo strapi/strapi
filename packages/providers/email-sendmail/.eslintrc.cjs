@@ -11,7 +11,9 @@ const config = {
     'node_modules/',
     '.eslintrc.cjs',
     'dist/',
+    'jest.config.js',
     'rollup.config.mjs',
+    'coverage/',
   ],
 };
 
