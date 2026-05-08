@@ -128,7 +128,7 @@ const imageNodeValidator = yup.object().shape({
     caption: yup.string().nullable(),
     width: yup.number().required(),
     height: yup.number().required(),
-    formats: yup.object().required(),
+    formats: yup.object().nullable(),
     hash: yup.string().required(),
     ext: yup.string().required(),
     mime: yup.string().required(),

@@ -123,6 +123,11 @@ export const validateSort = asyncCurry(
             return;
           }
 
+          // status is a virtual sort key for D&P-enabled content types
+          if (key === 'status' && ctx.schema?.options?.draftAndPublish) {
+            return;
+          }
+
           if (!attribute) {
             throwInvalidKey({ key, path: path.attribute });
           }
