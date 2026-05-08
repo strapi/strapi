@@ -1,0 +1,39 @@
+# Pinned third-party actions — bump SHAs here when upgrading (keep comments in sync with upstream tags).
+# - actions/checkout → tag v6
+# - actions/setup-node → v6.3.0 (verify against moving tag v6 when bumping)
+name: 'Checkout and optionally set up Node'
+description: 'Pinned actions/checkout and actions/setup-node; update versions only in this file.'
+inputs:
+  fetch-depth:
+    description: >
+      When non-empty, passed to actions/checkout (e.g. 0 for full history, 2 for path filters).
+      When empty, checkout uses its default fetch depth.
+    required: false
+    default: ''
+  node-version:
+    description: 'Node version for actions/setup-node (required when setup-node is true).'
+    required: false
+    default: ''
+  setup-node:
+    description: 'Whether to run actions/setup-node after checkout.'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout (custom fetch-depth)
+      if: ${{ inputs.fetch-depth != '' }}
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+
+    - name: Checkout (default fetch-depth)
+      if: ${{ inputs.fetch-depth == '' }}
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+    - name: Set up Node.js
+      if: ${{ inputs.setup-node == 'true' }}
+      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: ${{ inputs.node-version }}
