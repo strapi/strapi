@@ -63,4 +63,12 @@ export interface Database<TClient extends ClientKind = ClientKind> {
     runMigrations?: boolean;
     useTypescriptMigrations?: boolean;
   };
+  performance?: {
+    enabled?: boolean;
+    slowQueryMs?: number;
+    sampleRate?: number;
+    captureSqlText?: boolean;
+    captureBindings?: boolean;
+    output?: 'none' | 'log' | 'artifact' | 'both';
+  };
 }

@@ -33,6 +33,7 @@ import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 import { createContentSourceMapsService } from './services/content-source-maps';
+import { bridgeDatabasePerformanceEvents } from './services/performance-events';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
@@ -287,7 +288,7 @@ class Strapi extends Container implements Core.Strapi {
         const tsMigrationsEnabled =
           this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
-        return new Database(
+        const db = new Database(
           _.merge(this.config.get('database'), {
             logger,
             settings: {
@@ -297,6 +298,16 @@ class Strapi extends Container implements Core.Strapi {
             },
           })
         );
+
+        const perfOutput = this.config.get('database.performance.output', 'none');
+        bridgeDatabasePerformanceEvents({
+          db,
+          eventHub: this.eventHub,
+          logger,
+          output: perfOutput,
+        });
+
+        return db;
       })
       .add('reload', () => createReloader(this))
       .add('content-source-maps', () => createContentSourceMapsService(this));

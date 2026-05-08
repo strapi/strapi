@@ -1,6 +1,7 @@
 import type { Knex } from 'knex';
 
 import path from 'node:path';
+import { performance } from 'node:perf_hooks';
 
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
@@ -15,6 +16,14 @@ import { validateDatabase } from './validations';
 import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
+import {
+  DatabasePerformanceConfig,
+  DatabasePerformanceSubscriber,
+  DatabaseQueryPerfEvent,
+  DEFAULT_DATABASE_PERFORMANCE_CONFIG,
+  normalizeSqlFingerprint,
+  toQueryType,
+} from './performance';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -36,6 +45,7 @@ export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
   logger?: Logger;
+  performance?: DatabasePerformanceConfig;
 }
 
 const afterCreate =
@@ -71,6 +81,10 @@ class Database {
 
   logger: Logger;
 
+  performance: Required<DatabasePerformanceConfig>;
+
+  private performanceSubscribers = new Set<DatabasePerformanceSubscriber>();
+
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -82,6 +96,13 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+    const perfFromUser = { ...(config.performance ?? {}) };
+    // Sink-only keys (read by core) must not live on `@strapi/database` runtime perf config.
+    delete (perfFromUser as DatabasePerformanceConfig & { output?: unknown }).output;
+    this.performance = {
+      ...DEFAULT_DATABASE_PERFORMANCE_CONFIG,
+      ...perfFromUser,
+    };
 
     this.dialect = getDialect(this);
 
@@ -113,6 +134,7 @@ class Database {
     this.connection = createConnection(knexConfig, {
       pool: { afterCreate: afterCreate(this) },
     });
+    this.registerPerformanceListeners();
 
     this.schema = createSchemaProvider(this);
 
@@ -122,6 +144,146 @@ class Database {
     this.entityManager = createEntityManager(this);
 
     this.repair = createRepairManager(this);
+  }
+
+  private registerPerformanceListeners() {
+    if (!this.performance.enabled) {
+      return;
+    }
+
+    const inflightQueries = new Map<
+      string,
+      {
+        startedAt: number;
+        sql?: string;
+        bindings?: unknown[];
+        method?: string;
+        requestId?: string;
+      }
+    >();
+
+    this.connection.on('query', (queryData: any) => {
+      const queryId = queryData?.__knexQueryUid;
+      if (!queryId) {
+        return;
+      }
+
+      inflightQueries.set(queryId, {
+        startedAt: performance.now(),
+        sql: queryData?.sql,
+        bindings: Array.isArray(queryData?.bindings) ? queryData.bindings : undefined,
+        method: queryData?.method,
+        requestId: queryData?.queryContext?.requestId,
+      });
+    });
+
+    this.connection.on('query-response', (_response: unknown, queryData: any) => {
+      const event = this.buildPerformanceEvent({ inflightQueries, queryData, success: true });
+      if (event) {
+        this.emitPerformance(event);
+      }
+    });
+
+    this.connection.on('query-error', (error: any, queryData: any) => {
+      const event = this.buildPerformanceEvent({
+        inflightQueries,
+        queryData,
+        success: false,
+        errorCode: error?.code,
+      });
+
+      if (event) {
+        this.emitPerformance(event);
+      }
+    });
+  }
+
+  private buildPerformanceEvent({
+    inflightQueries,
+    queryData,
+    success,
+    errorCode,
+  }: {
+    inflightQueries: Map<
+      string,
+      {
+        startedAt: number;
+        sql?: string;
+        bindings?: unknown[];
+        method?: string;
+        requestId?: string;
+      }
+    >;
+    queryData: any;
+    success: boolean;
+    errorCode?: string;
+  }): DatabaseQueryPerfEvent | null {
+    const queryId = queryData?.__knexQueryUid;
+    if (!queryId) {
+      return null;
+    }
+
+    const state = inflightQueries.get(queryId);
+    if (!state) {
+      return null;
+    }
+
+    inflightQueries.delete(queryId);
+    const durationMs = Math.max(0, performance.now() - state.startedAt);
+    const isSlowOrFailed = !success || durationMs >= this.performance.slowQueryMs;
+
+    if (!isSlowOrFailed) {
+      return null;
+    }
+
+    if (Math.random() > this.performance.sampleRate) {
+      return null;
+    }
+
+    const sql = state.sql;
+    const method = state.method;
+
+    const event: DatabaseQueryPerfEvent = {
+      type: success ? 'query.slow' : 'query.error',
+      timestamp: new Date().toISOString(),
+      durationMs,
+      dbClient: this.dialect.client,
+      queryFingerprint: normalizeSqlFingerprint(sql),
+      queryType: toQueryType(method),
+      requestId: state.requestId,
+      success,
+      errorCode,
+    };
+
+    if (this.performance.captureSqlText && sql) {
+      event.sql = sql;
+    }
+
+    if (this.performance.captureBindings && state.bindings) {
+      event.bindings = state.bindings;
+    }
+
+    return event;
+  }
+
+  subscribeToPerformanceEvents(subscriber: DatabasePerformanceSubscriber) {
+    this.performanceSubscribers.add(subscriber);
+
+    return () => {
+      this.performanceSubscribers.delete(subscriber);
+    };
+  }
+
+  private emitPerformance(event: DatabaseQueryPerfEvent) {
+    for (const subscriber of this.performanceSubscribers) {
+      try {
+        Promise.resolve(subscriber(event)).catch(() => {
+          // Ignore subscriber errors to keep database query path fail-open.
+        });
+      } catch {
+        // Ignore subscriber errors to keep database query path fail-open.
+      }
+    }
   }
 
   async init({ models }: { models: Model[] }) {
@@ -265,3 +427,4 @@ class Database {
 
 export { Database, errors };
 export type { Model, JoinTable, Identifiers, Migration };
+export type { DatabaseQueryPerfEvent, DatabasePerformanceConfig, DatabasePerformanceSubscriber };
