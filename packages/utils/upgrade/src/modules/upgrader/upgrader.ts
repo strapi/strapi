@@ -252,20 +252,28 @@ export class Upgrader implements UpgraderInterface {
     const json = createJSONTransformAPI(packageJSON);
 
     const dependencies = json.get<Record<string, string>>('dependencies', {});
+    const devDependencies = json.get<Record<string, string>>('devDependencies', {});
     const strapiDependencies = this.getScopedStrapiDependencies(dependencies);
+    const strapiDevDependencies = this.getScopedStrapiDependencies(devDependencies);
 
-    this.logger?.debug?.(
-      `Found ${f.highlight(strapiDependencies.length)} dependency(ies) to update`
-    );
+    const totalToUpdate = strapiDependencies.length + strapiDevDependencies.length;
+
+    this.logger?.debug?.(`Found ${f.highlight(totalToUpdate)} dependency(ies) to update`);
     strapiDependencies.forEach((dependency) =>
       this.logger?.debug?.(`- ${dependency[0]} (${dependency[1]} -> ${this.target})`)
     );
+    strapiDevDependencies.forEach((dependency) =>
+      this.logger?.debug?.(
+        `- ${dependency[0]} (devDependencies) (${dependency[1]} -> ${this.target})`
+      )
+    );
 
-    if (strapiDependencies.length === 0) {
+    if (totalToUpdate === 0) {
       return;
     }
 
     strapiDependencies.forEach(([name]) => json.set(`dependencies.${name}`, this.target.raw));
+    strapiDevDependencies.forEach(([name]) => json.set(`devDependencies.${name}`, this.target.raw));
 
     const updatedPackageJSON = json.root();
 
