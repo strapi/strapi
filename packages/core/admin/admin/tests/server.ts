@@ -101,6 +101,7 @@ export const server: SetupServer = setupServer(
     http.get('/admin/users/me', () => {
       return HttpResponse.json({
         data: {
+          id: 1,
           email: 'michka@michka.fr',
           firstname: 'michoko',
           lastname: 'ronronscelestes',
@@ -153,31 +154,41 @@ export const server: SetupServer = setupServer(
     http.get('/admin/permissions', ({ request }) => {
       const role = new URL(request.url).searchParams.get('role');
 
-      if (role !== '1') {
-        return new HttpResponse(null, { status: 404 });
-      }
-
-      return HttpResponse.json({
-        data: {
-          conditions: [
+      const permissionsData = {
+        conditions: [
+          {
+            id: 'admin::is-creator',
+            displayName: 'Is creator',
+            category: 'default',
+          },
+        ],
+        sections: {
+          collectionTypes: {
+            actions: [],
+            subjects: [],
+          },
+          singleTypes: {
+            actions: [],
+            subjects: [],
+          },
+          plugins: [],
+          settings: [
             {
-              id: 'admin::is-creator',
-              displayName: 'Is creator',
-              category: 'default',
+              displayName: 'Access the Email Settings page',
+              category: 'email',
+              subCategory: 'general',
+              action: 'plugin::email.settings.read',
             },
           ],
-          sections: {
-            settings: [
-              {
-                displayName: 'Access the Email Settings page',
-                category: 'email',
-                subCategory: 'general',
-                action: 'plugin::email.settings.read',
-              },
-            ],
-          },
         },
-      });
+      };
+
+      // role === '' used by AdminPermissions (token permission layout, no role scoping)
+      if (role === '1' || role === '') {
+        return HttpResponse.json({ data: permissionsData });
+      }
+
+      return new HttpResponse(null, { status: 404 });
     }),
     /**
      *
@@ -485,6 +496,7 @@ export const server: SetupServer = setupServer(
             id: '1',
             name: 'My super token',
             description: 'This describe my super token',
+            kind: 'content-api',
             type: 'read-only',
             createdAt: '2021-11-15T00:00:00.000Z',
             permissions: [],
@@ -492,17 +504,83 @@ export const server: SetupServer = setupServer(
         ],
       });
     }),
-    http.get('/admin/api-tokens/:id', () => {
+    http.get('/admin/api-tokens/:id', ({ params }) => {
+      const { id } = params;
+
+      if (id === '2') {
+        return HttpResponse.json({
+          data: {
+            id: '2',
+            name: 'My admin token',
+            description: 'This is an admin token',
+            kind: 'admin',
+            adminPermissions: [],
+            adminUserOwner: {
+              id: 1,
+              firstname: 'John',
+              lastname: 'Doe',
+              email: 'john@example.com',
+            },
+            createdAt: '2021-11-15T00:00:00.000Z',
+          },
+        });
+      }
+
       return HttpResponse.json({
         data: {
           id: '1',
           name: 'My super token',
           description: 'This describe my super token',
+          kind: 'content-api',
           type: 'read-only',
           createdAt: '2021-11-15T00:00:00.000Z',
           permissions: [],
         },
       });
+    }),
+    /**
+     * ADMIN TOKENS
+     */
+    http.get('/admin/admin-tokens', () => {
+      return HttpResponse.json({
+        data: [
+          {
+            id: '1',
+            name: 'My admin token',
+            description: 'This is an admin token',
+            kind: 'admin',
+            adminPermissions: [],
+            adminUserOwner: {
+              id: 1,
+              firstname: 'John',
+              lastname: 'Doe',
+              email: 'john@example.com',
+            },
+            createdAt: '2021-11-15T00:00:00.000Z',
+          },
+        ],
+      });
+    }),
+    http.get('/admin/admin-tokens/:id', () => {
+      return HttpResponse.json({
+        data: {
+          id: '1',
+          name: 'My admin token',
+          description: 'This is an admin token',
+          kind: 'admin',
+          adminPermissions: [],
+          adminUserOwner: {
+            id: 1,
+            firstname: 'John',
+            lastname: 'Doe',
+            email: 'john@example.com',
+          },
+          createdAt: '2021-11-15T00:00:00.000Z',
+        },
+      });
+    }),
+    http.get('/admin/admin-tokens/:id/owner-permissions', () => {
+      return HttpResponse.json({ data: [] });
     }),
     /**
      * Audit Logs
