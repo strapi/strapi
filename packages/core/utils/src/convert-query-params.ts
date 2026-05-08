@@ -232,7 +232,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const startAsANumber = toNumber(startQuery);
 
     if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
-      throw new ValidationError(`convertStartQueryParams expected a positive integer got ${startAsANumber}`);
+      throw new ValidationError(
+        `convertStartQueryParams expected a positive integer got ${startAsANumber}`
+      );
     }
 
     return startAsANumber;
@@ -245,7 +247,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const limitAsANumber = toNumber(limitQuery);
 
     if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
-      throw new ValidationError(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
+      throw new ValidationError(
+        `convertLimitQueryParams expected a positive integer got ${limitAsANumber}`
+      );
     }
 
     if (limitAsANumber === -1) {
@@ -442,7 +446,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // Edge case when trying to use the fragment ('on') on a non-morph like attribute
       if (!isMorphLikeRelationalAttribute && hasPopulateFragmentDefined(subPopulate)) {
-        throw new ValidationError(`Using fragments is not permitted to populate "${key}" in "${schema.uid}"`);
+        throw new ValidationError(
+          `Using fragments is not permitted to populate "${key}" in "${schema.uid}"`
+        );
       }
 
       // NOTE: Retrieve the target schema UID.
@@ -762,4 +768,3 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 };
 
 export { createTransformer };
-
