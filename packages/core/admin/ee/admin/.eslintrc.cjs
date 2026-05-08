@@ -3,7 +3,7 @@
 /** @type {import('eslint').Linter.Config} */
 const config = {
   root: true,
-  env: { es6: true },
+  ignorePatterns: ['.eslintrc.cjs'],
   overrides: [
     {
       files: ['**/*.js', '**/*.jsx'],

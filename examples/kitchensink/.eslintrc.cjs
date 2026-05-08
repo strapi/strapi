@@ -6,6 +6,7 @@ const config = {
   extends: 'eslint:recommended',
   ignorePatterns: [
     '.cache',
+    '.eslintrc.cjs',
     'build',
     '**/node_modules/**',
   ],

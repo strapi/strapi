@@ -5,8 +5,9 @@ const config = {
   root: true,
   extends: ['eslint-config-custom/back/typescript'],
   ignorePatterns: [
+    '.eslintrc.cjs',
     'bin',
-    'coverage',
+    'coverage/',
     'dist',
     'rollup.config.mjs',
   ],

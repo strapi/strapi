@@ -4,6 +4,7 @@
 const config = {
   root: true,
   extends: ['eslint-config-custom/front/typescript'],
+  ignorePatterns: ['.eslintrc.cjs'],
   overrides: [
     {
       files: ['**/*'],

@@ -5,8 +5,8 @@ const config = {
   root: true,
   ignorePatterns: [
     'dist',
+    '.eslintrc.cjs',
   ],
-  env: { es6: true },
   overrides: [
     {
       files: ['**/*.js', '**/*.jsx'],

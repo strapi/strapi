@@ -6,7 +6,7 @@ const config = {
   ignorePatterns: [
     'dist',
     'rollup.config.mjs',
-    '.eslintrc.cjs'
+    '.eslintrc.cjs',
   ],
   overrides: [
     {
