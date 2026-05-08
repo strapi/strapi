@@ -2,6 +2,10 @@
 
 This project contains complex Strapi schemas for testing migrations between Strapi v4 and v5, plus a benchmark harness for measuring the performance of those migrations.
 
+## Built-in performance monitoring (demo)
+
+`config/database.ts` enables SQL slow/error instrumentation (`performance.db.*` on `eventHub`, structured warns, NDJSON append to `.tmp/performance-events.ndjson`). `config/server.ts` enables per-request summaries (`performance.request.summary`). `src/index.ts` mirrors summaries to **`strapi.log.debug`** only when the request did DB work (`dbQueryCount` or `slowOrErrorQueryEvents` above zero). `config/server.ts` sets **`STRAPI_APP_LOG_LEVEL`** (default **`debug`**) so those lines appear; set to `info` when you want quieter runs. Other env vars: `DATABASE_PERF_SLOW_MS`, `DATABASE_PERF_CAPTURE_SQL`, `SERVER_PERF_REQUEST_SUMMARY`.
+
 ## Content Types
 
 The project includes 8 content types covering the feature space v4→v5 migrations touch.
