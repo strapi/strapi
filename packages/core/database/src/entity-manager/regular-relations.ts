@@ -24,10 +24,10 @@ declare module 'knex' {
 }
 
 //  TODO: This is a short term solution, to not steal relations from the same document.
-const getDocumentSiblingIdsQuery = (tableName: string, id: ID) => {
+const getDocumentSiblingIdsQuery = (tableName: string, id: ID, db: Database) => {
   // Find if the model is a content type or something else (e.g. component)
   // to only get the documentId if it's a content type
-  const models: Model[] = Array.from(strapi.db.metadata.values());
+  const models: Model[] = Array.from(db.metadata.values());
 
   const isContentType = models.find((model) => {
     return model.tableName === tableName && model.attributes.documentId;
@@ -84,7 +84,7 @@ const deletePreviousOneToAnyRelations = async ({
     .delete()
     .from(joinTable.name)
     // Exclude the ids of the current document
-    .whereNotIn(joinColumn.name, getDocumentSiblingIdsQuery(joinColumn.referencedTable!, id))
+    .whereNotIn(joinColumn.name, getDocumentSiblingIdsQuery(joinColumn.referencedTable!, id, db))
     // Include all the ids that are being connected
     .whereIn(inverseJoinColumn.name, relIdsToadd)
     .where(joinTable.on || {})
@@ -125,7 +125,7 @@ const deletePreviousAnyToOneRelations = async ({
       .where(joinColumn.name, id)
       .whereNotIn(
         inverseJoinColumn.name,
-        getDocumentSiblingIdsQuery(inverseJoinColumn.referencedTable!, relIdToadd)
+        getDocumentSiblingIdsQuery(inverseJoinColumn.referencedTable!, relIdToadd, db)
       )
       .where(joinTable.on || {})
       .transacting(trx);
@@ -153,7 +153,7 @@ const deletePreviousAnyToOneRelations = async ({
       // Exclude the ids of the current document
       .whereNotIn(
         inverseJoinColumn.name,
-        getDocumentSiblingIdsQuery(inverseJoinColumn.referencedTable!, relIdToadd)
+        getDocumentSiblingIdsQuery(inverseJoinColumn.referencedTable!, relIdToadd, db)
       )
       .where(joinTable.on || {})
       .transacting(trx);
@@ -284,7 +284,7 @@ const cleanOrderColumns = async ({
         .where(joinColumn.name, id)
         .toSQL();
 
-    switch (strapi.db.dialect.client) {
+    switch (db.dialect.client) {
       case 'mysql': {
         // Here it's MariaDB and MySQL 8
         const select = selectRowsToOrder(joinTable.name);
@@ -342,7 +342,7 @@ const cleanOrderColumns = async ({
         .where(inverseJoinColumn.name, 'in', inverseRelIds)
         .toSQL();
 
-    switch (strapi.db.dialect.client) {
+    switch (db.dialect.client) {
       case 'mysql': {
         // Here it's MariaDB and MySQL 8
         const select = selectRowsToOrder(joinTable.name);

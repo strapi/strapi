@@ -30,7 +30,7 @@ export const createdPublishedAt: Migration = {
 
       // Ignore non-content types
       const uid = meta.uid;
-      const model = strapi.getModel(uid);
+      const model = db.strapi.getModel(uid);
       if (!model) {
         continue;
       }

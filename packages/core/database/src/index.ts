@@ -12,7 +12,7 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { Model, JoinTable } from './types';
+import type { Model, JoinTable, StrapiHost } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
 
@@ -36,6 +36,7 @@ export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
   logger?: Logger;
+  strapi?: StrapiHost;
 }
 
 const afterCreate =
@@ -71,6 +72,8 @@ class Database {
 
   logger: Logger;
 
+  strapi: StrapiHost;
+
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -82,6 +85,12 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+
+    const strapi = config.strapi ?? (globalThis as { strapi?: StrapiHost }).strapi;
+    if (!strapi) {
+      throw new Error('Database requires a Strapi host. Pass `config.strapi` to the constructor.');
+    }
+    this.strapi = strapi;
 
     this.dialect = getDialect(this);
 
@@ -264,4 +273,4 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration };
+export type { Model, JoinTable, Identifiers, Migration, StrapiHost };

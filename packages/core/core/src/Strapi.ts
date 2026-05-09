@@ -295,6 +295,7 @@ class Strapi extends Container implements Core.Strapi {
                 dir: path.join(projectDir, 'database/migrations'),
               },
             },
+            strapi: this,
           })
         );
       })

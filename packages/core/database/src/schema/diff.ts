@@ -417,7 +417,7 @@ export default (db: Database) => {
     }
 
     // maintain audit logs table from EE -> CE
-    const parsePersistedTable = (persistedTable: string | Table) => {
+    const parsePersistedTable = (persistedTable: PersistedTable) => {
       if (typeof persistedTable === 'string') {
         return persistedTable;
       }
@@ -426,10 +426,10 @@ export default (db: Database) => {
 
     const persistedTables = helpers.hasTable(databaseSchema, 'strapi_core_store_settings')
       ? // TODO: replace with low level db query instead
-        ((await strapi.store.get({
+        (((await db.strapi.store.get({
           type: 'core',
           key: 'persisted_tables',
-        })) ?? [])
+        })) ?? []) as PersistedTable[])
       : [];
 
     const reservedTables = [...RESERVED_TABLE_NAMES, ...persistedTables.map(parsePersistedTable)];
@@ -463,7 +463,7 @@ export default (db: Database) => {
             );
           })
           // In case the table is not found, filter undefined values
-          .filter((table: PersistedTable) => !_.isNil(table));
+          .filter((table: Table | undefined): table is Table => !_.isNil(table));
 
         removedTables.push(databaseTable, ...dependencies);
       }
