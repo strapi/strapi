@@ -298,14 +298,13 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       return { data: result as TData, status: response.status, headers: response.headers };
     }
 
+    if (response.status === 204) {
+      return { data: {} as TData, status: response.status };
+    }
+
     try {
       const result = await response.json();
 
-      /**
-       * validateStatus allows us to customize when a response should throw an error
-       * In native Fetch API, a response is considered "not ok"
-       * when the status code falls in the 200 to 299 (inclusive) range
-       */
       if (!response.ok && result.error && !validateStatus?.(response.status)) {
         const fetchError = new FetchError(result.error.message, { data: result });
         fetchError.status = response.status;
