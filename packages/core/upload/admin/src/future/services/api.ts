@@ -163,7 +163,8 @@ const fetchUploadStream = async ({
     headers.Authorization = `Bearer ${token}`;
   }
 
-  return fetch(`${backendURL}/upload/unstable/stream`, {
+  // AdityaOP007 solve issue #25750
+  return fetch(`${backendURL}/admin/upload/unstable/stream`, {
     method: 'POST',
     headers,
     body: formData,
@@ -194,7 +195,8 @@ const fetchUrlUploadStream = async ({
     headers.Authorization = `Bearer ${token}`;
   }
 
-  return fetch(`${backendURL}/upload/unstable/stream-from-urls`, {
+  // AdityaOP007 solve issue #25750
+  return fetch(`${backendURL}/admin/upload/unstable/stream-from-urls`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ urls, folderId }),
@@ -376,13 +378,20 @@ const performStreamUpload = async ({
     if (!response.ok || !response.body) {
       unregisterAbortController(uploadId);
 
+      // AdityaOP007 solve issue #25750
       let errorMessage = 'Upload request failed';
       try {
-        const errorData = await response.json();
-        if (errorData.error?.message) {
-          errorMessage = errorData.error.message;
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
+        const text = await response.text();
+        try {
+          const errorData = JSON.parse(text);
+          if (errorData.error?.message) {
+            errorMessage = errorData.error.message;
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          // If not JSON, use the first part of the text if it's short, or a generic status message
+          errorMessage = text.length < 100 ? text : `Upload failed with status ${response.status}`;
         }
       } catch {
         errorMessage = `Upload failed with status ${response.status}`;
@@ -445,10 +454,24 @@ const uploadApi = adminApi
         queryFn: async ({ formData, totalFiles }, { dispatch, getState }) => {
           const token = (getState() as RootState).admin_app?.token;
 
+          // AdityaOP007 solve issue #25750
           // Extract file names and sizes from FormData
           const files = formData.getAll('files') as File[];
-          const fileInfoJson = formData.get('fileInfo') as string;
-          const fileInfo = JSON.parse(fileInfoJson) as Array<{ name: string }>;
+          const fileInfoJson = formData.get('fileInfo');
+          let fileInfo: Array<{ name: string }> = [];
+
+          if (typeof fileInfoJson === 'string') {
+            try {
+              const parsed = JSON.parse(fileInfoJson);
+              fileInfo = Array.isArray(parsed) ? parsed : [parsed];
+            } catch {
+              // Fallback if JSON is invalid
+              fileInfo = files.map((f) => ({ name: f.name }));
+            }
+          } else {
+            fileInfo = files.map((f) => ({ name: f.name }));
+          }
+
           const fileNames = fileInfo.map((info) => info.name);
           const fileSizes = files.map((file) => file.size);
 
@@ -588,13 +611,21 @@ const uploadApi = adminApi
             if (!response.ok || !response.body) {
               unregisterAbortController(uploadId);
 
+              // AdityaOP007 solve issue #25750
               let errorMessage = 'Upload request failed';
               try {
-                const errorData = await response.json();
-                if (errorData.error?.message) {
-                  errorMessage = errorData.error.message;
-                } else if (errorData.message) {
-                  errorMessage = errorData.message;
+                const text = await response.text();
+                try {
+                  const errorData = JSON.parse(text);
+                  if (errorData.error?.message) {
+                    errorMessage = errorData.error.message;
+                  } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                  }
+                } catch {
+                  // If not JSON, use the first part of the text if it's short, or a generic status message
+                  errorMessage =
+                    text.length < 100 ? text : `Upload failed with status ${response.status}`;
                 }
               } catch {
                 errorMessage = `Upload failed with status ${response.status}`;
