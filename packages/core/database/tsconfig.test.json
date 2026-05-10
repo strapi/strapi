@@ -1,0 +1,10 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "composite": true,
+    "types": ["jest", "node"],
+    "noEmit": true
+  },
+  "include": ["src/global.d.ts", "src/**/__tests__/", "src/**/*.test.ts"],
+  "references": [{ "path": "./tsconfig.build.json" }]
+}

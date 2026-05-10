@@ -1,8 +1,10 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "tsconfig/base.json",
   "compilerOptions": {
+    "types": ["jest", "node"],
+    "allowJs": true,
     "noEmit": true
   },
-  "include": ["src"],
+  "include": ["src", ".eslintrc.js"],
   "exclude": ["node_modules"]
 }
