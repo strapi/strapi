@@ -3,13 +3,21 @@ import { randomUUID } from 'node:crypto';
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
-import { buildPublicRequestSummaryPayload } from '../performance-event-payloads';
+import {
+  buildPublicRequestStagePayload,
+  buildPublicRequestStartPayload,
+  buildPublicRequestSummaryPayload,
+  type PublicRequestPerfStage,
+} from '../performance-event-payloads';
 import { resolveRouteTemplate } from '../../utils/koa-route-template';
-import { isServerRequestPerfTrackingEnabled } from '../../utils/server-performance-tracking';
+import {
+  getServerRequestPerformanceEmitSettings,
+  isServerRequestPerfTrackingEnabled,
+} from '../../utils/server-performance-tracking';
 import type { PerfQueryAgg } from '../../utils/perf-query-stats';
 
 /**
- * Request id assignment, DB perf rollup hooks context, and `performance.request.summary` emission.
+ * Request id assignment, DB perf rollup hooks context, and `performance.request.*` hub emission.
  * Runs inside `requestCtx` + optional HTTP tracing wrapper.
  */
 export async function runRequestPerformanceMiddleware(
@@ -19,6 +27,7 @@ export async function runRequestPerformanceMiddleware(
 ): Promise<void> {
   const dbPerformanceEnabled = strapi.config.get('database.performance.enabled') === true;
   const requestSummaryEnabled = isServerRequestPerfTrackingEnabled(strapi);
+  const emitSettings = getServerRequestPerformanceEmitSettings(strapi);
 
   if (dbPerformanceEnabled || requestSummaryEnabled) {
     ctx.state.strapiPerfRequestId = randomUUID();
@@ -26,6 +35,28 @@ export async function runRequestPerformanceMiddleware(
 
   const requestId = ctx.state.strapiPerfRequestId as string | undefined;
   const startedAt = Date.now();
+
+  if (requestSummaryEnabled && requestId) {
+    ctx.state.strapiPerfSampled =
+      emitSettings.requestSampleRate >= 1 ? true : Math.random() < emitSettings.requestSampleRate;
+    ctx.state.strapiPerfStagesEnabled =
+      emitSettings.emitStageEvents === true && requestSummaryEnabled;
+
+    const emitStart = ctx.state.strapiPerfSampled === true || emitSettings.emitStageEvents === true;
+
+    if (emitStart) {
+      strapi.eventHub
+        .emit(
+          'performance.request.start',
+          buildPublicRequestStartPayload({
+            requestId,
+            method: ctx.method,
+            path: ctx.path,
+          })
+        )
+        .catch(() => {});
+    }
+  }
 
   let summaryTracked = false;
   const trackSummary = () => {
@@ -38,10 +69,18 @@ export async function runRequestPerformanceMiddleware(
     const dbStats = statsMap.get(requestId);
     statsMap.delete(requestId);
 
+    const durationMs = Date.now() - startedAt;
+    const sampled = ctx.state.strapiPerfSampled === true;
+    const slowEnough = durationMs >= emitSettings.slowRequestMs;
+
+    if (!sampled && !slowEnough) {
+      return;
+    }
+
     const slowQueryCount = dbStats?.slowOrErrorEvents ?? 0;
     const summaryPayload = buildPublicRequestSummaryPayload({
       requestId,
-      durationMs: Date.now() - startedAt,
+      durationMs,
       method: ctx.method,
       route: resolveRouteTemplate(ctx),
       path: ctx.path,
@@ -54,6 +93,26 @@ export async function runRequestPerformanceMiddleware(
     strapi.eventHub.emit('performance.request.summary', summaryPayload).catch(() => {
       /* fail-open */
     });
+
+    if (emitSettings.emitStageEvents) {
+      const stages = ctx.state.strapiPerfStages as
+        | Array<{ stage: PublicRequestPerfStage; stageDurationMs: number }>
+        | undefined;
+      if (Array.isArray(stages)) {
+        for (const s of stages) {
+          strapi.eventHub
+            .emit(
+              'performance.request.stage',
+              buildPublicRequestStagePayload({
+                requestId,
+                stage: s.stage,
+                stageDurationMs: s.stageDurationMs,
+              })
+            )
+            .catch(() => {});
+        }
+      }
+    }
   };
 
   if (requestSummaryEnabled && requestId) {

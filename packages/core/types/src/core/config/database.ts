@@ -72,8 +72,13 @@ export interface Database<TClient extends ClientKind = ClientKind> {
     output?: 'none' | 'log' | 'artifact' | 'both';
     /** Append-only JSON artifact path (used when `output` is `artifact` or `both`) */
     artifactPath?: string;
+    /** Flush interval for artifact batches (ms). Preferred over {@link artifactFlushIntervalMs}. */
+    flushIntervalMs?: number;
+    /** Max buffered perf rows before each flush (rolling window). Preferred over {@link artifactMaxEvents}. */
+    maxEvents?: number;
+    /** @deprecated Use {@link flushIntervalMs}. */
     artifactFlushIntervalMs?: number;
-    /** Max DB performance events kept in memory before each flush (rolling window) */
+    /** @deprecated Use {@link maxEvents}. */
     artifactMaxEvents?: number;
   };
 }

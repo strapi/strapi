@@ -6,9 +6,192 @@ import type { Core, Modules } from '@strapi/types';
 const DB_SLOW_EVENT = 'performance.db.query.slow';
 const DB_ERROR_EVENT = 'performance.db.query.error';
 
+const REQUEST_PERF_EVENTS = [
+  'performance.request.start',
+  'performance.request.stage',
+  'performance.request.summary',
+] as const;
+
 export type PerformanceArtifactDisposed = () => Promise<void>;
 
+type BufferedPerfRow = {
+  kind: string;
+  emittedAt: string;
+  event: unknown;
+};
+
+type ArtifactFingerprintAgg = { fingerprint: string; count: number; totalMs: number };
+
+export type PerformanceArtifactSummaryV1 = {
+  /** Count of DB perf rows in this batch (slow + error events only in current producers). */
+  totalQueriesObserved: number;
+  /** Same as `totalQueriesObserved` for this batch — all captured rows are slow or error path. */
+  slowQueryCount: number;
+  p50Ms: number;
+  p95Ms: number;
+  p99Ms: number;
+  topFingerprints: ArtifactFingerprintAgg[];
+  requestCount?: number;
+  slowRequestCount?: number;
+};
+
+export type PerformanceArtifactEnvelopeV1 = {
+  schemaVersion: 1;
+  generatedAt: string;
+  strapiVersion: string;
+  nodeVersion: string;
+  gitSha?: string;
+  config: Record<string, unknown>;
+  summary: PerformanceArtifactSummaryV1;
+  events: BufferedPerfRow[];
+};
+
 const shouldCaptureArtifact = (output: unknown) => output === 'artifact' || output === 'both';
+
+function resolveFlushIntervalMs(strapi: Core.Strapi): number {
+  const preferred = strapi.config.get('database.performance.flushIntervalMs');
+  if (typeof preferred === 'number' && preferred > 0) {
+    return preferred;
+  }
+  const legacy = strapi.config.get('database.performance.artifactFlushIntervalMs', 5000);
+  return typeof legacy === 'number' && legacy > 0 ? legacy : 5000;
+}
+
+function resolveMaxEvents(strapi: Core.Strapi): number {
+  const preferred = strapi.config.get('database.performance.maxEvents');
+  if (typeof preferred === 'number' && preferred > 0) {
+    return preferred;
+  }
+  const legacy = strapi.config.get('database.performance.artifactMaxEvents', 10_000);
+  return typeof legacy === 'number' && legacy > 0 ? legacy : 10_000;
+}
+
+function clampPositiveInt(value: unknown, fallback: number): number {
+  if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
+    return fallback;
+  }
+  return value;
+}
+
+function pickDefined<T extends Record<string, unknown>>(obj: T | undefined, keys: (keyof T)[]) {
+  const out: Record<string, unknown> = {};
+  if (!obj) {
+    return out;
+  }
+  for (const k of keys) {
+    if (obj[k] !== undefined) {
+      out[String(k)] = obj[k];
+    }
+  }
+  return out;
+}
+
+function buildRedactedPerfSnapshot(strapi: Core.Strapi): Record<string, unknown> {
+  const dbPerf = strapi.config.get('database.performance') as Record<string, unknown> | undefined;
+  const srvPerf = strapi.config.get('server.performance') as Record<string, unknown> | undefined;
+
+  return {
+    database: pickDefined(dbPerf, [
+      'enabled',
+      'slowQueryMs',
+      'sampleRate',
+      'output',
+      'captureSqlText',
+      'captureBindings',
+      'flushIntervalMs',
+      'maxEvents',
+      'artifactFlushIntervalMs',
+      'artifactMaxEvents',
+    ]),
+    server: pickDefined(srvPerf, [
+      'requestSummaryEnabled',
+      'requestTrackingEnabled',
+      'slowRequestMs',
+      'requestSampleRate',
+      'emitStageEvents',
+    ]),
+  };
+}
+
+function percentileNearest(sorted: number[], p: number): number {
+  if (sorted.length === 0) {
+    return 0;
+  }
+  const idx = Math.ceil((p / 100) * sorted.length) - 1;
+  return sorted[Math.max(0, Math.min(sorted.length - 1, idx))];
+}
+
+function computeFingerprintRollup(rows: BufferedPerfRow[]): ArtifactFingerprintAgg[] {
+  const map = new Map<string, { count: number; totalMs: number }>();
+
+  for (const row of rows) {
+    if (row.kind !== DB_SLOW_EVENT && row.kind !== DB_ERROR_EVENT) {
+      continue;
+    }
+    const ev = row.event as { queryFingerprint?: string; durationMs?: number };
+    const fp = typeof ev.queryFingerprint === 'string' ? ev.queryFingerprint : 'unknown';
+    const ms = typeof ev.durationMs === 'number' ? ev.durationMs : 0;
+    const cur = map.get(fp) ?? { count: 0, totalMs: 0 };
+    cur.count += 1;
+    cur.totalMs += ms;
+    map.set(fp, cur);
+  }
+
+  return [...map.entries()]
+    .map(([fingerprint, v]) => ({ fingerprint, count: v.count, totalMs: v.totalMs }))
+    .sort((a, b) => b.count - a.count || b.totalMs - a.totalMs)
+    .slice(0, 10);
+}
+
+export function summarizePerfArtifactBatch(
+  rows: BufferedPerfRow[],
+  opts: { slowRequestMs: number }
+): PerformanceArtifactSummaryV1 {
+  const durations: number[] = [];
+  let dbEventRows = 0;
+  let requestCount = 0;
+  let slowRequestCount = 0;
+
+  for (const row of rows) {
+    if (row.kind === DB_SLOW_EVENT || row.kind === DB_ERROR_EVENT) {
+      dbEventRows += 1;
+      const ev = row.event as { durationMs?: number };
+      if (typeof ev.durationMs === 'number') {
+        durations.push(ev.durationMs);
+      }
+    }
+    if (row.kind === 'performance.request.summary') {
+      requestCount += 1;
+      const ev = row.event as { durationMs?: number };
+      if (typeof ev.durationMs === 'number' && ev.durationMs >= opts.slowRequestMs) {
+        slowRequestCount += 1;
+      }
+    }
+  }
+
+  durations.sort((a, b) => a - b);
+
+  return {
+    totalQueriesObserved: dbEventRows,
+    slowQueryCount: dbEventRows,
+    p50Ms: percentileNearest(durations, 50),
+    p95Ms: percentileNearest(durations, 95),
+    p99Ms: percentileNearest(durations, 99),
+    topFingerprints: computeFingerprintRollup(rows),
+    requestCount: requestCount > 0 ? requestCount : undefined,
+    slowRequestCount: requestCount > 0 ? slowRequestCount : undefined,
+  };
+}
+
+function resolveGitSha(): string | undefined {
+  return (
+    process.env.GITHUB_SHA ||
+    process.env.COMMIT_SHA ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.CIRCLE_SHA1 ||
+    undefined
+  );
+}
 
 /**
  * Buffered performance artifact: each flush appends one JSON object (single line) to `artifactPath`.
@@ -23,21 +206,31 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
     };
   }
 
-  const flushMsRaw = strapi.config.get('database.performance.artifactFlushIntervalMs', 5000);
-  const maxEventsRaw = strapi.config.get('database.performance.artifactMaxEvents', 1000);
+  const flushMs = resolveFlushIntervalMs(strapi);
+  const maxEvents = resolveMaxEvents(strapi);
+  const slowRequestMs = clampPositiveInt(
+    strapi.config.get('server.performance.slowRequestMs'),
+    500
+  );
 
-  const flushMs = typeof flushMsRaw === 'number' && flushMsRaw > 0 ? flushMsRaw : 5000;
-  const maxEvents = typeof maxEventsRaw === 'number' && maxEventsRaw > 0 ? maxEventsRaw : 1000;
-
-  const buffer: unknown[] = [];
+  const buffer: BufferedPerfRow[] = [];
   let flushInProgress = false;
 
-  const serializeLine = (events: unknown[]) =>
-    `${JSON.stringify({
-      schemaVersion: 1 as const,
-      flushedAt: new Date().toISOString(),
+  const buildEnvelope = (events: BufferedPerfRow[]): PerformanceArtifactEnvelopeV1 => {
+    const gitSha = resolveGitSha();
+    return {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      strapiVersion: String(strapi.config.get('info.strapi') ?? 'unknown'),
+      nodeVersion: process.version,
+      ...(gitSha ? { gitSha } : {}),
+      config: buildRedactedPerfSnapshot(strapi),
+      summary: summarizePerfArtifactBatch(events, { slowRequestMs }),
       events,
-    })}\n`;
+    };
+  };
+
+  const serializeLine = (events: BufferedPerfRow[]) => `${JSON.stringify(buildEnvelope(events))}\n`;
 
   const flush = async () => {
     if (flushInProgress || buffer.length === 0) {
@@ -61,7 +254,10 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
   };
 
   const subscriber: Modules.EventHub.Subscriber = async (eventName, ...args) => {
-    if (eventName !== DB_SLOW_EVENT && eventName !== DB_ERROR_EVENT) {
+    const isDb = eventName === DB_SLOW_EVENT || eventName === DB_ERROR_EVENT;
+    const isReq = (REQUEST_PERF_EVENTS as readonly string[]).includes(eventName);
+
+    if (!isDb && !isReq) {
       return;
     }
 

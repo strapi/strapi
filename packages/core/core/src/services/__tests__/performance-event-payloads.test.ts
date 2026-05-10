@@ -1,5 +1,7 @@
 import {
   buildPublicDatabaseQueryPerformancePayload,
+  buildPublicRequestStagePayload,
+  buildPublicRequestStartPayload,
   buildPublicRequestSummaryPayload,
   PERFORMANCE_PUBLIC_SCHEMA_VERSION,
 } from '../performance-event-payloads';
@@ -47,5 +49,22 @@ describe('performance event payloads', () => {
     expect(s.schemaVersion).toBe(1);
     expect(s.slowQueryCount).toBe(1);
     expect(s.slowOrErrorQueryEvents).toBe(1);
+  });
+
+  it('builds request start and stage payloads', () => {
+    const start = buildPublicRequestStartPayload({
+      requestId: 'r',
+      method: 'POST',
+      path: '/admin',
+    });
+    expect(start.eventVersion).toBe(1);
+
+    const stage = buildPublicRequestStagePayload({
+      requestId: 'r',
+      stage: 'policy',
+      stageDurationMs: 3,
+    });
+    expect(stage.stage).toBe('policy');
+    expect(stage.schemaVersion).toBe(PERFORMANCE_PUBLIC_SCHEMA_VERSION);
   });
 });

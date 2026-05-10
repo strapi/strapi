@@ -11,7 +11,15 @@ describe('performance events public API', () => {
 
     const api = createPerformanceEventsPublicApi(strapi as any);
     expect(api.getSchemaVersion()).toBe(1);
-    expect(api.getCapabilities().events).toContain('performance.request.summary');
+    expect(api.getCapabilities().events).toEqual(
+      expect.arrayContaining([
+        'performance.db.query.slow',
+        'performance.db.query.error',
+        'performance.request.start',
+        'performance.request.stage',
+        'performance.request.summary',
+      ])
+    );
 
     const listener = jest.fn().mockRejectedValue(new Error('plugin boom'));
     const off = api.subscribe('performance.db.query.slow', listener);

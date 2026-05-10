@@ -73,9 +73,23 @@ Payload (**v1**): `schemaVersion`, `eventVersion`, plus
 
 Producer: `@strapi/database`. Bridge: `@strapi/core` forwards to the hub with versioning.
 
+### `performance.request.start`
+
+Emitted at the beginning of the request when request tracking is enabled **and** either the request is sampled for hub emission (`server.performance.requestSampleRate`) or **`server.performance.emitStageEvents`** is true (so stage timings have a stable anchor).
+
+Payload (**v1**): `schemaVersion`, `eventVersion`, `requestId`, `method`, `path`.
+
+### `performance.request.stage`
+
+Emitted **after** the response finishes, **only** when **`server.performance.emitStageEvents`** is true and the same conditions as **`performance.request.summary`** caused a summary to be emitted (see below). One hub event per measured pipeline segment.
+
+Payload (**v1**): `schemaVersion`, `eventVersion`, `requestId`, `stage`, `stageDurationMs`.
+
+`stage` is one of: `middleware`, `auth`, `policy`, `controller`, `service`, `sanitize`, `validate`, `other` (core currently emits `auth`, `policy`, optional route `middleware`, and `controller`).
+
 ### `performance.request.summary`
 
-Emitted when **`server.performance.requestSummaryEnabled`** or **`server.performance.requestTrackingEnabled`** is true, after the HTTP response finishes.
+Emitted when **`server.performance.requestSummaryEnabled`** or **`server.performance.requestTrackingEnabled`** is true, after the HTTP response finishes, **only if** the request was sampled (`server.performance.requestSampleRate`, default `0.1`) **or** the wall time is at least **`server.performance.slowRequestMs`** (default `500`).
 
 Payload (**v1**): `schemaVersion`, `eventVersion`, plus
 
@@ -94,7 +108,9 @@ Payload (**v1**): `schemaVersion`, `eventVersion`, plus
 
 ## Rate limiting
 
-Slow-query and request summaries can be high volume if thresholds are low. Use **`database.performance.sampleRate`**, **`slowQueryMs`**, and production-safe capture flags. Plugin handlers should be **non-blocking** and **cheap**; never `await` remote exporters on the hot path inside the listener—queue work instead.
+Slow-query and request summaries can be high volume if thresholds are low. Use **`database.performance.sampleRate`**, **`slowQueryMs`**, **`server.performance.requestSampleRate`**, **`server.performance.slowRequestMs`**, and production-safe capture flags. Plugin handlers should be **non-blocking** and **cheap**; never `await` remote exporters on the hot path inside the listener—queue work instead.
+
+When **`database.performance.output`** is **`artifact`** or **`both`** and **`database.performance.artifactPath`** is set, core appends structured NDJSON batches that include DB perf rows and request timeline rows when emitted. Prefer **`database.performance.flushIntervalMs`** / **`database.performance.maxEvents`** (legacy: **`artifactFlushIntervalMs`** / **`artifactMaxEvents`**).
 
 ## See also
 

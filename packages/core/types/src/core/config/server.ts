@@ -76,6 +76,21 @@ export interface ServerPerformance {
    * See contributor docs: performance hub events.
    */
   requestTrackingEnabled?: boolean;
+  /**
+   * Requests slower than this (ms) always emit hub timeline events (`start`/`summary`/`stage`),
+   * even when `requestSampleRate` would skip them.
+   */
+  slowRequestMs?: number;
+  /**
+   * Probability in `[0, 1]` that a request emits hub timeline events (when tracking is enabled).
+   * Always combined with {@link slowRequestMs}: slow requests are never dropped from summaries.
+   */
+  requestSampleRate?: number;
+  /**
+   * When true with request tracking, records route-handler pipeline stage durations (`auth`, `policy`,
+   * `middleware`, `controller`) and emits `performance.request.stage` with the summary batch.
+   */
+  emitStageEvents?: boolean;
 }
 
 export interface ServerObservabilityTracingOtlp {

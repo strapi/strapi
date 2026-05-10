@@ -1,11 +1,14 @@
 import type { Core } from '@strapi/types';
 
-import { isServerRequestPerfTrackingEnabled } from '../server-performance-tracking';
+import {
+  getServerRequestPerformanceEmitSettings,
+  isServerRequestPerfTrackingEnabled,
+} from '../server-performance-tracking';
 
 function mockStrapi(config: Record<string, unknown>): Core.Strapi {
   return {
     config: {
-      get: (key: string) => config[key],
+      get: (key: string, def?: unknown) => (config[key] !== undefined ? config[key] : def),
     },
   } as Core.Strapi;
 }
@@ -37,5 +40,28 @@ describe('isServerRequestPerfTrackingEnabled', () => {
         })
       )
     ).toBe(false);
+  });
+});
+
+describe('getServerRequestPerformanceEmitSettings', () => {
+  it('returns defaults when unset', () => {
+    expect(getServerRequestPerformanceEmitSettings(mockStrapi({}))).toEqual({
+      slowRequestMs: 500,
+      requestSampleRate: 0.1,
+      emitStageEvents: false,
+    });
+  });
+
+  it('clamps sample rate into unit interval', () => {
+    expect(
+      getServerRequestPerformanceEmitSettings(
+        mockStrapi({ 'server.performance.requestSampleRate': 2 })
+      ).requestSampleRate
+    ).toBe(1);
+    expect(
+      getServerRequestPerformanceEmitSettings(
+        mockStrapi({ 'server.performance.requestSampleRate': -1 })
+      ).requestSampleRate
+    ).toBe(0);
   });
 });
