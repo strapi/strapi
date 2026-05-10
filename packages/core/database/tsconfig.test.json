@@ -5,6 +5,6 @@
     "types": ["jest", "node"],
     "noEmit": true
   },
-  "include": ["src/**/*.test.ts", "src/**/__tests__/**/*.ts"],
+  "include": ["src/global.d.ts", "src/**/*.test.ts", "src/**/__tests__/**/*.ts"],
   "references": [{ "path": "./tsconfig.build.json" }]
 }
