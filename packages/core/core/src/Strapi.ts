@@ -34,11 +34,14 @@ import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 import { createContentSourceMapsService } from './services/content-source-maps';
 import { bridgeDatabasePerformanceEvents } from './services/performance-events';
+import { createPerformanceEventsPublicApi } from './services/performance-events-public-api';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+
+import { isServerRequestPerfTrackingEnabled } from './utils/server-performance-tracking';
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -132,6 +135,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get eventHub(): Modules.EventHub.EventHub {
     return this.get('eventHub');
+  }
+
+  get performanceEvents(): Modules.PerformanceEvents.PerformanceEventsPublicApi {
+    return this.get('performanceEvents');
   }
 
   get fs(): Core.StrapiFS {
@@ -273,7 +280,22 @@ class Strapi extends Container implements Core.Strapi {
       .add('auth', createAuth())
       .add('server', () => createServer(this))
       .add('fs', () => createStrapiFs(this))
-      .add('eventHub', () => createEventHub())
+      .add('eventHub', () =>
+        createEventHub({
+          onSubscriberError: (error, { eventName, phase }) => {
+            try {
+              this.log.warn(
+                `[event-hub] ${phase} handler failed for "${eventName}": ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            } catch {
+              console.warn('[strapi:event-hub]', phase, eventName, error);
+            }
+          },
+        })
+      )
+      .add('performanceEvents', () => createPerformanceEventsPublicApi(this))
       .add('startupLogger', () => utils.createStartupLogger(this))
       .add('logger', () => logger)
       .add('fetch', () => utils.createStrapiFetch(this))
@@ -293,12 +315,11 @@ class Strapi extends Container implements Core.Strapi {
           this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
         const dbPerformanceEnabled = this.config.get('database.performance.enabled') === true;
-        const requestSummaryEnabled =
-          this.config.get('server.performance.requestSummaryEnabled') === true;
+        const requestPerfTrackingEnabled = isServerRequestPerfTrackingEnabled(this);
 
         /* eslint-disable object-shorthand -- arrows preserve outer Strapi `this`; method shorthand binds wrong `this` */
         const perfRequestHooks =
-          dbPerformanceEnabled || requestSummaryEnabled
+          dbPerformanceEnabled || requestPerfTrackingEnabled
             ? {
                 performance: {
                   getRequestId: () => {
@@ -306,7 +327,7 @@ class Strapi extends Container implements Core.Strapi {
                     return (ctx?.state as { strapiPerfRequestId?: string } | undefined)
                       ?.strapiPerfRequestId;
                   },
-                  ...(requestSummaryEnabled
+                  ...(requestPerfTrackingEnabled
                     ? {
                         notifyQueryTelemetry: ({
                           durationMs,

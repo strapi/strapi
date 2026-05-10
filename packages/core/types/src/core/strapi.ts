@@ -15,6 +15,11 @@ export interface Strapi extends Container {
   log: Logger;
   fs: StrapiFS;
   eventHub: Modules.EventHub.EventHub;
+  /**
+   * Subscribe to documented `performance.*` hub events with handler error isolation.
+   * Prefer over raw `eventHub.on` for perf signals.
+   */
+  performanceEvents: Modules.PerformanceEvents.PerformanceEventsPublicApi;
   startupLogger: StartupLogger;
   cron: Modules.Cron.CronService;
   store: Modules.CoreStore.CoreStore;

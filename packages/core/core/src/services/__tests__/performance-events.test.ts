@@ -22,6 +22,7 @@ describe('Performance events bridge', () => {
 
     subscribers[0]({
       type: 'query.slow',
+      timestamp: '2020-01-01T00:00:00.000Z',
       durationMs: 120,
       dbClient: 'postgres',
       queryType: 'select',
@@ -29,7 +30,15 @@ describe('Performance events bridge', () => {
       success: true,
     });
 
-    expect(eventHub.emit).toHaveBeenCalledWith('performance.db.query.slow', expect.any(Object));
+    expect(eventHub.emit).toHaveBeenCalledWith(
+      'performance.db.query.slow',
+      expect.objectContaining({
+        schemaVersion: 1,
+        eventVersion: 1,
+        durationMs: 120,
+        dbClient: 'postgres',
+      })
+    );
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -54,6 +63,7 @@ describe('Performance events bridge', () => {
 
     subscribers[0]({
       type: 'query.error',
+      timestamp: '2020-01-01T00:00:00.000Z',
       durationMs: 140,
       dbClient: 'sqlite',
       queryType: 'other',
@@ -63,11 +73,19 @@ describe('Performance events bridge', () => {
       requestId: 'req-123',
     });
 
-    expect(eventHub.emit).toHaveBeenCalledWith('performance.db.query.error', expect.any(Object));
+    expect(eventHub.emit).toHaveBeenCalledWith(
+      'performance.db.query.error',
+      expect.objectContaining({
+        schemaVersion: 1,
+        requestId: 'req-123',
+        errorCode: 'SQLITE_ERROR',
+      })
+    );
     expect(logger.warn).toHaveBeenCalledTimes(1);
     const line = logger.warn.mock.calls[0][0] as string;
     expect(line).toContain('performance.db.query.error');
     expect(line).toContain('"durationMs":140');
     expect(line).toContain('"errorCode":"SQLITE_ERROR"');
+    expect(line).toContain('"schemaVersion":1');
   });
 });

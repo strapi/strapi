@@ -27,14 +27,13 @@ export default {
       }
 
       const summary = args[0] as
-        | { dbQueryCount?: number; slowOrErrorQueryEvents?: number }
+        | { dbQueryCount?: number; slowQueryCount?: number; slowOrErrorQueryEvents?: number }
         | undefined;
 
+      const slowCount = summary?.slowQueryCount ?? summary?.slowOrErrorQueryEvents ?? 0;
+
       // Quiet admin-shell traffic: summaries still exist on the hub; skip console noise.
-      if (
-        !summary ||
-        ((summary.dbQueryCount ?? 0) === 0 && (summary.slowOrErrorQueryEvents ?? 0) === 0)
-      ) {
+      if (!summary || ((summary.dbQueryCount ?? 0) === 0 && slowCount === 0)) {
         return;
       }
 

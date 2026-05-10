@@ -1,6 +1,16 @@
 export type Subscriber = (eventName: string, ...args: any[]) => Promise<void>;
 export type Listener = (...args: any[]) => Promise<void>;
 
+export interface EventHubSubscriberErrorInfo {
+  eventName: string;
+  phase: 'subscriber' | 'listener';
+}
+
+export interface CreateEventHubOptions {
+  /** Invoked when a subscriber or named listener throws; emit still completes for other handlers. */
+  onSubscriberError?(error: unknown, info: EventHubSubscriberErrorInfo): void;
+}
+
 export interface EventHub {
   emit(eventName: string, ...args: unknown[]): Promise<void>;
   subscribe(subscriber: Subscriber): () => void;
@@ -18,14 +28,19 @@ export interface EventHub {
 /**
  * The event hub is Strapi's event control center.
  */
-export default function createEventHub(): EventHub {
+export default function createEventHub(options?: CreateEventHubOptions): EventHub {
+  const { onSubscriberError } = options ?? {};
   const listeners = new Map();
 
   // Default subscriber to easily add listeners with the on() method
   const defaultSubscriber = async (eventName: string, ...args: unknown[]) => {
     if (listeners.has(eventName)) {
       for (const listener of listeners.get(eventName)) {
-        await listener(...args);
+        try {
+          await listener(...args);
+        } catch (error) {
+          onSubscriberError?.(error, { eventName, phase: 'listener' });
+        }
       }
     }
   };
@@ -36,7 +51,11 @@ export default function createEventHub(): EventHub {
   const eventHub: EventHub = {
     async emit(eventName, ...args) {
       for (const subscriber of subscribers) {
-        await subscriber(eventName, ...args);
+        try {
+          await subscriber(eventName, ...args);
+        } catch (error) {
+          onSubscriberError?.(error, { eventName, phase: 'subscriber' });
+        }
       }
     },
 

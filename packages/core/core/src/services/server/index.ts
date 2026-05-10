@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import Router from '@koa/router';
+import type { Context } from 'koa';
 import type { Core, Modules } from '@strapi/types';
 
 import { createHTTPServer } from './http-server';
@@ -12,6 +13,21 @@ import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
 import { withHttpServerTracing } from '../observability/opentelemetry-tracing';
+import { buildPublicRequestSummaryPayload } from '../performance-event-payloads';
+import { isServerRequestPerfTrackingEnabled } from '../../utils/server-performance-tracking';
+
+const resolveRouteTemplate = (ctx: Context): string => {
+  const matched = ctx._matchedRoute;
+  if (typeof matched === 'string' && matched.length > 0) {
+    return matched;
+  }
+
+  if (ctx.routerPath && ctx.routerPath.length > 0) {
+    return ctx.routerPath;
+  }
+
+  return ctx.path;
+};
 
 const healthCheck: Core.MiddlewareHandler = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
@@ -28,8 +44,7 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     requestCtx.run(ctx, async () => {
       await withHttpServerTracing(strapi, ctx, async () => {
         const dbPerformanceEnabled = strapi.config.get('database.performance.enabled') === true;
-        const requestSummaryEnabled =
-          strapi.config.get('server.performance.requestSummaryEnabled') === true;
+        const requestSummaryEnabled = isServerRequestPerfTrackingEnabled(strapi);
 
         if (dbPerformanceEnabled || requestSummaryEnabled) {
           ctx.state.strapiPerfRequestId = randomUUID();
@@ -50,19 +65,22 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
           const dbStats = statsMap.get(requestId);
           statsMap.delete(requestId);
 
-          strapi.eventHub
-            .emit('performance.request.summary', {
-              requestId,
-              durationMs: Date.now() - startedAt,
-              method: ctx.method,
-              path: ctx.path,
-              dbQueryCount: dbStats?.count ?? 0,
-              dbTotalMs: dbStats?.totalMs ?? 0,
-              slowOrErrorQueryEvents: dbStats?.slowOrErrorEvents ?? 0,
-            })
-            .catch(() => {
-              /* fail-open */
-            });
+          const slowQueryCount = dbStats?.slowOrErrorEvents ?? 0;
+          const summaryPayload = buildPublicRequestSummaryPayload({
+            requestId,
+            durationMs: Date.now() - startedAt,
+            method: ctx.method,
+            route: resolveRouteTemplate(ctx),
+            path: ctx.path,
+            statusCode: ctx.status,
+            dbQueryCount: dbStats?.count ?? 0,
+            dbTotalMs: dbStats?.totalMs ?? 0,
+            slowQueryCount,
+          });
+
+          strapi.eventHub.emit('performance.request.summary', summaryPayload).catch(() => {
+            /* fail-open */
+          });
         };
 
         if (requestSummaryEnabled && requestId) {
