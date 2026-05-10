@@ -42,6 +42,7 @@ import { createConfigProvider } from './services/config';
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
 
 import { isServerRequestPerfTrackingEnabled } from './utils/server-performance-tracking';
+import { mergeQueryTelemetryIntoStats, type PerfQueryAgg } from './utils/perf-query-stats';
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -338,25 +339,12 @@ class Strapi extends Container implements Core.Strapi {
                             return;
                           }
 
-                          type PerfAgg = {
-                            count: number;
-                            totalMs: number;
-                            slowOrErrorEvents: number;
-                          };
-                          const statsMap = this.get('perfQueryStats') as Map<string, PerfAgg>;
-                          const bucket = statsMap.get(requestId) ?? {
-                            count: 0,
-                            totalMs: 0,
-                            slowOrErrorEvents: 0,
-                          };
-
-                          bucket.count += 1;
-                          bucket.totalMs += durationMs;
-                          if (slowOrErrorEventEmitted) {
-                            bucket.slowOrErrorEvents += 1;
-                          }
-
-                          statsMap.set(requestId, bucket);
+                          mergeQueryTelemetryIntoStats(
+                            this.get('perfQueryStats') as Map<string, PerfQueryAgg>,
+                            requestId,
+                            durationMs,
+                            slowOrErrorEventEmitted
+                          );
                         },
                       }
                     : {}),
