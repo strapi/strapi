@@ -36,6 +36,13 @@ export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
   logger?: Logger;
+  /**
+   * Strapi host used by the database layer (e.g. for model lookups and store
+   * access). Optional for backwards compatibility: when omitted, the
+   * constructor falls back to `globalThis.strapi`, which is deprecated and
+   * will be removed in the next major. At that point this field will become
+   * required — always pass the Strapi instance explicitly.
+   */
   strapi?: StrapiHost;
 }
 
@@ -86,10 +93,20 @@ class Database {
 
     this.logger = config.logger ?? console;
 
-    const strapi = config.strapi ?? (globalThis as { strapi?: StrapiHost }).strapi;
+    let strapi = config.strapi;
+    if (!strapi) {
+      strapi = (globalThis as { strapi?: StrapiHost }).strapi;
+      if (strapi) {
+        this.logger.warn(
+          'Database resolved its Strapi host from `globalThis.strapi`. This fallback is deprecated and will be removed in the next major; pass `config.strapi` to the Database constructor explicitly.'
+        );
+      }
+    }
+
     if (!strapi) {
       throw new Error('Database requires a Strapi host. Pass `config.strapi` to the constructor.');
     }
+
     this.strapi = strapi;
 
     this.dialect = getDialect(this);
