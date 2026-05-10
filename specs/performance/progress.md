@@ -2,6 +2,8 @@
 
 High-level roadmap and delivery status for the core performance instrumentation work. Each step links to its detailed spec under this folder.
 
+_Status verified against the repository (packages, docs, `.github`), not from informal notes._
+
 | Step        | Topic                                | Detail spec                                                                                        | Status          |
 | ----------- | ------------------------------------ | -------------------------------------------------------------------------------------------------- | --------------- |
 | 01 — SQL    | Slow / error DB query signals        | [01-core-sql-slow-query-monitoring.md](./01-core-sql-slow-query-monitoring.md)                     | **Done**        |
@@ -11,49 +13,69 @@ High-level roadmap and delivery status for the core performance instrumentation 
 | 05 — API    | Public event contract for plugins    | [05-public-performance-event-api-for-plugins.md](./05-public-performance-event-api-for-plugins.md) | **Done**        |
 | 06 — Req    | Request timeline + DB correlation    | [06-core-request-timeline-events.md](./06-core-request-timeline-events.md)                         | **Partial**     |
 
+**Outside this table (implemented in core):** optional **OpenTelemetry tracing** via `server.observability.tracing` (`@strapi/core`: HTTP server spans + Knex query spans, console and/or OTLP HTTP exporter). This is **not** the spec **04** plugin/UI; it is framework-level tracing.
+
 ---
 
 ## What is implemented today (quick reference)
 
-- **Database (`@strapi/database`)**: Knex listeners, duration + fingerprint, sampling, fast-path error emission, optional SQL/bind capture, subscriber API and internal hooks (`getRequestId`, `notifyQueryTelemetry`).
-- **Core bridge**: DB events forwarded to `strapi.eventHub` as `performance.db.query.slow` / `performance.db.query.error`, optional structured logger output.
-- **Request correlation**: When `database.performance.enabled` or `server.performance.requestSummaryEnabled` is `true`, Koa assigns `strapiPerfRequestId`; core injects `getRequestId`; Strapi QueryBuilder attaches `mergeKnexQueryContext` so slow/error events carry **`requestId`** when HTTP (or caller) context exists.
-- **Per-request rollup (summaries)** (partial vs spec **06**): When `requestSummaryEnabled` **or** `requestTrackingEnabled` is `true`, middleware aggregates counts/millis and emits a **versioned** `performance.request.summary` after the HTTP response completes (`route`, `statusCode`, `slowQueryCount`, plus backward-compatible `slowOrErrorQueryEvents`). Covered by unit tests on `runRequestPerformanceMiddleware`, route resolution, config alias, and `mergeQueryTelemetryIntoStats`.
-- **Artifact sink (thin)**: When `database.performance.output` is `artifact` or `both` and `artifactPath` is set, a provider buffers hub DB events and appends JSON lines (`schemaVersion`, `flushedAt`, `events`).
+- **Database (`@strapi/database`)**: `Database` registers Knex `query` / `query-response` / `query-error` handlers in [`packages/core/database/src/index.ts`](../../packages/core/database/src/index.ts) (`registerPerformanceListeners`). Duration, fingerprint, sampling, optional SQL/bind capture, `subscribeToPerformanceEvents`, and runtime hooks `getRequestId` / `notifyQueryTelemetry` (injected by core when configured).
+- **Core bridge**: [`bridgeDatabasePerformanceEvents`](../../packages/core/core/src/services/performance-events.ts) forwards DB subscriber events to `strapi.eventHub` as `performance.db.query.slow` / `performance.db.query.error` with **versioned** payloads; optional **single-line JSON** `logger.warn` when `database.performance.output` is `log` or `both`.
+- **Request correlation**: `strapiPerfRequestId` is set in [`runRequestPerformanceMiddleware`](../../packages/core/core/src/services/server/request-performance-middleware.ts) when **`database.performance.enabled`** **or** **`server.performance.requestSummaryEnabled`** **or** **`server.performance.requestTrackingEnabled`** is true (see [`isServerRequestPerfTrackingEnabled`](../../packages/core/core/src/utils/server-performance-tracking.ts)). Core passes **`getRequestId`** into the DB config when either DB perf or request tracking is on; QueryBuilder uses **`mergeKnexQueryContext`** so slow/error events can carry **`requestId`** when ALS/request context exists.
+- **Per-request rollup (summaries)** (partial vs spec **06**): Same flags as above for **emitting** summaries: when **`requestSummaryEnabled`** or **`requestTrackingEnabled`** is true, **`performance.request.summary`** is emitted after `finish`/`close` with **`route`** (template when available), **`statusCode`**, **`slowQueryCount`**, deprecated alias **`slowOrErrorQueryEvents`**, plus **`schemaVersion`** / **`eventVersion`**. Implemented in [`request-performance-middleware.ts`](../../packages/core/core/src/services/server/request-performance-middleware.ts); wired from [`services/server/index.ts`](../../packages/core/core/src/services/server/index.ts) inside `requestCtx` + optional HTTP tracing wrapper.
+- **Telemetry aggregation**: [`mergeQueryTelemetryIntoStats`](../../packages/core/core/src/utils/perf-query-stats.ts) updates **`perfQueryStats`** from **`notifyQueryTelemetry`** in [`Strapi.ts`](../../packages/core/core/src/Strapi.ts) when request tracking is enabled.
+- **Artifact sink (thin)**: [`attachPerformanceArtifactWriter`](../../packages/core/core/src/services/performance-artifact.ts) (provider [`performance-monitor`](../../packages/core/core/src/providers/performance-monitor.ts)) listens on the hub for the two DB perf event names, buffers, and **append-only** NDJSON lines shaped as `{ schemaVersion: 1, flushedAt, events }`. Config: **`database.performance.artifactPath`**, **`artifactFlushIntervalMs`**, **`artifactMaxEvents`** (defaults 5000 ms / 1000 events in code).
+- **Public perf API & hub safety**: **`strapi.performanceEvents`** in [`performance-events-public-api.ts`](../../packages/core/core/src/services/performance-events-public-api.ts); contributor doc [`performance-events.md`](../../docs/docs/docs/01-core/strapi/performance-events.md); [`createEventHub`](../../packages/core/core/src/services/event-hub.ts) supports isolated subscriber/listener errors when Strapi constructs the hub.
+- **OpenTelemetry (core)**: Provider [`observability-tracing`](../../packages/core/core/src/providers/observability-tracing.ts), implementation [`opentelemetry-tracing.ts`](../../packages/core/core/src/services/observability/opentelemetry-tracing.ts); gated by **`server.observability.tracing.enabled`**.
+
+---
+
+## Automated tests (inventory)
+
+| Area                           | Location                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DB perf behaviour & defaults   | [`packages/core/database/src/__tests__/performance.test.ts`](../../packages/core/database/src/__tests__/performance.test.ts), [`performance-defaults.test.ts`](../../packages/core/database/src/__tests__/performance-defaults.test.ts)                                                                                                 |
+| Hub bridge & payloads          | [`performance-events.test.ts`](../../packages/core/core/src/services/__tests__/performance-events.test.ts), [`performance-event-payloads.test.ts`](../../packages/core/core/src/services/__tests__/performance-event-payloads.test.ts)                                                                                                  |
+| `performanceEvents` API        | [`performance-events-public-api.test.ts`](../../packages/core/core/src/services/__tests__/performance-events-public-api.test.ts)                                                                                                                                                                                                        |
+| Event hub isolation            | [`event-hub.test.ts`](../../packages/core/core/src/services/__tests__/event-hub.test.ts)                                                                                                                                                                                                                                                |
+| Artifact writer                | [`performance-artifact.test.ts`](../../packages/core/core/src/services/__tests__/performance-artifact.test.ts)                                                                                                                                                                                                                          |
+| Request summary middleware     | [`request-performance-middleware.test.ts`](../../packages/core/core/src/services/server/__tests__/request-performance-middleware.test.ts)                                                                                                                                                                                               |
+| Route template / flags / stats | [`koa-route-template.test.ts`](../../packages/core/core/src/utils/__tests__/koa-route-template.test.ts), [`server-performance-tracking.test.ts`](../../packages/core/core/src/utils/__tests__/server-performance-tracking.test.ts), [`perf-query-stats.test.ts`](../../packages/core/core/src/utils/__tests__/perf-query-stats.test.ts) |
+| OTel helpers only              | [`opentelemetry-tracing-utils.test.ts`](../../packages/core/core/src/services/observability/__tests__/opentelemetry-tracing-utils.test.ts)                                                                                                                                                                                              |
+
+**Not covered by automated tests:** representative **benchmark / regression** for SQL overhead (spec **01**); **full OTel** provider stack (integration-style); **`tests/api`** or E2E exercising perf config end-to-end.
 
 ---
 
 ## Gap list (still to align with specs)
 
-Updates below map to the same numbered specs linked in the table.
-
 ### [01](./01-core-sql-slow-query-monitoring.md)
 
-- **Acceptance criterion 3 (correlation)** is covered: ALS-backed ids when DB perf **or** request summaries are enabled, plus **Knex `queryContext.requestId`** on QueryBuilder-built queries (`mergeKnexQueryContext` — including deep-sort join queries and joined delete/update paths).
-- **Spec touchpoint** `connection.ts`: listeners remain registered alongside the Knex instance in `[Database](../../packages/core/database/src/index.ts)`; no dedicated split in `[connection](../../packages/core/database/src/connection.ts)` is required for v1.
-- **Bench / regressions**: spec §Performance still needs a maintained benchmark run (manual or CI) — not automated here.
-- **Defaults contract**: unit test documents `DEFAULT_DATABASE_PERFORMANCE_CONFIG` matches spec defaults (`captureSqlText` / `captureBindings` off).
+- Correlation and emission behaviour: **done** in code and covered by DB + core unit tests.
+- Listeners live on **`Database`** after Knex creation ([`index.ts`](../../packages/core/database/src/index.ts)), not split into [`connection.ts`](../../packages/core/database/src/connection.ts) alone — acceptable for v1.
+- **Bench / regressions**: still **no** maintained automated benchmark in CI or repo scripts.
 
 ### [02](./02-core-performance-artifact-output.md)
 
-- Full **v1 schema** still missing (`strapiVersion`, `nodeVersion`, optional `gitSha`, redacted `config` snapshot, aggregate **`summary`** with percentiles / top fingerprints).
-- Config key naming may need alignment (`flushIntervalMs` / `maxEvents` vs current `artifactFlushIntervalMs` / `artifactMaxEvents`).
-- Decide single-file vs append-only contract and document it in the spec.
+- File envelope is minimal: **`schemaVersion`**, **`flushedAt`**, **`events`** — no **`strapiVersion`**, **`nodeVersion`**, **`gitSha`**, redacted config snapshot, or aggregate **`summary`** (percentiles / top fingerprints).
+- Config keys remain **`artifactFlushIntervalMs`** / **`artifactMaxEvents`** (not renamed to match spec naming).
+- Append-only behaviour is **implemented**; full contract should still be spelled out in the detail spec.
 
 ### [03](./03-ci-workload-threshold-evaluation.md)
 
-- No GitHub Actions workflow, workload harness, or threshold comparison yet.
+- **No** workflow under `.github` referencing perf thresholds or this artifact format (verified by search).
 
 ### [04](./04-optional-plugin-performance-insights.md)
 
-- No dedicated plugin package; no OTLP/vendor exporters or aggregation UI.
+- **No** dedicated “Performance Insights” plugin package, aggregation UI, or plugin-scoped exporters.
+- **Note:** **`server.observability.tracing`** in core can export traces via OTLP HTTP — this satisfies **tracing** needs for some deployments but **not** the spec’s plugin/product shape.
 
 ### [05](./05-public-performance-event-api-for-plugins.md)
 
-- **Delivered**: Hub payloads include **`schemaVersion`** + **`eventVersion`**; contributor doc [performance-events.md](../../docs/docs/docs/01-core/strapi/performance-events.md); **`strapi.performanceEvents`** (`subscribe`, `getSchemaVersion`, `getCapabilities`) wraps listeners with error isolation; **`eventHub.emit`** isolates subscriber/listener throws when configured (Strapi wiring logs warnings).
+- **Done** for documented hub contract, versioned payloads, **`strapi.performanceEvents`**, hub error isolation, and contributor docs (see quick reference above).
 
 ### [06](./06-core-request-timeline-events.md)
 
-- No `performance.request.start` or `performance.request.stage` yet; no `emitStageEvents` / stage timing in the pipeline.
-- Summary payload **aligned further**: **`route`** (template when matched), **`statusCode`**, **`slowQueryCount`** (+ deprecated **`slowOrErrorQueryEvents`** alias). Remaining gaps: **`slowRequestMs`** / **`requestSampleRate`** sampling, stage events.
-- Config: **`requestTrackingEnabled`** accepted as alias for **`requestSummaryEnabled`** (either enables the same middleware).
+- **Missing:** `performance.request.start`, `performance.request.stage`, **`emitStageEvents`**, pipeline stage timings.
+- **Missing:** **`slowRequestMs`**, **`requestSampleRate`** (and related sampling of summaries).
+- **Present:** end-of-request **summary** with DB rollups and correlation; **`requestTrackingEnabled`** alias.
