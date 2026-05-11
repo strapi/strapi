@@ -8,6 +8,12 @@ inputs:
     description: 'Should run EE or CE tests'
   jestOptions:
     description: 'Jest options'
+  perfArtifacts:
+    description: 'When true, pass --perf-artifacts to yarn test:api (NDJSON under artifacts/api-perf)'
+    default: 'false'
+  perfArtifactSuffix:
+    description: 'Unique filename fragment for the perf NDJSON file (use per matrix cell in CI)'
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -16,4 +22,6 @@ runs:
         DB_OPTIONS: ${{ inputs.dbOptions }}
         RUN_EE: ${{ inputs.runEE }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
+        RUN_PERF_ARTIFACTS: ${{ inputs.perfArtifacts == 'true' && '1' || '' }}
+        PERF_ARTIFACT_SUFFIX: ${{ inputs.perfArtifactSuffix }}
       shell: bash

@@ -99,6 +99,7 @@ package-lock.json
 
 test-apps
 coverage
+artifacts
 
 ############################
 # Builds

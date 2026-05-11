@@ -59,6 +59,7 @@
     "release": "node scripts/release.js",
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node tests/scripts/run-api-tests.js",
+    "ci:summarize-api-perf": "node scripts/summarize-api-perf-artifacts.mjs",
     "test:api:clean": "rimraf ./coverage",
     "test:clean": "run-s -c test:api:clean test:e2e:clean test:cli:clean",
     "test:cli": "node tests/scripts/run-cli-tests.js",
