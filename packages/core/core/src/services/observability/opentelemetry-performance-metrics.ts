@@ -136,7 +136,7 @@ export function registerOpenTelemetryPerformanceMetrics(strapi: Core.Strapi): vo
     {
       unit: 'ms',
       description:
-        'Document service operation duration (Core REST API → strapi.documents find/create/update/…)',
+        'Document service operation duration (all strapi.documents(uid) repository calls — REST, admin, plugins)',
     }
   );
   adminPermissionsPhaseDurationMs = meter.createHistogram(

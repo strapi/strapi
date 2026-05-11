@@ -52,6 +52,44 @@ let disposeKnexListeners: (() => void) | null = null;
 const isTracingConfigEnabled = (strapi: Core.Strapi): boolean =>
   strapi.config.get('server.observability.tracing.enabled') === true;
 
+const STARTUP_TRACER_NAME = '@strapi/core.startup';
+
+/**
+ * INTERNAL span for Strapi startup phases (`register`, `bootstrap`, `listen`).
+ * Uses root spans when `root: true` so startup appears as its own trace in Jaeger.
+ */
+export async function withStartupSpan<T>(
+  strapi: Core.Strapi,
+  spanName: string,
+  fn: () => Promise<T>,
+  options?: { root?: boolean }
+): Promise<T> {
+  if (!isTracingConfigEnabled(strapi) || !nodeProvider) {
+    return fn();
+  }
+
+  const tracer = trace.getTracer(STARTUP_TRACER_NAME);
+  const parentContext = options?.root === true ? ROOT_CONTEXT : undefined;
+
+  const runInSpan = async (span: Span) => {
+    try {
+      return await fn();
+    } catch (error) {
+      span.recordException(error instanceof Error ? error : new Error(String(error)));
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  };
+
+  if (parentContext !== undefined) {
+    return tracer.startActiveSpan(spanName, { kind: SpanKind.INTERNAL }, parentContext, runInSpan);
+  }
+
+  return tracer.startActiveSpan(spanName, { kind: SpanKind.INTERNAL }, runInSpan);
+}
+
 /** Starts the Node SDK and wires `trace`/propagation globals. Call from provider `register`. */
 export function registerOpenTelemetryTracing(strapi: Core.Strapi): void {
   if (!isTracingConfigEnabled(strapi)) {
@@ -330,7 +368,7 @@ export async function withContentApiSpan<T>(
 }
 
 /**
- * Wraps `strapi.documents(uid).…` calls from the Core REST API service layer.
+ * Wraps `strapi.documents(uid).{operation}(…)` (document-service middleware).
  * INTERNAL span `strapi.documents.{operation}` when tracing is on; histogram
  * `strapi.document_service.operation.duration_ms` when metrics OTLP is on.
  */

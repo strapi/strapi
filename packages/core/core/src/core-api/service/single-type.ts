@@ -1,7 +1,5 @@
 import type { Struct, Core } from '@strapi/types';
 
-import { withDocumentServiceObservation } from '../../services/observability/opentelemetry-tracing';
-
 import { CoreService } from './core-service';
 
 export class SingleTypeService extends CoreService implements Core.CoreAPI.Service.SingleType {
@@ -25,9 +23,7 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
   async find(params = {}) {
     const { uid } = this.contentType;
 
-    return withDocumentServiceObservation(strapi as Core.Strapi, 'findFirst', uid, () =>
-      strapi.documents(uid).findFirst(this.getFetchParams(params))
-    );
+    return strapi.documents(uid).findFirst(this.getFetchParams(params));
   }
 
   async createOrUpdate(params = {}) {
@@ -36,17 +32,13 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     const documentId = await this.getDocumentId();
 
     if (documentId) {
-      return withDocumentServiceObservation(strapi as Core.Strapi, 'update', uid, () =>
-        strapi.documents(uid).update({
-          ...this.getFetchParams(params),
-          documentId,
-        })
-      );
+      return strapi.documents(uid).update({
+        ...this.getFetchParams(params),
+        documentId,
+      });
     }
 
-    return withDocumentServiceObservation(strapi as Core.Strapi, 'create', uid, () =>
-      strapi.documents(uid).create(this.getFetchParams(params))
-    );
+    return strapi.documents(uid).create(this.getFetchParams(params));
   }
 
   async delete(params = {}) {
@@ -55,16 +47,10 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     const documentId = await this.getDocumentId();
     if (!documentId) return { deletedEntries: 0 };
 
-    const { entries } = await withDocumentServiceObservation(
-      strapi as Core.Strapi,
-      'delete',
-      uid,
-      () =>
-        strapi.documents(uid).delete({
-          ...this.getFetchParams(params),
-          documentId,
-        })
-    );
+    const { entries } = await strapi.documents(uid).delete({
+      ...this.getFetchParams(params),
+      documentId,
+    });
 
     return { deletedEntries: entries.length };
   }
