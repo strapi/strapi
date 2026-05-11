@@ -22,6 +22,8 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
 
     expect(screen.getByRole('button', { name: 'Filters' })).toBeInTheDocument();
 
+    expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
+
     expect(screen.getByRole('grid')).toBeInTheDocument();
 
     [

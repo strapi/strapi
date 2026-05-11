@@ -170,6 +170,7 @@
   "Settings.permissions.auditLogs.content-type.delete": "Delete content type",
   "Settings.permissions.auditLogs.content-type.update": "Update content type",
   "Settings.permissions.auditLogs.date": "Date",
+  "Settings.permissions.auditLogs.export": "Export",
   "Settings.permissions.auditLogs.details": "Log Details",
   "Settings.permissions.auditLogs.entry.create": "Create entry{model, select, undefined {} other { ({model})}}",
   "Settings.permissions.auditLogs.entry.delete": "Delete entry{model, select, undefined {} other { ({model})}}",
