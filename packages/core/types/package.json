@@ -56,9 +56,9 @@
     "koa": "2.16.4",
     "koa-body": "6.0.1",
     "node-schedule": "2.1.1",
-    "typedoc": "0.25.10",
-    "typedoc-github-wiki-theme": "1.1.0",
-    "typedoc-plugin-markdown": "3.17.1",
+    "typedoc": "0.28.19",
+    "typedoc-github-wiki-theme": "2.1.0",
+    "typedoc-plugin-markdown": "4.11.0",
     "zod": "3.25.67"
   },
   "devDependencies": {
