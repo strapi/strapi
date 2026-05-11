@@ -1,6 +1,6 @@
 'use strict';
 
-// Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
+// `strapi.db.query` behaviour: createMany batching, deep filters, deleteMany (incl. relation + filters parity).
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 
@@ -114,5 +114,22 @@ describe('Deep Filtering API', () => {
     const remainingEntries = await strapi.db.query('api::test.test').findMany();
     expect(remainingEntries.length).toBe(1);
     expect(remainingEntries[0].name).toBe('Samuel UMTITI');
+  });
+
+  // deleteMany must merge `filters` like `count` / `findMany` (GH#11998, PR #25420 / #25590).
+  test('deleteMany respects filters combined with relation where (same param shape as count)', async () => {
+    const uid = 'api::test.test';
+    const params = {
+      where: { related: { title: 'Category A' } },
+      filters: { name: 'Hugo LLORIS' },
+    };
+
+    expect(await strapi.db.query(uid).count(params)).toBe(1);
+
+    await strapi.db.query(uid).deleteMany(params);
+
+    const remaining = await strapi.db.query(uid).findMany();
+    expect(remaining).toHaveLength(2);
+    expect(remaining.map((e) => e.name).sort()).toEqual(['Lucas HERNANDEZ', 'Samuel UMTITI']);
   });
 });
