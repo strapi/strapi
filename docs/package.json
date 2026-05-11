@@ -45,9 +45,9 @@
     "@docusaurus/module-type-aliases": "3.10.0",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
-    "docusaurus-plugin-typedoc": "0.22.0",
-    "typedoc": "0.25.10",
-    "typedoc-plugin-markdown": "3.17.1",
+    "docusaurus-plugin-typedoc": "1.4.2",
+    "typedoc": "0.28.19",
+    "typedoc-plugin-markdown": "4.11.0",
     "typescript": "5.4.5",
     "unist-util-visit": "5.0.0"
   }
