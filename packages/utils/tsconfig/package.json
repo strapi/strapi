@@ -3,6 +3,10 @@
   "version": "5.46.0",
   "private": true,
   "devDependencies": {
+    "@testing-library/jest-dom": "6.4.5",
     "@tsconfig/node20": "20.1.6"
+  },
+  "peerDependencies": {
+    "@testing-library/jest-dom": "6.4.5"
   }
 }

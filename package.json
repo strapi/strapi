@@ -40,6 +40,7 @@
     "build:watch": "nx watch --all --nx-ignore-cycles -- nx run \\$NX_PROJECT_NAME:build --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
     "commit": "commit",
+    "knip": "knip",
     "doc:api": "node scripts/open-api/serve.js",
     "format": "yarn format:code && yarn format:other",
     "format:code": "yarn prettier:code --write",
@@ -97,8 +98,7 @@
     "@types/koa": "2.13.4",
     "@babel/core": "7.29.0",
     "@babel/runtime": "7.29.2",
-    "@babel/runtime-corejs3": "7.29.2",
-    "@types/node": "^20"
+    "@babel/runtime-corejs3": "7.29.2"
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
@@ -164,6 +164,7 @@
     "jest-cli": "29.6.0",
     "jest-environment-jsdom": "29.6.1",
     "jest-watch-typeahead": "2.2.2",
+    "knip": "6.14.0",
     "lint-staged": "15.2.10",
     "lodash": "4.18.1",
     "minimatch": "10.2.5",
