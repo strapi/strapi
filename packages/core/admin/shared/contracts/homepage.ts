@@ -1,6 +1,8 @@
 import type { errors } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
 
+import type { PerformanceWidgetSnapshot } from './performance-widget';
+
 // Export required to avoid "cannot be named" TS build error
 export interface RecentDocument {
   kind: Struct.ContentTypeKind;
@@ -24,6 +26,17 @@ export declare namespace GetRecentDocuments {
 
   export interface Response {
     data: RecentDocument[];
+    error?: errors.ApplicationError;
+  }
+}
+
+export declare namespace GetPerformanceSnapshot {
+  export interface Request {
+    body: {};
+  }
+
+  export interface Response {
+    data: PerformanceWidgetSnapshot;
     error?: errors.ApplicationError;
   }
 }

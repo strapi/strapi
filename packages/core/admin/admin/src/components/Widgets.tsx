@@ -16,7 +16,11 @@ import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useGetCountDocumentsQuery, useGetKeyStatisticsQuery } from '../services/homepage';
+import {
+  useGetCountDocumentsQuery,
+  useGetKeyStatisticsQuery,
+  useGetPerformanceSnapshotQuery,
+} from '../services/homepage';
 import { getDisplayName, getInitials } from '../utils/users';
 
 import { Widget } from './WidgetHelpers';
@@ -81,6 +85,12 @@ const GridCell = styled(Box)`
   &:nth-last-child(-n + 2) {
     border-bottom: none;
   }
+`;
+
+const PerfStatCell = styled(GridCell)`
+  flex-direction: column;
+  align-items: flex-start;
+  padding: ${({ theme }) => theme.spaces[3]};
 `;
 
 const formatNumber = ({ locale, number }: { locale: string; number: number }) => {
@@ -260,6 +270,170 @@ const KeyStatisticsWidget = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * Performance snapshot (JSON Lines artifact tail)
+ * -----------------------------------------------------------------------------------------------*/
+
+const PerformanceSnapshotWidget = () => {
+  const { formatMessage, locale } = useIntl();
+  const { data, isLoading, isError } = useGetPerformanceSnapshotQuery();
+
+  if (isLoading) {
+    return <Widget.Loading />;
+  }
+
+  if (isError || !data) {
+    return <Widget.Error />;
+  }
+
+  if (data.source === 'none') {
+    return (
+      <Widget.NoData>
+        <Typography variant="omega" textAlign="center" textColor="neutral600">
+          {data.hint}
+        </Typography>
+      </Widget.NoData>
+    );
+  }
+
+  const { artifact, databasePerformanceEnabled, requestTimelineEnabled } = data;
+  const { totals, batchesParsed, lastGeneratedAt, fileFound, topFingerprints } = artifact;
+
+  const formatInt = (n: number) =>
+    new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(n);
+
+  if (artifact.configured && fileFound && batchesParsed === 0) {
+    return (
+      <Widget.NoData>
+        <Typography variant="omega" textAlign="center" textColor="neutral600">
+          {formatMessage({
+            id: 'widget.performance.empty-file',
+            defaultMessage:
+              'Performance artifact is configured but no valid batches were found at the end of the file yet.',
+          })}
+        </Typography>
+      </Widget.NoData>
+    );
+  }
+
+  if (artifact.configured && !fileFound) {
+    return (
+      <Widget.NoData>
+        <Typography variant="omega" textAlign="center" textColor="neutral600">
+          {formatMessage({
+            id: 'widget.performance.missing-file',
+            defaultMessage:
+              'Performance artifact path is set, but the file does not exist yet. Traffic will create it on first flush.',
+          })}
+        </Typography>
+      </Widget.NoData>
+    );
+  }
+
+  return (
+    <Flex direction="column" gap={3} height="100%">
+      <Flex justifyContent="space-between" alignItems="center" gap={2} wrap="wrap">
+        <Typography variant="pi" textColor="neutral500">
+          {formatMessage({
+            id: 'widget.performance.flags',
+            defaultMessage: 'DB perf: {db} · Request timeline: {req}',
+            values: {
+              db: databasePerformanceEnabled ? 'on' : 'off',
+              req: requestTimelineEnabled ? 'on' : 'off',
+            },
+          })}
+        </Typography>
+        {lastGeneratedAt ? (
+          <Typography variant="pi" textColor="neutral500">
+            {formatMessage({
+              id: 'widget.performance.last-flush',
+              defaultMessage: 'Last batch: {time}',
+              values: { time: lastGeneratedAt },
+            })}
+          </Typography>
+        ) : null}
+      </Flex>
+      <Grid>
+        <PerfStatCell>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+            {formatMessage({
+              id: 'widget.performance.slow-db',
+              defaultMessage: 'Slow / error DB events',
+            })}
+          </Typography>
+          <Typography variant="alpha" fontWeight="bold">
+            {formatInt(totals.slowQueryCount)}
+          </Typography>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+            {formatMessage({
+              id: 'widget.performance.requests',
+              defaultMessage: 'Request summaries',
+            })}
+          </Typography>
+          <Typography variant="alpha" fontWeight="bold">
+            {formatInt(totals.requestCount)}
+          </Typography>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+            {formatMessage({
+              id: 'widget.performance.slow-requests',
+              defaultMessage: 'Slow requests',
+            })}
+          </Typography>
+          <Typography variant="alpha" fontWeight="bold">
+            {formatInt(totals.slowRequestCount)}
+          </Typography>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+            {formatMessage({
+              id: 'widget.performance.p95',
+              defaultMessage: 'Max batch p95 (ms)',
+            })}
+          </Typography>
+          <Typography variant="alpha" fontWeight="bold">
+            {formatInt(totals.maxP95Ms)}
+          </Typography>
+        </PerfStatCell>
+      </Grid>
+      {topFingerprints.length > 0 ? (
+        <Flex direction="column" gap={1}>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+            {formatMessage({
+              id: 'widget.performance.top-queries',
+              defaultMessage: 'Top query fingerprints (recent tail)',
+            })}
+          </Typography>
+          {topFingerprints.map((fp) => (
+            <Flex key={fp.fingerprint} justifyContent="space-between" gap={2}>
+              <Typography variant="pi" textColor="neutral800" ellipsis title={fp.fingerprint}>
+                {fp.fingerprint}
+              </Typography>
+              <Typography variant="pi" textColor="neutral600">
+                {formatInt(fp.count)}×
+              </Typography>
+            </Flex>
+          ))}
+        </Flex>
+      ) : null}
+      <LinkButton
+        href="https://docs.strapi.io/dev-docs/configurations/database#database-documentation"
+        isExternal
+        size="S"
+        variant="tertiary"
+      >
+        {formatMessage({
+          id: 'widget.performance.docs',
+          defaultMessage: 'Database & performance configuration',
+        })}
+      </LinkButton>
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * DeployNowWidget
  * -----------------------------------------------------------------------------------------------*/
 
@@ -290,4 +464,4 @@ const DeployNowWidget = () => {
   );
 };
 
-export { ProfileWidget, KeyStatisticsWidget, DeployNowWidget };
+export { ProfileWidget, KeyStatisticsWidget, PerformanceSnapshotWidget, DeployNowWidget };

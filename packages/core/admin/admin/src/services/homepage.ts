@@ -13,6 +13,13 @@ const homepageService = adminApi
         transformResponse: (response: Homepage.GetKeyStatistics.Response) => response.data,
         providesTags: (_, _err) => ['HomepageKeyStatistics'],
       }),
+      getPerformanceSnapshot: builder.query<Homepage.GetPerformanceSnapshot.Response['data'], void>(
+        {
+          query: () => '/admin/homepage/performance-snapshot',
+          transformResponse: (response: Homepage.GetPerformanceSnapshot.Response) => response.data,
+          providesTags: (_, _err) => ['HomepagePerformanceSnapshot'],
+        }
+      ),
       getCountDocuments: builder.query<Homepage.GetCountDocuments.Response['data'], void>({
         query: () => '/content-manager/homepage/count-documents',
         transformResponse: (response: Homepage.GetCountDocuments.Response) => response.data,
@@ -36,6 +43,7 @@ const homepageService = adminApi
 
 const {
   useGetKeyStatisticsQuery,
+  useGetPerformanceSnapshotQuery,
   useGetCountDocumentsQuery,
   useGetHomepageLayoutQuery,
   useUpdateHomepageLayoutMutation,
@@ -43,6 +51,7 @@ const {
 
 export {
   useGetKeyStatisticsQuery,
+  useGetPerformanceSnapshotQuery,
   useGetCountDocumentsQuery,
   useGetHomepageLayoutQuery,
   useUpdateHomepageLayoutMutation,

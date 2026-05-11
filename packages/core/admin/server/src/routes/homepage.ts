@@ -9,6 +9,14 @@ export default [
   },
   {
     method: 'GET',
+    path: '/homepage/performance-snapshot',
+    handler: 'homepage.getPerformanceSnapshot',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
     path: '/homepage/layout',
     handler: 'homepage.getHomepageLayout',
     config: { policies: ['admin::isAuthenticatedAdmin'] },

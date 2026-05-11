@@ -14,7 +14,13 @@ import { fetchBaseQuery } from '../utils/baseQuery';
 const adminApi = createApi({
   reducerPath: 'adminApi',
   baseQuery: fetchBaseQuery(),
-  tagTypes: ['GuidedTourMeta', 'HomepageKeyStatistics', 'AiUsage', 'AiFeatureConfig'],
+  tagTypes: [
+    'GuidedTourMeta',
+    'HomepageKeyStatistics',
+    'HomepagePerformanceSnapshot',
+    'AiUsage',
+    'AiFeatureConfig',
+  ],
   endpoints: () => ({}),
 });
 
