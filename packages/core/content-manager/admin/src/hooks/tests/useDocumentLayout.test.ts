@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import { renderHook, screen, server, waitFor } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
 import { useDocumentLayout } from '../useDocumentLayout';
@@ -407,12 +407,12 @@ describe('useDocumentLayout', () => {
 
   it('should display an error should the configuration fail to fetch', async () => {
     server.use(
-      rest.get('/content-manager/:collectionType/:model/configuration', (req, res, ctx) => {
-        return res(
-          ctx.status(500),
-          ctx.json({
+      http.get('/content-manager/:collectionType/:model/configuration', () => {
+        return HttpResponse.json(
+          {
             error: new errors.ApplicationError('Error fetching configuration'),
-          })
+          },
+          { status: 500 }
         );
       })
     );
