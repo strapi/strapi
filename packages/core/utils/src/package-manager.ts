@@ -3,10 +3,10 @@ import preferredPM from 'preferred-pm';
 
 import type { Options as ProcessOptions } from 'execa';
 
-const SUPPORTED_PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'];
+const SUPPORTED_PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const;
 const DEFAULT_PACKAGE_MANAGER = 'npm' as const;
 
-type SupportedPackageManagerName = 'npm' | 'yarn' | 'pnpm';
+type SupportedPackageManagerName = (typeof SUPPORTED_PACKAGE_MANAGERS)[number];
 
 export const getPreferred = async (pkgPath: string): Promise<SupportedPackageManagerName> => {
   const pm = await preferredPM(pkgPath);
