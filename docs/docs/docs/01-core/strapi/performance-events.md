@@ -110,7 +110,7 @@ Payload (**v1**): `schemaVersion`, `eventVersion`, plus
 
 Slow-query and request summaries can be high volume if thresholds are low. Use **`database.performance.sampleRate`**, **`slowQueryMs`**, **`server.performance.requestSampleRate`**, **`server.performance.slowRequestMs`**, and production-safe capture flags. Plugin handlers should be **non-blocking** and **cheap**; never `await` remote exporters on the hot path inside the listener—queue work instead.
 
-When **`database.performance.output`** is **`artifact`** or **`both`** and **`database.performance.artifactPath`** is set, core appends structured NDJSON batches that include DB perf rows and request timeline rows when emitted. Prefer **`database.performance.flushIntervalMs`** / **`database.performance.maxEvents`** (legacy: **`artifactFlushIntervalMs`** / **`artifactMaxEvents`**).
+When **`database.performance.output`** is **`artifact`** or **`both`** and **`database.performance.artifactPath`** is set, core appends structured JSON Lines batches (one JSON object per line) that include DB perf rows and request timeline rows when emitted. Prefer **`database.performance.flushIntervalMs`** / **`database.performance.maxEvents`** (legacy: **`artifactFlushIntervalMs`** / **`artifactMaxEvents`**).
 
 ## See also
 

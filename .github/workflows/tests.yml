@@ -404,7 +404,7 @@ jobs:
           perfArtifacts: true
           perfArtifactSuffix: ce-postgres-n${{ matrix.node }}-j${{ strategy.job-index }}
 
-      - name: Upload Strapi API performance NDJSON
+      - name: Upload Strapi API performance JSON Lines
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -455,7 +455,7 @@ jobs:
           perfArtifacts: true
           perfArtifactSuffix: ce-mysql-n${{ matrix.node }}-j${{ strategy.job-index }}
 
-      - name: Upload Strapi API performance NDJSON
+      - name: Upload Strapi API performance JSON Lines
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -490,7 +490,7 @@ jobs:
           perfArtifacts: true
           perfArtifactSuffix: ce-sqlite-n${{ matrix.node }}-j${{ strategy.job-index }}
 
-      - name: Upload Strapi API performance NDJSON
+      - name: Upload Strapi API performance JSON Lines
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -546,7 +546,7 @@ jobs:
           perfArtifacts: true
           perfArtifactSuffix: ee-postgres-n${{ matrix.node }}-j${{ strategy.job-index }}
 
-      - name: Upload Strapi API performance NDJSON
+      - name: Upload Strapi API performance JSON Lines
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -600,7 +600,7 @@ jobs:
           perfArtifacts: true
           perfArtifactSuffix: ee-mysql-n${{ matrix.node }}-j${{ strategy.job-index }}
 
-      - name: Upload Strapi API performance NDJSON
+      - name: Upload Strapi API performance JSON Lines
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -638,7 +638,7 @@ jobs:
           perfArtifacts: true
           perfArtifactSuffix: ee-sqlite-n${{ matrix.node }}-j${{ strategy.job-index }}
 
-      - name: Upload Strapi API performance NDJSON
+      - name: Upload Strapi API performance JSON Lines
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -664,7 +664,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download API perf NDJSON artifacts
+      - name: Download API perf JSON Lines artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: strapi-api-perf-*

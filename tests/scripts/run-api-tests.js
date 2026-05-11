@@ -60,7 +60,7 @@ const resolvePerfArtifactEnv = ({ perfArtifacts, perfArtifactSuffix }) => {
   const safeSuffix = String(rawSuffix).replace(/[^a-zA-Z0-9._-]+/g, '_');
   const perfDir = path.join(repoRoot, 'artifacts', 'api-perf');
   fs.mkdirSync(perfDir, { recursive: true });
-  const perfPath = path.join(perfDir, `${safeSuffix}.ndjson`);
+  const perfPath = path.join(perfDir, `${safeSuffix}.jsonl`);
 
   return { STRAPI_CI_PERF_ARTIFACT_PATH: perfPath };
 };
@@ -129,7 +129,7 @@ yargs
         type: 'boolean',
         default: false,
         describe:
-          'Enable Strapi v1 NDJSON perf batches (database.performance + request summaries); files go under artifacts/api-perf/',
+          'Enable Strapi v1 JSON Lines perf batches (database.performance + request summaries); files go under artifacts/api-perf/',
       });
 
       yarg.option('perf-artifact-suffix', {

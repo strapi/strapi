@@ -70,7 +70,7 @@ export interface Database<TClient extends ClientKind = ClientKind> {
     captureSqlText?: boolean;
     captureBindings?: boolean;
     output?: 'none' | 'log' | 'artifact' | 'both';
-    /** Append-only JSON artifact path (used when `output` is `artifact` or `both`) */
+    /** Append-only JSON Lines artifact path (used when `output` is `artifact` or `both`) */
     artifactPath?: string;
     /** Flush interval for artifact batches (ms). Preferred over {@link artifactFlushIntervalMs}. */
     flushIntervalMs?: number;

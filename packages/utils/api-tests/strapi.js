@@ -17,7 +17,7 @@ const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password'])
 
 /**
  * When `yarn test:api --perf-artifacts` sets `STRAPI_CI_PERF_ARTIFACT_PATH`, merge perf config
- * before `load()` so NDJSON batches work even if `test-apps/api` was generated from an older
+ * before `load()` so JSON Lines perf batches work even if `test-apps/api` was generated from an older
  * template (without `tests/app-template` env wiring).
  */
 const applyCiPerformanceArtifactTestConfig = (strapi) => {

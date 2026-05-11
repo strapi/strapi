@@ -9,10 +9,10 @@ inputs:
   jestOptions:
     description: 'Jest options'
   perfArtifacts:
-    description: 'When true, pass --perf-artifacts to yarn test:api (NDJSON under artifacts/api-perf)'
+    description: 'When true, pass --perf-artifacts to yarn test:api (JSON Lines under artifacts/api-perf)'
     default: 'false'
   perfArtifactSuffix:
-    description: 'Unique filename fragment for the perf NDJSON file (use per matrix cell in CI)'
+    description: 'Unique filename fragment for the perf .jsonl file (use per matrix cell in CI)'
     default: ''
 runs:
   using: 'composite'

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Merge Strapi v1 performance NDJSON batches (one JSON object per line) from CI download dirs
+ * Merge Strapi v1 performance JSON Lines batches (one JSON object per line) from CI download dirs
  * and write a compact markdown summary for dashboards / PR inspection.
  *
  * Usage: node scripts/summarize-api-perf-artifacts.mjs <inputDir> [--out path/to/summary.md]
@@ -26,7 +26,10 @@ async function collectNdjsonFiles(rootDir) {
       const full = path.join(dir, ent.name);
       if (ent.isDirectory()) {
         stack.push(full);
-      } else if (ent.isFile() && (ent.name.endsWith('.ndjson') || ent.name.endsWith('.jsonl'))) {
+      } else if (
+        ent.isFile() &&
+        (ent.name.endsWith('.jsonl') || ent.name.endsWith('.ndjson'))
+      ) {
         out.push(full);
       }
     }
@@ -91,7 +94,7 @@ async function main() {
   const files = await collectNdjsonFiles(path.resolve(inputDir));
   if (files.length === 0) {
     const body =
-      '# API performance artifacts summary\n\nNo `.ndjson` / `.jsonl` files found under the input directory.\n';
+      '# API performance artifacts summary\n\nNo `.jsonl` (or legacy `.ndjson`) files found under the input directory.\n';
     await fs.writeFile(path.resolve(outFile), body, 'utf8');
     console.log(`Wrote ${outFile} (empty)`);
     return;
@@ -124,13 +127,13 @@ async function main() {
   const lines = [
     '# API performance artifacts summary',
     '',
-    'Aggregated from Strapi **v1** NDJSON performance batches (`schemaVersion` 1) collected during `yarn test:api` with `--perf-artifacts`.',
+    'Aggregated from Strapi **v1** JSON Lines performance batches (`schemaVersion` 1) collected during `yarn test:api` with `--perf-artifacts`.',
     '',
     '## Totals (all files)',
     '',
     '| Metric | Value |',
     '| --- | ---: |',
-    `| NDJSON files | ${files.length} |`,
+    `| JSON Lines files | ${files.length} |`,
     `| Parsed batches (valid envelopes) | ${grand.batchesOk} |`,
     `| Slow / error DB events (sum of batch counts) | ${grand.slowQueryCount} |`,
     `| Request summaries (sum) | ${grand.requestCount} |`,

@@ -4,7 +4,7 @@ This project contains complex Strapi schemas for testing migrations between Stra
 
 ## Built-in performance monitoring (demo)
 
-`config/database.ts` enables SQL slow/error instrumentation (`performance.db.*` on `eventHub`, structured warns, NDJSON append to `.tmp/performance-events.ndjson`). `config/server.ts` enables per-request summaries (`performance.request.summary`). `src/index.ts` mirrors summaries to **`strapi.log.debug`** only when the request did DB work (`dbQueryCount` or `slowOrErrorQueryEvents` above zero). `config/server.ts` sets **`STRAPI_APP_LOG_LEVEL`** (default **`debug`**) so those lines appear; set to `info` when you want quieter runs. Other env vars: `DATABASE_PERF_SLOW_MS`, `DATABASE_PERF_CAPTURE_SQL`, `SERVER_PERF_REQUEST_SUMMARY`.
+`config/database.ts` enables SQL slow/error instrumentation (`performance.db.*` on `eventHub`, structured warns, JSON Lines append to `.tmp/performance-events.jsonl`). `config/server.ts` enables per-request summaries (`performance.request.summary`). `src/index.ts` mirrors summaries to **`strapi.log.debug`** only when the request did DB work (`dbQueryCount` or `slowOrErrorQueryEvents` above zero). `config/server.ts` sets **`STRAPI_APP_LOG_LEVEL`** (default **`debug`**) so those lines appear; set to `info` when you want quieter runs. Other env vars: `DATABASE_PERF_SLOW_MS`, `DATABASE_PERF_CAPTURE_SQL`, `SERVER_PERF_REQUEST_SUMMARY`.
 
 ## Content Types
 

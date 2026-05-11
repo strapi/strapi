@@ -9,7 +9,7 @@ import {
 } from './database-config';
 import { PERFORMANCE_ARTIFACT_REQUEST_EVENTS, PERFORMANCE_HUB_EVENT } from './hub-events';
 
-/** NDJSON envelope `schemaVersion` for each flushed line (additive within major). */
+/** JSON Lines: one envelope object per line; `schemaVersion` on each line (additive within major). */
 export const PERFORMANCE_ARTIFACT_BATCH_SCHEMA_VERSION = 1 as const;
 
 export type PerformanceArtifactDisposed = () => Promise<void>;
@@ -182,7 +182,7 @@ function resolveGitSha(): string | undefined {
 }
 
 /**
- * Buffered performance artifact: each flush appends one JSON object (single line) to `artifactPath`.
+ * Buffered performance artifact (JSON Lines): each flush appends one JSON object (single line) to `artifactPath`.
  */
 export function attachPerformanceArtifactWriter(strapi: Core.Strapi): PerformanceArtifactDisposed {
   const output = strapi.config.get('database.performance.output', 'none');

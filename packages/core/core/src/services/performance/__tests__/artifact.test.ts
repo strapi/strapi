@@ -16,7 +16,7 @@ describe('Performance artifact writer', () => {
 
   beforeEach(async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), 'strapi-perf-artifact-'));
-    artifactPath = path.join(tmpDir, 'performance-artifact.ndjson');
+    artifactPath = path.join(tmpDir, 'performance-artifact.jsonl');
   });
 
   afterEach(async () => {
