@@ -5,11 +5,15 @@ import * as constants from '../constants';
 import { Logger } from '../../logger';
 
 jest.mock('execa');
-jest.mock('@strapi/utils', () => ({
-  packageManager: {
-    getPreferred: jest.fn(),
-  },
-}));
+jest.mock(
+  '@strapi/utils',
+  () => ({
+    packageManager: {
+      getPreferred: jest.fn(),
+    },
+  }),
+  { virtual: true }
+);
 
 const mockNpmPackage = {
   _id: '@test/test',
@@ -228,6 +232,52 @@ describe('Package registry URL determination', () => {
     });
     expect(global.fetch).toHaveBeenCalledWith(
       'https://yarn-registry.example.com/@test/package',
+      expect.anything()
+    );
+  });
+
+  it('should fallback to the Yarn Classic registry when the Berry registry key is undefined', async () => {
+    mockGetPreferred.mockResolvedValue('yarn');
+    mockExeca
+      .mockResolvedValueOnce({ stdout: 'undefined\n' } as ExecaReturnValue)
+      .mockResolvedValueOnce({
+        stdout: 'https://classic-yarn-registry.example.com/',
+      } as ExecaReturnValue);
+
+    const pkg = new Package('@test/package', mockCwd, mockLogger);
+    await pkg.refresh();
+
+    expect(mockExeca).toHaveBeenNthCalledWith(1, 'yarn', ['config', 'get', 'npmRegistryServer'], {
+      timeout: 10_000,
+    });
+    expect(mockExeca).toHaveBeenNthCalledWith(2, 'yarn', ['config', 'get', 'registry'], {
+      timeout: 10_000,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://classic-yarn-registry.example.com/@test/package',
+      expect.anything()
+    );
+  });
+
+  it('should fallback to the Yarn Classic registry when the Berry registry lookup fails', async () => {
+    mockGetPreferred.mockResolvedValue('yarn');
+    mockExeca
+      .mockRejectedValueOnce(new Error('Unknown configuration setting'))
+      .mockResolvedValueOnce({
+        stdout: 'https://classic-yarn-registry.example.com/',
+      } as ExecaReturnValue);
+
+    const pkg = new Package('@test/package', mockCwd, mockLogger);
+    await pkg.refresh();
+
+    expect(mockExeca).toHaveBeenNthCalledWith(1, 'yarn', ['config', 'get', 'npmRegistryServer'], {
+      timeout: 10_000,
+    });
+    expect(mockExeca).toHaveBeenNthCalledWith(2, 'yarn', ['config', 'get', 'registry'], {
+      timeout: 10_000,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://classic-yarn-registry.example.com/@test/package',
       expect.anything()
     );
   });
