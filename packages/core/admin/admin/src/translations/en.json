@@ -851,6 +851,7 @@
   "widget.key-statistics.list.entries": "Entries",
   "widget.key-statistics.list.locales": "Locales",
   "widget.key-statistics.list.webhooks": "Webhooks",
+  "widget.performance-quick.context-trigger": "How this data is computed",
   "widget.performance-quick.title": "HTTP performance (window)",
   "widget.performance-routes.title": "Slow routes & SQL",
   "widget.performance.flags": "DB perf: {db} · Request timeline: {req}",

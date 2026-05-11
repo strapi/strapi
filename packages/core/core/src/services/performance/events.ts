@@ -34,7 +34,13 @@ export const bridgeDatabasePerformanceEvents = ({
 
     if (shouldLog(output)) {
       /* Winston pretty-print transports only stringify `message`, not metadata objects */
-      logger.warn(formatStrapiPerformanceHubLogRecord(eventName, payload));
+      const line = formatStrapiPerformanceHubLogRecord(eventName, payload);
+      // Slow queries are observability signals (like request summaries); only failed queries use warn.
+      if (event.type === 'query.error') {
+        logger.warn(line);
+      } else {
+        logger.debug(line);
+      }
     }
   });
 };

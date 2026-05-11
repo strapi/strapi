@@ -17,6 +17,7 @@ describe('Performance events bridge', () => {
 
     const logger = {
       warn: jest.fn(),
+      debug: jest.fn(),
     } as any;
 
     bridgeDatabasePerformanceEvents({ db, eventHub, logger, output: 'none' });
@@ -41,6 +42,43 @@ describe('Performance events bridge', () => {
       })
     );
     expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('logs slow queries at debug when logging output is enabled', () => {
+    const subscribers: Array<(event: any) => void> = [];
+    const db = {
+      subscribeToPerformanceEvents: jest.fn((subscriber) => {
+        subscribers.push(subscriber);
+        return () => {};
+      }),
+    } as any;
+
+    const eventHub = {
+      emit: jest.fn().mockResolvedValue(undefined),
+    } as any;
+
+    const logger = {
+      warn: jest.fn(),
+      debug: jest.fn(),
+    } as any;
+
+    bridgeDatabasePerformanceEvents({ db, eventHub, logger, output: 'log' });
+
+    subscribers[0]({
+      type: 'query.slow',
+      timestamp: '2020-01-01T00:00:00.000Z',
+      durationMs: 120,
+      dbClient: 'postgres',
+      queryType: 'select',
+      queryFingerprint: 'select * from users where id = ?',
+      success: true,
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledTimes(1);
+    const record = JSON.parse(logger.debug.mock.calls[0][0] as string);
+    expect(record.strapiPerfLog.event).toBe(PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW);
   });
 
   it('logs and emits query error events when logging output is enabled', () => {
@@ -58,6 +96,7 @@ describe('Performance events bridge', () => {
 
     const logger = {
       warn: jest.fn(),
+      debug: jest.fn(),
     } as any;
 
     bridgeDatabasePerformanceEvents({ db, eventHub, logger, output: 'log' });
@@ -82,6 +121,7 @@ describe('Performance events bridge', () => {
         errorCode: 'SQLITE_ERROR',
       })
     );
+    expect(logger.debug).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledTimes(1);
     const record = JSON.parse(logger.warn.mock.calls[0][0] as string);
     expect(record.strapiPerfLog.schemaVersion).toBe(1);

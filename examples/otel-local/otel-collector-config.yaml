@@ -1,0 +1,27 @@
+# Minimal OpenTelemetry Collector for local Strapi dev.
+# Receives OTLP gRPC + HTTP (same ports the official distro uses) and prints telemetry to stdout.
+#
+# Strapi sends:
+#   - Traces → http://localhost:4318/v1/traces   (when server.observability.tracing is on)
+#   - Metrics → http://localhost:4318/v1/metrics (when server.observability.metrics is on)
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      exporters: [debug]

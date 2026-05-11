@@ -1,5 +1,16 @@
+import * as React from 'react';
+
 import { useAuth, useTracking } from '@strapi/admin/strapi-admin';
-import { Avatar, Badge, Box, Flex, LinkButton, Typography } from '@strapi/design-system';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Flex,
+  IconButton,
+  LinkButton,
+  Popover,
+  Typography,
+} from '@strapi/design-system';
 import {
   Cloud,
   CloudUpload,
@@ -11,6 +22,7 @@ import {
   Layout,
   Graph,
   Webhooks,
+  Information,
 } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -307,6 +319,91 @@ const usePerformanceMetricsFormatters = () => {
   return { formatInt, formatMs, formatPct };
 };
 
+const PerformanceQuickStatsContextPopover = ({
+  tailWindowLines,
+  tailWindowKb,
+  databasePerformanceEnabled,
+  requestTimelineEnabled,
+  lastGeneratedAt,
+  linesScanned,
+  batchesParsed,
+}: {
+  tailWindowLines: number;
+  tailWindowKb: number;
+  databasePerformanceEnabled: boolean;
+  requestTimelineEnabled: boolean;
+  lastGeneratedAt: string | null | undefined;
+  linesScanned: number;
+  batchesParsed: number;
+}) => {
+  const { formatMessage } = useIntl();
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger>
+        <IconButton
+          type="button"
+          variant="tertiary"
+          size="S"
+          label={formatMessage({
+            id: 'widget.performance-quick.context-trigger',
+            defaultMessage: 'How this data is computed',
+          })}
+        >
+          <Information />
+        </IconButton>
+      </Popover.Trigger>
+      <Popover.Content side="bottom" align="end" style={{ maxWidth: '32rem' }}>
+        <Flex direction="column" gap={3} alignItems="flex-start" padding={4}>
+          <Typography variant="omega" textColor="neutral600">
+            {formatMessage(
+              {
+                id: 'widget.performance-quick.caption',
+                defaultMessage:
+                  'Aggregated from the last {lines} non-empty lines (~{kb} KB) of the performance artifact — a rolling window, not lifetime totals.',
+              },
+              { lines: tailWindowLines, kb: tailWindowKb }
+            )}
+          </Typography>
+          <Typography variant="omega" textColor="neutral600">
+            {formatMessage(
+              {
+                id: 'widget.performance.flags',
+                defaultMessage: 'DB perf: {db} · Request timeline: {req}',
+              },
+              {
+                db: databasePerformanceEnabled ? 'on' : 'off',
+                req: requestTimelineEnabled ? 'on' : 'off',
+              }
+            )}
+          </Typography>
+          {lastGeneratedAt ? (
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage(
+                {
+                  id: 'widget.performance.last-flush',
+                  defaultMessage: 'Last batch: {time}',
+                },
+                { time: lastGeneratedAt }
+              )}
+            </Typography>
+          ) : null}
+          <Typography variant="omega" textColor="neutral600">
+            {formatMessage(
+              {
+                id: 'widget.performance.tail-meta',
+                defaultMessage: '{linesRead} tail lines · {batches} v1 batches',
+              },
+              { linesRead: linesScanned, batches: batchesParsed }
+            )}
+          </Typography>
+        </Flex>
+      </Popover.Content>
+    </Popover.Root>
+  );
+};
+
 const PerformanceQuickStatsWidget = () => {
   const { formatMessage } = useIntl();
   const { formatInt, formatMs, formatPct } = usePerformanceMetricsFormatters();
@@ -348,205 +445,174 @@ const PerformanceQuickStatsWidget = () => {
   const kb = perfTailKb(tailWindow.maxTailBytes);
 
   return (
-    <Flex direction="column" gap={3} height="100%">
-      <Typography variant="pi" textColor="neutral600">
-        {formatMessage(
-          {
-            id: 'widget.performance-quick.caption',
-            defaultMessage:
-              'Aggregated from the last {lines} non-empty lines (~{kb} KB) of the performance artifact — a rolling window, not lifetime totals.',
-          },
-          { lines: tailWindow.maxNonEmptyLines, kb }
-        )}
-      </Typography>
-      <Flex justifyContent="space-between" alignItems="center" gap={2} wrap="wrap">
-        <Typography variant="pi" textColor="neutral500">
-          {formatMessage(
-            {
-              id: 'widget.performance.flags',
-              defaultMessage: 'DB perf: {db} · Request timeline: {req}',
-            },
-            {
-              db: databasePerformanceEnabled ? 'on' : 'off',
-              req: requestTimelineEnabled ? 'on' : 'off',
-            }
-          )}
-        </Typography>
-        {lastGeneratedAt ? (
-          <Typography variant="pi" textColor="neutral500" textAlign="right">
-            {formatMessage(
-              {
-                id: 'widget.performance.last-flush',
-                defaultMessage: 'Last batch: {time}',
-              },
-              { time: lastGeneratedAt }
-            )}
-          </Typography>
-        ) : null}
+    <Flex direction="column" gap={2} flex={1} minHeight={0} width="100%">
+      <Flex justifyContent="flex-end" alignItems="center" shrink={0} width="100%">
+        <PerformanceQuickStatsContextPopover
+          tailWindowLines={tailWindow.maxNonEmptyLines}
+          tailWindowKb={kb}
+          databasePerformanceEnabled={databasePerformanceEnabled}
+          requestTimelineEnabled={requestTimelineEnabled}
+          lastGeneratedAt={lastGeneratedAt}
+          linesScanned={linesScanned}
+          batchesParsed={batchesParsed}
+        />
       </Flex>
-      <Typography variant="pi" textColor="neutral500">
-        {formatMessage(
-          {
-            id: 'widget.performance.tail-meta',
-            defaultMessage: '{linesRead} tail lines · {batches} v1 batches',
-          },
-          { linesRead: linesScanned, batches: batchesParsed }
-        )}
-      </Typography>
-      <Grid>
-        <PerfStatCell>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-              {formatMessage({
-                id: 'widget.performance-quick.requests',
-                defaultMessage: 'Request summaries',
-              })}
-            </Typography>
-            <Typography variant="omega" textColor="neutral600">
-              {formatMessage({
-                id: 'widget.performance-quick.requests-hint',
-                defaultMessage: 'Sampled HTTP rows in window',
-              })}
-            </Typography>
-            <Typography variant="alpha" fontWeight="bold">
-              {formatInt(q.requestSummariesInWindow)}
-            </Typography>
-          </Flex>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-              {formatMessage({
-                id: 'widget.performance-quick.avg',
-                defaultMessage: 'Avg wall time',
-              })}
-            </Typography>
-            <Typography variant="omega" textColor="neutral600">
-              {formatMessage({
-                id: 'widget.performance-quick.avg-hint',
-                defaultMessage: 'Mean request duration',
-              })}
-            </Typography>
-            <Typography variant="alpha" fontWeight="bold">
-              {formatMs(q.avgRequestDurationMs)}
-            </Typography>
-          </Flex>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-              {formatMessage({
-                id: 'widget.performance-quick.median',
-                defaultMessage: 'Median wall time',
-              })}
-            </Typography>
-            <Typography variant="omega" textColor="neutral600">
-              {formatMessage({
-                id: 'widget.performance-quick.median-hint',
-                defaultMessage: 'p50 of summaries',
-              })}
-            </Typography>
-            <Typography variant="alpha" fontWeight="bold">
-              {formatMs(q.medianRequestDurationMs)}
-            </Typography>
-          </Flex>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-              {formatMessage({
-                id: 'widget.performance-quick.p95',
-                defaultMessage: 'p95 wall time',
-              })}
-            </Typography>
-            <Typography variant="omega" textColor="neutral600">
-              {formatMessage({
-                id: 'widget.performance-quick.p95-hint',
-                defaultMessage: 'Slow tail of requests',
-              })}
-            </Typography>
-            <Typography variant="alpha" fontWeight="bold">
-              {formatMs(q.p95RequestDurationMs)}
-            </Typography>
-          </Flex>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-              {formatMessage({
-                id: 'widget.performance-quick.db-share',
-                defaultMessage: 'Avg DB % of wall',
-              })}
-            </Typography>
-            <Typography variant="omega" textColor="neutral600">
-              {formatMessage({
-                id: 'widget.performance-quick.db-share-hint',
-                defaultMessage: 'dbTotalMs ÷ duration per summary',
-              })}
-            </Typography>
-            <Typography variant="alpha" fontWeight="bold">
-              {formatPct(q.avgDbPercentOfWallTime)}
-            </Typography>
-          </Flex>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-              {formatMessage({
-                id: 'widget.performance-quick.db-ms',
-                defaultMessage: 'Avg DB time',
-              })}
-            </Typography>
-            <Typography variant="omega" textColor="neutral600">
-              {formatMessage({
-                id: 'widget.performance-quick.db-ms-hint',
-                defaultMessage: 'Mean dbTotalMs',
-              })}
-            </Typography>
-            <Typography variant="alpha" fontWeight="bold">
-              {formatMs(q.avgDbTimePerRequestMs)}
-            </Typography>
-          </Flex>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-              {formatMessage({
-                id: 'widget.performance-quick.slow-sql',
-                defaultMessage: 'Slow / error SQL rows',
-              })}
-            </Typography>
-            <Typography variant="omega" textColor="neutral600">
-              {formatMessage({
-                id: 'widget.performance-quick.slow-sql-hint',
-                defaultMessage: 'In artifact window',
-              })}
-            </Typography>
-            <Typography variant="alpha" fontWeight="bold">
-              {formatInt(q.slowDbEventsInWindow)}
-            </Typography>
-          </Flex>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-              {formatMessage({
-                id: 'widget.performance-quick.slow-in-req',
-                defaultMessage: 'Slow queries (per request)',
-              })}
-            </Typography>
-            <Typography variant="omega" textColor="neutral600">
-              {formatMessage({
-                id: 'widget.performance-quick.slow-in-req-hint',
-                defaultMessage: 'Sum of slowQueryCount on summaries',
-              })}
-            </Typography>
-            <Typography variant="alpha" fontWeight="bold">
-              {formatInt(q.slowOrErrorQueriesAttributedToRequests)}
-            </Typography>
-          </Flex>
-        </PerfStatCell>
-      </Grid>
+      <Box flex={1} minHeight={0} width="100%" overflow="auto">
+        <Grid>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.requests',
+                  defaultMessage: 'Request summaries',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.requests-hint',
+                  defaultMessage: 'Sampled HTTP rows in window',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {formatInt(q.requestSummariesInWindow)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.avg',
+                  defaultMessage: 'Avg wall time',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.avg-hint',
+                  defaultMessage: 'Mean request duration',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {formatMs(q.avgRequestDurationMs)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.median',
+                  defaultMessage: 'Median wall time',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.median-hint',
+                  defaultMessage: 'p50 of summaries',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {formatMs(q.medianRequestDurationMs)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.p95',
+                  defaultMessage: 'p95 wall time',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.p95-hint',
+                  defaultMessage: 'Slow tail of requests',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {formatMs(q.p95RequestDurationMs)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.db-share',
+                  defaultMessage: 'Avg DB % of wall',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.db-share-hint',
+                  defaultMessage: 'dbTotalMs ÷ duration per summary',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {formatPct(q.avgDbPercentOfWallTime)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.db-ms',
+                  defaultMessage: 'Avg DB time',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.db-ms-hint',
+                  defaultMessage: 'Mean dbTotalMs',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {formatMs(q.avgDbTimePerRequestMs)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.slow-sql',
+                  defaultMessage: 'Slow / error SQL rows',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.slow-sql-hint',
+                  defaultMessage: 'In artifact window',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {formatInt(q.slowDbEventsInWindow)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.slow-in-req',
+                  defaultMessage: 'Slow queries (per request)',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.slow-in-req-hint',
+                  defaultMessage: 'Sum of slowQueryCount on summaries',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {formatInt(q.slowOrErrorQueriesAttributedToRequests)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+        </Grid>
+      </Box>
     </Flex>
   );
 };
