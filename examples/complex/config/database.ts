@@ -54,7 +54,11 @@ export default ({ env }) => {
       ...connections[client],
       acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
     },
-    /** Demo: SQL perf signals + hub bridge + JSON Lines artifact (see config/server.ts for request summaries). */
+    /**
+     * Demo: SQL perf signals + hub bridge + JSON Lines artifact (see `config/server.ts` for request summaries).
+     * Path is under the app root (`__dirname/../.tmp`) so it works with the admin Performance snapshot widget
+     * and `yarn develop` from any working directory.
+     */
     performance: {
       enabled: true,
       slowQueryMs: env.int('DATABASE_PERF_SLOW_MS', 50),
@@ -62,9 +66,9 @@ export default ({ env }) => {
       captureSqlText: env.bool('DATABASE_PERF_CAPTURE_SQL', true),
       captureBindings: env.bool('DATABASE_PERF_CAPTURE_BINDINGS', false),
       output: 'both',
-      artifactPath: path.join(process.cwd(), '.tmp', 'performance-events.jsonl'),
-      artifactFlushIntervalMs: env.int('DATABASE_PERF_ARTIFACT_FLUSH_MS', 3000),
-      artifactMaxEvents: env.int('DATABASE_PERF_ARTIFACT_MAX_EVENTS', 500),
+      artifactPath: path.join(__dirname, '..', '.tmp', 'performance-events.jsonl'),
+      flushIntervalMs: env.int('DATABASE_PERF_ARTIFACT_FLUSH_MS', 3000),
+      maxEvents: env.int('DATABASE_PERF_ARTIFACT_MAX_EVENTS', 500),
     },
   };
 };
