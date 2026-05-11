@@ -7,6 +7,7 @@ import cluster from 'node:cluster';
 import { createStrapi } from '@strapi/core';
 
 import type { CLIContext } from '../cli/types';
+import type { TsConfig } from '../cli/utils/tsconfig';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import { createBuildContext } from './create-build-context';
@@ -28,6 +29,42 @@ interface DevelopOptions extends CLIContext {
   watchAdmin?: boolean;
   buildAdmin?: boolean;
 }
+
+// Skip directories that don't carry source: avoids rescanning dist/build/cache trees.
+const NON_SOURCE_DIRS = new Set(['node_modules', 'dist', 'build', '.tmp', '.cache', '.strapi']);
+
+// Highest mtime under cwd, ignoring NON_SOURCE_DIRS and dotfiles.
+const newestSourceMtime = async (dir: string): Promise<number> => {
+  let latest = 0;
+  let entries;
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch {
+    return latest;
+  }
+  for (const entry of entries) {
+    if (NON_SOURCE_DIRS.has(entry.name) || entry.name.startsWith('.')) continue;
+    const full = path.join(dir, entry.name);
+    const mtime = entry.isDirectory()
+      ? await newestSourceMtime(full)
+      : await fs
+          .stat(full)
+          .then((s) => s.mtimeMs)
+          .catch(() => 0);
+    if (mtime > latest) latest = mtime;
+  }
+  return latest;
+};
+
+// True when dist/src/index.js and tsconfig.tsbuildinfo exist and post-date all source.
+const isDistUpToDate = async (cwd: string, tsconfig: TsConfig): Promise<boolean> => {
+  const distDir = tsconfig.config.options.outDir;
+  if (!distDir) return false;
+  const entry = await fs.stat(path.join(distDir, 'src/index.js')).catch(() => null);
+  const info = await fs.stat(path.join(distDir, 'tsconfig.tsbuildinfo')).catch(() => null);
+  if (!entry || !info) return false;
+  return (await newestSourceMtime(cwd)) <= entry.mtimeMs;
+};
 
 // This method removes all non-admin build files from the dist directory
 const cleanupDistDirectory = async ({
@@ -92,7 +129,7 @@ const develop = async ({
       return;
     }
 
-    if (tsconfig?.config) {
+    if (tsconfig?.config && !(await isDistUpToDate(cwd, tsconfig))) {
       // Build without diagnostics in case schemas have changed
       await cleanupDistDirectory({ tsconfig, logger, timer });
       try {
@@ -246,40 +283,56 @@ const develop = async ({
       loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
       loadStrapiSpinner.succeed();
 
-      // For TS projects, type generation is a requirement for the develop command so that the server can restart
-      // For JS projects, we respect the experimental autogenerate setting
-      if (tsconfig?.config || strapi.config.get('typescript.autogenerate') !== false) {
-        timer.start('generatingTS');
-        generatingTsSpinner.start();
-
-        await tsUtils.generators.generate({
-          strapi: strapiInstance,
-          pwd: cwd,
-          rootDir: undefined,
-          logger: { silent: true, debug: false },
-          artifacts: { contentTypes: true, components: true },
-        });
-
-        const generatingDuration = timer.end('generatingTS');
-        generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
-        generatingTsSpinner.succeed();
-      }
-
-      if (tsconfig?.config) {
-        timer.start('compilingTS');
-        compilingTsSpinner.start();
-
-        await cleanupDistDirectory({ tsconfig, logger, timer });
-        await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
-
-        const compilingDuration = timer.end('compilingTS');
-        compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
-        compilingTsSpinner.succeed();
-      }
-
       ensureWatcher();
 
       strapiInstance.start();
+
+      // Type generation (for IDE) and the diagnostic TS pass are not on the
+      // request path. Defer both so they run after `strapiInstance.start()`
+      // resolves; errors surface as deferred log lines instead of blocking.
+      setImmediate(async () => {
+        // For TS projects, type generation is a requirement for the develop command so that the server can restart
+        // For JS projects, we respect the experimental autogenerate setting
+        if (tsconfig?.config || strapi.config.get('typescript.autogenerate') !== false) {
+          timer.start('generatingTS');
+          generatingTsSpinner.start();
+
+          try {
+            await tsUtils.generators.generate({
+              strapi: strapiInstance,
+              pwd: cwd,
+              rootDir: undefined,
+              logger: { silent: true, debug: false },
+              artifacts: { contentTypes: true, components: true },
+            });
+
+            const generatingDuration = timer.end('generatingTS');
+            generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
+            generatingTsSpinner.succeed();
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            generatingTsSpinner.text = `Type generation failed: ${message}`;
+            generatingTsSpinner.fail();
+          }
+        }
+
+        if (tsconfig?.config) {
+          timer.start('compilingTS');
+          compilingTsSpinner.start();
+
+          try {
+            await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+
+            const compilingDuration = timer.end('compilingTS');
+            compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
+            compilingTsSpinner.succeed();
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            compilingTsSpinner.text = `TS diagnostics failed: ${message}`;
+            compilingTsSpinner.fail();
+          }
+        }
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error(`Error during development: ${message}`);
