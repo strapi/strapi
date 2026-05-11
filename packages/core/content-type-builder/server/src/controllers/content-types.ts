@@ -62,7 +62,18 @@ export default {
     try {
       await validateContentTypeInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      // Return structured validation error with details
+      const validationError = error as Error & { details?: unknown };
+      return ctx.send(
+        {
+          error: {
+            name: validationError.name || 'ValidationError',
+            message: validationError.message || 'Validation failed',
+            details: validationError.details || {},
+          },
+        },
+        400
+      );
     }
 
     try {
@@ -95,7 +106,17 @@ export default {
       await strapi.telemetry.send('didNotCreateContentType', {
         eventProperties: { error: (err as Error).message || err },
       });
-      ctx.send({ error: (err as Error).message || 'Unknown error' }, 400);
+      const error = err as Error & { details?: unknown };
+      ctx.send(
+        {
+          error: {
+            name: error.name || 'ApplicationError',
+            message: error.message || 'Unknown error',
+            details: error.details || {},
+          },
+        },
+        400
+      );
     }
   },
 
@@ -110,7 +131,18 @@ export default {
     try {
       await validateUpdateContentTypeInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      // Return structured validation error with details
+      const validationError = error as Error & { details?: unknown };
+      return ctx.send(
+        {
+          error: {
+            name: validationError.name || 'ValidationError',
+            message: validationError.message || 'Validation failed',
+            details: validationError.details || {},
+          },
+        },
+        400
+      );
     }
 
     try {
@@ -128,7 +160,17 @@ export default {
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
-      ctx.send({ error: (error as Error)?.message || 'Unknown error' }, 400);
+      const err = error as Error & { details?: unknown };
+      ctx.send(
+        {
+          error: {
+            name: err.name || 'ApplicationError',
+            message: err?.message || 'Unknown error',
+            details: err.details || {},
+          },
+        },
+        400
+      );
     }
   },
 
