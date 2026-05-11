@@ -4,7 +4,6 @@ const path = require('path');
 const _ = require('lodash');
 const dotenv = require('dotenv');
 const { createStrapi } = require('../../core/strapi');
-const { Core } = require('../../core/types');
 const { createUtils } = require('./utils');
 
 const superAdminCredentials = {
@@ -15,6 +14,57 @@ const superAdminCredentials = {
 };
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
+
+/**
+ * When `yarn test:api --perf-artifacts` sets `STRAPI_CI_PERF_ARTIFACT_PATH`, merge perf config
+ * before `load()` so NDJSON batches work even if `test-apps/api` was generated from an older
+ * template (without `tests/app-template` env wiring).
+ */
+const applyCiPerformanceArtifactTestConfig = (strapi) => {
+  const artifactPath = process.env.STRAPI_CI_PERF_ARTIFACT_PATH;
+  if (typeof artifactPath !== 'string' || artifactPath.length === 0) {
+    return;
+  }
+
+  const intEnv = (key, fallback) => {
+    const raw = process.env[key];
+    if (raw === undefined || raw === '') {
+      return fallback;
+    }
+    const n = Number.parseInt(String(raw), 10);
+    return Number.isFinite(n) ? n : fallback;
+  };
+
+  const floatEnv = (key, fallback) => {
+    const raw = process.env[key];
+    if (raw === undefined || raw === '') {
+      return fallback;
+    }
+    const n = Number.parseFloat(String(raw));
+    return Number.isFinite(n) ? n : fallback;
+  };
+
+  const dbPerf = strapi.config.get('database.performance') || {};
+  strapi.config.set('database.performance', {
+    ...dbPerf,
+    enabled: true,
+    output: 'artifact',
+    artifactPath,
+    slowQueryMs: intEnv('STRAPI_CI_PERF_SLOW_QUERY_MS', 5),
+    sampleRate: Math.min(1, Math.max(0, floatEnv('STRAPI_CI_PERF_SAMPLE_RATE', 1))),
+    flushIntervalMs: intEnv('STRAPI_CI_PERF_FLUSH_MS', 2000),
+    maxEvents: intEnv('STRAPI_CI_PERF_MAX_EVENTS', 10000),
+  });
+
+  const srvPerf = strapi.config.get('server.performance') || {};
+  strapi.config.set('server.performance', {
+    ...srvPerf,
+    requestSummaryEnabled: true,
+    requestSampleRate: Math.min(1, Math.max(0, floatEnv('STRAPI_CI_PERF_REQUEST_SAMPLE_RATE', 1))),
+    slowRequestMs: intEnv('STRAPI_CI_PERF_SLOW_REQUEST_MS', 500),
+    emitStageEvents: process.env.STRAPI_CI_PERF_EMIT_STAGES === 'true',
+  });
+};
 
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
@@ -60,6 +110,8 @@ const createStrapiInstance = async ({
       }
     }
   }
+
+  applyCiPerformanceArtifactTestConfig(instance);
 
   if (bypassAuth) {
     instance.get('auth').register('content-api', {
