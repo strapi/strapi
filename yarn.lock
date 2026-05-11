@@ -10406,6 +10406,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
+    "@opentelemetry/api": "npm:^1.9.0"
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
     "@types/koa": "npm:2.13.4"
