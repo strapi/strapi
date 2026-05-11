@@ -1,0 +1,382 @@
+model {
+  public_client = person 'Public API client' {
+    description 'Browser, mobile app, integration, or external consumer calling the public Content API.'
+  }
+
+  content_editor = person 'Content editor' {
+    description 'Admin user configuring content, API tokens, roles, and permissions.'
+  }
+
+  developer = person 'Developer' {
+    description 'Developer creating Strapi applications, content types, plugins, and custom code.'
+  }
+
+  external_system = external_system 'External integration' {
+    description 'Third-party service consuming published content through REST or GraphQL.'
+  }
+
+  aws_s3 = external_system 'AWS S3' {
+    description 'External object storage service used by the AWS S3 upload provider to store, retrieve, delete, and sign uploaded media assets.'
+    technology 'Amazon S3'
+  }
+
+  strapi = software_system 'Strapi CMS' {
+    description 'The running Strapi CMS application assembled from the server runtime, admin web application, CLI tooling, plugins, app APIs, configuration, and content type schemas.'
+    technology 'Node.js, Koa, React, Yarn workspaces, Nx'
+
+    server_runtime = container 'Strapi server runtime' {
+      description 'Node.js runtime that loads Strapi, registers APIs and plugins, serves HTTP routes, executes content operations, and talks to persistence and providers.'
+      technology 'packages/core/core, packages/core/strapi, Koa'
+
+      http_server = component 'HTTP server and Koa router' {
+        description 'Creates the HTTP server, mounts admin/content/plugin APIs, and dispatches requests through Koa routing.'
+        technology 'packages/core/core/src/services/server'
+      }
+
+      route_registration = component 'Route registration' {
+        description 'Registers admin routes, plugin routes, and app API routes. App API routers are tagged as content-api.'
+        technology 'packages/core/core/src/services/server/register-routes.ts'
+      }
+
+      endpoint_composer = component 'Endpoint composer' {
+        description 'Builds each Koa route handler chain with route metadata, authentication, authorization, policies, middlewares, return body middleware, and controller action.'
+        technology 'packages/core/core/src/services/server/compose-endpoint.ts'
+      }
+
+      schema_loader = component 'Content type schema loader' {
+        description 'Loads application and plugin content type schemas into the Strapi runtime during startup.'
+        technology 'packages/core/core loaders, content type schemas'
+      }
+
+      schema_sync = component 'Database schema sync' {
+        description 'Synchronizes loaded content type definitions with database metadata and tables through the database layer.'
+        technology '@strapi/database schema sync'
+      }
+
+      api_module_loader = component 'API module loader' {
+        description 'Loads application API route, controller, service, policy, and middleware modules that make up the runtime Content API surface.'
+        technology 'packages/core/core loaders'
+      }
+
+      content_api = component 'Content API service' {
+        description 'Framework service exposed as strapi.contentAPI. Owns Content API route metadata, permissions utilities, validation, sanitization, and extra route schemas.'
+        technology 'packages/core/core/src/services/content-api'
+      }
+
+      content_api_permissions = component 'Content API permissions utilities' {
+        description 'Discovers Content API controller actions, registers permission actions, and generates abilities.'
+        technology 'packages/core/core/src/services/content-api/permissions'
+      }
+
+      content_api_validation = component 'Content API validation and sanitization' {
+        description 'Validates and sanitizes Content API query, input, and output using content type schemas and auth context.'
+        technology '@strapi/utils validate/sanitize'
+      }
+
+      auth = component 'Authentication and authorization' {
+        description 'Strategy registry and authorization layer selected by route.info.type.'
+        technology 'packages/core/core/src/services/auth'
+      }
+
+      content_api_token_strategy = component 'Content API token strategy' {
+        description 'Authenticates API tokens, handles full/read-only/custom token behavior, and verifies route scopes.'
+        technology 'packages/core/admin/server/src/strategies/content-api-token.ts'
+      }
+
+      users_permissions_strategy = component 'Users-permissions strategy' {
+        description 'Authenticates JWT users or public role permissions and generates Content API abilities.'
+        technology 'packages/plugins/users-permissions/server/strategies/users-permissions.js'
+      }
+
+      core_api_layer = component 'Generated core API layer' {
+        description 'Factory-generated routers, controllers, and services for collection and single content types.'
+        technology 'packages/core/core/src/core-api'
+      }
+
+      admin_server_apis = component 'Admin server APIs' {
+        description 'Server-side admin module that registers admin routes, controllers, services, content types, auth, permissions, and optional static admin panel serving.'
+        technology 'packages/core/admin/server, packages/core/core/src/loaders/admin.ts'
+      }
+
+      content_manager_server = component 'Content Manager server module' {
+        description 'Admin-facing content editing APIs and services for collection types, single types, relations, publishing, history, and preview integrations.'
+        technology 'packages/core/content-manager/server'
+      }
+
+      cm_routes = component 'Content Manager routes' {
+        description 'Admin route definitions for initialization, content type configuration, components, UID generation, relations, collection types, single types, history, preview, and homepage.'
+        technology 'packages/core/content-manager/server/src/routes'
+      }
+
+      cm_routing_middleware = component 'Content Manager routing middleware' {
+        description 'Content Manager route middleware that attaches model-aware routing context before controller execution.'
+        technology 'packages/core/content-manager/server/src/middlewares/routing.ts'
+      }
+
+      cm_controllers = component 'Content Manager controllers' {
+        description 'Controller handlers for collection types, single types, components, content types, relations, UID generation, initialization, history, preview, and homepage.'
+        technology 'packages/core/content-manager/server/src/controllers'
+      }
+
+      cm_document_manager = component 'Content Manager document-manager service' {
+        description 'Service that performs admin content operations through strapi.documents and targeted database queries for locale, count, existence, and pagination checks.'
+        technology 'packages/core/content-manager/server/src/services/document-manager.ts'
+      }
+
+      cm_permission_services = component 'Content Manager permission services' {
+        description 'Permission and permission-checker services used by Content Manager controllers to evaluate admin access to content operations.'
+        technology 'packages/core/content-manager/server/src/services/permission*.ts'
+      }
+
+      cm_populate_metadata = component 'Content Manager populate and metadata services' {
+        description 'Services that build populate plans, map data, compute document metadata, and resolve field sizing for Content Manager responses.'
+        technology 'packages/core/content-manager/server/src/services/populate-builder.ts, data-mapper.ts, document-metadata.ts, field-sizes.ts'
+      }
+
+      cm_schema_configuration = component 'Content Manager schema and configuration services' {
+        description 'Services for content type and component configuration surfaced to the Admin Content Manager UI.'
+        technology 'packages/core/content-manager/server/src/services/content-types.ts, components.ts'
+      }
+
+      cm_history_preview_homepage = component 'Content Manager history, preview, and homepage modules' {
+        description 'Feature modules that add history, preview, and homepage routes, controllers, and services to the Content Manager server module.'
+        technology 'packages/core/content-manager/server/src/history, preview, homepage'
+      }
+
+      content_type_builder_server = component 'Content-Type Builder server module' {
+        description 'Admin-facing schema management APIs and services for content types, components, and schema builder behavior.'
+        technology 'packages/core/content-type-builder/server'
+      }
+
+      plugin_system = component 'Plugin system' {
+        description 'Discovers enabled plugins, loads strapi-server entrypoints, and wires plugin routes, controllers, services, policies, middlewares, content types, and lifecycles into the runtime.'
+        technology 'packages/core/core/src/loaders/plugins, packages/core/core/src/services/server/register-routes.ts'
+      }
+
+      plugin_modules = component 'Plugin modules' {
+        description 'Concrete official and application plugins loaded by the plugin system.'
+        technology 'packages/plugins, packages/core/* plugins, app plugins'
+      }
+
+      graphql_plugin = component 'GraphQL plugin' {
+        description 'Official plugin that contributes a GraphQL Content API surface from loaded Strapi content type schemas.'
+        technology 'packages/plugins/graphql'
+      }
+
+      graphql_endpoint = component 'GraphQL endpoint and Apollo server' {
+        description 'Apollo Server mounted by the GraphQL plugin on the configured GraphQL endpoint, defaulting to /graphql.'
+        technology 'packages/plugins/graphql/server/src/bootstrap.ts, @apollo/server'
+      }
+
+      graphql_schema_builder = component 'GraphQL schema builder' {
+        description 'Builds the GraphQL schema, generated queries, mutations, types, filters, and extension schema from Strapi content type metadata.'
+        technology 'packages/plugins/graphql/server/src/services/content-api, builders'
+      }
+
+      graphql_resolvers = component 'GraphQL resolvers and wrappers' {
+        description 'Generated and extended resolvers wrapped with GraphQL auth, policy, middleware, and resolver configuration before resolving content operations.'
+        technology 'packages/plugins/graphql/server/src/services/content-api/wrap-resolvers.ts, builders/resolvers'
+      }
+
+      upload_plugin = component 'Upload plugin' {
+        description 'Contributes upload Content API routes, media services, and provider loading for configured upload providers.'
+        technology 'packages/core/upload'
+      }
+
+      upload_service = component 'Upload service' {
+        description 'Server-side service that handles media upload, file metadata, provider calls, and media operations exposed by the Upload plugin.'
+        technology 'packages/core/upload/server/src/services'
+      }
+
+      upload_provider_loader = component 'Upload provider loader' {
+        description 'Loads the configured upload provider package from plugin::upload.provider and wraps provider methods.'
+        technology 'packages/core/upload/server/src/register.ts'
+      }
+
+      aws_s3_upload_provider = component 'AWS S3 upload provider' {
+        description 'Provider implementation that adapts Strapi upload operations to AWS S3 and S3-compatible APIs.'
+        technology 'packages/providers/upload-aws-s3'
+      }
+
+      document_service = component 'Document Service' {
+        description 'Primary high-level content API for reading and writing content documents.'
+        technology 'packages/core/core/src/services/document-service'
+      }
+
+      database_layer = component 'Database abstraction' {
+        description 'Database abstraction used by the server runtime to query and persist content, relations, components, users, roles, and API tokens.'
+        technology '@strapi/database'
+      }
+    }
+
+    admin_web_app = container 'Admin web application' {
+      description 'React admin dashboard bundle used by content editors and administrators. It can be built and served separately from the server runtime.'
+      technology 'packages/core/admin/admin, React'
+
+      admin_shell = component 'Admin shell' {
+        description 'Core React admin application shell, routing, layout, and plugin extension host.'
+        technology 'packages/core/admin/admin/src'
+      }
+
+      content_manager_ui = component 'Content Manager UI' {
+        description 'Admin UI for browsing and editing content entries.'
+        technology 'packages/core/content-manager/admin'
+      }
+
+      media_library_ui = component 'Media Library UI' {
+        description 'Admin UI for uploading, browsing, selecting, and managing media assets.'
+        technology 'packages/core/upload/admin'
+      }
+
+      content_type_builder_ui = component 'Content-Type Builder UI' {
+        description 'Admin UI for editing content type and component schemas.'
+        technology 'packages/core/content-type-builder/admin'
+      }
+
+      settings_api_tokens_ui = component 'Settings and API tokens UI' {
+        description 'Admin settings surfaces for configuring roles, permissions, and API tokens.'
+        technology 'packages/core/admin/admin/src/pages/Settings'
+      }
+
+      plugin_admin_extensions = component 'Plugin admin extensions' {
+        description 'Admin-side plugin extensions contributed through strapi-admin entrypoints.'
+        technology 'packages/*/*/admin, strapi-admin exports'
+      }
+    }
+
+    cli_tooling = container 'CLI tooling' {
+      description 'Command-line tooling for creating apps, running Strapi, generating OpenAPI output, and cloud workflows.'
+      technology 'packages/core/strapi/src/cli, packages/cli'
+
+      create_strapi_app = component 'Create Strapi App' {
+        description 'Project scaffolding workflow exposed through create-strapi-app.'
+        technology 'packages/cli/create-strapi-app, packages/cli/create-strapi'
+      }
+
+      cloud_cli = component 'Cloud CLI' {
+        description 'Strapi Cloud command workflows used from the Strapi CLI.'
+        technology 'packages/cli/cloud'
+      }
+
+      openapi_command = component 'OpenAPI command' {
+        description 'CLI command that generates OpenAPI documentation from Strapi routes.'
+        technology 'packages/core/strapi/src/cli/commands/openapi'
+      }
+
+      generators = component 'Generators' {
+        description 'Scaffolding generators for APIs, content types, plugins, and project files.'
+        technology 'packages/generators'
+      }
+    }
+
+    database = database 'Application database' {
+      description 'Configured application database: SQLite, PostgreSQL, MySQL, or MariaDB.'
+      technology '@strapi/database client'
+    }
+
+    application_source = code_package 'Application source files' {
+      description 'Files in a Strapi application that describe content schemas and application API modules.'
+
+      content_type_schema_files = code_package 'Content type schema files' {
+        description 'schema.json files for APIs, components, and plugin content types.'
+        technology 'src/api/**/content-types/**/schema.json, src/components/**, plugin schemas'
+      }
+
+      api_module_files = code_package 'API route/controller/service files' {
+        description 'Application route, controller, service, policy, and middleware modules loaded into the runtime.'
+        technology 'src/api/**/routes, controllers, services, policies, middlewares'
+      }
+    }
+
+    admin_web_app.content_type_builder_ui -> server_runtime.content_type_builder_server 'calls schema builder admin endpoints'
+    server_runtime.content_type_builder_server -> application_source.content_type_schema_files 'writes schema definitions'
+    cli_tooling.generators -> application_source.content_type_schema_files 'scaffolds schema files'
+    cli_tooling.generators -> application_source.api_module_files 'scaffolds API modules'
+
+    server_runtime.schema_loader -> application_source.content_type_schema_files 'reads schemas at startup'
+    server_runtime.schema_loader -> server_runtime.schema_sync 'provides loaded content type definitions'
+    server_runtime.schema_sync -> server_runtime.database_layer 'synchronizes database schema'
+    server_runtime.schema_loader -> server_runtime.core_api_layer 'provides content type metadata for generated APIs'
+    server_runtime.api_module_loader -> application_source.api_module_files 'loads route, controller, service, policy, and middleware modules'
+    server_runtime.api_module_loader -> server_runtime.route_registration 'provides loaded routers'
+
+    server_runtime.http_server -> server_runtime.route_registration 'mounts registered routes'
+    server_runtime.route_registration -> server_runtime.endpoint_composer 'composes each endpoint'
+    server_runtime.route_registration -> server_runtime.core_api_layer 'instantiates generated app API routers'
+    server_runtime.route_registration -> server_runtime.plugin_system 'registers plugin routers'
+    server_runtime.route_registration -> server_runtime.content_api 'marks Content API routes and applies extra route parameters'
+    server_runtime.endpoint_composer -> server_runtime.auth 'authenticates and authorizes requests'
+    server_runtime.endpoint_composer -> server_runtime.core_api_layer 'invokes generated controller actions'
+    server_runtime.endpoint_composer -> server_runtime.admin_server_apis 'invokes admin controllers'
+
+    server_runtime.content_api -> server_runtime.content_api_permissions 'owns permission action registry and ability engine'
+    server_runtime.content_api -> server_runtime.content_api_validation 'exposes validate and sanitize helpers'
+    server_runtime.auth -> server_runtime.content_api_token_strategy 'uses strategy for bearer API tokens'
+    server_runtime.auth -> server_runtime.users_permissions_strategy 'uses strategy for JWT users and public role access'
+    server_runtime.content_api_token_strategy -> server_runtime.content_api_permissions 'generates ability for custom token permissions'
+    server_runtime.users_permissions_strategy -> server_runtime.content_api_permissions 'generates ability for role permissions'
+
+    server_runtime.core_api_layer -> server_runtime.content_api 'uses Content API validate and sanitize helpers'
+    server_runtime.core_api_layer -> server_runtime.content_api_validation 'validates and sanitizes Content API requests and responses'
+    server_runtime.core_api_layer -> server_runtime.document_service 'delegates content operations'
+    server_runtime.admin_server_apis -> server_runtime.content_api 'exposes Content API routes and permission metadata to admin settings'
+    server_runtime.content_manager_server -> server_runtime.document_service 'manages content through document operations'
+    server_runtime.content_manager_server -> server_runtime.cm_routes 'registers route sets'
+    server_runtime.cm_routes -> server_runtime.cm_routing_middleware 'applies model-aware routing middleware'
+    server_runtime.cm_routes -> server_runtime.cm_controllers 'dispatches admin requests'
+    server_runtime.cm_routes -> server_runtime.cm_history_preview_homepage 'mounts feature route sets'
+    server_runtime.cm_controllers -> server_runtime.cm_permission_services 'checks admin content permissions'
+    server_runtime.cm_controllers -> server_runtime.cm_document_manager 'reads and writes content entries'
+    server_runtime.cm_controllers -> server_runtime.cm_schema_configuration 'reads content type and component configuration'
+    server_runtime.cm_controllers -> server_runtime.cm_populate_metadata 'builds response populate and metadata'
+    server_runtime.cm_history_preview_homepage -> server_runtime.cm_document_manager 'uses content documents for feature behavior'
+    server_runtime.cm_document_manager -> server_runtime.document_service 'uses strapi.documents for document operations'
+    server_runtime.cm_document_manager -> server_runtime.database_layer 'uses targeted database queries for counts and existence checks'
+    server_runtime.document_service -> server_runtime.database_layer 'uses database abstraction'
+    server_runtime.database_layer -> database 'persists and reads application data'
+
+    admin_web_app.content_manager_ui -> server_runtime.content_manager_server 'calls content manager admin endpoints'
+    admin_web_app.settings_api_tokens_ui -> server_runtime.admin_server_apis 'calls settings and API token endpoints'
+    server_runtime.admin_server_apis -> server_runtime.content_api 'reads Content API route and permission maps'
+    server_runtime.admin_server_apis -> server_runtime.content_api_token_strategy 'creates credentials consumed by strategy'
+
+    server_runtime.plugin_system -> server_runtime.plugin_modules 'loads enabled plugin server entrypoints'
+    server_runtime.plugin_modules -> server_runtime.auth 'plugins can register auth strategies'
+    server_runtime.plugin_modules -> server_runtime.content_api_validation 'plugins can register sanitizers and validators'
+    server_runtime.plugin_modules -> server_runtime.document_service 'plugins can register document middlewares'
+    server_runtime.plugin_modules -> admin_web_app.plugin_admin_extensions 'plugins can contribute admin UI extensions'
+
+    server_runtime.plugin_system -> server_runtime.graphql_plugin 'loads GraphQL plugin when enabled'
+    server_runtime.graphql_plugin -> server_runtime.graphql_schema_builder 'builds GraphQL content schema during bootstrap'
+    server_runtime.schema_loader -> server_runtime.graphql_schema_builder 'provides loaded content type metadata'
+    server_runtime.graphql_schema_builder -> server_runtime.graphql_resolvers 'generates queries, mutations, and resolver configuration'
+    server_runtime.graphql_plugin -> server_runtime.graphql_endpoint 'mounts configured GraphQL endpoint'
+    server_runtime.graphql_endpoint -> server_runtime.graphql_resolvers 'executes GraphQL operations'
+    server_runtime.graphql_resolvers -> server_runtime.auth 'applies auth through resolver wrapping'
+    server_runtime.graphql_resolvers -> server_runtime.document_service 'resolves content through document operations'
+
+    server_runtime.upload_plugin -> server_runtime.route_registration 'contributes upload routes'
+    server_runtime.upload_plugin -> server_runtime.upload_service 'handles media operations'
+    server_runtime.upload_service -> server_runtime.database_layer 'persists media file metadata'
+    server_runtime.upload_service -> server_runtime.upload_provider_loader 'delegates binary storage operations'
+    server_runtime.upload_plugin -> server_runtime.upload_provider_loader 'loads configured provider during plugin registration'
+    server_runtime.upload_provider_loader -> server_runtime.aws_s3_upload_provider 'loads provider when configured as aws-s3'
+    server_runtime.aws_s3_upload_provider -> aws_s3 'stores, reads, deletes, and signs media objects' 'S3 API'
+
+    admin_web_app.media_library_ui -> server_runtime.upload_plugin 'calls upload admin APIs'
+
+    cli_tooling.openapi_command -> server_runtime.content_api 'generates docs from registered route metadata'
+    cli_tooling.create_strapi_app -> server_runtime 'scaffolds applications that run the server runtime'
+
+    admin_web_app -> server_runtime 'calls admin and plugin APIs' 'HTTP'
+    cli_tooling -> application_source 'scaffolds project and API source files' 'File system'
+    application_source -> server_runtime 'loaded at bootstrap'
+    server_runtime -> database 'reads, writes, and syncs application data'
+  }
+
+  public_client -> strapi 'Consumes published content through Content APIs' 'HTTP'
+  external_system -> strapi 'Integrates with Strapi through REST or GraphQL APIs' 'HTTP'
+  content_editor -> strapi 'Models content and manages entries' 'Admin UI'
+  developer -> strapi 'Builds schemas, APIs, plugins, and extensions' 'Code and CLI'
+  strapi.server_runtime -> aws_s3 'Stores and retrieves uploaded media when configured with the AWS S3 provider' 'S3 API'
+}

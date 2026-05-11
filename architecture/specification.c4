@@ -1,0 +1,63 @@
+specification {
+  element person {
+    style {
+      shape person
+      color slate
+    }
+  }
+
+  element external_system {
+    notation 'External System'
+    style {
+      shape rectangle
+      color gray
+    }
+  }
+
+  element software_system {
+    notation 'Software System'
+    style {
+      shape rectangle
+      color blue
+    }
+  }
+
+  element container {
+    notation 'Container'
+    style {
+      shape rectangle
+      color indigo
+    }
+  }
+
+  element component {
+    notation 'Component'
+    style {
+      shape rectangle
+      color sky
+    }
+  }
+
+  element code_package {
+    notation 'Code Package'
+    style {
+      shape component
+      color green
+    }
+  }
+
+  element database {
+    notation 'Database'
+    style {
+      shape cylinder
+      color amber
+    }
+  }
+
+  relationship reads
+  relationship writes
+  relationship authenticates
+  relationship authorizes
+  relationship registers
+  relationship delegates
+}

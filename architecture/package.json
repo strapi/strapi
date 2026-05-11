@@ -1,0 +1,18 @@
+{
+  "name": "strapi-architecture",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "likec4 start .",
+    "build": "likec4 build .",
+    "export:png": "likec4 export png . --output ./exports",
+    "export:mermaid": "likec4 export mermaid . --output ./exports",
+    "format": "likec4 format .",
+    "check": "likec4 format --check ."
+  },
+  "devDependencies": {
+    "likec4": "^1.56.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
