@@ -31,3 +31,12 @@ export function resolveDatabasePerformanceMaxEvents(strapi: Core.Strapi): number
   );
   return typeof legacy === 'number' && legacy > 0 ? legacy : DEFAULT_DATABASE_PERF_MAX_EVENTS;
 }
+
+/** `0` = no file rotation; positive = rotate when the artifact reaches this size (bytes) before append. */
+export function resolveDatabasePerformanceArtifactMaxFileBytes(strapi: Core.Strapi): number {
+  const v = strapi.config.get('database.performance.artifactMaxFileBytes');
+  if (typeof v === 'number' && v > 0) {
+    return v;
+  }
+  return 0;
+}

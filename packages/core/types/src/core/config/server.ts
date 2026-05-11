@@ -102,6 +102,26 @@ export interface ServerObservabilityTracingOtlp {
   headers?: Record<string, string>;
 }
 
+export interface ServerObservabilityMetricsOtlp {
+  /** When true and `url` is set, exports Strapi performance metrics via OTLP/HTTP (e.g. collector `/v1/metrics`). */
+  enabled?: boolean;
+  /** OTLP metrics endpoint URL, typically `http://localhost:4318/v1/metrics`. */
+  url?: string;
+  /** Optional exporter headers (e.g. `{ Authorization: 'Bearer …' }`). */
+  headers?: Record<string, string>;
+}
+
+export interface ServerObservabilityMetrics {
+  /**
+   * When true, records request-summary and slow-query counters/histograms for OTLP export.
+   * Independent of {@link ServerObservabilityTracing.enabled}; configure `otlp` to send data.
+   */
+  enabled?: boolean;
+  /** Resource `service.name`; defaults to tracing `serviceName` or `strapi`. */
+  serviceName?: string;
+  otlp?: ServerObservabilityMetricsOtlp;
+}
+
 export interface ServerObservabilityTracing {
   /**
    * Enables OpenTelemetry tracing in core: HTTP server spans and Knex query child spans.
@@ -122,6 +142,7 @@ export interface ServerObservabilityTracing {
 
 export interface ServerObservability {
   tracing?: ServerObservabilityTracing;
+  metrics?: ServerObservabilityMetrics;
 }
 
 export interface Server {

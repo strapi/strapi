@@ -4,6 +4,7 @@ import coreStore from './coreStore';
 import cron from './cron';
 import performanceMonitor from './performance-monitor';
 import observabilityTracing from './observability-tracing';
+import observabilityPerformanceMetrics from './observability-performance-metrics';
 import registries from './registries';
 import sessionManager from './session-manager';
 import telemetry from './telemetry';
@@ -15,6 +16,7 @@ export const providers: Provider[] = [
   registries,
   performanceMonitor,
   observabilityTracing,
+  observabilityPerformanceMetrics,
   admin,
   ai,
   coreStore,

@@ -80,5 +80,11 @@ export interface Database<TClient extends ClientKind = ClientKind> {
     artifactFlushIntervalMs?: number;
     /** @deprecated Use {@link maxEvents}. */
     artifactMaxEvents?: number;
+    /**
+     * When set to a positive byte size, the performance JSON Lines file is renamed to
+     * `{artifactPath}.rotated.{timestamp}.jsonl` before the next append once the file reaches this size.
+     * `0` (default) disables rotation (operators can still rotate logs externally).
+     */
+    artifactMaxFileBytes?: number;
   };
 }

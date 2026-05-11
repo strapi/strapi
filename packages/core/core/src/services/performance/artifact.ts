@@ -1,9 +1,10 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rename, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import type { Core, Modules } from '@strapi/types';
 
 import {
+  resolveDatabasePerformanceArtifactMaxFileBytes,
   resolveDatabasePerformanceFlushIntervalMs,
   resolveDatabasePerformanceMaxEvents,
 } from './database-config';
@@ -84,6 +85,7 @@ function buildRedactedPerfSnapshot(strapi: Core.Strapi): Record<string, unknown>
       'maxEvents',
       'artifactFlushIntervalMs',
       'artifactMaxEvents',
+      'artifactMaxFileBytes',
     ]),
     server: pickDefined(srvPerf, [
       'requestSummaryEnabled',
@@ -196,6 +198,8 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
 
   const flushMs = resolveDatabasePerformanceFlushIntervalMs(strapi);
   const maxEvents = resolveDatabasePerformanceMaxEvents(strapi);
+  const artifactMaxFileBytes = resolveDatabasePerformanceArtifactMaxFileBytes(strapi);
+  const resolvedArtifactPath = path.resolve(artifactPath);
   const slowRequestMs = clampPositiveInt(
     strapi.config.get('server.performance.slowRequestMs'),
     500
@@ -220,6 +224,24 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
 
   const serializeLine = (events: BufferedPerfRow[]) => `${JSON.stringify(buildEnvelope(events))}\n`;
 
+  const maybeRotateArtifactFile = async () => {
+    if (artifactMaxFileBytes <= 0) {
+      return;
+    }
+    try {
+      const st = await stat(resolvedArtifactPath);
+      if (st.isFile() && st.size >= artifactMaxFileBytes) {
+        const rotated = `${resolvedArtifactPath}.rotated.${Date.now()}.jsonl`;
+        await rename(resolvedArtifactPath, rotated);
+      }
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code !== 'ENOENT') {
+        /* ignore rotation errors — next flush may succeed */
+      }
+    }
+  };
+
   const flush = async () => {
     if (flushInProgress || buffer.length === 0) {
       return;
@@ -229,8 +251,9 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
     const chunk = buffer.splice(0, buffer.length);
 
     try {
-      await mkdir(path.dirname(path.resolve(artifactPath)), { recursive: true });
-      await writeFile(artifactPath, serializeLine(chunk), {
+      await mkdir(path.dirname(resolvedArtifactPath), { recursive: true });
+      await maybeRotateArtifactFile();
+      await writeFile(resolvedArtifactPath, serializeLine(chunk), {
         encoding: 'utf8',
         flag: 'a',
       });

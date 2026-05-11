@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -150,6 +150,37 @@ describe('Performance artifact writer', () => {
 
     expect(doc.events).toHaveLength(2);
     expect(doc.events[0].event).toMatchObject({ id: 'b' });
+  });
+
+  it('rotates the artifact file when it exceeds artifactMaxFileBytes before append', async () => {
+    const filler = 'x'.repeat(120);
+    await writeFile(artifactPath, filler, 'utf8');
+
+    const strapi = mockStrapi({
+      'database.performance.artifactMaxFileBytes': 100,
+    }) as any;
+
+    const dispose = attachPerformanceArtifactWriter(strapi);
+
+    await strapi.eventHub.emit(PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW, {
+      type: 'query.slow',
+      timestamp: '2020-01-01T00:00:00.000Z',
+      durationMs: 5,
+      dbClient: 'postgres',
+      queryFingerprint: 'fp-rot',
+      queryType: 'select',
+      success: true,
+    });
+
+    await dispose();
+
+    const names = (await readdir(tmpDir)).sort();
+    expect(names.some((n) => n.includes('.rotated.'))).toBe(true);
+
+    const content = (await readFile(artifactPath, 'utf8')).trim();
+    const doc = JSON.parse(content);
+    expect(doc.events).toHaveLength(1);
+    expect(doc.events[0].event).toMatchObject({ queryFingerprint: 'fp-rot' });
   });
 
   it('buffers request timeline rows when emitted', async () => {
