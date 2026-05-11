@@ -405,6 +405,54 @@ describe('useDocumentLayout', () => {
     expect(result.current.list.layout).toEqual(expectedListLayout);
   });
 
+  it('should skip components in the configuration that are missing from the schema dictionary', async () => {
+    // Simulates the nested relation modal bug (issue #26190): the configuration
+    // endpoint can return component UIDs that are not present in the components
+    // dictionary built from the init response (e.g. when a deeply nested relation
+    // modal is opened and the inner schema's component set diverges from what the
+    // config API returns). Without the guard, components[uid].attributes throws.
+    server.use(
+      rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            data: {
+              ...mockData.contentManager.collectionTypeConfiguration,
+              components: {
+                ...mockData.contentManager.collectionTypeConfiguration.components,
+                'page-blocks.orphan': {
+                  uid: 'page-blocks.orphan',
+                  category: 'page-blocks',
+                  settings: {
+                    bulkable: true,
+                    filterable: true,
+                    searchable: true,
+                    pageSize: 10,
+                    mainField: 'id',
+                    defaultSortBy: 'id',
+                    defaultSortOrder: 'ASC',
+                  },
+                  metadatas: {},
+                  layouts: { list: [], edit: [] },
+                  isComponent: true,
+                },
+              },
+            },
+          })
+        );
+      })
+    );
+
+    const { result } = renderHook(() => useDocumentLayout(mockData.contentManager.contentType));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // The orphan component (present in config but absent from schema dict) must be
+    // silently skipped — not throw and not appear in the output.
+    expect(result.current.edit.components['page-blocks.orphan']).toBeUndefined();
+    // Known components must still be resolved normally.
+    expect(result.current.edit.components['blog.test-como']).toBeDefined();
+  });
+
   it('should display an error should the configuration fail to fetch', async () => {
     server.use(
       rest.get('/content-manager/:collectionType/:model/configuration', (req, res, ctx) => {
