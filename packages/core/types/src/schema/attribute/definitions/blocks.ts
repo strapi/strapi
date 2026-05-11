@@ -102,8 +102,9 @@ interface ImageBlockNode extends BaseNode {
   image: Attribute.MediaValue<false>;
   children: [{ type: 'text'; text: '' }];
 }
-
 export interface EmbeddedSocialMediaNode extends BaseNode {
   type: 'embedded-social-media';
+  embedSocialMedia: any;
+  socialMedia: 'youtube' | 'x-post';
   children: TextInlineNode[];
 }
