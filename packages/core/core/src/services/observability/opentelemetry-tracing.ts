@@ -23,6 +23,10 @@ import {
 } from '@opentelemetry/sdk-trace-node';
 
 import {
+  recordContentApiPhaseDuration,
+  recordDocumentServiceOperationDuration,
+} from './opentelemetry-performance-metrics';
+import {
   inferDbOperation,
   mapDatabaseClientToDbSystem,
   truncateSql,
@@ -250,22 +254,29 @@ export async function withHttpServerTracing(
 }
 
 const CONTENT_API_TRACER_NAME = '@strapi/core.content-api';
+const DOCUMENT_SERVICE_TRACER_NAME = '@strapi/core.document-service';
 
-/**
- * Runs `fn` inside an INTERNAL span when `server.observability.tracing.enabled` is true.
- * Used for Content API validate/sanitize work nested under the HTTP SERVER span.
- */
-export async function withContentApiSpan<T>(
+async function runWithOptionalInternalSpan<T>(
   strapi: Core.Strapi | undefined,
-  spanName: string,
-  attributes: Record<string, string | number | boolean | undefined>,
+  options: {
+    tracerName: string;
+    spanName: string;
+    attributes: Record<string, string | number | boolean | undefined>;
+    emitMetric: () => void;
+  },
   fn: () => Promise<T>
 ): Promise<T> {
+  const { tracerName, spanName, attributes, emitMetric } = options;
+
   if (!strapi || !isTracingConfigEnabled(strapi)) {
-    return fn();
+    try {
+      return await fn();
+    } finally {
+      emitMetric();
+    }
   }
 
-  const tracer = trace.getTracer(CONTENT_API_TRACER_NAME);
+  const tracer = trace.getTracer(tracerName);
 
   return tracer.startActiveSpan(spanName, { kind: SpanKind.INTERNAL }, async (span) => {
     try {
@@ -282,6 +293,72 @@ export async function withContentApiSpan<T>(
       throw error;
     } finally {
       span.end();
+      emitMetric();
     }
   });
+}
+
+/**
+ * Runs `fn` inside an INTERNAL span when `server.observability.tracing.enabled` is true.
+ * Records `strapi.content_api.phase.duration_ms` when observability metrics OTLP is active.
+ * Used for Content API validate/sanitize work nested under the HTTP SERVER span.
+ */
+export async function withContentApiSpan<T>(
+  strapi: Core.Strapi | undefined,
+  spanName: string,
+  attributes: Record<string, string | number | boolean | undefined>,
+  fn: () => Promise<T>
+): Promise<T> {
+  const startMs = performance.now();
+  const uid =
+    typeof attributes['strapi.content_type.uid'] === 'string'
+      ? attributes['strapi.content_type.uid']
+      : undefined;
+
+  return runWithOptionalInternalSpan(
+    strapi,
+    {
+      tracerName: CONTENT_API_TRACER_NAME,
+      spanName,
+      attributes,
+      emitMetric() {
+        recordContentApiPhaseDuration(strapi, uid, spanName, performance.now() - startMs);
+      },
+    },
+    fn
+  );
+}
+
+/**
+ * Wraps `strapi.documents(uid).…` calls from the Core REST API service layer.
+ * INTERNAL span `strapi.documents.{operation}` when tracing is on; histogram
+ * `strapi.document_service.operation.duration_ms` when metrics OTLP is on.
+ */
+export async function withDocumentServiceObservation<T>(
+  strapi: Core.Strapi | undefined,
+  operation: string,
+  contentTypeUid: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  const spanName = `strapi.documents.${operation}`;
+  const startMs = performance.now();
+  const spanAttrs = { 'strapi.content_type.uid': contentTypeUid };
+
+  return runWithOptionalInternalSpan(
+    strapi,
+    {
+      tracerName: DOCUMENT_SERVICE_TRACER_NAME,
+      spanName,
+      attributes: spanAttrs,
+      emitMetric() {
+        recordDocumentServiceOperationDuration(
+          strapi,
+          contentTypeUid,
+          operation,
+          performance.now() - startMs
+        );
+      },
+    },
+    fn
+  );
 }

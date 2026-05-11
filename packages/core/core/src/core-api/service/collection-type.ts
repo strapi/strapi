@@ -1,5 +1,7 @@
 import type { Core, Struct, Modules } from '@strapi/types';
 
+import { withDocumentServiceObservation } from '../../services/observability/opentelemetry-tracing';
+
 import {
   getPaginationInfo,
   shouldCount,
@@ -29,13 +31,21 @@ export class CollectionTypeService
     const paginationInfo = getPaginationInfo(fetchParams);
     const isPaged = isPagedPagination(fetchParams.pagination);
 
-    const results = await strapi.documents(uid).findMany({
-      ...fetchParams,
-      ...paginationInfo,
-    });
+    const results = await withDocumentServiceObservation(
+      strapi as Core.Strapi,
+      'findMany',
+      uid,
+      () =>
+        strapi.documents(uid).findMany({
+          ...fetchParams,
+          ...paginationInfo,
+        })
+    );
 
     if (shouldCount(fetchParams)) {
-      const count = await strapi.documents(uid).count({ ...fetchParams, ...paginationInfo });
+      const count = await withDocumentServiceObservation(strapi as Core.Strapi, 'count', uid, () =>
+        strapi.documents(uid).count({ ...fetchParams, ...paginationInfo })
+      );
 
       if (typeof count !== 'number') {
         throw new Error('Count should be a number');
@@ -56,34 +66,46 @@ export class CollectionTypeService
   findOne(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).findOne({
-      ...this.getFetchParams(params),
-      documentId,
-    });
+    return withDocumentServiceObservation(strapi as Core.Strapi, 'findOne', uid, () =>
+      strapi.documents(uid).findOne({
+        ...this.getFetchParams(params),
+        documentId,
+      })
+    );
   }
 
   async create(params = { data: {} }) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).create(this.getFetchParams(params));
+    return withDocumentServiceObservation(strapi as Core.Strapi, 'create', uid, () =>
+      strapi.documents(uid).create(this.getFetchParams(params))
+    );
   }
 
   update(documentId: Modules.Documents.ID, params = { data: {} }) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).update({
-      ...this.getFetchParams(params),
-      documentId,
-    });
+    return withDocumentServiceObservation(strapi as Core.Strapi, 'update', uid, () =>
+      strapi.documents(uid).update({
+        ...this.getFetchParams(params),
+        documentId,
+      })
+    );
   }
 
   async delete(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    const { entries } = await strapi.documents(uid).delete({
-      ...this.getFetchParams(params),
-      documentId,
-    });
+    const { entries } = await withDocumentServiceObservation(
+      strapi as Core.Strapi,
+      'delete',
+      uid,
+      () =>
+        strapi.documents(uid).delete({
+          ...this.getFetchParams(params),
+          documentId,
+        })
+    );
 
     return { deletedEntries: entries.length };
   }

@@ -4,6 +4,8 @@ import { Resource } from '@opentelemetry/resources';
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import type { Core } from '@strapi/types';
 
+import { setAdminPermissionsPhaseMetricsRecorder } from '@strapi/utils';
+
 import type {
   PublicDatabaseQueryPerformancePayload,
   PublicRequestSummaryPayload,
@@ -20,6 +22,9 @@ let meterProvider: MeterProvider | null = null;
 let requestDurationMs: Histogram | null = null;
 let requestDbTotalMs: Histogram | null = null;
 let dbSlowOrErrorCounter: Counter | null = null;
+let contentApiPhaseDurationMs: Histogram | null = null;
+let documentServiceOperationDurationMs: Histogram | null = null;
+let adminPermissionsPhaseDurationMs: Histogram | null = null;
 
 function clampAttr(value: string, max = MAX_ATTR_LEN): string {
   if (value.length <= max) {
@@ -122,6 +127,87 @@ export function registerOpenTelemetryPerformanceMetrics(strapi: Core.Strapi): vo
   dbSlowOrErrorCounter = meter.createCounter('strapi.db.slow_or_error.events', {
     description: 'Slow or failed database queries from `database.performance` hub events',
   });
+  contentApiPhaseDurationMs = meter.createHistogram('strapi.content_api.phase.duration_ms', {
+    unit: 'ms',
+    description: 'Content API sanitize and validate phase duration',
+  });
+  documentServiceOperationDurationMs = meter.createHistogram(
+    'strapi.document_service.operation.duration_ms',
+    {
+      unit: 'ms',
+      description:
+        'Document service operation duration (Core REST API → strapi.documents find/create/update/…)',
+    }
+  );
+  adminPermissionsPhaseDurationMs = meter.createHistogram(
+    'strapi.admin.permissions.phase.duration_ms',
+    {
+      unit: 'ms',
+      description:
+        'Admin permission sanitize/validate phase duration (permissions manager around admin API)',
+    }
+  );
+
+  setAdminPermissionsPhaseMetricsRecorder((strapi, uid, phase, durationMs) => {
+    recordAdminPermissionsPhaseDuration(strapi as Core.Strapi | undefined, uid, phase, durationMs);
+  });
+}
+
+/** OTLP histogram emit from `withContentApiSpan` when metrics SDK is initialized. */
+export function recordContentApiPhaseDuration(
+  strapi: Core.Strapi | undefined,
+  contentTypeUid: string | undefined,
+  phase: string,
+  durationMs: number
+): void {
+  if (!contentApiPhaseDurationMs || !strapi || !isMetricsFeatureEnabled(strapi)) {
+    return;
+  }
+  const attrs: Record<string, string> = {
+    'strapi.phase': clampAttr(phase),
+  };
+  if (contentTypeUid) {
+    attrs['strapi.content_type.uid'] = clampAttr(contentTypeUid);
+  }
+  contentApiPhaseDurationMs.record(durationMs, attrs);
+}
+
+/** OTLP histogram emit from Core API document calls when metrics SDK is initialized. */
+export function recordDocumentServiceOperationDuration(
+  strapi: Core.Strapi | undefined,
+  contentTypeUid: string | undefined,
+  operation: string,
+  durationMs: number
+): void {
+  if (!documentServiceOperationDurationMs || !strapi || !isMetricsFeatureEnabled(strapi)) {
+    return;
+  }
+  const attrs: Record<string, string> = {
+    'strapi.operation': clampAttr(operation),
+  };
+  if (contentTypeUid) {
+    attrs['strapi.content_type.uid'] = clampAttr(contentTypeUid);
+  }
+  documentServiceOperationDurationMs.record(durationMs, attrs);
+}
+
+/** OTLP histogram emit from `withAdminPermissionsSpan` when metrics SDK is initialized. */
+export function recordAdminPermissionsPhaseDuration(
+  strapi: Core.Strapi | undefined,
+  contentTypeUid: string | undefined,
+  phase: string,
+  durationMs: number
+): void {
+  if (!adminPermissionsPhaseDurationMs || !strapi || !isMetricsFeatureEnabled(strapi)) {
+    return;
+  }
+  const attrs: Record<string, string> = {
+    'strapi.phase': clampAttr(phase),
+  };
+  if (contentTypeUid) {
+    attrs['strapi.content_type.uid'] = clampAttr(contentTypeUid);
+  }
+  adminPermissionsPhaseDurationMs.record(durationMs, attrs);
 }
 
 /** Subscribes to performance hub events. Call from provider `bootstrap`. */
@@ -163,8 +249,13 @@ export async function shutdownOpenTelemetryPerformanceMetrics(strapi: Core.Strap
     strapi.log.warn(`[observability.metrics] Failed to shutdown meter provider cleanly: ${error}`);
   }
 
+  setAdminPermissionsPhaseMetricsRecorder(undefined);
+
   meterProvider = null;
   requestDurationMs = null;
   requestDbTotalMs = null;
   dbSlowOrErrorCounter = null;
+  contentApiPhaseDurationMs = null;
+  documentServiceOperationDurationMs = null;
+  adminPermissionsPhaseDurationMs = null;
 }
