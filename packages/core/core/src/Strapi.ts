@@ -2,6 +2,7 @@ import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
+import type { Span } from '@opentelemetry/api';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database, type DatabaseQueryTelemetryInfo } from '@strapi/database';
 
@@ -21,6 +22,9 @@ import { createReloader } from './services/reloader';
 
 import { providers } from './providers';
 import {
+  beginDeferredStartupRootSpan,
+  continueDeferredStartupRootSpan,
+  endDeferredStartupRootSpan,
   registerOpenTelemetryTracing,
   withStartupSpan,
 } from './services/observability/opentelemetry-tracing';
@@ -54,6 +58,9 @@ class Strapi extends Container implements Core.Strapi {
   app: any;
 
   isLoaded: boolean = false;
+
+  /** Root `strapi.startup` span left open after `load()` until `start()` runs listen (develop path). */
+  private deferredStartupRootSpan?: Span;
 
   internal_config: Record<string, unknown> = {};
 
@@ -259,6 +266,23 @@ class Strapi extends Container implements Core.Strapi {
   async start() {
     try {
       registerOpenTelemetryTracing(this as Core.Strapi);
+
+      const deferred = this.deferredStartupRootSpan;
+
+      if (deferred) {
+        try {
+          await continueDeferredStartupRootSpan(deferred, async () => {
+            await withStartupSpan(this as Core.Strapi, 'strapi.startup.listen', () =>
+              this.listen()
+            );
+          });
+        } finally {
+          endDeferredStartupRootSpan(deferred);
+          this.deferredStartupRootSpan = undefined;
+        }
+
+        return this;
+      }
 
       await withStartupSpan(
         this as Core.Strapi,
@@ -506,12 +530,13 @@ class Strapi extends Container implements Core.Strapi {
   async load() {
     registerOpenTelemetryTracing(this as Core.Strapi);
 
-    await withStartupSpan(
-      this as Core.Strapi,
-      'strapi.startup.load',
-      () => this.registerAndBootstrap(),
-      { root: true }
+    const span = await beginDeferredStartupRootSpan(this as Core.Strapi, () =>
+      this.registerAndBootstrap()
     );
+
+    if (span) {
+      this.deferredStartupRootSpan = span;
+    }
 
     this.isLoaded = true;
 
@@ -711,6 +736,9 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async destroy() {
+    endDeferredStartupRootSpan(this.deferredStartupRootSpan);
+    this.deferredStartupRootSpan = undefined;
+
     this.log.info('Shutting down Strapi');
     await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
 

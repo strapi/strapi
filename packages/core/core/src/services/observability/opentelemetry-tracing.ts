@@ -90,6 +90,52 @@ export async function withStartupSpan<T>(
   return tracer.startActiveSpan(spanName, { kind: SpanKind.INTERNAL }, runInSpan);
 }
 
+/**
+ * Runs `fn` under a root `strapi.startup` span without ending it yet.
+ * Used when `load()` runs before `start()` so `strapi.startup.listen` stays in the same trace
+ * (for example `strapi develop`).
+ *
+ * If `start()` never runs, call {@link endDeferredStartupRootSpan} from `destroy()` (Strapi does this).
+ */
+export async function beginDeferredStartupRootSpan(
+  strapi: Core.Strapi,
+  fn: () => Promise<void>
+): Promise<Span | undefined> {
+  if (!isTracingConfigEnabled(strapi) || !nodeProvider) {
+    await fn();
+    return undefined;
+  }
+
+  const tracer = trace.getTracer(STARTUP_TRACER_NAME);
+  const span = tracer.startSpan('strapi.startup', { kind: SpanKind.INTERNAL }, ROOT_CONTEXT);
+  const ctxWithSpan = trace.setSpan(ROOT_CONTEXT, span);
+
+  try {
+    await context.with(ctxWithSpan, fn);
+  } catch (error) {
+    span.recordException(error instanceof Error ? error : new Error(String(error)));
+    span.setStatus({ code: SpanStatusCode.ERROR });
+    span.end();
+    throw error;
+  }
+
+  return span;
+}
+
+/** Runs `fn` with the deferred root startup span active (wrap `strapi.startup.listen`). */
+export async function continueDeferredStartupRootSpan<T>(
+  span: Span,
+  fn: () => Promise<T>
+): Promise<T> {
+  const ctxWithSpan = trace.setSpan(ROOT_CONTEXT, span);
+  return context.with(ctxWithSpan, fn);
+}
+
+/** Ends the span from {@link beginDeferredStartupRootSpan}; no-op for `undefined`. */
+export function endDeferredStartupRootSpan(span: Span | undefined): void {
+  span?.end();
+}
+
 /** Starts the Node SDK and wires `trace`/propagation globals. Call from provider `register`. */
 export function registerOpenTelemetryTracing(strapi: Core.Strapi): void {
   if (!isTracingConfigEnabled(strapi)) {
