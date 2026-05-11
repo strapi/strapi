@@ -4,7 +4,19 @@ This project contains complex Strapi schemas for testing migrations between Stra
 
 ## Built-in performance monitoring (demo)
 
-`config/database.ts` enables SQL slow/error instrumentation (`performance.db.*` on `eventHub`, structured warns, JSON Lines append to `.tmp/performance-events.jsonl` under the app directory). `config/server.ts` enables per-request summaries (`performance.request.summary`). Together they populate the **admin Home → Performance snapshot** widget (super admin) when you run this app. `src/index.ts` mirrors summaries to **`strapi.log.debug`** only when the request did DB work (`dbQueryCount` or `slowOrErrorQueryEvents` above zero). `config/server.ts` sets **`STRAPI_APP_LOG_LEVEL`** (default **`debug`**) so those lines appear; set to `info` when you want quieter runs. Other env vars: `DATABASE_PERF_SLOW_MS`, `DATABASE_PERF_CAPTURE_SQL`, `SERVER_PERF_REQUEST_SUMMARY`, `SERVER_PERF_REQUEST_SAMPLE_RATE`, `SERVER_PERF_SLOW_REQUEST_MS`.
+`config/database.ts` enables SQL slow/error instrumentation (`performance.db.*` on `eventHub`, structured warns, JSON Lines append to `.tmp/performance-events.jsonl` under the app directory). `config/server.ts` enables per-request summaries (`performance.request.summary`). Together they populate the **admin Home → HTTP performance (window)** and **Slow routes & SQL** widgets (super admin) when you run this app. `src/index.ts` mirrors summaries to **`strapi.log.debug`** only when the request did DB work (`dbQueryCount` or `slowOrErrorQueryEvents` above zero). `config/server.ts` sets **`STRAPI_APP_LOG_LEVEL`** (default **`debug`**) so those lines appear; set to `info` when you want quieter runs. Other env vars: `DATABASE_PERF_SLOW_MS` (default **5** ms in this example so slow-query events show up on a fast local DB; raise for quieter, production-like sampling), `DATABASE_PERF_CAPTURE_SQL`, `SERVER_PERF_REQUEST_SUMMARY`, `SERVER_PERF_REQUEST_SAMPLE_RATE`, `SERVER_PERF_SLOW_REQUEST_MS`.
+
+### OpenTelemetry
+
+`config/server.ts` enables **OTLP HTTP** export for **traces** and **metrics** when `STRAPI_OTEL_ENABLED` is true (default **true**). Env vars are documented in **`.env.example`**: `STRAPI_OTEL_HTTP_ENDPOINT` (default `http://127.0.0.1:4318`), `STRAPI_OTEL_SERVICE_NAME` (default `strapi-complex`).
+
+**Run order:** start the local collector + Jaeger stack, then Strapi (e.g. `yarn develop:postgres`). Full steps, Jaeger URL, how to read traces vs metrics, and what happens if the collector is down are in **[`examples/otel-local/README.md`](../otel-local/README.md)** — that file is the single “how to use OTel here” guide; this section only describes how **this** example is wired.
+
+Set **`STRAPI_OTEL_ENABLED=false`** when you are not running Docker so Strapi does not keep attempting OTLP exports (the app still works if the collector is missing; export is async and may log warnings).
+
+### REST API smoke seed
+
+`yarn seed:rest` starts Strapi on an ephemeral localhost port, grants **Public** Content API access to **`basic`** (`find` / `findOne` / `create`), `POST /api/basics` with a minimal body, then `GET /api/basics` and `GET /api/basics/:documentId`. Same database requirements as `yarn seed:v5`. Optional: `SEED_REST_PORT` to pin the HTTP port instead of `0` (random).
 
 ## Content Types
 

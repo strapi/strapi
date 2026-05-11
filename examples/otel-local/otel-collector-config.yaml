@@ -16,12 +16,17 @@ receivers:
 exporters:
   debug:
     verbosity: detailed
+  # Forward traces to Jaeger (see docker-compose.yml). Open http://localhost:16686 — no login.
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [debug]
+      exporters: [debug, otlp/jaeger]
     metrics:
       receivers: [otlp]
       exporters: [debug]
