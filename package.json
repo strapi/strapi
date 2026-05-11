@@ -97,7 +97,8 @@
     "@types/koa": "2.13.4",
     "@babel/core": "7.29.0",
     "@babel/runtime": "7.29.2",
-    "@babel/runtime-corejs3": "7.29.2"
+    "@babel/runtime-corejs3": "7.29.2",
+    "@types/node": "^20"
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
