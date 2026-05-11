@@ -65,27 +65,37 @@ const SQL_QUERIES = {
   `,
   BULK_FOREIGN_KEYS: /* sql */ `
     SELECT
-      tco.table_name,
-      tco.constraint_name,
-      kcu.column_name,
-      rco.update_rule as on_update,
-      rco.delete_rule as on_delete,
-      rel_kcu.table_name as foreign_table,
-      rel_kcu.column_name as fk_column_name
-    FROM information_schema.table_constraints tco
-    JOIN information_schema.key_column_usage kcu
-      ON tco.constraint_name = kcu.constraint_name
-      AND tco.constraint_schema = kcu.constraint_schema
-      AND tco.table_name = kcu.table_name
-    JOIN information_schema.referential_constraints rco
-      ON tco.constraint_name = rco.constraint_name
-      AND tco.constraint_schema = rco.constraint_schema
-    JOIN information_schema.key_column_usage rel_kcu
-      ON rco.unique_constraint_name = rel_kcu.constraint_name
-      AND rco.unique_constraint_schema = rel_kcu.constraint_schema
-    WHERE tco.constraint_type = 'FOREIGN KEY'
-      AND tco.constraint_schema = ?
-      AND tco.table_name = ANY(?);
+      cl.relname AS table_name,
+      c.conname AS constraint_name,
+      att.attname AS column_name,
+      fcl.relname AS foreign_table,
+      fatt.attname AS fk_column_name,
+      CASE c.confupdtype
+        WHEN 'a' THEN 'NO ACTION'
+        WHEN 'r' THEN 'RESTRICT'
+        WHEN 'c' THEN 'CASCADE'
+        WHEN 'n' THEN 'SET NULL'
+        WHEN 'd' THEN 'SET DEFAULT'
+      END AS on_update,
+      CASE c.confdeltype
+        WHEN 'a' THEN 'NO ACTION'
+        WHEN 'r' THEN 'RESTRICT'
+        WHEN 'c' THEN 'CASCADE'
+        WHEN 'n' THEN 'SET NULL'
+        WHEN 'd' THEN 'SET DEFAULT'
+      END AS on_delete
+    FROM pg_constraint c
+    JOIN pg_class cl ON cl.oid = c.conrelid
+    JOIN pg_namespace n ON n.oid = cl.relnamespace
+    JOIN pg_class fcl ON fcl.oid = c.confrelid
+    JOIN LATERAL unnest(c.conkey, c.confkey) AS cols(conkey, confkey) ON true
+    JOIN pg_attribute att ON att.attrelid = c.conrelid AND att.attnum = cols.conkey
+    JOIN pg_attribute fatt ON fatt.attrelid = c.confrelid AND fatt.attnum = cols.confkey
+    WHERE c.contype = 'f'
+      AND n.nspname = ?
+      AND cl.relname = ANY(?)
+      AND fcl.relnamespace = cl.relnamespace
+    ORDER BY cl.relname, c.conname, cols.conkey;
   `,
 };
 
@@ -191,6 +201,10 @@ export default class PostgresqlSchemaInspector implements SchemaInspector {
   }
 
   async getBulkColumns(dbSchema: string, tableNames: string[]): Promise<Map<string, Column[]>> {
+    if (tableNames.length === 0) {
+      return new Map();
+    }
+
     const { rows } = await this.db.connection.raw<{ rows: RawColumn[] }>(SQL_QUERIES.BULK_COLUMNS, [
       dbSchema,
       tableNames,
@@ -225,6 +239,10 @@ export default class PostgresqlSchemaInspector implements SchemaInspector {
   }
 
   async getBulkIndexes(dbSchema: string, tableNames: string[]): Promise<Map<string, Index[]>> {
+    if (tableNames.length === 0) {
+      return new Map();
+    }
+
     const { rows } = await this.db.connection.raw<{ rows: RawIndex[] }>(SQL_QUERIES.BULK_INDEXES, [
       dbSchema,
       tableNames,
@@ -280,6 +298,10 @@ export default class PostgresqlSchemaInspector implements SchemaInspector {
     dbSchema: string,
     tableNames: string[]
   ): Promise<Map<string, ForeignKey[]>> {
+    if (tableNames.length === 0) {
+      return new Map();
+    }
+
     const { rows } = await this.db.connection.raw<{
       rows: Array<{
         table_name: string;

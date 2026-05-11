@@ -122,4 +122,63 @@ describe('SchemaInspector (integration)', () => {
 
     expect(normalize(fromSchema)).toEqual(normalize(fromSingle));
   });
+
+  test('getSchema groups columns per-table without leaking across tables', async () => {
+    // Covers the per-table grouping logic that the bulk inspector implementations
+    // rely on: `slug` lives only on article, `title` lives only on category, so
+    // a grouping bug would surface them on the wrong table.
+    const schema = await schemaInspector.getSchema();
+
+    const articleTable = strapi.db.metadata.get(
+      'api::inspector-article.inspector-article'
+    ).tableName;
+    const categoryTable = strapi.db.metadata.get(
+      'api::inspector-category.inspector-category'
+    ).tableName;
+
+    const article = schema.tables.find((t) => t.name === articleTable);
+    const category = schema.tables.find((t) => t.name === categoryTable);
+
+    const articleColNames = new Set(article.columns.map((c) => c.name));
+    const categoryColNames = new Set(category.columns.map((c) => c.name));
+
+    expect(articleColNames.has('slug')).toBe(true);
+    expect(articleColNames.has('title')).toBe(false);
+    expect(categoryColNames.has('title')).toBe(true);
+    expect(categoryColNames.has('slug')).toBe(false);
+  });
+
+  test('composite foreign keys are reported with every column in the constraint', async () => {
+    const knex = strapi.db.connection;
+    const parent = 'inspector_composite_parent';
+    const child = 'inspector_composite_child';
+
+    await knex.schema.dropTableIfExists(child);
+    await knex.schema.dropTableIfExists(parent);
+
+    try {
+      await knex.schema.createTable(parent, (t) => {
+        t.integer('a').notNullable();
+        t.integer('b').notNullable();
+        t.primary(['a', 'b']);
+      });
+      await knex.schema.createTable(child, (t) => {
+        t.integer('pa').notNullable();
+        t.integer('pb').notNullable();
+        t.foreign(['pa', 'pb']).references(['a', 'b']).inTable(parent);
+      });
+
+      const fks = await schemaInspector.getForeignKeys(child);
+      const compositeFk = fks.find((fk) => fk.referencedTable === parent);
+
+      expect(compositeFk).toBeDefined();
+      expect(compositeFk.columns).toEqual(expect.arrayContaining(['pa', 'pb']));
+      expect(compositeFk.referencedColumns).toEqual(expect.arrayContaining(['a', 'b']));
+      expect(compositeFk.columns).toHaveLength(2);
+      expect(compositeFk.referencedColumns).toHaveLength(2);
+    } finally {
+      await knex.schema.dropTableIfExists(child);
+      await knex.schema.dropTableIfExists(parent);
+    }
+  });
 });
