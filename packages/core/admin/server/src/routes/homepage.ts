@@ -9,8 +9,8 @@ export default [
   },
   {
     method: 'GET',
-    path: '/homepage/performance-snapshot',
-    handler: 'homepage.getPerformanceSnapshot',
+    path: '/homepage/performance-metrics',
+    handler: 'homepage.getPerformanceHomeMetrics',
     config: {
       policies: ['admin::isAuthenticatedAdmin'],
     },

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { Cloud, Clock, Graph, User, TrendUp } from '@strapi/icons';
+import { Cloud, Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -348,17 +348,31 @@ class StrapiApp {
         roles: ['strapi-super-admin'],
       },
       {
-        icon: Graph,
+        icon: TrendUp,
         title: {
-          id: 'widget.performance.title',
-          defaultMessage: 'Performance snapshot',
+          id: 'widget.performance-quick.title',
+          defaultMessage: 'HTTP performance (window)',
         },
         component: async () => {
-          const { PerformanceSnapshotWidget } = await import('./components/Widgets');
-          return PerformanceSnapshotWidget;
+          const { PerformanceQuickStatsWidget } = await import('./components/Widgets');
+          return PerformanceQuickStatsWidget;
         },
         pluginId: 'admin',
-        id: 'performance-snapshot',
+        id: 'performance-quick-stats',
+        roles: ['strapi-super-admin'],
+      },
+      {
+        icon: Clock,
+        title: {
+          id: 'widget.performance-routes.title',
+          defaultMessage: 'Slow routes & SQL',
+        },
+        component: async () => {
+          const { PerformanceRoutesSqlWidget } = await import('./components/Widgets');
+          return PerformanceRoutesSqlWidget;
+        },
+        pluginId: 'admin',
+        id: 'performance-routes-sql',
         roles: ['strapi-super-admin'],
       },
       {

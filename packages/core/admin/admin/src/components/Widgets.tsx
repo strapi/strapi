@@ -19,7 +19,7 @@ import { styled } from 'styled-components';
 import {
   useGetCountDocumentsQuery,
   useGetKeyStatisticsQuery,
-  useGetPerformanceSnapshotQuery,
+  useGetPerformanceHomeMetricsQuery,
 } from '../services/homepage';
 import { getDisplayName, getInitials } from '../utils/users';
 
@@ -91,6 +91,25 @@ const PerfStatCell = styled(GridCell)`
   flex-direction: column;
   align-items: flex-start;
   padding: ${({ theme }) => theme.spaces[3]};
+`;
+
+const FingerprintPanel = styled(Box)`
+  max-height: 11rem;
+  overflow-y: auto;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+  background: ${({ theme }) => theme.colors.neutral100};
+  padding: ${({ theme }) => theme.spaces[2]};
+`;
+
+const FingerprintText = styled.span`
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  word-break: break-word;
+  color: ${({ theme }) => theme.colors.neutral800};
 `;
 
 const formatNumber = ({ locale, number }: { locale: string; number: number }) => {
@@ -270,12 +289,28 @@ const KeyStatisticsWidget = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * Performance snapshot (JSON Lines artifact tail)
+ * Performance — two homepage widgets share one artifact tail query
  * -----------------------------------------------------------------------------------------------*/
 
-const PerformanceSnapshotWidget = () => {
-  const { formatMessage, locale } = useIntl();
-  const { data, isLoading, isError } = useGetPerformanceSnapshotQuery();
+const perfTailKb = (maxBytes: number) => Math.max(1, Math.round(maxBytes / 1024));
+
+const usePerformanceMetricsFormatters = () => {
+  const { locale } = useIntl();
+  const formatInt = (n: number) =>
+    new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(n);
+  const formatMs = (n: number | null) =>
+    n == null || Number.isNaN(n) ? '—' : `${formatInt(Math.round(n))} ms`;
+  const formatPct = (n: number | null) =>
+    n == null || Number.isNaN(n)
+      ? '—'
+      : `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n)}%`;
+  return { formatInt, formatMs, formatPct };
+};
+
+const PerformanceQuickStatsWidget = () => {
+  const { formatMessage } = useIntl();
+  const { formatInt, formatMs, formatPct } = usePerformanceMetricsFormatters();
+  const { data, isLoading, isError } = useGetPerformanceHomeMetricsQuery();
 
   if (isLoading) {
     return <Widget.Loading />;
@@ -286,149 +321,358 @@ const PerformanceSnapshotWidget = () => {
   }
 
   if (data.source === 'none') {
+    return <Widget.NoData>{data.hint}</Widget.NoData>;
+  }
+
+  if (!data.fileFound) {
     return (
       <Widget.NoData>
-        <Typography variant="omega" textAlign="center" textColor="neutral600">
-          {data.hint}
-        </Typography>
+        {formatMessage({
+          id: 'widget.performance.missing-file',
+          defaultMessage:
+            'Performance artifact path is set, but the file does not exist yet. Traffic will create it on first flush.',
+        })}
       </Widget.NoData>
     );
   }
 
-  const { artifact, databasePerformanceEnabled, requestTimelineEnabled } = data;
-  const { totals, batchesParsed, lastGeneratedAt, fileFound, topFingerprints } = artifact;
+  const {
+    quickStats: q,
+    tailWindow,
+    linesScanned,
+    batchesParsed,
+    lastGeneratedAt,
+    databasePerformanceEnabled,
+    requestTimelineEnabled,
+  } = data;
+  const kb = perfTailKb(tailWindow.maxTailBytes);
 
-  const formatInt = (n: number) =>
-    new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(n);
+  return (
+    <Flex direction="column" gap={3} height="100%">
+      <Typography variant="pi" textColor="neutral600">
+        {formatMessage(
+          {
+            id: 'widget.performance-quick.caption',
+            defaultMessage:
+              'Aggregated from the last {lines} non-empty lines (~{kb} KB) of the performance artifact — a rolling window, not lifetime totals.',
+          },
+          { lines: tailWindow.maxNonEmptyLines, kb }
+        )}
+      </Typography>
+      <Flex justifyContent="space-between" alignItems="center" gap={2} wrap="wrap">
+        <Typography variant="pi" textColor="neutral500">
+          {formatMessage(
+            {
+              id: 'widget.performance.flags',
+              defaultMessage: 'DB perf: {db} · Request timeline: {req}',
+            },
+            {
+              db: databasePerformanceEnabled ? 'on' : 'off',
+              req: requestTimelineEnabled ? 'on' : 'off',
+            }
+          )}
+        </Typography>
+        {lastGeneratedAt ? (
+          <Typography variant="pi" textColor="neutral500" textAlign="right">
+            {formatMessage(
+              {
+                id: 'widget.performance.last-flush',
+                defaultMessage: 'Last batch: {time}',
+              },
+              { time: lastGeneratedAt }
+            )}
+          </Typography>
+        ) : null}
+      </Flex>
+      <Typography variant="pi" textColor="neutral500">
+        {formatMessage(
+          {
+            id: 'widget.performance.tail-meta',
+            defaultMessage: '{linesRead} tail lines · {batches} v1 batches',
+          },
+          { linesRead: linesScanned, batches: batchesParsed }
+        )}
+      </Typography>
+      <Grid>
+        <PerfStatCell>
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+              {formatMessage({
+                id: 'widget.performance-quick.requests',
+                defaultMessage: 'Request summaries',
+              })}
+            </Typography>
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage({
+                id: 'widget.performance-quick.requests-hint',
+                defaultMessage: 'Sampled HTTP rows in window',
+              })}
+            </Typography>
+            <Typography variant="alpha" fontWeight="bold">
+              {formatInt(q.requestSummariesInWindow)}
+            </Typography>
+          </Flex>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+              {formatMessage({
+                id: 'widget.performance-quick.avg',
+                defaultMessage: 'Avg wall time',
+              })}
+            </Typography>
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage({
+                id: 'widget.performance-quick.avg-hint',
+                defaultMessage: 'Mean request duration',
+              })}
+            </Typography>
+            <Typography variant="alpha" fontWeight="bold">
+              {formatMs(q.avgRequestDurationMs)}
+            </Typography>
+          </Flex>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+              {formatMessage({
+                id: 'widget.performance-quick.median',
+                defaultMessage: 'Median wall time',
+              })}
+            </Typography>
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage({
+                id: 'widget.performance-quick.median-hint',
+                defaultMessage: 'p50 of summaries',
+              })}
+            </Typography>
+            <Typography variant="alpha" fontWeight="bold">
+              {formatMs(q.medianRequestDurationMs)}
+            </Typography>
+          </Flex>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+              {formatMessage({
+                id: 'widget.performance-quick.p95',
+                defaultMessage: 'p95 wall time',
+              })}
+            </Typography>
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage({
+                id: 'widget.performance-quick.p95-hint',
+                defaultMessage: 'Slow tail of requests',
+              })}
+            </Typography>
+            <Typography variant="alpha" fontWeight="bold">
+              {formatMs(q.p95RequestDurationMs)}
+            </Typography>
+          </Flex>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+              {formatMessage({
+                id: 'widget.performance-quick.db-share',
+                defaultMessage: 'Avg DB % of wall',
+              })}
+            </Typography>
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage({
+                id: 'widget.performance-quick.db-share-hint',
+                defaultMessage: 'dbTotalMs ÷ duration per summary',
+              })}
+            </Typography>
+            <Typography variant="alpha" fontWeight="bold">
+              {formatPct(q.avgDbPercentOfWallTime)}
+            </Typography>
+          </Flex>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+              {formatMessage({
+                id: 'widget.performance-quick.db-ms',
+                defaultMessage: 'Avg DB time',
+              })}
+            </Typography>
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage({
+                id: 'widget.performance-quick.db-ms-hint',
+                defaultMessage: 'Mean dbTotalMs',
+              })}
+            </Typography>
+            <Typography variant="alpha" fontWeight="bold">
+              {formatMs(q.avgDbTimePerRequestMs)}
+            </Typography>
+          </Flex>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+              {formatMessage({
+                id: 'widget.performance-quick.slow-sql',
+                defaultMessage: 'Slow / error SQL rows',
+              })}
+            </Typography>
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage({
+                id: 'widget.performance-quick.slow-sql-hint',
+                defaultMessage: 'In artifact window',
+              })}
+            </Typography>
+            <Typography variant="alpha" fontWeight="bold">
+              {formatInt(q.slowDbEventsInWindow)}
+            </Typography>
+          </Flex>
+        </PerfStatCell>
+        <PerfStatCell>
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+              {formatMessage({
+                id: 'widget.performance-quick.slow-in-req',
+                defaultMessage: 'Slow queries (per request)',
+              })}
+            </Typography>
+            <Typography variant="omega" textColor="neutral600">
+              {formatMessage({
+                id: 'widget.performance-quick.slow-in-req-hint',
+                defaultMessage: 'Sum of slowQueryCount on summaries',
+              })}
+            </Typography>
+            <Typography variant="alpha" fontWeight="bold">
+              {formatInt(q.slowOrErrorQueriesAttributedToRequests)}
+            </Typography>
+          </Flex>
+        </PerfStatCell>
+      </Grid>
+    </Flex>
+  );
+};
 
-  if (artifact.configured && fileFound && batchesParsed === 0) {
+const RouteRow = styled(Box)`
+  padding-bottom: ${({ theme }) => theme.spaces[2]};
+  margin-bottom: ${({ theme }) => theme.spaces[2]};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+`;
+
+const PerformanceRoutesSqlWidget = () => {
+  const { formatMessage } = useIntl();
+  const { formatInt, formatMs, formatPct } = usePerformanceMetricsFormatters();
+  const { data, isLoading, isError } = useGetPerformanceHomeMetricsQuery();
+
+  if (isLoading) {
+    return <Widget.Loading />;
+  }
+
+  if (isError || !data) {
+    return <Widget.Error />;
+  }
+
+  if (data.source === 'none') {
+    return <Widget.NoData>{data.hint}</Widget.NoData>;
+  }
+
+  if (!data.fileFound) {
     return (
       <Widget.NoData>
-        <Typography variant="omega" textAlign="center" textColor="neutral600">
-          {formatMessage({
-            id: 'widget.performance.empty-file',
-            defaultMessage:
-              'Performance artifact is configured but no valid batches were found at the end of the file yet.',
-          })}
-        </Typography>
+        {formatMessage({
+          id: 'widget.performance.missing-file',
+          defaultMessage:
+            'Performance artifact path is set, but the file does not exist yet. Traffic will create it on first flush.',
+        })}
       </Widget.NoData>
     );
   }
 
-  if (artifact.configured && !fileFound) {
+  const { slowestRoutes, topSqlFingerprints } = data;
+
+  if (slowestRoutes.length === 0 && topSqlFingerprints.length === 0) {
     return (
       <Widget.NoData>
-        <Typography variant="omega" textAlign="center" textColor="neutral600">
-          {formatMessage({
-            id: 'widget.performance.missing-file',
-            defaultMessage:
-              'Performance artifact path is set, but the file does not exist yet. Traffic will create it on first flush.',
-          })}
-        </Typography>
+        {formatMessage({
+          id: 'widget.performance-routes.empty',
+          defaultMessage:
+            'No HTTP request summaries or slow SQL rows in the current artifact tail. Generate traffic or widen the tail in code if you need more history.',
+        })}
       </Widget.NoData>
     );
   }
 
   return (
-    <Flex direction="column" gap={3} height="100%">
-      <Flex justifyContent="space-between" alignItems="center" gap={2} wrap="wrap">
-        <Typography variant="pi" textColor="neutral500">
-          {formatMessage({
-            id: 'widget.performance.flags',
-            defaultMessage: 'DB perf: {db} · Request timeline: {req}',
-            values: {
-              db: databasePerformanceEnabled ? 'on' : 'off',
-              req: requestTimelineEnabled ? 'on' : 'off',
-            },
-          })}
-        </Typography>
-        {lastGeneratedAt ? (
-          <Typography variant="pi" textColor="neutral500">
+    <Flex direction="column" gap={4} height="100%">
+      {slowestRoutes.length > 0 ? (
+        <Flex direction="column" gap={2}>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral700">
             {formatMessage({
-              id: 'widget.performance.last-flush',
-              defaultMessage: 'Last batch: {time}',
-              values: { time: lastGeneratedAt },
+              id: 'widget.performance-routes.slowest',
+              defaultMessage: 'Slowest routes (by average wall time)',
             })}
           </Typography>
-        ) : null}
-      </Flex>
-      <Grid>
-        <PerfStatCell>
-          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-            {formatMessage({
-              id: 'widget.performance.slow-db',
-              defaultMessage: 'Slow / error DB events',
-            })}
-          </Typography>
-          <Typography variant="alpha" fontWeight="bold">
-            {formatInt(totals.slowQueryCount)}
-          </Typography>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-            {formatMessage({
-              id: 'widget.performance.requests',
-              defaultMessage: 'Request summaries',
-            })}
-          </Typography>
-          <Typography variant="alpha" fontWeight="bold">
-            {formatInt(totals.requestCount)}
-          </Typography>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-            {formatMessage({
-              id: 'widget.performance.slow-requests',
-              defaultMessage: 'Slow requests',
-            })}
-          </Typography>
-          <Typography variant="alpha" fontWeight="bold">
-            {formatInt(totals.slowRequestCount)}
-          </Typography>
-        </PerfStatCell>
-        <PerfStatCell>
-          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-            {formatMessage({
-              id: 'widget.performance.p95',
-              defaultMessage: 'Max batch p95 (ms)',
-            })}
-          </Typography>
-          <Typography variant="alpha" fontWeight="bold">
-            {formatInt(totals.maxP95Ms)}
-          </Typography>
-        </PerfStatCell>
-      </Grid>
-      {topFingerprints.length > 0 ? (
-        <Flex direction="column" gap={1}>
-          <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-            {formatMessage({
-              id: 'widget.performance.top-queries',
-              defaultMessage: 'Top query fingerprints (recent tail)',
-            })}
-          </Typography>
-          {topFingerprints.map((fp) => (
-            <Flex key={fp.fingerprint} justifyContent="space-between" gap={2}>
-              <Typography variant="pi" textColor="neutral800" ellipsis title={fp.fingerprint}>
-                {fp.fingerprint}
+          {slowestRoutes.map((r, index) => (
+            <RouteRow key={`perf-route-${index}`}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral800" ellipsis>
+                {r.method} {r.route}
               </Typography>
-              <Typography variant="pi" textColor="neutral600">
-                {formatInt(fp.count)}×
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage(
+                  {
+                    id: 'widget.performance-routes.row-stats',
+                    defaultMessage:
+                      '{count} requests · avg {wall} · DB {dbpct} of wall · {dbms} DB time',
+                  },
+                  {
+                    count: formatInt(r.count),
+                    wall: formatMs(r.avgDurationMs),
+                    dbpct: formatPct(r.avgDbPercent),
+                    dbms: formatMs(r.avgDbMs),
+                  }
+                )}
               </Typography>
-            </Flex>
+            </RouteRow>
           ))}
         </Flex>
       ) : null}
-      <LinkButton
-        href="https://docs.strapi.io/dev-docs/configurations/database#database-documentation"
-        isExternal
-        size="S"
-        variant="tertiary"
-      >
-        {formatMessage({
-          id: 'widget.performance.docs',
-          defaultMessage: 'Database & performance configuration',
-        })}
-      </LinkButton>
+      {topSqlFingerprints.length > 0 ? (
+        <Flex direction="column" gap={2}>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+            {formatMessage({
+              id: 'widget.performance-routes.top-sql',
+              defaultMessage: 'Most frequent slow / error SQL shapes',
+            })}
+          </Typography>
+          <FingerprintPanel>
+            <Flex direction="column" gap={2}>
+              {topSqlFingerprints.map((fp) => (
+                <Flex
+                  key={fp.fingerprint}
+                  justifyContent="space-between"
+                  alignItems="flex-start"
+                  gap={3}
+                >
+                  <FingerprintText title={fp.fingerprint}>{fp.fingerprint}</FingerprintText>
+                  <Typography variant="pi" textColor="neutral600" fontWeight="bold">
+                    {formatMessage(
+                      {
+                        id: 'widget.performance.fingerprint-count',
+                        defaultMessage: '{count, number}×',
+                      },
+                      { count: fp.count }
+                    )}
+                  </Typography>
+                </Flex>
+              ))}
+            </Flex>
+          </FingerprintPanel>
+        </Flex>
+      ) : null}
     </Flex>
   );
 };
@@ -464,4 +708,10 @@ const DeployNowWidget = () => {
   );
 };
 
-export { ProfileWidget, KeyStatisticsWidget, PerformanceSnapshotWidget, DeployNowWidget };
+export {
+  ProfileWidget,
+  KeyStatisticsWidget,
+  PerformanceQuickStatsWidget,
+  PerformanceRoutesSqlWidget,
+  DeployNowWidget,
+};

@@ -61,7 +61,12 @@ export default ({ env }) => {
      */
     performance: {
       enabled: true,
-      slowQueryMs: env.int('DATABASE_PERF_SLOW_MS', 50),
+      /**
+       * Low on purpose: a *lower* threshold means *more* queries count as slow. On a fast local DB,
+       * 50ms often never fires; use a few ms here so the demo artifact/widget actually shows `query.slow`.
+       * Raise `DATABASE_PERF_SLOW_MS` (e.g. 100–500) when you want production-like rarity.
+       */
+      slowQueryMs: env.int('DATABASE_PERF_SLOW_MS', 5),
       sampleRate: Number.parseFloat(env('DATABASE_PERF_SAMPLE_RATE', '1')) || 1,
       captureSqlText: env.bool('DATABASE_PERF_CAPTURE_SQL', true),
       captureBindings: env.bool('DATABASE_PERF_CAPTURE_BINDINGS', false),

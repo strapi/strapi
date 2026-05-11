@@ -6,7 +6,7 @@ import {
   HomepageLayoutWrite,
   HomepageLayoutWriteSchema,
 } from '../controllers/validation/schema';
-import { buildPerformanceWidgetSnapshot } from './performance-snapshot';
+import { buildPerformanceHomeMetrics } from './performance-metrics';
 
 const DEFAULT_WIDTH = 6 as const;
 const keyFor = (userId: number) => `homepage-layout:${userId}`;
@@ -54,7 +54,7 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     return HomepageLayoutSchema.parse(value);
   };
 
-  const getPerformanceSnapshot = () => buildPerformanceWidgetSnapshot(strapi);
+  const getPerformanceHomeMetrics = () => buildPerformanceHomeMetrics(strapi);
 
   const updateHomepageLayout = async (userId: number, input: unknown): Promise<HomepageLayout> => {
     const write: HomepageLayoutWrite = HomepageLayoutWriteSchema.parse(input);
@@ -88,7 +88,7 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
   return {
     getKeyStatistics,
-    getPerformanceSnapshot,
+    getPerformanceHomeMetrics,
     getHomepageLayout,
     updateHomepageLayout,
   };

@@ -17,7 +17,7 @@ const adminApi = createApi({
   tagTypes: [
     'GuidedTourMeta',
     'HomepageKeyStatistics',
-    'HomepagePerformanceSnapshot',
+    'HomepagePerformanceMetrics',
     'AiUsage',
     'AiFeatureConfig',
   ],

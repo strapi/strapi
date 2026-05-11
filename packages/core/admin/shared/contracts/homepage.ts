@@ -1,7 +1,7 @@
 import type { errors } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
 
-import type { PerformanceWidgetSnapshot } from './performance-widget';
+import type { PerformanceHomeMetrics } from './performance-metrics';
 
 // Export required to avoid "cannot be named" TS build error
 export interface RecentDocument {
@@ -30,13 +30,13 @@ export declare namespace GetRecentDocuments {
   }
 }
 
-export declare namespace GetPerformanceSnapshot {
+export declare namespace GetPerformanceHomeMetrics {
   export interface Request {
     body: {};
   }
 
   export interface Response {
-    data: PerformanceWidgetSnapshot;
+    data: PerformanceHomeMetrics;
     error?: errors.ApplicationError;
   }
 }
