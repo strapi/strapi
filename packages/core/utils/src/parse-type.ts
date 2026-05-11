@@ -1,15 +1,27 @@
 import * as _ from 'lodash';
-import * as dates from 'date-fns';
+import type * as datesType from 'date-fns';
+
+// Lazy: defer date-fns until a date / time / timestamp value is parsed.
+// `@strapi/utils` is required during boot; date-fns adds ~50 ms of
+// transitive submodule loads that most callers never trigger.
+let lazyDates: typeof datesType | undefined;
+const dates = (): typeof datesType => {
+  if (!lazyDates) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyDates = require('date-fns');
+  }
+  return lazyDates as typeof datesType;
+};
 
 const timeRegex = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$/;
 
 const isDate = (v: unknown): v is Date => {
-  return dates.isDate(v);
+  return dates().isDate(v);
 };
 
 const parseTime = (value: unknown): string => {
   if (isDate(value)) {
-    return dates.format(value, 'HH:mm:ss.SSS');
+    return dates().format(value, 'HH:mm:ss.SSS');
   }
 
   if (typeof value !== 'string') {
@@ -29,7 +41,7 @@ const parseTime = (value: unknown): string => {
 
 const parseDate = (value: unknown) => {
   if (isDate(value)) {
-    return dates.format(value, 'yyyy-MM-dd');
+    return dates().format(value, 'yyyy-MM-dd');
   }
 
   if (typeof value !== 'string') {
@@ -37,9 +49,9 @@ const parseDate = (value: unknown) => {
   }
 
   try {
-    const date = dates.parseISO(value);
+    const date = dates().parseISO(value);
 
-    if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
+    if (dates().isValid(date)) return dates().format(date, 'yyyy-MM-dd');
 
     throw new Error(`Invalid format, expected an ISO compatible date`);
   } catch (error) {
@@ -57,11 +69,11 @@ const parseDateTimeOrTimestamp = (value: unknown) => {
   }
 
   try {
-    const date = dates.parseISO(value);
-    if (dates.isValid(date)) return date;
+    const date = dates().parseISO(value);
+    if (dates().isValid(date)) return date;
 
-    const milliUnixDate = dates.parse(value, 'T', new Date());
-    if (dates.isValid(milliUnixDate)) return milliUnixDate;
+    const milliUnixDate = dates().parse(value, 'T', new Date());
+    if (dates().isValid(milliUnixDate)) return milliUnixDate;
 
     throw new Error(`Invalid format, expected a timestamp or an ISO date`);
   } catch (error) {
