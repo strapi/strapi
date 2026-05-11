@@ -11,10 +11,10 @@ Docker Compose runs an **OpenTelemetry Collector** plus **Jaeger** so Strapi can
 
 There is **no collector login or web UI** — the collector only receives and forwards telemetry.
 
-| Where to look      | What you see                                                                                                                                                                                                                      |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Jaeger**         | **Traces** — HTTP spans, nested Knex `db.*` spans when queries run in that request. Open [http://localhost:16686](http://localhost:16686) (local all-in-one has **no auth**). Search by **service** name (e.g. `strapi-complex`). |
-| **Collector logs** | **Metrics** — this demo uses the `debug` exporter, so metric batches appear in `docker compose logs` (~60s export interval from Strapi). For charts, add Prometheus/Grafana or a vendor exporter later.                           |
+| Where to look      | What you see                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Jaeger**         | **Traces** — HTTP spans; nested Knex `db.*`; Content API **sanitize / validate** (`strapi.content-api.sanitize.*`, `strapi.content-api.validate.*`); **admin permissions** sanitize/validate (`strapi.admin.permissions.sanitize.*`, `strapi.admin.permissions.validate.*`); Core REST **document service** (`strapi.documents.findMany`, etc.). Open [http://localhost:16686](http://localhost:16686) (no auth). Search by **service** name (e.g. `strapi-complex`). |
+| **Collector logs** | **Metrics** — `debug` exporter prints batches (~60s). Includes HTTP summaries, DB slow/error counts, **`strapi.content_api.phase.duration_ms`**, **`strapi.document_service.operation.duration_ms`**, **`strapi.admin.permissions.phase.duration_ms`**. Add Prometheus/Grafana for dashboards.                                                                                                                                                                        |
 
 ---
 
@@ -53,6 +53,9 @@ Strapi does **not** retain long-term history; Jaeger / your backend stores trace
 ## 4. Reading trace waterfalls (quick)
 
 - **`db.select` / `db.first` / …** — Knex **builder method** for that round-trip, not “one giant query”. Expand a span for attributes like `db.statement` when present.
+- **`strapi.content-api.sanitize.*` / `validate.*`** — time in Content API input/query sanitization and validation (REST controllers).
+- **`strapi.admin.permissions.sanitize.*` / `validate.*`** — time in the admin **permissions manager** sanitize/validate helpers (RBAC-scoped admin API payloads and queries).
+- **`strapi.documents.*`** — time inside **`strapi.documents(uid)`** Core REST operations (`findMany`, `create`, …), excluding separate sanitize/validate spans around them.
 - **Gaps between `db.*` bars** — time **not** inside those traced queries (JS work, untraced I/O, scheduling), not DB time for those spans.
 - **Several `db.*` bars overlapping** — overlapping wall-clock time (concurrent async work). **Same start tick but no overlap** can still be sequential.
 
