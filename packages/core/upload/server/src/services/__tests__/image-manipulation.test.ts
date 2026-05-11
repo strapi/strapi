@@ -5,6 +5,8 @@ import _ from 'lodash';
 import sharp from 'sharp';
 import imageManipulation from '../image-manipulation';
 
+import type { UploadableFile } from '../../types';
+
 const defaultConfig = {
   'plugin::upload': {
     breakpoints: {
@@ -38,6 +40,13 @@ const animatedWebpPath = path.join(__dirname, 'upload', 'animated-test.webp');
 const staticPngPath = path.join(__dirname, 'upload', 'image.png');
 const tmpDir = path.join(__dirname, 'tmp-anim');
 
+const metadataFromUploadableStream = (file: UploadableFile, animated: boolean) =>
+  new Promise<sharp.Metadata>((resolve, reject) => {
+    const pipeline = animated ? sharp({ animated: true }) : sharp();
+    pipeline.metadata().then(resolve).catch(reject);
+    file.getStream().pipe(pipeline);
+  });
+
 const makeFile = (filePath: string, ext: string, mime: string, width: number, height: number) => ({
   name: `test${ext}`,
   hash: `test_${Date.now()}`,
@@ -46,6 +55,27 @@ const makeFile = (filePath: string, ext: string, mime: string, width: number, he
   filepath: filePath,
   path: null,
   getStream: () => fs.createReadStream(filePath),
+  width,
+  height,
+  size: 1,
+  tmpWorkingDirectory: tmpDir,
+  folderPath: '/',
+});
+
+/** Upload pipeline can omit `filepath` and only supply streams (fresh stream each call). */
+const makeStreamOnlyFile = (
+  sourcePath: string,
+  ext: string,
+  mime: string,
+  width: number,
+  height: number
+): UploadableFile => ({
+  name: `test-stream${ext}`,
+  hash: `stream_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+  ext,
+  mime,
+  path: null,
+  getStream: () => fs.createReadStream(sourcePath),
   width,
   height,
   size: 1,
@@ -89,6 +119,25 @@ describe('Image manipulation - animated images', () => {
       expect(thumb!.width).toBeLessThanOrEqual(245);
       expect(thumb!.height).toBeLessThanOrEqual(156);
     });
+
+    test('preserves WebP animation frames (stream-only, no filepath)', async () => {
+      const file = makeStreamOnlyFile(animatedWebpPath, '.webp', 'image/webp', 200, 200);
+      const thumb = await imageManipulation.generateThumbnail(file);
+
+      expect(thumb).not.toBeNull();
+      expect(thumb!.filepath).toBeDefined();
+      const meta = await sharp(thumb!.filepath!, { animated: true }).metadata();
+      expect(meta.pages).toBe(3);
+    });
+
+    test('preserves GIF animation frames (stream-only, no filepath)', async () => {
+      const file = makeStreamOnlyFile(animatedGifPath, '.gif', 'image/gif', 200, 200);
+      const thumb = await imageManipulation.generateThumbnail(file);
+
+      expect(thumb).not.toBeNull();
+      const meta = await sharp(thumb!.filepath!, { animated: true }).metadata();
+      expect(meta.pages).toBe(3);
+    });
   });
 
   describe('optimize', () => {
@@ -102,6 +151,24 @@ describe('Image manipulation - animated images', () => {
 
     test('reports single-frame dimensions for animated WebP', async () => {
       const file = makeFile(animatedWebpPath, '.webp', 'image/webp', 200, 200);
+      const result = await imageManipulation.optimize(file);
+
+      expect(result.width).toBe(200);
+      expect(result.height).toBe(200);
+    });
+
+    test('preserves WebP animation frames (stream-only, no filepath)', async () => {
+      const file = makeStreamOnlyFile(animatedWebpPath, '.webp', 'image/webp', 200, 200);
+      const result = await imageManipulation.optimize(file);
+
+      // When output is larger than input, optimize returns the original file (no filepath);
+      // otherwise getStream reads the optimized file. Both must still expose 3 frames.
+      const meta = await metadataFromUploadableStream(result, true);
+      expect(meta.pages).toBe(3);
+    });
+
+    test('reports single-frame dimensions for animated WebP (stream-only, no filepath)', async () => {
+      const file = makeStreamOnlyFile(animatedWebpPath, '.webp', 'image/webp', 200, 200);
       const result = await imageManipulation.optimize(file);
 
       expect(result.width).toBe(200);
