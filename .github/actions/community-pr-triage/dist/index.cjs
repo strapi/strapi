@@ -40800,7 +40800,7 @@ function buildLinearUpdateBody(stats, viewUrl) {
   const quickWinLines = stats.quickWins.map((a2) => prLine(a2, `${a2.pr.additions + a2.pr.deletions} LOC`)).join("\n");
   const newThisWeekLines = stats.newThisWeek.map((a2) => prLine(a2)).join("\n");
   return [
-    `\u{1F4CA} Weekly Community PR Report \u2014 ${date}`,
+    `## \u{1F4CA} Weekly Community PR Report \u2014 ${date}`,
     "",
     `\u{1F4C1} Total open PRs: ${stats.totalOpen}`,
     `\u{1F195} New this week: ${stats.newThisWeek.length}`,
