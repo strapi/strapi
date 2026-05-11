@@ -33,8 +33,10 @@ import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 import { createContentSourceMapsService } from './services/content-source-maps';
-import { bridgeDatabasePerformanceEvents } from './services/performance-events';
-import { createPerformanceEventsPublicApi } from './services/performance-events-public-api';
+import {
+  bridgeDatabasePerformanceEvents,
+  createPerformanceEventsPublicApi,
+} from './services/performance';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';

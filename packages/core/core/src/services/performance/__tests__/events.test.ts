@@ -1,4 +1,5 @@
-import { bridgeDatabasePerformanceEvents } from '../performance-events';
+import { bridgeDatabasePerformanceEvents } from '../events';
+import { PERFORMANCE_HUB_EVENT } from '../hub-events';
 
 describe('Performance events bridge', () => {
   it('bridges DB slow query events to event hub', () => {
@@ -31,7 +32,7 @@ describe('Performance events bridge', () => {
     });
 
     expect(eventHub.emit).toHaveBeenCalledWith(
-      'performance.db.query.slow',
+      PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW,
       expect.objectContaining({
         schemaVersion: 1,
         eventVersion: 1,
@@ -74,7 +75,7 @@ describe('Performance events bridge', () => {
     });
 
     expect(eventHub.emit).toHaveBeenCalledWith(
-      'performance.db.query.error',
+      PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR,
       expect.objectContaining({
         schemaVersion: 1,
         requestId: 'req-123',
@@ -82,10 +83,13 @@ describe('Performance events bridge', () => {
       })
     );
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    const line = logger.warn.mock.calls[0][0] as string;
-    expect(line).toContain('performance.db.query.error');
-    expect(line).toContain('"durationMs":140');
-    expect(line).toContain('"errorCode":"SQLITE_ERROR"');
-    expect(line).toContain('"schemaVersion":1');
+    const record = JSON.parse(logger.warn.mock.calls[0][0] as string);
+    expect(record.strapiPerfLog.schemaVersion).toBe(1);
+    expect(record.strapiPerfLog.event).toBe(PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR);
+    expect(record.strapiPerfLog.payload).toMatchObject({
+      durationMs: 140,
+      errorCode: 'SQLITE_ERROR',
+      schemaVersion: 1,
+    });
   });
 });

@@ -4,7 +4,7 @@ import { defineProvider } from './provider';
 import {
   attachPerformanceArtifactWriter,
   type PerformanceArtifactDisposed,
-} from '../services/performance-artifact';
+} from '../services/performance';
 
 const artifactDisposers = new WeakMap<Core.Strapi, PerformanceArtifactDisposed>();
 

@@ -4,7 +4,8 @@ import {
   buildPublicRequestStartPayload,
   buildPublicRequestSummaryPayload,
   PERFORMANCE_PUBLIC_SCHEMA_VERSION,
-} from '../performance-event-payloads';
+} from '../event-payloads';
+import { PERFORMANCE_HUB_EVENT } from '../hub-events';
 
 describe('performance event payloads', () => {
   it('wraps DB perf events with schema and event versions', () => {
@@ -18,12 +19,15 @@ describe('performance event payloads', () => {
       success: true,
     };
 
-    const slow = buildPublicDatabaseQueryPerformancePayload('performance.db.query.slow', inner);
+    const slow = buildPublicDatabaseQueryPerformancePayload(
+      PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW,
+      inner
+    );
     expect(slow.schemaVersion).toBe(PERFORMANCE_PUBLIC_SCHEMA_VERSION);
     expect(slow.eventVersion).toBe(1);
     expect(slow.queryFingerprint).toBe('fp');
 
-    const err = buildPublicDatabaseQueryPerformancePayload('performance.db.query.error', {
+    const err = buildPublicDatabaseQueryPerformancePayload(PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR, {
       ...inner,
       type: 'query.error',
       success: false,

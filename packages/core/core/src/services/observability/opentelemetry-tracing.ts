@@ -248,3 +248,40 @@ export async function withHttpServerTracing(
     );
   });
 }
+
+const CONTENT_API_TRACER_NAME = '@strapi/core.content-api';
+
+/**
+ * Runs `fn` inside an INTERNAL span when `server.observability.tracing.enabled` is true.
+ * Used for Content API validate/sanitize work nested under the HTTP SERVER span.
+ */
+export async function withContentApiSpan<T>(
+  strapi: Core.Strapi | undefined,
+  spanName: string,
+  attributes: Record<string, string | number | boolean | undefined>,
+  fn: () => Promise<T>
+): Promise<T> {
+  if (!strapi || !isTracingConfigEnabled(strapi)) {
+    return fn();
+  }
+
+  const tracer = trace.getTracer(CONTENT_API_TRACER_NAME);
+
+  return tracer.startActiveSpan(spanName, { kind: SpanKind.INTERNAL }, async (span) => {
+    try {
+      for (const [key, value] of Object.entries(attributes)) {
+        if (value !== undefined) {
+          span.setAttribute(key, value);
+        }
+      }
+
+      return await fn();
+    } catch (error) {
+      span.recordException(error instanceof Error ? error : new Error(String(error)));
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+}

@@ -8,7 +8,8 @@ import {
   buildPublicRequestStartPayload,
   buildPublicRequestSummaryPayload,
   type PublicRequestPerfStage,
-} from '../performance-event-payloads';
+} from '../performance/event-payloads';
+import { PERFORMANCE_HUB_EVENT } from '../performance/hub-events';
 import { resolveRouteTemplate } from '../../utils/koa-route-template';
 import {
   getServerRequestPerformanceEmitSettings,
@@ -47,7 +48,7 @@ export async function runRequestPerformanceMiddleware(
     if (emitStart) {
       strapi.eventHub
         .emit(
-          'performance.request.start',
+          PERFORMANCE_HUB_EVENT.REQUEST_START,
           buildPublicRequestStartPayload({
             requestId,
             method: ctx.method,
@@ -90,7 +91,7 @@ export async function runRequestPerformanceMiddleware(
       slowQueryCount,
     });
 
-    strapi.eventHub.emit('performance.request.summary', summaryPayload).catch(() => {
+    strapi.eventHub.emit(PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY, summaryPayload).catch(() => {
       /* fail-open */
     });
 
@@ -102,7 +103,7 @@ export async function runRequestPerformanceMiddleware(
         for (const s of stages) {
           strapi.eventHub
             .emit(
-              'performance.request.stage',
+              PERFORMANCE_HUB_EVENT.REQUEST_STAGE,
               buildPublicRequestStagePayload({
                 requestId,
                 stage: s.stage,

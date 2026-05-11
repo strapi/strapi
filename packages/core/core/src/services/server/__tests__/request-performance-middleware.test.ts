@@ -3,6 +3,7 @@ import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
 import { mergeQueryTelemetryIntoStats } from '../../../utils/perf-query-stats';
+import { PERFORMANCE_HUB_EVENT } from '../../performance/hub-events';
 import { runRequestPerformanceMiddleware } from '../request-performance-middleware';
 
 function createCtxWithResHooks(): {
@@ -125,7 +126,7 @@ describe('runRequestPerformanceMiddleware', () => {
     fireFinish();
 
     expect(emit).toHaveBeenCalledWith(
-      'performance.request.start',
+      PERFORMANCE_HUB_EVENT.REQUEST_START,
       expect.objectContaining({
         schemaVersion: 1,
         requestId,
@@ -134,7 +135,7 @@ describe('runRequestPerformanceMiddleware', () => {
       })
     );
     expect(emit).toHaveBeenCalledWith(
-      'performance.request.summary',
+      PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY,
       expect.objectContaining({
         schemaVersion: 1,
         eventVersion: 1,
@@ -171,7 +172,7 @@ describe('runRequestPerformanceMiddleware', () => {
     fireFinish();
 
     expect(emit).toHaveBeenCalledWith(
-      'performance.request.summary',
+      PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY,
       expect.objectContaining({ requestId })
     );
   });
@@ -222,7 +223,7 @@ describe('runRequestPerformanceMiddleware', () => {
     fireFinish();
 
     expect(emit).toHaveBeenCalledWith(
-      'performance.request.summary',
+      PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY,
       expect.objectContaining({ durationMs: 20 })
     );
 
@@ -253,7 +254,7 @@ describe('runRequestPerformanceMiddleware', () => {
     fireFinish();
 
     expect(emit).toHaveBeenCalledWith(
-      'performance.request.stage',
+      PERFORMANCE_HUB_EVENT.REQUEST_STAGE,
       expect.objectContaining({
         requestId,
         stage: 'auth',
@@ -261,7 +262,7 @@ describe('runRequestPerformanceMiddleware', () => {
       })
     );
     expect(emit).toHaveBeenCalledWith(
-      'performance.request.stage',
+      PERFORMANCE_HUB_EVENT.REQUEST_STAGE,
       expect.objectContaining({
         requestId,
         stage: 'controller',

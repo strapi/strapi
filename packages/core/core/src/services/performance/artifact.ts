@@ -3,14 +3,14 @@ import path from 'node:path';
 
 import type { Core, Modules } from '@strapi/types';
 
-const DB_SLOW_EVENT = 'performance.db.query.slow';
-const DB_ERROR_EVENT = 'performance.db.query.error';
+import {
+  resolveDatabasePerformanceFlushIntervalMs,
+  resolveDatabasePerformanceMaxEvents,
+} from './database-config';
+import { PERFORMANCE_ARTIFACT_REQUEST_EVENTS, PERFORMANCE_HUB_EVENT } from './hub-events';
 
-const REQUEST_PERF_EVENTS = [
-  'performance.request.start',
-  'performance.request.stage',
-  'performance.request.summary',
-] as const;
+/** NDJSON envelope `schemaVersion` for each flushed line (additive within major). */
+export const PERFORMANCE_ARTIFACT_BATCH_SCHEMA_VERSION = 1 as const;
 
 export type PerformanceArtifactDisposed = () => Promise<void>;
 
@@ -36,7 +36,7 @@ export type PerformanceArtifactSummaryV1 = {
 };
 
 export type PerformanceArtifactEnvelopeV1 = {
-  schemaVersion: 1;
+  schemaVersion: typeof PERFORMANCE_ARTIFACT_BATCH_SCHEMA_VERSION;
   generatedAt: string;
   strapiVersion: string;
   nodeVersion: string;
@@ -47,24 +47,6 @@ export type PerformanceArtifactEnvelopeV1 = {
 };
 
 const shouldCaptureArtifact = (output: unknown) => output === 'artifact' || output === 'both';
-
-function resolveFlushIntervalMs(strapi: Core.Strapi): number {
-  const preferred = strapi.config.get('database.performance.flushIntervalMs');
-  if (typeof preferred === 'number' && preferred > 0) {
-    return preferred;
-  }
-  const legacy = strapi.config.get('database.performance.artifactFlushIntervalMs', 5000);
-  return typeof legacy === 'number' && legacy > 0 ? legacy : 5000;
-}
-
-function resolveMaxEvents(strapi: Core.Strapi): number {
-  const preferred = strapi.config.get('database.performance.maxEvents');
-  if (typeof preferred === 'number' && preferred > 0) {
-    return preferred;
-  }
-  const legacy = strapi.config.get('database.performance.artifactMaxEvents', 10_000);
-  return typeof legacy === 'number' && legacy > 0 ? legacy : 10_000;
-}
 
 function clampPositiveInt(value: unknown, fallback: number): number {
   if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
@@ -125,7 +107,10 @@ function computeFingerprintRollup(rows: BufferedPerfRow[]): ArtifactFingerprintA
   const map = new Map<string, { count: number; totalMs: number }>();
 
   for (const row of rows) {
-    if (row.kind !== DB_SLOW_EVENT && row.kind !== DB_ERROR_EVENT) {
+    if (
+      row.kind !== PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW &&
+      row.kind !== PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR
+    ) {
       continue;
     }
     const ev = row.event as { queryFingerprint?: string; durationMs?: number };
@@ -153,14 +138,17 @@ export function summarizePerfArtifactBatch(
   let slowRequestCount = 0;
 
   for (const row of rows) {
-    if (row.kind === DB_SLOW_EVENT || row.kind === DB_ERROR_EVENT) {
+    if (
+      row.kind === PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW ||
+      row.kind === PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR
+    ) {
       dbEventRows += 1;
       const ev = row.event as { durationMs?: number };
       if (typeof ev.durationMs === 'number') {
         durations.push(ev.durationMs);
       }
     }
-    if (row.kind === 'performance.request.summary') {
+    if (row.kind === PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY) {
       requestCount += 1;
       const ev = row.event as { durationMs?: number };
       if (typeof ev.durationMs === 'number' && ev.durationMs >= opts.slowRequestMs) {
@@ -206,8 +194,8 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
     };
   }
 
-  const flushMs = resolveFlushIntervalMs(strapi);
-  const maxEvents = resolveMaxEvents(strapi);
+  const flushMs = resolveDatabasePerformanceFlushIntervalMs(strapi);
+  const maxEvents = resolveDatabasePerformanceMaxEvents(strapi);
   const slowRequestMs = clampPositiveInt(
     strapi.config.get('server.performance.slowRequestMs'),
     500
@@ -219,7 +207,7 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
   const buildEnvelope = (events: BufferedPerfRow[]): PerformanceArtifactEnvelopeV1 => {
     const gitSha = resolveGitSha();
     return {
-      schemaVersion: 1,
+      schemaVersion: PERFORMANCE_ARTIFACT_BATCH_SCHEMA_VERSION,
       generatedAt: new Date().toISOString(),
       strapiVersion: String(strapi.config.get('info.strapi') ?? 'unknown'),
       nodeVersion: process.version,
@@ -254,8 +242,10 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
   };
 
   const subscriber: Modules.EventHub.Subscriber = async (eventName, ...args) => {
-    const isDb = eventName === DB_SLOW_EVENT || eventName === DB_ERROR_EVENT;
-    const isReq = (REQUEST_PERF_EVENTS as readonly string[]).includes(eventName);
+    const isDb =
+      eventName === PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW ||
+      eventName === PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR;
+    const isReq = (PERFORMANCE_ARTIFACT_REQUEST_EVENTS as readonly string[]).includes(eventName);
 
     if (!isDb && !isReq) {
       return;

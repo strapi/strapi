@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
-import type { PublicRequestPerfStage } from '../performance-event-payloads';
+import type { PublicRequestPerfStage } from '../performance/event-payloads';
 
 type PerfStageEntry = { stage: PublicRequestPerfStage; stageDurationMs: number };
 

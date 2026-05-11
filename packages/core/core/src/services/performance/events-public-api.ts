@@ -1,9 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
 
-import {
-  PERFORMANCE_HUB_EVENT_NAMES,
-  PERFORMANCE_PUBLIC_SCHEMA_VERSION,
-} from './performance-event-payloads';
+import { PERFORMANCE_HUB_EVENT_NAMES, PERFORMANCE_PUBLIC_SCHEMA_VERSION } from './event-payloads';
 
 /**
  * Stable entry point for plugins to subscribe to performance hub events (Option B in the perf spec).

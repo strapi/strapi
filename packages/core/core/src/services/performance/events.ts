@@ -2,7 +2,9 @@ import type { Database, DatabaseQueryPerfEvent } from '@strapi/database';
 import type { Logger } from '@strapi/logger';
 import type { Modules } from '@strapi/types';
 
-import { buildPublicDatabaseQueryPerformancePayload } from './performance-event-payloads';
+import { buildPublicDatabaseQueryPerformancePayload } from './event-payloads';
+import { PERFORMANCE_HUB_EVENT } from './hub-events';
+import { formatStrapiPerformanceHubLogRecord } from './log';
 
 interface PerformanceBridgeOptions {
   db: Database;
@@ -10,9 +12,6 @@ interface PerformanceBridgeOptions {
   logger: Logger;
   output?: 'none' | 'log' | 'artifact' | 'both';
 }
-
-const DB_SLOW_EVENT = 'performance.db.query.slow' as const;
-const DB_ERROR_EVENT = 'performance.db.query.error' as const;
 
 const shouldLog = (output?: string) => output === 'log' || output === 'both';
 
@@ -23,7 +22,10 @@ export const bridgeDatabasePerformanceEvents = ({
   output = 'none',
 }: PerformanceBridgeOptions) => {
   return db.subscribeToPerformanceEvents((event: DatabaseQueryPerfEvent) => {
-    const eventName = event.type === 'query.error' ? DB_ERROR_EVENT : DB_SLOW_EVENT;
+    const eventName =
+      event.type === 'query.error'
+        ? PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR
+        : PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW;
     const payload = buildPublicDatabaseQueryPerformancePayload(eventName, event);
 
     eventHub.emit(eventName, payload).catch(() => {
@@ -32,7 +34,7 @@ export const bridgeDatabasePerformanceEvents = ({
 
     if (shouldLog(output)) {
       /* Winston pretty-print transports only stringify `message`, not metadata objects */
-      logger.warn(`${eventName} ${JSON.stringify(payload)}`);
+      logger.warn(formatStrapiPerformanceHubLogRecord(eventName, payload));
     }
   });
 };

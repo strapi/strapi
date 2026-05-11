@@ -1,5 +1,12 @@
 import type { DatabaseQueryPerfEvent } from '@strapi/database';
 
+import {
+  PERFORMANCE_HUB_EVENT,
+  PERFORMANCE_HUB_EVENT_NAMES,
+  type PerformanceHubBuiltInEventName,
+  type PerformanceHubDbQueryEventName,
+} from './hub-events';
+
 /** Namespace version for all `performance.*` hub payloads in Strapi 5.x (additive-only within major). */
 export const PERFORMANCE_PUBLIC_SCHEMA_VERSION = 1 as const;
 
@@ -10,15 +17,9 @@ export const PERFORMANCE_REQUEST_SUMMARY_EVENT_VERSION = 1 as const;
 export const PERFORMANCE_REQUEST_START_EVENT_VERSION = 1 as const;
 export const PERFORMANCE_REQUEST_STAGE_EVENT_VERSION = 1 as const;
 
-export const PERFORMANCE_HUB_EVENT_NAMES = [
-  'performance.db.query.slow',
-  'performance.db.query.error',
-  'performance.request.start',
-  'performance.request.stage',
-  'performance.request.summary',
-] as const;
+export { PERFORMANCE_HUB_EVENT, PERFORMANCE_HUB_EVENT_NAMES };
 
-export type PerformanceHubEventName = (typeof PERFORMANCE_HUB_EVENT_NAMES)[number];
+export type PerformanceHubEventName = PerformanceHubBuiltInEventName;
 
 export type PublicDatabaseQueryPerformancePayload = DatabaseQueryPerfEvent & {
   schemaVersion: typeof PERFORMANCE_PUBLIC_SCHEMA_VERSION;
@@ -76,11 +77,11 @@ export interface PublicRequestSummaryPayload {
 }
 
 export function buildPublicDatabaseQueryPerformancePayload(
-  hubEventName: 'performance.db.query.slow' | 'performance.db.query.error',
+  hubEventName: PerformanceHubDbQueryEventName,
   event: DatabaseQueryPerfEvent
 ): PublicDatabaseQueryPerformancePayload {
   const eventVersion =
-    hubEventName === 'performance.db.query.error'
+    hubEventName === PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR
       ? PERFORMANCE_DB_QUERY_ERROR_EVENT_VERSION
       : PERFORMANCE_DB_QUERY_SLOW_EVENT_VERSION;
 
