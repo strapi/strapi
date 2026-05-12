@@ -1,4 +1,4 @@
-import { checkIfAttributeIsDisplayable } from '../attributes';
+import { checkIfAttributeIsDisplayable, getMainField } from '../attributes';
 
 describe('attributes', () => {
   describe('checkIfAttributeIsDisplayable', () => {
@@ -36,6 +36,52 @@ describe('attributes', () => {
       } as const;
 
       expect(checkIfAttributeIsDisplayable(attribute)).toBeTruthy();
+    });
+  });
+
+  describe('getMainField', () => {
+    it('falls back to string when the component schema is not in the dictionary yet', () => {
+      const attribute = {
+        type: 'component' as const,
+        component: 'shared.missing',
+        repeatable: false,
+      };
+
+      const result = getMainField(attribute, 'title', { schemas: [], components: {} });
+
+      expect(result).toEqual({ name: 'title', type: 'string' });
+    });
+
+    it('reads the component sub-field type when the component schema is present', () => {
+      const attribute = {
+        type: 'component' as const,
+        component: 'shared.seo',
+        repeatable: false,
+      };
+
+      const result = getMainField(attribute, 'title', {
+        schemas: [],
+        components: {
+          'shared.seo': {
+            uid: 'shared.seo',
+            attributes: { title: { type: 'string' } },
+          } as any,
+        },
+      });
+
+      expect(result).toEqual({ name: 'title', type: 'string' });
+    });
+
+    it('falls back to string when the relation target schema or sub-field is missing', () => {
+      const attribute = {
+        type: 'relation' as const,
+        relation: 'manyToOne',
+        targetModel: 'api::missing.missing',
+      } as any;
+
+      const result = getMainField(attribute, 'name', { schemas: [], components: {} });
+
+      expect(result).toEqual({ name: 'name', type: 'string' });
     });
   });
 });
