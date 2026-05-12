@@ -25,7 +25,7 @@ With Strapi **already running** (e.g. `yarn develop:postgres`) and the collector
 1. Run **`yarn seed:rest`** once against this DB (grants Public permissions for all types in **`rest-stress-targets.json`**).
 2. From `examples/complex`: **`yarn stress:rest`** — hits **`/api/basics`**, **`/api/basic-dps`**, **`/api/basic-dp-i18ns`**, **`/api/relations`**, **`/api/relation-dps`**, **`/api/relation-dp-i18ns`**, **`/api/hc-m2m-sources`**, **`/api/hc-m2m-targets`** in rotation (list + findOne; draft/publish uses **`status`**; i18n uses **`locale`** from the JSON or **`STRESS_REST_LOCALE`** / **`--locale`**).
 
-Defaults: `http://127.0.0.1:1337/api`, **300** requests, **15** concurrent per batch. Options and env vars: **`scripts/stress-rest-api.js`**. Add **`--writes`** (or `STRESS_REST_WRITES=1`) for ~10% **`POST`** across those types (needs Public **create**, already granted by `seed:rest`).
+Defaults: `http://127.0.0.1:1337/api`, **300** requests, **15** concurrent per batch. Options and env vars: **`scripts/stress-rest-api.js`**. Add **`--writes`** (or `STRESS_REST_WRITES=1`) for a repeating **12-request cycle** per index: **POST** (create with generated scalars), **PUT** (partial update with new fake values), extra **GET** lists, then **GET** findOne. Requires Public **create** and **update** (run an updated `yarn seed:rest` once if you granted permissions before `update` existed).
 
 ## Content Types
 

@@ -9,7 +9,7 @@
  * Prerequisites
  * ---------------
  * - Strapi already up (e.g. `yarn develop` or `yarn develop:postgres` from this directory).
- * - Run `yarn seed:rest` once: grants Public **find** / **findOne** / **create** on those types.
+ * - Run `yarn seed:rest` once: grants Public **find** / **findOne** / **create** / **update** on those types.
  *
  * Usage (from examples/complex)
  * -----------------------------
@@ -22,32 +22,114 @@
  *   STRESS_REST_BASE_URL   API root including /api (http://127.0.0.1:1337/api)
  *   STRESS_REST_TOTAL      total requests (300)
  *   STRESS_REST_CONCURRENCY in-flight per batch (15)
- *   STRESS_REST_WRITES     if 1/true, ~10% POST (rotates across types)
+ *   STRESS_REST_WRITES     if 1/true, mixed POST (fake create) + PUT (fake update) + GET reads
  *   STRESS_REST_LOCALE     optional override for i18n `locale` query (else each target's JSON `locale`)
  */
 
 const path = require('node:path');
 const REST_TARGETS = require(path.join(__dirname, 'rest-stress-targets.json'));
 
+function strSeed(salt) {
+  const raw = String(salt).replace(/[^a-zA-Z0-9-]/g, '-');
+  return (raw.length > 4 ? raw : `s-${raw}`).slice(0, 80);
+}
+
+function fakeBasicLikeScalarsCreate(stamp) {
+  const n = stamp.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const safeEmailLocal = `u${n % 100000}`;
+  const domain = `${Math.abs(n % 10000)}.example.test`;
+  return {
+    stringField: `stress-${stamp}`,
+    textField: `Lorem ipsum dolor sit amet, consectetur ${stamp}. Checksum ${n % 997}.`,
+    integerField: 100 + (n % 10000),
+    bigintegerField: String(1_000_000 + (n % 100_000)),
+    decimalField: Number(((n % 1000) / 100).toFixed(2)),
+    floatField: Number(((n % 360) * 0.01).toFixed(4)),
+    booleanField: n % 2 === 0,
+    dateField: '2024-01-20',
+    datetimeField: '2024-01-20T12:00:00.000Z',
+    timeField: '09:15:00',
+    emailField: `${safeEmailLocal}@${domain}`,
+    passwordField: `Pwd-${stamp.slice(0, 20)}-9!x`,
+    jsonField: { stress: true, n, nested: { ok: true, stamp } },
+    enumerationField: ['one', 'two', 'three'][n % 3],
+  };
+}
+
+function fakeBasicLikeScalarsUpdate(stamp, i) {
+  const n = i + stamp.length * 7;
+  const safeEmailLocal = `upd${n % 99999}`;
+  const domain = `${Math.abs(n % 9000)}.example.test`;
+  return {
+    textField: `Updated lorem ${stamp} request#${i}.`,
+    integerField: 5000 + (n % 8000),
+    bigintegerField: String(2_000_000 + (n % 50_000)),
+    decimalField: Number(((n % 500) / 50).toFixed(2)),
+    floatField: Number(((n % 180) * 0.02).toFixed(4)),
+    booleanField: n % 3 !== 0,
+    dateField: '2024-02-10',
+    datetimeField: '2024-02-10T18:45:30.000Z',
+    timeField: '16:20:00',
+    emailField: `${safeEmailLocal}@${domain}`,
+    jsonField: { updated: true, seq: i, note: stamp.slice(0, 40) },
+    enumerationField: ['one', 'two', 'three'][(n + 1) % 3],
+  };
+}
+
 function makeCreatePayload(uid, salt) {
-  const stamp = `${Date.now()}-${salt}`;
+  const stamp = strSeed(salt);
+  const basicLike = fakeBasicLikeScalarsCreate(stamp);
   switch (uid) {
     case 'api::basic.basic':
-      return { data: { stringField: `s-${stamp}`, textField: 'stress-rest-api.js' } };
+      return { data: basicLike };
     case 'api::basic-dp.basic-dp':
-      return { data: { stringField: `s-${stamp}` } };
+      return { data: basicLike };
     case 'api::basic-dp-i18n.basic-dp-i18n':
-      return { data: { stringField: `s-${stamp}` } };
+      return { data: basicLike };
     case 'api::relation.relation':
-      return { data: { name: `r-${stamp}` } };
+      return {
+        data: {
+          name: `Relation ${stamp}`,
+        },
+      };
     case 'api::relation-dp.relation-dp':
-      return { data: { name: `r-${stamp}` } };
+      return {
+        data: {
+          name: `Relation-DP ${stamp}`,
+        },
+      };
     case 'api::relation-dp-i18n.relation-dp-i18n':
-      return { data: { name: `r-${stamp}` } };
+      return {
+        data: {
+          name: `Relation-DP-i18n ${stamp}`,
+        },
+      };
     case 'api::hc-m2m-source.hc-m2m-source':
-      return { data: { label: `src-${stamp}` } };
+      return { data: { label: `Source ${stamp}` } };
     case 'api::hc-m2m-target.hc-m2m-target':
-      return { data: { label: `tgt-${stamp}` } };
+      return { data: { label: `Target ${stamp}` } };
+    default:
+      return { data: {} };
+  }
+}
+
+function makeUpdatePayload(uid, salt, i) {
+  const stamp = strSeed(salt);
+  switch (uid) {
+    case 'api::basic.basic':
+    case 'api::basic-dp.basic-dp':
+    case 'api::basic-dp-i18n.basic-dp-i18n':
+      return { data: fakeBasicLikeScalarsUpdate(stamp, i) };
+    case 'api::relation.relation':
+      return { data: { name: `Updated relation ${stamp} #${i}` } };
+    case 'api::relation-dp.relation-dp':
+      return { data: { name: `Updated relation-dp ${stamp} #${i}` } };
+    case 'api::relation-dp-i18n.relation-dp-i18n':
+      return { data: { name: `Updated relation-dp-i18n ${stamp} #${i}` } };
+    case 'api::hc-m2m-source.hc-m2m-source':
+      return { data: { label: `Updated source ${stamp} #${i}` } };
+    case 'api::hc-m2m-target.hc-m2m-target':
+      return { data: { label: `Updated target ${stamp} #${i}` } };
     default:
       return { data: {} };
   }
@@ -139,6 +221,19 @@ function buildCreateUrl(base, target, opts) {
   return url;
 }
 
+/** PUT /:id — same locale/status as draft edits; no `fields` filter (mutations return full shape). */
+function buildPutUrl(base, target, documentId, opts) {
+  const url = new URL(`${base}/${target.pluralPath}/${documentId}`);
+  const loc = effectiveLocale(target, opts);
+  if (loc) {
+    url.searchParams.set('locale', loc);
+  }
+  if (target.draftAndPublish) {
+    url.searchParams.set('status', 'draft');
+  }
+  return url;
+}
+
 async function tryListFirstDocumentId(base, target, opts) {
   for (let v = 0; v < (target.draftAndPublish ? 2 : 1); v++) {
     const url = buildListUrl(base, target, v, opts);
@@ -217,7 +312,7 @@ Options:
   --base <url>     API root (default: http://127.0.0.1:1337/api or STRESS_REST_BASE_URL)
   -n <number>      total requests (STRESS_REST_TOTAL, default 300)
   -c <number>      concurrency per batch (STRESS_REST_CONCURRENCY, default 15)
-  -w, --writes     ~10% POST across types (needs Public create; STRESS_REST_WRITES=1)
+  -w, --writes     POST + PUT with generated field data (needs Public create+update; STRESS_REST_WRITES=1)
   --locale <code>  override i18n locale (else STRESS_REST_LOCALE or rest-stress-targets.json per type)
 
 Example:
@@ -245,23 +340,80 @@ Example:
 
   async function oneRequest(i) {
     const t = targets[i % targets.length];
-    const useWrite = opts.writes && i % 10 === 0;
     try {
-      if (useWrite) {
-        const url = buildCreateUrl(base, t, opts);
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(makeCreatePayload(t.uid, i)),
-        });
-        const text = await res.text();
-        if (!res.ok) {
-          throw new Error(`POST ${t.pluralPath} ${res.status}: ${text.slice(0, 200)}`);
-        }
-        const json = JSON.parse(text);
-        const newId = json.data?.documentId ?? json.data?.id;
-        if (newId) {
-          idByUid.set(t.uid, newId);
+      if (opts.writes) {
+        const phase = i % 12;
+        if (phase === 0) {
+          const url = buildCreateUrl(base, t, opts);
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(makeCreatePayload(t.uid, `post-${i}`)),
+          });
+          const text = await res.text();
+          if (!res.ok) {
+            throw new Error(`POST ${t.pluralPath} ${res.status}: ${text.slice(0, 200)}`);
+          }
+          const json = JSON.parse(text);
+          const newId = json.data?.documentId ?? json.data?.id;
+          if (newId) {
+            idByUid.set(t.uid, newId);
+          }
+        } else if (phase === 1) {
+          const id = idByUid.get(t.uid);
+          if (!id) {
+            const url = buildListUrl(base, t, i, opts);
+            const res = await fetch(url);
+            const text = await res.text();
+            if (!res.ok) {
+              throw new Error(`GET list ${t.pluralPath} ${res.status}: ${text.slice(0, 200)}`);
+            }
+            const json = JSON.parse(text);
+            const newId = firstDocumentIdFromListJson(json);
+            if (newId) {
+              idByUid.set(t.uid, newId);
+            }
+          } else {
+            const url = buildPutUrl(base, t, id, opts);
+            const res = await fetch(url, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(makeUpdatePayload(t.uid, `put-${i}`, i)),
+            });
+            const text = await res.text();
+            if (!res.ok) {
+              throw new Error(`PUT ${t.pluralPath} ${res.status}: ${text.slice(0, 200)}`);
+            }
+          }
+        } else if (phase >= 2 && phase <= 5) {
+          const url = buildListUrl(base, t, i, opts);
+          const res = await fetch(url);
+          const text = await res.text();
+          if (!res.ok) {
+            throw new Error(`GET list ${t.pluralPath} ${res.status}: ${text.slice(0, 200)}`);
+          }
+          const json = JSON.parse(text);
+          const newId = firstDocumentIdFromListJson(json);
+          if (newId) {
+            idByUid.set(t.uid, newId);
+          }
+        } else {
+          const id = idByUid.get(t.uid);
+          if (!id) {
+            const url = buildListUrl(base, t, i, opts);
+            const res = await fetch(url);
+            const text = await res.text();
+            if (!res.ok) {
+              throw new Error(`GET list ${t.pluralPath} ${res.status}: ${text.slice(0, 200)}`);
+            }
+          } else {
+            const url = buildFindOneUrl(base, t, id, opts);
+            const res = await fetch(url);
+            const text = await res.text();
+            if (!res.ok) {
+              throw new Error(`GET one ${t.pluralPath} ${res.status}: ${text.slice(0, 200)}`);
+            }
+          }
         }
       } else if (Math.floor(i / targets.length) % 2 === 0) {
         const url = buildListUrl(base, t, i, opts);
@@ -322,7 +474,7 @@ Example:
   }
   if (fail > 0) {
     console.log(
-      '\nHint: 403 → run `yarn seed:rest` once (grants Public find/findOne/create on all types in rest-stress-targets.json).'
+      '\nHint: 403 → run `yarn seed:rest` once (grants Public find/findOne/create/update on all types in rest-stress-targets.json).'
     );
     process.exitCode = 1;
   } else {

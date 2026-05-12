@@ -4,7 +4,7 @@
  * Run from `examples/complex` (e.g. `yarn seed:rest`). Requires a working DB (same as `yarn seed:v5`).
  *
  * Uses a random localhost port unless `SEED_REST_PORT` is set. Grants Public Content API
- * **find** / **findOne** / **create** on every collection type listed in
+ * **find** / **findOne** / **create** / **update** on every collection type listed in
  * `scripts/rest-stress-targets.json` (used by `yarn stress:rest`).
  */
 
@@ -17,6 +17,7 @@ const REST_ACTIONS = REST_TARGETS.flatMap((t) => [
   `${t.uid}.find`,
   `${t.uid}.findOne`,
   `${t.uid}.create`,
+  `${t.uid}.update`,
 ]);
 
 async function ensurePublicPermission(strapi, roleId, action) {
@@ -74,7 +75,7 @@ async function main() {
     const base = `http://${listenHost}:${listenPort}${apiPrefix}`;
 
     console.log(
-      `Granted ${REST_ACTIONS.length} Public permissions (${REST_TARGETS.length} types × find/findOne/create).`
+      `Granted ${REST_ACTIONS.length} Public permissions (${REST_TARGETS.length} types × find/findOne/create/update).`
     );
 
     const label = `rest-seed-${Date.now()}`;
