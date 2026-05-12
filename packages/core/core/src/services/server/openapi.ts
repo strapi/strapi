@@ -3,28 +3,10 @@ import fs from 'fs-extra';
 import * as openapi from '@strapi/openapi';
 import type { Core } from '@strapi/types';
 
-type OpenAPIRouteType = 'content-api' | 'admin';
-
-interface OpenAPIEndpointConfig {
-  enabled?: boolean;
-  route?: {
-    path?: string;
-  };
-  access?: {
-    mode?: 'public' | 'authenticated';
-    roles?: string[];
-  };
-  cache?: {
-    enabled?: boolean;
-    maxAgeMs?: number;
-    filePath?: string;
-  };
-}
-
-interface OpenAPIConfig {
-  'content-api'?: OpenAPIEndpointConfig;
-  admin?: OpenAPIEndpointConfig;
-}
+type OpenAPIConfig = Core.Config.OpenAPI;
+type OpenAPIEndpointConfig = NonNullable<OpenAPIConfig['content-api']>;
+type OpenAPIAccessMode = NonNullable<NonNullable<OpenAPIEndpointConfig['access']>['mode']>;
+type OpenAPIRouteType = keyof OpenAPIConfig;
 
 interface ResolvedEndpointConfig {
   type: OpenAPIRouteType;
@@ -32,7 +14,7 @@ interface ResolvedEndpointConfig {
   routePath: string;
   routerPrefix?: string;
   fullPath: string;
-  accessMode: 'public' | 'authenticated';
+  accessMode: OpenAPIAccessMode;
   accessRoles: string[];
   cacheEnabled: boolean;
   cacheMaxAgeMs: number;
@@ -262,15 +244,4 @@ export const registerOpenAPIRoute = (strapi: Core.Strapi) => {
   });
 
   routers.forEach((router) => strapi.server.routes(router));
-};
-
-export const __internal__ = {
-  DEFAULTS,
-  normalizePath,
-  joinPaths,
-  stripBasePrefix,
-  resolveEndpointConfig,
-  resolveOpenAPIConfig,
-  readCache,
-  writeCache,
 };

@@ -68,10 +68,10 @@ const defaultServerConfig = {
       },
     },
   },
-};
+} satisfies Partial<Core.Config.Server>;
 
 const defaultConfig = {
-  server: defaultServerConfig as Partial<Core.Config.Server>,
+  server: defaultServerConfig,
   admin: {} satisfies Partial<Core.Config.Admin>,
   api: {
     rest: {
