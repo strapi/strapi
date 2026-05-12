@@ -69,6 +69,25 @@ function recordDbSlowOrError(ev: PublicDatabaseQueryPerformancePayload): void {
   });
 }
 
+function recordStrapiLabeledHistogram(
+  histogram: Histogram | null,
+  strapi: Core.Strapi | undefined,
+  primaryAttribute: { name: string; value: string },
+  contentTypeUid: string | undefined,
+  durationMs: number
+): void {
+  if (!histogram || !strapi || !isMetricsFeatureEnabled(strapi)) {
+    return;
+  }
+  const attrs: Record<string, string> = {
+    [primaryAttribute.name]: clampAttr(primaryAttribute.value),
+  };
+  if (contentTypeUid) {
+    attrs['strapi.content_type.uid'] = clampAttr(contentTypeUid);
+  }
+  histogram.record(durationMs, attrs);
+}
+
 /** Installs a global `MeterProvider` when metrics + OTLP are enabled. Call from provider `register`. */
 export function registerOpenTelemetryPerformanceMetrics(strapi: Core.Strapi): void {
   if (!isMetricsFeatureEnabled(strapi)) {
@@ -160,16 +179,13 @@ export function recordContentApiPhaseDuration(
   phase: string,
   durationMs: number
 ): void {
-  if (!contentApiPhaseDurationMs || !strapi || !isMetricsFeatureEnabled(strapi)) {
-    return;
-  }
-  const attrs: Record<string, string> = {
-    'strapi.phase': clampAttr(phase),
-  };
-  if (contentTypeUid) {
-    attrs['strapi.content_type.uid'] = clampAttr(contentTypeUid);
-  }
-  contentApiPhaseDurationMs.record(durationMs, attrs);
+  recordStrapiLabeledHistogram(
+    contentApiPhaseDurationMs,
+    strapi,
+    { name: 'strapi.phase', value: phase },
+    contentTypeUid,
+    durationMs
+  );
 }
 
 /** OTLP histogram emit from Core API document calls when metrics SDK is initialized. */
@@ -179,16 +195,13 @@ export function recordDocumentServiceOperationDuration(
   operation: string,
   durationMs: number
 ): void {
-  if (!documentServiceOperationDurationMs || !strapi || !isMetricsFeatureEnabled(strapi)) {
-    return;
-  }
-  const attrs: Record<string, string> = {
-    'strapi.operation': clampAttr(operation),
-  };
-  if (contentTypeUid) {
-    attrs['strapi.content_type.uid'] = clampAttr(contentTypeUid);
-  }
-  documentServiceOperationDurationMs.record(durationMs, attrs);
+  recordStrapiLabeledHistogram(
+    documentServiceOperationDurationMs,
+    strapi,
+    { name: 'strapi.operation', value: operation },
+    contentTypeUid,
+    durationMs
+  );
 }
 
 /** OTLP histogram emit from `withAdminPermissionsSpan` when metrics SDK is initialized. */
@@ -198,16 +211,13 @@ export function recordAdminPermissionsPhaseDuration(
   phase: string,
   durationMs: number
 ): void {
-  if (!adminPermissionsPhaseDurationMs || !strapi || !isMetricsFeatureEnabled(strapi)) {
-    return;
-  }
-  const attrs: Record<string, string> = {
-    'strapi.phase': clampAttr(phase),
-  };
-  if (contentTypeUid) {
-    attrs['strapi.content_type.uid'] = clampAttr(contentTypeUid);
-  }
-  adminPermissionsPhaseDurationMs.record(durationMs, attrs);
+  recordStrapiLabeledHistogram(
+    adminPermissionsPhaseDurationMs,
+    strapi,
+    { name: 'strapi.phase', value: phase },
+    contentTypeUid,
+    durationMs
+  );
 }
 
 /** Subscribes to performance hub events. Call from provider `bootstrap`. */

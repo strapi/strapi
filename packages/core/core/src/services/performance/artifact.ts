@@ -2,6 +2,7 @@ import { mkdir, rename, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import type { Core, Modules } from '@strapi/types';
+import { percentileNearestSorted } from '@strapi/utils';
 
 import {
   resolveDatabasePerformanceArtifactMaxFileBytes,
@@ -97,14 +98,6 @@ function buildRedactedPerfSnapshot(strapi: Core.Strapi): Record<string, unknown>
   };
 }
 
-function percentileNearest(sorted: number[], p: number): number {
-  if (sorted.length === 0) {
-    return 0;
-  }
-  const idx = Math.ceil((p / 100) * sorted.length) - 1;
-  return sorted[Math.max(0, Math.min(sorted.length - 1, idx))];
-}
-
 function computeFingerprintRollup(rows: BufferedPerfRow[]): ArtifactFingerprintAgg[] {
   const map = new Map<string, { count: number; totalMs: number }>();
 
@@ -164,9 +157,9 @@ export function summarizePerfArtifactBatch(
   return {
     totalQueriesObserved: dbEventRows,
     slowQueryCount: dbEventRows,
-    p50Ms: percentileNearest(durations, 50),
-    p95Ms: percentileNearest(durations, 95),
-    p99Ms: percentileNearest(durations, 99),
+    p50Ms: percentileNearestSorted(durations, 50) ?? 0,
+    p95Ms: percentileNearestSorted(durations, 95) ?? 0,
+    p99Ms: percentileNearestSorted(durations, 99) ?? 0,
     topFingerprints: computeFingerprintRollup(rows),
     requestCount: requestCount > 0 ? requestCount : undefined,
     slowRequestCount: requestCount > 0 ? slowRequestCount : undefined,
