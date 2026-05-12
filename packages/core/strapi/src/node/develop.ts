@@ -15,6 +15,13 @@ import type { ViteWatcher } from './vite/watch';
 
 import { writeStaticClientFiles } from './staticFiles';
 import { Logger } from '../cli/utils/logger';
+import {
+  ensureCliOpenTelemetry,
+  flushCliOpenTelemetry,
+  isCliOpenTelemetryEnabled,
+  withCliDevelopPrimaryRootSpan,
+  withCliSpan,
+} from './cli-opentelemetry';
 
 interface DevelopOptions extends CLIContext {
   /**
@@ -83,62 +90,84 @@ const develop = async ({
   const timer = getTimer();
 
   if (cluster.isPrimary) {
-    const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
-      logger.error(err.message);
-      process.exit(1);
-    });
+    ensureCliOpenTelemetry();
+    const traced = <T>(name: string, fn: () => Promise<T>) =>
+      isCliOpenTelemetryEnabled() ? withCliSpan(name, fn) : fn();
 
-    if (didInstall) {
-      return;
-    }
-
-    if (tsconfig?.config) {
-      // Build without diagnostics in case schemas have changed
-      await cleanupDistDirectory({ tsconfig, logger, timer });
-      try {
-        await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
-      } catch (err: unknown) {
-        logger.error(`Error during initial TypeScript compilation: ${(err as Error).message}`);
-        // We don't return here because we want to attempt to start the server even if the initial compilation fails, as it can be fixed while the server is running
-      }
-    }
-
-    /**
-     * IF we're not watching the admin we're going to build it, this makes
-     * sure that at least the admin is built for users & they can interact
-     * with the application.
-     */
-    if (!watchAdmin && buildAdmin) {
-      timer.start('createBuildContext');
-      const contextSpinner = logger.spinner(`Building build context`).start();
-      console.log('');
-
-      const ctx = await createBuildContext({
-        cwd,
-        logger,
-        tsconfig,
-        options,
+    const runPrimaryPhases = async (): Promise<'stop' | 'continue'> => {
+      const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
+        logger.error(err.message);
+        process.exit(1);
       });
-      const contextDuration = timer.end('createBuildContext');
-      contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
-      contextSpinner.succeed();
 
-      timer.start('creatingAdmin');
-      const adminSpinner = logger.spinner(`Creating admin`).start();
-
-      await writeStaticClientFiles(ctx);
-
-      if (ctx.bundler === 'webpack') {
-        const { build: buildWebpack } = await import('./webpack/build');
-        await buildWebpack(ctx);
-      } else if (ctx.bundler === 'vite') {
-        const { build: buildVite } = await import('./vite/build');
-        await buildVite(ctx);
+      if (didInstall) {
+        return 'stop';
       }
 
-      const adminDuration = timer.end('creatingAdmin');
-      adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
-      adminSpinner.succeed();
+      if (tsconfig?.config) {
+        await traced('strapi.cli.develop.primary.prepare_typescript', async () => {
+          // Build without diagnostics in case schemas have changed
+          await cleanupDistDirectory({ tsconfig, logger, timer });
+          try {
+            await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+          } catch (err: unknown) {
+            logger.error(`Error during initial TypeScript compilation: ${(err as Error).message}`);
+            // We don't return here because we want to attempt to start the server even if the initial compilation fails, as it can be fixed while the server is running
+          }
+        });
+      }
+
+      /**
+       * IF we're not watching the admin we're going to build it, this makes
+       * sure that at least the admin is built for users & they can interact
+       * with the application.
+       */
+      if (!watchAdmin && buildAdmin) {
+        await traced('strapi.cli.develop.primary.build_admin_production', async () => {
+          timer.start('createBuildContext');
+          const contextSpinner = logger.spinner(`Building build context`).start();
+          console.log('');
+
+          const ctx = await createBuildContext({
+            cwd,
+            logger,
+            tsconfig,
+            options,
+          });
+          const contextDuration = timer.end('createBuildContext');
+          contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
+          contextSpinner.succeed();
+
+          timer.start('creatingAdmin');
+          const adminSpinner = logger.spinner(`Creating admin`).start();
+
+          await writeStaticClientFiles(ctx);
+
+          if (ctx.bundler === 'webpack') {
+            const { build: buildWebpack } = await import('./webpack/build');
+            await buildWebpack(ctx);
+          } else if (ctx.bundler === 'vite') {
+            const { build: buildVite } = await import('./vite/build');
+            await buildVite(ctx);
+          }
+
+          const adminDuration = timer.end('creatingAdmin');
+          adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
+          adminSpinner.succeed();
+        });
+      }
+
+      return 'continue';
+    };
+
+    const primaryOutcome = isCliOpenTelemetryEnabled()
+      ? await withCliDevelopPrimaryRootSpan(runPrimaryPhases)
+      : await runPrimaryPhases();
+
+    await flushCliOpenTelemetry();
+
+    if (primaryOutcome === 'stop') {
+      return;
     }
 
     cluster.on('message', async (worker, message) => {
@@ -146,12 +175,18 @@ const develop = async ({
         case 'reload': {
           if (tsconfig?.config) {
             try {
-              // Build without diagnostics in case schemas have changed
-              await cleanupDistDirectory({ tsconfig, logger, timer });
-              await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+              const tracedReload = <T>(name: string, fn: () => Promise<T>) =>
+                isCliOpenTelemetryEnabled() ? withCliSpan(name, fn) : fn();
+
+              await tracedReload('strapi.cli.develop.primary.reload_typescript', async () => {
+                // Build without diagnostics in case schemas have changed
+                await cleanupDistDirectory({ tsconfig, logger, timer });
+                await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+              });
+              await flushCliOpenTelemetry();
             } catch (err: unknown) {
-              const message = err instanceof Error ? err.message : String(err);
-              logger.error(`Error during TypeScript compilation on reload: ${message}`);
+              const errMessage = err instanceof Error ? err.message : String(err);
+              logger.error(`Error during TypeScript compilation on reload: ${errMessage}`);
               process.exit(1);
             }
           }

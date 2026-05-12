@@ -8,7 +8,7 @@ This project contains complex Strapi schemas for testing migrations between Stra
 
 ### OpenTelemetry
 
-`config/server.ts` enables **OTLP HTTP** export for **traces** and **metrics** when `STRAPI_OTEL_ENABLED` is true (default **true**). Env vars are documented in **`.env.example`**: `STRAPI_OTEL_HTTP_ENDPOINT` (default `http://127.0.0.1:4318`), `STRAPI_OTEL_SERVICE_NAME` (default `strapi-complex`).
+`config/server.ts` enables **OTLP HTTP** export for **traces** and **metrics** when `STRAPI_OTEL_ENABLED` is true (default **true**). Env vars are documented in **`.env.example`**: `STRAPI_OTEL_HTTP_ENDPOINT` (default `http://127.0.0.1:4318`), `STRAPI_OTEL_SERVICE_NAME` (default `strapi-complex`). The same env vars also enable **optional OTLP traces from the `strapi develop` cluster primary** (TypeScript compile and production admin build before the worker starts), as a **separate** Jaeger service `strapi-complex-cli-primary` — see the otel-local README.
 
 **Run order:** start the local collector + Jaeger stack, then Strapi (e.g. `yarn develop:postgres`). Full steps, Jaeger URL, how to read traces vs metrics, and what happens if the collector is down are in **[`examples/otel-local/README.md`](../otel-local/README.md)** — that file is the single “how to use OTel here” guide; this section only describes how **this** example is wired.
 
