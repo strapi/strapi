@@ -4,7 +4,8 @@
  * HTTP / document-service / DB telemetry quickly (e.g. OTLP → Jaeger + collector).
  *
  * Covers all collection types listed in `scripts/rest-stress-targets.json` (basics, basic-dps,
- * i18n + draft types, relations, hc-m2m, …) — rotates list + findOne across them.
+ * i18n + draft types, relations, hc-m2m, …). **`yarn stress:rest`** runs with **`--writes`** so
+ * Jaeger sees **POST** / **PUT** as well as **GET** (use **`yarn stress:rest:reads`** for GET-only).
  *
  * Prerequisites
  * ---------------
@@ -14,15 +15,16 @@
  * Usage (from examples/complex)
  * -----------------------------
  *   yarn stress:rest
+ *   yarn stress:rest:reads
  *   yarn stress:rest -- --base http://127.0.0.1:1337/api -n 800 -c 25
- *   STRESS_REST_WRITES=1 yarn stress:rest -- -n 400 -c 10
+ *   STRESS_REST_WRITES=1 yarn stress:rest:reads -- -n 400 -c 10
  *
  * Env (defaults in parentheses)
  * -----------------------------
  *   STRESS_REST_BASE_URL   API root including /api (http://127.0.0.1:1337/api)
  *   STRESS_REST_TOTAL      total requests (300)
  *   STRESS_REST_CONCURRENCY in-flight per batch (15)
- *   STRESS_REST_WRITES     if 1/true, mixed POST (fake create) + PUT (fake update) + GET reads
+ *   STRESS_REST_WRITES     if 1/true, POST+PUT+GET when you run the script without `--writes`
  *   STRESS_REST_LOCALE     optional override for i18n `locale` query (else each target's JSON `locale`)
  */
 
@@ -154,6 +156,8 @@ function parseArgs(argv) {
       out.concurrency = Math.max(1, parseInt(argv[++k], 10) || out.concurrency);
     } else if (a === '--writes' || a === '-w') {
       out.writes = true;
+    } else if (a === '--reads-only' || a === '--no-writes') {
+      out.writes = false;
     } else if (a === '--locale' && argv[k + 1]) {
       out.locale = argv[++k];
     } else if (a === '--help' || a === '-h') {
@@ -276,6 +280,11 @@ async function tryPostCreate(base, target, opts, salt) {
   return json.data?.documentId ?? json.data?.id ?? null;
 }
 
+function isConnectionRefused(err) {
+  const c = err && typeof err === 'object' && 'cause' in err ? err.cause : err;
+  return Boolean(c && typeof c === 'object' && c.code === 'ECONNREFUSED');
+}
+
 async function warmUpCaches(base, targets, opts) {
   const idByUid = new Map();
   for (const t of targets) {
@@ -312,7 +321,8 @@ Options:
   --base <url>     API root (default: http://127.0.0.1:1337/api or STRESS_REST_BASE_URL)
   -n <number>      total requests (STRESS_REST_TOTAL, default 300)
   -c <number>      concurrency per batch (STRESS_REST_CONCURRENCY, default 15)
-  -w, --writes     POST + PUT with generated field data (needs Public create+update; STRESS_REST_WRITES=1)
+  -w, --writes     POST + PUT + GET mix (default for yarn stress:rest in package.json)
+  --reads-only      GET list + findOne only (same as STRESS_REST_WRITES=0)
   --locale <code>  override i18n locale (else STRESS_REST_LOCALE or rest-stress-targets.json per type)
 
 Example:
@@ -328,10 +338,28 @@ Example:
     `Content types: ${targets.map((t) => t.pluralPath).join(', ')} (${targets.length} plural roots)`
   );
   console.log(
-    `Plan: ${opts.total} requests, batch concurrency ${opts.concurrency}, writes=${opts.writes}`
+    `Plan: ${opts.total} requests, batch concurrency ${opts.concurrency}, writes=${opts.writes}${opts.writes ? '' : ' (GET-only — use default yarn stress:rest for POST/PUT traces)'}`
   );
 
-  const idByUid = await warmUpCaches(base, targets, opts);
+  let idByUid;
+  try {
+    idByUid = await warmUpCaches(base, targets, opts);
+  } catch (err) {
+    if (isConnectionRefused(err)) {
+      console.error(
+        [
+          '',
+          `Cannot reach Strapi at ${base} (connection refused).`,
+          '  Start the app from this directory, e.g.  yarn develop',
+          '  Or set the API root:  yarn stress:rest -- --base http://HOST:PORT/api',
+          '  (env STRESS_REST_BASE_URL)',
+          '',
+        ].join('\n')
+      );
+      process.exit(1);
+    }
+    throw err;
+  }
   console.log(`Warm-up: cached documentId for ${idByUid.size} type(s).`);
 
   let ok = 0;

@@ -120,13 +120,22 @@ let disposeKnexListeners: (() => void) | null = null;
 const isTracingConfigEnabled = (strapi: Core.Strapi): boolean =>
   strapi.config.get('server.observability.tracing.enabled') === true;
 
-/** When tracing is on, adds `strapi.http.route.*` spans around auth/policy/middleware/controller (default: true). */
-export const isRouteHandlerStageTracingEnabled = (strapi: Core.Strapi): boolean => {
-  if (!isTracingConfigEnabled(strapi) || !nodeProvider) {
+/**
+ * Whether route-level tracing is turned on in config (`tracing.enabled` and
+ * `recordRouteHandlerStages` not explicitly `false`). Does not depend on the Node
+ * tracer provider — use this to decide that routes should use the perf/tracing
+ * middleware stack so spans appear once the provider is registered.
+ */
+export const isRouteHandlerStageTracingConfigured = (strapi: Core.Strapi): boolean => {
+  if (!isTracingConfigEnabled(strapi)) {
     return false;
   }
   return strapi.config.get('server.observability.tracing.recordRouteHandlerStages') !== false;
 };
+
+/** When tracing is on and the Node provider exists, route handlers emit `strapi.http.route.*` spans. */
+export const isRouteHandlerStageTracingEnabled = (strapi: Core.Strapi): boolean =>
+  isRouteHandlerStageTracingConfigured(strapi) && nodeProvider != null;
 
 const STARTUP_TRACER_NAME = '@strapi/core.startup';
 

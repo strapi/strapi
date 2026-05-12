@@ -43,7 +43,7 @@ For **any other app**, set `server.observability.tracing` and `server.observabil
 
 ## 3. View data
 
-1. **Traces:** [http://localhost:16686](http://localhost:16686) → **Search** → pick your service → **Find traces**. After a restart, look for **`strapi.startup`** for boot waterfalls. Use routes that hit the API (e.g. Content Manager); a bare **`GET /admin`** document often has **no DB child spans** because the HTML shell may do little server-side SQL.
+1. **Traces:** [http://localhost:16686](http://localhost:16686) → **Search** → pick your service → **Find traces**. After a restart, look for **`strapi.startup`** for boot waterfalls. For the **complex** example, **`yarn stress:rest`** (from `examples/complex`) sends **POST** / **PUT** / **GET** by default so you see mutations in Jaeger; **`yarn stress:rest:reads`** is GET-only. A bare **`GET /admin`** document often has **no DB child spans** because the HTML shell may do little server-side SQL.
 2. **Metrics:** `docker compose -f examples/otel-local/docker-compose.yml logs -f otel-collector` and wait for **ResourceMetrics** after traffic + export interval.
 
 Strapi does **not** retain long-term history; Jaeger / your backend stores traces until its retention; metrics in this demo are only what you see in logs unless you add a real metrics backend.
