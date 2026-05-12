@@ -1,6 +1,6 @@
 import { waitForElementToBeRemoved } from '@testing-library/react';
 import { render as renderRTL, waitFor, server, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { StageSelect } from '../StageSelect';
@@ -50,11 +50,10 @@ describe('StageSelect', () => {
 
   it("renders the select as disabled with a hint, if there aren't any stages", async () => {
     server.use(
-      rest.get(
+      http.get(
         '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
-        (req, res, ctx) => {
-          return res.once(ctx.json({ data: [] }));
-        }
+        () => HttpResponse.json({ data: [] }),
+        { once: true }
       )
     );
 
@@ -70,20 +69,18 @@ describe('StageSelect', () => {
 
   it('shows the single-stage hint when the workflow has one stage (empty options but meta says so)', async () => {
     server.use(
-      rest.get(
+      http.get(
         '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
-        (req, res, ctx) => {
-          return res.once(
-            ctx.json({
-              data: [],
-              meta: {
-                workflowCount: 1,
-                stageCount: 1,
-                canTransition: true,
-              },
-            })
-          );
-        }
+        () =>
+          HttpResponse.json({
+            data: [],
+            meta: {
+              workflowCount: 1,
+              stageCount: 1,
+              canTransition: true,
+            },
+          }),
+        { once: true }
       )
     );
 
@@ -102,20 +99,18 @@ describe('StageSelect', () => {
 
   it('shows the no-permission hint when there are multiple stages but the user cannot transition', async () => {
     server.use(
-      rest.get(
+      http.get(
         '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
-        (req, res, ctx) => {
-          return res.once(
-            ctx.json({
-              data: [],
-              meta: {
-                workflowCount: 1,
-                stageCount: 3,
-                canTransition: false,
-              },
-            })
-          );
-        }
+        () =>
+          HttpResponse.json({
+            data: [],
+            meta: {
+              workflowCount: 1,
+              stageCount: 3,
+              canTransition: false,
+            },
+          }),
+        { once: true }
       )
     );
 
