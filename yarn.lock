@@ -10135,10 +10135,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/strapi@workspace:packages/core/strapi"
   dependencies:
-    "@opentelemetry/api": "npm:^1.9.0"
-    "@opentelemetry/exporter-trace-otlp-http": "npm:^0.53.0"
-    "@opentelemetry/resources": "npm:^1.26.0"
-    "@opentelemetry/sdk-trace-node": "npm:^1.26.0"
     "@pmmmwh/react-refresh-webpack-plugin": "npm:0.5.15"
     "@strapi/admin": "npm:5.45.0"
     "@strapi/cloud-cli": "npm:5.45.0"
