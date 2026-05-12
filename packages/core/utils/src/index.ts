@@ -37,6 +37,7 @@ export * from './validation';
 export * from './route-serialization';
 
 export * from './primitives';
+export { arithmeticMean, percentileNearestSorted } from './primitives/stats';
 export * from './content-api-router';
 export * from './security';
 export {
