@@ -1,4 +1,5 @@
 import { isArray } from 'lodash/fp';
+import { generateNKeysBetween } from 'fractional-indexing';
 import { contentTypes } from '@strapi/utils';
 import type { UID, Schema, Core } from '@strapi/types';
 
@@ -421,10 +422,11 @@ const processDocumentData = async (
         attributes: {},
       }) as Schema.Component;
       if (attribute.repeatable && isArray(value)) {
+        const tempKeys = generateNKeysBetween(undefined, undefined, value.length);
         result[key] = await Promise.all(
           value.map(async (item: Record<string, unknown>, index: number) => {
             const processed = await processDocumentData(item, compSchema, components, preResolved);
-            return { ...processed, __temp_key__: index + 1 };
+            return { ...processed, __temp_key__: tempKeys[index] };
           })
         );
       } else if (value) {
@@ -442,13 +444,14 @@ const processDocumentData = async (
     }
 
     if (attribute.type === 'dynamiczone' && isArray(value)) {
+      const tempKeys = generateNKeysBetween(undefined, undefined, value.length);
       result[key] = await Promise.all(
         value.map(async (item: Record<string, unknown>, index: number) => {
           const compSchema = (components[item?.__component as string] || {
             attributes: {},
           }) as Schema.Component;
           const processed = await processDocumentData(item, compSchema, components, preResolved);
-          return { ...processed, __temp_key__: index + 1 };
+          return { ...processed, __temp_key__: tempKeys[index] };
         })
       );
       continue;

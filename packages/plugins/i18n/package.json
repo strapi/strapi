@@ -60,6 +60,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
+    "fractional-indexing": "3.2.0",
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.2.0",
     "@strapi/icons": "2.2.0",

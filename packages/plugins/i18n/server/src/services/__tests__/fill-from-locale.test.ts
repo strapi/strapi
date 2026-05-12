@@ -1,3 +1,4 @@
+import { generateNKeysBetween } from 'fractional-indexing';
 import { createFillFromLocaleService } from '../fill-from-locale';
 
 // ---------------------------------------------------------------------------
@@ -298,9 +299,10 @@ describe('transformDocument — components', () => {
     );
 
     const sections = result.sections as any[];
+    const expectedKeys = generateNKeysBetween(undefined, undefined, 2);
     expect(sections).toHaveLength(2);
-    expect(sections[0]).toMatchObject({ heading: 'First', __temp_key__: 1 });
-    expect(sections[1]).toMatchObject({ heading: 'Second', __temp_key__: 2 });
+    expect(sections[0]).toMatchObject({ heading: 'First', __temp_key__: expectedKeys[0] });
+    expect(sections[1]).toMatchObject({ heading: 'Second', __temp_key__: expectedKeys[1] });
     // id is in FIELDS_TO_REMOVE so it should be stripped
     expect(sections[0]).not.toHaveProperty('id');
   });
@@ -365,16 +367,17 @@ describe('transformDocument — dynamic zones', () => {
     );
 
     const body = result.body as any[];
+    const expectedKeys = generateNKeysBetween(undefined, undefined, 2);
     expect(body).toHaveLength(2);
     expect(body[0]).toMatchObject({
       __component: 'blocks.text',
       content: 'Hello',
-      __temp_key__: 1,
+      __temp_key__: expectedKeys[0],
     });
     expect(body[1]).toMatchObject({
       __component: 'blocks.image',
       url: 'https://example.com/img.png',
-      __temp_key__: 2,
+      __temp_key__: expectedKeys[1],
     });
     // id is in FIELDS_TO_REMOVE
     expect(body[0]).not.toHaveProperty('id');
