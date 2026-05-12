@@ -7,6 +7,7 @@ import {
   buildCookieOptionsWithExpiry,
   getSessionManager,
   generateDeviceId,
+  SESSION_COOKIE_NAME,
 } from '../../../../../shared/utils/session-auth';
 
 const defaultConnectionError = () => new Error('Invalid connection payload');
@@ -136,11 +137,14 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
     const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
 
     const domain: string | undefined = strapi.config.get('admin.auth.domain');
-    ctx.cookies.set('jwtToken', accessToken, {
+    const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
+
+    ctx.cookies.set(SESSION_COOKIE_NAME, accessToken, {
       httpOnly: false,
       secure: isSecure,
       overwrite: true,
       domain,
+      path,
     });
 
     const sanitizedUser = getService('user').sanitizeUser(user);
