@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import { arithmeticMean, percentileNearestSorted } from '@strapi/utils';
 
 import type {
   PerformanceFingerprintRow,
@@ -28,21 +29,6 @@ type RouteBucket = {
   dbPercents: number[];
 };
 
-function percentileNearest(sorted: number[], p: number): number | null {
-  if (sorted.length === 0) {
-    return null;
-  }
-  const idx = Math.ceil((p / 100) * sorted.length) - 1;
-  return sorted[Math.max(0, Math.min(sorted.length - 1, idx))];
-}
-
-function mean(nums: number[]): number | null {
-  if (nums.length === 0) {
-    return null;
-  }
-  return nums.reduce((a, b) => a + b, 0) / nums.length;
-}
-
 function routeKey(method: string, route: string): string {
   return `${method}\t${route}`;
 }
@@ -57,11 +43,11 @@ function finalizeQuickStats(input: {
   const sorted = [...input.durations].sort((a, b) => a - b);
   return {
     requestSummariesInWindow: input.durations.length,
-    avgRequestDurationMs: mean(input.durations),
-    medianRequestDurationMs: sorted.length === 0 ? null : percentileNearest(sorted, 50),
-    p95RequestDurationMs: sorted.length === 0 ? null : percentileNearest(sorted, 95),
-    avgDbTimePerRequestMs: mean(input.dbTotals),
-    avgDbPercentOfWallTime: mean(input.dbPercents),
+    avgRequestDurationMs: arithmeticMean(input.durations),
+    medianRequestDurationMs: percentileNearestSorted(sorted, 50),
+    p95RequestDurationMs: percentileNearestSorted(sorted, 95),
+    avgDbTimePerRequestMs: arithmeticMean(input.dbTotals),
+    avgDbPercentOfWallTime: arithmeticMean(input.dbPercents),
     slowDbEventsInWindow: input.slowDbEvents,
     slowOrErrorQueriesAttributedToRequests: input.slowQueriesInSummaries,
   };
@@ -81,9 +67,9 @@ function finalizeRoutes(map: Map<string, RouteBucket>, limit: number): Performan
   const rows: PerformanceRouteAgg[] = [];
   for (const b of map.values()) {
     if (b.durations.length > 0) {
-      const avgDurationMs = mean(b.durations) ?? 0;
-      const avgDbMs = mean(b.dbTotals) ?? 0;
-      const avgDbPercent = mean(b.dbPercents) ?? 0;
+      const avgDurationMs = arithmeticMean(b.durations) ?? 0;
+      const avgDbMs = arithmeticMean(b.dbTotals) ?? 0;
+      const avgDbPercent = arithmeticMean(b.dbPercents) ?? 0;
       rows.push({
         method: b.method,
         route: b.route,
