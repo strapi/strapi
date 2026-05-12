@@ -1508,7 +1508,11 @@ describe('API Token', () => {
       expect(update).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id },
-        data: attributes,
+        data: {
+          name: attributes.name,
+          description: attributes.description,
+          type: attributes.type,
+        },
       });
       expect(res).toEqual(attributes);
     });
@@ -1619,7 +1623,10 @@ describe('API Token', () => {
       expect(update).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id },
-        data: omit(['permissions'], updatedAttributes),
+        data: {
+          name: updatedAttributes.name,
+          type: updatedAttributes.type,
+        },
       });
 
       expect(res).toEqual({
@@ -1743,7 +1750,11 @@ describe('API Token', () => {
       expect(update).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id },
-        data: omit(['permissions'], updatedAttributes),
+        data: {
+          name: updatedAttributes.name,
+          description: updatedAttributes.description,
+          type: updatedAttributes.type,
+        },
       });
 
       expect(res).toEqual(updatedAttributes);
@@ -2023,7 +2034,17 @@ describe('API Token', () => {
 
       const res = await apiTokenUpdate(id, updatedAttributes);
 
-      expect(update).toHaveBeenCalled();
+      expect(update).toHaveBeenCalledWith({
+        select: expect.arrayContaining([expect.any(String)]),
+        where: { id },
+        data: {
+          name: updatedAttributes.name,
+          description: updatedAttributes.description,
+          type: updatedAttributes.type,
+          // null kind migrated to 'content-api' on first write
+          kind: 'content-api',
+        },
+      });
       expect(res).toMatchObject({
         name: 'api-token_tests-updated-name',
         type: 'read-only',
@@ -2033,6 +2054,46 @@ describe('API Token', () => {
       });
       // Must NOT contain adminUserOwner — this is a content-api shape
       expect((res as any).adminUserOwner).toBeUndefined();
+    });
+
+    test('Drops lifespan and expiresAt from the DB write — both are immutable after creation', async () => {
+      const id = 1;
+
+      const originalToken = {
+        id,
+        kind: 'content-api',
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+        lifespan: null,
+        expiresAt: null,
+      };
+
+      const findOne = jest.fn().mockResolvedValue(originalToken);
+      const update = jest.fn(({ data }) => Promise.resolve({ ...originalToken, ...data }));
+      const deleteFn = jest.fn(() => Promise.resolve());
+      const load = jest.fn().mockResolvedValueOnce([]);
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne, update, delete: deleteFn, load };
+          },
+        },
+        config: { get: jest.fn(() => '') },
+      } as any;
+
+      await apiTokenUpdate(id, {
+        name: 'api-token_tests-updated-name',
+        lifespan: constants.API_TOKEN_LIFESPANS.DAYS_7,
+        expiresAt: Date.now() + 999999,
+      } as any);
+
+      const [[{ data }]] = update.mock.calls;
+
+      expect(data.name).toBe('api-token_tests-updated-name');
+      expect('lifespan' in data).toBe(false);
+      expect('expiresAt' in data).toBe(false);
     });
   });
 

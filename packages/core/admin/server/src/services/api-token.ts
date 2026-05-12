@@ -101,6 +101,7 @@ const SELECT_FIELDS = [
 ];
 
 const POPULATE_FIELDS = ['permissions', 'adminPermissions', 'adminUserOwner'];
+const UPDATABLE_FIELDS = ['name', 'description', 'type'] as const;
 
 // TODO: we need to ensure the permissions are actually valid registered permissions!
 
@@ -975,8 +976,6 @@ const update = async (
     throw new ValidationError('kind is immutable after creation');
   }
 
-  assertValidLifespan(attributes.lifespan);
-
   let clampedAdminPermissions: PermissionInput[] | undefined;
   let tokenOwnerUser: AdminUser | undefined;
 
@@ -1035,10 +1034,7 @@ const update = async (
     }
   }
 
-  const baseData = omit(
-    ['kind', 'permissions', 'adminPermissions', 'adminUserOwner'],
-    attributes
-  ) as Record<string, unknown>;
+  const baseData = pick(UPDATABLE_FIELDS, attributes) as Record<string, unknown>;
 
   // Migrate legacy null-kind rows to the explicit value on first write
   if (originalToken.kind === null) {
