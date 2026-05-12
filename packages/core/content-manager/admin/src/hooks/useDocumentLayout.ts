@@ -287,6 +287,18 @@ const formatEditLayout = (
     components,
   }: { schemas: Schema[]; schema?: Schema; components: ComponentsDictionary }
 ): EditLayout => {
+  // Guard: when opening deeply nested relation modals (≥2 levels through dynamic-zones/components),
+  // the schema may not be in the useContentTypeSchema cache, causing:
+  // "Cannot read properties of undefined (reading 'attributes')"
+  if (!schema) {
+    return {
+      layout: [],
+      components: {},
+      metadatas: {},
+      options: {},
+      settings: { ...data.contentType?.settings, displayName: undefined },
+    };
+  }
   let currentPanelIndex = 0;
   /**
    * The fields arranged by the panels, new panels are made for dynamic zones only.
