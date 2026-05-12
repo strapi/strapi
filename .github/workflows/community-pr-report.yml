@@ -29,18 +29,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-
-      - name: Install action dependencies
-        run: npm ci
-        working-directory: .github/actions/community-pr-triage
-
-      - name: Build action
-        run: npm run build
-        working-directory: .github/actions/community-pr-triage
-
       - name: Run report
         uses: ./.github/actions/community-pr-triage
         with:
