@@ -44,7 +44,7 @@ The project includes 8 content types covering the feature space v4→v5 migratio
 
 Intentionally unrealistic; each targets a specific migration code path.
 
-- `hc-m2m-source` / `hc-m2m-target` — high-cardinality many-to-many. At `--multiplier 100` produces ~2K sources × ~2K targets × 10 fanout = 20K+ join rows, crossing the 1000-row chunk boundary in `copyRelationTableRows`.
+- `hc-m2m-source` / `hc-m2m-target` — high-cardinality many-to-many. At `--multiplier 100` produces ~2K sources × ~2K targets × 10 fanout = 20K+ join rows, crossing the 1000-row chunk boundary in `copyRelationTableRows`. **REST** uses the same `createCoreRouter` / controller / service pattern as other collection types so `yarn stress:rest` can hit `/api/hc-m2m-sources` and `/api/hc-m2m-targets`.
 
 ## Supported databases
 

@@ -295,7 +295,7 @@ async function warmUpCaches(base, targets, opts) {
   const skipped = targets.filter((t) => !idByUid.has(t.uid));
   if (skipped.length) {
     console.warn(
-      `Warm-up: ${skipped.length} type(s) skipped (no rows / 403): ${skipped.map((s) => s.pluralPath).join(', ')}`
+      `Warm-up: ${skipped.length} type(s) skipped (no data yet, denied, or no REST route): ${skipped.map((s) => s.pluralPath).join(', ')}`
     );
   }
   return idByUid;
@@ -474,7 +474,7 @@ Example:
   }
   if (fail > 0) {
     console.log(
-      '\nHint: 403 → run `yarn seed:rest` once (grants Public find/findOne/create/update on all types in rest-stress-targets.json).'
+      '\nHint: 403 → run `yarn seed:rest`. 404 on a plural → restart Strapi after adding API routes, or check `api.rest.prefix`.'
     );
     process.exitCode = 1;
   } else {
