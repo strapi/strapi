@@ -31,6 +31,7 @@ import {
   mapDatabaseClientToDbSystem,
   truncateSql,
 } from './opentelemetry-tracing-utils';
+import { disposeBcryptjsTracing } from './opentelemetry-bcryptjs';
 
 const SERVICE_NAME_ATTR = 'service.name';
 
@@ -51,6 +52,14 @@ let disposeKnexListeners: (() => void) | null = null;
 
 const isTracingConfigEnabled = (strapi: Core.Strapi): boolean =>
   strapi.config.get('server.observability.tracing.enabled') === true;
+
+/** When tracing is on, adds `strapi.http.route.*` spans around auth/policy/middleware/controller (default: true). */
+export const isRouteHandlerStageTracingEnabled = (strapi: Core.Strapi): boolean => {
+  if (!isTracingConfigEnabled(strapi) || !nodeProvider) {
+    return false;
+  }
+  return strapi.config.get('server.observability.tracing.recordRouteHandlerStages') !== false;
+};
 
 const STARTUP_TRACER_NAME = '@strapi/core.startup';
 
@@ -295,6 +304,8 @@ export function attachKnexQueryTracing(strapi: Core.Strapi): void {
 export async function shutdownOpenTelemetryTracing(strapi: Core.Strapi): Promise<void> {
   disposeKnexListeners?.();
   disposeKnexListeners = null;
+
+  disposeBcryptjsTracing();
 
   if (!nodeProvider) {
     return;

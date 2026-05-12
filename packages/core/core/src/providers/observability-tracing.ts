@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { defineProvider } from './provider';
+import { attachBcryptjsTracing } from '../services/observability/opentelemetry-bcryptjs';
 import {
   attachKnexQueryTracing,
   registerOpenTelemetryTracing,
@@ -14,6 +15,7 @@ export default defineProvider({
 
   async bootstrap(strapi: Core.Strapi) {
     attachKnexQueryTracing(strapi);
+    attachBcryptjsTracing(strapi);
   },
 
   destroy(strapi: Core.Strapi) {

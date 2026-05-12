@@ -4,6 +4,7 @@ import { errors } from '@strapi/utils';
 import Router from '@koa/router';
 
 import compose from 'koa-compose';
+import { isRouteHandlerStageTracingEnabled } from '../observability/opentelemetry-tracing';
 import { isServerRequestPerfTrackingEnabled } from '../../utils/server-performance-tracking';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
@@ -79,6 +80,8 @@ export default (strapi: Core.Strapi) => {
     strapi.config.get('server.performance.emitStageEvents') === true &&
     isServerRequestPerfTrackingEnabled(strapi);
 
+  const useRouteStageWrappers = perfStagesEnabled || isRouteHandlerStageTracingEnabled(strapi);
+
   return (route: Core.Route, { router }: { router: Router }) => {
     try {
       const method = getMethod(route);
@@ -88,15 +91,15 @@ export default (strapi: Core.Strapi) => {
 
       const action = getAction(route, strapi);
 
-      const routeHandler = perfStagesEnabled
+      const routeHandler = useRouteStageWrappers
         ? compose([
             createRouteInfoMiddleware(route),
-            wrapPerfStagePreNext('auth', compose([authenticate, authorize])),
-            wrapPerfStagePreNext('policy', createPolicicesMiddleware(route, strapi)),
+            wrapPerfStagePreNext(strapi, 'auth', compose([authenticate, authorize])),
+            wrapPerfStagePreNext(strapi, 'policy', createPolicicesMiddleware(route, strapi)),
             ...(middlewares.length > 0
-              ? [wrapPerfStagePreNext('middleware', compose(middlewares))]
+              ? [wrapPerfStagePreNext(strapi, 'middleware', compose(middlewares))]
               : []),
-            wrapPerfControllerChain(compose([returnBodyMiddleware, ...castArray(action)])),
+            wrapPerfControllerChain(strapi, compose([returnBodyMiddleware, ...castArray(action)])),
           ])
         : compose([
             createRouteInfoMiddleware(route),

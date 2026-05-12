@@ -137,6 +137,8 @@ export interface ServerObservabilityTracing {
   sampleRate?: number;
   /** Log completed spans to the console (development / debugging only). */
   consoleExporter?: boolean;
+  /** When false, omit `strapi.http.route.*` stage spans (auth, policy, middleware, controller). */
+  recordRouteHandlerStages?: boolean;
   otlp?: ServerObservabilityTracingOtlp;
 }
 
