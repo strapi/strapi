@@ -43,4 +43,5 @@ export * from './security';
 export {
   withAdminPermissionsSpan,
   setAdminPermissionsPhaseMetricsRecorder,
+  setRequestWorkTraceParentContextResolver,
 } from './observability/with-admin-permissions-span';

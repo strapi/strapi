@@ -3,7 +3,10 @@ import type { Span } from '@opentelemetry/api';
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
-import { isRouteHandlerStageTracingEnabled } from '../observability/opentelemetry-tracing';
+import {
+  isRouteHandlerStageTracingEnabled,
+  STRAPI_OTEL_KOA_HANDLER_CONTEXT,
+} from '../observability/opentelemetry-tracing';
 import type { PublicRequestPerfStage } from '../performance/event-payloads';
 
 type PerfStageEntry = { stage: PublicRequestPerfStage; stageDurationMs: number };
@@ -107,6 +110,10 @@ export function wrapPerfControllerChain(
     setRouteStageAttributes(span, ctx, 'controller');
     const ctxWithSpan = trace.setSpan(context.active(), span);
 
+    const state = ctx.state as Record<string | symbol, unknown>;
+    const previousOtel = state[STRAPI_OTEL_KOA_HANDLER_CONTEXT];
+    state[STRAPI_OTEL_KOA_HANDLER_CONTEXT] = ctxWithSpan;
+
     try {
       await context.with(ctxWithSpan, async () => {
         await chain(ctx, next);
@@ -116,6 +123,11 @@ export function wrapPerfControllerChain(
       span.setStatus({ code: SpanStatusCode.ERROR });
       throw error;
     } finally {
+      if (previousOtel !== undefined) {
+        state[STRAPI_OTEL_KOA_HANDLER_CONTEXT] = previousOtel;
+      } else {
+        delete state[STRAPI_OTEL_KOA_HANDLER_CONTEXT];
+      }
       span.end();
       appendPerfStage(ctx, 'controller', Date.now() - start);
     }

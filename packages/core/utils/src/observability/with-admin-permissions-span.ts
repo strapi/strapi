@@ -1,4 +1,10 @@
-import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
+import {
+  context,
+  SpanKind,
+  SpanStatusCode,
+  trace,
+  type Context as OtelContext,
+} from '@opentelemetry/api';
 
 const ADMIN_PERMISSIONS_TRACER_NAME = '@strapi/core.admin.permissions';
 
@@ -15,6 +21,22 @@ type PhaseMetricsRecorder = (
 ) => void;
 
 let phaseMetricsRecorder: PhaseMetricsRecorder | undefined;
+
+/**
+ * Wired from `@strapi/core` when HTTP tracing initializes. Lets internal spans nest under
+ * `strapi.http.route.controller` when DB drivers reset `context.active()` to the HTTP SERVER span.
+ */
+let requestWorkTraceParentContextResolver: (() => OtelContext) | undefined;
+
+export function setRequestWorkTraceParentContextResolver(
+  resolver: (() => OtelContext) | undefined
+): void {
+  requestWorkTraceParentContextResolver = resolver;
+}
+
+function resolveRequestWorkParentContext(): OtelContext {
+  return requestWorkTraceParentContextResolver?.() ?? context.active();
+}
 
 /**
  * Wired from `@strapi/core` when the OTLP metrics SDK initializes.
@@ -51,24 +73,29 @@ async function runWithOptionalInternalSpan<T>(
 
   const tracer = trace.getTracer(tracerName);
 
-  return tracer.startActiveSpan(spanName, { kind: SpanKind.INTERNAL }, async (span) => {
-    try {
-      for (const [key, value] of Object.entries(attributes)) {
-        if (value !== undefined) {
-          span.setAttribute(key, value);
+  return tracer.startActiveSpan(
+    spanName,
+    { kind: SpanKind.INTERNAL },
+    resolveRequestWorkParentContext(),
+    async (span) => {
+      try {
+        for (const [key, value] of Object.entries(attributes)) {
+          if (value !== undefined) {
+            span.setAttribute(key, value);
+          }
         }
-      }
 
-      return await fn();
-    } catch (error) {
-      span.recordException(error instanceof Error ? error : new Error(String(error)));
-      span.setStatus({ code: SpanStatusCode.ERROR });
-      throw error;
-    } finally {
-      span.end();
-      emitMetric();
+        return await fn();
+      } catch (error) {
+        span.recordException(error instanceof Error ? error : new Error(String(error)));
+        span.setStatus({ code: SpanStatusCode.ERROR });
+        throw error;
+      } finally {
+        span.end();
+        emitMetric();
+      }
     }
-  });
+  );
 }
 
 /**

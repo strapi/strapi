@@ -1,5 +1,6 @@
-import type { Context, Next } from 'koa';
+import type { Context as KoaContext, Next } from 'koa';
 import type { Core } from '@strapi/types';
+import { setRequestWorkTraceParentContextResolver } from '@strapi/utils';
 import {
   context,
   defaultTextMapGetter,
@@ -8,6 +9,7 @@ import {
   SpanKind,
   SpanStatusCode,
   trace,
+  type Context as OtelContext,
   type Span,
 } from '@opentelemetry/api';
 import { W3CTraceContextPropagator } from '@opentelemetry/core';
@@ -32,8 +34,73 @@ import {
   truncateSql,
 } from './opentelemetry-tracing-utils';
 import { disposeBcryptjsTracing } from './opentelemetry-bcryptjs';
+import requestCtx from '../request-context';
 
 const SERVICE_NAME_ATTR = 'service.name';
+
+/**
+ * Koa `ctx.state` entry: OpenTelemetry `Context` for the innermost traced HTTP handler
+ * (server span, then route controller span). Used when `context.active()` no longer reflects
+ * route work (e.g. DB driver callbacks) so spans still nest under the controller in Jaeger.
+ */
+export const STRAPI_OTEL_KOA_HANDLER_CONTEXT = Symbol.for('strapi.otel.koaHandlerContext');
+
+/** Span id of the root HTTP SERVER span for this request (driver callbacks reset ALS back to it). */
+const STRAPI_OTEL_HTTP_SERVER_SPAN_ID = Symbol.for('strapi.otel.httpServerSpanId');
+
+/**
+ * Parent context for spans started during HTTP handling (DB, documents, content-api, admin
+ * permissions). pg/mysql often reset AsyncLocalStorage so `context.active()` becomes the root
+ * HTTP SERVER span while `ctx.state[strapi.otel.koaHandlerContext]` still points at
+ * `strapi.http.route.controller` — prefer the latter in that case so work nests under the route.
+ */
+function getTraceParentContextForHttpHandlerWork(): OtelContext {
+  const active = context.active();
+  const activeSpan = trace.getSpan(active);
+
+  const koaCtx = requestCtx.get();
+  const state = koaCtx != null ? (koaCtx.state as Record<string | symbol, unknown>) : undefined;
+
+  const storedRaw = state?.[STRAPI_OTEL_KOA_HANDLER_CONTEXT];
+  const serverSpanIdRaw = state?.[STRAPI_OTEL_HTTP_SERVER_SPAN_ID];
+  const serverSpanId = typeof serverSpanIdRaw === 'string' ? serverSpanIdRaw : undefined;
+
+  if (storedRaw == null) {
+    return active;
+  }
+
+  const stored = storedRaw as OtelContext;
+  const storedSpan = trace.getSpan(stored);
+
+  if (storedSpan === undefined) {
+    return active;
+  }
+
+  if (activeSpan === undefined) {
+    return stored;
+  }
+
+  const activeId = activeSpan.spanContext().spanId;
+  const storedId = storedSpan.spanContext().spanId;
+
+  if (serverSpanId !== undefined && activeId === serverSpanId && activeId !== storedId) {
+    return stored;
+  }
+
+  return active;
+}
+
+function resolveKnexSpanParentContext(): OtelContext {
+  return getTraceParentContextForHttpHandlerWork();
+}
+
+function setKoaOtelHandlerContext(koaCtx: KoaContext, otelCtx: OtelContext): void {
+  (koaCtx.state as Record<string | symbol, unknown>)[STRAPI_OTEL_KOA_HANDLER_CONTEXT] = otelCtx;
+}
+
+function clearKoaOtelHandlerContext(koaCtx: KoaContext): void {
+  delete (koaCtx.state as Record<string | symbol, unknown>)[STRAPI_OTEL_KOA_HANDLER_CONTEXT];
+}
 
 /** Knex query event payload (`query`, `query-response`, `query-error`). */
 interface KnexQueryEvent {
@@ -167,6 +234,7 @@ export async function withStartupTraceChildPhase<T>(
 /** Starts the Node SDK and wires `trace`/propagation globals. Call from provider `register`. */
 export function registerOpenTelemetryTracing(strapi: Core.Strapi): void {
   if (!isTracingConfigEnabled(strapi)) {
+    setRequestWorkTraceParentContextResolver(undefined);
     return;
   }
 
@@ -216,6 +284,8 @@ export function registerOpenTelemetryTracing(strapi: Core.Strapi): void {
   nodeProvider.register({
     propagator: new W3CTraceContextPropagator(),
   });
+
+  setRequestWorkTraceParentContextResolver(() => getTraceParentContextForHttpHandlerWork());
 }
 
 /** Subscribes to Knex `query` lifecycle on `strapi.db.connection`. Call from provider `bootstrap`. */
@@ -244,7 +314,7 @@ export function attachKnexQueryTracing(strapi: Core.Strapi): void {
     }
 
     const tracer = trace.getTracer('@strapi/core.db');
-    const parentContext = context.active();
+    const parentContext = resolveKnexSpanParentContext();
     const op = inferDbOperation(queryData.sql, queryData.method);
     const span = tracer.startSpan(`db.${op}`, { kind: SpanKind.CLIENT }, parentContext);
 
@@ -302,6 +372,8 @@ export function attachKnexQueryTracing(strapi: Core.Strapi): void {
 
 /** Flushes exporters and clears Knex subscriptions. Safe to call when tracing was disabled. */
 export async function shutdownOpenTelemetryTracing(strapi: Core.Strapi): Promise<void> {
+  setRequestWorkTraceParentContextResolver(undefined);
+
   disposeKnexListeners?.();
   disposeKnexListeners = null;
 
@@ -323,7 +395,7 @@ export async function shutdownOpenTelemetryTracing(strapi: Core.Strapi): Promise
 /** HTTP span + trace context propagation; no-op unless `server.observability.tracing.enabled` is true. */
 export async function withHttpServerTracing(
   strapi: Core.Strapi,
-  koaCtx: Context,
+  koaCtx: KoaContext,
   next: Next
 ): Promise<void> {
   if (!isTracingConfigEnabled(strapi)) {
@@ -348,6 +420,12 @@ export async function withHttpServerTracing(
           span.setAttribute('http.url', url);
         }
 
+        const sc = span.spanContext();
+        (koaCtx.state as Record<string | symbol, unknown>)[STRAPI_OTEL_HTTP_SERVER_SPAN_ID] =
+          sc.spanId;
+
+        setKoaOtelHandlerContext(koaCtx, context.active());
+
         try {
           await next();
           span.setAttribute('http.response.status_code', koaCtx.status);
@@ -360,6 +438,10 @@ export async function withHttpServerTracing(
           span.setStatus({ code: SpanStatusCode.ERROR });
           throw error;
         } finally {
+          clearKoaOtelHandlerContext(koaCtx);
+          delete (koaCtx.state as Record<string | symbol, unknown>)[
+            STRAPI_OTEL_HTTP_SERVER_SPAN_ID
+          ];
           span.end();
         }
       }
@@ -391,31 +473,37 @@ async function runWithOptionalInternalSpan<T>(
   }
 
   const tracer = trace.getTracer(tracerName);
+  const parentContext = getTraceParentContextForHttpHandlerWork();
 
-  return tracer.startActiveSpan(spanName, { kind: SpanKind.INTERNAL }, async (span) => {
-    try {
-      for (const [key, value] of Object.entries(attributes)) {
-        if (value !== undefined) {
-          span.setAttribute(key, value);
+  return tracer.startActiveSpan(
+    spanName,
+    { kind: SpanKind.INTERNAL },
+    parentContext,
+    async (span) => {
+      try {
+        for (const [key, value] of Object.entries(attributes)) {
+          if (value !== undefined) {
+            span.setAttribute(key, value);
+          }
         }
-      }
 
-      return await fn();
-    } catch (error) {
-      span.recordException(error instanceof Error ? error : new Error(String(error)));
-      span.setStatus({ code: SpanStatusCode.ERROR });
-      throw error;
-    } finally {
-      span.end();
-      emitMetric();
+        return await fn();
+      } catch (error) {
+        span.recordException(error instanceof Error ? error : new Error(String(error)));
+        span.setStatus({ code: SpanStatusCode.ERROR });
+        throw error;
+      } finally {
+        span.end();
+        emitMetric();
+      }
     }
-  });
+  );
 }
 
 /**
  * Runs `fn` inside an INTERNAL span when `server.observability.tracing.enabled` is true.
  * Records `strapi.content_api.phase.duration_ms` when observability metrics OTLP is active.
- * Used for Content API validate/sanitize work nested under the HTTP SERVER span.
+ * Used for Content API validate/sanitize work nested under the HTTP route (controller) span.
  */
 export async function withContentApiSpan<T>(
   strapi: Core.Strapi | undefined,
