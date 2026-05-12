@@ -216,7 +216,6 @@
   "relation.notAvailable": "Нет отношений",
   "relation.publicationState.draft": "Черновик",
   "relation.publicationState.published": "Опубликовано",
-  "reviewWorkflows.stage.label": "Просмотреть этап",
   "select.currently.selected": "{count} выбрано",
   "success.record.delete": "Удалено",
   "success.record.publish": "Опубликовано",

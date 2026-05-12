@@ -283,7 +283,6 @@
   "relation.notAvailable": "Brak dostępnych relacji",
   "relation.publicationState.draft": "Szkic",
   "relation.publicationState.published": "Opublikowano",
-  "reviewWorkflows.stage.label": "Etap przeglądu",
   "select.currently.selected": "Zaznaczono {count}",
   "success.record.clone": "Sklonowano dokument",
   "success.record.discard": "Odrzucono zmiany",
