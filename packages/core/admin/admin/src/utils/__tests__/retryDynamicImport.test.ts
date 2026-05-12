@@ -72,8 +72,7 @@ describe('retryDynamicImport', () => {
           { initialDelayMs: 10, maxDelayMs: 80 }
         );
 
-        await jest.runOnlyPendingTimersAsync();
-        await jest.runOnlyPendingTimersAsync();
+        await jest.runAllTimersAsync();
 
         await expect(resultPromise).resolves.toBe('module');
         expect(calls).toBe(3);
@@ -91,8 +90,7 @@ describe('retryDynamicImport', () => {
           { maxAttempts: 3, initialDelayMs: 10, maxDelayMs: 80 }
         );
 
-        await jest.runOnlyPendingTimersAsync();
-        await jest.runOnlyPendingTimersAsync();
+        await jest.runAllTimersAsync();
 
         await expect(resultPromise).rejects.toBe(chunkError);
         expect(calls).toBe(3);
