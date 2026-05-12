@@ -18,6 +18,15 @@ Set **`STRAPI_OTEL_ENABLED=false`** when you are not running Docker so Strapi do
 
 `yarn seed:rest` starts Strapi on an ephemeral localhost port, grants **Public** Content API access to **`basic`** (`find` / `findOne` / `create`), `POST /api/basics` with a minimal body, then `GET /api/basics` and `GET /api/basics/:documentId`. Same database requirements as `yarn seed:v5`. Optional: `SEED_REST_PORT` to pin the HTTP port instead of `0` (random).
 
+### REST API stress (telemetry / load smoke)
+
+With Strapi **already running** (e.g. `yarn develop:postgres`) and the collector up if you use OTLP:
+
+1. Grant Public **find** / **findOne** on `basic` (run `yarn seed:rest` once against this DB if you have not already).
+2. From `examples/complex`: **`yarn stress:rest`** — defaults to `http://127.0.0.1:1337/api`, **300** requests, **15** concurrent per batch (alternating list + findOne).
+
+Options and env vars are documented in **`scripts/stress-rest-api.js`** (e.g. `yarn stress:rest -- --base http://127.0.0.1:1337/api -n 2000 -c 40`, or `STRESS_REST_TOTAL=500 STRESS_REST_CONCURRENCY=20 yarn stress:rest`). Add **`--writes`** (or `STRESS_REST_WRITES=1`) for ~10% `POST /basics` — requires Public **create** (again satisfied after `yarn seed:rest`).
+
 ## Content Types
 
 The project includes 8 content types covering the feature space v4→v5 migrations touch.
