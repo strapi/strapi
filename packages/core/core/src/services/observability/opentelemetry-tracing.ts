@@ -136,6 +136,25 @@ export function endDeferredStartupRootSpan(span: Span | undefined): void {
   span?.end();
 }
 
+/**
+ * Runs `fn` as a child of an explicit parent span (typically the deferred `strapi.startup` root
+ * left open after `load()` until `start()`). Used by the develop CLI and any other code that
+ * runs between load and listen so Jaeger shows where time goes.
+ */
+export async function withStartupTraceChildPhase<T>(
+  parentSpan: Span | undefined,
+  strapi: Core.Strapi,
+  spanName: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  if (!parentSpan || !isTracingConfigEnabled(strapi) || !nodeProvider) {
+    return fn();
+  }
+
+  const ctx = trace.setSpan(ROOT_CONTEXT, parentSpan);
+  return context.with(ctx, () => withStartupSpan(strapi, spanName, fn));
+}
+
 /** Starts the Node SDK and wires `trace`/propagation globals. Call from provider `register`. */
 export function registerOpenTelemetryTracing(strapi: Core.Strapi): void {
   if (!isTracingConfigEnabled(strapi)) {

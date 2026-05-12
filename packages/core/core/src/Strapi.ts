@@ -27,6 +27,7 @@ import {
   endDeferredStartupRootSpan,
   registerOpenTelemetryTracing,
   withStartupSpan,
+  withStartupTraceChildPhase,
 } from './services/observability/opentelemetry-tracing';
 import createEntityService from './services/entity-service';
 import createQueryParamService from './services/query-params';
@@ -543,6 +544,15 @@ class Strapi extends Container implements Core.Strapi {
     return this;
   }
 
+  withStartupTraceChild<T>(spanName: string, fn: () => Promise<T>): Promise<T> {
+    return withStartupTraceChildPhase(
+      this.deferredStartupRootSpan,
+      this as Core.Strapi,
+      spanName,
+      fn
+    );
+  }
+
   async register() {
     registerOpenTelemetryTracing(this as Core.Strapi);
 
@@ -569,7 +579,9 @@ class Strapi extends Container implements Core.Strapi {
       );
 
       // NOTE: Swap type customField for underlying data type
-      utils.convertCustomFieldType(this);
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.register.custom_fields', () =>
+        Promise.resolve(utils.convertCustomFieldType(this))
+      );
     });
 
     return this;
@@ -577,15 +589,21 @@ class Strapi extends Container implements Core.Strapi {
 
   async bootstrap() {
     await withStartupSpan(this as Core.Strapi, 'strapi.startup.bootstrap', async () => {
-      this.configureGlobalProxy();
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.bootstrap.configure_proxy', () =>
+        Promise.resolve(this.configureGlobalProxy())
+      );
 
-      const models = [
-        ...utils.transformContentTypesToModels(
-          [...Object.values(this.contentTypes), ...Object.values(this.components)],
-          this.db.metadata.identifiers
-        ),
-        ...this.get('models').get(),
-      ];
+      const models = await withStartupSpan(
+        this as Core.Strapi,
+        'strapi.startup.bootstrap.build_models',
+        async () => [
+          ...utils.transformContentTypesToModels(
+            [...Object.values(this.contentTypes), ...Object.values(this.components)],
+            this.db.metadata.identifiers
+          ),
+          ...this.get('models').get(),
+        ]
+      );
 
       await withStartupSpan(this as Core.Strapi, 'strapi.startup.bootstrap.db.init', () =>
         this.db.init({ models })

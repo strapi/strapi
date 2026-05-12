@@ -1,6 +1,11 @@
 import type { Core } from '@strapi/types';
+import type { Span } from '@opentelemetry/api';
 
-import { withContentApiSpan, withStartupSpan } from '../opentelemetry-tracing';
+import {
+  withContentApiSpan,
+  withStartupSpan,
+  withStartupTraceChildPhase,
+} from '../opentelemetry-tracing';
 
 function mockStrapi(tracingEnabled: boolean): Core.Strapi {
   return {
@@ -61,5 +66,27 @@ describe('withStartupSpan', () => {
 
     await expect(withStartupSpan(strapi, 'strapi.startup.bootstrap', fn)).resolves.toBe(42);
     expect(fn).toHaveBeenCalled();
+  });
+});
+
+describe('withStartupTraceChildPhase', () => {
+  it('runs fn when parent span is undefined', async () => {
+    const strapi = mockStrapi(true);
+    const fn = jest.fn().mockResolvedValue('x');
+
+    await expect(
+      withStartupTraceChildPhase(undefined, strapi, 'strapi.startup.cli.test', fn)
+    ).resolves.toBe('x');
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs fn when tracing is disabled even if parent is set', async () => {
+    const strapi = mockStrapi(false);
+    const fn = jest.fn().mockResolvedValue(1);
+
+    await expect(
+      withStartupTraceChildPhase({} as Span, strapi, 'strapi.startup.cli.test', fn)
+    ).resolves.toBe(1);
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 });
