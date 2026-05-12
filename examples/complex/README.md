@@ -16,16 +16,16 @@ Set **`STRAPI_OTEL_ENABLED=false`** when you are not running Docker so Strapi do
 
 ### REST API smoke seed
 
-`yarn seed:rest` starts Strapi on an ephemeral localhost port, grants **Public** Content API access to **`basic`** (`find` / `findOne` / `create`), `POST /api/basics` with a minimal body, then `GET /api/basics` and `GET /api/basics/:documentId`. Same database requirements as `yarn seed:v5`. Optional: `SEED_REST_PORT` to pin the HTTP port instead of `0` (random).
+`yarn seed:rest` starts Strapi on an ephemeral localhost port, grants **Public** Content API **find** / **findOne** / **create** on every collection type listed in **`scripts/rest-stress-targets.json`** (all eight complex APIs: `basics`, `basic-dps`, i18n + draft types, `relations`, `hc-m2m-*`, …), then smoke-tests **`POST` / `GET` / `GET :id`** on **`/api/basics`** only. Same database requirements as `yarn seed:v5`. Optional: `SEED_REST_PORT` to pin the HTTP port instead of `0` (random).
 
 ### REST API stress (telemetry / load smoke)
 
 With Strapi **already running** (e.g. `yarn develop:postgres`) and the collector up if you use OTLP:
 
-1. Grant Public **find** / **findOne** on `basic` (run `yarn seed:rest` once against this DB if you have not already).
-2. From `examples/complex`: **`yarn stress:rest`** — defaults to `http://127.0.0.1:1337/api`, **300** requests, **15** concurrent per batch (alternating list + findOne).
+1. Run **`yarn seed:rest`** once against this DB (grants Public permissions for all types in **`rest-stress-targets.json`**).
+2. From `examples/complex`: **`yarn stress:rest`** — hits **`/api/basics`**, **`/api/basic-dps`**, **`/api/basic-dp-i18ns`**, **`/api/relations`**, **`/api/relation-dps`**, **`/api/relation-dp-i18ns`**, **`/api/hc-m2m-sources`**, **`/api/hc-m2m-targets`** in rotation (list + findOne; draft/publish uses **`status`**; i18n uses **`locale`** from the JSON or **`STRESS_REST_LOCALE`** / **`--locale`**).
 
-Options and env vars are documented in **`scripts/stress-rest-api.js`** (e.g. `yarn stress:rest -- --base http://127.0.0.1:1337/api -n 2000 -c 40`, or `STRESS_REST_TOTAL=500 STRESS_REST_CONCURRENCY=20 yarn stress:rest`). Add **`--writes`** (or `STRESS_REST_WRITES=1`) for ~10% `POST /basics` — requires Public **create** (again satisfied after `yarn seed:rest`).
+Defaults: `http://127.0.0.1:1337/api`, **300** requests, **15** concurrent per batch. Options and env vars: **`scripts/stress-rest-api.js`**. Add **`--writes`** (or `STRESS_REST_WRITES=1`) for ~10% **`POST`** across those types (needs Public **create**, already granted by `seed:rest`).
 
 ## Content Types
 

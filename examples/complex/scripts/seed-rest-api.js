@@ -3,17 +3,21 @@
  * Seeds one `Basic` entry through the Content REST API, then reads it back with GET.
  * Run from `examples/complex` (e.g. `yarn seed:rest`). Requires a working DB (same as `yarn seed:v5`).
  *
- * Uses a random localhost port unless `SEED_REST_PORT` is set. Temporarily opens Public
- * permissions on `api::basic.basic` (find / findOne / create) for this process only.
+ * Uses a random localhost port unless `SEED_REST_PORT` is set. Grants Public Content API
+ * **find** / **findOne** / **create** on every collection type listed in
+ * `scripts/rest-stress-targets.json` (used by `yarn stress:rest`).
  */
 
+const path = require('node:path');
 const { createStrapi, compileStrapi } = require('@strapi/strapi');
 
-const BASIC_ACTIONS = [
-  'api::basic.basic.find',
-  'api::basic.basic.findOne',
-  'api::basic.basic.create',
-];
+const REST_TARGETS = require(path.join(__dirname, 'rest-stress-targets.json'));
+
+const REST_ACTIONS = REST_TARGETS.flatMap((t) => [
+  `${t.uid}.find`,
+  `${t.uid}.findOne`,
+  `${t.uid}.create`,
+]);
 
 async function ensurePublicPermission(strapi, roleId, action) {
   const existing = await strapi.db.query('plugin::users-permissions.permission').findOne({
@@ -29,7 +33,7 @@ async function ensurePublicPermission(strapi, roleId, action) {
   });
 }
 
-async function grantPublicBasicApi(strapi) {
+async function grantPublicRestStressApi(strapi) {
   const publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({
     where: { type: 'public' },
   });
@@ -38,7 +42,7 @@ async function grantPublicBasicApi(strapi) {
     throw new Error('users-permissions public role not found (bootstrap incomplete?)');
   }
 
-  for (const action of BASIC_ACTIONS) {
+  for (const action of REST_ACTIONS) {
     await ensurePublicPermission(strapi, publicRole.id, action);
   }
 }
@@ -59,7 +63,7 @@ async function main() {
     strapi.log.level = 'error';
 
     await strapi.load();
-    await grantPublicBasicApi(strapi);
+    await grantPublicRestStressApi(strapi);
     await strapi.listen();
 
     const addr = strapi.server.httpServer.address();
@@ -68,6 +72,10 @@ async function main() {
     const listenHost = '127.0.0.1';
     const apiPrefix = strapi.config.get('api.rest.prefix') || '/api';
     const base = `http://${listenHost}:${listenPort}${apiPrefix}`;
+
+    console.log(
+      `Granted ${REST_ACTIONS.length} Public permissions (${REST_TARGETS.length} types × find/findOne/create).`
+    );
 
     const label = `rest-seed-${Date.now()}`;
     const createRes = await fetch(`${base}/basics`, {
