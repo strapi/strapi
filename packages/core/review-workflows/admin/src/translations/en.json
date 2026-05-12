@@ -13,5 +13,7 @@
   "settings.page.purchase.perks2": "Manage user permissions",
   "settings.page.purchase.perks3": "Support for webhooks",
   "widget.assigned.title": "Assigned to me",
-  "widget.assigned.no-data": "No entries"
+  "widget.assigned.no-data": "No entries",
+  "containers.list.table-headers.reviewWorkflows.stage": "review stage",
+  "containers.list.table-headers.reviewWorkflows.assignee": "assignee"
 }
