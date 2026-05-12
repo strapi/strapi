@@ -4,6 +4,10 @@ import { defineProvider } from './provider';
 import * as registries from '../registries';
 import { loadApplicationContext } from '../loaders';
 import * as syncMigrations from '../migrations';
+import {
+  backfillAdminApiTokenOwners,
+  backfillAdminApiTokenOwnersMigration,
+} from '../migrations/database/5.45.0-backfill-admin-api-token-owners';
 import { discardDocumentDrafts } from '../migrations/database/5.0.0-discard-drafts';
 
 export default defineProvider({
@@ -34,7 +38,12 @@ export default defineProvider({
     strapi.hook('strapi::content-types.beforeSync').register(syncMigrations.disable);
     strapi.hook('strapi::content-types.afterSync').register(syncMigrations.enable);
 
-    // Database migrations
+    strapi.hook('strapi::content-types.afterSync').register(async () => {
+      await strapi.db.transaction(({ trx }) => backfillAdminApiTokenOwners(trx, strapi.db));
+    });
+
+    // Database migrations (core-owned domain migrations, not in @strapi/database internal list)
     strapi.db.migrations.providers.internal.register(discardDocumentDrafts);
+    strapi.db.migrations.providers.internal.register(backfillAdminApiTokenOwnersMigration);
   },
 });

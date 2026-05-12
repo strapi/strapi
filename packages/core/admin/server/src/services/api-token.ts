@@ -61,16 +61,24 @@ const assertOwnerMatchesCallingUser = async (
 const isSuperAdmin = (user: AdminUser | undefined): boolean =>
   user?.roles?.some((r) => r.code === SUPER_ADMIN_CODE) === true;
 
-const getOwnerId = (token: AdminApiToken): string => {
+const getOwnerId = (token: AdminApiToken): string | null => {
   const owner = token.adminUserOwner;
+  if (owner === null || owner === undefined) {
+    return null;
+  }
+
   return String(typeof owner === 'object' ? owner.id : owner);
 };
 
+/**
+ * Maps a persisted owner relation to the API DTO. Null is allowed for legacy rows
+ * (e.g. admin-kind tokens created before owner was enforced) so list/get do not throw.
+ */
 const toAdminTokenOwner = (
   owner: AdminApiToken['adminUserOwner'] | null | undefined
-): Data.ID | AdminTokenOwner => {
+): Data.ID | AdminTokenOwner | null => {
   if (owner === null || owner === undefined) {
-    throw new Error('adminUserOwner is required');
+    return null;
   }
 
   // Bare id
@@ -991,6 +999,11 @@ const update = async (
       // Ceiling is always the owner's permissions, not the calling user's.
       // A super admin editing another user's token must not overflow that user's scope.
       const ownerId = getOwnerId(originalToken as AdminApiToken);
+      if (ownerId === null) {
+        throw new ValidationError(
+          'This admin API token has no owner. Re-create the token or set an owner in the database.'
+        );
+      }
       const resolvedOwner = await getService('user').findOne(ownerId);
       if (resolvedOwner === null || resolvedOwner === undefined) {
         throw new ValidationError('Token owner no longer exists');

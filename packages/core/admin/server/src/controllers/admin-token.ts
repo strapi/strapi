@@ -29,14 +29,24 @@ const { ApplicationError } = errors;
 const isSuperAdmin = (user: AdminUser): boolean =>
   user.roles.some((r) => r.code === constants.SUPER_ADMIN_CODE) === true;
 
-const getOwnerId = (token: AdminApiToken): string => {
+const getOwnerId = (token: AdminApiToken): string | null => {
   const owner = token.adminUserOwner;
+  if (owner === null || owner === undefined) {
+    return null;
+  }
+
   return String(typeof owner === 'object' ? owner.id : owner);
 };
 
 /** Returns true when user is the recorded owner of an admin token. */
-const isTokenOwner = (user: AdminUser, token: AdminApiToken): boolean =>
-  getOwnerId(token) === String(user.id);
+const isTokenOwner = (user: AdminUser, token: AdminApiToken): boolean => {
+  const ownerId = getOwnerId(token);
+  if (ownerId === null) {
+    return false;
+  }
+
+  return ownerId === String(user.id);
+};
 
 /** Owner OR super-admin can manage an admin token (read metadata, update…). */
 const canAccessAdminToken = (user: AdminUser, token: AdminApiToken): boolean =>
@@ -216,6 +226,10 @@ export default {
     }
 
     const ownerId = getOwnerId(token);
+    if (ownerId === null) {
+      return ctx.notFound('owner.notFound');
+    }
+
     const ownerUser = await userService.findOne(ownerId);
     if (!ownerUser) {
       return ctx.notFound('owner.notFound');

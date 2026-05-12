@@ -800,6 +800,42 @@ describe('API Token', () => {
 
       expect(res[0].adminUserOwner).toEqual(adminTokenOwnerDto);
     });
+
+    /**
+     * Regression: super-admin `list()` maps every admin row through `toAdminTokenOwner`; null owner used to throw.
+     */
+    test('Lists admin tokens with null adminUserOwner without throwing (legacy rows)', async () => {
+      const findMany = jest.fn().mockResolvedValue([
+        {
+          id: 99,
+          kind: 'admin',
+          name: 'legacy-admin-token',
+          description: 'd',
+          adminPermissions: [],
+          adminUserOwner: null,
+        },
+      ]);
+      const superAdmin = { id: 1, roles: [{ code: 'strapi-super-admin' }] } as any;
+
+      setupStrapiMock({
+        db: {
+          query() {
+            return { findMany };
+          },
+        },
+        admin: {
+          services: {
+            encryption: encryptionService,
+          },
+        },
+      });
+
+      const res = await list(superAdmin, { filter: { kind: 'admin' } });
+
+      expect(res).toHaveLength(1);
+      expect(res[0].kind).toBe('admin');
+      expect(res[0].adminUserOwner).toBeNull();
+    });
   });
 
   describe('revoke', () => {
@@ -931,6 +967,41 @@ describe('API Token', () => {
         throw new Error('Expected admin token response');
       }
       expect(res.adminUserOwner).toEqual(adminTokenOwnerDto);
+    });
+
+    /**
+     * Regression: revoke returned admin tokens through `toAdminTokenOwner`, which threw on null owner.
+     */
+    test('Revoke admin token with null adminUserOwner returns without throwing', async () => {
+      const adminToken = {
+        id: 5,
+        kind: 'admin',
+        adminPermissions: [],
+        adminUserOwner: null,
+      };
+      const mockedFindOne = jest
+        .fn()
+        .mockResolvedValue({ id: adminToken.id, adminPermissions: [] });
+      const mockedDelete = jest.fn().mockResolvedValue(adminToken);
+
+      setupStrapiMock({
+        db: {
+          query() {
+            return { findOne: mockedFindOne, delete: mockedDelete };
+          },
+        },
+        admin: {
+          services: {
+            encryption: encryptionService,
+            permission: { deleteByIds: jest.fn() },
+          },
+        },
+      });
+
+      await expect(revoke(adminToken.id)).resolves.toMatchObject({
+        kind: 'admin',
+        adminUserOwner: null,
+      });
     });
   });
 
@@ -1070,6 +1141,43 @@ describe('API Token', () => {
         expect(res).not.toBeNull();
         expect(res?.kind).toBe('admin');
         expect((res as Record<string, any>).adminUserOwner).toEqual(adminTokenOwnerDto);
+      });
+
+      /**
+       * Regression: `kind === 'admin'` with `adminUserOwner: null` used to throw
+       * `adminUserOwner is required` from `toAdminTokenOwner` during serialization (e.g. super-admin list).
+       */
+      test('Admin token with null adminUserOwner: getById returns without throwing and owner is null', async () => {
+        const tokenFromDb = {
+          id: 99,
+          kind: 'admin',
+          name: 'legacy-admin-token',
+          description: 'd',
+          adminUserOwner: null,
+          adminPermissions: [],
+          permissions: [],
+        };
+
+        const findOne = jest.fn().mockResolvedValue(tokenFromDb);
+
+        setupStrapiMock({
+          db: {
+            query() {
+              return { findOne };
+            },
+          },
+          admin: {
+            services: {
+              encryption: encryptionService,
+              user: {},
+            },
+          },
+        });
+
+        await expect(getById(99)).resolves.toMatchObject({
+          kind: 'admin',
+          adminUserOwner: null,
+        });
       });
 
       test('Preserves kind when DB returns explicit kind "content-api"', async () => {
@@ -1615,6 +1723,63 @@ describe('API Token', () => {
       await expect(
         apiTokenUpdate(1, { type: 'read-only', name: 'api-token_tests-name' } as any)
       ).rejects.toThrow('Admin tokens cannot carry a legacy type');
+    });
+
+    test('Rejects admin permission update when persisted token has no owner', async () => {
+      const originalToken = {
+        id: 1,
+        kind: 'admin',
+        name: 'orphan-admin-token',
+        description: '',
+        adminUserOwner: null,
+      };
+
+      const dbFindOne = jest.fn().mockResolvedValue(originalToken);
+      const validActions = ['plugin::content-manager.explorer.read'];
+      const requestedPermissions = [
+        {
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::article.article',
+          conditions: [],
+          properties: {},
+        },
+      ];
+
+      const userFindOne = jest.fn();
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne: dbFindOne };
+          },
+        },
+        config: { get: jest.fn(() => '') },
+        admin: {
+          services: {
+            user: { findOne: userFindOne },
+            permission: {
+              findUserPermissions: jest.fn(),
+              actionProvider: {
+                keys: jest.fn().mockReturnValue(validActions),
+                values: jest.fn().mockReturnValue([
+                  {
+                    actionId: 'plugin::content-manager.explorer.read',
+                    section: 'contentTypes',
+                    subjects: ['api::article.article'],
+                  },
+                ]),
+              },
+              findMany: jest.fn().mockResolvedValue([]),
+            },
+          },
+        },
+      } as any;
+
+      await expect(
+        apiTokenUpdate(1, { adminPermissions: requestedPermissions } as any)
+      ).rejects.toThrow('This admin API token has no owner');
+
+      expect(userFindOne).not.toHaveBeenCalled();
     });
 
     test('Enforces owner ceiling when updating admin token permissions', async () => {

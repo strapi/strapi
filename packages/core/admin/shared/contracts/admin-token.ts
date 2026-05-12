@@ -6,7 +6,8 @@ import type { ApiTokenBase } from './content-api-token';
 export type AdminApiToken = ApiTokenBase & {
   kind: 'admin';
   adminPermissions: Permission[];
-  adminUserOwner: Data.ID | AdminTokenOwner;
+  /** Null only for inconsistent / pre-migration DB rows; new tokens always have an owner. */
+  adminUserOwner: Data.ID | AdminTokenOwner | null;
 };
 
 export type AdminTokenBody = Pick<AdminApiToken, 'name' | 'description'> & {
