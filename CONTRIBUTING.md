@@ -18,7 +18,7 @@ A Request For Comments has to be created on the [strapi/rfcs](https://github.com
 
 ## Code of Conduct
 
-This project, and everyone participating in it, are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold it. Make sure to read the [full text](CODE_OF_CONDUCT.md) to understand which type of actions may or may not be tolerated.
+This project, and everyone participating in it, are governed by the [Strapi Code of Conduct](https://github.com/strapi/strapi/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold it. Make sure to read the [full text](https://github.com/strapi/strapi/blob/main/CODE_OF_CONDUCT.md) to understand which type of actions may or may not be tolerated.
 
 ## Contributor License Agreement (CLA)
 

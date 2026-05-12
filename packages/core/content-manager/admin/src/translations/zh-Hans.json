@@ -777,7 +777,6 @@
   "content-manager.relation.notAvailable": "没有可用关系",
   "content-manager.relation.publicationState.draft": "草稿",
   "content-manager.relation.publicationState.published": "已发布",
-  "content-manager.reviewWorkflows.stage.label": "审阅阶段",
   "content-manager.select.currently.selected": "当前选择 {count} 条",
   "content-manager.success.record.delete": "已删除",
   "content-manager.success.record.publish": "已发布",

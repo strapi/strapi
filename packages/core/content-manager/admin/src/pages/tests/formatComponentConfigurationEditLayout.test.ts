@@ -206,4 +206,28 @@ describe('formatComponentConfigurationEditLayout', () => {
     const ctaField = reportRows.find((f) => f.name === 'cta')!;
     expect(ctaField.mainField).toEqual({ name: 'title', type: 'string' });
   });
+
+  it('skips component UIDs present in persisted configuration but missing from schema map (orphan refs)', () => {
+    const orphanUid = 'blog.orphan-missing-schema' as const;
+    const dataWithOrphan: FindComponentConfiguration.Response['data'] = {
+      ...data,
+      components: {
+        ...data.components,
+        [orphanUid]: data.components[uidReport]!,
+      },
+    };
+
+    expect(() =>
+      formatComponentConfigurationEditLayout(dataWithOrphan, {
+        schema: sectionComponent,
+        components: componentsDict,
+      })
+    ).not.toThrow();
+
+    const editLayout = formatComponentConfigurationEditLayout(dataWithOrphan, {
+      schema: sectionComponent,
+      components: componentsDict,
+    });
+    expect(editLayout.components[orphanUid]).toBeUndefined();
+  });
 });

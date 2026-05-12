@@ -74,7 +74,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       .filter(([, attribute]) => !['password'].includes(attribute.type));
 
     // Merge all attributes into a single schema
-    const attributesSchema = createAttributesSchema(sanitizedAttributes);
+    const attributesSchema = createAttributesSchema(this._strapi, sanitizedAttributes);
 
     return z
       .object({
@@ -185,7 +185,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       // Remove non-writable attributes
       .filter(isWritableAttribute);
 
-    return createAttributesInputSchema(sanitizedAttributes);
+    return createAttributesInputSchema(this._strapi, sanitizedAttributes);
   }
 
   get query() {
