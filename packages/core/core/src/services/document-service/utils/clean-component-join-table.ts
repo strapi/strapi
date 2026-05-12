@@ -3,8 +3,25 @@ import type { Schema } from '@strapi/types';
 import { findComponentParent, getParentSchemasForComponent } from '../components';
 
 /**
- * Cleans ghost relations with publication state mismatches from a join table
- * Uses schema-based draft/publish checking like prevention fix
+ * Cleans ghost relations with publication state mismatches from a join table.
+ *
+ * "Ghost" relations are duplicated join rows where, for a single source instance,
+ * relations exist to both the draft and the published version of the same target
+ * document. Only one of those relations is legitimate: the one whose publication
+ * state matches the source's own publication state. The other is a leftover
+ * from a past write-path bug and must be removed.
+ *
+ * Which side is the ghost is therefore not fixed — it depends on the source:
+ *   - A draft source (or a component instance whose owning entry is a draft)
+ *     should keep the relation pointing to the draft target; the
+ *     published-target row is the ghost.
+ *   - A published source (or a component instance whose owning entry is
+ *     published) should keep the relation pointing to the published target;
+ *     the draft-target row is the ghost.
+ *
+ * If the source's effective publication state cannot be determined (for
+ * example, an orphan component instance with no parent), the row is left
+ * untouched to avoid further data loss.
  */
 export const cleanComponentJoinTable = async (
   db: Database,
@@ -65,6 +82,11 @@ export const cleanComponentJoinTable = async (
   }
 };
 
+/**
+ * Walks up the component containment chain for a component instance until it
+ * reaches the owning content-type entry. Returns the content-type uid, table
+ * name and id of that entry, or null if the chain breaks (orphan component).
+ */
 const findContentTypeParentForComponentInstance = async (
   componentSchema: Schema.Component,
   componentId: number | string
@@ -98,8 +120,78 @@ const findContentTypeParentForComponentInstance = async (
 };
 
 /**
- * Finds join table entries with publication state mismatches
- * Uses existing component parent detection from document service
+ * Returns the effective publication state of a join-row's source:
+ *   - 'published' if the source row (or its owning content-type entry for
+ *     a component source) has `published_at IS NOT NULL`
+ *   - 'draft' if `published_at IS NULL`
+ *   - null if the state can't be determined (e.g., orphan component, or the
+ *     owning content type doesn't support D&P — in which case the source
+ *     keeps both states and we must not touch it)
+ */
+const resolveSourcePublicationState = async (
+  db: Database,
+  sourceModel: any,
+  sourceId: number | string
+): Promise<'draft' | 'published' | null> => {
+  const isComponentModel =
+    !sourceModel.uid?.startsWith('api::') &&
+    !sourceModel.uid?.startsWith('plugin::') &&
+    sourceModel.uid?.includes('.');
+
+  // Component source: walk up the component chain to the owning content-type entry
+  if (isComponentModel) {
+    const componentSchema = strapi.components[sourceModel.uid as keyof typeof strapi.components] as
+      | Schema.Component
+      | undefined;
+    if (!componentSchema) {
+      return null;
+    }
+
+    const parent = await findContentTypeParentForComponentInstance(componentSchema, sourceId);
+    if (!parent) {
+      return null;
+    }
+
+    const parentContentType = strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes];
+
+    // If the owning content type doesn't support D&P its entries hold both
+    // states inline; touching the join rows could destroy legitimate links.
+    if (!parentContentType?.options?.draftAndPublish) {
+      return null;
+    }
+
+    const parentRow = await db
+      .connection(parent.table)
+      .select('published_at')
+      .where('id', parent.parentId)
+      .first();
+
+    if (!parentRow) {
+      return null;
+    }
+    return parentRow.published_at === null ? 'draft' : 'published';
+  }
+
+  // Non-component source: read publication state directly from the source row
+  const sourceRow = await db
+    .connection(sourceModel.tableName)
+    .select('published_at')
+    .where('id', sourceId)
+    .first();
+
+  if (!sourceRow) {
+    return null;
+  }
+  return sourceRow.published_at === null ? 'draft' : 'published';
+};
+
+/**
+ * Finds join table entries with publication state mismatches.
+ *
+ * For every (source_id, target_document_id) pair where both a draft-target row
+ * and a published-target row exist, exactly one of them is a ghost. The one
+ * to drop is the one whose target publication state does NOT match the
+ * source's own publication state.
  */
 const findPublicationStateMismatches = async (
   db: Database,
@@ -113,22 +205,23 @@ const findPublicationStateMismatches = async (
     const sourceColumn = relation.joinTable.joinColumn.name;
     const targetColumn = relation.joinTable.inverseJoinColumn.name;
 
-    // Get all join entries with their target entities
-    const query = db
+    // Get all join entries with their target entities. We also fetch
+    // `document_id` so we can group by target document and apply the mismatch
+    // rule per-document rather than across the whole source.
+    const joinEntries = await db
       .connection(joinTableName)
       .select(
         `${joinTableName}.id as join_id`,
         `${joinTableName}.${sourceColumn} as source_id`,
         `${joinTableName}.${targetColumn} as target_id`,
-        `${targetModel.tableName}.published_at as target_published_at`
+        `${targetModel.tableName}.published_at as target_published_at`,
+        `${targetModel.tableName}.document_id as target_document_id`
       )
       .leftJoin(
         targetModel.tableName,
         `${joinTableName}.${targetColumn}`,
         `${targetModel.tableName}.id`
       );
-
-    const joinEntries = await query;
 
     // Group by source_id to find duplicates pointing to draft/published versions of same entity
     const entriesBySource: { [key: string]: any[] } = {};
@@ -142,13 +235,6 @@ const findPublicationStateMismatches = async (
 
     const ghostEntries: number[] = [];
 
-    // Check if this is a join table (ends with _lnk)
-    const isRelationJoinTable = joinTableName.endsWith('_lnk');
-    const isComponentModel =
-      !sourceModel.uid?.startsWith('api::') &&
-      !sourceModel.uid?.startsWith('plugin::') &&
-      sourceModel.uid?.includes('.');
-
     // Check for draft/publish inconsistencies
     for (const [sourceId, entries] of Object.entries(entriesBySource)) {
       // Skip entries with single relations
@@ -157,64 +243,63 @@ const findPublicationStateMismatches = async (
         continue;
       }
 
-      // For component join tables, check if THIS specific component instance's parent supports D&P
-      if (isRelationJoinTable && isComponentModel) {
-        try {
-          const componentSchema = strapi.components[sourceModel.uid] as Schema.Component;
-          if (!componentSchema) {
-            // eslint-disable-next-line no-continue
-            continue;
-          }
+      // Resolve the source's effective publication state. We need this to
+      // know which side of the duplicate pair is the ghost: the row whose
+      // target state disagrees with the source state.
+      let sourceState: 'draft' | 'published' | null;
+      try {
+        sourceState = await resolveSourcePublicationState(db, sourceModel, sourceId);
+      } catch (error) {
+        // Skip on error — better to leave data alone than to delete the wrong row
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
-          const parent = await findContentTypeParentForComponentInstance(componentSchema, sourceId);
-          if (!parent) {
-            continue;
-          }
+      if (sourceState === null) {
+        // Unknown source state — skip to avoid destroying legitimate links
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
-          // Check if THIS component instance's parent supports draft/publish
-          const parentContentType =
-            strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes];
-          if (!parentContentType?.options?.draftAndPublish) {
-            // This component instance's parent does NOT support D&P - skip cleanup
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-
-          // If we reach here, this component instance's parent DOES support D&P
-          // Continue to process this component instance for ghost relations
-        } catch (error) {
-          // Skip this component instance on error
+      // Group this source's rows by target document. The mismatch rule
+      // applies per-document: a single source may legitimately link to many
+      // different documents, mixed-state across documents is fine; what is
+      // never legitimate is the same source linking to BOTH versions of the
+      // SAME document.
+      const entriesByDocument: { [docId: string]: any[] } = {};
+      for (const entry of entries) {
+        const docId = String(entry.target_document_id ?? '');
+        if (!docId) {
           // eslint-disable-next-line no-continue
           continue;
         }
+        if (!entriesByDocument[docId]) {
+          entriesByDocument[docId] = [];
+        }
+        entriesByDocument[docId].push(entry);
       }
 
-      // Find ghost relations (same logic as original but with improved parent checking)
-      for (const entry of entries) {
-        if (entry.target_published_at === null) {
-          // This is a draft target - find its published version
-          const draftTarget = await db
-            .connection(targetModel.tableName)
-            .select('document_id')
-            .where('id', entry.target_id)
-            .first();
+      for (const documentEntries of Object.values(entriesByDocument)) {
+        if (documentEntries.length <= 1) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
 
-          if (draftTarget) {
-            const publishedVersion = await db
-              .connection(targetModel.tableName)
-              .select('id', 'document_id')
-              .where('document_id', draftTarget.document_id)
-              .whereNotNull('published_at')
-              .first();
+        const draftRows = documentEntries.filter((e) => e.target_published_at === null);
+        const publishedRows = documentEntries.filter((e) => e.target_published_at !== null);
 
-            if (publishedVersion) {
-              // Check if we also have a relation to the published version
-              const publishedRelation = entries.find((e) => e.target_id === publishedVersion.id);
-              if (publishedRelation) {
-                ghostEntries.push(publishedRelation.join_id);
-              }
-            }
-          }
+        // Only act when both states are present for the same document
+        if (draftRows.length === 0 || publishedRows.length === 0) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        // Delete the rows whose target state disagrees with the source state.
+        // A draft source keeps draft-target rows; a published source keeps
+        // published-target rows.
+        const ghostRows = sourceState === 'draft' ? publishedRows : draftRows;
+        for (const row of ghostRows) {
+          ghostEntries.push(row.join_id);
         }
       }
     }
