@@ -801,7 +801,7 @@ const regenerate = async (id: string | number): Promise<ContentApiApiToken | Adm
   const encryptedKey = encryptionService.encrypt(accessKey);
 
   const apiToken: AnyApiToken = await strapi.db.query('admin::api-token').update({
-    select: ['id', 'accessKey'],
+    select: ['id', 'accessKey', 'kind'],
     where: { id },
     data: {
       accessKey: hash(accessKey),
@@ -815,8 +815,9 @@ const regenerate = async (id: string | number): Promise<ContentApiApiToken | Adm
 
   return {
     ...apiToken,
+    kind: (apiToken.kind ?? 'content-api') as AnyApiToken['kind'],
     accessKey,
-  };
+  } as any;
 };
 
 const checkSaltIsDefined = () => {
@@ -884,7 +885,10 @@ const list = async <K extends AnyApiToken['kind']>(
         })
       : ({
           ...(omit(['permissions'], token) as object),
-          adminUserOwner: toAdminTokenOwner(token.adminUserOwner),
+          adminUserOwner:
+            token.adminUserOwner !== null && token.adminUserOwner !== undefined
+              ? toAdminTokenOwner(token.adminUserOwner)
+              : null,
         } as any)
   );
 };
@@ -913,14 +917,23 @@ const revoke = async (id: string | number): Promise<AnyApiToken> => {
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
 
-  if (deletedToken === null || deletedToken === undefined || deletedToken.kind !== 'admin') {
+  if (deletedToken === null || deletedToken === undefined) {
     return deletedToken;
   }
 
-  return {
+  if (deletedToken.kind === 'admin') {
+    return {
+      ...deletedToken,
+      adminUserOwner: toAdminTokenOwner(deletedToken.adminUserOwner),
+    };
+  }
+
+  // content-api tokens (including legacy null-kind rows): normalise shape
+  return omit(['adminPermissions', 'adminUserOwner'], {
     ...deletedToken,
-    adminUserOwner: toAdminTokenOwner(deletedToken.adminUserOwner),
-  };
+    kind: 'content-api' as const,
+    permissions: flattenTokenPermissions(deletedToken.permissions),
+  }) as ContentApiApiToken;
 };
 
 /**
@@ -954,8 +967,11 @@ const update = async (
 
   const raw = attributes as Record<string, unknown>;
 
-  // kind is immutable after creation
-  if (raw.kind !== undefined && raw.kind !== null && raw.kind !== originalToken.kind) {
+  // kind is immutable after creation.
+  // Null-kind rows are legacy content-api tokens — treat null and 'content-api' as the same
+  // effective value so that clients echoing back the normalised kind from a GET don't get rejected.
+  const effectiveStoredKind = originalToken.kind ?? 'content-api';
+  if (raw.kind !== undefined && raw.kind !== null && raw.kind !== effectiveStoredKind) {
     throw new ValidationError('kind is immutable after creation');
   }
 
@@ -964,7 +980,7 @@ const update = async (
   let clampedAdminPermissions: PermissionInput[] | undefined;
   let tokenOwnerUser: AdminUser | undefined;
 
-  if (originalToken.kind === 'content-api') {
+  if (originalToken.kind === null || originalToken.kind === 'content-api') {
     assertLegacyKindFields(attributes as ContentApiApiTokenBody);
 
     const incomingType = raw.type as ContentApiApiToken['type'] | undefined;
@@ -1019,14 +1035,23 @@ const update = async (
     }
   }
 
+  const baseData = omit(
+    ['kind', 'permissions', 'adminPermissions', 'adminUserOwner'],
+    attributes
+  ) as Record<string, unknown>;
+
+  // Migrate legacy null-kind rows to the explicit value on first write
+  if (originalToken.kind === null) {
+    baseData.kind = 'content-api';
+  }
+
   const updatedToken = await strapi.db.query('admin::api-token').update({
     select: SELECT_FIELDS,
     where: { id },
-    // kind is immutable — strip it along with relation fields so the DB write is clean
-    data: omit(['kind', 'permissions', 'adminPermissions', 'adminUserOwner'], attributes) as object,
+    data: baseData,
   });
 
-  if (originalToken.kind === 'content-api') {
+  if (originalToken.kind === null || originalToken.kind === 'content-api') {
     const incomingPermissions = raw.permissions as string[] | null | undefined;
 
     // custom tokens need to have their permissions updated as well

@@ -800,6 +800,56 @@ describe('API Token', () => {
 
       expect(res[0].adminUserOwner).toEqual(adminTokenOwnerDto);
     });
+
+    test('Does not throw when an admin token has adminUserOwner: null (orphaned row)', async () => {
+      const orphanedToken = {
+        id: 1,
+        kind: 'admin',
+        name: 'orphaned-admin-token',
+        adminPermissions: [],
+        adminUserOwner: null,
+      };
+      const findMany = jest.fn().mockResolvedValue([orphanedToken]);
+      const superAdmin = { id: 1, roles: [{ code: 'strapi-super-admin' }] } as any;
+
+      setupStrapiMock({
+        db: {
+          query() {
+            return { findMany };
+          },
+        },
+      });
+
+      const res = await list(superAdmin);
+
+      expect(res).toHaveLength(1);
+      expect((res[0] as any).adminUserOwner).toBeNull();
+    });
+
+    test('Does not throw when an admin token has adminUserOwner: undefined (orphaned row)', async () => {
+      const orphanedToken = {
+        id: 2,
+        kind: 'admin',
+        name: 'orphaned-admin-token-2',
+        adminPermissions: [],
+        adminUserOwner: undefined,
+      };
+      const findMany = jest.fn().mockResolvedValue([orphanedToken]);
+      const superAdmin = { id: 1, roles: [{ code: 'strapi-super-admin' }] } as any;
+
+      setupStrapiMock({
+        db: {
+          query() {
+            return { findMany };
+          },
+        },
+      });
+
+      const res = await list(superAdmin);
+
+      expect(res).toHaveLength(1);
+      expect((res[0] as any).adminUserOwner).toBeNull();
+    });
   });
 
   describe('revoke', () => {
@@ -839,7 +889,13 @@ describe('API Token', () => {
         where: { id: token.id },
         populate: ['permissions', 'adminPermissions', 'adminUserOwner'],
       });
-      expect(res).toEqual(token);
+      expect(res).toMatchObject({
+        id: token.id,
+        name: token.name,
+        description: token.description,
+        type: token.type,
+        kind: 'content-api',
+      });
     });
 
     test('It returns `null` if the resource does not exist', async () => {
@@ -931,6 +987,120 @@ describe('API Token', () => {
         throw new Error('Expected admin token response');
       }
       expect(res.adminUserOwner).toEqual(adminTokenOwnerDto);
+    });
+
+    test('Normalises kind: null to content-api in the returned DTO', async () => {
+      const mockedFindOne = jest.fn().mockResolvedValue({ id: 1, adminPermissions: [] });
+      const mockedDelete = jest.fn().mockResolvedValue({
+        id: 1,
+        kind: null,
+        permissions: [{ action: 'api::foo.find' }],
+        adminPermissions: [],
+        adminUserOwner: null,
+      });
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne: mockedFindOne, delete: mockedDelete };
+          },
+        },
+        admin: {
+          services: {
+            permission: { deleteByIds: jest.fn() },
+          },
+        },
+      } as any;
+
+      const res = await revoke(1);
+
+      expect(res).not.toBeNull();
+      expect((res as any).kind).toBe('content-api');
+    });
+
+    test('Returns kind: content-api for a regular content-api token', async () => {
+      const mockedFindOne = jest.fn().mockResolvedValue({ id: 2, adminPermissions: [] });
+      const mockedDelete = jest.fn().mockResolvedValue({
+        id: 2,
+        kind: 'content-api',
+        permissions: [{ action: 'api::foo.find' }],
+        adminPermissions: [],
+        adminUserOwner: null,
+      });
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne: mockedFindOne, delete: mockedDelete };
+          },
+        },
+        admin: {
+          services: {
+            permission: { deleteByIds: jest.fn() },
+          },
+        },
+      } as any;
+
+      const res = await revoke(2);
+
+      expect((res as any).kind).toBe('content-api');
+    });
+
+    test('Content-api revoke response does not include adminPermissions or adminUserOwner', async () => {
+      const mockedFindOne = jest.fn().mockResolvedValue({ id: 3, adminPermissions: [] });
+      const mockedDelete = jest.fn().mockResolvedValue({
+        id: 3,
+        kind: 'content-api',
+        permissions: [{ action: 'api::foo.find' }],
+        adminPermissions: [],
+        adminUserOwner: null,
+      });
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne: mockedFindOne, delete: mockedDelete };
+          },
+        },
+        admin: {
+          services: {
+            permission: { deleteByIds: jest.fn() },
+          },
+        },
+      } as any;
+
+      const res = await revoke(3);
+
+      expect('adminPermissions' in (res as object)).toBe(false);
+      expect('adminUserOwner' in (res as object)).toBe(false);
+    });
+
+    test('Flattens permissions to an array of strings for content-api tokens', async () => {
+      const mockedFindOne = jest.fn().mockResolvedValue({ id: 4, adminPermissions: [] });
+      const mockedDelete = jest.fn().mockResolvedValue({
+        id: 4,
+        kind: 'content-api',
+        permissions: [{ action: 'api::foo.find' }, { action: 'api::foo.create' }],
+        adminPermissions: [],
+        adminUserOwner: null,
+      });
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne: mockedFindOne, delete: mockedDelete };
+          },
+        },
+        admin: {
+          services: {
+            permission: { deleteByIds: jest.fn() },
+          },
+        },
+      } as any;
+
+      const res = await revoke(4);
+
+      expect((res as any).permissions).toEqual(['api::foo.find', 'api::foo.create']);
     });
   });
 
@@ -1214,15 +1384,16 @@ describe('API Token', () => {
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
-        select: ['id', 'accessKey'],
+        select: ['id', 'accessKey', 'kind'],
         data: {
           accessKey: hash(mockedApiToken.hexedString),
           encryptedKey: expect.any(String),
         },
       });
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         accessKey: mockedApiToken.hexedString,
         encryptedKey: expect.any(String),
+        kind: 'content-api',
       });
     });
 
@@ -1244,12 +1415,48 @@ describe('API Token', () => {
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
-        select: ['id', 'accessKey'],
+        select: ['id', 'accessKey', 'kind'],
         data: {
           accessKey: hash(mockedApiToken.hexedString),
           encryptedKey: expect.any(String),
         },
       });
+    });
+
+    test('Return value includes kind from the DB row', async () => {
+      const update = jest.fn().mockResolvedValue({ id: 1, accessKey: 'hash', kind: 'content-api' });
+
+      setupStrapiMock({
+        db: {
+          query() {
+            return { update };
+          },
+        },
+      });
+
+      const res = await regenerate(1);
+
+      expect((res as any).kind).toBe('content-api');
+    });
+
+    test('Selects kind in the DB query', async () => {
+      const update = jest.fn().mockResolvedValue({ id: 1, accessKey: 'hash', kind: 'content-api' });
+
+      setupStrapiMock({
+        db: {
+          query() {
+            return { update };
+          },
+        },
+      });
+
+      await regenerate(1);
+
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: expect.arrayContaining(['kind']),
+        })
+      );
     });
   });
 
@@ -1567,6 +1774,35 @@ describe('API Token', () => {
       ).rejects.toThrow('kind is immutable after creation');
     });
 
+    test('Does not throw when a client echoes back kind: content-api for a null-kind legacy token', async () => {
+      const originalToken = {
+        id: 1,
+        kind: null,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      };
+
+      const findOne = jest.fn().mockResolvedValue(originalToken);
+      const update = jest.fn(({ data }) => Promise.resolve({ ...originalToken, ...data }));
+      const deleteFn = jest.fn(() => Promise.resolve());
+      const load = jest.fn().mockResolvedValueOnce([]);
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne, update, delete: deleteFn, load };
+          },
+        },
+        config: { get: jest.fn(() => '') },
+      } as any;
+
+      // Client read the token via GET (received kind: 'content-api') and PUTs it back as-is
+      await expect(
+        apiTokenUpdate(1, { kind: 'content-api', name: 'api-token_tests-name' } as any)
+      ).resolves.not.toThrow();
+    });
+
     test('Throws when setting admin fields on a content API token update', async () => {
       const originalToken = {
         id: 1,
@@ -1752,6 +1988,51 @@ describe('API Token', () => {
         throw new Error('Expected admin token response');
       }
       expect(res.adminUserOwner).toEqual(adminTokenOwnerDto);
+    });
+
+    test('Updates a legacy token with null kind without throwing', async () => {
+      const id = 1;
+
+      const originalToken = {
+        id,
+        kind: null,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      };
+
+      const updatedAttributes = {
+        name: 'api-token_tests-updated-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      } as any;
+
+      const findOne = jest.fn().mockResolvedValue(originalToken);
+      const update = jest.fn(({ data }) => Promise.resolve({ ...originalToken, ...data }));
+      const deleteFn = jest.fn(() => Promise.resolve());
+      const load = jest.fn().mockResolvedValueOnce([]);
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne, update, delete: deleteFn, load };
+          },
+        },
+        config: { get: jest.fn(() => '') },
+      } as any;
+
+      const res = await apiTokenUpdate(id, updatedAttributes);
+
+      expect(update).toHaveBeenCalled();
+      expect(res).toMatchObject({
+        name: 'api-token_tests-updated-name',
+        type: 'read-only',
+        // null kind must be normalized to 'content-api' in the returned DTO
+        kind: 'content-api',
+        permissions: [],
+      });
+      // Must NOT contain adminUserOwner — this is a content-api shape
+      expect((res as any).adminUserOwner).toBeUndefined();
     });
   });
 
