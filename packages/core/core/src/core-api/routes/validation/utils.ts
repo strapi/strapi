@@ -1,5 +1,5 @@
 import { transformUidToValidOpenApiName } from '@strapi/utils';
-import type { Internal } from '@strapi/types';
+import type { Core, Internal } from '@strapi/types';
 import * as z from 'zod/v4';
 
 // Schema generation happens on-demand when schemas don't exist in the registry
@@ -18,7 +18,11 @@ import * as z from 'zod/v4';
  * safeGlobalRegistrySet("mySchema", z.object({ name: z.string() }));
  * ```
  */
-export const safeGlobalRegistrySet = (id: Internal.UID.Schema, schema: z.ZodType) => {
+export const safeGlobalRegistrySet = (
+  strapi: Core.Strapi,
+  id: Internal.UID.Schema,
+  schema: z.ZodType
+) => {
   try {
     const { _idmap: idMap } = z.globalRegistry;
 
@@ -31,7 +35,6 @@ export const safeGlobalRegistrySet = (id: Internal.UID.Schema, schema: z.ZodType
       idMap.delete(transformedId);
     }
 
-    // Register the new schema with the transformed ID
     strapi.log.debug(
       `${isReplacing ? 'Replacing' : 'Registering'} schema ${transformedId} in global registry`
     );
@@ -73,7 +76,11 @@ export const safeGlobalRegistrySet = (id: Internal.UID.Schema, schema: z.ZodType
  * );
  * ```
  */
-export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.ZodType) => {
+export const safeSchemaCreation = (
+  strapi: Core.Strapi,
+  id: Internal.UID.Schema,
+  callback: () => z.ZodType
+) => {
   try {
     const { _idmap: idMap } = z.globalRegistry;
 
@@ -92,10 +99,8 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
     const isBuiltInSchema = id.startsWith('plugin::') || id.startsWith('admin');
 
     if (isBuiltInSchema) {
-      // Built-in schemas keep at debug level to avoid clutter
       strapi.log.debug(`Initializing validation schema for ${transformedId}`);
     } else {
-      // User content
       const schemaName = transformedId
         .replace('Document', '')
         .replace('Entry', '')
@@ -106,13 +111,13 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
 
     // Temporary any placeholder before replacing with the actual schema type
     // Used to prevent infinite loops in cyclical data structures
-    safeGlobalRegistrySet(id, z.any());
+    safeGlobalRegistrySet(strapi, id, z.any());
 
     // Generate the actual schema using the callback
     const schema = callback();
 
     // Replace the placeholder with the real schema
-    safeGlobalRegistrySet(id, schema);
+    safeGlobalRegistrySet(strapi, id, schema);
 
     // Show completion for user content only
     if (!isBuiltInSchema) {

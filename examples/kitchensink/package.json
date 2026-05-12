@@ -10,7 +10,8 @@
     "develop": "strapi develop",
     "develop:ce": "STRAPI_DISABLE_EE=true strapi develop",
     "start": "strapi start",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@strapi/provider-email-mailgun": "workspace:*",

@@ -185,6 +185,7 @@ export default {
     const meta = {
       stageCount: workflowStages.length,
       workflowCount,
+      canTransition,
     };
 
     if (!canTransition) {
