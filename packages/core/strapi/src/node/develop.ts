@@ -195,6 +195,10 @@ const develop = async ({
 
     const strapiInstance = await strapi.load();
 
+    const loadStrapiDuration = timer.end('loadStrapi');
+    loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
+    loadStrapiSpinner.succeed();
+
     const contextSpinner = logger.spinner(`Building build context`);
     const adminSpinner = logger.spinner(`Creating admin`);
     const generatingTsSpinner = logger.spinner(`Generating types`);
@@ -210,74 +214,87 @@ const develop = async ({
 
     try {
       if (watchAdmin) {
-        timer.start('createBuildContext');
-        contextSpinner.start();
+        await strapiInstance.withStartupTraceChild('strapi.startup.cli.watch_admin', async () => {
+          timer.start('createBuildContext');
+          contextSpinner.start();
 
-        const ctx = await createBuildContext({
-          cwd,
-          logger,
-          strapi,
-          tsconfig,
-          options,
+          const ctx = await createBuildContext({
+            cwd,
+            logger,
+            strapi,
+            tsconfig,
+            options,
+          });
+          const contextDuration = timer.end('createBuildContext');
+          contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
+          contextSpinner.succeed();
+
+          timer.start('creatingAdmin');
+          adminSpinner.start();
+
+          await writeStaticClientFiles(ctx);
+
+          if (ctx.bundler === 'webpack') {
+            const { watch: watchWebpack } = await import('./webpack/watch');
+            bundleWatcher = await watchWebpack(ctx);
+          } else if (ctx.bundler === 'vite') {
+            const { watch: watchVite } = await import('./vite/watch');
+            bundleWatcher = await watchVite(ctx);
+          }
+
+          const adminDuration = timer.end('creatingAdmin');
+          adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
+          adminSpinner.succeed();
         });
-        const contextDuration = timer.end('createBuildContext');
-        contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
-        contextSpinner.succeed();
-
-        timer.start('creatingAdmin');
-        adminSpinner.start();
-
-        await writeStaticClientFiles(ctx);
-
-        if (ctx.bundler === 'webpack') {
-          const { watch: watchWebpack } = await import('./webpack/watch');
-          bundleWatcher = await watchWebpack(ctx);
-        } else if (ctx.bundler === 'vite') {
-          const { watch: watchVite } = await import('./vite/watch');
-          bundleWatcher = await watchVite(ctx);
-        }
-
-        const adminDuration = timer.end('creatingAdmin');
-        adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
-        adminSpinner.succeed();
       }
-
-      const loadStrapiDuration = timer.end('loadStrapi');
-      loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
-      loadStrapiSpinner.succeed();
 
       // For TS projects, type generation is a requirement for the develop command so that the server can restart
       // For JS projects, we respect the experimental autogenerate setting
       if (tsconfig?.config || strapi.config.get('typescript.autogenerate') !== false) {
-        timer.start('generatingTS');
-        generatingTsSpinner.start();
+        await strapiInstance.withStartupTraceChild(
+          'strapi.startup.cli.generate_types',
+          async () => {
+            timer.start('generatingTS');
+            generatingTsSpinner.start();
 
-        await tsUtils.generators.generate({
-          strapi: strapiInstance,
-          pwd: cwd,
-          rootDir: undefined,
-          logger: { silent: true, debug: false },
-          artifacts: { contentTypes: true, components: true },
-        });
+            await tsUtils.generators.generate({
+              strapi: strapiInstance,
+              pwd: cwd,
+              rootDir: undefined,
+              logger: { silent: true, debug: false },
+              artifacts: { contentTypes: true, components: true },
+            });
 
-        const generatingDuration = timer.end('generatingTS');
-        generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
-        generatingTsSpinner.succeed();
+            const generatingDuration = timer.end('generatingTS');
+            generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
+            generatingTsSpinner.succeed();
+          }
+        );
       }
 
       if (tsconfig?.config) {
-        timer.start('compilingTS');
-        compilingTsSpinner.start();
+        await strapiInstance.withStartupTraceChild(
+          'strapi.startup.cli.compile_typescript',
+          async () => {
+            timer.start('compilingTS');
+            compilingTsSpinner.start();
 
-        await cleanupDistDirectory({ tsconfig, logger, timer });
-        await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+            await cleanupDistDirectory({ tsconfig, logger, timer });
+            await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
 
-        const compilingDuration = timer.end('compilingTS');
-        compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
-        compilingTsSpinner.succeed();
+            const compilingDuration = timer.end('compilingTS');
+            compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
+            compilingTsSpinner.succeed();
+          }
+        );
       }
 
-      ensureWatcher();
+      await strapiInstance.withStartupTraceChild(
+        'strapi.startup.cli.init_file_watcher',
+        async () => {
+          ensureWatcher();
+        }
+      );
 
       strapiInstance.start();
     } catch (err: unknown) {
