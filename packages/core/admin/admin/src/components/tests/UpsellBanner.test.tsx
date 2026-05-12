@@ -28,6 +28,7 @@ jest.mock('../../../src/services/admin', () => ({
 describe('UpsellBanner', () => {
   beforeEach(() => {
     localStorage.removeItem('STRAPI_FREE_TRIAL_ENDS_AT:test-uuid');
+    localStorage.removeItem('STRAPI_UPSELL_BANNER_DISMISSED_FOR:test-uuid');
   });
 
   beforeAll(() => {
@@ -104,6 +105,74 @@ describe('UpsellBanner', () => {
       'target',
       '_blank'
     );
+  });
+
+  it('should render a close button', () => {
+    jest.setSystemTime(new Date(2025, 4, 10));
+
+    render(<UpsellBanner />);
+
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+  });
+
+  it('should hide the banner when the close button is clicked', async () => {
+    jest.setSystemTime(new Date(2025, 4, 10));
+
+    const { user } = render(<UpsellBanner />, {
+      userEventOptions: { advanceTimers: jest.advanceTimersByTime.bind(jest) },
+    });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(screen.queryByText('Access to Growth plan features:')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reopen banner' })).toBeInTheDocument();
+  });
+
+  it('should restore the full banner when "Reopen banner" is clicked', async () => {
+    jest.setSystemTime(new Date(2025, 4, 10));
+
+    const { user } = render(<UpsellBanner />, {
+      userEventOptions: { advanceTimers: jest.advanceTimersByTime.bind(jest) },
+    });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(screen.getByRole('button', { name: 'Reopen banner' }));
+
+    expect(screen.getByText('Access to Growth plan features:')).toBeInTheDocument();
+  });
+
+  it('should persist dismissal after remount', async () => {
+    jest.setSystemTime(new Date(2025, 4, 10));
+
+    const { unmount, user } = render(<UpsellBanner />, {
+      userEventOptions: { advanceTimers: jest.advanceTimersByTime.bind(jest) },
+    });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    unmount();
+
+    render(<UpsellBanner />);
+
+    expect(screen.queryByText('Access to Growth plan features:')).not.toBeInTheDocument();
+  });
+
+  it('should re-show the banner when the current trial end date differs from the dismissed date', () => {
+    jest.setSystemTime(new Date(2025, 4, 10));
+
+    // Banner was previously dismissed for an earlier trial end date
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT:test-uuid', '2026-08-01T00:00:00.000Z');
+    localStorage.setItem(
+      'STRAPI_UPSELL_BANNER_DISMISSED_FOR:test-uuid',
+      '2025-05-15T00:00:00.000Z'
+    );
+
+    // @ts-expect-error – mock
+    useGetLicenseTrialTimeLeftQuery.mockImplementationOnce(() => ({
+      data: {
+        trialEndsAt: '2026-08-01T00:00:00.000Z',
+      },
+    }));
+
+    render(<UpsellBanner />);
+
+    expect(screen.getByText('Access to Growth plan features:')).toBeInTheDocument();
   });
 
   it('should not render when license trial ended more than 7 days ago', () => {

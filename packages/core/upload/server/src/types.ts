@@ -65,6 +65,11 @@ export interface Config {
   sizeLimit?: number;
   providerOptions: Record<string, unknown>;
   actionOptions: Record<string, unknown>;
+  sharp?: {
+    cache?: boolean;
+    concurrency?: number;
+  };
+  concurrentUploadSize?: number;
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {

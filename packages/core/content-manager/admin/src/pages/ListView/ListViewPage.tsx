@@ -46,7 +46,10 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
-import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
+import {
+  type PersistentQueryConfig,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -99,11 +102,23 @@ const ListViewPage = () => {
     [copy, formatMessage, toggleNotification]
   );
 
-  usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
-  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
-
   const { collectionType, model, schema } = useDoc();
-  const { list, listViewConversionContext } = useDocumentLayout(model);
+  const { list, listViewConversionContext, isLoading: isLoadingLayout } = useDocumentLayout(model);
+
+  const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
+    () => ({
+      [`STRAPI_LIST_VIEW_SETTINGS:${model}`]: {
+        paths: ['sort', 'filters', 'pageSize'],
+        scoped: true,
+      },
+      STRAPI_LOCALE: {
+        paths: ['plugins.i18n.locale'],
+        scoped: false,
+      },
+    }),
+    [model]
+  );
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
@@ -170,7 +185,7 @@ const ListViewPage = () => {
     }
   }, [displayedHeaderNames]);
 
-  const [{ query }] = useQueryParams<{
+  const [{ query }, setQuery] = useQueryParams<{
     plugins?: Record<string, unknown>;
     page?: string;
     pageSize?: string;
@@ -185,11 +200,33 @@ const ListViewPage = () => {
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const hasAppliedFilters = Boolean((query as any)?.filters?.$and?.length);
+  const hasStatusFilter = Boolean(
+    (query as any)?.filters?.$and?.some((f: any) => f?.__status?.$eq != null)
+  );
 
-  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery({
-    model,
-    params,
-  });
+  // If a __status filter becomes active while sort=status:* is in the URL, strip the status sort.
+  React.useEffect(() => {
+    if (
+      hasStatusFilter &&
+      typeof query.sort === 'string' &&
+      /(?:^|,)\s*status:/i.test(query.sort)
+    ) {
+      const cleaned = query.sort
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
+        .join(',');
+      setQuery({ sort: cleaned || undefined }, 'push', true);
+    }
+  }, [hasStatusFilter, query.sort, setQuery]);
+
+  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
+    {
+      model,
+      params,
+    },
+    { skip: isLoadingLayout || !isHydrated }
+  );
 
   /**
    * If the API returns an error, display a notification
@@ -266,7 +303,7 @@ const ListViewPage = () => {
           defaultMessage: 'status',
         }),
         searchable: false,
-        sortable: false,
+        sortable: !hasStatusFilter,
       } satisfies ListFieldLayout);
     }
 
@@ -274,13 +311,14 @@ const ListViewPage = () => {
   }, [
     displayedHeaders,
     formatMessage,
+    hasStatusFilter,
     list,
     runHookWaterfall,
     schema?.options?.draftAndPublish,
     model,
   ]);
 
-  if (isLoading) {
+  if (isLoadingLayout || !isHydrated || isLoading) {
     return <Page.Loading />;
   }
 
@@ -349,7 +387,7 @@ const ListViewPage = () => {
 
   const actions =
     list.settings.filterable && schema ? (
-      <Filters.Root schema={schema}>
+      <Filters.Root schema={schema} layout={list}>
         <Layouts.Action
           endActions={endActions}
           startActions={startActions}

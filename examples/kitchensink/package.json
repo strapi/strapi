@@ -10,7 +10,8 @@
     "develop": "strapi develop",
     "develop:ce": "STRAPI_DISABLE_EE=true strapi develop",
     "start": "strapi start",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@strapi/provider-email-mailgun": "workspace:*",
@@ -18,7 +19,7 @@
     "@strapi/provider-upload-cloudinary": "workspace:*",
     "@strapi/strapi": "workspace:*",
     "better-sqlite3": "12.8.0",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "mysql2": "3.20.0",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.20.0",
