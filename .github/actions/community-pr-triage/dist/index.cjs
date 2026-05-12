@@ -40365,16 +40365,23 @@ async function fetchAllTicketsByPRNumber(teamId) {
   }
   return map;
 }
+async function findTriageStateId(teamId) {
+  const team = await linearClient.team(teamId);
+  const states = await team.states({ filter: { type: { eq: "triage" } }, first: 1 });
+  return states.nodes[0]?.id;
+}
 async function createTicket(pr2, analysis, teamId, projectId, labelMap) {
   const title = `PR #${pr2.number}: ${pr2.title}`;
   const description = buildDescription(pr2, analysis);
   const labelIds = await buildLabelIds(analysis, labelMap, teamId);
+  const stateId = await findTriageStateId(teamId);
   const result = await linearClient.createIssue({
     teamId,
     projectId,
     title,
     description,
-    labelIds
+    labelIds,
+    stateId
   });
   const issue = await result.issue;
   if (!issue) throw new Error(`Failed to create Linear issue for PR #${pr2.number}`);
