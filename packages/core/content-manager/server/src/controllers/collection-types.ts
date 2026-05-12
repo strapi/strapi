@@ -603,7 +603,20 @@ export default {
 
     const { locale } = await getDocumentLocaleAndStatus(ctx.query, model);
 
-    // Find locales to delete
+    // Check if the content type is i18n-enabled
+    const i18nPlugin = strapi.plugin('i18n');
+    const isLocalized = i18nPlugin
+      ? i18nPlugin.service('content-types').isLocalizedContentType(model)
+      : false;
+
+    // For non-i18n content types, skip locale resolution and delete directly
+    if (!isLocalized) {
+      const result = await documentManager.delete(id, model);
+      ctx.body = await permissionChecker.sanitizeOutput(result);
+      return;
+    }
+
+    // For i18n content types, find locales to delete
     const documentLocales = await documentManager.findLocales(id, model, { populate, locale });
 
     if (documentLocales.length === 0) {
