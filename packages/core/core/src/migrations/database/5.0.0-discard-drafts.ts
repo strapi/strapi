@@ -1551,6 +1551,10 @@ async function cloneComponentRelationJoinTables(
 
     const joinTable = attribute.joinTable;
     const sourceColumnName = joinTable.joinColumn.name;
+    // Morph join tables use morphColumn instead of inverseJoinColumn — skip them
+    if (!joinTable.inverseJoinColumn) {
+      continue;
+    }
     const targetColumnName = joinTable.inverseJoinColumn.name;
 
     if (!componentMeta.relationsLogPrinted) {
@@ -2004,6 +2008,10 @@ async function copyRelationsForContentType({
     }
 
     const { name: sourceColumnName } = joinTable.joinColumn;
+    // Morph join tables use morphColumn instead of inverseJoinColumn — skip them
+    if (!joinTable.inverseJoinColumn) {
+      continue;
+    }
     const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
     // Process in batches to avoid MySQL query size limits and SQLite expression tree limits
@@ -2148,6 +2156,9 @@ async function copyRelationsFromOtherContentTypes({
       }
 
       const { name: sourceColumnName } = joinTable.joinColumn;
+      if (!joinTable.inverseJoinColumn) {
+        continue;
+      }
       const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
       // Query existing relations by target IDs to avoid duplicates
@@ -2252,6 +2263,9 @@ async function copyRelationsToOtherContentTypes({
     }
 
     const { name: sourceColumnName } = joinTable.joinColumn;
+    if (!joinTable.inverseJoinColumn) {
+      continue;
+    }
     const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
     // Get target content type's publishedToDraftMap if it has draft/publish (cached)
@@ -2554,6 +2568,9 @@ async function fixExistingDraftRelations({ trx, uid }: { trx: Knex; uid: string 
     }
 
     const { name: sourceColumnName } = joinTable.joinColumn;
+    if (!joinTable.inverseJoinColumn) {
+      continue;
+    }
     const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
     // Get draft map for target to convert published targets to draft targets
@@ -2746,6 +2763,9 @@ async function fixExistingDraftComponentRelations({ trx, uid }: { trx: Knex; uid
 
         const relationJoinTable = attr.joinTable.name;
         const sourceColumn = attr.joinTable.joinColumn.name;
+        if (!attr.joinTable.inverseJoinColumn) {
+          continue;
+        }
         const targetColumn = attr.joinTable.inverseJoinColumn.name;
 
         const hasRelationTable = await trx.schema.hasTable(relationJoinTable);
@@ -2965,6 +2985,9 @@ async function fixPublishedComponentRelationTargets({ trx, uid }: { trx: Knex; u
 
       const relationJoinTable = attr.joinTable.name;
       const sourceColumn = attr.joinTable.joinColumn.name;
+      if (!attr.joinTable.inverseJoinColumn) {
+        continue;
+      }
       const targetColumn = attr.joinTable.inverseJoinColumn.name;
       if (!(await ensureTableExists(trx, relationJoinTable))) continue;
 
