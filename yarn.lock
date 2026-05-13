@@ -8958,7 +8958,7 @@ __metadata:
     "@types/react-window": "npm:1.8.8"
     "@types/sanitize-html": "npm:2.13.0"
     "@vitejs/plugin-react-swc": "npm:3.6.0"
-    axios: "npm:1.15.1"
+    axios: "npm:1.15.2"
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
     chalk: "npm:^4.1.2"
@@ -9043,7 +9043,7 @@ __metadata:
     "@types/cli-progress": "npm:3.11.5"
     "@types/eventsource": "npm:1.1.15"
     "@types/lodash": "npm:^4.14.191"
-    axios: "npm:1.15.1"
+    axios: "npm:1.15.2"
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
     cli-progress: "npm:3.12.0"
@@ -13694,14 +13694,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.15.1":
-  version: 1.15.1
-  resolution: "axios@npm:1.15.1"
+"axios@npm:1.15.2":
+  version: 1.15.2
+  resolution: "axios@npm:1.15.2"
   dependencies:
     follow-redirects: "npm:^1.15.11"
     form-data: "npm:^4.0.5"
     proxy-from-env: "npm:^2.1.0"
-  checksum: 10c0/f8b5f3aa954cc1da283e32ad81882967a371dfec7dcc75174fcae93093daeb5399aec2ec587d04779f46b00ff1c297ac9edf3fa596452d6a3d455ce5b58093a4
+  checksum: 10c0/4eeae0feeaa7fdc1ef24f81f8b378fdadedf4aebdd6bf224484675160f8744cf17b9b0d1c215279979940f7e8ce463beffa2f713099612e428eac238515c81d5
   languageName: node
   linkType: hard
 
