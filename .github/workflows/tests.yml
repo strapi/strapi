@@ -213,7 +213,7 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        node: [20]
+        node: [24]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -253,7 +253,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Install Playwright Browsers
@@ -302,7 +302,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install

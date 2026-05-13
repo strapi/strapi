@@ -113,7 +113,10 @@ const extractContentTypeComponents = (
   const uniqueComponentUids = [...new Set(componentUids)];
 
   const componentsByKey = uniqueComponentUids.reduce<ComponentsDictionary>((acc, uid) => {
-    acc[uid] = allComponents[uid];
+    const component = allComponents[uid];
+    if (component) {
+      acc[uid] = component;
+    }
 
     return acc;
   }, {});
