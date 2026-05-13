@@ -173,6 +173,8 @@ export default {
     ]);
 
     const workflowStages = workflowResult ? workflowResult.stages : [];
+    const entityStageId = entity?.[ENTITY_STAGE_ATTRIBUTE]?.id;
+    const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
 
     const meta = {
       stageCount: workflowStages.length,
@@ -194,9 +196,6 @@ export default {
 
       return;
     }
-
-    const entityStageId = entity[ENTITY_STAGE_ATTRIBUTE]?.id;
-    const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
 
     if (!canTransition) {
       ctx.body = {

@@ -138,14 +138,15 @@ describe('StageSelect', () => {
     useDocumentMock.mockReturnValue({ document: undefined });
 
     server.use(
-      rest.get('*/content-manager/:kind/:uid/:id/stages', (req, res, ctx) => {
-        return res.once(
-          ctx.json({
+      http.get(
+        '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
+        () =>
+          HttpResponse.json({
             data: [],
-            meta: { workflowCount: 1, stageCount: 2 },
-          })
-        );
-      })
+            meta: { workflowCount: 1, stageCount: 2, canTransition: true },
+          }),
+        { once: true }
+      )
     );
 
     render();
