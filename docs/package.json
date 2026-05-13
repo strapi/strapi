@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "2.0.1",
-    "@docusaurus/core": "3.10.0",
+    "@docusaurus/core": "3.10.1",
     "@docusaurus/preset-classic": "3.10.0",
     "@docusaurus/theme-mermaid": "3.10.0",
     "@mdx-js/react": "3.1.1",
