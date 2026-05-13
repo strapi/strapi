@@ -42,14 +42,14 @@ const WorkflowLimitModal = ({ open, onOpenChange }: LimitsModalProps) => {
     <LimitsModal.Root open={open} onOpenChange={onOpenChange}>
       <LimitsModal.Title>
         {formatMessage({
-          id: 'content-manager.reviewWorkflows.workflows.limit.title',
+          id: 'review-workflows.workflows.limit.title',
           defaultMessage: 'You’ve reached the limit of workflows in your plan',
         })}
       </LimitsModal.Title>
 
       <LimitsModal.Body>
         {formatMessage({
-          id: 'content-manager.reviewWorkflows.workflows.limit.body',
+          id: 'review-workflows.workflows.limit.body',
           defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
         })}
       </LimitsModal.Body>
@@ -64,14 +64,14 @@ const StageLimitModal = ({ open, onOpenChange }: LimitsModalProps) => {
     <LimitsModal.Root open={open} onOpenChange={onOpenChange}>
       <LimitsModal.Title>
         {formatMessage({
-          id: 'content-manager.reviewWorkflows.stages.limit.title',
+          id: 'review-workflows.stages.limit.title',
           defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
         })}
       </LimitsModal.Title>
 
       <LimitsModal.Body>
         {formatMessage({
-          id: 'content-manager.reviewWorkflows.stages.limit.body',
+          id: 'review-workflows.stages.limit.body',
           defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
         })}
       </LimitsModal.Body>
@@ -96,7 +96,7 @@ const Select = ({
     <SingleSelect
       disabled={stages.length === 0}
       placeholder={formatMessage({
-        id: 'content-manager.reviewWorkflows.assignee.placeholder',
+        id: 'review-workflows.assignee.placeholder',
         defaultMessage: 'Select…',
       })}
       startIcon={
@@ -250,7 +250,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
             toggleNotification({
               type: 'success',
               message: formatMessage({
-                id: 'content-manager.reviewWorkflows.stage.notification.saved',
+                id: 'review-workflows.stage.notification.saved',
                 defaultMessage: 'Review stage updated',
               }),
             });
@@ -268,7 +268,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
-          id: 'content-manager.reviewWorkflows.stage.notification.error',
+          id: 'review-workflows.stage.notification.error',
           defaultMessage: 'An error occurred while updating the review stage',
         }),
       });
@@ -278,17 +278,30 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const isLoading = isLoadingStages || isLoadingDocument;
 
   const reviewStageLabel = formatMessage({
-    id: 'content-manager.reviewWorkflows.stage.label',
+    id: 'review-workflows.stage.label',
     defaultMessage: 'Review stage',
   });
-  const reviewStageHint =
-    !isLoading &&
-    stages.length === 0 &&
-    // TODO: Handle errors and hints
-    formatMessage({
-      id: 'content-manager.reviewWorkflows.stages.no-transition',
-      defaultMessage: 'You don’t have the permission to update this stage.',
-    });
+
+  // When there's only one single stage in the workflow, the stages array is empty,
+  // showing a hint to the user saying that they don't have the permission to update this stage.
+  // Adding a check on the total number of stages in the workflow to show a more accurate message instead.
+  const totalWorkflowStages = meta?.stageCount ?? 0;
+  const canTransition = meta?.canTransition ?? true;
+  let reviewStageHint: string | false = false;
+  if (!isLoading && stages.length === 0) {
+    if (canTransition && totalWorkflowStages === 1) {
+      reviewStageHint = formatMessage({
+        id: 'review-workflows.stages.single-stage',
+        defaultMessage:
+          'This workflow only has one stage. Add more stages to be able to update it here.',
+      });
+    } else {
+      reviewStageHint = formatMessage({
+        id: 'review-workflows.stages.no-transition',
+        defaultMessage: 'You don’t have the permission to update this stage.',
+      });
+    }
+  }
 
   if (isCompact) {
     return (
@@ -308,7 +321,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
                 value={activeWorkflowStage?.id}
                 onChange={handleChange}
                 placeholder={formatMessage({
-                  id: 'content-manager.reviewWorkflows.assignee.placeholder',
+                  id: 'review-workflows.assignee.placeholder',
                   defaultMessage: 'Select…',
                 })}
               />
@@ -344,7 +357,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
           value={activeWorkflowStage?.id}
           onChange={handleChange}
           placeholder={formatMessage({
-            id: 'content-manager.reviewWorkflows.assignee.placeholder',
+            id: 'review-workflows.assignee.placeholder',
             defaultMessage: 'Select…',
           })}
         />

@@ -8,6 +8,8 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
+const MAX_DATE = new Date(2099, 11, 31);
+
 const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
@@ -29,6 +31,7 @@ const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
           }}
           onClear={() => field.onChange(name, null)}
           value={value}
+          maxDate={MAX_DATE}
           {...props}
         />
         <Field.Hint />

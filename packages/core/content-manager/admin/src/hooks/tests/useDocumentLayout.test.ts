@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import { renderHook, screen, server, waitFor } from '@tests/utils';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
 import { extractContentTypeComponents } from '../useContentTypeSchema';
@@ -429,88 +429,84 @@ describe('useDocumentLayout', () => {
     const orphanModelUid = 'api::orphan.footer';
 
     server.use(
-      rest.get('/content-manager/init', (req, res, ctx) =>
-        res(
-          ctx.json({
-            data: {
-              components: mockData.contentManager.components,
-              contentTypes: [
-                ...mockData.contentManager.contentTypes,
-                {
-                  uid: orphanModelUid,
-                  isDisplayed: true,
-                  apiID: 'footer',
-                  kind: 'singleType',
-                  info: {
-                    singularName: 'footer',
-                    pluralName: 'footers',
-                    displayName: 'Footer',
-                    name: 'Footer',
-                    description: '',
-                  },
-                  options: {},
-                  pluginOptions: {},
-                  attributes: {},
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: mockData.contentManager.components,
+            contentTypes: [
+              ...mockData.contentManager.contentTypes,
+              {
+                uid: orphanModelUid,
+                isDisplayed: true,
+                apiID: 'footer',
+                kind: 'singleType',
+                info: {
+                  singularName: 'footer',
+                  pluralName: 'footers',
+                  displayName: 'Footer',
+                  name: 'Footer',
+                  description: '',
                 },
-              ],
-            },
-          })
-        )
+                options: {},
+                pluginOptions: {},
+                attributes: {},
+              },
+            ],
+          },
+        })
       ),
-      rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
-        if (req.params.model !== orphanModelUid) {
+      http.get('/content-manager/content-types/:model/configuration', ({ params }) => {
+        if (params.model !== orphanModelUid) {
           const configuration =
-            req.params.model === 'api::homepage.homepage'
+            params.model === 'api::homepage.homepage'
               ? mockData.contentManager.singleTypeConfiguration
               : mockData.contentManager.collectionTypeConfiguration;
 
-          return res(ctx.json({ data: configuration }));
+          return HttpResponse.json({ data: configuration });
         }
 
-        return res(
-          ctx.json({
-            data: {
-              contentType: {
-                uid: orphanModelUid,
-                settings: {
-                  bulkable: false,
-                  filterable: false,
-                  searchable: false,
-                  pageSize: 10,
-                  mainField: 'title',
-                  defaultSortBy: '',
-                  defaultSortOrder: 'ASC',
-                },
-                metadatas: {},
-                options: {},
-                layouts: {
-                  edit: [],
-                  list: [],
-                },
+        return HttpResponse.json({
+          data: {
+            contentType: {
+              uid: orphanModelUid,
+              settings: {
+                bulkable: false,
+                filterable: false,
+                searchable: false,
+                pageSize: 10,
+                mainField: 'title',
+                defaultSortBy: '',
+                defaultSortOrder: 'ASC',
               },
-              components: {
-                'orphan.ghost': {
-                  layouts: {
-                    edit: [[{ name: 'field', size: 12 }]],
-                  },
-                  metadatas: {
-                    field: {
-                      edit: {
-                        label: 'field',
-                        description: '',
-                        placeholder: '',
-                        visible: true,
-                        editable: true,
-                      },
-                    },
-                  },
-                  settings: {},
-                  isComponent: true,
-                },
+              metadatas: {},
+              options: {},
+              layouts: {
+                edit: [],
+                list: [],
               },
             },
-          })
-        );
+            components: {
+              'orphan.ghost': {
+                layouts: {
+                  edit: [[{ name: 'field', size: 12 }]],
+                },
+                metadatas: {
+                  field: {
+                    edit: {
+                      label: 'field',
+                      description: '',
+                      placeholder: '',
+                      visible: true,
+                      editable: true,
+                    },
+                  },
+                },
+                settings: {},
+                isComponent: true,
+              },
+            },
+          },
+        });
       })
     );
 
@@ -526,55 +522,51 @@ describe('useDocumentLayout', () => {
     const secondModelUid = 'api::address.address';
 
     server.use(
-      rest.get('/content-manager/init', (req, res, ctx) =>
-        res(
-          ctx.json({
-            data: {
-              components: mockData.contentManager.components,
-              contentTypes: mockData.contentManager.contentTypes,
-            },
-          })
-        )
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: mockData.contentManager.components,
+            contentTypes: mockData.contentManager.contentTypes,
+          },
+        })
       ),
-      rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
-        if (req.params.model === firstModelUid) {
-          return res(ctx.json({ data: mockData.contentManager.singleTypeConfiguration }));
+      http.get('/content-manager/content-types/:model/configuration', async ({ params }) => {
+        if (params.model === firstModelUid) {
+          return HttpResponse.json({ data: mockData.contentManager.singleTypeConfiguration });
         }
 
-        if (req.params.model === secondModelUid) {
-          return res(
-            ctx.delay(75),
-            ctx.json({
-              data: {
-                contentType: {
-                  uid: secondModelUid,
-                  settings: {
-                    bulkable: true,
-                    filterable: true,
-                    searchable: true,
-                    pageSize: 10,
-                    mainField: 'id',
-                    defaultSortBy: 'id',
-                    defaultSortOrder: 'ASC',
-                  },
-                  metadatas:
-                    mockData.contentManager.collectionTypeConfiguration.contentType.metadatas,
-                  options: {},
-                  layouts: {
-                    edit: mockData.contentManager.collectionTypeConfiguration.contentType.layouts
-                      .edit,
-                    list: mockData.contentManager.collectionTypeConfiguration.contentType.layouts
-                      .list,
-                  },
+        if (params.model === secondModelUid) {
+          await delay(75);
+          return HttpResponse.json({
+            data: {
+              contentType: {
+                uid: secondModelUid,
+                settings: {
+                  bulkable: true,
+                  filterable: true,
+                  searchable: true,
+                  pageSize: 10,
+                  mainField: 'id',
+                  defaultSortBy: 'id',
+                  defaultSortOrder: 'ASC',
                 },
-                // Simulate mismatch where component settings map is not ready/available yet.
-                components: {},
+                metadatas:
+                  mockData.contentManager.collectionTypeConfiguration.contentType.metadatas,
+                options: {},
+                layouts: {
+                  edit: mockData.contentManager.collectionTypeConfiguration.contentType.layouts
+                    .edit,
+                  list: mockData.contentManager.collectionTypeConfiguration.contentType.layouts
+                    .list,
+                },
               },
-            })
-          );
+              // Simulate mismatch where component settings map is not ready/available yet.
+              components: {},
+            },
+          });
         }
 
-        return res(ctx.json({ data: mockData.contentManager.collectionTypeConfiguration }));
+        return HttpResponse.json({ data: mockData.contentManager.collectionTypeConfiguration });
       })
     );
 
