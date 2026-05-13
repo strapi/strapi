@@ -373,14 +373,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
               // next). For row 0, use index 0 instead so fields that are not full-width can still
               // be moved above the first row—there is no separate drop area above it in the UI.
 
-              // TODO:Can dynamicly detect which is higher, but it should be computed in onDragMove.
-              const insertAtTop = overContainerIndex === 0;
-              const insertAtBottom = overContainerIndex === draft.length - 1;
-              // fallback to insert at next line
-              let insertIndex = overContainerIndex + 1;
-              if (insertAtTop) insertIndex = 0;
-              if (insertAtBottom) insertIndex = draft.length;
-
+              const insertIndex = overContainerIndex === 0 ? 0 : overContainerIndex + 1;
               /**
                * When inserting *after* the hovered row, reuse the following row if it only
                * contains spacers. Skip when inserting at index 0 — draft[0] is the hovered row.
