@@ -334,7 +334,8 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             activeIndex !== -1 &&
             overIndex !== -1;
           const canCreateNewRowForItem =
-            activeContainerIndex !== overContainerIndex && GRID_COLUMNS - spaceTaken === 0;
+            activeContainerIndex !== overContainerIndex &&
+            GRID_COLUMNS - spaceTaken < draggedItem.size;
           const isHoveringOverSpacer = overItem?.name === TEMP_FIELD_NAME;
 
           /**
