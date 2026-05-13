@@ -287,7 +287,7 @@ export const findAndClose = async (page: Page, text: string, options: FindAndClo
   const elements = page.locator(`:has-text("${text}")[role="${role}"]`);
 
   if (required) {
-    await expect(elements.first()).toBeVisible(); // expect at least one element
+    await expect(elements.first()).toBeVisible();
   }
 
   // Find all 'Close' buttons that are siblings of the elements containing the specified text.
@@ -525,11 +525,187 @@ const waitForLayoutFrames = async (page: Page, frames = 3) => {
   }
 };
 
+type DragElementAboveOptions = {
+  source: Locator;
+  target: Locator;
+  steps?: number;
+  delay?: number;
+};
+
+type InnerDropSurfaceDragParams = DragElementAboveOptions & {
+  /** Prefix for thrown errors (e.g. `WebKit`, `Firefox`). */
+  browserLabel: string;
+  /** Run after `mouseup` — e.g. Firefox teardown so later clicks are not swallowed. */
+  afterMouseUp?: () => Promise<void>;
+};
+
+/**
+ * WebKit + Firefox: drop targets use the inner row card (`:scope > *` index 1), same rect as react-dnd’s `objectRef`.
+ * Chromium keeps its own `<li>`-based path.
+ */
+const dragElementAboveInnerDropSurface = async (
+  page: Page,
+  { source, target, steps = 5, delay = 20, browserLabel, afterMouseUp }: InnerDropSurfaceDragParams
+) => {
+  const hitTarget = target.locator(':scope > *').nth(1);
+
+  const v = page.viewportSize();
+  if (v) {
+    const minHeight = 960;
+    if (v.height < minHeight) {
+      await page.setViewportSize({ width: v.width, height: minHeight });
+    }
+  }
+
+  await ensureElementsInViewport(page, source, target);
+
+  const draggable = source.locator('[draggable="true"]');
+
+  const sourceBox = await draggable.boundingBox();
+  let targetBox = await hitTarget.boundingBox();
+
+  if (!sourceBox || !targetBox) {
+    throw new Error('Bounding boxes for source or target could not be determined.');
+  }
+
+  const startX = sourceBox.x + sourceBox.width / 2;
+  const startY = sourceBox.y + sourceBox.height / 2;
+
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+
+  await page.waitForTimeout(100);
+  await waitForLayoutFrames(page, 6);
+  await hitTarget.scrollIntoViewIfNeeded();
+  await waitForLayoutFrames(page, 4);
+  const freshTargetBox = await hitTarget.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+  if (!freshTargetBox || freshTargetBox.width === 0) {
+    await page.mouse.up();
+    throw new Error(
+      `${browserLabel}: drop surface bounding box could not be resolved after drag start (layout may still be settling).`
+    );
+  }
+  targetBox = freshTargetBox;
+
+  let endX = targetBox.x + targetBox.width / 2;
+  let endY = targetBox.y + targetBox.height * 0.35;
+
+  const stepDelay = Math.max(delay, 20);
+  for (let i = 1; i <= steps; i++) {
+    const drop = await hitTarget.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height * 0.35 };
+    });
+    const t = i / steps;
+    const x = startX + (drop.x - startX) * t;
+    const y = startY + (drop.y - startY) * t;
+    await page.mouse.move(x, y);
+    await page.waitForTimeout(stepDelay);
+  }
+  const finalBox = await hitTarget.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+  if (finalBox && finalBox.width > 0) {
+    endX = finalBox.x + finalBox.width / 2;
+    endY = finalBox.y + finalBox.height * 0.35;
+    await page.mouse.move(endX, endY);
+  }
+
+  await page.waitForTimeout(140);
+  await page.mouse.up();
+  await afterMouseUp?.();
+};
+
+/**
+ * Chromium-only path for {@link dragElementAbove}. Do not change when fixing other browsers.
+ */
+const dragElementAboveChromium = async (page: Page, options: DragElementAboveOptions) => {
+  const { source, target, steps = 5, delay = 20 } = options;
+
+  await ensureElementsInViewport(page, source, target);
+
+  const draggable = source.locator('[draggable="true"]');
+
+  const sourceBox = await draggable.boundingBox();
+  let targetBox = await target.boundingBox();
+
+  if (sourceBox && targetBox) {
+    const startX = sourceBox.x + sourceBox.width / 2;
+    const startY = sourceBox.y + sourceBox.height / 2;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+
+    await page.waitForTimeout(100);
+    await waitForLayoutFrames(page, 6);
+    const freshTargetBox = await target.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height };
+    });
+    if (!freshTargetBox || freshTargetBox.width === 0) {
+      await page.mouse.up();
+      throw new Error(
+        'Chromium: target bounding box could not be resolved after drag start (layout may still be settling).'
+      );
+    }
+    targetBox = freshTargetBox;
+
+    let endX = targetBox.x + targetBox.width / 2;
+    let endY = targetBox.y + targetBox.height * 0.35;
+
+    const stepDelay = Math.max(delay, 15);
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const x = startX + (endX - startX) * t;
+      const y = startY + (endY - startY) * t;
+      await page.mouse.move(x, y);
+      await page.waitForTimeout(stepDelay);
+    }
+    const finalBox = await target.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height };
+    });
+    if (finalBox && finalBox.width > 0) {
+      endX = finalBox.x + finalBox.width / 2;
+      endY = finalBox.y + finalBox.height * 0.35;
+      await page.mouse.move(endX, endY);
+    }
+
+    await page.waitForTimeout(100);
+    await page.mouse.up();
+  } else {
+    throw new Error('Bounding boxes for source or target could not be determined.');
+  }
+};
+
+/** WebKit: same inner-card drag as Firefox; no post-`mouseup` hook. */
+const dragElementAboveWebKit = async (page: Page, options: DragElementAboveOptions) =>
+  dragElementAboveInnerDropSurface(page, { ...options, browserLabel: 'WebKit' });
+
+/** Firefox: inner-card drag + teardown so later UI clicks are not swallowed after HTML5 DnD. */
+const dragElementAboveFirefox = async (page: Page, options: DragElementAboveOptions) =>
+  dragElementAboveInnerDropSurface(page, {
+    ...options,
+    browserLabel: 'Firefox',
+    afterMouseUp: async () => {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(100);
+      const vp = page.viewportSize();
+      if (vp) {
+        await page.mouse.move(Math.floor(vp.width / 2), Math.floor(vp.height / 2));
+      }
+    },
+  });
+
 /**
  * Smoothly drags a draggable element within a source <li> to just above a target <li>.
- * Automatically detects WebKit and uses a WebKit-specific implementation if needed.
- * In Chromium, re-resolves the target position after mousedown so the drop uses the
- * target's position after the source row collapses (avoids dragging to a stale offset).
+ *
+ * Dispatches to {@link dragElementAboveChromium} or {@link dragElementAboveInnerDropSurface}
+ * (WebKit / Firefox — shared logic; Firefox passes an `afterMouseUp` hook).
  *
  * @param {object} page - The Playwright page instance.
  * @param {object} options - Options for the drag operation.
@@ -538,88 +714,18 @@ const waitForLayoutFrames = async (page: Page, frames = 3) => {
  * @param {number} [options.steps=5] - Number of steps for smooth movement.
  * @param {number} [options.delay=20] - Delay in milliseconds between steps.
  */
-export const dragElementAbove = async (page, options) => {
-  // Extract options
-  const { source, target, steps = 5, delay = 20 } = options;
-
-  // Ensure both elements are fully visible in the viewport
-  await ensureElementsInViewport(page, source, target);
-
-  // Locate the draggable button within the source <li>
-  const draggable = source.locator('[draggable="true"]');
-
-  // Get bounding boxes of the draggable button and target <li>
-  const sourceBox = await draggable.boundingBox();
-  let targetBox = await target.boundingBox();
-
-  if (sourceBox && targetBox) {
-    // Calculate start position
-    const startX = sourceBox.x + sourceBox.width / 2;
-    const startY = sourceBox.y + sourceBox.height / 2;
-
-    // Move to the starting position and press the mouse
-    await page.mouse.move(startX, startY);
-    await page.mouse.down();
-
-    const browserType = page.context().browser()?.browserType().name() ?? '';
-
-    // In Chromium the source collapses into a floating drag preview; the target's position
-    // can change. Never use the pre-mousedown target position for the move — wait for layout
-    // to settle, then resolve the target's current position (via getBoundingClientRect in page)
-    // so we use the real post-collapse coordinates.
-    if (browserType === 'chromium') {
-      await page.waitForTimeout(100);
-      await waitForLayoutFrames(page, 6);
-      const freshTargetBox = await target.evaluate((el) => {
-        const r = el.getBoundingClientRect();
-        return { x: r.x, y: r.y, width: r.width, height: r.height };
-      });
-      if (!freshTargetBox || freshTargetBox.width === 0) {
-        await page.mouse.up();
-        throw new Error(
-          'Chromium: target bounding box could not be resolved after drag start (layout may still be settling).'
-        );
-      }
-      targetBox = freshTargetBox;
-    }
-
-    // Resolve drop coordinates from the current target box (post-collapse in Chromium)
-    let endX = targetBox.x + targetBox.width / 2;
-    let endY = targetBox.y + targetBox.height * 0.35;
-
-    if (browserType === 'chromium') {
-      // Move in steps so dragover events fire; re-query target position right before final move
-      // so we end at the actual current drop zone (layout can shift during the move).
-      const stepDelay = Math.max(delay, 15);
-      for (let i = 1; i <= steps; i++) {
-        const t = i / steps;
-        const x = startX + (endX - startX) * t;
-        const y = startY + (endY - startY) * t;
-        await page.mouse.move(x, y);
-        await page.waitForTimeout(stepDelay);
-      }
-      // Final position: re-resolve target so we release over the current drop area
-      const finalBox = await target.evaluate((el) => {
-        const r = el.getBoundingClientRect();
-        return { x: r.x, y: r.y, width: r.width, height: r.height };
-      });
-      if (finalBox && finalBox.width > 0) {
-        endX = finalBox.x + finalBox.width / 2;
-        endY = finalBox.y + finalBox.height * 0.35;
-        await page.mouse.move(endX, endY);
-      }
-    } else {
-      await page.mouse.move(endX, endY, { steps: steps });
-    }
-
-    // Brief pause at drop position so react-dnd can set isOver before release
-    await page.waitForTimeout(100);
-
-    // Release the mouse to drop the element
-    await page.mouse.up();
-  } else {
-    throw new Error('Bounding boxes for source or target could not be determined.');
+export const dragElementAbove = async (page: Page, options: DragElementAboveOptions) => {
+  const browserType = page.context().browser()?.browserType().name() ?? '';
+  if (browserType === 'webkit') {
+    return dragElementAboveWebKit(page, options);
   }
+  if (browserType === 'firefox') {
+    return dragElementAboveFirefox(page, options);
+  }
+  if (browserType === 'chromium') {
+    return dragElementAboveChromium(page, options);
+  }
+  throw new Error(`Unsupported browser: ${browserType}`);
 };
 
 /**

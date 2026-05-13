@@ -1,0 +1,21 @@
+{
+  "Plugin.name": "Dağıtım",
+  "Homepage.title": "Strapi Cloud ile Ücretsiz Dağıtım Yapın!",
+  "Homepage.subTitle": "Tamamen ücretsiz planımızla başlayın - kredi kartı gerekmez, süre sınırı yok.",
+  "Homepage.deploy.title": "Tercih ettiğiniz dağıtım yöntemini seçin",
+  "Homepage.deploy.ariaLabel": "Dağıtım seçenekleri",
+  "Homepage.deploy.git.badge": "Önerilen",
+  "Homepage.deploy.git.title": "Strapi Cloud'a Dağıt",
+  "Homepage.deploy.git.subTitle": "Bir GitHub veya GitLab projesini doğrudan Strapi Cloud üzerinden dağıtın",
+  "Homepage.deploy.git.button": "Strapi Cloud'a Dağıt",
+  "Homepage.deploy.cli.title": "CLI ile Dağıt",
+  "Homepage.deploy.cli.subTitle": "Strapi projenizi doğrudan dağıtmak için komut satırını kullanın",
+  "Homepage.deploy.cli.ariaLabel": "Paket yöneticisi",
+  "Homepage.deploy.cli.copy": "Kopyala",
+  "Homepage.deploy.documentation": "Sorun mu yaşıyorsunuz? Belgelerimize göz atın",
+  "Homepage.freePlan.api": "2.5K API isteği",
+  "Homepage.freePlan.storage": "10 GB depolama",
+  "Homepage.freePlan.bandwidth": "10 GB içerik bant genişliği",
+  "Homepage.freePlan.cdn": "Global CDN",
+  "Homepage.freePlan.pushToDeploy": "Otomatik dağıtım"
+}
