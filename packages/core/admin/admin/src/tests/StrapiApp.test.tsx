@@ -549,6 +549,18 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.configurations.locales).toEqual(['en', 'fr']);
     });
 
+    it('maps legacy Danish admin locale code dk to ISO 639-1 da', () => {
+      const app = new StrapiApp({ config: { locales: ['dk'] } });
+
+      expect(app.configurations.locales).toEqual(['en', 'da']);
+    });
+
+    it('deduplicates da when both dk and da are configured', () => {
+      const app = new StrapiApp({ config: { locales: ['dk', 'da'] } });
+
+      expect(app.configurations.locales).toEqual(['en', 'da']);
+    });
+
     it('should override the authLogo', () => {
       const app = new StrapiApp({ config: { auth: { logo: 'fr' } } });
 

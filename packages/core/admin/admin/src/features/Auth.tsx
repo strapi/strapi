@@ -8,6 +8,7 @@ import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { login as loginAction, logout as logoutAction, setLocale, setToken } from '../reducer';
+import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -142,7 +143,7 @@ const AuthProvider = ({
   React.useEffect(() => {
     if (user) {
       if (user.preferedLanguage) {
-        dispatch(setLocale(user.preferedLanguage));
+        dispatch(setLocale(normalizeAdminLocale(user.preferedLanguage)));
       }
     }
   }, [dispatch, user]);

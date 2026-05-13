@@ -6,6 +6,7 @@ import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
+import uniq from 'lodash/uniq';
 import { RouterProvider } from 'react-router-dom';
 
 import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/admin/src/constants';
@@ -28,6 +29,7 @@ import {
 } from './reducer';
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
+import { normalizeAdminLocale } from './translations/normalizeAdminLocale';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 import type { DefaultTheme } from 'styled-components';
@@ -253,10 +255,12 @@ class StrapiApp {
 
   createCustomConfigurations = (customConfig: NonNullable<StrapiAppConstructorArgs['config']>) => {
     if (customConfig.locales) {
-      this.configurations.locales = [
-        'en',
-        ...(customConfig.locales?.filter((loc) => loc !== 'en') || []),
-      ];
+      const extraLocales =
+        customConfig.locales
+          ?.filter((loc) => loc !== 'en')
+          .map((loc) => normalizeAdminLocale(loc)) || [];
+
+      this.configurations.locales = uniq(['en', ...extraLocales]);
     }
 
     if (customConfig.auth?.logo) {
@@ -434,6 +438,19 @@ class StrapiApp {
    * with the default ones.
    */
   async loadTrads(customTranslations: Record<string, Record<string, string>> = {}) {
+    const normalizedCustomTranslations = Object.keys(customTranslations).reduce<
+      Record<string, Record<string, string>>
+    >((acc, key) => {
+      const normalizedKey = normalizeAdminLocale(key);
+
+      acc[normalizedKey] = {
+        ...(acc[normalizedKey] || {}),
+        ...customTranslations[key],
+      };
+
+      return acc;
+    }, {});
+
     const adminTranslations = await this.loadAdminTrads();
 
     const arrayOfPromises = Object.keys(this.appPlugins)
@@ -475,7 +492,7 @@ class StrapiApp {
       acc[current] = {
         ...adminTranslations[current],
         ...(mergedTrads[current] || {}),
-        ...(customTranslations[current] ?? {}),
+        ...(normalizedCustomTranslations[current] ?? {}),
       };
 
       return acc;
@@ -511,8 +528,9 @@ class StrapiApp {
 
   render() {
     const localeNames = pick(languageNativeNames, this.configurations.locales || []);
-    const locale = (localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) ||
-      'en') as keyof typeof localeNames;
+    const storedLocale =
+      localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
+    const locale = normalizeAdminLocale(storedLocale) as keyof typeof localeNames;
 
     this.store = configureStore(
       {
