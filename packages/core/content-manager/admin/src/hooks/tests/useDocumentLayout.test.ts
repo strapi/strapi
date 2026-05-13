@@ -1,8 +1,9 @@
 import { errors } from '@strapi/utils';
 import { renderHook, screen, server, waitFor } from '@tests/utils';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
+import { extractContentTypeComponents } from '../useContentTypeSchema';
 import { useDocumentLayout } from '../useDocumentLayout';
 
 describe('useDocumentLayout', () => {
@@ -422,5 +423,184 @@ describe('useDocumentLayout', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await screen.findByText('Error fetching configuration');
+  });
+
+  it('does not crash when persisted configuration references component layouts without matching `/init` schemas (regression gh#26206)', async () => {
+    const orphanModelUid = 'api::orphan.footer';
+
+    server.use(
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: mockData.contentManager.components,
+            contentTypes: [
+              ...mockData.contentManager.contentTypes,
+              {
+                uid: orphanModelUid,
+                isDisplayed: true,
+                apiID: 'footer',
+                kind: 'singleType',
+                info: {
+                  singularName: 'footer',
+                  pluralName: 'footers',
+                  displayName: 'Footer',
+                  name: 'Footer',
+                  description: '',
+                },
+                options: {},
+                pluginOptions: {},
+                attributes: {},
+              },
+            ],
+          },
+        })
+      ),
+      http.get('/content-manager/content-types/:model/configuration', ({ params }) => {
+        if (params.model !== orphanModelUid) {
+          const configuration =
+            params.model === 'api::homepage.homepage'
+              ? mockData.contentManager.singleTypeConfiguration
+              : mockData.contentManager.collectionTypeConfiguration;
+
+          return HttpResponse.json({ data: configuration });
+        }
+
+        return HttpResponse.json({
+          data: {
+            contentType: {
+              uid: orphanModelUid,
+              settings: {
+                bulkable: false,
+                filterable: false,
+                searchable: false,
+                pageSize: 10,
+                mainField: 'title',
+                defaultSortBy: '',
+                defaultSortOrder: 'ASC',
+              },
+              metadatas: {},
+              options: {},
+              layouts: {
+                edit: [],
+                list: [],
+              },
+            },
+            components: {
+              'orphan.ghost': {
+                layouts: {
+                  edit: [[{ name: 'field', size: 12 }]],
+                },
+                metadatas: {
+                  field: {
+                    edit: {
+                      label: 'field',
+                      description: '',
+                      placeholder: '',
+                      visible: true,
+                      editable: true,
+                    },
+                  },
+                },
+                settings: {},
+                isComponent: true,
+              },
+            },
+          },
+        });
+      })
+    );
+
+    const { result } = renderHook(() => useDocumentLayout(orphanModelUid));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.edit.components).toEqual({});
+  });
+
+  it('waits for the active model configuration when switching single types and handles missing component settings safely (regression gh#26206)', async () => {
+    const firstModelUid = 'api::homepage.homepage';
+    const secondModelUid = 'api::address.address';
+
+    server.use(
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: mockData.contentManager.components,
+            contentTypes: mockData.contentManager.contentTypes,
+          },
+        })
+      ),
+      http.get('/content-manager/content-types/:model/configuration', async ({ params }) => {
+        if (params.model === firstModelUid) {
+          return HttpResponse.json({ data: mockData.contentManager.singleTypeConfiguration });
+        }
+
+        if (params.model === secondModelUid) {
+          await delay(75);
+          return HttpResponse.json({
+            data: {
+              contentType: {
+                uid: secondModelUid,
+                settings: {
+                  bulkable: true,
+                  filterable: true,
+                  searchable: true,
+                  pageSize: 10,
+                  mainField: 'id',
+                  defaultSortBy: 'id',
+                  defaultSortOrder: 'ASC',
+                },
+                metadatas:
+                  mockData.contentManager.collectionTypeConfiguration.contentType.metadatas,
+                options: {},
+                layouts: {
+                  edit: mockData.contentManager.collectionTypeConfiguration.contentType.layouts
+                    .edit,
+                  list: mockData.contentManager.collectionTypeConfiguration.contentType.layouts
+                    .list,
+                },
+              },
+              // Simulate mismatch where component settings map is not ready/available yet.
+              components: {},
+            },
+          });
+        }
+
+        return HttpResponse.json({ data: mockData.contentManager.collectionTypeConfiguration });
+      })
+    );
+
+    const { result, rerender } = renderHook(({ model }) => useDocumentLayout(model), {
+      initialProps: { model: firstModelUid },
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    rerender({ model: secondModelUid });
+
+    expect(result.current.isLoading).toBe(true);
+    // While switching to a model with no cached layout we surface the
+    // empty default rather than bleeding the previous model's layout.
+    expect(result.current.edit.layout).toEqual([]);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.edit.settings.displayName).toBe('Address');
+    expect(result.current.edit.layout.length).toBeGreaterThan(0);
+  });
+});
+
+describe('extractContentTypeComponents', () => {
+  it('omits component UIDs that are referenced but missing from the catalog', () => {
+    const attributes = {
+      footer: {
+        type: 'component' as const,
+        repeatable: false,
+        component: 'missing.catalog.component' as const,
+        pluginOptions: {},
+        required: false,
+      },
+    };
+
+    expect(extractContentTypeComponents(attributes, {})).toEqual({});
   });
 });

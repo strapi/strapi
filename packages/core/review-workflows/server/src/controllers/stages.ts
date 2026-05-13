@@ -177,6 +177,7 @@ export default {
     const meta = {
       stageCount: workflowStages.length,
       workflowCount,
+      canTransition,
     };
 
     // The entity may not exist yet for the requested locale (e.g. switching to a
