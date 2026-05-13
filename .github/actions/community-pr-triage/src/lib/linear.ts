@@ -166,12 +166,6 @@ export async function fetchAllTicketsByPRNumber(
   return map;
 }
 
-async function findTriageStateId(teamId: string): Promise<string | undefined> {
-  const team = await linearClient.team(teamId);
-  const states = await team.states({ filter: { type: { eq: 'triage' } }, first: 1 });
-  return states.nodes[0]?.id;
-}
-
 export async function createTicket(
   pr: CommunityPR,
   analysis: PRAnalysis,
@@ -182,7 +176,6 @@ export async function createTicket(
   const title = `PR #${pr.number}: ${pr.title}`;
   const description = buildDescription(pr, analysis);
   const labelIds = await buildLabelIds(analysis, labelMap, teamId);
-  const stateId = await findTriageStateId(teamId);
 
   const result = await linearClient.createIssue({
     teamId,
@@ -190,7 +183,6 @@ export async function createTicket(
     title,
     description,
     labelIds,
-    stateId,
   });
 
   const issue = await result.issue;
