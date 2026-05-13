@@ -8,7 +8,7 @@ import { PERMISSIONS, PLUGIN_ID } from './constants';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import { importLocaleJsonWithLegacyDkFallback, type StrapiApp } from '@strapi/admin/strapi-admin';
 import type {
   DocumentActionComponent,
   BulkActionComponent,
@@ -137,24 +137,19 @@ const admin: Plugin.Config.AdminInput = {
   },
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
-      locales.map((locale) => {
-        return import(`./translations/${locale}.json`)
-          .then(({ default: data }) => {
-            return {
-              data: prefixPluginTranslations(data, 'content-releases'),
-              locale,
-            };
-          })
-          .catch(() => {
-            return {
-              data: {},
-              locale,
-            };
-          });
+      locales.map(async (locale) => {
+        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+          import(`./translations/${code}.json`)
+        );
+
+        return {
+          data: prefixPluginTranslations(data, 'content-releases'),
+          locale,
+        };
       })
     );
 
-    return Promise.resolve(importedTrads);
+    return importedTrads;
   },
 };
 

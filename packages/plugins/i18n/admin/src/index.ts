@@ -30,7 +30,7 @@ import { getTranslation } from './utils/getTranslation';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import { importLocaleJsonWithLegacyDkFallback, type StrapiApp } from '@strapi/admin/strapi-admin';
 import type {
   ContentManagerPlugin,
   DocumentActionComponent,
@@ -212,23 +212,18 @@ export default {
   },
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
-      locales.map((locale) => {
-        return import(`./translations/${locale}.json`)
-          .then(({ default: data }) => {
-            return {
-              data: prefixPluginTranslations(data, pluginId),
-              locale,
-            };
-          })
-          .catch(() => {
-            return {
-              data: {},
-              locale,
-            };
-          });
+      locales.map(async (locale) => {
+        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+          import(`./translations/${code}.json`)
+        );
+
+        return {
+          data: prefixPluginTranslations(data, pluginId),
+          locale,
+        };
       })
     );
 
-    return Promise.resolve(importedTrads);
+    return importedTrads;
   },
 };

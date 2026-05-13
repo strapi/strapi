@@ -1,5 +1,7 @@
 import { strapi as pkgStrapi } from '../../package.json';
 
+import { importLocaleJsonWithLegacyDkFallback } from '@strapi/admin/strapi-admin';
+
 import { PERMISSIONS } from './constants';
 import getTrad from './utils/getTrad';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
@@ -75,20 +77,15 @@ export default {
   bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map((locale) => {
-        return import(`./translations/${locale}.json`)
-          .then(({ default: data }) => {
-            return {
-              data: prefixPluginTranslations(data, 'users-permissions'),
-              locale,
-            };
-          })
-          .catch(() => {
-            return {
-              data: {},
-              locale,
-            };
-          });
+      locales.map(async (locale) => {
+        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+          import(`./translations/${code}.json`)
+        );
+
+        return {
+          data: prefixPluginTranslations(data, 'users-permissions'),
+          locale,
+        };
       })
     );
 

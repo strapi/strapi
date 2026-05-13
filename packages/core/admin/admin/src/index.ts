@@ -97,6 +97,7 @@ export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widget
 /**
  * Utils
  */
+export { importLocaleJsonWithLegacyDkFallback } from './utils/importLocaleJsonWithLegacyDkFallback';
 export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';

@@ -30,6 +30,7 @@ import {
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 import { normalizeAdminLocale } from './translations/normalizeAdminLocale';
+import { importLocaleJsonWithLegacyDkFallback } from './utils/importLocaleJsonWithLegacyDkFallback';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 import type { DefaultTheme } from 'styled-components';
@@ -414,12 +415,15 @@ class StrapiApp {
 
           return { data, locale };
         } catch {
-          try {
-            const { default: data } = await import(`./translations/${locale}.json`);
+          const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+            import(`./translations/${code}.json`)
+          );
+
+          if (Object.keys(data).length > 0) {
             return { data, locale };
-          } catch {
-            return { data: null, locale };
           }
+
+          return { data: null, locale };
         }
       })
     );

@@ -1,7 +1,10 @@
 import { PERMISSIONS } from './constants';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import {
+  importLocaleJsonWithLegacyDkFallback,
+  type StrapiApp,
+} from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 const admin: Plugin.Config.AdminInput = {
@@ -37,24 +40,19 @@ const admin: Plugin.Config.AdminInput = {
   bootstrap() {},
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
-      locales.map((locale) => {
-        return import(`./translations/${locale}.json`)
-          .then(({ default: data }) => {
-            return {
-              data: prefixPluginTranslations(data, 'email'),
-              locale,
-            };
-          })
-          .catch(() => {
-            return {
-              data: {},
-              locale,
-            };
-          });
+      locales.map(async (locale) => {
+        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+          import(`./translations/${code}.json`)
+        );
+
+        return {
+          data: prefixPluginTranslations(data, 'email'),
+          locale,
+        };
       })
     );
 
-    return Promise.resolve(importedTrads);
+    return importedTrads;
   },
 };
 
