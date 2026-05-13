@@ -41,7 +41,9 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await registerWebhookEvents();
 
   await getService('weeklyMetrics').registerCron();
-  await getService('aiMetadataJobs').registerCron();
+  if (strapi.ai.admin.isEnabled() === true) {
+    await getService('aiMetadataJobs').registerCron();
+  }
 
   getService('metrics').sendUploadPluginMetrics();
 

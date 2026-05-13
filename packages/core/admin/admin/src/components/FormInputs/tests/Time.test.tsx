@@ -33,12 +33,12 @@ describe('TimeInput Component', () => {
     expect(screen.getByText('Test Time')).toBeInTheDocument();
   });
 
-  it('should display initial time value correctly', () => {
+  it('should strip seconds and milliseconds from display value', () => {
     setupTest('14:30:00.000');
     render(<TimeInput type="time" name="testTime" label="Test Time" />);
 
     const input = screen.getByRole('combobox');
-    expect(input).toHaveValue('14:30:00.000');
+    expect(input).toHaveValue('14:30');
   });
 
   it('should handle time selection and add seconds/milliseconds suffix', () => {
@@ -138,7 +138,6 @@ describe('TimeInput Component', () => {
     render(<TimeInput type="time" name="testTime" label="Test Time" />);
 
     const input = screen.getByRole('combobox');
-    // TimePicker displays full format
-    expect(input).toHaveValue('08:15:00.000');
+    expect(input).toHaveValue('08:15');
   });
 });
