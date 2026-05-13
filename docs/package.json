@@ -26,9 +26,9 @@
     ]
   },
   "resolutions": {
-    "@babel/helpers": "7.27.0",
-    "@babel/runtime": "7.26.10",
-    "@babel/runtime-corejs3": "7.26.10"
+    "@babel/helpers": "7.29.2",
+    "@babel/runtime": "7.29.2",
+    "@babel/runtime-corejs3": "7.29.2"
   },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "2.0.1",
