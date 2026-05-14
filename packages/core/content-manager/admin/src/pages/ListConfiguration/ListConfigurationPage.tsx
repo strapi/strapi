@@ -47,7 +47,7 @@ const ListConfiguration = () => {
 
   const { model, collectionType, schema } = useDoc();
 
-  const { isLoading: isLoadingLayout, list, edit } = useDocLayout();
+  const { isLoading: isLoadingLayout, list, edit, listViewConversionContext } = useDocLayout();
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
     null
@@ -131,17 +131,32 @@ const ListConfiguration = () => {
       return acc;
     }, {});
 
+    /**
+     * Same context as `formatListLayout` / `ListViewPage#displayedHeaders` so `getMainField`
+     * can resolve component and relation list columns (see #25509, #25872).
+     */
+    const listFieldLayouts = listViewConversionContext
+      ? convertListLayoutToFieldLayouts(
+          headerNames,
+          schema?.attributes,
+          headerMetadatas,
+          {
+            configurations: listViewConversionContext.componentConfigurations,
+            schemas: listViewConversionContext.componentSchemas,
+          },
+          listViewConversionContext.contentTypeSchemas
+        )
+      : convertListLayoutToFieldLayouts(headerNames, schema?.attributes, headerMetadatas);
+
     return {
-      layout: convertListLayoutToFieldLayouts(headerNames, schema?.attributes, headerMetadatas).map(
-        ({ label, sortable, name }) => ({
-          label: typeof label === 'string' ? label : formatMessage(label),
-          sortable,
-          name,
-        })
-      ),
+      layout: listFieldLayouts.map(({ label, sortable, name }) => ({
+        label: typeof label === 'string' ? label : formatMessage(label),
+        sortable,
+        name,
+      })),
       settings: list.settings,
     } satisfies FormData;
-  }, [formatMessage, list, displayedHeaderNames, schema, metadata]);
+  }, [formatMessage, list, displayedHeaderNames, schema, metadata, listViewConversionContext]);
 
   if (collectionType === SINGLE_TYPES) {
     return <Navigate to={`/single-types/${model}`} />;
