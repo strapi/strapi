@@ -7,20 +7,18 @@
     "./package.json": "./package.json",
     "./strapi-admin": {
       "source": "./admin/src/index.jsx",
-      "import": "./dist/admin/index.mjs",
-      "require": "./dist/admin/index.js",
-      "default": "./dist/admin/index.js"
+      "import": "./admin/src/index.jsx",
+      "require": "./admin/src/index.jsx",
+      "default": "./admin/src/index.jsx"
     },
     "./strapi-server": {
       "source": "./server/src/index.js",
-      "import": "./dist/server/index.mjs",
-      "require": "./dist/server/index.js",
-      "default": "./dist/server/index.js"
+      "import": "./server/src/index.js",
+      "require": "./server/src/index.js",
+      "default": "./server/src/index.js"
     }
   },
   "scripts": {
-    "build": "strapi-plugin build",
-    "watch": "strapi-plugin watch",
     "lint": "eslint ."
   },
   "peerDependencies": {
@@ -35,7 +33,6 @@
     "styled-components": "^6.0.0"
   },
   "devDependencies": {
-    "@strapi/sdk-plugin": "^6.0.1",
     "@strapi/strapi": "workspace:*",
     "eslint": "8.57.1"
   },
