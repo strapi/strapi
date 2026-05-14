@@ -1,12 +1,12 @@
-import type { Cipher } from 'crypto';
+import type { Cipheriv, Decipheriv } from 'crypto';
 
-export type EncryptionStrategy = (key: string) => Cipher;
+export type EncryptionStrategy = (key: string) => Cipheriv | Decipheriv;
 
 export type Strategies = {
-  'aes-128-ecb': (key: string) => Cipher;
-  aes128: (key: string) => Cipher;
-  aes192: (key: string) => Cipher;
-  aes256: (key: string) => Cipher;
+  'aes-128-ecb': (key: string) => Cipheriv | Decipheriv;
+  aes128: (key: string) => Cipheriv | Decipheriv;
+  aes192: (key: string) => Cipheriv | Decipheriv;
+  aes256: (key: string) => Cipheriv | Decipheriv;
 };
 
 export type Algorithm = 'aes-128-ecb' | 'aes128' | 'aes192' | 'aes256';

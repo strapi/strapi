@@ -3,8 +3,7 @@ import type { Core, UID } from '@strapi/types';
 import { pick } from 'lodash/fp';
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
-import { HistoryVersions } from '../../../../shared/contracts';
-import { RestoreHistoryVersion } from '../../../../shared/contracts/history-versions';
+import type { HistoryVersions } from '../../../../shared/contracts';
 import { validateRestoreVersion } from './validation/history-version';
 
 /**
@@ -92,7 +91,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
     },
 
     async restoreVersion(ctx) {
-      const request = ctx.request as unknown as RestoreHistoryVersion.Request;
+      const request = ctx.request as unknown as HistoryVersions.RestoreHistoryVersion.Request;
 
       await validateRestoreVersion(request.body, 'contentType is required');
 
@@ -111,7 +110,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
 
       return {
         data: { documentId: restoredDocument.documentId },
-      } satisfies RestoreHistoryVersion.Response;
+      } satisfies HistoryVersions.RestoreHistoryVersion.Response;
     },
   } satisfies Core.Controller;
 };

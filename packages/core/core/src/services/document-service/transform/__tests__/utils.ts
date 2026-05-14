@@ -1,7 +1,7 @@
-import { Schema, Common } from '@strapi/types';
+import type { Schema, Internal } from '@strapi/types';
 
 const createSchemaFromAttributes = (
-  uid: Common.UID.ContentType,
+  uid: Internal.UID.ContentType,
   attributes: Schema.Attributes,
   singularName?: string,
   pluralName?: string,
@@ -26,9 +26,9 @@ const createSchemaFromAttributes = (
   };
 };
 
-export const CATEGORY_UID = 'api::category.category' as Common.UID.ContentType;
-export const PRODUCT_UID = 'api::product.product' as Common.UID.ContentType;
-export const SHOP_UID = 'api::shop.shop' as Common.UID.ContentType;
+export const CATEGORY_UID = 'api::category.category' as Internal.UID.ContentType;
+export const PRODUCT_UID = 'api::product.product' as Internal.UID.ContentType;
+export const SHOP_UID = 'api::shop.shop' as Internal.UID.ContentType;
 
 export const models: Record<string, Schema.ContentType> = {
   [CATEGORY_UID]: createSchemaFromAttributes(

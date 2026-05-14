@@ -9,6 +9,7 @@ describe('metrics', () => {
   });
   test('Initializes a middleware', () => {
     const use = jest.fn();
+    const add = jest.fn();
 
     const metricsInstance = metrics({
       config: {
@@ -32,6 +33,9 @@ describe('metrics', () => {
       requestContext: {
         get: jest.fn(() => ({})),
       },
+      cron: {
+        add,
+      },
       fetch,
     } as any);
 
@@ -44,6 +48,7 @@ describe('metrics', () => {
 
   test('Does not init middleware if disabled', () => {
     const use = jest.fn();
+    const add = jest.fn();
 
     const metricsInstance = metrics({
       config: {
@@ -66,6 +71,9 @@ describe('metrics', () => {
       },
       requestContext: {
         get: jest.fn(() => ({})),
+      },
+      cron: {
+        add,
       },
       fetch,
     } as any);
@@ -99,6 +107,9 @@ describe('metrics', () => {
       },
       requestContext: {
         get: jest.fn(() => ({})),
+      },
+      cron: {
+        add: jest.fn(),
       },
       fetch,
     } as any);
@@ -147,6 +158,9 @@ describe('metrics', () => {
           root: process.cwd(),
         },
       },
+      cron: {
+        add: jest.fn(),
+      },
       requestContext: {
         get: jest.fn(() => ({})),
       },
@@ -156,5 +170,101 @@ describe('metrics', () => {
     send('someEvent');
 
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  test('Includes EE subscription info when present', () => {
+    const { send } = metrics({
+      config: {
+        get(path: string | string[]) {
+          return get(path, this);
+        },
+        uuid: 'test',
+        environment: 'dev',
+        info: {
+          strapi: '0.0.0',
+        },
+      },
+      server: {
+        use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
+      cron: {
+        add: jest.fn(),
+      },
+      fetch,
+      EE: true,
+      ee: {
+        subscriptionId: 'sub_123',
+        planPriceId: 'price_abc',
+      },
+    } as any);
+
+    send('someEvent');
+
+    expect(fetch).toHaveBeenCalled();
+
+    const callParameters = fetch.mock.calls[0] as any[];
+    const body = JSON.parse(callParameters[1].body);
+    expect(body.groupProperties).toMatchObject({
+      projectType: 'Enterprise',
+      projectId: 'test',
+      subscriptionId: 'sub_123',
+      planPriceId: 'price_abc',
+    });
+
+    fetch.mockClear();
+  });
+
+  test('Does not include EE fields when absent', () => {
+    const { send } = metrics({
+      config: {
+        get(path: string | string[]) {
+          return get(path, this);
+        },
+        uuid: 'test',
+        environment: 'dev',
+        info: {
+          strapi: '0.0.0',
+        },
+      },
+      server: {
+        use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
+      cron: {
+        add: jest.fn(),
+      },
+      fetch,
+      EE: false,
+    } as any);
+
+    send('someEvent');
+
+    expect(fetch).toHaveBeenCalled();
+
+    const callParameters = fetch.mock.calls[0] as any[];
+    const body = JSON.parse(callParameters[1].body);
+    expect(body.groupProperties).toMatchObject({
+      projectType: 'Community',
+      projectId: 'test',
+    });
+    expect(body.groupProperties.subscriptionId).toBeUndefined();
+    expect(body.groupProperties.planPriceId).toBeUndefined();
+
+    fetch.mockClear();
   });
 });

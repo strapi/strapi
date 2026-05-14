@@ -1,25 +1,23 @@
 import { Layout } from '@strapi/icons';
 
-import pluginPkg from '../../package.json';
-
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { reducers } from './reducers';
 import { formsAPI } from './utils/formAPI';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-const name = pluginPkg.strapi.name;
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     app.addReducers(reducers);
     app.addMenuLink({
       to: `plugins/${pluginId}`,
       icon: Layout,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
-        defaultMessage: 'Content Types Builder',
+        defaultMessage: 'Content-Type Builder',
       },
       permissions: PERMISSIONS.main,
       Component: () => import('./pages/App'),
@@ -28,7 +26,7 @@ export default {
 
     app.registerPlugin({
       id: pluginId,
-      name,
+      name: pluginId,
       // Internal APIs exposed by the CTB for the other plugins to use
       apis: {
         forms: formsAPI,

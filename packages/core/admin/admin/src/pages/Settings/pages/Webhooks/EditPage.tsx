@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Main } from '@strapi/design-system';
-import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
 
@@ -15,6 +14,8 @@ import { isBaseQueryError } from '../../../../utils/baseQuery';
 
 import { WebhookForm, WebhookFormProps, WebhookFormValues } from './components/WebhookForm';
 import { useWebhooks } from './hooks/useWebhooks';
+
+import type { Modules } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * EditView

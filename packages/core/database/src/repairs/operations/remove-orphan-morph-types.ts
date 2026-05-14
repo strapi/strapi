@@ -13,7 +13,6 @@ const isMorphRelationWithPivot = (
     attribute.type === 'relation' &&
     'relation' in attribute &&
     'joinTable' in attribute &&
-    'target' in attribute &&
     'name' in attribute.joinTable &&
     'pivotColumns' in attribute.joinTable &&
     attribute.joinTable.pivotColumns.includes(pivot)

@@ -19,6 +19,7 @@ interface YupFormattedError {
   path: string[];
   message: string;
   name: string;
+  value: string;
 }
 
 function getPrefixedId(message: string, callback?: (prefixedMessage: string) => string) {

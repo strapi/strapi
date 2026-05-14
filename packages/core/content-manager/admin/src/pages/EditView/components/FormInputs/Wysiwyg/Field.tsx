@@ -1,22 +1,16 @@
 import * as React from 'react';
 
-import { useField, useStrapiApp, type InputProps } from '@strapi/admin/strapi-admin';
-import { Field, Flex } from '@strapi/design-system';
+import { useField, useStrapiApp, useIsMobile, type InputProps } from '@strapi/admin/strapi-admin';
+import { Box, Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
 import { EditorLayout } from './EditorLayout';
-import {
-  insertFile,
-  listHandler,
-  markdownHandler,
-  quoteAndCodeHandler,
-  titleHandler,
-} from './utils/utils';
+import { insertFile } from './utils/utils';
 import { WysiwygFooter } from './WysiwygFooter';
-import { WysiwygNav } from './WysiwygNav';
+import { WysiwygNav, WysiwygPreviewToggleButton } from './WysiwygNav';
 
 import type { Schema } from '@strapi/types';
 
@@ -35,6 +29,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const [isPreviewMode, setIsPreviewMode] = React.useState(false);
     const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
     const [isExpandMode, setIsExpandMode] = React.useState(false);
+    const isMobile = useIsMobile();
     const components = useStrapiApp('ImageDialog', (state) => state.components);
 
     const MediaLibraryDialog = components['media-library'];
@@ -44,51 +39,6 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const handleToggleExpand = () => {
       setIsPreviewMode(false);
       setIsExpandMode((prev) => !prev);
-    };
-
-    const handleActionClick = (
-      value: string,
-      currentEditorRef: React.MutableRefObject<EditorFromTextArea>,
-      togglePopover?: () => void
-    ) => {
-      switch (value) {
-        case 'Link':
-        case 'Strikethrough': {
-          markdownHandler(currentEditorRef, value);
-          togglePopover?.();
-          break;
-        }
-        case 'Code':
-        case 'Quote': {
-          quoteAndCodeHandler(currentEditorRef, value);
-          togglePopover?.();
-          break;
-        }
-        case 'Bold':
-        case 'Italic':
-        case 'Underline': {
-          markdownHandler(currentEditorRef, value);
-          break;
-        }
-        case 'BulletList':
-        case 'NumberList': {
-          listHandler(currentEditorRef, value);
-          togglePopover?.();
-          break;
-        }
-        case 'h1':
-        case 'h2':
-        case 'h3':
-        case 'h4':
-        case 'h5':
-        case 'h6': {
-          titleHandler(currentEditorRef, value);
-          break;
-        }
-        default: {
-          // Nothing
-        }
-      }
     };
 
     const handleSelectAssets = (files: any[]) => {
@@ -116,12 +66,10 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
               isExpandMode={isExpandMode}
               editorRef={editorRef}
               isPreviewMode={isPreviewMode}
-              onActionClick={handleActionClick}
               onToggleMediaLib={handleToggleMediaLib}
               onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
               disabled={disabled}
             />
-
             <Editor
               disabled={disabled}
               isExpandMode={isExpandMode}
@@ -135,8 +83,19 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
               value={field.value}
               ref={forwardedRef}
             />
-
-            {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
+            {!isExpandMode && !isMobile && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
+            {isMobile && (
+              <Box position="absolute" bottom={0} right={0} left={0} pointerEvents="none">
+                <Flex justifyContent="flex-end" padding={4}>
+                  <Box pointerEvents="auto" display="inline-flex">
+                    <WysiwygPreviewToggleButton
+                      isPreviewMode={isPreviewMode}
+                      onTogglePreviewMode={handleTogglePreviewMode}
+                    />
+                  </Box>
+                </Flex>
+              </Box>
+            )}
           </EditorLayout>
           <Field.Hint />
           <Field.Error />

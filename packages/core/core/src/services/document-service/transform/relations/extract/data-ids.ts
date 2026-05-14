@@ -1,11 +1,12 @@
 import { curry } from 'lodash/fp';
 
-import { UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { relations } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
+import { normalizeXToOneRelationValue } from '../utils/xto-one';
 import { LongHandDocument } from '../utils/types';
 
 const { isPolymorphic } = relations;
@@ -57,6 +58,9 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
       const isPolymorphicRelation = isPolymorphic(attribute);
       const addDocId = addRelationDocId(idMap, source);
 
+      // Skip looking up entries we're about to discard.
+      const normalizedValue = normalizeXToOneRelationValue(attribute, value as any);
+
       return mapRelation((relation) => {
         if (!relation || !relation.documentId) {
           return relation;
@@ -86,7 +90,7 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
         }
 
         return relation;
-      }, value as any);
+      }, normalizedValue as any);
     },
     { schema: strapi.getModel(source.uid), getModel: strapi.getModel.bind(strapi) },
     data

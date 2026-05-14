@@ -1,5 +1,5 @@
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
-import { Schema } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 import { getBatchToDiscard } from './database/5.0.0-discard-drafts';
 

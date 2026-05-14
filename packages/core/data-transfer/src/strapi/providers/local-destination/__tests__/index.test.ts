@@ -1,11 +1,14 @@
 import { createLocalStrapiDestinationProvider } from '../index';
 import * as restoreApi from '../strategies/restore';
 import {
+  assertWriteStreamBackpressure,
+  createSlowWritable,
   getStrapiFactory,
   getContentTypes,
   setGlobalStrapi,
   getStrapiModels,
 } from '../../../../__tests__/test-utils';
+import type { IEntity } from '../../../../../types';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -45,7 +48,13 @@ describe('Local Strapi Source Destination', () => {
     test('Should not have a defined Strapi instance if bootstrap has not been called', () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
-          db: { transaction },
+          db: {
+            transaction,
+            lifecycles: {
+              enable: jest.fn(),
+              disable: jest.fn(),
+            },
+          },
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
@@ -62,7 +71,13 @@ describe('Local Strapi Source Destination', () => {
     test('Should have a defined Strapi instance if bootstrap has been called', async () => {
       const provider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
-          db: { transaction },
+          db: {
+            transaction,
+            lifecycles: {
+              enable: jest.fn(),
+              disable: jest.fn(),
+            },
+          },
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
@@ -82,7 +97,13 @@ describe('Local Strapi Source Destination', () => {
     test('requires strategy to be restore', async () => {
       const restoreProvider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
-          db: { transaction },
+          db: {
+            transaction,
+            lifecycles: {
+              enable: jest.fn(),
+              disable: jest.fn(),
+            },
+          },
           ...strapiCommonProperties,
         }),
         strategy: 'restore',
@@ -99,7 +120,13 @@ describe('Local Strapi Source Destination', () => {
         (async () => {
           const invalidProvider = createLocalStrapiDestinationProvider({
             getStrapi: getStrapiFactory({
-              db: { transaction },
+              db: {
+                transaction,
+                lifecycles: {
+                  enable: jest.fn(),
+                  disable: jest.fn(),
+                },
+              },
             }),
             /* @ts-ignore: disable-next-line */
             strategy: 'foo',
@@ -203,6 +230,10 @@ describe('Local Strapi Source Destination', () => {
               transacting: jest.fn().mockReturnThis(),
             }),
           }),
+          lifecycles: {
+            enable: jest.fn(),
+            disable: jest.fn(),
+          },
         },
         ...strapiCommonProperties,
       })();
@@ -224,5 +255,43 @@ describe('Local Strapi Source Destination', () => {
 
       expect(deleteAllSpy).toBeCalledTimes(1);
     });
+  });
+
+  describe('Backpressure', () => {
+    test('entities write stream applies backpressure to slow down fast readables', async () => {
+      const { writable: slowWritable } = createSlowWritable<IEntity>({
+        highWaterMark: 1,
+        delayMs: 15,
+      });
+      jest
+        .spyOn(restoreApi, 'createEntitiesWriteStream')
+        .mockReturnValue(slowWritable as ReturnType<typeof restoreApi.createEntitiesWriteStream>);
+
+      const provider = createLocalStrapiDestinationProvider({
+        getStrapi: getStrapiFactory({
+          db: {
+            transaction,
+            lifecycles: { enable: jest.fn(), disable: jest.fn() },
+          },
+          ...strapiCommonProperties,
+        }),
+        strategy: 'restore',
+        restore: { entities: { exclude: [] } },
+      });
+      await provider.bootstrap();
+
+      const writeStream = provider.createEntitiesWriteStream();
+      const entityChunks: IEntity[] = Array.from({ length: 25 }, (_, i) => ({
+        id: i + 1,
+        type: 'api::foo.foo',
+        data: { title: `Entity ${i}`, documentId: `doc-${i}` },
+      }));
+
+      const { sourcePaused } = await assertWriteStreamBackpressure(writeStream, entityChunks, {
+        delayMs: 15,
+      });
+
+      expect(sourcePaused).toBe(true);
+    }, 5000);
   });
 });

@@ -6,6 +6,8 @@
 
 export { buildValidParams } from './utils/api';
 
+export { RelativeTime } from './components/RelativeTime';
+export { DocumentStatus } from './pages/EditView/components/DocumentStatus';
 export {
   useDocument as unstable_useDocument,
   useContentManagerContext as unstable_useContentManagerContext,
@@ -18,6 +20,7 @@ export type {
   ListFieldLayout,
   ListLayout,
 } from './hooks/useDocumentLayout';
+export type { InjectableListViewFilter } from './constants/hooks';
 export * from './features/DocumentRBAC';
 export type {
   EditViewContext,
@@ -25,6 +28,7 @@ export type {
   BulkActionComponent,
   BulkActionComponentProps,
   BulkActionDescription,
+  ContentManagerPlugin,
   DescriptionComponent,
   DescriptionReducer,
   PanelComponentProps,
@@ -37,3 +41,8 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './content-manager';
+export type {
+  RichTextBlocksStore,
+  SelectorBlock,
+  NonSelectorBlock,
+} from './pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';

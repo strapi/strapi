@@ -12,6 +12,7 @@ import { useIntl } from 'react-intl';
 import { useRouteError } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useClipboard } from '../hooks/useClipboard';
 
 /**
@@ -36,17 +37,27 @@ ${error.stack}
 
     return (
       <Main height="100%">
-        <Flex alignItems="center" height="100%" justifyContent="center">
+        <Flex
+          alignItems="center"
+          height="100%"
+          justifyContent="center"
+          paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+          paddingRight={RESPONSIVE_DEFAULT_SPACING}
+        >
           <Flex
             gap={7}
-            padding={7}
+            padding={{
+              initial: 6,
+              small: 7,
+              medium: 8,
+            }}
             direction="column"
-            width="35%"
+            width="100%"
+            maxWidth="512px"
             shadow="tableShadow"
             borderColor="neutral150"
             background="neutral0"
             hasRadius
-            maxWidth="512px"
           >
             <Flex direction="column" gap={2}>
               <WarningCircle width="32px" height="32px" fill="danger600" />

@@ -2,7 +2,7 @@
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
     "production": [
-      "default",
+      "{workspaceRoot}/rollup.utils.mjs",
       "!{projectRoot}/**/*.test.ts",
       "!{projectRoot}/**/*.test.js",
       "!{projectRoot}/**/*.test.api.js",
@@ -11,9 +11,8 @@
       "!{projectRoot}/**/*.md",
       "!{projectRoot}/jest.config.js",
       "!{projectRoot}/jest.config.front.js",
-      "!{projectRoot}/tsconfig.eslint.json",
-      "!{projectRoot}/.eslintignore",
-      "!{projectRoot}/.eslintrc.js"
+      "!{projectRoot}/**/tsconfig.eslint.json",
+      "!{projectRoot}/**/.eslintrc.cjs"
     ]
   },
   "cli": {
@@ -21,8 +20,20 @@
   },
   "targetDefaults": {
     "build": {
-      "inputs": ["production", "^production"],
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
       "dependsOn": ["^build"],
+      "cache": true
+    },
+    "build:code": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
+    },
+    "build:types": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build:types"],
       "cache": true
     },
     "test:unit": {
@@ -37,22 +48,22 @@
       "inputs": [
         "{projectRoot}/**/*.js",
         "{projectRoot}/**/*.ts",
-        "{projectRoot}/.eslintrc.js",
-        "{projectRoot}/.eslintignore",
-        "{projectRoot}/tsconfig.eslint.json",
+        "{projectRoot}/**/.eslintrc.cjs",
+        "{projectRoot}/**/tsconfig.eslint.json",
         "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
       ],
       "cache": true
     }
   },
   "useInferencePlugins": false,
+  "parallel": 8,
   "pluginsConfig": {
     "@nx/js": {
       "analyzeSourceFiles": false
     }
   },
   "release": {
-    "projects": ["packages/**/*"],
+    "projects": ["packages/**/*", ".github/actions/check-pr-status", "scripts/front"],
     "changelog": {
       "workspaceChangelog": {
         "file": false,
@@ -60,10 +71,10 @@
       }
     },
     "version": {
-      "conventionalCommits": false
-    },
-    "git": {
-      "commitMessage": "release: {version}"
+      "conventionalCommits": false,
+      "git": {
+        "commitMessage": "release: {version}"
+      }
     },
     "conventionalCommits": {
       "types": {

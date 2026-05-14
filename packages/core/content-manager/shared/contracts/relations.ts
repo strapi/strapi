@@ -1,11 +1,11 @@
-import { Modules, Data } from '@strapi/types';
+import type { Modules, Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 type PaginationQuery = Modules.EntityService.Params.Pagination.PageNotation;
 
 export interface RelationResult {
   documentId: Modules.Documents.ID;
-  id: number;
+  id: Data.ID;
   status?: Modules.Documents.Params.PublicationStatus.Kind;
   locale?: Modules.Documents.Params.Locale.StringNotation;
   [key: string]: any;

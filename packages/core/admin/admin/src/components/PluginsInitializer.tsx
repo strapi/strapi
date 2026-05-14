@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { produce } from 'immer';
-import set from 'lodash/set';
 
 import { Page } from '../components/PageHelpers';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
@@ -94,7 +93,7 @@ const reducer: React.Reducer<State, Action> = (state = initialState, action: Act
   produce(state, (draftState) => {
     switch (action.type) {
       case 'SET_PLUGIN_READY': {
-        set(draftState, ['plugins', action.pluginId, 'isReady'], true);
+        draftState.plugins[action.pluginId].isReady = true;
         break;
       }
       default:

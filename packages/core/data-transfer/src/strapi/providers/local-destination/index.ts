@@ -3,16 +3,10 @@ import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
 import type { Core, Struct } from '@strapi/types';
-import type {
-  IAsset,
-  IDestinationProvider,
-  IFile,
-  IMetadata,
-  ProviderType,
-  Transaction,
-} from '../../../../types';
+import type { IDestinationProvider, IMetadata, ProviderType, Transaction } from '../../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
+import { createAssetsDestinationWritable } from './assets-destination-writable';
 import { restore } from './strategies';
 import * as utils from '../../../utils';
 import {
@@ -31,6 +25,8 @@ export interface ILocalStrapiDestinationProviderOptions {
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
   restore?: restore.IRestoreOptions; // erase data in strapi database before transfer; required if strategy is 'restore'
   strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
+  /** CLI / UI: human-readable progress during {@link beforeTransfer} (restore prep). */
+  onTransferPhase?: (message: string) => void;
 }
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {
@@ -68,7 +64,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.strapi) {
       throw new ProviderInitializationError('Could not access local strapi');
     }
-
+    this.strapi.db.lifecycles.disable();
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
 
@@ -101,8 +97,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
+    assertValidStrapi(this.strapi);
     this.transaction?.end();
-
+    this.strapi.db.lifecycles.enable();
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
       await this.strapi?.destroy();
@@ -176,11 +173,20 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Strapi instance not found');
     }
 
+    this.options.onTransferPhase?.('Local: preparing destination for restore…');
+
     await this.transaction?.attach(async (trx) => {
       try {
         if (this.options.strategy === 'restore') {
+          if (this.#areAssetsIncluded()) {
+            this.options.onTransferPhase?.('Local: backing up existing upload folder…');
+          }
           await this.#handleAssetsBackup();
+          if (this.#areAssetsIncluded()) {
+            this.options.onTransferPhase?.('Local: deleting existing media files from disk…');
+          }
           await this.#deleteAllAssets(trx);
+          this.options.onTransferPhase?.('Local: clearing database content for restore…');
           await this.#deleteFromRestoreOptions();
         }
       } catch (error) {
@@ -315,85 +321,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       );
     }
 
-    const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
-    const strapi = this.strapi;
-    const transaction = this.transaction;
     const fileEntitiesMapper = this.#entitiesMapper['plugin::upload.file'];
 
-    const restoreMediaEntitiesContent = this.#isContentTypeIncluded('plugin::upload.file');
-
-    return new Writable({
-      objectMode: true,
-      async final(next) {
-        // Delete the backup folder
-        await removeAssetsBackup();
-        next();
-      },
-      async write(chunk: IAsset, _encoding, callback) {
-        await transaction?.attach(async () => {
-          const uploadData = {
-            ...chunk.metadata,
-            stream: Readable.from(chunk.stream),
-            buffer: chunk?.buffer,
-          };
-
-          const provider = strapi.config.get<{ provider: string }>('plugin::upload').provider;
-
-          const fileId = fileEntitiesMapper?.[uploadData.id];
-          if (!fileId) {
-            callback(new Error(`File ID not found for ID: ${uploadData.id}`));
-          }
-
-          try {
-            await strapi.plugin('upload').provider.uploadStream(uploadData);
-
-            // if we're not supposed to transfer the associated entities, stop here
-            if (!restoreMediaEntitiesContent) {
-              return callback();
-            }
-
-            // Files formats are stored within the parent file entity
-            if (uploadData?.type) {
-              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: { id: fileId },
-              });
-              if (!entry) {
-                throw new Error('file not found');
-              }
-              const specificFormat = entry?.formats?.[uploadData.type];
-              if (specificFormat) {
-                specificFormat.url = uploadData.url;
-              }
-              await strapi.db.query('plugin::upload.file').update({
-                where: { id: entry.id },
-                data: {
-                  formats: entry.formats,
-                  provider,
-                },
-              });
-              return callback();
-            }
-
-            const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-              where: { id: fileId },
-            });
-            if (!entry) {
-              throw new Error('file not found');
-            }
-            entry.url = uploadData.url;
-            await strapi.db.query('plugin::upload.file').update({
-              where: { id: entry.id },
-              data: {
-                url: entry.url,
-                provider,
-              },
-            });
-            callback();
-          } catch (error) {
-            callback(new Error(`Error while uploading asset ${chunk.filename} ${error}`));
-          }
-        });
-      },
+    return createAssetsDestinationWritable({
+      strapi: this.strapi,
+      transaction: this.transaction!,
+      resolveUploadFileId: (metadata) => fileEntitiesMapper?.[metadata.id],
+      restoreMediaEntitiesContent: this.#isContentTypeIncluded('plugin::upload.file'),
+      removeAssetsBackup: this.#removeAssetsBackup.bind(this),
     });
   }
 

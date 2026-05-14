@@ -18,6 +18,9 @@ const CM_COMPONENTS_MOCK_DATA = [
       id: {
         type: 'string',
       },
+      documentId: {
+        type: 'string',
+      },
       name: {
         type: 'string',
         default: 'toto',
@@ -371,6 +374,12 @@ const CM_CONTENT_TYPE_MOCK_DATA = [
       id: {
         type: 'string',
       },
+      documentId: {
+        type: 'string',
+      },
+      name: {
+        type: 'string',
+      },
       postal_code: {
         type: 'string',
         pluginOptions: {},
@@ -483,6 +492,9 @@ const CM_CONTENT_TYPE_MOCK_DATA = [
     options: { draftAndPublish: true },
     attributes: {
       id: {
+        type: 'string',
+      },
+      documentId: {
         type: 'string',
       },
       Title: {
@@ -692,6 +704,28 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
           sortable: true,
         },
       },
+      documentId: {
+        edit: {},
+        list: {
+          label: 'documentId',
+          searchable: true,
+          sortable: true,
+        },
+      },
+      name: {
+        edit: {
+          label: 'name',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'name',
+          searchable: true,
+          sortable: true,
+        },
+      },
       postal_code: {
         edit: {
           label: 'postal_code',
@@ -912,7 +946,7 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
       },
     },
     layouts: {
-      list: ['id', 'categories', 'cover', 'postal_code'],
+      list: ['documentId', 'categories', 'cover', 'postal_code'],
       edit: [
         [{ name: 'dz', size: 12 }],
         [
@@ -920,6 +954,7 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
             name: 'slug',
             size: 6,
           },
+          { name: 'name', size: 6 },
         ],
         [
           {

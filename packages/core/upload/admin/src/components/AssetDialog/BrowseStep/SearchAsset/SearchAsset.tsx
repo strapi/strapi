@@ -1,11 +1,11 @@
 // TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { IconButton, Searchbar, SearchForm } from '@strapi/design-system';
 import { Search } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { useTracking } from '../../../../hooks/useTracking';
 import { getTrad } from '../../../../utils';
 
 import type { Query } from '../../../../../../shared/contracts/files';

@@ -152,21 +152,23 @@ export const listHandler = (
 
     editor.current.operation(function () {
       selections.forEach(function (selection) {
-        const pos = [selection.head.line, selection.anchor.line].sort();
+        const pos = [selection.head.line, selection.anchor.line].sort((a, b) => a - b);
+        // Will match a bullet point or any number
+        const regexIsItemFromList = /^[*-]\s|^\d+\.\s/;
 
-        // Remove if the first text starts with it
+        // Remove if the first text starts with a bullet point or any number
         if (remove == null) {
-          remove = doc.getLine(pos[0]).startsWith(insertion);
+          remove = doc.getLine(pos[0]).match(regexIsItemFromList) !== null;
         }
 
         for (let i = pos[0]; i <= pos[1]; i++) {
           if (remove) {
-            // Don't remove if we don't start with it
-            if (doc.getLine(i).startsWith(insertion)) {
+            // Don't remove if the line doesn't start with a bullet point or a number
+            if (doc.getLine(i).match(regexIsItemFromList) !== null) {
               doc.replaceRange('', { line: i, ch: 0 }, { line: i, ch: insertion.length });
             }
           } else {
-            const lineInsertion = listType === 'BulletList' ? '- ' : `${i + 1}. `;
+            const lineInsertion = listType === 'BulletList' ? '- ' : `${i - pos[0] + 1}. `;
             doc.replaceRange(lineInsertion, { line: i, ch: 0 });
           }
         }

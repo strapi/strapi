@@ -121,7 +121,7 @@ module.exports = {
         target: 'api::tag.tag',
       },
     },
-    uid: 'api::articlewit.articlewit',
+    uid: 'api::articlewithtag.articlewithtag',
     displayName: 'Article with tag',
     singularName: 'articlewithtag',
     pluralName: 'articlewithtags',

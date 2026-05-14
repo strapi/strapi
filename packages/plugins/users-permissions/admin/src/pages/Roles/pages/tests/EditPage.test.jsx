@@ -1,8 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { fireEvent, render as renderRTL, waitForElementToBeRemoved } from '@testing-library/react';
+import {
+  fireEvent,
+  render as renderRTL,
+  waitForElementToBeRemoved,
+  screen,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -10,12 +15,22 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { EditPage } from '../EditPage';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/:id" element={<EditPage />} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
           queries: {
+            retry: false,
+          },
+          mutations: {
             retry: false,
           },
         },
@@ -46,8 +61,6 @@ describe('Roles – EditPage', () => {
     const { getByText, getByRole, user } = render();
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
-
-    expect(getByRole('link', { name: 'Back' })).toBeInTheDocument();
 
     expect(getByRole('heading', { name: 'Authenticated' })).toBeInTheDocument();
     expect(getByRole('heading', { name: 'Role details' })).toBeInTheDocument();
@@ -100,26 +113,29 @@ describe('Roles – EditPage', () => {
   });
 
   it("can update a role's name, description and permissions", async () => {
-    const { getByRole, user, getByText, findByRole, findByText } = render();
+    const { user } = render();
 
-    await waitForElementToBeRemoved(() => getByText('Loading content.'));
+    const textboxName = await screen.findByRole('textbox', { name: 'Name' });
+    const textboxDescription = await screen.findByRole('textbox', { name: 'Description' });
 
-    await user.type(getByRole('textbox', { name: 'Name' }), 'test');
-    await user.type(getByRole('textbox', { name: 'Description' }), 'testing');
+    await user.type(textboxName, 'test');
+    await user.type(textboxDescription, 'testing');
     await user.click(
-      getByRole('button', {
+      screen.getByRole('button', {
         name: 'Address Define all allowed actions for the api::address plugin.',
       })
     );
-    await user.click(getByRole('checkbox', { name: 'create' }));
 
-    const button = await findByRole('button', { name: 'Save' });
+    const checkboxCreate = await screen.findByRole('checkbox', { name: 'create' });
+    await user.click(checkboxCreate);
+
+    const button = await screen.findByRole('button', { name: 'Save' });
     /**
      * @note user.click will not trigger the form.
      */
     fireEvent.click(button);
-    await findByText('Role edited');
-    await findByText('Authenticated');
+    await screen.findByText('Role edited');
+    await screen.findByText('Authenticated');
   });
 
   it('will update the Advanced Settings panel when you click on the cog icon of a specific permission', async () => {

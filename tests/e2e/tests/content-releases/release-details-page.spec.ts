@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
-import { clickAndWait, describeOnCondition } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { findAndClose } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, navToHeader } from '../../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { findAndClose } from '../../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const releaseName = 'Trent Crimm: The Independent';
@@ -29,11 +29,11 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
 
 describeOnCondition(edition === 'EE')('Release page', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
 
-    await page.getByRole('link', { name: 'Releases' }).click();
+    await navToHeader(page, ['Releases'], 'Releases');
     page.getByRole('link', { name: `${releaseName}` }).click();
     await page.waitForURL('/admin/plugins/content-releases/*');
   });

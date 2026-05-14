@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Popover, Tag } from '@strapi/design-system';
 import { Plus, Filter as FilterIcon, Cross } from '@strapi/icons';
-import { Schema } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import {
@@ -21,6 +20,8 @@ import { createContext } from './Context';
 import { Form, InputProps } from './Form';
 import { InputRenderer } from './FormInputs/Renderer';
 
+import type { Schema } from '@strapi/types';
+
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
@@ -36,11 +37,60 @@ interface FitlersContextValue {
   onChange: (data: FilterFormData) => void;
   options: Filters.Filter[];
   setOpen: (open: boolean) => void;
+  editingFilter: FilterFormData | null;
+  setEditingFilter: (filter: FilterFormData | null) => void;
 }
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
 
-interface RootProps extends Partial<FitlersContextValue>, Popover.Props {
+const getFilterDetails = (
+  filterEntry: Record<string, unknown>,
+  options: Filters.Filter[]
+): { name: string; operator: string; value: unknown } | null => {
+  const [name] = Object.keys(filterEntry);
+  const option = options.find((o) => o.name === name);
+  if (!option) {
+    return null;
+  }
+
+  const operatorObj =
+    option.type === 'relation'
+      ? (filterEntry[name] as Record<string, unknown>)?.[option.mainField?.name ?? 'id']
+      : filterEntry[name];
+
+  if (typeof operatorObj !== 'object' || operatorObj === null) {
+    return null;
+  }
+
+  const [operator] = Object.keys(operatorObj as Record<string, unknown>);
+  if (!operator) {
+    return null;
+  }
+
+  return { name, operator, value: (operatorObj as Record<string, unknown>)[operator] };
+};
+
+const isFilterMatch = (
+  filterEntry: Record<string, unknown>,
+  options: Filters.Filter[],
+  target: FilterFormData
+): boolean => {
+  const details = getFilterDetails(filterEntry, options);
+  if (!details || details.name !== target.name || details.operator !== target.filter) {
+    return false;
+  }
+  if (FILTERS_WITH_NO_VALUE.includes(target.filter)) {
+    return true;
+  }
+
+  const decoded =
+    typeof details.value === 'string' ? decodeURIComponent(details.value) : details.value;
+  return decoded === target.value;
+};
+
+interface RootProps
+  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>,
+    Popover.Props {
   children: React.ReactNode;
 }
 
@@ -54,16 +104,25 @@ const Root = ({
   defaultOpen,
   ...restProps
 }: RootProps) => {
+  const [editingFilter, setEditingFilter] = React.useState<FilterFormData | null>(null);
+
   const handleChange = (data: FilterFormData) => {
     if (onChange) {
       onChange(data);
     }
   };
+
   const [open = false, setOpen] = useControllableState({
     prop: openProp,
     defaultProp: defaultOpen,
     onChange: onOpenChange,
   });
+
+  React.useEffect(() => {
+    if (!open) {
+      setEditingFilter(null);
+    }
+  }, [open]);
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen} {...restProps}>
@@ -72,6 +131,8 @@ const Root = ({
         disabled={disabled}
         onChange={handleChange}
         options={options}
+        editingFilter={editingFilter}
+        setEditingFilter={setEditingFilter}
       >
         {children}
       </FiltersProvider>
@@ -107,13 +168,25 @@ const Trigger = React.forwardRef<HTMLButtonElement, Filters.TriggerProps>(
 /* -------------------------------------------------------------------------------------------------
  * Popover
  * -----------------------------------------------------------------------------------------------*/
-
-const PopoverImpl = () => {
+/**
+ * The zIndex property is used to override the zIndex of the Portal element of the Popover.
+ * This is needed to ensure that the DatePicker is rendered above the Popover when opened.
+ * The issue was that both the DatePicker and the Popover are rendered in a Portal and have the same zIndex.
+ * On init, since the DatePicker is rendered before the Popover in the DOM,
+ * it's causing the issue of appearing behind the Popover.
+ */
+const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   const [{ query }, setQuery] = useQueryParams<Filters.Query>();
   const { formatMessage } = useIntl();
   const options = useFilters('Popover', ({ options }) => options);
   const onChange = useFilters('Popover', ({ onChange }) => onChange);
   const setOpen = useFilters('Popover', ({ setOpen }) => setOpen);
+  const editingFilter = useFilters('Popover', ({ editingFilter }) => editingFilter);
+  const setEditingFilter = useFilters('Popover', ({ setEditingFilter }) => setEditingFilter);
+
+  const initialValues = React.useMemo(() => {
+    return editingFilter ?? { name: options[0]?.name, filter: BASE_FILTERS[0].value };
+  }, [editingFilter, options]);
 
   if (options.length === 0) {
     return null;
@@ -151,37 +224,46 @@ const PopoverImpl = () => {
       [data.filter]: value,
     };
 
-    const newFilterQuery = {
-      ...query.filters,
-      $and: [
-        ...(query.filters?.$and ?? []),
-        {
-          [data.name]:
-            fieldOptions.type === 'relation'
-              ? {
-                  [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
-                }
-              : operatorValuePairing,
-        },
-      ],
+    const newFilterEntry = {
+      [data.name]:
+        fieldOptions.type === 'relation'
+          ? {
+              [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
+            }
+          : operatorValuePairing,
     };
 
-    setQuery({ filters: newFilterQuery, page: 1 });
+    const existingFilters = query.filters?.$and ?? [];
+
+    const newFilterQuery = editingFilter
+      ? {
+          ...query.filters,
+          $and: existingFilters.map((filter) =>
+            isFilterMatch(filter, options, editingFilter) ? newFilterEntry : filter
+          ),
+        }
+      : {
+          ...query.filters,
+          $and: [...existingFilters, newFilterEntry],
+        };
+
+    setQuery({ filters: newFilterQuery, page: 1 }, 'push', true);
     setOpen(false);
+    setEditingFilter(null);
   };
 
   return (
-    <Popover.Content>
+    <Popover.Content style={{ zIndex }}>
       <Box padding={3}>
         <Form
           method="POST"
-          initialValues={
-            {
-              name: options[0]?.name,
-              filter: BASE_FILTERS[0].value,
-            } satisfies FilterFormData
-          }
+          initialValues={initialValues}
           onSubmit={handleSubmit}
+          key={
+            editingFilter
+              ? `edit-${editingFilter.name}-${editingFilter.filter}-${editingFilter.value ?? 'empty'}`
+              : 'create'
+          }
         >
           {({ values: formValues, modified, isSubmitting }) => {
             const filter = options.find((filter) => filter.name === formValues.name);
@@ -228,8 +310,7 @@ const PopoverImpl = () => {
                 ))}
                 {filter &&
                 formValues.filter &&
-                formValues.filter !== '$null' &&
-                formValues.filter !== '$notNull' ? (
+                !FILTERS_WITH_NO_VALUE.includes(formValues.filter) ? (
                   <Input
                     {...filter}
                     label={null}
@@ -247,7 +328,12 @@ const PopoverImpl = () => {
                   type="submit"
                   fullWidth
                 >
-                  {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
+                  {editingFilter
+                    ? formatMessage({
+                        id: 'app.utils.update-filter',
+                        defaultMessage: 'Update filter',
+                      })
+                    : formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
                 </Button>
               </Flex>
             );
@@ -319,31 +405,16 @@ const List = () => {
      * if it does, remove it.
      */
     const nextFilters = (query?.filters?.$and ?? []).filter((filter) => {
-      const [attributeName] = Object.keys(filter);
-      if (attributeName !== data.name) {
+      const details = getFilterDetails(filter, options);
+      if (!details) {
         return true;
       }
 
-      const { type, mainField } = options.find(({ name }) => name === attributeName)!;
-
-      if (type === 'relation') {
-        const filterObj = filter[attributeName][mainField?.name ?? 'id'];
-
-        if (typeof filterObj === 'object') {
-          const [operator] = Object.keys(filterObj);
-          const value = filterObj[operator];
-
-          return !(operator === data.filter && value === data.value);
-        }
-
-        return true;
-      } else {
-        const filterObj = filter[attributeName];
-        const [operator] = Object.keys(filterObj);
-        const value = filterObj[operator];
-
-        return !(operator === data.filter && value === data.value);
-      }
+      return !(
+        details.name === data.name &&
+        details.operator === data.filter &&
+        details.value === data.value
+      );
     });
 
     setQuery({ filters: { $and: nextFilters }, page: 1 });
@@ -356,61 +427,31 @@ const List = () => {
   return (
     <>
       {query?.filters?.$and?.map((queryFilter) => {
-        const [attributeName] = Object.keys(queryFilter);
-        const filter = options.find(({ name }) => name === attributeName);
-        const filterObj = queryFilter[attributeName];
-
-        if (!filter || typeof filterObj !== 'object' || filterObj === null) {
+        const details = getFilterDetails(queryFilter, options);
+        if (!details || typeof details.value === 'object') {
           return null;
         }
 
-        if (filter.type === 'relation') {
-          const modelFilter = filterObj[filter.mainField?.name ?? 'id'];
-
-          if (typeof modelFilter === 'object') {
-            const [operator] = Object.keys(modelFilter);
-            const value = modelFilter[operator];
-            return (
-              <AttributeTag
-                key={`${attributeName}-${operator}-${value}`}
-                {...filter}
-                onClick={handleClick}
-                operator={operator}
-                value={value}
-              />
-            );
-          }
-
+        const filter = options.find(({ name }) => name === details.name);
+        if (!filter) {
           return null;
-        } else {
-          const [operator] = Object.keys(filterObj);
-          const value = filterObj[operator];
-
-          /**
-           * Something has gone wrong here, because the attribute is not a relation
-           * but we have a nested filter object.
-           */
-          if (typeof value === 'object') {
-            return null;
-          }
-
-          return (
-            <AttributeTag
-              key={`${attributeName}-${operator}-${value}`}
-              {...filter}
-              onClick={handleClick}
-              operator={operator}
-              value={value}
-            />
-          );
         }
+        return (
+          <AttributeTag
+            key={`${details.name}-${details.operator}-${details.value}`}
+            {...filter}
+            onRemove={handleClick}
+            operator={details.operator}
+            value={String(details.value)}
+          />
+        );
       })}
     </>
   );
 };
 
 interface AttributeTagProps extends Filters.Filter {
-  onClick: (data: FilterFormData) => void;
+  onRemove: (data: FilterFormData) => void;
   operator: string;
   value: string;
 }
@@ -420,16 +461,27 @@ const AttributeTag = ({
   label,
   mainField,
   name,
-  onClick,
+  onRemove,
   operator,
   options,
   value,
   ...filter
 }: AttributeTagProps) => {
   const { formatMessage, formatDate, formatTime, formatNumber } = useIntl();
+  const setOpen = useFilters('AttributeTag', ({ setOpen }) => setOpen);
+  const setEditingFilter = useFilters('AttributeTag', ({ setEditingFilter }) => setEditingFilter);
 
-  const handleClick = () => {
-    onClick({ name, value, filter: operator });
+  const handleEdit = () => {
+    setEditingFilter({
+      name,
+      filter: operator,
+      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : decodeURIComponent(value),
+    });
+    setOpen(true);
+  };
+
+  const handleRemove = () => {
+    onRemove({ name, value, filter: operator });
   };
 
   const type = mainField?.type ? mainField.type : filter.type;
@@ -476,14 +528,20 @@ const AttributeTag = ({
       : value;
   }
 
-  const content = `${label} ${formatMessage({
+  const operatorLabel = formatMessage({
     id: `components.FilterOptions.FILTER_TYPES.${operator}`,
     defaultMessage: operator,
-  })} ${operator !== '$null' && operator !== '$notNull' ? formattedValue : ''}`;
+  });
+
+  const content = FILTERS_WITH_NO_VALUE.includes(operator)
+    ? `${label} ${operatorLabel}`
+    : `${label} ${operatorLabel} ${formattedValue}`;
 
   return (
-    <Tag padding={1} onClick={handleClick} icon={<Cross />}>
-      {content}
+    <Tag padding={1} onClick={handleRemove} icon={<Cross />} label={content}>
+      <Box tag="span" cursor="pointer" onClick={handleEdit}>
+        {content}
+      </Box>
     </Tag>
   );
 };

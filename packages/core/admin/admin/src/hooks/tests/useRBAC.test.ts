@@ -1,5 +1,5 @@
 import { renderHook, server, waitFor } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { useRBAC } from '../useRBAC';
 
@@ -50,27 +50,23 @@ describe('useRBAC', () => {
       })
     );
 
-    expect(result.current.allowedActions).toMatchInlineSnapshot(`
-      {
-        "canCreate": false,
-        "canDelete": false,
-        "canRead": false,
-        "canUpdate": false,
-      }
-    `);
+    expect(result.current.allowedActions).toEqual({
+      canCreate: false,
+      canDelete: false,
+      canRead: false,
+      canUpdate: false,
+    });
 
     expect(result.current.isLoading).toBe(true);
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.allowedActions).toMatchInlineSnapshot(`
-      {
-        "canCreate": true,
-        "canDelete": true,
-        "canRead": true,
-        "canUpdate": true,
-      }
-    `);
+    expect(result.current.allowedActions).toEqual({
+      canCreate: true,
+      canDelete: true,
+      canRead: true,
+      canUpdate: true,
+    });
   });
 
   it('should return falsey values if after matching the permissions and no match is found', async () => {
@@ -89,11 +85,9 @@ describe('useRBAC', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.allowedActions).toMatchInlineSnapshot(`
-      {
-        "canUnacceptable": false,
-      }
-    `);
+    expect(result.current.allowedActions).toEqual({
+      canUnacceptable: false,
+    });
   });
 
   describe('checking against the server if there are conditions in the permissions', () => {
@@ -115,17 +109,13 @@ describe('useRBAC', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(result.current.allowedActions).toMatchInlineSnapshot(`
-        {
-          "canCreate": true,
-        }
-      `);
+      expect(result.current.allowedActions).toEqual({
+        canCreate: true,
+      });
     });
 
     it("should return falsey values if the permissions condition doesn't pass", async () => {
-      server.use(
-        rest.post('/admin/permissions/check', (req, res, ctx) => res(ctx.json({ data: [false] })))
-      );
+      server.use(http.post('/admin/permissions/check', () => HttpResponse.json({ data: [false] })));
 
       const { result } = renderHook(
         () => {
@@ -156,29 +146,27 @@ describe('useRBAC', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(result.current.allowedActions).toMatchInlineSnapshot(`
-        {
-          "canCreate": false,
-        }
-      `);
+      expect(result.current.allowedActions).toEqual({
+        canCreate: false,
+      });
 
       server.restoreHandlers();
     });
 
     it('should check all the conditions and return their values in order', async () => {
       server.use(
-        rest.post('/admin/permissions/check', async (req, res, ctx) => {
-          const { permissions } = await req.json();
+        http.post<Record<string, never>, { permissions: Array<{ action: string }> }>(
+          '/admin/permissions/check',
+          async ({ request }) => {
+            const body = await request.json();
 
-          return res(
-            ctx.json({
-              // @ts-expect-error – shhh
-              data: permissions.map(({ action }) =>
+            return HttpResponse.json({
+              data: body.permissions.map(({ action }) =>
                 action === 'admin::roles.create' ? false : true
               ),
-            })
-          );
-        })
+            });
+          }
+        )
       );
 
       const { result } = renderHook(
@@ -220,12 +208,10 @@ describe('useRBAC', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(result.current.allowedActions).toMatchInlineSnapshot(`
-        {
-          "canCreate": false,
-          "canUpdate": true,
-        }
-      `);
+      expect(result.current.allowedActions).toEqual({
+        canCreate: false,
+        canUpdate: true,
+      });
 
       server.restoreHandlers();
     });

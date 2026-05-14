@@ -41,7 +41,6 @@ describe('ConfigurationProvider', () => {
         defaultAuthLogo={'strapi.jpg'}
         defaultMenuLogo={'strapi.jpg'}
         showReleaseNotification={false}
-        showTutorials={false}
       >
         <TestComponent />
       </ConfigurationProvider>
@@ -58,7 +57,6 @@ describe('ConfigurationProvider', () => {
         defaultAuthLogo={'strapi.jpg'}
         defaultMenuLogo={'strapi.jpg'}
         showReleaseNotification={false}
-        showTutorials={false}
       >
         <TestComponent />
       </ConfigurationProvider>

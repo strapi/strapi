@@ -94,15 +94,15 @@ declare module 'koa' {
   }
 
   interface ExtendableContext {
-    ok: (response?: string | object) => Koa.Context;
-    created: (response?: string | object) => Koa.Context;
-    noContent: (response?: string | object) => Koa.Context;
-    badRequest: (response?: string | object) => Koa.Context;
-    unauthorized: (response?: string | object) => Koa.Context;
-    forbidden: (response?: string | object) => Koa.Context;
-    notFound: (response?: string | object) => Koa.Context;
-    locked: (response?: string | object) => Koa.Context;
-    internalServerError: (response?: string | object) => Koa.Context;
+    ok: (response?: string | object, details?: object) => Koa.Context;
+    created: (response?: string | object, details?: object) => Koa.Context;
+    noContent: (response?: string | object, details?: object) => Koa.Context;
+    badRequest: (response?: string | object, details?: object) => Koa.Context;
+    unauthorized: (response?: string | object, details?: object) => Koa.Context;
+    forbidden: (response?: string | object, details?: object) => Koa.Context;
+    notFound: (response?: string | object, details?: object) => Koa.Context;
+    locked: (response?: string | object, details?: object) => Koa.Context;
+    internalServerError: (response?: string | object, details?: object) => Koa.Context;
     notImplemented: (response?: string | object, data?: Record<string, unknown>) => Koa.Context;
   }
 }

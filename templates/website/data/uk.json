@@ -1,0 +1,481 @@
+{
+  "global": {
+    "id": 1,
+    "locale": "uk",
+    "metaTitleSuffix": "Strapi Corporate",
+    "metadata": {
+      "id": 1,
+      "metaTitle": "Strapi starter for Corporate Sites",
+      "metaDescription": "Побудуйте свій корпоративний сайт за допомогою Strapi",
+      "twitterCardType": "summary",
+      "twitterUsername": "strapijs",
+      "shareImage": null
+    },
+    "notificationBanner": {
+      "id": 1,
+      "text": "Ця сторінка була побудована за допомогою Strapi Starter для корпоративних сайтів.\n[Переглянути інші стартери Strapi](https://strapi.io/starters)",
+      "type": "info"
+    },
+    "navbar": {
+      "id": 1,
+      "links": [
+        {
+          "id": 1,
+          "url": "/pricing",
+          "newTab": false,
+          "text": "Тарифні плани"
+        },
+        {
+          "id": 3,
+          "url": "/contact",
+          "newTab": false,
+          "text": "Контакти"
+        }
+      ],
+      "button": {
+        "id": 13,
+        "url": "#",
+        "newTab": false,
+        "text": "Зареєструватися",
+        "type": "secondary"
+      },
+      "logo": null
+    },
+    "footer": {
+      "id": 1,
+      "smallText": "© Авторські права: Моя Компанія™",
+      "columns": [
+        {
+          "id": 1,
+          "title": "Продукт",
+          "links": [
+            {
+              "id": 11,
+              "url": "#",
+              "newTab": false,
+              "text": "Особливості"
+            },
+            {
+              "id": 13,
+              "url": "#",
+              "newTab": false,
+              "text": "Зареєструватися"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Правове",
+          "links": [
+            {
+              "id": 15,
+              "url": "#",
+              "newTab": false,
+              "text": "Політика конфіденційності"
+            },
+            {
+              "id": 16,
+              "url": "#",
+              "newTab": false,
+              "text": "Загальні положення та умови"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "Компанія",
+          "links": [
+            {
+              "id": 18,
+              "url": "#",
+              "newTab": false,
+              "text": "Кар'єра"
+            },
+            {
+              "id": 21,
+              "url": "#",
+              "newTab": false,
+              "text": "Команда"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "title": "Соціальні мережі",
+          "links": [
+            {
+              "id": 24,
+              "url": "#",
+              "newTab": false,
+              "text": "Twitter"
+            },
+            {
+              "id": 25,
+              "url": "#",
+              "newTab": false,
+              "text": "LinkedIn"
+            }
+          ]
+        }
+      ],
+      "logo": null
+    },
+    "favicon": null,
+    "localizations": [
+      {
+        "id": 2,
+        "locale": "uk"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": 1,
+      "slug": "",
+      "locale": "uk",
+      "localizations": [
+        {
+          "id": 5,
+          "locale": "uk"
+        }
+      ],
+      "shortName": "Головна",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 2,
+        "metaTitle": "Strapi corporate site starter",
+        "metaDescription": "Побудуйте повністю редагований сайт із Strapi",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 1,
+          "__component": "sections.hero",
+          "title": "Найкращий спосіб створити свій корпоративний сайт",
+          "label": "Новий стартер Strapi",
+          "description": "Почніть з вашого корпоративного веб-сайту Strapi за лічені секунди.",
+          "smallTextWithLink": "Хочете побудувати власний з нуля? Підручник незабаром",
+          "buttons": [
+            {
+              "id": 2,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "Почати",
+              "type": "primary"
+            },
+            {
+              "id": 4,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": true,
+              "text": "Подивитися код",
+              "type": "secondary"
+            }
+          ],
+          "picture": null
+        },
+        {
+          "id": 1,
+          "__component": "sections.feature-rows-group",
+          "features": [
+            {
+              "id": 1,
+              "title": "Нехай маркетингові команди будують свої сторінки",
+              "description": "Завдяки заздалегідь вбудованому списку розділів інтерфейсу, маркетологи можуть розробити саме те, що вони хочуть.",
+              "link": {
+                "id": 7,
+                "url": "#",
+                "newTab": false,
+                "text": "Перегляньте список розділів інтерфейсу"
+              },
+              "media": null
+            },
+            {
+              "id": 2,
+              "title": "Залиште своїх розробників у спокої",
+              "description": "Ви можете публікувати, редагувати та видаляти сторінки без допомоги розробників. Ваша технічна команда може нарешті зосередитись на своїх завданнях.",
+              "link": {
+                "id": 8,
+                "url": "#",
+                "newTab": false,
+                "text": "Перегляньте, як створити сторінку"
+              },
+              "media": null
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "__component": "sections.feature-columns-group",
+          "features": [
+            {
+              "id": 1,
+              "title": "Попередній перегляд своїх змін",
+              "description": "Завдяки інтегрованому режиму попереднього перегляду ви можете візуалізувати свої сторінки, перш ніж їх публікувати.",
+              "icon": null
+            },
+            {
+              "id": 2,
+              "title": "Повністю адаптивний",
+              "description": "Цей стартер добре працює на всіх екранах, нехай це мобільний, планшет чи компʼютер.",
+              "icon": null
+            },
+            {
+              "id": 3,
+              "title": "Легко налаштувати",
+              "description": "Ми використовуємо Tailwind для стилів. Ви можете змінити тему свого сайту, не копаючи код.",
+              "icon": null
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "__component": "sections.testimonials-group",
+          "title": "Ваші відгуки клієнтів тут",
+          "description": "У цьому розділі ви можете продемонструвати своїх клієнтів. Вставте цитати та покажіть логотипи компаній, яким подобається ваш продукт",
+          "link": {
+            "id": 2,
+            "url": "#",
+            "newTab": false,
+            "text": "Всі відгуки"
+          },
+          "logos": [
+            {
+              "id": 1,
+              "title": "Strapi",
+              "logo": null
+            },
+            {
+              "id": 2,
+              "title": "Strapi 2",
+              "logo": null
+            },
+            {
+              "id": 3,
+              "title": "Strapi 3",
+              "logo": null
+            }
+          ],
+          "testimonials": [
+            {
+              "id": 1,
+              "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+              "authorName": "Ім'я Вашого Клієнта",
+              "authorTitle": "Щасливий клієнт",
+              "link": "#",
+              "logo": null,
+              "picture": null
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "__component": "sections.lead-form",
+          "title": "Підпишіться на наш бюлетень",
+          "emailPlaceholder": "email@company.com",
+          "submitButton": {
+            "id": 1,
+            "__component": "links.button",
+            "text": "Підписатися",
+            "type": "primary"
+          },
+          "location": "Підвал домашньої сторінки"
+        },
+        {
+          "id": 2,
+          "__component": "sections.bottom-actions",
+          "title": "Почніть створювати свій веб-сайт",
+          "buttons": [
+            {
+              "id": 7,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "Розпочати",
+              "type": "primary"
+            },
+            {
+              "id": 8,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "Дивіться код",
+              "type": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "slug": "pricing",
+      "locale": "uk",
+      "localizations": [
+        {
+          "id": 6,
+          "locale": "uk"
+        }
+      ],
+      "shortName": "Тарифи",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 3,
+        "metaTitle": "Тарифи",
+        "metaDescription": "Різні плани",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 1,
+          "__component": "sections.pricing",
+          "title": "Чітка таблиця ціноутворення",
+          "plans": [
+            {
+              "id": 1,
+              "name": "Хобі",
+              "description": "Ідеально підходить для приватних проектів",
+              "isRecommended": null,
+              "price": 0,
+              "pricePeriod": "forever",
+              "features": [
+                {
+                  "id": 1,
+                  "name": "Класна функція"
+                },
+                {
+                  "id": 2,
+                  "name": "Ще одна крута функція"
+                },
+                {
+                  "id": 3,
+                  "name": "Якась інша крута функція"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "name": "Преміум",
+              "description": "Більш досконалий план невеликої компанії",
+              "isRecommended": true,
+              "price": 20,
+              "pricePeriod": "per month",
+              "features": [
+                {
+                  "id": 4,
+                  "name": "Найкрутіша функція"
+                },
+                {
+                  "id": 5,
+                  "name": "Приємна функція"
+                },
+                {
+                  "id": 6,
+                  "name": "Весела функція"
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "name": "Підприємство",
+              "description": "Для великих потреб компаній",
+              "isRecommended": null,
+              "price": 299,
+              "pricePeriod": "per month",
+              "features": [
+                {
+                  "id": 7,
+                  "name": "Дивовижна особливість"
+                },
+                {
+                  "id": 8,
+                  "name": "Функція вау ефект"
+                },
+                {
+                  "id": 9,
+                  "name": "Захоплююча функція "
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "slug": "secret",
+      "locale": "uk",
+      "localizations": [
+        {
+          "id": 7,
+          "locale": "uk"
+        }
+      ],
+      "shortName": "Таємний",
+      "metadata": {
+        "id": 7,
+        "metaTitle": "Таємна сторінка",
+        "metaDescription": "Сторінка лише для попереднього перегляду",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 2,
+          "__component": "sections.rich-text",
+          "content": "## Таємна сторінка\n\nВи можете переглянути цю сторінку лише в режимі попереднього перегляду."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "slug": "contact",
+      "locale": "uk",
+      "localizations": [
+        {
+          "id": 8,
+          "locale": "uk"
+        }
+      ],
+      "shortName": "Контакт",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 4,
+        "metaTitle": "Контакт",
+        "metaDescription": "Зв’яжіться з нашою командою",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 1,
+          "__component": "sections.rich-text",
+          "content": "# Зв’яжіться\n\n> Це приклад сторінки, яка майже повністю покладається на розділ RichText. Це корисно для статей у блозі або важких для вмісту сторінок, таких як юридичні умови.\n\nМи хотіли б почути від вас.\n\n## Соціальні медіа\n\n* [Twitter](#)\n* [Twitter](#)\n* [Twitter](#)\n\n## Поштова адреса\n\nвул. Степана Бандери 8\n__79013__ **Львів**, *Україна*\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "id": 1,
+          "__component": "sections.bottom-actions",
+          "title": "Зв’яжіться",
+          "buttons": [
+            {
+              "id": 1,
+              "url": "#",
+              "newTab": false,
+              "text": "Надіслати електронний лист",
+              "type": "primary"
+            },
+            {
+              "id": 3,
+              "url": "#",
+              "newTab": false,
+              "text": "Напишіть нам на Twitter",
+              "type": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

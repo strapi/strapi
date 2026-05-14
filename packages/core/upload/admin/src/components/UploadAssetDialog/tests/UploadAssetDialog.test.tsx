@@ -3,6 +3,12 @@ import { within } from '@testing-library/react';
 import { fireEvent, render, screen } from '@tests/utils';
 
 import { UploadAssetDialog } from '../UploadAssetDialog';
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 describe('UploadAssetDialog', () => {
   let confirmSpy: jest.SpyInstance;
 
@@ -96,7 +102,7 @@ describe('UploadAssetDialog', () => {
        */
       fireEvent.click(getByRole('button', { name: 'Next' }));
 
-      await screen.findByText('An error occured');
+      await screen.findByText('An error occurred');
     }, 10000);
 
     /**

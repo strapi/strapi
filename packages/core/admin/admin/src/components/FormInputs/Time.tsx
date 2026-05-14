@@ -8,10 +8,16 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
+const formatTimeForTimePicker = (value: string | null | undefined): string => {
+  if (!value) return '';
+  const [hours, minutes] = value.split(':');
+  return hours && minutes ? `${hours}:${minutes}` : value;
+};
+
 const TimeInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
-    const field = useField<string>(name);
+    const field = useField<string | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
@@ -25,8 +31,8 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
           onChange={(time) => {
             field.onChange(name, `${time}:00.000`);
           }}
-          onClear={() => field.onChange(name, undefined)}
-          value={field.value ?? ''}
+          onClear={() => field.onChange(name, null)}
+          value={formatTimeForTimePicker(field.value)}
           {...props}
         />
         <Field.Hint />

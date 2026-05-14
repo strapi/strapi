@@ -19,6 +19,7 @@ import {
 import { login } from '../../../reducer';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
@@ -29,24 +30,59 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
-    .matches(/[a-z]/, {
-      message: {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least 1 lowercase letter',
+    // bcrypt has a max length of 72 bytes (not characters!)
+    .test(
+      'required-byte-size',
+      {
+        id: 'components.Input.error.contain.maxBytes',
+        defaultMessage: 'Password must be less than 73 bytes',
       },
-    })
-    .matches(/[A-Z]/, {
-      message: {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      function (value) {
+        if (!value || typeof value !== 'string') return true; // validated elsewhere
+
+        const byteSize = getByteSize(value);
+        return byteSize <= 72;
+      }
+    )
+    .test(
+      'lowercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.lowercase',
+          defaultMessage: 'Password must contain at least 1 lowercase letter',
+        },
       },
-    })
-    .matches(/\d/, {
-      message: {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least 1 number',
+      (value) => {
+        if (!value) return true;
+        return /[a-z]/.test(value);
+      }
+    )
+    .test(
+      'uppercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.uppercase',
+          defaultMessage: 'Password must contain at least 1 uppercase letter',
+        },
       },
-    })
+      (value) => {
+        if (!value) return true;
+        return /[A-Z]/.test(value);
+      }
+    )
+    .test(
+      'number',
+      {
+        message: {
+          id: 'components.Input.error.contain.number',
+          defaultMessage: 'Password must contain at least 1 number',
+        },
+      },
+      (value) => {
+        if (!value) return true;
+        return /\d/.test(value);
+      }
+    )
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',

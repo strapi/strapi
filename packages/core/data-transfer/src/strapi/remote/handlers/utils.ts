@@ -10,6 +10,7 @@ import { ProviderError, ProviderTransferError } from '../../../errors/providers'
 import { VALID_TRANSFER_COMMANDS, ValidTransferCommand } from './constants';
 import { TransferMethod } from '../constants';
 import { createDiagnosticReporter } from '../../../utils/diagnostic';
+import { stringifyTransferWebSocketPayload } from '../../../utils/transfer-websocket-json';
 
 type WSCallback = (client: WebSocket, request: IncomingMessage) => void;
 
@@ -126,6 +127,8 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
     }
 
     disableTimeouts();
+    strapi.db.lifecycles.disable();
+    strapi.log.info('[Data transfer] Disabling lifecycle hooks');
 
     // Create a connection between the client & the server
     wss.emit('connection', client, ctx.req);
@@ -243,7 +246,7 @@ export const handlerControllerFactory =
                 details = e.details;
               }
 
-              const payload = JSON.stringify({
+              const envelope: Record<string, unknown> = {
                 uuid,
                 data: data ?? null,
                 error: e
@@ -253,7 +256,9 @@ export const handlerControllerFactory =
                       details,
                     }
                   : null,
-              });
+              };
+
+              const payload = stringifyTransferWebSocketPayload(envelope);
 
               this.send(payload, (error) => (error ? reject(error) : resolve()));
             });
@@ -266,7 +271,7 @@ export const handlerControllerFactory =
             return new Promise((resolve, reject) => {
               const uuid = randomUUID();
 
-              const payload = JSON.stringify({ uuid, data: message });
+              const payload = stringifyTransferWebSocketPayload({ uuid, data: message });
 
               this.send(payload, (error) => {
                 if (error) {
@@ -347,6 +352,8 @@ export const handlerControllerFactory =
             cannotRespondHandler(err);
           } finally {
             resetTimeouts();
+            strapi.db.lifecycles.enable();
+            strapi.log.info('[Data transfer] Restoring lifecycle hooks');
           }
         });
         ws.on('error', async (...args) => {

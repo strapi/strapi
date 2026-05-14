@@ -176,7 +176,8 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                                 return (
                                   <Grid.Item
                                     key={field.name}
-                                    col={size}
+                                    m={size}
+                                    xs={12}
                                     direction="column"
                                     alignItems="stretch"
                                   >

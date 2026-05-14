@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box, BoxComponent, Flex, Typography } from '@strapi/design-system';
 import map from 'lodash/map';
 import tail from 'lodash/tail';

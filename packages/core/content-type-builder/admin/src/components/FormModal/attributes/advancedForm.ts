@@ -5,6 +5,31 @@ import { attributeOptions } from './attributeOptions';
 
 type DataType = 'biginteger' | 'string' | 'integer' | 'float' | 'decimal';
 
+const conditionSection = {
+  sectionTitle: {
+    id: getTrad('form.attribute.condition.title'),
+    defaultMessage: 'Condition',
+  },
+  intlLabel: {
+    id: getTrad('form.attribute.condition.description'),
+    defaultMessage:
+      'Toggle field settings depending on the value of another boolean or enumeration field.',
+  },
+  items: [
+    {
+      name: 'conditions',
+      type: 'condition-form',
+      intlLabel: {
+        id: getTrad('form.attribute.condition.label'),
+        defaultMessage: 'Conditions',
+      },
+      validations: {
+        required: true,
+      },
+    },
+  ],
+};
+
 export const advancedForm = {
   blocks() {
     return {
@@ -16,6 +41,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.required, attributeOptions.private],
         },
+        conditionSection,
       ],
     };
   },
@@ -60,6 +86,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.required, attributeOptions.private],
         },
+        conditionSection,
       ],
     };
   },
@@ -69,6 +96,20 @@ export const advancedForm = {
     }
 
     if (repeatable) {
+      const minComponentsAttribute = {
+        ...attributeOptions.min,
+        intlLabel: {
+          id: getTrad('form.attribute.item.minimumComponents'),
+          defaultMessage: 'Minimum components',
+        },
+      };
+      const maxComponentsAttribute = {
+        ...attributeOptions.max,
+        intlLabel: {
+          id: getTrad('form.attribute.item.maximumComponents'),
+          defaultMessage: 'Maximum components',
+        },
+      };
       return {
         sections: [
           {
@@ -79,10 +120,11 @@ export const advancedForm = {
             items: [
               attributeOptions.required,
               attributeOptions.private,
-              attributeOptions.max,
-              attributeOptions.min,
+              minComponentsAttribute,
+              maxComponentsAttribute,
             ],
           },
+          conditionSection,
         ],
       };
     }
@@ -96,6 +138,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.required, attributeOptions.private],
         },
+        conditionSection,
       ],
     };
   },
@@ -122,6 +165,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.required, attributeOptions.unique, attributeOptions.private],
         },
+        conditionSection,
       ],
     };
   },
@@ -135,6 +179,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.required, attributeOptions.max, attributeOptions.min],
         },
+        conditionSection,
       ],
     };
   },
@@ -150,7 +195,6 @@ export const advancedForm = {
             },
           ],
         },
-
         {
           sectionTitle: {
             id: 'global.settings',
@@ -164,6 +208,7 @@ export const advancedForm = {
             attributeOptions.private,
           ],
         },
+        conditionSection,
       ],
     };
   },
@@ -220,7 +265,6 @@ export const advancedForm = {
             },
           ],
         },
-
         {
           sectionTitle: {
             id: 'global.settings',
@@ -228,6 +272,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.required, attributeOptions.private],
         },
+        conditionSection,
       ],
     };
   },
@@ -241,6 +286,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.required, attributeOptions.private],
         },
+        conditionSection,
       ],
     };
   },
@@ -270,6 +316,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.required, attributeOptions.private],
         },
+        conditionSection,
       ],
     };
   },
@@ -307,6 +354,7 @@ export const advancedForm = {
             attributeOptions.private,
           ],
         },
+        conditionSection,
       ],
     };
   },
@@ -314,7 +362,6 @@ export const advancedForm = {
     return {
       sections: [
         { sectionTitle: null, items: [attributeOptions.default] },
-
         {
           sectionTitle: {
             id: 'global.settings',
@@ -327,6 +374,7 @@ export const advancedForm = {
             attributeOptions.private,
           ],
         },
+        conditionSection,
       ],
     };
   },
@@ -340,6 +388,7 @@ export const advancedForm = {
           },
           items: [attributeOptions.private],
         },
+        conditionSection,
       ],
     };
   },
@@ -359,6 +408,7 @@ export const advancedForm = {
             attributeOptions.private,
           ],
         },
+        conditionSection,
       ],
     };
   },
@@ -366,7 +416,6 @@ export const advancedForm = {
     return {
       sections: [
         { sectionTitle: null, items: [attributeOptions.default, attributeOptions.regex] },
-
         {
           sectionTitle: {
             id: 'global.settings',
@@ -380,6 +429,7 @@ export const advancedForm = {
             attributeOptions.private,
           ],
         },
+        conditionSection,
       ],
     };
   },
@@ -392,7 +442,6 @@ export const advancedForm = {
             { ...attributeOptions.default, disabled: Boolean(data.targetField), type: 'text' },
           ],
         },
-
         {
           sectionTitle: {
             id: 'global.settings',
@@ -403,8 +452,10 @@ export const advancedForm = {
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,
+            attributeOptions.regex,
           ],
         },
+        conditionSection,
       ],
     };
   },

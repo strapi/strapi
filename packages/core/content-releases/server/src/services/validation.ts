@@ -1,5 +1,5 @@
 import { errors, contentTypes } from '@strapi/utils';
-import { Core, UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';

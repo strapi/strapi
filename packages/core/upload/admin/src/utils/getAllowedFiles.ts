@@ -15,14 +15,18 @@ export interface AllowedFiles extends File {
   type: string;
 }
 
-export const getAllowedFiles = (pluralTypes: string[], files: AllowedFiles[]) => {
+export const getAllowedFiles = (pluralTypes: string[] | null, files: AllowedFiles[]) => {
+  if (!pluralTypes) {
+    return files;
+  }
+
   const singularTypes = toSingularTypes(pluralTypes);
 
   const allowedFiles = files.filter((file) => {
     const fileType = file?.mime?.split('/')[0];
 
     if (!fileType) {
-      return false;
+      return singularTypes.includes('file');
     }
 
     if (singularTypes.includes('file') && !['video', 'image', 'audio'].includes(fileType)) {

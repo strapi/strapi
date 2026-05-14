@@ -1,6 +1,6 @@
 # PR checker for status
 
-This action checks a PR labels, milestone and status to validate it is ready for merging into main.
+This action checks a PR labels, milestone and status to validate it is ready for merging.
 
 > ❗️ When making changes to this code, make sure to run the build before committing. See [Development](#development) to know more.
 
@@ -12,14 +12,14 @@ This action checks a PR labels, milestone and status to validate it is ready for
 - `flag: don't merge`
 
 2. The PR should have one and only one `source: *` label.
-3. The PR should have one and only one `issue-type: *` label.
-4. The PR must have a milestone defined.
+3. The PR should have one and only one `pr: *` label.
+4. PRs targeting `develop` must have a milestone defined.
 
 ## Contributing
 
 ### Requirements
 
-- The code is compatible with Node 18, 20, and 22
+- The code is compatible with Node 20, 22, and 24
 
 ### Dependencies
 

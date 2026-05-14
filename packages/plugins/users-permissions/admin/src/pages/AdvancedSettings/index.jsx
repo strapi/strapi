@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography, useNotifyAT } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
@@ -135,6 +135,7 @@ const AdvancedSettingsPage = () => {
                     disabled={!modified || !canUpdate}
                     startIcon={<Check />}
                     size="S"
+                    fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>

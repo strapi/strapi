@@ -14,6 +14,9 @@ const categories = {
 
 const UID_PRODUCT = 'api::product.product';
 const UID_CATEGORY = 'api::category.category';
+const UID_TAG = 'api::tag.tag';
+const UID_VDP = 'api::vdp.vdp';
+const UID_PAGE = 'api::page.page';
 
 const productModel = {
   displayName: 'Product',
@@ -53,6 +56,16 @@ const productModel = {
       relation: 'oneToOne',
       target: UID_CATEGORY,
       targetAttribute: 'oneproduct',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    tag: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: UID_TAG,
       pluginOptions: {
         i18n: {
           localized: true,
@@ -107,6 +120,18 @@ const categoryModel = {
   },
 };
 
+const tagModel = {
+  displayName: 'Tag',
+  singularName: 'tag',
+  pluralName: 'tags',
+  draftAndPublish: false,
+  attributes: {
+    name: {
+      type: 'string',
+    },
+  },
+};
+
 const compoModel = {
   displayName: 'compo',
   attributes: {
@@ -126,14 +151,48 @@ const compoModel = {
   },
 };
 
+// Content type with a field named 'filters' — reproduces issue #21338
+// where the attribute name collides with the query keyword 'filters'
+const vdpModel = {
+  displayName: 'VDP',
+  singularName: 'vdp',
+  pluralName: 'vdps',
+  draftAndPublish: true,
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    filters: {
+      type: 'string',
+    },
+  },
+};
+
+const pageModel = {
+  displayName: 'Page',
+  singularName: 'page',
+  pluralName: 'pages',
+  draftAndPublish: true,
+  attributes: {
+    title: {
+      type: 'string',
+    },
+    searchResultsPage: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: UID_VDP,
+    },
+  },
+};
+
 describe('CM API - Number of draft relations', () => {
   const nonDefaultLocale = 'fr';
 
   beforeAll(async () => {
     await builder
-      .addContentTypes([categoryModel])
+      .addContentTypes([categoryModel, tagModel, vdpModel])
       .addComponent(compoModel)
-      .addContentTypes([productModel])
+      .addContentTypes([productModel, pageModel])
       .build();
 
     strapi = await createStrapiInstance();
@@ -191,6 +250,9 @@ describe('CM API - Number of draft relations', () => {
   });
 
   afterAll(async () => {
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -439,6 +501,36 @@ describe('CM API - Number of draft relations', () => {
     expect(body.data).toBe(8);
   });
 
+  test('Return 0 and not crash when product has a relation to a non-draftAndPublish type', async () => {
+    // Create a tag (non-D&P content type)
+    const {
+      body: { data: tag },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_TAG}`,
+      body: { name: 'Important' },
+    });
+
+    // Create a product with a relation to the non-D&P tag
+    const {
+      body: { data: product },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
+      body: { name: 'TaggedProduct', tag: tag.documentId },
+    });
+
+    // countDraftRelations should not crash and should return 0
+    // because the tag content type has no draft/publish concept
+    const { body, statusCode } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
+    });
+
+    expect(statusCode).toBe(200);
+    expect(body.data).toBe(0);
+  });
+
   test('Correctly count the number of draft relations across multiple locales and document IDs', async () => {
     // Reset the database and create new data for this test
     await strapi.query(UID_PRODUCT).deleteMany({});
@@ -511,5 +603,37 @@ describe('CM API - Number of draft relations', () => {
     const totalDraftRelations = counts.reduce((acc, { body }) => acc + body.data, 0);
 
     expect(totalDraftRelations).toBe(3);
+  });
+
+  // Regression test for issue #21338: attribute named 'filters' collides with query keyword
+  test('countDraftRelations does not crash when a related type has an attribute named "filters"', async () => {
+    // Create a VDP entry (has a 'filters' string attribute)
+    const {
+      body: { data: vdp },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_VDP}`,
+      body: { name: 'Test VDP', filters: 'some filter value' },
+    });
+
+    // Create a Page with a relation to the VDP
+    const {
+      body: { data: page },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_PAGE}`,
+      body: { title: 'Test Page', searchResultsPage: vdp.documentId },
+    });
+
+    // countDraftRelations should return 200, not 400
+    // Before the fix, this would fail with:
+    //   "Invalid key publishedAt at searchResultsPage.filters"
+    const { body, statusCode } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${UID_PAGE}/${page.documentId}/actions/countDraftRelations`,
+    });
+
+    expect(statusCode).toBe(200);
+    expect(typeof body.data).toBe('number');
   });
 });

@@ -12,7 +12,7 @@ import generateService from './plops/service';
 export default (plop: NodePlopAPI) => {
   // Plop config
   plop.setWelcomeMessage('Strapi Generators');
-  plop.addHelper('pluralize', (text: string) => pluralize(text));
+  plop.setHelper('pluralize', (text: string) => pluralize(text));
 
   // Generators
   generateApi(plop);

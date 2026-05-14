@@ -323,4 +323,215 @@ describe('User Controller', () => {
       expect(ctx.body).toStrictEqual({ data: { ...user, ...body } });
     });
   });
+
+  describe('Delete user', () => {
+    const user = {
+      id: 1,
+      firstname: 'Kai',
+      lastname: 'Doe',
+      email: 'kaidoe@email.com',
+      roles: [1, 2],
+    };
+
+    test('Delete user successfully', async () => {
+      const deleteById = jest.fn(() => Promise.resolve(user));
+      const sanitizeUser = jest.fn((user) => user);
+      const deleted = jest.fn();
+      const ctx = createContext({ params: { id: user.id } }, { deleted }) as any;
+
+      ctx.state = { user: { id: 2 } };
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { deleteById, sanitizeUser },
+          },
+        },
+      } as any;
+
+      await userController.deleteOne(ctx);
+
+      expect(deleteById).toHaveBeenCalledWith(user.id);
+      expect(sanitizeUser).toHaveBeenCalledWith(user);
+      expect(deleted).toHaveBeenCalledWith({ data: user });
+    });
+
+    test('Prevents user from deleting themselves', async () => {
+      const deleteById = jest.fn();
+      const ctx = createContext({ params: { id: user.id } }) as any;
+
+      ctx.state = { user: { id: user.id } }; // Same user ID
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { deleteById },
+          },
+        },
+      } as any;
+
+      expect.assertions(3);
+
+      try {
+        await userController.deleteOne(ctx);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
+        expect(e.message).toEqual('You cannot delete your own user');
+      }
+
+      expect(deleteById).not.toHaveBeenCalled();
+    });
+
+    test('Handles missing user in context', async () => {
+      const deleteById = jest.fn(() => Promise.resolve(user));
+      const sanitizeUser = jest.fn((user) => user);
+      const deleted = jest.fn();
+      const ctx = createContext({ params: { id: user.id } }, { deleted }) as any;
+
+      ctx.state = { user: undefined };
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { deleteById, sanitizeUser },
+          },
+        },
+      } as any;
+
+      await userController.deleteOne(ctx);
+
+      expect(deleteById).toHaveBeenCalledWith(user.id);
+      expect(sanitizeUser).toHaveBeenCalledWith(user);
+      expect(deleted).toHaveBeenCalledWith({ data: user });
+    });
+
+    test('User not found for deletion', async () => {
+      const deleteById = jest.fn(() => Promise.resolve(null));
+      const notFound = jest.fn();
+      const ctx = createContext({ params: { id: 999 } }, { notFound }) as any;
+
+      ctx.state = { user: { id: 2 } };
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { deleteById },
+          },
+        },
+      } as any;
+
+      await userController.deleteOne(ctx);
+
+      expect(deleteById).toHaveBeenCalledWith(999);
+      expect(notFound).toHaveBeenCalledWith('User not found');
+    });
+  });
+
+  describe('Delete multiple users', () => {
+    const users = [
+      { id: 1, firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com', roles: [1, 2] },
+      { id: 2, firstname: 'John', lastname: 'Smith', email: 'john@email.com', roles: [1] },
+    ];
+
+    test('Delete multiple users successfully', async () => {
+      const deleteByIds = jest.fn(() => Promise.resolve(users));
+      const sanitizeUser = jest.fn((user) => user);
+      const deleted = jest.fn();
+      const body = { ids: [1, 2] };
+      const ctx = createContext({ body }, { deleted }) as any;
+
+      // Mock different user making the request
+      ctx.state = { user: { id: 3 } }; // Different user ID
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { deleteByIds, sanitizeUser },
+          },
+        },
+      } as any;
+
+      await userController.deleteMany(ctx);
+
+      expect(deleteByIds).toHaveBeenCalledWith([1, 2]);
+      expect(sanitizeUser).toHaveBeenCalledTimes(2);
+      expect(deleted).toHaveBeenCalledWith({ data: users });
+    });
+
+    test('Prevents user from deleting themselves in batch delete', async () => {
+      const deleteByIds = jest.fn();
+      const body = { ids: [1, 2, 3] };
+      const ctx = createContext({ body }) as any;
+
+      ctx.state = { user: { id: 2 } };
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { deleteByIds },
+          },
+        },
+      } as any;
+
+      try {
+        await userController.deleteMany(ctx);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
+        expect(e.message).toEqual('You cannot delete your own user');
+      }
+
+      expect(deleteByIds).not.toHaveBeenCalled();
+    });
+
+    test('Handles missing user in context for batch delete', async () => {
+      const deleteByIds = jest.fn(() => Promise.resolve(users));
+      const sanitizeUser = jest.fn((user) => user);
+      const deleted = jest.fn();
+      const body = { ids: [1, 2] };
+      const ctx = createContext({ body }, { deleted }) as any;
+
+      ctx.state = { user: undefined };
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { deleteByIds, sanitizeUser },
+          },
+        },
+      } as any;
+
+      await userController.deleteMany(ctx);
+
+      expect(deleteByIds).toHaveBeenCalledWith([1, 2]);
+      expect(sanitizeUser).toHaveBeenCalledTimes(2);
+      expect(deleted).toHaveBeenCalledWith({ data: users });
+    });
+
+    test('Handles string IDs in batch delete self-prevention check', async () => {
+      const deleteByIds = jest.fn(() => Promise.resolve(users));
+      const sanitizeUser = jest.fn((user) => user);
+      const deleted = jest.fn();
+      const body = { ids: [1, 2, 3] };
+      const ctx = createContext({ body }, { deleted }) as any;
+
+      ctx.state = { user: { id: 2 } };
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: { deleteByIds, sanitizeUser },
+          },
+        },
+      } as any;
+
+      try {
+        await userController.deleteMany(ctx);
+      } catch (e: any) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
+        expect(e.message).toEqual('You cannot delete your own user');
+      }
+
+      expect(deleteByIds).not.toHaveBeenCalled();
+    });
+  });
 });

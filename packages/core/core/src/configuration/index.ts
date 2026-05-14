@@ -12,12 +12,11 @@ import loadConfigDir from './config-loader';
 import { getDirs } from './get-dirs';
 
 import type { StrapiOptions } from '../Strapi';
+import { version as strapiVersion } from '../../package.json';
 
 dotenv.config({ path: process.env.ENV_PATH });
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-
-const { version: strapiVersion } = require(path.join(__dirname, '../../package.json'));
 
 const defaultConfig = {
   server: {
@@ -61,6 +60,7 @@ export const loadConfiguration = (opts: StrapiOptions) => {
     autoReload,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
+    installId: _.get(pkgJSON, 'strapi.installId'),
     packageJsonStrapi: _.omit(_.get(pkgJSON, 'strapi', {}), 'uuid'),
     info: {
       ...pkgJSON,

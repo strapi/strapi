@@ -1,3 +1,1 @@
-import pluginPkg from '../../package.json';
-
-export const pluginId = pluginPkg.name.replace(/^@strapi\//i, '');
+export const pluginId = 'content-type-builder';

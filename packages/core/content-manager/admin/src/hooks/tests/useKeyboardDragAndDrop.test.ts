@@ -1,6 +1,6 @@
 import type { KeyboardEvent } from 'react';
 
-import { act, renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useKeyboardDragAndDrop } from '../useKeyboardDragAndDrop';
 
@@ -12,27 +12,28 @@ describe('useKeyboardDragAndDrop', () => {
     }) as unknown as KeyboardEvent<HTMLButtonElement>;
 
   describe('onGrabItem', () => {
-    it('should be called when the event is the enter key', () => {
+    it('should be called when the event is the enter key', async () => {
       const onGrabItem = jest.fn();
       const { result } = renderHook(() =>
         useKeyboardDragAndDrop(true, 0, { onGrabItem, onMoveItem: jest.fn() })
       );
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Enter'));
       });
 
       expect(onGrabItem).toHaveBeenCalledWith(0);
     });
 
-    it('should be called when the event is the space key', () => {
+    it('should be called when the event is the space key', async () => {
       const onGrabItem = jest.fn();
       const { result } = renderHook(() =>
         useKeyboardDragAndDrop(true, 0, { onGrabItem, onMoveItem: jest.fn() })
       );
 
-      act(() => {
+      await waitFor(() => {
         result.current(event(' '));
+        result.current(event('Enter'));
       });
 
       expect(onGrabItem).toHaveBeenCalledWith(0);
@@ -40,34 +41,34 @@ describe('useKeyboardDragAndDrop', () => {
   });
 
   describe('onDropItem', () => {
-    it('should be called after the enter key is pressed twice', () => {
+    it('should be called after the enter key is pressed twice', async () => {
       const onDropItem = jest.fn();
       const { result } = renderHook(() =>
         useKeyboardDragAndDrop(true, 0, { onDropItem, onMoveItem: jest.fn() })
       );
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Enter'));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Enter'));
       });
 
       expect(onDropItem).toHaveBeenCalledWith(0);
     });
 
-    it('should be called after the space key is pressed twice', () => {
+    it('should be called after the space key is pressed twice', async () => {
       const onDropItem = jest.fn();
       const { result } = renderHook(() =>
         useKeyboardDragAndDrop(true, 0, { onDropItem, onMoveItem: jest.fn() })
       );
 
-      act(() => {
+      await waitFor(() => {
         result.current(event(' '));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event(' '));
       });
 
@@ -76,40 +77,40 @@ describe('useKeyboardDragAndDrop', () => {
   });
 
   describe('onCancel', () => {
-    it('should be called when the escape key is pressed provided that the enter or space key has been pressed first', () => {
+    it('should be called when the escape key is pressed provided that the enter or space key has been pressed first', async () => {
       const onCancel = jest.fn();
       const { result } = renderHook(() =>
         useKeyboardDragAndDrop(true, 0, { onCancel, onMoveItem: jest.fn() })
       );
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Enter'));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Escape'));
       });
 
       expect(onCancel).toHaveBeenCalledWith(0);
 
-      act(() => {
+      await waitFor(() => {
         result.current(event(' '));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Escape'));
       });
 
       expect(onCancel).toHaveBeenCalledTimes(2);
     });
 
-    it('should not be called if neither the space nor enter key have been pressed first', () => {
+    it('should not be called if neither the space nor enter key have been pressed first', async () => {
       const onCancel = jest.fn();
       const { result } = renderHook(() =>
         useKeyboardDragAndDrop(true, 0, { onCancel, onMoveItem: jest.fn() })
       );
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Escape'));
       });
 
@@ -118,90 +119,90 @@ describe('useKeyboardDragAndDrop', () => {
   });
 
   describe('onMoveItem', () => {
-    it('should be called when the down arrow is pressed provided the enter key has been pressed first', () => {
+    it('should be called when the down arrow is pressed provided the enter key has been pressed first', async () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 0, { onMoveItem }));
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Enter'));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('ArrowDown'));
       });
 
       expect(onMoveItem).toHaveBeenCalledWith(1, 0);
     });
 
-    it('should be called when the right arrow is pressed provided the enter key has been pressed first', () => {
+    it('should be called when the right arrow is pressed provided the enter key has been pressed first', async () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 0, { onMoveItem }));
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Enter'));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('ArrowRight'));
       });
 
       expect(onMoveItem).toHaveBeenCalledWith(1, 0);
     });
 
-    it('should not be called with either the down arrow or right arrow if the enter key has not been pressed prior', () => {
+    it('should not be called with either the down arrow or right arrow if the enter key has not been pressed prior', async () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 0, { onMoveItem }));
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('ArrowDown'));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('ArrowRight'));
       });
 
       expect(onMoveItem).not.toHaveBeenCalled();
     });
 
-    it('should be called when the up arrow is pressed provided the enter key has been pressed first', () => {
+    it('should be called when the up arrow is pressed provided the enter key has been pressed first', async () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 1, { onMoveItem }));
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Enter'));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('ArrowUp'));
       });
 
       expect(onMoveItem).toHaveBeenCalledWith(0, 1);
     });
 
-    it('should be called when the left arrow is pressed provided the enter key has been pressed first', () => {
+    it('should be called when the left arrow is pressed provided the enter key has been pressed first', async () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 1, { onMoveItem }));
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('Enter'));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('ArrowLeft'));
       });
 
       expect(onMoveItem).toHaveBeenCalledWith(0, 1);
     });
 
-    it('should not be called with either the left or up arrow key if the enter key has not been pressed first', () => {
+    it('should not be called with either the left or up arrow key if the enter key has not been pressed first', async () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 1, { onMoveItem }));
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('ArrowUp'));
       });
 
-      act(() => {
+      await waitFor(() => {
         result.current(event('ArrowLeft'));
       });
 

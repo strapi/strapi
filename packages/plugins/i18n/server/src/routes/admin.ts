@@ -73,5 +73,51 @@ export default {
         policies: ['admin::isAuthenticatedAdmin'],
       },
     },
+    {
+      method: 'GET',
+      path: '/content-manager/get-fill-from-locale/:model',
+      handler: 'content-types.getFillFromLocaleData',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/settings',
+      handler: 'settings.getSettings',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/settings',
+      handler: 'settings.updateSettings',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/ai-localization-jobs/collection-types/:contentType/:documentId',
+      handler: 'ai-localization-jobs.getJobForCollectionType',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/ai-localization-jobs/single-types/:contentType',
+      handler: 'ai-localization-jobs.getJobForSingleType',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
   ],
 };

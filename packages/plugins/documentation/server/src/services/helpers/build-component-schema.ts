@@ -23,7 +23,7 @@ const getRequiredAttributes = (allAttributes: Struct.SchemaAttributes) => {
 };
 
 /**
- * @decription Get all open api schema objects for a given content type
+ * @description Get all open api schema objects for a given content type
  *
  * @param {object} apiInfo
  * @property {string} apiInfo.uniqueName - Api name | Api name + Content type name
@@ -132,7 +132,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
       type: 'object',
       ...(requiredAttributes.length && { required: requiredAttributes }),
       properties: {
-        id: { type: 'number' },
+        id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
         documentId: { type: 'string' },
         ...cleanSchemaAttributes(attributes, { didAddStrapiComponentsToSchemas }),
       },

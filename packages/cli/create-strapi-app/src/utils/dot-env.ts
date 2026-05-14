@@ -15,6 +15,7 @@ APP_KEYS=<%= appKeys %>
 API_TOKEN_SALT=<%= apiTokenSalt %>
 ADMIN_JWT_SECRET=<%= adminJwtToken %>
 TRANSFER_TOKEN_SALT=<%= transferTokenSalt %>
+ENCRYPTION_KEY=<%= encryptionKey %>
 
 # Database
 DATABASE_CLIENT=<%= database.client %>
@@ -35,6 +36,7 @@ export function generateDotEnv(scope: Scope) {
     apiTokenSalt: generateASecret(),
     transferTokenSalt: generateASecret(),
     adminJwtToken: generateASecret(),
+    encryptionKey: generateASecret(),
     database: {
       client: scope.database.client,
       connection: {

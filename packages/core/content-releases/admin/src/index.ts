@@ -4,7 +4,7 @@ import { ReleaseAction } from './components/ReleaseAction';
 import { ReleaseActionModalForm } from './components/ReleaseActionModal';
 import { addColumnToTableHook } from './components/ReleaseListCell';
 import { Panel as ReleasesPanel } from './components/ReleasesPanel';
-import { PERMISSIONS } from './constants';
+import { PERMISSIONS, PLUGIN_ID } from './constants';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
@@ -67,10 +67,12 @@ const admin: Plugin.Config.AdminInput = {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
         },
+        licenseOnly: true,
         permissions: [],
-        async Component() {
-          const { ProtectedReleasesSettingsPage } = await import('./pages/ReleasesSettingsPage');
-          return { default: ProtectedReleasesSettingsPage };
+        Component() {
+          return import('./pages/ReleasesSettingsPage').then((mod) => ({
+            default: mod.ProtectedReleasesSettingsPage,
+          }));
         },
       });
 
@@ -89,21 +91,45 @@ const admin: Plugin.Config.AdminInput = {
 
       // Hook that adds a column into the CM's LV table
       app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+
+      app.widgets.register([
+        {
+          icon: PaperPlane,
+          title: {
+            id: `${PLUGIN_ID}.widget.upcoming-releases.title`,
+            defaultMessage: 'Upcoming releases',
+          },
+          component: async () => {
+            const { UpcomingReleasesWidget } = await import('./components/Widgets');
+            return UpcomingReleasesWidget;
+          },
+          pluginId: PLUGIN_ID,
+          id: 'upcoming-releases',
+          link: {
+            label: {
+              id: `${PLUGIN_ID}.widget.upcoming-releases.link`,
+              defaultMessage: 'Open Releases',
+            },
+            href: '/plugins/content-releases',
+          },
+        },
+      ]);
     } else if (
       !window.strapi.features.isEnabled('cms-content-releases') &&
       window.strapi?.flags?.promoteEE
     ) {
       app.addSettingsLink('global', {
         id: pluginId,
-        to: '/plugins/purchase-content-releases',
+        to: 'purchase-content-releases',
         intlLabel: {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
         },
         permissions: [],
-        async Component() {
-          const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
-          return { default: PurchaseContentReleases };
+        Component() {
+          return import('./pages/PurchaseContentReleases').then((mod) => ({
+            default: mod.PurchaseContentReleases,
+          }));
         },
         licenseOnly: true,
       });

@@ -1,4 +1,4 @@
-import { Modules } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import { isNil } from 'lodash/fp';

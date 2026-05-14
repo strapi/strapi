@@ -1,4 +1,4 @@
-import { Data, Modules } from '@strapi/types';
+import type { Data, Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 /**
@@ -20,6 +20,37 @@ export declare namespace GetNonLocalizedFields {
   export interface Response {
     nonLocalizedFields: object;
     localizations: Array<{ id: Data.ID; locale: string; publishedAt: string | null }>;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * GET /i18n/content-manager/get-fill-from-locale - Get data from source locale to fill target locale
+ */
+export interface FillFromLocaleParams {
+  model: string;
+  documentId?: string;
+  sourceLocale: string;
+  targetLocale: string;
+  collectionType: 'collection-types' | 'single-types';
+}
+
+export declare namespace FillFromLocale {
+  export interface Request {
+    body: {};
+    query: Params;
+  }
+
+  export interface Params {
+    model: string;
+    documentId?: string;
+    sourceLocale: string;
+    targetLocale: string;
+    collectionType: 'collection-types' | 'single-types';
+  }
+
+  export interface Response {
+    data: Record<string, unknown>;
     error?: errors.ApplicationError;
   }
 }

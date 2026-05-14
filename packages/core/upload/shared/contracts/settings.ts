@@ -4,7 +4,7 @@
  */
 
 import { errors } from '@strapi/utils';
-import { Utils } from '@strapi/types';
+import type { Utils } from '@strapi/types';
 
 export interface Settings {
   data: {
@@ -12,8 +12,11 @@ export interface Settings {
     responsiveDimensions?: boolean;
     autoOrientation?: boolean;
     videoPreview?: boolean;
+    aiMetadata?: boolean;
   };
 }
+
+export type SettingsData = Settings['data'];
 
 /**
  * GET /upload/settings

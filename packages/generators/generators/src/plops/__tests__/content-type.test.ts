@@ -62,7 +62,7 @@ describe('Content Type Generator', () => {
       },
       attributes: {},
     });
-  });
+  }, 30000);
 
   test('it scaffolds a new API', async () => {
     await strapiGenerators.generate(

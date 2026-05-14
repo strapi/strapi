@@ -4,6 +4,7 @@ import type { AdminUser } from '../../../shared/contracts/shared';
 import { getService } from '../utils';
 import { validateProfileUpdateInput } from '../validation/user';
 import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
+import { getSessionManager } from '../../../shared/utils/session-auth';
 
 export default {
   async getMe(ctx: Context) {
@@ -28,10 +29,15 @@ export default {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
 
       if (!isValid) {
-        // @ts-expect-error - refactor ctx bad request to take a second argument
         return ctx.badRequest('ValidationError', {
           currentPassword: ['Invalid credentials'],
         });
+      }
+
+      // Invalidate all sessions when password changes for security
+      const sessionManager = getSessionManager();
+      if (sessionManager && sessionManager.hasOrigin('admin')) {
+        await sessionManager('admin').invalidateRefreshToken(String(ctx.state.user.id));
       }
     }
 

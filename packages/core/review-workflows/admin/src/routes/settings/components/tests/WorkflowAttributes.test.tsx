@@ -1,6 +1,6 @@
 import { Form } from '@strapi/admin/strapi-admin';
 import { render, waitFor, screen, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { WorkflowAttributes, WorkflowAttributesProps } from '../WorkflowAttributes';
 
@@ -66,21 +66,19 @@ describe('WorkflowAttributes', () => {
    */
   it.skip('should not render a collection-type group if there are no collection-types', async () => {
     server.use(
-      rest.get('/content-manager/content-types', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            data: [
-              {
-                uid: 'uid1',
-                isDisplayed: true,
-                kind: 'singleType',
-                info: {
-                  displayName: 'Single CT 1',
-                },
+      http.get('/content-manager/content-types', () => {
+        return HttpResponse.json({
+          data: [
+            {
+              uid: 'uid1',
+              isDisplayed: true,
+              kind: 'singleType',
+              info: {
+                displayName: 'Single CT 1',
               },
-            ],
-          })
-        );
+            },
+          ],
+        });
       })
     );
 
@@ -98,21 +96,19 @@ describe('WorkflowAttributes', () => {
    */
   it.skip('should not render a collection-type group if there are no single-types', async () => {
     server.use(
-      rest.get('/content-manager/content-types', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            data: [
-              {
-                uid: 'uid1',
-                isDisplayed: true,
-                kind: 'collectionType',
-                info: {
-                  displayName: 'Collection CT 1',
-                },
+      http.get('/content-manager/content-types', () => {
+        return HttpResponse.json({
+          data: [
+            {
+              uid: 'uid1',
+              isDisplayed: true,
+              kind: 'collectionType',
+              info: {
+                displayName: 'Collection CT 1',
               },
-            ],
-          })
-        );
+            },
+          ],
+        });
       })
     );
 

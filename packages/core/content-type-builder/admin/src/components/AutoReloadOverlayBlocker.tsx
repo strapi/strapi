@@ -26,13 +26,14 @@ export interface AutoReloadOverlayBlockerConfig {
  * -----------------------------------------------------------------------------------------------*/
 
 export interface AutoReloadOverlayBlockerContextValue {
-  lockAppWithAutoreload?: (config?: AutoReloadOverlayBlockerConfig) => void;
-  unlockAppWithAutoreload?: () => void;
+  lockAppWithAutoreload: (config?: AutoReloadOverlayBlockerConfig) => void;
+  unlockAppWithAutoreload: () => void;
 }
 
-const AutoReloadOverlayBlockerContext = React.createContext<AutoReloadOverlayBlockerContextValue>(
-  {}
-);
+const AutoReloadOverlayBlockerContext = React.createContext<AutoReloadOverlayBlockerContextValue>({
+  lockAppWithAutoreload: () => {},
+  unlockAppWithAutoreload: () => {},
+});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
@@ -42,7 +43,7 @@ export interface AutoReloadOverlayBlockerProviderProps {
   children: React.ReactNode;
 }
 
-const MAX_ELAPSED_TIME = 30 * 1000;
+const MAX_ELAPSED_TIME = 300 * 1000;
 
 const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlockerProviderProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -144,7 +145,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) =>
           </Flex>
           {displayedIcon === 'reload' && (
             <IconBox padding={6} background="primary100" borderColor="primary200">
-              <LoaderReload width="3.6rem" height="3.6rem" />
+              <LoaderReload width="4rem" height="4rem" />
             </IconBox>
           )}
           {displayedIcon === 'time' && (
@@ -209,6 +210,9 @@ const Overlay = styled(Flex)`
 
 const IconBox = styled(Box)`
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   svg {
     > path {
       fill: ${({ theme }) => theme.colors.primary600} !important;

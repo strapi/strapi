@@ -1,3 +1,15 @@
+/**
+ * TODO:
+ * # Bidirectional relations
+ *
+ *  Testing bidirectional relations is a bit tricky with our current setup on the api test.
+ *  As soon as we can test it we should implement:
+ *  - Bidirectional relations targeting the same content type (self referencing)
+ *    - Can connect, disconnect, reorder
+ *    - Can publish and discard
+ *  - Test inverse order of relations is preserved when publishing.
+ *
+ */
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createContentAPIRequest } from 'api-tests/request';
@@ -1480,6 +1492,94 @@ describe('Relations', () => {
       });
 
       expect(updatedShop.data).toMatchObject(expectedShop);
+    });
+  });
+
+  /**
+   * GH#22611: REST create/update must accept relation values as `{ documentId }` objects
+   * (not only scalars or `{ connect: [...] }`). Previously this failed validation with
+   * "Invalid key documentId".
+   */
+  describe('GH#22611: direct relation object { documentId } (REST shorthand, no connect/set)', () => {
+    test('creates a shop with oneToOne relation using { documentId } object', async () => {
+      const res = await createEntry(
+        'shops',
+        {
+          name: 'GH22611 direct docId',
+          products_ow: { documentId: docid1 },
+        },
+        populateShop
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(res.data).toMatchObject({
+        name: 'GH22611 direct docId',
+        products_ow: { documentId: docid1 },
+      });
+    });
+
+    test('updates oneToOne relation using { documentId } object', async () => {
+      const created = await createEntry(
+        'shops',
+        {
+          name: 'GH22611 update',
+          products_ow: { documentId: docid1 },
+        },
+        populateShop
+      );
+
+      expect(created.error).toBeUndefined();
+
+      const updated = await updateEntry(
+        'shops',
+        created.data.documentId,
+        {
+          name: 'GH22611 update',
+          products_ow: { documentId: docid2 },
+        },
+        populateShop
+      );
+
+      expect(updated.error).toBeUndefined();
+      expect(updated.data.products_ow).toMatchObject({ documentId: docid2 });
+    });
+
+    test('creates with manyToOne and oneToMany using { documentId } object form', async () => {
+      const res = await createEntry(
+        'shops',
+        {
+          name: 'GH22611 mixed',
+          products_mo: { documentId: docid1 },
+          products_om: [{ documentId: docid2 }, { documentId: docid3 }],
+        },
+        populateShop
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(res.data).toMatchObject({
+        products_mo: { documentId: docid1 },
+        products_om: [{ documentId: docid2 }, { documentId: docid3 }],
+      });
+    });
+
+    test('creates nested component relation using { documentId } object (non-repeatable myCompo)', async () => {
+      const res = await createEntry(
+        'shops',
+        {
+          name: 'GH22611 component',
+          myCompo: {
+            name: 'inner',
+            compo_products_ow: { documentId: docid1 },
+          },
+        },
+        populateShop
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(res.data.myCompo).toMatchObject({
+        name: 'inner',
+        compo_products_ow: { documentId: docid1 },
+      });
     });
   });
 });

@@ -1,10 +1,8 @@
-import type { DynamicPromptsFunction } from 'node-plop';
-
 import validateAttributeInput from '../utils/validate-attribute-input';
 
 interface AttributeAnswer {
   attributeName: string;
-  attributeType: typeof DEFAULT_TYPES;
+  attributeType: (typeof DEFAULT_TYPES)[number];
   enum?: string;
   multiple?: boolean;
 }
@@ -32,7 +30,7 @@ const DEFAULT_TYPES = [
   'boolean',
 ] as const;
 
-const getAttributesPrompts: DynamicPromptsFunction = async (inquirer) => {
+const getAttributesPrompts = async (inquirer: any) => {
   const { addAttributes } = await inquirer.prompt([
     {
       type: 'confirm',
@@ -47,7 +45,7 @@ const getAttributesPrompts: DynamicPromptsFunction = async (inquirer) => {
    * @param {import('inquirer').Inquirer} inquirer
    * @returns {Promise<void>}
    */
-  const createNewAttributes = async (inquirer: Parameters<DynamicPromptsFunction>[0]) => {
+  const createNewAttributes = async (inquirer: any) => {
     const answers = await inquirer.prompt([
       {
         type: 'input',
@@ -65,13 +63,13 @@ const getAttributesPrompts: DynamicPromptsFunction = async (inquirer) => {
         }),
       },
       {
-        when: (answers) => answers.attributeType === 'enumeration',
+        when: (answers: AttributeAnswer) => answers.attributeType === 'enumeration',
         type: 'input',
         name: 'enum',
         message: 'Add values separated by a comma',
       },
       {
-        when: (answers) => answers.attributeType === 'media',
+        when: (answers: AttributeAnswer) => answers.attributeType === 'media',
         type: 'list',
         name: 'multiple',
         message: 'Choose media type',

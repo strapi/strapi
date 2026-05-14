@@ -8,20 +8,18 @@ describe('useReviewWorkflows', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.workflows).toMatchInlineSnapshot(`
-      [
-        {
-          "id": 1,
-          "stages": [
-            {
-              "color": "#FFFFFF",
-              "id": 1,
-              "name": "To Review",
-            },
-          ],
-        },
-      ]
-    `);
+    expect(result.current.workflows).toEqual([
+      {
+        id: 1,
+        stages: [
+          {
+            id: 1,
+            name: 'To Review',
+            color: '#FFFFFF',
+          },
+        ],
+      },
+    ]);
   });
 
   it.todo('creates a workflow');

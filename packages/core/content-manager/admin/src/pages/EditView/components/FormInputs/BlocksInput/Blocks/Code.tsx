@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
-import * as Prism from 'prismjs';
+import * as PrismModule from 'prismjs';
 import { useIntl } from 'react-intl';
 import { BaseRange, Element, Editor, Node, NodeEntry, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
@@ -13,14 +13,85 @@ import { codeLanguages } from '../utils/constants';
 import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
-// Import the PrismJS theme to highlight the code
+
 import 'prismjs/themes/prism-solarizedlight.css';
-import './utils/prismLanguages';
+import 'prismjs/components/prism-asmatmel';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-basic';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-clojure';
+import 'prismjs/components/prism-cobol';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-dart';
+import 'prismjs/components/prism-docker';
+import 'prismjs/components/prism-elixir';
+import 'prismjs/components/prism-erlang';
+import 'prismjs/components/prism-fortran';
+import 'prismjs/components/prism-fsharp';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-graphql';
+import 'prismjs/components/prism-groovy';
+import 'prismjs/components/prism-haskell';
+import 'prismjs/components/prism-haxe';
+import 'prismjs/components/prism-ini';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-julia';
+import 'prismjs/components/prism-kotlin';
+import 'prismjs/components/prism-latex';
+import 'prismjs/components/prism-lua';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-matlab';
+import 'prismjs/components/prism-makefile';
+import 'prismjs/components/prism-objectivec';
+import 'prismjs/components/prism-perl';
+import 'prismjs/components/prism-php';
+import 'prismjs/components/prism-powershell';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-r';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-sas';
+import 'prismjs/components/prism-scala';
+import 'prismjs/components/prism-scheme';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-stata';
+import 'prismjs/components/prism-swift';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-vbnet';
+import 'prismjs/components/prism-yaml';
+
+/**
+ * prismjs is UMD and may not expose a namespace when bundled by Vite; the content-manager
+ * index preloads it so `window.Prism` is set. Use that when the module import is empty.
+ */
+function resolvePrism(): typeof PrismModule | undefined {
+  if (typeof PrismModule !== 'undefined' && PrismModule?.languages) {
+    return PrismModule;
+  }
+
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const globalPrism = (window as Window & { Prism?: typeof PrismModule }).Prism;
+  return globalPrism;
+}
+
+const Prism = resolvePrism();
 
 type BaseRangeCustom = BaseRange & { className: string };
 
 export const decorateCode = ([node, path]: NodeEntry) => {
   const ranges: BaseRangeCustom[] = [];
+
+  // Prism can be undefined when the UMD bundle doesn't expose a namespace and window.Prism
+  // isn't set yet (e.g. this chunk ran before the content-manager preload). Skip decoration.
+  if (!Prism?.languages) return ranges;
 
   // make sure it is an Slate Element
   if (!Element.isElement(node) || node.type !== 'code') return ranges;
@@ -130,6 +201,33 @@ const CodeEditor = (props: RenderElementProps) => {
   );
 };
 
+const withCode = (editor: Editor) => {
+  const { insertData } = editor;
+
+  editor.insertData = (data) => {
+    const pastedText = data.getData('text/plain');
+
+    if (pastedText && editor.selection) {
+      // Check if we're currently inside a code block
+      const codeBlockEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'code',
+      });
+
+      if (codeBlockEntry) {
+        // We're inside a code block, handle the paste specially
+        // Replace the selected content with the pasted text, preserving newlines
+        Transforms.insertText(editor, pastedText);
+        return;
+      }
+    }
+
+    // For non-code blocks, use the default behavior
+    insertData(data);
+  };
+
+  return editor;
+};
+
 const codeBlocks: Pick<BlocksStore, 'code'> = {
   code: {
     renderElement: (props) => <CodeEditor {...props} />,
@@ -147,6 +245,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       pressEnterTwiceToExit(editor);
     },
     snippets: ['```'],
+    plugin: withCode,
   },
 };
 

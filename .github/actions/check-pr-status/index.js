@@ -3,7 +3,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`, `flag: documentation`];
+const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`];
 
 async function main() {
   try {
@@ -32,15 +32,14 @@ async function main() {
       core.setFailed(`The PR must have one and only one 'pr:' label.`);
     }
 
-    // NOTE: to avoid manual work, this is commented until we can set the workflow to trigger on pull_request milestone changes.
-    // ref: https://github.community/t/feature-request-add-milestone-changes-as-activity-type-to-pull-request/16778/16
-    /*
-     const milestone = context.payload.pull_request?.milestone;
-     const hasMilestone = !!milestone;
-     if (!hasMilestone) {
-       core.setFailed(`The PR must have a milestone.`);
-     }
-     */
+    const baseRef = github.context.payload.pull_request?.base?.ref;
+    const milestone = github.context.payload.pull_request?.milestone;
+    const requiresMilestone = baseRef === 'develop';
+    const isMissingMilestone = milestone === null || milestone === undefined;
+
+    if (requiresMilestone === true && isMissingMilestone === true) {
+      core.setFailed(`The PR must have a milestone.`);
+    }
   } catch (error) {
     core.setFailed(error.message);
   }

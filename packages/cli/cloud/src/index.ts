@@ -5,6 +5,7 @@ import link from './link';
 import login from './login';
 import logout from './logout';
 import createProject from './create-project';
+import { createGrowthSsoTrial } from './create-growth-sso-trial';
 import listProjects from './list-projects';
 import listEnvironments from './environment/list';
 import linkEnvironment from './environment/link';
@@ -22,6 +23,8 @@ export const cli = {
   listEnvironments,
 };
 
+export { createGrowthSsoTrial };
+
 const cloudCommands = [
   deployProject,
   link,
@@ -35,8 +38,8 @@ const cloudCommands = [
 async function initCloudCLIConfig() {
   const localConfig = await getLocalConfig();
 
-  if (!localConfig.deviceId) {
-    localConfig.deviceId = crypto.randomUUID();
+  if (!localConfig.installId) {
+    localConfig.installId = crypto.randomUUID();
   }
 
   await saveLocalConfig(localConfig);
