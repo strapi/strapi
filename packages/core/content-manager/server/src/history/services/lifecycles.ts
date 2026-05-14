@@ -43,7 +43,7 @@ const shouldCreateHistoryVersion = (
    */
   if (
     context.action === 'update' &&
-    strapi.requestContext.get()?.request.url.endsWith('/actions/publish')
+    strapi.requestContext.get()?.request.url.split('?')[0].endsWith('/actions/publish')
   ) {
     return false;
   }

@@ -1,9 +1,41 @@
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import resources from './resources/index';
 
 const ARTICLE_UID = 'api::article.article';
+
+// Minimal schema — only what this test needs (title + i18n + draftAndPublish).
+// Avoids the heavyweight shared resources (4 content types, 5 components, fixtures)
+// which cause slow setup/teardown due to multiple Strapi restarts per schema deletion.
+const resources = {
+  schemas: {
+    'content-types': {
+      [ARTICLE_UID]: {
+        kind: 'collectionType',
+        collectionName: 'articles',
+        singularName: 'article',
+        pluralName: 'articles',
+        displayName: 'Article',
+        draftAndPublish: true,
+        pluginOptions: { i18n: { localized: true } },
+        attributes: {
+          title: {
+            type: 'string',
+            pluginOptions: { i18n: { localized: true } },
+          },
+        },
+      },
+    },
+    components: {},
+  },
+  fixtures: {
+    'content-types': {
+      [ARTICLE_UID]: [],
+    },
+  },
+  locales: [{ name: 'French', code: 'fr' }],
+};
+
 describe('Document Service - Document ID Uniqueness', () => {
   let testUtils;
   let strapi: Core.Strapi;

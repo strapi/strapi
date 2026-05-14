@@ -389,6 +389,27 @@ describe('Document Service', () => {
 
         expect(res.statusCode).toBe(400);
       });
+
+      it('GET /api/articles with filters and hasPublishedVersion returns correctly filtered results', async () => {
+        const res = await rqContent({
+          method: 'GET',
+          url: '/articles',
+          qs: {
+            status: 'draft',
+            hasPublishedVersion: 'false',
+            'filters[title][$containsi]': 'Article1',
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        res.body.data.forEach((article: { documentId: string; title?: string }) => {
+          expect(article.documentId).toBe('Article1');
+          if (article.title) {
+            expect(article.title).toContain('Article1');
+          }
+        });
+      });
     });
 
     describe('GraphQL', () => {

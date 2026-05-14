@@ -63,9 +63,10 @@ const DropFilesMessageImpl = styled(Box)<{ $leftContentWidth: number }>`
 
 interface DropFilesMessageProps {
   uploadDropZoneRef?: React.RefObject<HTMLDivElement>;
+  folderName: string;
 }
 
-const DropFilesMessage = ({ uploadDropZoneRef }: DropFilesMessageProps) => {
+const DropFilesMessage = ({ uploadDropZoneRef, folderName }: DropFilesMessageProps) => {
   const { formatMessage } = useIntl();
   const { isDragging } = useUploadDropZone();
 
@@ -102,7 +103,7 @@ const DropFilesMessage = ({ uploadDropZoneRef }: DropFilesMessageProps) => {
       <Flex gap={2} alignItems="center">
         <Folder width={20} height={20} fill="neutral0" />
         <Typography textColor="neutral0" fontWeight="semiBold">
-          Current folder{/* TODO: Replace this later with the current folder name */}
+          {folderName}
         </Typography>
       </Flex>
     </DropFilesMessageImpl>

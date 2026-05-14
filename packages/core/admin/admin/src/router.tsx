@@ -83,7 +83,7 @@ const getInitialRoutes = (): RouteObject[] => [
       //     ),
       //   }))
       // ),
-      ...[...getSettingsEERoutes(), ...ROUTES_CE].filter(
+      ...[...getSettingsEERoutes(), ...ROUTES_CE()].filter(
         (route, index, refArray) => refArray.findIndex((obj) => obj.path === route.path) === index
       ),
     ],

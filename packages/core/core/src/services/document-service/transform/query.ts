@@ -3,11 +3,14 @@ import type { UID } from '@strapi/types';
 import { curry, assoc } from 'lodash/fp';
 import { parseHasPublishedVersion, getHasPublishedVersionCondition } from '../draft-and-publish';
 
-const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
-  const query = strapi.get('query-params').transform(uid, params);
+import { pickAllowedQueryParams } from '../params';
 
-  // Parse and validate hasPublishedVersion if provided
-  const hasPublishedVersion = parseHasPublishedVersion(params?.hasPublishedVersion);
+const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
+  const allowlisted = pickAllowedQueryParams(params ?? {});
+  const query = strapi.get('query-params').transform(uid, allowlisted);
+
+  // Parse and validate hasPublishedVersion if provided (from allowlisted params only)
+  const hasPublishedVersion = parseHasPublishedVersion(allowlisted?.hasPublishedVersion);
 
   // If hasPublishedVersion is set, wrap the existing filters function to also
   // apply the hasPublishedVersion condition. This ensures the condition is

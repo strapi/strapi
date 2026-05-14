@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Form, Layouts, useForm, createRulesEngine, useIsMobile } from '@strapi/admin/strapi-admin';
+import { Form, Layouts, createRulesEngine, useForm, useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
@@ -11,6 +11,10 @@ import {
   prepareTempKeys,
   removeFieldsThatDontExistOnSchema,
 } from '../../pages/EditView/utils/data';
+import {
+  getConditionDependencyPaths,
+  getConditionDependencySubscriptionValue,
+} from '../../utils/conditionalFields';
 import { HistoryContextValue, useHistoryContext } from '../pages/History';
 
 import { VersionInputRenderer } from './VersionInputRenderer';
@@ -102,20 +106,72 @@ function getRemaingFieldsLayout({
  * FormPanel
  * -----------------------------------------------------------------------------------------------*/
 
+// Reuse one rules engine instance instead of creating a new one on every render.
+const rulesEngine = createRulesEngine();
+
+const getPanelConditionDependencyPaths = (panel: EditFieldLayout[][]): string[] | null => {
+  // Aggregate condition dependencies across all fields in the panel so we can subscribe narrowly.
+  const dependencies = new Set<string>();
+
+  for (const row of panel) {
+    for (const field of row) {
+      const condition = field.attribute?.conditions?.visible;
+
+      if (!condition) {
+        continue;
+      }
+
+      const paths = getConditionDependencyPaths(condition);
+
+      if (paths === null) {
+        return null;
+      }
+
+      for (const path of paths) {
+        dependencies.add(path);
+      }
+    }
+  }
+
+  return [...dependencies].sort();
+};
+
 const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
   const isMobile = useIsMobile();
-  const fieldValues = useForm('Fields', (state) => state.values);
-  const rulesEngine = createRulesEngine();
+  const conditionDependencyPaths = React.useMemo(
+    () => getPanelConditionDependencyPaths(panel),
+    [panel]
+  );
+  const getValues = useForm(
+    'FormPanel',
+    (state) => (state as typeof state & { getValues: () => unknown }).getValues
+  );
+  const conditionSubscriptionValue = useForm('FormPanel', (state) => {
+    return getConditionDependencySubscriptionValue(state.values, conditionDependencyPaths);
+  });
+  // For narrow subscriptions, read the latest full values lazily via getValues() to evaluate rules.
+  // This avoids rerendering for unrelated form changes while preserving correct condition evaluation.
+  const fieldValues = conditionDependencyPaths === null ? conditionSubscriptionValue : getValues();
+
+  const isFieldVisible = React.useCallback(
+    (field: EditFieldLayout) => {
+      const condition = field.attribute?.conditions?.visible;
+
+      if (!condition) {
+        return true;
+      }
+
+      return rulesEngine.evaluate(condition, fieldValues);
+    },
+    [fieldValues]
+  );
+
   if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
     const [row] = panel;
     const [field] = row;
-    const condition = field.attribute?.conditions?.visible;
 
-    if (condition) {
-      const isVisible = rulesEngine.evaluate(condition, fieldValues);
-      if (!isVisible) {
-        return null; // Skip rendering the dynamic zone if the condition is not met
-      }
+    if (!isFieldVisible(field)) {
+      return null;
     }
 
     return (
@@ -137,15 +193,7 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
         {panel.map((row, gridRowIndex) => {
-          const visibleFields = row.filter((field) => {
-            const condition = field.attribute?.conditions?.visible;
-
-            if (condition) {
-              return rulesEngine.evaluate(condition, fieldValues);
-            }
-
-            return true;
-          });
+          const visibleFields = row.filter(isFieldVisible);
 
           if (visibleFields.length === 0) {
             return null; // Skip rendering the entire grid row

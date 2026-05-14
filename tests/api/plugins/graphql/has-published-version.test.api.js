@@ -211,4 +211,32 @@ describe('Test Graphql hasPublishedVersion filter', () => {
     expect(res.body.data.articles[0].documentId).toBe('article-1');
     expect(res.body.data.articles[0].categories).toEqual([{ name: 'Category 2' }]);
   });
+
+  test('filters and hasPublishedVersion work together in the same query', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        {
+          articles_connection(
+            status: DRAFT
+            hasPublishedVersion: false
+            filters: { title: { eq: "Article 1" } }
+          ) {
+            nodes {
+              documentId
+              title
+            }
+            pageInfo {
+              total
+            }
+          }
+        }
+      `,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.articles_connection.nodes).toHaveLength(1);
+    expect(res.body.data.articles_connection.nodes[0].documentId).toBe('article-1');
+    expect(res.body.data.articles_connection.nodes[0].title).toBe('Article 1');
+    expect(res.body.data.articles_connection.pageInfo.total).toBe(1);
+  });
 });
