@@ -33,8 +33,8 @@
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "2.0.1",
     "@docusaurus/core": "3.10.1",
-    "@docusaurus/preset-classic": "3.10.0",
-    "@docusaurus/theme-mermaid": "3.10.0",
+    "@docusaurus/preset-classic": "3.10.1",
+    "@docusaurus/theme-mermaid": "3.10.1",
     "@mdx-js/react": "3.1.1",
     "clsx": "2.1.1",
     "prism-react-renderer": "2.4.1",
@@ -42,7 +42,7 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.10.0",
+    "@docusaurus/module-type-aliases": "3.10.1",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
     "docusaurus-plugin-typedoc": "1.4.2",
