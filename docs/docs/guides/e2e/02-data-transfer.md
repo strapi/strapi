@@ -63,7 +63,9 @@ Now that you have a Strapi instance with the same data that each e2e starts with
 
 Once you've created your new data from the test instance, you'll need to export it so it can be used in the end-to-end tests.
 
-Be sure to include the content types you would like exported in the `ALLOWED_CONTENT_TYPES` array found in `tests/e2e/constants.js`.
+Content types from the test app template are included automatically. If the data packet needs a new
+system or plugin content type, add it to the explicit `ALLOWED_CONTENT_TYPES` entries in
+`tests/e2e/constants.ts`.
 
 The script accepts the backup destination filename as an argument. Run it from the directory of the strapi instance you created earlier based on the test-app template.
 

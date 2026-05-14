@@ -1,24 +1,41 @@
+import { existsSync, readdirSync } from 'fs';
+import { join } from 'path';
+
 export const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('../app-template/src/constants');
 
-// NOTE: anything included here needs to be included in all test datasets exports
+const APP_TEMPLATE_API_DIR = join(__dirname, '../app-template/src/api');
+
+const getAppTemplateContentTypes = () => {
+  if (!existsSync(APP_TEMPLATE_API_DIR)) {
+    return [];
+  }
+
+  return readdirSync(APP_TEMPLATE_API_DIR, { withFileTypes: true })
+    .filter((api) => api.isDirectory())
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .flatMap((api) => {
+      const contentTypesDir = join(APP_TEMPLATE_API_DIR, api.name, 'content-types');
+
+      if (!existsSync(contentTypesDir)) {
+        return [];
+      }
+
+      return readdirSync(contentTypesDir, { withFileTypes: true })
+        .filter((contentType) => contentType.isDirectory())
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((contentType) => `api::${api.name}.${contentType.name}`);
+    });
+};
+
+const APP_TEMPLATE_CONTENT_TYPES = getAppTemplateContentTypes();
+
 export const ALLOWED_CONTENT_TYPES = [
   'admin::user',
   'admin::role',
   'admin::permission',
   'admin::api-token',
   'admin::transfer-token',
-  'api::article.article',
-  'api::author.author',
-  'api::homepage.homepage',
-  'api::product.product',
-  'api::shop.shop',
-  'api::match.match',
-  'api::upcoming-match.upcoming-match',
-  'api::unique.unique',
-  'api::condition.condition',
-  'api::country.country',
-  'api::cat.cat',
-  'api::dog.dog',
+  ...APP_TEMPLATE_CONTENT_TYPES,
   'plugin::content-manager.history-version',
   /**
    * I18N
