@@ -1,95 +1,42 @@
-/**
- * Tests for the clone function in the document service repository.
- *
- * Covers the bug where cloning an entry with a one-to-one (or one-to-many)
- * relation and removing it in the duplicate form would still transfer the
- * relation from the original to the clone due to lodash deep merge preserving
- * stale `id` keys inside relation objects.
- *
- * See: https://github.com/strapi/strapi/issues/25749
- */
+// Regression coverage for https://github.com/strapi/strapi/issues/25749.
 
-describe('document-service clone — relation merge', () => {
-  describe('shallow merge of queryParams.data over cloned entry data', () => {
-    /**
-     * Reproduces the exact data shape seen at repository.ts line ~450.
-     *
-     * `clonedEntryData`  – what comes back from the DB for the original entry
-     *                      (getDeepPopulate with relationalFields: ['id'])
-     * `userProvidedData` – what the user submitted from the duplicate form
-     */
-    function applyCloneMerge(clonedEntryData: Record<string, any>, userProvidedData: Record<string, any>) {
-      // The fixed implementation: shallow spread instead of lodash merge
-      return { ...clonedEntryData, ...userProvidedData };
-    }
+import { mergeCloneData } from '../repository';
 
-    it('replaces a one-to-one relation entirely when user disconnects it', () => {
-      const clonedEntryData = {
-        title: 'Original page',
-        menu: { id: 3 },
-      };
-
-      // User removed the relation in the duplicate form
-      const userProvidedData = {
+describe('mergeCloneData', () => {
+  describe('relation operations (bug #25749)', () => {
+    it('replaces a one-to-one relation entirely when the user disconnects it', () => {
+      const cloned = { title: 'Original page', menu: { id: 3 } };
+      const user = {
         title: 'Cloned page',
         menu: { connect: [], disconnect: [{ id: 3 }] },
       };
 
-      const result = applyCloneMerge(clonedEntryData, userProvidedData);
+      const result = mergeCloneData(cloned, user);
 
-      // The stale `id: 3` must NOT survive in the merged relation
       expect(result.menu).not.toHaveProperty('id');
       expect(result.menu).toEqual({ connect: [], disconnect: [{ id: 3 }] });
+      expect(result.title).toBe('Cloned page');
     });
 
-    it('preserves the relation when user keeps it', () => {
-      const clonedEntryData = {
-        title: 'Original page',
-        menu: { id: 3 },
-      };
+    it('preserves the relation when the user keeps it', () => {
+      const cloned = { title: 'Original page', menu: { id: 3 } };
+      const user = { menu: { connect: [{ id: 3 }], disconnect: [] } };
 
-      const userProvidedData = {
-        title: 'Cloned page',
-        menu: { connect: [{ id: 3 }], disconnect: [] },
-      };
-
-      const result = applyCloneMerge(clonedEntryData, userProvidedData);
+      const result = mergeCloneData(cloned, user);
 
       expect(result.menu).toEqual({ connect: [{ id: 3 }], disconnect: [] });
     });
 
-    it('does not affect scalar fields not present in userProvidedData', () => {
-      const clonedEntryData = {
-        title: 'Original page',
-        slug: 'original-page',
-        menu: { id: 3 },
-      };
-
-      const userProvidedData = {
-        title: 'Cloned page',
-        menu: { connect: [], disconnect: [{ id: 3 }] },
-      };
-
-      const result = applyCloneMerge(clonedEntryData, userProvidedData);
-
-      // slug was not in userProvidedData — should be preserved from the clone
-      expect(result.slug).toBe('original-page');
-      expect(result.title).toBe('Cloned page');
-    });
-
-    it('handles one-to-many relations the same way', () => {
-      const clonedEntryData = {
+    it('handles one-to-many disconnects the same way', () => {
+      const cloned = {
         title: 'Original',
         tags: [{ id: 1 }, { id: 2 }, { id: 3 }],
       };
-
-      // User removed all tags in the duplicate form
-      const userProvidedData = {
-        title: 'Clone',
+      const user = {
         tags: { connect: [], disconnect: [{ id: 1 }, { id: 2 }, { id: 3 }] },
       };
 
-      const result = applyCloneMerge(clonedEntryData, userProvidedData);
+      const result = mergeCloneData(cloned, user);
 
       expect(result.tags).toEqual({
         connect: [],
@@ -97,41 +44,103 @@ describe('document-service clone — relation merge', () => {
       });
     });
 
-    it('deep merge (old behaviour) demonstrates the bug for documentation purposes', () => {
-      // This test documents WHY the old lodash merge was wrong.
-      // lodash merge({ id: 3 }, { connect: [], disconnect: [...] })
-      // produces { id: 3, connect: [], disconnect: [...] } — stale id survives.
-      const buggyMerge = (a: Record<string, any>, b: Record<string, any>): any => {
-        const result: Record<string, any> = { ...a };
-        for (const key of Object.keys(b)) {
-          const aVal = a[key];
-          const bVal = b[key];
-          if (
-            bVal !== null &&
-            typeof bVal === 'object' &&
-            !Array.isArray(bVal) &&
-            aVal !== null &&
-            typeof aVal === 'object' &&
-            !Array.isArray(aVal)
-          ) {
-            result[key] = buggyMerge(aVal, bVal);
-          } else {
-            result[key] = bVal;
-          }
-        }
-        return result;
+    it('handles the `set` operator the same way as connect/disconnect', () => {
+      const cloned = { menu: { id: 3 } };
+      const user = { menu: { set: [{ id: 5 }] } };
+
+      const result = mergeCloneData(cloned, user);
+
+      expect(result.menu).toEqual({ set: [{ id: 5 }] });
+      expect(result.menu).not.toHaveProperty('id');
+    });
+  });
+
+  describe('non-relation fields keep deep-merge semantics', () => {
+    it('deep-merges partial component data (existing behavior)', () => {
+      const cloned = {
+        title: 'Original',
+        seo: { id: 7, metaTitle: 'old', metaDescription: 'old desc' },
+      };
+      const user = { seo: { metaTitle: 'new' } };
+
+      const result = mergeCloneData(cloned, user);
+
+      expect(result.seo).toEqual({
+        id: 7,
+        metaTitle: 'new',
+        metaDescription: 'old desc',
+      });
+    });
+
+    it('deep-merges partial JSON-like data (existing behavior)', () => {
+      const cloned = { config: { a: 1, b: 2, nested: { x: 1 } } };
+      const user = { config: { a: 3, nested: { y: 2 } } };
+
+      const result = mergeCloneData(cloned, user);
+
+      expect(result.config).toEqual({
+        a: 3,
+        b: 2,
+        nested: { x: 1, y: 2 },
+      });
+    });
+
+    it('replaces scalar fields supplied by the user', () => {
+      const cloned = { title: 'Original page', slug: 'original-page' };
+      const user = { title: 'Cloned page' };
+
+      const result = mergeCloneData(cloned, user);
+
+      expect(result.title).toBe('Cloned page');
+      expect(result.slug).toBe('original-page');
+    });
+  });
+
+  describe('mixed payloads', () => {
+    it('replaces relation ops and deep-merges components in the same call', () => {
+      const cloned = {
+        title: 'Original',
+        menu: { id: 3 },
+        seo: { id: 7, metaTitle: 'old', metaDescription: 'old desc' },
+      };
+      const user = {
+        title: 'Cloned',
+        menu: { connect: [], disconnect: [{ id: 3 }] },
+        seo: { metaTitle: 'new' },
       };
 
-      const clonedEntryData = { menu: { id: 3 } };
-      const userProvidedData = { menu: { connect: [], disconnect: [{ id: 3 }] } };
+      const result = mergeCloneData(cloned, user);
 
-      const buggyResult = buggyMerge(clonedEntryData, userProvidedData);
-      // Stale id persists — this is the bug
-      expect(buggyResult.menu).toHaveProperty('id', 3);
+      expect(result.menu).toEqual({ connect: [], disconnect: [{ id: 3 }] });
+      expect(result.seo).toEqual({
+        id: 7,
+        metaTitle: 'new',
+        metaDescription: 'old desc',
+      });
+      expect(result.title).toBe('Cloned');
+    });
+  });
 
-      // The fix does not have this problem
-      const fixedResult = applyCloneMerge(clonedEntryData, userProvidedData);
-      expect(fixedResult.menu).not.toHaveProperty('id');
+  describe('defensive cases', () => {
+    it('returns a shallow copy of the cloned data when user data is undefined', () => {
+      const cloned = { title: 'Original', menu: { id: 3 } };
+
+      const result = mergeCloneData(cloned, undefined);
+
+      expect(result).toEqual(cloned);
+      expect(result).not.toBe(cloned);
+    });
+
+    it('does not mutate either input', () => {
+      const cloned = { title: 'Original', menu: { id: 3 } };
+      const user = { menu: { connect: [], disconnect: [{ id: 3 }] } };
+      const clonedSnapshot = JSON.parse(JSON.stringify(cloned));
+      const userSnapshot = JSON.parse(JSON.stringify(user));
+
+      mergeCloneData(cloned, user);
+
+      expect(cloned).toEqual(clonedSnapshot);
+      expect(user).toEqual(userSnapshot);
     });
   });
 });
