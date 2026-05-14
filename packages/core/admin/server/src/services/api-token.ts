@@ -66,11 +66,13 @@ const getOwnerId = (token: AdminApiToken): string => {
   return String(typeof owner === 'object' ? owner.id : owner);
 };
 
+
 const toAdminTokenOwner = (
   owner: AdminApiToken['adminUserOwner'] | null | undefined
-): Data.ID | AdminTokenOwner => {
+): Data.ID | AdminTokenOwner | null => {
+
   if (owner === null || owner === undefined) {
-    throw new Error('adminUserOwner is required');
+    return null;
   }
 
   // Bare id
@@ -86,7 +88,6 @@ const toAdminTokenOwner = (
     email: owner.email,
   };
 };
-
 const SELECT_FIELDS = [
   'id',
   'kind',
