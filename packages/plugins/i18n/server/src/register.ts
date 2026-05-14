@@ -76,9 +76,6 @@ const extendContentTypes = (strapi: Core.Strapi) => {
             id: {
               $notIn: results.map((r) => r.id),
             },
-            published_at: {
-              $notNull: true,
-            },
           };
         },
       },
