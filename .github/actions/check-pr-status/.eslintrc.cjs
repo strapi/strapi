@@ -4,10 +4,16 @@
 const config = {
   root: true,
   extends: ['eslint-config-custom/back'],
-  ignorePatterns: [
-    'node_modules/',
-    '.eslintrc.cjs',
-    'dist/',
+  ignorePatterns: ['node_modules/', '.eslintrc.cjs', 'dist/'],
+  overrides: [
+    {
+      files: ['__tests__/**/*.js'],
+      rules: {
+        'import/no-unresolved': 'off',
+        'import/extensions': 'off',
+        'node/no-missing-require': 'off',
+      },
+    },
   ],
 };
 

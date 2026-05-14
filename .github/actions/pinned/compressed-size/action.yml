@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Compressed size (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  build-script:
+    required: true
+  pattern:
+    required: true
+  strip-hash:
+    required: true
+  minimum-change-threshold:
+    required: true
+  exclude:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: preactjs/compressed-size-action@66325aad6443cb7cf89c4bfcd414aea2367cda94
+      with:
+        build-script: ${{ inputs.build-script }}
+        pattern: ${{ inputs.pattern }}
+        strip-hash: ${{ inputs.strip-hash }}
+        minimum-change-threshold: ${{ inputs.minimum-change-threshold }}
+        exclude: ${{ inputs.exclude }}

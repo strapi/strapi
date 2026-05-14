@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Checkout (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  repository:
+    description: Repository name with owner
+    required: false
+    default: ${{ github.repository }}
+  token:
+    description: PAT or GITHUB_TOKEN
+    required: false
+    default: ${{ github.token }}
+  fetch-depth:
+    required: false
+    default: '1'
+  persist-credentials:
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      with:
+        repository: ${{ inputs.repository }}
+        token: ${{ inputs.token }}
+        fetch-depth: ${{ inputs.fetch-depth }}
+        persist-credentials: ${{ inputs.persist-credentials }}

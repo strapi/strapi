@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
 name: 'Fetch Merged Pull Requests Between Branches'
 description: 'Fetch merged pull requests between two branches using the GitHub API.'
 

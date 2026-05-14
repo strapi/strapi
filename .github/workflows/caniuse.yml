@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: ./.github/actions/pinned/checkout
         with:
           fetch-depth: 0
       - name: Configure git
@@ -22,7 +22,7 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
       - name: Update Browserslist database and create PR if applies
-        uses: c2corg/browserslist-update-action@v2
+        uses: ./.github/actions/pinned/browserslist-update
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: browserslist-update

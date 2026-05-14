@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Download artifact (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  name:
+    required: true
+  path:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}

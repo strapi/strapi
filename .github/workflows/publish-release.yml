@@ -27,18 +27,18 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'strapi/strapi'
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: ./.github/actions/pinned/create-github-app-token
         id: app-token
         with:
           app-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_SECRET }}
-      - uses: actions/checkout@v6
+      - uses: ./.github/actions/pinned/checkout
         with:
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0 # Fetch full history
       - name: Setup npmrc
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-      - uses: actions/setup-node@v6
+      - uses: ./.github/actions/pinned/setup-node
         with:
           node-version: 24
       - run: yarn

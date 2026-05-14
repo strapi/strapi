@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Issues helper — create comment (pinned)
+description: Pinned wrapper — see ../../README.md
+inputs:
+  token:
+    required: true
+  issue-number:
+    required: true
+  body:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions-cool/issues-helper@200c78641dbf33838311e5a1e0c31bbdb92d7cf0
+      with:
+        actions: create-comment
+        token: ${{ inputs.token }}
+        issue-number: ${{ inputs.issue-number }}
+        body: ${{ inputs.body }}

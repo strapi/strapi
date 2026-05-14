@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Upload artifact (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  name:
+    required: true
+  path:
+    required: true
+  retention-days:
+    required: false
+    default: '0'
+runs:
+  using: composite
+  steps:
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        retention-days: ${{ inputs.retention-days }}

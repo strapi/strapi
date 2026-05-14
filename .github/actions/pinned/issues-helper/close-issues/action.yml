@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Issues helper — close issues (pinned)
+description: Pinned wrapper — see ../../README.md
+inputs:
+  token:
+    required: true
+  labels:
+    required: true
+  inactive-day:
+    required: true
+  close-reason:
+    required: true
+  body:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions-cool/issues-helper@200c78641dbf33838311e5a1e0c31bbdb92d7cf0
+      with:
+        actions: close-issues
+        token: ${{ inputs.token }}
+        labels: ${{ inputs.labels }}
+        inactive-day: ${{ inputs.inactive-day }}
+        close-reason: ${{ inputs.close-reason }}
+        body: ${{ inputs.body }}

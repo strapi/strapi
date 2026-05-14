@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Stale (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  repo-token:
+    required: false
+    default: ${{ github.token }}
+  ascending:
+    required: false
+    default: 'false'
+  only-labels:
+    required: false
+    default: ''
+  exempt-issue-labels:
+    required: false
+    default: ''
+  exempt-all-milestones:
+    required: false
+    default: 'false'
+  exempt-all-assignees:
+    required: false
+    default: 'false'
+  days-before-stale:
+    required: false
+    default: '60'
+  days-before-close:
+    required: false
+    default: '7'
+  days-before-pr-stale:
+    required: false
+    default: '-1'
+  days-before-pr-close:
+    required: false
+    default: '-1'
+  operations-per-run:
+    required: false
+    default: '30'
+  stale-issue-message:
+    required: false
+    default: ''
+  close-issue-message:
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f
+      with:
+        repo-token: ${{ inputs.repo-token }}
+        ascending: ${{ inputs.ascending }}
+        only-labels: ${{ inputs.only-labels }}
+        exempt-issue-labels: ${{ inputs.exempt-issue-labels }}
+        exempt-all-milestones: ${{ inputs.exempt-all-milestones }}
+        exempt-all-assignees: ${{ inputs.exempt-all-assignees }}
+        days-before-stale: ${{ inputs.days-before-stale }}
+        days-before-close: ${{ inputs.days-before-close }}
+        days-before-pr-stale: ${{ inputs.days-before-pr-stale }}
+        days-before-pr-close: ${{ inputs.days-before-pr-close }}
+        operations-per-run: ${{ inputs.operations-per-run }}
+        stale-issue-message: ${{ inputs.stale-issue-message }}
+        close-issue-message: ${{ inputs.close-issue-message }}

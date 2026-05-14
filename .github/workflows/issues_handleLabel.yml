@@ -19,9 +19,8 @@ jobs:
       # Unable to Reproduce Tasks
       - name: 'Comment: unable to reproduce'
         if: "${{ github.event.label.name == 'status: can not reproduce' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/create-comment
         with:
-          actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -39,9 +38,8 @@ jobs:
       # v3 Legacy Issues
       - name: 'Comment: unsupported v3 issues'
         if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/create-comment
         with:
-          actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -62,9 +60,8 @@ jobs:
             Thank You
       - name: 'Close: unsupported v3 issues'
         if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/close-issue
         with:
-          actions: 'close-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'not_planned'
@@ -72,9 +69,8 @@ jobs:
       # v4 Legacy Issues
       - name: 'Comment: unsupported v4 issues'
         if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/create-comment
         with:
-          actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -99,9 +95,8 @@ jobs:
             Thank You
       - name: 'Close: unsupported v4 issues'
         if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/close-issue
         with:
-          actions: 'close-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'not_planned'
@@ -109,9 +104,8 @@ jobs:
       # Feature request redirections
       - name: 'Comment: redirect feature request to canny'
         if: "${{ github.event.label.name == 'issue: feature request' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/create-comment
         with:
-          actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -131,9 +125,8 @@ jobs:
             Thank you for your insight and have a good day.
       - name: 'Close: redirect feature request to canny'
         if: "${{ github.event.label.name == 'issue: feature request' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/close-issue
         with:
-          actions: 'close-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'completed'
@@ -141,9 +134,8 @@ jobs:
       # Invalid bug report template actions
       - name: 'Comment: invalid bug report template'
         if: "${{ github.event.label.name == 'flag: invalid template' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/create-comment
         with:
-          actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -159,9 +151,8 @@ jobs:
             Thank you.
       - name: 'Close: invalid bug report template'
         if: "${{ github.event.label.name == 'flag: invalid template' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/close-issue
         with:
-          actions: 'close-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'not_planned'
@@ -169,9 +160,8 @@ jobs:
       # Redirect questions to GitHub Discussions
       - name: 'Comment: redirect question to discussions'
         if: "${{ github.event.label.name == 'flag: question' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/create-comment
         with:
-          actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -188,17 +178,15 @@ jobs:
             Thank you!
       - name: 'Close: redirect question to discussions'
         if: "${{ github.event.label.name == 'flag: question' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/close-issue
         with:
-          actions: 'close-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'not_planned'
       - name: 'Lock: redirect question to discussions'
         if: "${{ github.event.label.name == 'flag: question' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/lock-issue
         with:
-          actions: 'lock-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           lock-reason: 'off-topic'

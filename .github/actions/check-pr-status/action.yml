@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
 name: 'PR Checker'
 description: 'Check PR status for mergeability'
 runs:

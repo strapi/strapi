@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
 name: 'Run e2e tests'
 description: 'Run e2e tests'
 inputs:

@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Get user teams membership (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  github-token:
+    required: true
+  team:
+    required: true
+  username:
+    required: true
+outputs:
+  isTeamMember:
+    description: '"true" or "false" string'
+    value: ${{ steps.membership.outputs.isTeamMember }}
+runs:
+  using: composite
+  steps:
+    - id: membership
+      uses: tspascoal/get-user-teams-membership@818140d631d5f29f26b151afbe4179f87d9ceb5e
+      with:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        team: ${{ inputs.team }}
+        username: ${{ inputs.username }}

@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: SonarQube scan (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  sonar-token:
+    required: true
+  sonar-host-url:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: SonarSource/sonarqube-scan-action@59db25f34e16620e48ab4bb9e4a5dce155cb5432
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+        SONAR_HOST_URL: ${{ inputs.sonar-host-url }}

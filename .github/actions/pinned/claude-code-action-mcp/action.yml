@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Claude Code with MCP args (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  anthropic_api_key:
+    required: true
+  prompt:
+    required: true
+  claude_args:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: anthropics/claude-code-action@f4fb5c6cdccc1ee7af63692f5d08d56efaa64cc8
+      with:
+        anthropic_api_key: ${{ inputs.anthropic_api_key }}
+        prompt: ${{ inputs.prompt }}
+        claude_args: ${{ inputs.claude_args }}

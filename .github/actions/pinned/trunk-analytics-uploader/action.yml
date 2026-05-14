@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Trunk analytics uploader (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  junit-paths:
+    required: true
+  org-slug:
+    required: true
+  token:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: trunk-io/analytics-uploader@95a0fb8b29e45b6068304261fb518644b426a803
+      with:
+        junit-paths: ${{ inputs.junit-paths }}
+        org-slug: ${{ inputs.org-slug }}
+        token: ${{ inputs.token }}

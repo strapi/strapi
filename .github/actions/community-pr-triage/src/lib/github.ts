@@ -15,7 +15,7 @@ export async function fetchInternalAuthors(org: string): Promise<Set<string>> {
     org,
     per_page: 100,
   });
-  return new Set(members.map((m) => m.login));
+  return new Set(members.map((m: { login: string }) => m.login));
 }
 
 function isBot(login: string): boolean {
@@ -81,7 +81,7 @@ export async function fetchOpenCommunityPRs(internalAuthors: Set<string>): Promi
         title: pr.title,
         body: '', // filled by per-PR detail fetch below
         author: pr.user?.login ?? 'unknown',
-        labels: pr.labels.map((l) => l.name ?? ''),
+        labels: pr.labels.map((l: { name?: string | null }) => l.name ?? ''),
         additions: 0, // filled below
         deletions: 0, // filled below
         changedFiles: 0, // filled below
@@ -139,7 +139,7 @@ export async function fetchPRFiles(prNumber: number): Promise<string[]> {
     pull_number: prNumber,
     per_page: 100,
   });
-  return files.map((f) => f.filename);
+  return files.map((f: { filename: string }) => f.filename);
 }
 
 export async function postComment(prNumber: number, body: string): Promise<void> {
@@ -159,7 +159,9 @@ export async function fetchOpenPRsWithLabel(labelName: string): Promise<number[]
     labels: labelName,
     per_page: 100,
   });
-  return issues.filter((i) => 'pull_request' in i).map((i) => i.number);
+  return issues
+    .filter((i: { pull_request?: unknown }) => 'pull_request' in i)
+    .map((i: { number: number }) => i.number);
 }
 
 // Returns the ISO timestamp of the most recent 'labeled' event for the given label,

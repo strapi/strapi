@@ -5,15 +5,17 @@
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
-    "build": "NODE_ENV=production ncc build index.js -o dist --minify",
-    "lint": "run -T eslint .",
-    "watch": "NODE_ENV=production ncc build index.js -w -o dist --minify"
+    "build": "tsup",
+    "watch": "tsup --watch",
+    "test": "run -T jest --config jest.config.js",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@actions/core": "1.11.1",
-    "@actions/github": "6.0.0"
+    "@actions/core": "3.0.1",
+    "@actions/github": "9.1.1"
   },
   "devDependencies": {
-    "@vercel/ncc": "0.38.2"
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
   }
 }

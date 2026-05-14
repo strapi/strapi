@@ -1,11 +1,9 @@
-'use strict';
+import * as core from '@actions/core';
+import * as github from '@actions/github';
 
-const core = require('@actions/core');
-const github = require('@actions/github');
+export const BLOCKING_LABELS: string[] = [`flag: 💥 Breaking change`, `flag: don't merge`];
 
-const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`];
-
-async function main() {
+export async function run(): Promise<void> {
   try {
     const labels = github.context.payload.pull_request?.labels ?? [];
 
@@ -40,15 +38,7 @@ async function main() {
     if (requiresMilestone === true && isMissingMilestone === true) {
       core.setFailed(`The PR must have a milestone.`);
     }
-  } catch (error) {
-    core.setFailed(error.message);
+  } catch (error: unknown) {
+    core.setFailed(error instanceof Error ? error.message : String(error));
   }
-}
-
-main.BLOCKING_LABELS = BLOCKING_LABELS;
-
-if (require.main === module) {
-  main();
-} else {
-  module.exports = main;
 }

@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Cache (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  path:
+    required: true
+  key:
+    required: true
+  restore-keys:
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}

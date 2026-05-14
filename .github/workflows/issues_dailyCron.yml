@@ -13,9 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: check for inactive issues that can't be reproduced
-        uses: actions-cool/issues-helper@v3
+        uses: ./.github/actions/pinned/issues-helper/close-issues
         with:
-          actions: 'close-issues'
           token: ${{ secrets.GITHUB_TOKEN }}
           labels: 'status: can not reproduce'
           inactive-day: 14

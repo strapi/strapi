@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
 name: 'Analyze lockfile dependencies'
 description: 'Parse dependencies from the yarn lockfile and run security tests on them'
 inputs:

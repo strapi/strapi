@@ -1,36 +1,41 @@
 'use strict';
 
-jest.mock('@actions/github');
-jest.mock('@actions/core');
-
-const github = require('@actions/github');
-const core = require('@actions/core');
-const action = require('../index');
+function loadAction() {
+  const github = require('@actions/github');
+  const core = require('@actions/core');
+  const { run, BLOCKING_LABELS } = require('../src/check-pr');
+  return { github, core, run, BLOCKING_LABELS };
+}
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetModules();
 });
 
-test.each(action.BLOCKING_LABELS)('Test blocking labels %s', async (label) => {
-  github.context = {
-    payload: {
-      pull_request: {
-        labels: [{ name: label }],
+test.each([`flag: 💥 Breaking change`, `flag: don't merge`])(
+  'Test blocking labels %s',
+  async (label) => {
+    const { github, core, run } = loadAction();
+    github.context = {
+      payload: {
+        pull_request: {
+          labels: [{ name: label }],
+        },
       },
-    },
-  };
+    };
 
-  const setFailed = jest.spyOn(core, 'setFailed');
+    const setFailed = jest.spyOn(core, 'setFailed');
 
-  await action();
+    await run();
 
-  expect(setFailed).toHaveBeenCalled();
-  expect(setFailed.mock.calls[0][0]).toContain(`The PR has been labelled with a blocking label`);
+    expect(setFailed).toHaveBeenCalled();
+    expect(setFailed.mock.calls[0][0]).toContain(`The PR has been labelled with a blocking label`);
 
-  setFailed.mockRestore();
-});
+    setFailed.mockRestore();
+  }
+);
 
 test('Test missing source label', async () => {
+  const { github, core, run } = loadAction();
   github.context = {
     payload: {
       pull_request: {
@@ -41,7 +46,7 @@ test('Test missing source label', async () => {
 
   const setFailed = jest.spyOn(core, 'setFailed');
 
-  await action();
+  await run();
 
   expect(setFailed).toHaveBeenCalled();
   expect(setFailed.mock.calls[0][0]).toBe(`The PR must have one and only one 'source:' label.`);
@@ -50,6 +55,7 @@ test('Test missing source label', async () => {
 });
 
 test('Test too many source label', async () => {
+  const { github, core, run } = loadAction();
   github.context = {
     payload: {
       pull_request: {
@@ -60,7 +66,7 @@ test('Test too many source label', async () => {
 
   const setFailed = jest.spyOn(core, 'setFailed');
 
-  await action();
+  await run();
 
   expect(setFailed).toHaveBeenCalled();
   expect(setFailed.mock.calls[0][0]).toBe(`The PR must have one and only one 'source:' label.`);
@@ -69,6 +75,7 @@ test('Test too many source label', async () => {
 });
 
 test('Test missing pr label', async () => {
+  const { github, core, run } = loadAction();
   github.context = {
     payload: {
       pull_request: {
@@ -79,7 +86,7 @@ test('Test missing pr label', async () => {
 
   const setFailed = jest.spyOn(core, 'setFailed');
 
-  await action();
+  await run();
 
   expect(setFailed).toHaveBeenCalled();
   expect(setFailed.mock.calls[0][0]).toBe(`The PR must have one and only one 'pr:' label.`);
@@ -88,6 +95,7 @@ test('Test missing pr label', async () => {
 });
 
 test('Test too many pr label', async () => {
+  const { github, core, run } = loadAction();
   github.context = {
     payload: {
       pull_request: {
@@ -98,7 +106,7 @@ test('Test too many pr label', async () => {
 
   const setFailed = jest.spyOn(core, 'setFailed');
 
-  await action();
+  await run();
 
   expect(setFailed).toHaveBeenCalled();
   expect(setFailed.mock.calls[0][0]).toBe(`The PR must have one and only one 'pr:' label.`);
@@ -107,6 +115,7 @@ test('Test too many pr label', async () => {
 });
 
 test('Test missing milestone for develop PR', async () => {
+  const { github, core, run } = loadAction();
   github.context = {
     payload: {
       pull_request: {
@@ -121,7 +130,7 @@ test('Test missing milestone for develop PR', async () => {
 
   const setFailed = jest.spyOn(core, 'setFailed');
 
-  await action();
+  await run();
 
   expect(setFailed).toHaveBeenCalled();
   expect(setFailed.mock.calls[0][0]).toBe(`The PR must have a milestone.`);
@@ -130,6 +139,7 @@ test('Test missing milestone for develop PR', async () => {
 });
 
 test('Test missing milestone for non-develop PR', async () => {
+  const { github, core, run } = loadAction();
   github.context = {
     payload: {
       pull_request: {
@@ -144,7 +154,7 @@ test('Test missing milestone for non-develop PR', async () => {
 
   const setFailed = jest.spyOn(core, 'setFailed');
 
-  await action();
+  await run();
 
   expect(setFailed).not.toHaveBeenCalled();
 
@@ -152,6 +162,7 @@ test('Test missing milestone for non-develop PR', async () => {
 });
 
 test('Test develop PR with milestone', async () => {
+  const { github, core, run } = loadAction();
   github.context = {
     payload: {
       pull_request: {
@@ -168,7 +179,7 @@ test('Test develop PR with milestone', async () => {
 
   const setFailed = jest.spyOn(core, 'setFailed');
 
-  await action();
+  await run();
 
   expect(setFailed).not.toHaveBeenCalled();
 

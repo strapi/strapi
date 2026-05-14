@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Nx set SHAs (pinned)
+description: Pinned wrapper — see ../README.md
+runs:
+  using: composite
+  steps:
+    - uses: nrwl/nx-set-shas@afb73a62d26e41464e9254689e1fd6122ee683c1

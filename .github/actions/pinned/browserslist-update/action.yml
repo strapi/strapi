@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Browserslist update (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  github_token:
+    required: true
+  branch:
+    required: true
+  base_branch:
+    required: true
+  commit_message:
+    required: true
+  title:
+    required: true
+  labels:
+    required: true
+  reviewers:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: c2corg/browserslist-update-action@a76abb476199caea5399f9e28ff3f16e491ec566
+      with:
+        github_token: ${{ inputs.github_token }}
+        branch: ${{ inputs.branch }}
+        base_branch: ${{ inputs.base_branch }}
+        commit_message: ${{ inputs.commit_message }}
+        title: ${{ inputs.title }}
+        labels: ${{ inputs.labels }}
+        reviewers: ${{ inputs.reviewers }}

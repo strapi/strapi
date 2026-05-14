@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Comment pull request (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  message:
+    required: true
+  github-token:
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    - uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b
+      with:
+        message: ${{ inputs.message }}
+        github-token: ${{ inputs.github-token }}

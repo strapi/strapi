@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Deploy GitHub Pages (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  github_token:
+    required: true
+  publish_dir:
+    required: true
+  user_name:
+    required: true
+  user_email:
+    required: true
+  cname:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453
+      with:
+        github_token: ${{ inputs.github_token }}
+        publish_dir: ${{ inputs.publish_dir }}
+        user_name: ${{ inputs.user_name }}
+        user_email: ${{ inputs.user_email }}
+        cname: ${{ inputs.cname }}

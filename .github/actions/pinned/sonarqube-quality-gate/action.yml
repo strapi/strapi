@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: SonarQube quality gate (pinned)
+description: Pinned wrapper — see ../README.md
+inputs:
+  sonar-token:
+    required: true
+  sonar-host-url:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+        SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
