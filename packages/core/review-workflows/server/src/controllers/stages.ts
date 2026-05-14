@@ -158,14 +158,7 @@ export default {
       return ctx.forbidden();
     }
 
-    // Load entity
-    const locale = (await validateLocale(query?.locale)) ?? undefined;
-    const [entity, workflowCount, workflowResult] = await Promise.all([
-      strapi.documents(modelUID).findOne({
-        documentId,
-        locale,
-        populate: [ENTITY_STAGE_ATTRIBUTE],
-      }),
+    const [workflowCount, workflowResult] = await Promise.all([
       workflowService.count(),
       workflowService.getAssignedWorkflow(modelUID, {
         populate: { stages: { populate: { permissions: { populate: ['role'] } } } },
@@ -173,8 +166,19 @@ export default {
     ]);
 
     const workflowStages = workflowResult ? workflowResult.stages : [];
+
+    // Load entity
+    const locale = (await validateLocale(query?.locale)) ?? undefined;
+    const entity = await strapi.documents(modelUID).findOne({
+      documentId,
+      locale,
+      populate: [ENTITY_STAGE_ATTRIBUTE],
+    });
+
     const entityStageId = entity?.[ENTITY_STAGE_ATTRIBUTE]?.id;
-    const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
+    const canTransition = entity
+      ? stagePermissions.can(STAGE_TRANSITION_UID, entityStageId)
+      : false;
 
     const meta = {
       stageCount: workflowStages.length,
