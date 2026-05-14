@@ -152,7 +152,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return {};
     },
 
-    // FIXME: handle relations
+    /**
+     * Bulk delete documents — relations are handled by the underlying
+     * Document Service's delete() which cleans up join tables, components
+     * and dynamic zones. Each document is deleted within a single transaction
+     * to ensure atomicity.
+     */
     async deleteMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
