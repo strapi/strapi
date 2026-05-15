@@ -139,7 +139,7 @@
     "react-select": "5.8.0",
     "react-window": "1.8.10",
     "rimraf": "6.1.3",
-    "sanitize-html": "2.13.0",
+    "sanitize-html": "2.17.4",
     "scheduler": "0.23.0",
     "semver": "7.7.4",
     "sift": "16.0.1",
