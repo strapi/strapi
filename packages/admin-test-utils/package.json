@@ -88,7 +88,7 @@
     "@testing-library/jest-dom": "6.4.5",
     "eslint-config-custom": "5.46.0",
     "jest-environment-jsdom": "29.6.1",
-    "styled-components": "6.1.8",
+    "styled-components": "6.4.1",
     "tsconfig": "5.46.0"
   },
   "peerDependencies": {

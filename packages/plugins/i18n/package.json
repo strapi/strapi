@@ -85,7 +85,7 @@
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.1.8"
+    "styled-components": "6.4.1"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
