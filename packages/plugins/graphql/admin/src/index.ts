@@ -1,4 +1,4 @@
-import { importLocaleJsonWithLegacyDkFallback } from '@strapi/admin/strapi-admin';
+import { type ImportLocaleJson } from '@strapi/admin/strapi-admin';
 import pluginPkg from '../../package.json';
 
 import { pluginId } from './pluginId';
@@ -16,10 +16,16 @@ export default {
     });
   },
   bootstrap() {},
-  async registerTrads({ locales }: { locales: string[] }) {
+  async registerTrads({
+    locales,
+    importLocaleJson,
+  }: {
+    locales: string[];
+    importLocaleJson: ImportLocaleJson;
+  }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+        const data = await importLocaleJson(locale, (code) =>
           import(`./translations/${code}.json`)
         );
 

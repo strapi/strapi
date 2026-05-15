@@ -92,4 +92,20 @@ describe('convertListLayoutToFieldLayouts', () => {
     expect(result).toHaveLength(1);
     expect(result[0].mainField).toEqual({ name: 'name', type: 'string' });
   });
+
+  it('does not throw when component UID is missing from configurations', () => {
+    const result = convertListLayoutToFieldLayouts(
+      columns,
+      contentTypeAttributes,
+      listMetadatas,
+      {
+        configurations: {},
+        schemas: componentSchemas,
+      },
+      []
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].mainField).toEqual({ name: 'name', type: 'string' });
+  });
 });

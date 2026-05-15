@@ -3,7 +3,7 @@ import pluginPkg from '../../package.json';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-import { importLocaleJsonWithLegacyDkFallback, type StrapiApp } from '@strapi/admin/strapi-admin';
+import { type StrapiApp } from '@strapi/admin/strapi-admin';
 
 const name = pluginPkg.strapi.name;
 
@@ -16,10 +16,16 @@ export default {
     });
   },
   bootstrap() {},
-  async registerTrads({ locales }: { locales: string[] }) {
+  async registerTrads({
+    locales,
+    importLocaleJson,
+  }: {
+    locales: string[];
+    importLocaleJson: StrapiApp['importLocaleJson'];
+  }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+        const data = await importLocaleJson(locale, (code) =>
           import(`./translations/${code}.json`)
         );
 

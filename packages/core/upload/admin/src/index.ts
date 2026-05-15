@@ -12,7 +12,7 @@ import { getTrad, prefixPluginTranslations } from './utils';
 
 import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog/MediaLibraryDialog';
 import type { MediaLibraryInputProps } from './components/MediaLibraryInput/MediaLibraryInput';
-import { importLocaleJsonWithLegacyDkFallback, type StrapiApp } from '@strapi/admin/strapi-admin';
+import { type StrapiApp } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 const name = pluginPkg.strapi.name;
@@ -91,10 +91,16 @@ const admin: Plugin.Config.AdminInput = {
       name,
     });
   },
-  async registerTrads({ locales }: { locales: string[] }) {
+  async registerTrads({
+    locales,
+    importLocaleJson,
+  }: {
+    locales: string[];
+    importLocaleJson: StrapiApp['importLocaleJson'];
+  }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+        const data = await importLocaleJson(locale, (code) =>
           import(`./translations/${code}.json`)
         );
 

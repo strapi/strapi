@@ -30,10 +30,24 @@ import {
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 import { normalizeAdminLocale } from './translations/normalizeAdminLocale';
-import { importLocaleJsonWithLegacyDkFallback } from './utils/importLocaleJsonWithLegacyDkFallback';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
+
+/**
+ * Canonical admin locale codes mapped to legacy translation file names still
+ * shipped by some plugins. When loading `locale`, Strapi falls back to the legacy
+ * code and logs a deprecation warning once per pair.
+ */
+const ADMIN_LOCALE_LEGACY_ALIASES: Record<string, string> = {
+  da: 'dk',
+};
+
 import type { DefaultTheme } from 'styled-components';
+
+export type ImportLocaleJson = (
+  locale: string,
+  importJson: (code: string) => Promise<{ default: Record<string, string> }>
+) => Promise<Record<string, string>>;
 
 const {
   INJECT_COLUMN_IN_TABLE,
@@ -63,7 +77,10 @@ interface StrapiAppPlugin {
     args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
   ) => void;
   register: (app: StrapiApp) => void;
-  registerTrads?: (args: { locales: string[] }) => Promise<Translations>;
+  registerTrads?: (args: {
+    locales: string[];
+    importLocaleJson: ImportLocaleJson;
+  }) => Promise<Translations>;
 }
 
 interface InjectionZoneComponent {
@@ -95,6 +112,7 @@ class StrapiApp {
   appPlugins: Record<string, StrapiAppPlugin>;
   plugins: Record<string, Plugin> = {};
   hooksDict: Record<string, ReturnType<typeof createHook>> = {};
+  private warnedLegacyLocalePairs = new Set<string>();
 
   admin = {
     injectionZones: {},
@@ -407,6 +425,39 @@ class StrapiApp {
     }
   }
 
+  importLocaleJson: ImportLocaleJson = async (locale, importJson) => {
+    const load = async (code: string) => {
+      const mod = await importJson(code);
+
+      return mod.default ?? {};
+    };
+
+    try {
+      return await load(locale);
+    } catch {
+      const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
+
+      if (legacyLocale) {
+        const deprecationKey = `${locale}:${legacyLocale}`;
+
+        if (!this.warnedLegacyLocalePairs.has(deprecationKey)) {
+          this.warnedLegacyLocalePairs.add(deprecationKey);
+          console.warn(
+            `[deprecated] Admin locale "${legacyLocale}" is deprecated. Rename translation files to "${locale}.json". Support for "${legacyLocale}" will be removed in a future Strapi version.`
+          );
+        }
+
+        try {
+          return await load(legacyLocale);
+        } catch {
+          return {};
+        }
+      }
+
+      return {};
+    }
+  };
+
   async loadAdminTrads() {
     const adminLocales = await Promise.all(
       this.configurations.locales.map(async (locale) => {
@@ -415,7 +466,7 @@ class StrapiApp {
 
           return { data, locale };
         } catch {
-          const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+          const data = await this.importLocaleJson(locale, (code) =>
             import(`./translations/${code}.json`)
           );
 
@@ -462,7 +513,10 @@ class StrapiApp {
         const registerTrads = this.appPlugins[plugin].registerTrads;
 
         if (registerTrads) {
-          return registerTrads({ locales: this.configurations.locales });
+          return registerTrads({
+            locales: this.configurations.locales,
+            importLocaleJson: this.importLocaleJson,
+          });
         }
 
         return null;

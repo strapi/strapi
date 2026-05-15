@@ -1,7 +1,5 @@
 import { strapi as pkgStrapi } from '../../package.json';
 
-import { importLocaleJsonWithLegacyDkFallback } from '@strapi/admin/strapi-admin';
-
 import { PERMISSIONS } from './constants';
 import getTrad from './utils/getTrad';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
@@ -75,10 +73,10 @@ export default {
     });
   },
   bootstrap() {},
-  async registerTrads({ locales }) {
+  async registerTrads({ locales, importLocaleJson }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+        const data = await importLocaleJson(locale, (code) =>
           import(`./translations/${code}.json`)
         );
 

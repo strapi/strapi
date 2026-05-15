@@ -1,8 +1,9 @@
-import { importLocaleJsonWithLegacyDkFallback } from './importLocaleJsonWithLegacyDkFallback';
+import { StrapiApp } from '../StrapiApp';
 
-describe('importLocaleJsonWithLegacyDkFallback', () => {
+describe('StrapiApp.importLocaleJson', () => {
   it('returns primary locale data when import succeeds', async () => {
-    const data = await importLocaleJsonWithLegacyDkFallback('fr', async () => ({
+    const app = new StrapiApp();
+    const data = await app.importLocaleJson('fr', async () => ({
       default: { hello: 'world' },
     }));
 
@@ -10,7 +11,8 @@ describe('importLocaleJsonWithLegacyDkFallback', () => {
   });
 
   it('falls back from da to dk when da fails', async () => {
-    const data = await importLocaleJsonWithLegacyDkFallback('da', async (code) => {
+    const app = new StrapiApp();
+    const data = await app.importLocaleJson('da', async (code) => {
       if (code === 'da') {
         throw new Error('no da');
       }
@@ -22,7 +24,8 @@ describe('importLocaleJsonWithLegacyDkFallback', () => {
   });
 
   it('returns empty object when da and dk both fail', async () => {
-    const data = await importLocaleJsonWithLegacyDkFallback('da', async () => {
+    const app = new StrapiApp();
+    const data = await app.importLocaleJson('da', async () => {
       throw new Error('fail');
     });
 

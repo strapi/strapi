@@ -6,7 +6,7 @@ import { Panel } from './routes/content-manager/model/id/components/Panel';
 import { addColumnToTableHook, addFilterToListViewHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
-import { importLocaleJsonWithLegacyDkFallback, type StrapiApp, type WidgetArgs } from '@strapi/admin/strapi-admin';
+import { type StrapiApp, type WidgetArgs } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 const admin: Plugin.Config.AdminInput = {
@@ -84,10 +84,16 @@ const admin: Plugin.Config.AdminInput = {
       });
     }
   },
-  async registerTrads({ locales }: { locales: string[] }) {
+  async registerTrads({
+    locales,
+    importLocaleJson,
+  }: {
+    locales: string[];
+    importLocaleJson: StrapiApp['importLocaleJson'];
+  }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        const data = await importLocaleJsonWithLegacyDkFallback(locale, (code) =>
+        const data = await importLocaleJson(locale, (code) =>
           import(`./translations/${code}.json`)
         );
 
