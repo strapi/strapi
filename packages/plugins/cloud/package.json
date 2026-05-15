@@ -56,12 +56,12 @@
   "devDependencies": {
     "@strapi/admin": "5.46.0",
     "@strapi/strapi": "5.46.0",
-    "eslint-config-custom": "5.46.0",
+    "eslint-config-custom": "workspace:*",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
-    "tsconfig": "5.46.0",
+    "tsconfig": "workspace:*",
     "typescript": "5.4.5"
   },
   "peerDependencies": {

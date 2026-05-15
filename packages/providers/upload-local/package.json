@@ -53,9 +53,9 @@
     "@strapi/types": "5.46.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "5.46.0",
+    "eslint-config-custom": "workspace:*",
     "memfs": "4.6.0",
-    "tsconfig": "5.46.0"
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

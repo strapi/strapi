@@ -86,8 +86,9 @@
     "@strapi/types": "5.46.0",
     "@types/fs-extra": "11.0.4",
     "@types/jscodeshift": "17.3.0",
-    "eslint-config-custom": "5.46.0",
-    "rimraf": "6.1.3"
+    "eslint-config-custom": "workspace:*",
+    "rimraf": "6.1.3",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

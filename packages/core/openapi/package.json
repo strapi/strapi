@@ -63,6 +63,8 @@
   },
   "devDependencies": {
     "@strapi/types": "5.46.0",
-    "@types/debug": "^4"
+    "@types/debug": "^4",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   }
 }

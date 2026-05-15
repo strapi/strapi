@@ -73,8 +73,8 @@
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
     "@types/lodash": "^4.14.191",
-    "eslint-config-custom": "5.46.0",
-    "tsconfig": "5.46.0"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
