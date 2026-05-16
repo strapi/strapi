@@ -47,7 +47,14 @@ const saveDefinitionToFileSystem = async (dir, file, content) => {
   const filepath = path.join(dir, file);
 
   fse.ensureDirSync(dir);
-  await fse.writeFile(filepath, content);
+
+  // Use write-to-temp-then-rename for atomic writes.
+  // This prevents the TS compiler from reading a partially-written file
+  // if compilation runs concurrently with type generation.
+  const tmpPath = `${filepath}.tmp`;
+
+  await fse.writeFile(tmpPath, content);
+  await fse.rename(tmpPath, filepath);
 
   return filepath;
 };
@@ -64,10 +71,10 @@ const format = async (content) => {
   const prettier = await import('prettier'); // ESM-only
 
   const configFile = await prettier.resolveConfigFile();
+
   const config = configFile
     ? await prettier.resolveConfig(configFile)
-    : // Default config
-      {
+    : {
         singleQuote: true,
         useTabs: false,
         tabWidth: 2,
@@ -201,7 +208,7 @@ const timer = () => {
     get duration() {
       assert(state.start !== null, 'The timer has not been started');
 
-      return ((state.end ?? Date.now) - state.start) / 1000;
+      return ((state.end ?? Date.now()) - state.start) / 1000;
     },
   };
 };
