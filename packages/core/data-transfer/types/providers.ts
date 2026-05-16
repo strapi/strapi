@@ -1,4 +1,5 @@
 import type { Readable, Writable } from 'stream';
+import type { Struct } from '@strapi/types';
 import type {
   IDestinationProviderTransferResults,
   IProviderTransferResults,
