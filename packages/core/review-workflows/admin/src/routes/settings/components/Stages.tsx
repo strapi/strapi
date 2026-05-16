@@ -343,7 +343,7 @@ const Stage = ({
                   {
                     disabled: !canUpdate,
                     label: formatMessage({
-                      id: 'content-manager.reviewWorkflows.stage.color',
+                      id: 'review-workflows.stage.color',
                       defaultMessage: 'Color',
                     }),
                     name: `stages.${index}.color`,
