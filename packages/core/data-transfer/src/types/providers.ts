@@ -9,7 +9,7 @@ import type {
   TransferStage,
 } from './utils';
 import type { IMetadata } from './common-entities';
-import type { IDiagnosticReporter } from '../src/utils/diagnostic';
+import type { IDiagnosticReporter } from '../utils/diagnostic';
 
 export type ProviderType = 'source' | 'destination';
 

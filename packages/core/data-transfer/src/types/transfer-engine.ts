@@ -1,8 +1,8 @@
 import type { PassThrough } from 'stream';
 import type { ITransferResults, TransferTransforms, TransferProgress } from './utils';
 import type { ISourceProvider, IDestinationProvider } from './providers';
-import type { IDiagnosticReporter } from '../src/utils/diagnostic';
-import type { Diff } from '../src/utils/json';
+import type { IDiagnosticReporter } from '../utils/diagnostic';
+import type { Diff } from '../utils/json';
 
 export type TransferFilterPreset = 'content' | 'files' | 'config';
 
