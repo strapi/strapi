@@ -84,6 +84,22 @@ const GuidedTourTooltipImpl = ({
     isCurrentStep &&
     isStepConditionMet;
 
+  // Ref to the anchor wrapper for scrolling into view.
+  const anchorRef = React.useRef<HTMLSpanElement>(null);
+
+  // Scroll the anchor element into view when the popover opens,
+  // so the tooltip is not rendered outside the viewport.
+  React.useEffect(() => {
+    if (!isPopoverOpen) return;
+
+    // Use requestAnimationFrame to ensure DOM is painted before scrolling.
+    const raf = requestAnimationFrame(() => {
+      anchorRef.current?.scrollIntoView({ behavior: 'auto', block: 'center' });
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, [isPopoverOpen]);
+
   // Lock the scroll
   React.useEffect(() => {
     if (!isPopoverOpen) return;
@@ -132,7 +148,9 @@ const GuidedTourTooltipImpl = ({
         </Portal>
       )}
       <Popover.Root open={isPopoverOpen}>
-        <Popover.Anchor>{children}</Popover.Anchor>
+        <Popover.Anchor asChild>
+          <span ref={anchorRef}>{children}</span>
+        </Popover.Anchor>
         {content({ Step, state, dispatch })}
       </Popover.Root>
     </>
