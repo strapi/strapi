@@ -1,6 +1,6 @@
 export default (destination: string) => {
   if (destination === 'api') {
-    return `api/{{ api }}`;
+    return `api/{{ id }}`;
   }
 
   if (destination === 'plugin') {
