@@ -111,10 +111,24 @@ const sqlClientModule = {
 };
 
 export function addDatabaseDependencies(scope: Scope) {
-  scope.dependencies = {
-    ...scope.dependencies,
-    ...sqlClientModule[scope.database.client],
-  };
+  const client = scope.database.client;
+
+  // Production database drivers go into dependencies
+  if (client !== 'sqlite') {
+    scope.dependencies = {
+      ...scope.dependencies,
+      ...sqlClientModule[client],
+    };
+  } else {
+    // better-sqlite3 is only needed for `strapi develop` (local dev),
+    // not for `strapi start` (production). Move it to devDependencies
+    // so that production images built with --omit=dev exclude it,
+    // avoiding native binary issues on cross-arch builds (e.g. ARM64 + QEMU).
+    scope.devDependencies = {
+      ...scope.devDependencies,
+      ...sqlClientModule.sqlite,
+    };
+  }
 }
 
 interface QuestionFactory {
