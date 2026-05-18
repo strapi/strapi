@@ -103,6 +103,27 @@ describe('Document Service relations', () => {
     );
   });
 
+  describe('Populate sort', () => {
+    // https://github.com/strapi/strapi/issues/26359
+    testInTransaction.each([
+      ['object', { sort: { name: 'asc' } }],
+      ['string', { sort: 'name' }],
+    ])('sorts manyToMany populated relations (%s sort)', async (_label, populateCategories) => {
+      const article = await strapi.documents(ARTICLE_UID).create({
+        locale: 'en',
+        data: {
+          title: 'Populate sort test',
+          categories: ['Cat2', 'Cat1'],
+        },
+        populate: {
+          categories: populateCategories,
+        },
+      });
+
+      expect(article.categories.map((category) => category.name)).toEqual(['Cat1-EN', 'Cat2-EN']);
+    });
+  });
+
   describe('Discard', () => {
     testInTransaction(
       'Discarding draft brings back relations from the published version',
