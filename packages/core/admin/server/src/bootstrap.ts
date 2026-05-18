@@ -2,7 +2,11 @@ import { merge, map, difference, uniq } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
-import { getTokenOptions, expiresInToSeconds } from './services/token';
+import {
+  getTokenOptions,
+  expiresInToSeconds,
+  hasUserConfiguredAuthOptionsExpiresIn,
+} from './services/token';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';
@@ -135,8 +139,11 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const legacyMaxSessionFallback =
     expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_SESSION_LIFESPAN;
 
-  // Warn if using deprecated legacy expiresIn for new session settings
-  const hasLegacyExpires = options?.expiresIn != null;
+  // Warn only when the user set legacy admin.auth.options.expiresIn. Merged JWT options always
+  // include the default expiresIn ('30d'), so reading merged options alone is a false positive.
+  const hasLegacyExpires = hasUserConfiguredAuthOptionsExpiresIn(
+    strapi.config.get('admin.auth.options')
+  );
   const hasNewMaxRefresh = strapi.config.get('admin.auth.sessions.maxRefreshTokenLifespan') != null;
   const hasNewMaxSession = strapi.config.get('admin.auth.sessions.maxSessionLifespan') != null;
 
