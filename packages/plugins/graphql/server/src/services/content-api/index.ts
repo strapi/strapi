@@ -3,6 +3,7 @@ import { makeSchema } from 'nexus';
 import { prop, startsWith } from 'lodash/fp';
 import type * as Nexus from 'nexus';
 import type { Core, Struct } from '@strapi/types';
+import { mergeSchemas, addResolversToSchema } from '@graphql-tools/schema';
 
 import { wrapResolvers } from './wrap-resolvers';
 import {
@@ -18,11 +19,9 @@ import {
   registerDynamicZonesDefinition,
 } from './register-functions';
 import { TypeRegistry } from '../type-registry';
+import { Builders } from '../builders';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { mergeSchemas, addResolversToSchema } = require('@graphql-tools/schema');
-
   const { service: getGraphQLService } = strapi.plugin('graphql');
   const { config } = strapi.plugin('graphql');
 
@@ -30,9 +29,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const extensionService = getGraphQLService('extension');
 
   // Type Registry
-  let registry: any;
+  let registry: TypeRegistry;
   // Builders Instances
-  let builders: any;
+  let builders: Builders;
   // Cached set of built-in query fields (populated at bootstrap)
   let builtInQueryFields: Set<string> = new Set();
 
