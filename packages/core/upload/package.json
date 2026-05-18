@@ -111,6 +111,7 @@
     "@types/koa": "2.13.4",
     "@types/koa-range": "0.3.5",
     "@types/koa-static": "4.0.2",
+    "eslint-config-custom": "workspace:*",
     "formidable": "3.5.4",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
@@ -118,7 +119,8 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

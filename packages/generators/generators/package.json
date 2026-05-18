@@ -64,9 +64,9 @@
     "@types/fs-extra": "11.0.4",
     "@types/jscodeshift": "17.3.0",
     "copyfiles": "2.4.1",
-    "eslint-config-custom": "5.46.0",
+    "eslint-config-custom": "workspace:*",
     "outdent": "^0.8.0",
-    "tsconfig": "5.46.0"
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

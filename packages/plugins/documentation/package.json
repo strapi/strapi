@@ -82,7 +82,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@strapi/admin-test-utils": "5.46.0",
+    "@strapi/admin-test-utils": "workspace:*",
     "@strapi/strapi": "5.46.0",
     "@strapi/types": "5.46.0",
     "@testing-library/react": "16.3.0",
@@ -91,6 +91,7 @@
     "@types/koa": "2.13.4",
     "@types/koa-session": "6.4.1",
     "@types/swagger-ui-dist": "3.30.4",
+    "eslint-config-custom": "workspace:*",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
     "koa-session": "6.4.0",
@@ -99,7 +100,8 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",

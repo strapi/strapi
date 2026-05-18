@@ -78,12 +78,14 @@
     "@testing-library/react": "16.3.0",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
+    "eslint-config-custom": "workspace:*",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

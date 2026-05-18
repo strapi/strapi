@@ -50,8 +50,8 @@
     "sift": "16.0.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.46.0",
-    "tsconfig": "5.46.0"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

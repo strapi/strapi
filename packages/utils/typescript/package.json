@@ -47,7 +47,8 @@
     "typescript": "5.4.5"
   },
   "devDependencies": {
-    "@types/fs-extra": "11.0.4"
+    "@types/fs-extra": "11.0.4",
+    "eslint-config-custom": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

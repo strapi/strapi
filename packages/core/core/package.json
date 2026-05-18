@@ -133,11 +133,11 @@
     "@types/node": "24.10.0",
     "@types/node-schedule": "2.1.7",
     "@types/statuses": "2.0.1",
-    "eslint-config-custom": "5.46.0",
+    "eslint-config-custom": "workspace:*",
     "supertest": "7.2.2",
-    "tsconfig": "5.46.0",
+    "tsconfig": "workspace:*",
     "vitest": "catalog:",
-    "vitest-config": "5.46.0"
+    "vitest-config": "workspace:*"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

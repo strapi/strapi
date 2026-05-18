@@ -81,9 +81,11 @@
     "@types/stream-json": "1.7.3",
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
+    "eslint-config-custom": "workspace:*",
     "knex": "3.0.1",
     "koa": "2.16.4",
     "rimraf": "6.1.3",
+    "tsconfig": "workspace:*",
     "typescript": "5.4.5"
   },
   "engines": {

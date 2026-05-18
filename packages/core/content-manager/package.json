@@ -115,12 +115,14 @@
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
     "@types/prismjs": "1.26.5",
+    "eslint-config-custom": "workspace:*",
     "koa-body": "6.0.1",
     "msw": "2.13.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
