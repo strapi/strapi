@@ -1,7 +1,7 @@
 import { arg } from 'nexus';
-import { Context } from '../../types';
+import { StrapiContext } from '../../types';
 
-export default ({ strapi }: Context) => {
+export default ({ strapi }: StrapiContext) => {
   const { PUBLICATION_STATUS_TYPE_NAME } = strapi.plugin('graphql').service('constants');
 
   return arg({

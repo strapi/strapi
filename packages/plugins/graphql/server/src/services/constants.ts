@@ -16,7 +16,7 @@ const GRAPHQL_SCALARS = [
   'Date',
   'Time',
   'DateTime',
-] as const;
+];
 
 const STRAPI_SCALARS = [
   'boolean',
@@ -37,7 +37,7 @@ const STRAPI_SCALARS = [
   'email',
   'password',
   'text',
-] as const;
+];
 
 const SCALARS_ASSOCIATIONS = {
   uid: 'String',
@@ -136,20 +136,6 @@ const GRAPHQL_SCALAR_OPERATORS = {
 const ERROR_CODES = {
   emptyDynamicZone: 'dynamiczone.empty',
 } as const;
-
-export type Constants = {
-  PAGINATION_TYPE_NAME: string;
-  RESPONSE_COLLECTION_META_TYPE_NAME: string;
-  PUBLICATION_STATE_TYPE_NAME: string;
-  GRAPHQL_SCALARS: string[];
-  STRAPI_SCALARS: string[];
-  GENERIC_MORPH_TYPENAME: string;
-  KINDS: typeof KINDS;
-  GRAPHQL_SCALAR_OPERATORS: typeof GRAPHQL_SCALAR_OPERATORS;
-  SCALARS_ASSOCIATIONS: typeof SCALARS_ASSOCIATIONS;
-  ERROR_CODES: typeof ERROR_CODES;
-  ERROR_TYPE_NAME: string;
-};
 
 export default () => ({
   PAGINATION_TYPE_NAME,
