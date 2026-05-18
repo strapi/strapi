@@ -9,7 +9,7 @@ import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/c
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
-import { getPopulateForLocalizations } from '../services/utils/populate';
+import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -129,6 +129,66 @@ const mergeDocumentIdFilter = (
 };
 
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
+
+/**
+ * Extracts the sort direction for the 'status' field from a sort parameter.
+ * Returns 'ASC', 'DESC', or null if status is not being sorted.
+ *
+ * The sort param can be a string ('status:ASC'), an array (['status:ASC']),
+ * or an object ({ status: 'ASC' }).
+ */
+const extractStatusSortOrder = (sort: unknown): 'ASC' | 'DESC' | null => {
+  if (!sort) return null;
+
+  if (typeof sort === 'string') {
+    const match = sort.match(/(?:^|,)\s*status:(ASC|DESC)\s*(?:,|$)/i);
+    return match ? (match[1].toUpperCase() as 'ASC' | 'DESC') : null;
+  }
+
+  if (Array.isArray(sort)) {
+    for (const item of sort) {
+      const result = extractStatusSortOrder(item);
+      if (result) return result;
+    }
+    return null;
+  }
+
+  if (typeof sort === 'object' && sort !== null && 'status' in sort) {
+    const dir = String((sort as Record<string, unknown>).status).toUpperCase();
+    return dir === 'ASC' || dir === 'DESC' ? dir : null;
+  }
+
+  return null;
+};
+
+/**
+ * Removes the 'status' field from a sort parameter, returning the remainder
+ * (or undefined if status was the only sort field).
+ */
+const removeStatusFromSort = (sort: unknown): unknown => {
+  if (!sort) return sort;
+
+  if (typeof sort === 'string') {
+    const cleaned = sort
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
+      .join(',');
+    return cleaned || undefined;
+  }
+
+  if (Array.isArray(sort)) {
+    const cleaned = sort.filter((item) => extractStatusSortOrder(item) === null);
+    return cleaned.length ? cleaned : undefined;
+  }
+
+  if (typeof sort === 'object' && sort !== null) {
+    const { status: _removed, ...rest } = sort as Record<string, unknown>;
+    return Object.keys(rest).length ? rest : undefined;
+  }
+
+  return sort;
+};
 
 /**
  * Create a new document.
@@ -255,7 +315,24 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
+    // Extract and remove 'status' sort before sanitization/validation, since status
+    // is not a real schema attribute and would be rejected by the permission checker.
+    // It is re-added after sanitization so the DB layer can handle it via a CASE expression.
+    const hasPublicationStatusFilter =
+      query.status !== undefined ||
+      query.hasPublishedVersion !== undefined ||
+      query.publicationStatusFilter !== undefined;
+    const rawStatusSortOrder = extractStatusSortOrder(query.sort);
+    // Disable status sort when a publication status filter is active — all results share the
+    // same status, making the sort a no-op.
+    const statusSortOrder = hasPublicationStatusFilter ? null : rawStatusSortOrder;
+    // Always strip 'status' from the sort before passing to the document service / permission
+    // checker — it is not a real schema attribute and would be rejected by validation.
+    const queryWithoutStatusSort = rawStatusSortOrder
+      ? { ...query, sort: removeStatusFromSort(query.sort) }
+      : query;
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryWithoutStatusSort);
 
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
@@ -302,6 +379,20 @@ export default {
           documentIds
         ),
       };
+    }
+
+    if (statusSortOrder) {
+      const s = findPageParams.sort;
+      const statusSort = `status:${statusSortOrder}`;
+      if (!s) {
+        findPageParams.sort = statusSort;
+      } else if (Array.isArray(s)) {
+        findPageParams.sort = [...s, statusSort];
+      } else if (typeof s === 'string') {
+        findPageParams.sort = `${s},${statusSort}`;
+      } else {
+        findPageParams.sort = { ...(s as object), status: statusSortOrder };
+      }
     }
 
     const { results: documents, pagination } = await documentManager.findPage(
@@ -629,6 +720,34 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
+  async bulkFindForValidation(ctx: any) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { documentIds, locale, sort } = ctx.request.body;
+
+    await validateBulkActionInput(ctx.request.body);
+
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const populate = await buildDeepPopulate(model as UID.CollectionType);
+
+    const documents = await strapi.documents(model as UID.CollectionType).findMany({
+      populate,
+      filters: { documentId: { $in: documentIds } } as any,
+      locale,
+      sort,
+      status: 'draft',
+    });
+
+    const results = await Promise.all(documents.map(permissionChecker.sanitizeOutput));
+
+    ctx.body = { results };
+  },
+
   async bulkPublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
@@ -873,10 +992,16 @@ export default {
 
     if (permissionChecker.requiresEntity.read()) {
       // Only load what we need for access checks
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
+
       const entity = await documentManager.findOne(id, model, {
         locale,
         status,
-        populate: {},
+        populate,
       });
 
       if (!entity) {

@@ -574,10 +574,8 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
       const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => fromRow(targetMeta, rowOrRows);
 
       return (map[type][id] || []).map((row) => {
-        return {
-          [typeField]: type,
-          ...fromTargetRow(row),
-        };
+        // Spread target first so a same-named user attribute cannot override the morph type UID
+        return { ...fromTargetRow(row), [typeField]: type };
       });
     });
 
@@ -590,7 +588,7 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
   const { db } = ctx;
 
   const { morphColumn } = attribute;
-  const { idColumn, typeColumn } = morphColumn;
+  const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
   // make a map for each type what ids to return
   // make a nested map per id
@@ -649,7 +647,9 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
     const fromTargetRow = (rowOrRows: Row | Row[] | undefined) =>
       fromRow(db.metadata.get(type), rowOrRows);
 
-    result[attributeName] = fromTargetRow(_.first(matchingRows));
+    const row = fromTargetRow(_.first(matchingRows));
+    // Spread target first so a same-named user attribute cannot override the morph type UID
+    result[attributeName] = row ? { ...row, [typeField]: type } : row;
   });
 };
 

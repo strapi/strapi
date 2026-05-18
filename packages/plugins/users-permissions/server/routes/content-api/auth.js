@@ -94,6 +94,7 @@ module.exports = (strapi) => {
       path: '/auth/send-email-confirmation',
       handler: 'auth.sendEmailConfirmation',
       config: {
+        middlewares: ['plugin::users-permissions.rateLimit'],
         prefix: '',
       },
       request: {

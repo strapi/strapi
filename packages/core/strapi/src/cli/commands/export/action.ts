@@ -14,7 +14,7 @@ import {
 import {
   getDefaultExportName,
   buildTransferTable,
-  DEFAULT_IGNORED_CONTENT_TYPES,
+  isIgnoredContentType,
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
@@ -30,9 +30,6 @@ const {
   providers: { createLocalFileDestinationProvider },
 } = fileDataTransfer;
 
-const {
-  providers: { createLocalDirectoryDestinationProvider },
-} = directoryDataTransfer;
 const {
   providers: { createLocalStrapiSourceProvider },
 } = strapiDataTransfer;
@@ -83,17 +80,14 @@ export default async (opts: CmdOptions) => {
       links: [
         {
           filter(link) {
-            return (
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
-              !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
-            );
+            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
           },
         },
       ],
       entities: [
         {
           filter(entity) {
-            return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+            return !isIgnoredContentType(entity.type);
           },
         },
       ],
@@ -187,6 +181,7 @@ const createDestinationProvider = (opts: CmdOptions) => {
     : undefined;
 
   if (format === 'dir') {
+    const { createLocalDirectoryDestinationProvider } = directoryDataTransfer.providers;
     const dirPath = path.isAbsolute(filepath) ? filepath : path.resolve(process.cwd(), filepath);
     return createLocalDirectoryDestinationProvider({
       directory: { path: dirPath },
