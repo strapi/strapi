@@ -49,11 +49,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
     "./utils": {
       "types": "./dist/utils/index.d.ts",
+      "source": "./src/utils/index.ts",
       "import": "./dist/utils/index.mjs",
       "require": "./dist/utils/index.js"
     },

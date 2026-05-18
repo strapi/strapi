@@ -43,12 +43,12 @@
   ],
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
-    "build:code": "run -T  rollup -c",
+    "build:code": "rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
-    "watch": "run -T rollup -c -w"
+    "watch": "rollup -c -w"
   },
   "dependencies": {
     "@strapi/cloud-cli": "5.46.0",
@@ -60,7 +60,6 @@
     "inquirer": "9.3.8",
     "lodash": "4.18.1",
     "node-machine-id": "^1.1.10",
-    "ora": "^5.4.1",
     "rollup": "4.59.0",
     "semver": "7.7.4",
     "sort-package-json": "2.10.0",
