@@ -19,6 +19,22 @@ interface GetAssetsResponse {
   pagination: Pagination;
 }
 
+/**
+ * Subset of the file metadata that can be edited from the asset details drawer.
+ * `folder = null` represents the root of the Media Library.
+ */
+export interface UpdateAssetFileInfo {
+  name?: string | null;
+  caption?: string | null;
+  alternativeText?: string | null;
+  folder?: number | null;
+}
+
+interface UpdateAssetArgs {
+  id: number;
+  fileInfo: UpdateAssetFileInfo;
+}
+
 const assetsApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getAssets: builder.query<GetAssetsResponse, GetAssetsParams | void>({
@@ -59,7 +75,29 @@ const assetsApi = uploadApi.injectEndpoints({
       }),
       providesTags: (_result, _error, id) => [{ type: 'Asset' as const, id }],
     }),
+    /**
+     * Update the editable metadata of an existing asset.
+     * Hits the legacy `POST /upload?id=<id>` endpoint which dispatches to
+     * `admin-upload.updateFileInfo`.
+     */
+    updateAsset: builder.mutation<AssetWithPopulatedCreatedBy, UpdateAssetArgs>({
+      query: ({ id, fileInfo }) => {
+        const formData = new FormData();
+        formData.append('fileInfo', JSON.stringify(fileInfo));
+
+        return {
+          url: '/upload',
+          method: 'POST',
+          data: formData,
+          config: { params: { id } },
+        };
+      },
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Asset' as const, id },
+        { type: 'Asset' as const, id: 'LIST' },
+      ],
+    }),
   }),
 });
 
-export const { useGetAssetsQuery, useGetAssetQuery } = assetsApi;
+export const { useGetAssetsQuery, useGetAssetQuery, useUpdateAssetMutation } = assetsApi;

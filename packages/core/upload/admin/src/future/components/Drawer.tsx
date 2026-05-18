@@ -74,7 +74,10 @@ const DrawerContainer = styled(Flex)<DrawerContainerProps>`
   right: 0;
   padding: ${({ theme }) => theme.spaces[2]};
   max-width: 100%;
-  z-index: 1000;
+  /* Use the dialog z-index (320) so popovers (500) and tooltips (1000) rendered
+     from descendant components — e.g. the asset details SingleSelect — surface
+     above the drawer panel instead of being hidden behind it. */
+  z-index: ${({ theme }) => theme.zIndices.dialog};
   overflow: hidden;
   width: ${({ width }) => width ?? '400px'};
   max-height: ${({ maxHeight }) => maxHeight ?? '100vh'};

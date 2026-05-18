@@ -1,12 +1,15 @@
 import * as React from 'react';
 
-import { useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
+import { useNotification, useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
 import {
   Alert,
   Box,
+  Button,
   Field,
   Flex,
   Loader,
+  SingleSelect,
+  SingleSelectOption,
   TextInput,
   Typography,
   VisuallyHidden,
@@ -17,7 +20,8 @@ import { styled } from 'styled-components';
 
 import { Drawer, DRAWER_CLOSE_ANIMATION_MS } from '../../../../components/Drawer';
 import { AssetType } from '../../../../enums';
-import { useGetAssetQuery } from '../../../../services/assets';
+import { useGetAssetQuery, useUpdateAssetMutation } from '../../../../services/assets';
+import { useGetAllFoldersQuery } from '../../../../services/folders';
 import { formatBytes, getFileExtension } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -25,6 +29,9 @@ import { getTranslationKey } from '../../../../utils/translations';
 import { AssetPreview } from './AssetPreview';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
+
+/** String value used by the location select to represent root folder (Media Library). */
+const ROOT_FOLDER_VALUE = '__root__';
 
 // Name of the parameter to look for in the URL to open the drawer
 const URL_PARAM = 'assetId';
@@ -136,19 +143,21 @@ const StyledWarning = styled(WarningCircle)`
 interface DetailFieldProps {
   name: string;
   label: string;
-  value: string | null | undefined;
+  value: string;
+  onChange: (value: string) => void;
   required?: boolean;
+  disabled?: boolean;
 }
 
-const DetailField = ({ name, label, value, required }: DetailFieldProps) => (
+const DetailField = ({ name, label, value, onChange, required, disabled }: DetailFieldProps) => (
   <Field.Root name={name} required={required}>
     <Field.Label>{label}</Field.Label>
     <TextInput
-      value={value ?? ''}
-      // TODO: handle onChange
-      onChange={() => {}}
+      value={value}
+      onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
       endAction={!value ? <StyledWarning /> : undefined}
       type="text"
+      disabled={disabled}
     />
   </Field.Root>
 );
@@ -161,10 +170,79 @@ interface AssetDetailsProps {
   asset: AssetWithPopulatedCreatedBy;
 }
 
+interface AssetFormState {
+  name: string;
+  caption: string;
+  alternativeText: string;
+  folder: number | null;
+}
+
+const buildFormState = (asset: AssetWithPopulatedCreatedBy): AssetFormState => ({
+  name: asset.name ?? '',
+  caption: asset.caption ?? '',
+  alternativeText: asset.alternativeText ?? '',
+  folder:
+    typeof asset.folder === 'object' && asset.folder !== null
+      ? ((asset.folder as { id: number }).id ?? null)
+      : ((asset.folder as number | null | undefined) ?? null),
+});
+
 const AssetDetails = ({ asset }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
+  const { toggleNotification } = useNotification();
+
+  const [form, setForm] = React.useState<AssetFormState>(() => buildFormState(asset));
+
+  React.useEffect(() => {
+    setForm(buildFormState(asset));
+  }, [asset.id]);
+
+  const { data: folders = [] } = useGetAllFoldersQuery();
+  const [updateAsset, { isLoading: isSaving }] = useUpdateAssetMutation();
 
   const isImage = asset.mime?.includes(AssetType.Image);
+
+  const initial = React.useMemo(() => buildFormState(asset), [asset]);
+  const dataChanged =
+    form.name !== initial.name ||
+    form.caption !== initial.caption ||
+    form.alternativeText !== initial.alternativeText ||
+    form.folder !== initial.folder;
+
+  const handleFieldChange = <K extends keyof AssetFormState>(key: K, value: AssetFormState[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSave = async () => {
+    const res = await updateAsset({
+      id: asset.id,
+      fileInfo: {
+        name: form.name,
+        caption: form.caption,
+        alternativeText: form.alternativeText,
+        folder: form.folder,
+      },
+    });
+
+    if ('error' in res) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslationKey('asset-details.update.error'),
+          defaultMessage: 'Failed to update the asset.',
+        }),
+      });
+      return;
+    }
+
+    toggleNotification({
+      type: 'success',
+      message: formatMessage({
+        id: getTranslationKey('asset-details.update.success'),
+        defaultMessage: 'Asset updated.',
+      }),
+    });
+  };
 
   return (
     <Flex
@@ -271,9 +349,39 @@ const AssetDetails = ({ asset }: AssetDetailsProps) => {
           id: getTranslationKey('asset-details.fileName'),
           defaultMessage: 'File name',
         })}
-        value={asset.name}
+        value={form.name}
+        onChange={(value) => handleFieldChange('name', value)}
+        disabled={isSaving}
         required
       />
+      <Field.Root name="location" required>
+        <Field.Label>
+          {formatMessage({
+            id: getTranslationKey('asset-details.location'),
+            defaultMessage: 'Location',
+          })}
+        </Field.Label>
+        <SingleSelect
+          value={form.folder === null ? ROOT_FOLDER_VALUE : String(form.folder)}
+          onChange={(value) => {
+            const next = value === ROOT_FOLDER_VALUE ? null : Number(value);
+            handleFieldChange('folder', next);
+          }}
+          disabled={isSaving}
+        >
+          <SingleSelectOption value={ROOT_FOLDER_VALUE}>
+            {formatMessage({
+              id: getTranslationKey('asset-details.location.root'),
+              defaultMessage: 'Media Library',
+            })}
+          </SingleSelectOption>
+          {folders.map((folder) => (
+            <SingleSelectOption key={folder.id} value={String(folder.id)}>
+              {folder.name}
+            </SingleSelectOption>
+          ))}
+        </SingleSelect>
+      </Field.Root>
       {isImage && (
         <>
           <DetailField
@@ -282,7 +390,9 @@ const AssetDetails = ({ asset }: AssetDetailsProps) => {
               id: getTranslationKey('asset-details.caption'),
               defaultMessage: 'Caption',
             })}
-            value={asset.caption}
+            value={form.caption}
+            onChange={(value) => handleFieldChange('caption', value)}
+            disabled={isSaving}
           />
           <DetailField
             name="alternativeText"
@@ -290,10 +400,26 @@ const AssetDetails = ({ asset }: AssetDetailsProps) => {
               id: getTranslationKey('asset-details.alternativeText'),
               defaultMessage: 'Alternative text',
             })}
-            value={asset.alternativeText}
+            value={form.alternativeText}
+            onChange={(value) => handleFieldChange('alternativeText', value)}
+            disabled={isSaving}
           />
         </>
       )}
+
+      <Flex justifyContent="flex-end" gap={2} paddingTop={2}>
+        <Button
+          variant="default"
+          onClick={handleSave}
+          loading={isSaving}
+          disabled={!dataChanged || isSaving}
+        >
+          {formatMessage({
+            id: getTranslationKey('asset-details.save'),
+            defaultMessage: 'Save',
+          })}
+        </Button>
+      </Flex>
     </Flex>
   );
 };
