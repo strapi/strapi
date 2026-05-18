@@ -2,7 +2,11 @@ import { merge, map, difference, uniq } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
-import { getTokenOptions, expiresInToSeconds, hasUserConfiguredAuthOptionsExpiresIn } from './services/token';
+import {
+  getTokenOptions,
+  expiresInToSeconds,
+  hasUserConfiguredAuthOptionsExpiresIn,
+} from './services/token';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';

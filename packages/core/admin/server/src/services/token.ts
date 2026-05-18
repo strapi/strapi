@@ -50,7 +50,12 @@ For security reasons, prefer storing the secret in an environment variable and r
   }
 };
 
-export { createToken, getTokenOptions, checkSecretIsDefined, hasUserConfiguredAuthOptionsExpiresIn };
+export {
+  createToken,
+  getTokenOptions,
+  checkSecretIsDefined,
+  hasUserConfiguredAuthOptionsExpiresIn,
+};
 
 /**
  * Convert an expiresIn value (string or number) into seconds.

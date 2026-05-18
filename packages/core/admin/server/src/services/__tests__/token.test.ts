@@ -1,4 +1,9 @@
-import { getTokenOptions, createToken, expiresInToSeconds, hasUserConfiguredAuthOptionsExpiresIn } from '../token';
+import {
+  getTokenOptions,
+  createToken,
+  expiresInToSeconds,
+  hasUserConfiguredAuthOptionsExpiresIn,
+} from '../token';
 
 describe('expiresInToSeconds', () => {
   test('returns undefined for null/undefined', () => {
