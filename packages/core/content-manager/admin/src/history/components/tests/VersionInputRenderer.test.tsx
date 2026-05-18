@@ -25,16 +25,25 @@ const baseAttribute = {
   target: 'api::category.category',
 };
 
+type RenderFieldOptions = {
+  /** Form field path; must match a key in `initialFormValues` */
+  name?: string;
+  label?: string;
+};
+
 const renderField = (
   initialFormValues: Record<string, unknown>,
-  attributeOverrides: Partial<RelationsFieldProps['attribute']> = {}
-) =>
-  renderRTL(
+  attributeOverrides: Partial<RelationsFieldProps['attribute']> = {},
+  options: RenderFieldOptions = {}
+) => {
+  const name = options.name ?? 'categories';
+  const label = options.label ?? 'Categories';
+  return renderRTL(
     <CustomRelationInput
       // @ts-expect-error - test setup uses minimal attribute shape
       attribute={{ ...baseAttribute, ...attributeOverrides }}
-      label="Categories"
-      name="categories"
+      label={label}
+      name={name}
       type="relation"
       mainField={{ name: 'name', type: 'string' }}
     />,
@@ -48,6 +57,7 @@ const renderField = (
       },
     }
   );
+};
 
 describe('CustomRelationInput (history)', () => {
   it('renders "No relations" when the field value is the expected `{ results, meta }` shape with an empty list', async () => {
