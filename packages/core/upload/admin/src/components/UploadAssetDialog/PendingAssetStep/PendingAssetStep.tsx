@@ -193,7 +193,11 @@ export const PendingAssetStep = ({
         <Button onClick={onClose} variant="tertiary">
           {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
         </Button>
-        <Button onClick={handleSubmit} loading={uploadStatus === Status.Uploading}>
+        <Button
+          onClick={handleSubmit}
+          loading={uploadStatus === Status.Uploading}
+          disabled={assets.length === 0}
+        >
           {formatMessage(
             {
               id: getTrad('modal.upload-list.footer.button'),

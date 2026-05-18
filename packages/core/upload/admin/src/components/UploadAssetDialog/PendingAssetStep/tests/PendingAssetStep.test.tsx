@@ -88,4 +88,31 @@ describe('PendingAssetStep', () => {
 
     expect(container).toMatchSnapshot();
   });
+
+  it('disables the upload button when there are no assets', () => {
+    const { getByRole } = renderTL(
+      <QueryClientProvider client={queryClient}>
+        <DesignSystemProvider>
+          <IntlProvider locale="en">
+            <Modal.Root open>
+              <Modal.Content>
+                <PendingAssetStep
+                  assets={[]}
+                  onClose={jest.fn()}
+                  onAddAsset={jest.fn()}
+                  onEditAsset={jest.fn()}
+                  onClickAddAsset={jest.fn()}
+                  onCancelUpload={jest.fn()}
+                  onRemoveAsset={jest.fn()}
+                  onUploadSucceed={jest.fn()}
+                />
+              </Modal.Content>
+            </Modal.Root>
+          </IntlProvider>
+        </DesignSystemProvider>
+      </QueryClientProvider>
+    );
+
+    expect(getByRole('button', { name: 'Upload 0 assets to the library' })).toBeDisabled();
+  });
 });
