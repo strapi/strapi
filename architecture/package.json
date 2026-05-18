@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "likec4 start .",
     "build": "likec4 build .",
-    "export:png": "likec4 export png . --output ./exports",
-    "export:mermaid": "likec4 export mermaid . --output ./exports",
+    "export:png": "likec4 export png . --outdir ./exports",
+    "export:mermaid": "likec4 export mermaid . --outdir ./exports",
     "format": "likec4 format .",
     "check": "likec4 format --check ."
   },

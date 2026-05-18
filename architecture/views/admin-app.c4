@@ -1,0 +1,259 @@
+views {
+  view admin_app_components of strapi.admin_web_app {
+    title 'Admin Web Application - Components'
+    description '''
+      Admin app components and the server-side capabilities they call.
+    '''
+
+    include
+      admin_shell,
+      admin_providers,
+      admin_router,
+      admin_store,
+      admin_api_services,
+      admin_feature_providers,
+      admin_layouts,
+      admin_pages,
+      admin_shared_components,
+      content_manager_ui,
+      content_type_builder_ui,
+      settings_api_tokens_ui,
+      plugin_admin_extensions,
+      strapi.server_runtime,
+      strapi.server_runtime.content_manager_server,
+      strapi.server_runtime.content_type_builder_server,
+      strapi.server_runtime.admin_server_apis,
+      strapi.server_runtime.plugin_modules,
+      admin_shell -> content_manager_ui,
+      admin_shell -> content_type_builder_ui,
+      admin_shell -> settings_api_tokens_ui,
+      admin_shell -> plugin_admin_extensions,
+      admin_shell -> admin_providers,
+      admin_shell -> admin_router,
+      admin_shell -> admin_layouts,
+      admin_providers -> admin_store,
+      admin_providers -> admin_feature_providers,
+      admin_store -> admin_api_services,
+      admin_router -> admin_pages,
+      admin_router -> content_manager_ui,
+      admin_router -> content_type_builder_ui,
+      admin_router -> settings_api_tokens_ui,
+      admin_pages -> admin_api_services,
+      settings_api_tokens_ui -> admin_api_services,
+      content_manager_ui -> admin_shared_components,
+      content_type_builder_ui -> admin_shared_components,
+      content_manager_ui -> strapi.server_runtime.content_manager_server,
+      content_type_builder_ui -> strapi.server_runtime.content_type_builder_server,
+      settings_api_tokens_ui -> strapi.server_runtime.admin_server_apis,
+      plugin_admin_extensions -> strapi.server_runtime.plugin_modules
+  }
+
+  view admin_frontend_foundation of strapi.admin_web_app {
+    title 'Admin Web Application - Frontend Foundation'
+    description '''
+      Frontend foundation inside the Admin web application: providers, routing, state, API services, layouts, pages, and shared components.
+    '''
+
+    include
+      admin_shell,
+      admin_providers,
+      admin_router,
+      admin_store,
+      admin_api_services,
+      admin_feature_providers,
+      admin_layouts,
+      admin_pages,
+      admin_shared_components,
+      admin_shell -> admin_providers,
+      admin_shell -> admin_router,
+      admin_shell -> admin_layouts,
+      admin_providers -> admin_store,
+      admin_providers -> admin_feature_providers,
+      admin_store -> admin_api_services,
+      admin_router -> admin_pages,
+      admin_pages -> admin_api_services,
+      admin_pages -> admin_shared_components,
+      admin_layouts -> admin_shared_components
+  }
+
+  view admin_feature_surfaces of strapi.admin_web_app {
+    title 'Admin Web Application - Feature Surfaces'
+    description '''
+      Admin feature surfaces: the router exposes core pages and feature/plugin UIs, which call server capabilities and reuse the shared admin UI layer.
+    '''
+
+    include
+      admin_router,
+      admin_pages,
+      content_manager_ui,
+      content_type_builder_ui,
+      settings_api_tokens_ui,
+      plugin_admin_extensions,
+      admin_api_services,
+      admin_shared_components,
+      strapi.server_runtime,
+      strapi.server_runtime.content_manager_server,
+      strapi.server_runtime.content_type_builder_server,
+      strapi.server_runtime.admin_server_apis,
+      strapi.server_runtime.plugin_modules,
+      admin_router -> admin_pages,
+      admin_router -> content_manager_ui,
+      admin_router -> content_type_builder_ui,
+      admin_router -> settings_api_tokens_ui,
+      admin_router -> plugin_admin_extensions,
+      admin_pages -> admin_api_services,
+      settings_api_tokens_ui -> admin_api_services,
+      content_manager_ui -> admin_shared_components,
+      content_type_builder_ui -> admin_shared_components,
+      content_manager_ui -> strapi.server_runtime.content_manager_server,
+      content_type_builder_ui -> strapi.server_runtime.content_type_builder_server,
+      settings_api_tokens_ui -> strapi.server_runtime.admin_server_apis,
+      plugin_admin_extensions -> strapi.server_runtime.plugin_modules
+  }
+
+  view content_manager_ui_internals of strapi.admin_web_app.content_manager_ui {
+    title 'Content Manager UI - Code Organization'
+    description '''
+      Code organization for the Admin Content Manager frontend package: route entrypoints, layout, page surfaces, hooks, services, state, and shared UI modules.
+    '''
+
+    include
+      cm_ui_plugin_entry,
+      cm_ui_router,
+      cm_ui_layout,
+      cm_ui_list_view,
+      cm_ui_edit_view,
+      cm_ui_configuration_views,
+      cm_ui_hooks,
+      cm_ui_services,
+      cm_ui_state,
+      cm_ui_shared_components,
+      cm_ui_history_preview,
+      strapi.server_runtime,
+      strapi.server_runtime.content_manager_server,
+      cm_ui_plugin_entry -> cm_ui_router,
+      cm_ui_plugin_entry -> cm_ui_shared_components,
+      cm_ui_router -> cm_ui_layout,
+      cm_ui_router -> cm_ui_list_view,
+      cm_ui_router -> cm_ui_edit_view,
+      cm_ui_router -> cm_ui_configuration_views,
+      cm_ui_router -> cm_ui_history_preview,
+      cm_ui_layout -> cm_ui_hooks,
+      cm_ui_layout -> cm_ui_shared_components,
+      cm_ui_list_view -> cm_ui_hooks,
+      cm_ui_list_view -> cm_ui_services,
+      cm_ui_list_view -> cm_ui_shared_components,
+      cm_ui_edit_view -> cm_ui_hooks,
+      cm_ui_edit_view -> cm_ui_services,
+      cm_ui_edit_view -> cm_ui_shared_components,
+      cm_ui_configuration_views -> cm_ui_services,
+      cm_ui_hooks -> cm_ui_state,
+      cm_ui_hooks -> cm_ui_services,
+      cm_ui_services -> strapi.server_runtime.content_manager_server,
+      cm_ui_history_preview -> cm_ui_services
+    style cm_ui_router {
+      border none
+    }
+  }
+
+  view admin_shell_code of strapi.admin_web_app.admin_shell {
+    title 'Admin Shell - Code Organization'
+    description '''
+      Code-level organization of the Admin shell entrypoint and extension API.
+    '''
+
+    include
+      admin_app_entry,
+      admin_extension_api,
+      strapi.admin_web_app.admin_router,
+      admin_app_entry -> admin_extension_api,
+      admin_extension_api -> strapi.admin_web_app.admin_router.admin_plugin_routes
+  }
+
+  view admin_router_code of strapi.admin_web_app.admin_router {
+    title 'Admin Router - Code Organization'
+    description '''
+      Code-level organization of Admin routing: auth routes, authenticated layout routes, and feature/plugin routes.
+    '''
+
+    include
+      admin_auth_routes,
+      admin_authenticated_routes,
+      admin_plugin_routes,
+      admin_auth_routes -> admin_authenticated_routes,
+      admin_authenticated_routes -> admin_plugin_routes
+  }
+
+  view admin_providers_code of strapi.admin_web_app.admin_providers {
+    title 'Admin Providers - Code Organization'
+    description '''
+      Code-level organization of Admin app providers for context, configuration, Redux, and server data.
+    '''
+
+    include
+      admin_context_providers,
+      admin_data_providers,
+      strapi.admin_web_app.admin_store,
+      strapi.admin_web_app.admin_feature_providers,
+      admin_context_providers -> strapi.admin_web_app.admin_feature_providers,
+      admin_data_providers -> strapi.admin_web_app.admin_store
+  }
+
+  view admin_api_services_code of strapi.admin_web_app.admin_api_services {
+    title 'Admin API Services - Code Organization'
+    description '''
+      Code-level organization of Admin RTK Query services and settings/auth API modules.
+    '''
+
+    include
+      admin_api_base,
+      admin_auth_api,
+      admin_settings_api,
+      strapi.server_runtime,
+      strapi.server_runtime.admin_server_apis,
+      admin_api_base -> admin_auth_api,
+      admin_api_base -> admin_settings_api,
+      admin_settings_api -> strapi.server_runtime.admin_server_apis
+  }
+
+  view content_type_builder_ui_code of strapi.admin_web_app.content_type_builder_ui {
+    title 'Content-Type Builder UI - Code Organization'
+    description '''
+      Code-level organization of the Content-Type Builder frontend package: app pages, data manager, schema components, form modals, and utilities.
+    '''
+
+    include
+      ctb_ui_app_pages,
+      ctb_ui_data_manager,
+      ctb_ui_schema_components,
+      ctb_ui_form_modals,
+      ctb_ui_utils,
+      strapi.server_runtime,
+      strapi.server_runtime.content_type_builder_server,
+      ctb_ui_app_pages -> ctb_ui_data_manager,
+      ctb_ui_app_pages -> ctb_ui_schema_components,
+      ctb_ui_schema_components -> ctb_ui_form_modals,
+      ctb_ui_form_modals -> ctb_ui_data_manager,
+      ctb_ui_data_manager -> strapi.server_runtime.content_type_builder_server,
+      ctb_ui_schema_components -> ctb_ui_utils
+  }
+
+  view settings_api_tokens_ui_code of strapi.admin_web_app.settings_api_tokens_ui {
+    title 'Settings and API Tokens UI - Code Organization'
+    description '''
+      Code-level organization of settings pages for API tokens, roles, users, transfer tokens, and webhooks.
+    '''
+
+    include
+      settings_navigation,
+      api_tokens_pages,
+      admin_roles_pages,
+      transfer_tokens_webhooks_pages,
+      strapi.admin_web_app.admin_api_services,
+      settings_navigation -> api_tokens_pages,
+      settings_navigation -> admin_roles_pages,
+      settings_navigation -> transfer_tokens_webhooks_pages,
+      api_tokens_pages -> strapi.admin_web_app.admin_api_services.admin_settings_api,
+      admin_roles_pages -> strapi.admin_web_app.admin_api_services.admin_settings_api
+  }
+}

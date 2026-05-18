@@ -41,7 +41,15 @@ specification {
   element code_package {
     notation 'Code Package'
     style {
-      shape component
+      shape rectangle
+      color green
+    }
+  }
+
+  element source_document {
+    notation 'Source Document'
+    style {
+      shape document
       color green
     }
   }

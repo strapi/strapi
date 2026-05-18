@@ -1,0 +1,23 @@
+views {
+  view content_type_builder_server_code of strapi.server_runtime.content_type_builder_server {
+    title 'Content-Type Builder Server - Code Organization'
+    description '''
+      Code-level organization of the Content-Type Builder server package: routes, middlewares, controllers, services, and schema builder internals.
+    '''
+
+    include
+      ctb_server_routes,
+      ctb_server_middlewares,
+      ctb_server_controllers,
+      ctb_server_services,
+      ctb_schema_builder,
+      strapi.application_source,
+      strapi.application_source.content_type_schema_files,
+      ctb_server_routes -> ctb_server_middlewares,
+      ctb_server_routes -> ctb_server_controllers,
+      ctb_server_controllers -> ctb_server_services,
+      ctb_server_services -> ctb_schema_builder,
+      ctb_server_middlewares -> ctb_server_controllers,
+      ctb_schema_builder -> strapi.application_source.content_type_schema_files
+  }
+}
