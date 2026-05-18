@@ -21,6 +21,7 @@ import resolvers from './resolvers';
 import operators from './filters/operators';
 import utils from './utils';
 import type { TypeRegistry } from '../type-registry';
+import { Context } from '../types';
 
 export type Builders = ReturnType<typeof enums> &
   ReturnType<typeof dynamicZone> &
@@ -36,7 +37,7 @@ export type Builders = ReturnType<typeof enums> &
   ReturnType<typeof genericMorph> &
   ReturnType<typeof resolvers>;
 
-const buildersFactories = [
+const buildersFactories: ReadonlyArray<(context: Context) => object> = [
   enums,
   dynamicZone,
   entity,
@@ -60,7 +61,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Instantiate every builder with a strapi instance & a type registry
      */
     new(name: string, registry: TypeRegistry): Builders {
-      const context = { strapi, registry };
+      const context: Context = { strapi, registry };
 
       const builders = buildersFactories
         // Create a new instance of every builders
