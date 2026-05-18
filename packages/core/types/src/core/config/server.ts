@@ -89,5 +89,5 @@ export interface Server {
   admin?: ServerAdmin;
   webhooks?: Webhooks;
   http?: Http;
-  mcp: McpConfig;
+  mcp?: McpConfig;
 }
