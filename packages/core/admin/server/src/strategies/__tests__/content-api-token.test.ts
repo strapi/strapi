@@ -32,7 +32,7 @@ describe('Content-API Token Auth Strategy', () => {
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': {
+            'api-token-content-api': {
               getByAccessKey,
               hash,
             },
@@ -62,7 +62,7 @@ describe('Content-API Token Auth Strategy', () => {
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': {
+            'api-token-content-api': {
               getByAccessKey,
               hash,
             },
@@ -93,7 +93,7 @@ describe('Content-API Token Auth Strategy', () => {
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': {
+            'api-token-content-api': {
               getByAccessKey,
               hash,
             },
@@ -136,7 +136,7 @@ describe('Content-API Token Auth Strategy', () => {
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': {
+            'api-token-content-api': {
               getByAccessKey,
               hash,
             },
@@ -163,7 +163,7 @@ describe('Content-API Token Auth Strategy', () => {
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': {
+            'api-token-content-api': {
               getByAccessKey,
               hash,
               update,
@@ -195,7 +195,7 @@ describe('Content-API Token Auth Strategy', () => {
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': { getByAccessKey, hash },
+            'api-token-content-api': { getByAccessKey, hash },
           },
           db: {
             query() {
@@ -219,7 +219,7 @@ describe('Content-API Token Auth Strategy', () => {
       global.strapi = {
         admin: {
           services: {
-            'api-token-admin': { getByAccessKey, hash },
+            'api-token-content-api': { getByAccessKey, hash },
           },
         },
         db: {
