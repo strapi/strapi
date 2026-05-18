@@ -187,7 +187,7 @@ const buildFormState = (asset: AssetWithPopulatedCreatedBy): AssetFormState => (
       : ((asset.folder as number | null | undefined) ?? null),
 });
 
-const AssetDetails = ({ asset }: AssetDetailsProps) => {
+export const AssetDetails = ({ asset }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
 
