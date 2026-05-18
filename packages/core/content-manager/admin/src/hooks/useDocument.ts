@@ -75,6 +75,21 @@ type UseDocument = (
   getInitialFormValues: (isCreatingDocument?: boolean) => AnyData | undefined;
 };
 
+/**
+ * Mirrors the server's `isLocalizedAttribute` in
+ * `packages/plugins/i18n/server/src/services/content-types.ts`: an attribute
+ * counts as localized only when `pluginOptions.i18n.localized` is explicitly
+ * `true`. Both `false` and `undefined` mean "non-localized" — important here
+ * because attributes created without the i18n plugin omit the field entirely,
+ * and we still want them inherited when creating a new locale draft.
+ */
+const isLocalizedAttribute = (attribute: { pluginOptions?: object }): boolean => {
+  // `pluginOptions` on the base attribute is typed as `object`, so we have to
+  // narrow it to the i18n-specific shape here.
+  const i18nOptions = attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined;
+  return i18nOptions?.i18n?.localized === true;
+};
+
 /* -------------------------------------------------------------------------------------------------
  * useDocument
  * -----------------------------------------------------------------------------------------------*/
@@ -200,7 +215,10 @@ const useDocument: UseDocument = (args, opts) => {
    *
    * Scope intentionally matches what the server populates into
    * `meta.availableLocales` (see `packages/core/content-manager/server/src/services/document-metadata.ts`):
-   *   - non-localized (`pluginOptions.i18n.localized === false`)
+   *   - non-localized — `isLocalizedAttribute` semantics, so attributes whose
+   *     `pluginOptions.i18n.localized` is `undefined` count as non-localized
+   *     (an attribute created without the i18n plugin has no i18n options at
+   *     all but is still inherited at save by `copyNonLocalizedFields`).
    *   - scalar or media — `component` / `dynamiczone` / `relation` are excluded
    *     because the server doesn't populate them in `availableLocales` either,
    *     so there'd be nothing to copy from.
@@ -212,11 +230,8 @@ const useDocument: UseDocument = (args, opts) => {
 
     return Object.keys(schema.attributes).filter((name) => {
       const attribute = schema.attributes[name];
-      // `pluginOptions` is typed as `object` on the base attribute, so narrow it
-      // to the i18n shape rather than ambient-casting the whole attribute.
-      const i18nOptions = attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined;
 
-      if (i18nOptions?.i18n?.localized !== false) {
+      if (isLocalizedAttribute(attribute)) {
         return false;
       }
 
@@ -237,10 +252,19 @@ const useDocument: UseDocument = (args, opts) => {
    * We also prepare the form for new documents, so we need to:
    * - set default values on fields
    * - inherit non-localized scalar/media values from a sibling locale.
+   *   Scope is intentionally limited to scalars and media — that is exactly
+   *   what the server populates into `meta.availableLocales` (see
+   *   `packages/core/content-manager/server/src/services/document-metadata.ts`).
+   *   Components, dynamic zones, and relations are not in that payload; the
+   *   server fills them at save time via `copyNonLocalizedFields` (in
+   *   `packages/core/core/src/services/document-service/internationalization.ts`)
+   *   when the new locale row is first created.
    *   Baking the inheritance into `initialValues` here is what lets it survive
-   *   both `<Form>` re-inits (`SET_INITIAL_VALUES`) and `Blocker.resetForm()` —
-   *   neither of which the previous side-effect-based prefill in
-   *   `LocalePickerAction` could survive on revisits.
+   *   `<Form>` re-inits: the `SET_INITIAL_VALUES` effect in
+   *   `packages/core/admin/admin/src/components/Form.tsx` re-applies these
+   *   values whenever `initialValues` changes (e.g. after a locale switch),
+   *   which the previous side-effect-based prefill in `LocalePickerAction`
+   *   could not survive on revisits.
    */
   const getInitialFormValues = React.useCallback(
     (isCreatingDocument: boolean = false) => {
@@ -259,8 +283,13 @@ const useDocument: UseDocument = (args, opts) => {
       let form: AnyData = createDefaultForm(schema, components);
 
       // Intentionally use `availableLocales[0]`:
-      // - Non-localized fields are always in sync across all locales (`copyNonLocalizedFields`).
-      // - Avoids depending on the i18n plugin just to find the default locale.
+      // - The server sorts `getAvailableLocales` with the default locale first
+      //   (see `document-metadata.ts`), so index 0 is the canonical inheritance
+      //   source. Sibling locales can drift on non-localized fields because the
+      //   server only syncs them at locale-creation time, not on subsequent
+      //   updates — preferring the default keeps the surfaced values stable.
+      // - Avoids coupling this hook to `useGetLocalesQuery` just to find the
+      //   default locale.
       const sibling = meta?.availableLocales?.[0] as Record<string, unknown> | undefined;
       if (sibling && nonLocalizedScalarAndMediaFields.length > 0) {
         const inherited = nonLocalizedScalarAndMediaFields.reduce<AnyData>((acc, name) => {

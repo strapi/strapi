@@ -541,6 +541,40 @@ describe('useDocument · getInitialFormValues · i18n non-localized inheritance'
     });
   });
 
+  it('inherits scalar fields whose i18n pluginOptions are undefined (matches server isLocalizedAttribute semantics)', async () => {
+    mockSchema({
+      // No `pluginOptions` at all — created without the i18n plugin.
+      legacyTitle: { type: 'string' },
+      // Has `pluginOptions` but no i18n key.
+      legacySlug: { type: 'string', pluginOptions: {} },
+      // Explicitly non-localized — already covered elsewhere, kept here as a
+      // sanity check that mixed shapes coexist in the same schema.
+      author: { type: 'string', ...nonLocalized },
+      body: { type: 'string', ...localized },
+    });
+    mockMissingLocale({
+      id: 1,
+      locale: 'en',
+      legacyTitle: 'Inherited title',
+      legacySlug: 'inherited-slug',
+      author: 'Inherited author',
+      body: 'should not leak',
+      updatedAt: '',
+      createdAt: '',
+      publishedAt: '',
+      status: 'draft',
+    });
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getInitialFormValues(true)).toEqual({
+      legacyTitle: 'Inherited title',
+      legacySlug: 'inherited-slug',
+      author: 'Inherited author',
+    });
+  });
+
   it('does not inherit fields when all are localized', async () => {
     mockSchema({
       body: { type: 'string', ...localized },
