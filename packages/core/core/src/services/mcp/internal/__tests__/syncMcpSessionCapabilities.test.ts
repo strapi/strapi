@@ -1,7 +1,6 @@
 import type { Modules } from '@strapi/types';
-import type { McpCapabilityDefinitions } from '../McpServerFactory';
+import type { McpCapabilityDefinitions, McpRegistries } from '../McpServerFactory';
 import type { McpAdminTokenAbility } from '../../authentication';
-import type { McpSession } from '../McpSession';
 import { McpCapabilityDefinitionRegistry } from '../McpCapabilityDefinitionRegistry';
 import { canUseMcpCapability, syncMcpSessionCapabilities } from '../syncMcpSessionCapabilities';
 
@@ -61,7 +60,7 @@ const createRegistry = (initialStatus: Record<string, RegistryStatus>) => {
   };
 };
 
-const createSession = ({
+const createRegistries = ({
   toolStatus = {},
   promptStatus = {},
   resourceStatus = {},
@@ -69,18 +68,15 @@ const createSession = ({
   toolStatus?: Record<string, RegistryStatus>;
   promptStatus?: Record<string, RegistryStatus>;
   resourceStatus?: Record<string, RegistryStatus>;
-}): Pick<McpSession, 'toolRegistry' | 'promptRegistry' | 'resourceRegistry'> =>
+}): McpRegistries =>
   ({
-    toolRegistry: createRegistry(toolStatus),
-    promptRegistry: createRegistry(promptStatus),
-    resourceRegistry: createRegistry(resourceStatus),
-  }) as unknown as Pick<McpSession, 'toolRegistry' | 'promptRegistry' | 'resourceRegistry'>;
+    tools: createRegistry(toolStatus),
+    prompts: createRegistry(promptStatus),
+    resources: createRegistry(resourceStatus),
+  }) as unknown as McpRegistries;
 
 const createAbility = (can: McpAdminTokenAbility['can']): McpAdminTokenAbility => ({
   can,
-  cannot: jest.fn(
-    (action: string, subject?: unknown, field?: string) => !can(action, subject, field)
-  ),
 });
 
 const createToolDefinition = (
@@ -96,26 +92,26 @@ const createToolDefinition = (
 describe('syncMcpSessionCapabilities', () => {
   test('disables an enabled capability when fresh ability denies it', () => {
     const ability = createAbility(jest.fn(() => false));
-    const session = createSession({ toolStatus: { denied: 'enabled' } });
+    const registries = createRegistries({ toolStatus: { denied: 'enabled' } });
     const definitions = createDefinitions({
       tools: [createToolDefinition({ name: 'denied', auth: { action: 'admin::read' } })],
     });
 
     const summary = syncMcpSessionCapabilities({
-      session,
+      registries,
       definitions,
       ability,
       isDevMode: false,
     });
 
-    expect(session.toolRegistry.disable).toHaveBeenCalledWith('denied');
-    expect(session.toolRegistry.enable).not.toHaveBeenCalled();
+    expect(registries.tools.disable).toHaveBeenCalledWith('denied');
+    expect(registries.tools.enable).not.toHaveBeenCalled();
     expect(summary).toStrictEqual({ enabled: [], disabled: ['denied'] });
   });
 
   test('enables a disabled capability when fresh ability allows it', () => {
     const ability = createAbility(jest.fn(() => true));
-    const session = createSession({ promptStatus: { allowed: 'disabled' } });
+    const registries = createRegistries({ promptStatus: { allowed: 'disabled' } });
     const definitions = createDefinitions({
       prompts: [
         {
@@ -126,20 +122,20 @@ describe('syncMcpSessionCapabilities', () => {
     });
 
     const summary = syncMcpSessionCapabilities({
-      session,
+      registries,
       definitions,
       ability,
       isDevMode: false,
     });
 
-    expect(session.promptRegistry.enable).toHaveBeenCalledWith('allowed');
-    expect(session.promptRegistry.disable).not.toHaveBeenCalled();
+    expect(registries.prompts.enable).toHaveBeenCalledWith('allowed');
+    expect(registries.prompts.disable).not.toHaveBeenCalled();
     expect(summary).toStrictEqual({ enabled: ['allowed'], disabled: [] });
   });
 
   test('does not mutate registries when current status already matches desired state', () => {
     const ability = createAbility(jest.fn((action: string) => action === 'admin::read'));
-    const session = createSession({
+    const registries = createRegistries({
       toolStatus: { allowed: 'enabled', denied: 'disabled' },
     });
     const definitions = createDefinitions({
@@ -150,14 +146,14 @@ describe('syncMcpSessionCapabilities', () => {
     });
 
     const summary = syncMcpSessionCapabilities({
-      session,
+      registries,
       definitions,
       ability,
       isDevMode: false,
     });
 
-    expect(session.toolRegistry.enable).not.toHaveBeenCalled();
-    expect(session.toolRegistry.disable).not.toHaveBeenCalled();
+    expect(registries.tools.enable).not.toHaveBeenCalled();
+    expect(registries.tools.disable).not.toHaveBeenCalled();
     expect(summary).toStrictEqual({ enabled: [], disabled: [] });
   });
 

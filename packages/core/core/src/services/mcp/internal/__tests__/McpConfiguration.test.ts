@@ -20,29 +20,34 @@ describe('McpConfiguration', () => {
     const config = new McpConfiguration(mockStrapi as Core.Strapi);
 
     expect(config.path).toBe('/mcp');
-    expect(config.sessionIdleTimeoutMs).toBe(30 * 60 * 1000);
-    expect(config.maxSessions).toBe(100);
-    expect(config.cleanupIntervalMs).toBe(5 * 60 * 1000);
-    expect(config.requestTimeoutMs).toBe(30 * 1000);
+    expect(config.connectTimeoutMs).toBe(5 * 1000);
+    expect(config.requestTimeoutMs).toBe(60 * 1000);
   });
 
-  test('should use custom config values when provided', () => {
+  test('should use custom connectTimeoutMs when provided', () => {
     configGetSpy.mockImplementation((key, defaultValue) => {
       const customConfig: Record<string, any> = {
-        'server.mcp.sessionIdleTimeoutMs': 10 * 60 * 1000,
-        'server.mcp.maxSessions': 50,
-        'server.mcp.cleanupIntervalMs': 2 * 60 * 1000,
-        'server.mcp.requestTimeoutMs': 60 * 1000,
+        'server.mcp.connectTimeoutMs': 10 * 1000,
       };
       return customConfig[key] ?? defaultValue;
     });
 
     const config = new McpConfiguration(mockStrapi as Core.Strapi);
 
-    expect(config.sessionIdleTimeoutMs).toBe(10 * 60 * 1000);
-    expect(config.maxSessions).toBe(50);
-    expect(config.cleanupIntervalMs).toBe(2 * 60 * 1000);
-    expect(config.requestTimeoutMs).toBe(60 * 1000);
+    expect(config.connectTimeoutMs).toBe(10 * 1000);
+  });
+
+  test('should use custom requestTimeoutMs when provided', () => {
+    configGetSpy.mockImplementation((key, defaultValue) => {
+      const customConfig: Record<string, any> = {
+        'server.mcp.requestTimeoutMs': 120 * 1000,
+      };
+      return customConfig[key] ?? defaultValue;
+    });
+
+    const config = new McpConfiguration(mockStrapi as Core.Strapi);
+
+    expect(config.requestTimeoutMs).toBe(120 * 1000);
   });
 
   describe('isEnabled', () => {

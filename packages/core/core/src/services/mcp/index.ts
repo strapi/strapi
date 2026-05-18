@@ -7,10 +7,8 @@ import type { McpHandlerDependencies } from './handlers/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import { McpConfiguration } from './internal/McpConfiguration';
 import { createMcpServerWithRegistries } from './internal/McpServerFactory';
-import { McpSessionManager } from './internal/McpSessionManager';
 import { createMcpRoutes } from './routes';
 import { logToolDefinition } from './tools/log';
-import { createManagedInterval } from './utils/createManagedInterval';
 
 /**
  * Creates an MCP service instance for Strapi Core
@@ -19,16 +17,10 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
   // Initialize configuration
   const config = new McpConfiguration(strapi);
 
-  // Initialize session manager
-  const sessionManager = new McpSessionManager(config, strapi);
-
   const authenticationStrategy = createMcpAdminTokenAuthenticator(strapi);
 
   // Status tracking
   let serverStatus: Modules.MCP.McpServiceStatus = 'idle';
-
-  // Cleanup interval management
-  const cleanupSessionsInterval = createManagedInterval();
 
   // Definition registries
   const toolDefinitions = new McpCapabilityDefinitionRegistry<
@@ -50,7 +42,6 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
   const handlerDependencies: McpHandlerDependencies = {
     strapi,
     authenticationStrategy,
-    sessionManager,
     config,
     createServerWithRegistries: createMcpServerWithRegistries,
     capabilityDefinitions: {
@@ -62,8 +53,8 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
   // Create HTTP handlers
   const handlePost = createPostHandler(handlerDependencies);
-  const handleGet = createGetHandler(handlerDependencies);
-  const handleDelete = createDeleteHandler(handlerDependencies);
+  const handleGet = createGetHandler();
+  const handleDelete = createDeleteHandler();
 
   const service: Modules.MCP.McpService = {
     isEnabled() {
@@ -121,45 +112,15 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
       const routes = createMcpRoutes(config, { handlePost, handleGet, handleDelete });
       strapi.server.routes(routes);
 
-      // Set status to 'running' after routes are registered
       serverStatus = 'running';
-
-      // Start periodic cleanup of idle sessions
-      cleanupSessionsInterval.start(() => {
-        sessionManager.cleanupIdleSessions();
-      }, config.cleanupIntervalMs);
 
       const baseUrl = strapi.config.get('server.url', 'http://localhost:1337');
       strapi.log.info(`[MCP] Server available at ${baseUrl}${config.path}`);
     },
 
     async stop() {
-      serverStatus = 'stopping';
-
-      try {
-        const { erroredSessionMessages, hasErrors } = await sessionManager.closeAllSessions();
-
-        // Log any errors encountered during session closures
-        if (hasErrors === true) {
-          strapi.log.error(
-            `[MCP] Errors occurred while stopping sessions:\n${erroredSessionMessages.join('\n')}`
-          );
-          serverStatus = 'error';
-        } else {
-          serverStatus = 'idle';
-        }
-      } catch (error) {
-        strapi.log.error('[MCP] Error stopping service', {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : undefined,
-        });
-        serverStatus = 'error';
-      } finally {
-        // Clear cleanup interval
-        cleanupSessionsInterval.clear();
-
-        strapi.log.info('[MCP] Service stopped');
-      }
+      serverStatus = 'idle';
+      strapi.log.info('[MCP] Service stopped');
     },
   };
 

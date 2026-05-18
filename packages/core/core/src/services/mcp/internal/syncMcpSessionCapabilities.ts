@@ -1,7 +1,6 @@
 import type { Modules } from '@strapi/types';
 import type { McpAdminTokenAbility } from '../authentication';
-import type { McpSession } from './McpSession';
-import type { McpCapabilityDefinitions } from './McpServerFactory';
+import type { McpCapabilityDefinitions, McpRegistries } from './McpServerFactory';
 
 type CanUseAuthorizedCapabilityParams = {
   ability: McpAdminTokenAbility;
@@ -15,7 +14,7 @@ export type CanUseMcpCapabilityParams = {
 };
 
 export type SyncMcpSessionCapabilitiesParams = {
-  session: Pick<McpSession, 'toolRegistry' | 'promptRegistry' | 'resourceRegistry'>;
+  registries: McpRegistries;
   definitions: McpCapabilityDefinitions;
   ability: McpAdminTokenAbility;
   isDevMode: boolean;
@@ -56,7 +55,7 @@ export const canUseMcpCapability = ({
 };
 
 export const syncMcpSessionCapabilities = ({
-  session,
+  registries,
   definitions,
   ability,
   isDevMode,
@@ -68,45 +67,45 @@ export const syncMcpSessionCapabilities = ({
 
   definitions.tools.forEach((definition) => {
     const allowed = canUseMcpCapability({ ability, definition, isDevMode });
-    const status = session.toolRegistry.status(definition.name);
+    const status = registries.tools.status(definition.name);
 
     if (status === 'disabled' && allowed === true) {
-      session.toolRegistry.enable(definition.name);
+      registries.tools.enable(definition.name);
       summary.enabled.push(definition.name);
     }
 
     if (status === 'enabled' && allowed === false) {
-      session.toolRegistry.disable(definition.name);
+      registries.tools.disable(definition.name);
       summary.disabled.push(definition.name);
     }
   });
 
   definitions.prompts.forEach((definition) => {
     const allowed = canUseMcpCapability({ ability, definition, isDevMode });
-    const status = session.promptRegistry.status(definition.name);
+    const status = registries.prompts.status(definition.name);
 
     if (status === 'disabled' && allowed === true) {
-      session.promptRegistry.enable(definition.name);
+      registries.prompts.enable(definition.name);
       summary.enabled.push(definition.name);
     }
 
     if (status === 'enabled' && allowed === false) {
-      session.promptRegistry.disable(definition.name);
+      registries.prompts.disable(definition.name);
       summary.disabled.push(definition.name);
     }
   });
 
   definitions.resources.forEach((definition) => {
     const allowed = canUseMcpCapability({ ability, definition, isDevMode });
-    const status = session.resourceRegistry.status(definition.name);
+    const status = registries.resources.status(definition.name);
 
     if (status === 'disabled' && allowed === true) {
-      session.resourceRegistry.enable(definition.name);
+      registries.resources.enable(definition.name);
       summary.enabled.push(definition.name);
     }
 
     if (status === 'enabled' && allowed === false) {
-      session.resourceRegistry.disable(definition.name);
+      registries.resources.disable(definition.name);
       summary.disabled.push(definition.name);
     }
   });
