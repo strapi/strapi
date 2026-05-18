@@ -159,9 +159,9 @@ export default (context: Context) => {
 
       builder.field(attributeName, {
         type: nonNull(list(typeName)),
-        async resolve(parent: any, args: any, context: any, info: any) {
+        async resolve(parent: unknown, args: unknown, context: unknown, info: unknown) {
           const res = await resolve(parent, args, context, info);
-          const nodes = 'nodes' in res ? res.nodes : [];
+          const nodes = res && 'nodes' in res ? res.nodes : [];
           return nodes ?? [];
         },
         args,
@@ -169,9 +169,9 @@ export default (context: Context) => {
     } else {
       builder.field(attributeName, {
         type: typeName,
-        async resolve(parent: any, args: any, context: any, info: any) {
+        async resolve(parent: unknown, args: unknown, context: unknown, info: unknown) {
           const res = await resolve(parent, args, context, info);
-          return 'value' in res ? res.value : undefined;
+          return res && 'value' in res ? res.value : undefined;
         },
         args,
       });
@@ -268,9 +268,9 @@ export default (context: Context) => {
 
       builder.field(attributeName, {
         type: nonNull(list(typeName)),
-        async resolve(parent: any, args: any, context: any, info: any) {
+        async resolve(parent: unknown, args: unknown, context: unknown, info: unknown) {
           const res = await resolve(parent, args, context, info);
-          const nodes = 'nodes' in res ? res.nodes : [];
+          const nodes = res && 'nodes' in res ? res.nodes : [];
           return nodes ?? [];
         },
         args,
@@ -278,9 +278,9 @@ export default (context: Context) => {
     } else {
       builder.field(attributeName, {
         type: typeName,
-        async resolve(parent: any, args: any, context: any, info: any) {
+        async resolve(parent: unknown, args: unknown, context: unknown, info: unknown) {
           const res = await resolve(parent, args, context, info);
-          return 'value' in res ? res.value : undefined;
+          return res && 'value' in res ? res.value : undefined;
         },
         args,
       });

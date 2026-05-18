@@ -13,12 +13,16 @@ type PublicServices = {
   [K in keyof typeof services as `plugin::graphql.${K & string}`]: ReturnType<(typeof services)[K]>;
 };
 
-declare module '@strapi/types' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  export namespace Public {
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
-    export interface Services extends PublicServices {}
-  }
+// `@strapi/types` re-exports `Core`/`Public` via `export type * as` aliases
+// (see packages/core/types/src/index.ts). Those aliases are not augmentable:
+// `declare module '@strapi/types' { namespace Public/Core { ... } }` creates a
+// shadowing declaration instead of merging, silently dropping the real members.
+// Augment the modules that actually declare the interfaces instead:
+//   - `Services` -> @strapi/types/dist/public (public/registries.ts)
+//   - `Strapi`   -> @strapi/types/dist/core   (core/strapi.ts)
+declare module '@strapi/types/dist/public' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface Services extends PublicServices {}
 }
 
 declare module '@strapi/types/dist/core' {

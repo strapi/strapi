@@ -3,7 +3,6 @@ import { makeSchema } from 'nexus';
 import { prop, startsWith } from 'lodash/fp';
 import type * as Nexus from 'nexus';
 import type { Core, Struct } from '@strapi/types';
-import { mergeSchemas, addResolversToSchema } from '@graphql-tools/schema';
 
 import { wrapResolvers } from './wrap-resolvers';
 import {
@@ -22,6 +21,8 @@ import { TypeRegistry } from '../type-registry';
 import { Builders } from '../builders';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { mergeSchemas, addResolversToSchema } = require('@graphql-tools/schema');
   const { service: getGraphQLService } = strapi.plugin('graphql');
   const { config } = strapi.plugin('graphql');
 

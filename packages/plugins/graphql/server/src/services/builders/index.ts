@@ -83,12 +83,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Retrieve a set of builders instances from
-     * the builders map for a given name
+     * the builders map for a given name.
+     *
+     * `content-api` builders are always instantiated at bootstrap before any
+     * consumer runs, so that name is typed as always-present (and guarded at
+     * runtime below); every other name may be missing.
      */
     get<Name extends string>(
       name: Name
     ): Name extends 'content-api' ? Builders : Builders | undefined {
-      return buildersMap.get(name) as Builders;
+      const builders = buildersMap.get(name);
+
+      if (name === 'content-api' && !builders) {
+        throw new Error(`[@strapi/plugin-graphql] Missing builders for ${name}`);
+      }
+
+      return builders as Name extends 'content-api' ? Builders : Builders | undefined;
     },
 
     filters: {
