@@ -91,6 +91,7 @@ jobs:
           linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
           linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
           linear-labels: ${{ vars.LINEAR_LABELS }}
+          linear-triage-state-id: ${{ vars.LINEAR_TRIAGE_STATE_ID }}
 
   triage:
     runs-on: ubuntu-latest
@@ -121,3 +122,4 @@ jobs:
           linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
           linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
           linear-labels: ${{ vars.LINEAR_LABELS }}
+          linear-triage-state-id: ${{ vars.LINEAR_TRIAGE_STATE_ID }}

@@ -19186,10 +19186,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("error", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     exports2.error = error;
-    function warning4(message, properties = {}) {
+    function warning5(message, properties = {}) {
       (0, command_1.issueCommand)("warning", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
-    exports2.warning = warning4;
+    exports2.warning = warning5;
     function notice(message, properties = {}) {
       (0, command_1.issueCommand)("notice", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
@@ -42255,7 +42255,7 @@ var require_src = __commonJS({
 });
 
 // src/index.ts
-var core4 = __toESM(require_core());
+var core5 = __toESM(require_core());
 
 // src/lib/github.ts
 var github = __toESM(require_github());
@@ -42407,6 +42407,9 @@ async function appendToPRBody(prNumber, appendText) {
     body: newBody
   });
 }
+
+// src/lib/linear.ts
+var core = __toESM(require_core());
 
 // ../../../node_modules/@linear/sdk/dist/index-es.min.js
 var import_stream = __toESM(require("stream"));
@@ -54569,16 +54572,30 @@ async function fetchAllTicketsByPRNumber(teamId) {
   }
   return map;
 }
-async function createTicket(pr2, analysis, teamId, projectId, labelMap) {
+async function resolveTriageStateId(teamId, override) {
+  if (override) return override;
+  const team = await linearClient.team(teamId);
+  const byType = await team.states({ filter: { type: { eq: "triage" } }, first: 1 });
+  if (byType.nodes[0]) return byType.nodes[0].id;
+  const allStates = await team.states({ first: 50 });
+  const byName = allStates.nodes.find((s2) => s2.name.toLowerCase() === "triage");
+  if (byName) return byName.id;
+  const names = allStates.nodes.map((s2) => `${s2.name} (${s2.type})`).join(", ");
+  core.warning(`No Triage state found for team ${teamId}. Available: ${names}`);
+  return void 0;
+}
+async function createTicket(pr2, analysis, teamId, projectId, labelMap, triageStateId) {
   const title = `PR #${pr2.number}: ${pr2.title}`;
   const description = buildDescription(pr2, analysis);
   const labelIds = await buildLabelIds(analysis, labelMap, teamId);
+  const stateId = await resolveTriageStateId(teamId, triageStateId);
   const result = await linearClient.createIssue({
     teamId,
     projectId,
     title,
     description,
-    labelIds
+    labelIds,
+    stateId
   });
   const issue = await result.issue;
   if (!issue) throw new Error(`Failed to create Linear issue for PR #${pr2.number}`);
@@ -54901,7 +54918,8 @@ async function syncPR(prNumber, triggerLabel, inputs) {
       analysis,
       inputs.cprTeamId,
       inputs.projectId,
-      labelMap
+      labelMap,
+      inputs.triageStateId
     );
     analysis.linearTicketId = ticket.identifier;
     await postComment(
@@ -54917,17 +54935,17 @@ async function syncPR(prNumber, triggerLabel, inputs) {
 }
 
 // src/modes/sync-all.ts
-var core = __toESM(require_core());
+var core2 = __toESM(require_core());
 async function syncAll(inputs) {
   const internalAuthors = await fetchInternalAuthors("strapi");
   const prs = await fetchOpenCommunityPRs(internalAuthors);
-  core.info(`Found ${prs.length} open community PRs to sync`);
+  core2.info(`Found ${prs.length} open community PRs to sync`);
   const [cprTickets, cmsTickets, labelMap] = await Promise.all([
     fetchAllTicketsByPRNumber(inputs.cprTeamId),
     fetchAllTicketsByPRNumber(inputs.cmsTeamId),
     resolveTeamLabels(inputs.cprTeamId, inputs.labelMap)
   ]);
-  core.info(`Loaded ${cprTickets.size} CPR tickets, ${cmsTickets.size} CMS tickets`);
+  core2.info(`Loaded ${cprTickets.size} CPR tickets, ${cmsTickets.size} CMS tickets`);
   let created = 0;
   let updated = 0;
   let failed = 0;
@@ -54956,14 +54974,15 @@ async function syncAll(inputs) {
             await updateTicket(cprTicket.id, pr2, analysis, labelMap, inputs.cprTeamId);
             updated++;
           } else if (cmsTicket) {
-            core.info(`PR #${pr2.number} already in CMS as ${cmsTicket.identifier}, skipping`);
+            core2.info(`PR #${pr2.number} already in CMS as ${cmsTicket.identifier}, skipping`);
           } else {
             const ticket = await createTicket(
               pr2,
               analysis,
               inputs.cprTeamId,
               inputs.projectId,
-              labelMap
+              labelMap,
+              inputs.triageStateId
             );
             try {
               await postComment(
@@ -54972,24 +54991,24 @@ async function syncAll(inputs) {
               );
               await appendToPRBody(pr2.number, `Fixes ${ticket.identifier}`);
             } catch (err) {
-              core.warning(`PR #${pr2.number}: could not update GitHub (no write access?) \u2014 ${err}`);
+              core2.warning(`PR #${pr2.number}: could not update GitHub (no write access?) \u2014 ${err}`);
             }
             created++;
-            core.info(`Created ${ticket.identifier} for PR #${pr2.number}`);
+            core2.info(`Created ${ticket.identifier} for PR #${pr2.number}`);
           }
         } catch (err) {
           failed++;
-          core.warning(`PR #${pr2.number}: sync failed \u2014 ${err}`);
+          core2.warning(`PR #${pr2.number}: sync failed \u2014 ${err}`);
         }
       })
     );
     if (i2 + 10 < prs.length) await new Promise((r2) => setTimeout(r2, 1e3));
   }
-  core.info(`Sync complete: ${created} created, ${updated} updated, ${failed} failed`);
+  core2.info(`Sync complete: ${created} created, ${updated} updated, ${failed} failed`);
 }
 
 // src/modes/weekly-report.ts
-var core2 = __toESM(require_core());
+var core3 = __toESM(require_core());
 function buildLinearUpdateBody(stats, viewUrl) {
   const date = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
   const prLine = (a2, extra) => {
@@ -55017,88 +55036,6 @@ function buildLinearUpdateBody(stats, viewUrl) {
   ].filter((line) => line !== void 0).join("\n").trim();
 }
 async function weeklyReport(inputs) {
-  const internalAuthors = await fetchInternalAuthors("strapi");
-  const prs = await fetchOpenCommunityPRs(internalAuthors);
-  const [cprTickets, cmsTickets] = await Promise.all([
-    fetchAllTicketsByPRNumber(inputs.cprTeamId),
-    fetchAllTicketsByPRNumber(inputs.cmsTeamId)
-  ]);
-  core2.info(`Loaded ${cprTickets.size} CPR tickets, ${cmsTickets.size} CMS tickets`);
-  const analyses = [];
-  for (let i2 = 0; i2 < prs.length; i2 += 10) {
-    const batch = prs.slice(i2, i2 + 10);
-    const batchAnalyses = await Promise.all(
-      batch.map(async (pr2) => {
-        try {
-          const hasSourceLabel = pr2.labels.some((l2) => l2.startsWith("source: "));
-          const files = hasSourceLabel ? [] : await fetchPRFiles(pr2.number);
-          pr2.files = files;
-          const ticket = cprTickets.get(pr2.number) ?? cmsTickets.get(pr2.number) ?? null;
-          return {
-            pr: pr2,
-            isQuickWin: isQuickWin(pr2),
-            area: detectArea(pr2.labels, files),
-            isStale: isStale(pr2),
-            daysSinceUpdate: daysSince(pr2.updatedAt),
-            linearTicketId: ticket?.identifier ?? null,
-            linearTicketDbId: ticket?.id ?? null
-          };
-        } catch (err) {
-          core2.warning(`PR #${pr2.number}: skipping due to error \u2014 ${err}`);
-          return null;
-        }
-      })
-    );
-    analyses.push(...batchAnalyses.filter(Boolean));
-    if (i2 + 10 < prs.length) await new Promise((r2) => setTimeout(r2, 1e3));
-  }
-  const since = new Date(Date.now() - 7 * 864e5).toISOString();
-  const cmsPickups = await fetchCMSPickups(inputs.cmsTeamId, since);
-  const quickWinCandidates = analyses.filter((a2) => a2.isQuickWin);
-  const ciResults = await Promise.all(
-    quickWinCandidates.map(async (a2) => {
-      try {
-        return await fetchCIStatus(a2.pr.headSha);
-      } catch {
-        return false;
-      }
-    })
-  );
-  const quickWins = quickWinCandidates.filter((_2, i2) => ciResults[i2]).slice(0, 5);
-  const stats = {
-    totalOpen: analyses.length,
-    newThisWeek: analyses.filter((a2) => isNewThisWeek(a2.pr)),
-    pickedUpByCMS: cmsPickups,
-    stalePRs: analyses.filter((a2) => a2.isStale),
-    quickWins
-  };
-  const labelMap = await resolveTeamLabels(inputs.cprTeamId, inputs.labelMap);
-  await Promise.all(
-    analyses.filter((a2) => a2.linearTicketDbId !== null && a2.linearTicketId?.startsWith("CPR-")).map(async (a2) => {
-      try {
-        await updateTicketLabels(a2.linearTicketDbId, a2, labelMap, inputs.cprTeamId);
-      } catch (err) {
-        core2.warning(`Failed to update labels for ${a2.linearTicketId}: ${err}`);
-      }
-    })
-  );
-  const body = buildLinearUpdateBody(stats, inputs.triageViewUrl);
-  await postProjectUpdate(inputs.projectId, body);
-  if (inputs.postToNotion && inputs.notionDatabaseId) {
-    await createReportPage(
-      inputs.notionDatabaseId,
-      stats,
-      analyses,
-      (/* @__PURE__ */ new Date()).toISOString()
-    );
-  }
-}
-
-// src/modes/notion-report.ts
-var core3 = __toESM(require_core());
-async function notionReport(inputs) {
-  if (!inputs.notionDatabaseId)
-    throw new Error("notion-database-id is required for notion-report mode");
   const internalAuthors = await fetchInternalAuthors("strapi");
   const prs = await fetchOpenCommunityPRs(internalAuthors);
   const [cprTickets, cmsTickets] = await Promise.all([
@@ -55136,6 +55073,88 @@ async function notionReport(inputs) {
   }
   const since = new Date(Date.now() - 7 * 864e5).toISOString();
   const cmsPickups = await fetchCMSPickups(inputs.cmsTeamId, since);
+  const quickWinCandidates = analyses.filter((a2) => a2.isQuickWin);
+  const ciResults = await Promise.all(
+    quickWinCandidates.map(async (a2) => {
+      try {
+        return await fetchCIStatus(a2.pr.headSha);
+      } catch {
+        return false;
+      }
+    })
+  );
+  const quickWins = quickWinCandidates.filter((_2, i2) => ciResults[i2]).slice(0, 5);
+  const stats = {
+    totalOpen: analyses.length,
+    newThisWeek: analyses.filter((a2) => isNewThisWeek(a2.pr)),
+    pickedUpByCMS: cmsPickups,
+    stalePRs: analyses.filter((a2) => a2.isStale),
+    quickWins
+  };
+  const labelMap = await resolveTeamLabels(inputs.cprTeamId, inputs.labelMap);
+  await Promise.all(
+    analyses.filter((a2) => a2.linearTicketDbId !== null && a2.linearTicketId?.startsWith("CPR-")).map(async (a2) => {
+      try {
+        await updateTicketLabels(a2.linearTicketDbId, a2, labelMap, inputs.cprTeamId);
+      } catch (err) {
+        core3.warning(`Failed to update labels for ${a2.linearTicketId}: ${err}`);
+      }
+    })
+  );
+  const body = buildLinearUpdateBody(stats, inputs.triageViewUrl);
+  await postProjectUpdate(inputs.projectId, body);
+  if (inputs.postToNotion && inputs.notionDatabaseId) {
+    await createReportPage(
+      inputs.notionDatabaseId,
+      stats,
+      analyses,
+      (/* @__PURE__ */ new Date()).toISOString()
+    );
+  }
+}
+
+// src/modes/notion-report.ts
+var core4 = __toESM(require_core());
+async function notionReport(inputs) {
+  if (!inputs.notionDatabaseId)
+    throw new Error("notion-database-id is required for notion-report mode");
+  const internalAuthors = await fetchInternalAuthors("strapi");
+  const prs = await fetchOpenCommunityPRs(internalAuthors);
+  const [cprTickets, cmsTickets] = await Promise.all([
+    fetchAllTicketsByPRNumber(inputs.cprTeamId),
+    fetchAllTicketsByPRNumber(inputs.cmsTeamId)
+  ]);
+  core4.info(`Loaded ${cprTickets.size} CPR tickets, ${cmsTickets.size} CMS tickets`);
+  const analyses = [];
+  for (let i2 = 0; i2 < prs.length; i2 += 10) {
+    const batch = prs.slice(i2, i2 + 10);
+    const batchAnalyses = await Promise.all(
+      batch.map(async (pr2) => {
+        try {
+          const hasSourceLabel = pr2.labels.some((l2) => l2.startsWith("source: "));
+          const files = hasSourceLabel ? [] : await fetchPRFiles(pr2.number);
+          pr2.files = files;
+          const ticket = cprTickets.get(pr2.number) ?? cmsTickets.get(pr2.number) ?? null;
+          return {
+            pr: pr2,
+            isQuickWin: isQuickWin(pr2),
+            area: detectArea(pr2.labels, files),
+            isStale: isStale(pr2),
+            daysSinceUpdate: daysSince(pr2.updatedAt),
+            linearTicketId: ticket?.identifier ?? null,
+            linearTicketDbId: ticket?.id ?? null
+          };
+        } catch (err) {
+          core4.warning(`PR #${pr2.number}: skipping due to error \u2014 ${err}`);
+          return null;
+        }
+      })
+    );
+    analyses.push(...batchAnalyses.filter(Boolean));
+    if (i2 + 10 < prs.length) await new Promise((r2) => setTimeout(r2, 1e3));
+  }
+  const since = new Date(Date.now() - 7 * 864e5).toISOString();
+  const cmsPickups = await fetchCMSPickups(inputs.cmsTeamId, since);
   const stats = {
     totalOpen: analyses.length,
     newThisWeek: analyses.filter((a2) => isNewThisWeek(a2.pr)),
@@ -55157,20 +55176,21 @@ function parseLabels(raw) {
 }
 function loadInputs() {
   return {
-    githubToken: core4.getInput("github-token", { required: true }),
-    linearApiKey: core4.getInput("linear-api-key", { required: true }),
-    cprTeamId: core4.getInput("linear-cpr-team-id", { required: true }),
-    cmsTeamId: core4.getInput("linear-cms-team-id", { required: true }),
-    projectId: core4.getInput("linear-project-id", { required: true }),
-    triageViewUrl: core4.getInput("linear-triage-view-url") || "",
-    postToNotion: core4.getInput("post-to-notion") === "true",
-    notionApiKey: core4.getInput("notion-api-key") || null,
-    notionDatabaseId: core4.getInput("notion-database-id") || null,
-    labelMap: parseLabels(core4.getInput("linear-labels"))
+    githubToken: core5.getInput("github-token", { required: true }),
+    linearApiKey: core5.getInput("linear-api-key", { required: true }),
+    cprTeamId: core5.getInput("linear-cpr-team-id", { required: true }),
+    cmsTeamId: core5.getInput("linear-cms-team-id", { required: true }),
+    projectId: core5.getInput("linear-project-id", { required: true }),
+    triageViewUrl: core5.getInput("linear-triage-view-url") || "",
+    postToNotion: core5.getInput("post-to-notion") === "true",
+    notionApiKey: core5.getInput("notion-api-key") || null,
+    notionDatabaseId: core5.getInput("notion-database-id") || null,
+    labelMap: parseLabels(core5.getInput("linear-labels")),
+    triageStateId: core5.getInput("linear-triage-state-id") || null
   };
 }
 async function run() {
-  const mode = core4.getInput("mode", { required: true });
+  const mode = core5.getInput("mode", { required: true });
   const inputs = loadInputs();
   initGitHub(inputs.githubToken);
   initLinear(inputs.linearApiKey);
@@ -55180,9 +55200,9 @@ async function run() {
   }
   switch (mode) {
     case "sync-pr": {
-      const prNumber = parseInt(core4.getInput("pr-number", { required: true }), 10);
+      const prNumber = parseInt(core5.getInput("pr-number", { required: true }), 10);
       if (isNaN(prNumber)) throw new Error("pr-number must be a valid integer");
-      const triggerLabel = core4.getInput("trigger-label") || null;
+      const triggerLabel = core5.getInput("trigger-label") || null;
       await syncPR(prNumber, triggerLabel, inputs);
       break;
     }
@@ -55196,10 +55216,10 @@ async function run() {
       await notionReport(inputs);
       break;
     default:
-      core4.setFailed(`Unknown mode: ${mode}`);
+      core5.setFailed(`Unknown mode: ${mode}`);
   }
 }
-run().catch((err) => core4.setFailed(err instanceof Error ? err.message : String(err)));
+run().catch((err) => core5.setFailed(err instanceof Error ? err.message : String(err)));
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:
