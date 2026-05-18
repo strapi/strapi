@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = require('./server/src');
+module.exports = require('./dist/server');
