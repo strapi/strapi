@@ -1,4 +1,9 @@
-import { getTokenOptions, createToken, expiresInToSeconds } from '../token';
+import {
+  getTokenOptions,
+  createToken,
+  expiresInToSeconds,
+  hasUserConfiguredAuthOptionsExpiresIn,
+} from '../token';
 
 describe('expiresInToSeconds', () => {
   test('returns undefined for null/undefined', () => {
@@ -269,6 +274,34 @@ describe('Token', () => {
           publicKey: '-----BEGIN PUBLIC KEY-----\ntest-public-key\n-----END PUBLIC KEY-----',
         },
       });
+    });
+  });
+
+  describe('hasUserConfiguredAuthOptionsExpiresIn', () => {
+    test('returns false when options are undefined', () => {
+      expect(hasUserConfiguredAuthOptionsExpiresIn(undefined)).toBe(false);
+    });
+
+    test('returns false when options are null', () => {
+      expect(hasUserConfiguredAuthOptionsExpiresIn(null)).toBe(false);
+    });
+
+    test('returns false when options omit expiresIn', () => {
+      expect(hasUserConfiguredAuthOptionsExpiresIn({ algorithm: 'HS256' })).toBe(false);
+    });
+
+    test('returns false for non-object values', () => {
+      expect(hasUserConfiguredAuthOptionsExpiresIn('string')).toBe(false);
+      expect(hasUserConfiguredAuthOptionsExpiresIn(42)).toBe(false);
+    });
+
+    test('returns true when expiresIn is set', () => {
+      expect(hasUserConfiguredAuthOptionsExpiresIn({ expiresIn: '7d' })).toBe(true);
+      expect(hasUserConfiguredAuthOptionsExpiresIn({ expiresIn: 3600 })).toBe(true);
+    });
+
+    test('returns false when expiresIn is explicitly null', () => {
+      expect(hasUserConfiguredAuthOptionsExpiresIn({ expiresIn: null })).toBe(false);
     });
   });
 
