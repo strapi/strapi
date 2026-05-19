@@ -20,7 +20,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
 
     const definition: Modules.MCP.McpCapabilityDefinition = {
       name: 'my-capability',
-      devModeOnly: false,
+      auth: { action: 'test.action' },
     };
 
     registry.define(definition);
@@ -43,7 +43,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
     };
     const definitionB: Modules.MCP.McpCapabilityDefinition = {
       name: 'duplicate',
-      devModeOnly: false,
+      auth: { action: 'test.action' },
     };
 
     registry.define(definitionA);
@@ -56,6 +56,34 @@ describe('McpCapabilityDefinitionRegistry', () => {
     expect(registry.size).toBe(1);
   });
 
+  test('define() throws when a non-dev capability does not declare auth action', () => {
+    const registry = new McpCapabilityDefinitionRegistry<
+      'tool',
+      Modules.MCP.McpCapabilityDefinition
+    >('tool');
+
+    expect(() =>
+      registry.define({
+        name: 'missing-auth',
+        devModeOnly: false,
+      } as Modules.MCP.McpCapabilityDefinition)
+    ).toThrow('[MCP] tool with name "missing-auth" must declare auth action or be devModeOnly.');
+  });
+
+  test('define() throws when a non-dev capability declares an empty auth action', () => {
+    const registry = new McpCapabilityDefinitionRegistry<
+      'tool',
+      Modules.MCP.McpCapabilityDefinition
+    >('tool');
+
+    expect(() =>
+      registry.define({
+        name: 'empty-action',
+        auth: { action: '' },
+      })
+    ).toThrow('[MCP] tool with name "empty-action" must declare auth action or be devModeOnly.');
+  });
+
   test('delete() removes definitions and reports success', () => {
     const registry = new McpCapabilityDefinitionRegistry<
       'resource',
@@ -64,7 +92,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
 
     const definitionA: Modules.MCP.McpCapabilityDefinition = {
       name: 'a',
-      devModeOnly: false,
+      auth: { action: 'test.action' },
     };
     const definitionB: Modules.MCP.McpCapabilityDefinition = {
       name: 'b',

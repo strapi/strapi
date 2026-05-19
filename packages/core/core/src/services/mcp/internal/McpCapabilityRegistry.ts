@@ -30,7 +30,7 @@ export class McpCapabilityRegistryBase<
   protected register<LocallyRegistered extends Registered>(
     registerFn: (definition: Definition) => LocallyRegistered
   ) {
-    for (const definition of this.#definitions.getAll()) {
+    this.#definitions.forEach((definition) => {
       const existing = this.#registered.get(definition.name);
       if (existing !== undefined) {
         throw new Error(
@@ -44,7 +44,7 @@ export class McpCapabilityRegistryBase<
       registered.disable();
 
       this.#registered.set(definition.name, registered);
-    }
+    });
   }
 
   list(ctx?: {
@@ -58,13 +58,14 @@ export class McpCapabilityRegistryBase<
         name: string;
         status: 'enabled' | 'disabled' | 'defined' | 'undefined';
         devModeOnly: boolean;
+        auth: Definition['auth'] | undefined;
       }[]
     >((acc, curr) => {
       const status = this.status(curr.name);
       if (filter?.status !== undefined && !filter.status.includes(status)) {
         return acc;
       }
-      acc.push({ name: curr.name, status, devModeOnly: curr.devModeOnly });
+      acc.push({ name: curr.name, status, devModeOnly: !!curr.devModeOnly, auth: curr.auth });
       return acc;
     }, []);
   }

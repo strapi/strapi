@@ -36,6 +36,7 @@ jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
 
 describe('createMcpServerWithRegistries', () => {
   let mockStrapi: Partial<Core.Strapi>;
+  let mockAbility: { can: jest.Mock };
   let toolDefinitions: McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>;
   let promptDefinitions: McpCapabilityDefinitionRegistry<'prompt', Modules.MCP.McpPromptDefinition>;
   let resourceDefinitions: McpCapabilityDefinitionRegistry<
@@ -45,6 +46,7 @@ describe('createMcpServerWithRegistries', () => {
 
   beforeEach(() => {
     mockStrapi = {} as Core.Strapi;
+    mockAbility = { can: jest.fn(() => false) };
     toolDefinitions = new McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>(
       'tool'
     );
@@ -67,6 +69,7 @@ describe('createMcpServerWithRegistries', () => {
         resources: resourceDefinitions,
       },
       isDevMode: false,
+      ability: mockAbility,
     });
 
     expect(result.mcpServer).toBeDefined();
@@ -95,6 +98,7 @@ describe('createMcpServerWithRegistries', () => {
         resources: resourceDefinitions,
       },
       isDevMode: true,
+      ability: mockAbility,
     });
 
     // The tool should be enabled
@@ -122,6 +126,7 @@ describe('createMcpServerWithRegistries', () => {
         resources: resourceDefinitions,
       },
       isDevMode: false,
+      ability: mockAbility,
     });
 
     // The tool should remain disabled
@@ -140,10 +145,88 @@ describe('createMcpServerWithRegistries', () => {
         resources: resourceDefinitions,
       },
       isDevMode: false,
+      ability: mockAbility,
     });
 
     expect(result.registries.toolRegistry.list().length).toBe(0);
     expect(result.registries.promptRegistry.list().length).toBe(0);
     expect(result.registries.resourceRegistry.list().length).toBe(0);
+  });
+
+  test('should enable auth-gated capabilities when action is allowed', () => {
+    mockAbility.can.mockReturnValue(true);
+    toolDefinitions.define({
+      name: 'authorized-tool',
+      title: 'Authorized Tool',
+      description: 'An authorized tool',
+      auth: { action: 'admin::read' },
+      inputSchema: undefined,
+      outputSchema: z.object({}),
+      createHandler: () => async () => ({ content: [], structuredContent: {} }),
+    });
+
+    const result = createMcpServerWithRegistries({
+      strapi: mockStrapi as Core.Strapi,
+      definitions: {
+        tools: toolDefinitions,
+        prompts: promptDefinitions,
+        resources: resourceDefinitions,
+      },
+      isDevMode: false,
+      ability: mockAbility,
+    });
+
+    expect(result.registries.toolRegistry.status('authorized-tool')).toBe('enabled');
+    expect(mockAbility.can).toHaveBeenCalledWith('admin::read');
+  });
+
+  test('should keep auth-gated capabilities disabled when action is denied', () => {
+    mockAbility.can.mockReturnValue(false);
+    toolDefinitions.define({
+      name: 'unauthorized-tool',
+      title: 'Unauthorized Tool',
+      description: 'An unauthorized tool',
+      auth: { action: 'admin::read' },
+      inputSchema: undefined,
+      outputSchema: z.object({}),
+      createHandler: () => async () => ({ content: [], structuredContent: {} }),
+    });
+
+    const result = createMcpServerWithRegistries({
+      strapi: mockStrapi as Core.Strapi,
+      definitions: {
+        tools: toolDefinitions,
+        prompts: promptDefinitions,
+        resources: resourceDefinitions,
+      },
+      isDevMode: false,
+      ability: mockAbility,
+    });
+
+    expect(result.registries.toolRegistry.status('unauthorized-tool')).toBe('disabled');
+  });
+
+  test('should pass auth subject when checking capabilities', () => {
+    mockAbility.can.mockReturnValue(true);
+    resourceDefinitions.define({
+      name: 'authorized-resource',
+      uri: 'strapi://authorized-resource',
+      metadata: {},
+      auth: { action: 'admin::read', subject: 'api::article.article' },
+      createHandler: () => async () => ({ contents: [] }),
+    });
+
+    createMcpServerWithRegistries({
+      strapi: mockStrapi as Core.Strapi,
+      definitions: {
+        tools: toolDefinitions,
+        prompts: promptDefinitions,
+        resources: resourceDefinitions,
+      },
+      isDevMode: false,
+      ability: mockAbility,
+    });
+
+    expect(mockAbility.can).toHaveBeenCalledWith('admin::read', 'api::article.article');
   });
 });

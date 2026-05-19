@@ -46,10 +46,9 @@ describe('McpConfiguration', () => {
   });
 
   describe('isEnabled', () => {
-    test('should return true when both mcp.enabled and autoReload are true', () => {
+    test('should return true when mcp.enabled is true', () => {
       configGetSpy.mockImplementation((key, defaultValue) => {
         if (key === 'server.mcp.enabled') return true;
-        if (key === 'autoReload') return true;
         return defaultValue;
       });
 
@@ -61,7 +60,6 @@ describe('McpConfiguration', () => {
     test('should return false when mcp.enabled is false', () => {
       configGetSpy.mockImplementation((key, defaultValue) => {
         if (key === 'server.mcp.enabled') return false;
-        if (key === 'autoReload') return true;
         return defaultValue;
       });
 
@@ -70,24 +68,8 @@ describe('McpConfiguration', () => {
       expect(config.isEnabled()).toBe(false);
     });
 
-    test('should return false when autoReload is false', () => {
-      configGetSpy.mockImplementation((key, defaultValue) => {
-        if (key === 'server.mcp.enabled') return true;
-        if (key === 'autoReload') return false;
-        return defaultValue;
-      });
-
-      const config = new McpConfiguration(mockStrapi as Core.Strapi);
-
-      expect(config.isEnabled()).toBe(false);
-    });
-
-    test('should return false when both are false', () => {
-      configGetSpy.mockImplementation((key, defaultValue) => {
-        if (key === 'server.mcp.enabled') return false;
-        if (key === 'autoReload') return false;
-        return defaultValue;
-      });
+    test('should return false when mcp.enabled is not set', () => {
+      configGetSpy.mockImplementation((key, defaultValue) => defaultValue);
 
       const config = new McpConfiguration(mockStrapi as Core.Strapi);
 

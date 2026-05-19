@@ -4,7 +4,9 @@ import type { Core, Modules } from '@strapi/types';
 import { McpPromptRegistry } from '../prompt-registry';
 import { McpResourceRegistry } from '../resource-registry';
 import { McpToolRegistry } from '../tool-registry';
+import type { McpAdminTokenAbility } from '../authentication';
 import { McpCapabilityDefinitionRegistry } from './McpCapabilityDefinitionRegistry';
+import { syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
 
 export type McpCapabilityDefinitions = {
   tools: McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>;
@@ -27,12 +29,14 @@ export type CreateMcpServerWithRegistriesParams = {
   strapi: Core.Strapi;
   definitions: McpCapabilityDefinitions;
   isDevMode: boolean;
+  ability: McpAdminTokenAbility;
 };
 
 export const createMcpServerWithRegistries = ({
   strapi,
   definitions,
   isDevMode,
+  ability,
 }: CreateMcpServerWithRegistriesParams): McpServerWithRegistries => {
   const capabilities: {
     logging?: Record<string, unknown>;
@@ -81,26 +85,16 @@ export const createMcpServerWithRegistries = ({
   promptRegistry.bind(mcpServer);
   resourceRegistry.bind(mcpServer);
 
-  // TODO @Nico: Manage Permissions from Auth
-
-  // Enable devModeOnly capabilities when running in dev mode
-  if (isDevMode === true) {
-    toolRegistry.list({ filter: { status: ['disabled'] } }).forEach((cap) => {
-      if (cap.devModeOnly === true) {
-        toolRegistry.enable(cap.name);
-      }
-    });
-    promptRegistry.list({ filter: { status: ['disabled'] } }).forEach((cap) => {
-      if (cap.devModeOnly === true) {
-        promptRegistry.enable(cap.name);
-      }
-    });
-    resourceRegistry.list({ filter: { status: ['disabled'] } }).forEach((cap) => {
-      if (cap.devModeOnly === true) {
-        resourceRegistry.enable(cap.name);
-      }
-    });
-  }
+  syncMcpSessionCapabilities({
+    session: {
+      toolRegistry,
+      promptRegistry,
+      resourceRegistry,
+    },
+    definitions,
+    ability,
+    isDevMode,
+  });
 
   return {
     mcpServer,
