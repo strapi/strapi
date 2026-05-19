@@ -97,7 +97,7 @@ const Banner = ({
             <LinkButton
               width="max-content"
               variant="tertiary"
-              href="https://strapi.chargebeeportal.com"
+              href="https://billing-portal.apps.staging.strapi.team"
               target="_blank"
             >
               {formatMessage(
