@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import { LinearClient } from '@linear/sdk';
 import { CommunityPR, PRAnalysis } from './types';
 
@@ -166,16 +167,41 @@ export async function fetchAllTicketsByPRNumber(
   return map;
 }
 
+async function resolveTriageStateId(
+  teamId: string,
+  override: string | null
+): Promise<string | undefined> {
+  if (override) return override;
+
+  const team = await linearClient.team(teamId);
+
+  // Try the dedicated triage state type first
+  const byType = await team.states({ filter: { type: { eq: 'triage' } }, first: 1 });
+  if (byType.nodes[0]) return byType.nodes[0].id;
+
+  // Fall back to a state named "Triage" regardless of type
+  const allStates = await team.states({ first: 50 });
+  const byName = allStates.nodes.find((s) => s.name.toLowerCase() === 'triage');
+  if (byName) return byName.id;
+
+  // Log available states to help diagnose misconfiguration
+  const names = allStates.nodes.map((s) => `${s.name} (${s.type})`).join(', ');
+  core.warning(`No Triage state found for team ${teamId}. Available: ${names}`);
+  return undefined;
+}
+
 export async function createTicket(
   pr: CommunityPR,
   analysis: PRAnalysis,
   teamId: string,
   projectId: string,
-  labelMap: Map<string, string>
+  labelMap: Map<string, string>,
+  triageStateId: string | null
 ): Promise<{ identifier: string; url: string }> {
   const title = `PR #${pr.number}: ${pr.title}`;
   const description = buildDescription(pr, analysis);
   const labelIds = await buildLabelIds(analysis, labelMap, teamId);
+  const stateId = await resolveTriageStateId(teamId, triageStateId);
 
   const result = await linearClient.createIssue({
     teamId,
@@ -183,6 +209,7 @@ export async function createTicket(
     title,
     description,
     labelIds,
+    stateId,
   });
 
   const issue = await result.issue;

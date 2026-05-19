@@ -76,13 +76,15 @@ export default ({ strapi }: Context) => {
         }
         const rootQueryArgs = rootPath ? context.rootQueryArgsByPath?.get(rootPath.key) : undefined;
 
-        // Only inherit status from built-in queries to avoid conflicts with custom resolvers
-        const inheritedStatus =
-          rootQueryArgs?.status &&
-          rootQueryArgs?._originField &&
-          isBuiltInQueryField(rootQueryArgs._originField)
-            ? rootQueryArgs.status
-            : null;
+        const shouldInheritRootQueryStatus =
+          rootQueryArgs?._originField && isBuiltInQueryField(rootQueryArgs._originField);
+
+        // Only inherit status from built-in queries to avoid conflicts with custom resolvers.
+        // Built-in root queries default to published results; draft/preview queries pass `status`.
+        // Nested relations should match that parent query.
+        const inheritedStatus = shouldInheritRootQueryStatus
+          ? rootQueryArgs.status || 'published'
+          : null;
 
         const statusToApply = args.status || inheritedStatus;
 
