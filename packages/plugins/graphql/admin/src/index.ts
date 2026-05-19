@@ -1,4 +1,3 @@
-import { type ImportLocaleJson } from '@strapi/admin/strapi-admin';
 import pluginPkg from '../../package.json';
 
 import { pluginId } from './pluginId';
@@ -16,23 +15,22 @@ export default {
     });
   },
   bootstrap() {},
-  async registerTrads({
-    locales,
-    importLocaleJson,
-  }: {
-    locales: string[];
-    importLocaleJson: ImportLocaleJson;
-  }) {
+  async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        const data = await importLocaleJson(locale, (code) =>
-          import(`./translations/${code}.json`)
-        );
+        try {
+          const { default: data } = await import(`./translations/${locale}.json`);
 
-        return {
-          data: prefixPluginTranslations(data, pluginId),
-          locale,
-        };
+          return {
+            data: prefixPluginTranslations(data ?? {}, pluginId),
+            locale,
+          };
+        } catch {
+          return {
+            data: {},
+            locale,
+          };
+        }
       })
     );
 

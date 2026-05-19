@@ -77,10 +77,7 @@ interface StrapiAppPlugin {
     args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
   ) => void;
   register: (app: StrapiApp) => void;
-  registerTrads?: (args: {
-    locales: string[];
-    importLocaleJson: ImportLocaleJson;
-  }) => Promise<Translations>;
+  registerTrads?: (args: { locales: string[] }) => Promise<Translations>;
 }
 
 interface InjectionZoneComponent {
@@ -458,6 +455,30 @@ class StrapiApp {
     }
   };
 
+  private mergePluginTranslationsByCanonical(pluginTradsBatch: Translation[]) {
+    return pluginTradsBatch.reduce<Record<string, Translation['data']>>((acc, current) => {
+      const canonicalLocale = normalizeAdminLocale(current.locale);
+
+      acc[canonicalLocale] = {
+        ...(current.locale === canonicalLocale ? acc[canonicalLocale] : current.data),
+        ...(current.locale === canonicalLocale ? current.data : acc[canonicalLocale]),
+      };
+
+      if (current.locale !== canonicalLocale && Object.keys(current.data).length > 0) {
+        const deprecationKey = `${canonicalLocale}:${current.locale}`;
+
+        if (!this.warnedLegacyLocalePairs.has(deprecationKey)) {
+          this.warnedLegacyLocalePairs.add(deprecationKey);
+          console.warn(
+            `[deprecated] Admin locale "${current.locale}" is deprecated. Rename translation files to "${canonicalLocale}.json".`
+          );
+        }
+      }
+
+      return acc;
+    }, {});
+  }
+
   async loadAdminTrads() {
     const adminLocales = await Promise.all(
       this.configurations.locales.map(async (locale) => {
@@ -508,14 +529,21 @@ class StrapiApp {
 
     const adminTranslations = await this.loadAdminTrads();
 
+    const localesForPlugins = uniq(
+      this.configurations.locales.flatMap((locale) => {
+        const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
+
+        return legacyLocale ? [locale, legacyLocale] : [locale];
+      })
+    );
+
     const arrayOfPromises = Object.keys(this.appPlugins)
       .map((plugin) => {
         const registerTrads = this.appPlugins[plugin].registerTrads;
 
         if (registerTrads) {
           return registerTrads({
-            locales: this.configurations.locales,
-            importLocaleJson: this.importLocaleJson,
+            locales: localesForPlugins,
           });
         }
 
@@ -526,14 +554,7 @@ class StrapiApp {
     const pluginsTrads = (await Promise.all(arrayOfPromises)) as Array<Translation[]>;
     const mergedTrads = pluginsTrads.reduce<{ [locale: string]: Translation['data'] }>(
       (acc, currentPluginTrads) => {
-        const pluginTrads = currentPluginTrads.reduce<{ [locale: string]: Translation['data'] }>(
-          (acc1, current) => {
-            acc1[current.locale] = current.data;
-
-            return acc1;
-          },
-          {}
-        );
+        const pluginTrads = this.mergePluginTranslationsByCanonical(currentPluginTrads);
 
         Object.keys(pluginTrads).forEach((locale) => {
           acc[locale] = { ...acc[locale], ...pluginTrads[locale] };
