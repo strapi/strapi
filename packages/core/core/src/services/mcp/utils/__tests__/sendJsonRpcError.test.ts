@@ -20,7 +20,7 @@ describe('sendJsonRpcError', () => {
   test('should send JSON-RPC error response with correct format', () => {
     sendJsonRpcError(mockResponse as ServerResponse, 'INVALID_SESSION', 'Invalid request');
 
-    expect(writeHeadSpy).toHaveBeenCalledWith(400, { 'Content-Type': 'application/json' });
+    expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
     expect(endSpy).toHaveBeenCalledWith(
       JSON.stringify({
         jsonrpc: '2.0',
@@ -59,7 +59,7 @@ describe('sendJsonRpcError', () => {
   test('should override catalog message when custom message is provided', () => {
     sendJsonRpcError(mockResponse as ServerResponse, 'SESSION_REQUIRED', 'Session ID required');
 
-    expect(writeHeadSpy).toHaveBeenCalledWith(400, { 'Content-Type': 'application/json' });
+    expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
     expect(endSpy).toHaveBeenCalledWith(
       JSON.stringify({
         jsonrpc: '2.0',

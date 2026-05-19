@@ -1,7 +1,6 @@
 import type {
   McpServer,
   RegisteredResource,
-  ResourceMetadata,
   // eslint-disable-next-line import/extensions
 } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Core, Modules } from '@strapi/types';
@@ -12,13 +11,9 @@ import {
 } from './internal/McpCapabilityRegistry';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 
-export const makeMcpResourceDefinition = <Name extends string>(resource: {
-  name: Name;
-  uri: string;
-  metadata: ResourceMetadata;
-  devModeOnly: boolean;
-  createHandler: (strapi: Core.Strapi) => Modules.MCP.McpResourceCallback;
-}): Modules.MCP.McpResourceDefinition<Name> => resource as Modules.MCP.McpResourceDefinition<Name>;
+export const makeMcpResourceDefinition = <Definition extends Modules.MCP.McpResourceDefinition>(
+  resource: Definition
+): Definition => resource;
 
 export class McpResourceRegistry
   extends McpCapabilityRegistryBase<

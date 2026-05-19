@@ -2,23 +2,27 @@ import { z } from '@strapi/utils';
 
 import { makeMcpToolDefinition } from '../tool-registry';
 
+const inputSchema = z.object({
+  message: z.string().describe('Message to log'),
+  level: z
+    .enum(['info', 'http', 'warn', 'error', 'log'])
+    .optional()
+    .describe('Log level (default: info)'),
+});
+
+const outputSchema = z.object({
+  status: z.string(),
+  message: z.string(),
+  level: z.string(),
+  timestamp: z.string(),
+});
+
 export const logToolDefinition = makeMcpToolDefinition({
   name: 'log',
   title: 'Strapi Log',
   description: 'Logs a message to the Strapi logger with specified level',
-  inputSchema: z.object({
-    message: z.string().describe('Message to log'),
-    level: z
-      .enum(['info', 'http', 'warn', 'error', 'log'])
-      .optional()
-      .describe('Log level (default: info)'),
-  }),
-  outputSchema: z.object({
-    status: z.string(),
-    message: z.string(),
-    level: z.string(),
-    timestamp: z.string(),
-  }),
+  inputSchema,
+  outputSchema,
   devModeOnly: true,
   createHandler: (strapi) => async (params) => {
     const { message, level = 'info' } = params;

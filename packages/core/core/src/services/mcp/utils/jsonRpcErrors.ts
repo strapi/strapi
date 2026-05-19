@@ -11,17 +11,17 @@ export const JSON_RPC_ERRORS = {
   INVALID_SESSION: {
     code: -32003, // Session expired
     message: 'Invalid session',
-    httpStatus: 400,
+    httpStatus: 401,
+  },
+  SESSION_REQUIRED: {
+    code: -32000, // Server error
+    message: 'Session required',
+    httpStatus: 401,
   },
   MAX_SESSIONS_REACHED: {
     code: -32001, // Server overloaded
     message: 'Maximum number of sessions reached',
     httpStatus: 503,
-  },
-  SESSION_REQUIRED: {
-    code: -32000, // Server error
-    message: 'Session required',
-    httpStatus: 400,
   },
   METHOD_NOT_ALLOWED: {
     code: -32601, // Method not found

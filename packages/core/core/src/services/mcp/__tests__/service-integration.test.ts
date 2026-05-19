@@ -32,9 +32,6 @@ describe('MCP Service Integration', () => {
           if (key === 'server.mcp.enabled') {
             return true;
           }
-          if (key === 'autoReload') {
-            return true; // Required for isEnabled() to return true
-          }
           if (key === 'server.url') {
             return 'http://localhost:1337';
           }
@@ -123,9 +120,6 @@ describe('MCP Service Integration', () => {
             if (key === 'server.mcp.enabled') {
               return false;
             }
-            if (key === 'autoReload') {
-              return false; // Disabled will also require autoReload to be false
-            }
             return defaultValue;
           }),
         } as any,
@@ -186,7 +180,7 @@ describe('MCP Service Integration', () => {
           title: 'Test Tool',
           description: 'Test tool',
           outputSchema: {} as any,
-          devModeOnly: false,
+          auth: { action: 'test.action' },
           createHandler: jest.fn(),
         });
       }).not.toThrow();
@@ -203,7 +197,7 @@ describe('MCP Service Integration', () => {
           title: 'Test Tool',
           description: 'Test tool',
           outputSchema: {} as any,
-          devModeOnly: false,
+          auth: { action: 'test.action' },
           createHandler: jest.fn(),
         });
       }).toThrow('[MCP] Tools must be registered before MCP server starts');

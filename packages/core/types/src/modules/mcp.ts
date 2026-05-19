@@ -14,12 +14,29 @@ import type { ResourceMetadata } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type * as Core from '../core';
 
 /**
+ * Admin permission requirement for non-dev MCP capabilities.
+ */
+export type McpCapabilityAuth = {
+  action: string;
+  subject?: string;
+};
+
+export type McpCapabilityAccess =
+  | {
+      devModeOnly: true;
+      auth?: never;
+    }
+  | {
+      devModeOnly?: never;
+      auth: McpCapabilityAuth;
+    };
+
+/**
  * Base definition for Strapi MCP capabilities
  */
-export interface McpCapabilityDefinition<Name extends string = string> {
+export type McpCapabilityDefinition<Name extends string = string> = {
   name: Name;
-  devModeOnly: boolean;
-}
+} & McpCapabilityAccess;
 
 /**
  * Callback function for Strapi MCP tools
@@ -45,7 +62,7 @@ export type McpToolCallback<
 /**
  * Definition for Strapi MCP tools
  */
-export interface McpToolDefinition<
+export type McpToolDefinition<
   Name extends string = string,
   InputSchema extends z.ZodObject<z.ZodRawShape> | undefined =
     | z.ZodObject<z.ZodRawShape>
@@ -53,13 +70,13 @@ export interface McpToolDefinition<
   OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
   Title extends string = string,
   Description extends string = string,
-> extends McpCapabilityDefinition<Name> {
+> = McpCapabilityDefinition<Name> & {
   title: Title;
   description: Description;
   inputSchema: InputSchema;
   outputSchema: OutputSchema;
   createHandler: (strapi: Core.Strapi) => McpToolCallback<InputSchema, OutputSchema>;
-}
+};
 
 /**
  * Callback function for Strapi MCP prompts
@@ -75,19 +92,19 @@ export type McpPromptCallback<ArgsSchema extends z.ZodObject<z.ZodRawShape> | un
 /**
  * Definition for Strapi MCP prompts
  */
-export interface McpPromptDefinition<
+export type McpPromptDefinition<
   Name extends string = string,
   ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined =
     | z.ZodObject<z.ZodRawShape>
     | undefined,
   Title extends string = string,
   Description extends string = string,
-> extends McpCapabilityDefinition<Name> {
+> = McpCapabilityDefinition<Name> & {
   title: Title;
   description: Description;
   argsSchema?: ArgsSchema;
   createHandler: (strapi: Core.Strapi) => McpPromptCallback<ArgsSchema>;
-}
+};
 
 /**
  * Callback function for Strapi MCP resources
@@ -100,12 +117,11 @@ export type McpResourceCallback = (
 /**
  * Definition for Strapi MCP resources
  */
-export interface McpResourceDefinition<Name extends string = string>
-  extends McpCapabilityDefinition<Name> {
+export type McpResourceDefinition<Name extends string = string> = McpCapabilityDefinition<Name> & {
   uri: string;
   metadata: ResourceMetadata;
   createHandler: (strapi: Core.Strapi) => McpResourceCallback;
-}
+};
 
 export type McpServiceStatus = 'idle' | 'starting' | 'running' | 'stopping' | 'error';
 
@@ -141,7 +157,24 @@ export interface McpService {
     description: Description;
     inputSchema?: InputSchema;
     outputSchema: OutputSchema;
-    devModeOnly: boolean;
+    devModeOnly: true;
+    auth?: never;
+    createHandler: (strapi: Core.Strapi) => McpToolCallback<InputSchema, OutputSchema>;
+  }): void;
+  registerTool<
+    Name extends string,
+    OutputSchema extends z.ZodObject<z.ZodRawShape>,
+    Title extends string,
+    Description extends string,
+    InputSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
+  >(tool: {
+    name: Name;
+    title: Title;
+    description: Description;
+    inputSchema?: InputSchema;
+    outputSchema: OutputSchema;
+    devModeOnly?: never;
+    auth: McpCapabilityAuth;
     createHandler: (strapi: Core.Strapi) => McpToolCallback<InputSchema, OutputSchema>;
   }): void;
 
@@ -160,7 +193,22 @@ export interface McpService {
     title: Title;
     description: Description;
     argsSchema?: ArgsSchema;
-    devModeOnly: boolean;
+    devModeOnly: true;
+    auth?: never;
+    createHandler: (strapi: Core.Strapi) => McpPromptCallback<ArgsSchema>;
+  }): void;
+  registerPrompt<
+    Name extends string,
+    ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined,
+    Title extends string,
+    Description extends string,
+  >(prompt: {
+    name: Name;
+    title: Title;
+    description: Description;
+    argsSchema?: ArgsSchema;
+    devModeOnly?: never;
+    auth: McpCapabilityAuth;
     createHandler: (strapi: Core.Strapi) => McpPromptCallback<ArgsSchema>;
   }): void;
 
@@ -173,7 +221,16 @@ export interface McpService {
     name: Name;
     uri: string;
     metadata: ResourceMetadata;
-    devModeOnly: boolean;
+    devModeOnly: true;
+    auth?: never;
+    createHandler: (strapi: Core.Strapi) => McpResourceCallback;
+  }): void;
+  registerResource<Name extends string>(resource: {
+    name: Name;
+    uri: string;
+    metadata: ResourceMetadata;
+    devModeOnly?: never;
+    auth: McpCapabilityAuth;
     createHandler: (strapi: Core.Strapi) => McpResourceCallback;
   }): void;
 

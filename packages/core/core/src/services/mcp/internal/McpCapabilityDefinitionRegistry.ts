@@ -12,6 +12,10 @@ export class McpCapabilityDefinitionRegistry<
     this.capability = capability;
   }
 
+  get size(): number {
+    return this.#definitions.size;
+  }
+
   define(definition: Definition) {
     const existing = this.#definitions.get(definition.name);
     if (existing !== undefined) {
@@ -19,6 +23,15 @@ export class McpCapabilityDefinitionRegistry<
         `[MCP] ${this.capability} with name "${definition.name}" is already registered. Names must be unique.`
       );
     }
+
+    if (definition.devModeOnly !== true) {
+      if (definition.auth === undefined || definition.auth.action === '') {
+        throw new Error(
+          `[MCP] ${this.capability} with name "${definition.name}" must declare auth action or be devModeOnly.`
+        );
+      }
+    }
+
     this.#definitions.set(definition.name, definition);
   }
 
@@ -34,7 +47,7 @@ export class McpCapabilityDefinitionRegistry<
     return Array.from(this.#definitions.values());
   }
 
-  get size(): number {
-    return this.#definitions.size;
+  forEach(callback: (definition: Definition) => void) {
+    this.#definitions.forEach(callback);
   }
 }
