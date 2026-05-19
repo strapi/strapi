@@ -1,13 +1,6 @@
 import type { Core } from '@strapi/types';
 import { createMcpService } from '../index';
 
-jest.mock('../utils/createManagedInterval', () => ({
-  createManagedInterval: () => ({
-    start: jest.fn(),
-    clear: jest.fn(),
-  }),
-}));
-
 describe('MCP Service Integration', () => {
   let mockStrapi: Partial<Core.Strapi>;
   let mockServerRoutes: jest.Mock;

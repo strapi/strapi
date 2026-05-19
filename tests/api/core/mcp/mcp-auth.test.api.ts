@@ -164,15 +164,10 @@ describe('MCP admin token authentication (api)', () => {
     });
   };
 
-  const mcpRpc = async (
-    accessKey: string,
-    sessionId: string,
-    method: string,
-    params?: Record<string, unknown>
-  ) => {
+  const mcpRpc = async (accessKey: string, method: string, params?: Record<string, unknown>) => {
     rpcId += 1;
 
-    return mcpRequest('POST', accessKey, sessionId, {
+    return mcpRequest('POST', accessKey, undefined, {
       jsonrpc: '2.0',
       id: rpcId,
       method,
@@ -180,8 +175,8 @@ describe('MCP admin token authentication (api)', () => {
     });
   };
 
-  const sendInitializedNotification = async (accessKey: string, sessionId: string) => {
-    const res = await mcpRequest('POST', accessKey, sessionId, {
+  const sendInitializedNotification = async (accessKey: string) => {
+    const res = await mcpRequest('POST', accessKey, undefined, {
       jsonrpc: '2.0',
       method: 'notifications/initialized',
     });
@@ -189,7 +184,11 @@ describe('MCP admin token authentication (api)', () => {
     expect([200, 202]).toContain(res.statusCode);
   };
 
-  const initializeMcpSession = async (accessKey: string): Promise<string> => {
+  /**
+   * Stateless MCP: each POST uses a fresh transport (no `mcp-session-id` header).
+   * Clients still perform initialize + notifications/initialized before other RPCs.
+   */
+  const initializeMcpSession = async (accessKey: string): Promise<void> => {
     rpcId += 1;
 
     const res = await mcpRequest('POST', accessKey, undefined, {
@@ -211,16 +210,13 @@ describe('MCP admin token authentication (api)', () => {
       jsonrpc: '2.0',
       result: expect.any(Object),
     });
-    expect(res.headers['mcp-session-id']).toEqual(expect.any(String));
+    expect(res.headers['mcp-session-id']).toBeUndefined();
 
-    const sessionId = res.headers['mcp-session-id'] as string;
-    await sendInitializedNotification(accessKey, sessionId);
-
-    return sessionId;
+    await sendInitializedNotification(accessKey);
   };
 
-  const listTools = async (accessKey: string, sessionId: string): Promise<string[]> => {
-    const res = await mcpRpc(accessKey, sessionId, 'tools/list');
+  const listTools = async (accessKey: string): Promise<string[]> => {
+    const res = await mcpRpc(accessKey, 'tools/list');
 
     expect(res.statusCode).toBe(200);
     const rpcResponse = parseMcpResponse(res);
@@ -252,8 +248,18 @@ describe('MCP admin token authentication (api)', () => {
   };
 
   describe('unauthorized requests', () => {
-    test.each(['POST', 'GET', 'DELETE'] as const)(
-      '%s /mcp returns session-required JSON-RPC error without a bearer token',
+    test('POST /mcp returns JSON-RPC authentication error without a bearer token', async () => {
+      const res = await mcpRequest('POST', undefined, undefined, {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/list',
+      });
+
+      expectJsonRpcError(res, 'AUTHENTICATION_REQUIRED');
+    });
+
+    test.each(['GET', 'DELETE'] as const)(
+      '%s /mcp is not supported (stateless MCP is POST-only)',
       async (method) => {
         const res = await mcpRequest(method, undefined, undefined, {
           jsonrpc: '2.0',
@@ -261,33 +267,14 @@ describe('MCP admin token authentication (api)', () => {
           method: 'tools/list',
         });
 
-        expectJsonRpcError(res, 'SESSION_REQUIRED');
+        expectJsonRpcError(res, 'METHOD_NOT_ALLOWED');
       }
     );
   });
 
-  describe('session ownership', () => {
-    test.each(['POST', 'GET', 'DELETE'] as const)(
-      '%s /mcp rejects a different token for an existing session',
-      async (method) => {
-        const tokenA = await createAdminToken();
-        const tokenB = await createAdminToken();
-        const sessionId = await initializeMcpSession(tokenA.accessKey);
-
-        const res = await mcpRequest(method, tokenB.accessKey, sessionId, {
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'tools/list',
-        });
-
-        expectJsonRpcError(res, 'INVALID_SESSION');
-      }
-    );
-  });
-
-  test('revoked token is rejected for an existing session', async () => {
+  test('revoked token is rejected after MCP handshake', async () => {
     const token = await createAdminToken();
-    const sessionId = await initializeMcpSession(token.accessKey);
+    await initializeMcpSession(token.accessKey);
 
     const revokeRes = await rq({
       url: `/admin/admin-tokens/${token.id}`,
@@ -295,51 +282,51 @@ describe('MCP admin token authentication (api)', () => {
     });
     expect(revokeRes.statusCode).toBe(200);
 
-    const res = await mcpRpc(token.accessKey, sessionId, 'tools/list');
+    const res = await mcpRpc(token.accessKey, 'tools/list');
 
-    expectJsonRpcError(res, 'SESSION_REQUIRED');
+    expectJsonRpcError(res, 'AUTHENTICATION_REQUIRED');
   });
 
-  test('expired token is rejected for an existing session', async () => {
+  test('expired token is rejected after MCP handshake', async () => {
     const token = await createAdminToken();
-    const sessionId = await initializeMcpSession(token.accessKey);
+    await initializeMcpSession(token.accessKey);
 
     await strapi.db.query('admin::api-token').update({
       where: { id: token.id },
       data: { expiresAt: new Date(Date.now() - 1000) },
     });
 
-    const res = await mcpRpc(token.accessKey, sessionId, 'tools/list');
+    const res = await mcpRpc(token.accessKey, 'tools/list');
 
-    expectJsonRpcError(res, 'SESSION_REQUIRED');
+    expectJsonRpcError(res, 'AUTHENTICATION_REQUIRED');
   });
 
-  test('same-session tools/list reflects admin token permission changes', async () => {
+  test('sequential tools/list calls reflect admin token permission changes (stateless)', async () => {
     const token = await createAdminToken({
       adminPermissions: [
         { action: AUTHORIZED_ACTION, subject: null, conditions: [], properties: {} },
       ],
     });
-    const sessionId = await initializeMcpSession(token.accessKey);
+    await initializeMcpSession(token.accessKey);
 
-    await expect(listTools(token.accessKey, sessionId)).resolves.toContain(TEST_TOOL_NAME);
+    await expect(listTools(token.accessKey)).resolves.toContain(TEST_TOOL_NAME);
 
     await setAdminTokenPermissions(token, []);
 
-    await expect(listTools(token.accessKey, sessionId)).resolves.not.toContain(TEST_TOOL_NAME);
+    await expect(listTools(token.accessKey)).resolves.not.toContain(TEST_TOOL_NAME);
   });
 
-  test('authenticated GET and DELETE reject malformed session ids', async () => {
+  test('authenticated GET and DELETE return method-not-allowed (MCP is POST-only)', async () => {
     const token = await createAdminToken();
 
     const getRes = await mcpRequest('GET', token.accessKey, 'not-a-uuid');
-    expectJsonRpcError(getRes, 'SESSION_REQUIRED');
+    expectJsonRpcError(getRes, 'METHOD_NOT_ALLOWED');
 
     const deleteRes = await mcpRequest('DELETE', token.accessKey, 'not-a-uuid');
-    expectJsonRpcError(deleteRes, 'SESSION_REQUIRED');
+    expectJsonRpcError(deleteRes, 'METHOD_NOT_ALLOWED');
   });
 
-  test('authenticated GET and DELETE reject multiple session headers', async () => {
+  test('authenticated GET and DELETE return method-not-allowed even with multiple session headers', async () => {
     const token = await createAdminToken();
     const sessionIds = [
       '12345678-1234-1234-1234-123456789abc',
@@ -347,9 +334,9 @@ describe('MCP admin token authentication (api)', () => {
     ];
 
     const getRes = await mcpRequest('GET', token.accessKey, sessionIds);
-    expectJsonRpcError(getRes, 'SESSION_REQUIRED');
+    expectJsonRpcError(getRes, 'METHOD_NOT_ALLOWED');
 
     const deleteRes = await mcpRequest('DELETE', token.accessKey, sessionIds);
-    expectJsonRpcError(deleteRes, 'SESSION_REQUIRED');
+    expectJsonRpcError(deleteRes, 'METHOD_NOT_ALLOWED');
   });
 });

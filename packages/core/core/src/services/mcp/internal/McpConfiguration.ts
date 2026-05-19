@@ -3,11 +3,7 @@ import type { Core } from '@strapi/types';
 export class McpConfiguration {
   readonly path: string;
 
-  readonly sessionIdleTimeoutMs: number;
-
-  readonly maxSessions: number;
-
-  readonly cleanupIntervalMs: number;
+  readonly connectTimeoutMs: number;
 
   readonly requestTimeoutMs: number;
 
@@ -16,13 +12,8 @@ export class McpConfiguration {
   constructor(strapi: Core.Strapi) {
     this.#strapi = strapi;
     this.path = '/mcp';
-    this.sessionIdleTimeoutMs = strapi.config.get(
-      'server.mcp.sessionIdleTimeoutMs',
-      30 * 60 * 1000
-    ); // 30 minutes
-    this.maxSessions = strapi.config.get('server.mcp.maxSessions', 100);
-    this.cleanupIntervalMs = strapi.config.get('server.mcp.cleanupIntervalMs', 5 * 60 * 1000); // 5 minutes
-    this.requestTimeoutMs = strapi.config.get('server.mcp.requestTimeoutMs', 30 * 1000); // 30 seconds
+    this.connectTimeoutMs = strapi.config.get('server.mcp.connectTimeoutMs', 5 * 1000); // 5 seconds
+    this.requestTimeoutMs = strapi.config.get('server.mcp.requestTimeoutMs', 60 * 1000); // 60 seconds
   }
 
   isEnabled(): boolean {
