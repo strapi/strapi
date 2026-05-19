@@ -632,6 +632,10 @@ test.describe('Edit view', () => {
     // Switch back to English without saving French draft
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'English (en)' }).click();
+    await page
+      .getByRole('alertdialog', { name: 'Confirmation' })
+      .getByRole('button', { name: 'Confirm' })
+      .click();
     await expect(page.getByLabel('name')).toHaveValue('Revisit product');
 
     // Switch again to French locale; non-localized field should still be pre-filled
@@ -642,7 +646,12 @@ test.describe('Edit view', () => {
     await expect(page.getByLabel('name')).toHaveValue('');
 
     // Cleanup: remove the non-localized field so other tests are not affected
-    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.locator('role=link[name^="Content-Type Builder"]').last().click();
+    await page
+      .getByRole('alertdialog', { name: 'Confirmation' })
+      .getByRole('button', { name: 'Confirm' })
+      .click();
+    await navToHeader(page, ['Products'], 'Products');
     await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
