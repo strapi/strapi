@@ -27,10 +27,13 @@ export const wrapSafeHandler = <TArgs extends unknown[], TResult>(
     } catch (error) {
       const normalized = error instanceof Error ? error : new Error(String(error));
 
-      strapi.log.error(`[MCP] ${capabilityType} "${name}" threw an error during execution`, {
-        error: normalized.message,
-        stack: normalized.stack,
-      });
+      strapi.log.error(
+        `[MCP] ${capabilityType} "${name}" threw an error during execution: ${normalized.message}`,
+        {
+          error: normalized.message,
+          stack: normalized.stack,
+        }
+      );
 
       return createErrorResult(normalized, args);
     }

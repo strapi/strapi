@@ -37,6 +37,7 @@ jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
 describe('createMcpServerWithRegistries', () => {
   let mockStrapi: Partial<Core.Strapi>;
   let mockAbility: { can: jest.Mock };
+  let mockUser: { id: number };
   let toolDefinitions: McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>;
   let promptDefinitions: McpCapabilityDefinitionRegistry<'prompt', Modules.MCP.McpPromptDefinition>;
   let resourceDefinitions: McpCapabilityDefinitionRegistry<
@@ -47,6 +48,7 @@ describe('createMcpServerWithRegistries', () => {
   beforeEach(() => {
     mockStrapi = {} as Core.Strapi;
     mockAbility = { can: jest.fn(() => false) };
+    mockUser = { id: 1 };
     toolDefinitions = new McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>(
       'tool'
     );
@@ -70,6 +72,7 @@ describe('createMcpServerWithRegistries', () => {
       },
       isDevMode: false,
       ability: mockAbility,
+      user: mockUser,
     });
 
     expect(result.mcpServer).toBeDefined();
@@ -85,8 +88,8 @@ describe('createMcpServerWithRegistries', () => {
       title: 'Dev Tool',
       description: 'A dev-only tool',
       devModeOnly: true,
-      inputSchema: undefined,
-      outputSchema: z.object({}),
+      resolveInputSchema: () => undefined,
+      resolveOutputSchema: () => z.object({}),
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
     });
 
@@ -99,6 +102,7 @@ describe('createMcpServerWithRegistries', () => {
       },
       isDevMode: true,
       ability: mockAbility,
+      user: mockUser,
     });
 
     // The tool should be enabled
@@ -113,8 +117,8 @@ describe('createMcpServerWithRegistries', () => {
       title: 'Dev Tool',
       description: 'A dev-only tool',
       devModeOnly: true,
-      inputSchema: undefined,
-      outputSchema: z.object({}),
+      resolveInputSchema: () => undefined,
+      resolveOutputSchema: () => z.object({}),
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
     });
 
@@ -127,6 +131,7 @@ describe('createMcpServerWithRegistries', () => {
       },
       isDevMode: false,
       ability: mockAbility,
+      user: mockUser,
     });
 
     // The tool should remain disabled
@@ -146,6 +151,7 @@ describe('createMcpServerWithRegistries', () => {
       },
       isDevMode: false,
       ability: mockAbility,
+      user: mockUser,
     });
 
     expect(result.registries.tools.list().length).toBe(0);
@@ -160,8 +166,8 @@ describe('createMcpServerWithRegistries', () => {
       title: 'Authorized Tool',
       description: 'An authorized tool',
       auth: { action: 'admin::read' },
-      inputSchema: undefined,
-      outputSchema: z.object({}),
+      resolveInputSchema: () => undefined,
+      resolveOutputSchema: () => z.object({}),
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
     });
 
@@ -174,6 +180,7 @@ describe('createMcpServerWithRegistries', () => {
       },
       isDevMode: false,
       ability: mockAbility,
+      user: mockUser,
     });
 
     expect(result.registries.tools.status('authorized-tool')).toBe('enabled');
@@ -187,8 +194,8 @@ describe('createMcpServerWithRegistries', () => {
       title: 'Unauthorized Tool',
       description: 'An unauthorized tool',
       auth: { action: 'admin::read' },
-      inputSchema: undefined,
-      outputSchema: z.object({}),
+      resolveInputSchema: () => undefined,
+      resolveOutputSchema: () => z.object({}),
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
     });
 
@@ -201,9 +208,36 @@ describe('createMcpServerWithRegistries', () => {
       },
       isDevMode: false,
       ability: mockAbility,
+      user: mockUser,
     });
 
     expect(result.registries.tools.status('unauthorized-tool')).toBe('disabled');
+  });
+
+  test('should register and bind a tool with no resolveInputSchema', () => {
+    mockAbility.can.mockReturnValue(true);
+    toolDefinitions.define({
+      name: 'no-input-tool',
+      title: 'No Input Tool',
+      description: 'A tool with no input schema',
+      devModeOnly: true,
+      resolveOutputSchema: () => z.object({ ok: z.boolean() }),
+      createHandler: () => async () => ({ content: [], structuredContent: { ok: true } }),
+    });
+
+    expect(() => {
+      createMcpServerWithRegistries({
+        strapi: mockStrapi as Core.Strapi,
+        definitions: {
+          tools: toolDefinitions,
+          prompts: promptDefinitions,
+          resources: resourceDefinitions,
+        },
+        isDevMode: true,
+        ability: mockAbility,
+        user: mockUser,
+      });
+    }).not.toThrow();
   });
 
   test('should pass auth subject when checking capabilities', () => {
@@ -225,6 +259,7 @@ describe('createMcpServerWithRegistries', () => {
       },
       isDevMode: false,
       ability: mockAbility,
+      user: mockUser,
     });
 
     expect(mockAbility.can).toHaveBeenCalledWith('admin::read', 'api::article.article');

@@ -30,6 +30,7 @@ export type CreateMcpServerWithRegistriesParams = {
   definitions: McpCapabilityDefinitions;
   isDevMode: boolean;
   ability: McpAdminTokenAbility;
+  user: Modules.MCP.McpHandlerContext['user'];
 };
 
 export const createMcpServerWithRegistries = ({
@@ -37,6 +38,7 @@ export const createMcpServerWithRegistries = ({
   definitions,
   isDevMode,
   ability,
+  user,
 }: CreateMcpServerWithRegistriesParams): McpServerWithRegistries => {
   const capabilities: {
     logging?: Record<string, unknown>;
@@ -70,6 +72,8 @@ export const createMcpServerWithRegistries = ({
   const tools = new McpToolRegistry({
     strapi,
     definitions: definitions.tools,
+    ability,
+    user,
   });
   const prompts = new McpPromptRegistry({
     strapi,

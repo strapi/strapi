@@ -172,7 +172,7 @@ describe('MCP Service Integration', () => {
           name: 'test-tool',
           title: 'Test Tool',
           description: 'Test tool',
-          outputSchema: {} as any,
+          resolveOutputSchema: () => ({}) as any,
           auth: { action: 'test.action' },
           createHandler: jest.fn(),
         });
@@ -189,7 +189,7 @@ describe('MCP Service Integration', () => {
           name: 'test-tool',
           title: 'Test Tool',
           description: 'Test tool',
-          outputSchema: {} as any,
+          resolveOutputSchema: () => ({}) as any,
           auth: { action: 'test.action' },
           createHandler: jest.fn(),
         });

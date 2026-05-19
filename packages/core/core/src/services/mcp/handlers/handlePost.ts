@@ -30,6 +30,7 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
         definitions: capabilityDefinitions,
         isDevMode: config.isDevMode(),
         ability: authResult.ability,
+        user: authResult.user,
       });
 
       const transport = new StreamableHTTPServerTransport({
