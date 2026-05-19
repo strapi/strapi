@@ -1,0 +1,87 @@
+name: Needs QA Checklist
+
+# Generates a PR-specific QA checklist when the needs-qa label is added.
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  generate-checklist:
+    if: ${{ github.event.label.name == 'needs-qa' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate QA checklist
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          anthropic_api_key: ${{ secrets.PR_QA_ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Generate a focused QA checklist for this pull request.
+
+            Required context:
+            1. Fetch the PR title, body, author, labels, base branch, and changed files.
+            2. Fetch the PR diff.
+            3. Analyze the implementation impact from the PR description, changed files, and diff.
+
+            Post the result as a GitHub PR comment. If a previous AI-generated QA checklist
+            comment exists, update that comment instead of creating a duplicate. Identify the
+            managed comment with this exact hidden marker:
+            <!-- ai-generated-qa-checklist -->
+
+            The comment must use this structure:
+
+            <!-- ai-generated-qa-checklist -->
+            ## AI-generated QA checklist
+
+            ### Scope / Impact
+            - Summarize what changed and which product areas, packages, plugins, APIs, or user
+              flows are likely affected.
+            - Mention notable files or implementation details only when they help QA understand
+              the risk.
+
+            ### Manual QA
+            - [ ] Specific validation steps for the main affected user flow.
+            - [ ] Verification that the behavior matches the PR description.
+            - [ ] Regression checks for nearby functionality.
+
+            ### Edge Cases
+            - [ ] Invalid, empty, loading, permission, locale, draft/publish, database, or plugin
+                  behavior where relevant.
+
+            ### Test Setup
+            - List required setup, fixtures, roles, content types, locales, database choice, feature
+              flags, or plugin configuration. Write "No special setup identified" if none is
+              needed.
+
+            ### Possible QA Automation
+            | Candidate | Test Layer | Priority | Signal |
+            | --- | --- | --- | --- |
+            | ... | Unit / Frontend / API Integration / E2E | Recommended / Optional | ... |
+
+            ### Assumptions / Gaps
+            - List anything important that could not be inferred from the PR description or diff.
+            - Include "No major gaps identified" if the checklist is based on clear context.
+
+            ### QA Resolution
+            Add `qa-done` when completed, or `qa-skipped` if intentionally skipped.
+
+            Keep the checklist specific to this PR. Do not include generic items unless they are
+            tied to files, behavior, or risks in the diff.
+
+          claude_args: |
+            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh api:*)"
