@@ -18,13 +18,13 @@ describe('sendJsonRpcError', () => {
   });
 
   test('should send JSON-RPC error response with correct format', () => {
-    sendJsonRpcError(mockResponse as ServerResponse, 'INVALID_SESSION', 'Invalid request');
+    sendJsonRpcError(mockResponse as ServerResponse, 'AUTHENTICATION_REQUIRED', 'Invalid request');
 
     expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
     expect(endSpy).toHaveBeenCalledWith(
       JSON.stringify({
         jsonrpc: '2.0',
-        error: { code: JSON_RPC_ERRORS.INVALID_SESSION.code, message: 'Invalid request' },
+        error: { code: JSON_RPC_ERRORS.AUTHENTICATION_REQUIRED.code, message: 'Invalid request' },
         id: null,
       })
     );
@@ -41,15 +41,15 @@ describe('sendJsonRpcError', () => {
   });
 
   test('should use default message from catalog when custom message is not provided', () => {
-    sendJsonRpcError(mockResponse as ServerResponse, 'MAX_SESSIONS_REACHED');
+    sendJsonRpcError(mockResponse as ServerResponse, 'METHOD_NOT_ALLOWED');
 
-    expect(writeHeadSpy).toHaveBeenCalledWith(503, { 'Content-Type': 'application/json' });
+    expect(writeHeadSpy).toHaveBeenCalledWith(405, { 'Content-Type': 'application/json' });
     expect(endSpy).toHaveBeenCalledWith(
       JSON.stringify({
         jsonrpc: '2.0',
         error: {
-          code: JSON_RPC_ERRORS.MAX_SESSIONS_REACHED.code,
-          message: JSON_RPC_ERRORS.MAX_SESSIONS_REACHED.message,
+          code: JSON_RPC_ERRORS.METHOD_NOT_ALLOWED.code,
+          message: JSON_RPC_ERRORS.METHOD_NOT_ALLOWED.message,
         },
         id: null,
       })
@@ -57,13 +57,13 @@ describe('sendJsonRpcError', () => {
   });
 
   test('should override catalog message when custom message is provided', () => {
-    sendJsonRpcError(mockResponse as ServerResponse, 'SESSION_REQUIRED', 'Session ID required');
+    sendJsonRpcError(mockResponse as ServerResponse, 'AUTHENTICATION_REQUIRED', 'Token expired');
 
     expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
     expect(endSpy).toHaveBeenCalledWith(
       JSON.stringify({
         jsonrpc: '2.0',
-        error: { code: JSON_RPC_ERRORS.SESSION_REQUIRED.code, message: 'Session ID required' },
+        error: { code: JSON_RPC_ERRORS.AUTHENTICATION_REQUIRED.code, message: 'Token expired' },
         id: null,
       })
     );

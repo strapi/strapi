@@ -15,9 +15,9 @@ export type McpCapabilityDefinitions = {
 };
 
 export type McpRegistries = {
-  toolRegistry: McpToolRegistry;
-  promptRegistry: McpPromptRegistry;
-  resourceRegistry: McpResourceRegistry;
+  tools: McpToolRegistry;
+  prompts: McpPromptRegistry;
+  resources: McpResourceRegistry;
 };
 
 export type McpServerWithRegistries = {
@@ -67,29 +67,29 @@ export const createMcpServerWithRegistries = ({
   );
 
   // Bootstrap registries with current definitions
-  const toolRegistry = new McpToolRegistry({
+  const tools = new McpToolRegistry({
     strapi,
     definitions: definitions.tools,
   });
-  const promptRegistry = new McpPromptRegistry({
+  const prompts = new McpPromptRegistry({
     strapi,
     definitions: definitions.prompts,
   });
-  const resourceRegistry = new McpResourceRegistry({
+  const resources = new McpResourceRegistry({
     strapi,
     definitions: definitions.resources,
   });
 
   // Register capabilities (disabled by default)
-  toolRegistry.bind(mcpServer);
-  promptRegistry.bind(mcpServer);
-  resourceRegistry.bind(mcpServer);
+  tools.bind(mcpServer);
+  prompts.bind(mcpServer);
+  resources.bind(mcpServer);
 
   syncMcpSessionCapabilities({
-    session: {
-      toolRegistry,
-      promptRegistry,
-      resourceRegistry,
+    registries: {
+      tools,
+      prompts,
+      resources,
     },
     definitions,
     ability,
@@ -99,9 +99,9 @@ export const createMcpServerWithRegistries = ({
   return {
     mcpServer,
     registries: {
-      toolRegistry,
-      promptRegistry,
-      resourceRegistry,
+      tools,
+      prompts,
+      resources,
     },
   };
 };

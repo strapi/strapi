@@ -73,9 +73,9 @@ describe('createMcpServerWithRegistries', () => {
     });
 
     expect(result.mcpServer).toBeDefined();
-    expect(result.registries.toolRegistry).toBeDefined();
-    expect(result.registries.promptRegistry).toBeDefined();
-    expect(result.registries.resourceRegistry).toBeDefined();
+    expect(result.registries.tools).toBeDefined();
+    expect(result.registries.prompts).toBeDefined();
+    expect(result.registries.resources).toBeDefined();
   });
 
   test('should enable devModeOnly capabilities when in dev mode', () => {
@@ -102,7 +102,7 @@ describe('createMcpServerWithRegistries', () => {
     });
 
     // The tool should be enabled
-    const enabledTools = result.registries.toolRegistry.list({ filter: { status: ['enabled'] } });
+    const enabledTools = result.registries.tools.list({ filter: { status: ['enabled'] } });
     expect(enabledTools.some((t) => t.name === 'dev-tool')).toBe(true);
   });
 
@@ -130,7 +130,7 @@ describe('createMcpServerWithRegistries', () => {
     });
 
     // The tool should remain disabled
-    const disabledTools = result.registries.toolRegistry.list({
+    const disabledTools = result.registries.tools.list({
       filter: { status: ['disabled'] },
     });
     expect(disabledTools.some((t) => t.name === 'dev-tool')).toBe(true);
@@ -148,9 +148,9 @@ describe('createMcpServerWithRegistries', () => {
       ability: mockAbility,
     });
 
-    expect(result.registries.toolRegistry.list().length).toBe(0);
-    expect(result.registries.promptRegistry.list().length).toBe(0);
-    expect(result.registries.resourceRegistry.list().length).toBe(0);
+    expect(result.registries.tools.list().length).toBe(0);
+    expect(result.registries.prompts.list().length).toBe(0);
+    expect(result.registries.resources.list().length).toBe(0);
   });
 
   test('should enable auth-gated capabilities when action is allowed', () => {
@@ -176,7 +176,7 @@ describe('createMcpServerWithRegistries', () => {
       ability: mockAbility,
     });
 
-    expect(result.registries.toolRegistry.status('authorized-tool')).toBe('enabled');
+    expect(result.registries.tools.status('authorized-tool')).toBe('enabled');
     expect(mockAbility.can).toHaveBeenCalledWith('admin::read');
   });
 
@@ -203,7 +203,7 @@ describe('createMcpServerWithRegistries', () => {
       ability: mockAbility,
     });
 
-    expect(result.registries.toolRegistry.status('unauthorized-tool')).toBe('disabled');
+    expect(result.registries.tools.status('unauthorized-tool')).toBe('disabled');
   });
 
   test('should pass auth subject when checking capabilities', () => {

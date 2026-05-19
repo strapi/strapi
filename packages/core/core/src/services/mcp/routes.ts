@@ -7,7 +7,7 @@ import { sendJsonRpcError } from './utils/sendJsonRpcError';
  * Returns JSON-RPC error instead of plain text so MCP clients can parse it.
  */
 const handleMethodNotAllowed: Core.MiddlewareHandler = async (ctx) => {
-  ctx.set('Allow', 'GET, POST, DELETE');
+  ctx.set('Allow', 'POST');
   sendJsonRpcError(ctx.res, 'METHOD_NOT_ALLOWED');
 };
 /**
