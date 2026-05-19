@@ -9121,6 +9121,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/core@workspace:packages/core/core"
   dependencies:
+    "@casl/ability": "npm:6.7.5"
     "@koa/cors": "npm:5.0.0"
     "@koa/router": "npm:12.0.2"
     "@modelcontextprotocol/sdk": "npm:1.29.0"

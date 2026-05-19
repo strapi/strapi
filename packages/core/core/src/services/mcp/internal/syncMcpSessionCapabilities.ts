@@ -33,6 +33,7 @@ const canUseAuthorizedCapability = ({
     return ability.can(auth.action, auth.subject);
   }
 
+  // @ts-expect-error ability.can expects 2 arguments, but runtime allows 1 argument
   return ability.can(auth.action);
 };
 

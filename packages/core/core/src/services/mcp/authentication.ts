@@ -1,15 +1,15 @@
 import type { Core, Data } from '@strapi/types';
+import type { Ability } from '@casl/ability';
 import type { Context } from 'koa';
 
-export type McpAdminTokenAbility = {
-  can(action: string, subject?: string): boolean;
-};
+export type McpAdminTokenAbility = Ability;
 
 export type McpAdminTokenAuthResult =
   | { authenticated: false; error?: Error }
   | {
       authenticated: true;
       credentials: { id: Data.ID };
+      user: { id: Data.ID };
       ability: McpAdminTokenAbility;
     };
 
@@ -48,6 +48,7 @@ export const createMcpAdminTokenAuthenticator = (strapi: Core.Strapi) => ({
     return {
       authenticated: true,
       credentials: { id: authResult.credentials.id },
+      user: { id: authResult.user.id },
       ability: authResult.ability,
     };
   },

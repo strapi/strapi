@@ -49,8 +49,8 @@ describe('MCP admin token authentication (api)', () => {
           title: 'MCP Refresh Test Tool',
           description: 'Only used by MCP API integration tests',
           auth: { action: AUTHORIZED_ACTION },
-          inputSchema: z.object({}),
-          outputSchema: z.object({ ok: z.boolean() }),
+          resolveInputSchema: () => z.object({}),
+          resolveOutputSchema: () => z.object({ ok: z.boolean() }),
           createHandler: () => async () => ({ structuredContent: { ok: true }, content: [] }),
         });
       },

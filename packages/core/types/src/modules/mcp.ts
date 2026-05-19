@@ -1,3 +1,4 @@
+import type { Ability } from '@casl/ability';
 import { z } from '@strapi/utils';
 // eslint-disable-next-line import/extensions
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -21,6 +22,17 @@ export type McpCapabilityAuth = {
   subject?: string;
 };
 
+/**
+ * Per-request context injected into MCP tool handler factories.
+ * Carries the authenticated session's ability so handlers can enforce
+ * field-level and entity-level permission checks identical to HTTP controllers.
+ * Also carries the token owner's user so write handlers can call setCreatorFields.
+ */
+export type McpHandlerContext = {
+  userAbility: Ability;
+  user: { id: string | number };
+};
+
 export type McpCapabilityAccess =
   | {
       devModeOnly: true;
@@ -39,25 +51,42 @@ export type McpCapabilityDefinition<Name extends string = string> = {
 } & McpCapabilityAccess;
 
 /**
- * Callback function for Strapi MCP tools
+ * Handler function for Strapi MCP tools.
+ * Receives a single object parameter `{ args, extra }`.
+ * When InputSchema is a ZodObject, `args` is typed as its inferred shape.
+ * When InputSchema is undefined, `args` is `never` (omit it in destructuring).
  */
-export type McpToolCallback<
-  InputSchema extends z.ZodObject<z.ZodRawShape> | undefined,
-  OutputSchema extends z.ZodObject<z.ZodRawShape>,
-> = InputSchema extends z.ZodTypeAny
-  ? (
-      args: z.infer<InputSchema>,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>
-    ) => Promise<{
+export type McpToolHandler<
+  InputSchema extends z.ZodObject<z.ZodRawShape> | undefined =
+    | z.ZodObject<z.ZodRawShape>
+    | undefined,
+  OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
+> = (
+  params: {
+    extra: RequestHandlerExtra<ServerRequest, ServerNotification>;
+  } & (InputSchema extends z.ZodObject<z.ZodRawShape>
+    ? { args: z.infer<InputSchema> }
+    : { args?: never })
+) => Promise<McpToolHandlerReturn<OutputSchema>>;
+
+/**
+ * Return type for Strapi MCP tool handlers.
+ */
+export type McpToolHandlerReturn<
+  OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
+> =
+  | {
+      content: ContentBlock[];
+      structuredContent?: never;
+      isError: true;
+    }
+  | {
       content: ContentBlock[];
       structuredContent: z.infer<OutputSchema>;
-      isError?: boolean;
-    }>
-  : (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) => Promise<{
-      content: ContentBlock[];
-      structuredContent: z.infer<OutputSchema>;
-      isError?: boolean;
-    }>;
+      isError?: never;
+    };
+
+export type McpToolSchemaResolver<Schema> = (context: McpHandlerContext) => Schema;
 
 /**
  * Definition for Strapi MCP tools
@@ -73,9 +102,12 @@ export type McpToolDefinition<
 > = McpCapabilityDefinition<Name> & {
   title: Title;
   description: Description;
-  inputSchema: InputSchema;
-  outputSchema: OutputSchema;
-  createHandler: (strapi: Core.Strapi) => McpToolCallback<InputSchema, OutputSchema>;
+  resolveInputSchema?: McpToolSchemaResolver<InputSchema>;
+  resolveOutputSchema: McpToolSchemaResolver<OutputSchema>;
+  createHandler: (
+    strapi: Core.Strapi,
+    context: McpHandlerContext
+  ) => McpToolHandler<NoInfer<InputSchema>, NoInfer<OutputSchema>>;
 };
 
 /**
@@ -155,11 +187,14 @@ export interface McpService {
     name: Name;
     title: Title;
     description: Description;
-    inputSchema?: InputSchema;
-    outputSchema: OutputSchema;
+    resolveInputSchema?: McpToolSchemaResolver<InputSchema>;
+    resolveOutputSchema: McpToolSchemaResolver<OutputSchema>;
     devModeOnly: true;
     auth?: never;
-    createHandler: (strapi: Core.Strapi) => McpToolCallback<InputSchema, OutputSchema>;
+    createHandler: (
+      strapi: Core.Strapi,
+      context: McpHandlerContext
+    ) => McpToolHandler<NoInfer<InputSchema>, NoInfer<OutputSchema>>;
   }): void;
   registerTool<
     Name extends string,
@@ -171,11 +206,14 @@ export interface McpService {
     name: Name;
     title: Title;
     description: Description;
-    inputSchema?: InputSchema;
-    outputSchema: OutputSchema;
+    resolveInputSchema?: McpToolSchemaResolver<InputSchema>;
+    resolveOutputSchema: McpToolSchemaResolver<OutputSchema>;
     devModeOnly?: never;
     auth: McpCapabilityAuth;
-    createHandler: (strapi: Core.Strapi) => McpToolCallback<InputSchema, OutputSchema>;
+    createHandler: (
+      strapi: Core.Strapi,
+      context: McpHandlerContext
+    ) => McpToolHandler<NoInfer<InputSchema>, NoInfer<OutputSchema>>;
   }): void;
 
   /**

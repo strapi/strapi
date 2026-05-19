@@ -39,6 +39,7 @@ describe('handlePost', () => {
       authenticate: jest.fn().mockResolvedValue({
         authenticated: true,
         credentials: { id: 1 },
+        user: { id: 1 },
         ability: { can: jest.fn(() => true) },
       }),
     };
@@ -140,6 +141,7 @@ describe('handlePost', () => {
       definitions: capabilityDefinitions,
       isDevMode: mockConfig.isDevMode(),
       ability: expect.objectContaining({ can: expect.any(Function) }),
+      user: { id: 1 },
     });
     expect(StreamableHTTPServerTransport).toHaveBeenCalledWith({ sessionIdGenerator: undefined });
     expect(mockMcpServer.connect).toHaveBeenCalledWith(mockTransport);

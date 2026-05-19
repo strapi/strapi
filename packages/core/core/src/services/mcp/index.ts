@@ -65,17 +65,14 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
       return serverStatus === 'running';
     },
 
-    registerTool(tool) {
+    registerTool(tool: Modules.MCP.McpToolDefinition) {
       if (serverStatus !== 'idle') {
         throw new Error(
           '[MCP] Tools must be registered before MCP server starts. Register during plugin register().'
         );
       }
-      const { inputSchema, ...rest } = tool;
-      toolDefinitions.define({
-        ...rest,
-        inputSchema,
-      });
+
+      toolDefinitions.define(tool);
     },
 
     registerPrompt(prompt) {
