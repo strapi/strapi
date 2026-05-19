@@ -48,6 +48,7 @@
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
+    "test:unit": "run -T jest",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
