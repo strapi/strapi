@@ -412,12 +412,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const { fileInfo } = data;
       fileData = await enhanceAndValidateFile(file, fileInfo);
 
-      // keep a constant hash and extension so the file url doesn't change when the file is replaced
-      _.assign(fileData, {
-        hash: dbFile.hash,
-        ext: dbFile.ext,
-      });
-
       // execute delete function of the provider
       if (dbFile.provider === config.provider) {
         await strapi.plugin('upload').provider.delete(dbFile);

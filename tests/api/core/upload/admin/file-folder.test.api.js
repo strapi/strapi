@@ -141,9 +141,10 @@ describe('File', () => {
   describe('Update info', () => {
     describe('Move a file from a folder to another folder', () => {
       test('when replacing the file', async () => {
+        const previousFile = data.files[1];
         const res = await rq({
           method: 'POST',
-          url: `/upload?id=${data.files[1].id}`,
+          url: `/upload?id=${previousFile.id}`,
           formData: {
             files: fs.createReadStream(path.join(__dirname, '../utils/rec.pdf')),
             fileInfo: JSON.stringify({ folder: data.folders[1].id }),
@@ -151,7 +152,7 @@ describe('File', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toMatchObject({ id: data.files[1].id });
+        expect(res.body).toMatchObject({ id: previousFile.id });
 
         const { body: file } = await rq({
           method: 'GET',
@@ -161,7 +162,7 @@ describe('File', () => {
         expect(file).toMatchObject({
           id: expect.anything(),
           name: 'rec.pdf',
-          ext: '.jpg',
+          ext: '.pdf',
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
@@ -172,6 +173,8 @@ describe('File', () => {
           folder: { id: data.folders[1].id },
           folderPath: data.folders[1].path,
         });
+        expect(file.hash).not.toBe(previousFile.hash);
+        expect(file.url).not.toBe(previousFile.url);
         data.files[1] = file;
       });
 
@@ -195,7 +198,7 @@ describe('File', () => {
         expect(file).toMatchObject({
           id: expect.anything(),
           name: 'rec.pdf',
-          ext: '.jpg',
+          ext: '.pdf',
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
@@ -232,7 +235,7 @@ describe('File', () => {
         expect(file).toMatchObject({
           id: expect.anything(),
           name: 'rec.pdf',
-          ext: '.jpg',
+          ext: '.pdf',
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
@@ -266,7 +269,7 @@ describe('File', () => {
         expect(file).toMatchObject({
           id: expect.anything(),
           name: 'rec.pdf',
-          ext: '.jpg',
+          ext: '.pdf',
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
@@ -337,7 +340,7 @@ describe('File', () => {
         expect(file).toMatchObject({
           id: expect.anything(),
           name: 'rec.pdf',
-          ext: '.jpg',
+          ext: '.pdf',
           mime: 'application/pdf',
           hash: expect.any(String),
           size: expect.any(Number),
