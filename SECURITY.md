@@ -54,7 +54,9 @@ CVEs (Common Vulnerabilities and Exposures) are issued by GitHub on our behalf a
 
 A machine-readable copy of our security contact information is also published per [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) at [`.well-known/security.txt`](.well-known/security.txt) (also served at `https://strapi.io/.well-known/security.txt`).
 
-> [!IMPORTANT] > **Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities.** Submitting a report is not a request for payment, and we will not engage in negotiations over compensation.
+<!-- prettier-ignore -->
+> [!IMPORTANT]
+> **Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities.** Submitting a report is not a request for payment, and we will not engage in negotiations over compensation.
 
 You can review past advisories and CVEs published by Strapi on our [GitHub Security Advisories page](https://github.com/strapi/strapi/security/advisories) — this is also the de-facto acknowledgments record for prior reporters.
 
@@ -137,7 +139,9 @@ If we determine that we need additional materials (scripts, archives, screenshot
 
 ### Response Times and Disclosure Process
 
-> [!IMPORTANT] > **We can no longer commit to a specific response timeframe.** Due to the significant rise in AI-generated vulnerability reports, the overall volume of submissions we receive has increased drastically. This makes it impractical for us to guarantee a fixed initial-response SLA. We process reports in good faith and as quickly as our triage capacity allows, prioritizing well-written, manually-validated reports with clear impact and reproduction steps.
+<!-- prettier-ignore -->
+> [!IMPORTANT]
+> **We can no longer commit to a specific response timeframe.** Due to the significant rise in AI-generated vulnerability reports, the overall volume of submissions we receive has increased drastically. This makes it impractical for us to guarantee a fixed initial-response SLA. We process reports in good faith and as quickly as our triage capacity allows, prioritizing well-written, manually-validated reports with clear impact and reproduction steps.
 
 #### If you have not heard from us
 
