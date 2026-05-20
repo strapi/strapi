@@ -45,7 +45,7 @@ views {
       document_service -> database_layer,
       database_layer -> strapi.database
     style api_module_loader {
-    	shape rectangle
+      shape rectangle
       border none
     }
   }
@@ -120,5 +120,32 @@ views {
       ds_transform_layer -> ds_attribute_handlers,
       ds_transform_layer -> ds_utils,
       ds_document_operations -> strapi.server_runtime.database_layer
+  }
+
+  dynamic view content_api_request_flow {
+    variant sequence
+    title 'Content API - Published Content Request Flow'
+    description '''
+      Sequence view for a typical public Content API read request: HTTP routing composes the endpoint, authentication and authorization build request context, generated controllers validate and sanitize data, and document operations read through the database abstraction.
+    '''
+
+    public_client -> strapi.server_runtime.http_server 'GET /api/:content-type'
+    strapi.server_runtime.http_server -> strapi.server_runtime.endpoint_composer 'dispatch matched Koa endpoint'
+    strapi.server_runtime.endpoint_composer -> strapi.server_runtime.auth 'authenticate and authorize request'
+    strapi.server_runtime.auth -> strapi.server_runtime.content_api_token_strategy 'check bearer API token when present'
+    strapi.server_runtime.auth -> strapi.server_runtime.users_permissions_strategy 'fall back to JWT or public role access'
+    strapi.server_runtime.content_api_token_strategy -> strapi.server_runtime.content_api_permissions 'generate token ability'
+    strapi.server_runtime.users_permissions_strategy -> strapi.server_runtime.content_api_permissions 'generate role ability'
+    strapi.server_runtime.endpoint_composer -> strapi.server_runtime.core_api_layer.core_api_controllers 'invoke generated controller action'
+    strapi.server_runtime.core_api_layer.core_api_controllers -> strapi.server_runtime.content_api 'validate and sanitize query/output'
+    strapi.server_runtime.core_api_layer.core_api_controllers -> strapi.server_runtime.core_api_layer.core_api_services 'delegate content operation'
+    strapi.server_runtime.core_api_layer.core_api_services -> strapi.server_runtime.document_service 'read documents'
+    strapi.server_runtime.document_service -> strapi.server_runtime.database_layer 'query content and relations'
+    strapi.server_runtime.database_layer -> strapi.database 'execute SQL'
+    strapi.server_runtime.database_layer <- strapi.database 'rows'
+    strapi.server_runtime.document_service <- strapi.server_runtime.database_layer 'database result'
+    strapi.server_runtime.core_api_layer.core_api_services <- strapi.server_runtime.document_service 'documents'
+    strapi.server_runtime.core_api_layer.core_api_controllers <- strapi.server_runtime.core_api_layer.core_api_services 'controller payload'
+    public_client <- strapi.server_runtime.http_server 'sanitized JSON response'
   }
 }
