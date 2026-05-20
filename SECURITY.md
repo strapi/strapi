@@ -54,7 +54,7 @@ CVEs (Common Vulnerabilities and Exposures) are issued by GitHub on our behalf a
 
 A machine-readable copy of our security contact information is also published per [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) at [`.well-known/security.txt`](.well-known/security.txt) (also served at `https://strapi.io/.well-known/security.txt`).
 
-**Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities.**
+> [!IMPORTANT] > **Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities.** Submitting a report is not a request for payment, and we will not engage in negotiations over compensation.
 
 You can review past advisories and CVEs published by Strapi on our [GitHub Security Advisories page](https://github.com/strapi/strapi/security/advisories) — this is also the de-facto acknowledgments record for prior reporters.
 
