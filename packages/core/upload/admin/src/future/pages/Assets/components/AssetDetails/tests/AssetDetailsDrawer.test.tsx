@@ -34,15 +34,27 @@ const buildFoldersHandler = () =>
     })
   );
 
+const buildSettingsHandler = (aiMetadata = false) =>
+  http.get('/upload/settings', () =>
+    HttpResponse.json({
+      data: {
+        sizeOptimization: true,
+        responsiveDimensions: true,
+        autoOrientation: true,
+        aiMetadata,
+      },
+    })
+  );
+
 describe('AssetDetails (asset details drawer body)', () => {
   beforeEach(() => {
-    server.use(buildFoldersHandler());
+    server.use(buildFoldersHandler(), buildSettingsHandler());
   });
 
   it('seeds the form from the asset and keeps the save button disabled until a field changes', async () => {
     render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
-    const saveButton = await screen.findByRole('button', { name: 'Save' });
+    const saveButton = await screen.findByRole('button', { name: 'Save changes' });
     expect(saveButton).toBeDisabled();
     expect(screen.getByDisplayValue('photo.png')).toBeInTheDocument();
     expect(screen.getByDisplayValue('A caption')).toBeInTheDocument();
@@ -65,7 +77,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     await user.clear(nameInput);
     await user.type(nameInput, 'updated.png');
 
-    const saveButton = screen.getByRole('button', { name: 'Save' });
+    const saveButton = screen.getByRole('button', { name: 'Save changes' });
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
 
@@ -108,7 +120,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     await user.click(select);
     await user.click(await screen.findByRole('option', { name: 'Second' }));
 
-    const saveButton = screen.getByRole('button', { name: 'Save' });
+    const saveButton = screen.getByRole('button', { name: 'Save changes' });
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
 
@@ -133,7 +145,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     await user.click(select);
     await user.click(await screen.findByRole('option', { name: 'Media Library' }));
 
-    const saveButton = screen.getByRole('button', { name: 'Save' });
+    const saveButton = screen.getByRole('button', { name: 'Save changes' });
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
 
@@ -158,7 +170,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Wait for folders query so the toast can resolve the folder name.
     await screen.findByRole('combobox');
 
-    const trashButton = screen.getByRole('button', { name: 'Delete this asset' });
+    const trashButton = screen.getByRole('button', { name: 'Delete this file' });
     await user.click(trashButton);
 
     // Dialog opens via Radix AlertDialog — match by the body copy.
@@ -180,10 +192,71 @@ describe('AssetDetails (asset details drawer body)', () => {
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={closeDetails} />);
 
     await screen.findByRole('combobox');
-    await user.click(screen.getByRole('button', { name: 'Delete this asset' }));
+    await user.click(screen.getByRole('button', { name: 'Delete this file' }));
     await screen.findByText(/This file cannot be recovered/i);
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
     await waitFor(() => expect(closeDetails).not.toHaveBeenCalled());
+  });
+
+  it('opens the confirm dialog when the trigger is clicked and uploads the file picked after Continue', async () => {
+    // FormData parsing in msw under jsdom hangs when the body contains a real
+    // File blob, so we capture the request metadata only (id + content-type +
+    // presence of a body) rather than re-parsing the multipart payload here.
+    let captured: { id: string | null; contentType: string | null; hasBody: boolean } = {
+      id: null,
+      contentType: null,
+      hasBody: false,
+    };
+    server.use(
+      http.post('/upload', async ({ request }) => {
+        const url = new URL(request.url);
+        captured = {
+          id: url.searchParams.get('id'),
+          contentType: request.headers.get('content-type'),
+          hasBody: request.body !== null,
+        };
+        return HttpResponse.json({ ...baseAsset, name: 'replacement.png' });
+      })
+    );
+
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+    await screen.findByRole('combobox');
+
+    // Confirm dialog must NOT be visible before the trigger is clicked.
+    expect(screen.queryByText(/Replace this media file\?/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Replace this file' }));
+
+    await screen.findByText(/Replace this media file\?/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+    // After Continue, the dialog closes and the picker fires. The picker is an
+    // OS-level dialog we cannot drive from jsdom, so simulate the file pick by
+    // dispatching a change event on the hidden native input.
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(fileInput).toBeTruthy();
+    expect(fileInput).not.toHaveAttribute('multiple');
+
+    const file = new File(['hello'], 'replacement.png', { type: 'image/png' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await waitFor(() => expect(captured.id).toBe('1'));
+    expect(captured.contentType).toMatch(/multipart\/form-data/);
+    expect(captured.hasBody).toBe(true);
+    // Success toast renders inside the drawer, above the preview, not in the
+    // global notifications region.
+    await screen.findByText(/File replaced\./i);
+  });
+
+  it('shows the AI variant of the replace description when AI metadata is enabled in settings', async () => {
+    server.use(buildSettingsHandler(true));
+
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+    await screen.findByRole('combobox');
+
+    await user.click(screen.getByRole('button', { name: 'Replace this file' }));
+
+    await screen.findByText(/AI will generate new metadata after upload/i);
   });
 });
