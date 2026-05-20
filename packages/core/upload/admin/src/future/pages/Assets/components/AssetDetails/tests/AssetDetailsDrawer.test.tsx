@@ -1,4 +1,4 @@
-import { render, screen, server, waitFor } from '@tests/utils';
+import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { AssetDetails } from '../AssetDetailsDrawer';
@@ -67,7 +67,7 @@ describe('AssetDetails (asset details drawer body)', () => {
 
     const saveButton = screen.getByRole('button', { name: 'Save' });
     await waitFor(() => expect(saveButton).toBeEnabled());
-    await user.click(saveButton);
+    fireEvent.click(saveButton);
 
     await waitFor(() => expect(captured.id).toBe('1'));
 
@@ -110,7 +110,7 @@ describe('AssetDetails (asset details drawer body)', () => {
 
     const saveButton = screen.getByRole('button', { name: 'Save' });
     await waitFor(() => expect(saveButton).toBeEnabled());
-    await user.click(saveButton);
+    fireEvent.click(saveButton);
 
     await waitFor(() => expect(captured.body).not.toBeNull());
     const fileInfo = JSON.parse(captured.body!.get('fileInfo') as string);
@@ -135,7 +135,7 @@ describe('AssetDetails (asset details drawer body)', () => {
 
     const saveButton = screen.getByRole('button', { name: 'Save' });
     await waitFor(() => expect(saveButton).toBeEnabled());
-    await user.click(saveButton);
+    fireEvent.click(saveButton);
 
     await waitFor(() => expect(captured.body).not.toBeNull());
     const fileInfo = JSON.parse(captured.body!.get('fileInfo') as string);

@@ -4,6 +4,7 @@ import type {
   GetFiles,
   File,
   Pagination,
+  UploadFileInfo,
   AssetWithPopulatedCreatedBy,
 } from '../../../../shared/contracts/files';
 
@@ -19,20 +20,9 @@ interface GetAssetsResponse {
   pagination: Pagination;
 }
 
-/**
- * Subset of the file metadata that can be edited from the asset details drawer.
- * `folder = null` represents the root of the Media Library.
- */
-export interface UpdateAssetFileInfo {
-  name?: string | null;
-  caption?: string | null;
-  alternativeText?: string | null;
-  folder?: number | null;
-}
-
 interface UpdateAssetArgs {
   id: number;
-  fileInfo: UpdateAssetFileInfo;
+  fileInfo: Partial<UploadFileInfo>;
 }
 
 const assetsApi = uploadApi.injectEndpoints({

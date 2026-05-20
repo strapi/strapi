@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { useNotification, useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
+import {
+  Form,
+  useField,
+  useForm,
+  useNotification,
+  useQueryParams,
+  getDisplayName,
+} from '@strapi/admin/strapi-admin';
 import {
   Alert,
   Box,
@@ -29,9 +36,6 @@ import { getTranslationKey } from '../../../../utils/translations';
 import { AssetPreview } from './AssetPreview';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
-
-/** String value used by the location select to represent root folder (Media Library). */
-const ROOT_FOLDER_VALUE = '__root__';
 
 // Name of the parameter to look for in the URL to open the drawer
 const URL_PARAM = 'assetId';
@@ -143,24 +147,89 @@ const StyledWarning = styled(WarningCircle)`
 interface DetailFieldProps {
   name: string;
   label: string;
-  value: string;
-  onChange: (value: string) => void;
   required?: boolean;
-  disabled?: boolean;
 }
 
-const DetailField = ({ name, label, value, onChange, required, disabled }: DetailFieldProps) => (
-  <Field.Root name={name} required={required}>
-    <Field.Label>{label}</Field.Label>
-    <TextInput
-      value={value}
-      onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
-      endAction={!value ? <StyledWarning /> : undefined}
-      type="text"
-      disabled={disabled}
-    />
-  </Field.Root>
-);
+const DetailField = ({ name, label, required }: DetailFieldProps) => {
+  const field = useField<string>(name);
+  const isSubmitting = useForm('DetailField', (state) => state.isSubmitting);
+  const value = field.value ?? '';
+
+  return (
+    <Field.Root name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
+      <TextInput
+        value={value}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+          field.onChange(name, event.target.value)
+        }
+        endAction={!value ? <StyledWarning /> : undefined}
+        type="text"
+        disabled={isSubmitting}
+      />
+    </Field.Root>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * LocationField
+ * -----------------------------------------------------------------------------------------------*/
+
+interface LocationFieldProps {
+  label: string;
+  rootLabel: string;
+  folders: Array<{ id: number; name: string }>;
+}
+
+const LocationField = ({ label, rootLabel, folders }: LocationFieldProps) => {
+  const field = useField<number | null>('folder');
+  const isSubmitting = useForm('LocationField', (state) => state.isSubmitting);
+
+  return (
+    <Field.Root name="folder" required>
+      <Field.Label>{label}</Field.Label>
+      {/* `null` is the canonical "root of the Media Library" value everywhere
+          in the upload domain. The DS `SingleSelectOption.value` prop is typed
+          `string | number`, so we use the empty string as a DOM-only sentinel
+          for the root option and map it back to `null` on change. */}
+      <SingleSelect
+        value={field.value == null ? '' : String(field.value)}
+        onChange={(value) => {
+          const next = value === '' ? null : Number(value);
+          field.onChange('folder', next);
+        }}
+        disabled={isSubmitting}
+      >
+        <SingleSelectOption value="">{rootLabel}</SingleSelectOption>
+        {folders.map((folder) => (
+          <SingleSelectOption key={folder.id} value={String(folder.id)}>
+            {folder.name}
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+    </Field.Root>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * SaveButton
+ * -----------------------------------------------------------------------------------------------*/
+
+const SaveButton = ({ label }: { label: string }) => {
+  const modified = useForm('SaveButton', (state) => state.modified);
+  const isSubmitting = useForm('SaveButton', (state) => state.isSubmitting);
+
+  return (
+    <Button
+      type="submit"
+      variant="default"
+      loading={isSubmitting}
+      disabled={!modified || isSubmitting}
+    >
+      {label}
+    </Button>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * AssetDetails
@@ -177,50 +246,32 @@ interface AssetFormState {
   folder: number | null;
 }
 
-const buildFormState = (asset: AssetWithPopulatedCreatedBy): AssetFormState => ({
-  name: asset.name ?? '',
-  caption: asset.caption ?? '',
-  alternativeText: asset.alternativeText ?? '',
-  folder:
-    typeof asset.folder === 'object' && asset.folder !== null
-      ? ((asset.folder as { id: number }).id ?? null)
-      : ((asset.folder as number | null | undefined) ?? null),
-});
-
 export const AssetDetails = ({ asset }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
-
-  const [form, setForm] = React.useState<AssetFormState>(() => buildFormState(asset));
-
-  React.useEffect(() => {
-    setForm(buildFormState(asset));
-  }, [asset.id]);
-
   const { data: folders = [] } = useGetAllFoldersQuery();
-  const [updateAsset, { isLoading: isSaving }] = useUpdateAssetMutation();
+  const [updateAsset] = useUpdateAssetMutation();
 
   const isImage = asset.mime?.includes(AssetType.Image);
 
-  const initial = React.useMemo(() => buildFormState(asset), [asset]);
-  const dataChanged =
-    form.name !== initial.name ||
-    form.caption !== initial.caption ||
-    form.alternativeText !== initial.alternativeText ||
-    form.folder !== initial.folder;
-
-  const handleFieldChange = <K extends keyof AssetFormState>(key: K, value: AssetFormState[K]) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const initialValues: AssetFormState = {
+    name: asset.name ?? '',
+    caption: asset.caption ?? '',
+    alternativeText: asset.alternativeText ?? '',
+    folder:
+      typeof asset.folder === 'object' && asset.folder !== null
+        ? ((asset.folder as { id: number }).id ?? null)
+        : ((asset.folder as number | null | undefined) ?? null),
   };
 
-  const handleSave = async () => {
+  const handleSubmit = async (values: AssetFormState) => {
     const res = await updateAsset({
       id: asset.id,
       fileInfo: {
-        name: form.name,
-        caption: form.caption,
-        alternativeText: form.alternativeText,
-        folder: form.folder,
+        name: values.name,
+        caption: values.caption,
+        alternativeText: values.alternativeText,
+        folder: values.folder,
       },
     });
 
@@ -245,182 +296,155 @@ export const AssetDetails = ({ asset }: AssetDetailsProps) => {
   };
 
   return (
-    <Flex
-      direction="column"
-      alignItems="stretch"
-      gap={4}
-      paddingTop={4}
-      paddingBottom={4}
-      paddingLeft={5}
-      paddingRight={5}
-    >
-      <Typography variant="beta" fontWeight="semiBold" tag="h3">
-        {formatMessage({
-          id: getTranslationKey('asset-details.fileInfo'),
-          defaultMessage: 'File info',
-        })}
-      </Typography>
+    // `key={asset.id}` resets the form when the drawer switches to a different
+    // asset so cached values from the previous asset don't bleed in.
+    <Form key={asset.id} method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
       <Flex
-        wrap="wrap"
+        direction="column"
+        alignItems="stretch"
         gap={4}
-        background="neutral100"
         paddingTop={4}
         paddingBottom={4}
-        paddingLeft={6}
-        paddingRight={6}
-        alignItems="flex-start"
+        paddingLeft={5}
+        paddingRight={5}
       >
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.creationDate'),
-            defaultMessage: 'Creation date',
+        <Typography variant="beta" fontWeight="semiBold" tag="h3">
+          {formatMessage({
+            id: getTranslationKey('asset-details.fileInfo'),
+            defaultMessage: 'File info',
           })}
-          value={
-            asset.createdAt
-              ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
-              : null
-          }
-        />
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.lastUpdated'),
-            defaultMessage: 'Last updated',
-          })}
-          value={
-            asset.updatedAt
-              ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
-              : null
-          }
-        />
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.createdBy'),
-            defaultMessage: 'Created by',
-          })}
-          value={
-            asset.createdBy
-              ? (getDisplayName({
-                  firstname: asset.createdBy.firstname ?? undefined,
-                  lastname: asset.createdBy.lastname ?? undefined,
-                  username: asset.createdBy.username ?? undefined,
-                  email: asset.createdBy.email ?? undefined,
-                }) ?? '-')
-              : null
-          }
-        />
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.size'),
-            defaultMessage: 'Size',
-          })}
-          value={asset.size ? formatBytes(asset.size, 1) : null}
-        />
-        {isImage && (asset.width != null || asset.height != null) && (
+        </Typography>
+        <Flex
+          wrap="wrap"
+          gap={4}
+          background="neutral100"
+          paddingTop={4}
+          paddingBottom={4}
+          paddingLeft={6}
+          paddingRight={6}
+          alignItems="flex-start"
+        >
           <DetailItem
             label={formatMessage({
-              id: getTranslationKey('asset-details.dimensions'),
-              defaultMessage: 'Dimensions',
+              id: getTranslationKey('asset-details.creationDate'),
+              defaultMessage: 'Creation date',
             })}
             value={
-              asset.width != null && asset.height != null
-                ? `${asset.width} × ${asset.height}`
+              asset.createdAt
+                ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
                 : null
             }
           />
-        )}
-        <DetailItem
+          <DetailItem
+            label={formatMessage({
+              id: getTranslationKey('asset-details.lastUpdated'),
+              defaultMessage: 'Last updated',
+            })}
+            value={
+              asset.updatedAt
+                ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
+                : null
+            }
+          />
+          <DetailItem
+            label={formatMessage({
+              id: getTranslationKey('asset-details.createdBy'),
+              defaultMessage: 'Created by',
+            })}
+            value={
+              asset.createdBy
+                ? (getDisplayName({
+                    firstname: asset.createdBy.firstname ?? undefined,
+                    lastname: asset.createdBy.lastname ?? undefined,
+                    username: asset.createdBy.username ?? undefined,
+                    email: asset.createdBy.email ?? undefined,
+                  }) ?? '-')
+                : null
+            }
+          />
+          <DetailItem
+            label={formatMessage({
+              id: getTranslationKey('asset-details.size'),
+              defaultMessage: 'Size',
+            })}
+            value={asset.size ? formatBytes(asset.size, 1) : null}
+          />
+          {isImage && (asset.width != null || asset.height != null) && (
+            <DetailItem
+              label={formatMessage({
+                id: getTranslationKey('asset-details.dimensions'),
+                defaultMessage: 'Dimensions',
+              })}
+              value={
+                asset.width != null && asset.height != null
+                  ? `${asset.width} × ${asset.height}`
+                  : null
+              }
+            />
+          )}
+          <DetailItem
+            label={formatMessage({
+              id: getTranslationKey('asset-details.extension'),
+              defaultMessage: 'Extension',
+            })}
+            value={getFileExtension(asset.ext)}
+          />
+          <DetailItem
+            label={formatMessage({
+              id: getTranslationKey('asset-details.assetId'),
+              defaultMessage: 'Asset ID',
+            })}
+            value={String(asset.id)}
+          />
+        </Flex>
+        <DetailField
+          name="name"
           label={formatMessage({
-            id: getTranslationKey('asset-details.extension'),
-            defaultMessage: 'Extension',
+            id: getTranslationKey('asset-details.fileName'),
+            defaultMessage: 'File name',
           })}
-          value={getFileExtension(asset.ext)}
+          required
         />
-        <DetailItem
+        <LocationField
           label={formatMessage({
-            id: getTranslationKey('asset-details.assetId'),
-            defaultMessage: 'Asset ID',
-          })}
-          value={String(asset.id)}
-        />
-      </Flex>
-      <DetailField
-        name="fileName"
-        label={formatMessage({
-          id: getTranslationKey('asset-details.fileName'),
-          defaultMessage: 'File name',
-        })}
-        value={form.name}
-        onChange={(value) => handleFieldChange('name', value)}
-        disabled={isSaving}
-        required
-      />
-      <Field.Root name="location" required>
-        <Field.Label>
-          {formatMessage({
             id: getTranslationKey('asset-details.location'),
             defaultMessage: 'Location',
           })}
-        </Field.Label>
-        <SingleSelect
-          value={form.folder === null ? ROOT_FOLDER_VALUE : String(form.folder)}
-          onChange={(value) => {
-            const next = value === ROOT_FOLDER_VALUE ? null : Number(value);
-            handleFieldChange('folder', next);
-          }}
-          disabled={isSaving}
-        >
-          <SingleSelectOption value={ROOT_FOLDER_VALUE}>
-            {formatMessage({
-              id: getTranslationKey('asset-details.location.root'),
-              defaultMessage: 'Media Library',
-            })}
-          </SingleSelectOption>
-          {folders.map((folder) => (
-            <SingleSelectOption key={folder.id} value={String(folder.id)}>
-              {folder.name}
-            </SingleSelectOption>
-          ))}
-        </SingleSelect>
-      </Field.Root>
-      {isImage && (
-        <>
-          <DetailField
-            name="caption"
-            label={formatMessage({
-              id: getTranslationKey('asset-details.caption'),
-              defaultMessage: 'Caption',
-            })}
-            value={form.caption}
-            onChange={(value) => handleFieldChange('caption', value)}
-            disabled={isSaving}
-          />
-          <DetailField
-            name="alternativeText"
-            label={formatMessage({
-              id: getTranslationKey('asset-details.alternativeText'),
-              defaultMessage: 'Alternative text',
-            })}
-            value={form.alternativeText}
-            onChange={(value) => handleFieldChange('alternativeText', value)}
-            disabled={isSaving}
-          />
-        </>
-      )}
-
-      <Flex justifyContent="flex-end" gap={2} paddingTop={2}>
-        <Button
-          variant="default"
-          onClick={handleSave}
-          loading={isSaving}
-          disabled={!dataChanged || isSaving}
-        >
-          {formatMessage({
-            id: getTranslationKey('asset-details.save'),
-            defaultMessage: 'Save',
+          rootLabel={formatMessage({
+            id: getTranslationKey('asset-details.location.root'),
+            defaultMessage: 'Media Library',
           })}
-        </Button>
+          folders={folders}
+        />
+        {isImage && (
+          <>
+            <DetailField
+              name="caption"
+              label={formatMessage({
+                id: getTranslationKey('asset-details.caption'),
+                defaultMessage: 'Caption',
+              })}
+            />
+            <DetailField
+              name="alternativeText"
+              label={formatMessage({
+                id: getTranslationKey('asset-details.alternativeText'),
+                defaultMessage: 'Alternative text',
+              })}
+            />
+          </>
+        )}
+
+        <Flex justifyContent="flex-end" gap={2} paddingTop={2}>
+          <SaveButton
+            label={formatMessage({
+              id: getTranslationKey('asset-details.save'),
+              defaultMessage: 'Save',
+            })}
+          />
+        </Flex>
       </Flex>
-    </Flex>
+    </Form>
   );
 };
 
