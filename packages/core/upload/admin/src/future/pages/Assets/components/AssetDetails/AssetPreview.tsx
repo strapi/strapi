@@ -103,8 +103,16 @@ interface AssetPreviewProps {
 
 export const AssetPreview = ({ asset }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
-  const { alternativeText, ext, mime, url } = asset;
-  const mediaUrl = prefixFileUrlWithBackendUrl(url);
+  const { alternativeText, ext, mime, url, updatedAt } = asset;
+  // Append the asset's `updatedAt` as a cache-buster so a freshly replaced
+  // file (often served at the same URL) shows the new content instead of the
+  // browser-cached old version.
+  const cacheKey = updatedAt ? new Date(updatedAt).getTime() : undefined;
+  const appendCacheBuster = (raw: string | undefined) => {
+    if (!raw || cacheKey === undefined) return raw;
+    return raw.includes('?') ? `${raw}&v=${cacheKey}` : `${raw}?v=${cacheKey}`;
+  };
+  const mediaUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
   const [isMediaLoaded, setIsMediaLoaded] = React.useState(false);
   React.useEffect(() => {
@@ -112,7 +120,7 @@ export const AssetPreview = ({ asset }: AssetPreviewProps) => {
   }, [mediaUrl]);
 
   if (mime?.includes(AssetType.Image)) {
-    const imageUrl = prefixFileUrlWithBackendUrl(url);
+    const imageUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
     if (imageUrl) {
       return (
