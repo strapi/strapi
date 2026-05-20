@@ -7,5 +7,6 @@
   "settings.not-available": "Робочі процеси перегляду доступні лише в рамках Enterprise Edition. Оновіть план, щоб створювати та керувати робочими процесами.",
   "settings.review-workflows.workflow.stageRequiredToPublish.label": "Необхідний етап для публікації",
   "settings.review-workflows.workflow.stageRequiredToPublish.any": "Будь-який етап",
-  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Запобігає публікації записів, якщо вони не знаходяться на необхідному етапі."
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Запобігає публікації записів, якщо вони не знаходяться на необхідному етапі.",
+  "stage.label": "Етап перегляду"
 }

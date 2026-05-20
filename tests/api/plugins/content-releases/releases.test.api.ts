@@ -59,6 +59,25 @@ const articleModel = {
   },
 };
 
+const pageUID = 'api::page.page';
+const pageModel = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'page',
+  pluralName: 'pages',
+  displayName: 'Page',
+  kind: 'collectionType',
+  attributes: {
+    title: { type: 'string' },
+    parent: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'api::page.page',
+      targetAttribute: 'children',
+    },
+  },
+};
+
 describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const builder = createTestBuilder();
   let strapi;
@@ -120,7 +139,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   beforeAll(async () => {
     await builder
       .addContentType(productModel)
-      .addContentTypes([categoryModel, articleModel])
+      .addContentTypes([categoryModel, articleModel, pageModel])
       .build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -712,6 +731,45 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       const categoryData = categoryList[0];
       const categoryName = categoryData.attributes?.name ?? categoryData.name;
       expect(categoryName).toBe('Tech');
+    });
+
+    test('publishes self-related parent and child in one release and preserves relation', async () => {
+      const parentPage = await createEntry(pageUID, { title: 'Parent Page' });
+      const childPage = await createEntry(pageUID, {
+        title: 'Child Page',
+        parent: { documentId: parentPage.data.documentId, locale: null },
+      });
+
+      const createReleaseRes = await createRelease();
+      const release = createReleaseRes.body.data;
+
+      await createReleaseAction(release.id, {
+        contentType: pageUID,
+        entryDocumentId: parentPage.data.documentId,
+        type: 'publish',
+      });
+      await createReleaseAction(release.id, {
+        contentType: pageUID,
+        entryDocumentId: childPage.data.documentId,
+        type: 'publish',
+      });
+
+      const publishRes = await rq({
+        method: 'POST',
+        url: `/content-releases/${release.id}/publish`,
+      });
+
+      expect(publishRes.statusCode).toBe(200);
+      expect(publishRes.body.data.status).toBe('done');
+
+      const publishedChildRes = await rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/${pageUID}/${childPage.data.documentId}`,
+        qs: { status: 'published' },
+      });
+
+      expect(publishedChildRes.statusCode).toBe(200);
+      expect(publishedChildRes.body.data.parent).toMatchObject({ count: 1 });
     });
   });
 
