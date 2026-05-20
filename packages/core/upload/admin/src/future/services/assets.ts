@@ -87,7 +87,26 @@ const assetsApi = uploadApi.injectEndpoints({
         { type: 'Asset' as const, id: 'LIST' },
       ],
     }),
+    /**
+     * Permanently delete an asset by id. Hits the same endpoint as the legacy
+     * `useRemoveAsset` hook so server behaviour is unchanged.
+     */
+    deleteAsset: builder.mutation<unknown, number>({
+      query: (id) => ({
+        url: `/upload/files/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: 'Asset' as const, id },
+        { type: 'Asset' as const, id: 'LIST' },
+      ],
+    }),
   }),
 });
 
-export const { useGetAssetsQuery, useGetAssetQuery, useUpdateAssetMutation } = assetsApi;
+export const {
+  useGetAssetsQuery,
+  useGetAssetQuery,
+  useUpdateAssetMutation,
+  useDeleteAssetMutation,
+} = assetsApi;

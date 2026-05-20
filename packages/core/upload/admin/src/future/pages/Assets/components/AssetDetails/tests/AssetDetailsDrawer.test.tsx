@@ -40,7 +40,7 @@ describe('AssetDetails (asset details drawer body)', () => {
   });
 
   it('seeds the form from the asset and keeps the save button disabled until a field changes', async () => {
-    render(<AssetDetails asset={baseAsset} />);
+    render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
     const saveButton = await screen.findByRole('button', { name: 'Save' });
     expect(saveButton).toBeDisabled();
@@ -59,7 +59,7 @@ describe('AssetDetails (asset details drawer body)', () => {
       })
     );
 
-    const { user } = render(<AssetDetails asset={baseAsset} />);
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
     const nameInput = await screen.findByDisplayValue('photo.png');
     await user.clear(nameInput);
@@ -83,7 +83,7 @@ describe('AssetDetails (asset details drawer body)', () => {
   });
 
   it('renders the Media Library root option plus every folder returned by the API', async () => {
-    const { user } = render(<AssetDetails asset={baseAsset} />);
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
     const select = await screen.findByRole('combobox');
     await user.click(select);
@@ -102,7 +102,7 @@ describe('AssetDetails (asset details drawer body)', () => {
       })
     );
 
-    const { user } = render(<AssetDetails asset={baseAsset} />);
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
     const select = await screen.findByRole('combobox');
     await user.click(select);
@@ -127,7 +127,7 @@ describe('AssetDetails (asset details drawer body)', () => {
       })
     );
 
-    const { user } = render(<AssetDetails asset={assetInFolder} />);
+    const { user } = render(<AssetDetails asset={assetInFolder} closeDetails={jest.fn()} />);
 
     const select = await screen.findByRole('combobox');
     await user.click(select);
@@ -140,5 +140,50 @@ describe('AssetDetails (asset details drawer body)', () => {
     await waitFor(() => expect(captured.body).not.toBeNull());
     const fileInfo = JSON.parse(captured.body!.get('fileInfo') as string);
     expect(fileInfo.folder).toBeNull();
+  });
+
+  it('deletes the asset, closes the drawer, and toasts the parent folder name', async () => {
+    const closeDetails = jest.fn();
+    const assetInFolder = { ...baseAsset, folder: 2 };
+    let deleteId: string | null = null;
+    server.use(
+      http.delete('/upload/files/:id', ({ params }) => {
+        deleteId = String(params.id);
+        return HttpResponse.json({ id: Number(params.id) });
+      })
+    );
+
+    const { user } = render(<AssetDetails asset={assetInFolder} closeDetails={closeDetails} />);
+
+    // Wait for folders query so the toast can resolve the folder name.
+    await screen.findByRole('combobox');
+
+    const trashButton = screen.getByRole('button', { name: 'Delete this asset' });
+    await user.click(trashButton);
+
+    // Dialog opens via Radix AlertDialog — match by the body copy.
+    await screen.findByText(/This file cannot be recovered/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(deleteId).toBe('1'));
+    await waitFor(() => expect(closeDetails).toHaveBeenCalledTimes(1));
+  });
+
+  it('keeps the drawer open and surfaces the error message when the delete request fails', async () => {
+    const closeDetails = jest.fn();
+    server.use(
+      http.delete('/upload/files/:id', () =>
+        HttpResponse.json({ error: { message: 'Asset locked' } }, { status: 400 })
+      )
+    );
+
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={closeDetails} />);
+
+    await screen.findByRole('combobox');
+    await user.click(screen.getByRole('button', { name: 'Delete this asset' }));
+    await screen.findByText(/This file cannot be recovered/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(closeDetails).not.toHaveBeenCalled());
   });
 });

@@ -12,8 +12,10 @@ import {
   Alert,
   Box,
   Button,
+  Dialog,
   Field,
   Flex,
+  IconButton,
   Loader,
   SingleSelect,
   SingleSelectOption,
@@ -21,17 +23,22 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ArrowLineRight, FileError, WarningCircle } from '@strapi/icons';
+import { ArrowLineRight, FileError, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { Drawer, DRAWER_CLOSE_ANIMATION_MS } from '../../../../components/Drawer';
 import { AssetType } from '../../../../enums';
-import { useGetAssetQuery, useUpdateAssetMutation } from '../../../../services/assets';
+import {
+  useDeleteAssetMutation,
+  useGetAssetQuery,
+  useUpdateAssetMutation,
+} from '../../../../services/assets';
 import { useGetAllFoldersQuery } from '../../../../services/folders';
 import { formatBytes, getFileExtension } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
+import { useFolderInfo } from '../../hooks/useFolderInfo';
 
 import { AssetPreview } from './AssetPreview';
 
@@ -212,6 +219,100 @@ const LocationField = ({ label, rootLabel, folders }: LocationFieldProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * DeleteAssetButton
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DeleteAssetButtonProps {
+  asset: AssetWithPopulatedCreatedBy;
+  folderId: number | null;
+  closeDetails: () => void;
+}
+
+const DeleteAssetButton = ({ asset, folderId, closeDetails }: DeleteAssetButtonProps) => {
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [deleteAsset, { isLoading: isDeleting }] = useDeleteAssetMutation();
+  const { title: folderName } = useFolderInfo(folderId);
+
+  const handleConfirm = async () => {
+    const res = await deleteAsset(asset.id);
+
+    if ('error' in res) {
+      const error = res.error as { data?: { error?: { message?: string }; message?: string } };
+      const message =
+        error?.data?.error?.message ??
+        error?.data?.message ??
+        formatMessage({
+          id: getTranslationKey('asset-details.delete.error'),
+          defaultMessage: 'Failed to delete the asset.',
+        });
+      toggleNotification({ type: 'danger', message });
+      setIsOpen(false);
+      return;
+    }
+
+    toggleNotification({
+      type: 'success',
+      message: formatMessage(
+        {
+          id: getTranslationKey('asset-details.delete.success'),
+          defaultMessage: '1 element have been deleted from {folderName}',
+        },
+        { folderName }
+      ),
+    });
+    setIsOpen(false);
+    closeDetails();
+  };
+
+  const triggerLabel = formatMessage({
+    id: getTranslationKey('asset-details.delete.trigger'),
+    defaultMessage: 'Delete this file',
+  });
+
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog.Trigger>
+        <IconButton withTooltip={false} label={triggerLabel} variant="danger-light">
+          <Trash />
+        </IconButton>
+      </Dialog.Trigger>
+      <Dialog.Content>
+        <Dialog.Header>
+          {formatMessage({
+            id: getTranslationKey('asset-details.delete.title'),
+            defaultMessage: 'Delete this media file?',
+          })}
+        </Dialog.Header>
+        <Dialog.Body
+          icon={<WarningCircle width="24px" height="24px" fill="danger600" />}
+          textAlign="center"
+        >
+          {formatMessage({
+            id: getTranslationKey('asset-details.delete.description'),
+            defaultMessage:
+              'This file cannot be recovered once deleted. If it is currently in use, linked content will break and image containers will be empty.',
+          })}
+        </Dialog.Body>
+        <Dialog.Footer>
+          <Dialog.Cancel>
+            <Button variant="tertiary" disabled={isDeleting} fullWidth>
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          </Dialog.Cancel>
+          <Dialog.Action>
+            <Button variant="danger-light" loading={isDeleting} onClick={handleConfirm} fullWidth>
+              {formatMessage({ id: 'app.components.Button.confirm', defaultMessage: 'Confirm' })}
+            </Button>
+          </Dialog.Action>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * SaveButton
  * -----------------------------------------------------------------------------------------------*/
 
@@ -237,6 +338,7 @@ const SaveButton = ({ label }: { label: string }) => {
 
 interface AssetDetailsProps {
   asset: AssetWithPopulatedCreatedBy;
+  closeDetails: () => void;
 }
 
 interface AssetFormState {
@@ -246,7 +348,7 @@ interface AssetFormState {
   folder: number | null;
 }
 
-export const AssetDetails = ({ asset }: AssetDetailsProps) => {
+export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
   const { data: folders = [] } = useGetAllFoldersQuery();
@@ -280,7 +382,7 @@ export const AssetDetails = ({ asset }: AssetDetailsProps) => {
         type: 'danger',
         message: formatMessage({
           id: getTranslationKey('asset-details.update.error'),
-          defaultMessage: 'Failed to update the asset.',
+          defaultMessage: 'Failed to update the file.',
         }),
       });
       return;
@@ -290,7 +392,7 @@ export const AssetDetails = ({ asset }: AssetDetailsProps) => {
       type: 'success',
       message: formatMessage({
         id: getTranslationKey('asset-details.update.success'),
-        defaultMessage: 'Asset updated.',
+        defaultMessage: 'File updated.',
       }),
     });
   };
@@ -435,11 +537,16 @@ export const AssetDetails = ({ asset }: AssetDetailsProps) => {
           </>
         )}
 
-        <Flex justifyContent="flex-end" gap={2} paddingTop={2}>
+        <Flex justifyContent="space-between" alignItems="center" gap={2} paddingTop={2}>
+          <DeleteAssetButton
+            asset={asset}
+            folderId={initialValues.folder}
+            closeDetails={closeDetails}
+          />
           <SaveButton
             label={formatMessage({
-              id: getTranslationKey('asset-details.save'),
-              defaultMessage: 'Save',
+              id: getTranslationKey('asset-details.saveChanges'),
+              defaultMessage: 'Save changes',
             })}
           />
         </Flex>
@@ -527,7 +634,7 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
       <DrawerHeader asset={asset} closeDetails={closeDetails} />
       <Drawer.ScrollableContent>
         <AssetPreview asset={asset} />
-        <AssetDetails asset={asset} />
+        <AssetDetails asset={asset} closeDetails={closeDetails} />
       </Drawer.ScrollableContent>
     </>
   );
