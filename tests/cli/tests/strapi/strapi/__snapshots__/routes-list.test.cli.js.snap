@@ -36,6 +36,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ DELETE             │ /api/conditions/:id                                                             │
 │ POST               │ /api/config/ratelimit/enable                                                    │
 │ POST               │ /api/config/permissions/prune                                                   │
+│ POST               │ /api/config/permissions/resync-super-admin                                      │
 │ POST               │ /api/config/resettransfertoken                                                  │
 │ HEAD|GET           │ /api/countries                                                                  │
 │ HEAD|GET           │ /api/countries/:id                                                              │
@@ -158,6 +159,13 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/api-tokens/:id                                                           │
 │ PUT                │ /admin/api-tokens/:id                                                           │
 │ POST               │ /admin/api-tokens/:id/regenerate                                                │
+│ POST               │ /admin/admin-tokens                                                             │
+│ HEAD|GET           │ /admin/admin-tokens                                                             │
+│ DELETE             │ /admin/admin-tokens/:id                                                         │
+│ HEAD|GET           │ /admin/admin-tokens/:id                                                         │
+│ PUT                │ /admin/admin-tokens/:id                                                         │
+│ POST               │ /admin/admin-tokens/:id/regenerate                                              │
+│ HEAD|GET           │ /admin/admin-tokens/:id/owner-permissions                                       │
 │ HEAD|GET           │ /admin/content-api/permissions                                                  │
 │ HEAD|GET           │ /admin/content-api/routes                                                       │
 │ HEAD|GET           │ /admin/transfer/runner/push                                                     │
@@ -171,6 +179,9 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/homepage/key-statistics                                                  │
 │ HEAD|GET           │ /admin/homepage/layout                                                          │
 │ PUT                │ /admin/homepage/layout                                                          │
+│ HEAD|GET           │ /admin/ai-usage                                                                 │
+│ HEAD|GET           │ /admin/ai-token                                                                 │
+│ HEAD|GET           │ /admin/ai-feature-config                                                        │
 │ HEAD|GET           │ /content-manager/init                                                           │
 │ HEAD|GET           │ /content-manager/content-types                                                  │
 │ HEAD|GET           │ /content-manager/content-types-settings                                         │
@@ -202,6 +213,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /content-manager/collection-types/:model/:id/actions/unpublish                  │
 │ POST               │ /content-manager/collection-types/:model/:id/actions/discard                    │
 │ POST               │ /content-manager/collection-types/:model/actions/bulkDelete                     │
+│ POST               │ /content-manager/collection-types/:model/actions/bulkFindForValidation          │
 │ POST               │ /content-manager/collection-types/:model/actions/bulkPublish                    │
 │ POST               │ /content-manager/collection-types/:model/actions/bulkUnpublish                  │
 │ HEAD|GET           │ /content-manager/collection-types/:model/:id/actions/countDraftRelations        │
@@ -256,6 +268,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ PUT                │ /i18n/locales/:id                                                               │
 │ DELETE             │ /i18n/locales/:id                                                               │
 │ POST               │ /i18n/content-manager/actions/get-non-localized-fields                          │
+│ HEAD|GET           │ /i18n/content-manager/get-fill-from-locale/:model                               │
 │ HEAD|GET           │ /i18n/settings                                                                  │
 │ PUT                │ /i18n/settings                                                                  │
 │ HEAD|GET           │ /i18n/ai-localization-jobs/collection-types/:contentType/:documentId            │

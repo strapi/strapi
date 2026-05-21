@@ -37,6 +37,8 @@ When you need to update the data packet for a new test, you will first need a St
 
 When running the `yarn test:e2e` command, test app instances are created in `test-apps/e2e/test-app-{n}`. You can use one of the these apps to update the data.
 
+For **EE** features, use the same **`STRAPI_LICENSE`** as for e2e: set it in **`tests/e2e/.env`** (see [E2E setup → environment variables](./00-setup.md#e2e-ce-ee-env)) or **export** it in your shell for the manual `dts-import` / `dts-export` commands below (those scripts do not load `tests/e2e/.env` by themselves).
+
 Navigate to one of the test-apps and run `yarn install && yarn develop`
 
 Leave the development server running, and then run the following command to reset and seed the database with the current e2e data packet. The script expects the name of the data packet you want to import found in `tests/e2e/data`.
@@ -61,7 +63,9 @@ Now that you have a Strapi instance with the same data that each e2e starts with
 
 Once you've created your new data from the test instance, you'll need to export it so it can be used in the end-to-end tests.
 
-Be sure to include the content types you would like exported in the `ALLOWED_CONTENT_TYPES` array found in `tests/e2e/constants.js`.
+Content types from the test app template are included automatically. If the data packet needs a new
+system or plugin content type, add it to the explicit `ALLOWED_CONTENT_TYPES` entries in
+`tests/e2e/constants.ts`.
 
 The script accepts the backup destination filename as an argument. Run it from the directory of the strapi instance you created earlier based on the test-app template.
 

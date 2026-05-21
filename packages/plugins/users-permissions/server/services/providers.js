@@ -8,7 +8,7 @@
 const _ = require('lodash');
 const urlJoin = require('url-join');
 
-const { getService } = require('../utils');
+const { getService, findValidUsername } = require('../utils');
 
 module.exports = ({ strapi }) => {
   /**
@@ -86,9 +86,14 @@ module.exports = ({ strapi }) => {
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: advancedSettings.default_role } });
 
+    // Username: prefer profile, else email prefix; findValidUsername ensures valid + unique
+    const base = (profile.username && profile.username.trim()) || email.split('@')[0];
+    const username = await findValidUsername(base);
+
     // Create the new user.
     const newUser = {
       ...profile,
+      username, // use the generated or provided username
       email, // overwrite with lowercased email
       provider,
       role: defaultRole.id,
