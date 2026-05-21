@@ -4,6 +4,7 @@ import { createMcpService } from '../index';
 describe('MCP Service Integration', () => {
   let mockStrapi: Partial<Core.Strapi>;
   let mockServerRoutes: jest.Mock;
+  let mockServerUse: jest.Mock;
   let logDebugSpy: jest.Mock;
   let logInfoSpy: jest.Mock;
   let logErrorSpy: jest.Mock;
@@ -13,6 +14,7 @@ describe('MCP Service Integration', () => {
     logInfoSpy = jest.fn();
     logErrorSpy = jest.fn();
     mockServerRoutes = jest.fn();
+    mockServerUse = jest.fn();
 
     mockStrapi = {
       log: {
@@ -33,6 +35,7 @@ describe('MCP Service Integration', () => {
       } as any,
       server: {
         routes: mockServerRoutes,
+        use: mockServerUse,
       } as any,
     };
   });
@@ -46,7 +49,27 @@ describe('MCP Service Integration', () => {
       expect(mockServerRoutes).toHaveBeenCalledTimes(1);
       const registeredRoutes = mockServerRoutes.mock.calls[0][0];
 
-      expect(registeredRoutes).toHaveLength(11);
+      expect(registeredRoutes).toHaveLength(5);
+    });
+
+    test('should register OAuth discovery fallback middleware via server.use', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      expect(mockServerUse).toHaveBeenCalledTimes(1);
+      expect(typeof mockServerUse.mock.calls[0][0]).toBe('function');
+    });
+
+    test('should register middleware before routes', async () => {
+      const callOrder: string[] = [];
+      mockServerUse.mockImplementation(() => callOrder.push('use'));
+      mockServerRoutes.mockImplementation(() => callOrder.push('routes'));
+
+      const service = createMcpService(mockStrapi as Core.Strapi);
+      await service.start();
+
+      expect(callOrder).toEqual(['use', 'routes']);
     });
 
     test('should register POST route with correct configuration', async () => {
@@ -109,7 +132,7 @@ describe('MCP Service Integration', () => {
       const disabledStrapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn((key: string, defaultValue?: any) => {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
             if (key === 'server.mcp.enabled') {
               return false;
             }
@@ -123,6 +146,7 @@ describe('MCP Service Integration', () => {
       await service.start();
 
       expect(mockServerRoutes).not.toHaveBeenCalled();
+      expect(mockServerUse).not.toHaveBeenCalled();
       expect(logDebugSpy).toHaveBeenCalledWith('[MCP] Server is disabled');
     });
 

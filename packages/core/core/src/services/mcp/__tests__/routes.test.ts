@@ -27,7 +27,7 @@ describe('MCP Routes', () => {
     test('should create routes with correct structure', () => {
       const routes = createMcpRoutes(mockConfig, mockHandlers);
 
-      expect(routes).toHaveLength(11);
+      expect(routes).toHaveLength(5);
       expect(routes).toStrictEqual([
         {
           method: 'POST',
@@ -69,54 +69,6 @@ describe('MCP Routes', () => {
             auth: false,
           },
         },
-        {
-          method: 'GET',
-          path: '/.well-known/oauth-authorization-server',
-          handler: expect.any(Function),
-          config: {
-            auth: false,
-          },
-        },
-        {
-          method: 'POST',
-          path: '/.well-known/oauth-authorization-server',
-          handler: expect.any(Function),
-          config: {
-            auth: false,
-          },
-        },
-        {
-          method: 'PUT',
-          path: '/.well-known/oauth-authorization-server',
-          handler: expect.any(Function),
-          config: {
-            auth: false,
-          },
-        },
-        {
-          method: 'DELETE',
-          path: '/.well-known/oauth-authorization-server',
-          handler: expect.any(Function),
-          config: {
-            auth: false,
-          },
-        },
-        {
-          method: 'PATCH',
-          path: '/.well-known/oauth-authorization-server',
-          handler: expect.any(Function),
-          config: {
-            auth: false,
-          },
-        },
-        {
-          method: 'POST',
-          path: '/register',
-          handler: expect.any(Function),
-          config: {
-            auth: false,
-          },
-        },
       ]);
     });
 
@@ -150,6 +102,18 @@ describe('MCP Routes', () => {
       expect(routes[0].handler).toBe(mockHandlers.handlePost);
       expect(routes[1].handler).toBe(mockHandlers.handleGet);
       expect(routes[2].handler).toBe(mockHandlers.handleDelete);
+    });
+
+    test('should not include OAuth discovery routes', () => {
+      const routes = createMcpRoutes(mockConfig, mockHandlers);
+
+      const oauthPaths = routes.filter(
+        (r) =>
+          r.path === '/.well-known/oauth-authorization-server' ||
+          r.path === '/.well-known/openid-configuration' ||
+          r.path === '/register'
+      );
+      expect(oauthPaths).toHaveLength(0);
     });
   });
 
