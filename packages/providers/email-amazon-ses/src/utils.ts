@@ -124,9 +124,8 @@ export const getClientConfig = (providerOptions: ProviderOptions): SESClientConf
   const endpoint =
     amazon ||
     providerOptions.endpoint ||
-    (hasLegacyStaticCredentials && !amazon && !providerOptions.endpoint
-      ? DEFAULT_SES_ENDPOINT
-      : undefined);
+    (hasLegacyStaticCredentials ? DEFAULT_SES_ENDPOINT : undefined);
+
   const parsedRegionFromEndpoint = regionFromEndpoint(endpoint);
 
   const explicitCredentials =
@@ -151,10 +150,10 @@ export const getClientConfig = (providerOptions: ProviderOptions): SESClientConf
   const resolvedRegion =
     region ||
     parsedRegionFromEndpoint ||
-    (unparseableLegacyAmazon ||
-    (hasLegacyStaticCredentials && !parsedRegionFromEndpoint && !endpoint)
-      ? 'us-east-1'
-      : undefined);
+    ((unparseableLegacyAmazon ||
+      (hasLegacyStaticCredentials && !parsedRegionFromEndpoint && !endpoint)) &&
+      'us-east-1') ||
+    undefined;
 
   // node-ses createClient only consumed key, secret, and amazon — ignore stray options.
   const sdkOnlyOptions = hasLegacyStaticCredentials ? {} : clientConfig;
