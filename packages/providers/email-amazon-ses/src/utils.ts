@@ -28,7 +28,7 @@ export interface SendOptions {
   to: string | string[];
   cc?: string | string[];
   bcc?: string | string[];
-  replyTo?: string;
+  replyTo?: string | string[];
   subject: string;
   text: string;
   html: string;
@@ -68,6 +68,7 @@ export const regionFromEndpoint = (endpoint?: EndpointInput): string | undefined
   }
 };
 
+/** Matches node-ses `extractRecipient`: arrays pass through, strings become a single entry. */
 export const toAddressList = (value?: string | string[]): string[] | undefined => {
   if (!value) {
     return undefined;
@@ -77,10 +78,33 @@ export const toAddressList = (value?: string | string[]): string[] | undefined =
     return value;
   }
 
-  return value
-    .split(',')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
+  return [value];
+};
+
+export interface LegacyMessageTag {
+  name: string;
+  value: string;
+}
+
+const mapLegacyMessageTags = (messageTags: unknown): SendEmailCommandInput['Tags'] => {
+  if (!Array.isArray(messageTags)) {
+    return undefined;
+  }
+
+  return messageTags
+    .filter(
+      (tag): tag is LegacyMessageTag =>
+        typeof tag === 'object' &&
+        tag !== null &&
+        'name' in tag &&
+        'value' in tag &&
+        typeof tag.name === 'string' &&
+        typeof tag.value === 'string'
+    )
+    .map((tag) => ({
+      Name: tag.name,
+      Value: tag.value,
+    }));
 };
 
 /**
@@ -96,7 +120,13 @@ export const toAddressList = (value?: string | string[]): string[] | undefined =
 export const getClientConfig = (providerOptions: ProviderOptions): SESClientConfig => {
   const { key, secret, amazon, credentials, region, ...clientConfig } = providerOptions;
 
-  const endpoint = amazon || providerOptions.endpoint;
+  const hasLegacyStaticCredentials = Boolean(key && secret);
+  const endpoint =
+    amazon ||
+    providerOptions.endpoint ||
+    (hasLegacyStaticCredentials && !amazon && !providerOptions.endpoint
+      ? DEFAULT_SES_ENDPOINT
+      : undefined);
   const parsedRegionFromEndpoint = regionFromEndpoint(endpoint);
 
   const explicitCredentials =
@@ -114,7 +144,6 @@ export const getClientConfig = (providerOptions: ProviderOptions): SESClientConf
         }
       : undefined);
 
-  const hasLegacyStaticCredentials = Boolean(key && secret);
   const unparseableLegacyAmazon = Boolean(
     amazon && hasLegacyStaticCredentials && !parsedRegionFromEndpoint
   );
@@ -127,8 +156,11 @@ export const getClientConfig = (providerOptions: ProviderOptions): SESClientConf
       ? 'us-east-1'
       : undefined);
 
+  // node-ses createClient only consumed key, secret, and amazon — ignore stray options.
+  const sdkOnlyOptions = hasLegacyStaticCredentials ? {} : clientConfig;
+
   return {
-    ...clientConfig,
+    ...sdkOnlyOptions,
     ...(resolvedRegion ? { region: resolvedRegion } : {}),
     ...(endpoint ? { endpoint } : {}),
     ...(explicitCredentials
@@ -146,14 +178,16 @@ export const buildSendEmailCommandInput = (
 ): SendEmailCommandInput => {
   const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-  return {
+  const { configurationSet, messageTags, ...sdkRest } = rest;
+
+  const commandInput: SendEmailCommandInput = {
     Source: from || settings.defaultFrom,
     Destination: {
       ToAddresses: toAddressList(to),
       CcAddresses: toAddressList(cc),
       BccAddresses: toAddressList(bcc),
     },
-    ReplyToAddresses: toAddressList(replyTo || settings.defaultReplyTo),
+    ReplyToAddresses: toAddressList(replyTo !== undefined ? replyTo : settings.defaultReplyTo),
     Message: {
       Subject: {
         Data: subject,
@@ -178,6 +212,18 @@ export const buildSendEmailCommandInput = (
           : {}),
       },
     },
-    ...rest,
+    ...sdkRest,
   };
+
+  if (typeof configurationSet === 'string') {
+    commandInput.ConfigurationSetName = configurationSet;
+  }
+
+  const tags = mapLegacyMessageTags(messageTags);
+
+  if (tags?.length) {
+    commandInput.Tags = tags;
+  }
+
+  return commandInput;
 };

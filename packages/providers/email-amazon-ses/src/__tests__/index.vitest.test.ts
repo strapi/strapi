@@ -65,6 +65,7 @@ describe('@strapi/provider-email-amazon-ses', () => {
         expect(MockSESClient).toHaveBeenCalledWith(
           expect.objectContaining({
             region: 'us-east-1',
+            endpoint: 'https://email.us-east-1.amazonaws.com',
             credentials: expectedLegacyCredentials,
           })
         );
@@ -266,6 +267,38 @@ describe('@strapi/provider-email-amazon-ses', () => {
       const instance = initProvider();
 
       await expect(instance.send(createBaseEmailOptions())).rejects.toThrow(errorMessage);
+    });
+
+    it('maps node-ses configurationSet on send', async () => {
+      const instance = initProvider();
+
+      await instance.send({
+        ...createBaseEmailOptions(),
+        configurationSet: 'tracked-set',
+      });
+
+      expect(MockSendEmailCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ConfigurationSetName: 'tracked-set',
+        })
+      );
+      const commandInput = MockSendEmailCommand.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+      expect(commandInput).not.toHaveProperty('configurationSet');
+    });
+
+    it('maps node-ses messageTags on send', async () => {
+      const instance = initProvider();
+
+      await instance.send({
+        ...createBaseEmailOptions(),
+        messageTags: [{ name: 'env', value: 'staging' }],
+      });
+
+      expect(MockSendEmailCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          Tags: [{ Name: 'env', Value: 'staging' }],
+        })
+      );
     });
   });
 });

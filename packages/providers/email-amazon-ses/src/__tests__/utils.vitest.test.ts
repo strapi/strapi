@@ -28,10 +28,9 @@ describe('@strapi/provider-email-amazon-ses utils', () => {
   });
 
   describe('toAddressList', () => {
-    it('splits comma-separated addresses like node-ses string recipients', () => {
+    it('wraps string recipients in a single entry (node-ses extractRecipient)', () => {
       expect(toAddressList('a@example.com, b@example.com')).toEqual([
-        'a@example.com',
-        'b@example.com',
+        'a@example.com, b@example.com',
       ]);
     });
 
@@ -80,6 +79,7 @@ describe('@strapi/provider-email-amazon-ses utils', () => {
 
       expect(config).toEqual({
         region: 'us-east-1',
+        endpoint: DEFAULT_SES_ENDPOINT,
         credentials: {
           accessKeyId,
           secretAccessKey,
@@ -276,7 +276,7 @@ describe('@strapi/provider-email-amazon-ses utils', () => {
       expect(input.Destination).toEqual({
         ToAddresses: ['to@example.com'],
         CcAddresses: ['cc@example.com'],
-        BccAddresses: ['bcc1@example.com', 'bcc2@example.com'],
+        BccAddresses: ['bcc1@example.com, bcc2@example.com'],
       });
     });
   });
