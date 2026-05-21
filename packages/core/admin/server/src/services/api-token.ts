@@ -685,10 +685,6 @@ const hash = (accessKey: string) => {
 const authenticateAdminToken = async (
   accessToken: string
 ): Promise<AdminTokenAuthenticationResult> => {
-  if (strapi.features.future.isEnabled('adminTokens') !== true) {
-    return { authenticated: false };
-  }
-
   const apiToken = (await getBy({ accessKey: hash(accessToken) })) as AdminApiToken | null;
 
   if (apiToken === null || apiToken === undefined) {
