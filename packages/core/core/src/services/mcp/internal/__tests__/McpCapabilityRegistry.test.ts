@@ -79,7 +79,7 @@ describe('McpCapabilityRegistryBase', () => {
       expect(registry.status('tool-1')).toBe('disabled');
     });
 
-    test('should throw error when registering a capability with duplicate name', () => {
+    test('should throw when bind is called twice on the same registry (double-bind protection)', () => {
       definitionRegistry.define({
         name: 'duplicate-tool',
         title: 'Tool',

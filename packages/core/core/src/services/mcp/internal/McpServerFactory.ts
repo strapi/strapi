@@ -6,6 +6,7 @@ import { McpResourceRegistry } from '../resource-registry';
 import { McpToolRegistry } from '../tool-registry';
 import type { McpAdminTokenAbility } from '../authentication';
 import { McpCapabilityDefinitionRegistry } from './McpCapabilityDefinitionRegistry';
+import type { McpCapabilityRegistryReadonly } from './McpCapabilityRegistry';
 import { syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
 
 export type McpCapabilityDefinitions = {
@@ -20,9 +21,16 @@ export type McpRegistries = {
   resources: McpResourceRegistry;
 };
 
+/** Read-only registry surface exposed on McpServerWithRegistries. */
+export type McpRegistriesReadonly = {
+  tools: McpCapabilityRegistryReadonly;
+  prompts: McpCapabilityRegistryReadonly;
+  resources: McpCapabilityRegistryReadonly;
+};
+
 export type McpServerWithRegistries = {
   mcpServer: McpServer;
-  registries: McpRegistries;
+  registries: McpRegistriesReadonly;
 };
 
 export type CreateMcpServerWithRegistriesParams = {
@@ -48,6 +56,8 @@ export const createMcpServerWithRegistries = ({
   } = {
     logging: {},
   };
+  // Advertise capability categories when definitions exist (server-level), not per-user enabled
+  // count. Clients discover the real set via tools/list, prompts/list, resources/list after sync.
   if (definitions.tools.size > 0) {
     capabilities.tools = {};
   }
