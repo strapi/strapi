@@ -7,6 +7,7 @@ import type { McpHandlerDependencies } from './handlers/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import { McpConfiguration } from './internal/McpConfiguration';
 import { createMcpServerWithRegistries } from './internal/McpServerFactory';
+import { createOAuthDiscoveryFallbackMiddleware } from './middleware/oauthDiscoveryFallback';
 import { createMcpRoutes } from './routes';
 import { logToolDefinition } from './tools/log';
 
@@ -105,6 +106,8 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
         throw new Error(`[MCP] Server already started or starting (status: ${serverStatus})`);
       }
       serverStatus = 'starting';
+
+      strapi.server.use(createOAuthDiscoveryFallbackMiddleware());
 
       const routes = createMcpRoutes(config, { handlePost, handleGet, handleDelete });
       strapi.server.routes(routes);

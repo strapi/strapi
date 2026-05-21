@@ -10,15 +10,6 @@ const handleMethodNotAllowed: Core.MiddlewareHandler = async (ctx) => {
   ctx.set('Allow', 'POST');
   sendJsonRpcError(ctx.res, 'METHOD_NOT_ALLOWED');
 };
-/**
- * Handler for OAuth discovery endpoints.
- * Returns JSON 404 so MCP clients skip OAuth and use Bearer token auth.
- */
-const handleOAuthNotSupported: Core.MiddlewareHandler = async (ctx) => {
-  ctx.status = 404;
-  ctx.set('Content-Type', 'application/json');
-  ctx.body = { error: 'not_found', error_description: 'OAuth not supported' };
-};
 
 export type McpRouteHandlers = {
   handlePost: Core.MiddlewareHandler;
@@ -44,42 +35,5 @@ export const createMcpRoutes = (
     // Unsupported methods on /mcp - return JSON error for MCP client compatibility
     { method: 'PUT', path: config.path, handler: handleMethodNotAllowed, config: noAuth },
     { method: 'PATCH', path: config.path, handler: handleMethodNotAllowed, config: noAuth },
-    // OAuth discovery endpoints - return 404 JSON so clients fall back to Bearer auth
-    {
-      method: 'GET',
-      path: '/.well-known/oauth-authorization-server',
-      handler: handleOAuthNotSupported,
-      config: noAuth,
-    },
-    {
-      method: 'POST',
-      path: '/.well-known/oauth-authorization-server',
-      handler: handleOAuthNotSupported,
-      config: noAuth,
-    },
-    {
-      method: 'PUT',
-      path: '/.well-known/oauth-authorization-server',
-      handler: handleOAuthNotSupported,
-      config: noAuth,
-    },
-    {
-      method: 'DELETE',
-      path: '/.well-known/oauth-authorization-server',
-      handler: handleOAuthNotSupported,
-      config: noAuth,
-    },
-    {
-      method: 'PATCH',
-      path: '/.well-known/oauth-authorization-server',
-      handler: handleOAuthNotSupported,
-      config: noAuth,
-    },
-    /**
-     * OAuth Dynamic Client Registration endpoint (RFC 7591).
-     * Claude Code's MCP client probes this endpoint; without a JSON response,
-     * Strapi returns plain text "Method Not Allowed" which breaks the client.
-     */
-    { method: 'POST', path: '/register', handler: handleOAuthNotSupported, config: noAuth },
   ];
 };
