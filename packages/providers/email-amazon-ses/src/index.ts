@@ -35,6 +35,23 @@ interface ProviderOptions extends Omit<SESClientConfig, 'credentials'> {
   amazon?: string;
 }
 
+const SES_ENDPOINT_REGION_PATTERN = /email\.([a-z0-9-]+)\.amazonaws\.com/i;
+
+const regionFromEndpoint = (endpoint?: string | { url?: string }): string | undefined => {
+  const endpointUrl = typeof endpoint === 'string' ? endpoint : endpoint?.url;
+
+  if (!endpointUrl) {
+    return undefined;
+  }
+
+  try {
+    const match = new URL(endpointUrl).hostname.match(SES_ENDPOINT_REGION_PATTERN);
+    return match?.[1];
+  } catch {
+    return undefined;
+  }
+};
+
 const toAddressList = (value?: string | string[]): string[] | undefined => {
   if (!value) {
     return undefined;
@@ -51,9 +68,10 @@ const toAddressList = (value?: string | string[]): string[] | undefined => {
 };
 
 const getClientConfig = (providerOptions: ProviderOptions): SESClientConfig => {
-  const { key, secret, amazon, credentials, ...clientConfig } = providerOptions;
+  const { key, secret, amazon, credentials, region, ...clientConfig } = providerOptions;
 
   const endpoint = amazon || providerOptions.endpoint;
+  const resolvedRegion = region || regionFromEndpoint(endpoint);
 
   const explicitCredentials =
     (credentials && typeof credentials === 'object' && 'key' in credentials
@@ -72,6 +90,7 @@ const getClientConfig = (providerOptions: ProviderOptions): SESClientConfig => {
 
   return {
     ...clientConfig,
+    ...(resolvedRegion ? { region: resolvedRegion } : {}),
     ...(endpoint ? { endpoint } : {}),
     ...(explicitCredentials
       ? {

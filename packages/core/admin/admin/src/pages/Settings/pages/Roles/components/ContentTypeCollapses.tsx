@@ -49,14 +49,22 @@ const ContentTypeCollapses = ({
     setCollapseToOpen(nextCollapseToOpen);
   };
 
-  return (
-    <>
-      {subjects.map(({ uid, label, properties }, index) => {
-        const isActive = collapseToOpen === uid;
+  const subjectsWithActions = React.useMemo(
+    () =>
+      subjects.map(({ uid, label, properties }) => {
         const availableActions = actions.map((action) => ({
           ...action,
           isDisplayed: Array.isArray(action.subjects) && action.subjects.indexOf(uid) !== -1,
         }));
+        return { uid, label, properties, availableActions };
+      }),
+    [subjects, actions]
+  );
+
+  return (
+    <>
+      {subjectsWithActions.map(({ uid, label, properties, availableActions }, index) => {
+        const isActive = collapseToOpen === uid;
         return (
           <Flex
             key={uid}
@@ -74,6 +82,7 @@ const ContentTypeCollapses = ({
               label={label}
               onClickToggle={handleClickToggleCollapse(uid)}
               pathToData={[pathToData, uid].join('..')}
+              subject={uid}
             />
             {isActive &&
               properties.map(({ label: propertyLabel, value, children: childrenForm }) => {
@@ -86,6 +95,7 @@ const ContentTypeCollapses = ({
                     pathToData={[pathToData, uid].join('..')}
                     propertyName={value}
                     key={value}
+                    subject={uid}
                   />
                 );
               })}
@@ -106,6 +116,7 @@ interface CollapseProps
   isGrey?: boolean;
   onClickToggle: RowLabelWithCheckboxProps['onClick'];
   pathToData: string;
+  subject: string;
 }
 
 const Collapse = ({
@@ -116,10 +127,16 @@ const Collapse = ({
   label,
   onClickToggle,
   pathToData,
+  subject,
 }: CollapseProps) => {
   const { formatMessage } = useIntl();
-  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
-    usePermissionsDataManager();
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+    checkUserHasPermission,
+    userPermissions,
+  } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
 
   // This corresponds to the data related to the CT left checkbox
@@ -184,6 +201,8 @@ const Collapse = ({
                 label: permissionLabel,
               } = restAction as VisibleCheckboxAction;
 
+              const userHasPermission = checkUserHasPermission(actionId, subject);
+
               if (isParentCheckbox) {
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
@@ -201,7 +220,7 @@ const Collapse = ({
                         />
                       )}
                       <Checkbox
-                        disabled={isFormDisabled}
+                        disabled={isFormDisabled || !userHasPermission}
                         name={checkboxName}
                         aria-label={formatMessage(
                           {
@@ -241,7 +260,7 @@ const Collapse = ({
                     />
                   )}
                   <Checkbox
-                    disabled={isFormDisabled}
+                    disabled={isFormDisabled || !userHasPermission}
                     name={checkboxName}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                     onCheckedChange={(value) => {
@@ -274,6 +293,7 @@ const Collapse = ({
             headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
             actions={checkboxesActions}
             isFormDisabled={isFormDisabled}
+            isReadOnly={userPermissions !== undefined}
             onClose={() => {
               setIsConditionModalOpen(false);
             }}
