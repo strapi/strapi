@@ -352,7 +352,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           <MemoizedRelationsComboboxInput
             disabled={isDisabled}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
-            id={componentUID && component ? (componentId ? `${componentId}` : '') : documentId}
+            id={id}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
             onChange={handleConnect}
