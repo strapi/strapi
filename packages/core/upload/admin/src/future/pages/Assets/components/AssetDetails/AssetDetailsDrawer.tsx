@@ -1,13 +1,24 @@
 import * as React from 'react';
 
-import { useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
+import {
+  Form,
+  useField,
+  useForm,
+  useNotification,
+  useQueryParams,
+  getDisplayName,
+} from '@strapi/admin/strapi-admin';
 import {
   Alert,
   Box,
+  Button,
   Field,
   Flex,
   Loader,
+  SingleSelect,
+  SingleSelectOption,
   TextInput,
+  Tooltip,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
@@ -17,7 +28,8 @@ import { styled } from 'styled-components';
 
 import { Drawer, DRAWER_CLOSE_ANIMATION_MS } from '../../../../components/Drawer';
 import { AssetType } from '../../../../enums';
-import { useGetAssetQuery } from '../../../../services/assets';
+import { useGetAssetQuery, useUpdateAssetMutation } from '../../../../services/assets';
+import { useGetAllFoldersQuery } from '../../../../services/folders';
 import { formatBytes, getFileExtension } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -54,7 +66,7 @@ export const useAssetDetailsParam = () => {
   const openDetails = React.useCallback(
     (id: number) => {
       setIsClosing(false);
-      setQuery({ [URL_PARAM]: String(id) });
+      setQuery({ [URL_PARAM]: String(id) }, 'push', true);
     },
     [setQuery]
   );
@@ -67,7 +79,7 @@ export const useAssetDetailsParam = () => {
   React.useEffect(() => {
     if (!isClosing) return;
     const timer = window.setTimeout(() => {
-      setQuery({ [URL_PARAM]: undefined }, 'remove');
+      setQuery({ [URL_PARAM]: undefined }, 'remove', true);
       setIsClosing(false);
       displayAssetId.current = null;
     }, DRAWER_CLOSE_ANIMATION_MS);
@@ -136,22 +148,83 @@ const StyledWarning = styled(WarningCircle)`
 interface DetailFieldProps {
   name: string;
   label: string;
-  value: string | null | undefined;
   required?: boolean;
 }
 
-const DetailField = ({ name, label, value, required }: DetailFieldProps) => (
-  <Field.Root name={name} required={required}>
-    <Field.Label>{label}</Field.Label>
-    <TextInput
-      value={value ?? ''}
-      // TODO: handle onChange
-      onChange={() => {}}
-      endAction={!value ? <StyledWarning /> : undefined}
-      type="text"
-    />
-  </Field.Root>
-);
+const DetailField = ({ name, label, required }: DetailFieldProps) => {
+  const { formatMessage } = useIntl();
+  const field = useField<string>(name);
+  const isSubmitting = useForm('DetailField', (state) => state.isSubmitting);
+  const value = field.value ?? '';
+  const emptyTooltipLabel = formatMessage(
+    {
+      id: getTranslationKey('asset-details.field.empty'),
+      defaultMessage: '{label} is currently empty.',
+    },
+    { label }
+  );
+
+  return (
+    <Field.Root name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
+      <TextInput
+        value={value}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+          field.onChange(name, event.target.value)
+        }
+        endAction={
+          !value ? (
+            <Tooltip label={emptyTooltipLabel}>
+              <StyledWarning aria-label={emptyTooltipLabel} role="img" />
+            </Tooltip>
+          ) : undefined
+        }
+        type="text"
+        disabled={isSubmitting}
+      />
+    </Field.Root>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * LocationField
+ * -----------------------------------------------------------------------------------------------*/
+
+interface LocationFieldProps {
+  label: string;
+  rootLabel: string;
+  folders: Array<{ id: number; name: string }>;
+}
+
+const LocationField = ({ label, rootLabel, folders }: LocationFieldProps) => {
+  const field = useField<number | null>('folder');
+  const isSubmitting = useForm('LocationField', (state) => state.isSubmitting);
+
+  return (
+    <Field.Root name="folder" required>
+      <Field.Label>{label}</Field.Label>
+      {/* `null` is the canonical "root of the Media Library" value everywhere
+          in the upload domain. The DS `SingleSelectOption.value` prop is typed
+          `string | number`, so we use the empty string as a DOM-only sentinel
+          for the root option and map it back to `null` on change. */}
+      <SingleSelect
+        value={field.value == null ? '' : String(field.value)}
+        onChange={(value) => {
+          const next = value === '' ? null : Number(value);
+          field.onChange('folder', next);
+        }}
+        disabled={isSubmitting}
+      >
+        <SingleSelectOption value="">{rootLabel}</SingleSelectOption>
+        {folders.map((folder) => (
+          <SingleSelectOption key={folder.id} value={String(folder.id)}>
+            {folder.name}
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+    </Field.Root>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * AssetDetails
@@ -161,140 +234,219 @@ interface AssetDetailsProps {
   asset: AssetWithPopulatedCreatedBy;
 }
 
-const AssetDetails = ({ asset }: AssetDetailsProps) => {
+interface AssetFormState {
+  name: string;
+  caption: string;
+  alternativeText: string;
+  folder: number | null;
+}
+
+export const AssetDetails = ({ asset }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { data: folders = [] } = useGetAllFoldersQuery();
+  const [updateAsset] = useUpdateAssetMutation();
 
   const isImage = asset.mime?.includes(AssetType.Image);
 
+  const initialValues: AssetFormState = {
+    name: asset.name ?? '',
+    caption: asset.caption ?? '',
+    alternativeText: asset.alternativeText ?? '',
+    folder:
+      typeof asset.folder === 'object' && asset.folder !== null
+        ? ((asset.folder as { id: number }).id ?? null)
+        : ((asset.folder as number | null | undefined) ?? null),
+  };
+
+  const handleSubmit = async (values: AssetFormState) => {
+    const res = await updateAsset({
+      id: asset.id,
+      fileInfo: {
+        name: values.name,
+        caption: values.caption,
+        alternativeText: values.alternativeText,
+        folder: values.folder,
+      },
+    });
+
+    if ('error' in res) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslationKey('asset-details.update.error'),
+          defaultMessage: 'Failed to update the file.',
+        }),
+      });
+      return;
+    }
+
+    toggleNotification({
+      type: 'success',
+      message: formatMessage({
+        id: getTranslationKey('asset-details.update.success'),
+        defaultMessage: 'File updated',
+      }),
+    });
+  };
+
   return (
-    <Flex
-      direction="column"
-      alignItems="stretch"
-      gap={4}
-      paddingTop={4}
-      paddingBottom={4}
-      paddingLeft={5}
-      paddingRight={5}
-    >
-      <Typography variant="beta" fontWeight="semiBold" tag="h3">
-        {formatMessage({
-          id: getTranslationKey('asset-details.fileInfo'),
-          defaultMessage: 'File info',
-        })}
-      </Typography>
-      <Flex
-        wrap="wrap"
-        gap={4}
-        background="neutral100"
-        paddingTop={4}
-        paddingBottom={4}
-        paddingLeft={6}
-        paddingRight={6}
-        alignItems="flex-start"
-      >
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.creationDate'),
-            defaultMessage: 'Creation date',
-          })}
-          value={
-            asset.createdAt
-              ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
-              : null
-          }
-        />
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.lastUpdated'),
-            defaultMessage: 'Last updated',
-          })}
-          value={
-            asset.updatedAt
-              ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
-              : null
-          }
-        />
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.createdBy'),
-            defaultMessage: 'Created by',
-          })}
-          value={
-            asset.createdBy
-              ? (getDisplayName({
-                  firstname: asset.createdBy.firstname ?? undefined,
-                  lastname: asset.createdBy.lastname ?? undefined,
-                  username: asset.createdBy.username ?? undefined,
-                  email: asset.createdBy.email ?? undefined,
-                }) ?? '-')
-              : null
-          }
-        />
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.size'),
-            defaultMessage: 'Size',
-          })}
-          value={asset.size ? formatBytes(asset.size, 1) : null}
-        />
-        {isImage && (asset.width != null || asset.height != null) && (
-          <DetailItem
-            label={formatMessage({
-              id: getTranslationKey('asset-details.dimensions'),
-              defaultMessage: 'Dimensions',
+    // `key={asset.id}` resets the form when the drawer switches to a different
+    // asset so cached values from the previous asset don't bleed in.
+    <Form key={asset.id} method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
+      {({ modified, isSubmitting }) => (
+        <Flex
+          direction="column"
+          alignItems="stretch"
+          gap={4}
+          paddingTop={4}
+          paddingBottom={4}
+          paddingLeft={5}
+          paddingRight={5}
+        >
+          <Typography variant="beta" fontWeight="semiBold" tag="h3">
+            {formatMessage({
+              id: getTranslationKey('asset-details.fileInfo'),
+              defaultMessage: 'File info',
             })}
-            value={
-              asset.width != null && asset.height != null
-                ? `${asset.width} × ${asset.height}`
-                : null
-            }
-          />
-        )}
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.extension'),
-            defaultMessage: 'Extension',
-          })}
-          value={getFileExtension(asset.ext)}
-        />
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.assetId'),
-            defaultMessage: 'Asset ID',
-          })}
-          value={String(asset.id)}
-        />
-      </Flex>
-      <DetailField
-        name="fileName"
-        label={formatMessage({
-          id: getTranslationKey('asset-details.fileName'),
-          defaultMessage: 'File name',
-        })}
-        value={asset.name}
-        required
-      />
-      {isImage && (
-        <>
+          </Typography>
+          <Flex
+            wrap="wrap"
+            gap={4}
+            background="neutral100"
+            paddingTop={4}
+            paddingBottom={4}
+            paddingLeft={6}
+            paddingRight={6}
+            alignItems="flex-start"
+          >
+            <DetailItem
+              label={formatMessage({
+                id: getTranslationKey('asset-details.creationDate'),
+                defaultMessage: 'Creation date',
+              })}
+              value={
+                asset.createdAt
+                  ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
+                  : null
+              }
+            />
+            <DetailItem
+              label={formatMessage({
+                id: getTranslationKey('asset-details.lastUpdated'),
+                defaultMessage: 'Last updated',
+              })}
+              value={
+                asset.updatedAt
+                  ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
+                  : null
+              }
+            />
+            <DetailItem
+              label={formatMessage({
+                id: getTranslationKey('asset-details.createdBy'),
+                defaultMessage: 'Created by',
+              })}
+              value={
+                asset.createdBy
+                  ? (getDisplayName({
+                      firstname: asset.createdBy.firstname ?? undefined,
+                      lastname: asset.createdBy.lastname ?? undefined,
+                      username: asset.createdBy.username ?? undefined,
+                      email: asset.createdBy.email ?? undefined,
+                    }) ?? '-')
+                  : null
+              }
+            />
+            <DetailItem
+              label={formatMessage({
+                id: getTranslationKey('asset-details.size'),
+                defaultMessage: 'Size',
+              })}
+              value={asset.size ? formatBytes(asset.size, 1) : null}
+            />
+            {isImage && (asset.width != null || asset.height != null) && (
+              <DetailItem
+                label={formatMessage({
+                  id: getTranslationKey('asset-details.dimensions'),
+                  defaultMessage: 'Dimensions',
+                })}
+                value={
+                  asset.width != null && asset.height != null
+                    ? `${asset.width} × ${asset.height}`
+                    : null
+                }
+              />
+            )}
+            <DetailItem
+              label={formatMessage({
+                id: getTranslationKey('asset-details.extension'),
+                defaultMessage: 'Extension',
+              })}
+              value={getFileExtension(asset.ext)}
+            />
+            <DetailItem
+              label={formatMessage({
+                id: getTranslationKey('asset-details.assetId'),
+                defaultMessage: 'Asset ID',
+              })}
+              value={String(asset.id)}
+            />
+          </Flex>
           <DetailField
-            name="caption"
+            name="name"
             label={formatMessage({
-              id: getTranslationKey('asset-details.caption'),
-              defaultMessage: 'Caption',
+              id: getTranslationKey('asset-details.fileName'),
+              defaultMessage: 'File name',
             })}
-            value={asset.caption}
+            required
           />
-          <DetailField
-            name="alternativeText"
+          <LocationField
             label={formatMessage({
-              id: getTranslationKey('asset-details.alternativeText'),
-              defaultMessage: 'Alternative text',
+              id: getTranslationKey('asset-details.location'),
+              defaultMessage: 'Location',
             })}
-            value={asset.alternativeText}
+            rootLabel={formatMessage({
+              id: getTranslationKey('plugin.home'),
+              defaultMessage: 'Home',
+            })}
+            folders={folders}
           />
-        </>
+          {isImage && (
+            <>
+              <DetailField
+                name="caption"
+                label={formatMessage({
+                  id: getTranslationKey('asset-details.caption'),
+                  defaultMessage: 'Caption',
+                })}
+              />
+              <DetailField
+                name="alternativeText"
+                label={formatMessage({
+                  id: getTranslationKey('asset-details.alternativeText'),
+                  defaultMessage: 'Alternative text',
+                })}
+              />
+            </>
+          )}
+
+          <Flex justifyContent="flex-end" gap={2} paddingTop={2}>
+            <Button
+              type="submit"
+              variant="default"
+              loading={isSubmitting}
+              disabled={!modified || isSubmitting}
+            >
+              {formatMessage({
+                id: getTranslationKey('asset-details.save'),
+                defaultMessage: 'Save changes',
+              })}
+            </Button>
+          </Flex>
+        </Flex>
       )}
-    </Flex>
+    </Form>
   );
 };
 
