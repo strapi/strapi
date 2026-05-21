@@ -7,7 +7,11 @@ import { sendJsonRpcError } from './utils/sendJsonRpcError';
  * Returns JSON-RPC error instead of plain text so MCP clients can parse it.
  */
 const handleMethodNotAllowed: Core.MiddlewareHandler = async (ctx) => {
-  ctx.set('Allow', 'POST');
+  // Opt out of Koa's response phase — sendJsonRpcError writes directly to ctx.res.
+  ctx.respond = false;
+  // ctx.set() writes to Koa's in-memory headers which are never flushed when ctx.respond = false.
+  // Use res.setHeader() so the header is included when sendJsonRpcError calls res.writeHead().
+  ctx.res.setHeader('Allow', 'POST');
   sendJsonRpcError(ctx.res, 'METHOD_NOT_ALLOWED');
 };
 

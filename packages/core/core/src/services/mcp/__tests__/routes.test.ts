@@ -110,6 +110,29 @@ describe('MCP Routes', () => {
       rest.forEach((h) => expect(h).toBe(first));
     });
 
+    test('should have handleMethodNotAllowed set ctx.respond = false and send Allow header via res.setHeader', async () => {
+      const routes = createMcpRoutes(mockConfig, mockHandlers);
+      const nonPostHandler = routes[1].handler as Core.MiddlewareHandler;
+
+      const setHeaderSpy = jest.fn();
+      const writeHeadSpy = jest.fn();
+      const endSpy = jest.fn();
+      const ctx = {
+        respond: true,
+        res: {
+          headersSent: false,
+          setHeader: setHeaderSpy,
+          writeHead: writeHeadSpy,
+          end: endSpy,
+        },
+      } as any;
+
+      await nonPostHandler(ctx, () => Promise.resolve());
+
+      expect(ctx.respond).toBe(false);
+      expect(setHeaderSpy).toHaveBeenCalledWith('Allow', 'POST');
+    });
+
     test('should not include OAuth discovery routes', () => {
       const routes = createMcpRoutes(mockConfig, mockHandlers);
 

@@ -15,6 +15,10 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
   } = deps;
 
   return async (ctx) => {
+    // Opt out of Koa's response phase — the MCP SDK writes directly to ctx.res
+    // (via res.writeHead / res.end / SSE streaming). Without this, Koa's respond()
+    // would also try to write ctx.body to the socket after the handler returns.
+    ctx.respond = false;
     const req = ctx.req;
     const res = ctx.res;
 
