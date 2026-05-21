@@ -17,6 +17,28 @@ describe('withTimeout', () => {
     await expect(result).resolves.toBe('success');
   });
 
+  test('clears the timer when the promise resolves before timeout', async () => {
+    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+    const promise = Promise.resolve('success');
+
+    await withTimeout(promise, 1000, 'timer-clear-check');
+
+    expect(clearTimeoutSpy).toHaveBeenCalledTimes(1);
+    clearTimeoutSpy.mockRestore();
+  });
+
+  test('clears the timer when the promise rejects before timeout', async () => {
+    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+    const promise = Promise.reject(new Error('early rejection'));
+
+    await expect(withTimeout(promise, 1000, 'timer-clear-on-reject')).rejects.toThrow(
+      'early rejection'
+    );
+
+    expect(clearTimeoutSpy).toHaveBeenCalledTimes(1);
+    clearTimeoutSpy.mockRestore();
+  });
+
   test('rejects when timeout is reached before promise resolves', async () => {
     const promise = new Promise<string>((resolve) => {
       setTimeout(() => resolve('success'), 2000);
