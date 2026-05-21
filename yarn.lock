@@ -9392,6 +9392,8 @@ __metadata:
     "@strapi/utils": "npm:5.46.1"
     eslint-config-custom: "npm:5.46.1"
     tsconfig: "npm:5.46.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.46.1"
   languageName: unknown
   linkType: soft
 
