@@ -27,6 +27,7 @@ import { PaginationError, ValidationError } from './errors';
 import { isOperator } from './operators';
 
 import parseType from './parse-type';
+import type { PublicationFilterMode } from './publication-filter';
 import { Model } from './types';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE } = constants;
@@ -80,9 +81,10 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
+  publicationFilter?: PublicationFilterMode;
   /**
-   * Filter documents by whether they have a published version.
-   * Use with `status: 'draft'` to find documents that have never been published.
+   * @deprecated Replaced by `publicationFilter` (`never-published`, `has-published-version`, …).
+   * Retained for backward compatibility with existing REST and GraphQL clients.
    */
   hasPublishedVersion?: boolean | 'true' | 'false';
 }
