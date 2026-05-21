@@ -13,8 +13,6 @@ const handleMethodNotAllowed: Core.MiddlewareHandler = async (ctx) => {
 
 export type McpRouteHandlers = {
   handlePost: Core.MiddlewareHandler;
-  handleGet: Core.MiddlewareHandler;
-  handleDelete: Core.MiddlewareHandler;
 };
 
 /**
@@ -28,11 +26,9 @@ export const createMcpRoutes = (
   const noAuth = { auth: false } as const;
 
   return [
-    // Core MCP endpoints
     { method: 'POST', path: config.path, handler: handlers.handlePost, config: noAuth },
-    { method: 'GET', path: config.path, handler: handlers.handleGet, config: noAuth },
-    { method: 'DELETE', path: config.path, handler: handlers.handleDelete, config: noAuth },
-    // Unsupported methods on /mcp - return JSON error for MCP client compatibility
+    { method: 'GET', path: config.path, handler: handleMethodNotAllowed, config: noAuth },
+    { method: 'DELETE', path: config.path, handler: handleMethodNotAllowed, config: noAuth },
     { method: 'PUT', path: config.path, handler: handleMethodNotAllowed, config: noAuth },
     { method: 'PATCH', path: config.path, handler: handleMethodNotAllowed, config: noAuth },
   ];

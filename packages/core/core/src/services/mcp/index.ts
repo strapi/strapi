@@ -1,7 +1,5 @@
 import type { Core, Modules } from '@strapi/types';
 import { createMcpAdminTokenAuthenticator } from './authentication';
-import { createDeleteHandler } from './handlers/handleDelete';
-import { createGetHandler } from './handlers/handleGet';
 import { createPostHandler } from './handlers/handlePost';
 import type { McpHandlerDependencies } from './handlers/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
@@ -54,8 +52,6 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
   // Create HTTP handlers
   const handlePost = createPostHandler(handlerDependencies);
-  const handleGet = createGetHandler();
-  const handleDelete = createDeleteHandler();
 
   const service: Modules.MCP.McpService = {
     isEnabled() {
@@ -109,7 +105,7 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
       strapi.server.use(createOAuthDiscoveryFallbackMiddleware());
 
-      const routes = createMcpRoutes(config, { handlePost, handleGet, handleDelete });
+      const routes = createMcpRoutes(config, { handlePost });
       strapi.server.routes(routes);
 
       serverStatus = 'running';

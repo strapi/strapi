@@ -86,34 +86,6 @@ describe('MCP Service Integration', () => {
       expect(typeof postRoute.handler).toBe('function');
     });
 
-    test('should register GET route with correct configuration', async () => {
-      const service = createMcpService(mockStrapi as Core.Strapi);
-
-      await service.start();
-
-      const registeredRoutes = mockServerRoutes.mock.calls[0][0];
-      const getRoute = registeredRoutes.find((r: any) => r.method === 'GET');
-
-      expect(getRoute).toBeDefined();
-      expect(getRoute.path).toBe('/mcp');
-      expect(getRoute.config.auth).toBe(false);
-      expect(typeof getRoute.handler).toBe('function');
-    });
-
-    test('should register DELETE route with correct configuration', async () => {
-      const service = createMcpService(mockStrapi as Core.Strapi);
-
-      await service.start();
-
-      const registeredRoutes = mockServerRoutes.mock.calls[0][0];
-      const deleteRoute = registeredRoutes.find((r: any) => r.method === 'DELETE');
-
-      expect(deleteRoute).toBeDefined();
-      expect(deleteRoute.path).toBe('/mcp');
-      expect(deleteRoute.config.auth).toBe(false);
-      expect(typeof deleteRoute.handler).toBe('function');
-    });
-
     test('should use hardcoded /mcp path', async () => {
       // Path is currently hardcoded in McpConfiguration
       const service = createMcpService(mockStrapi as Core.Strapi);

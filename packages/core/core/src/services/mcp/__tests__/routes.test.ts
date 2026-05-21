@@ -18,8 +18,6 @@ describe('MCP Routes', () => {
 
     mockHandlers = {
       handlePost: jest.fn(),
-      handleGet: jest.fn(),
-      handleDelete: jest.fn(),
     };
   });
 
@@ -94,14 +92,22 @@ describe('MCP Routes', () => {
       expect(routes[0].method).toBe('POST');
       expect(routes[1].method).toBe('GET');
       expect(routes[2].method).toBe('DELETE');
+      expect(routes[3].method).toBe('PUT');
+      expect(routes[4].method).toBe('PATCH');
     });
 
     test('should assign correct handlers', () => {
       const routes = createMcpRoutes(mockConfig, mockHandlers);
 
       expect(routes[0].handler).toBe(mockHandlers.handlePost);
-      expect(routes[1].handler).toBe(mockHandlers.handleGet);
-      expect(routes[2].handler).toBe(mockHandlers.handleDelete);
+    });
+
+    test('should use the same internal handler for all non-POST methods', () => {
+      const routes = createMcpRoutes(mockConfig, mockHandlers);
+
+      const nonPostHandlers = routes.slice(1).map((r) => r.handler);
+      const [first, ...rest] = nonPostHandlers;
+      rest.forEach((h) => expect(h).toBe(first));
     });
 
     test('should not include OAuth discovery routes', () => {
