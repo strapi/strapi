@@ -1,149 +1,20 @@
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+
 import {
-  SESClient,
-  SendEmailCommand,
-  type SendEmailCommandInput,
-  type SESClientConfig,
-} from '@aws-sdk/client-ses';
-
-interface Settings {
-  defaultFrom: string;
-  defaultReplyTo: string | string[];
-}
-
-interface SendOptions {
-  from?: string;
-  to: string | string[];
-  cc?: string | string[];
-  bcc?: string | string[];
-  replyTo?: string;
-  subject: string;
-  text: string;
-  html: string;
-  [key: string]: unknown;
-}
-
-interface ProviderCredentials {
-  key: string;
-  secret: string;
-  sessionToken?: string;
-}
-
-interface ProviderOptions extends Omit<SESClientConfig, 'credentials'> {
-  credentials?: ProviderCredentials | NonNullable<SESClientConfig['credentials']>;
-  key?: string;
-  secret?: string;
-  amazon?: string;
-}
-
-const SES_ENDPOINT_REGION_PATTERN = /email\.([a-z0-9-]+)\.amazonaws\.com/i;
-
-const regionFromEndpoint = (endpoint?: string | { url?: string }): string | undefined => {
-  const endpointUrl = typeof endpoint === 'string' ? endpoint : endpoint?.url;
-
-  if (!endpointUrl) {
-    return undefined;
-  }
-
-  try {
-    const match = new URL(endpointUrl).hostname.match(SES_ENDPOINT_REGION_PATTERN);
-    return match?.[1];
-  } catch {
-    return undefined;
-  }
-};
-
-const toAddressList = (value?: string | string[]): string[] | undefined => {
-  if (!value) {
-    return undefined;
-  }
-
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  return value
-    .split(',')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-};
-
-const getClientConfig = (providerOptions: ProviderOptions): SESClientConfig => {
-  const { key, secret, amazon, credentials, region, ...clientConfig } = providerOptions;
-
-  const endpoint = amazon || providerOptions.endpoint;
-  const resolvedRegion = region || regionFromEndpoint(endpoint);
-
-  const explicitCredentials =
-    (credentials && typeof credentials === 'object' && 'key' in credentials
-      ? {
-          accessKeyId: credentials.key,
-          secretAccessKey: credentials.secret,
-          ...(credentials.sessionToken ? { sessionToken: credentials.sessionToken } : {}),
-        }
-      : credentials) ||
-    (key && secret
-      ? {
-          accessKeyId: key,
-          secretAccessKey: secret,
-        }
-      : undefined);
-
-  return {
-    ...clientConfig,
-    ...(resolvedRegion ? { region: resolvedRegion } : {}),
-    ...(endpoint ? { endpoint } : {}),
-    ...(explicitCredentials
-      ? {
-          credentials: explicitCredentials,
-        }
-      : {}),
-  };
-};
+  buildSendEmailCommandInput,
+  getClientConfig,
+  type ProviderOptions,
+  type ProviderSettings,
+  type SendOptions,
+} from './utils';
 
 export default {
-  init(providerOptions: ProviderOptions, settings: Settings) {
+  init(providerOptions: ProviderOptions, settings: ProviderSettings) {
     const client = new SESClient(getClientConfig(providerOptions));
 
     return {
       async send(options: SendOptions): Promise<void> {
-        const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
-
-        const commandInput: SendEmailCommandInput = {
-          Source: from || settings.defaultFrom,
-          Destination: {
-            ToAddresses: toAddressList(to),
-            CcAddresses: toAddressList(cc),
-            BccAddresses: toAddressList(bcc),
-          },
-          ReplyToAddresses: toAddressList(replyTo || settings.defaultReplyTo),
-          Message: {
-            Subject: {
-              Data: subject,
-              Charset: 'UTF-8',
-            },
-            Body: {
-              ...(html
-                ? {
-                    Html: {
-                      Data: html,
-                      Charset: 'UTF-8',
-                    },
-                  }
-                : {}),
-              ...(text
-                ? {
-                    Text: {
-                      Data: text,
-                      Charset: 'UTF-8',
-                    },
-                  }
-                : {}),
-            },
-          },
-          ...rest,
-        };
-
-        await client.send(new SendEmailCommand(commandInput));
+        await client.send(new SendEmailCommand(buildSendEmailCommandInput(options, settings)));
       },
     };
   },

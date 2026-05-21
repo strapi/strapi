@@ -42,6 +42,8 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -50,7 +52,9 @@
   },
   "devDependencies": {
     "eslint-config-custom": "5.46.1",
-    "tsconfig": "5.46.1"
+    "tsconfig": "5.46.1",
+    "vitest": "catalog:",
+    "vitest-config": "5.46.1"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
