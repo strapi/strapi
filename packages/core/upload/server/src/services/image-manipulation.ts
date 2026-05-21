@@ -15,6 +15,46 @@ type Dimensions = {
 
 const { bytesToKbytes } = fileUtils;
 
+// Set STRAPI_UPLOAD_MEM_DEBUG=1 to log RSS/external memory deltas around each
+// Sharp pipeline. `external` is where libvips allocations show up, so it is
+// the most important number when chasing Sharp memory issues.
+const MEM_DEBUG = process.env.STRAPI_UPLOAD_MEM_DEBUG === '1';
+
+const fmtMB = (bytes: number) => {
+  const mb = bytes / 1024 / 1024;
+  const sign = mb >= 0 ? '+' : '';
+  return `${sign}${mb.toFixed(2)}MB`;
+};
+
+const measureSharp = async <T>(label: string, fn: () => Promise<T>): Promise<T> => {
+  if (!MEM_DEBUG) return fn();
+
+  if (global.gc) global.gc();
+  const before = process.memoryUsage();
+  const start = process.hrtime.bigint();
+  try {
+    return await fn();
+  } finally {
+    const after = process.memoryUsage();
+    const tookMs = Number(process.hrtime.bigint() - start) / 1e6;
+    const line =
+      `[sharp-mem] op=${label} ` +
+      `rss=${fmtMB(after.rss - before.rss)} ` +
+      `ext=${fmtMB(after.external - before.external)} ` +
+      `heap=${fmtMB(after.heapUsed - before.heapUsed)} ` +
+      `rss_total=${fmtMB(after.rss)} ` +
+      `ext_total=${fmtMB(after.external)} ` +
+      `took=${tookMs.toFixed(1)}ms`;
+    // strapi may not be initialized when this runs at boot; fall back to console.
+    if (typeof strapi !== 'undefined' && strapi.log) {
+      strapi.log.debug(line);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(line);
+    }
+  }
+};
+
 const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
@@ -35,15 +75,17 @@ const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
   });
 
 const getMetadata = (file: UploadableFile): Promise<sharp.Metadata> => {
-  if (!file.filepath) {
-    return new Promise((resolve, reject) => {
-      const pipeline = sharp();
-      pipeline.metadata().then(resolve).catch(reject);
-      file.getStream().pipe(pipeline);
-    });
-  }
+  return measureSharp(`metadata${file.filepath ? '' : ':stream'}`, () => {
+    if (!file.filepath) {
+      return new Promise<sharp.Metadata>((resolve, reject) => {
+        const pipeline = sharp();
+        pipeline.metadata().then(resolve).catch(reject);
+        file.getStream().pipe(pipeline);
+      });
+    }
 
-  return sharp(file.filepath).metadata();
+    return sharp(file.filepath).metadata();
+  });
 };
 
 const getDimensions = async (file: UploadableFile): Promise<Dimensions> => {
@@ -71,18 +113,23 @@ const resizeFileTo = async (
 ) => {
   const filePath = file.tmpWorkingDirectory ? join(file.tmpWorkingDirectory, hash) : hash;
 
-  let newInfo;
-  if (!file.filepath) {
-    const transform = sharp()
-      .resize(options)
-      .on('info', (info) => {
-        newInfo = info;
-      });
+  let newInfo: sharp.OutputInfo | undefined;
+  await measureSharp(
+    `resize:${options.width}x${options.height}${file.filepath ? '' : ':stream'} name=${name}`,
+    async () => {
+      if (!file.filepath) {
+        const transform = sharp()
+          .resize(options)
+          .on('info', (info) => {
+            newInfo = info;
+          });
 
-    await writeStreamToFile(file.getStream().pipe(transform), filePath);
-  } else {
-    newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
-  }
+        await writeStreamToFile(file.getStream().pipe(transform), filePath);
+      } else {
+        newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
+      }
+    }
+  );
 
   const { width, height, size } = newInfo ?? {};
 
@@ -149,16 +196,21 @@ const optimize = async (file: UploadableFile) => {
       ? join(file.tmpWorkingDirectory, `optimized-${file.hash}`)
       : `optimized-${file.hash}`;
 
-    let newInfo;
-    if (!file.filepath) {
-      transformer.on('info', (info) => {
-        newInfo = info;
-      });
+    let newInfo: sharp.OutputInfo | undefined;
+    await measureSharp(
+      `optimize:${format}${file.filepath ? '' : ':stream'} name=${file.name}`,
+      async () => {
+        if (!file.filepath) {
+          transformer.on('info', (info) => {
+            newInfo = info;
+          });
 
-      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
-    } else {
-      newInfo = await transformer.toFile(filePath);
-    }
+          await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+        } else {
+          newInfo = await transformer.toFile(filePath);
+        }
+      }
+    );
 
     const { width: newWidth, height: newHeight, size: newSize } = newInfo ?? {};
 
@@ -243,20 +295,22 @@ const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
 const isFaultyImage = async (file: UploadableFile) => {
-  if (!file.filepath) {
-    return new Promise((resolve, reject) => {
-      const pipeline = sharp();
-      pipeline.stats().then(resolve).catch(reject);
-      file.getStream().pipe(pipeline);
-    });
-  }
+  return measureSharp(`stats${file.filepath ? '' : ':stream'}`, async () => {
+    if (!file.filepath) {
+      return new Promise((resolve, reject) => {
+        const pipeline = sharp();
+        pipeline.stats().then(resolve).catch(reject);
+        file.getStream().pipe(pipeline);
+      });
+    }
 
-  try {
-    await sharp(file.filepath).stats();
-    return false;
-  } catch (e) {
-    return true;
-  }
+    try {
+      await sharp(file.filepath).stats();
+      return false;
+    } catch (e) {
+      return true;
+    }
+  });
 };
 
 const isOptimizableImage = async (file: UploadableFile) => {
