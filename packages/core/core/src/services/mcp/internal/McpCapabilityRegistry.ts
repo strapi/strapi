@@ -7,6 +7,12 @@ export interface McpCapabilityRegistry {
   bind: (mcpServer: McpServer) => void;
 }
 
+/** Read-only registry surface for external consumers (plugins, handlers). */
+export type McpCapabilityRegistryReadonly = Pick<
+  McpCapabilityRegistryBase<'tool', Modules.MCP.McpCapabilityDefinition, RegisteredCapability>,
+  'list' | 'status'
+>;
+
 export type RegisteredCapability = {
   enabled: boolean;
   enable(): void;
@@ -31,6 +37,7 @@ export class McpCapabilityRegistryBase<
     registerFn: (definition: Definition) => LocallyRegistered
   ) {
     this.#definitions.forEach((definition) => {
+      // Defence: register() must be called at most once per registry instance (double-bind protection).
       const existing = this.#registered.get(definition.name);
       if (existing !== undefined) {
         throw new Error(
@@ -82,6 +89,7 @@ export class McpCapabilityRegistryBase<
     return 'undefined';
   }
 
+  /** @internal Used by syncMcpSessionCapabilities; not part of the public registry API. */
   enable(name: string) {
     const registered = this.#registered.get(name);
     if (!registered) {
@@ -92,12 +100,14 @@ export class McpCapabilityRegistryBase<
     registered.enable();
   }
 
+  /** @internal Used by syncMcpSessionCapabilities; not part of the public registry API. */
   enableAll() {
     for (const registered of this.#registered.values()) {
       registered.enable();
     }
   }
 
+  /** @internal Used by syncMcpSessionCapabilities; not part of the public registry API. */
   disable(name: string) {
     const registered = this.#registered.get(name);
     if (!registered) {
@@ -108,12 +118,14 @@ export class McpCapabilityRegistryBase<
     registered.disable();
   }
 
+  /** @internal Used by syncMcpSessionCapabilities; not part of the public registry API. */
   disableAll() {
     for (const registered of this.#registered.values()) {
       registered.disable();
     }
   }
 
+  /** @internal Used by syncMcpSessionCapabilities; not part of the public registry API. */
   remove(name: string) {
     const registered = this.#registered.get(name);
     if (!registered) {
@@ -125,6 +137,7 @@ export class McpCapabilityRegistryBase<
     this.#registered.delete(name);
   }
 
+  /** @internal Used by syncMcpSessionCapabilities; not part of the public registry API. */
   removeAll() {
     for (const registered of this.#registered.values()) {
       registered.remove();
