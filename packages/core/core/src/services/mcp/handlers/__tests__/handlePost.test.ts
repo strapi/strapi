@@ -46,7 +46,7 @@ describe('handlePost', () => {
   });
 
   const makeCtx = (req: IncomingMessage, res: ServerResponse, body?: unknown) =>
-    ({ req, res, request: { body } }) as any;
+    ({ req, res, request: { body }, respond: true }) as any;
 
   const makeRes = () => {
     const writeHeadSpy = jest.fn();
@@ -60,6 +60,36 @@ describe('handlePost', () => {
   };
 
   const makeReq = () => ({ headers: {} }) as unknown as IncomingMessage;
+
+  test('should set ctx.respond = false before touching the response', async () => {
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries: jest.fn().mockReturnValue({
+        mcpServer: {
+          connect: jest.fn().mockResolvedValue(undefined),
+          close: jest.fn().mockResolvedValue(undefined),
+        },
+        registries: {},
+      }),
+      capabilityDefinitions: {} as any,
+    };
+
+    const { StreamableHTTPServerTransport } = jest.requireMock(
+      '@modelcontextprotocol/sdk/server/streamableHttp.js'
+    );
+    StreamableHTTPServerTransport.mockImplementation(() => ({
+      handleRequest: jest.fn().mockResolvedValue(undefined),
+    }));
+
+    const handler = createPostHandler(deps);
+    const ctx = makeCtx(makeReq(), { headersSent: false } as unknown as ServerResponse);
+
+    await handler(ctx, () => Promise.resolve());
+
+    expect(ctx.respond).toBe(false);
+  });
 
   test('should return AUTHENTICATION_REQUIRED when authentication fails', async () => {
     mockAuthenticationStrategy.authenticate = jest.fn().mockResolvedValue({
@@ -83,6 +113,7 @@ describe('handlePost', () => {
 
     await handler(ctx, () => Promise.resolve());
 
+    expect(ctx.respond).toBe(false);
     expect(writeHeadSpy).toHaveBeenCalledWith(401, { 'Content-Type': 'application/json' });
     expect(endSpy).toHaveBeenCalledWith(
       JSON.stringify({
