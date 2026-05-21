@@ -104,10 +104,10 @@ export default ({ strapi }: Context) => {
             : {};
 
         const inheritedPublicationFilter =
-          context.rootQueryArgs?.publicationFilter !== undefined &&
-          context.rootQueryArgs?._originField &&
-          isBuiltInQueryField(context.rootQueryArgs._originField)
-            ? context.rootQueryArgs.publicationFilter
+          rootQueryArgs?.publicationFilter !== undefined &&
+          rootQueryArgs?._originField &&
+          isBuiltInQueryField(rootQueryArgs._originField)
+            ? rootQueryArgs.publicationFilter
             : undefined;
 
         const inheritedHasPublishedVersion =
