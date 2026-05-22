@@ -768,5 +768,8 @@
   "Usecase.title": "تخبرنا أكثر قليلا عن نفسك",
   "Users.components.List.empty": "لا يوجد مستخدمون ...",
   "Users.components.List.empty.withFilters": "لا يوجد مستخدمون لديهم عوامل التصفية المطبقة ...",
-  "Users.components.List.empty.withSearch": "لا يوجد مستخدمون مطابقون للبحث({search})..."
+  "Users.components.List.empty.withSearch": "لا يوجد مستخدمون مطابقون للبحث({search})...",
+  "HomePage.widget.deploy-now.title": "هل أنت مستعد للنشر؟",
+  "HomePage.widget.deploy-now.description": "انشر مشروعك.",
+  "HomePage.widget.deploy-now.button": "انشر الآن"
 }

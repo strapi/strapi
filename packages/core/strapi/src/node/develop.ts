@@ -12,11 +12,12 @@ import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import { createBuildContext } from './create-build-context';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
+import { computeWorkerRestartDelay } from './develop-restart-on-error';
 
 import { writeStaticClientFiles } from './staticFiles';
 import { Logger } from '../cli/utils/logger';
 
-const TS_COMPILATION_FAILED_MESSAGE = 'TypeScript compilation failed';
+const STARTUP_AUTO_RETRY_DELAY_MS = 5_000;
 
 interface DevelopOptions extends CLIContext {
   /**
@@ -88,10 +89,7 @@ const develop = async ({
 
   if (cluster.isPrimary) {
     const expectedWorkerExits = new Set<number>();
-    const unexpectedExitTimestamps: number[] = [];
-    const UNEXPECTED_EXIT_WINDOW_MS = 10_000;
-    const BACKOFF_THRESHOLD = 3;
-    const MAX_RESTART_BACKOFF_MS = 5_000;
+    let unexpectedExitTimestamps: number[] = [];
 
     const forkWorker = (delayMs = 0) => {
       if (delayMs > 0) {
@@ -120,9 +118,6 @@ const develop = async ({
       try {
         await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
       } catch (err: unknown) {
-        if (!restartOnError) {
-          throw err;
-        }
         logger.error(`Error during initial TypeScript compilation: ${(err as Error).message}`);
         // We don't return here because we want to attempt to start the server even if the initial compilation fails, as it can be fixed while the server is running
       }
@@ -170,9 +165,15 @@ const develop = async ({
       switch (message) {
         case 'reload': {
           if (tsconfig?.config) {
-            // Build without diagnostics in case schemas have changed
-            await cleanupDistDirectory({ tsconfig, logger, timer });
-            await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+            try {
+              // Build without diagnostics in case schemas have changed
+              await cleanupDistDirectory({ tsconfig, logger, timer });
+              await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+            } catch (err: unknown) {
+              const errorMessage = err instanceof Error ? err.message : String(err);
+              logger.error(`Error during TypeScript compilation on reload: ${errorMessage}`);
+              process.exit(1);
+            }
           }
           if (restartOnError) {
             expectedWorkerExits.add(worker.id);
@@ -210,21 +211,11 @@ const develop = async ({
           return;
         }
 
-        const now = Date.now();
-        unexpectedExitTimestamps.push(now);
-
-        while (
-          unexpectedExitTimestamps.length > 0 &&
-          now - unexpectedExitTimestamps[0] > UNEXPECTED_EXIT_WINDOW_MS
-        ) {
-          unexpectedExitTimestamps.shift();
-        }
-
-        const crashCount = unexpectedExitTimestamps.length;
-        const delayMs =
-          crashCount >= BACKOFF_THRESHOLD
-            ? Math.min((crashCount - BACKOFF_THRESHOLD + 1) * 1_000, MAX_RESTART_BACKOFF_MS)
-            : 0;
+        const { timestamps, delayMs } = computeWorkerRestartDelay(
+          unexpectedExitTimestamps,
+          Date.now()
+        );
+        unexpectedExitTimestamps = timestamps;
 
         logger.warn(
           `Worker exited unexpectedly (code: ${code ?? 'unknown'}, signal: ${signal ?? 'none'}). Restarting${
@@ -254,31 +245,32 @@ const develop = async ({
      * as a strapi middleware.
      */
     let bundleWatcher: WebpackWatcher | ViteWatcher | undefined;
-    let strapiInstance: Awaited<ReturnType<typeof createStrapi>> | undefined;
+
+    const strapiInstance = await strapi.load();
 
     const contextSpinner = logger.spinner(`Building build context`);
     const adminSpinner = logger.spinner(`Creating admin`);
     const generatingTsSpinner = logger.spinner(`Generating types`);
     const compilingTsSpinner = logger.spinner(`Compiling TS`);
 
+    let watcherStarted = false;
+    const ensureWatcher = () => {
+      if (!watcherStarted) {
+        watcherStarted = true;
+        startWatcher(
+          strapiInstance,
+          cwd,
+          polling ?? false,
+          logger,
+          bundleWatcher,
+          restartOnError ?? false
+        );
+      }
+    };
+
     let startupFailed = false;
-    let shouldKeepWatchingAfterFailure = false;
 
     try {
-      if (tsconfig?.config) {
-        timer.start('compilingTS');
-        compilingTsSpinner.start();
-
-        await cleanupDistDirectory({ tsconfig, logger, timer });
-        await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
-
-        const compilingDuration = timer.end('compilingTS');
-        compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
-        compilingTsSpinner.succeed();
-      }
-
-      strapiInstance = await strapi.load();
-
       if (watchAdmin) {
         timer.start('createBuildContext');
         contextSpinner.start();
@@ -335,29 +327,30 @@ const develop = async ({
         generatingTsSpinner.succeed();
       }
 
+      if (tsconfig?.config) {
+        timer.start('compilingTS');
+        compilingTsSpinner.start();
+
+        await cleanupDistDirectory({ tsconfig, logger, timer });
+        await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+
+        const compilingDuration = timer.end('compilingTS');
+        compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
+        compilingTsSpinner.succeed();
+      }
+
+      ensureWatcher();
+
       strapiInstance.start();
     } catch (err: unknown) {
       startupFailed = true;
-      const isTypeScriptCompilationError =
-        err instanceof Error && err.message === TS_COMPILATION_FAILED_MESSAGE;
-      shouldKeepWatchingAfterFailure = restartOnError || isTypeScriptCompilationError;
-      logger.error(`Error during development: ${(err as Error).message}`);
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error(`Error during development: ${message}`);
 
-      if (isTypeScriptCompilationError && strapiInstance) {
-        // Compilation failed after load; tear down the loaded instance so we don't keep running stale code.
-        await strapiInstance.destroy();
-        strapiInstance = undefined;
-
-        if (bundleWatcher) {
-          bundleWatcher.close();
-          bundleWatcher = undefined;
-        }
-      }
-
-      // Stop any active startup spinners before entering watch-only mode.
       if (loadStrapiSpinner.isSpinning) {
         loadStrapiSpinner.fail();
       }
+      // Fail any spinners that were left running.
       if (contextSpinner.isSpinning) {
         contextSpinner.fail();
       }
@@ -370,31 +363,46 @@ const develop = async ({
       if (generatingTsSpinner.isSpinning) {
         generatingTsSpinner.fail();
       }
-      if (!shouldKeepWatchingAfterFailure) {
-        throw err;
-      }
-    } finally {
-      if (strapiInstance && (!startupFailed || shouldKeepWatchingAfterFailure)) {
-        startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
-      } else if (startupFailed && shouldKeepWatchingAfterFailure) {
-        startFallbackWatcher(cwd, polling ?? false, logger, restartOnError ? 5_000 : 0);
-      }
 
-      if (startupFailed && shouldKeepWatchingAfterFailure) {
-        logger.info(
-          'Watching for file changes. The app will retry automatically on the next change.'
-        );
+      ensureWatcher();
+
+      if (restartOnError) {
+        scheduleStartupAutoRetry(strapiInstance, logger);
       }
+    }
+
+    if (startupFailed && restartOnError) {
+      logger.info(
+        'Watching for file changes. The app will retry automatically on the next change.'
+      );
     }
   }
 };
+
+function scheduleStartupAutoRetry(
+  strapiInstance: Awaited<ReturnType<typeof createStrapi>>,
+  logger: Logger
+) {
+  logger.info(
+    `Startup failed. Retrying automatically in ${Math.floor(STARTUP_AUTO_RETRY_DELAY_MS / 1_000)} seconds...`
+  );
+
+  setTimeout(() => {
+    if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
+      logger.info('Automatic retry delay elapsed. Retrying startup...');
+      strapiInstance.reload.isReloading = true;
+      strapiInstance.reload();
+    }
+  }, STARTUP_AUTO_RETRY_DELAY_MS);
+}
 
 function startWatcher(
   strapiInstance: Awaited<ReturnType<typeof createStrapi>>,
   cwd: string,
   polling: boolean,
   logger: Logger,
-  bundleWatcher?: WebpackWatcher | ViteWatcher
+  bundleWatcher?: WebpackWatcher | ViteWatcher,
+  exitAfterKill = false
 ) {
   let isShuttingDown = false;
 
@@ -458,10 +466,13 @@ function startWatcher(
   process.on('message', async (message) => {
     switch (message) {
       case 'kill': {
-        if (isShuttingDown) {
+        if (exitAfterKill && isShuttingDown) {
           return;
         }
-        isShuttingDown = true;
+
+        if (exitAfterKill) {
+          isShuttingDown = true;
+        }
 
         logger.debug(
           'child process has the kill message, destroying the strapi instance and sending the killed process message'
@@ -474,71 +485,13 @@ function startWatcher(
           bundleWatcher.close();
         }
         process.send?.('killed');
-        process.nextTick(() => {
-          process.exit(0);
-        });
-        break;
-      }
-      default:
-        break;
-    }
-  });
-}
 
-function startFallbackWatcher(cwd: string, polling: boolean, logger: Logger, retryDelayMs = 0) {
-  let isRestarting = false;
-  let isShuttingDown = false;
-  let retryTimeout: ReturnType<typeof setTimeout> | undefined;
-
-  const requestRestart = (message: string) => {
-    if (isRestarting) {
-      return;
-    }
-
-    isRestarting = true;
-    logger.info(message);
-    process.send?.('reload');
-  };
-
-  const watcher = chokidar
-    .watch([path.join(cwd, 'src'), path.join(cwd, 'config')], {
-      ignoreInitial: true,
-      usePolling: polling,
-      ignored: [
-        /(^|[/\\])\../, // dot files
-        '**/node_modules/**',
-        '**/dist/**',
-      ],
-    })
-    .on('add', () => requestRestart('File changed while startup failed. Retrying...'))
-    .on('change', () => requestRestart('File changed while startup failed. Retrying...'))
-    .on('unlink', () => requestRestart('File changed while startup failed. Retrying...'));
-
-  if (retryDelayMs > 0) {
-    logger.info(
-      `Startup failed. Retrying automatically in ${Math.floor(retryDelayMs / 1_000)} seconds...`
-    );
-    retryTimeout = setTimeout(() => {
-      requestRestart('Automatic retry delay elapsed. Retrying startup...');
-    }, retryDelayMs);
-  }
-
-  process.on('message', async (message) => {
-    switch (message) {
-      case 'kill': {
-        if (isShuttingDown) {
-          return;
-        }
-        isShuttingDown = true;
-        if (retryTimeout) {
-          clearTimeout(retryTimeout);
+        if (exitAfterKill) {
+          process.nextTick(() => {
+            process.exit(0);
+          });
         }
 
-        await watcher.close();
-        process.send?.('killed');
-        process.nextTick(() => {
-          process.exit(0);
-        });
         break;
       }
       default:

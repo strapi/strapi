@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { Clock, User, TrendUp } from '@strapi/icons';
+import { Cloud, Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -34,6 +34,7 @@ import type { DefaultTheme } from 'styled-components';
 
 const {
   INJECT_COLUMN_IN_TABLE,
+  INJECT_LIST_VIEW_FILTERS,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
@@ -129,6 +130,7 @@ class StrapiApp {
     this.createCustomConfigurations(config ?? {});
 
     this.createHook(INJECT_COLUMN_IN_TABLE);
+    this.createHook(INJECT_LIST_VIEW_FILTERS);
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
@@ -346,6 +348,19 @@ class StrapiApp {
         pluginId: 'admin',
         id: 'key-statistics',
         roles: ['strapi-super-admin'],
+      },
+      {
+        icon: Cloud,
+        title: {
+          id: 'widget.deploy-now.title',
+          defaultMessage: 'Deploy',
+        },
+        component: async () => {
+          const { DeployNowWidget } = await import('./components/Widgets');
+          return DeployNowWidget;
+        },
+        pluginId: 'admin',
+        id: 'deploy-now',
       },
     ]);
 

@@ -51,8 +51,8 @@ const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
 
     try {
       await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
-    } catch (err: unknown) {
-      // we exit here to maintain the same behavior as before.
+    } catch {
+      // Match previous compiler behavior (process.exit inside basic.run).
       process.exit(1);
     }
 

@@ -1,5 +1,6 @@
 import * as z from 'zod/v4';
 import { createAPISanitizers } from '../sanitize';
+import { ValidationError } from '../errors';
 import { articleModel, getModel } from './test-fixtures';
 
 describe('sanitizeQuery', () => {
@@ -67,5 +68,48 @@ describe('sanitizeQuery', () => {
       });
       expect(result).toHaveProperty('tags', ['a', 'b']);
     });
+  });
+
+  describe('publicationFilter (core query param)', () => {
+    it('throws ValidationError with details when publicationFilter is invalid', async () => {
+      const query = { filters: { id: 1 }, publicationFilter: 'invalid-mode' };
+
+      try {
+        await sanitizers.query(query, schema, { strictParams: false });
+        expect.fail('expected throw');
+      } catch (e: any) {
+        expect(e).toBeInstanceOf(ValidationError);
+        expect(e.details?.source).toBe('query');
+        expect(e.details?.param).toBe('publicationFilter');
+      }
+    });
+
+    it('passes through valid publicationFilter', async () => {
+      const query = { filters: { id: 1 }, publicationFilter: 'modified' };
+      const result = await sanitizers.query(query, schema, { strictParams: false });
+      expect(result).toMatchObject({ publicationFilter: 'modified' });
+    });
+  });
+
+  it('removes invalid nested scalar filter keys next to operators', async () => {
+    const query = {
+      filters: {
+        title: {
+          $containsi: 'foo',
+          __invalidNestedFilterKey: 'should-be-removed',
+        },
+      },
+    };
+
+    const result = await sanitizers.query(query, schema);
+
+    expect(result).toMatchObject({
+      filters: {
+        title: {
+          $containsi: 'foo',
+        },
+      },
+    });
+    expect((result as any).filters.title).not.toHaveProperty('__invalidNestedFilterKey');
   });
 });

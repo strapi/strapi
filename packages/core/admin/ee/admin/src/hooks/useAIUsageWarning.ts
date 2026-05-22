@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useNotification } from '../../../../admin/src/features/Notifications';
-import { useGetAIUsageQuery } from '../services/ai';
+import { useGetAiUsageQuery } from '../services/ai';
 
 import { useAIAvailability } from './useAIAvailability';
 
@@ -16,7 +16,7 @@ export function useAIUsageWarning(threshold: number = 0.8) {
   const isAuthPage = location.pathname.startsWith('/auth');
   const { toggleNotification } = useNotification();
   const isAIEnabled = useAIAvailability();
-  const { data, isLoading, error } = useGetAIUsageQuery(undefined, {
+  const { data, isLoading, error } = useGetAiUsageQuery(undefined, {
     refetchOnMountOrArgChange: true,
     skip: !isAIEnabled || isAuthPage,
   });
