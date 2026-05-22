@@ -224,9 +224,27 @@ const processData = (
         const joinColumnName = attribute.joinColumn.name;
 
         // allow setting to null
-        const attrValue = !isUndefined(data[attributeName])
+        let attrValue = !isUndefined(data[attributeName])
           ? data[attributeName]
           : data[joinColumnName];
+
+        // Legacy single-column storage: only one id fits. Take the last
+        // and warn — modern schemas use a join table that can hold both
+        // the draft and published rows of the related entry.
+        if (
+          isObject(attrValue) &&
+          !Array.isArray(attrValue) &&
+          'set' in attrValue &&
+          Array.isArray(attrValue.set)
+        ) {
+          const setIds = attrValue.set;
+          if (setIds.length > 1) {
+            strapi?.log?.warn?.(
+              `Multiple ids provided for xToOne relation "${attributeName}" stored in a single FK column; keeping only the last id. Consider using a join table (useJoinTable: true) to support multiple versions of a Draft-and-Publish target.`
+            );
+          }
+          attrValue = setIds.length > 0 ? setIds[setIds.length - 1] : null;
+        }
 
         if (isNull(attrValue)) {
           obj[joinColumnName] = attrValue;
@@ -1315,9 +1333,12 @@ export const createEntityManager = (db: Database): EntityManager => {
               // remove gap between orders
               await cleanOrderColumns({ attribute, db, id, transaction: trx });
             } else {
-              if (isAnyToOne(attribute)) {
-                cleanRelationData.set = cleanRelationData.set?.slice(-1);
-              }
+              // Keep every row. The payload was already collapsed to a
+              // single related entry upstream; what's left here may still
+              // be two rows for the same entry (its draft and published
+              // sides) and both need to be linked, otherwise the entry
+              // vanishes from the Edit View on save.
+
               // overwrite all relations
               relIdsToaddOrMove = toIds(cleanRelationData.set);
               await deleteRelations({

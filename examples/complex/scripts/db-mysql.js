@@ -9,6 +9,7 @@ const {
   getComposeEnv,
   COMPOSE_PROJECT_NAME,
 } = require('./db-utils');
+const { getComposeCommand, getContainerCommand } = require('./compose');
 
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
@@ -18,6 +19,15 @@ const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 const DB_NAME = process.env.DATABASE_NAME || 'strapi';
 const DB_USER = process.env.DATABASE_USERNAME || 'strapi';
 const DB_PASSWORD = process.env.DATABASE_PASSWORD || 'strapi';
+
+function composeCmd() {
+  const { exe, prefixArgs } = getComposeCommand();
+  return [exe, ...prefixArgs].join(' ');
+}
+
+function containerCmd() {
+  return getContainerCommand();
+}
 
 // Try to find the container name dynamically, fallback to expected name
 function getContainerName() {
@@ -39,11 +49,11 @@ function ensureSnapshotsDir() {
   }
 }
 
-function execDocker(command) {
+function execShell(cmd) {
   try {
-    execSync(command, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv() });
+    execSync(cmd, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv(), shell: '/bin/bash' });
   } catch (error) {
-    console.error(`Error executing: ${command}`);
+    console.error(`Error executing: ${cmd}`);
     process.exit(1);
   }
 }
@@ -51,13 +61,13 @@ function execDocker(command) {
 switch (command) {
   case 'start':
     console.log('Starting mysql container...');
-    execDocker(`docker-compose -f ${DOCKER_COMPOSE_FILE} up -d mysql`);
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} up -d mysql`);
     console.log('✅ MySQL started');
     break;
 
   case 'stop':
     console.log('Stopping mysql container...');
-    execDocker(`docker-compose -f ${DOCKER_COMPOSE_FILE} stop mysql`);
+    execShell(`${composeCmd()} -f ${DOCKER_COMPOSE_FILE} stop mysql`);
     console.log('✅ MySQL stopped');
     break;
 
@@ -74,8 +84,8 @@ switch (command) {
       const containerName = getContainerName();
       try {
         execSync(
-          `docker exec ${containerName} mysqldump -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} mysqldump -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot created: ${snapshotPath}`);
       } catch (error) {
@@ -102,13 +112,13 @@ switch (command) {
       try {
         // Drop and recreate database
         execSync(
-          `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         // Restore from snapshot
         execSync(
-          `docker exec -i ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec -i ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log(`✅ Snapshot restored: ${snapshotName}`);
       } catch (error) {
@@ -124,8 +134,8 @@ switch (command) {
       const containerName = getContainerName();
       try {
         execSync(
-          `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
         console.log('✅ Database wiped');
       } catch (error) {
@@ -139,9 +149,32 @@ switch (command) {
     {
       const containerName = getContainerName();
       try {
-        // Use information_schema for fast approximate counts
+        // Refresh information_schema.tables.table_rows with fresh stats.
+        // The default values can lag reality by hours, which is unacceptable
+        // for benchmark reports. ANALYZE TABLE triggers a stats refresh.
+        const analyzeQuery = `
+          SELECT CONCAT('ANALYZE TABLE ', table_name, ';') AS cmd
+          FROM information_schema.tables
+          WHERE table_schema = '${DB_NAME}';
+        `;
+        try {
+          const analyzeList = execSync(
+            `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${analyzeQuery.trim()}" -s -N`,
+            { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+          );
+          const cmds = analyzeList.trim().split('\n').filter(Boolean).join(' ');
+          if (cmds) {
+            execSync(
+              `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${cmds}"`,
+              { stdio: 'ignore', cwd: COMPLEX_DIR, shell: '/bin/bash' }
+            );
+          }
+        } catch {
+          // Best-effort; fall through to stale stats rather than fail the check.
+        }
+
         const query = `
-          SELECT 
+          SELECT
             table_name,
             table_rows
           FROM information_schema.tables
@@ -150,8 +183,8 @@ switch (command) {
         `;
 
         const output = execSync(
-          `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
-          { encoding: 'utf8', cwd: COMPLEX_DIR }
+          `${containerCmd()} exec ${containerName} mysql -h 127.0.0.1 -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
+          { encoding: 'utf8', cwd: COMPLEX_DIR, shell: '/bin/bash' }
         );
 
         const lines = output

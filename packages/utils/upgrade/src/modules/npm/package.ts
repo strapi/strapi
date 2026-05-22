@@ -72,6 +72,7 @@ export class Package implements PackageInterface {
       const registryCommands = {
         yarn: ['config', 'get', 'npmRegistryServer'],
         npm: ['config', 'get', 'registry'],
+        pnpm: ['config', 'get', 'registry'],
       } as const;
 
       const command = registryCommands[packageManagerName as keyof typeof registryCommands];

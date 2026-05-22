@@ -56,22 +56,22 @@ describe('Content Manager single types', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: '3 errors occurred',
+          message: 'Invalid input: expected string, received undefined',
           details: {
             errors: [
               {
                 path: ['contentTypeUID'],
-                message: 'contentTypeUID is a required field',
+                message: 'Invalid input: expected string, received undefined',
                 name: 'ValidationError',
               },
               {
                 path: ['field'],
-                message: 'field is a required field',
+                message: 'Invalid input: expected string, received undefined',
                 name: 'ValidationError',
               },
               {
                 path: ['data'],
-                message: 'data is a required field',
+                message: 'Invalid input: expected object, received undefined',
                 name: 'ValidationError',
               },
             ],
@@ -280,22 +280,22 @@ describe('Content Manager single types', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: '3 errors occurred',
+          message: 'Invalid input: expected string, received undefined',
           details: {
             errors: [
               {
                 path: ['contentTypeUID'],
-                message: 'contentTypeUID is a required field',
+                message: 'Invalid input: expected string, received undefined',
                 name: 'ValidationError',
               },
               {
                 path: ['field'],
-                message: 'field is a required field',
+                message: 'Invalid input: expected string, received undefined',
                 name: 'ValidationError',
               },
               {
                 path: ['value'],
-                message: 'value is a required field',
+                message: 'Invalid input: expected string, received undefined',
                 name: 'ValidationError',
               },
             ],
@@ -321,12 +321,11 @@ describe('Content Manager single types', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'value must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"',
+          message: 'Must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"',
           details: {
             errors: [
               {
-                message:
-                  'value must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"',
+                message: 'Must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"',
                 name: 'ValidationError',
                 path: ['value'],
               },

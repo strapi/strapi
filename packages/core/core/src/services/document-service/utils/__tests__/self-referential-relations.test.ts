@@ -62,7 +62,7 @@ describe('self-referential-relations', () => {
         },
       };
 
-      const result = await load('api::category.category' as any, [{ id: '10', locale: 'en' }]);
+      const result = await load('api::category.category' as any, [{ id: 10, locale: 'en' }]);
 
       expect(result).toHaveLength(0);
       expect(chain.transacting).not.toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe('self-referential-relations', () => {
         },
       };
 
-      const result = await load('api::category.category' as any, [{ id: '10', locale: 'en' }]);
+      const result = await load('api::category.category' as any, [{ id: 10, locale: 'en' }]);
 
       expect(result).toHaveLength(0);
     });
@@ -102,8 +102,8 @@ describe('self-referential-relations', () => {
         },
       };
 
-      const sourceEntries = [{ id: '10', locale: 'en' }];
-      const targetEntries = [{ id: '20', locale: 'en' }];
+      const sourceEntries = [{ id: 10, locale: 'en' }];
+      const targetEntries = [{ id: 20, locale: 'en' }];
       const relationData = [
         {
           joinTable: {
@@ -111,7 +111,7 @@ describe('self-referential-relations', () => {
             joinColumn: { name: 'category_id' },
             inverseJoinColumn: { name: 'inv_category_id' },
           },
-          relations: [{ id: 1, category_id: '10', inv_category_id: '10', field_order: 1 }],
+          relations: [{ id: 1, category_id: 10, inv_category_id: 10, field_order: 1 }],
         },
       ];
 
@@ -119,7 +119,7 @@ describe('self-referential-relations', () => {
 
       expect(mockBatchInsert).toHaveBeenCalledWith(
         'categories_parent_lnk',
-        [{ category_id: '20', inv_category_id: '20', field_order: 1 }],
+        [{ category_id: 20, inv_category_id: 20, field_order: 1 }],
         1000
       );
     });
@@ -133,8 +133,8 @@ describe('self-referential-relations', () => {
         },
       };
 
-      const sourceEntries = [{ id: '10', locale: 'en' }];
-      const targetEntries = [{ id: '20', locale: 'en' }];
+      const sourceEntries = [{ id: 10, locale: 'en' }];
+      const targetEntries = [{ id: 20, locale: 'en' }];
       const relationData = [
         {
           joinTable: {
@@ -142,7 +142,7 @@ describe('self-referential-relations', () => {
             joinColumn: { name: 'category_id' },
             inverseJoinColumn: { name: 'inv_category_id' },
           },
-          relations: [{ id: 1, category_id: '10', inv_category_id: '99', field_order: 1 }],
+          relations: [{ id: 1, category_id: 10, inv_category_id: 99, field_order: 1 }],
         },
       ];
 
@@ -161,12 +161,12 @@ describe('self-referential-relations', () => {
       };
 
       const sourceEntries = [
-        { id: '10', locale: 'en' },
-        { id: '11', locale: 'fr' },
+        { id: 10, locale: 'en' },
+        { id: 11, locale: 'fr' },
       ];
       const targetEntries = [
-        { id: '20', locale: 'en' },
-        { id: '21', locale: 'fr' },
+        { id: 20, locale: 'en' },
+        { id: 21, locale: 'fr' },
       ];
       const relationData = [
         {
@@ -176,8 +176,8 @@ describe('self-referential-relations', () => {
             inverseJoinColumn: { name: 'inv_category_id' },
           },
           relations: [
-            { id: 1, category_id: '10', inv_category_id: '10', field_order: 1 },
-            { id: 2, category_id: '11', inv_category_id: '11', field_order: 1 },
+            { id: 1, category_id: 10, inv_category_id: 10, field_order: 1 },
+            { id: 2, category_id: 11, inv_category_id: 11, field_order: 1 },
           ],
         },
       ];
@@ -187,8 +187,8 @@ describe('self-referential-relations', () => {
       expect(mockBatchInsert).toHaveBeenCalledWith(
         'categories_parent_lnk',
         [
-          { category_id: '20', inv_category_id: '20', field_order: 1 },
-          { category_id: '21', inv_category_id: '21', field_order: 1 },
+          { category_id: 20, inv_category_id: 20, field_order: 1 },
+          { category_id: 21, inv_category_id: 21, field_order: 1 },
         ],
         1000
       );
@@ -202,7 +202,7 @@ describe('self-referential-relations', () => {
         },
       };
 
-      await sync([{ id: '10', locale: 'en' }], [{ id: '20', locale: 'en' }], []);
+      await sync([{ id: 10, locale: 'en' }], [{ id: 20, locale: 'en' }], []);
 
       expect(strapi.db.transaction).not.toHaveBeenCalled();
     });
