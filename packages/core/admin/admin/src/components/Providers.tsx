@@ -13,6 +13,7 @@ import { TrackingProvider } from '../features/Tracking';
 import { GuidedTourProvider } from './GuidedTour/GuidedTourProvider';
 import { LanguageProvider } from './LanguageProvider';
 import { Theme } from './Theme';
+import { TooltipProvider } from '@strapi/design-system';
 
 import type { Store } from '../core/store/configure';
 import type { StrapiApp } from '../StrapiApp';
@@ -57,6 +58,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                   <NotificationsProvider>
                     <TrackingProvider>
                       <GuidedTourProvider>
+                        <TooltipProvider>
                         <ConfigurationProvider
                           defaultAuthLogo={strapi.configurations.authLogo}
                           defaultMenuLogo={strapi.configurations.menuLogo}
@@ -64,6 +66,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                         >
                           {children}
                         </ConfigurationProvider>
+                        </TooltipProvider>
                       </GuidedTourProvider>
                     </TrackingProvider>
                   </NotificationsProvider>
