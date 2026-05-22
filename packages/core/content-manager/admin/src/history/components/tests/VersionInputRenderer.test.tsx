@@ -76,16 +76,15 @@ describe('CustomRelationInput (history)', () => {
   it('does not crash when the historical field value is a sanitized admin-user object', async () => {
     // Admin-user relations are sanitized server-side to a plain user object,
     // not the `{ results, meta }` shape — same crash class as above.
+    // `name` must match the key in `initialValues` so useField reads the value.
     renderField(
       {
         manager: { id: 7, firstname: 'Ada', lastname: 'Lovelace', email: 'ada@example.test' },
       },
       // @ts-expect-error - test override
-      { targetModel: 'admin::user', target: 'admin::user' }
+      { targetModel: 'admin::user', target: 'admin::user' },
+      { name: 'manager', label: 'Manager' }
     );
-    // Field with name="categories" is still rendered (we don't pass "manager"
-    // here), so the empty-state path runs because the field value at "categories"
-    // is undefined. The point is that the render completes without throwing.
     expect(await screen.findByText(/No relations/i)).toBeInTheDocument();
   });
 
