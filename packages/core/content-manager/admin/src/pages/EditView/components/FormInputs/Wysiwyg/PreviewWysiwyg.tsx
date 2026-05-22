@@ -11,8 +11,9 @@ interface PreviewWysiwygProps {
 
 const PreviewWysiwyg = ({ data }: PreviewWysiwygProps) => {
   const html = React.useMemo(
-    () =>
-      sanitizeHtml(md.render((data ?? '').replaceAll('\\n', '\n')), {
+    () => {
+      const rendered = md.render((data ?? '').replaceAll('\\n', '\n'));
+      return sanitizeHtml(typeof rendered === 'string' ? rendered : '', {
         ...sanitizeHtml.defaults,
         allowedTags: false,
         allowedAttributes: {
