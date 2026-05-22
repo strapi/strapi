@@ -33,6 +33,7 @@ interface State {
   aliasCounter: number;
   filters: any;
   search: string;
+  processed: boolean;
 }
 
 export interface QueryBuilder {
@@ -116,6 +117,7 @@ const createQueryBuilder = (
       aliasCounter: 0,
       filters: null,
       search: null,
+      processed: false,
     },
     initialState
   );
@@ -372,16 +374,22 @@ const createQueryBuilder = (
     },
 
     runSubQuery() {
+      const originalType = state.type;
+
       this.select('id');
       const subQB = this.getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
       const connection = db.getConnection(tableName);
 
-      return (connection[state.type] as Knex)().whereIn('id', nestedSubQuery);
+      return (connection[originalType] as Knex)().whereIn('id', nestedSubQuery);
     },
 
     processState() {
+      if (this.state.processed) {
+        return;
+      }
+
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
 
       if (!_.isNil(state.filters)) {
@@ -402,6 +410,8 @@ const createQueryBuilder = (
       state.data = helpers.toRow(meta, state.data);
 
       this.processSelect();
+
+      this.state.processed = true;
     },
 
     shouldUseDistinct() {
@@ -436,12 +446,13 @@ const createQueryBuilder = (
 
       const qb = db.getConnection(aliasedTableName);
 
+      this.processState();   // <-- MOVED UP (critical for nested filters)
+
       if (this.shouldUseSubQuery()) {
         return this.runSubQuery();
       }
 
-      this.processState();
-
+      // (no more processState() call here)
       switch (state.type) {
         case 'select': {
           qb.select(state.select.map((column) => this.aliasColumn(column)));
