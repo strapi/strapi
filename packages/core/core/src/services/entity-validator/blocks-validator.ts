@@ -142,6 +142,15 @@ const imageNodeValidator = yup.object().shape({
   children: yup.array().of(inlineNodeValidator).required(),
 });
 
+const embeddedSocialMediaNodeValidator = yup.object().shape({
+  type: yup.string().equals(['embedded-social-media']).required(),
+  embedSocialMedia: yup.object().shape({
+    socialMediaUrl: yup.string(),
+    socialMediaType: yup.mixed().oneOf(['youtube', 'x-post']),
+  }),
+  children: yup.array().of(inlineNodeValidator).required(),
+});
+
 // TODO: remove the any and replace with a correct Type
 const blockNodeValidator: any = yup.lazy((value: { type: string }) => {
   switch (value.type) {
@@ -157,6 +166,8 @@ const blockNodeValidator: any = yup.lazy((value: { type: string }) => {
       return imageNodeValidator;
     case 'code':
       return codeBlockValidator;
+    case 'embedded-social-media':
+      return embeddedSocialMediaNodeValidator;
     default:
       return yup.mixed().test('invalid-type', 'Block node is of invalid type', () => {
         return false;
