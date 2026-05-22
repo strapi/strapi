@@ -41,12 +41,21 @@ const schema = yup.object({
 });
 
 const XMediaElement = ({ xUrl }: { xUrl: string }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
   function loadTweet(id: string): void {
-    window.twttr.widgets
-      .createTweet(id, document.getElementById('first-tweet'), {
-        align: 'left',
-      })
-      .then(function (el: any) {});
+    const container = containerRef.current;
+    if (!container) return;
+    window.twttr.ready(() => {
+      window.twttr.widgets
+        .createTweet(id, container, {
+          align: 'left',
+        })
+        .then(function (el: any) {})
+        .catch(() => {
+          console.error('Unable to load tweet');
+        });
+    });
   }
 
   React.useEffect(() => {
@@ -56,12 +65,12 @@ const XMediaElement = ({ xUrl }: { xUrl: string }) => {
     const isXJsLoaded = document.getElementById('twitter-wjs');
     if (!isXJsLoaded) {
       const script = document.createElement('script');
-
       script.id = 'twitter-wjs';
       script.src = 'https://platform.twitter.com/widgets.js';
       script.async = true;
-
+      script.onload = () => loadTweet(id);
       document.body.appendChild(script);
+    } else if (!window.twttr?.widgets) {
       document.getElementById('twitter-wjs')?.addEventListener('load', () => {
         loadTweet(id);
       });
@@ -70,7 +79,7 @@ const XMediaElement = ({ xUrl }: { xUrl: string }) => {
     }
   }, []);
 
-  return <div id="first-tweet"></div>;
+  return <div ref={containerRef}></div>;
 };
 
 const YoutubeMediaElement = ({ youtubeUrl }: { youtubeUrl: string }) => {
