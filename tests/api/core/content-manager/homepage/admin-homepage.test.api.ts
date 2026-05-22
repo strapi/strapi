@@ -131,7 +131,7 @@ describe('Homepage API', () => {
       expect(response.statusCode).toBe(400);
       expect(response.body).toMatchObject({
         error: {
-          message: 'action is a required field',
+          message: 'Invalid option: expected one of "update"|"publish"',
         },
       });
     });
