@@ -12,6 +12,7 @@ import {
   Alert,
   Box,
   Button,
+  Dialog,
   Field,
   Flex,
   Loader,
@@ -232,7 +233,31 @@ const LocationField = ({ label, rootLabel, folders }: LocationFieldProps) => {
 
 interface AssetDetailsProps {
   asset: AssetWithPopulatedCreatedBy;
+  /**
+   * Bubble the form's `modified` flag up to the drawer so it can decide
+   * whether to confirm-on-close. The form context is otherwise scoped to
+   * `<Form>`'s subtree, hence the callback bridge.
+   */
+  onDirtyChange?: (dirty: boolean) => void;
 }
+
+/**
+ * Side-effect bridge that mirrors the current `modified` flag onto a callback
+ * supplied by an ancestor. Lives inside `<Form>` so it can read the form
+ * context; renders nothing.
+ */
+const FormDirtyBridge = ({
+  modified,
+  onDirtyChange,
+}: {
+  modified: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+}) => {
+  React.useEffect(() => {
+    onDirtyChange?.(modified);
+  }, [modified, onDirtyChange]);
+  return null;
+};
 
 interface AssetFormState {
   name: string;
@@ -241,7 +266,7 @@ interface AssetFormState {
   folder: number | null;
 }
 
-export const AssetDetails = ({ asset }: AssetDetailsProps) => {
+export const AssetDetails = ({ asset, onDirtyChange }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
   const { data: folders = [] } = useGetAllFoldersQuery();
@@ -294,158 +319,171 @@ export const AssetDetails = ({ asset }: AssetDetailsProps) => {
     // `key={asset.id}` resets the form when the drawer switches to a different
     // asset so cached values from the previous asset don't bleed in.
     <Form key={asset.id} method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
-      {({ modified, isSubmitting }) => (
-        <Flex
-          direction="column"
-          alignItems="stretch"
-          gap={4}
-          paddingTop={4}
-          paddingBottom={4}
-          paddingLeft={5}
-          paddingRight={5}
-        >
-          <Typography variant="beta" fontWeight="semiBold" tag="h3">
-            {formatMessage({
-              id: getTranslationKey('asset-details.fileInfo'),
-              defaultMessage: 'File info',
-            })}
-          </Typography>
-          <Flex
-            wrap="wrap"
-            gap={4}
-            background="neutral100"
-            paddingTop={4}
-            paddingBottom={4}
-            paddingLeft={6}
-            paddingRight={6}
-            alignItems="flex-start"
-          >
-            <DetailItem
-              label={formatMessage({
-                id: getTranslationKey('asset-details.creationDate'),
-                defaultMessage: 'Creation date',
-              })}
-              value={
-                asset.createdAt
-                  ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
-                  : null
-              }
-            />
-            <DetailItem
-              label={formatMessage({
-                id: getTranslationKey('asset-details.lastUpdated'),
-                defaultMessage: 'Last updated',
-              })}
-              value={
-                asset.updatedAt
-                  ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
-                  : null
-              }
-            />
-            <DetailItem
-              label={formatMessage({
-                id: getTranslationKey('asset-details.createdBy'),
-                defaultMessage: 'Created by',
-              })}
-              value={
-                asset.createdBy
-                  ? (getDisplayName({
-                      firstname: asset.createdBy.firstname ?? undefined,
-                      lastname: asset.createdBy.lastname ?? undefined,
-                      username: asset.createdBy.username ?? undefined,
-                      email: asset.createdBy.email ?? undefined,
-                    }) ?? '-')
-                  : null
-              }
-            />
-            <DetailItem
-              label={formatMessage({
-                id: getTranslationKey('asset-details.size'),
-                defaultMessage: 'Size',
-              })}
-              value={asset.size ? formatBytes(asset.size, 1) : null}
-            />
-            {isImage && (asset.width != null || asset.height != null) && (
-              <DetailItem
-                label={formatMessage({
-                  id: getTranslationKey('asset-details.dimensions'),
-                  defaultMessage: 'Dimensions',
-                })}
-                value={
-                  asset.width != null && asset.height != null
-                    ? `${asset.width} × ${asset.height}`
-                    : null
-                }
-              />
-            )}
-            <DetailItem
-              label={formatMessage({
-                id: getTranslationKey('asset-details.extension'),
-                defaultMessage: 'Extension',
-              })}
-              value={getFileExtension(asset.ext)}
-            />
-            <DetailItem
-              label={formatMessage({
-                id: getTranslationKey('asset-details.assetId'),
-                defaultMessage: 'Asset ID',
-              })}
-              value={String(asset.id)}
-            />
-          </Flex>
-          <DetailField
-            name="name"
-            label={formatMessage({
-              id: getTranslationKey('asset-details.fileName'),
-              defaultMessage: 'File name',
-            })}
-            required
-          />
-          <LocationField
-            label={formatMessage({
-              id: getTranslationKey('asset-details.location'),
-              defaultMessage: 'Location',
-            })}
-            rootLabel={formatMessage({
-              id: getTranslationKey('plugin.home'),
-              defaultMessage: 'Home',
-            })}
-            folders={folders}
-          />
-          {isImage && (
-            <>
-              <DetailField
-                name="caption"
-                label={formatMessage({
-                  id: getTranslationKey('asset-details.caption'),
-                  defaultMessage: 'Caption',
-                })}
-              />
-              <DetailField
-                name="alternativeText"
-                label={formatMessage({
-                  id: getTranslationKey('asset-details.alternativeText'),
-                  defaultMessage: 'Alternative text',
-                })}
-              />
-            </>
-          )}
-
-          <Flex justifyContent="flex-end" gap={2} paddingTop={2}>
-            <Button
-              type="submit"
-              variant="default"
-              loading={isSubmitting}
-              disabled={!modified || isSubmitting}
+      {({ modified, isSubmitting, values }) => {
+        const nameIsEmpty = ((values as AssetFormState).name ?? '').trim() === '';
+        return (
+          <>
+            <FormDirtyBridge modified={modified} onDirtyChange={onDirtyChange} />
+            <Flex
+              direction="column"
+              alignItems="stretch"
+              gap={4}
+              paddingTop={4}
+              paddingBottom={4}
+              paddingLeft={5}
+              paddingRight={5}
             >
-              {formatMessage({
-                id: getTranslationKey('asset-details.save'),
-                defaultMessage: 'Save changes',
-              })}
-            </Button>
-          </Flex>
-        </Flex>
-      )}
+              <Typography variant="beta" fontWeight="semiBold" tag="h3">
+                {formatMessage({
+                  id: getTranslationKey('asset-details.fileInfo'),
+                  defaultMessage: 'File info',
+                })}
+              </Typography>
+              <Flex
+                wrap="wrap"
+                gap={4}
+                background="neutral100"
+                paddingTop={4}
+                paddingBottom={4}
+                paddingLeft={6}
+                paddingRight={6}
+                alignItems="flex-start"
+              >
+                <DetailItem
+                  label={formatMessage({
+                    id: getTranslationKey('asset-details.creationDate'),
+                    defaultMessage: 'Creation date',
+                  })}
+                  value={
+                    asset.createdAt
+                      ? formatDate(new Date(asset.createdAt), {
+                          dateStyle: 'long',
+                          timeStyle: 'short',
+                        })
+                      : null
+                  }
+                />
+                <DetailItem
+                  label={formatMessage({
+                    id: getTranslationKey('asset-details.lastUpdated'),
+                    defaultMessage: 'Last updated',
+                  })}
+                  value={
+                    asset.updatedAt
+                      ? formatDate(new Date(asset.updatedAt), {
+                          dateStyle: 'long',
+                          timeStyle: 'short',
+                        })
+                      : null
+                  }
+                />
+                <DetailItem
+                  label={formatMessage({
+                    id: getTranslationKey('asset-details.createdBy'),
+                    defaultMessage: 'Created by',
+                  })}
+                  value={
+                    asset.createdBy
+                      ? (getDisplayName({
+                          firstname: asset.createdBy.firstname ?? undefined,
+                          lastname: asset.createdBy.lastname ?? undefined,
+                          username: asset.createdBy.username ?? undefined,
+                          email: asset.createdBy.email ?? undefined,
+                        }) ?? '-')
+                      : null
+                  }
+                />
+                <DetailItem
+                  label={formatMessage({
+                    id: getTranslationKey('asset-details.size'),
+                    defaultMessage: 'Size',
+                  })}
+                  value={asset.size ? formatBytes(asset.size, 1) : null}
+                />
+                {isImage && (asset.width != null || asset.height != null) && (
+                  <DetailItem
+                    label={formatMessage({
+                      id: getTranslationKey('asset-details.dimensions'),
+                      defaultMessage: 'Dimensions',
+                    })}
+                    value={
+                      asset.width != null && asset.height != null
+                        ? `${asset.width} × ${asset.height}`
+                        : null
+                    }
+                  />
+                )}
+                <DetailItem
+                  label={formatMessage({
+                    id: getTranslationKey('asset-details.extension'),
+                    defaultMessage: 'Extension',
+                  })}
+                  value={getFileExtension(asset.ext)}
+                />
+                <DetailItem
+                  label={formatMessage({
+                    id: getTranslationKey('asset-details.assetId'),
+                    defaultMessage: 'Asset ID',
+                  })}
+                  value={String(asset.id)}
+                />
+              </Flex>
+              <DetailField
+                name="name"
+                label={formatMessage({
+                  id: getTranslationKey('asset-details.fileName'),
+                  defaultMessage: 'File name',
+                })}
+                required
+              />
+              <LocationField
+                label={formatMessage({
+                  id: getTranslationKey('asset-details.location'),
+                  defaultMessage: 'Location',
+                })}
+                rootLabel={formatMessage({
+                  id: getTranslationKey('plugin.home'),
+                  defaultMessage: 'Home',
+                })}
+                folders={folders}
+              />
+              {isImage && (
+                <>
+                  <DetailField
+                    name="caption"
+                    label={formatMessage({
+                      id: getTranslationKey('asset-details.caption'),
+                      defaultMessage: 'Caption',
+                    })}
+                  />
+                  <DetailField
+                    name="alternativeText"
+                    label={formatMessage({
+                      id: getTranslationKey('asset-details.alternativeText'),
+                      defaultMessage: 'Alternative text',
+                    })}
+                  />
+                </>
+              )}
+
+              <Flex justifyContent="flex-end" gap={2} paddingTop={2}>
+                <Button
+                  type="submit"
+                  variant="default"
+                  loading={isSubmitting}
+                  // File name is required; block submit when it's empty or whitespace so the API can't 400 on a blank value.
+                  disabled={!modified || isSubmitting || nameIsEmpty}
+                >
+                  {formatMessage({
+                    id: getTranslationKey('asset-details.save'),
+                    defaultMessage: 'Save changes',
+                  })}
+                </Button>
+              </Flex>
+            </Flex>
+          </>
+        );
+      }}
     </Form>
   );
 };
@@ -485,9 +523,10 @@ const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
 interface DrawerContentProps {
   assetId: number;
   closeDetails: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
-const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
+const DrawerContent = ({ assetId, closeDetails, onDirtyChange }: DrawerContentProps) => {
   const { formatMessage } = useIntl();
   const {
     data: asset,
@@ -529,9 +568,59 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
       <DrawerHeader asset={asset} closeDetails={closeDetails} />
       <Drawer.ScrollableContent>
         <AssetPreview asset={asset} />
-        <AssetDetails asset={asset} />
+        <AssetDetails asset={asset} onDirtyChange={onDirtyChange} />
       </Drawer.ScrollableContent>
     </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ConfirmDiscardDialog
+ * -----------------------------------------------------------------------------------------------*/
+
+const DiscardConfirmDialog = ({
+  confirmDiscardOpen,
+  setConfirmDiscardOpen,
+  handleDiscardConfirm,
+}: {
+  confirmDiscardOpen: boolean;
+  setConfirmDiscardOpen: (open: boolean) => void;
+  handleDiscardConfirm: () => void;
+}) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Dialog.Root open={confirmDiscardOpen} onOpenChange={setConfirmDiscardOpen}>
+      <Dialog.Content>
+        <Dialog.Header>
+          {formatMessage({
+            id: getTranslationKey('asset-details.discard.title'),
+            defaultMessage: 'Discard unsaved changes?',
+          })}
+        </Dialog.Header>
+        <Dialog.Body textAlign="center">
+          {formatMessage({
+            id: getTranslationKey('asset-details.discard.description'),
+            defaultMessage: 'The changes will be lost, are you sure?',
+          })}
+        </Dialog.Body>
+        <Dialog.Footer>
+          <Dialog.Cancel>
+            <Button variant="tertiary" fullWidth>
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          </Dialog.Cancel>
+          <Dialog.Action>
+            <Button variant="secondary" onClick={handleDiscardConfirm} fullWidth>
+              {formatMessage({
+                id: getTranslationKey('asset-details.discard.confirm'),
+                defaultMessage: 'Discard',
+              })}
+            </Button>
+          </Dialog.Action>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 };
 
@@ -542,13 +631,36 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 export const AssetDetailsDrawer = () => {
   const { formatMessage } = useIntl();
   const { assetId, isVisible, shouldRenderDrawer, closeDetails } = useAssetDetailsParam();
+  // Track the inner form's dirty state via a ref so the close handlers can
+  // read the latest value synchronously without re-rendering the whole drawer
+  // on every keystroke.
+  const isDirtyRef = React.useRef(false);
+  const [confirmDiscardOpen, setConfirmDiscardOpen] = React.useState(false);
+
+  const handleDirtyChange = React.useCallback((dirty: boolean) => {
+    isDirtyRef.current = dirty;
+  }, []);
+
+  const requestClose = React.useCallback(() => {
+    if (isDirtyRef.current) {
+      setConfirmDiscardOpen(true);
+      return;
+    }
+    closeDetails();
+  }, [closeDetails]);
+
+  const handleDiscardConfirm = React.useCallback(() => {
+    isDirtyRef.current = false;
+    setConfirmDiscardOpen(false);
+    closeDetails();
+  }, [closeDetails]);
 
   if (!shouldRenderDrawer || assetId === null) {
     return null;
   }
 
   return (
-    <Drawer.Root isVisible={isVisible} onClose={closeDetails}>
+    <Drawer.Root isVisible={isVisible} onClose={requestClose}>
       {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
           VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
       <div>
@@ -568,8 +680,17 @@ export const AssetDetailsDrawer = () => {
         </VisuallyHidden>
       </div>
       <Drawer.Body animationDirection="left" width="41.6rem" height="100vh">
-        <DrawerContent assetId={assetId} closeDetails={closeDetails} />
+        <DrawerContent
+          assetId={assetId}
+          closeDetails={requestClose}
+          onDirtyChange={handleDirtyChange}
+        />
       </Drawer.Body>
+      <DiscardConfirmDialog
+        confirmDiscardOpen={confirmDiscardOpen}
+        setConfirmDiscardOpen={setConfirmDiscardOpen}
+        handleDiscardConfirm={handleDiscardConfirm}
+      />
     </Drawer.Root>
   );
 };
