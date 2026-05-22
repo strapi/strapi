@@ -133,7 +133,7 @@ module.exports = ({ env }) => {
   if (client === 'sqlite') {
     return {
       connection: {
-        client: 'better-sqlite3',
+        client: 'sqlite',
         connection: {
           filename: path.resolve(
             __dirname,

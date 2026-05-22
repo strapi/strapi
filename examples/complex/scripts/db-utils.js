@@ -5,6 +5,17 @@ const { runCompose, runContainer } = require('./compose');
 
 const COMPOSE_PROJECT_NAME = process.env.COMPOSE_PROJECT_NAME || 'strapi_complex';
 
+const SAFE_SNAPSHOT_NAME = /^[a-zA-Z0-9._-]+$/;
+
+function assertSafeSnapshotName(name) {
+  if (!name || !SAFE_SNAPSHOT_NAME.test(name)) {
+    console.error(
+      'Error: Snapshot name must contain only letters, numbers, dots, underscores, and hyphens'
+    );
+    process.exit(1);
+  }
+}
+
 function getComposeEnv() {
   return { ...process.env, COMPOSE_PROJECT_NAME };
 }
@@ -249,6 +260,7 @@ function getDatabaseEnv(dbType) {
 
 module.exports = {
   COMPOSE_PROJECT_NAME,
+  assertSafeSnapshotName,
   getComposeEnv,
   getContainerId,
   getContainerName,

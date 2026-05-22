@@ -112,7 +112,7 @@ const argv = yargs(hideBin(process.argv))
   .help()
   .parse();
 
-const database = argv.database || process.env.DATABASE_CLIENT || 'postgres';
+const database = argv.database || process.env.DATABASE_CLIENT || 'sqlite';
 const multiplier =
   argv.multiplier || Number(process.env.MIGRATION_MULTIPLIER || process.env.SEED_MULTIPLIER) || 1;
 
@@ -226,7 +226,7 @@ function runPrintPlan() {
     destination: 'workspace',
     note: 'Final Strapi is always the monorepo (examples/complex); there is no --final version flag.',
     wouldUse: {
-      database: argv.database || process.env.DATABASE_CLIENT || 'postgres',
+      database: argv.database || process.env.DATABASE_CLIENT || 'sqlite',
       multiplier: argv.multiplier || Number(process.env.MIGRATION_MULTIPLIER) || 1,
     },
   };

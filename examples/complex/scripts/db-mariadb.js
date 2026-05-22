@@ -8,6 +8,7 @@ const {
   getContainerName: getComposeContainerName,
   getComposeEnv,
   COMPOSE_PROJECT_NAME,
+  assertSafeSnapshotName,
 } = require('./db-utils');
 const { getComposeCommand, getContainerCommand } = require('./compose');
 
@@ -76,6 +77,7 @@ switch (command) {
       console.error('Usage: node db-mariadb.js snapshot <name>');
       process.exit(1);
     }
+    assertSafeSnapshotName(snapshotName);
     ensureSnapshotsDir();
     const snapshotPath = path.join(SNAPSHOTS_DIR, `mariadb-${snapshotName}.sql`);
     console.log(`Creating snapshot: ${snapshotName}...`);
@@ -101,6 +103,7 @@ switch (command) {
       console.error('Usage: node db-mariadb.js restore <name>');
       process.exit(1);
     }
+    assertSafeSnapshotName(snapshotName);
     const restorePath = path.join(SNAPSHOTS_DIR, `mariadb-${snapshotName}.sql`);
     if (!fs.existsSync(restorePath)) {
       console.error(`Error: Snapshot not found: ${restorePath}`);

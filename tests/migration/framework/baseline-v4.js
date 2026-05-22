@@ -24,8 +24,8 @@ async function runV4Baseline(ctx, opts) {
     },
   });
 
-  const { writeV4Dotenv, prepareDockerDatabase } = require('./shared');
-  writeV4Dotenv(ctx, dbEnv);
+  const { writeAppDotenv, prepareDockerDatabase, nestedYarnInstallEnv } = require('./shared');
+  writeAppDotenv(ctx, dbEnv);
 
   if (database === 'sqlite') {
     fs.mkdirSync(path.join(ctx.V4_APP_DIR, '.tmp'), { recursive: true });
@@ -36,13 +36,14 @@ async function runV4Baseline(ctx, opts) {
     await prepareDockerDatabase(ctx, database);
   }
 
+  // Empty lockfile marks this directory as a standalone Yarn project (not a monorepo workspace).
   fs.writeFileSync(path.join(ctx.V4_APP_DIR, 'yarn.lock'), '');
 
   console.log('\n📦 yarn install (v4 app)...');
   await execa('yarn', ['install'], {
     cwd: ctx.V4_APP_DIR,
     stdio: 'inherit',
-    env: { ...process.env, ...dbEnv },
+    env: nestedYarnInstallEnv(dbEnv),
   });
 
   console.log('\n🌱 Seeding v4 database...');

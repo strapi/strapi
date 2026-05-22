@@ -23,13 +23,15 @@ async function runPinnedStrapiStage(ctx, stage) {
     },
   });
 
+  const { nestedYarnInstallEnv } = require('./shared');
+
   fs.writeFileSync(path.join(pinnedRoot, 'yarn.lock'), '');
 
   console.log(`\n📦 yarn install (pinned Strapi ${version})...`);
   await execa('yarn', ['install'], {
     cwd: pinnedRoot,
     stdio: 'inherit',
-    env: { ...process.env, ...stage.dbEnv },
+    env: nestedYarnInstallEnv(stage.dbEnv),
   });
 
   const bootScript = path.join(__dirname, 'boot-strapi-once.js');

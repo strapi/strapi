@@ -28,9 +28,8 @@ async function runV5PinnedBaseline(ctx, opts) {
     },
   });
 
-  const { writeV4Dotenv, prepareDockerDatabase } = require('./shared');
-  // v5 app uses the same .env shape as the complex example (DATABASE_*); reuse v4 env writer key layout.
-  writeV4Dotenv({ ...ctx, V4_APP_DIR: pinnedRoot }, dbEnv);
+  const { writeAppDotenv, prepareDockerDatabase, nestedYarnInstallEnv } = require('./shared');
+  writeAppDotenv({ ...ctx, V4_APP_DIR: pinnedRoot }, dbEnv);
 
   if (database === 'sqlite') {
     fs.mkdirSync(path.join(pinnedRoot, '.tmp'), { recursive: true });
@@ -47,7 +46,7 @@ async function runV5PinnedBaseline(ctx, opts) {
   await execa('yarn', ['install'], {
     cwd: pinnedRoot,
     stdio: 'inherit',
-    env: { ...process.env, ...dbEnv },
+    env: nestedYarnInstallEnv(dbEnv),
   });
 
   const scriptsDir = path.join(pinnedRoot, 'scripts');

@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const { execSync } = require('child_process');
+const path = require('path');
 const execa = require('execa');
 
 function composeEnv(ctx, extra = {}) {
@@ -13,9 +13,22 @@ function composeEnv(ctx, extra = {}) {
   };
 }
 
+/**
+ * Env for yarn install in ephemeral apps outside the monorepo workspace.
+ * CI PR "hardened mode" forbids lockfile updates unless immutable installs are disabled.
+ */
+function nestedYarnInstallEnv(extra = {}) {
+  return {
+    ...process.env,
+    YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+    ...extra,
+  };
+}
+
 async function dockerComposeDownVolumes(ctx) {
+  const { runCompose } = require(path.join(ctx.COMPLEX_DIR, 'scripts', 'compose'));
   try {
-    execSync(`docker-compose -f ${ctx.DOCKER_COMPOSE_FILE} down -v`, {
+    runCompose(['-f', ctx.DOCKER_COMPOSE_FILE, 'down', '-v'], {
       cwd: ctx.COMPLEX_DIR,
       stdio: 'pipe',
       env: composeEnv(ctx),
@@ -114,7 +127,7 @@ function buildDatabaseEnvForClient(ctx, client) {
   };
 }
 
-function writeV4Dotenv(ctx, dbEnv) {
+function writeAppDotenv(ctx, dbEnv) {
   const keys = ['toBeModified1', 'toBeModified2', 'toBeModified3', 'toBeModified4'].join(',');
   let body = `HOST=0.0.0.0
 PORT=1337
@@ -248,10 +261,11 @@ async function runWorkspaceBuilds(repoRoot, { fullBuild, skipBuild }) {
 
 module.exports = {
   composeEnv,
+  nestedYarnInstallEnv,
   dockerComposeDownVolumes,
   resolveDockerHostPorts,
   buildDatabaseEnvForClient,
-  writeV4Dotenv,
+  writeAppDotenv,
   prepareDockerDatabase,
   assertNodeForV4,
   runWorkspaceBuilds,
