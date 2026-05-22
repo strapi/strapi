@@ -6,7 +6,7 @@ import {
   server,
   waitFor,
 } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { ComponentProvider } from '../../ComponentContext';
@@ -138,24 +138,27 @@ describe('Relations', () => {
     }> = [];
 
     server.use(
-      rest.get('/content-manager/relations/:model/:fieldName', (req, res, ctx) => {
-        relationSearchRequests.push({
-          model: req.params.model as string,
-          fieldName: req.params.fieldName as string,
-          id: req.url.searchParams.get('id'),
-        });
+      http.get<{ model: string; fieldName: string }>(
+        '/content-manager/relations/:model/:fieldName',
+        ({ params, request }) => {
+          const url = new URL(request.url);
 
-        return res(
-          ctx.json({
+          relationSearchRequests.push({
+            model: params.model,
+            fieldName: params.fieldName,
+            id: url.searchParams.get('id'),
+          });
+
+          return HttpResponse.json({
             results: [],
             pagination: {
               page: 1,
               pageCount: 1,
               total: 0,
             },
-          })
-        );
-      })
+          });
+        }
+      )
     );
 
     const { user } = renderRTL(
