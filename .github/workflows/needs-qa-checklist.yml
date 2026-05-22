@@ -2,7 +2,7 @@ name: Needs QA Checklist
 
 # Generates a PR-specific QA checklist when the needs-qa label is added.
 on:
-  pull_request:
+  pull_request_target:
     types: [labeled]
 
 jobs:
