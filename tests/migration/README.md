@@ -38,6 +38,7 @@ on **sqlite**, **postgres**, **mysql**, and **mariadb** (Node **20**). **`$VERSI
 
 - Nested `yarn install` in ephemeral apps (`.migration-v5/`) uses an empty **`yarn.lock`** (standalone project marker) plus **`YARN_ENABLE_IMMUTABLE_INSTALLS=false`** so PR hardened mode does not fail with `YN0028` when the lockfile is populated.
 - CI also sets **`YARN_ENABLE_IMMUTABLE_INSTALLS: false`** on the job and passes **`--initial-node 20`** to match the runner.
+- **Postgres / MySQL / MariaDB** matrix legs start DB containers via `examples/complex/docker-compose.dev.yml`. CI sets **`STRAPI_BENCH_RUNTIME=docker`** (and `compose.js` prefers Docker when **`GITHUB_ACTIONS=true`**) because Podman is often installed on runners but not running.
 - If CI fails on nested install but local passes, compare Node major and re-run with `--initial-node 20`.
 
 ### When `migration_v5` runs

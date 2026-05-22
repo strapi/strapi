@@ -344,6 +344,10 @@ jobs:
     timeout-minutes: 30
     env:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
+      # Non-sqlite legs use examples/complex/docker-compose.dev.yml (see examples/complex/scripts/compose.js).
+      # Pin the container runtime here so CI matches the Docker daemon on ubuntu-latest runners.
+      # compose.js also prefers Docker when GITHUB_ACTIONS=true; this env is the explicit job default.
+      STRAPI_BENCH_RUNTIME: docker
     strategy:
       fail-fast: false
       matrix:

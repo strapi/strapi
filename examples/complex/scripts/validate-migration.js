@@ -17,11 +17,20 @@ const EXPECTED_COUNTS_V4 = {
   relation: 5,
   relationDp: { published: 5, drafts: 3, total: 8 },
   relationDpI18n: { published: 10, drafts: 6, total: 16 },
+  /** v4 seed only (seed-v4.js / scaffold seed.js); not seeded by seed-v5.js */
+  hcM2mSource: { published: 15, drafts: 5, total: 20 },
+  hcM2mTarget: { published: 15, drafts: 5, total: 20 },
+  hcM2mTargetsPerSource: 10,
 };
 
-// seed-v5.js: same totals at m=1 (2 locales × published/draft counts)
+// seed-v5.js: same totals at m=1 (2 locales × published/draft counts); no hc-m2m fixture
 const EXPECTED_COUNTS_V5 = {
-  ...EXPECTED_COUNTS_V4,
+  basic: EXPECTED_COUNTS_V4.basic,
+  basicDp: EXPECTED_COUNTS_V4.basicDp,
+  basicDpI18n: EXPECTED_COUNTS_V4.basicDpI18n,
+  relation: EXPECTED_COUNTS_V4.relation,
+  relationDp: EXPECTED_COUNTS_V4.relationDp,
+  relationDpI18n: EXPECTED_COUNTS_V4.relationDpI18n,
 };
 
 const EXPECTED_COUNTS_PER_RUN =
@@ -29,8 +38,12 @@ const EXPECTED_COUNTS_PER_RUN =
 
 const MEDIA_PER_RUN = 10;
 
+function expectsHcM2mData() {
+  return MIGRATION_DATA_ORIGIN === 'v4';
+}
+
 function parseCliArgs(argv) {
-  const opts = { multiplier: 1, expectInvalidFk: true };
+  const opts = { multiplier: 1 };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--multiplier' && argv[i + 1] != null) {
@@ -85,6 +98,21 @@ function getExpectedCounts(multiplier = 1) {
       total: EXPECTED_COUNTS_PER_RUN.relationDpI18n.total * m,
     },
     media: MEDIA_PER_RUN * m,
+    ...(expectsHcM2mData()
+      ? {
+          hcM2mSource: {
+            published: EXPECTED_COUNTS_V4.hcM2mSource.published * m,
+            drafts: EXPECTED_COUNTS_V4.hcM2mSource.drafts * m,
+            total: EXPECTED_COUNTS_V4.hcM2mSource.total * m,
+          },
+          hcM2mTarget: {
+            published: EXPECTED_COUNTS_V4.hcM2mTarget.published * m,
+            drafts: EXPECTED_COUNTS_V4.hcM2mTarget.drafts * m,
+            total: EXPECTED_COUNTS_V4.hcM2mTarget.total * m,
+          },
+          hcM2mTargetsPerSource: EXPECTED_COUNTS_V4.hcM2mTargetsPerSource,
+        }
+      : {}),
   };
 }
 
@@ -286,7 +314,93 @@ async function validateCounts(strapi, expected) {
   if (mediaCount < expected.media)
     errors.push(`media: expected >= ${expected.media}, got ${mediaCount}`);
 
+  if (expected.hcM2mSource) {
+    const hcSourceCounts = await countPublishedDrafts('api::hc-m2m-source.hc-m2m-source');
+    const hcSourceExpectedDrafts = expected.hcM2mSource.drafts + expected.hcM2mSource.published;
+    const hcSourceExpectedTotal = expected.hcM2mSource.published * 2 + expected.hcM2mSource.drafts;
+    checks.push({
+      type: 'hc-m2m-source (published)',
+      actual: hcSourceCounts.published,
+      expected: expected.hcM2mSource.published,
+    });
+    checks.push({
+      type: 'hc-m2m-source (drafts)',
+      actual: hcSourceCounts.drafts,
+      expected: hcSourceExpectedDrafts,
+    });
+    checks.push({
+      type: 'hc-m2m-source (total)',
+      actual: hcSourceCounts.published + hcSourceCounts.drafts,
+      expected: hcSourceExpectedTotal,
+    });
+    if (hcSourceCounts.published !== expected.hcM2mSource.published)
+      errors.push(
+        `hc-m2m-source published: expected ${expected.hcM2mSource.published}, got ${hcSourceCounts.published}`
+      );
+    if (hcSourceCounts.drafts !== hcSourceExpectedDrafts)
+      errors.push(
+        `hc-m2m-source drafts: expected ${hcSourceExpectedDrafts}, got ${hcSourceCounts.drafts}`
+      );
+
+    const hcTargetCounts = await countPublishedDrafts('api::hc-m2m-target.hc-m2m-target');
+    const hcTargetExpectedDrafts = expected.hcM2mTarget.drafts + expected.hcM2mTarget.published;
+    const hcTargetExpectedTotal = expected.hcM2mTarget.published * 2 + expected.hcM2mTarget.drafts;
+    checks.push({
+      type: 'hc-m2m-target (published)',
+      actual: hcTargetCounts.published,
+      expected: expected.hcM2mTarget.published,
+    });
+    checks.push({
+      type: 'hc-m2m-target (drafts)',
+      actual: hcTargetCounts.drafts,
+      expected: hcTargetExpectedDrafts,
+    });
+    checks.push({
+      type: 'hc-m2m-target (total)',
+      actual: hcTargetCounts.published + hcTargetCounts.drafts,
+      expected: hcTargetExpectedTotal,
+    });
+    if (hcTargetCounts.published !== expected.hcM2mTarget.published)
+      errors.push(
+        `hc-m2m-target published: expected ${expected.hcM2mTarget.published}, got ${hcTargetCounts.published}`
+      );
+    if (hcTargetCounts.drafts !== hcTargetExpectedDrafts)
+      errors.push(
+        `hc-m2m-target drafts: expected ${hcTargetExpectedDrafts}, got ${hcTargetCounts.drafts}`
+      );
+  }
+
   return { errors, checks };
+}
+
+/**
+ * @param {import('@strapi/strapi').Core.Strapi} strapi
+ * @param {string} uid
+ * @param {{ label: string, localized?: boolean }} opts
+ */
+async function validateDraftPublishPairingForUid(strapi, uid, { label, localized = false }) {
+  const errors = [];
+  const entries = await strapi
+    .documents(uid)
+    .findMany({ populate: '*', ...(localized ? { locale: 'all' } : {}) });
+  const byKey = new Map();
+  for (const e of entries) {
+    if (!e.documentId) {
+      errors.push(`${label} id=${e.id}: missing documentId`);
+      continue;
+    }
+    const key = localized ? `${e.documentId}::${e.locale || ''}` : e.documentId;
+    const bucket = byKey.get(key) || { draft: null, published: null };
+    if (e.publishedAt) bucket.published = e;
+    else bucket.draft = e;
+    byKey.set(key, bucket);
+  }
+  for (const [key, pair] of byKey.entries()) {
+    if (pair.published && !pair.draft) {
+      errors.push(`${label} ${key}: published without draft`);
+    }
+  }
+  return { errors };
 }
 
 function getEntityIdentifier(entity) {
@@ -304,83 +418,36 @@ function getEntityIdentifierArray(arr) {
 async function validateDocumentStructure(strapi, expected) {
   const errors = [];
 
-  // basic-dp: ensure published entries have a draft counterpart
-  // Use the Document Service API shorthand: strapi.documents(uid).findMany(...)
-  const all = await strapi.documents('api::basic-dp.basic-dp').findMany({ populate: '*' });
-  const byDoc = new Map();
-  for (const e of all) {
-    if (!e.documentId) {
-      errors.push(`basic-dp id=${e.id}: missing documentId`);
-      continue;
-    }
-    const doc = byDoc.get(e.documentId) || { draft: null, published: null };
-    if (e.publishedAt) doc.published = e;
-    else doc.draft = e;
-    byDoc.set(e.documentId, doc);
-  }
-  for (const [docId, pair] of byDoc.entries()) {
-    if (pair.published && !pair.draft)
-      errors.push(`basic-dp documentId ${docId}: published without draft`);
-  }
-
-  // basic-dp-i18n: per-locale check
-  const allI18n = await strapi
-    .documents('api::basic-dp-i18n.basic-dp-i18n')
-    .findMany({ populate: '*', locale: 'all' });
-  const mapI18n = new Map();
-  for (const e of allI18n) {
-    if (!e.documentId) {
-      errors.push(`basic-dp-i18n id=${e.id}: missing documentId`);
-      continue;
-    }
-    const key = `${e.documentId}::${e.locale || ''}`;
-    const cur = mapI18n.get(key) || { draft: null, published: null };
-    if (e.publishedAt) cur.published = e;
-    else cur.draft = e;
-    mapI18n.set(key, cur);
-  }
-  for (const [k, v] of mapI18n.entries()) {
-    if (v.published && !v.draft) errors.push(`basic-dp-i18n ${k}: published without draft`);
+  for (const { errors: e } of [
+    await validateDraftPublishPairingForUid(strapi, 'api::basic-dp.basic-dp', {
+      label: 'basic-dp',
+    }),
+    await validateDraftPublishPairingForUid(strapi, 'api::basic-dp-i18n.basic-dp-i18n', {
+      label: 'basic-dp-i18n',
+      localized: true,
+    }),
+    await validateDraftPublishPairingForUid(strapi, 'api::relation-dp.relation-dp', {
+      label: 'relation-dp',
+    }),
+    await validateDraftPublishPairingForUid(strapi, 'api::relation-dp-i18n.relation-dp-i18n', {
+      label: 'relation-dp-i18n',
+      localized: true,
+    }),
+  ]) {
+    errors.push(...e);
   }
 
-  // relation-dp checks (draft/publish pairing)
-  const relDpAll = await strapi
-    .documents('api::relation-dp.relation-dp')
-    .findMany({ populate: '*' });
-  const relByDoc = new Map();
-  for (const e of relDpAll) {
-    if (!e.documentId) {
-      errors.push(`relation-dp id=${e.id}: missing documentId`);
-      continue;
+  if (expected.hcM2mSource) {
+    for (const { errors: e } of [
+      await validateDraftPublishPairingForUid(strapi, 'api::hc-m2m-source.hc-m2m-source', {
+        label: 'hc-m2m-source',
+      }),
+      await validateDraftPublishPairingForUid(strapi, 'api::hc-m2m-target.hc-m2m-target', {
+        label: 'hc-m2m-target',
+      }),
+    ]) {
+      errors.push(...e);
     }
-    const doc = relByDoc.get(e.documentId) || { draft: null, published: null };
-    if (e.publishedAt) doc.published = e;
-    else doc.draft = e;
-    relByDoc.set(e.documentId, doc);
-  }
-  for (const [docId, pair] of relByDoc.entries()) {
-    if (pair.published && !pair.draft)
-      errors.push(`relation-dp documentId ${docId}: published without draft`);
-  }
-
-  // relation-dp-i18n: per-locale
-  const relDpI18nAll = await strapi
-    .documents('api::relation-dp-i18n.relation-dp-i18n')
-    .findMany({ populate: '*', locale: 'all' });
-  const relI18nMap = new Map();
-  for (const e of relDpI18nAll) {
-    if (!e.documentId) {
-      errors.push(`relation-dp-i18n id=${e.id}: missing documentId`);
-      continue;
-    }
-    const key = `${e.documentId}::${e.locale || ''}`;
-    const cur = relI18nMap.get(key) || { draft: null, published: null };
-    if (e.publishedAt) cur.published = e;
-    else cur.draft = e;
-    relI18nMap.set(key, cur);
-  }
-  for (const [k, v] of relI18nMap.entries()) {
-    if (v.published && !v.draft) errors.push(`relation-dp-i18n ${k}: published without draft`);
   }
 
   return { errors };
@@ -411,6 +478,20 @@ async function validateRelationsPresence(strapi) {
   for (const e of relDp) {
     if (e.oneToOneBasic && !e.oneToOneBasic.id)
       errors.push(`relation-dp.id=${e.id} oneToOneBasic missing id`);
+  }
+
+  if (expectsHcM2mData()) {
+    const hcSources = await strapi
+      .documents('api::hc-m2m-source.hc-m2m-source')
+      .findMany({ populate: { targets: true } });
+    for (const e of hcSources) {
+      if (!e.publishedAt) continue;
+      if (!Array.isArray(e.targets) || e.targets.length === 0) {
+        errors.push(`hc-m2m-source id=${e.id}: published entry has no targets`);
+      } else if (e.targets.some((t) => !t || t.id == null)) {
+        errors.push(`hc-m2m-source id=${e.id}: targets contains missing refs`);
+      }
+    }
   }
 
   return { errors };
@@ -651,20 +732,25 @@ async function validateMediaParityForDp(strapi) {
   return { errors };
 }
 
-async function validateNestedComponentRelationParity(strapi) {
+async function validateNestedComponentRelationParityForUid(strapi, uid, label) {
   const errors = [];
-  // Sections/header: populate '*' only (no nested field paths)
-  const populate = { sections: { populate: '*' }, header: { populate: '*' } };
-  const entries = await strapi.documents('api::relation-dp.relation-dp').findMany({ populate });
+  const contentType = strapi.contentTypes[uid];
+  if (!contentType) return { errors };
+  const localized = isI18nContentType(contentType);
+  const populate = buildPopulateFromAttributes(contentType.attributes);
+  const entries = await strapi
+    .documents(uid)
+    .findMany({ populate, ...(localized ? { locale: 'all' } : {}) });
   const byDoc = new Map();
   for (const entry of entries) {
     if (!entry.documentId) continue;
-    const bucket = byDoc.get(entry.documentId) || { draft: null, published: null };
+    const key = localized ? `${entry.documentId}::${entry.locale || ''}` : entry.documentId;
+    const bucket = byDoc.get(key) || { draft: null, published: null };
     if (entry.publishedAt) bucket.published = entry;
     else bucket.draft = entry;
-    byDoc.set(entry.documentId, bucket);
+    byDoc.set(key, bucket);
   }
-  for (const [docId, pair] of byDoc.entries()) {
+  for (const [docKey, pair] of byDoc.entries()) {
     if (!pair.published || !pair.draft) continue;
     const sectionsPub = pair.published.sections || [];
     const sectionsDraft = pair.draft.sections || [];
@@ -684,12 +770,12 @@ async function validateNestedComponentRelationParity(strapi) {
           const draftArticle = rd?.article?.id ?? rd?.article?.documentId;
           if (pubArticle != null && draftArticle == null) {
             errors.push(
-              `relation-dp documentId ${docId}: nested reference-list.references[${j}].article present on published, missing on draft`
+              `${label} ${docKey}: nested reference-list.references[${j}].article present on published, missing on draft`
             );
           }
           if (draftArticle != null && pubArticle == null) {
             errors.push(
-              `relation-dp documentId ${docId}: nested reference-list.references[${j}].article present on draft, missing on published`
+              `${label} ${docKey}: nested reference-list.references[${j}].article present on draft, missing on published`
             );
           }
         }
@@ -697,6 +783,26 @@ async function validateNestedComponentRelationParity(strapi) {
     }
   }
   return { errors };
+}
+
+async function validateNestedComponentRelationParity(strapi) {
+  const errors = [];
+  for (const { uid, label } of [
+    { uid: 'api::relation-dp.relation-dp', label: 'relation-dp' },
+    { uid: 'api::relation-dp-i18n.relation-dp-i18n', label: 'relation-dp-i18n' },
+  ]) {
+    const result = await validateNestedComponentRelationParityForUid(strapi, uid, label);
+    errors.push(...result.errors);
+  }
+  return { errors };
+}
+
+function recordMorphDraftGap(errors, label, countPub, countDraft) {
+  if (countPub > 0 && countDraft === 0) {
+    errors.push(
+      `${label}: ${countPub} published morph row(s) but no draft morph rows (discard-drafts should copy links to draft entries)`
+    );
+  }
 }
 
 async function verifyMigrationFixAtDbLevel(strapi) {
@@ -746,6 +852,7 @@ async function verifyMigrationFixAtDbLevel(strapi) {
               )?.c ?? 0
             );
 
+      recordMorphDraftGap(errors, 'Morph (relation-dp direct)', countPub, countDraft);
       const morphNote =
         countPub === 0 && countDraft === 0
           ? ' (no direct media on relation-dp in this seed)'
@@ -773,7 +880,9 @@ async function verifyMigrationFixAtDbLevel(strapi) {
       const entityIdCol = rdCmps?.joinColumn?.name;
       const cmpIdCol = rdCmps?.morphColumn?.idColumn?.name;
       const cmpTypeCol = rdCmps?.morphColumn?.typeColumn?.name;
-      if (!rdCmpsTable || !entityIdCol || !cmpIdCol || !cmpTypeCol) return out;
+      if (!rdCmpsTable || !entityIdCol || !cmpIdCol || !cmpTypeCol) {
+        return { lines: out, errors };
+      }
 
       // Header blocks in sections dynamic zone
       const headerType = 'shared.header';
@@ -855,6 +964,12 @@ async function verifyMigrationFixAtDbLevel(strapi) {
                     .first()
                 )?.c ?? 0
               );
+        recordMorphDraftGap(
+          errors,
+          'Morph (shared.logo under relation-dp)',
+          countPubLogo,
+          countDraftLogo
+        );
         const logoNote =
           countPubLogo > 0 && countDraftLogo === 0
             ? ' (draft morph rows missing)'
@@ -890,6 +1005,7 @@ async function verifyMigrationFixAtDbLevel(strapi) {
           : Number(
               (await conn(morphTable).whereIn(sourceCol, draftIds).count('* as c').first())?.c ?? 0
             );
+      recordMorphDraftGap(errors, 'Morph (relation-dp morphTargets)', countPub, countDraft);
       const note =
         countPub > 0 && countDraft > 0
           ? ' (draft rows present)'
@@ -1168,9 +1284,22 @@ async function run() {
       'api::relation-dp-i18n.relation-dp-i18n'
     );
     results.errors.push(...relationParityI18n.errors);
+    // hc-m2m: Document API parity only (join-table row counts / raw FK ids diverge after discard-drafts).
+    let relationParityHcM2m = { errors: [] };
+    if (expectsHcM2mData()) {
+      relationParityHcM2m = await validateRelationParityForDp(
+        strapi,
+        'api::hc-m2m-source.hc-m2m-source'
+      );
+      results.errors.push(...relationParityHcM2m.errors);
+    }
     results.sections.push({
       name: 'DP relation parity (API)',
-      errors: [...relationParity.errors, ...relationParityI18n.errors],
+      errors: [
+        ...relationParity.errors,
+        ...relationParityI18n.errors,
+        ...(expectsHcM2mData() ? relationParityHcM2m.errors : []),
+      ],
     });
 
     const entityGraph = await validateEntityGraph(strapi);
@@ -1219,7 +1348,7 @@ async function run() {
       console.log(`  - ${section.name}: ${status}`);
     }
 
-    if (verification.lines.length > 0) {
+    if (verification.lines?.length > 0) {
       console.log('\n🔬 DB-level verification:');
       for (const line of verification.lines) console.log(line);
     }
