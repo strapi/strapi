@@ -6,6 +6,7 @@ import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
+import { useIdleSessionLogout } from '../hooks/useIdleSessionLogout';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { login as loginAction, logout as logoutAction, setLocale, setToken } from '../reducer';
 import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
@@ -18,7 +19,7 @@ import {
   useLogoutMutation,
 } from '../services/auth';
 import { getOrCreateDeviceId } from '../utils/deviceId';
-import { setOnTokenUpdate } from '../utils/getFetchClient';
+import { setOnSessionExpired, setOnTokenUpdate } from '../utils/getFetchClient';
 
 import type {
   Permission as PermissionContract,
@@ -161,6 +162,33 @@ const AuthProvider = ({
       setOnTokenUpdate(null);
     };
   }, [dispatch]);
+
+  /**
+   * Register the session-expired handler that the fetch layer / RTK baseQuery
+   * call when the server rejects the refresh token. This is what redirects
+   * the active tab to /auth/login on a 401, instead of leaving the user on
+   * a stale page until they click something.
+   */
+  React.useEffect(() => {
+    setOnSessionExpired(() => {
+      clearStateAndLogout();
+    });
+
+    return () => {
+      setOnSessionExpired(null);
+    };
+  }, [clearStateAndLogout]);
+
+  /**
+   * Proactive idle-session detection. See `useIdleSessionLogout` for the full
+   * rationale and the UX trade-off (a user actively typing in a form with no
+   * outgoing API calls will still be logged out at `exp`).
+   */
+  useIdleSessionLogout({
+    token,
+    onExpired: clearStateAndLogout,
+    disabled: _disableRenewToken,
+  });
 
   React.useEffect(() => {
     /**

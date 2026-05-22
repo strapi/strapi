@@ -35,6 +35,14 @@ let refreshPromise: Promise<string | null> | null = null;
 let onTokenUpdate: ((token: string) => void) | null = null;
 
 /**
+ * Callback to notify the app when the session has been terminated and the user
+ * should be redirected to the login page (e.g., refresh token rejected, idle
+ * session expired). The React layer registers a handler that clears local
+ * auth state and navigates to /auth/login.
+ */
+let onSessionExpired: (() => void) | null = null;
+
+/**
  * Set the callback that will be called when the token is refreshed.
  * This allows the React layer to update Redux state when a token refresh occurs.
  *
@@ -48,6 +56,26 @@ let onTokenUpdate: ((token: string) => void) | null = null;
  */
 const setOnTokenUpdate = (callback: ((token: string) => void) | null): void => {
   onTokenUpdate = callback;
+};
+
+/**
+ * Set the callback that will be called when the active session is no longer
+ * valid (refresh token rejected by the server, or detected idle on the
+ * client). This lets the active tab redirect to /auth/login without waiting
+ * for the next user-initiated request to fail.
+ *
+ * @param callback - Function to call when the session ends, or null to clear
+ */
+const setOnSessionExpired = (callback: (() => void) | null): void => {
+  onSessionExpired = callback;
+};
+
+/**
+ * Trigger the registered session-expired callback, if any. Safe to call from
+ * non-React code (e.g., the RTK Query baseQuery 401 handler).
+ */
+const triggerSessionExpired = (): void => {
+  onSessionExpired?.();
 };
 
 /**
@@ -517,5 +545,7 @@ export {
   attemptTokenRefresh,
   storeToken,
   setOnTokenUpdate,
+  setOnSessionExpired,
+  triggerSessionExpired,
 };
 export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };
