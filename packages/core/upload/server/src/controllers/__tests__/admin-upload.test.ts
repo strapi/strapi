@@ -136,6 +136,93 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     } as any;
   });
 
+  describe('replaceFile', () => {
+    it('accepts a single replacement file received as an array', async () => {
+      const replacementFile = {
+        filepath: '/tmp/replacement.pdf',
+        originalFilename: 'replacement.pdf',
+        mimetype: 'application/pdf',
+      };
+
+      mockContext.query = { id: '1' } as any;
+      mockContext.request!.body = {
+        fileInfo: ['{"name":"replacement.pdf","folder":null}'],
+      };
+      mockContext.request!.files = { files: [replacementFile] } as any;
+
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [replacementFile],
+        filteredBody: {
+          fileInfo: {
+            name: 'replacement.pdf',
+            folder: null,
+          },
+        },
+        errors: [],
+      });
+      mockValidateUploadBody.mockResolvedValue({
+        fileInfo: {
+          name: 'replacement.pdf',
+          folder: null,
+          alternativeText: '',
+          caption: '',
+          focalPoint: null,
+        },
+      });
+
+      uploadService.replace.mockResolvedValue({
+        id: 1,
+        name: 'replacement.pdf',
+      });
+
+      await adminUploadController.replaceFile(mockContext as Context);
+
+      expect(mockPrepareUploadRequest).toHaveBeenCalledWith(
+        replacementFile,
+        mockContext.request!.body,
+        strapi
+      );
+      expect(uploadService.replace).toHaveBeenCalledWith(
+        '1',
+        {
+          data: {
+            fileInfo: {
+              name: 'replacement.pdf',
+              folder: null,
+              alternativeText: '',
+              caption: '',
+              focalPoint: null,
+            },
+          },
+          file: replacementFile,
+        },
+        { user: { id: 1 } }
+      );
+      expect(mockContext.body).toEqual({
+        id: 1,
+        name: 'replacement.pdf',
+        cleaned: true,
+      });
+    });
+
+    it('rejects multiple replacement files', async () => {
+      mockContext.query = { id: '1' } as any;
+      mockContext.request!.files = {
+        files: [
+          { filepath: '/tmp/first.jpg', originalFilename: 'first.jpg', mimetype: 'image/jpeg' },
+          { filepath: '/tmp/second.jpg', originalFilename: 'second.jpg', mimetype: 'image/jpeg' },
+        ],
+      } as any;
+
+      await expect(adminUploadController.replaceFile(mockContext as Context)).rejects.toThrow(
+        'Cannot replace a file with multiple ones'
+      );
+
+      expect(mockPrepareUploadRequest).not.toHaveBeenCalled();
+      expect(uploadService.replace).not.toHaveBeenCalled();
+    });
+  });
+
   describe('uploadFiles - Security Filtering', () => {
     it('should call enforceUploadSecurity with uploaded files', async () => {
       const files = [

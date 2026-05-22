@@ -72,7 +72,7 @@ export default {
     const {
       state: { userAbility, user },
       query: { id },
-      request: { body, files: { files } = {} },
+      request: { body, files: { files: filesInput } = {} },
     } = ctx;
 
     if (typeof id !== 'string') {
@@ -87,9 +87,11 @@ export default {
       id
     );
 
-    if (Array.isArray(files)) {
+    if (Array.isArray(filesInput) && filesInput.length > 1) {
       throw new errors.ApplicationError('Cannot replace a file with multiple ones');
     }
+
+    const files = Array.isArray(filesInput) ? filesInput[0] : filesInput;
 
     const {
       validFiles,
