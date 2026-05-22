@@ -913,6 +913,8 @@ async function verifyMigrationFixAtDbLevel(strapi) {
       const entityIdCol = dzJoin.joinColumn.name;
       const componentIdCol = dzJoin.morphColumn.idColumn.name;
       const componentTypeCol = dzJoin.morphColumn.typeColumn.name;
+      const fieldCol = dzJoin.orderColumn?.name || 'field';
+      const sectionsField = 'sections';
 
       const relTable = relationDpMeta.tableName;
       const relRows = await conn(relTable).select('id', 'document_id', 'published_at');
@@ -935,26 +937,29 @@ async function verifyMigrationFixAtDbLevel(strapi) {
         if (!pair.published || !pair.draft) continue;
         const dzRows = await conn(joinTableName)
           .whereIn(entityIdCol, [pair.published, pair.draft])
-          .select(entityIdCol, componentIdCol, componentTypeCol);
+          .select(entityIdCol, componentIdCol, componentTypeCol, fieldCol);
+        // Only rows for the sections dynamic zone (join table also stores other component fields).
+        const sectionsRows = dzRows.filter((row) => row[fieldCol] === sectionsField);
+        const componentInstanceKey = (row) => `${row[componentTypeCol]}:${row[componentIdCol]}`;
         const pubDz = new Set(
-          dzRows
+          sectionsRows
             .filter((row) => row[entityIdCol] === pair.published)
-            .map((row) => row[componentIdCol])
+            .map(componentInstanceKey)
         );
         const draftDz = new Set(
-          dzRows.filter((row) => row[entityIdCol] === pair.draft).map((row) => row[componentIdCol])
+          sectionsRows.filter((row) => row[entityIdCol] === pair.draft).map(componentInstanceKey)
         );
         if (pubDz.size === 0 && draftDz.size === 0) continue;
         docsWithDz += 1;
-        const overlaps = [...pubDz].filter((id) => draftDz.has(id));
+        const overlaps = [...pubDz].filter((key) => draftDz.has(key));
         if (overlaps.length > 0) {
           docsWithOverlap += 1;
           errors.push(
-            `relation-dp documentId ${docId}: ${overlaps.length} dynamic-zone component id(s) shared between published and draft`
+            `relation-dp documentId ${docId}: ${overlaps.length} sections dynamic-zone component instance(s) shared between published and draft (${overlaps.join(', ')})`
           );
         }
 
-        const refRows = dzRows.filter((row) => row[componentTypeCol] === refListType);
+        const refRows = sectionsRows.filter((row) => row[componentTypeCol] === refListType);
         const pubCmps = new Set(
           refRows
             .filter((row) => row[entityIdCol] === pair.published)
