@@ -59,8 +59,20 @@ const addCustomMethods = (app: Koa) => {
   return app;
 };
 
-const createKoaApp = ({ proxy, keys }: { proxy: boolean; keys: string[] }) => {
+const createKoaApp = ({
+  proxy,
+  proxyIpHeader = 'X-Forwarded-For',
+  maxIpsCount = 0,
+  keys,
+}: {
+  proxy: boolean;
+  proxyIpHeader: string;
+  maxIpsCount: number;
+  keys: string[];
+}) => {
   const app = new Koa({ proxy });
+  app.proxyIpHeader = proxyIpHeader;
+  app.maxIpsCount = maxIpsCount;
   app.keys = keys;
 
   addCustomMethods(app);
