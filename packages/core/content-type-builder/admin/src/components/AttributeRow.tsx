@@ -118,7 +118,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
 
   const src = 'target' in item && item.target ? 'relation' : ico;
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
     const dependentRows = checkDependentRows(contentTypes, item.name);
     if (dependentRows.length > 0) {
@@ -145,7 +145,11 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
     setShowConfirmDialog(false);
   };
 
-  const handleClick = () => {
+  const handleClick = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
     if (isMorph) {
       return;
     }
@@ -219,6 +223,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                 defaultMessage: 'Drag',
               })} ${item.name}`}
               disabled={isTypeDeleted || isDeleted}
+              style={{ outlineOffset: '-2px' }}
             >
               <Drag />
             </IconButton>

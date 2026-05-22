@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import { WebSocket } from 'ws';
 import { once } from 'lodash/fp';
@@ -19,18 +19,44 @@ import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
+import {
+  createTransferAssetStreamChunk,
+  transferAssetStreamChunkByteLength,
+} from '../../../utils/transfer-asset-chunk';
 
 export interface IRemoteStrapiDestinationProviderOptions
-  extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
+  extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy' | 'onTransferPhase'> {
   url: URL; // the url of the remote Strapi admin
   auth?: Auth.ITransferTokenAuth;
   retryMessageOptions?: {
     retryMessageTimeout: number; // milliseconds to wait for a response from a message
     retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
   };
+  /** Include per-asset stream checksums and require peers to validate on receive. */
+  verifyChecksums?: boolean;
 }
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
+
+/**
+ * Default batching for entities / links / configuration over WebSocket push.
+ *
+ * Goals: (1) enough payload per round-trip to stay efficient on large transfers,
+ * (2) small enough per message that the remote can process and ack without multi-minute stalls,
+ * (3) bounded gap between engine progress and the wire (see item cap + age).
+ *
+ * These are fixed defaults (not tuned per dataset) so behavior is predictable everywhere.
+ */
+const STREAM_STEP_MAX_BATCH_BYTES = 512 * 1024;
+
+/** Caps parallel work per message and how far UI count can lead the network for tiny rows. */
+const STREAM_STEP_MAX_BATCH_ITEMS = 100;
+
+/**
+ * If the first row in the current batch has waited this long, flush before appending more.
+ * Helps mixed-size streams (e.g. occasional large rows) without relying on tiny byte caps alone.
+ */
+const STREAM_STEP_MAX_BATCH_AGE_MS = 450;
 
 class RemoteStrapiDestinationProvider implements IDestinationProvider {
   name = 'destination::remote-strapi';
@@ -49,11 +75,14 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   #diagnostics?: IDiagnosticReporter;
 
+  #checksumsEnabled = false;
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
     this.dispatcher = null;
     this.transferID = null;
+    this.#checksumsEnabled = options.verifyChecksums === true;
 
     this.resetStats();
   }
@@ -69,15 +98,28 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   async initTransfer(): Promise<string> {
     const { strategy, restore } = this.options;
+    const wantsChecksums = this.options.verifyChecksums === true;
 
     const query = this.dispatcher?.dispatchCommand({
       command: 'init',
-      params: { options: { strategy, restore }, transfer: 'push' },
+      params: {
+        options: { strategy, restore },
+        transfer: 'push',
+        ...(wantsChecksums ? { checksums: true } : {}),
+      },
     });
 
-    const res = (await query) as Server.Payload<Server.InitMessage>;
+    const res = (await query) as
+      | (Server.Payload<Server.InitMessage> & { checksums?: boolean })
+      | null;
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
+    }
+    this.#checksumsEnabled = wantsChecksums && res.checksums === true;
+    if (wantsChecksums && res.checksums !== true) {
+      this.#reportWarning(
+        '[Data transfer][push] Checksums were requested but the remote does not support checksum negotiation; continuing without checksum validation.'
+      );
     }
 
     this.resetStats();
@@ -164,21 +206,40 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   #writeStream(step: Exclude<Client.TransferPushStep, 'assets'>): Writable {
     type Step = typeof step;
 
-    const batchSize = 1024 * 1024; // 1MB;
     const startTransferOnce = this.#startStepOnce(step);
 
     let batch = [] as Client.GetTransferPushStreamData<Step>;
+    let batchStartedAt = 0;
 
     const batchLength = () => jsonLength(batch);
+
+    const flushBatch = async (): Promise<Error | null> => {
+      if (batch.length === 0) {
+        return null;
+      }
+      const payload = batch;
+      batch = [];
+      batchStartedAt = 0;
+      return this.#streamStep(step, payload);
+    };
+
+    const shouldFlushBatchAfterPush = () => {
+      if (batch.length === 0) {
+        return false;
+      }
+      return (
+        batchLength() >= STREAM_STEP_MAX_BATCH_BYTES ||
+        batch.length >= STREAM_STEP_MAX_BATCH_ITEMS ||
+        Date.now() - batchStartedAt >= STREAM_STEP_MAX_BATCH_AGE_MS
+      );
+    };
 
     return new Writable({
       objectMode: true,
 
       final: async (callback) => {
         if (batch.length > 0) {
-          const streamError = await this.#streamStep(step, batch);
-
-          batch = [];
+          const streamError = await flushBatch();
 
           if (streamError) {
             return callback(streamError);
@@ -191,7 +252,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         if (stats && (stats.started !== count || stats.finished !== count)) {
           callback(
             new Error(
-              `Data missing: sent ${this.stats[step].count} ${step}, recieved ${stats.started} and saved ${stats.finished} ${step}`
+              `Data missing: sent ${this.stats[step].count} ${step}, received ${stats.started} and saved ${stats.finished} ${step}`
             )
           );
         }
@@ -199,19 +260,27 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         callback(error);
       },
 
-      write: async (chunk, _encoding, callback) => {
+      async write(chunk, _encoding, callback) {
         const startError = await startTransferOnce();
         if (startError) {
           return callback(startError);
         }
 
+        // Flush a batch that has sat long enough before growing it further (bounded latency).
+        if (batch.length > 0 && Date.now() - batchStartedAt >= STREAM_STEP_MAX_BATCH_AGE_MS) {
+          const staleError = await flushBatch();
+          if (staleError) {
+            return callback(staleError);
+          }
+        }
+
         batch.push(chunk);
+        if (batch.length === 1) {
+          batchStartedAt = Date.now();
+        }
 
-        if (batchLength() >= batchSize) {
-          const streamError = await this.#streamStep(step, batch);
-
-          batch = [];
-
+        if (shouldFlushBatchAfterPush()) {
+          const streamError = await flushBatch();
           if (streamError) {
             return callback(streamError);
           }
@@ -230,6 +299,17 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         origin: 'remote-destination-provider',
       },
       kind: 'info',
+    });
+  }
+
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'remote-destination-provider',
+      },
+      kind: 'warning',
     });
   }
 
@@ -324,6 +404,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async beforeTransfer() {
+    this.options.onTransferPhase?.(
+      'Remote: waiting for server to clear data and prepare destination…'
+    );
     await this.dispatcher?.dispatchTransferAction('beforeTransfer');
   }
 
@@ -354,13 +437,11 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   createAssetsWriteStream(): Writable | Promise<Writable> {
     let batch: Client.TransferAssetFlow[] = [];
     let hasStarted = false;
+    const verifyChecksums = this.#checksumsEnabled;
 
     const batchSize = 1024 * 1024; // 1MB;
     const batchLength = () => {
-      return batch.reduce(
-        (acc, chunk) => (chunk.action === 'stream' ? acc + chunk.data.byteLength : acc),
-        0
-      );
+      return batch.reduce((acc, chunk) => acc + transferAssetStreamChunkByteLength(chunk), 0);
     };
     const startAssetsTransferOnce = this.#startStepOnce('assets');
 
@@ -409,6 +490,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
         const assetID = randomUUID();
         const { filename, filepath, stats, stream, metadata } = asset;
+        const checksumHash = verifyChecksums ? createHash('sha256') : undefined;
 
         try {
           await safePush({
@@ -418,16 +500,21 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
           });
 
           for await (const chunk of stream) {
-            await safePush({ action: 'stream', assetID, data: chunk });
+            checksumHash?.update(chunk);
+            await safePush(createTransferAssetStreamChunk(assetID, chunk));
           }
 
-          await safePush({ action: 'end', assetID });
+          await safePush({
+            action: 'end',
+            assetID,
+            ...(checksumHash
+              ? { checksum: { algorithm: 'sha256' as const, value: checksumHash.digest('hex') } }
+              : {}),
+          });
 
           callback();
         } catch (error) {
-          if (error instanceof Error) {
-            callback(error);
-          }
+          callback(error instanceof Error ? error : new Error(String(error)));
         }
       },
     });

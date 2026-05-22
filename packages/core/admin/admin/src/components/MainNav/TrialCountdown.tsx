@@ -2,7 +2,7 @@ import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import { Flex, Tooltip } from '@strapi/design-system';
 import { format, isBefore, startOfToday } from 'date-fns';
 import { useIntl } from 'react-intl';
-import { useTheme } from 'styled-components';
+import { styled, useTheme } from 'styled-components';
 
 import { useGetLicenseTrialTimeLeftQuery } from '../../../src/services/admin';
 
@@ -48,6 +48,14 @@ const CircleProgressBar = ({ percentage }: CircleProgressBarProps) => {
   );
 };
 
+const Container = styled(Flex)`
+  display: none;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    display: flex;
+  }
+`;
+
 const TrialCountdown = () => {
   const { formatMessage } = useIntl();
   const { license, isError, isLoading } = useLicenseLimits();
@@ -81,7 +89,7 @@ const TrialCountdown = () => {
       : Math.ceil(timeDifference / millisecondsPerDay);
 
   return (
-    <Flex justifyContent="center" padding={3}>
+    <Container justifyContent="center" padding={3}>
       <Tooltip
         label={formatMessage(
           isTargetDateInPast
@@ -103,7 +111,7 @@ const TrialCountdown = () => {
           <CircleProgressBar percentage={((30 - daysLeft) * 100) / 30} />
         </div>
       </Tooltip>
-    </Flex>
+    </Container>
   );
 };
 

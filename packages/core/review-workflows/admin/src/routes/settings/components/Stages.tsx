@@ -40,7 +40,8 @@ import { useDragAndDrop } from '../hooks/useDragAndDrop';
 
 import { AddStage } from './AddStage';
 
-interface WorkflowStage extends Pick<IStage, 'id' | 'name' | 'permissions' | 'color'> {
+interface WorkflowStage
+  extends Pick<IStage, 'id' | 'name' | 'fromPermissions' | 'toPermissions' | 'color'> {
   __temp_key__: string;
 }
 
@@ -131,7 +132,8 @@ const Stage = ({
   canUpdate = false,
   stagesCount,
   name,
-  permissions,
+  fromPermissions,
+  toPermissions,
   color,
   defaultOpen,
 }: StageProps) => {
@@ -229,7 +231,7 @@ const Stage = ({
   }, [dragPreviewRef, index]);
 
   const handleCloneClick = () => {
-    addFieldRow('stages', { name, color, permissions });
+    addFieldRow('stages', { name, color, fromPermissions, toPermissions });
   };
 
   const id = React.useId();
@@ -341,7 +343,7 @@ const Stage = ({
                   {
                     disabled: !canUpdate,
                     label: formatMessage({
-                      id: 'content-manager.reviewWorkflows.stage.color',
+                      id: 'review-workflows.stage.color',
                       defaultMessage: 'Color',
                     }),
                     name: `stages.${index}.color`,
@@ -353,9 +355,9 @@ const Stage = ({
                     disabled: !canUpdate,
                     label: formatMessage({
                       id: 'Settings.review-workflows.stage.permissions.label',
-                      defaultMessage: 'Roles that can change this stage',
+                      defaultMessage: 'Roles that can change from this stage',
                     }),
-                    name: `stages.${index}.permissions`,
+                    name: `stages.${index}.fromPermissions`,
                     placeholder: formatMessage({
                       id: 'Settings.review-workflows.stage.permissions.placeholder',
                       defaultMessage: 'Select a role',
@@ -364,8 +366,29 @@ const Stage = ({
                     size: 6,
                     type: 'permissions' as const,
                   },
+                  {
+                    disabled: !canUpdate,
+                    label: formatMessage({
+                      id: 'Settings.review-workflows.stage.toPermissions.label',
+                      defaultMessage: 'Roles that can move content to this stage',
+                    }),
+                    name: `stages.${index}.toPermissions`,
+                    placeholder: formatMessage({
+                      id: 'Settings.review-workflows.stage.toPermissions.placeholder',
+                      defaultMessage: 'Select a role',
+                    }),
+                    required: false,
+                    size: 6,
+                    type: 'permissions' as const,
+                  },
                 ].map(({ size, ...field }) => (
-                  <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+                  <Grid.Item
+                    key={field.name}
+                    col={size}
+                    xs={12}
+                    direction="column"
+                    alignItems="stretch"
+                  >
                     <InputRenderer {...field} />
                   </Grid.Item>
                 ))}
@@ -498,13 +521,22 @@ interface PermissionsFieldProps
   type: 'permissions';
 }
 
-const PermissionsField = ({ disabled, name, placeholder, required }: PermissionsFieldProps) => {
+const PermissionsField = ({
+  label,
+  disabled,
+  name,
+  placeholder,
+  required,
+}: PermissionsFieldProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const [isApplyAllConfirmationOpen, setIsApplyAllConfirmationOpen] = React.useState(false);
   const { value = [], error, onChange } = useField<StagePermission[]>(name);
   const allStages = useForm<WorkflowStage[]>('PermissionsField', (state) => state.values.stages);
   const onFormValueChange = useForm('PermissionsField', (state) => state.onChange);
+
+  // Derive the field key (e.g. "fromPermissions" or "toPermissions") from the full field name
+  const fieldKey = name.split('.').pop() as keyof WorkflowStage;
   const rolesErrorCount = React.useRef(0);
 
   const { data: roles = [], isLoading, error: getRolesError } = useGetAdminRolesQuery();
@@ -544,12 +576,7 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
         })}
         required={required}
       >
-        <Field.Label>
-          {formatMessage({
-            id: 'Settings.review-workflows.stage.permissions.label',
-            defaultMessage: 'Roles that can change this stage',
-          })}
-        </Field.Label>
+        <Field.Label>{label}</Field.Label>
         <TextInput
           disabled
           placeholder={formatMessage({
@@ -570,12 +597,8 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
       <Flex alignItems="flex-end" gap={3}>
         <PermissionWrapper grow={1}>
           <Field.Root error={error} name={name} required>
-            <Field.Label>
-              {formatMessage({
-                id: 'Settings.review-workflows.stage.permissions.label',
-                defaultMessage: 'Roles that can change this stage',
-              })}
-            </Field.Label>
+            <Field.Label>{label}</Field.Label>
+
             <MultiSelect
               disabled={disabled}
               onChange={(values) => {
@@ -632,7 +655,7 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
                 'stages',
                 allStages.map((stage) => ({
                   ...stage,
-                  permissions: value,
+                  [fieldKey]: value,
                 }))
               );
 

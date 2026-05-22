@@ -84,11 +84,31 @@ export const forms = {
       },
       advanced({ customField, data, step, extensions, ...rest }: any) {
         // Default section with no fields
-        const sections: FormTypeOptions = [{ sectionTitle: null, items: [] }];
+        const sections: FormTypeOptions = [
+          { sectionTitle: null, items: [] },
+          {
+            sectionTitle: { id: 'form.attribute.condition.section', defaultMessage: 'Conditions' },
+            items: [
+              {
+                name: 'conditions',
+                type: 'condition-form',
+                intlLabel: {
+                  id: 'form.attribute.condition.label',
+                  defaultMessage: 'Visibility condition',
+                },
+                description: {
+                  id: 'form.attribute.condition.desc',
+                  defaultMessage: 'Show this field only when a boolean/enum condition matches.',
+                },
+              },
+            ],
+          },
+        ];
         const injectedInputs = extensions.getAdvancedForm(['attribute', customField.type], {
           data,
           type: customField.type,
           step,
+          customField,
           ...rest,
         });
 
@@ -159,6 +179,7 @@ export const forms = {
             data,
             type,
             step,
+            customField: null,
             ...rest,
           });
 

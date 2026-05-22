@@ -1,7 +1,7 @@
 import { Box } from '@strapi/design-system';
-import { styled } from 'styled-components';
+import { styled, type DefaultTheme } from 'styled-components';
 
-const StyledBox = styled(Box)`
+const StyledBox = styled(Box)<CurveProps>`
   position: absolute;
   left: -3.4rem;
   top: 0px;
@@ -15,7 +15,7 @@ const StyledBox = styled(Box)`
   }
 `;
 
-const Svg = styled.svg`
+const Svg = styled.svg<CurveProps>`
   position: relative;
   flex-shrink: 0;
   transform: translate(-0.5px, -1px);
@@ -26,11 +26,11 @@ const Svg = styled.svg`
 `;
 
 interface CurveProps {
-  color: string;
+  color: keyof DefaultTheme['colors'];
 }
 
 export const Curve = (props: CurveProps) => (
-  <StyledBox>
+  <StyledBox {...props}>
     <Svg
       width="20"
       height="23"

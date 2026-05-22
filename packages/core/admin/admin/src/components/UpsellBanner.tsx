@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Box, Flex, LinkButton, Typography } from '@strapi/design-system';
-import { isAfter, subDays } from 'date-fns';
+import { Box, Flex, IconButton, LinkButton, Typography } from '@strapi/design-system';
+import { ArrowsOut, Cross } from '@strapi/icons';
+import { isAfter, isValid, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useGetLicenseTrialTimeLeftQuery } from '../../src/services/admin';
+import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useScopedPersistentState } from '../hooks/usePersistentState';
 
 const BannerBackground = styled(Flex)`
@@ -15,94 +17,131 @@ const BannerBackground = styled(Flex)`
     ${({ theme }) => theme.colors.primary600} 0%,
     ${({ theme }) => theme.colors.alternative600} 121.48%
   );
+  position: relative;
 `;
 
-const Banner = ({ isTrialEndedRecently }: { isTrialEndedRecently: boolean }) => {
+const FixedButtonWrapper = styled(Box)`
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  z-index: 11;
+  align-items: flex-end;
+  top: 9px;
+  right: 16px;
+`;
+
+const Banner = ({
+  isTrialEndedRecently,
+  onDismiss,
+}: {
+  isTrialEndedRecently: boolean;
+  onDismiss: () => void;
+}) => {
   const { formatMessage } = useIntl();
 
   return (
-    <BannerBackground width="100%" justifyContent="center">
-      <Flex
-        justifyContent="center"
-        alignItems="center"
-        width="100%"
-        paddingTop={2}
-        paddingBottom={2}
-        paddingLeft={10}
-        paddingRight={10}
-        gap={2}
-      >
-        <Box>
-          <Typography
-            variant="delta"
-            fontWeight="bold"
-            textColor="neutral0"
-            textAlign="center"
-            fontSize={2}
-          >
-            {formatMessage(
-              isTrialEndedRecently
-                ? {
-                    id: 'app.components.UpsellBanner.intro.ended',
-                    defaultMessage: 'Your trial has ended: ',
-                  }
-                : {
-                    id: 'app.components.UpsellBanner.intro',
-                    defaultMessage: 'Access to Growth plan features: ',
-                  }
-            )}
-          </Typography>
-          <Typography
-            variant="delta"
-            textColor="neutral0"
-            textAlign="center"
-            paddingRight={4}
-            fontSize={2}
-          >
-            {formatMessage(
-              isTrialEndedRecently
-                ? {
-                    id: 'app.components.UpsellBanner.text.ended',
-                    defaultMessage: 'Keep access to Growth features by upgrading now.',
-                  }
-                : {
-                    id: 'app.components.UpsellBanner.text',
-                    defaultMessage:
-                      'As part of your trial, you can explore premium tools such as Content History, Releases, and Single Sign-On (SSO).',
-                  }
-            )}
-          </Typography>
-        </Box>
-        <Box>
-          <LinkButton
-            width="max-content"
-            variant="tertiary"
-            href="https://strapi.chargebeeportal.com"
-            target="_blank"
-          >
-            {formatMessage(
-              isTrialEndedRecently
-                ? {
-                    id: 'app.components.UpsellBanner.button.ended',
-                    defaultMessage: 'Keep Growth plan',
-                  }
-                : {
-                    id: 'app.components.UpsellBanner.button',
-                    defaultMessage: 'Upgrade now',
-                  }
-            )}
-          </LinkButton>
-        </Box>
-      </Flex>
-    </BannerBackground>
+    <>
+      <BannerBackground width="100%" justifyContent="center">
+        <Flex
+          justifyContent="center"
+          alignItems="center"
+          width="100%"
+          paddingTop={2}
+          paddingBottom={2}
+          paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+          paddingRight={RESPONSIVE_DEFAULT_SPACING}
+          gap={2}
+        >
+          <Box>
+            <Typography
+              variant="delta"
+              fontWeight="bold"
+              textColor="neutral0"
+              textAlign="center"
+              fontSize={2}
+            >
+              {formatMessage(
+                isTrialEndedRecently
+                  ? {
+                      id: 'app.components.UpsellBanner.intro.ended',
+                      defaultMessage: 'Your trial has ended: ',
+                    }
+                  : {
+                      id: 'app.components.UpsellBanner.intro',
+                      defaultMessage: 'Access to Growth plan features: ',
+                    }
+              )}
+            </Typography>
+            <Typography
+              variant="delta"
+              textColor="neutral0"
+              textAlign="center"
+              paddingRight={4}
+              fontSize={2}
+            >
+              {formatMessage(
+                isTrialEndedRecently
+                  ? {
+                      id: 'app.components.UpsellBanner.text.ended',
+                      defaultMessage: 'Keep access to Growth features by upgrading now.',
+                    }
+                  : {
+                      id: 'app.components.UpsellBanner.text',
+                      defaultMessage:
+                        'As part of your trial, you can explore premium tools such as Content History, Releases, and Single Sign-On (SSO).',
+                    }
+              )}
+            </Typography>
+          </Box>
+          <Box>
+            <LinkButton
+              width="max-content"
+              variant="tertiary"
+              href="https://strapi.chargebeeportal.com"
+              target="_blank"
+            >
+              {formatMessage(
+                isTrialEndedRecently
+                  ? {
+                      id: 'app.components.UpsellBanner.button.ended',
+                      defaultMessage: 'Keep Growth plan',
+                    }
+                  : {
+                      id: 'app.components.UpsellBanner.button',
+                      defaultMessage: 'Upgrade now',
+                    }
+              )}
+            </LinkButton>
+          </Box>
+        </Flex>
+      </BannerBackground>
+      <FixedButtonWrapper>
+        <IconButton
+          withTooltip={false}
+          label={formatMessage({
+            id: 'app.components.UpsellBanner.close',
+            defaultMessage: 'Close',
+          })}
+          onClick={onDismiss}
+        >
+          <Cross />
+        </IconButton>
+      </FixedButtonWrapper>
+    </>
   );
 };
 
 const UpsellBanner = () => {
   const { license } = useLicenseLimits();
+  const { formatMessage } = useIntl();
 
   const [cachedTrialEndsAt, setCachedTrialEndsAt] = useScopedPersistentState<string | undefined>(
     'STRAPI_FREE_TRIAL_ENDS_AT',
+    undefined
+  );
+
+  const [dismissedFor, setDismissedFor] = useScopedPersistentState<string | undefined>(
+    'STRAPI_UPSELL_BANNER_DISMISSED_FOR',
     undefined
   );
 
@@ -128,11 +167,43 @@ const UpsellBanner = () => {
       isAfter(new Date(cachedTrialEndsAt), sevenDaysAgo)
   );
 
-  if (timeLeftData.data?.trialEndsAt || isTrialEndedRecently) {
-    return <Banner isTrialEndedRecently={isTrialEndedRecently} />;
+  const trialEndsAt = timeLeftData.data?.trialEndsAt ?? cachedTrialEndsAt;
+
+  const toCanonicalISO = (v: string | undefined): string | undefined => {
+    if (!v) return undefined;
+    const date = new Date(v);
+    return isValid(date) ? date.toISOString() : undefined;
+  };
+
+  const isDismissed = Boolean(
+    trialEndsAt && toCanonicalISO(dismissedFor) === toCanonicalISO(trialEndsAt)
+  );
+
+  const handleDismiss = () => setDismissedFor(toCanonicalISO(trialEndsAt));
+  const handleReopen = () => setDismissedFor(undefined);
+
+  if (!(timeLeftData.data?.trialEndsAt || isTrialEndedRecently)) {
+    return null;
   }
 
-  return null;
+  if (isDismissed) {
+    return (
+      <FixedButtonWrapper>
+        <IconButton
+          withTooltip={false}
+          label={formatMessage({
+            id: 'app.components.UpsellBanner.reopen',
+            defaultMessage: 'Reopen banner',
+          })}
+          onClick={handleReopen}
+        >
+          <ArrowsOut />
+        </IconButton>
+      </FixedButtonWrapper>
+    );
+  }
+
+  return <Banner isTrialEndedRecently={isTrialEndedRecently} onDismiss={handleDismiss} />;
 };
 
 export { UpsellBanner };

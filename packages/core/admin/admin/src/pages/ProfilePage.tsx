@@ -16,6 +16,7 @@ import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
 import { useTracking } from '../features/Tracking';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
+import { useIsDesktop } from '../hooks/useMediaQuery';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
@@ -67,6 +68,7 @@ const Panel = ({ children, ...flexProps }: FlexProps) => {
 };
 
 const ProfilePage = () => {
+  const isDesktop = useIsDesktop();
   const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -92,7 +94,7 @@ const ProfilePage = () => {
     } else {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   }, [formatMessage, notifyStatus, toggleNotification, user]);
@@ -163,7 +165,7 @@ const ProfilePage = () => {
       } else {
         toggleNotification({
           type: 'danger',
-          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }
     }
@@ -187,52 +189,57 @@ const ProfilePage = () => {
   };
 
   return (
-    <Page.Main aria-busy={isSubmittingForm}>
-      <Page.Title>
-        {formatMessage({
-          id: 'Settings.profile.form.section.head.title',
-          defaultMessage: 'User profile',
-        })}
-      </Page.Title>
-      <Form
-        method="PUT"
-        onSubmit={handleSubmit}
-        initialValues={initialData}
-        validationSchema={PROFILE_VALIDTION_SCHEMA}
-      >
-        {({ isSubmitting, modified }) => (
-          <>
-            <Layouts.Header
-              title={getDisplayName(user)}
-              primaryAction={
-                <Button
-                  startIcon={<Check />}
-                  loading={isSubmitting}
-                  type="submit"
-                  disabled={!modified}
-                >
-                  {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-                </Button>
-              }
-            />
-            <Box paddingBottom={6}>
-              <Layouts.Content>
-                <Flex direction="column" alignItems="stretch" gap={6}>
-                  <UserInfoSection />
-                  {!hasLockedRole && <PasswordSection />}
-                  <PreferencesSection localeNames={localeNames} />
-                </Flex>
-              </Layouts.Content>
-            </Box>
-          </>
+    <>
+      <Page.Main aria-busy={isSubmittingForm}>
+        <Page.Title>
+          {formatMessage({
+            id: 'Settings.profile.form.section.head.title',
+            defaultMessage: 'User profile',
+          })}
+        </Page.Title>
+        <Form
+          method="PUT"
+          onSubmit={handleSubmit}
+          initialValues={initialData}
+          validationSchema={PROFILE_VALIDTION_SCHEMA}
+        >
+          {({ isSubmitting, modified }) => (
+            <>
+              <Layouts.Header
+                title={getDisplayName(user)}
+                primaryAction={
+                  <Button
+                    startIcon={<Check />}
+                    loading={isSubmitting}
+                    type="submit"
+                    disabled={!modified}
+                    fullWidth
+                  >
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+                  </Button>
+                }
+              />
+              <Box paddingBottom={6}>
+                <Layouts.Content>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
+                    <UserInfoSection />
+                    {!hasLockedRole && <PasswordSection />}
+                    <PreferencesSection localeNames={localeNames} />
+                  </Flex>
+                </Layouts.Content>
+              </Box>
+            </>
+          )}
+        </Form>
+        {isDesktop && process.env.NODE_ENV === 'development' && (
+          <Box paddingBottom={6}>
+            <Layouts.Content>
+              <GuidedTourSection />
+            </Layouts.Content>
+          </Box>
         )}
-      </Form>
-      <Box paddingBottom={10}>
-        <Layouts.Content>
-          <GuidedTourSection />
-        </Layouts.Content>
-      </Box>
-    </Page.Main>
+      </Page.Main>
+    </>
   );
 };
 
@@ -288,7 +295,14 @@ const PasswordSection = () => {
       ].map((row, index) => (
         <Grid.Root key={index} gap={5}>
           {row.map(({ size, ...field }) => (
-            <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+            <Grid.Item
+              key={field.name}
+              xs={12}
+              m={6}
+              col={size}
+              direction="column"
+              alignItems="stretch"
+            >
               <InputRenderer {...field} />
             </Grid.Item>
           ))}
@@ -403,14 +417,21 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               })),
             ],
             placeholder: formatMessage({
-              id: 'components.Select.placeholder',
+              id: 'app.components.Select.placeholder',
               defaultMessage: 'Select',
             }),
             size: 6,
             type: 'enumeration' as const,
           },
         ].map(({ size, ...field }) => (
-          <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+          <Grid.Item
+            key={field.name}
+            xs={12}
+            m={6}
+            col={size}
+            direction="column"
+            alignItems="stretch"
+          >
             <InputRenderer {...field} />
           </Grid.Item>
         ))}
@@ -475,7 +496,14 @@ const UserInfoSection = () => {
             type: 'string' as const,
           },
         ].map(({ size, ...field }) => (
-          <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+          <Grid.Item
+            key={field.name}
+            xs={12}
+            m={6}
+            col={size}
+            direction="column"
+            alignItems="stretch"
+          >
             <InputRenderer {...field} />
           </Grid.Item>
         ))}

@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
@@ -186,6 +187,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
             limit: MAX_DOCUMENTS,
             fields: meta.fields,
             ...additionalQueryParams,
+            locale: '*',
           });
 
           const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
@@ -256,21 +258,23 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
           const strapiDBConnection = strapi.db.connection;
           const tableName = strapi.contentType(meta.uid).collectionName;
           if (tableName) {
-            const draftDocuments = await strapiDBConnection(tableName)
-              .whereNull('published_at')
-              .whereIn('document_id', function () {
-                this.select('document_id')
-                  .from(tableName)
-                  .groupBy('document_id')
-                  .havingRaw('COUNT(*) = 1');
-              })
-              .count('* as count')
-              .first();
-            countDocuments.draft += Number(draftDocuments?.count) || 0;
+            if (meta.hasDraftAndPublish) {
+              const draftDocuments = await strapiDBConnection(tableName)
+                .whereNull('published_at')
+                .whereIn('document_id', function () {
+                  this.select('document_id')
+                    .from(tableName)
+                    .groupBy('document_id')
+                    .havingRaw('COUNT(*) = 1');
+                })
+                .count('* as count')
+                .first();
+              countDocuments.draft += Number(draftDocuments?.count) || 0;
+            }
 
             const publishedDocuments = meta.hasDraftAndPublish
               ? await strapiDBConnection(tableName)
-                  .select('draft.document_id')
+                  .countDistinct('draft.document_id as count')
                   .from(`${tableName} as draft`)
                   .join(`${tableName} as published`, function () {
                     this.on('draft.document_id', '=', 'published.document_id')
@@ -278,30 +282,28 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
                       .andOnNull('draft.published_at')
                       .andOnNotNull('published.published_at');
                   })
-                  .countDistinct('draft.document_id as count')
-                  .groupBy('draft.document_id')
                   .first()
               : await strapiDBConnection(tableName)
-                  .select('document_id')
-                  .from(`${tableName}`)
                   .countDistinct('document_id as count')
-                  .groupBy('document_id')
+                  .from(`${tableName}`)
                   .first();
             countDocuments.published += Number(publishedDocuments?.count) || 0;
 
-            const modifiedDocuments = await strapiDBConnection(tableName)
-              .select('draft.document_id')
-              .from(`${tableName} as draft`)
-              .join(`${tableName} as published`, function () {
-                this.on('draft.document_id', '=', 'published.document_id')
-                  .andOn('draft.updated_at', '!=', 'published.updated_at')
-                  .andOnNull('draft.published_at')
-                  .andOnNotNull('published.published_at');
-              })
-              .countDistinct('draft.document_id as count')
-              .groupBy('draft.document_id')
-              .first();
-            countDocuments.modified += Number(modifiedDocuments?.count) || 0;
+            if (meta.hasDraftAndPublish) {
+              const modifiedDocuments = await strapiDBConnection(tableName)
+                .select('draft.document_id')
+                .from(`${tableName} as draft`)
+                .join(`${tableName} as published`, function () {
+                  this.on('draft.document_id', '=', 'published.document_id')
+                    .andOn('draft.updated_at', '!=', 'published.updated_at')
+                    .andOnNull('draft.published_at')
+                    .andOnNotNull('published.published_at');
+                })
+                .countDistinct('draft.document_id as count')
+                .groupBy('draft.document_id')
+                .first();
+              countDocuments.modified += Number(modifiedDocuments?.count) || 0;
+            }
           }
         })
       );

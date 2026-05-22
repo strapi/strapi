@@ -74,7 +74,7 @@ const Login = ({ children }: LoginProps) => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={1}>
-              <Typography variant="alpha" tag="h1">
+              <Typography variant="alpha" tag="h1" textAlign="center">
                 {formatMessage({
                   id: 'Auth.form.welcome.title',
                   defaultMessage: 'Welcome!',
@@ -82,7 +82,12 @@ const Login = ({ children }: LoginProps) => {
               </Typography>
             </Box>
             <Box paddingBottom={7}>
-              <Typography variant="epsilon" textColor="neutral600">
+              <Typography
+                variant="epsilon"
+                textColor="neutral600"
+                textAlign="center"
+                display="block"
+              >
                 {formatMessage({
                   id: 'Auth.form.welcome.subtitle',
                   defaultMessage: 'Log in to your Strapi account',
@@ -117,7 +122,7 @@ const Login = ({ children }: LoginProps) => {
                     defaultMessage: 'kai@doe.com',
                   }),
                   required: true,
-                  type: 'string' as const,
+                  type: 'email' as const,
                 },
                 {
                   label: formatMessage({

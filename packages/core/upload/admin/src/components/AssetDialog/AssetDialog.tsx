@@ -2,7 +2,16 @@
 import * as React from 'react';
 
 import { Page } from '@strapi/admin/strapi-admin';
-import { Badge, Button, Divider, Flex, Loader, Modal, Tabs } from '@strapi/design-system';
+import {
+  Badge,
+  Button,
+  Divider,
+  Flex,
+  Loader,
+  Modal,
+  ScrollArea,
+  Tabs,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -36,7 +45,7 @@ import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + 8rem)`};
+  min-height: ${() => `calc(60dvh + 8rem)`};
 `;
 
 export interface FileRow extends Asset {
@@ -293,41 +302,43 @@ export const AssetContent = ({
           </Flex>
         </Flex>
         <Divider />
-        <Modal.Body>
-          <Tabs.Content value="browse">
-            <BrowseStep
-              allowedTypes={allowedTypes}
-              assets={assets!}
-              canCreate={canCreate}
-              canRead={canRead}
-              folders={folders as FolderWithType[]}
-              onSelectAsset={handleSelectAsset}
-              selectedAssets={selectedAssets}
-              multiple={multiple}
-              onSelectAllAsset={handleSelectAllAssets}
-              onEditAsset={setAssetToEdit}
-              onEditFolder={setFolderToEdit}
-              pagination={pagination!}
-              queryObject={queryObject!}
-              onAddAsset={onAddAsset}
-              onChangeFilters={(filters: FilterCondition<string>[] | BrowseFilter[]) =>
-                onChangeFilters!(filters as FilterCondition<string>[])
-              }
-              onChangeFolder={handleFolderChange}
-              onChangePage={onChangePage!}
-              onChangePageSize={onChangePageSize!}
-              onChangeSort={(sort: string | undefined) => onChangeSort!(sort as Query['sort'])}
-              onChangeSearch={onChangeSearch!}
-            />
-          </Tabs.Content>
-          <Tabs.Content value="selected">
-            <SelectedStep
-              selectedAssets={selectedAssets}
-              onSelectAsset={handleSelectAsset}
-              onReorderAsset={handleMoveItem}
-            />
-          </Tabs.Content>
-        </Modal.Body>
+        <ScrollArea>
+          <Modal.Body>
+            <Tabs.Content value="browse">
+              <BrowseStep
+                allowedTypes={allowedTypes}
+                assets={assets!}
+                canCreate={canCreate}
+                canRead={canRead}
+                folders={folders as FolderWithType[]}
+                onSelectAsset={handleSelectAsset}
+                selectedAssets={selectedAssets}
+                multiple={multiple}
+                onSelectAllAsset={handleSelectAllAssets}
+                onEditAsset={setAssetToEdit}
+                onEditFolder={setFolderToEdit}
+                pagination={pagination!}
+                queryObject={queryObject!}
+                onAddAsset={onAddAsset}
+                onChangeFilters={(filters: FilterCondition<string>[] | BrowseFilter[]) =>
+                  onChangeFilters!(filters as FilterCondition<string>[])
+                }
+                onChangeFolder={handleFolderChange}
+                onChangePage={onChangePage!}
+                onChangePageSize={onChangePageSize!}
+                onChangeSort={(sort: string | undefined) => onChangeSort!(sort as Query['sort'])}
+                onChangeSearch={onChangeSearch!}
+              />
+            </Tabs.Content>
+            <Tabs.Content value="selected">
+              <SelectedStep
+                selectedAssets={selectedAssets}
+                onSelectAsset={handleSelectAsset}
+                onReorderAsset={handleMoveItem}
+              />
+            </Tabs.Content>
+          </Modal.Body>
+        </ScrollArea>
       </TabsRoot>
       <DialogFooter onClose={onClose} onValidate={() => onValidate(selectedAssets)} />
     </>

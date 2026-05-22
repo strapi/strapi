@@ -2,22 +2,34 @@ import { screen, render } from '@tests/utils';
 
 import { NavUser } from '../NavUser';
 
+jest.mock('../../../utils/users', () => ({
+  getInitials: jest.fn(() => 'JD'),
+  getDisplayName: jest.fn(() => 'John Doe'),
+}));
+
 describe('NavUser', () => {
   it('shows the initials of the user', async () => {
-    render(<NavUser initials="JD">John Doe</NavUser>);
+    render(<NavUser />);
 
     await screen.findByText('JD');
   });
 
+  it('passing initials and children overrides the inside logic', async () => {
+    render(<NavUser initials="MS">Michael Scott</NavUser>);
+    await screen.findByText('MS');
+    const userName = screen.getByText('Michael Scott');
+    expect(userName).toBeInTheDocument();
+  });
+
   it('contains the user name', async () => {
-    render(<NavUser initials="JD">John Doe</NavUser>);
+    render(<NavUser />);
     await screen.findByText('JD');
     const userName = screen.getByText('John Doe');
     expect(userName).toBeInTheDocument();
   });
 
   it('shows the user menu when clicked', async () => {
-    const { user } = render(<NavUser initials="JD">John Doe</NavUser>);
+    const { user } = render(<NavUser />);
     await screen.findByText('JD');
     const buttonMenu = screen.getByRole('button');
     await user.click(buttonMenu);
@@ -26,7 +38,7 @@ describe('NavUser', () => {
   });
 
   it('shows the profile link in the user menu when clicked', async () => {
-    const { user } = render(<NavUser initials="JD">John Doe</NavUser>);
+    const { user } = render(<NavUser />);
     await screen.findByText('JD');
     const buttonMenu = screen.getByRole('button');
     await user.click(buttonMenu);
@@ -35,7 +47,7 @@ describe('NavUser', () => {
   });
 
   it('shows the logout link in the user menu when clicked', async () => {
-    const { user } = render(<NavUser initials="JD">John Doe</NavUser>);
+    const { user } = render(<NavUser />);
     await screen.findByText('JD');
     const buttonMenu = screen.getByRole('button');
     await user.click(buttonMenu);
@@ -44,7 +56,7 @@ describe('NavUser', () => {
   });
 
   it('shows the logout link with correct hover styles', async () => {
-    const { user } = render(<NavUser initials="JD">John Doe</NavUser>);
+    const { user } = render(<NavUser />);
 
     // Open the menu
     const buttonMenu = screen.getByRole('button');

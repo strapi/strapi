@@ -41,7 +41,8 @@ const renderAdmin = async (
         return features?.future?.[name] === true;
       },
     },
-    // @ts-expect-error – there's pollution from the global scope of Node.
+    // eslint-disable-next-line
+    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision. Cannot use @ts-expect-error because of build:code and build:types context collision.
     features: {
       SSO: 'sso',
       AUDIT_LOGS: 'audit-logs',
@@ -57,6 +58,11 @@ const renderAdmin = async (
       nps: false,
       promoteEE: true,
     },
+    // eslint-disable-next-line
+    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.
+    ai: {
+      enabled: true,
+    },
   };
 
   const { get } = getFetchClient();
@@ -67,12 +73,15 @@ const renderAdmin = async (
     features: {
       name: string;
     }[];
+    ai: {
+      enabled: boolean;
+    };
   }
 
   try {
     const {
       data: {
-        data: { isEE, isTrial, features, flags },
+        data: { isEE, isTrial, features, flags, ai },
       },
     } = await get<{ data: ProjectType }>('/admin/project-type');
 
@@ -81,9 +90,13 @@ const renderAdmin = async (
     window.strapi.flags = flags;
     window.strapi.features = {
       ...window.strapi.features,
-      isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
+      isEnabled: (featureName: string | undefined) =>
+        features.some((feature) => feature.name === featureName),
     };
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
+    // eslint-disable-next-line
+    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.
+    window.strapi.ai = ai;
   } catch (err) {
     /**
      * If this fails, we simply don't activate any EE features.

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-import { sharedSetup } from '../../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 test.describe('RBAC - Delete Roles', () => {
   // Runs before each test
@@ -10,7 +10,7 @@ test.describe('RBAC - Delete Roles', () => {
     await sharedSetup('rbac-roles', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Navigate to the Users management page

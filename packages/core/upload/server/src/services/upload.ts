@@ -48,13 +48,13 @@ const { bytesToKbytes } = fileUtils;
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const fileService = getService('file');
 
-  const sendMediaMetrics = (data: Pick<File, 'caption' | 'alternativeText'>) => {
+  const sendMediaMetrics = async (data: Pick<File, 'caption' | 'alternativeText'>) => {
     if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-      strapi.telemetry.send('didSaveMediaWithCaption');
+      await getService('metrics').trackUsage('didSaveMediaWithCaption');
     }
 
     if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-      strapi.telemetry.send('didSaveMediaWithAlternativeText');
+      await getService('metrics').trackUsage('didSaveMediaWithAlternativeText');
     }
   };
 
@@ -148,6 +148,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
+      focalPoint: fileInfo.focalPoint,
       folder: fileInfo.folder,
       folderPath: await fileService.getFolderPath(fileInfo.folder),
       hash: imageManipulationService.generateFileName(basename),
@@ -185,10 +186,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     fileInfo: FileInfo,
     metas?: Metas
   ): Promise<UploadableFile> {
+    // Prefer detected MIME type from security validation. Treat application/octet-stream as
+    // undeclared so we use detected type when the client sends no real Content-Type.
+    const detected = (file as any).detectedMimeType;
+    const declared = file.mimetype || '';
+    const mimeType =
+      detected ||
+      (declared && declared !== 'application/octet-stream' ? declared : undefined) ||
+      'application/octet-stream';
+
     const currentFile = (await formatFileInfo(
       {
         filename: file.originalFilename ?? 'unamed',
-        type: file.mimetype ?? 'application/octet-stream',
+        type: mimeType,
         size: file.size,
       },
       fileInfo,
@@ -223,7 +233,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       files,
     }: {
       data: Record<string, unknown>;
-      files: InputFile | InputFile[];
+      files: InputFile[];
     },
     opts?: CommonOptions
   ) {
@@ -231,8 +241,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // create temporary folder to store files for stream manipulation
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
-    let uploadedFiles: any[] = [];
-
+    const uploadedFiles = [];
     try {
       const { fileInfo, ...metas } = data;
 
@@ -244,9 +253,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return uploadFileAndPersist(fileData, { user });
       };
 
-      uploadedFiles = await Promise.all(
-        fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
+      const concurrentUploadSize = Math.max(
+        1,
+        strapi.config.get<Config>('plugin::upload').concurrentUploadSize ?? 1
       );
+
+      const fileBatches = _.chunk(
+        fileArray.map((file, idx) => ({ file, fileInfo: fileInfoArray[idx] || {} })),
+        concurrentUploadSize
+      );
+
+      for (const batch of fileBatches) {
+        const results = await Promise.all(
+          batch.map(({ file, fileInfo }) => doUpload(file, fileInfo))
+        );
+        uploadedFiles.push(...results);
+      }
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);
@@ -339,7 +361,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function updateFileInfo(
     id: ID,
-    { name, alternativeText, caption, folder }: FileInfo,
+    { name, alternativeText, caption, focalPoint, folder }: FileInfo,
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
@@ -357,6 +379,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       name: newName,
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
+      focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
       folder: _.isUndefined(folder) ? dbFile.folder : folder,
       folderPath: _.isUndefined(folder) ? dbFile.path : await fileService.getFolderPath(folder),
     };
@@ -436,7 +459,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    sendMediaMetrics(fileValues);
+    await sendMediaMetrics(fileValues);
 
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
@@ -456,7 +479,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    sendMediaMetrics(fileValues);
+    await sendMediaMetrics(fileValues);
 
     const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -539,11 +562,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res as Settings | null;
   }
 
-  function setSettings(value: Settings) {
+  async function setSettings(value: Settings) {
     if (value.responsiveDimensions === true) {
-      strapi.telemetry.send('didEnableResponsiveDimensions');
+      await getService('metrics').trackUsage('didEnableResponsiveDimensions');
     } else {
-      strapi.telemetry.send('didDisableResponsiveDimensions');
+      await getService('metrics').trackUsage('didDisableResponsiveDimensions');
     }
 
     return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });

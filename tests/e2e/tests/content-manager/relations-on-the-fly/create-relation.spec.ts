@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait } from '../../../utils/shared';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { clickAndWait } from '../../../../utils/shared';
 
 const CREATE_URL = /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
 
 test.describe('Relations on the fly - Create a Relation', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     // Step 0. Login as admin
     await login({ page });

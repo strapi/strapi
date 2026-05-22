@@ -20,6 +20,7 @@ export interface Options {
   install?: boolean;
   example?: boolean;
   gitInit?: boolean;
+  nonInteractive?: boolean;
   templateBranch?: string;
   templatePath?: string;
 }

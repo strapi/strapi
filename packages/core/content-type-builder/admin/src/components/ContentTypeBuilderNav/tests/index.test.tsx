@@ -55,11 +55,7 @@ jest.mock('../../DataManager/useDataManager.ts', () => {
 
 const mockedUseDataManager = jest.mocked(useDataManager);
 
-const App = (
-  <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
-    <div />
-  </Layouts.Root>
-);
+const App = <ContentTypeBuilderNav />;
 
 describe('<ContentTypeBuilderNav />', () => {
   beforeEach(() => {
@@ -452,7 +448,7 @@ describe('<ContentTypeBuilderNav />', () => {
     it('should render the search input', () => {
       render(App);
 
-      expect(screen.getByRole('textbox', { name: /search/i })).toBeInTheDocument();
+      expect(screen.getByRole('searchbox', { name: /search/i })).toBeInTheDocument();
     });
 
     it('Should call search.onChange when the input value changes', async () => {
@@ -460,7 +456,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
       render(App);
 
-      const input = screen.getByRole('textbox', { name: /search/i });
+      const input = screen.getByRole('searchbox', { name: /search/i });
       await user.type(input, 'test');
 
       expect(input).toHaveValue('test');
@@ -472,7 +468,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
       render(App);
 
-      const input = screen.getByRole('textbox', { name: /search/i });
+      const input = screen.getByRole('searchbox', { name: /search/i });
       await user.type(input, 'test');
 
       expect(input).toHaveValue('test');

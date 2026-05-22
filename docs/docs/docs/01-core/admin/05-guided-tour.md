@@ -7,21 +7,9 @@ The Guided Tour provides an interactive onboarding experience that guides new us
 The Guided Tour system is built with a modular architecture consisting of:
 
 - **Context Provider** (`Context.tsx`) - Global state management and persistence
-- **Tour Factory** (`Tours.tsx`) - Tour creation and step management
-- **Step Components** (`Step.tsx`) - Reusable popover components for tour steps
+- **Tour Factory** (`Tours.tsx`) - Tour factory and GuidedTourTooltip
+- **Steps** (`Steps`) - Step factory, reusable step components, and tour specific step components
 - **Overview Component** (`Overview.tsx`) - Homepage tour overview and progress tracking
-
-### Core Files
-
-```
-GuidedTour/
-├── Context.tsx         # State management and React context
-├── Tours.tsx           # Tour definitions and factory functions
-├── Step.tsx            # Step component factory and UI
-├── Overview.tsx        # Homepage overview component
-└── tests/
-    └── reducer.test.ts # Unit tests for state reducer
-```
 
 ## Core Concepts
 
@@ -70,6 +58,29 @@ Steps can be conditionally displayed based on user actions:
   content: (Step) => (/* step content */)
 }
 ```
+
+### 4. Excluding Steps from Step Count
+
+Some steps shouldn't be counted in the step count displayed to the user. Use `excludeFromStepCount` to exclude them:
+
+```typescript
+{
+  name: 'Welcome',
+  excludeFromStepCount: true,
+  content: (Step) => (
+    <Step.Root>
+      <Step.Title id="tour.welcome" defaultMessage="Welcome!" />
+      <Step.Content id="tour.intro" defaultMessage="Let's get started with this tour." />
+      <Step.Actions showStepCount={false} />
+    </Step.Root>
+  )
+}
+```
+
+`createTour()` will add a `_meta` property to the tour object that provides information about the number of steps in the tour (total steps) and then the number of steps that will actually be displayed to the user:
+
+- `_meta.totalStepCount` - The total number of steps defined for the tour
+- `_meta.displayedStepCount` - The total number of steps - the number of steps with `excludeFromStepCount: true`
 
 ## Usage Guide
 
@@ -160,10 +171,6 @@ const MyComponent = () => {
 ```
 
 3. **Mark actions complete** to trigger conditional steps:
-
-:::note
-To foster a declarative API it is recommended to update the [backend endpoint](#backend-integration) for actions that save to the database and invalidate the cache when the action is completed. Otherwise an action on the frontend (ie didCopyApiToken) can update the state imperatively.
-:::
 
 ```tsx
 import { useGuidedTour } from './Context';
@@ -271,7 +278,6 @@ const initialState = {
   tours: {
     contentManager: {
       currentStep: 0,
-      length: 3,
       isCompleted: false,
     },
   },
@@ -285,10 +291,12 @@ const initialState = {
 The tour reducer handles these actions:
 
 - `next_step` - Advance to the next step in a tour
+- `previous_step` - Go back to the previous step in a tour
+- `go_to_step` - Go to a specific step
 - `skip_tour` - Mark a tour as completed (skipped)
-- `set_completed_actions` - Update the list of completed user actions
 - `skip_all_tours` - Disable all tours globally
 - `reset_all_tours` - Reset all tours to initial state
+- `set_completed_actions` - Update the list of completed user actions
 
 ### Using the Hook
 
@@ -318,9 +326,9 @@ Tour state is automatically persisted to localStorage using the `usePersistentSt
 
 Tours integrate with the backend through:
 
-- `useGetGuidedTourMetaQuery()` - Fetches tour metadata from the server
-- Completed actions are synchronized between client and server.
-- First-time user detection (`isFirstSuperAdminUser`)
+`useGetGuidedTourMetaQuery()`
+
+- Fetches relative metadata from the server such as `isFirstSuperAdminUser`
 
 ## E2E Testing
 
@@ -336,6 +344,7 @@ type TourStep<P extends string> = {
   name: P;
   content: Content;
   when?: (completedActions: ExtendedCompletedActions) => boolean;
+  excludeFromStepCount?: boolean; // Exclude from "Step X of Y" counting
 };
 
 // State management
@@ -348,9 +357,17 @@ type State = {
 type Action =
   | { type: 'next_step'; payload: ValidTourName }
   | { type: 'skip_tour'; payload: ValidTourName }
+  | { type: 'previous_step'; payload: ValidTourName }
+  | { type: 'go_to_step'; payload: { tourName: ValidTourName; step: number } }
   | { type: 'set_completed_actions'; payload: ExtendedCompletedActions }
   | { type: 'skip_all_tours' }
   | { type: 'reset_all_tours' };
+
+// Tour metadata
+type TourMeta = {
+  totalStepCount: number;
+  displayedStepCount: number;
+};
 
 // Step components
 type Step = {
@@ -359,4 +376,7 @@ type Step = {
   Content: (props: StepProps) => React.ReactNode;
   Actions: (props: ActionsProps & { to?: string } & FlexProps) => React.ReactNode;
 };
+
+// Tour object includes both steps and metadata
+type Tour = Components & { _meta: TourMeta };
 ```

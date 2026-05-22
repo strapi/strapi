@@ -3,11 +3,22 @@
  * This file contains functions responsible for mapping Strapi attribute definitions to Zod schemas.
  */
 
-import type { Schema } from '@strapi/types';
+import type { Core, Schema } from '@strapi/types';
 import * as z from 'zod/v4';
 
 // eslint-disable-next-line import/no-cycle
 import * as attributes from './attributes';
+
+const isCustomFieldAttribute = (
+  attribute: unknown
+): attribute is { type: 'customField'; customField: string } => {
+  return (
+    !!attribute &&
+    typeof attribute === 'object' &&
+    (attribute as any).type === 'customField' &&
+    typeof (attribute as any).customField === 'string'
+  );
+};
 
 /**
  * Creates a Zod schema for a collection of Strapi attributes.
@@ -27,12 +38,13 @@ import * as attributes from './attributes';
  * ```
  */
 export const createAttributesSchema = (
+  strapi: Core.Strapi,
   attributes: [name: string, attribute: Schema.Attribute.AnyAttribute][]
 ) => {
   return attributes.reduce((acc, [name, attribute]) => {
     return acc.extend({
       get [name]() {
-        return mapAttributeToSchema(attribute);
+        return mapAttributeToSchema(strapi, attribute);
       },
     });
   }, z.object({}));
@@ -57,12 +69,13 @@ export const createAttributesSchema = (
  * ```
  */
 export const createAttributesInputSchema = (
+  strapi: Core.Strapi,
   attributes: [name: string, attribute: Schema.Attribute.AnyAttribute][]
 ) => {
   return attributes.reduce((acc, [name, attribute]) => {
     return acc.extend({
       get [name]() {
-        return mapAttributeToInputSchema(attribute);
+        return mapAttributeToInputSchema(strapi, attribute);
       },
     });
   }, z.object({}));
@@ -87,7 +100,10 @@ export const createAttributesInputSchema = (
  * const booleanSchema = mapAttributeToSchema(booleanAttribute); // Returns a Zod boolean schema with a default.
  * ```
  */
-export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): z.ZodTypeAny => {
+export const mapAttributeToSchema = (
+  strapi: Core.Strapi,
+  attribute: Schema.Attribute.AnyAttribute
+): z.ZodTypeAny => {
   switch (attribute.type) {
     case 'biginteger':
       return attributes.bigIntegerToSchema(attribute);
@@ -96,7 +112,7 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     case 'boolean':
       return attributes.booleanToSchema(attribute);
     case 'component':
-      return attributes.componentToSchema(attribute);
+      return attributes.componentToSchema(strapi, attribute);
     case 'date':
       return attributes.dateToSchema(attribute);
     case 'datetime':
@@ -116,9 +132,9 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     case 'json':
       return attributes.jsonToSchema(attribute);
     case 'media':
-      return attributes.mediaToSchema(attribute);
+      return attributes.mediaToSchema(strapi, attribute);
     case 'relation':
-      return attributes.relationToSchema(attribute);
+      return attributes.relationToSchema(strapi, attribute);
     case 'password':
     case 'text':
     case 'richtext':
@@ -131,6 +147,17 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     case 'uid':
       return attributes.uidToSchema(attribute);
     default: {
+      if (isCustomFieldAttribute(attribute)) {
+        const attrCF = attribute as { type: 'customField'; customField: string };
+        const customField = strapi.get('custom-fields').get(attrCF.customField);
+        if (!customField) {
+          throw new Error(`Custom field '${attrCF.customField}' not found`);
+        }
+
+        // Re-dispatch with the resolved underlying Strapi kind
+        return mapAttributeToSchema(strapi, { ...attrCF, type: customField.type });
+      }
+
       const { type } = attribute as Schema.Attribute.AnyAttribute;
 
       throw new Error(`Unsupported attribute type: ${type}`);
@@ -179,6 +206,7 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
  *
  */
 export const mapAttributeToInputSchema = (
+  strapi: Core.Strapi,
   attribute: Schema.Attribute.AnyAttribute
 ): z.ZodTypeAny => {
   switch (attribute.type) {
@@ -224,6 +252,17 @@ export const mapAttributeToInputSchema = (
     case 'uid':
       return attributes.uidToInputSchema(attribute);
     default: {
+      if (isCustomFieldAttribute(attribute)) {
+        const attrCF = attribute as { type: 'customField'; customField: string };
+        const customField = strapi.get('custom-fields').get(attrCF.customField);
+        if (!customField) {
+          throw new Error(`Custom field '${attrCF.customField}' not found`);
+        }
+
+        // Re-dispatch with the resolved underlying Strapi kind
+        return mapAttributeToInputSchema(strapi, { ...attrCF, type: customField.type });
+      }
+
       const { type } = attribute as Schema.Attribute.AnyAttribute;
 
       throw new Error(`Unsupported attribute type: ${type}`);

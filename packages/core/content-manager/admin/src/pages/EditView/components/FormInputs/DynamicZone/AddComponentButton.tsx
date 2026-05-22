@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Flex, Typography, TypographyComponent } from '@strapi/design-system';
+import { Button, Flex, Typography } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
 import { styled } from 'styled-components';
 
@@ -59,9 +59,17 @@ const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolea
 
 const StyledButton = styled(Button)`
   padding-left: ${({ theme }) => theme.spaces[3]};
+  padding-top: ${({ theme }) => theme.spaces[2]};
+  padding-bottom: ${({ theme }) => theme.spaces[2]};
   border-radius: 26px;
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
-  height: 5rem;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-left: ${({ theme }) => theme.spaces[3]};
+    padding-top: ${({ theme }) => theme.spaces[0]};
+    padding-bottom: ${({ theme }) => theme.spaces[0]};
+    height: 5rem;
+  }
 `;
 
 export { AddComponentButton };

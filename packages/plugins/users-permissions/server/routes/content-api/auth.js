@@ -94,6 +94,7 @@ module.exports = (strapi) => {
       path: '/auth/send-email-confirmation',
       handler: 'auth.sendEmailConfirmation',
       config: {
+        middlewares: ['plugin::users-permissions.rateLimit'],
         prefix: '',
       },
       request: {
@@ -113,6 +114,18 @@ module.exports = (strapi) => {
         body: { 'application/json': validator.changePasswordBodySchema },
       },
       response: validator.authResponseSchema,
+    },
+    {
+      method: 'POST',
+      path: '/auth/refresh',
+      handler: 'auth.refresh',
+      config: { prefix: '' },
+    },
+    {
+      method: 'POST',
+      path: '/auth/logout',
+      handler: 'auth.logout',
+      config: { prefix: '' },
     },
   ];
 };

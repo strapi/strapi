@@ -24,15 +24,36 @@ import { RelativeTime } from './RelativeTime';
 
 import type { RecentDocument } from '../../../shared/contracts/homepage';
 
-const CellTypography = styled(Typography)`
+const BASE_MAX_WIDTH = '14.4rem';
+
+/**
+ * Calculate dynamic max-width based on column span
+ * Base width is 14.4rem for 6 columns, scale proportionally
+ */
+const calculateDynamicMaxWidth = (columnWidth: number = 4): string => {
+  const baseColumnWidth = 4;
+  const baseMaxWidth = 14.4; // rem
+  const calculatedWidth = (baseMaxWidth * columnWidth) / baseColumnWidth;
+  return `${Math.round(calculatedWidth * 10) / 10}rem`;
+};
+
+const CellTypography = styled(Typography)<{ $maxWidth?: string }>`
   display: block;
-  max-width: 14.4rem;
+  max-width: ${({ $maxWidth }) => $maxWidth || BASE_MAX_WIDTH};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
-const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) => {
+const RecentDocumentsTable = ({
+  documents,
+  type,
+  dynamicMaxWidth = BASE_MAX_WIDTH,
+}: {
+  documents: RecentDocument[];
+  type: 'edited' | 'published';
+  dynamicMaxWidth?: string;
+}) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -46,7 +67,9 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
   };
 
   const handleRowClick = (document: RecentDocument) => () => {
-    trackUsage('willEditEntryFromHome');
+    trackUsage('willEditEntryFromHome', {
+      entryType: type,
+    });
     const link = getEditViewLink(document);
     navigate(link);
   };
@@ -55,14 +78,23 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
     <Table colCount={5} rowCount={documents?.length ?? 0}>
       <Tbody>
         {documents?.map((document) => (
-          <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
+          <Tr
+            onClick={handleRowClick(document)}
+            cursor="pointer"
+            key={`${document.documentId}-${document.locale ?? 'default'}`}
+          >
             <Td>
-              <CellTypography title={document.title} variant="omega" textColor="neutral800">
+              <CellTypography
+                title={document.title}
+                variant="omega"
+                textColor="neutral800"
+                $maxWidth={dynamicMaxWidth}
+              >
                 {document.title}
               </CellTypography>
             </Td>
             <Td>
-              <CellTypography variant="omega" textColor="neutral600">
+              <CellTypography variant="omega" textColor="neutral600" $maxWidth={dynamicMaxWidth}>
                 {document.kind === 'singleType'
                   ? formatMessage({
                       id: 'content-manager.widget.last-edited.single-type',
@@ -95,7 +127,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
                 <IconButton
                   tag={Link}
                   to={getEditViewLink(document)}
-                  onClick={() => trackUsage('willEditEntryFromHome')}
+                  onClick={() => trackUsage('willEditEntryFromHome', { type })}
                   label={formatMessage({
                     id: 'content-manager.actions.edit.label',
                     defaultMessage: 'Edit',
@@ -117,9 +149,11 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
  * LastEditedWidget
  * -----------------------------------------------------------------------------------------------*/
 
-const LastEditedWidget = () => {
+const LastEditedWidget = ({ columnWidth = 6 }: { columnWidth?: number }) => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'update' });
+
+  const dynamicMaxWidth = calculateDynamicMaxWidth(columnWidth);
 
   if (isLoading) {
     return <Widget.Loading />;
@@ -140,16 +174,18 @@ const LastEditedWidget = () => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} />;
+  return <RecentDocumentsTable documents={data} type="edited" dynamicMaxWidth={dynamicMaxWidth} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
  * LastPublishedWidget
  * -----------------------------------------------------------------------------------------------*/
 
-const LastPublishedWidget = () => {
+const LastPublishedWidget = ({ columnWidth = 6 }: { columnWidth?: number }) => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'publish' });
+
+  const dynamicMaxWidth = calculateDynamicMaxWidth(columnWidth);
 
   if (isLoading) {
     return <Widget.Loading />;
@@ -170,7 +206,9 @@ const LastPublishedWidget = () => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} />;
+  return (
+    <RecentDocumentsTable documents={data} type="published" dynamicMaxWidth={dynamicMaxWidth} />
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -296,10 +334,13 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
             fontWeight="normal"
             $textColor="neutral600"
           >
-            {formatMessage({
-              id: 'content-manager.widget.chart-entries.title',
-              defaultMessage: 'entries',
-            })}
+            {formatMessage(
+              {
+                id: 'content-manager.widget.chart-entries.count.label',
+                defaultMessage: '{count, plural, =0 {entries} one {entry} other {entries}}',
+              },
+              { count: total }
+            )}
           </TextChart>
         </text>
       </svg>

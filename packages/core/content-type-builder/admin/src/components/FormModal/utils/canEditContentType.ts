@@ -1,5 +1,3 @@
-import get from 'lodash/get';
-
 import { getRelationType } from '../../../utils/getRelationType';
 
 import type { AnyAttribute, ContentType } from '../../../types';

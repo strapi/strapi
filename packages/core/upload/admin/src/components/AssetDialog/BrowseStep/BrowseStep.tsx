@@ -354,6 +354,9 @@ export const BrowseStep = ({
                 return (
                   <Grid.Item
                     col={3}
+                    m={4}
+                    s={6}
+                    xs={12}
                     key={`folder-${folder.id}`}
                     direction="column"
                     alignItems="stretch"
@@ -402,7 +405,7 @@ export const BrowseStep = ({
                                 {
                                   id: getTrad('list.folder.subtitle'),
                                   defaultMessage:
-                                    '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
+                                    '{folderCount, plural, one {# folder} other {# folders}}, {filesCount, plural, one {# asset} other {# assets}}',
                                 },
                                 {
                                   folderCount: folder.children?.count,
@@ -454,7 +457,13 @@ export const BrowseStep = ({
       )}
 
       {pagination.pageCount > 0 && (
-        <Flex justifyContent="space-between" paddingTop={4} position="relative" zIndex={1}>
+        <Flex
+          justifyContent="space-between"
+          paddingTop={4}
+          position="relative"
+          zIndex={1}
+          overflow="hidden"
+        >
           <PageSize
             pageSize={queryObject.pageSize! as number}
             onChangePageSize={onChangePageSize}

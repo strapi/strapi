@@ -1,6 +1,17 @@
-import { useAuth } from '@strapi/admin/strapi-admin';
-import { Avatar, Badge, Box, Flex, Typography } from '@strapi/design-system';
-import { Earth, Images, User, Key, Files, Layout, Graph, Webhooks } from '@strapi/icons';
+import { useAuth, useTracking } from '@strapi/admin/strapi-admin';
+import { Avatar, Badge, Box, Flex, LinkButton, Typography } from '@strapi/design-system';
+import {
+  Cloud,
+  CloudUpload,
+  Earth,
+  Images,
+  User,
+  Key,
+  Files,
+  Layout,
+  Graph,
+  Webhooks,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -85,6 +96,7 @@ const LinkCell = styled(Link)`
 `;
 
 const KeyStatisticsWidget = () => {
+  const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
   const { data: countDocuments, isLoading: isLoadingCountDocuments } = useGetCountDocumentsQuery();
   const { data: countKeyStatistics, isLoading: isLoadingKeyStatistics } =
@@ -216,6 +228,7 @@ const KeyStatisticsWidget = () => {
               to={item.link}
               key={`key-statistics-${key}`}
               data-testid={`stat-${key}`}
+              onClick={() => trackUsage('didOpenKeyStatisticsWidgetLink', { itemKey: key })}
             >
               <Flex alignItems="center" gap={2}>
                 <Flex
@@ -246,4 +259,35 @@ const KeyStatisticsWidget = () => {
   );
 };
 
-export { ProfileWidget, KeyStatisticsWidget };
+/* -------------------------------------------------------------------------------------------------
+ * DeployNowWidget
+ * -----------------------------------------------------------------------------------------------*/
+
+const DeployNowWidget = () => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Flex direction="column" gap={4} height="100%" alignItems="center" justifyContent="center">
+      <CloudUpload width="3.2rem" height="3.2rem" />
+      <Flex direction="column" gap={2}>
+        <Typography variant="beta" textAlign="center">
+          {formatMessage({
+            id: 'HomePage.widget.deploy-now.title',
+            defaultMessage: 'Ready to go live ?',
+          })}
+        </Typography>
+        <Typography variant="omega" textColor="neutral600" textAlign="center">
+          {formatMessage({
+            id: 'HomePage.widget.deploy-now.description',
+            defaultMessage: 'Deploy with Strapi Cloud',
+          })}
+        </Typography>
+      </Flex>
+      <LinkButton href="https://cloud.strapi.io/login" isExternal size="L" startIcon={<Cloud />}>
+        {formatMessage({ id: 'HomePage.widget.deploy-now.button', defaultMessage: 'Deploy Now' })}
+      </LinkButton>
+    </Flex>
+  );
+};
+
+export { ProfileWidget, KeyStatisticsWidget, DeployNowWidget };

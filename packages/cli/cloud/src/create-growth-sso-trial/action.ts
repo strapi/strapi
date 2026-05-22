@@ -1,4 +1,5 @@
 import { cloudApiFactory, tokenServiceFactory } from '../services';
+import { getContext } from '../services/context';
 import { createLogger } from '../services/logger';
 import { trackEvent } from '../utils/analytics';
 
@@ -36,7 +37,9 @@ export default async ({
   try {
     const response = await cloudApiService.createTrial({ strapiVersion: strapiVersion || '' });
 
-    await trackEvent({ logger, cwd: process.cwd() }, cloudApiService, 'didCreateGrowthSsoTrial', {
+    const ctx = getContext();
+
+    await trackEvent(ctx, cloudApiService, 'didCreateGrowthSsoTrial', {
       strapiVersion: strapiVersion || '',
     });
 

@@ -1,18 +1,234 @@
 import * as React from 'react';
 import { useParams, useLoaderData, useRevalidator } from 'react-router-dom';
+import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 
-// @ts-ignore
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
-import { Grid, Flex, Typography, JSONInput, Box } from '@strapi/design-system';
+import { Grid, Flex, Typography, JSONInput, Box, Button } from '@strapi/design-system';
+import { ChevronDown, ChevronRight } from '@strapi/icons';
 
 const filterAttributes = (item) => {
   const excludedKeys = ['documentId', 'id', 'createdAt', 'updatedAt', 'publishedAt'];
   return Object.entries(item).filter(([key]) => !excludedKeys.includes(key));
 };
 
+const ToggleableContainer = ({ headerText, children, isEmpty = false }) => {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
+  return (
+    <Flex direction="column" alignItems="flex-start" gap={1}>
+      <Flex
+        tag="button"
+        alignItems="center"
+        gap={1}
+        onClick={() => setIsExpanded(!isExpanded)}
+        paddingTop={1}
+        paddingBottom={1}
+        marginLeft={-1}
+        disabled={isEmpty}
+        color="neutral600"
+      >
+        {isExpanded ? <ChevronDown /> : <ChevronRight />}
+        <Typography variant="omega">{headerText}</Typography>
+      </Flex>
+      {isExpanded && (
+        <Box
+          borderWidth="0 0 0 2px"
+          borderColor="neutral200"
+          paddingLeft={3}
+          paddingTop={1}
+          paddingBottom={1}
+        >
+          {children}
+        </Box>
+      )}
+    </Flex>
+  );
+};
+
+const isImageMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('image/')
+  );
+};
+
+const isVideoMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('video/')
+  );
+};
+
+const isAudioMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('audio/')
+  );
+};
+
+const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = undefined }) => {
+  if (fieldName === 'blocks') {
+    return (
+      <Flex direction="column" alignItems="flex-start" fontSize="1.4rem" gap={2}>
+        {value ? <BlocksRenderer content={value} /> : 'null'}
+      </Flex>
+    );
+  }
+
+  // Use the email type to test clickable preview elements
+  if (fieldName === 'email') {
+    return (
+      <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
+        {value}
+      </Button>
+    );
+  }
+
+  // Handle image media fields
+  if (isImageMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box
+          tag="img"
+          src={value.url}
+          alt={value.alternativeText || value.name || 'Image'}
+          maxWidth="100%"
+          maxHeight="300px"
+          borderRadius="4px"
+          style={{
+            objectFit: 'contain',
+          }}
+        />
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  // Handle video media fields
+  if (isVideoMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box
+          tag="video"
+          src={value.url}
+          controls
+          maxWidth="100%"
+          maxHeight="300px"
+          borderRadius="4px"
+        >
+          Your browser does not support the video tag.
+        </Box>
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  // Handle audio media fields
+  if (isAudioMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box tag="audio" src={value.url} controls>
+          Your browser does not support the audio tag.
+        </Box>
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  if (Array.isArray(value)) {
+    return (
+      <ToggleableContainer
+        headerText={`Array (${value.length} items)`}
+        isEmpty={value.length === 0}
+      >
+        <Flex direction="column" gap={2}>
+          {value.map((item, index) => (
+            <Box key={index}>
+              {typeof item === 'object' && item !== null ? (
+                <NestedValue
+                  value={item}
+                  level={level + 1}
+                  arrayIndex={index}
+                  fieldName={fieldName}
+                />
+              ) : (
+                <Flex direction="column" gap={1}>
+                  <Typography variant="pi" textColor="neutral500">
+                    [{index}]
+                  </Typography>
+                  <NestedValue
+                    value={item}
+                    level={level + 1}
+                    arrayIndex={index}
+                    fieldName={fieldName}
+                  />
+                </Flex>
+              )}
+            </Box>
+          ))}
+        </Flex>
+      </ToggleableContainer>
+    );
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    const entries = filterAttributes(value);
+
+    return (
+      <ToggleableContainer
+        headerText={`${arrayIndex !== undefined ? `[${arrayIndex}] ` : ''}Object (${entries.length} properties)`}
+        isEmpty={entries.length === 0}
+      >
+        <Flex direction="column" alignItems="flex-start" gap={2}>
+          {entries.map(([key, val]) => (
+            <Flex key={key} direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="sigma" textColor="neutral600">
+                {key}
+              </Typography>
+              <NestedValue value={val} level={level + 1} fieldName={key} />
+            </Flex>
+          ))}
+        </Flex>
+      </ToggleableContainer>
+    );
+  }
+
+  return (
+    <Box>
+      <Typography>{String(value)}</Typography>
+    </Box>
+  );
+};
+
+const Entry = ({ data }) => {
+  return (
+    <Grid.Root gap={5} tag="dl">
+      {filterAttributes(data).map(([key, value]) => (
+        <Grid.Item key={key} col={6} s={12} direction="column" alignItems="start">
+          <Typography variant="sigma" textColor="neutral600" tag="dt">
+            {key}
+          </Typography>
+          <Flex gap={3} direction="column" alignItems="start" tag="dd">
+            <NestedValue value={value} fieldName={key} />
+          </Flex>
+        </Grid.Item>
+      ))}
+    </Grid.Root>
+  );
+};
+
 const PreviewComponent = () => {
-  const { apiName, documentId, locale, status: documentStatus, collectionType } = useParams();
-  const data = useLoaderData();
+  const { apiName, documentId, locale, status: documentStatus } = useParams();
+  const { main, unrelated } = useLoaderData();
   const revalidator = useRevalidator();
 
   React.useEffect(() => {
@@ -31,10 +247,16 @@ const PreviewComponent = () => {
       if (data?.type === 'strapiUpdate') {
         // The data is stale, force a refetch
         revalidator.revalidate();
+      } else if (data?.type === 'strapiScript') {
+        const script = window.document.createElement('script');
+        script.textContent = data.payload.script;
+        window.document.head.appendChild(script);
       }
     };
 
     window.addEventListener('message', handleMessage);
+
+    window.parent?.postMessage({ type: 'previewReady' }, '*');
 
     return () => {
       window.removeEventListener('message', handleMessage);
@@ -76,7 +298,7 @@ const PreviewComponent = () => {
                 URL metadata
               </Typography>
               <Grid.Root gap={5} tag="dl">
-                <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                <Grid.Item col={12} s={6} direction="column" alignItems="start">
                   <Typography variant="sigma" textColor="neutral600" tag="dt">
                     Content Type
                   </Typography>
@@ -84,7 +306,7 @@ const PreviewComponent = () => {
                     <Typography>{apiName}</Typography>
                   </Flex>
                 </Grid.Item>
-                <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                <Grid.Item col={12} s={6} direction="column" alignItems="start">
                   <Typography variant="sigma" textColor="neutral600" tag="dt">
                     Document Id
                   </Typography>
@@ -92,7 +314,7 @@ const PreviewComponent = () => {
                     <Typography>{documentId}</Typography>
                   </Flex>
                 </Grid.Item>
-                <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                <Grid.Item col={12} s={6} direction="column" alignItems="start">
                   <Typography variant="sigma" textColor="neutral600" tag="dt">
                     Status
                   </Typography>
@@ -100,7 +322,7 @@ const PreviewComponent = () => {
                     <Typography>{documentStatus}</Typography>
                   </Flex>
                 </Grid.Item>
-                <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                <Grid.Item col={12} s={6} direction="column" alignItems="start">
                   <Typography variant="sigma" textColor="neutral600" tag="dt">
                     Locale
                   </Typography>
@@ -111,28 +333,21 @@ const PreviewComponent = () => {
                 Rest API data
               </Typography>
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
-              {data ? (
+              {main ? (
                 <>
-                  <Grid.Root gap={5} tag="dl">
-                    {filterAttributes(data).map(([key, value]) => (
-                      <Grid.Item key={key} col={6} s={12} direction="column" alignItems="start">
-                        <Typography variant="sigma" textColor="neutral600" tag="dt">
-                          {key}
-                        </Typography>
-                        <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                          <Typography>
-                            {typeof value === 'object' && value !== null
-                              ? JSON.stringify(value, null, 2)
-                              : String(value)}
-                          </Typography>
-                        </Flex>
-                      </Grid.Item>
-                    ))}
-                  </Grid.Root>
-                  <JSONInput value={JSON.stringify(data, null, 2)} disabled />
+                  <Entry data={main} />
+                  <JSONInput value={JSON.stringify(main, null, 2)} disabled />
                 </>
               ) : (
                 <Typography textColor="neutral600">No data found</Typography>
+              )}
+              {unrelated && (
+                <>
+                  <Typography variant="delta" tag="h3">
+                    Unrelated API data
+                  </Typography>
+                  <Entry data={unrelated} />
+                </>
               )}
             </Flex>
           </Layouts.Content>

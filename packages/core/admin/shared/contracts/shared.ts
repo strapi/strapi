@@ -1,4 +1,4 @@
-import type { Data } from '@strapi/types';
+import type { Data, Struct, UID } from '@strapi/types';
 
 export interface Entity {
   id: Data.ID;
@@ -46,6 +46,11 @@ export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
 export type SanitizedAdminUser = Omit<AdminUser, 'password' | 'resetPasswordToken' | 'roles'> & {
   roles: SanitizedAdminRole[];
 };
+
+export type AdminTokenOwner = Pick<
+  AdminUser,
+  'id' | 'firstname' | 'lastname' | 'username' | 'email'
+>;
 export interface AdminRole extends Entity {
   name: string;
   code: string;
@@ -64,4 +69,13 @@ export interface Pagination {
   pageSize: number;
   pageCount: number;
   total: number;
+}
+
+export interface FieldContentSourceMap {
+  path: string;
+  type: Struct.SchemaAttributes[string]['type'];
+  documentId: string;
+  locale: string | null;
+  model?: UID.Schema;
+  kind?: Struct.ContentTypeKind;
 }

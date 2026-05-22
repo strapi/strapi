@@ -21,7 +21,7 @@ const SSOProviders = ({ providers, displayAllProviders }: SSOProvidersProps) => 
     return (
       <Grid.Root gap={4}>
         {providers.map((provider) => (
-          <Grid.Item key={provider.uid} col={4} direction="column" alignItems="stretch">
+          <Grid.Item key={provider.uid} col={4} xs={12} direction="column" alignItems="stretch">
             <SSOProviderButton provider={provider} />
           </Grid.Item>
         ))}
@@ -33,11 +33,11 @@ const SSOProviders = ({ providers, displayAllProviders }: SSOProvidersProps) => 
     return (
       <Grid.Root gap={4}>
         {providers.slice(0, 2).map((provider) => (
-          <Grid.Item key={provider.uid} col={4} direction="column" alignItems="stretch">
+          <Grid.Item key={provider.uid} col={4} xs={12} direction="column" alignItems="stretch">
             <SSOProviderButton provider={provider} />
           </Grid.Item>
         ))}
-        <Grid.Item col={4} direction="column" alignItems="stretch">
+        <Grid.Item col={4} xs={12} direction="column" alignItems="stretch">
           <Tooltip
             label={formatMessage({
               id: 'global.see-more',
@@ -108,6 +108,10 @@ const SSOButton = styled.a`
     text-decoration: none;
   }
   color: ${({ theme }) => theme.colors.neutral600};
+
+  ${({ theme }) => theme.breakpoints.initial} {
+    width: 100%;
+  }
 `;
 
 export { SSOProviders };

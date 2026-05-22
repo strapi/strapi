@@ -129,5 +129,10 @@ describe('admin_app reducer', () => {
       expect(localStorage.getItem('isLoggedIn')).toBe(null);
       expect(deleteCookie).toHaveBeenCalledWith('jwtToken');
     });
+
+    it('login persist=false should not touch localStorage token', () => {
+      reducer(undefined, login({ token: 'abcd', persist: false }));
+      expect(localStorage.getItem('jwtToken')).toBe(null);
+    });
   });
 });

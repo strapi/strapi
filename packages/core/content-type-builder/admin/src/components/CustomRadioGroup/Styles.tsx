@@ -11,7 +11,7 @@ const Wrapper = styled(Flex)`
     user-select: none;
     flex: 1;
 
-    ${inputFocusStyle()}
+    ${inputFocusStyle() as any}
   }
 
   input {

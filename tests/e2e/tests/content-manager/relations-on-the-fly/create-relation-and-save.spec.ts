@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait } from '../../../utils/shared';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { clickAndWait } from '../../../../utils/shared';
 
 test.describe('Relations on the fly - Create a Relation and Save', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
   });
 
@@ -37,7 +37,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     await expect(page.getByRole('status', { name: 'Draft' }).first()).toBeVisible();
 
     // Step 5. Close the relation modal to see the updated relation on the root document
-    await page.getByRole('button', { name: 'Close modal' }).click();
+    await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
 
     // Wait for the modal to be closed
     await expect(page.getByText('Create a relation')).not.toBeVisible();

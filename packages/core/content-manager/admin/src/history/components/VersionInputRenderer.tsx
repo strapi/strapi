@@ -87,7 +87,6 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       <>
         <Field.Label action={props.labelAction}>{props.label}</Field.Label>
         <Box marginTop={1}>
-          {/* @ts-expect-error – we dont need closeLabel */}
           <StyledAlert variant="default">
             {formatMessage({
               id: 'content-manager.history.content.no-relations',
@@ -143,7 +142,6 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         </Flex>
       )}
       {meta.missingCount > 0 && (
-        /* @ts-expect-error – we dont need closeLabel */
         <StyledAlert
           marginTop={1}
           variant="warning"
