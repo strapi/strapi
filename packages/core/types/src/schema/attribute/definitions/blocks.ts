@@ -104,7 +104,9 @@ interface ImageBlockNode extends BaseNode {
 }
 export interface EmbeddedSocialMediaNode extends BaseNode {
   type: 'embedded-social-media';
-  embedSocialMedia: any;
-  socialMedia: 'youtube' | 'x-post';
+  embedSocialMedia: {
+    socialMediaUrl: string;
+    socialMediaType: 'youtube' | 'x-post';
+  };
   children: TextInlineNode[];
 }

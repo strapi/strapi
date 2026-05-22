@@ -22,6 +22,7 @@ declare global {
   interface Window {
     onYouTubePlayerAPIReady: () => void;
     YT: any;
+    twttr: any;
   }
 }
 
@@ -39,33 +40,43 @@ const schema = yup.object({
     }),
 });
 
-const XMediaElement = ({ html }: { html: string }) => {
-  const markup = { __html: html };
+const XMediaElement = ({ xUrl }: { xUrl: string }) => {
+  function loadTweet(id: string): void {
+    window.twttr.widgets
+      .createTweet(id, document.getElementById('first-tweet'), {
+        align: 'left',
+      })
+      .then(function (el: any) {});
+  }
 
   React.useEffect(() => {
-    const script = document.createElement('script');
+    const url = new URL(xUrl);
+    const pathname = url.pathname.split('/');
+    const id = pathname[pathname.length - 1];
+    const isXJsLoaded = document.getElementById('twitter-wjs');
+    if (!isXJsLoaded) {
+      const script = document.createElement('script');
 
-    script.id = 'twitter-wjs';
-    script.src = 'https://platform.twitter.com/widgets.js';
-    script.async = true;
+      script.id = 'twitter-wjs';
+      script.src = 'https://platform.twitter.com/widgets.js';
+      script.async = true;
 
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
+      document.body.appendChild(script);
+      document.getElementById('twitter-wjs')?.addEventListener('load', () => {
+        loadTweet(id);
+      });
+    } else {
+      loadTweet(id);
+    }
   }, []);
 
-  return <div dangerouslySetInnerHTML={markup}></div>;
+  return <div id="first-tweet"></div>;
 };
 
-const YoutubeMediaElement = ({ youtubeUrl }: { youtubeUrl: URL }) => {
-  const videoId = youtubeUrl.searchParams.get('v');
-  const src = 'https://www.youtube.com/embed/' + videoId;
-
+const YoutubeMediaElement = ({ youtubeUrl }: { youtubeUrl: string }) => {
   return (
     <iframe
-      src={src}
+      src={youtubeUrl}
       width="640"
       height="390"
       referrerPolicy="strict-origin-when-cross-origin"
@@ -82,8 +93,8 @@ const EmbedSocialMediaDialog = () => {
   if (!components || !isOpen) return null;
 
   const insertEmbedSocialMedia = (
-    element: React.JSX.Element,
-    socialMedia: 'youtube' | 'x-post'
+    socialMediaUrl: string,
+    socialMediaType: 'youtube' | 'x-post'
   ) => {
     // If the selection is inside a list, split the list so that the modified block is outside of it
     Transforms.unwrapNodes(editor, {
@@ -112,8 +123,10 @@ const EmbedSocialMediaDialog = () => {
     // Convert embedding to nodes and insert them
     const embedSocialMediaNode: Block<'embedded-social-media'> = {
       type: 'embedded-social-media',
-      embedSocialMedia: element,
-      socialMedia,
+      embedSocialMedia: {
+        socialMediaUrl,
+        socialMediaType,
+      },
       children: [{ type: 'text', text: '' }],
     };
 
@@ -130,24 +143,12 @@ const EmbedSocialMediaDialog = () => {
     socialMediaType: 'youtube' | 'x-post';
     socialMediaUrl: string;
   }) => {
-    switch (socialMediaType) {
-      case 'youtube':
-        const youtubeUrl = new URL(socialMediaUrl);
-        insertEmbedSocialMedia(<YoutubeMediaElement youtubeUrl={youtubeUrl} />, 'youtube');
-        break;
-      case 'x-post':
-        const params = new URLSearchParams({
-          url: socialMediaUrl,
-          omit_script: 'true',
-        }).toString();
-        const url = new URL('https://publish.x.com/oembed');
-        url.search = params;
-        const response = await fetch(url, { method: 'GET' });
-        const data = await response.json();
-        const { html } = data;
-        insertEmbedSocialMedia(<XMediaElement html={html} />, 'x-post');
-        break;
+    if (socialMediaType == 'youtube') {
+      const youtubeUrl = new URL(socialMediaUrl);
+      const videoId = youtubeUrl.searchParams.get('v');
+      socialMediaUrl = 'https://www.youtube.com/embed/' + videoId;
     }
+    insertEmbedSocialMedia(socialMediaUrl, socialMediaType);
     setIsOpen(false);
   };
 
@@ -218,13 +219,16 @@ const EmbedSocialMedia = ({ attributes, children, element }: RenderElementProps)
     return null;
   }
 
-  const { embedSocialMedia } = element;
+  const { socialMediaUrl, socialMediaType } = element.embedSocialMedia;
 
-  return (
-    <>
-      <div>{embedSocialMedia}</div>
-    </>
-  );
+  switch (socialMediaType) {
+    case 'youtube':
+      return <YoutubeMediaElement youtubeUrl={socialMediaUrl} />;
+    case 'x-post':
+      return <XMediaElement xUrl={socialMediaUrl} />;
+    default:
+      break;
+  }
 };
 
 const embeddedSocialMediaBlocks: Pick<BlocksStore, 'embedded-social-media'> = {
