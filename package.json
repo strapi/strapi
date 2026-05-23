@@ -193,5 +193,8 @@
     "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   },
-  "isStrapiMonorepo": true
+  "isStrapiMonorepo": true,
+  "dependencies": {
+    "@strapi/core": "5.20.0"
+  }
 }
