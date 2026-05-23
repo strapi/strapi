@@ -22,17 +22,11 @@ import { useDeviceType } from '../../hooks/useDeviceType';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
 import { useIsMobile } from '../../hooks/useMediaQuery';
 
-import { getMatchingDocLink } from './utils/getMatchingDocLink';
+import { getMatchingDocLink, type DocLink } from './utils/getMatchingDocLink';
 
 /* -------------------------------------------------------------------------------------------------
  * BaseHeaderLayout
  * -----------------------------------------------------------------------------------------------*/
-
-interface DocLink {
-  link: string;
-  title: string;
-  path: string;
-}
 
 interface BaseHeaderLayoutProps extends Omit<TypographyProps<'div'>, 'tag'> {
   navigationAction?: React.ReactNode;

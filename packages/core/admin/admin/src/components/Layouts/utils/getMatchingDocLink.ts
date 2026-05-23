@@ -1,5 +1,11 @@
 import { matchRoutes, RouteObject } from 'react-router-dom';
 
+export interface DocLink {
+  link: string;
+  title: string;
+  path: string;
+}
+
 type DocRoute = RouteObject & { link: string; title: string };
 
 const matchingLinks: DocRoute[] = [
@@ -150,7 +156,7 @@ const matchingLinks: DocRoute[] = [
   },
 ];
 
-export function getMatchingDocLink(pathname: string) {
+export function getMatchingDocLink(pathname: string): DocLink | null {
   const matches = matchRoutes(matchingLinks, pathname);
   const match = matches?.[0];
 
