@@ -129,7 +129,7 @@
     "passport-local": "1.0.0",
     "pluralize": "8.0.0",
     "punycode": "2.3.1",
-    "qs": "6.15.0",
+    "qs": "6.15.2",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
     "react-intl": "6.6.2",
@@ -175,7 +175,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
-    "vite": "5.4.21",
+    "vite": "6.4.2",
     "vite-plugin-dts": "^4.3.0"
   },
   "peerDependencies": {
