@@ -152,7 +152,6 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return {};
     },
 
-    // FIXME: handle relations
     async deleteMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
