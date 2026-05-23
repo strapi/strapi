@@ -8874,7 +8874,7 @@ __metadata:
     p-map: "npm:4.0.0"
     passport-local: "npm:1.0.0"
     pluralize: "npm:8.0.0"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
     react-dnd-html5-backend: "npm:16.0.1"
@@ -8993,7 +8993,7 @@ __metadata:
     markdown-it-sup: "npm:1.0.0"
     msw: "npm:2.13.4"
     prismjs: "npm:1.30.0"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
     react-dnd-html5-backend: "npm:16.0.1"
@@ -9043,7 +9043,7 @@ __metadata:
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
@@ -9096,7 +9096,7 @@ __metadata:
     lodash: "npm:4.18.1"
     micromatch: "npm:^4.0.8"
     pluralize: "npm:8.0.0"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-dropzone: "npm:14.3.8"
@@ -9191,7 +9191,7 @@ __metadata:
     ora: "npm:5.4.1"
     package-json: "npm:7.0.0"
     pkg-up: "npm:3.1.0"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     resolve.exports: "npm:2.0.2"
     semver: "npm:7.7.4"
     statuses: "npm:2.0.1"
@@ -9410,7 +9410,7 @@ __metadata:
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
@@ -9472,7 +9472,7 @@ __metadata:
     "@strapi/utils": "npm:5.46.1"
     eslint-config-custom: "npm:5.46.1"
     lodash: "npm:4.18.1"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     sift: "npm:16.0.1"
     tsconfig: "npm:5.46.1"
   languageName: unknown
@@ -10069,7 +10069,7 @@ __metadata:
     mime-types: "npm:2.1.35"
     msw: "npm:2.13.4"
     prop-types: "npm:^15.8.1"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
     react-dom: "npm:18.3.1"
@@ -13253,7 +13253,7 @@ __metadata:
   dependencies:
     dotenv: "npm:16.6.1"
     lodash: "npm:4.18.1"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     supertest: "npm:7.2.2"
   languageName: unknown
   linkType: soft
@@ -26411,12 +26411,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:6.15.0":
-  version: 6.15.0
-  resolution: "qs@npm:6.15.0"
+"qs@npm:6.15.2":
+  version: 6.15.2
+  resolution: "qs@npm:6.15.2"
   dependencies:
     side-channel: "npm:^1.1.0"
-  checksum: 10c0/ff341078a78a991d8a48b4524d52949211447b4b1ad907f489cac0770cbc346a28e47304455c0320e5fb000f8762d64b03331e3b71865f663bf351bcba8cdb4b
+  checksum: 10c0/e6fd5f6f0aab06d480fe9ab15cebfc4ce4235303e2f91dc69a8f7f4df1e668a61c11d1cfbabacf4295cbbeb7b670ed23db45307480726259761f98e5695e93a7
   languageName: node
   linkType: hard
 
@@ -29014,7 +29014,7 @@ __metadata:
     plop: "npm:4.0.5"
     prettier: "npm:3.3.3"
     prettier-2: "npm:prettier@^2"
-    qs: "npm:6.15.0"
+    qs: "npm:6.15.2"
     rimraf: "npm:6.1.3"
     rollup: "npm:4.59.0"
     rollup-plugin-html: "npm:0.2.1"
