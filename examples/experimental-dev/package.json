@@ -20,7 +20,7 @@
     "react": "rc",
     "react-dom": "rc",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.1.8"
+    "styled-components": "6.4.1"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

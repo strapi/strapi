@@ -10,10 +10,6 @@ const { UnauthorizedError } = errors;
  * Authenticate an admin token. Rejects tokens with kind !== 'admin'.
  */
 export const authenticate = async (ctx: Context) => {
-  if (strapi.features.future.isEnabled('adminTokens') !== true) {
-    return { authenticated: false };
-  }
-
   const apiTokenService = getService('api-token-admin');
   const token = extractToken(ctx);
 

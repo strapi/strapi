@@ -1,5 +1,7 @@
 import type { Context } from '../../types';
 
+import { mergePublicationFilterFromGraphQLArgs } from './merge-publication-args';
+
 export default ({ strapi }: Context) => ({
   async resolvePagination(parent: any, _: any, ctx: any) {
     const { args, resourceUID } = parent.info;
@@ -15,7 +17,17 @@ export default ({ strapi }: Context) => ({
       auth: ctx?.state?.auth,
     });
 
-    const total = await strapi.documents!(resourceUID).count(sanitizedQuery);
+    const { publicationFilter } = mergePublicationFilterFromGraphQLArgs(
+      args as Record<string, unknown>
+    );
+    const sanitized = sanitizedQuery as Record<string, unknown>;
+    const { status, ...restSanitized } = sanitized;
+
+    const total = await strapi.documents!(resourceUID).count({
+      ...restSanitized,
+      ...(publicationFilter !== undefined ? { publicationFilter } : {}),
+      status: (status as 'draft' | 'published' | undefined) ?? 'published',
+    });
 
     const pageSize = limit === -1 ? total - start : safeLimit;
     const pageCount = limit === -1 ? safeLimit : Math.ceil(total / safeLimit);

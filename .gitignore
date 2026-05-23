@@ -156,6 +156,8 @@ tests/cli/.env
 ############################
 CLAUDE.local.md
 .claude
+.agents/local-skills
+.agents/local-state
 
 ############################
 # Strapi
