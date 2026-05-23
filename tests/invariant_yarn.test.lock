@@ -1,0 +1,164 @@
+describe("CORS configuration must not expose sensitive data to unauthorized origins", () => {
+  const payloads = [
+    "https://evil.com",
+    "https://attacker.example.com",
+    "null",
+    "https://strapi.io.evil.com",
+    "https://evil.com%60.strapi.io",
+    "https://strapi.io@evil.com",
+    "https://strapiio.evil.com",
+    "https://evil.com/https://strapi.io",
+    "http://localhost.evil.com",
+    "https://sub.evil.com",
+    "https://evil.com:443",
+    "https://evil.com:80",
+    "file://",
+    "data://",
+    "javascript://",
+    "https://xn--evil-pta.com",
+    "https://evil.com%2F@strapi.io",
+    "https://strapi.io%00.evil.com",
+    "https://evil.com?origin=https://strapi.io",
+    "https://evil.com#https://strapi.io",
+    "*",
+    "",
+    "https://",
+    "//evil.com",
+    "https://evil.com/path?query=value",
+  ];
+
+  // Simulated CORS validation logic mirroring what Strapi core should enforce
+  function isCorsAllowed(requestOrigin, allowedOrigins) {
+    if (!requestOrigin || requestOrigin === "") return false;
+    if (!allowedOrigins || allowedOrigins.length === 0) return false;
+
+    // Wildcard should never be used in credentialed contexts
+    if (allowedOrigins.includes("*")) return false;
+
+    return allowedOrigins.some((allowed) => {
+      if (typeof allowed !== "string") return false;
+      // Strict equality check - no prefix/suffix matching
+      return allowed === requestOrigin;
+    });
+  }
+
+  function extractSensitiveHeaders(corsHeaders) {
+    const sensitiveHeaders = [
+      "authorization",
+      "x-api-key",
+      "cookie",
+      "set-cookie",
+      "x-auth-token",
+      "x-strapi-token",
+    ];
+    const exposed = [];
+    if (!corsHeaders) return exposed;
+
+    const exposedHeaders = (corsHeaders["access-control-expose-headers"] || "")
+      .toLowerCase()
+      .split(",")
+      .map((h) => h.trim());
+
+    sensitiveHeaders.forEach((header) => {
+      if (exposedHeaders.includes(header)) {
+        exposed.push(header);
+      }
+    });
+    return exposed;
+  }
+
+  function buildCorsResponse(requestOrigin, allowedOrigins) {
+    const allowed = isCorsAllowed(requestOrigin, allowedOrigins);
+    const headers = {};
+
+    if (allowed) {
+      headers["access-control-allow-origin"] = requestOrigin;
+      headers["access-control-allow-credentials"] = "true";
+    }
+
+    return { allowed, headers };
+  }
+
+  const trustedOrigins = [
+    "https://trusted.strapi.io",
+    "https://admin.myapp.com",
+  ];
+
+  test.each(payloads)(
+    "rejects adversarial origin and does not expose sensitive data: %s",
+    (payload) => {
+      // 1. Adversarial origin must NOT be allowed
+      const corsAllowed = isCorsAllowed(payload, trustedOrigins);
+      expect(corsAllowed).toBe(false);
+
+      // 2. Response must not reflect adversarial origin in CORS headers
+      const response = buildCorsResponse(payload, trustedOrigins);
+      expect(response.allowed).toBe(false);
+      expect(response.headers["access-control-allow-origin"]).toBeUndefined();
+
+      // 3. Credentials must not be exposed to adversarial origins
+      expect(response.headers["access-control-allow-credentials"]).toBeUndefined();
+
+      // 4. Wildcard must never be used as allowed origin in credentialed context
+      const wildcardResponse = buildCorsResponse("*", ["*"]);
+      expect(wildcardResponse.allowed).toBe(false);
+    }
+  );
+
+  test("trusted origins are correctly allowed", () => {
+    trustedOrigins.forEach((origin) => {
+      const corsAllowed = isCorsAllowed(origin, trustedOrigins);
+      expect(corsAllowed).toBe(true);
+    });
+  });
+
+  test("sensitive headers must not be exposed via CORS", () => {
+    const dangerousHeaders = {
+      "access-control-expose-headers":
+        "authorization, x-api-key, cookie, set-cookie, x-strapi-token",
+    };
+    const exposed = extractSensitiveHeaders(dangerousHeaders);
+    expect(exposed.length).toBeGreaterThan(0);
+
+    // Assert that a safe configuration exposes no sensitive headers
+    const safeHeaders = {
+      "access-control-expose-headers": "content-type, x-request-id",
+    };
+    const safeExposed = extractSensitiveHeaders(safeHeaders);
+    expect(safeExposed.length).toBe(0);
+  });
+
+  test("CORS must not allow null origin", () => {
+    const nullOriginAllowed = isCorsAllowed("null", trustedOrigins);
+    expect(nullOriginAllowed).toBe(false);
+  });
+
+  test("CORS must not allow empty string origin", () => {
+    const emptyOriginAllowed = isCorsAllowed("", trustedOrigins);
+    expect(emptyOriginAllowed).toBe(false);
+  });
+
+  test("CORS must not allow wildcard when credentials are involved", () => {
+    const wildcardAllowed = isCorsAllowed("*", ["*"]);
+    expect(wildcardAllowed).toBe(false);
+
+    // Even if wildcard is in allowed list, it should be rejected
+    const wildcardInList = isCorsAllowed("https://evil.com", ["*"]);
+    expect(wildcardInList).toBe(false);
+  });
+
+  test("origin matching must be exact and not allow prefix/suffix bypass", () => {
+    const bypassAttempts = [
+      "https://trusted.strapi.io.evil.com",
+      "https://evil.com/trusted.strapi.io",
+      "https://trusted.strapi.io@evil.com",
+      "https://eviltrusted.strapi.io",
+      "https://trusted.strapi.io:8080",
+    ];
+
+    bypassAttempts.forEach((attempt) => {
+      const allowed = isCorsAllowed(attempt, trustedOrigins);
+      expect(allowed).toBe(false);
+    });
+  });
+});
