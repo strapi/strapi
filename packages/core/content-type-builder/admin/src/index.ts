@@ -6,7 +6,7 @@ import { reducers } from './reducers';
 import { formsAPI } from './utils/formAPI';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-import { type StrapiApp } from '@strapi/admin/strapi-admin';
+import { type ImportLocaleJson, type StrapiApp } from '@strapi/admin/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -34,22 +34,24 @@ export default {
     });
   },
   bootstrap() {},
-  async registerTrads({ locales }: { locales: string[] }) {
+  async registerTrads({
+    locales,
+    importLocaleJson,
+  }: {
+    locales: string[];
+    importLocaleJson: ImportLocaleJson;
+  }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+        const data = await importLocaleJson(
+          locale,
+          (code) => import(`./translations/${code}.json`)
+        );
 
-          return {
-            data: prefixPluginTranslations(data ?? {}, pluginId),
-            locale,
-          };
-        } catch {
-          return {
-            data: {},
-            locale,
-          };
-        }
+        return {
+          data: prefixPluginTranslations(data ?? {}, pluginId),
+          locale,
+        };
       })
     );
 

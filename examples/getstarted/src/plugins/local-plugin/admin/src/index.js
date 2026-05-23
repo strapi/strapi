@@ -66,22 +66,18 @@ export default {
     });
   },
   bootstrap() {},
-  async registerTrads({ locales }) {
+  async registerTrads({ locales, importLocaleJson }) {
     const importedTrads = await Promise.all(
-      locales.map((locale) => {
-        return import(`./translations/${locale}.json`)
-          .then(({ default: data }) => {
-            return {
-              data: prefixPluginTranslations(data, pluginId),
-              locale,
-            };
-          })
-          .catch(() => {
-            return {
-              data: {},
-              locale,
-            };
-          });
+      locales.map(async (locale) => {
+        const data = await importLocaleJson(
+          locale,
+          (code) => import(`./translations/${code}.json`)
+        );
+
+        return {
+          data: prefixPluginTranslations(data, pluginId),
+          locale,
+        };
       })
     );
 

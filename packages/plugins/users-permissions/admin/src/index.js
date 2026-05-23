@@ -73,22 +73,18 @@ export default {
     });
   },
   bootstrap() {},
-  async registerTrads({ locales }) {
+  async registerTrads({ locales, importLocaleJson }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+        const data = await importLocaleJson(
+          locale,
+          (code) => import(`./translations/${code}.json`)
+        );
 
-          return {
-            data: prefixPluginTranslations(data ?? {}, 'users-permissions'),
-            locale,
-          };
-        } catch {
-          return {
-            data: {},
-            locale,
-          };
-        }
+        return {
+          data: prefixPluginTranslations(data ?? {}, 'users-permissions'),
+          locale,
+        };
       })
     );
 

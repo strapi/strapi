@@ -8,7 +8,7 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
-import { type StrapiApp, type WidgetArgs } from '@strapi/admin/strapi-admin';
+import { type ImportLocaleJson, type StrapiApp, type WidgetArgs } from '@strapi/admin/strapi-admin';
 
 // NOTE: we have to preload it to ensure chunks will have it available as global
 import 'prismjs';
@@ -114,22 +114,24 @@ export default {
       previewAdmin.bootstrap(app);
     }
   },
-  async registerTrads({ locales }: { locales: string[] }) {
+  async registerTrads({
+    locales,
+    importLocaleJson,
+  }: {
+    locales: string[];
+    importLocaleJson: ImportLocaleJson;
+  }) {
     const importedTrads = await Promise.all(
       locales.map(async (locale) => {
-        try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+        const data = await importLocaleJson(
+          locale,
+          (code) => import(`./translations/${code}.json`)
+        );
 
-          return {
-            data: prefixPluginTranslations(data ?? {}, PLUGIN_ID),
-            locale,
-          };
-        } catch {
-          return {
-            data: {},
-            locale,
-          };
-        }
+        return {
+          data: prefixPluginTranslations(data ?? {}, PLUGIN_ID),
+          locale,
+        };
       })
     );
 

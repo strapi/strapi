@@ -35,8 +35,9 @@ import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 
 /**
  * Canonical admin locale codes mapped to legacy translation file names still
- * shipped by some plugins. When loading `locale`, Strapi falls back to the legacy
- * code and logs a deprecation warning once per pair.
+ * shipped by some plugins. `importLocaleJson` uses this map when loading JSON
+ * so third-party plugins can keep shipping `dk.json` while the admin UI uses `da`.
+ * `registerTrads` receives the same `importLocaleJson` instance from `StrapiApp`.
  */
 const ADMIN_LOCALE_LEGACY_ALIASES: Record<string, string> = {
   da: 'dk',
@@ -77,7 +78,10 @@ interface StrapiAppPlugin {
     args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
   ) => void;
   register: (app: StrapiApp) => void;
-  registerTrads?: (args: { locales: string[] }) => Promise<Translations>;
+  registerTrads?: (args: {
+    locales: string[];
+    importLocaleJson: ImportLocaleJson;
+  }) => Promise<Translations>;
 }
 
 interface InjectionZoneComponent {
@@ -487,8 +491,9 @@ class StrapiApp {
 
           return { data, locale };
         } catch {
-          const data = await this.importLocaleJson(locale, (code) =>
-            import(`./translations/${code}.json`)
+          const data = await this.importLocaleJson(
+            locale,
+            (code) => import(`./translations/${code}.json`)
           );
 
           if (Object.keys(data).length > 0) {
@@ -529,21 +534,14 @@ class StrapiApp {
 
     const adminTranslations = await this.loadAdminTrads();
 
-    const localesForPlugins = uniq(
-      this.configurations.locales.flatMap((locale) => {
-        const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
-
-        return legacyLocale ? [locale, legacyLocale] : [locale];
-      })
-    );
-
     const arrayOfPromises = Object.keys(this.appPlugins)
       .map((plugin) => {
         const registerTrads = this.appPlugins[plugin].registerTrads;
 
         if (registerTrads) {
           return registerTrads({
-            locales: localesForPlugins,
+            locales: this.configurations.locales,
+            importLocaleJson: this.importLocaleJson.bind(this),
           });
         }
 
@@ -607,8 +605,7 @@ class StrapiApp {
 
   render() {
     const localeNames = pick(languageNativeNames, this.configurations.locales || []);
-    const storedLocale =
-      localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
+    const storedLocale = localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
     const locale = normalizeAdminLocale(storedLocale) as keyof typeof localeNames;
 
     this.store = configureStore(
