@@ -120,7 +120,7 @@ describe('createSafeCapabilityRegistration', () => {
         ['arg1', 'arg2']
       );
       expect(strapi.log.error).toHaveBeenCalledWith(
-        '[MCP] Tool "fail-tool" threw an error during execution',
+        '[MCP] Tool "fail-tool" threw an error during execution: runtime boom',
         expect.objectContaining({ error: 'runtime boom' })
       );
     });
