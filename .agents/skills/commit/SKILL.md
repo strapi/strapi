@@ -17,7 +17,7 @@ body
 
 - Type and subject are **lowercase**
 - No period at end of subject
-- Imperative mood for `feat` / `chore` / `enhancement` ("add" not "added"); `fix` and `docs` are descriptive (see Subject Rules below)
+- Subject is descriptive — say **what** the commit is about, not **how** the code achieves it (see Subject Rules below)
 - Scope is optional; use a package or feature area (e.g., `admin`, `database`, `graphql`, `deps`, `commitlint`)
 - Body line length is **not** enforced (the `body-max-line-length` rule is disabled)
 - Merge commits like `Merge branch '<x>' into <y>` are ignored by commitlint
@@ -42,7 +42,9 @@ The full enforced list comes from [.commitlintrc.ts](../../../.commitlintrc.ts):
 
 > Note: `CONTRIBUTING.md` shows `doc:` in one example; the enforced type is `docs`. Use `docs`.
 
-Types **not** in the list (and therefore rejected): `perf`, `refactor`, `style`, `build`, `improvement`, `wip`.
+Types **not** in the list (and therefore rejected by commitlint): `perf`, `refactor`, `style`, `build`, `improvement`, `wip`.
+
+> Note: `refactor` and `perf` are rejected as **type prefixes**, but the underlying work is still valid — route it through `enhancement` (when it improves the product/feature) or `chore` (when it's internal housekeeping with no product change). See the Decision Guide below.
 
 ## Subject Rules (from CONTRIBUTING.md)
 
@@ -59,8 +61,8 @@ The subject summarises **what** the commit is about, not **how** the code achiev
 
 - New user-facing capability? → `feat`
 - Existing feature is broken? → `fix` (describe the bug)
-- Existing feature being improved (perf, UX, internal restructure with no behaviour change)? → `enhancement` or `chore`
-- Tooling, deps, build config, repo housekeeping? → `chore` (use `chore(deps): ...` for dep bumps)
+- Existing feature, code, UX, or perf gets meaningfully better (including internal swaps that improve operational behaviour)? → `enhancement`
+- Repo housekeeping with no product change — deps, tooling, build config, examples cleanup, lint/format-only changes? → `chore` (use `chore(deps): ...` for dep bumps)
 - Documentation only? → `docs`
 - Tests only? → `test`
 - CI/workflow files only? → `ci`
