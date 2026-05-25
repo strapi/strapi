@@ -10,6 +10,27 @@ import { formatDocumentWithMetadata } from '../controllers/utils/metadata';
 import { indexByDocumentId } from '../controllers/utils/document-status';
 import { getPopulateForLocalizations } from '../services/utils/populate';
 
+const isContentTypeLocalized = (strapi: Core.Strapi, uid: string): boolean => {
+  const ct = strapi.contentTypes?.[uid as UID.ContentType];
+  if (ct === undefined) return false;
+  return (
+    (ct as { pluginOptions?: { i18n?: { localized?: boolean } } }).pluginOptions?.i18n
+      ?.localized === true
+  );
+};
+
+type CustomFieldAttribute = {
+  type: 'customField';
+  customField: string;
+  [key: string]: unknown;
+};
+
+const isCustomFieldAttribute = (attr: unknown): attr is CustomFieldAttribute =>
+  typeof attr === 'object' &&
+  attr !== null &&
+  (attr as Record<string, unknown>).type === 'customField' &&
+  typeof (attr as Record<string, unknown>).customField === 'string';
+
 export type ContentManagerModelForMcp = Pick<
   Struct.ContentTypeSchema,
   'uid' | 'kind' | 'options'
@@ -47,6 +68,19 @@ type McpToolsBuildContext = {
   /** Default locale from i18n plugin. null when i18n is not installed or unknown. */
   defaultLocale: string | null;
 };
+
+type McpDocumentQuery = {
+  populate?: unknown;
+  locale?: string;
+  status?: string;
+  fields?: unknown;
+  filters?: unknown;
+  sort?: unknown;
+  pagination?: unknown;
+  [key: string]: unknown;
+};
+
+type McpFindManyParams = Parameters<Modules.Documents.ServiceInstance['findMany']>[0];
 
 const localeDefaultDescription = (
   defaultLocale: string | null,
@@ -104,12 +138,7 @@ const resolvePermittedLocaleSchema = (
 ): z.ZodTypeAny => {
   if (localeCodes === null) return baseLocaleSchema;
 
-  const isLocalized =
-    (
-      strapi.contentTypes?.[uid as UID.CollectionType] as
-        | { pluginOptions?: { i18n?: { localized?: boolean } } }
-        | undefined
-    )?.pluginOptions?.i18n?.localized === true;
+  const isLocalized = isContentTypeLocalized(strapi, uid);
   if (isLocalized === false) {
     return z.string().optional().describe('This content type is not localized. Locale is ignored.');
   }
@@ -705,19 +734,14 @@ const attributeToInputSchema = (
       return relAttr.required === true ? s : s.optional();
     }
     default: {
-      if (
-        typeof attr === 'object' &&
-        attr !== null &&
-        (attr as unknown as Record<string, unknown>).type === 'customField' &&
-        typeof (attr as unknown as Record<string, unknown>).customField === 'string'
-      ) {
-        const customFieldKey = (attr as unknown as Record<string, unknown>).customField as string;
-        const customField = strapi.get('custom-fields').get(customFieldKey);
+      const unknownAttr: unknown = attr;
+      if (isCustomFieldAttribute(unknownAttr)) {
+        const customField = strapi.get('custom-fields').get(unknownAttr.customField);
         if (customField !== undefined) {
           return attributeToInputSchema(
             strapi,
             {
-              ...(attr as unknown as Record<string, unknown>),
+              ...unknownAttr,
               type: customField.type,
             } as unknown as Schema.Attribute.AnyAttribute,
             visited
@@ -1012,8 +1036,14 @@ const createCollectionListHandler =
       uid
     );
 
+    const findPageQuery: McpDocumentQuery = {
+      ...permissionQuery,
+      populate,
+      locale: resolvedLocale,
+      status: resolvedStatus,
+    };
     const { results: documents, pagination } = await documentManager.findPage(
-      { ...permissionQuery, populate, locale: resolvedLocale, status: resolvedStatus } as any,
+      findPageQuery as McpFindManyParams,
       uid
     );
 
@@ -1083,7 +1113,9 @@ const createCollectionGetHandler =
       const { meta } = await formatDocumentWithMetadata(
         permissionChecker,
         uid,
-        { documentId, locale: resolvedLocale, publishedAt: null } as any,
+        { documentId, locale: resolvedLocale, publishedAt: null } as Parameters<
+          typeof formatDocumentWithMetadata
+        >[2],
         { availableLocales: true, availableStatus: false }
       );
 
@@ -1102,7 +1134,7 @@ const createCollectionGetHandler =
 
 const createCollectionCreateHandler =
   (uid: UID.CollectionType) =>
-  (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
   }: {
@@ -1120,20 +1152,22 @@ const createCollectionCreateHandler =
 
     const sanitizedData = setCreatorFields({ user })(
       await permissionChecker.sanitizeCreateInput(data)
-    );
+    ) as Record<string, unknown>;
 
     const { locale: resolvedLocale, status } = await getDocumentLocaleAndStatus({ locale }, uid);
 
-    const document = await documentManager.create(uid, {
-      data: sanitizedData as any,
-      locale: resolvedLocale,
-      status,
-    });
+    const result = await strapi.db.transaction(async () => {
+      const document = await documentManager.create(uid, {
+        data: sanitizedData,
+        locale: resolvedLocale,
+        status,
+      });
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
-    const result = await formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument, {
-      availableLocales: false,
-      availableStatus: false,
+      const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
+      return formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument, {
+        availableLocales: false,
+        availableStatus: false,
+      });
     });
 
     return ok(result as Record<string, unknown>);
@@ -1141,7 +1175,7 @@ const createCollectionCreateHandler =
 
 const createCollectionUpdateHandler =
   (uid: UID.CollectionType) =>
-  (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
   }: {
@@ -1191,16 +1225,20 @@ const createCollectionUpdateHandler =
       : permissionChecker.sanitizeCreateInput;
 
     const isEdition = documentVersion !== null && documentVersion !== undefined;
-    const sanitizedData = setCreatorFields({ user, isEdition })(await sanitizeInput(data));
+    const sanitizedData = setCreatorFields({ user, isEdition })(
+      await sanitizeInput(data)
+    ) as Record<string, unknown>;
 
-    const updatedDocument = await documentManager.update(
-      documentVersion?.documentId ?? documentId,
-      uid,
-      { data: sanitizedData as any, locale: resolvedLocale }
-    );
+    const result = await strapi.db.transaction(async () => {
+      const updatedDocument = await documentManager.update(
+        documentVersion?.documentId ?? documentId,
+        uid,
+        { data: sanitizedData, locale: resolvedLocale }
+      );
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(updatedDocument);
-    const result = await formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument);
+      const sanitizedDocument = await permissionChecker.sanitizeOutput(updatedDocument);
+      return formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument);
+    });
 
     return ok(result as Record<string, unknown>);
   };
@@ -1230,12 +1268,7 @@ const createCollectionDeleteHandler =
 
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
-    const isLocalized =
-      (
-        strapi.contentTypes?.[uid as UID.CollectionType] as
-          | { pluginOptions?: { i18n?: { localized?: boolean } } }
-          | undefined
-      )?.pluginOptions?.i18n?.localized === true;
+    const isLocalized = isContentTypeLocalized(strapi, uid);
 
     const localeForQuery = isLocalized === true ? resolvedLocale : undefined;
 
@@ -1440,6 +1473,8 @@ const singleCreateOrUpdate = async (
 ): Promise<Modules.MCP.McpToolHandlerReturn> => {
   const { userAbility, user } = context;
   const { data, locale } = args;
+  // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+  const typedUid = uid as UID.ContentType;
 
   const documentManager = getService('document-manager');
   const permissionChecker = getService('permission-checker').create({
@@ -1454,21 +1489,24 @@ const singleCreateOrUpdate = async (
   const sanitizedQuery = await permissionChecker.sanitizedQuery.update({ locale });
   const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
-  const populate = await getService('populate-builder')(uid as any)
+  const populate = await getService('populate-builder')(typedUid)
     .populateFromQuery(sanitizedQuery)
     .populateDeep(Infinity)
     .countRelations()
-    .withPopulateOverride(getPopulateForLocalizations(uid as any))
+    .withPopulateOverride(getPopulateForLocalizations(typedUid))
     .build();
 
+  const draftFindQuery: McpDocumentQuery = {
+    ...sanitizedQuery,
+    populate,
+    locale: resolvedLocale,
+    status: 'draft',
+  };
   const [documentVersion, otherDocumentVersion] = await Promise.all([
     documentManager
-      .findMany(
-        { ...sanitizedQuery, populate, locale: resolvedLocale, status: 'draft' } as any,
-        uid as any
-      )
+      .findMany(draftFindQuery as McpFindManyParams, typedUid)
       .then((docs: any[]) => docs[0]),
-    strapi.db.query(uid as any).findOne({ select: ['documentId'] }),
+    strapi.db.query(typedUid).findOne({ select: ['documentId'] }),
   ]);
 
   const documentId = otherDocumentVersion?.documentId;
@@ -1486,30 +1524,31 @@ const singleCreateOrUpdate = async (
     : permissionChecker.sanitizeCreateInput;
 
   const isEdition = documentVersion !== null && documentVersion !== undefined;
-  const sanitizedData = setCreatorFields({ user, isEdition })(await sanitizeInput(data));
+  const sanitizedData = setCreatorFields({ user, isEdition })(await sanitizeInput(data)) as Record<
+    string,
+    unknown
+  >;
 
-  let result: any;
+  const formatted = await strapi.db.transaction(async () => {
+    let doc: any;
 
-  if (!documentId) {
-    result = await documentManager.create(uid as any, {
-      data: sanitizedData,
-      ...sanitizedQuery,
-      locale: resolvedLocale,
-    });
-  } else {
-    result = await documentManager.update(documentId, uid as any, {
-      data: sanitizedData as any,
-      populate,
-      locale: resolvedLocale,
-    });
-  }
+    if (documentId === undefined) {
+      doc = await documentManager.create(typedUid, {
+        data: sanitizedData,
+        ...sanitizedQuery,
+        locale: resolvedLocale,
+      });
+    } else {
+      doc = await documentManager.update(documentId, typedUid, {
+        data: sanitizedData,
+        populate,
+        locale: resolvedLocale,
+      });
+    }
 
-  const sanitizedDocument = await permissionChecker.sanitizeOutput(result);
-  const formatted = await formatDocumentWithMetadata(
-    permissionChecker,
-    uid as any,
-    sanitizedDocument
-  );
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(doc);
+    return formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
+  });
 
   return ok(formatted as Record<string, unknown>);
 };
@@ -1524,6 +1563,8 @@ const createSingleGetHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale, status } = args as z.infer<typeof singleGetInputSchema>;
+    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    const typedUid = uid as UID.ContentType;
 
     const permissionChecker = getService('permission-checker').create({
       userAbility,
@@ -1540,18 +1581,21 @@ const createSingleGetHandler =
       uid
     );
 
-    const populate = await getService('populate-builder')(uid as any)
+    const populate = await getService('populate-builder')(typedUid)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
       .countRelations()
-      .withPopulateOverride(getPopulateForLocalizations(uid as any))
+      .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 
+    const versionFindQuery: McpDocumentQuery = {
+      ...permissionQuery,
+      populate,
+      locale: resolvedLocale,
+      status: resolvedStatus,
+    };
     const version = await getService('document-manager')
-      .findMany(
-        { ...permissionQuery, populate, locale: resolvedLocale, status: resolvedStatus } as any,
-        uid as any
-      )
+      .findMany(versionFindQuery as McpFindManyParams, typedUid)
       .then((docs: any[]) => docs[0]);
 
     if (!version) {
@@ -1559,7 +1603,7 @@ const createSingleGetHandler =
         throw new errors.ForbiddenError();
       }
 
-      const document = await strapi.db.query(uid as any).findOne({});
+      const document = await strapi.db.query(typedUid).findOne({});
 
       if (!document) {
         throw new errors.NotFoundError();
@@ -1567,8 +1611,12 @@ const createSingleGetHandler =
 
       const { meta } = await formatDocumentWithMetadata(
         permissionChecker,
-        uid as any,
-        { documentId: document.documentId, locale: resolvedLocale, publishedAt: null } as any,
+        typedUid,
+        {
+          documentId: document.documentId,
+          locale: resolvedLocale,
+          publishedAt: null,
+        } as Parameters<typeof formatDocumentWithMetadata>[2],
         { availableLocales: true, availableStatus: false }
       );
 
@@ -1580,11 +1628,7 @@ const createSingleGetHandler =
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    const result = await formatDocumentWithMetadata(
-      permissionChecker,
-      uid as any,
-      sanitizedDocument
-    );
+    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -1615,6 +1659,8 @@ const createSingleDeleteHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale } = args as z.infer<typeof singleDeleteInputSchema>;
+    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    const typedUid = uid as UID.ContentType;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
@@ -1628,25 +1674,20 @@ const createSingleDeleteHandler =
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.delete({ locale });
 
-    const populate = await getService('populate-builder')(uid as any)
+    const populate = await getService('populate-builder')(typedUid)
       .populateFromQuery(sanitizedQuery)
       .populateDeep(Infinity)
       .countRelations()
-      .withPopulateOverride(getPopulateForLocalizations(uid as any))
+      .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
-    const isLocalized =
-      (
-        strapi.contentTypes?.[uid as unknown as UID.CollectionType] as
-          | { pluginOptions?: { i18n?: { localized?: boolean } } }
-          | undefined
-      )?.pluginOptions?.i18n?.localized === true;
+    const isLocalized = isContentTypeLocalized(strapi, uid);
 
     const localeForQuery = isLocalized === true ? resolvedLocale : undefined;
 
-    const documentLocales = await documentManager.findLocales(undefined, uid as any, {
+    const documentLocales = await documentManager.findLocales(undefined, typedUid, {
       populate,
       locale: localeForQuery,
     });
@@ -1661,7 +1702,7 @@ const createSingleDeleteHandler =
       }
     }
 
-    const deletedEntity = await documentManager.delete(documentLocales[0].documentId, uid as any, {
+    const deletedEntity = await documentManager.delete(documentLocales[0].documentId, typedUid, {
       locale: localeForQuery,
     });
 
@@ -1680,6 +1721,8 @@ const createSinglePublishHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale } = args as z.infer<typeof singlePublishInputSchema>;
+    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    const typedUid = uid as UID.ContentType;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
@@ -1695,8 +1738,13 @@ const createSinglePublishHandler =
       const sanitizedQuery = await permissionChecker.sanitizedQuery.publish({ locale });
       const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
+      const publishFindQuery: McpDocumentQuery = {
+        ...sanitizedQuery,
+        locale: resolvedLocale,
+        status: 'draft',
+      };
       const document = await getService('document-manager')
-        .findMany({ ...sanitizedQuery, locale: resolvedLocale, status: 'draft' } as any, uid as any)
+        .findMany(publishFindQuery as McpFindManyParams, typedUid)
         .then((docs: any[]) => docs[0]);
 
       if (!document) {
@@ -1707,7 +1755,7 @@ const createSinglePublishHandler =
         throw new errors.ForbiddenError();
       }
 
-      const publishResult = await documentManager.publish(document.documentId, uid as any, {
+      const publishResult = await documentManager.publish(document.documentId, typedUid, {
         locale: resolvedLocale,
       });
 
@@ -1715,11 +1763,7 @@ const createSinglePublishHandler =
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    const result = await formatDocumentWithMetadata(
-      permissionChecker,
-      uid as any,
-      sanitizedDocument
-    );
+    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -1734,6 +1778,8 @@ const createSingleUnpublishHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale, discardDraft } = args as z.infer<typeof singleUnpublishInputSchema>;
+    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    const typedUid = uid as UID.ContentType;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
@@ -1752,8 +1798,9 @@ const createSingleUnpublishHandler =
     const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish({ locale });
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
+    const unpublishFindQuery: McpDocumentQuery = { ...sanitizedQuery, locale: resolvedLocale };
     const document = await getService('document-manager')
-      .findMany({ ...sanitizedQuery, locale: resolvedLocale } as any, uid as any)
+      .findMany(unpublishFindQuery as McpFindManyParams, typedUid)
       .then((docs: any[]) => docs[0]);
 
     if (!document) {
@@ -1770,16 +1817,16 @@ const createSingleUnpublishHandler =
 
     const result = await strapi.db.transaction(async () => {
       if (discardDraft === true) {
-        await documentManager.discardDraft(document.documentId, uid as any, {
+        await documentManager.discardDraft(document.documentId, typedUid, {
           locale: resolvedLocale,
         });
       }
 
       return asyncPipe.pipe(
         (doc: any) =>
-          documentManager.unpublish(doc.documentId, uid as any, { locale: resolvedLocale }),
+          documentManager.unpublish(doc.documentId, typedUid, { locale: resolvedLocale }),
         permissionChecker.sanitizeOutput,
-        (doc: any) => formatDocumentWithMetadata(permissionChecker, uid as any, doc)
+        (doc: any) => formatDocumentWithMetadata(permissionChecker, typedUid, doc)
       )(document);
     });
 
@@ -1796,6 +1843,8 @@ const createSingleDiscardDraftHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale } = args as z.infer<typeof singleDiscardDraftInputSchema>;
+    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    const typedUid = uid as UID.ContentType;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
@@ -1810,11 +1859,13 @@ const createSingleDiscardDraftHandler =
     const sanitizedQuery = await permissionChecker.sanitizedQuery.discard({ locale });
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
+    const discardFindQuery: McpDocumentQuery = {
+      ...sanitizedQuery,
+      locale: resolvedLocale,
+      status: 'published',
+    };
     const document = await getService('document-manager')
-      .findMany(
-        { ...sanitizedQuery, locale: resolvedLocale, status: 'published' } as any,
-        uid as any
-      )
+      .findMany(discardFindQuery as McpFindManyParams, typedUid)
       .then((docs: any[]) => docs[0]);
 
     if (!document) {
@@ -1827,9 +1878,9 @@ const createSingleDiscardDraftHandler =
 
     const discardedDocument = await asyncPipe.pipe(
       (doc: any) =>
-        documentManager.discardDraft(doc.documentId, uid as any, { locale: resolvedLocale }),
+        documentManager.discardDraft(doc.documentId, typedUid, { locale: resolvedLocale }),
       permissionChecker.sanitizeOutput,
-      (doc: any) => formatDocumentWithMetadata(permissionChecker, uid as any, doc)
+      (doc: any) => formatDocumentWithMetadata(permissionChecker, typedUid, doc)
     )(document);
 
     return ok(discardedDocument as Record<string, unknown>);

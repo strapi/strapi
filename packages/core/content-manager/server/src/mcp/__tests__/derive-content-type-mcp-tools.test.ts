@@ -637,7 +637,7 @@ describe('collection-type handler: create', () => {
   const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [baseModel({})]);
   const createTool = tools.find((t) => t.name === 'create_article')!;
 
-  const strapi = {} as unknown as Core.Strapi;
+  const strapi = makeMinimalGlobalStrapi();
   const context = { userAbility: makeUserAbility(), user: mockUser };
 
   beforeEach(() => jest.clearAllMocks());
@@ -2023,7 +2023,7 @@ describe('collection-type handler: update', () => {
     baseModel({ options: { draftAndPublish: true } }),
   ]);
   const updateTool = tools.find((t) => t.name === 'update_article')!;
-  const strapi = {} as unknown as Core.Strapi;
+  const strapi = makeStrapiWithDb();
   const context = { userAbility: makeUserAbility(), user: mockUser };
 
   beforeEach(() => jest.clearAllMocks());
