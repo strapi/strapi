@@ -13,6 +13,19 @@ import {
 } from '../derive-content-type-mcp-tools';
 import { ACTIONS } from '../../services/permission-checker';
 
+/**
+ * Phased per: .agents/local-state/2026-05-25-fine-tune-content-management-tools/003-merged-analysis-and-implementation-plan.md
+ *
+ * | Phase | Scope in this file |
+ * |-------|-------------------|
+ * | 1 ✅  | Handler contract tests (list/get/create/delete + update/publish/unpublish/discard + single write/publish/unpublish/discard + publish schema contract) |
+ * | 2     | `buildDataSchema`, `buildSortSchema`, `buildFiltersSchema`, `getComponentLeafPaths` — update imports when extracted to `mcp/schemas/*` |
+ * | 3     | Component permission narrowing — tighten Zod to permitted leaf paths only (F4 partial, F7) |
+ * | 4     | Handler extraction + F1 global.strapi DI, F2 single unpublish transaction result, F3 shared permission checker |
+ * | 5     | Populate depth presets per operation (F5, F14) — assert `populateDeep` depth in handler tests |
+ * | 6     | Optional follow-ups (F6, F8, F12–F20) — not covered here yet |
+ */
+
 // ---------------------------------------------------------------------------
 // Type helpers derived from the source module's exported signatures
 // ---------------------------------------------------------------------------
@@ -125,7 +138,9 @@ const makePermissionChecker = (overrides: Record<string, jest.Mock> = {}) => ({
   ...overrides,
 });
 
-const makeDocumentManager = (overrides: Record<string, jest.Mock> = {}) => ({
+const makeDocumentManager = (
+  overrides: Record<string, jest.Mock> = {}
+): Record<string, jest.Mock> => ({
   findPage: jest.fn(() =>
     Promise.resolve({ results: [], pagination: { page: 1, pageSize: 25, pageCount: 0, total: 0 } })
   ),
@@ -160,6 +175,23 @@ const makePopulateBuilder = () => {
   };
   return jest.fn(() => builder);
 };
+
+// Minimal strapi-shaped object that satisfies the unit.setup.js global setter.
+// Used by handlers that reference bare `global.strapi` (singleGetHandler, singleCreateOrUpdate).
+// TODO @Nico Phase 4 (F1): remove once global.strapi dependency is replaced with injected strapi.
+const makeMinimalGlobalStrapi = (dbOverrides?: Record<string, unknown>): Core.Strapi =>
+  ({
+    plugins: {},
+    apis: {},
+    admin: { services: {} },
+    getModel: jest.fn(() => ({})),
+    contentTypes: {},
+    db: dbOverrides?.db ?? {
+      transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+      query: jest.fn(() => ({ findOne: jest.fn(() => Promise.resolve(null)) })),
+    },
+    ...dbOverrides,
+  }) as unknown as Core.Strapi;
 
 // ---------------------------------------------------------------------------
 // Global mock setup
@@ -517,7 +549,7 @@ describe('tool input schemas', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Handler behavior tests
+// Phase 1 — Handler contract tests (baseline)
 // ---------------------------------------------------------------------------
 
 describe('collection-type handler: list', () => {
@@ -558,6 +590,14 @@ describe('collection-type handler: get', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
+  it('throws ForbiddenError when user cannot read', async () => {
+    mockPermissionChecker.cannot.read.mockReturnValueOnce(true);
+    const handler = getTool.createHandler(strapi, context);
+    await expect(handler({ args: { documentId: 'abc' }, extra: mockExtra })).rejects.toThrow(
+      'Forbidden'
+    );
+  });
+
   it('throws NotFoundError when document does not exist', async () => {
     mockDocumentManager.findOne.mockResolvedValueOnce(null);
     mockDocumentManager.exists.mockResolvedValueOnce(false);
@@ -568,23 +608,29 @@ describe('collection-type handler: get', () => {
     ).rejects.toThrow('Not Found');
   });
 
+  it('returns empty data with meta when document exists but requested locale/status not found', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce(null);
+    mockDocumentManager.exists.mockResolvedValueOnce(true);
+
+    const handler = getTool.createHandler(strapi, context);
+    const result = await handler({
+      args: { documentId: 'doc-1', locale: 'fr' },
+      extra: mockExtra,
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.structuredContent).toMatchObject({ data: {}, meta: expect.anything() });
+  });
+
   it('returns document data when found', async () => {
     const doc = { documentId: 'abc', title: 'Hello' };
-    mockDocumentManager.findOne.mockResolvedValueOnce(doc as never);
+    mockDocumentManager.findOne.mockResolvedValueOnce(doc);
 
     const handler = getTool.createHandler(strapi, context);
     const result = await handler({ args: { documentId: 'abc', locale: 'en' }, extra: mockExtra });
 
     expect(result.isError).toBeUndefined();
     expect(result.structuredContent).toMatchObject({ data: doc });
-  });
-
-  it('throws ForbiddenError when user cannot read', async () => {
-    mockPermissionChecker.cannot.read.mockReturnValueOnce(true);
-    const handler = getTool.createHandler(strapi, context);
-    await expect(handler({ args: { documentId: 'abc' }, extra: mockExtra })).rejects.toThrow(
-      'Forbidden'
-    );
   });
 });
 
@@ -646,26 +692,81 @@ describe('collection-type handler: delete', () => {
   });
 
   it('calls documentManager.delete when locale exists', async () => {
-    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'abc' }] as never);
+    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'abc' }]);
     const handler = deleteTool.createHandler(strapi, context);
     await handler({ args: { documentId: 'abc', locale: 'en' }, extra: mockExtra });
     expect(mockDocumentManager.delete).toHaveBeenCalled();
   });
 });
 
-describe('single-type handler: single_get', () => {
+describe('single-type handler: get', () => {
+  const uid = 'api::global.global';
   const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
-    baseModel({ kind: 'singleType', uid: 'api::global.global', apiID: 'global' }),
+    baseModel({ kind: 'singleType', uid, apiID: 'global', options: { draftAndPublish: true } }),
   ]);
   const getTool = tools.find((t) => t.name === 'get_global')!;
-
-  const strapi = {} as unknown as Core.Strapi;
   const context = { userAbility: makeUserAbility(), user: mockUser };
 
   beforeEach(() => jest.clearAllMocks());
 
+  afterEach(() => {
+    global.strapi = makeMinimalGlobalStrapi() as unknown as typeof global.strapi;
+  });
+
   it('throws ForbiddenError when user cannot read', async () => {
+    const strapi = {} as unknown as Core.Strapi;
+    const handler = getTool.createHandler(strapi, context);
     mockPermissionChecker.cannot.read.mockReturnValueOnce(true);
+    await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
+      'Forbidden'
+    );
+  });
+
+  it('returns empty data with meta when version not found but document exists', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    const dbQueryFindOne = jest.fn(() => Promise.resolve({ documentId: 'st-1' }));
+    // singleGetHandler uses bare `strapi` (global) for db.query — pre-existing design smell
+    // TODO @Nico Phase 4 (F1): pass injected strapi instead of global.strapi in singleGetHandler
+    const strapi = makeMinimalGlobalStrapi({
+      db: {
+        transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+        query: jest.fn(() => ({ findOne: dbQueryFindOne })),
+      },
+    });
+    global.strapi = strapi as unknown as typeof global.strapi;
+
+    const handler = getTool.createHandler(strapi, context);
+    const result = await handler({ args: { locale: 'fr' }, extra: mockExtra });
+
+    expect(result.structuredContent).toMatchObject({ data: {}, meta: expect.anything() });
+  });
+
+  it('throws NotFoundError when version not found and no document at all', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    const dbQueryFindOne = jest.fn(() => Promise.resolve(null));
+    const strapi = makeMinimalGlobalStrapi({
+      db: {
+        transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+        query: jest.fn(() => ({ findOne: dbQueryFindOne })),
+      },
+    });
+    global.strapi = strapi as unknown as typeof global.strapi;
+
+    const handler = getTool.createHandler(strapi, context);
+    await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
+      'Not Found'
+    );
+  });
+
+  it('throws ForbiddenError when version found but entity-level read is forbidden', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1' }]);
+    mockPermissionChecker.cannot.read
+      .mockReturnValueOnce(false) // global
+      .mockReturnValueOnce(true); // entity
+
+    // No db.query needed here — version is found so the fallback path isn't taken
+    const strapi = makeMinimalGlobalStrapi();
+    global.strapi = strapi as unknown as typeof global.strapi;
     const handler = getTool.createHandler(strapi, context);
     await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
       'Forbidden'
@@ -729,6 +830,10 @@ const makeModel = (attrs: TestAttrs): ContentManagerModelForMcp => ({
   options: {},
   attributes: attrs,
 });
+
+// ---------------------------------------------------------------------------
+// Phase 2 — Schema builders (extract to mcp/schemas/*; keep exports stable)
+// ---------------------------------------------------------------------------
 
 describe('buildDataSchema', () => {
   it('accepts an empty attributes object and produces a strict empty schema', () => {
@@ -1550,6 +1655,7 @@ const makeNonLocalizedStrapi = (uid: string): Core.Strapi =>
     },
   }) as unknown as Core.Strapi;
 
+// Phase 1 — locale schema + handler locale branches; Phase 4 (F3) will reuse one permission checker in getPermittedLocales
 describe('locale permission segregation', () => {
   const uid = 'api::article.article';
   // Use a model with at least one scalar attribute so sort/filters schemas don't produce z.never()
@@ -1853,7 +1959,7 @@ describe('collection-type handler: delete on non-localized CT', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('calls findLocales without locale when content type is not localized', async () => {
-    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }] as never);
+    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }]);
     const handler = deleteTool.createHandler(nonLocalizedStrapi, context);
     await handler({ args: { documentId: 'doc-1' }, extra: mockExtra });
 
@@ -1873,7 +1979,7 @@ describe('collection-type handler: delete on non-localized CT', () => {
     const localizedTools = deriveDisplayedContentTypeMcpToolDefinitions(localizedStrapi, [model]);
     const localizedDeleteTool = localizedTools.find((t) => t.name === 'delete_article')!;
 
-    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }] as never);
+    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }]);
     const handler = localizedDeleteTool.createHandler(localizedStrapi, context);
     await handler({ args: { documentId: 'doc-1', locale: 'fr' }, extra: mockExtra });
 
@@ -1885,13 +1991,674 @@ describe('collection-type handler: delete on non-localized CT', () => {
   });
 
   it('succeeds (does not throw NotFoundError) when findLocales returns result for non-localized CT', async () => {
-    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }] as never);
+    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }]);
     const handler = deleteTool.createHandler(nonLocalizedStrapi, context);
     await expect(
       handler({ args: { documentId: 'doc-1' }, extra: mockExtra })
     ).resolves.not.toThrow();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Additional handler tests — collection-type
+// ---------------------------------------------------------------------------
+
+const makeStrapiWithDb = (overrides: Record<string, unknown> = {}): Core.Strapi =>
+  ({
+    getModel: jest.fn(() => ({})),
+    db: {
+      transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+      query: jest.fn(() => ({
+        findOne: jest.fn(() => Promise.resolve(null)),
+      })),
+    },
+    contentTypes: {},
+    plugins: {},
+    apis: {},
+    admin: { services: {} },
+    ...overrides,
+  }) as unknown as Core.Strapi;
+
+describe('collection-type handler: update', () => {
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ options: { draftAndPublish: true } }),
+  ]);
+  const updateTool = tools.find((t) => t.name === 'update_article')!;
+  const strapi = {} as unknown as Core.Strapi;
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws NotFoundError when document does not exist', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce(null);
+    mockDocumentManager.exists.mockResolvedValueOnce(false);
+
+    const handler = updateTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'missing', data: {}, locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Not Found');
+  });
+
+  it('creates new locale when document exists but locale version is missing', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce(null);
+    mockDocumentManager.exists.mockResolvedValueOnce(true);
+    mockDocumentManager.update.mockResolvedValueOnce({ documentId: 'doc-1', title: 'New locale' });
+
+    const handler = updateTool.createHandler(strapi, context);
+    const result = await handler({
+      args: { documentId: 'doc-1', data: { title: 'New locale' }, locale: 'fr' },
+      extra: mockExtra,
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(mockDocumentManager.update).toHaveBeenCalled();
+    expect(mockPermissionChecker.sanitizeCreateInput).toHaveBeenCalled();
+    expect(mockSetCreatorFields).toHaveBeenCalledWith({ user: mockUser, isEdition: false });
+  });
+
+  it('throws ForbiddenError when document exists, locale exists, but entity update is forbidden', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    mockDocumentManager.exists.mockResolvedValueOnce(true);
+    mockPermissionChecker.cannot.update
+      .mockReturnValueOnce(false) // global: pass
+      .mockReturnValueOnce(true); // entity: fail
+
+    const handler = updateTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', data: {}, locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+  });
+
+  it('throws ForbiddenError when locale missing and create is forbidden', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce(null);
+    mockDocumentManager.exists.mockResolvedValueOnce(true);
+    mockPermissionChecker.cannot.create.mockReturnValueOnce(true);
+
+    const handler = updateTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', data: {}, locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+  });
+
+  it('returns formatted document on success', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1', title: 'Original' });
+    mockDocumentManager.exists.mockResolvedValueOnce(true);
+    mockDocumentManager.update.mockResolvedValueOnce({ documentId: 'doc-1', title: 'Updated' });
+
+    const handler = updateTool.createHandler(strapi, context);
+    const result = await handler({
+      args: { documentId: 'doc-1', data: { title: 'Updated' }, locale: 'en' },
+      extra: mockExtra,
+    });
+
+    expect(result.structuredContent).toMatchObject({
+      data: expect.objectContaining({ documentId: 'doc-1' }),
+    });
+    expect(mockDocumentManager.update).toHaveBeenCalled();
+    expect(mockSetCreatorFields).toHaveBeenCalledWith({ user: mockUser, isEdition: true });
+  });
+});
+
+describe('collection-type handler: publish', () => {
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ options: { draftAndPublish: true } }),
+  ]);
+  const publishTool = tools.find((t) => t.name === 'publish_article')!;
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws NotFoundError when document does not exist', async () => {
+    mockDocumentManager.exists.mockResolvedValueOnce(false);
+
+    const strapi = makeStrapiWithDb();
+    const handler = publishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'missing', locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Document not found');
+  });
+
+  it('throws NotFoundError when draft locale is missing', async () => {
+    mockDocumentManager.exists.mockResolvedValueOnce(true);
+    mockDocumentManager.findOne.mockResolvedValueOnce(null);
+
+    const strapi = makeStrapiWithDb();
+    const handler = publishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', locale: 'fr' }, extra: mockExtra })
+    ).rejects.toThrow('Document locale not found');
+  });
+
+  it('throws ForbiddenError when entity publish is forbidden', async () => {
+    mockDocumentManager.exists.mockResolvedValueOnce(true);
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    mockPermissionChecker.cannot.publish
+      .mockReturnValueOnce(false) // global: pass
+      .mockReturnValueOnce(true); // entity: fail
+
+    const strapi = makeStrapiWithDb();
+    const handler = publishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+  });
+
+  it('returns published document on success', async () => {
+    mockDocumentManager.exists.mockResolvedValueOnce(true);
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    mockDocumentManager.publish.mockResolvedValueOnce([
+      { documentId: 'doc-1', publishedAt: '2026-01-01' },
+    ]);
+
+    const strapi = makeStrapiWithDb();
+    const handler = publishTool.createHandler(strapi, context);
+    const result = await handler({
+      args: { documentId: 'doc-1', locale: 'en' },
+      extra: mockExtra,
+    });
+
+    expect(result.structuredContent).toMatchObject({
+      data: expect.objectContaining({ documentId: 'doc-1' }),
+    });
+    expect(mockDocumentManager.publish).toHaveBeenCalledWith(
+      'doc-1',
+      'api::article.article',
+      expect.objectContaining({ locale: 'en' })
+    );
+  });
+});
+
+describe('collection-type handler: unpublish', () => {
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ options: { draftAndPublish: true } }),
+  ]);
+  const unpublishTool = tools.find((t) => t.name === 'unpublish_article')!;
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws NotFoundError when no published document is found', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce(null);
+
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'missing', locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Not Found');
+  });
+
+  it('throws ForbiddenError when global unpublish is forbidden', async () => {
+    mockPermissionChecker.cannot.unpublish.mockReturnValueOnce(true);
+
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+  });
+
+  it('throws ForbiddenError when discardDraft=true but discard permission is missing', async () => {
+    mockPermissionChecker.cannot.discard.mockReturnValueOnce(true);
+
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', discardDraft: true, locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+    // Fails before document lookup
+    expect(mockDocumentManager.findOne).not.toHaveBeenCalled();
+  });
+
+  it('throws ForbiddenError when entity unpublish is forbidden', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    mockPermissionChecker.cannot.unpublish
+      .mockReturnValueOnce(false) // global
+      .mockReturnValueOnce(true); // entity
+
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+  });
+
+  it('throws ForbiddenError when discardDraft=true but entity discard is forbidden', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    mockPermissionChecker.cannot.discard
+      .mockReturnValueOnce(false) // global
+      .mockReturnValueOnce(true); // entity
+
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', discardDraft: true, locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+  });
+
+  it('unpublishes without discarding draft when discardDraft is false', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    mockDocumentManager.unpublish.mockResolvedValueOnce({ documentId: 'doc-1' });
+
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await handler({ args: { documentId: 'doc-1', locale: 'en' }, extra: mockExtra });
+
+    expect(mockDocumentManager.unpublish).toHaveBeenCalled();
+    expect(mockDocumentManager.discardDraft).not.toHaveBeenCalled();
+  });
+
+  it('discards draft before unpublishing when discardDraft=true', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+
+    const discardOrder: string[] = [];
+    mockDocumentManager.discardDraft.mockImplementation(async () => {
+      discardOrder.push('discard');
+      return { documentId: 'doc-1' };
+    });
+    mockDocumentManager.unpublish.mockImplementation(async () => {
+      discardOrder.push('unpublish');
+      return { documentId: 'doc-1' };
+    });
+
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await handler({
+      args: { documentId: 'doc-1', discardDraft: true, locale: 'en' },
+      extra: mockExtra,
+    });
+
+    expect(discardOrder[0]).toBe('discard');
+    expect(discardOrder[1]).toBe('unpublish');
+  });
+});
+
+describe('collection-type handler: discard_draft', () => {
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ options: { draftAndPublish: true } }),
+  ]);
+  const discardTool = tools.find((t) => t.name === 'discard_article_draft')!;
+  const strapi = {} as unknown as Core.Strapi;
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws NotFoundError when no published document found', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce(null);
+
+    const handler = discardTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'missing', locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Not Found');
+  });
+
+  it('throws ForbiddenError when entity discard is forbidden', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    mockPermissionChecker.cannot.discard
+      .mockReturnValueOnce(false) // global
+      .mockReturnValueOnce(true); // entity
+
+    const handler = discardTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { documentId: 'doc-1', locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+  });
+
+  it('discards draft and returns result on success', async () => {
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    mockDocumentManager.discardDraft.mockResolvedValueOnce({ documentId: 'doc-1' });
+
+    const handler = discardTool.createHandler(strapi, context);
+    const result = await handler({
+      args: { documentId: 'doc-1', locale: 'en' },
+      extra: mockExtra,
+    });
+
+    expect(mockDocumentManager.discardDraft).toHaveBeenCalledWith(
+      'doc-1',
+      'api::article.article',
+      expect.objectContaining({ locale: 'en' })
+    );
+    expect(result.structuredContent).toBeDefined();
+  });
+});
+
+describe('single-type handler: create/update (write)', () => {
+  const uid = 'api::global.global';
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ kind: 'singleType', uid, apiID: 'global', options: { draftAndPublish: true } }),
+  ]);
+  const writeTool = (name: 'create_global' | 'update_global') =>
+    tools.find((t) => t.name === name)!;
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  const makeCreateTool = () => writeTool('create_global');
+  const makeUpdateTool = () => writeTool('update_global');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    // Restore global.strapi to minimal valid object so other tests don't break
+    global.strapi = makeMinimalGlobalStrapi() as unknown as typeof global.strapi;
+  });
+
+  // singleCreateOrUpdate uses bare `strapi` (global) for db.query — pre-existing design smell
+  // TODO @Nico Phase 4 (F1): pass injected strapi into singleCreateOrUpdate instead of global.strapi
+  const setupGlobalStrapi = (findOneResult: unknown) => {
+    const dbQueryFindOne = jest.fn(() => Promise.resolve(findOneResult));
+    const strapi = makeMinimalGlobalStrapi({
+      db: {
+        transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+        query: jest.fn(() => ({ findOne: dbQueryFindOne })),
+      },
+    });
+    global.strapi = strapi as unknown as typeof global.strapi;
+    return { strapi, dbQueryFindOne };
+  };
+
+  it('create branch — calls documentManager.create when no existing document', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    mockDocumentManager.create.mockResolvedValueOnce({ documentId: 'new-1' });
+    const { strapi } = setupGlobalStrapi(null);
+
+    const handler = makeCreateTool().createHandler(strapi, context);
+    await handler({ args: { data: { title: 'New' }, locale: 'en' }, extra: mockExtra });
+
+    expect(mockDocumentManager.create).toHaveBeenCalled();
+    expect(mockDocumentManager.update).not.toHaveBeenCalled();
+  });
+
+  it('update branch — calls documentManager.update when existing document with draft version', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1', title: 'old' }]);
+    mockDocumentManager.update.mockResolvedValueOnce({ documentId: 'st-1', title: 'new' });
+    const { strapi } = setupGlobalStrapi({ documentId: 'st-1' });
+
+    const handler = makeUpdateTool().createHandler(strapi, context);
+    await handler({ args: { data: { title: 'new' }, locale: 'en' }, extra: mockExtra });
+
+    expect(mockDocumentManager.update).toHaveBeenCalled();
+    expect(mockDocumentManager.create).not.toHaveBeenCalled();
+    expect(mockSetCreatorFields).toHaveBeenCalledWith({ user: mockUser, isEdition: true });
+  });
+
+  it('update branch — uses existing documentId when draft version missing (new locale)', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    mockDocumentManager.update.mockResolvedValueOnce({ documentId: 'st-1' });
+    const { strapi } = setupGlobalStrapi({ documentId: 'st-1' });
+
+    const handler = makeUpdateTool().createHandler(strapi, context);
+    await handler({ args: { data: {}, locale: 'fr' }, extra: mockExtra });
+
+    expect(mockDocumentManager.update).toHaveBeenCalled();
+    expect(mockSetCreatorFields).toHaveBeenCalledWith({ user: mockUser, isEdition: false });
+  });
+
+  it('throws ForbiddenError when both create and update are forbidden', async () => {
+    mockPermissionChecker.cannot.create.mockReturnValueOnce(true);
+    mockPermissionChecker.cannot.update.mockReturnValueOnce(true);
+    const { strapi } = setupGlobalStrapi(null);
+
+    const handler = makeCreateTool().createHandler(strapi, context);
+    await expect(handler({ args: { data: {} }, extra: mockExtra })).rejects.toThrow('Forbidden');
+  });
+
+  it('throws ForbiddenError when entity update is forbidden', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1' }]);
+    // cannot.create() returns false (default), so cannot.update() in combined check is short-circuited
+    // The only call is the entity-level check: cannot.update(documentVersion)
+    mockPermissionChecker.cannot.update.mockReturnValueOnce(true); // entity: fail
+    const { strapi } = setupGlobalStrapi({ documentId: 'st-1' });
+
+    const handler = makeUpdateTool().createHandler(strapi, context);
+    await expect(handler({ args: { data: {} }, extra: mockExtra })).rejects.toThrow('Forbidden');
+  });
+
+  it('throws ForbiddenError when version missing and create is forbidden', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    mockPermissionChecker.cannot.create
+      .mockReturnValueOnce(false) // combined initial check (passes because update also passes)
+      .mockReturnValueOnce(true); // version-missing branch
+    const { strapi } = setupGlobalStrapi({ documentId: 'st-1' });
+
+    const handler = makeUpdateTool().createHandler(strapi, context);
+    await expect(handler({ args: { data: {}, locale: 'fr' }, extra: mockExtra })).rejects.toThrow(
+      'Forbidden'
+    );
+  });
+});
+
+describe('single-type handler: publish', () => {
+  const uid = 'api::global.global';
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ kind: 'singleType', uid, apiID: 'global', options: { draftAndPublish: true } }),
+  ]);
+  const publishTool = tools.find((t) => t.name === 'publish_global')!;
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws NotFoundError when no draft document found', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    const strapi = makeStrapiWithDb();
+    const handler = publishTool.createHandler(strapi, context);
+    await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
+      'Single type document not found'
+    );
+  });
+
+  it('throws ForbiddenError when entity publish is forbidden', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1' }]);
+    mockPermissionChecker.cannot.publish
+      .mockReturnValueOnce(false) // global
+      .mockReturnValueOnce(true); // entity
+
+    const strapi = makeStrapiWithDb();
+    const handler = publishTool.createHandler(strapi, context);
+    await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
+      'Forbidden'
+    );
+  });
+
+  it('returns published document on success', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1' }]);
+    mockDocumentManager.publish.mockResolvedValueOnce([
+      { documentId: 'st-1', publishedAt: '2026-01-01' },
+    ]);
+
+    const strapi = makeStrapiWithDb();
+    const handler = publishTool.createHandler(strapi, context);
+    const result = await handler({ args: { locale: 'en' }, extra: mockExtra });
+
+    expect(mockDocumentManager.publish).toHaveBeenCalledWith(
+      'st-1',
+      uid,
+      expect.objectContaining({ locale: 'en' })
+    );
+    expect(result.structuredContent).toMatchObject({ data: expect.anything() });
+  });
+});
+
+describe('single-type handler: unpublish', () => {
+  const uid = 'api::global.global';
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ kind: 'singleType', uid, apiID: 'global', options: { draftAndPublish: true } }),
+  ]);
+  const unpublishTool = tools.find((t) => t.name === 'unpublish_global')!;
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws NotFoundError when no document is found', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
+      'Not Found'
+    );
+  });
+
+  it('throws ForbiddenError when discardDraft permission is missing', async () => {
+    mockPermissionChecker.cannot.discard.mockReturnValueOnce(true);
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    await expect(
+      handler({ args: { discardDraft: true, locale: 'en' }, extra: mockExtra })
+    ).rejects.toThrow('Forbidden');
+  });
+
+  it('unpublishes successfully and returns result', async () => {
+    // Documents current F2 behavior: transaction result discarded, then findMany re-fetch.
+    // TODO @Nico Phase 4 (F2): assert handler returns transaction output — expect single findMany call
+    // First findMany: inside handler (before transaction — finds document)
+    mockDocumentManager.findMany
+      .mockResolvedValueOnce([{ documentId: 'st-1' }])
+      // Second findMany: re-fetch after transaction
+      .mockResolvedValueOnce([{ documentId: 'st-1' }]);
+    mockDocumentManager.unpublish.mockResolvedValueOnce({ documentId: 'st-1' });
+
+    const strapi = makeStrapiWithDb();
+    const handler = unpublishTool.createHandler(strapi, context);
+    const result = await handler({ args: { locale: 'en' }, extra: mockExtra });
+
+    expect(mockDocumentManager.unpublish).toHaveBeenCalled();
+    expect(result.isError).toBeUndefined();
+  });
+});
+
+describe('single-type handler: discard_draft', () => {
+  const uid = 'api::global.global';
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ kind: 'singleType', uid, apiID: 'global', options: { draftAndPublish: true } }),
+  ]);
+  const discardTool = tools.find((t) => t.name === 'discard_global_draft')!;
+  const strapi = {} as unknown as Core.Strapi;
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws NotFoundError when no published document found', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    const handler = discardTool.createHandler(strapi, context);
+    await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
+      'Not Found'
+    );
+  });
+
+  it('throws ForbiddenError when entity discard is forbidden', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1' }]);
+    mockPermissionChecker.cannot.discard
+      .mockReturnValueOnce(false) // global
+      .mockReturnValueOnce(true); // entity
+
+    const handler = discardTool.createHandler(strapi, context);
+    await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
+      'Forbidden'
+    );
+  });
+
+  it('discards draft and returns result on success', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1' }]);
+    mockDocumentManager.discardDraft.mockResolvedValueOnce({ documentId: 'st-1' });
+
+    const handler = discardTool.createHandler(strapi, context);
+    const result = await handler({ args: { locale: 'en' }, extra: mockExtra });
+
+    expect(mockDocumentManager.discardDraft).toHaveBeenCalledWith(
+      'st-1',
+      uid,
+      expect.objectContaining({ locale: 'en' })
+    );
+    expect(result).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 3 — Component permission schema tightening (F4 partial, F7)
+// ---------------------------------------------------------------------------
+
+describe('schema: component permission narrowing — current behavior', () => {
+  const attrs = {
+    title: { type: 'string' },
+    SEO: { type: 'component', component: 'shared.seo' },
+  } as TestAttrs;
+  const model = baseModel({ uid: 'api::article.article', attributes: attrs });
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+  const createTool = tools.find((t) => t.name === 'create_article')!;
+
+  it('includes entire component when at least one nested leaf is permitted', () => {
+    // Regular admin: only SEO.title in CASL rules — but whole component is exposed
+    // TODO @Nico Phase 3: tighten schema to SEO.title only; reject SEO.description and SEO.url via Zod
+    const ability = makeFieldRestrictedAbility(['title', 'SEO.title']);
+    const context = { userAbility: ability, user: mockUser };
+
+    const inputSchema = createTool.resolveInputSchema(context);
+    // Whole SEO component accepted (current behavior — whole component exposed)
+    expect(
+      inputSchema.safeParse({ data: { SEO: { title: 'a', description: 'b', url: 'c' } } }).success
+    ).toBe(true);
+    expect(inputSchema.safeParse({ data: { SEO: { title: 'a' } } }).success).toBe(true);
+  });
+
+  it('excludes component when zero nested leaves are permitted', () => {
+    const permitted = new Set(['title']);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _actual = jest.requireActual(
+      '../derive-content-type-mcp-tools'
+    ) as typeof import('../derive-content-type-mcp-tools');
+    const schema = buildDataSchema(mockStrapi, model, attrs, permitted);
+    // SEO is excluded — no SEO.* paths in permitted set
+    expect(schema.safeParse({ title: 'hello' }).success).toBe(true);
+    expect(schema.safeParse({ title: 'hello', SEO: {} }).success).toBe(false);
+  });
+
+  it('resolves nested component paths correctly for permission checks', () => {
+    // nested.label and nested.inner.title are permitted → whole nested component exposed
+    // TODO @Nico Phase 3: tighten schema to nested.label + nested.inner.title only; reject inner.description/url
+    const ability = makeFieldRestrictedAbility(['nested.label', 'nested.inner.title']);
+    const context = { userAbility: ability, user: mockUser };
+
+    const nestedAttrs = {
+      nested: { type: 'component', component: 'shared.nested' },
+    } as TestAttrs;
+    const nestedModel = baseModel({ uid: 'api::article.article', attributes: nestedAttrs });
+    const nestedTools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [nestedModel]);
+    const nestedCreateTool = nestedTools.find((t) => t.name === 'create_article')!;
+
+    const inputSchema = nestedCreateTool.resolveInputSchema(context);
+    // nested component present
+    expect(inputSchema.safeParse({ data: { nested: { label: 'hi' } } }).success).toBe(true);
+    // inner sub-component also fully exposed (current behavior)
+    expect(
+      inputSchema.safeParse({
+        data: { nested: { label: 'hi', inner: { title: 't', description: 'd', url: '/u' } } },
+      }).success
+    ).toBe(true);
+  });
+});
+
+// Phase 1 — publish tool schema/description contract (existing draft only)
+describe('schema: publish tool behavior contract', () => {
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ options: { draftAndPublish: true } }),
+  ]);
+
+  it('publish tool description mentions existing document and documentId', () => {
+    const publishTool = tools.find((t) => t.name === 'publish_article')!;
+    expect(publishTool.description).toContain('documentId');
+    expect(publishTool.description.toLowerCase()).toContain('existing');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 5 — Populate depth presets (F5, F14)
+// TODO @Nico Phase 5: add describe('handler populate presets') asserting populateDeep depth
+//   per operation — list=1, get=bounded, single read/write/delete=bounded, lifecycle=shallow
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Phase 1 — Handler contract tests (locale edge cases, pre-existing)
+// ---------------------------------------------------------------------------
 
 describe('single-type handler: delete on non-localized CT', () => {
   const uid = 'api::global.global';
@@ -1912,7 +2679,7 @@ describe('single-type handler: delete on non-localized CT', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('calls findLocales without locale when content type is not localized', async () => {
-    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }] as never);
+    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }]);
     const handler = deleteTool.createHandler(nonLocalizedStrapi, context);
     await handler({ args: {}, extra: mockExtra });
 
@@ -1932,7 +2699,7 @@ describe('single-type handler: delete on non-localized CT', () => {
     const localizedTools = deriveDisplayedContentTypeMcpToolDefinitions(localizedStrapi, [model]);
     const localizedDeleteTool = localizedTools.find((t) => t.name === 'delete_global')!;
 
-    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }] as never);
+    mockDocumentManager.findLocales.mockResolvedValueOnce([{ documentId: 'doc-1' }]);
     const handler = localizedDeleteTool.createHandler(localizedStrapi, context);
     await handler({ args: { locale: 'fr' }, extra: mockExtra });
 
