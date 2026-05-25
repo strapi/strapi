@@ -1,6 +1,6 @@
 ---
-name: write-a-skill
-description: Create new agent skills with proper structure, progressive disclosure, and bundled resources. Use when user wants to create, write, or build a new skill.
+name: writing-skills
+description: Creates new agent skills with progressive disclosure and bundled resources. Use when the user wants to create, write, or build a new skill.
 ---
 
 # Writing Skills
@@ -85,7 +85,7 @@ The description is **the only thing your agent sees** when deciding which skill 
 **Format**:
 
 - Max 1024 chars
-- Start with an imperative verb (e.g. "Extract...", "Create...")
+- Write in third person
 - First sentence: what it does
 - Second sentence: "Use when [specific triggers]"
 
