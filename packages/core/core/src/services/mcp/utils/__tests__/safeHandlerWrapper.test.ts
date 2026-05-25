@@ -79,7 +79,7 @@ describe('wrapSafeHandler', () => {
       await safe();
 
       expect(strapi.log.error).toHaveBeenCalledWith(
-        '[MCP] Resource "my-resource" threw an error during execution',
+        '[MCP] Resource "my-resource" threw an error during execution: db connection lost',
         {
           error: 'db connection lost',
           stack: error.stack,
@@ -104,7 +104,7 @@ describe('wrapSafeHandler', () => {
 
       expect(result).toEqual({ msg: 'raw string error' });
       expect(strapi.log.error).toHaveBeenCalledWith(
-        '[MCP] Tool "string-throw" threw an error during execution',
+        '[MCP] Tool "string-throw" threw an error during execution: raw string error',
         expect.objectContaining({ error: 'raw string error' })
       );
     });
