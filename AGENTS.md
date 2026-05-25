@@ -226,7 +226,16 @@ yarn prettier:check # check only
 - Branch from `develop`, target `develop` — never `main`.
 - Link the issue you're fixing in the description.
 - All tests must pass before merging.
+<<<<<<< HEAD
 - PR description must follow [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).
+=======
+- PR description must use this template:
+  - **What does it do?** — technical changes made
+  - **Why is it needed?** — problem being solved
+  - **How to test it?** — steps to reproduce and verify
+  - **Related issue(s)/PR(s)** — links
+- When creating pull requests, always follow the template in [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md). Do not use your own format.
+>>>>>>> 63dc1f32c2 (feat: adding a skill for commit conventions)
 
 ---
 
