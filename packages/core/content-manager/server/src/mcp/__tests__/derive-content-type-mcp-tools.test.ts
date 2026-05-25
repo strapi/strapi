@@ -348,20 +348,19 @@ describe('deriveDisplayedContentTypeMcpToolDefinitions', () => {
     expect(names).not.toContain('discard_article_draft');
   });
 
-  it('uses single-type tool names and separate create/update gates', () => {
+  it('uses single-type tool names with unified write tool', () => {
     const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
       baseModel({ kind: 'singleType', uid: 'api::global.global', apiID: 'global' }),
     ]);
     const names = tools.map((t) => t.name);
     expect(names).toContain('get_global');
-    expect(names).toContain('create_global');
-    expect(names).toContain('update_global');
+    expect(names).toContain('write_global');
+    expect(names).not.toContain('create_global');
+    expect(names).not.toContain('update_global');
     expect(names).not.toContain('list_global');
 
-    const create = tools.find((t) => t.name === 'create_global');
-    const update = tools.find((t) => t.name === 'update_global');
-    expect(create?.auth.action).toBe(ACTIONS.create);
-    expect(update?.auth.action).toBe(ACTIONS.update);
+    const write = tools.find((t) => t.name === 'write_global');
+    expect(write?.auth.action).toBe(ACTIONS.update);
   });
 });
 
@@ -604,7 +603,7 @@ describe('collection-type handler: get', () => {
     const handler = getTool.createHandler(strapi, context);
     await expect(
       handler({ args: { documentId: 'missing', locale: 'en' }, extra: mockExtra })
-    ).rejects.toThrow('Not Found');
+    ).rejects.toThrow('Document not found');
   });
 
   it('returns empty data with meta when document exists but requested locale/status not found', async () => {
@@ -687,7 +686,7 @@ describe('collection-type handler: delete', () => {
     const handler = deleteTool.createHandler(strapi, context);
     await expect(
       handler({ args: { documentId: 'abc', locale: 'en' }, extra: mockExtra })
-    ).rejects.toThrow('Not Found');
+    ).rejects.toThrow('Document not found');
   });
 
   it('calls documentManager.delete when locale exists', async () => {
@@ -753,7 +752,7 @@ describe('single-type handler: get', () => {
 
     const handler = getTool.createHandler(strapi, context);
     await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
-      'Not Found'
+      'Document not found'
     );
   });
 
@@ -2035,7 +2034,7 @@ describe('collection-type handler: update', () => {
     const handler = updateTool.createHandler(strapi, context);
     await expect(
       handler({ args: { documentId: 'missing', data: {}, locale: 'en' }, extra: mockExtra })
-    ).rejects.toThrow('Not Found');
+    ).rejects.toThrow('Document not found');
   });
 
   it('creates new locale when document exists but locale version is missing', async () => {
@@ -2183,7 +2182,7 @@ describe('collection-type handler: unpublish', () => {
     const handler = unpublishTool.createHandler(strapi, context);
     await expect(
       handler({ args: { documentId: 'missing', locale: 'en' }, extra: mockExtra })
-    ).rejects.toThrow('Not Found');
+    ).rejects.toThrow('Document not found');
   });
 
   it('throws ForbiddenError when global unpublish is forbidden', async () => {
@@ -2287,7 +2286,7 @@ describe('collection-type handler: discard_draft', () => {
     const handler = discardTool.createHandler(strapi, context);
     await expect(
       handler({ args: { documentId: 'missing', locale: 'en' }, extra: mockExtra })
-    ).rejects.toThrow('Not Found');
+    ).rejects.toThrow('Document not found');
   });
 
   it('throws ForbiddenError when entity discard is forbidden', async () => {
@@ -2326,12 +2325,8 @@ describe('single-type handler: create/update (write)', () => {
   const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
     baseModel({ kind: 'singleType', uid, apiID: 'global', options: { draftAndPublish: true } }),
   ]);
-  const writeTool = (name: 'create_global' | 'update_global') =>
-    tools.find((t) => t.name === name)!;
+  const writeTool = () => tools.find((t) => t.name === 'write_global')!;
   const context = { userAbility: makeUserAbility(), user: mockUser };
-
-  const makeCreateTool = () => writeTool('create_global');
-  const makeUpdateTool = () => writeTool('update_global');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -2353,7 +2348,7 @@ describe('single-type handler: create/update (write)', () => {
     mockDocumentManager.create.mockResolvedValueOnce({ documentId: 'new-1' });
     const { strapi } = makeStrapiForWrite(null);
 
-    const handler = makeCreateTool().createHandler(strapi, context);
+    const handler = writeTool().createHandler(strapi, context);
     await handler({ args: { data: { title: 'New' }, locale: 'en' }, extra: mockExtra });
 
     expect(mockDocumentManager.create).toHaveBeenCalled();
@@ -2365,7 +2360,7 @@ describe('single-type handler: create/update (write)', () => {
     mockDocumentManager.update.mockResolvedValueOnce({ documentId: 'st-1', title: 'new' });
     const { strapi } = makeStrapiForWrite({ documentId: 'st-1' });
 
-    const handler = makeUpdateTool().createHandler(strapi, context);
+    const handler = writeTool().createHandler(strapi, context);
     await handler({ args: { data: { title: 'new' }, locale: 'en' }, extra: mockExtra });
 
     expect(mockDocumentManager.update).toHaveBeenCalled();
@@ -2378,7 +2373,7 @@ describe('single-type handler: create/update (write)', () => {
     mockDocumentManager.update.mockResolvedValueOnce({ documentId: 'st-1' });
     const { strapi } = makeStrapiForWrite({ documentId: 'st-1' });
 
-    const handler = makeUpdateTool().createHandler(strapi, context);
+    const handler = writeTool().createHandler(strapi, context);
     await handler({ args: { data: {}, locale: 'fr' }, extra: mockExtra });
 
     expect(mockDocumentManager.update).toHaveBeenCalled();
@@ -2390,7 +2385,7 @@ describe('single-type handler: create/update (write)', () => {
     mockPermissionChecker.cannot.update.mockReturnValueOnce(true);
     const { strapi } = makeStrapiForWrite(null);
 
-    const handler = makeCreateTool().createHandler(strapi, context);
+    const handler = writeTool().createHandler(strapi, context);
     await expect(handler({ args: { data: {} }, extra: mockExtra })).rejects.toThrow('Forbidden');
   });
 
@@ -2401,7 +2396,7 @@ describe('single-type handler: create/update (write)', () => {
     mockPermissionChecker.cannot.update.mockReturnValueOnce(true); // entity: fail
     const { strapi } = makeStrapiForWrite({ documentId: 'st-1' });
 
-    const handler = makeUpdateTool().createHandler(strapi, context);
+    const handler = writeTool().createHandler(strapi, context);
     await expect(handler({ args: { data: {} }, extra: mockExtra })).rejects.toThrow('Forbidden');
   });
 
@@ -2412,7 +2407,7 @@ describe('single-type handler: create/update (write)', () => {
       .mockReturnValueOnce(true); // version-missing branch
     const { strapi } = makeStrapiForWrite({ documentId: 'st-1' });
 
-    const handler = makeUpdateTool().createHandler(strapi, context);
+    const handler = writeTool().createHandler(strapi, context);
     await expect(handler({ args: { data: {}, locale: 'fr' }, extra: mockExtra })).rejects.toThrow(
       'Forbidden'
     );
@@ -2434,7 +2429,7 @@ describe('single-type handler: publish', () => {
     const strapi = makeStrapiWithDb();
     const handler = publishTool.createHandler(strapi, context);
     await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
-      'Single type document not found'
+      'Document not found'
     );
   });
 
@@ -2485,7 +2480,7 @@ describe('single-type handler: unpublish', () => {
     const strapi = makeStrapiWithDb();
     const handler = unpublishTool.createHandler(strapi, context);
     await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
-      'Not Found'
+      'Document not found'
     );
   });
 
@@ -2527,7 +2522,7 @@ describe('single-type handler: discard_draft', () => {
     mockDocumentManager.findMany.mockResolvedValueOnce([]);
     const handler = discardTool.createHandler(strapi, context);
     await expect(handler({ args: { locale: 'en' }, extra: mockExtra })).rejects.toThrow(
-      'Not Found'
+      'Document not found'
     );
   });
 

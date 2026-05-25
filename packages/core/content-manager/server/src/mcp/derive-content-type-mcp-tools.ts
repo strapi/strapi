@@ -73,7 +73,6 @@ type McpDocumentQuery = {
   populate?: unknown;
   locale?: string;
   status?: string;
-  fields?: unknown;
   filters?: unknown;
   sort?: unknown;
   pagination?: unknown;
@@ -962,9 +961,13 @@ const getPermittedLocales = (
 };
 
 const ok = (structuredContent: Record<string, unknown>): Modules.MCP.McpToolHandlerReturn => ({
-  content: [{ type: 'text', text: JSON.stringify(structuredContent, null, 2) }],
+  content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
   structuredContent,
 });
+
+const MCP_NOT_FOUND_DOCUMENT = 'Document not found.';
+const MCP_NOT_FOUND_LOCALE = 'Document locale not found.';
+const MCP_NOT_FOUND_OR_PUBLISHED = 'Document not found or already published.';
 
 const describeTool = (params: {
   apiID: string;
@@ -973,6 +976,8 @@ const describeTool = (params: {
 }): { title: string; description: string } => {
   const { apiID, uid, operation } = params;
   const operationNoteByType: Partial<Record<string, string>> = {
+    write:
+      ' Creates or updates the single-type document. If no document exists, creates one; otherwise updates the existing draft.',
     publish:
       ' Operates on an existing document by documentId and may return a different numeric id for the published version row.',
     unpublish:
@@ -1107,7 +1112,7 @@ const createCollectionGetHandler =
     if (!version) {
       const exists = await documentManager.exists(uid, documentId);
       if (!exists) {
-        throw new errors.NotFoundError();
+        throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
       }
 
       const { meta } = await formatDocumentWithMetadata(
@@ -1208,7 +1213,7 @@ const createCollectionUpdateHandler =
     ]);
 
     if (!documentExists) {
-      throw new errors.NotFoundError();
+      throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
     }
 
     // If version is not found but document exists, the intent is to create a new locale
@@ -1278,7 +1283,7 @@ const createCollectionDeleteHandler =
     });
 
     if (documentLocales.length === 0) {
-      throw new errors.NotFoundError();
+      throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
     }
 
     for (const document of documentLocales) {
@@ -1316,7 +1321,7 @@ const createCollectionPublishHandler =
     const publishedDocument = await strapi.db.transaction(async () => {
       const exists = await documentManager.exists(uid, documentId);
       if (!exists) {
-        throw new errors.NotFoundError('Document not found.');
+        throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
       }
 
       const document = await documentManager.findOne(documentId, uid, {
@@ -1325,7 +1330,7 @@ const createCollectionPublishHandler =
       });
 
       if (!document) {
-        throw new errors.NotFoundError('Document locale not found.');
+        throw new errors.NotFoundError(MCP_NOT_FOUND_LOCALE);
       }
 
       if (permissionChecker.cannot.publish(document)) {
@@ -1337,7 +1342,7 @@ const createCollectionPublishHandler =
       });
 
       if (!publishResult || publishResult.length === 0) {
-        throw new errors.NotFoundError('Document not found or already published.');
+        throw new errors.NotFoundError(MCP_NOT_FOUND_OR_PUBLISHED);
       }
 
       return publishResult[0];
@@ -1387,7 +1392,7 @@ const createCollectionUnpublishHandler =
     });
 
     if (!document) {
-      throw new errors.NotFoundError();
+      throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
     }
 
     if (permissionChecker.cannot.unpublish(document)) {
@@ -1444,7 +1449,7 @@ const createCollectionDiscardDraftHandler =
     });
 
     if (!document) {
-      throw new errors.NotFoundError();
+      throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
     }
 
     if (permissionChecker.cannot.discard(document)) {
@@ -1473,7 +1478,7 @@ const singleCreateOrUpdate = async (
 ): Promise<Modules.MCP.McpToolHandlerReturn> => {
   const { userAbility, user } = context;
   const { data, locale } = args;
-  // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+  // TODO: fix UID.SingleType assignability in @strapi/types
   const typedUid = uid as UID.ContentType;
 
   const documentManager = getService('document-manager');
@@ -1563,7 +1568,7 @@ const createSingleGetHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale, status } = args as z.infer<typeof singleGetInputSchema>;
-    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    // TODO: fix UID.SingleType assignability in @strapi/types
     const typedUid = uid as UID.ContentType;
 
     const permissionChecker = getService('permission-checker').create({
@@ -1606,7 +1611,7 @@ const createSingleGetHandler =
       const document = await strapi.db.query(typedUid).findOne({});
 
       if (!document) {
-        throw new errors.NotFoundError();
+        throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
       }
 
       const { meta } = await formatDocumentWithMetadata(
@@ -1659,7 +1664,7 @@ const createSingleDeleteHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale } = args as z.infer<typeof singleDeleteInputSchema>;
-    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    // TODO: fix UID.SingleType assignability in @strapi/types
     const typedUid = uid as UID.ContentType;
 
     const documentManager = getService('document-manager');
@@ -1693,7 +1698,7 @@ const createSingleDeleteHandler =
     });
 
     if (documentLocales.length === 0) {
-      throw new errors.NotFoundError();
+      throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
     }
 
     for (const document of documentLocales) {
@@ -1721,7 +1726,7 @@ const createSinglePublishHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale } = args as z.infer<typeof singlePublishInputSchema>;
-    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    // TODO: fix UID.SingleType assignability in @strapi/types
     const typedUid = uid as UID.ContentType;
 
     const documentManager = getService('document-manager');
@@ -1748,7 +1753,7 @@ const createSinglePublishHandler =
         .then((docs: any[]) => docs[0]);
 
       if (!document) {
-        throw new errors.NotFoundError('Single type document not found.');
+        throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
       }
 
       if (permissionChecker.cannot.publish(document)) {
@@ -1778,7 +1783,7 @@ const createSingleUnpublishHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale, discardDraft } = args as z.infer<typeof singleUnpublishInputSchema>;
-    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    // TODO: fix UID.SingleType assignability in @strapi/types
     const typedUid = uid as UID.ContentType;
 
     const documentManager = getService('document-manager');
@@ -1804,7 +1809,7 @@ const createSingleUnpublishHandler =
       .then((docs: any[]) => docs[0]);
 
     if (!document) {
-      throw new errors.NotFoundError();
+      throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
     }
 
     if (permissionChecker.cannot.unpublish(document)) {
@@ -1843,7 +1848,7 @@ const createSingleDiscardDraftHandler =
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
     const { userAbility } = context;
     const { locale } = args as z.infer<typeof singleDiscardDraftInputSchema>;
-    // TODO @Nico: fix UID.SingleType assignability in @strapi/types
+    // TODO: fix UID.SingleType assignability in @strapi/types
     const typedUid = uid as UID.ContentType;
 
     const documentManager = getService('document-manager');
@@ -1869,7 +1874,7 @@ const createSingleDiscardDraftHandler =
       .then((docs: any[]) => docs[0]);
 
     if (!document) {
-      throw new errors.NotFoundError();
+      throw new errors.NotFoundError(MCP_NOT_FOUND_DOCUMENT);
     }
 
     if (permissionChecker.cannot.discard(document)) {
@@ -2166,35 +2171,26 @@ const buildSingleTypeTools = (
     });
   };
 
-  const resolveCreateInputSchema = (context: Modules.MCP.McpHandlerContext) => {
-    const writeFields = getPermittedFields(
+  const resolveWriteInputSchema = (context: Modules.MCP.McpHandlerContext) => {
+    const createFields = getPermittedFields(
       strapi,
       context.userAbility,
       ACTIONS.create,
       uid,
       attributes
     );
-    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields);
-    const localeSchema = resolvePermittedLocaleSchema(
-      strapi,
-      context,
-      ACTIONS.create,
-      uid,
-      ctx.localeCodes,
-      ctx.defaultLocale,
-      runtimeLocaleSchema
-    );
-    return z.object({ data: dataSchema, locale: localeSchema });
-  };
-
-  const resolveUpdateInputSchema = (context: Modules.MCP.McpHandlerContext) => {
-    const writeFields = getPermittedFields(
+    const updateFields = getPermittedFields(
       strapi,
       context.userAbility,
       ACTIONS.update,
       uid,
       attributes
     );
+    // null means all fields permitted; union of null with anything is null (all permitted)
+    const writeFields: Set<string> | null =
+      createFields === null || updateFields === null
+        ? null
+        : new Set([...createFields, ...updateFields]);
     const dataSchema = buildDataSchema(strapi, model, attributes, writeFields);
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
@@ -2279,18 +2275,10 @@ const buildSingleTypeTools = (
       createHandler: createSingleGetHandler(uid),
     },
     {
-      name: `create_${slug}`,
-      ...describeTool({ apiID: model.apiID, uid, operation: 'create' }),
-      auth: authFor(uid, ACTIONS.create),
-      resolveInputSchema: resolveCreateInputSchema,
-      resolveOutputSchema: resolveReadOutputSchema,
-      createHandler: createSingleWriteHandler(uid),
-    },
-    {
-      name: `update_${slug}`,
-      ...describeTool({ apiID: model.apiID, uid, operation: 'update' }),
+      name: `write_${slug}`,
+      ...describeTool({ apiID: model.apiID, uid, operation: 'write' }),
       auth: authFor(uid, ACTIONS.update),
-      resolveInputSchema: resolveUpdateInputSchema,
+      resolveInputSchema: resolveWriteInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createSingleWriteHandler(uid),
     },
