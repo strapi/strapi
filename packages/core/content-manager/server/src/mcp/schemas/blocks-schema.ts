@@ -126,6 +126,11 @@ const blockNodeSchema = z.discriminatedUnion('type', [
   imageSchema,
 ]);
 
+/**
+ * Returns the Zod schema for a Strapi Blocks (rich-text) field input.
+ * Accepts an array of block nodes — paragraph, heading, quote, code, image, and list —
+ * matching Strapi's internal blocks data model.
+ */
 export const buildBlocksInputSchema = (): z.ZodArray<z.ZodTypeAny> =>
   z
     .array(

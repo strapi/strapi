@@ -64,6 +64,10 @@ type CollectionUnpublishArgs = DocumentLocaleArgs & {
 // Handler factories
 // ---------------------------------------------------------------------------
 
+/**
+ * Creates a handler for listing (paginated) documents of a collection-type.
+ * Enforces RBAC read permission and sanitizes query + output via permissionChecker.
+ */
 export const createCollectionListHandler =
   (uid: UID.CollectionType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -130,6 +134,10 @@ export const createCollectionListHandler =
     return ok({ results, pagination } as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for fetching a single collection-type document by `documentId`.
+ * Enforces RBAC read permission; returns available locale metadata when the locale is missing.
+ */
 export const createCollectionGetHandler =
   (uid: UID.CollectionType) =>
   (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -196,6 +204,10 @@ export const createCollectionGetHandler =
     return ok(result as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for creating a new collection-type document.
+ * Enforces RBAC create permission; sanitizes input and stamps creator fields.
+ */
 export const createCollectionCreateHandler =
   (uid: UID.CollectionType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -237,6 +249,11 @@ export const createCollectionCreateHandler =
     return ok(result as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for updating an existing collection-type document draft.
+ * Creates a new locale version when the target locale does not yet exist for the document.
+ * Enforces RBAC update (or create) permission accordingly.
+ */
 export const createCollectionUpdateHandler =
   (uid: UID.CollectionType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -307,6 +324,10 @@ export const createCollectionUpdateHandler =
     return ok(result as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for deleting a collection-type document (or a specific locale).
+ * Enforces RBAC delete permission on every locale version before deletion.
+ */
 export const createCollectionDeleteHandler =
   (uid: UID.CollectionType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -357,6 +378,10 @@ export const createCollectionDeleteHandler =
     return ok({ data: sanitizedResult } as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for publishing a collection-type document draft.
+ * Enforces RBAC publish permission; throws NotFound when the draft or document is missing.
+ */
 export const createCollectionPublishHandler =
   (uid: UID.CollectionType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -413,6 +438,11 @@ export const createCollectionPublishHandler =
     return ok(result as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for unpublishing a collection-type document.
+ * Optionally discards the draft in the same transaction when `discardDraft` is true.
+ * Enforces RBAC unpublish (and discard) permission.
+ */
 export const createCollectionUnpublishHandler =
   (uid: UID.CollectionType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -474,6 +504,10 @@ export const createCollectionUnpublishHandler =
     return ok(result as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for discarding the draft of a collection-type document.
+ * Restores the published version as the draft. Enforces RBAC discard permission.
+ */
 export const createCollectionDiscardDraftHandler =
   (uid: UID.CollectionType) =>
   (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>

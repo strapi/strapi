@@ -47,6 +47,12 @@ export { getComponentLeafPaths } from './permissions';
 // Collection-type tool-definition builder
 // ---------------------------------------------------------------------------
 
+/**
+ * Derives the full set of `DerivedTool` definitions for a single collection-type model.
+ * Produces list/get/create/update/delete tools, plus publish/unpublish/discard_draft
+ * when draft-and-publish is enabled. Each tool's input/output schema is resolved
+ * per-request so RBAC field and locale constraints are applied at call time.
+ */
 const buildCollectionTools = (
   strapi: Core.Strapi,
   model: ContentManagerModelForMcp,

@@ -31,7 +31,7 @@ export const attributeTypeToFilterValue = (attr: Schema.Attribute.AnyAttribute):
   }
 };
 
-// All Strapi filter operators (excluding experimental $jsonSupersetOf)
+/** All supported Strapi filter operators (excludes the experimental `$jsonSupersetOf`). */
 export const FILTER_OPERATORS = [
   '$eq',
   '$eqi',

@@ -4,6 +4,7 @@ import type { Core, Modules, Struct, UID } from '@strapi/types';
 import { getService } from '../utils';
 import type { ContentManagerModelForMcp } from './types';
 
+/** Returns true if the content type identified by `uid` has the i18n `localized` plugin option enabled. */
 export const isContentTypeLocalized = (strapi: Core.Strapi, uid: string): boolean => {
   const ct = strapi.contentTypes?.[uid as UID.ContentType];
   if (ct === undefined) return false;
@@ -24,6 +25,11 @@ const localeDefaultDescription = (
   return 'Defaults to the default locale.';
 };
 
+/**
+ * Builds the base locale Zod schema for a derived MCP tool input.
+ * When `localeCodes` is provided, constrains the field to a `z.enum` of available codes
+ * with an optional default; otherwise falls back to a plain optional string.
+ */
 export const buildLocaleSchema = (
   localeCodes: [string, ...string[]] | null,
   defaultLocale: string | null
@@ -140,6 +146,11 @@ export const getComponentLeafPaths = (
   return paths.length > 0 ? paths : [prefix];
 };
 
+/**
+ * Returns the subset of attribute keys the session may access for `action` on `uid`.
+ * Returns `null` when all fields are permitted (caller should skip field filtering).
+ * Component attributes are resolved to their nested leaf paths before checking CASL rules.
+ */
 export const getPermittedFields = (
   strapi: Core.Strapi,
   userAbility: Modules.MCP.McpHandlerContext['userAbility'],
@@ -169,6 +180,11 @@ export const getPermittedFields = (
   return new Set(permitted);
 };
 
+/**
+ * Filters `localeCodes` to only those the session may access for `action`.
+ * Returns `null` when all locales are permitted (caller should use the unfiltered base schema).
+ * Returns an empty tuple-like array when no locale is permitted.
+ */
 export const getPermittedLocales = (
   permissionChecker: { cannot: (action: string, entity?: unknown) => boolean },
   action: string,

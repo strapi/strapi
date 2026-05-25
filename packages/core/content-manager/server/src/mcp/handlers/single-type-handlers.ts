@@ -35,6 +35,11 @@ type SingleWriteArgs = { data: Record<string, unknown>; locale?: string };
 // Shared create-or-update logic mirroring single-types controller
 // ---------------------------------------------------------------------------
 
+/**
+ * Core write logic shared by the single-type write handler.
+ * Creates the document when none exists; updates the existing draft otherwise.
+ * Enforces RBAC create/update permission and sanitizes input + output.
+ */
 export const singleCreateOrUpdate = async (
   strapi: Core.Strapi,
   uid: UID.SingleType,
@@ -127,6 +132,11 @@ export const singleCreateOrUpdate = async (
 // Handler factories
 // ---------------------------------------------------------------------------
 
+/**
+ * Creates a handler for reading the single-type document.
+ * Returns available locale metadata when the requested locale version does not exist.
+ * Enforces RBAC read permission.
+ */
 export const createSingleGetHandler =
   (uid: UID.SingleType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -203,6 +213,10 @@ export const createSingleGetHandler =
     return ok(result as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for creating or updating the single-type document.
+ * Delegates to `singleCreateOrUpdate`; enforces RBAC create/update permission.
+ */
 export const createSingleWriteHandler =
   (uid: UID.SingleType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -214,6 +228,10 @@ export const createSingleWriteHandler =
     return singleCreateOrUpdate(strapi, uid, context, args as SingleWriteArgs);
   };
 
+/**
+ * Creates a handler for deleting the single-type document (or a specific locale).
+ * Enforces RBAC delete permission on every locale version before deletion.
+ */
 export const createSingleDeleteHandler =
   (uid: UID.SingleType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -272,6 +290,10 @@ export const createSingleDeleteHandler =
     return ok({ data: sanitizedResult } as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for publishing the single-type document draft.
+ * Enforces RBAC publish permission; throws NotFound when the draft is missing.
+ */
 export const createSinglePublishHandler =
   (uid: UID.SingleType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -325,6 +347,11 @@ export const createSinglePublishHandler =
     return ok(result as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for unpublishing the single-type document.
+ * Optionally discards the draft in the same transaction when `discardDraft` is true.
+ * Enforces RBAC unpublish (and discard) permission.
+ */
 export const createSingleUnpublishHandler =
   (uid: UID.SingleType) =>
   (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
@@ -386,6 +413,10 @@ export const createSingleUnpublishHandler =
     return ok(result as Record<string, unknown>);
   };
 
+/**
+ * Creates a handler for discarding the draft of the single-type document.
+ * Restores the published version as the draft. Enforces RBAC discard permission.
+ */
 export const createSingleDiscardDraftHandler =
   (uid: UID.SingleType) =>
   (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>

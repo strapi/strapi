@@ -1,6 +1,7 @@
 import { z } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 
+/** Attribute types considered scalar for sorting and filtering (excludes relations, components, media, json, blocks). */
 export const SCALAR_ATTRIBUTE_TYPES = new Set([
   'string',
   'text',

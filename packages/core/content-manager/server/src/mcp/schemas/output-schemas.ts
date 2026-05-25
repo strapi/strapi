@@ -18,6 +18,10 @@ const buildOutputDataSchema = (
   return z.object(shape).loose();
 };
 
+/**
+ * Builds the MCP output schema for a single-document response (`{ data, meta }`).
+ * Field shape is constrained to `readFields` when non-null (RBAC field filtering).
+ */
 export const buildDocumentOutputSchema = (
   attributes: Struct.SchemaAttributes,
   readFields: Set<string> | null
@@ -34,6 +38,10 @@ export const buildDocumentOutputSchema = (
     })
     .loose();
 
+/**
+ * Builds the MCP output schema for a paginated list response (`{ results, pagination }`).
+ * Field shape is constrained to `readFields` when non-null (RBAC field filtering).
+ */
 export const buildListOutputSchema = (
   attributes: Struct.SchemaAttributes,
   readFields: Set<string> | null
@@ -50,6 +58,10 @@ export const buildListOutputSchema = (
     })
     .loose();
 
+/**
+ * Builds the MCP output schema for a delete response (`{ data }`).
+ * Field shape is constrained to `readFields` when non-null (RBAC field filtering).
+ */
 export const buildDeleteOutputSchema = (
   attributes: Struct.SchemaAttributes,
   readFields: Set<string> | null
