@@ -21,7 +21,7 @@ import { ACTIONS } from '../../services/permission-checker';
  * | 1 ✅  | Handler contract tests (list/get/create/delete + update/publish/unpublish/discard + single write/publish/unpublish/discard + publish schema contract) |
  * | 2     | `buildDataSchema`, `buildSortSchema`, `buildFiltersSchema`, `getComponentLeafPaths` — update imports when extracted to `mcp/schemas/*` |
  * | 3     | Component permission narrowing — tighten Zod to permitted leaf paths only (F4 partial, F7) |
- * | 4     | Handler extraction + F1 global.strapi DI, F2 single unpublish transaction result, F3 shared permission checker |
+ * | 4 ✅  | F1 global.strapi DI, F2 single unpublish transaction result, F3 shared permission checker |
  * | 5     | Populate depth presets per operation (F5, F14) — assert `populateDeep` depth in handler tests |
  * | 6     | Optional follow-ups (F6, F8, F12–F20) — not covered here yet |
  */
@@ -177,8 +177,7 @@ const makePopulateBuilder = () => {
 };
 
 // Minimal strapi-shaped object that satisfies the unit.setup.js global setter.
-// Used by handlers that reference bare `global.strapi` (singleGetHandler, singleCreateOrUpdate).
-// TODO @Nico Phase 4 (F1): remove once global.strapi dependency is replaced with injected strapi.
+// Used by handlers that reference bare `global.strapi` (singleGetHandler).
 const makeMinimalGlobalStrapi = (dbOverrides?: Record<string, unknown>): Core.Strapi =>
   ({
     plugins: {},
@@ -1655,7 +1654,7 @@ const makeNonLocalizedStrapi = (uid: string): Core.Strapi =>
     },
   }) as unknown as Core.Strapi;
 
-// Phase 1 — locale schema + handler locale branches; Phase 4 (F3) will reuse one permission checker in getPermittedLocales
+// Locale schema + handler locale branches (F3: permissionChecker injected via resolvePermittedLocaleSchema)
 describe('locale permission segregation', () => {
   const uid = 'api::article.article';
   // Use a model with at least one scalar attribute so sort/filters schemas don't produce z.never()
@@ -2338,29 +2337,21 @@ describe('single-type handler: create/update (write)', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    // Restore global.strapi to minimal valid object so other tests don't break
-    global.strapi = makeMinimalGlobalStrapi() as unknown as typeof global.strapi;
-  });
-
-  // singleCreateOrUpdate uses bare `strapi` (global) for db.query — pre-existing design smell
-  // TODO @Nico Phase 4 (F1): pass injected strapi into singleCreateOrUpdate instead of global.strapi
-  const setupGlobalStrapi = (findOneResult: unknown) => {
+  const makeStrapiForWrite = (findOneResult: unknown) => {
     const dbQueryFindOne = jest.fn(() => Promise.resolve(findOneResult));
-    const strapi = makeMinimalGlobalStrapi({
+    const strapi = makeStrapiWithDb({
       db: {
         transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
         query: jest.fn(() => ({ findOne: dbQueryFindOne })),
       },
     });
-    global.strapi = strapi as unknown as typeof global.strapi;
     return { strapi, dbQueryFindOne };
   };
 
   it('create branch — calls documentManager.create when no existing document', async () => {
     mockDocumentManager.findMany.mockResolvedValueOnce([]);
     mockDocumentManager.create.mockResolvedValueOnce({ documentId: 'new-1' });
-    const { strapi } = setupGlobalStrapi(null);
+    const { strapi } = makeStrapiForWrite(null);
 
     const handler = makeCreateTool().createHandler(strapi, context);
     await handler({ args: { data: { title: 'New' }, locale: 'en' }, extra: mockExtra });
@@ -2372,7 +2363,7 @@ describe('single-type handler: create/update (write)', () => {
   it('update branch — calls documentManager.update when existing document with draft version', async () => {
     mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1', title: 'old' }]);
     mockDocumentManager.update.mockResolvedValueOnce({ documentId: 'st-1', title: 'new' });
-    const { strapi } = setupGlobalStrapi({ documentId: 'st-1' });
+    const { strapi } = makeStrapiForWrite({ documentId: 'st-1' });
 
     const handler = makeUpdateTool().createHandler(strapi, context);
     await handler({ args: { data: { title: 'new' }, locale: 'en' }, extra: mockExtra });
@@ -2385,7 +2376,7 @@ describe('single-type handler: create/update (write)', () => {
   it('update branch — uses existing documentId when draft version missing (new locale)', async () => {
     mockDocumentManager.findMany.mockResolvedValueOnce([]);
     mockDocumentManager.update.mockResolvedValueOnce({ documentId: 'st-1' });
-    const { strapi } = setupGlobalStrapi({ documentId: 'st-1' });
+    const { strapi } = makeStrapiForWrite({ documentId: 'st-1' });
 
     const handler = makeUpdateTool().createHandler(strapi, context);
     await handler({ args: { data: {}, locale: 'fr' }, extra: mockExtra });
@@ -2397,7 +2388,7 @@ describe('single-type handler: create/update (write)', () => {
   it('throws ForbiddenError when both create and update are forbidden', async () => {
     mockPermissionChecker.cannot.create.mockReturnValueOnce(true);
     mockPermissionChecker.cannot.update.mockReturnValueOnce(true);
-    const { strapi } = setupGlobalStrapi(null);
+    const { strapi } = makeStrapiForWrite(null);
 
     const handler = makeCreateTool().createHandler(strapi, context);
     await expect(handler({ args: { data: {} }, extra: mockExtra })).rejects.toThrow('Forbidden');
@@ -2408,7 +2399,7 @@ describe('single-type handler: create/update (write)', () => {
     // cannot.create() returns false (default), so cannot.update() in combined check is short-circuited
     // The only call is the entity-level check: cannot.update(documentVersion)
     mockPermissionChecker.cannot.update.mockReturnValueOnce(true); // entity: fail
-    const { strapi } = setupGlobalStrapi({ documentId: 'st-1' });
+    const { strapi } = makeStrapiForWrite({ documentId: 'st-1' });
 
     const handler = makeUpdateTool().createHandler(strapi, context);
     await expect(handler({ args: { data: {} }, extra: mockExtra })).rejects.toThrow('Forbidden');
@@ -2419,7 +2410,7 @@ describe('single-type handler: create/update (write)', () => {
     mockPermissionChecker.cannot.create
       .mockReturnValueOnce(false) // combined initial check (passes because update also passes)
       .mockReturnValueOnce(true); // version-missing branch
-    const { strapi } = setupGlobalStrapi({ documentId: 'st-1' });
+    const { strapi } = makeStrapiForWrite({ documentId: 'st-1' });
 
     const handler = makeUpdateTool().createHandler(strapi, context);
     await expect(handler({ args: { data: {}, locale: 'fr' }, extra: mockExtra })).rejects.toThrow(
@@ -2507,14 +2498,8 @@ describe('single-type handler: unpublish', () => {
     ).rejects.toThrow('Forbidden');
   });
 
-  it('unpublishes successfully and returns result', async () => {
-    // Documents current F2 behavior: transaction result discarded, then findMany re-fetch.
-    // TODO @Nico Phase 4 (F2): assert handler returns transaction output — expect single findMany call
-    // First findMany: inside handler (before transaction — finds document)
-    mockDocumentManager.findMany
-      .mockResolvedValueOnce([{ documentId: 'st-1' }])
-      // Second findMany: re-fetch after transaction
-      .mockResolvedValueOnce([{ documentId: 'st-1' }]);
+  it('unpublishes successfully and returns transaction result directly', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([{ documentId: 'st-1' }]);
     mockDocumentManager.unpublish.mockResolvedValueOnce({ documentId: 'st-1' });
 
     const strapi = makeStrapiWithDb();
@@ -2522,6 +2507,7 @@ describe('single-type handler: unpublish', () => {
     const result = await handler({ args: { locale: 'en' }, extra: mockExtra });
 
     expect(mockDocumentManager.unpublish).toHaveBeenCalled();
+    expect(mockDocumentManager.findMany).toHaveBeenCalledTimes(1);
     expect(result.isError).toBeUndefined();
   });
 });

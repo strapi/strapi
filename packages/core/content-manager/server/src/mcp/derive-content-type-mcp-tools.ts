@@ -114,7 +114,11 @@ const resolvePermittedLocaleSchema = (
     return z.string().optional().describe('This content type is not localized. Locale is ignored.');
   }
 
-  const permitted = getPermittedLocales(context.userAbility, action, uid, localeCodes);
+  const permissionChecker = getService('permission-checker').create({
+    userAbility: context.userAbility,
+    model: uid,
+  });
+  const permitted = getPermittedLocales(permissionChecker, action, localeCodes);
   if (permitted === null) return baseLocaleSchema;
   if (permitted.length === 0) {
     return z.never().optional().describe('No locale access for this action.');
@@ -916,13 +920,10 @@ const getPermittedFields = (
 };
 
 const getPermittedLocales = (
-  userAbility: Modules.MCP.McpHandlerContext['userAbility'],
+  permissionChecker: { cannot: (action: string, entity?: unknown) => boolean },
   action: string,
-  uid: string,
   localeCodes: [string, ...string[]]
 ): [string, ...string[]] | null => {
-  const permissionChecker = getService('permission-checker').create({ userAbility, model: uid });
-
   const permitted = localeCodes.filter(
     (code) => permissionChecker.cannot(action, { locale: code }) === false
   );
@@ -1432,6 +1433,7 @@ const createCollectionDiscardDraftHandler =
 
 /** Shared create-or-update logic mirroring single-types controller. */
 const singleCreateOrUpdate = async (
+  strapi: Core.Strapi,
   uid: UID.SingleType,
   context: Modules.MCP.McpHandlerContext,
   args: { data: Record<string, unknown>; locale?: string }
@@ -1589,13 +1591,18 @@ const createSingleGetHandler =
 
 const createSingleWriteHandler =
   (uid: UID.SingleType) =>
-  (_strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
+  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
   async ({
     args,
   }: {
     args: Record<string, unknown>;
   }): Promise<Modules.MCP.McpToolHandlerReturn> => {
-    return singleCreateOrUpdate(uid, context, args as z.infer<typeof singleWriteInputSchema>);
+    return singleCreateOrUpdate(
+      strapi,
+      uid,
+      context,
+      args as z.infer<typeof singleWriteInputSchema>
+    );
   };
 
 const createSingleDeleteHandler =
@@ -1761,32 +1768,20 @@ const createSingleUnpublishHandler =
       throw new errors.ForbiddenError();
     }
 
-    await strapi.db.transaction(async () => {
+    const result = await strapi.db.transaction(async () => {
       if (discardDraft === true) {
         await documentManager.discardDraft(document.documentId, uid as any, {
           locale: resolvedLocale,
         });
       }
 
-      await asyncPipe.pipe(
+      return asyncPipe.pipe(
         (doc: any) =>
           documentManager.unpublish(doc.documentId, uid as any, { locale: resolvedLocale }),
         permissionChecker.sanitizeOutput,
         (doc: any) => formatDocumentWithMetadata(permissionChecker, uid as any, doc)
       )(document);
     });
-
-    // Re-fetch after transaction to return fresh state
-    const updatedDocument = await getService('document-manager')
-      .findMany({ locale: resolvedLocale } as any, uid as any)
-      .then((docs: any[]) => docs[0]);
-
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(updatedDocument);
-    const result = await formatDocumentWithMetadata(
-      permissionChecker,
-      uid as any,
-      sanitizedDocument
-    );
 
     return ok(result as Record<string, unknown>);
   };
