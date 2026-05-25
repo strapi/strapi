@@ -32,6 +32,15 @@ The following are the most important packages (not exhaustive — run `yarn work
 | `@strapi/permissions`              | RBAC engine                                               |
 | `@strapi/plugin-users-permissions` | JWT authentication                                        |
 
+### Skills directories
+
+This repo tracks two skill roots, both visible in git:
+
+- `.agents/skills/<name>/` — agent skills following the `.agents/` convention
+- `.claude/skills/<name>/` — Claude Code-specific skills
+
+Personal/in-progress skills go under `<root>/skills/local/` (gitignored). See [.agents/skills/write-a-skill/SKILL.md](.agents/skills/write-a-skill/SKILL.md) for authoring guidance.
+
 ---
 
 ## Architecture

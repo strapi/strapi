@@ -21,6 +21,7 @@ description: Create new agent skills with proper structure, progressive disclosu
    - Utility scripts if deterministic operations needed
 
 3. **Review with user** - present draft and ask:
+
    - Does this cover your use cases?
    - Anything missing or unclear?
    - Should any section be more/less detailed?
@@ -84,7 +85,7 @@ The description is **the only thing your agent sees** when deciding which skill 
 **Format**:
 
 - Max 1024 chars
-- Write in third person
+- Start with an imperative verb (e.g. "Extract...", "Create...")
 - First sentence: what it does
 - Second sentence: "Use when [specific triggers]"
 
