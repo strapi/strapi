@@ -45,6 +45,22 @@ export interface SortParamsObject {
 type SortParams = string | string[] | SortParamsObject | SortParamsObject[];
 type FieldsParams = string | string[];
 
+const hasSort = (sort?: SortParams | null): sort is SortParams => {
+  if (sort == null) {
+    return false;
+  }
+
+  if (Array.isArray(sort)) {
+    return sort.length > 0;
+  }
+
+  if (typeof sort === 'string') {
+    return sort.length > 0;
+  }
+
+  return true;
+};
+
 type FiltersParams = unknown;
 
 export interface PopulateAttributesParams {
@@ -506,8 +522,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    if (sort) {
-      query.orderBy = convertSortQueryParams(sort);
+    const sortParam = sort;
+    if (hasSort(sortParam)) {
+      query.orderBy = convertSortQueryParams(sortParam);
     }
 
     if (filters) {
@@ -718,8 +735,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       query._q = _q;
     }
 
-    if (!isNil(sort)) {
-      query.orderBy = convertSortQueryParams(sort);
+    const sortParam = sort;
+    if (hasSort(sortParam)) {
+      query.orderBy = convertSortQueryParams(sortParam);
     }
 
     if (!isNil(filters)) {

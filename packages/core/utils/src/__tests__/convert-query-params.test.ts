@@ -378,5 +378,25 @@ describe('convert-query-params', () => {
     });
   });
 
+  describe('transformQueryParams', () => {
+    it('treats an empty sort array as no sort', () => {
+      const result = transformer.transformQueryParams('api::dog.dog', {
+        sort: [],
+        limit: 10,
+      });
+
+      expect(result.orderBy).toBeUndefined();
+      expect(result.limit).toBe(10);
+    });
+
+    it('treats a missing sort as no sort', () => {
+      const result = transformer.transformQueryParams('api::dog.dog', {
+        limit: 10,
+      });
+
+      expect(result.orderBy).toBeUndefined();
+    });
+  });
+
   test.todo('transformParamsToQuery');
 });
