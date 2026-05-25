@@ -146,5 +146,5 @@ After drafting, verify:
 - [ ] No time-sensitive info
 - [ ] Consistent terminology
 - [ ] Concrete examples included
-- [ ] References one level deep
+- [ ] Reference files link directly from SKILL.md, not from other reference files
 - [ ] All file paths use forward slashes
