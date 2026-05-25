@@ -1,9 +1,1 @@
-export {};
-
-declare global {
-  interface Window {
-    strapi: {
-      backendURL: string;
-    };
-  }
-}
+/// <reference types="@strapi/types/globals-admin" />

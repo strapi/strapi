@@ -1,13 +1,8 @@
-export {};
+/// <reference types="@strapi/types/globals-admin" />
 
 declare global {
-  interface Window {
-    strapi: {
-      backendURL: string;
-      future: {
-        isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => boolean;
-      };
-    };
-  }
   declare module '*?raw';
 }
+
+// Keep this file a module
+export {};
