@@ -59,6 +59,19 @@ description: Brief description of capability. Use when [specific triggers].
 [Link to separate files: See [REFERENCE.md](REFERENCE.md)]
 ```
 
+## Conciseness Principle
+
+Once Claude loads SKILL.md, every token in it competes with conversation history and other context. Only include what Claude doesn't already know. For each line, ask: _"can I assume Claude knows this?"_ and _"does this paragraph justify its token cost?"_ Prefer concrete examples over explanations.
+
+## Frontmatter Constraints
+
+The `name` field is also validated:
+
+- Max 64 characters
+- Lowercase letters, numbers, and hyphens only
+- No reserved words (`anthropic`, `claude`)
+- Prefer gerund form (`processing-pdfs`, `writing-documentation`); noun phrases (`pdf-processing`) are also acceptable
+
 ## Description Requirements
 
 The description is **the only thing your agent sees** when deciding which skill to load. It's surfaced in the system prompt alongside all other installed skills. Your agent reads these descriptions and picks the relevant skill based on the user's request.
@@ -103,17 +116,34 @@ Scripts save tokens and improve reliability vs generated code.
 
 Split into separate files when:
 
-- SKILL.md exceeds 100 lines
+- SKILL.md body exceeds 500 lines
 - Content has distinct domains (finance vs sales schemas)
 - Advanced features are rarely needed
+
+**Reference file rules:**
+
+- Keep references **one level deep** from SKILL.md. Claude may only partially read nested references (e.g. `head -100`), so files linked from another reference file can be missed.
+- Reference files longer than 100 lines should include a table of contents at the top so Claude can see the full scope even on a partial read.
+
+## Common Pitfalls
+
+- **Time-sensitive info** — don't write "After August 2025, use the new API". Move legacy content into a clearly-marked "Old patterns" section that won't rot.
+- **Inconsistent terminology** — pick one term (e.g. "field", not also "box" / "element" / "control") and use it throughout.
+- **Windows-style paths** — always use forward slashes (`scripts/helper.py`), even when authored on Windows.
+- **Too many options** — pick a default and provide an escape hatch. Don't enumerate every library; say "Use X. For [edge case], use Y instead."
+- **Punting to Claude in scripts** — handle errors explicitly inside utility scripts rather than letting them fail. Avoid voodoo constants — document why values like timeouts or retry counts were chosen.
+- **MCP tool references** — always use fully qualified names (`ServerName:tool_name`) to avoid "tool not found" errors when multiple MCP servers are loaded.
+- **Ambiguous script intent** — make clear whether Claude should _run_ a script ("Run `analyze_form.py` to extract fields") or _read_ it ("See `analyze_form.py` for the extraction algorithm"). Execution is preferred for utilities.
 
 ## Review Checklist
 
 After drafting, verify:
 
 - [ ] Description includes triggers ("Use when...")
-- [ ] SKILL.md under 100 lines
+- [ ] Name is lowercase, hyphens only, ≤64 chars, no reserved words
+- [ ] SKILL.md body under 500 lines
 - [ ] No time-sensitive info
 - [ ] Consistent terminology
 - [ ] Concrete examples included
 - [ ] References one level deep
+- [ ] All file paths use forward slashes
