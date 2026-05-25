@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "spaces",
+  "info": {
+    "singularName": "space",
+    "pluralName": "spaces",
+    "displayName": "Space",
+    "description": "A virtual tenant within this Strapi deployment."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "slug": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "configurable": false,
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "color": {
+      "type": "string",
+      "configurable": false,
+      "regex": "^#[0-9A-Fa-f]{6}$"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["active", "archived"],
+      "default": "active",
+      "required": true,
+      "configurable": false
+    }
+  }
+}
