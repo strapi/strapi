@@ -1,6 +1,6 @@
 import { z } from '@strapi/utils';
 
-import { buildBlocksInputSchema } from '../blocks-schema';
+import { buildBlocksInputSchema } from '../schemas/blocks-schema';
 
 const schema = buildBlocksInputSchema();
 
