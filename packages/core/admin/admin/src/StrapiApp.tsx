@@ -218,8 +218,8 @@ class StrapiApp {
 
   addSettingsLink = (
     sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink
-  ) => {
+    link: UnloadedSettingsLink | UnloadedSettingsLink[]
+  ): void => {
     this.router.addSettingsLink(sectionId, link);
   };
 
