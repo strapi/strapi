@@ -5,6 +5,7 @@ import { getService } from '../../utils';
 import { getDocumentLocaleAndStatus } from '../../controllers/validation/dimensions';
 import { formatDocumentWithMetadata } from '../../controllers/utils/metadata';
 import { getPopulateForLocalizations } from '../../services/utils/populate';
+import { MCP_NOT_FOUND_DOCUMENT } from './constants';
 import { isContentTypeLocalized } from '../permissions';
 import { ok } from '../utils';
 
@@ -19,8 +20,6 @@ type McpDocumentQuery = {
 };
 
 type McpFindManyParams = Parameters<Modules.Documents.ServiceInstance['findMany']>[0];
-
-const MCP_NOT_FOUND_DOCUMENT = 'Document not found.';
 
 // ---------------------------------------------------------------------------
 // Input arg schemas — used for type-safe narrowing from Record<string, unknown>

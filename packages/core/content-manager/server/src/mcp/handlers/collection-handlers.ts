@@ -6,6 +6,11 @@ import { getDocumentLocaleAndStatus } from '../../controllers/validation/dimensi
 import { formatDocumentWithMetadata } from '../../controllers/utils/metadata';
 import { indexByDocumentId } from '../../controllers/utils/document-status';
 import { getPopulateForLocalizations } from '../../services/utils/populate';
+import {
+  MCP_NOT_FOUND_DOCUMENT,
+  MCP_NOT_FOUND_LOCALE,
+  MCP_NOT_FOUND_OR_PUBLISHED,
+} from './constants';
 import { isContentTypeLocalized } from '../permissions';
 import { ok } from '../utils';
 
@@ -20,10 +25,6 @@ type McpDocumentQuery = {
 };
 
 type McpFindManyParams = Parameters<Modules.Documents.ServiceInstance['findMany']>[0];
-
-const MCP_NOT_FOUND_DOCUMENT = 'Document not found.';
-const MCP_NOT_FOUND_LOCALE = 'Document locale not found.';
-const MCP_NOT_FOUND_OR_PUBLISHED = 'Document not found or already published.';
 
 // ---------------------------------------------------------------------------
 // Arg types — type-level only; runtime validation is handled by the MCP SDK
