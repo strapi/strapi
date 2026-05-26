@@ -406,6 +406,40 @@ describe('Homepage API', () => {
       });
     });
 
+    it('counts more than one modified document per content type', async () => {
+      const before = await rq({
+        method: 'GET',
+        url: '/content-manager/homepage/count-documents',
+      });
+
+      // Create 3 additional articles, publish them, then update the draft so
+      // each one lands in the 'modified' bucket.
+      const articleCount = 3;
+      for (let i = 0; i < articleCount; i++) {
+        const article = await strapi.documents(articleUid).create({
+          data: {
+            title: `Modified Article ${i}`,
+          },
+        });
+        await strapi.documents(articleUid).publish({
+          documentId: article.documentId,
+        });
+        await strapi.documents(articleUid).update({
+          documentId: article.documentId,
+          data: { title: `Modified Article ${i} (updated)` },
+        });
+      }
+
+      const after = await rq({
+        method: 'GET',
+        url: '/content-manager/homepage/count-documents',
+      });
+
+      expect(after.statusCode).toBe(200);
+      // The buggy implementation would return modified ≤ 1 here.
+      expect(after.body.data.modified - before.body.data.modified).toBe(articleCount);
+    });
+
     afterAll(async () => {
       await strapi.destroy();
       await builder.cleanup();
