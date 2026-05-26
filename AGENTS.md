@@ -34,12 +34,9 @@ The following are the most important packages (not exhaustive — run `yarn work
 
 ### Skills directories
 
-This repo tracks two skill roots, both visible in git:
+Shared skills live under `.agents/skills/<name>/`. Tool-specific skill directories (e.g. `.claude/skills/`) should be symlinks to `.agents/skills/` — each AI tool has its own well-known location.
 
-- `.agents/skills/<name>/` — agent skills following the `.agents/` convention
-- `.claude/skills/<name>/` — Claude Code-specific skills
-
-Personal/in-progress skills go under `<root>/skills/local/` (gitignored). See [.agents/skills/write-a-skill/SKILL.md](.agents/skills/write-a-skill/SKILL.md) for authoring guidance.
+Personal/in-progress skills go under `.agents/local-skills/` (gitignored). See [.agents/skills/writing-skills/SKILL.md](.agents/skills/writing-skills/SKILL.md) for authoring guidance.
 
 ---
 

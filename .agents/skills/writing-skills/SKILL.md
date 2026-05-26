@@ -34,7 +34,7 @@ skill-name/
 ├── REFERENCE.md       # Detailed docs (if needed)
 ├── EXAMPLES.md        # Usage examples (if needed)
 └── scripts/           # Utility scripts (if needed)
-    └── helper.js
+    └── helper.ts
 ```
 
 ## SKILL.md Template
@@ -62,7 +62,7 @@ description: Brief description of capability. Use when [specific triggers].
 
 ## Conciseness Principle
 
-Once Claude loads SKILL.md, every token in it competes with conversation history and other context. Only include what Claude doesn't already know. For each line, ask: _"can I assume Claude knows this?"_ and _"does this paragraph justify its token cost?"_ Prefer concrete examples over explanations.
+Once the agent loads SKILL.md, every token in it competes with conversation history and other context. Only include what the agent doesn't already know. For each line, ask: _"can I assume the agent knows this?"_ and _"does this paragraph justify its token cost?"_ Prefer concrete examples over explanations.
 
 ## Frontmatter Constraints
 
@@ -111,8 +111,6 @@ Add utility scripts when:
 - Same code would be generated repeatedly
 - Errors need explicit handling
 
-Scripts save tokens and improve reliability vs generated code.
-
 ## When to Split Files
 
 Split into separate files when:
@@ -123,8 +121,8 @@ Split into separate files when:
 
 **Reference file rules:**
 
-- Keep references **one level deep** from SKILL.md. Claude may only partially read nested references (e.g. `head -100`), so files linked from another reference file can be missed.
-- Reference files longer than 100 lines should include a table of contents at the top so Claude can see the full scope even on a partial read.
+- Keep references **one level deep** from SKILL.md. Agents may only partially read nested references (e.g. `head -100`), so files linked from another reference file can be missed.
+- Reference files longer than 100 lines should include a table of contents at the top so the agent can see the full scope even on a partial read.
 
 ## Common Pitfalls
 
@@ -132,19 +130,19 @@ Split into separate files when:
 - **Inconsistent terminology** — pick one term (e.g. "field", not also "box" / "element" / "control") and use it throughout.
 - **Windows-style paths** — always use forward slashes (`scripts/helper.py`), even when authored on Windows.
 - **Too many options** — pick a default and provide an escape hatch. Don't enumerate every library; say "Use X. For [edge case], use Y instead."
-- **Punting to Claude in scripts** — handle errors explicitly inside utility scripts rather than letting them fail. Avoid voodoo constants — document why values like timeouts or retry counts were chosen.
+- **Punting to the agent in scripts** — handle errors explicitly inside utility scripts rather than letting them fail. Avoid voodoo constants — document why values like timeouts or retry counts were chosen.
 - **MCP tool references** — always use fully qualified names (`ServerName:tool_name`) to avoid "tool not found" errors when multiple MCP servers are loaded.
-- **Ambiguous script intent** — make clear whether Claude should _run_ a script ("Run `analyze_form.py` to extract fields") or _read_ it ("See `analyze_form.py` for the extraction algorithm"). Execution is preferred for utilities.
+- **Ambiguous script intent** — make clear whether the agent should _run_ a script ("Run `analyze_form.py` to extract fields") or _read_ it ("See `analyze_form.py` for the extraction algorithm"). Execution is preferred for utilities.
 
 ## Review Checklist
 
 After drafting, verify:
 
-- [ ] Description includes triggers ("Use when...")
-- [ ] Name is lowercase, hyphens only, ≤64 chars, no reserved words
-- [ ] SKILL.md body under 500 lines
-- [ ] No time-sensitive info
-- [ ] Consistent terminology
-- [ ] Concrete examples included
-- [ ] Reference files link directly from SKILL.md, not from other reference files
-- [ ] All file paths use forward slashes
+- Description includes triggers ("Use when...")
+- Name is lowercase, hyphens only, ≤64 chars, no reserved words
+- SKILL.md body under 500 lines
+- No time-sensitive info
+- Consistent terminology
+- Concrete examples included
+- Reference files link directly from SKILL.md, not from other reference files
+- All file paths use forward slashes
