@@ -1,5 +1,4 @@
 import type { Modules } from '@strapi/types';
-import type { ExplorerAuth } from './types';
 
 /**
  * Converts a Strapi content-type UID into a safe MCP tool-name segment.
@@ -48,9 +47,3 @@ export const describeTool = (params: {
     description: `Content-manager ${operation} for ${uid}.${operationNoteByType[operation] ?? ''}`,
   };
 };
-
-/** Builds the static auth descriptor used to gate a derived MCP tool by RBAC action + subject. */
-export const authFor = (uid: string, action: string): ExplorerAuth => ({
-  action,
-  subject: uid,
-});

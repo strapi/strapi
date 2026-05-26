@@ -94,7 +94,9 @@ describe('syncMcpSessionCapabilities', () => {
     const ability = createAbility(jest.fn(() => false));
     const registries = createRegistries({ toolStatus: { denied: 'enabled' } });
     const definitions = createDefinitions({
-      tools: [createToolDefinition({ name: 'denied', auth: { action: 'admin::read' } })],
+      tools: [
+        createToolDefinition({ name: 'denied', auth: { policies: [{ action: 'admin::read' }] } }),
+      ],
     });
 
     const summary = syncMcpSessionCapabilities({
@@ -116,7 +118,7 @@ describe('syncMcpSessionCapabilities', () => {
       prompts: [
         {
           name: 'allowed',
-          auth: { action: 'admin::read' },
+          auth: { policies: [{ action: 'admin::read' }] },
         } as Modules.MCP.McpPromptDefinition,
       ],
     });
@@ -140,8 +142,8 @@ describe('syncMcpSessionCapabilities', () => {
     });
     const definitions = createDefinitions({
       tools: [
-        createToolDefinition({ name: 'allowed', auth: { action: 'admin::read' } }),
-        createToolDefinition({ name: 'denied', auth: { action: 'admin::delete' } }),
+        createToolDefinition({ name: 'allowed', auth: { policies: [{ action: 'admin::read' }] } }),
+        createToolDefinition({ name: 'denied', auth: { policies: [{ action: 'admin::delete' }] } }),
       ],
     });
 
@@ -164,7 +166,7 @@ describe('syncMcpSessionCapabilities', () => {
       ability,
       definition: createToolDefinition({
         name: 'subject-tool',
-        auth: { action: 'admin::read', subject: 'api::article.article' },
+        auth: { policies: [{ action: 'admin::read', subject: 'api::article.article' }] },
       }),
       isDevMode: false,
     });
@@ -179,7 +181,7 @@ describe('syncMcpSessionCapabilities', () => {
       ability,
       definition: createToolDefinition({
         name: 'field-restricted-tool',
-        auth: { action: 'admin::read', subject: 'api::article.article' },
+        auth: { policies: [{ action: 'admin::read', subject: 'api::article.article' }] },
       }),
       isDevMode: false,
     });
@@ -207,11 +209,47 @@ describe('syncMcpSessionCapabilities', () => {
       ability,
       definition: createToolDefinition({
         name: 'conditioned-tool',
-        auth: { action: 'admin::read', subject: 'api::article.article' },
+        auth: { policies: [{ action: 'admin::read', subject: 'api::article.article' }] },
       }),
       isDevMode: false,
     });
 
     expect(ability.can).toHaveBeenCalledWith('admin::read', 'api::article.article');
+  });
+
+  test('enables capability when any policy in a multi-policy auth is satisfied', () => {
+    const ability = createAbility(
+      jest.fn((action: string) => action === 'plugin::content-manager.explorer.create')
+    );
+    const registries = createRegistries({ toolStatus: { 'write-single': 'disabled' } });
+    const definitions = createDefinitions({
+      tools: [
+        createToolDefinition({
+          name: 'write-single',
+          auth: {
+            policies: [
+              {
+                action: 'plugin::content-manager.explorer.create',
+                subject: 'api::home-page.home-page',
+              },
+              {
+                action: 'plugin::content-manager.explorer.update',
+                subject: 'api::home-page.home-page',
+              },
+            ],
+          },
+        }),
+      ],
+    });
+
+    const summary = syncMcpSessionCapabilities({
+      registries,
+      definitions,
+      ability,
+      isDevMode: false,
+    });
+
+    expect(registries.tools.enable).toHaveBeenCalledWith('write-single');
+    expect(summary).toStrictEqual({ enabled: ['write-single'], disabled: [] });
   });
 });

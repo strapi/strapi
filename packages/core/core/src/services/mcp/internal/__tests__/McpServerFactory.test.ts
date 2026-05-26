@@ -165,7 +165,7 @@ describe('createMcpServerWithRegistries', () => {
       name: 'authorized-tool',
       title: 'Authorized Tool',
       description: 'An authorized tool',
-      auth: { action: 'admin::read' },
+      auth: { policies: [{ action: 'admin::read' }] },
       resolveInputSchema: () => undefined,
       resolveOutputSchema: () => z.object({}),
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
@@ -193,7 +193,7 @@ describe('createMcpServerWithRegistries', () => {
       name: 'unauthorized-tool',
       title: 'Unauthorized Tool',
       description: 'An unauthorized tool',
-      auth: { action: 'admin::read' },
+      auth: { policies: [{ action: 'admin::read' }] },
       resolveInputSchema: () => undefined,
       resolveOutputSchema: () => z.object({}),
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
@@ -246,7 +246,7 @@ describe('createMcpServerWithRegistries', () => {
       name: 'authorized-resource',
       uri: 'strapi://authorized-resource',
       metadata: {},
-      auth: { action: 'admin::read', subject: 'api::article.article' },
+      auth: { policies: [{ action: 'admin::read', subject: 'api::article.article' }] },
       createHandler: () => async () => ({ contents: [] }),
     });
 
