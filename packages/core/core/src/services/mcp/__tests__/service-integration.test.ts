@@ -169,7 +169,7 @@ describe('MCP Service Integration', () => {
           title: 'Test Tool',
           description: 'Test tool',
           resolveOutputSchema: () => ({}) as any,
-          auth: { action: 'test.action' },
+          auth: { policies: [{ action: 'test.action' }] },
           createHandler: jest.fn(),
         });
       }).not.toThrow();
@@ -186,7 +186,7 @@ describe('MCP Service Integration', () => {
           title: 'Test Tool',
           description: 'Test tool',
           resolveOutputSchema: () => ({}) as any,
-          auth: { action: 'test.action' },
+          auth: { policies: [{ action: 'test.action' }] },
           createHandler: jest.fn(),
         });
       }).toThrow('[MCP] Tools must be registered before MCP server starts');

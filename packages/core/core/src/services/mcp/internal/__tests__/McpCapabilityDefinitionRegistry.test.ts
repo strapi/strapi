@@ -20,7 +20,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
 
     const definition: Modules.MCP.McpCapabilityDefinition = {
       name: 'my-capability',
-      auth: { action: 'test.action' },
+      auth: { policies: [{ action: 'test.action' }] },
     };
 
     registry.define(definition);
@@ -43,7 +43,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
     };
     const definitionB: Modules.MCP.McpCapabilityDefinition = {
       name: 'duplicate',
-      auth: { action: 'test.action' },
+      auth: { policies: [{ action: 'test.action' }] },
     };
 
     registry.define(definitionA);
@@ -67,7 +67,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
         name: 'missing-auth',
         devModeOnly: false,
       } as Modules.MCP.McpCapabilityDefinition)
-    ).toThrow('[MCP] tool with name "missing-auth" must declare auth action or be devModeOnly.');
+    ).toThrow('[MCP] tool with name "missing-auth" must declare auth policies or be devModeOnly.');
   });
 
   test('define() throws when a non-dev capability declares an empty auth action', () => {
@@ -79,9 +79,9 @@ describe('McpCapabilityDefinitionRegistry', () => {
     expect(() =>
       registry.define({
         name: 'empty-action',
-        auth: { action: '' },
+        auth: { policies: [{ action: '' }] },
       })
-    ).toThrow('[MCP] tool with name "empty-action" must declare auth action or be devModeOnly.');
+    ).toThrow('[MCP] tool with name "empty-action" must declare auth policies or be devModeOnly.');
   });
 
   test('delete() removes definitions and reports success', () => {
@@ -92,7 +92,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
 
     const definitionA: Modules.MCP.McpCapabilityDefinition = {
       name: 'a',
-      auth: { action: 'test.action' },
+      auth: { policies: [{ action: 'test.action' }] },
     };
     const definitionB: Modules.MCP.McpCapabilityDefinition = {
       name: 'b',
