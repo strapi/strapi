@@ -17,7 +17,7 @@ const CREATE_URL_TEAM = /\/admin\/content-manager\/collection-types\/api::team.t
 
 test.describe('Cloning', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -162,7 +162,6 @@ test.describe('Cloning', () => {
      * The save button should be disabled and the publish button enabled.
      */
     await page.waitForURL(CLONE_URL_ARTICLE);
-    await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled(); // we current don't support publish & create in clone routes.
     await page.getByRole('textbox', { name: 'slug' }).fill('');

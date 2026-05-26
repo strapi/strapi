@@ -21,7 +21,7 @@ export const CreateActionEE = React.forwardRef<HTMLButtonElement, CreateActionCE
     }
 
     return (
-      <Flex gap={2}>
+      <Flex width="100%" gap={2}>
         {!isNil(permittedSeats) && shouldStopCreate && (
           <Tooltip
             label={formatMessage({
@@ -40,6 +40,7 @@ export const CreateActionEE = React.forwardRef<HTMLButtonElement, CreateActionCE
           size="S"
           disabled={shouldStopCreate}
           {...props}
+          fullWidth
         >
           {formatMessage({
             id: 'Settings.permissions.users.create',

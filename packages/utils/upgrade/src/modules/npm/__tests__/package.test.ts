@@ -296,6 +296,24 @@ describe('Package registry URL determination', () => {
     );
   });
 
+  it('should use pnpm registry when pnpm is the preferred package manager', async () => {
+    const pnpmRegistry = 'https://pnpm-registry.example.com/';
+    mockGetPreferred.mockResolvedValue('pnpm');
+    mockExeca.mockResolvedValue({ stdout: pnpmRegistry } as ExecaReturnValue);
+
+    const pkg = new Package('@test/package', mockCwd, mockLogger);
+    await pkg.refresh();
+
+    expect(mockGetPreferred).toHaveBeenCalledWith(mockCwd);
+    expect(mockExeca).toHaveBeenCalledWith('pnpm', ['config', 'get', 'registry'], {
+      timeout: 10_000,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://pnpm-registry.example.com/@test/package',
+      expect.anything()
+    );
+  });
+
   it('should fallback to default registry when no other registry is available', async () => {
     delete process.env.NPM_REGISTRY_URL;
     mockGetPreferred.mockResolvedValue(null);

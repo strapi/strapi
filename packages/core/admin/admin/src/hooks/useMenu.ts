@@ -16,6 +16,7 @@ export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'> 
 };
 export type MobileMenuItem = {
   to: string;
+  target?: string;
   link?: string;
 };
 
@@ -49,7 +50,8 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
           id: 'global.marketplace',
           defaultMessage: 'Marketplace',
         },
-        to: '/marketplace',
+        to: 'https://market.strapi.io',
+        target: '_blank',
         permissions: permissions.marketplace?.main ?? [],
         position: 7,
       },

@@ -88,6 +88,12 @@ interface AdvancedAttributeSettings {
   private?: boolean;
   default?: any;
   regexp?: string;
+  condition?: {
+    field: string;
+    operator: 'is' | 'is not';
+    value: string | boolean;
+    action: 'show' | 'hide';
+  };
 }
 
 interface AddComponentAttribute extends AddAttribute {
@@ -386,7 +392,7 @@ export const addRelationAttribute = async (
     await page.locator('input[name="name"]').fill(name);
   }
 
-  await page.getByRole('button', { name: 'Finish' }).click();
+  await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
 };
 
 export const addComponentAttribute = async (
@@ -439,6 +445,8 @@ export const addComponentAttribute = async (
     }
 
     await addAttributes(page, attrCompOptions.attributes, { clickFinish: false, ...options });
+    // Inner addAttributes skips Finish on the last nested field when clickFinish is false; submit the component form here.
+    await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
   }
 };
 
@@ -452,16 +460,12 @@ export const addDynamicZoneAttribute = async (page: Page, attribute: AddDynamicZ
     page.getByRole('button', { name: new RegExp('Add components to the zone', 'i') })
   );
 
-  // Add the components to the dynamic zone
+  // Creating a DZ does not show a Finish control on the DZ modal (see FormModalEndActions); the
+  // add-component-to-DZ flow closes the modal when the component is done. Skip the outer Finish.
   await addAttributes(page, attribute.dz.components, {
-    fromDz: attribute.name, // Pass the DZ name to ensure subsequent components are added to the DZ
+    fromDz: attribute.name,
+    clickFinish: false,
   });
-
-  // Finish the dynamic zone creation
-  const finishButton = page.getByRole('button', { name: 'Finish' });
-  if (await finishButton.isVisible({ timeout: 0 })) {
-    await finishButton.click();
-  }
 };
 
 // Add contentTypeName to options interface
@@ -574,6 +578,27 @@ export const fillAttribute = async (
     if (isString(advanced.default)) {
       await page.getByLabel('Default').fill(advanced.default);
     }
+
+    if (advanced.condition) {
+      const { field, operator, value, action } = advanced.condition;
+      await page.getByRole('button', { name: 'Apply condition' }).click();
+
+      await page.locator('[name="conditions.field"]').click();
+      await page.getByRole('option', { name: field }).click();
+
+      await page.locator('[name="conditions.operator"]').click();
+      await page.getByRole('option', { name: operator, exact: true }).click();
+
+      await page.locator('[name="conditions.value"]').click();
+      await page.getByRole('option', { name: value.toString() }).click();
+
+      await page.locator('[name="conditions.action"]').click();
+      await page
+        .getByRole('option')
+        .filter({ hasText: new RegExp(`${action}`, 'i') })
+        .first()
+        .click();
+    }
   }
 };
 
@@ -604,11 +629,12 @@ export const addAttributes = async (
           page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
         );
       }
-    } else {
-      // Last attribute, click 'Finish' only if it's visible
-      if (await page.getByRole('button', { name: 'Finish' }).isVisible({ timeout: 0 })) {
-        await page.getByRole('button', { name: 'Finish' }).click({ force: true });
-      }
+    } else if (
+      options?.clickFinish !== false &&
+      // Creating a DZ closes the modal when components are added; there is no Finish on the CT field list.
+      !isDynamicZoneAttribute(attribute)
+    ) {
+      await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
     }
   }
 };
@@ -678,13 +704,13 @@ const createContentType = async (
   const singularIdField = page.getByLabel('API ID (Singular)');
   await expect(singularIdField).toHaveValue(singularId || kebabCase(name));
   if (singularId) {
-    singularIdField.fill(singularId);
+    await singularIdField.fill(singularId);
   }
 
   const pluralIdField = page.getByLabel('API ID (Plural)');
   await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
   if (pluralId) {
-    pluralIdField.fill(pluralId);
+    await pluralIdField.fill(pluralId);
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();

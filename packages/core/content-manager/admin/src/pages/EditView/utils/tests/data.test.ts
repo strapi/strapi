@@ -1,5 +1,10 @@
 import { testData } from '../../../../tests/data';
-import { handleInvisibleAttributes, removeProhibitedFields } from '../data';
+import {
+  getDirectParent,
+  handleInvisibleAttributes,
+  prepareTempKeys,
+  removeProhibitedFields,
+} from '../data';
 
 const defaultFieldsValues = {
   name: 'name',
@@ -7,6 +12,40 @@ const defaultFieldsValues = {
 };
 
 describe('data', () => {
+  describe('getDirectParent', () => {
+    const values = {
+      title: 'hello',
+      conditional: [
+        {
+          name: 'wow',
+          url: 'some',
+          nested: {
+            name: 'name',
+            test: '',
+          },
+        },
+      ],
+    };
+
+    it('should return the root object for a top-level path', () => {
+      expect(getDirectParent(values, 'title')).toBe(values);
+    });
+
+    it('should return the array item parent for dynamic zone fields', () => {
+      expect(getDirectParent(values, 'conditional.0.url')).toEqual(values.conditional[0]);
+    });
+
+    it('should return the nested object for deep fields', () => {
+      expect(getDirectParent(values, 'conditional.0.nested.test')).toEqual(
+        values.conditional[0].nested
+      );
+    });
+
+    it('should return undefined for invalid paths', () => {
+      expect(getDirectParent(values, 'conditional.foo.url')).toBeUndefined();
+    });
+  });
+
   describe('removeProhibitedFields', () => {
     it('should return an empty object', () => {
       const { components, contentType } = testData;
@@ -489,6 +528,37 @@ describe('data', () => {
       });
       expect(result.data).not.toHaveProperty('internationalCode');
       expect(result.removedAttributes).toEqual(['internationalCode']);
+    });
+  });
+
+  describe('prepareTempKeys', () => {
+    it('does not crash when DZ data references a component missing from the schemas dict', () => {
+      const schema = {
+        attributes: {
+          dz: {
+            type: 'dynamiczone',
+            components: ['shared.kept'],
+          },
+        },
+      } as const;
+
+      const components = {
+        'shared.kept': {
+          attributes: {
+            label: { type: 'string' as const },
+          },
+        },
+      };
+
+      const data = {
+        dz: [
+          { __component: 'shared.kept', id: 1, label: 'still here' },
+          { __component: 'shared.detached', id: 2, label: 'gone from schema' },
+        ],
+      };
+
+      // @ts-expect-error - test data shape doesn't need full schema typing
+      expect(() => prepareTempKeys(schema, components)(data)).not.toThrow();
     });
   });
 });

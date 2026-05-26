@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Watch stale issues
-        uses: actions/stale@v9
+        uses: actions/stale@v10
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           ascending: true # Start with oldest issues first
           exempt-issue-labels: 'issue: security,severity: critical,severity: high,status: confirmed' # Don't close issues with any of these labels
           exempt-all-milestones: true # Don't close issues that are part of a milestone
           exempt-all-assignees: false # Close even if they are assigned
-          days-before-stale: 365 # Mark as stale after 1 year of no activity
+          days-before-stale: 90 # Mark as stale after 90 days of no activity
           days-before-close: 14 # Close 14 days after stale warning
           days-before-pr-stale: -1 # Don't apply to PRs
           days-before-pr-close: -1 # PRs disabled
@@ -28,7 +28,7 @@ jobs:
           stale-issue-message: |
             👋 Hello, and thank you for helping us to make Strapi better!
 
-            This issue has had no activity for over **1 year**. As part of our effort to keep the issue tracker focused and manageable, we are reviewing older reports.
+            This issue has had no activity for over **90 days**. As part of our effort to keep the issue tracker focused and manageable, we are reviewing older reports.
 
             To ensure we spend our limited resources effectively, we are prioritizing:
             - Active issues related to Strapi v5

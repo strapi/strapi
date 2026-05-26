@@ -89,7 +89,7 @@ export class Package implements PackageInterface {
           yarnMajorVersion >= 2
             ? ['config', 'get', 'npmRegistryServer']
             : ['config', 'get', 'registry'];
-      } else if (packageManagerName === 'npm') {
+      } else if (packageManagerName === 'npm' || packageManagerName === 'pnpm') {
         command = ['config', 'get', 'registry'];
       } else {
         this.logger.warn(`Unsupported package manager: ${packageManagerName}`);

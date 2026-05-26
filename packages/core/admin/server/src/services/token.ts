@@ -1,31 +1,13 @@
 import crypto from 'crypto';
 import _ from 'lodash';
-import type { Algorithm } from 'jsonwebtoken';
-import type { AdminUser } from '../../../shared/contracts/shared';
+import type { Core } from '@strapi/types';
 
 const defaultJwtOptions = { expiresIn: '30d' };
 
-export type TokenOptions = {
-  expiresIn?: string;
-  algorithm?: Algorithm;
-  privateKey?: string;
-  publicKey?: string;
-  [key: string]: unknown;
-};
-
-export type TokenPayload = {
-  id: AdminUser['id'];
-};
-
-export type AdminAuthConfig = {
-  secret: string;
-  options: TokenOptions;
-};
-
 const getTokenOptions = () => {
-  const { options, secret } = strapi.config.get<AdminAuthConfig>(
+  const { options, secret } = strapi.config.get<Core.Config.Admin['auth']>(
     'admin.auth',
-    {} as AdminAuthConfig
+    {} as Core.Config.Admin['auth']
   );
 
   // Check for new sessions.options configuration
@@ -38,6 +20,18 @@ const getTokenOptions = () => {
     secret,
     options: mergedOptions,
   };
+};
+
+/**
+ * True when the project set `admin.auth.options.expiresIn`.
+ * Do not use merged options from {@link getTokenOptions}: defaults always inject `expiresIn: '30d'`,
+ * which would make every install look like a legacy config (see GitHub #25989).
+ */
+const hasUserConfiguredAuthOptionsExpiresIn = (adminAuthOptions: unknown): boolean => {
+  if (adminAuthOptions == null || typeof adminAuthOptions !== 'object') {
+    return false;
+  }
+  return (adminAuthOptions as { expiresIn?: unknown }).expiresIn != null;
 };
 
 /**
@@ -56,7 +50,12 @@ For security reasons, prefer storing the secret in an environment variable and r
   }
 };
 
-export { createToken, getTokenOptions, checkSecretIsDefined };
+export {
+  createToken,
+  getTokenOptions,
+  checkSecretIsDefined,
+  hasUserConfiguredAuthOptionsExpiresIn,
+};
 
 /**
  * Convert an expiresIn value (string or number) into seconds.
