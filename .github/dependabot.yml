@@ -260,9 +260,6 @@ updates:
       time: '22:00'
     cooldown:
       default-days: 30
-      semver-patch-days: 30
-      semver-minor-days: 60
-      semver-major-days: 90
     labels:
       - 'source: dependencies'
       - 'pr: chore'
