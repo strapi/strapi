@@ -8958,6 +8958,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/content-manager@workspace:packages/core/content-manager"
   dependencies:
+    "@casl/ability": "npm:6.7.5"
     "@dnd-kit/core": "npm:6.3.1"
     "@dnd-kit/sortable": "npm:10.0.0"
     "@dnd-kit/utilities": "npm:3.2.2"
@@ -9011,6 +9012,7 @@ __metadata:
     slate-react: "npm:0.98.3"
     styled-components: "npm:6.4.1"
     yup: "npm:0.32.9"
+    zod: "npm:3.25.67"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
