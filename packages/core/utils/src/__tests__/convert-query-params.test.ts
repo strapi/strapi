@@ -1,4 +1,4 @@
-import { createTransformer } from '../convert-query-params';
+import { createTransformer, type Params } from '../convert-query-params';
 import { Model } from '../types';
 
 const models = {
@@ -306,7 +306,7 @@ describe('convert-query-params', () => {
         unknownParam: 'ignored',
       };
 
-      const result = transformer.transformQueryParams('api::dog.dog', params);
+      const result = transformer.transformQueryParams('api::dog.dog', params as unknown as Params);
 
       expect(result.where).toEqual({ title: 'Hello' });
       expect(result.orderBy).toEqual({ title: 'asc' });
@@ -379,9 +379,20 @@ describe('convert-query-params', () => {
   });
 
   describe('transformQueryParams', () => {
-    it('treats an empty sort array as no sort', () => {
+    it.each<[string, Params]>([
+      ['missing sort', {}],
+      ['null sort', { sort: null } as unknown as Params],
+      ['empty sort array', { sort: [] }],
+      ['empty sort string', { sort: '' }],
+      ['comma-only sort string', { sort: ',' }],
+      ['empty sort object', { sort: {} }],
+      ['array of empty strings', { sort: [''] }],
+      ['array of empty sort objects', { sort: [{}] }],
+      ['array with only null (qs sort[])', { sort: [null] } as unknown as Params],
+      ['object sort with empty order', { sort: { title: '' } } as unknown as Params],
+    ])('treats %s as no sort', (_label, params) => {
       const result = transformer.transformQueryParams('api::dog.dog', {
-        sort: [],
+        ...params,
         limit: 10,
       });
 
@@ -389,12 +400,88 @@ describe('convert-query-params', () => {
       expect(result.limit).toBe(10);
     });
 
-    it('treats a missing sort as no sort', () => {
+    it('still applies sort when a field is present', () => {
       const result = transformer.transformQueryParams('api::dog.dog', {
+        sort: 'title:asc',
         limit: 10,
       });
 
-      expect(result.orderBy).toBeUndefined();
+      expect(result.orderBy).toEqual([{ title: 'asc' }]);
+    });
+
+    it.each([
+      ['trailing comma', 'title:asc,', [{ title: 'asc' }]],
+      ['trailing comma and space', 'title:asc, ', [{ title: 'asc' }]],
+      [
+        'multiple fields with trailing comma',
+        'title:asc,createdAt:desc,',
+        [{ title: 'asc' }, { createdAt: 'desc' }],
+      ],
+    ])('drops empty segments from %s', (_label, sort, expectedOrderBy) => {
+      const result = transformer.transformQueryParams('api::dog.dog', {
+        sort,
+        limit: 10,
+      });
+
+      expect(result.orderBy).toEqual(expectedOrderBy);
+    });
+
+    it.each([
+      ['empty sort array', []],
+      ['empty sort string', ''],
+      ['comma-only sort string', ','],
+    ])('does not set nested populate orderBy for %s', (_label, sortValue) => {
+      const result = transformer.transformQueryParams('api::dog.dog', {
+        populate: {
+          one_to_one: {
+            sort: sortValue,
+            limit: 5,
+          },
+        },
+      });
+
+      expect(result.populate).toMatchObject({
+        one_to_one: { limit: 5 },
+      });
+      expect(
+        (result.populate as { one_to_one?: Record<string, unknown> }).one_to_one
+      ).not.toHaveProperty('orderBy');
+    });
+
+    it('sets nested populate orderBy when sort has a field', () => {
+      const result = transformer.transformQueryParams('api::dog.dog', {
+        populate: {
+          one_to_one: {
+            sort: 'title:asc',
+            limit: 5,
+          },
+        },
+      });
+
+      expect(result.populate).toMatchObject({
+        one_to_one: {
+          orderBy: [{ title: 'asc' }],
+          limit: 5,
+        },
+      });
+    });
+
+    it('drops trailing comma segments in nested populate sort', () => {
+      const result = transformer.transformQueryParams('api::dog.dog', {
+        populate: {
+          one_to_one: {
+            sort: 'title:asc,',
+            limit: 5,
+          },
+        },
+      });
+
+      expect(result.populate).toMatchObject({
+        one_to_one: {
+          orderBy: [{ title: 'asc' }],
+          limit: 5,
+        },
+      });
     });
   });
 

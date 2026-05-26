@@ -131,6 +131,34 @@ describe('GraphQL relation order (issue #26426)', () => {
     expect(names).toEqual(['Third', 'First', 'Second']);
   });
 
+  test('returns oneToMany relations in connect order when sort is explicitly empty', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        {
+          menu {
+            data {
+              attributes {
+                left {
+                  menuItems(sort: []) {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      `,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+
+    const menuItems = res.body.data.menu.data.attributes.left.menuItems;
+    const names = menuItems.map((item) => item.name ?? item.attributes?.name);
+
+    expect(names).toEqual(['Third', 'First', 'Second']);
+  });
+
   test('returns oneToMany relations in connect order via _connection', async () => {
     const res = await graphqlQuery({
       query: /* GraphQL */ `

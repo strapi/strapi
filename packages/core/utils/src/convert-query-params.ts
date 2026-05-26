@@ -45,21 +45,120 @@ export interface SortParamsObject {
 type SortParams = string | string[] | SortParamsObject | SortParamsObject[];
 type FieldsParams = string | string[];
 
-const hasSort = (sort?: SortParams | null): sort is SortParams => {
-  if (sort == null) {
+const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
+
+/**
+ * Splits a REST sort string into trimmed segments with a non-empty field (drops '', ',', trailing commas).
+ */
+function getMeaningfulSortSegments(sort: string): string[] {
+  return sort
+    .split(',')
+    .map((segment) => segment.trim())
+    .filter((segment) => {
+      if (segment.length === 0) {
+        return false;
+      }
+
+      const [field] = segment.split(':');
+      return field.trim().length > 0;
+    });
+}
+
+/**
+ * Whether a nested sort object ({ field: 'asc' } or { relation: { name: 'desc' } }) specifies
+ * at least one field to sort on. Empty objects and keys with blank orders are treated as no sort.
+ */
+function hasMeaningfulSortObject(sort: SortParamsObject): boolean {
+  return Object.keys(sort).some((key) => {
+    const order = sort[key];
+
+    if (typeof order === 'string') {
+      return order.length > 0;
+    }
+
+    if (isPlainObject(order)) {
+      return hasMeaningfulSortObject(order as SortParamsObject);
+    }
+
+    return false;
+  });
+}
+
+/** Whether a REST-style sort string contains at least one meaningful segment. */
+function hasMeaningfulStringSort(sort: string): boolean {
+  return getMeaningfulSortSegments(sort).length > 0;
+}
+
+function isEmptySortMap(sortMap: SortMap): boolean {
+  const keys = Object.keys(sortMap);
+
+  if (keys.length === 0) {
+    return true;
+  }
+
+  return keys.every((key) => {
+    const value = sortMap[key];
+
+    if (typeof value === 'string') {
+      return value.trim().length === 0;
+    }
+
+    if (isPlainObject(value)) {
+      return isEmptySortMap(value as SortMap);
+    }
+
+    return true;
+  });
+}
+
+/** Drops empty sort maps so a trailing comma does not leave a truthy but meaningless `orderBy`. */
+function normalizeOrderBy(orderBy: OrderByQuery): OrderByQuery | undefined {
+  if (Array.isArray(orderBy)) {
+    const filtered = orderBy.filter((sortMap) => !isEmptySortMap(sortMap));
+
+    return filtered.length > 0 ? filtered : undefined;
+  }
+
+  return isEmptySortMap(orderBy) ? undefined : orderBy;
+}
+
+/**
+ * Whether `sort` should be converted to `orderBy`. Empty or absent sort must stay undefined so
+ * populated relations keep join-table connect order (GraphQL defaults nested sort to []).
+ */
+function hasSort(sort?: SortParams | null): sort is SortParams {
+  if (sort === undefined || sort === null) {
     return false;
   }
 
-  if (Array.isArray(sort)) {
-    return sort.length > 0;
-  }
-
   if (typeof sort === 'string') {
-    return sort.length > 0;
+    return hasMeaningfulStringSort(sort);
   }
 
-  return true;
-};
+  if (Array.isArray(sort)) {
+    if (sort.length === 0) {
+      return false;
+    }
+
+    return sort.some((item) => {
+      if (typeof item === 'string') {
+        return hasMeaningfulStringSort(item);
+      }
+
+      if (isPlainObject(item)) {
+        return hasMeaningfulSortObject(item as SortParamsObject);
+      }
+
+      return false;
+    });
+  }
+
+  if (isPlainObject(sort)) {
+    return hasMeaningfulSortObject(sort as SortParamsObject);
+  }
+
+  return false;
+}
 
 type FiltersParams = unknown;
 
@@ -165,7 +264,6 @@ const convertOrderingQueryParams = (ordering: unknown) => {
   return ordering;
 };
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
 const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
 
@@ -198,30 +296,35 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   };
 
   const convertStringSortQueryParam = (sortQuery: string): SortMap[] => {
-    return sortQuery.split(',').map((value) => convertSingleSortQueryParam(value));
+    return getMeaningfulSortSegments(sortQuery).map((segment) =>
+      convertSingleSortQueryParam(segment)
+    );
   };
 
   const convertSingleSortQueryParam = (sortQuery: string): SortMap => {
-    if (!sortQuery) {
+    const trimmed = sortQuery.trim();
+
+    if (!trimmed) {
       return {};
     }
 
-    if (!isString(sortQuery)) {
+    if (!isString(trimmed)) {
       throw new Error('Invalid sort query');
     }
 
     // split field and order param with default order to ascending
-    const [field, order = 'asc'] = sortQuery.split(':');
+    const [rawField, order = 'asc'] = trimmed.split(':');
+    const field = rawField.trim();
 
     if (field.length === 0) {
       throw new Error('Field cannot be empty');
     }
 
-    validateOrder(order);
+    validateOrder(order.trim());
 
     // TODO: field should be a valid path on an object model
 
-    return _.set({}, field, order);
+    return _.set({}, field, order.trim());
   };
 
   const convertNestedSortQueryParam = (sortQuery: SortParamsObject): SortMap => {
@@ -231,16 +334,36 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // this is a deep sort
       if (isPlainObject(order)) {
-        transformedSort[field] = convertNestedSortQueryParam(order);
+        const nested = convertNestedSortQueryParam(order as SortParamsObject);
+
+        if (!isEmptySortMap(nested)) {
+          transformedSort[field] = nested;
+        }
       } else if (typeof order === 'string') {
-        validateOrder(order);
-        transformedSort[field] = order;
+        const trimmedOrder = order.trim();
+
+        if (trimmedOrder.length > 0) {
+          validateOrder(trimmedOrder);
+          transformedSort[field] = trimmedOrder;
+        }
       } else {
         throw Error(`Invalid sort type expected object or string got ${typeof order}`);
       }
     }
 
     return transformedSort;
+  };
+
+  const applySortToQuery = (query: Query, sortParam?: SortParams | null) => {
+    if (!hasSort(sortParam)) {
+      return;
+    }
+
+    const orderBy = normalizeOrderBy(convertSortQueryParams(sortParam));
+
+    if (orderBy !== undefined) {
+      query.orderBy = orderBy;
+    }
   };
 
   /**
@@ -522,10 +645,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    const sortParam = sort;
-    if (hasSort(sortParam)) {
-      query.orderBy = convertSortQueryParams(sortParam);
-    }
+    applySortToQuery(query, sort);
 
     if (filters) {
       query.where = convertFiltersQueryParams(filters, schema);
@@ -735,10 +855,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       query._q = _q;
     }
 
-    const sortParam = sort;
-    if (hasSort(sortParam)) {
-      query.orderBy = convertSortQueryParams(sortParam);
-    }
+    applySortToQuery(query, sort);
 
     if (!isNil(filters)) {
       query.where = convertFiltersQueryParams(filters, schema);
