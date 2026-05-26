@@ -17,8 +17,8 @@ import { NavBurgerMenu } from './MainNav/NavBurgerMenu';
 import { NavUser } from './MainNav/NavUser';
 import { TrialCountdown } from './MainNav/TrialCountdown';
 
-const sortLinks = (links: MenuItem[]) => {
-  return links.sort((a, b) => {
+const sortLinks = (links: MenuItem[] = []) => {
+  return [...(links ?? [])].sort((a, b) => {
     // if no position is defined, we put the link in the position of the external plugins, before the plugins list
     const positionA = a.position ?? 6;
     const positionB = b.position ?? 6;
@@ -85,9 +85,10 @@ const LeftMenu = ({
     setIsBurgerMenuShown(false);
   }, [pathname]);
 
-  const listLinksAlphabeticallySorted = [...pluginsSectionLinks, ...generalSectionLinks].sort(
-    (a, b) => formatter.compare(formatMessage(a.intlLabel), formatMessage(b.intlLabel))
-  );
+  const listLinksAlphabeticallySorted = [
+    ...(pluginsSectionLinks ?? []),
+    ...(generalSectionLinks ?? []),
+  ].sort((a, b) => formatter.compare(formatMessage(a.intlLabel), formatMessage(b.intlLabel)));
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
   /**
