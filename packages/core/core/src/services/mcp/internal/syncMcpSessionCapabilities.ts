@@ -25,17 +25,13 @@ export type SyncMcpSessionCapabilitiesSummary = {
   disabled: string[];
 };
 
-const canUseAuthorizedCapability = ({
-  ability,
-  auth,
-}: CanUseAuthorizedCapabilityParams): boolean => {
-  if (auth.subject !== undefined) {
-    return ability.can(auth.action, auth.subject);
-  }
-
-  // @ts-expect-error ability.can expects 2 arguments, but runtime allows 1 argument
-  return ability.can(auth.action);
-};
+const canUseAuthorizedCapability = ({ ability, auth }: CanUseAuthorizedCapabilityParams): boolean =>
+  auth.policies.some(({ action, subject }) =>
+    subject !== undefined
+      ? ability.can(action, subject)
+      : // @ts-expect-error ability.can expects 2 arguments, but runtime allows 1
+        ability.can(action)
+  );
 
 export const canUseMcpCapability = ({
   ability,

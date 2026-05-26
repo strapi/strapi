@@ -4,7 +4,7 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { ACTIONS } from '../services/permission-checker';
 
 import type { ContentManagerModelForMcp, McpToolsBuildContext, DerivedTool } from './types';
-import { slugifyUidForMcpToolName, describeTool, authFor } from './utils';
+import { slugifyUidForMcpToolName, describeTool } from './utils';
 import { buildLocaleSchema, resolvePermittedLocaleSchema, getPermittedFields } from './permissions';
 import {
   statusSchema,
@@ -223,7 +223,7 @@ const buildCollectionTools = (
     {
       name: `list_${slug}`,
       ...describeTool({ apiID: model.apiID, uid, operation: 'list' }),
-      auth: authFor(uid, ACTIONS.read),
+      auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
       resolveInputSchema: resolveListInputSchema,
       resolveOutputSchema: (context) =>
         buildListOutputSchema(attributes, resolveReadFields(context)),
@@ -232,7 +232,7 @@ const buildCollectionTools = (
     {
       name: `get_${slug}`,
       ...describeTool({ apiID: model.apiID, uid, operation: 'get' }),
-      auth: authFor(uid, ACTIONS.read),
+      auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
       resolveInputSchema: resolveGetInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createCollectionGetHandler(uid),
@@ -240,7 +240,7 @@ const buildCollectionTools = (
     {
       name: `create_${slug}`,
       ...describeTool({ apiID: model.apiID, uid, operation: 'create' }),
-      auth: authFor(uid, ACTIONS.create),
+      auth: { policies: [{ action: ACTIONS.create, subject: uid }] },
       resolveInputSchema: resolveCreateInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createCollectionCreateHandler(uid),
@@ -248,7 +248,7 @@ const buildCollectionTools = (
     {
       name: `update_${slug}`,
       ...describeTool({ apiID: model.apiID, uid, operation: 'update' }),
-      auth: authFor(uid, ACTIONS.update),
+      auth: { policies: [{ action: ACTIONS.update, subject: uid }] },
       resolveInputSchema: resolveUpdateInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createCollectionUpdateHandler(uid),
@@ -256,7 +256,7 @@ const buildCollectionTools = (
     {
       name: `delete_${slug}`,
       ...describeTool({ apiID: model.apiID, uid, operation: 'delete' }),
-      auth: authFor(uid, ACTIONS.delete),
+      auth: { policies: [{ action: ACTIONS.delete, subject: uid }] },
       resolveInputSchema: resolveDeleteInputSchema,
       resolveOutputSchema: (context) =>
         buildDeleteOutputSchema(attributes, resolveReadFields(context)),
@@ -269,7 +269,7 @@ const buildCollectionTools = (
       {
         name: `publish_${slug}`,
         ...describeTool({ apiID: model.apiID, uid, operation: 'publish' }),
-        auth: authFor(uid, ACTIONS.publish),
+        auth: { policies: [{ action: ACTIONS.publish, subject: uid }] },
         resolveInputSchema: resolvePublishInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createCollectionPublishHandler(uid),
@@ -277,7 +277,7 @@ const buildCollectionTools = (
       {
         name: `unpublish_${slug}`,
         ...describeTool({ apiID: model.apiID, uid, operation: 'unpublish' }),
-        auth: authFor(uid, ACTIONS.unpublish),
+        auth: { policies: [{ action: ACTIONS.unpublish, subject: uid }] },
         resolveInputSchema: resolveUnpublishInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createCollectionUnpublishHandler(uid),
@@ -285,7 +285,7 @@ const buildCollectionTools = (
       {
         name: `discard_${slug}_draft`,
         ...describeTool({ apiID: model.apiID, uid, operation: 'discard_draft' }),
-        auth: authFor(uid, ACTIONS.discard),
+        auth: { policies: [{ action: ACTIONS.discard, subject: uid }] },
         resolveInputSchema: resolveDiscardDraftInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createCollectionDiscardDraftHandler(uid),
@@ -437,7 +437,7 @@ const buildSingleTypeTools = (
     {
       name: `get_${slug}`,
       ...describeTool({ apiID: model.apiID, uid, operation: 'get' }),
-      auth: authFor(uid, ACTIONS.read),
+      auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
       resolveInputSchema: resolveGetInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createSingleGetHandler(uid),
@@ -445,7 +445,12 @@ const buildSingleTypeTools = (
     {
       name: `write_${slug}`,
       ...describeTool({ apiID: model.apiID, uid, operation: 'write' }),
-      auth: authFor(uid, ACTIONS.update),
+      auth: {
+        policies: [
+          { action: ACTIONS.create, subject: uid },
+          { action: ACTIONS.update, subject: uid },
+        ],
+      },
       resolveInputSchema: resolveWriteInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createSingleWriteHandler(uid),
@@ -453,7 +458,7 @@ const buildSingleTypeTools = (
     {
       name: `delete_${slug}`,
       ...describeTool({ apiID: model.apiID, uid, operation: 'delete' }),
-      auth: authFor(uid, ACTIONS.delete),
+      auth: { policies: [{ action: ACTIONS.delete, subject: uid }] },
       resolveInputSchema: resolveDeleteInputSchema,
       resolveOutputSchema: (context) =>
         buildDeleteOutputSchema(attributes, resolveReadFields(context)),
@@ -466,7 +471,7 @@ const buildSingleTypeTools = (
       {
         name: `publish_${slug}`,
         ...describeTool({ apiID: model.apiID, uid, operation: 'publish' }),
-        auth: authFor(uid, ACTIONS.publish),
+        auth: { policies: [{ action: ACTIONS.publish, subject: uid }] },
         resolveInputSchema: resolvePublishInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createSinglePublishHandler(uid),
@@ -474,7 +479,7 @@ const buildSingleTypeTools = (
       {
         name: `unpublish_${slug}`,
         ...describeTool({ apiID: model.apiID, uid, operation: 'unpublish' }),
-        auth: authFor(uid, ACTIONS.unpublish),
+        auth: { policies: [{ action: ACTIONS.unpublish, subject: uid }] },
         resolveInputSchema: resolveUnpublishInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createSingleUnpublishHandler(uid),
@@ -482,7 +487,7 @@ const buildSingleTypeTools = (
       {
         name: `discard_${slug}_draft`,
         ...describeTool({ apiID: model.apiID, uid, operation: 'discard_draft' }),
-        auth: authFor(uid, ACTIONS.discard),
+        auth: { policies: [{ action: ACTIONS.discard, subject: uid }] },
         resolveInputSchema: resolveDiscardDraftInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createSingleDiscardDraftHandler(uid),

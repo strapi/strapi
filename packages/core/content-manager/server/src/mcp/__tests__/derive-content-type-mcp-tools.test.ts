@@ -318,8 +318,12 @@ describe('deriveDisplayedContentTypeMcpToolDefinitions', () => {
 
     expect(list).toBeDefined();
     expect(get).toBeDefined();
-    expect(list?.auth).toEqual({ action: ACTIONS.read, subject: 'api::article.article' });
-    expect(get?.auth).toEqual({ action: ACTIONS.read, subject: 'api::article.article' });
+    expect(list?.auth).toEqual({
+      policies: [{ action: ACTIONS.read, subject: 'api::article.article' }],
+    });
+    expect(get?.auth).toEqual({
+      policies: [{ action: ACTIONS.read, subject: 'api::article.article' }],
+    });
   });
 
   it('adds publish, unpublish, and discard_draft when draft and publish is enabled', () => {
@@ -335,8 +339,8 @@ describe('deriveDisplayedContentTypeMcpToolDefinitions', () => {
     const discard = tools.find((t) => t.name === 'discard_article_draft');
     const publish = tools.find((t) => t.name === 'publish_article');
 
-    expect(discard?.auth.action).toBe(ACTIONS.discard);
-    expect(publish?.auth.action).toBe(ACTIONS.publish);
+    expect(discard?.auth.policies[0].action).toBe(ACTIONS.discard);
+    expect(publish?.auth.policies[0].action).toBe(ACTIONS.publish);
   });
 
   it('omits draft workflow tools when draft and publish is disabled', () => {
@@ -360,7 +364,9 @@ describe('deriveDisplayedContentTypeMcpToolDefinitions', () => {
     expect(names).not.toContain('list_global');
 
     const write = tools.find((t) => t.name === 'write_global');
-    expect(write?.auth.action).toBe(ACTIONS.update);
+    expect(write?.auth.policies.map((p) => p.action)).toEqual(
+      expect.arrayContaining([ACTIONS.create, ACTIONS.update])
+    );
   });
 });
 
@@ -783,10 +789,13 @@ describe('tool annotations', () => {
     }
   });
 
-  it('all tools have a valid auth object with action and subject', () => {
+  it('all tools have a valid auth object with policies containing action and subject', () => {
     for (const tool of tools) {
-      expect(tool.auth.action).toBeTruthy();
-      expect(tool.auth.subject).toBeTruthy();
+      expect(tool.auth.policies.length).toBeGreaterThan(0);
+      for (const policy of tool.auth.policies) {
+        expect(policy.action).toBeTruthy();
+        expect(policy.subject).toBeTruthy();
+      }
     }
   });
 

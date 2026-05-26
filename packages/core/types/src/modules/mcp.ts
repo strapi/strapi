@@ -14,12 +14,18 @@ import type {
 import type { ResourceMetadata } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type * as Core from '../core';
 
-/**
- * Admin permission requirement for non-dev MCP capabilities.
- */
-export type McpCapabilityAuth = {
+/** A single CASL permission check: action + optional subject. */
+export type McpAuthPolicy = {
   action: string;
   subject?: string;
+};
+
+/**
+ * Auth requirement for a non-dev MCP capability.
+ * The session gate passes when the user's ability satisfies ANY policy in the array.
+ */
+export type McpCapabilityAuth = {
+  policies: [McpAuthPolicy, ...McpAuthPolicy[]];
 };
 
 /**

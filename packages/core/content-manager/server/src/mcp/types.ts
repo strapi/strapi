@@ -21,13 +21,11 @@ export type McpToolsBuildContext = {
   defaultLocale: string | null;
 };
 
-export type ExplorerAuth = { action: string; subject: string };
-
 export type DerivedTool = {
   name: string;
   title: string;
   description: string;
-  auth: ExplorerAuth;
+  auth: Modules.MCP.McpCapabilityAuth;
   resolveInputSchema: (context: Modules.MCP.McpHandlerContext) => z.ZodObject<z.ZodRawShape>;
   resolveOutputSchema: (context: Modules.MCP.McpHandlerContext) => z.ZodObject<z.ZodRawShape>;
   createHandler: (

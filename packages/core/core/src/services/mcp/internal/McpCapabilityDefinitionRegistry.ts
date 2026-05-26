@@ -25,9 +25,13 @@ export class McpCapabilityDefinitionRegistry<
     }
 
     if (definition.devModeOnly !== true) {
-      if (definition.auth === undefined || definition.auth.action === '') {
+      if (
+        definition.auth === undefined ||
+        definition.auth.policies.length === 0 ||
+        definition.auth.policies.some((p) => p.action === '')
+      ) {
         throw new Error(
-          `[MCP] ${this.capability} with name "${definition.name}" must declare auth action or be devModeOnly.`
+          `[MCP] ${this.capability} with name "${definition.name}" must declare auth policies or be devModeOnly.`
         );
       }
     }
