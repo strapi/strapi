@@ -19,20 +19,24 @@ export default {
     });
   },
 
-  async registerTrads({ locales, importLocaleJson }) {
+  async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(async (locale) => {
-        const data = await importLocaleJson(
-          locale,
-          (code) => import(`./translations/${code}.json`)
-        );
-
-        return {
-          data: prefixPluginTranslations(data, name),
-          locale,
-        };
+      locales.map((locale) => {
+        return import(`./translations/${locale}.json`)
+          .then(({ default: data }) => {
+            return {
+              data: prefixPluginTranslations(data, name),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
       })
     );
-    return importedTrads;
+    return Promise.resolve(importedTrads);
   },
 };

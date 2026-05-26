@@ -97,7 +97,6 @@ export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widget
 /**
  * Utils
  */
-export type { ImportLocaleJson } from './StrapiApp';
 export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';

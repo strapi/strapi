@@ -9,7 +9,6 @@ import { useStrapiApp } from '../features/StrapiApp';
 import { useIdleSessionLogout } from '../hooks/useIdleSessionLogout';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { login as loginAction, logout as logoutAction, setLocale, setToken } from '../reducer';
-import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -18,6 +17,7 @@ import {
   useLoginMutation,
   useLogoutMutation,
 } from '../services/auth';
+import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { getOrCreateDeviceId } from '../utils/deviceId';
 import { setOnSessionExpired, setOnTokenUpdate } from '../utils/getFetchClient';
 

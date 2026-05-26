@@ -62,15 +62,6 @@ const patchedConsole = {
       .join(' ');
 
     /**
-     * Strapi admin logs intentional deprecation warnings when loading legacy
-     * translation file names (e.g. dk for Danish). Allow those through without
-     * failing the suite.
-     */
-    if (msg.includes('[deprecated] Admin locale')) {
-      return;
-    }
-
-    /**
      * React Router emits dev-only warnings about upcoming v7 behavior when `future`
      * flags are left undefined. We don't want test log pollution or flaky failures
      * from these informational warnings, so we drop them entirely.

@@ -32,23 +32,15 @@ import { languageNativeNames } from './translations/languageNativeNames';
 import { normalizeAdminLocale } from './translations/normalizeAdminLocale';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
+import type { DefaultTheme } from 'styled-components';
 
 /**
  * Canonical admin locale codes mapped to legacy translation file names still
- * shipped by some plugins. `importLocaleJson` uses this map when loading JSON
- * so third-party plugins can keep shipping `dk.json` while the admin UI uses `da`.
- * `registerTrads` receives the same `importLocaleJson` instance from `StrapiApp`.
+ * shipped by some plugins.
  */
 const ADMIN_LOCALE_LEGACY_ALIASES: Record<string, string> = {
   da: 'dk',
 };
-
-import type { DefaultTheme } from 'styled-components';
-
-export type ImportLocaleJson = (
-  locale: string,
-  importJson: (code: string) => Promise<{ default: Record<string, string> }>
-) => Promise<Record<string, string>>;
 
 const {
   INJECT_COLUMN_IN_TABLE,
@@ -78,10 +70,7 @@ interface StrapiAppPlugin {
     args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
   ) => void;
   register: (app: StrapiApp) => void;
-  registerTrads?: (args: {
-    locales: string[];
-    importLocaleJson: ImportLocaleJson;
-  }) => Promise<Translations>;
+  registerTrads?: (args: { locales: string[] }) => Promise<Translations>;
 }
 
 interface InjectionZoneComponent {
@@ -426,39 +415,6 @@ class StrapiApp {
     }
   }
 
-  importLocaleJson: ImportLocaleJson = async (locale, importJson) => {
-    const load = async (code: string) => {
-      const mod = await importJson(code);
-
-      return mod.default ?? {};
-    };
-
-    try {
-      return await load(locale);
-    } catch {
-      const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
-
-      if (legacyLocale) {
-        const deprecationKey = `${locale}:${legacyLocale}`;
-
-        if (!this.warnedLegacyLocalePairs.has(deprecationKey)) {
-          this.warnedLegacyLocalePairs.add(deprecationKey);
-          console.warn(
-            `[deprecated] Admin locale "${legacyLocale}" is deprecated. Rename translation files to "${locale}.json". Support for "${legacyLocale}" will be removed in a future Strapi version.`
-          );
-        }
-
-        try {
-          return await load(legacyLocale);
-        } catch {
-          return {};
-        }
-      }
-
-      return {};
-    }
-  };
-
   private mergePluginTranslationsByCanonical(pluginTradsBatch: Translation[]) {
     return pluginTradsBatch.reduce<Record<string, Translation['data']>>((acc, current) => {
       const canonicalLocale = normalizeAdminLocale(current.locale);
@@ -491,16 +447,12 @@ class StrapiApp {
 
           return { data, locale };
         } catch {
-          const data = await this.importLocaleJson(
-            locale,
-            (code) => import(`./translations/${code}.json`)
-          );
-
-          if (Object.keys(data).length > 0) {
+          try {
+            const { default: data } = await import(`./translations/${locale}.json`);
             return { data, locale };
+          } catch {
+            return { data: null, locale };
           }
-
-          return { data: null, locale };
         }
       })
     );
@@ -533,16 +485,20 @@ class StrapiApp {
     }, {});
 
     const adminTranslations = await this.loadAdminTrads();
+    const localesForPlugins = uniq(
+      this.configurations.locales.flatMap((locale) => {
+        const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
+
+        return legacyLocale ? [locale, legacyLocale] : [locale];
+      })
+    );
 
     const arrayOfPromises = Object.keys(this.appPlugins)
       .map((plugin) => {
         const registerTrads = this.appPlugins[plugin].registerTrads;
 
         if (registerTrads) {
-          return registerTrads({
-            locales: this.configurations.locales,
-            importLocaleJson: this.importLocaleJson.bind(this),
-          });
+          return registerTrads({ locales: localesForPlugins });
         }
 
         return null;

@@ -616,4 +616,47 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.configurations.notifications.releases).toBeFalsy();
     });
   });
+
+  describe('loadTrads', () => {
+    it('loads legacy Danish translations from plugins using the unchanged registerTrads API', async () => {
+      const originalWarn = console.warn;
+      const consoleSpy = jest.fn();
+      console.warn = consoleSpy;
+
+      try {
+        const app = new StrapiApp({
+          config: { locales: ['da'] },
+          appPlugins: {
+            legacyPlugin: {
+              register: jest.fn(),
+              async registerTrads({ locales }: { locales: string[] }) {
+                return locales.map((locale) => {
+                  const data: Record<string, string> =
+                    locale === 'dk' ? { 'legacy.plugin.label': 'Legacy Danish' } : {};
+
+                  return { locale, data };
+                });
+              },
+            },
+          },
+        });
+
+        await app.loadTrads();
+
+        const translations = app.configurations.translations as Record<
+          string,
+          Record<string, string>
+        >;
+
+        expect(translations.da).toEqual(
+          expect.objectContaining({ 'legacy.plugin.label': 'Legacy Danish' })
+        );
+        expect(consoleSpy).toHaveBeenCalledWith(
+          '[deprecated] Admin locale "dk" is deprecated. Rename translation files to "da.json".'
+        );
+      } finally {
+        console.warn = originalWarn;
+      }
+    });
+  });
 });

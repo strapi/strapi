@@ -4,7 +4,7 @@ import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-import { type ImportLocaleJson, type StrapiApp } from '@strapi/admin/strapi-admin';
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -38,27 +38,25 @@ export default {
       permissions: PERMISSIONS.main,
     });
   },
-  async registerTrads({
-    locales,
-    importLocaleJson,
-  }: {
-    locales: string[];
-    importLocaleJson: ImportLocaleJson;
-  }) {
+  async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
-      locales.map(async (locale) => {
-        const data = await importLocaleJson(
-          locale,
-          (code) => import(`./translations/${code}.json`)
-        );
-
-        return {
-          data: prefixPluginTranslations(data ?? {}, pluginId),
-          locale,
-        };
+      locales.map((locale) => {
+        return import(`./translations/${locale}.json`)
+          .then(({ default: data }) => {
+            return {
+              data: prefixPluginTranslations(data, pluginId),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
       })
     );
 
-    return importedTrads;
+    return Promise.resolve(importedTrads);
   },
 };
