@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import { createMcpMetrics } from '../metrics';
 
 /**
  * Wraps an MCP capability handler to catch and log errors from user-provided callbacks.
@@ -23,9 +24,20 @@ export const wrapSafeHandler = <TArgs extends unknown[], TResult>(
 
   return async (...args: TArgs): Promise<TResult> => {
     try {
-      return await handler(...args);
+      const result = await handler(...args);
+      createMcpMetrics(strapi).send('didExecuteMcpCapability', {
+        capabilityName: name,
+        capabilityType,
+      });
+      return result;
     } catch (error) {
       const normalized = error instanceof Error ? error : new Error(String(error));
+
+      createMcpMetrics(strapi).send('didNotExecuteMcpCapability', {
+        capabilityName: name,
+        capabilityType,
+        errorClass: normalized.constructor.name,
+      });
 
       strapi.log.error(
         `[MCP] ${capabilityType} "${name}" threw an error during execution: ${normalized.message}`,

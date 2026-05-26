@@ -1,5 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
 import { createMcpAdminTokenAuthenticator } from './authentication';
+import { createMcpMetrics } from './metrics';
 import { createPostHandler } from './handlers/handlePost';
 import type { McpHandlerDependencies } from './handlers/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
@@ -109,6 +110,11 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
       strapi.server.routes(routes);
 
       serverStatus = 'running';
+
+      createMcpMetrics(strapi).send('didStartMcpServer', {
+        toolCount: toolDefinitions.getAll().length,
+        path: config.path,
+      });
 
       const baseUrl = strapi.config.get('server.url', 'http://localhost:1337');
       strapi.log.info(`[MCP] Server available at ${baseUrl}${config.path}`);

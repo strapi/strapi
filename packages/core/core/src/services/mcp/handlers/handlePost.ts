@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/extensions
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type { Core } from '@strapi/types';
+import { createMcpMetrics } from '../metrics';
 import { sendJsonRpcError } from '../utils/sendJsonRpcError';
 import { withTimeout } from '../utils/withTimeout';
 import type { McpHandlerDependencies } from './types';
@@ -22,12 +23,19 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
     const req = ctx.req;
     const res = ctx.res;
 
+    const metrics = createMcpMetrics(strapi);
+
     try {
       const authResult = await authenticationStrategy.authenticate(ctx);
       if (authResult.authenticated === false) {
+        metrics.send('didNotAuthenticateMcpRequest', {
+          errorClass: authResult.error?.constructor.name ?? 'unknown',
+        });
         sendJsonRpcError(res, 'AUTHENTICATION_REQUIRED');
         return;
       }
+
+      metrics.send('didAuthenticateMcpRequest');
 
       const { mcpServer } = createServerWithRegistries({
         strapi,
@@ -58,6 +66,10 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
         await mcpServer.close();
       }
     } catch (error) {
+      metrics.send('didNotHandleMcpRequest', {
+        errorClass: error instanceof Error ? error.constructor.name : 'unknown',
+      });
+
       strapi.log.error('[MCP] Error handling POST request', {
         error: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
