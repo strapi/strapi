@@ -445,4 +445,109 @@ describe('Homepage API', () => {
       await builder.cleanup();
     });
   });
+
+  /**
+   * document_id-level bucket semantics for localized D&P content types.
+   * Each test uses a fresh app so counts are not polluted by other cases.
+   */
+  describe('Count Documents — document_id semantics (i18n)', () => {
+    const getCountDocuments = () =>
+      rq({
+        method: 'GET',
+        url: '/content-manager/homepage/count-documents',
+      });
+
+    beforeAll(async () => {
+      await builder
+        .addContentTypes([articleModel])
+        .addFixtures('plugin::i18n.locale', [{ name: 'French', code: 'fr' }])
+        .build();
+      strapi = await createStrapiInstance();
+      rq = await createAuthRequest({ strapi });
+    });
+
+    it('counts a never-published multi-locale document once in draft', async () => {
+      const before = await getCountDocuments();
+
+      const en = await strapi.documents(articleUid).create({
+        data: { title: 'Never published EN' },
+        locale: 'en',
+      });
+      await strapi.documents(articleUid).create({
+        data: { documentId: en.documentId, title: 'Never published FR' },
+        locale: 'fr',
+      });
+
+      const rows = await strapi.db.connection('articles').where({ document_id: en.documentId });
+      expect(rows.length).toBeGreaterThanOrEqual(2);
+      expect(rows.every((row) => row.published_at === null)).toBe(true);
+
+      const after = await getCountDocuments();
+
+      expect(after.statusCode).toBe(200);
+      expect(after.body.data.draft - before.body.data.draft).toBe(1);
+      expect(after.body.data.published - before.body.data.published).toBe(0);
+      expect(after.body.data.modified - before.body.data.modified).toBe(0);
+    });
+
+    it('places a partially localized published document in a single bucket (modified, not also published)', async () => {
+      const before = await getCountDocuments();
+
+      const en = await strapi.documents(articleUid).create({
+        data: { title: 'Partial i18n EN' },
+        locale: 'en',
+      });
+      await strapi.documents(articleUid).publish({
+        documentId: en.documentId,
+        locale: 'en',
+      });
+      await strapi.documents(articleUid).create({
+        data: { documentId: en.documentId, title: 'Partial i18n FR draft' },
+        locale: 'fr',
+      });
+
+      const after = await getCountDocuments();
+
+      expect(after.statusCode).toBe(200);
+      // en is published in sync; fr exists only as draft → document_id is modified, not published.
+      expect(after.body.data.modified - before.body.data.modified).toBe(1);
+      expect(after.body.data.published - before.body.data.published).toBe(0);
+      expect(after.body.data.draft - before.body.data.draft).toBe(0);
+    });
+
+    it('counts a fully published in-sync multi-locale document once in published', async () => {
+      const before = await getCountDocuments();
+
+      const en = await strapi.documents(articleUid).create({
+        data: { title: 'Full i18n EN' },
+        locale: 'en',
+      });
+      await strapi.documents(articleUid).publish({
+        documentId: en.documentId,
+        locale: 'en',
+      });
+
+      const fr = await strapi.documents(articleUid).create({
+        data: { documentId: en.documentId, title: 'Full i18n FR' },
+        locale: 'fr',
+      });
+      await strapi.documents(articleUid).publish({
+        documentId: fr.documentId,
+        locale: 'fr',
+      });
+
+      const after = await getCountDocuments();
+
+      expect(after.statusCode).toBe(200);
+      expect(after.body.data.published - before.body.data.published).toBe(1);
+      expect(after.body.data.modified - before.body.data.modified).toBe(0);
+      expect(after.body.data.draft - before.body.data.draft).toBe(0);
+    });
+
+    afterAll(async () => {
+      await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+      await strapi.destroy();
+      await builder.cleanup();
+    });
+  });
 });
