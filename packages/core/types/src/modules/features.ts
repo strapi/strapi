@@ -1,6 +1,5 @@
 export interface FeaturesConfig {
   future?: {
-    adminTokens?: boolean;
     unstableMediaLibrary?: boolean;
   };
 }
