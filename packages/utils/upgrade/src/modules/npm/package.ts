@@ -75,6 +75,17 @@ export class Package implements PackageInterface {
     }
   }
 
+  private normalizeRegistryOutput(stdout: string): string | undefined {
+    const registry = stdout.trim();
+
+    // Yarn Classic (v1) may return literal "undefined" for unset config values
+    if (!registry || registry === 'undefined') {
+      return undefined;
+    }
+
+    return registry;
+  }
+
   private async getRegistryFromPackageManager(): Promise<string | undefined> {
     try {
       const packageManagerName = await packageManager.getPreferred(this.cwd);
@@ -97,14 +108,7 @@ export class Package implements PackageInterface {
       }
 
       const { stdout } = await execa(packageManagerName, [...command], { timeout: 10_000 });
-      const registry = stdout.trim();
-
-      // Yarn Classic (v1) may return literal "undefined" for unset config values
-      if (!registry || registry === 'undefined') {
-        return undefined;
-      }
-
-      return registry;
+      return this.normalizeRegistryOutput(stdout);
     } catch (error) {
       this.logger.warn('Failed to determine registry URL from package manager');
       return undefined;

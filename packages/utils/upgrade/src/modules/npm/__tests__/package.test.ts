@@ -260,10 +260,10 @@ describe('Package registry URL determination', () => {
     );
   });
 
-  it('should fallback to default registry when Yarn Classic returns literal "undefined" string', async () => {
+  it('should fallback to default registry when package manager returns literal "undefined" string', async () => {
     delete process.env.NPM_REGISTRY_URL;
     mockGetPreferred.mockResolvedValue('yarn');
-    // Yarn Classic (v1) returns the literal string "undefined" when npmRegistryServer is not set
+    // Yarn Classic (v1) returns the literal string "undefined" when a config key is unset
     mockExeca
       .mockResolvedValueOnce({ stdout: '1.22.22' } as ExecaReturnValue)
       .mockResolvedValueOnce({ stdout: 'undefined' } as ExecaReturnValue);
@@ -297,6 +297,7 @@ describe('Package registry URL determination', () => {
   });
 
   it('should use pnpm registry when pnpm is the preferred package manager', async () => {
+    delete process.env.NPM_REGISTRY_URL;
     const pnpmRegistry = 'https://pnpm-registry.example.com/';
     mockGetPreferred.mockResolvedValue('pnpm');
     mockExeca.mockResolvedValue({ stdout: pnpmRegistry } as ExecaReturnValue);
