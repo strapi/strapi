@@ -145,8 +145,8 @@ const imageNodeValidator = yup.object().shape({
 const embeddedSocialMediaNodeValidator = yup.object().shape({
   type: yup.string().equals(['embedded-social-media']).required(),
   embedSocialMedia: yup.object().shape({
-    socialMediaUrl: yup.string(),
-    socialMediaType: yup.mixed().oneOf(['youtube', 'x-post']),
+    socialMediaUrl: yup.string().required(),
+    socialMediaType: yup.mixed().oneOf(['youtube', 'x-post']).required(),
   }),
   children: yup.array().of(inlineNodeValidator).required(),
 });
