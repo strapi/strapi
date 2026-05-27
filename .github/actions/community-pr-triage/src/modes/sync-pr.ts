@@ -35,7 +35,8 @@ export async function syncPR(
       analysis,
       inputs.cprTeamId,
       inputs.projectId,
-      labelMap
+      labelMap,
+      inputs.triageStateId
     );
     analysis.linearTicketId = ticket.identifier;
 

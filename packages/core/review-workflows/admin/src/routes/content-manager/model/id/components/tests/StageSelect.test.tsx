@@ -5,19 +5,29 @@ import { Route, Routes } from 'react-router-dom';
 
 import { StageSelect } from '../StageSelect';
 
-jest.mock('@strapi/content-manager/strapi-admin', () => ({
-  unstable_useDocument: jest.fn().mockReturnValue({
-    document: {
-      documentId: '12345',
-      id: 12345,
-      ['strapi_stage']: {
-        id: 1,
-        color: '#4945FF',
-        name: 'Stage 1',
-      },
+const defaultDocument = {
+  document: {
+    documentId: '12345',
+    id: 12345,
+    ['strapi_stage']: {
+      id: 1,
+      color: '#4945FF',
+      name: 'Stage 1',
     },
-  }),
+  },
+};
+
+const useDocumentMock = jest.fn().mockReturnValue(defaultDocument);
+
+jest.mock('@strapi/content-manager/strapi-admin', () => ({
+  get unstable_useDocument() {
+    return useDocumentMock;
+  },
 }));
+
+afterEach(() => {
+  useDocumentMock.mockReturnValue(defaultDocument);
+});
 
 describe('StageSelect', () => {
   const render = () =>
@@ -122,5 +132,31 @@ describe('StageSelect', () => {
       expect(screen.queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true')
     );
     await screen.findByText('You don’t have the permission to update this stage.');
+  });
+
+  it('renders the select as disabled with a "save first" hint when the locale entry does not exist yet', async () => {
+    useDocumentMock.mockReturnValue({ document: undefined });
+
+    server.use(
+      http.get(
+        '/review-workflows/content-manager/:collectionType/:contentType/:id/stages',
+        () =>
+          HttpResponse.json({
+            data: [],
+            meta: { workflowCount: 1, stageCount: 2, canTransition: true },
+          }),
+        { once: true }
+      )
+    );
+
+    render();
+
+    await waitFor(() =>
+      expect(screen.queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true')
+    );
+    await screen.findByText('Save this entry to assign a workflow stage.');
+    expect(
+      screen.queryByText('You don’t have the permission to update this stage.')
+    ).not.toBeInTheDocument();
   });
 });

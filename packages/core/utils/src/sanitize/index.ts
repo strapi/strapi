@@ -17,6 +17,7 @@ import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 import type { Model, Data } from '../types';
+import { validatePublicationFilterQueryParam } from '../publication-filter';
 
 export interface Options {
   auth?: unknown;
@@ -188,6 +189,10 @@ const createAPISanitizers = (opts: APIOptions) => {
     const { filters, sort, fields, populate } = query;
 
     const sanitizedQuery = cloneDeep(query);
+
+    if ('publicationFilter' in sanitizedQuery) {
+      validatePublicationFilterQueryParam(sanitizedQuery.publicationFilter);
+    }
 
     if (filters) {
       Object.assign(sanitizedQuery, { filters: await sanitizeFilters(filters, schema, { auth }) });
