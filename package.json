@@ -94,6 +94,7 @@
     "test:unit:vitest:watch": "vitest --watch"
   },
   "resolutions": {
+    "webpack": "5.106.2",
     "@types/koa": "2.13.4",
     "@babel/core": "7.29.0",
     "@babel/runtime": "7.29.2",
