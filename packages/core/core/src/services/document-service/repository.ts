@@ -616,6 +616,20 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     // Sync self-referential relations with the new published entries
     await selfReferentialRelations.sync(draftsToPublish, publishedEntries, selfRelationsToSync);
 
+    // When the parent of a component was published before this target had any published
+    // version, the published component was created without a relation row. The generic
+    // unidirectional sync above only updates existing rows, so fill in the missing
+    // published-to-published links here.
+    const draftToPublishedTargetMap = updatedDraft.reduce(
+      (acc: Record<string, number | string>, draft: any) => {
+        const published = publishedEntries.find((p: any) => p.locale === draft.locale);
+        if (published) acc[String(draft.id)] = published.id;
+        return acc;
+      },
+      {}
+    );
+    await components.syncMissingPublishedComponentRelations(uid, draftToPublishedTargetMap);
+
     publishedEntries.forEach(emitEvent('entry.publish'));
 
     return { documentId, entries: publishedEntries };

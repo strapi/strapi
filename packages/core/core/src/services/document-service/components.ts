@@ -605,6 +605,192 @@ const createComponentRelationFilter = () => {
   };
 };
 
+/**
+ * Find the corresponding component instance in the published version of a parent
+ * given a draft component instance.
+ *
+ * Walks up via *_cmps join tables until a content-type parent is reached; matches
+ * the component by (field, order) inside the published twin parent's components join
+ * table. Returns null when no published parent twin exists or the slot is missing.
+ */
+const findCorrespondingPublishedComponent = async (
+  componentSchema: Schema.Component,
+  draftComponentId: number | string,
+  opts: { trx?: any } = {}
+): Promise<number | string | null> => {
+  const parentSchemas = getParentSchemasForComponent(componentSchema);
+  const parent = await findComponentParent(componentSchema, draftComponentId, parentSchemas, opts);
+  if (!parent?.uid) return null;
+
+  const identifiers = strapi.db.metadata.identifiers;
+  const entityIdColumn = getComponentJoinColumnEntityName(identifiers);
+  const componentIdColumn = getComponentJoinColumnInverseName(identifiers);
+  const componentTypeColumn = getComponentTypeColumn(identifiers);
+  const fieldColumn = identifiers.FIELD_COLUMN;
+  const orderColumn = identifiers.ORDER_COLUMN;
+
+  const parentSchema = (strapi.components[parent.uid as UID.Component] ??
+    strapi.contentTypes[parent.uid as UID.ContentType]) as
+    | Schema.Component
+    | Schema.ContentType
+    | undefined;
+  if (!parentSchema?.collectionName) return null;
+
+  const joinTableName = getComponentJoinTableName(parentSchema.collectionName, identifiers);
+  const trx = opts.trx;
+  const withTrx = (qb: any) => (trx ? qb.transacting(trx) : qb);
+
+  // Field + order of the draft component inside its parent's components join table.
+  const draftRow = await withTrx(strapi.db.getConnection(joinTableName))
+    .where({
+      [entityIdColumn]: parent.parentId,
+      [componentIdColumn]: draftComponentId,
+      [componentTypeColumn]: componentSchema.uid,
+    })
+    .first(fieldColumn, orderColumn);
+  if (!draftRow) return null;
+
+  let publishedParentId: number | string | null = null;
+
+  if (strapi.contentTypes[parent.uid as UID.ContentType]) {
+    const ct = strapi.contentTypes[parent.uid as UID.ContentType];
+    if (!ct.options?.draftAndPublish) {
+      // Parent isn't versioned: there's a single instance and the draft component is it.
+      return draftComponentId;
+    }
+
+    const parentEntry = await strapi.db.query(parent.uid).findOne({
+      select: ['id', 'documentId', 'locale', 'publishedAt'],
+      where: { id: parent.parentId },
+    });
+    if (!parentEntry) return null;
+    if (parentEntry.publishedAt) {
+      // Already the published version's component — nothing to remap.
+      return draftComponentId;
+    }
+
+    const publishedParent = await strapi.db.query(parent.uid).findOne({
+      select: ['id'],
+      where: {
+        documentId: parentEntry.documentId,
+        locale: parentEntry.locale,
+        publishedAt: { $ne: null },
+      },
+    });
+    if (!publishedParent) return null;
+    publishedParentId = publishedParent.id;
+  } else {
+    // Nested: walk up recursively.
+    const parentComponentSchema = strapi.components[parent.uid as UID.Component];
+    publishedParentId = await findCorrespondingPublishedComponent(
+      parentComponentSchema,
+      parent.parentId,
+      opts
+    );
+    if (publishedParentId == null) return null;
+  }
+
+  const publishedRow = await withTrx(strapi.db.getConnection(joinTableName))
+    .where({
+      [entityIdColumn]: publishedParentId,
+      [componentTypeColumn]: componentSchema.uid,
+      [fieldColumn]: draftRow[fieldColumn],
+      [orderColumn]: draftRow[orderColumn],
+    })
+    .first(componentIdColumn);
+  if (!publishedRow) return null;
+
+  return publishedRow[componentIdColumn];
+};
+
+/**
+ * After a D&P-enabled target has been (re)published, ensure that components belonging to
+ * an already-published parent are linked to the new published target.
+ *
+ * This bridges the gap created when the parent was published *before* the target had any
+ * published version: at that point `transformData` drops the relation (no published target
+ * to point at), so the published component is left with no row at all. When the target
+ * finally publishes, the generic unidirectional-relations sync only updates rows that
+ * already pointed at the old published target — it cannot create rows that never existed.
+ */
+const syncMissingPublishedComponentRelations = async (
+  targetUid: UID.ContentType,
+  draftToPublishedTargetMap: Record<string, number | string>
+): Promise<void> => {
+  const draftTargetIds = Object.keys(draftToPublishedTargetMap);
+  if (draftTargetIds.length === 0) return;
+
+  await strapi.db.transaction(async ({ trx }) => {
+    const identifiers = strapi.db.metadata.identifiers;
+    const idColumn = identifiers.ID_COLUMN;
+
+    for (const component of Object.values(strapi.components) as Schema.Component[]) {
+      const dbModel = strapi.db.metadata.get(component.uid);
+
+      for (const attribute of Object.values(dbModel.attributes) as any) {
+        if (
+          attribute.type !== 'relation' ||
+          attribute.target !== targetUid ||
+          attribute.inversedBy ||
+          attribute.mappedBy
+        ) {
+          continue;
+        }
+
+        const joinTable = attribute.joinTable;
+        if (!joinTable) continue;
+
+        const sourceColumn = joinTable.joinColumn.name;
+        const targetColumn = joinTable.inverseJoinColumn.name;
+
+        const draftRelations = await strapi.db
+          .getConnection()
+          .select('*')
+          .from(joinTable.name)
+          .whereIn(targetColumn, draftTargetIds)
+          .transacting(trx);
+
+        if (draftRelations.length === 0) continue;
+
+        for (const relation of draftRelations) {
+          const draftCompoId = relation[sourceColumn];
+          const draftTargetId = relation[targetColumn];
+          const newPublishedTargetId = draftToPublishedTargetMap[String(draftTargetId)];
+          if (newPublishedTargetId == null) continue;
+
+          const publishedCompoId = await findCorrespondingPublishedComponent(
+            component,
+            draftCompoId,
+            { trx }
+          );
+          if (publishedCompoId == null) continue;
+          if (String(publishedCompoId) === String(draftCompoId)) continue;
+
+          const alreadyExists = await strapi.db
+            .getConnection()
+            .select(idColumn)
+            .from(joinTable.name)
+            .where({ [sourceColumn]: publishedCompoId, [targetColumn]: newPublishedTargetId })
+            .first()
+            .transacting(trx);
+          if (alreadyExists) continue;
+
+          const { [idColumn]: _ignored, ...rest } = relation;
+          await strapi.db
+            .getConnection()
+            .insert({
+              ...rest,
+              [sourceColumn]: publishedCompoId,
+              [targetColumn]: newPublishedTargetId,
+            })
+            .into(joinTable.name)
+            .transacting(trx);
+        }
+      }
+    }
+  });
+};
+
 export {
   omitComponentData,
   assignComponentData,
@@ -616,4 +802,5 @@ export {
   createComponentRelationFilter,
   findComponentParent,
   getParentSchemasForComponent,
+  syncMissingPublishedComponentRelations,
 };
