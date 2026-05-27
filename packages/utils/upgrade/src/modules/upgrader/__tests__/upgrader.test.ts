@@ -131,7 +131,9 @@ describe('Upgrader', () => {
       const upgrader = upgraderFactory(project, semVerFactory('5.9.0'), npmPackageStub);
 
       expect(upgrader.getTarget().raw).toBe('5.9.0');
-      expect(npmPackageStub.findVersion).toHaveBeenCalledWith(expect.objectContaining({ raw: '5.9.0' }));
+      expect(npmPackageStub.findVersion).toHaveBeenCalledWith(
+        expect.objectContaining({ raw: '5.9.0' })
+      );
     });
 
     it('resolves pre-release semver targets from npm', () => {
@@ -301,7 +303,11 @@ describe('Upgrader', () => {
       await upgrader.upgrade();
 
       expect(mockedGetPreferred).toHaveBeenCalledWith(project.cwd);
-      expect(mockedInstallDependencies).toHaveBeenCalledWith(project.cwd, 'yarn', expect.any(Object));
+      expect(mockedInstallDependencies).toHaveBeenCalledWith(
+        project.cwd,
+        'yarn',
+        expect.any(Object)
+      );
     });
 
     it('passes dry mode to the codemod runner', async () => {
@@ -324,7 +330,11 @@ describe('Upgrader', () => {
     it('returns an error report when a required requirement fails', async () => {
       const project = createProject('5.8.1');
       const npmPackageStub = createNpmPackageStub();
-      const upgrader = upgraderFactory(project, semVerFactory('5.9.0'), npmPackageStub).addRequirement(
+      const upgrader = upgraderFactory(
+        project,
+        semVerFactory('5.9.0'),
+        npmPackageStub
+      ).addRequirement(
         requirementFactory('REQUIRE_CLEAN_GIT', () => {
           throw new Error('Working tree is dirty');
         })
