@@ -8,6 +8,7 @@ import {
   describeOnCondition,
   findAndClose,
   navToHeader,
+  withContentManagerSave,
 } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 
@@ -588,6 +589,67 @@ test.describe('Edit view', () => {
     await findAndClose(page, 'Saved Document');
 
     // Remove the field from the content type
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+  });
+
+  /**
+   * Regression test: Non-localized fields should stay pre-filled when switching between locale drafts,
+   * even if the draft is unsaved. Previously, switching back to a cached unsaved locale would clear
+   * non-localized values due to the prefill logic only running once.
+   */
+  test('non-localized fields remain pre-filled when revisiting an unsaved locale draft', async ({
+    page,
+  }) => {
+    const switchEditLocale = async (localeOption: string) => {
+      await page.getByRole('combobox', { name: 'Locales' }).click();
+      await page.getByRole('option', { name: localeOption }).click();
+      await expect(page.getByRole('combobox', { name: 'Locales' })).toHaveText(localeOption);
+    };
+
+    // Add a non-localized field to the Products content type
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: /add another field to this collection type/i }).click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
+    await page.getByLabel('Name', { exact: true }).fill('nonTranslatableField');
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByLabel('Enable localization for this').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+
+    // Create and save a new entry in the English locale
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
+    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
+    await page.getByLabel('name').fill('Revisit product');
+    await page.getByLabel('nonTranslatableField').fill('Shared across locales');
+    await withContentManagerSave(page, () => page.getByRole('button', { name: 'Save' }).click());
+    await findAndClose(page, 'Saved Document');
+
+    // Go to the unsaved French locale draft; non-localized field should be inherited
+    await switchEditLocale('French (fr)');
+    await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
+    await expect(page.getByLabel('nonTranslatableField')).toHaveValue('Shared across locales');
+    await expect(page.getByLabel('name')).toHaveValue('');
+
+    // Switch back to English without saving French draft
+    await switchEditLocale('English (en)');
+    await expect(page.getByRole('heading', { name: 'Revisit product' })).toBeVisible();
+    await expect(page.getByLabel('name')).toHaveValue('Revisit product');
+
+    // Switch again to French locale; non-localized field should still be pre-filled
+    // Previously this would fail—field would be empty because prefill effect didn't rerun
+    await switchEditLocale('French (fr)');
+    await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
+    await expect(page.getByLabel('nonTranslatableField')).toHaveValue('Shared across locales');
+    await expect(page.getByLabel('name')).toHaveValue('');
+
+    // Cleanup: remove the non-localized field so other tests are not affected
     await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
     await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
     await page.getByRole('button', { name: 'Save' }).click();

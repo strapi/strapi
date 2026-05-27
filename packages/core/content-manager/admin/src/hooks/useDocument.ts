@@ -195,6 +195,40 @@ const useDocument: UseDocument = (args, opts) => {
   );
 
   /**
+   * Schema attributes that should be inherited from a sibling locale when
+   * creating a new locale draft.
+   *
+   * Scope intentionally matches what the server populates into
+   * `meta.availableLocales` (see `packages/core/content-manager/server/src/services/document-metadata.ts`):
+   *   - non-localized (`pluginOptions.i18n.localized === false`)
+   *   - scalar or media — `component` / `dynamiczone` / `relation` are excluded
+   *     because the server doesn't populate them in `availableLocales` either,
+   *     so there'd be nothing to copy from.
+   */
+  const nonLocalizedScalarAndMediaFields = React.useMemo(() => {
+    if (!schema?.attributes) {
+      return [];
+    }
+
+    return Object.keys(schema.attributes).filter((name) => {
+      const attribute = schema.attributes[name];
+      // `pluginOptions` is typed as `object` on the base attribute, so narrow it
+      // to the i18n shape rather than ambient-casting the whole attribute.
+      const i18nOptions = attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined;
+
+      if (i18nOptions?.i18n?.localized !== false) {
+        return false;
+      }
+
+      return (
+        attribute.type !== 'component' &&
+        attribute.type !== 'dynamiczone' &&
+        attribute.type !== 'relation'
+      );
+    });
+  }, [schema]);
+
+  /**
    * Here we prepare the form for editing, we need to:
    * - remove prohibited fields from the document (passwords | ADD YOURS WHEN THERES A NEW ONE)
    * - swap out count objects on relations for empty arrays
@@ -202,6 +236,11 @@ const useDocument: UseDocument = (args, opts) => {
    *
    * We also prepare the form for new documents, so we need to:
    * - set default values on fields
+   * - inherit non-localized scalar/media values from a sibling locale.
+   *   Baking the inheritance into `initialValues` here is what lets it survive
+   *   both `<Form>` re-inits (`SET_INITIAL_VALUES`) and `Blocker.resetForm()` —
+   *   neither of which the previous side-effect-based prefill in
+   *   `LocalePickerAction` could survive on revisits.
    */
   const getInitialFormValues = React.useCallback(
     (isCreatingDocument: boolean = false) => {
@@ -213,11 +252,37 @@ const useDocument: UseDocument = (args, opts) => {
        * Check that we have an ID so we know the
        * document has been created in some way.
        */
-      const form = document?.id ? document : createDefaultForm(schema, components);
+      if (document?.id) {
+        return transformDocument(schema, components)(document);
+      }
+
+      let form: AnyData = createDefaultForm(schema, components);
+
+      // Intentionally use `availableLocales[0]`:
+      // - Non-localized fields are always in sync across all locales (`copyNonLocalizedFields`).
+      // - Avoids depending on the i18n plugin just to find the default locale.
+      const sibling = meta?.availableLocales?.[0] as Record<string, unknown> | undefined;
+      if (sibling && nonLocalizedScalarAndMediaFields.length > 0) {
+        const inherited = nonLocalizedScalarAndMediaFields.reduce<AnyData>((acc, name) => {
+          if (name in sibling) {
+            acc[name] = sibling[name];
+          }
+          return acc;
+        }, {});
+
+        form = { ...form, ...inherited };
+      }
 
       return transformDocument(schema, components)(form);
     },
-    [document, isSingleType, schema, components]
+    [
+      document,
+      isSingleType,
+      schema,
+      components,
+      meta?.availableLocales,
+      nonLocalizedScalarAndMediaFields,
+    ]
   );
 
   const isLoading = isLoadingDocument || isFetchingDocument || isLoadingSchema;

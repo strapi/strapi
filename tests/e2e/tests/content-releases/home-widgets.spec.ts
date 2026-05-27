@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import {
@@ -6,9 +6,19 @@ import {
   describeOnCondition,
   findAndClose,
   navToHeader,
+  withContentManagerSave,
 } from '../../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
+/** Wait until the homepage upcoming-releases widget has finished loading its data. */
+const waitForUpcomingReleases = (page: Page) =>
+  page.waitForResponse(
+    (response) =>
+      response.request().method() === 'GET' &&
+      response.url().includes('/content-releases/homepage/upcoming-releases') &&
+      response.ok()
+  );
 
 describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () => {
   test.beforeEach(async ({ page }) => {
@@ -21,13 +31,11 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     const upcomingReleasesWidget = page.getByLabel(/upcoming releases/i, { exact: true });
     await expect(upcomingReleasesWidget).toBeVisible();
 
-    // Check that the not scheduled release is displayed
-    const firstReleaseRow = upcomingReleasesWidget.getByRole('row').nth(0);
-    await expect(firstReleaseRow).toBeVisible();
-    await expect(
-      firstReleaseRow.getByRole('gridcell', { name: /trent crimm: the independent/i })
-    ).toBeVisible();
-    await expect(firstReleaseRow.getByRole('gridcell', { name: /not scheduled/i })).toBeVisible();
+    const trentCrimmRow = upcomingReleasesWidget
+      .getByRole('row')
+      .filter({ hasText: /trent crimm: the independent/i });
+    await expect(trentCrimmRow).toBeVisible();
+    await expect(trentCrimmRow.getByRole('gridcell', { name: /not scheduled/i })).toBeVisible();
 
     // Create a new scheduled release in the future
     await navToHeader(page, ['Releases'], 'Releases');
@@ -61,18 +69,22 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     await page.getByRole('button', { name: /continue/i }).click();
     await findAndClose(page, 'Release created');
 
-    // Go back to the homepage
+    // Go back to the homepage and wait for the widget to refetch
+    const upcomingAfterCreate = waitForUpcomingReleases(page);
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-    const nextReleaseRow = upcomingReleasesWidget.getByRole('row').nth(1);
+    await upcomingAfterCreate;
+
+    const nextReleaseRow = upcomingReleasesWidget
+      .getByRole('row')
+      .filter({ hasText: nextReleaseName });
     await expect(nextReleaseRow).toBeVisible();
-    await expect(nextReleaseRow.getByRole('gridcell', { name: nextReleaseName })).toBeVisible();
     await expect(nextReleaseRow.getByRole('gridcell', { name: /empty/i })).toBeVisible();
 
     // Add an entry to the release
     await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
     await page.getByRole('textbox', { name: /age/i }).fill('1');
-    await page.getByRole('button', { name: /save/i }).click();
+    await withContentManagerSave(page, () => page.getByRole('button', { name: /save/i }).click());
     await page.getByRole('button', { name: 'More document actions' }).click();
     await page.getByRole('menuitem', { name: 'Add to release' }).click();
     const addToReleaseDialog = await page.getByRole('dialog', { name: 'Add to release' });
@@ -83,7 +95,14 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     await findAndClose(page, 'Entry added to release');
 
     // Go back to the homepage and check that the widget was updated
+    const upcomingAfterAdd = waitForUpcomingReleases(page);
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-    await expect(nextReleaseRow.getByRole('gridcell', { name: /blocked/i })).toBeVisible();
+    await upcomingAfterAdd;
+    await expect(
+      upcomingReleasesWidget
+        .getByRole('row')
+        .filter({ hasText: nextReleaseName })
+        .getByRole('gridcell', { name: /blocked/i })
+    ).toBeVisible();
   });
 });
