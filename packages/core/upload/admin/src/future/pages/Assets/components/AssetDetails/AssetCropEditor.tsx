@@ -12,8 +12,11 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Crop, Link } from '@strapi/icons';
+// Raw cropperjs stylesheet, injected via createGlobalStyle. Without it the
+// cropper container collapses and the image/crop box don't render.
+import cropperCss from 'cropperjs/dist/cropper.css?raw';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { createGlobalStyle, styled } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/files';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -26,6 +29,8 @@ import type {
 } from '../../../../../../../shared/contracts/files';
 
 const FOCAL_DIAMETER_REM = 5.6;
+
+const CropperGlobalStyle = createGlobalStyle`${cropperCss}`;
 
 /* -------------------------------------------------------------------------------------------------
  * Styled
@@ -243,6 +248,7 @@ export const AssetCropEditor = ({
 
   return (
     <Portal>
+      <CropperGlobalStyle />
       <FocusTrap onEscape={onClose}>
         <Overlay>
           <HeaderBar alignItems="center">
