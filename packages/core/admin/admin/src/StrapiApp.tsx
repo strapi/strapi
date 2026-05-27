@@ -314,7 +314,7 @@ class StrapiApp {
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
   async register(customRegister?: unknown) {
-    this.widgets.register([
+    const widgets = [
       {
         icon: User,
         title: {
@@ -349,7 +349,10 @@ class StrapiApp {
         id: 'key-statistics',
         roles: ['strapi-super-admin'],
       },
-      {
+    ];
+
+    if ('strapi-cloud' in this.appPlugins) {
+      widgets.push({
         icon: Cloud,
         title: {
           id: 'widget.deploy-now.title',
@@ -361,8 +364,10 @@ class StrapiApp {
         },
         pluginId: 'admin',
         id: 'deploy-now',
-      },
-    ]);
+      });
+    }
+
+    this.widgets.register(widgets);
 
     Object.keys(this.appPlugins).forEach((plugin) => {
       this.appPlugins[plugin].register(this);
