@@ -148,6 +148,7 @@ test.describe('Edit collection type', () => {
       await page.getByRole('tab', { name: 'Advanced settings' }).click();
       await page.getByRole('textbox', { name: 'Default value' }).fill(field.defaultValue);
       await page.getByRole('button', { name: 'Finish' }).click();
+      await expect(page.getByLabel('Name', { exact: true })).toBeHidden();
     }
 
     await page.getByRole('button', { name: 'Save' }).click();

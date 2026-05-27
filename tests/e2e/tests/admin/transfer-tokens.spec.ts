@@ -48,16 +48,11 @@ test.describe('Transfer Tokens', () => {
   test('Created tokens list page should be correct', async ({ page }) => {
     await createTransferToken(page, 'my test token', 'unlimited', 'Full access');
 
-    // if we don't wait until createdAt is at least 1s, we see "NaN" for the timestamp
-    // TODO: fix the bug and remove this
-    await page.waitForTimeout(1100);
-
     await navToHeader(page, ['Settings', 'Transfer Tokens'], 'Transfer Tokens');
 
     const row = page.getByRole('row').filter({ hasText: 'my test token' });
     await expect(row).toBeVisible();
 
-    // Check the time element within the specific row
     await expect(row.getByText(/\d+ (second|minute)s? ago/)).toBeVisible();
     // TODO: expand on this test, it could check edit and delete icons
   });

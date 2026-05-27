@@ -38,4 +38,12 @@ describe('RelativeTime', () => {
 
     expect(screen.getByRole('time')).toHaveTextContent('5 minutes ago');
   });
+
+  it('renders 0 seconds ago when the timestamp is less than a second old', () => {
+    const now = 1443686400000;
+    spiedDateNow = setDateNow(now);
+    render(<RelativeTime timestamp={new Date(now - 500)} />);
+
+    expect(screen.getByRole('time')).toHaveTextContent('0 seconds ago');
+  });
 });

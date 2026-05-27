@@ -48,7 +48,11 @@ const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
         return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
       }) ?? 'seconds';
 
-    const relativeTime = isPast(timestamp) ? -interval[unit] : interval[unit];
+    const value = interval[unit];
+    const relativeTime = isPast(timestamp) ? -value : value;
+
+    const showZeroSecondsAgo =
+      value === 0 && unit === 'seconds' && (isPast(timestamp) || timestamp.getTime() > Date.now());
 
     // Display custom text if interval is less than the threshold
     const customInterval = customIntervals.find(
@@ -57,7 +61,9 @@ const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
 
     const displayText = customInterval
       ? customInterval.text
-      : formatRelativeTime(relativeTime, unit, { numeric: 'auto' });
+      : showZeroSecondsAgo
+        ? formatRelativeTime(-0, 'seconds', { numeric: 'always' })
+        : formatRelativeTime(relativeTime, unit, { numeric: 'auto' });
 
     return (
       <time

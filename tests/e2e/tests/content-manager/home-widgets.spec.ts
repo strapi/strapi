@@ -1,7 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import {
+  clickAndWait,
+  findAndClose,
+  navToHeader,
+  withContentManagerPublish,
+  withContentManagerSave,
+} from '../../../utils/shared';
 
 test.describe('Homepage - Content Manager Widgets', () => {
   test.beforeEach(async ({ page }) => {
@@ -20,12 +26,14 @@ test.describe('Homepage - Content Manager Widgets', () => {
 
     const nameBox = page.getByLabel(/name/i);
     await nameBox.fill('Nike Mens newer!');
-    await page.getByRole('button', { name: /save/i }).click();
+    await withContentManagerSave(page, () => page.getByRole('button', { name: /save/i }).click());
     await findAndClose(page, 'Saved document');
 
     // Go back to the home page, the updated entry should be the first in the table
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-    const mostRecentEntry = recentlyEditedWidget.getByRole('row').nth(0);
+    const mostRecentEntry = recentlyEditedWidget
+      .getByRole('row')
+      .filter({ hasText: /nike mens newer!/i });
     await expect(mostRecentEntry).toBeVisible();
     await expect(
       mostRecentEntry.getByRole('gridcell', { name: /nike mens newer!/i })
@@ -40,12 +48,16 @@ test.describe('Homepage - Content Manager Widgets', () => {
     // Make content update in the CM
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await page.getByRole('button', { name: /publish/i }).click();
+    await withContentManagerPublish(page, () =>
+      page.getByRole('button', { name: /publish/i }).click()
+    );
     await findAndClose(page, 'Published document');
 
     // Go back to the home page, the published entry should be the first in the table with published status
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-    const mostRecentPublishedEntry = recentlyPublishedWidget.getByRole('row').nth(0);
+    const mostRecentPublishedEntry = recentlyPublishedWidget
+      .getByRole('row')
+      .filter({ hasText: 'West Ham post match analysis' });
     await expect(mostRecentPublishedEntry).toBeVisible();
     await expect(
       mostRecentPublishedEntry.getByRole('gridcell', { name: 'West Ham post match analysis' })
@@ -59,12 +71,14 @@ test.describe('Homepage - Content Manager Widgets', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
     const title = page.getByLabel(/title/i);
     await title.fill('West Ham pre match pep talk');
-    await page.getByRole('button', { name: /save/i }).click();
+    await withContentManagerSave(page, () => page.getByRole('button', { name: /save/i }).click());
     await findAndClose(page, 'Saved document');
 
     // Go back to the home page, the published entry should be the first in the table with modified status
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-    const mostRecentModifiedEntry = recentlyPublishedWidget.getByRole('row').nth(0);
+    const mostRecentModifiedEntry = recentlyPublishedWidget
+      .getByRole('row')
+      .filter({ hasText: 'West Ham post match analysis' });
     await expect(
       // It should still be the published data, not the modified draft data
       mostRecentModifiedEntry.getByRole('gridcell', { name: 'West Ham post match analysis' })
@@ -86,7 +100,9 @@ test.describe('Homepage - Content Manager Widgets', () => {
     );
     const titleFieldEnglish = page.getByLabel(/title/i);
     await titleFieldEnglish.fill('West Ham Football Team');
-    await page.getByRole('button', { name: /publish/i }).click();
+    await withContentManagerPublish(page, () =>
+      page.getByRole('button', { name: /publish/i }).click()
+    );
     await findAndClose(page, 'Published document');
 
     // Create and publish a French entry
@@ -99,7 +115,9 @@ test.describe('Homepage - Content Manager Widgets', () => {
     );
     const titleFieldFrench = page.getByLabel(/title/i);
     await titleFieldFrench.fill("L'équipe de West Ham");
-    await page.getByRole('button', { name: /publish/i }).click();
+    await withContentManagerPublish(page, () =>
+      page.getByRole('button', { name: /publish/i }).click()
+    );
     await findAndClose(page, 'Published document');
 
     // Go back to the home page, the recently published widget should show entries from different locales
@@ -139,7 +157,9 @@ test.describe('Homepage - Content Manager Widgets', () => {
     // Publish an entry
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await page.getByRole('button', { name: /publish/i }).click();
+    await withContentManagerPublish(page, () =>
+      page.getByRole('button', { name: /publish/i }).click()
+    );
     await findAndClose(page, 'Published document');
 
     // Modify an entry
@@ -148,11 +168,13 @@ test.describe('Homepage - Content Manager Widgets', () => {
       page,
       page.getByRole('gridcell', { name: 'Why I prefer football over soccer' })
     );
-    await page.getByRole('button', { name: /publish/i }).click();
+    await withContentManagerPublish(page, () =>
+      page.getByRole('button', { name: /publish/i }).click()
+    );
     await findAndClose(page, 'Published document');
     const title = page.getByLabel(/title/i);
     await title.fill('West Ham pre match pep talk');
-    await page.getByRole('button', { name: /save/i }).click();
+    await withContentManagerSave(page, () => page.getByRole('button', { name: /save/i }).click());
     await findAndClose(page, 'Saved document');
 
     // Go back to the home page

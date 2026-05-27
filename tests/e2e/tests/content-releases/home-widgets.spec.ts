@@ -6,6 +6,7 @@ import {
   describeOnCondition,
   findAndClose,
   navToHeader,
+  withContentManagerSave,
 } from '../../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -63,16 +64,17 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
 
     // Go back to the homepage
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-    const nextReleaseRow = upcomingReleasesWidget.getByRole('row').nth(1);
+    const nextReleaseRow = upcomingReleasesWidget
+      .getByRole('row')
+      .filter({ hasText: nextReleaseName });
     await expect(nextReleaseRow).toBeVisible();
-    await expect(nextReleaseRow.getByRole('gridcell', { name: nextReleaseName })).toBeVisible();
     await expect(nextReleaseRow.getByRole('gridcell', { name: /empty/i })).toBeVisible();
 
     // Add an entry to the release
     await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
     await page.getByRole('textbox', { name: /age/i }).fill('1');
-    await page.getByRole('button', { name: /save/i }).click();
+    await withContentManagerSave(page, () => page.getByRole('button', { name: /save/i }).click());
     await page.getByRole('button', { name: 'More document actions' }).click();
     await page.getByRole('menuitem', { name: 'Add to release' }).click();
     const addToReleaseDialog = await page.getByRole('dialog', { name: 'Add to release' });
@@ -84,6 +86,11 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
 
     // Go back to the homepage and check that the widget was updated
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-    await expect(nextReleaseRow.getByRole('gridcell', { name: /blocked/i })).toBeVisible();
+    await expect(
+      upcomingReleasesWidget
+        .getByRole('row')
+        .filter({ hasText: nextReleaseName })
+        .getByRole('gridcell', { name: /blocked/i })
+    ).toBeVisible();
   });
 });

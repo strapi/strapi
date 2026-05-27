@@ -4,6 +4,7 @@ import {
   describeOnCondition,
   findAndClose,
   navToHeader,
+  withContentManagerPublish,
 } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
@@ -30,16 +31,21 @@ describeOnCondition(edition === 'EE')('Releases - Document status', () => {
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
 
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await page.getByRole('button', { name: /publish/i }).click();
+    await withContentManagerPublish(page, () =>
+      page.getByRole('button', { name: /publish/i }).click()
+    );
     await findAndClose(page, 'Published document');
     await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
 
-    await expect(
-      page.getByRole('row').nth(1).getByRole('status', { name: 'published' })
-    ).toBeVisible();
-    await expect(page.getByRole('row').nth(2).getByRole('status', { name: 'draft' })).toBeVisible();
+    const westHamRow = page.getByRole('row').filter({ hasText: 'West Ham post match analysis' });
+    const footballRow = page
+      .getByRole('row')
+      .filter({ hasText: 'Why I prefer football over soccer' });
 
-    await page.getByRole('row').nth(2).getByRole('button', { name: 'Row actions' }).click();
+    await expect(westHamRow.getByRole('status', { name: 'published' })).toBeVisible();
+    await expect(footballRow.getByRole('status', { name: 'draft' })).toBeVisible();
+
+    await footballRow.getByRole('button', { name: 'Row actions' }).click();
     await page.getByRole('menuitem', { name: 'Add to release' }).click();
     await page.getByRole('combobox', { name: 'Select a release' }).click();
     await page.getByRole('option', { name: releaseName }).click();
@@ -51,10 +57,8 @@ describeOnCondition(edition === 'EE')('Releases - Document status', () => {
     await clickAndWait(page, page.getByRole('button', { name: 'Publish', exact: true }));
 
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
-    await expect(page.getByRole('row').nth(1).getByRole('status', { name: 'draft' })).toBeVisible();
-    await expect(
-      page.getByRole('row').nth(2).getByRole('status', { name: 'published' })
-    ).toBeVisible();
+    await expect(westHamRow.getByRole('status', { name: 'draft' })).toBeVisible();
+    await expect(footballRow.getByRole('status', { name: 'published' })).toBeVisible();
 
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
     await expect(page.getByRole('status', { name: 'Draft' }).first()).toBeVisible();

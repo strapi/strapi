@@ -28,11 +28,11 @@ test.describe('Content Type UID Generation', () => {
     const displayName = page.getByLabel('Display name');
     await displayName.fill('Members');
 
-    // Wait for auto-generation
-    await page.waitForTimeout(500);
+    const singularIdField = page.getByLabel('API ID (Singular)');
+    const pluralIdField = page.getByLabel('API ID (Plural)');
+    await expect(pluralIdField).toHaveValue('members');
 
     // manually change singular name to "member"
-    const singularIdField = page.getByLabel('API ID (Singular)');
     await singularIdField.clear();
     await singularIdField.fill('member');
 
@@ -40,7 +40,6 @@ test.describe('Content Type UID Generation', () => {
     await expect(singularIdField).toHaveValue('member');
 
     // Verify plural name is "members"
-    const pluralIdField = page.getByLabel('API ID (Plural)');
     await expect(pluralIdField).toHaveValue('members');
 
     // Continue to add fields
@@ -85,10 +84,6 @@ test.describe('Content Type UID Generation', () => {
     const displayName = page.getByLabel('Display name');
     await displayName.fill('Cities');
 
-    // Wait for auto-generation
-    await page.waitForTimeout(500);
-
-    // Singular name will be auto-generated as "cities" (just slugified, NOT singularized)
     const singularIdField = page.getByLabel('API ID (Singular)');
     await expect(singularIdField).toHaveValue('cities');
 

@@ -158,7 +158,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue('Being from Kansas City');
       // Assert the previous version in the list is the expected version
       const previousVersion = versionCards.nth(1);
-      previousVersion.click();
+      await previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas is a pity');
       await expect(previousVersion.getByText('(current)')).not.toBeVisible();
 
@@ -177,7 +177,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // The current version is the most recent draft
       await expect(currentVersion.getByText('Published')).toBeVisible();
       await expect(titleInput).toHaveValue('Being from Kansas City');
-      previousVersion.click();
+      await previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas City');
 
       // Go back to the entry
