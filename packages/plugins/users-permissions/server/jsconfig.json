@@ -1,0 +1,9 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "strict": false,
+    "noEmit": true
+  },
+  "include": ["./**/*.js"],
+  "exclude": ["**/__tests__", "**/*.test.js"]
+}

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": ".",
+    "noEmit": true,
     "module": "commonjs",
     "target": "es6"
   },
@@ -8,13 +9,19 @@
     "**/node_modules/*",
     ".git",
     ".npm",
+    ".nx",
     "**/.cache/*",
     "**/.tmp/*",
+    "**/.docusaurus/*",
     "**/dist/*",
     "**/build/*",
+    "**/coverage/*",
     "**/*.test.js",
     "**/*.test.api.js",
-    "**/examples/getstarted/*",
-    "**/examples/kitchensink/*"
+
+    ".github/actions",
+    "packages",
+    "examples",
+    "templates"
   ]
 }
