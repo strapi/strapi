@@ -17,9 +17,16 @@ import { useControllableState } from '../hooks/useControllableState';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
+import {
+  buildDayOnlyOperatorPairing,
+  isLocalMidnight,
+  normaliseDayOnlyFilter,
+  parseISODate,
+} from './filtersDayOnly';
 import { Form, InputProps } from './Form';
 import { InputRenderer } from './FormInputs/Renderer';
 
+import type { FilterClause } from './filtersDayOnly';
 import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
@@ -60,6 +67,13 @@ const getFilterDetails = (
 
   if (typeof operatorObj !== 'object' || operatorObj === null) {
     return null;
+  }
+
+  if (option.type === 'datetime') {
+    const synthetic = normaliseDayOnlyFilter(operatorObj as Record<string, unknown>);
+    if (synthetic) {
+      return { name, operator: synthetic.operator, value: synthetic.value };
+    }
   }
 
   const [operator] = Object.keys(operatorObj as Record<string, unknown>);
@@ -220,9 +234,21 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
      * }
      * ```
      */
-    const operatorValuePairing = {
+    let operatorValuePairing: FilterClause = {
       [data.filter]: value,
     };
+
+    // Datetime attributes: if the user left the time half empty the picker emits a Date at local
+    // midnight — expand the filter to a calendar-day range using $between / $not / single-bound ops.
+    if (fieldOptions.type === 'datetime' && !FILTERS_WITH_NO_VALUE.includes(data.filter)) {
+      const parsedValue = parseISODate(data.value);
+      if (parsedValue && isLocalMidnight(parsedValue)) {
+        const dayOnlyPairing = buildDayOnlyOperatorPairing(data.filter, parsedValue);
+        if (dayOnlyPairing) {
+          operatorValuePairing = dayOnlyPairing;
+        }
+      }
+    }
 
     const newFilterEntry = {
       [data.name]:
@@ -492,9 +518,14 @@ const AttributeTag = ({
     case 'date':
       formattedValue = formatDate(value, { dateStyle: 'full' });
       break;
-    case 'datetime':
-      formattedValue = formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
+    case 'datetime': {
+      const parsed = parseISODate(value);
+      formattedValue =
+        parsed && isLocalMidnight(parsed)
+          ? formatDate(value, { dateStyle: 'full' })
+          : formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
       break;
+    }
     case 'time':
       const [hour, minute] = value.split(':');
       const date = new Date();
@@ -562,6 +593,10 @@ interface MainField {
   type: Schema.Attribute.Kind | 'custom';
 }
 
+// Value of a single $and entry under an attribute: either a flat operator map (non-relation, incl.
+// day-only $not wrapping), or a relation-keyed nested map.
+type FilterAttributeContent = FilterClause | Record<string, FilterClause>;
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace Filters {
   export interface Filter {
@@ -614,7 +649,7 @@ namespace Filters {
        * }
        * ```
        */
-      $and?: Array<Record<string, Record<string, string | Record<string, string>>>>;
+      $and?: Array<Record<string, FilterAttributeContent>>;
     };
     page?: number;
   }
