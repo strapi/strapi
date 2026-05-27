@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  Blocker,
   Form,
   useField,
   useForm,
@@ -12,7 +13,6 @@ import {
   Alert,
   Box,
   Button,
-  Dialog,
   Field,
   Flex,
   Loader,
@@ -27,7 +27,7 @@ import { ArrowLineRight, FileError, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { Drawer, DRAWER_CLOSE_ANIMATION_MS } from '../../../../components/Drawer';
+import { Drawer } from '../../../../components/Drawer';
 import { AssetType } from '../../../../enums';
 import { useGetAssetQuery, useUpdateAssetMutation } from '../../../../services/assets';
 import { useGetAllFoldersQuery } from '../../../../services/folders';
@@ -53,10 +53,12 @@ export const useAssetDetailsParam = () => {
   const assetId = detailsId ? parseInt(detailsId, 10) : null;
   const hasValidId = assetId !== null && !Number.isNaN(assetId);
 
-  const [isClosing, setIsClosing] = React.useState(false);
+  // Closing is driven by removing the URL param (a navigation), so navigation
+  // guards like <Blocker> can intercept it. Mount/unmount and the slide-out
+  // animation are owned by Radix's presence (see Drawer.Body); the only thing
+  // tracked here is the last opened id, so the asset stays visible while the
+  // drawer animates out after the param is gone.
   const displayAssetId = React.useRef<number | null>(null);
-
-  const isVisible = hasValidId && !isClosing;
 
   React.useEffect(() => {
     if (hasValidId) {
@@ -66,34 +68,18 @@ export const useAssetDetailsParam = () => {
 
   const openDetails = React.useCallback(
     (id: number) => {
-      setIsClosing(false);
       setQuery({ [URL_PARAM]: String(id) }, 'push', true);
     },
     [setQuery]
   );
 
   const closeDetails = React.useCallback(() => {
-    if (!hasValidId) return;
-    setIsClosing(true);
-  }, [hasValidId]);
-
-  React.useEffect(() => {
-    if (!isClosing) return;
-    const timer = window.setTimeout(() => {
-      setQuery({ [URL_PARAM]: undefined }, 'remove', true);
-      setIsClosing(false);
-      displayAssetId.current = null;
-    }, DRAWER_CLOSE_ANIMATION_MS);
-    return () => window.clearTimeout(timer);
-  }, [isClosing, setQuery]);
-
-  const shouldRenderDrawer = hasValidId || isClosing;
-  const drawerAssetId = isClosing ? (displayAssetId.current ?? assetId) : assetId;
+    setQuery({ [URL_PARAM]: undefined }, 'remove', true);
+  }, [setQuery]);
 
   return {
-    assetId: drawerAssetId,
-    isVisible,
-    shouldRenderDrawer,
+    assetId: hasValidId ? assetId : displayAssetId.current,
+    isVisible: hasValidId,
     openDetails,
     closeDetails,
   };
@@ -233,31 +219,7 @@ const LocationField = ({ label, rootLabel, folders }: LocationFieldProps) => {
 
 interface AssetDetailsProps {
   asset: AssetWithPopulatedCreatedBy;
-  /**
-   * Bubble the form's `modified` flag up to the drawer so it can decide
-   * whether to confirm-on-close. The form context is otherwise scoped to
-   * `<Form>`'s subtree, hence the callback bridge.
-   */
-  onDirtyChange?: (dirty: boolean) => void;
 }
-
-/**
- * Side-effect bridge that mirrors the current `modified` flag onto a callback
- * supplied by an ancestor. Lives inside `<Form>` so it can read the form
- * context; renders nothing.
- */
-const FormDirtyBridge = ({
-  modified,
-  onDirtyChange,
-}: {
-  modified: boolean;
-  onDirtyChange?: (dirty: boolean) => void;
-}) => {
-  React.useEffect(() => {
-    onDirtyChange?.(modified);
-  }, [modified, onDirtyChange]);
-  return null;
-};
 
 interface AssetFormState {
   name: string;
@@ -266,7 +228,7 @@ interface AssetFormState {
   folder: number | null;
 }
 
-export const AssetDetails = ({ asset, onDirtyChange }: AssetDetailsProps) => {
+export const AssetDetails = ({ asset }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
   const { data: folders = [] } = useGetAllFoldersQuery();
@@ -319,11 +281,15 @@ export const AssetDetails = ({ asset, onDirtyChange }: AssetDetailsProps) => {
     // `key={asset.id}` resets the form when the drawer switches to a different
     // asset so cached values from the previous asset don't bleed in.
     <Form key={asset.id} method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
-      {({ modified, isSubmitting, values }) => {
+      {({ modified, isSubmitting, values, resetForm }) => {
         const nameIsEmpty = ((values as AssetFormState).name ?? '').trim() === '';
         return (
           <>
-            <FormDirtyBridge modified={modified} onDirtyChange={onDirtyChange} />
+            {/* Guards every close path (X button, ESC, route change, browser
+                back) by intercepting the navigation when the form is dirty.
+                `onProceed` resets the form so the held navigation can complete.
+                Lives inside <Form> so it can read the form context. */}
+            <Blocker onProceed={resetForm} />
             <Flex
               direction="column"
               alignItems="stretch"
@@ -523,10 +489,9 @@ const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
 interface DrawerContentProps {
   assetId: number;
   closeDetails: () => void;
-  onDirtyChange?: (dirty: boolean) => void;
 }
 
-const DrawerContent = ({ assetId, closeDetails, onDirtyChange }: DrawerContentProps) => {
+const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
   const { formatMessage } = useIntl();
   const {
     data: asset,
@@ -568,59 +533,9 @@ const DrawerContent = ({ assetId, closeDetails, onDirtyChange }: DrawerContentPr
       <DrawerHeader asset={asset} closeDetails={closeDetails} />
       <Drawer.ScrollableContent>
         <AssetPreview asset={asset} />
-        <AssetDetails asset={asset} onDirtyChange={onDirtyChange} />
+        <AssetDetails asset={asset} />
       </Drawer.ScrollableContent>
     </>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * ConfirmDiscardDialog
- * -----------------------------------------------------------------------------------------------*/
-
-const DiscardConfirmDialog = ({
-  confirmDiscardOpen,
-  setConfirmDiscardOpen,
-  handleDiscardConfirm,
-}: {
-  confirmDiscardOpen: boolean;
-  setConfirmDiscardOpen: (open: boolean) => void;
-  handleDiscardConfirm: () => void;
-}) => {
-  const { formatMessage } = useIntl();
-
-  return (
-    <Dialog.Root open={confirmDiscardOpen} onOpenChange={setConfirmDiscardOpen}>
-      <Dialog.Content>
-        <Dialog.Header>
-          {formatMessage({
-            id: getTranslationKey('asset-details.discard.title'),
-            defaultMessage: 'Discard unsaved changes?',
-          })}
-        </Dialog.Header>
-        <Dialog.Body textAlign="center">
-          {formatMessage({
-            id: getTranslationKey('asset-details.discard.description'),
-            defaultMessage: 'The changes will be lost, are you sure?',
-          })}
-        </Dialog.Body>
-        <Dialog.Footer>
-          <Dialog.Cancel>
-            <Button variant="tertiary" fullWidth>
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
-          </Dialog.Cancel>
-          <Dialog.Action>
-            <Button variant="secondary" onClick={handleDiscardConfirm} fullWidth>
-              {formatMessage({
-                id: getTranslationKey('asset-details.discard.confirm'),
-                defaultMessage: 'Discard',
-              })}
-            </Button>
-          </Dialog.Action>
-        </Dialog.Footer>
-      </Dialog.Content>
-    </Dialog.Root>
   );
 };
 
@@ -630,67 +545,39 @@ const DiscardConfirmDialog = ({
 
 export const AssetDetailsDrawer = () => {
   const { formatMessage } = useIntl();
-  const { assetId, isVisible, shouldRenderDrawer, closeDetails } = useAssetDetailsParam();
-  // Track the inner form's dirty state via a ref so the close handlers can
-  // read the latest value synchronously without re-rendering the whole drawer
-  // on every keystroke.
-  const isDirtyRef = React.useRef(false);
-  const [confirmDiscardOpen, setConfirmDiscardOpen] = React.useState(false);
+  const { assetId, isVisible, closeDetails } = useAssetDetailsParam();
 
-  const handleDirtyChange = React.useCallback((dirty: boolean) => {
-    isDirtyRef.current = dirty;
-  }, []);
-
-  const requestClose = React.useCallback(() => {
-    if (isDirtyRef.current) {
-      setConfirmDiscardOpen(true);
-      return;
-    }
-    closeDetails();
-  }, [closeDetails]);
-
-  const handleDiscardConfirm = React.useCallback(() => {
-    isDirtyRef.current = false;
-    setConfirmDiscardOpen(false);
-    closeDetails();
-  }, [closeDetails]);
-
-  if (!shouldRenderDrawer || assetId === null) {
-    return null;
-  }
-
+  // Keep <Drawer.Root> mounted and let Radix presence own the open/close
+  // lifecycle. `assetId` stays set once opened (it falls back to the last id
+  // while closing), so the panel persists through the slide-out before Radix
+  // unmounts it; the guard only suppresses the never-opened initial state.
   return (
-    <Drawer.Root isVisible={isVisible} onClose={requestClose}>
-      {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
-          VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
-      <div>
-        <VisuallyHidden>
-          <Drawer.Title>
-            {formatMessage({
-              id: getTranslationKey('asset-details.title'),
-              defaultMessage: 'File details',
-            })}
-          </Drawer.Title>
-          <Drawer.Description>
-            {formatMessage({
-              id: getTranslationKey('asset-details.description'),
-              defaultMessage: 'Displays file information and metadata',
-            })}
-          </Drawer.Description>
-        </VisuallyHidden>
-      </div>
-      <Drawer.Body animationDirection="left" width="41.6rem" height="100vh">
-        <DrawerContent
-          assetId={assetId}
-          closeDetails={requestClose}
-          onDirtyChange={handleDirtyChange}
-        />
-      </Drawer.Body>
-      <DiscardConfirmDialog
-        confirmDiscardOpen={confirmDiscardOpen}
-        setConfirmDiscardOpen={setConfirmDiscardOpen}
-        handleDiscardConfirm={handleDiscardConfirm}
-      />
+    <Drawer.Root isVisible={isVisible} onClose={closeDetails}>
+      {assetId !== null && (
+        <>
+          {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
+              VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
+          <div>
+            <VisuallyHidden>
+              <Drawer.Title>
+                {formatMessage({
+                  id: getTranslationKey('asset-details.title'),
+                  defaultMessage: 'File details',
+                })}
+              </Drawer.Title>
+              <Drawer.Description>
+                {formatMessage({
+                  id: getTranslationKey('asset-details.description'),
+                  defaultMessage: 'Displays file information and metadata',
+                })}
+              </Drawer.Description>
+            </VisuallyHidden>
+          </div>
+          <Drawer.Body animationDirection="left" width="41.6rem" height="100vh">
+            <DrawerContent assetId={assetId} closeDetails={closeDetails} />
+          </Drawer.Body>
+        </>
+      )}
     </Drawer.Root>
   );
 };

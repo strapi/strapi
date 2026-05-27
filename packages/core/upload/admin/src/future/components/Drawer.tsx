@@ -74,10 +74,13 @@ const DrawerContainer = styled(Flex)<DrawerContainerProps>`
   right: 0;
   padding: ${({ theme }) => theme.spaces[2]};
   max-width: 100%;
-  /* Use the dialog z-index (320) so popovers (500) and tooltips (1000) rendered
-     from descendant components — e.g. the asset details SingleSelect — surface
-     above the drawer panel instead of being hidden behind it. */
-  z-index: ${({ theme }) => theme.zIndices.dialog};
+  /* Sit at the overlay layer (300): above the page/navigation, but below
+     popovers (500) and tooltips (1000) rendered from descendant components
+     (e.g. the asset details SingleSelect) so they surface above the panel, and
+     below dialog content (modal, 310) so confirmation dialogs — e.g. the
+     unsaved-changes <Blocker> — render on top of the drawer rather than behind
+     it. */
+  z-index: ${({ theme }) => theme.zIndices.overlay};
   overflow: hidden;
   width: ${({ width }) => width ?? '400px'};
   max-height: ${({ maxHeight }) => maxHeight ?? '100vh'};
@@ -151,7 +154,6 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
   ({ animationDirection, children, ...props }, ref) => (
     <Dialog.Content
       ref={ref}
-      forceMount
       asChild
       onPointerDownOutside={(e) => e.preventDefault()}
       onInteractOutside={(e) => e.preventDefault()}
