@@ -540,7 +540,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       return entity;
     },
 
-    // TODO: where do we handle relation processing for many queries ?
+    // TODO: unlike delete(), deleteMany does not run deleteRelations() per removed row.
     async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
