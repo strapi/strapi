@@ -98,8 +98,8 @@ export const register = (program: Command) => {
 
   // upgrade to <target>
   program
-    .command('to <target>', { hidden: true })
-    .description('Upgrade to the specified version of Strapi')
+    .command('to <target>')
+    .description('Upgrade to a specific version of Strapi')
     .addOption(projectPathOption)
     .addOption(dryOption)
     .addOption(debugOption)
@@ -121,8 +121,9 @@ export const register = (program: Command) => {
     )
     .action(async (target: string, options: CLIUpgradeToOptions) => {
       if (!isValidSemVer(target)) {
-        console.error(`Invalid target supplied, expected a valid semver but got "${target}"`);
-        process.exit(1);
+        throw new InvalidArgumentError(
+          `Invalid target supplied, expected a valid semver but got "${target}"`
+        );
       }
 
       return upgrade({ ...options, target: semVerFactory(target) });
