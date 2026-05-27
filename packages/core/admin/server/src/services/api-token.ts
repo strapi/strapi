@@ -700,8 +700,6 @@ const authenticateAdminToken = async (
     return { authenticated: false, error: expiryError };
   }
 
-  await updateLastUsedAt(apiToken);
-
   const ownerId = resolveAdminTokenOwnerId(apiToken);
   if (ownerId === null) {
     return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
@@ -718,6 +716,8 @@ const authenticateAdminToken = async (
   if (user.isActive !== true || user.blocked === true) {
     return { authenticated: false, error: new UnauthorizedError('Token owner is deactivated') };
   }
+
+  await updateLastUsedAt(apiToken);
 
   const ability = await getService('permission').engine.generateTokenAbility(
     apiToken.adminPermissions ?? [],

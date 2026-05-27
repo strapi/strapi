@@ -30,6 +30,10 @@ describe('Admin Token Auth Strategy', () => {
   const hash = jest.fn(() => 'api-token_tests-hashed-access-key');
   const generateTokenAbility = jest.fn<any, any>(() => Promise.resolve({ can: jest.fn() }));
 
+  beforeEach(() => {
+    update.mockClear();
+  });
+
   const makeStrapi = (
     getByAccessKey: jest.Mock,
     findOneUser: jest.Mock = jest.fn(() => activeUserWithRoles)
@@ -44,8 +48,6 @@ describe('Admin Token Auth Strategy', () => {
       if (expiresAt !== null && expiresAt !== undefined && new Date(expiresAt) < new Date()) {
         return { authenticated: false, error: new errors.UnauthorizedError('Token expired') };
       }
-
-      await update(apiToken);
 
       const owner = apiToken.adminUserOwner;
       const ownerId =
@@ -73,6 +75,8 @@ describe('Admin Token Auth Strategy', () => {
           error: new errors.UnauthorizedError('Token owner is deactivated'),
         };
       }
+
+      await update(apiToken);
 
       const ability = await generateTokenAbility(apiToken.adminPermissions ?? [], user);
       return { authenticated: true, credentials: apiToken, user, ability };
@@ -126,6 +130,7 @@ describe('Admin Token Auth Strategy', () => {
         populate: ['roles'],
       });
       expect(generateTokenAbility).toHaveBeenCalledWith([], activeUserWithRoles);
+      expect(update).toHaveBeenCalledWith(token);
     });
 
     test('Fails to authenticate when loaded owner isActive is false', async () => {
@@ -141,6 +146,7 @@ describe('Admin Token Auth Strategy', () => {
       expect(authenticated).toBe(false);
       expect(error).toBeInstanceOf(errors.UnauthorizedError);
       expect(error.message).toBe('Token owner is deactivated');
+      expect(update).not.toHaveBeenCalled();
     });
 
     test('Fails to authenticate when loaded owner is blocked', async () => {
@@ -156,6 +162,7 @@ describe('Admin Token Auth Strategy', () => {
       expect(authenticated).toBe(false);
       expect(error).toBeInstanceOf(errors.UnauthorizedError);
       expect(error.message).toBe('Token owner is deactivated');
+      expect(update).not.toHaveBeenCalled();
     });
 
     test('Authenticates when adminUserOwner is a bare ID and the owner can be loaded', async () => {
@@ -169,6 +176,7 @@ describe('Admin Token Auth Strategy', () => {
 
       expect(response.authenticated).toBe(true);
       expect(ctx.state.user).toBe(activeUserWithRoles);
+      expect(update).toHaveBeenCalledWith(token);
     });
 
     test('Fails to authenticate if the authorization header is missing', async () => {
@@ -192,6 +200,7 @@ describe('Admin Token Auth Strategy', () => {
       expect(authenticated).toBe(false);
       expect(error).toBeInstanceOf(errors.UnauthorizedError);
       expect(error.message).toBe('Token expired');
+      expect(update).not.toHaveBeenCalled();
     });
 
     test('Rejects an admin token on a content-api route (defensive kind check)', async () => {
@@ -228,6 +237,7 @@ describe('Admin Token Auth Strategy', () => {
       expect(authenticated).toBe(false);
       expect(error).toBeInstanceOf(errors.UnauthorizedError);
       expect(error.message).toBe('Token owner not found');
+      expect(update).not.toHaveBeenCalled();
     });
   });
 
