@@ -1,12 +1,16 @@
 # Dependabot policy for the Strapi monorepo:
 # - Security advisories: open immediately; npm families grouped, others individual.
 # - Version updates: max 10 open npm PRs / 3 actions PRs, weekly on Sundays.
-# - Cooldown: 30d patch / 60d minor before version-update PRs (security unaffected).
-# - Majors: manual only (except security advisories that require a major bump).
+# - Cooldown (npm): 30d patch / 60d minor / 90d major before version-update PRs.
+# - Cooldown (github-actions): default-days only — semver-specific fields are unsupported.
+# - Security advisories bypass cooldown.
+# - Majors: manual only for npm version updates (see ignore); security majors still open.
 version: 2
 updates:
+  # Yarn workspaces monorepo — scan package.json files from the repo root.
   - package-ecosystem: npm
     directory: /
+    # Version-update groups: one PR per toolchain family instead of one PR per package.
     groups:
       babel:
         applies-to: version-updates
@@ -208,13 +212,16 @@ updates:
           - 'html-webpack-plugin'
           - 'mini-css-extract-plugin'
 
+    # Conventional commit prefix; scope comes from the updated package name.
     commit-message:
       prefix: 'chore'
       include: 'scope'
+    # Check once per week to limit PR noise; Sunday evening UTC.
     schedule:
       interval: weekly
       day: sunday
       time: '22:00'
+    # Cap concurrent open version-update PRs; security updates are not limited here.
     open-pull-requests-limit: 10
     # Wait for releases to stabilise before opening version-update PRs.
     # Security advisories are not affected by cooldown.
@@ -223,9 +230,11 @@ updates:
       semver-patch-days: 30
       semver-minor-days: 60
       semver-major-days: 90
+    # Bump package.json ranges to the resolved version (not widen or lock).
     versioning-strategy: increase
+    # Block automated major version updates; review and merge majors manually.
     ignore:
-      # Only allow patch as minor babel versions need to be upgraded all together
+      # Babel minor/major bumps must land together — only allow patch updates here.
       - dependency-name: '@babel/*'
         update-types:
           - 'version-update:semver-major'
@@ -239,7 +248,9 @@ updates:
       - 'source: dependencies'
       - 'pr: chore'
 
+  # Workflow actions in .github/workflows (and action.yml at the repo root).
   - package-ecosystem: github-actions
+    # Fewer concurrent PRs than npm — workflow changes need closer review.
     open-pull-requests-limit: 3
     directory: /
     groups:
@@ -258,11 +269,9 @@ updates:
       interval: weekly
       day: sunday
       time: '22:00'
+    # github-actions supports default-days only (no semver-major/minor/patch-days).
     cooldown:
       default-days: 30
-      semver-patch-days: 30
-      semver-minor-days: 60
-      semver-major-days: 90
     labels:
       - 'source: dependencies'
       - 'pr: chore'
