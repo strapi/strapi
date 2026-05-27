@@ -102,25 +102,15 @@ const checkRequiredDependencies = async ({
   );
 
   if (install.length > 0) {
-    logger.info(
-      'The Strapi admin needs to install the following dependencies:',
+    logger.warn(
+      'The Strapi admin is missing required dependencies:',
       os.EOL,
-      install.map(({ name, wantedVersion }) => `  - ${name}@${wantedVersion}`).join(os.EOL)
+      install.map(({ name, wantedVersion }) => `  - ${name}@${wantedVersion}`).join(os.EOL),
+      '',
+      'Please install them manually before running `strapi build`:',
+      `  npm install --save ${install.map(({ name, wantedVersion }) => `${name}@${wantedVersion}`).join(' ')}`,
     );
-
-    await installDependencies(install, {
-      cwd,
-      logger,
-    });
-
-    const [file, ...args] = process.argv;
-
-    /**
-     * Re-run the same command after installation e.g. strapi build because the yarn.lock might
-     * not be the same and could break installations. It's not the best solution, but it works.
-     */
-    await execa(file, args, { cwd, stdio: 'inherit' });
-    return { didInstall: true };
+    throw new Error('Missing required dependencies for admin panel. Install them and re-run `strapi build`.');
   }
 
   if (review.length) {
