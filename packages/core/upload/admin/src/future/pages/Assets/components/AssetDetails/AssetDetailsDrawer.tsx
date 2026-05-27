@@ -39,6 +39,7 @@ import { styled } from 'styled-components';
 
 import { Drawer } from '../../../../components/Drawer';
 import { AssetType } from '../../../../enums';
+import { useUploadFilesStreamMutation } from '../../../../services/api';
 import {
   useDeleteAssetMutation,
   useGetAssetQuery,
@@ -57,9 +58,13 @@ import { rotateImage } from '../../../../utils/rotateImage';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
 
+import { AssetCropEditor } from './AssetCropEditor';
 import { AssetPreview } from './AssetPreview';
 
-import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
+import type {
+  AssetWithPopulatedCreatedBy,
+  FocalPoint,
+} from '../../../../../../../shared/contracts/files';
 
 // Name of the parameter to look for in the URL to open the drawer
 const URL_PARAM = 'assetId';
@@ -587,6 +592,9 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { data: folders = [] } = useGetAllFoldersQuery();
   const [updateAsset] = useUpdateAssetMutation();
   const [replaceAsset] = useReplaceAssetMutation();
+  const [uploadFiles] = useUploadFilesStreamMutation();
+
+  const [isCropOpen, setIsCropOpen] = React.useState(false);
 
   // In-drawer toast slot
   const [drawerToast, setDrawerToast] = React.useState<DrawerToast | null>(null);
@@ -653,6 +661,60 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     });
   };
 
+  const notifyCropError = () => {
+    setDrawerToast({
+      type: 'danger',
+      message: formatMessage({
+        id: getTranslationKey('asset-details.crop.error'),
+        defaultMessage: 'Failed to crop the file.',
+      }),
+    });
+  };
+
+  // Apply: replace the original binary with the cropped file + focal point.
+  const handleCropApply = async (file: globalThis.File, focalPoint: FocalPoint) => {
+    const res = await replaceAsset({
+      id: asset.id,
+      file,
+      fileInfo: { focalPoint },
+    });
+    if ('error' in res) {
+      notifyCropError();
+      return;
+    }
+    setIsCropOpen(false);
+    setDrawerToast({
+      type: 'success',
+      message: formatMessage({
+        id: getTranslationKey('asset-details.crop.success'),
+        defaultMessage: 'File cropped.',
+      }),
+    });
+  };
+
+  // Save as copy: upload the cropped file as a new asset in the same folder.
+  const handleCropSaveAsCopy = async (file: globalThis.File, focalPoint: FocalPoint) => {
+    const formData = new FormData();
+    formData.append('files', file);
+    formData.append(
+      'fileInfo',
+      JSON.stringify([{ name: asset.name, folder: initialValues.folder, focalPoint }])
+    );
+    const res = await uploadFiles({ formData, totalFiles: 1 });
+    if ('error' in res) {
+      notifyCropError();
+      return;
+    }
+    setIsCropOpen(false);
+    setDrawerToast({
+      type: 'success',
+      message: formatMessage({
+        id: getTranslationKey('asset-details.crop.copy-success'),
+        defaultMessage: 'Copy created.',
+      }),
+    });
+  };
+
   return (
     // `key={asset.id}` resets the form when the drawer switches to a different
     // asset so cached values from the previous asset don't bleed in.
@@ -667,6 +729,14 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                 `onProceed` resets the form so the held navigation can complete.
                 Lives inside <Form> so it can read the form context. */}
               <Blocker onProceed={resetForm} />
+              {isCropOpen && isImage ? (
+                <AssetCropEditor
+                  asset={asset}
+                  onClose={() => setIsCropOpen(false)}
+                  onApply={handleCropApply}
+                  onSaveAsCopy={handleCropSaveAsCopy}
+                />
+              ) : null}
               {drawerToast ? (
                 <DrawerToastSlot>
                   <Alert
@@ -682,7 +752,9 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                 <AssetPreview
                   asset={asset}
                   rotation={(values as AssetFormState).rotation}
-                  actions={isImage ? <AssetImageActions /> : null}
+                  actions={
+                    isImage ? <AssetImageActions onCrop={() => setIsCropOpen(true)} /> : null
+                  }
                 />
                 <Flex
                   direction="column"
