@@ -1,7 +1,8 @@
 /**
  * Migration overview
  * ===================
- * 1. Create bare draft rows for every published entry, cloning only scalar fields (no relations/components yet).
+ * 1. Create bare draft rows for every published entry, cloning scalar fields and join-column
+ *    foreign keys (no components, dynamic zones, or join-table relations yet).
  *    We do this with a single INSERT … SELECT per content type to avoid touching the document service for every single v4 entry.
  *
  * 2. Rewire all relations so the newly created drafts behave exactly like calling `documentService.discardDraft()`
@@ -146,8 +147,8 @@ const hasDraftAndPublish = async (trx: Knex, meta: any) => {
 };
 
 /**
- * Copy all the published entries to draft entries, without it's components, dynamic zones or relations.
- * This ensures all necessary draft's exist before copying it's relations.
+ * Copy published entries to draft rows, cloning scalar fields and join-column foreign keys.
+ * Components, dynamic zones, and join-table relations are handled in later stages.
  */
 async function copyPublishedEntriesToDraft({
   db,
@@ -158,17 +159,20 @@ async function copyPublishedEntriesToDraft({
   trx: Knex;
   uid: string;
 }) {
-  // Extract all scalar attributes to use in the insert query
   const meta = db.metadata.get(uid);
 
-  // Get scalar attributes that will be copied over the new draft
-  const scalarAttributes = Object.values(meta.attributes).reduce((acc, attribute: any) => {
+  const columnsToCopy = Object.values(meta.attributes).reduce((acc, attribute: any) => {
     if (['id'].includes(attribute.columnName)) {
       return acc;
     }
 
     if (contentTypes.isScalarAttribute(attribute)) {
       acc.push(attribute.columnName);
+      return acc;
+    }
+
+    if (attribute.type === 'relation' && attribute.joinColumn && !attribute.joinTable) {
+      acc.push(attribute.joinColumn.name);
     }
 
     return acc;
@@ -184,16 +188,16 @@ async function copyPublishedEntriesToDraft({
   await trx
     // INSERT INTO tableName (columnName1, columnName2, columnName3, ...)
     .into(
-      trx.raw(`?? (${scalarAttributes.map(() => `??`).join(', ')})`, [
+      trx.raw(`?? (${columnsToCopy.map(() => `??`).join(', ')})`, [
         meta.tableName,
-        ...scalarAttributes,
+        ...columnsToCopy,
       ])
     )
     .insert((subQb: typeof trx) => {
       // SELECT columnName1, columnName2, columnName3, ...
       subQb
         .select(
-          ...scalarAttributes.map((att: string) => {
+          ...columnsToCopy.map((att: string) => {
             // NOTE: these literals reference Strapi's built-in system columns. They never get shortened by
             // the identifier migration (5.0.0-01-convert-identifiers-long-than-max-length) so we can safely
             // compare/use them directly here.
