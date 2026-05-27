@@ -61,6 +61,19 @@ describe('AssetDetails (asset details drawer body)', () => {
     expect(screen.getByDisplayValue('A photo')).toBeInTheDocument();
   });
 
+  it('enables save after rotating the image preview', async () => {
+    // The actual binary production (canvas → blob) is covered by e2e; jsdom
+    // has no canvas, so here we assert the rotate button marks the form dirty.
+    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
+
+    const saveButton = await screen.findByRole('button', { name: 'Save changes' });
+    expect(saveButton).toBeDisabled();
+
+    await user.click(screen.getByRole('button', { name: 'Rotate 90°' }));
+
+    await waitFor(() => expect(saveButton).toBeEnabled());
+  });
+
   it('enables save when a field is edited and submits the new fileInfo to the update endpoint', async () => {
     let captured: { id: string | null; body: FormData | null } = { id: null, body: null };
     server.use(

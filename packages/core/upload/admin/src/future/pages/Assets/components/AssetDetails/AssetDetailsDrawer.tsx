@@ -25,7 +25,15 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ArrowLineRight, FileError, Download, Trash, WarningCircle } from '@strapi/icons';
+import {
+  ArrowLineRight,
+  ArrowsCounterClockwise,
+  Crop,
+  FileError,
+  Download,
+  Trash,
+  WarningCircle,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -39,8 +47,13 @@ import {
 } from '../../../../services/assets';
 import { useGetAllFoldersQuery } from '../../../../services/folders';
 import { useGetSettingsQuery } from '../../../../services/settings';
-import { formatBytes, getFileExtension } from '../../../../utils/files';
+import {
+  formatBytes,
+  getFileExtension,
+  prefixFileUrlWithBackendUrl,
+} from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
+import { rotateImage } from '../../../../utils/rotateImage';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
 
@@ -502,6 +515,54 @@ const ReplaceAssetButton = ({ asset, onNotify }: ReplaceAssetButtonProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * AssetImageActions - crop / rotate buttons overlaid on the image preview.
+ * Rendered inside <Form> so the rotate button can drive the `rotation` field.
+ * -----------------------------------------------------------------------------------------------*/
+
+interface AssetImageActionsProps {
+  onCrop?: () => void;
+}
+
+const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
+  const { formatMessage } = useIntl();
+  const rotation = useField<number>('rotation');
+  const isSubmitting = useForm('AssetImageActions', (state) => state.isSubmitting);
+
+  const handleRotate = () => {
+    rotation.onChange('rotation', ((rotation.value ?? 0) + 90) % 360);
+  };
+
+  return (
+    <Flex direction="column" gap={2}>
+      <IconButton
+        withTooltip={false}
+        label={formatMessage({
+          id: getTranslationKey('asset-details.crop.trigger'),
+          defaultMessage: 'Crop',
+        })}
+        variant="tertiary"
+        onClick={onCrop}
+        disabled={isSubmitting || !onCrop}
+      >
+        <Crop />
+      </IconButton>
+      <IconButton
+        withTooltip={false}
+        label={formatMessage({
+          id: getTranslationKey('asset-details.rotate.trigger'),
+          defaultMessage: 'Rotate 90°',
+        })}
+        variant="tertiary"
+        onClick={handleRotate}
+        disabled={isSubmitting}
+      >
+        <ArrowsCounterClockwise />
+      </IconButton>
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * AssetDetails
  * -----------------------------------------------------------------------------------------------*/
 
@@ -515,6 +576,9 @@ interface AssetFormState {
   caption: string;
   alternativeText: string;
   folder: number | null;
+  // Pending clockwise rotation (deg). A form field so rotating marks the form
+  // dirty and rides the existing Save flow; persisted by replacing the binary.
+  rotation: number;
 }
 
 export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
@@ -522,6 +586,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { toggleNotification } = useNotification();
   const { data: folders = [] } = useGetAllFoldersQuery();
   const [updateAsset] = useUpdateAssetMutation();
+  const [replaceAsset] = useReplaceAssetMutation();
 
   // In-drawer toast slot
   const [drawerToast, setDrawerToast] = React.useState<DrawerToast | null>(null);
@@ -541,18 +606,32 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       typeof asset.folder === 'object' && asset.folder !== null
         ? ((asset.folder as { id: number }).id ?? null)
         : ((asset.folder as number | null | undefined) ?? null),
+    rotation: 0,
   };
 
   const handleSubmit = async (values: AssetFormState) => {
-    const res = await updateAsset({
-      id: asset.id,
-      fileInfo: {
-        name: values.name,
-        caption: values.caption,
-        alternativeText: values.alternativeText,
-        folder: values.folder,
-      },
-    });
+    const fileInfo = {
+      name: values.name,
+      caption: values.caption,
+      alternativeText: values.alternativeText,
+      folder: values.folder,
+    };
+
+    // A pending rotation changes the binary, so persist via replaceAsset
+    // (rotated File + metadata in one request). Otherwise update metadata only.
+    const hasRotation = values.rotation % 360 !== 0;
+    const res = hasRotation
+      ? await replaceAsset({
+          id: asset.id,
+          file: await rotateImage(
+            prefixFileUrlWithBackendUrl(asset.url) as string,
+            values.rotation,
+            asset.name,
+            asset.mime ?? 'image/png'
+          ),
+          fileInfo,
+        })
+      : await updateAsset({ id: asset.id, fileInfo });
 
     if ('error' in res) {
       toggleNotification({
@@ -600,7 +679,11 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                 </DrawerToastSlot>
               ) : null}
               <Drawer.ScrollableContent>
-                <AssetPreview asset={asset} />
+                <AssetPreview
+                  asset={asset}
+                  rotation={(values as AssetFormState).rotation}
+                  actions={isImage ? <AssetImageActions /> : null}
+                />
                 <Flex
                   direction="column"
                   alignItems="stretch"

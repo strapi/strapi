@@ -35,6 +35,8 @@
   "asset-details.replace.continue": "Continue",
   "asset-details.replace.success": "File replaced.",
   "asset-details.replace.error": "Failed to replace the file.",
+  "asset-details.rotate.trigger": "Rotate 90°",
+  "asset-details.crop.trigger": "Crop",
   "asset-details.noPreview": "No preview available",
   "upload.generic-error": "An error occurred while uploading the file.",
   "upload.progress": "Upload progress",

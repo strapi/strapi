@@ -41,10 +41,22 @@ const AssetContainer = styled(Flex)`
   height: 100%;
 `;
 
-const StyledImage = styled.img`
+const StyledImage = styled.img<{ $rotation?: number }>`
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  transform: ${({ $rotation }) => ($rotation ? `rotate(${$rotation}deg)` : 'none')};
+`;
+
+/**
+ * Top-right overlay slot for image actions (crop / rotate). Sits above the
+ * image (z-index 3 > AssetContainer 2) so the buttons stay clickable.
+ */
+const ActionsOverlay = styled(Flex)`
+  position: absolute;
+  top: ${({ theme }) => theme.spaces[3]};
+  right: ${({ theme }) => theme.spaces[3]};
+  z-index: 3;
 `;
 
 const StyledVideo = styled.video`
@@ -99,9 +111,13 @@ const AssetLoader = () => {
 
 interface AssetPreviewProps {
   asset: File | AssetWithPopulatedCreatedBy;
+  /** Live clockwise rotation (degrees) applied to the image preview only. */
+  rotation?: number;
+  /** Overlay rendered top-right of the image preview (crop / rotate buttons). */
+  actions?: React.ReactNode;
 }
 
-export const AssetPreview = ({ asset }: AssetPreviewProps) => {
+export const AssetPreview = ({ asset, rotation = 0, actions }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
   const { alternativeText, ext, mime, url, updatedAt } = asset;
   // Append the asset's `updatedAt` as a cache-buster so a freshly replaced
@@ -126,10 +142,12 @@ export const AssetPreview = ({ asset }: AssetPreviewProps) => {
       return (
         <PreviewContainer>
           {!isMediaLoaded && <AssetLoader />}
+          {actions ? <ActionsOverlay>{actions}</ActionsOverlay> : null}
           <AssetContainer>
             <StyledImage
               src={imageUrl}
               alt={alternativeText || asset.name || ''}
+              $rotation={rotation}
               onLoad={() => setIsMediaLoaded(true)}
               onError={() => setIsMediaLoaded(true)}
             />
