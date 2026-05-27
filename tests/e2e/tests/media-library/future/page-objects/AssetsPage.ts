@@ -312,6 +312,38 @@ export class AssetsPage {
   }
 
   /**
+   * Click the rotate button overlaid on the image preview. Each click rotates
+   * the preview 90° and marks the form dirty.
+   */
+  async rotateAssetFromDrawer() {
+    await this.assetDetailsDrawer.getByRole('button', { name: /Rotate/i }).click();
+  }
+
+  /**
+   * Open the fullscreen crop & focus editor from the preview. Returns once the
+   * editor footer (Apply) is visible. The editor renders in a Portal at body
+   * root, so query off `page`, not the drawer.
+   */
+  async openCropEditor() {
+    await this.assetDetailsDrawer.getByRole('button', { name: 'Crop' }).click();
+    await expect(this.page.getByRole('button', { name: 'Apply' })).toBeVisible();
+  }
+
+  /**
+   * Click Apply in the crop editor (replace the original).
+   */
+  async applyCrop() {
+    await this.page.getByRole('button', { name: 'Apply' }).click();
+  }
+
+  /**
+   * Click "Save as copy" in the crop editor (new asset in the same folder).
+   */
+  async saveCropAsCopy() {
+    await this.page.getByRole('button', { name: 'Save as copy' }).click();
+  }
+
+  /**
    * Open the New menu and click "New folder"
    */
   async openCreateFolderDialog() {
