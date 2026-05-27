@@ -154,6 +154,7 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
   ({ animationDirection, children, ...props }, ref) => (
     <Dialog.Content
       ref={ref}
+      forceMount
       asChild
       onPointerDownOutside={(e) => e.preventDefault()}
       onInteractOutside={(e) => e.preventDefault()}

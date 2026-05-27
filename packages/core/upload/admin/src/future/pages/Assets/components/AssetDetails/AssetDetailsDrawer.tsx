@@ -54,17 +54,29 @@ export const useAssetDetailsParam = () => {
   const hasValidId = assetId !== null && !Number.isNaN(assetId);
 
   // Closing is driven by removing the URL param (a navigation), so navigation
-  // guards like <Blocker> can intercept it. Mount/unmount and the slide-out
-  // animation are owned by Radix's presence (see Drawer.Body); the only thing
-  // tracked here is the last opened id, so the asset stays visible while the
-  // drawer animates out after the param is gone.
+  // guards like <Blocker> can intercept it. `isMounted` keeps the drawer in the
+  // tree through the slide-out: it stays true once opened and only flips false
+  // when the close animation actually ends (see onCloseAnimationEnd), so the
+  // close duration lives entirely in CSS — no JS timer.
+  const [isMounted, setIsMounted] = React.useState(hasValidId);
   const displayAssetId = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     if (hasValidId) {
       displayAssetId.current = assetId;
+      setIsMounted(true);
     }
   }, [hasValidId, assetId]);
+
+  const onCloseAnimationEnd = React.useCallback(
+    (event: React.AnimationEvent) => {
+      // Ignore animations bubbling up from descendants, and the slide-in.
+      if (event.target === event.currentTarget && !hasValidId) {
+        setIsMounted(false);
+      }
+    },
+    [hasValidId]
+  );
 
   const openDetails = React.useCallback(
     (id: number) => {
@@ -80,6 +92,8 @@ export const useAssetDetailsParam = () => {
   return {
     assetId: hasValidId ? assetId : displayAssetId.current,
     isVisible: hasValidId,
+    shouldRenderDrawer: isMounted,
+    onCloseAnimationEnd,
     openDetails,
     closeDetails,
   };
@@ -545,39 +559,41 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
 export const AssetDetailsDrawer = () => {
   const { formatMessage } = useIntl();
-  const { assetId, isVisible, closeDetails } = useAssetDetailsParam();
+  const { assetId, isVisible, shouldRenderDrawer, onCloseAnimationEnd, closeDetails } =
+    useAssetDetailsParam();
 
-  // Keep <Drawer.Root> mounted and let Radix presence own the open/close
-  // lifecycle. `assetId` stays set once opened (it falls back to the last id
-  // while closing), so the panel persists through the slide-out before Radix
-  // unmounts it; the guard only suppresses the never-opened initial state.
+  if (!shouldRenderDrawer || assetId === null) {
+    return null;
+  }
+
   return (
     <Drawer.Root isVisible={isVisible} onClose={closeDetails}>
-      {assetId !== null && (
-        <>
-          {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
-              VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
-          <div>
-            <VisuallyHidden>
-              <Drawer.Title>
-                {formatMessage({
-                  id: getTranslationKey('asset-details.title'),
-                  defaultMessage: 'File details',
-                })}
-              </Drawer.Title>
-              <Drawer.Description>
-                {formatMessage({
-                  id: getTranslationKey('asset-details.description'),
-                  defaultMessage: 'Displays file information and metadata',
-                })}
-              </Drawer.Description>
-            </VisuallyHidden>
-          </div>
-          <Drawer.Body animationDirection="left" width="41.6rem" height="100vh">
-            <DrawerContent assetId={assetId} closeDetails={closeDetails} />
-          </Drawer.Body>
-        </>
-      )}
+      {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
+          VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
+      <div>
+        <VisuallyHidden>
+          <Drawer.Title>
+            {formatMessage({
+              id: getTranslationKey('asset-details.title'),
+              defaultMessage: 'File details',
+            })}
+          </Drawer.Title>
+          <Drawer.Description>
+            {formatMessage({
+              id: getTranslationKey('asset-details.description'),
+              defaultMessage: 'Displays file information and metadata',
+            })}
+          </Drawer.Description>
+        </VisuallyHidden>
+      </div>
+      <Drawer.Body
+        animationDirection="left"
+        width="41.6rem"
+        height="100vh"
+        onAnimationEnd={onCloseAnimationEnd}
+      >
+        <DrawerContent assetId={assetId} closeDetails={closeDetails} />
+      </Drawer.Body>
     </Drawer.Root>
   );
 };
