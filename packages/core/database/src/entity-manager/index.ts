@@ -544,8 +544,11 @@ export const createEntityManager = (db: Database): EntityManager => {
     async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
+      // Only apply filter criteria (_q / where / filters), same as count — not full findMany params.
+      // limit, offset, orderBy, populate, etc. must be ignored: populate throws on delete results,
+      // and pagination keys can make deleteMany diverge from findMany or delete an unexpected slice.
       const deletedRows = await this.createQueryBuilder(uid)
-        .init(params)
+        .init(pick(['_q', 'where', 'filters'], params))
         .delete()
         .execute<number>({ mapResults: false });
 
