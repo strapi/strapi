@@ -71,7 +71,10 @@ export const createTestSetup = async (
 };
 
 export type DestroyTestSetupOptions = {
-  /** Passed to `builder.cleanup()`; golden restore is on by default (`API_TEST_GOLDEN_RESTORE=0` to disable). */
+  /**
+   * When false, run legacy CTB cleanup (many Strapi boots) instead of golden snapshot restore.
+   * Use only when a suite cannot share the shared test app teardown path.
+   */
   useGoldenRestore?: boolean;
 };
 

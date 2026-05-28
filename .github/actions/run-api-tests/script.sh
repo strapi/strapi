@@ -7,7 +7,6 @@ fi
 
 export ENV_PATH="$(pwd)/test-apps/api/.env"
 export JWT_SECRET="aSecret"
-export API_TEST_GOLDEN_RESTORE="${API_TEST_GOLDEN_RESTORE:-1}"
 
 opts=($DB_OPTIONS)
 jestOptions=($JEST_OPTIONS)

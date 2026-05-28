@@ -4,7 +4,7 @@ import { ARTICLE_UID } from './utils';
 
 /**
  * Verifies golden snapshot teardown: two sequential suites using the full document-service
- * resource pack can share test-apps/api without CTB cleanup (API_TEST_GOLDEN_RESTORE, default on).
+ * resource pack can share test-apps/api without legacy CTB cleanup between describes.
  */
 describe('API test golden snapshot restore — suite A', () => {
   let testUtils: Awaited<ReturnType<typeof createTestSetup>>;

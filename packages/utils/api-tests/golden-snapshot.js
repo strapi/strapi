@@ -28,9 +28,6 @@ const getGoldenDir = (appDir = getAppDir()) => {
   return path.join(parent, '.golden', name);
 };
 
-/** Enabled by default; set `API_TEST_GOLDEN_RESTORE=0` to use legacy CTB cleanup. */
-const isGoldenRestoreEnabled = () => process.env.API_TEST_GOLDEN_RESTORE !== '0';
-
 const isGoldenRestoreSupported = (appDir = getAppDir()) => {
   const { client } = readDatabaseMeta(appDir);
   return SUPPORTED_CLIENTS.has(client);
@@ -132,7 +129,6 @@ module.exports = {
   goldenSnapshotExists,
   getAppDir,
   getGoldenDir,
-  isGoldenRestoreEnabled,
   isGoldenRestoreSupported,
   readDatabaseMeta,
 };

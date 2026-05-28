@@ -4,11 +4,7 @@ const { get } = require('lodash/fp');
 
 const modelsUtils = require('../models');
 const { sanitize } = require('../../../core/utils');
-const {
-  isGoldenRestoreEnabled,
-  isGoldenRestoreSupported,
-  restoreGoldenSnapshot,
-} = require('../golden-snapshot');
+const { isGoldenRestoreSupported, restoreGoldenSnapshot } = require('../golden-snapshot');
 const actionRegistry = require('./action-registry');
 const { createContext } = require('./context');
 
@@ -81,10 +77,14 @@ const createTestBuilder = (options = {}) => {
       return this;
     },
 
+    /**
+     * @param {{ enableTestDataAutoCleanup?: boolean, useGoldenRestore?: boolean }} [options]
+     * @param {boolean} [options.useGoldenRestore=true] Pass false for legacy CTB teardown when this suite cannot use golden restore.
+     */
     async cleanup(options = {}) {
       const { enableTestDataAutoCleanup = true, useGoldenRestore = true } = options;
 
-      if (useGoldenRestore && isGoldenRestoreEnabled() && isGoldenRestoreSupported()) {
+      if (useGoldenRestore && isGoldenRestoreSupported()) {
         await restoreGoldenSnapshot();
         ctx.resetState();
         return this;
