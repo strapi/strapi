@@ -1,6 +1,8 @@
-# Complex Example Project
+# Migration test fixture (`examples/complex`)
 
-This project contains complex Strapi schemas for testing migrations between Strapi v4 and v5, plus a benchmark harness for measuring the performance of those migrations.
+**Canonical Strapi app for v4→v5 migration integration tests and benchmarks.** It ships rich schemas (relations, dynamic zones, i18n, draft/publish, stress cases), seed scripts, `validate-migration.js`, and database tooling used by CI and local workflows.
+
+> **Location:** this directory stays at `examples/complex` (Yarn workspace name `complex`) for historical reasons. It is **test infrastructure**, not a casual demo like `getstarted`. Test orchestration lives in [`tests/migration/`](../../tests/migration/README.md). **Future:** we may relocate the app under `tests/migration/` (e.g. `tests/migration/fixture/`) so ownership and CI path filters are clearer; until then, treat changes here as changes to the migration-test contract.
 
 ## Content Types
 
@@ -32,7 +34,7 @@ Container runtime is auto-detected in this order: `podman compose` → `podman-c
 
 ## Migration Testing Workflow
 
-This project includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots. The complex example ships its own `docker-compose.dev.yml` so the database containers are independent of the monorepo root.
+This fixture includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots. It ships its own `docker-compose.dev.yml` so database containers are independent of the monorepo root.
 
 ### Setup
 
@@ -161,7 +163,7 @@ yarn db:check:mariadb
 
 11. **Repeat from step 7** to test fixes
 
-**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. The complex example uses its own Compose project name (`strapi_complex`) so it does not collide with other containers.
+**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. Manual workflows use Compose project name `strapi_complex` so they do not collide with other containers (automated `yarn test:migrations` uses `strapi_migration_v5` by default).
 
 ## Automated migration test (monorepo)
 

@@ -1,6 +1,6 @@
 # Local DB checkpoints (optional, debugging)
 
-Migration tests use a **single shared database file** (e.g. SQLite) under `examples/complex/.migration-v5/`. The runner **deletes** that state at the start of every run, so to inspect a DB after a specific step:
+Migration tests use a **single shared database file** (e.g. SQLite) under `examples/complex/.migration-v5/` (migration test fixture; see [README](README.md#test-fixture)). The runner **deletes** that state at the start of every run, so to inspect a DB after a specific step:
 
 1. Run a migration test, then **before the next run** (or in a second terminal after interrupting) copy the DB file, e.g.:
 

@@ -1,13 +1,19 @@
 # Migration integration tests
 
-End-to-end checks for **v4 (or pinned v5) seed → optional published Strapi `via` steps → always workspace** (this monorepo’s `examples/complex`).
+End-to-end checks for **v4 (or pinned v5) seed → optional published Strapi `via` steps → always workspace** on the monorepo’s migration test fixture at [`examples/complex`](../../examples/complex/README.md).
+
+## Test fixture
+
+The **Strapi app, schemas, seeds, validators, and DB tooling** live in [`examples/complex/`](../../examples/complex/README.md) (workspace name `complex`). This directory (`tests/migration/`) owns the **runner, scenarios, and CI wiring** only.
+
+The fixture path is historical; we may relocate it under `tests/migration/` later (e.g. `tests/migration/fixture/`). Until then, CI watches both trees — see [When `migration_v5` runs](#when-migration_v5-runs) and [`.github/filters.yaml`](../../.github/filters.yaml).
 
 ## Requirements
 
 - **`--initial <semver>`** — explicit starting npm version (**required** unless you pass **`--scenario`**). Final app is **always workspace**; there is no `--final` Strapi version.
 - **`--via` / `-v`** — optional repeatable pinned Strapi versions between seed and workspace.
 
-Hands-on commands and `yarn test:migrations` flags: [examples/complex/README.md — Automated migration test](../../examples/complex/README.md). CI triggers and path filters are documented **below** (not repeated in the complex README).
+Hands-on commands and `yarn test:migrations` flags: [examples/complex/README.md — Automated migration test](../../examples/complex/README.md). CI triggers and path filters are documented **below** (not repeated in the fixture README).
 
 ## Quick reference
 
