@@ -29,6 +29,7 @@ const FIELD_SCHEMA = yup.object().shape({
   description: yup.string().nullable(),
   placeholder: yup.string().nullable(),
   editable: yup.boolean(),
+  mediaField: yup.string().nullable(),
   size: yup.number().required(),
 });
 
@@ -71,6 +72,40 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                * we're editing.
                */
               if (!ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD.includes(attribute.type)) {
+                acc.push({
+                  label: key,
+                  value: key,
+                });
+              }
+
+              return acc;
+            }, []),
+          };
+        }
+      }
+
+      return { data: [] };
+    },
+    skip: attribute?.type !== 'relation',
+  });
+
+  const { data: mediaFieldOptions } = useGetInitialDataQuery(undefined, {
+    selectFromResult: (res) => {
+      if (attribute?.type !== 'relation' || !res.data) {
+        return { data: [] };
+      }
+
+      if ('targetModel' in attribute && typeof attribute.targetModel === 'string') {
+        const targetSchema = res.data.contentTypes.find(
+          (schema) => schema.uid === attribute.targetModel
+        );
+
+        if (targetSchema) {
+          return {
+            data: Object.entries(targetSchema.attributes).reduce<
+              Array<{ label: string; value: string }>
+            >((acc, [key, attribute]) => {
+              if (attribute.type === 'media') {
                 acc.push({
                   label: key,
                   value: key,
@@ -186,6 +221,29 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                 type: 'enumeration' as const,
               },
               {
+                name: 'mediaField',
+                label: formatMessage({
+                  id: getTranslation('containers.edit-settings.modal-form.mediaField'),
+                  defaultMessage: 'Entry thumbnail',
+                }),
+                hint: formatMessage({
+                  id: getTranslation('containers.edit-settings.modal-form.mediaField.hint'),
+                  defaultMessage: 'Set the media field used as thumbnail for relation items',
+                }),
+                size: 6,
+                options: [
+                  {
+                    label: formatMessage({
+                      id: 'global.none',
+                      defaultMessage: 'None',
+                    }),
+                    value: '',
+                  },
+                  ...mediaFieldOptions,
+                ],
+                type: 'enumeration' as const,
+              },
+              {
                 name: 'size',
                 label: formatMessage({
                   id: getTranslation('containers.ListSettingsView.modal-form.size'),
@@ -239,19 +297,26 @@ const filterFieldsBasedOnAttributeType = (type: Schema.Attribute.Kind) => (field
   switch (type) {
     case 'blocks':
     case 'richtext':
-      return field.name !== 'size' && field.name !== 'mainField';
+      return field.name !== 'size' && field.name !== 'mainField' && field.name !== 'mediaField';
     case 'boolean':
     case 'media':
-      return field.name !== 'placeholder' && field.name !== 'mainField';
+      return (
+        field.name !== 'placeholder' && field.name !== 'mainField' && field.name !== 'mediaField'
+      );
     case 'component':
       return field.name === 'label' || field.name === 'editable';
     case 'dynamiczone':
     case 'json':
-      return field.name !== 'placeholder' && field.name !== 'mainField' && field.name !== 'size';
+      return (
+        field.name !== 'placeholder' &&
+        field.name !== 'mainField' &&
+        field.name !== 'mediaField' &&
+        field.name !== 'size'
+      );
     case 'relation':
       return true;
     default:
-      return field.name !== 'mainField';
+      return field.name !== 'mainField' && field.name !== 'mediaField';
   }
 };
 

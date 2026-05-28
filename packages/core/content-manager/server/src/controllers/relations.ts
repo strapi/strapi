@@ -50,6 +50,20 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   return mainField;
 };
 
+const sanitizeMediaField = (model: any, mediaField: any, userAbility: any) => {
+  const attr = model.attributes?.[mediaField];
+  if (!attr || attr.type !== 'media') return null;
+
+  const permissionChecker = getService('permission-checker').create({
+    userAbility,
+    model: model.uid,
+  });
+
+  if (!permissionChecker.can.read(null, mediaField)) return null;
+
+  return mediaField;
+};
+
 /**
  *
  * All relations sent to this function should have the same status or no status
@@ -244,6 +258,20 @@ export default {
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
+    const mediaField = flow(
+      prop(`metadatas.${targetField}.edit.mediaField`),
+      (field: string | undefined) =>
+        field ? sanitizeMediaField(targetSchema, field, userAbility) : null
+    )(modelConfig);
+
+    const populateForMedia = mediaField
+      ? {
+          [mediaField]: {
+            fields: ['url', 'alternativeText', 'formats', 'width', 'height', 'mime', 'name'],
+          },
+        }
+      : undefined;
+
     const fieldsToSelect = uniq([
       mainField,
       PUBLISHED_AT_ATTRIBUTE,
@@ -262,6 +290,8 @@ export default {
       attribute,
       fieldsToSelect,
       mainField,
+      mediaField,
+      populateForMedia,
       source: { schema: sourceSchema, isLocalized: isSourceLocalized },
       target: { schema: targetSchema, isLocalized: isTargetLocalized },
       sourceSchema,
@@ -286,6 +316,7 @@ export default {
       targetField,
       fieldsToSelect,
       mainField,
+      populateForMedia,
       source: {
         schema: { uid: sourceUid, modelType: sourceModelType },
         isLocalized: isSourceLocalized,
@@ -309,6 +340,9 @@ export default {
       // cannot select other fields as the user may not have the permissions
       fields: fieldsToSelect,
       ...permissionQuery,
+      ...(populateForMedia
+        ? { populate: { ...permissionQuery.populate, ...populateForMedia } }
+        : {}),
     };
 
     // If no status is requested, we find all the draft relations and later update them
@@ -423,6 +457,7 @@ export default {
       targetField,
       fieldsToSelect,
       status,
+      populateForMedia,
       source: { schema: sourceSchema },
       target: { schema: targetSchema },
     } = await this.extractAndValidateRequestInfo(ctx, id);
@@ -482,6 +517,7 @@ export default {
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,
       filters,
+      ...(populateForMedia ? { populate: populateForMedia } : {}),
     });
 
     /**
@@ -500,6 +536,7 @@ export default {
     const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
       ...strapi.get('query-params').transform(targetUid, permissionQuery),
       ordering: 'desc',
+      ...(populateForMedia ? { populate: populateForMedia } : {}),
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority

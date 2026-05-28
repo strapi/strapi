@@ -1,4 +1,4 @@
-import { has, assoc, mapValues, prop } from 'lodash/fp';
+import { has, assoc, flow, mapValues, prop } from 'lodash/fp';
 import { getService } from '../utils';
 import { createModelConfigurationSchema, validateKind } from './validation';
 
@@ -8,6 +8,15 @@ const assocListMainField = assoc('list.mainField');
 
 const assocMainField = (metadata: any) =>
   hasEditMainField(metadata) ? assocListMainField(getEditMainField(metadata), metadata) : metadata;
+
+const hasEditMediaField = has('edit.mediaField');
+const getEditMediaField = prop('edit.mediaField');
+const assocListMediaField = assoc('list.mediaField');
+
+const assocMediaField = (metadata: any) =>
+  hasEditMediaField(metadata)
+    ? assocListMediaField(getEditMediaField(metadata), metadata)
+    : metadata;
 
 export default {
   async findContentTypes(ctx: any) {
@@ -57,7 +66,7 @@ export default {
     const confWithUpdatedMetadata = {
       ...configuration,
       metadatas: {
-        ...mapValues(assocMainField, configuration.metadatas),
+        ...mapValues(flow(assocMainField, assocMediaField), configuration.metadatas),
         documentId: {
           edit: {},
           list: {
@@ -117,7 +126,7 @@ export default {
 
     const confWithUpdatedMetadata = {
       ...newConfiguration,
-      metadatas: mapValues(assocMainField, newConfiguration.metadatas),
+      metadatas: mapValues(flow(assocMainField, assocMediaField), newConfiguration.metadatas),
     };
 
     const components = await contentTypeService.findComponentsConfigurations(contentType);

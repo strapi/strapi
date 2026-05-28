@@ -75,6 +75,25 @@ const createMetadasSchema = (schema: any) => {
 
                 return yup.string().oneOf(validAttributes.concat('id')).default('id');
               }),
+              mediaField: yup.lazy((value) => {
+                if (!value) {
+                  return yup.string().nullable();
+                }
+
+                const targetSchema = getService('content-types').findContentType(
+                  schema.attributes[key].targetModel
+                );
+
+                if (!targetSchema) {
+                  return yup.string().nullable();
+                }
+
+                const validMediaAttributes = Object.keys(targetSchema.attributes).filter(
+                  (attrKey) => targetSchema.attributes[attrKey].type === 'media'
+                );
+
+                return yup.string().oneOf(validMediaAttributes).nullable();
+              }),
             })
             .noUnknown()
             .required(),
