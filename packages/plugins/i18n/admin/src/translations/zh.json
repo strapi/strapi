@@ -35,6 +35,7 @@
   "Settings.locales.modal.edit.success": "已成功編輯地區設定",
   "Settings.locales.modal.edit.tab.label": "在 I18N 基礎和進階設定間瀏覽",
   "Settings.locales.modal.create.name.label": "地區設定顯示名稱",
+  "Settings.locales.modal.create.name.description": "地區設定將以該名稱在管理面板中顯示",
   "Settings.locales.modal.create.name.label.error": "地區設定顯示名稱不得超過 50 個字元。",
   "Settings.locales.modal.locales.label": "地區設定",
   "Settings.locales.modal.title": "設定",

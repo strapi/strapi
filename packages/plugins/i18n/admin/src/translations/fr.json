@@ -35,6 +35,7 @@
   "Settings.locales.modal.edit.success": "Locale modifiée avec succès",
   "Settings.locales.modal.edit.tab.label": "Navigation entre les paramètres de base et les paramètres avancés de l'I18N",
   "Settings.locales.modal.create.name.label": "Nom d'affichage de la locale",
+  "Settings.locales.modal.create.name.description": "La locale sera affichée sous ce nom dans le panneau d'administration.",
   "Settings.locales.modal.create.name.label.error": "Le nom d'affichage de la locale doit avoir moins de 50 caractères.",
   "Settings.locales.modal.locales.label": "Locales",
   "Settings.locales.modal.title": "Configurations",

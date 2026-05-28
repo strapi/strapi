@@ -30,6 +30,7 @@
   "Settings.locales.modal.edit.success": "该语言已完成编辑",
   "Settings.locales.modal.edit.tab.label": "将会在国际化基础设置及高级设置之前切换",
   "Settings.locales.modal.create.name.label": "语言显示名称",
+  "Settings.locales.modal.create.name.description": "管理面板中语言将会以该名显示",
   "Settings.locales.modal.create.name.label.error": "语言的显示名称不能少于50个字符",
   "Settings.locales.modal.locales.label": "语言",
   "Settings.locales.modal.title": "配置",

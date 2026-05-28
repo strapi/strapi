@@ -37,6 +37,7 @@
   "Settings.locales.modal.edit.success": "Перевод успешно отредактирован",
   "Settings.locales.modal.edit.tab.label": "Переключение между основными настройками этого плагина и расширенными настройками",
   "Settings.locales.modal.create.name.label": "Отображаемое имя перевода",
+  "Settings.locales.modal.create.name.description": "Перевод будет отображаться под этим именем в панели администратора",
   "Settings.locales.modal.create.name.label.error": "Отображаемое имя перевода может содержать не более 50 символов.",
   "Settings.locales.modal.locales.label": "Переводы",
   "Settings.locales.modal.title": "Настройки",

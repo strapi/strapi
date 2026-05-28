@@ -35,6 +35,7 @@
   "Settings.locales.modal.edit.success": "Sprogvariant redigeret",
   "Settings.locales.modal.edit.tab.label": "Navigerer mellem i18n standardindstillinger og avancerede indstillinger",
   "Settings.locales.modal.create.name.label": "Sprogvariantens visningsnavn",
+  "Settings.locales.modal.create.name.description": "Sprogvariant bliver vist under dette navn i admin panelet",
   "Settings.locales.modal.create.name.label.error": "Sprogvariantens visningsnavn skal være mindre end 50 tegn.",
   "Settings.locales.modal.locales.label": "Sprogvarianter",
   "Settings.locales.modal.title": "Konfigurationer",
