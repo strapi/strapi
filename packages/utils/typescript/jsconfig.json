@@ -4,5 +4,5 @@
     "strict": false,
     "noEmit": true
   },
-  "include": ["./lib/**/*.js", "./index.d.ts"]
+  "include": ["lib", "index.d.ts"]
 }

@@ -8,5 +8,6 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["./index.js", "./__tests__/**/*.js"]
+  "include": ["index.js", "__tests__"],
+  "exclude": ["dist"]
 }
