@@ -158,6 +158,7 @@ DATABASE_PASSWORD=${dbEnv.DATABASE_PASSWORD}
 async function prepareDockerDatabase(ctx, client) {
   const dbUtils = require(require('path').join(ctx.COMPLEX_DIR, 'scripts', 'db-utils.js'));
   const { startContainer, getContainerId, waitForPostgresReady, waitForMysqlReady } = dbUtils;
+  const env = composeEnv(ctx);
 
   if (client === 'postgres') {
     await execa(
@@ -166,10 +167,10 @@ async function prepareDockerDatabase(ctx, client) {
       {
         cwd: ctx.COMPLEX_DIR,
         stdio: 'inherit',
-        env: composeEnv(ctx),
+        env,
       }
     );
-    const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'postgres');
+    const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'postgres', env);
     if (cid) {
       waitForPostgresReady(cid);
     }
@@ -177,21 +178,21 @@ async function prepareDockerDatabase(ctx, client) {
   }
 
   if (client === 'mysql') {
-    startContainer(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mysql');
-    const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mysql');
+    startContainer(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mysql', env);
+    const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mysql', env);
     if (cid) {
       waitForMysqlReady(cid);
     }
     await execa('node', [require('path').join(ctx.COMPLEX_DIR, 'scripts', 'db-mysql.js'), 'wipe'], {
       cwd: ctx.COMPLEX_DIR,
       stdio: 'inherit',
-      env: composeEnv(ctx),
+      env,
     });
   }
 
   if (client === 'mariadb') {
-    startContainer(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mariadb');
-    const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mariadb');
+    startContainer(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mariadb', env);
+    const cid = getContainerId(ctx.DOCKER_COMPOSE_FILE, ctx.COMPLEX_DIR, 'mariadb', env);
     if (cid) {
       waitForMysqlReady(cid);
     }
@@ -201,7 +202,7 @@ async function prepareDockerDatabase(ctx, client) {
       {
         cwd: ctx.COMPLEX_DIR,
         stdio: 'inherit',
-        env: composeEnv(ctx),
+        env,
       }
     );
   }
