@@ -14,6 +14,17 @@ import type { Attribute } from '../../types';
 
 type WhereCtx = Ctx & { alias?: string; isGroupRoot?: boolean };
 
+/**
+ * Escapes special LIKE wildcard characters (%, _) in a string value
+ * so they are treated as literal characters in SQL LIKE patterns.
+ */
+const escapeLikeWildcards = (value: string): string => {
+  return value
+    .replaceAll('\\', '\\\\')
+    .replaceAll('%', '\\%')
+    .replaceAll('_', '\\_');
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
 const castValue = (value: unknown, attribute: Attribute | null) => {
@@ -327,38 +338,38 @@ const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, v
       break;
     }
     case '$startsWith': {
-      qb.where(column, 'like', `${value}%`);
+      qb.where(column, 'like', `${escapeLikeWildcards(`${value}`)}%`);
       break;
     }
     case '$startsWithi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${escapeLikeWildcards(`${value}`)}%`]);
       break;
     }
     case '$endsWith': {
-      qb.where(column, 'like', `%${value}`);
+      qb.where(column, 'like', `%${escapeLikeWildcards(`${value}`)}`);
       break;
     }
     case '$endsWithi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${escapeLikeWildcards(`${value}`)}`]);
       break;
     }
     case '$contains': {
-      qb.where(column, 'like', `%${value}%`);
+      qb.where(column, 'like', `%${escapeLikeWildcards(`${value}`)}%`);
       break;
     }
 
     case '$notContains': {
-      qb.whereNot(column, 'like', `%${value}%`);
+      qb.whereNot(column, 'like', `%${escapeLikeWildcards(`${value}`)}%`);
       break;
     }
 
     case '$containsi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${escapeLikeWildcards(`${value}`)}%`]);
       break;
     }
 
     case '$notContainsi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `%${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `%${escapeLikeWildcards(`${value}`)}%`]);
       break;
     }
 
