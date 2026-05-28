@@ -12,6 +12,10 @@ export default defineProvider({
   },
 
   async bootstrap(strapi) {
+    if (strapi.config.get('admin.serveAdminPanel') === false) {
+      return;
+    }
+
     const adminAuth = strapi.config.get<Core.Config.Admin['auth']>('admin.auth');
     const jwtSecret = adminAuth?.secret;
 
