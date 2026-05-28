@@ -583,7 +583,11 @@ jobs:
   sonarqube:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.head.repo.fork && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
+    # Dependabot PRs cannot access repository secrets (SONAR_TOKEN), so skip analysis.
+    if: >-
+      ${{ !github.event.pull_request.head.repo.fork
+      && (github.event_name != 'pull_request' || (github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'))
+      && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
     needs: [conditions, unit_back, unit_front]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
