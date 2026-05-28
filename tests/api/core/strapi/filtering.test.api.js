@@ -626,6 +626,20 @@ describe('Filtering API', () => {
         expect(res.statusCode).toBe(200);
         expect(res.body.data).toHaveLength(1);
       });
+
+      test('$containsi escapes % so it matches the literal substring', async () => {
+        const res = await filterTags({ $containsi: '100%' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+      });
+
+      test('$startsWith escapes % so it matches literally', async () => {
+        const res = await filterTags({ $startsWith: '50%' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+      });
     });
 
     // FIXME: Not working on sqlite due to https://www.sqlite.org/draft/pragma.html#pragma_case_sensitive_like
