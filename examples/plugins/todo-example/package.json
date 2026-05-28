@@ -19,8 +19,8 @@
     }
   },
   "scripts": {
-    "build": "npx @strapi/sdk-plugin@6.0.1 build",
-    "watch": "npx @strapi/sdk-plugin@6.0.1 watch",
+    "build": "strapi-plugin build",
+    "watch": "strapi-plugin watch",
     "lint": "eslint ."
   },
   "peerDependencies": {
@@ -35,6 +35,7 @@
     "styled-components": "6.4.1"
   },
   "devDependencies": {
+    "@strapi/sdk-plugin": "6.0.1",
     "@strapi/strapi": "workspace:*",
     "eslint": "8.57.1"
   },
