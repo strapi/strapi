@@ -275,7 +275,7 @@ const applyOperator = (
         qb.whereNull(column);
         break;
       }
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} = LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$ne': {
@@ -292,7 +292,7 @@ const applyOperator = (
         qb.whereNotNull(column);
         break;
       }
-      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} <> LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$gt': {
