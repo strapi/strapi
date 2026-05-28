@@ -458,6 +458,100 @@ describe('Validate visitors util', () => {
         ValidationError
       );
     });
+
+    const withDynamicZonePopulateCtx = () => {
+      const dynamicZoneModel: any = {
+        uid: 'api::withdynamiczone.withdynamiczone',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: {
+          singularName: 'withdynamiczone',
+          pluralName: 'withdynamiczones',
+          displayName: 'With Dynamic Zone',
+        },
+        options: {},
+        attributes: {
+          id: { type: 'integer' },
+          field: {
+            type: 'dynamiczone',
+            components: ['default.compo-with-other-compo', 'default.simple-compo'],
+          },
+        },
+      };
+
+      const models: Record<string, any> = {
+        'api::withdynamiczone.withdynamiczone': dynamicZoneModel,
+        'default.compo-with-other-compo': {
+          uid: 'default.compo-with-other-compo',
+          modelType: 'component',
+          info: { singularName: 'compo-with-other-compo', pluralName: 'compo-with-other-compos' },
+          options: {},
+          attributes: {
+            compo: { type: 'component', component: 'default.simple-compo' },
+          },
+        },
+        'default.simple-compo': {
+          uid: 'default.simple-compo',
+          modelType: 'component',
+          info: { singularName: 'simple-compo', pluralName: 'simple-compos' },
+          options: {},
+          attributes: {
+            name: { type: 'string' },
+          },
+        },
+      };
+
+      return {
+        schema: dynamicZoneModel,
+        getModel: (uid: string) => models[uid],
+      };
+    };
+
+    test.each([
+      ['dot-notation nested component path', ['field.compo']],
+      ['dot-notation shallow dynamic zone', ['field']],
+      ['wildcard nested populate object', { field: { populate: '*' } }],
+      ['populate array mixing shallow and nested paths', ['field', 'field.compo']],
+    ])('allows valid dynamic zone populate: %s', async (_label, populate) => {
+      const ctx: any = withDynamicZonePopulateCtx();
+
+      await expect(validators.defaultValidatePopulate(ctx, populate)).resolves.toBeDefined();
+    });
+
+    test('allows dot-notation shallow populate on morphToOne', async () => {
+      const morphHostModel: any = {
+        uid: 'api::host.host',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: { singularName: 'host', pluralName: 'hosts', displayName: 'Host' },
+        options: {},
+        attributes: {
+          id: { type: 'integer' },
+          morphLink: {
+            type: 'relation',
+            relation: 'morphToOne',
+            target: 'api::target.target',
+          },
+        },
+      };
+
+      const ctxMorph: any = {
+        schema: morphHostModel,
+        getModel: (uid: string) =>
+          uid === 'api::host.host'
+            ? morphHostModel
+            : {
+                uid: 'api::target.target',
+                modelType: 'contentType',
+                kind: 'collectionType',
+                attributes: { id: { type: 'integer' } },
+              },
+      };
+
+      await expect(
+        validators.defaultValidatePopulate(ctxMorph, ['morphLink'])
+      ).resolves.toBeDefined();
+    });
   });
 
   describe('throwRestrictedRelations', () => {

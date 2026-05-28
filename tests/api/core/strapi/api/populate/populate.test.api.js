@@ -300,6 +300,18 @@ describe('Populate', () => {
       expect(body.data).toHaveLength(3);
     });
 
+    test.each([
+      ['morphToMany', ['morph_to_many']],
+      ['morphToOne', ['morph_to_one']],
+    ])('%s accepts dot-notation populate array (regression)', async (_label, populate) => {
+      const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, {
+        qs: { populate },
+      });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(3);
+    });
+
     test('non-polymorphic relation still accepts nested populate object (regression)', async () => {
       const qs = {
         populate: {

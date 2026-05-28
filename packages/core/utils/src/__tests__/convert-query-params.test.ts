@@ -347,6 +347,14 @@ describe('convert-query-params', () => {
           transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
         ).toThrowError(invalidPolymorphicNestedPopulateMessage);
       });
+
+      test('array populate strings stay arrays (dot notation for dynamic zone)', () => {
+        const populate = ['dz', 'dz.field'];
+
+        expect(
+          transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
+        ).toStrictEqual(['dz', 'dz.field']);
+      });
     });
   });
 

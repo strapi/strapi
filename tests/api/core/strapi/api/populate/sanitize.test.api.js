@@ -261,6 +261,61 @@ describe('Sanitize populated entries', () => {
       expect(status).toBe(200);
     });
 
+    test('accepts dz with shallow dot-notation populate array', async () => {
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.b.pluralName}`,
+        {
+          qs: {
+            populate: ['dz'],
+          },
+        }
+      );
+
+      expect(status).toBe(200);
+      expect(body.data[0].dz).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ __component: 'default.cp-a', name: 'cp_two' }),
+          expect.objectContaining({ __component: 'default.cp-b', title: 'cp_three' }),
+        ])
+      );
+    });
+
+    test('accepts dz with nested dot-notation populate array', async () => {
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.b.pluralName}`,
+        {
+          qs: {
+            populate: ['dz.name'],
+          },
+        }
+      );
+
+      expect(status).toBe(200);
+      expect(body.data[0].dz).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ __component: 'default.cp-a', name: 'cp_two' }),
+        ])
+      );
+    });
+
+    test('accepts dz with mixed dot-notation populate paths', async () => {
+      const { status, body } = await contentAPIRequest.get(
+        `/${schemas.contentTypes.b.pluralName}`,
+        {
+          qs: {
+            populate: ['dz', 'dz.name'],
+          },
+        }
+      );
+
+      expect(status).toBe(200);
+      expect(body.data[0].dz).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ __component: 'default.cp-a', name: 'cp_two' }),
+        ])
+      );
+    });
+
     test('rejects dz with invalid nested populate string (400)', async () => {
       const { status, body } = await contentAPIRequest.get(
         `/${schemas.contentTypes.b.pluralName}`,
