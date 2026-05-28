@@ -69,6 +69,7 @@ export interface Config {
     cache?: boolean;
     concurrency?: number;
   };
+  concurrentUploadSize?: number;
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {
