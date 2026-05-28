@@ -9,6 +9,7 @@ import wrapWithRateLimit from './rate-limiter';
 import createSender from './sender';
 import createMiddleware from './middleware';
 import isTruthy from './is-truthy';
+import { MCP_LIMITED_TELEMETRY_EVENTS } from '../mcp/metrics/metrics';
 
 const LIMITED_EVENTS = [
   'didSaveMediaWithAlternativeText',
@@ -16,6 +17,7 @@ const LIMITED_EVENTS = [
   'didDisableResponsiveDimensions',
   'didEnableResponsiveDimensions',
   'didInitializePluginUpload',
+  ...Object.values(MCP_LIMITED_TELEMETRY_EVENTS),
 ];
 
 const createTelemetryInstance = (strapi: Core.Strapi) => {
