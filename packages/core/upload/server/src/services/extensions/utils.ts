@@ -26,12 +26,14 @@ function isFile(value: unknown, attribute: Schema.Attribute.AnyAttribute): value
   return true;
 }
 
-/**
- * Matches URLs from the upload provider in text content.
- * Looks for URLs pointing to the /uploads/ path which is Strapi's default
- * upload path, or URLs matching the configured provider's base URL.
- */
-const UPLOAD_URL_REGEX = /(https?:\/\/[^\s"'<>)]+\/uploads\/[^\s"'<>)]+)/g;
+// Richtext can embed upload URLs as markdown images, markdown links, or HTML
+// img/anchor tags. Capturing all four is provider-agnostic — works for local
+// /uploads/, S3 buckets, MinIO, or any custom endpoint. The DB lookup below
+// filters out URLs that don't correspond to a tracked file.
+const MARKDOWN_IMG_REGEX = /!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/g;
+const MARKDOWN_LINK_REGEX = /(?<!!)\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/g;
+const HTML_IMG_SRC_REGEX = /<img[^>]+src=["'](https?:\/\/[^"']+)["']/gi;
+const HTML_ANCHOR_HREF_REGEX = /<a[^>]+href=["'](https?:\/\/[^"']+)["']/gi;
 
 /**
  * Re-signs upload provider URLs found within text/richtext/blocks content.
@@ -46,9 +48,15 @@ const signUrlsInText = async (text: string): Promise<string> => {
     return text;
   }
 
-  // Find all URLs in the text that could be from the upload provider
-  const urls = text.match(UPLOAD_URL_REGEX);
-  if (!urls || urls.length === 0) {
+  // Extract candidate URLs from markdown and HTML embeds; the DB lookup below
+  // filters out anything that isn't actually an uploaded file.
+  const urls = [
+    ...Array.from(text.matchAll(MARKDOWN_IMG_REGEX), (m) => m[1]),
+    ...Array.from(text.matchAll(MARKDOWN_LINK_REGEX), (m) => m[1]),
+    ...Array.from(text.matchAll(HTML_IMG_SRC_REGEX), (m) => m[1]),
+    ...Array.from(text.matchAll(HTML_ANCHOR_HREF_REGEX), (m) => m[1]),
+  ];
+  if (urls.length === 0) {
     return text;
   }
 
@@ -83,7 +91,7 @@ const signUrlsInText = async (text: string): Promise<string> => {
         // Replace all occurrences of this URL (including any old signed params)
         // Match the base path portion and replace including any query string
         const escapedBase = baseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const urlPattern = new RegExp(escapedBase + '(\\?[^\\s"\'<>)]*)?', 'g');
+        const urlPattern = new RegExp(`${escapedBase}(\\?[^\\s"'<>)]*)?`, 'g');
         result = result.replace(urlPattern, signedUrl.url);
       }
     } catch {
@@ -139,7 +147,7 @@ const signUrlsInBlocks = async (blocks: any[]): Promise<any[]> => {
 
 /**
  * Visitor function to sign media URLs in entity attributes.
- * Handles media fields, richtext/text fields with embedded URLs,
+ * Handles media fields, richtext fields with embedded image URLs,
  * and blocks fields with image nodes.
  */
 const signEntityMediaVisitor: SignEntityMediaVisitor = async (
@@ -167,12 +175,8 @@ const signEntityMediaVisitor: SignEntityMediaVisitor = async (
     return;
   }
 
-  // Handle richtext and text attributes — re-sign embedded upload URLs
-  if (
-    (attribute.type === 'richtext' || attribute.type === 'text') &&
-    typeof value === 'string' &&
-    value.length > 0
-  ) {
+  // Handle richtext attributes — re-sign embedded upload URLs in markdown/HTML
+  if (attribute.type === 'richtext' && typeof value === 'string' && value.length > 0) {
     const signedText = await signUrlsInText(value);
     if (signedText !== value) {
       set(key, signedText);
