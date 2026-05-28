@@ -31,7 +31,7 @@ import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { styled } from 'styled-components';
+import { createGlobalStyle, styled } from 'styled-components';
 
 import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
@@ -677,6 +677,16 @@ interface RelationModalWithContextProps
   >;
 }
 
+const RelationComboboxListboxStyle = createGlobalStyle`
+  body[data-cm-relation-combobox-open='true'] [role='listbox'] {
+    max-height: min(28rem, 60vh) !important;
+  }
+
+  body[data-cm-relation-combobox-open='true'] [data-radix-combobox-viewport] {
+    max-height: min(28rem, 60vh) !important;
+  }
+`;
+
 const RelationModalWithContext = ({
   relation,
   name,
@@ -692,6 +702,7 @@ const RelationModalWithContext = ({
   ...props
 }: RelationModalWithContextProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
+  const [isComboboxOpen, setIsComboboxOpen] = React.useState(false);
   const { formatMessage } = useIntl();
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
@@ -714,84 +725,104 @@ const RelationModalWithContext = ({
   const handleSearch = async (search: string) => {
     setSearchParams((s) => ({ ...s, _q: search, page: 1 }));
   };
+
+  React.useEffect(() => {
+    if (!isComboboxOpen) {
+      delete document.body.dataset.cmRelationComboboxOpen;
+      return;
+    }
+
+    document.body.dataset.cmRelationComboboxOpen = 'true';
+
+    return () => {
+      delete document.body.dataset.cmRelationComboboxOpen;
+    };
+  }, [isComboboxOpen]);
+
   return (
     <RelationModalRenderer>
       {({ dispatch }) => (
-        <Combobox
-          ref={fieldRef}
-          creatable="visible"
-          creatableDisabled={!canCreate}
-          createMessage={() =>
-            formatMessage({
-              id: getTranslation('relation.create'),
-              defaultMessage: 'Create a relation',
-            })
-          }
-          onCreateOption={() => {
-            if (canCreate) {
-              dispatch({
-                type: 'GO_TO_RELATION',
-                payload: {
-                  document: relation,
-                  shouldBypassConfirmation: false,
-                  fieldToConnect: name,
-                  fieldToConnectUID: componentUID,
-                },
-              });
+        <>
+          <RelationComboboxListboxStyle />
+          <Combobox
+            ref={fieldRef}
+            creatable="visible"
+            creatableDisabled={!canCreate}
+            createMessage={() =>
+              formatMessage({
+                id: getTranslation('relation.create'),
+                defaultMessage: 'Create a relation',
+              })
             }
-          }}
-          creatableStartIcon={<Plus fill="neutral500" />}
-          name={name}
-          autocomplete={{ type: 'list', filter: 'contains' }}
-          placeholder={
-            placeholder ||
-            formatMessage({
-              id: getTranslation('relation.add'),
-              defaultMessage: 'Add relation',
-            })
-          }
-          hasMoreItems={hasNextPage}
-          loading={isLoadingSearchRelations || isLoadingPermissions}
-          onOpenChange={() => {
-            handleSearch(textValue ?? '');
-          }}
-          noOptionsMessage={() =>
-            formatMessage({
-              id: getTranslation('relation.notAvailable'),
-              defaultMessage: 'No relations available',
-            })
-          }
-          loadingMessage={formatMessage({
-            id: getTranslation('relation.isLoading'),
-            defaultMessage: 'Relations are loading',
-          })}
-          onLoadMore={handleLoadMore}
-          textValue={textValue}
-          onChange={handleChange}
-          onTextValueChange={(text) => {
-            setTextValue(text);
-          }}
-          onInputChange={(event) => {
-            handleSearch(event.currentTarget.value);
-          }}
-          {...props}
-        >
-          {options?.map((opt) => {
-            const textValue = getRelationLabel(opt, mainField);
+            onCreateOption={() => {
+              if (canCreate) {
+                dispatch({
+                  type: 'GO_TO_RELATION',
+                  payload: {
+                    document: relation,
+                    shouldBypassConfirmation: false,
+                    fieldToConnect: name,
+                    fieldToConnectUID: componentUID,
+                  },
+                });
+              }
+            }}
+            creatableStartIcon={<Plus fill="neutral500" />}
+            name={name}
+            autocomplete={{ type: 'list', filter: 'contains' }}
+            placeholder={
+              placeholder ||
+              formatMessage({
+                id: getTranslation('relation.add'),
+                defaultMessage: 'Add relation',
+              })
+            }
+            hasMoreItems={hasNextPage}
+            loading={isLoadingSearchRelations || isLoadingPermissions}
+            onOpenChange={(open) => {
+              setIsComboboxOpen(open);
+              if (open) {
+                handleSearch(textValue ?? '');
+              }
+            }}
+            noOptionsMessage={() =>
+              formatMessage({
+                id: getTranslation('relation.notAvailable'),
+                defaultMessage: 'No relations available',
+              })
+            }
+            loadingMessage={formatMessage({
+              id: getTranslation('relation.isLoading'),
+              defaultMessage: 'Relations are loading',
+            })}
+            onLoadMore={handleLoadMore}
+            textValue={textValue}
+            onChange={handleChange}
+            onTextValueChange={(text) => {
+              setTextValue(text);
+            }}
+            onInputChange={(event) => {
+              handleSearch(event.currentTarget.value);
+            }}
+            {...props}
+          >
+            {options?.map((opt) => {
+              const textValue = getRelationLabel(opt, mainField);
 
-            return (
-              <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
-                <Flex gap={2} justifyContent="space-between">
-                  <Flex gap={2}>
-                    <LinkIcon fill="neutral500" />
-                    <Typography ellipsis>{textValue}</Typography>
+              return (
+                <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
+                  <Flex gap={2} justifyContent="space-between">
+                    <Flex gap={2}>
+                      <LinkIcon fill="neutral500" />
+                      <Typography ellipsis>{textValue}</Typography>
+                    </Flex>
+                    {opt.status ? <DocumentStatus status={opt.status} /> : null}
                   </Flex>
-                  {opt.status ? <DocumentStatus status={opt.status} /> : null}
-                </Flex>
-              </ComboboxOption>
-            );
-          })}
-        </Combobox>
+                </ComboboxOption>
+              );
+            })}
+          </Combobox>
+        </>
       )}
     </RelationModalRenderer>
   );
