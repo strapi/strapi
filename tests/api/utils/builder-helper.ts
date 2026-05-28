@@ -70,7 +70,15 @@ export const createTestSetup = async (
   };
 };
 
-export const destroyTestSetup = async ({ strapi, builder }) => {
+export type DestroyTestSetupOptions = {
+  /** Passed to `builder.cleanup()`; golden restore is on by default (`API_TEST_GOLDEN_RESTORE=0` to disable). */
+  useGoldenRestore?: boolean;
+};
+
+export const destroyTestSetup = async (
+  { strapi, builder },
+  options: DestroyTestSetupOptions = {}
+) => {
   await strapi.destroy();
-  await builder.cleanup();
+  await builder.cleanup({ useGoldenRestore: options.useGoldenRestore });
 };

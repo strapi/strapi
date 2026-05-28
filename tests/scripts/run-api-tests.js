@@ -1,15 +1,28 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
 
 process.env.NODE_ENV = 'test';
 
+// Fast teardown via golden snapshot (sqlite, postgres, mysql). Set API_TEST_GOLDEN_RESTORE=0 for legacy CTB cleanup.
+if (process.env.API_TEST_GOLDEN_RESTORE == null) {
+  process.env.API_TEST_GOLDEN_RESTORE = '1';
+}
+
 const appPath = 'test-apps/api';
 process.env.ENV_PATH = path.resolve(__dirname, '../..', appPath, '.env');
 
 const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
+const {
+  captureGoldenSnapshot,
+  goldenSnapshotExists,
+  isGoldenRestoreEnabled,
+  isGoldenRestoreSupported,
+} = require('../../packages/utils/api-tests/golden-snapshot');
+const { createStrapiInstance } = require('../../packages/utils/api-tests/strapi');
 
 const databases = {
   postgres: {
@@ -64,6 +77,7 @@ const runAllTests = async (args) => {
       JWT_SECRET: 'aSecret',
       STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE: 'true',
       NODE_OPTIONS: nodeOptions,
+      API_TEST_GOLDEN_RESTORE: process.env.API_TEST_GOLDEN_RESTORE,
     },
   });
 };
@@ -73,6 +87,31 @@ const main = async ({ database, generateApp }, args) => {
     if (generateApp) {
       await cleanTestApp(appPath);
       await generateTestApp({ appPath, database });
+    }
+
+    if (isGoldenRestoreEnabled()) {
+      const envPath = path.resolve(__dirname, '../..', appPath, '.env');
+      if (!fs.existsSync(envPath)) {
+        throw new Error(
+          'API_TEST_GOLDEN_RESTORE=1 requires a generated test app at test-apps/api. Run with --generate-app (default) or generate the app first.'
+        );
+      }
+      const appDir = path.resolve(__dirname, '../..', appPath);
+
+      if (!isGoldenRestoreSupported(appDir)) {
+        throw new Error(
+          'API_TEST_GOLDEN_RESTORE=1 requires DATABASE_CLIENT sqlite, postgres, or mysql in the test app .env'
+        );
+      }
+
+      if (generateApp || !goldenSnapshotExists()) {
+        // Migrations run on first boot; capture after bootstrap for every database client.
+        process.env.JWT_SECRET = process.env.JWT_SECRET || 'aSecret';
+        const strapi = await createStrapiInstance({ logLevel: 'error' });
+        const { goldenDir, client } = await captureGoldenSnapshot({ strapi });
+        await strapi.destroy();
+        console.log(`[api-tests] golden snapshot captured at ${goldenDir} (${client})`);
+      }
     }
 
     await runAllTests(args).catch(() => {
