@@ -490,7 +490,9 @@
   "app.components.ToggleCheckbox.enabled-label": "Aktiviert",
   "app.components.ToggleCheckbox.disabled-label": "Deaktiviert",
   "app.components.UpsellBanner.button": "Jetzt upgraden",
+  "app.components.UpsellBanner.close": "Das Banner schließen.",
   "app.components.UpsellBanner.intro": "Zugang zu Growth-Plan-Features: ",
+  "app.components.UpsellBanner.reopen": "Das Banner erneut öffnen.",
   "app.components.UpsellBanner.text": "Als Teil deiner Testphase kannst du Premium-Tools wie Inhalts-Historie, Releases und Single Sign-On (SSO) erkunden.",
   "app.components.Users.MagicLink.connect": "Diesen Link dem Benutzer zum Registrieren schicken.",
   "app.components.Users.MagicLink.connect.sso": "Sende dem Benutzer diesen Link, das erste Login kann über einen SSO-Anbeiter gemacht werden",
@@ -842,5 +844,8 @@
   "HomePage.addWidget.noWidgetsAvailable": "Keine Widgets zum Hinzufügen verfügbar",
   "HomePage.addWidget.button": "Widget hinzufügen",
   "HomePage.widget.delete": "Löschen",
-  "HomePage.widget.drag": "Ziehen zum Verschieben"
+  "HomePage.widget.drag": "Ziehen zum Verschieben",
+  "HomePage.widget.deploy-now.title": "Bereit zum Veröffentlichen?",
+  "HomePage.widget.deploy-now.description": "Stellen Sie Ihr Projekt bereit.",
+  "HomePage.widget.deploy-now.button": "Jetzt deployen"
 }

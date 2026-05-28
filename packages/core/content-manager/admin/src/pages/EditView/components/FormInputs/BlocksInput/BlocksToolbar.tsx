@@ -24,6 +24,7 @@ import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolb
 import { insertLink } from './Blocks/Link';
 import {
   type BlocksStore,
+  type SelectorBlock,
   type SelectorBlockKey,
   isSelectorBlockKey,
   useBlocksEditorContext,
@@ -129,7 +130,7 @@ function useConversionModal() {
 }
 
 interface ToolbarButtonProps {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   name: string;
   label: MessageDescriptor;
   isActive: boolean;
@@ -176,7 +177,7 @@ const ToolbarButton = ({
           hasRadius
           type="button"
         >
-          <Icon fill={disabled ? 'neutral300' : enabledColor} />
+          {Icon && <Icon fill={disabled ? 'neutral300' : enabledColor} />}
         </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>
@@ -189,18 +190,17 @@ const BlocksDropdown = () => {
   const { modalElement, handleConversionResult } = useConversionModal();
   const isMobile = useIsMobile();
 
-  const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
-    ReturnType<typeof getEntries>
-  >((currentKeys, entry) => {
-    const [key, block] = entry;
+  const blockKeysToInclude: string[] = getEntries(blocks).reduce<string[]>(
+    (currentKeys, [key, block]) => {
+      return block?.isInBlocksSelector ? [...currentKeys, key] : currentKeys;
+    },
+    []
+  );
 
-    return block.isInBlocksSelector ? [...currentKeys, key] : currentKeys;
-  }, []);
-
-  const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
+  const [blockSelected, setBlockSelected] = React.useState<string>('paragraph');
 
   const handleSelect = (optionKey: unknown) => {
-    if (!isSelectorBlockKey(optionKey)) {
+    if (typeof optionKey !== 'string' || !blocks[optionKey]) {
       return;
     }
 
@@ -246,7 +246,7 @@ const BlocksDropdown = () => {
     }
 
     // Let the block handle the Slate conversion logic
-    const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
+    const maybeRenderModal = blocks[optionKey]?.handleConvert?.(editor);
     handleConversionResult(maybeRenderModal);
 
     setBlockSelected(optionKey);
@@ -301,25 +301,37 @@ const BlocksDropdown = () => {
 
       // Find the block key that matches the anchor node
       const anchorBlockKey = getKeys(blocks).find(
-        (blockKey) => !Editor.isEditor(selectedNode) && blocks[blockKey].matchNode(selectedNode)
+        (blockKey) => !Editor.isEditor(selectedNode) && blocks[blockKey]?.matchNode(selectedNode)
       );
 
       // Change the value selected in the dropdown if it doesn't match the anchor block key
       if (anchorBlockKey && anchorBlockKey !== blockSelected) {
-        setBlockSelected(anchorBlockKey as SelectorBlockKey);
+        setBlockSelected(anchorBlockKey);
       }
     }
   }, [editor.selection, editor, blocks, blockSelected]);
 
-  const Icon = blocks[blockSelected].icon;
+  React.useEffect(() => {
+    // If the selected block is not in the list of blocks to include, change the selected block to the first one
+    if (blockKeysToInclude.length > 0 && !blockKeysToInclude.includes(blockSelected)) {
+      setBlockSelected(blockKeysToInclude[0]);
+    }
+  }, [blockKeysToInclude, blockSelected]);
+
+  if (!blocks[blockSelected]) {
+    return null;
+  }
+
+  const selectedBlock = blocks[blockSelected] as SelectorBlock;
+  const Icon = selectedBlock.icon;
 
   return (
     <>
       <SelectWrapper>
         <SingleSelect
-          startIcon={<Icon />}
+          startIcon={Icon && <Icon />}
           onChange={handleSelect}
-          customizeContent={() => (isMobile ? '' : formatMessage(blocks[blockSelected].label))}
+          customizeContent={() => (isMobile ? '' : formatMessage(selectedBlock.label))}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
           aria-label={formatMessage({
@@ -328,15 +340,18 @@ const BlocksDropdown = () => {
           })}
           disabled={disabled}
         >
-          {blockKeysToInclude.map((key) => (
-            <BlockOption
-              key={key}
-              value={key}
-              label={blocks[key].label}
-              icon={blocks[key].icon}
-              blockSelected={blockSelected}
-            />
-          ))}
+          {blockKeysToInclude.map((key) => {
+            const selectorBlock = blocks[key] as SelectorBlock;
+            return (
+              <BlockOption
+                key={key}
+                value={key}
+                label={selectorBlock.label}
+                icon={selectorBlock.icon}
+                blockSelected={blockSelected}
+              />
+            );
+          })}
         </SingleSelect>
       </SelectWrapper>
       {modalElement}
@@ -346,7 +361,7 @@ const BlocksDropdown = () => {
 
 interface BlockOptionProps {
   value: string;
-  icon: React.ComponentType<React.SVGProps<SVGElement>>;
+  icon?: React.ComponentType<React.SVGProps<SVGElement>>;
   label: MessageDescriptor;
   blockSelected: string;
 }
@@ -358,7 +373,7 @@ const BlockOption = ({ value, icon: Icon, label, blockSelected }: BlockOptionPro
 
   return (
     <SingleSelectOption
-      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral500'} />}
+      startIcon={Icon && <Icon fill={isSelected ? 'primary600' : 'neutral500'} />}
       value={value}
     >
       {formatMessage(label)}
@@ -448,7 +463,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
 
     if (!currentListEntry) {
       // If selection is not a list then convert it to list
-      blocks[`list-${format}`].handleConvert!(editor);
+      blocks[`list-${format}`]?.handleConvert!(editor);
       return;
     }
 
@@ -461,7 +476,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
         Transforms.setNodes(editor, { format }, { at: currentListPath });
       } else {
         // Format is same, convert selected list-item to paragraph
-        blocks['paragraph'].handleConvert!(editor);
+        blocks['paragraph']?.handleConvert!(editor);
       }
     }
   };
@@ -471,7 +486,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
 
     return (
       <StyledMenuItem
-        startIcon={<Icon />}
+        startIcon={Icon && <Icon />}
         onSelect={() => toggleList(format)}
         isActive={isListActive()}
         disabled={isListDisabled()}
@@ -809,8 +824,8 @@ const BlocksToolbar = () => {
           <ToolbarSeparator style={{ marginLeft: '0.4rem' }} />
           <Toolbar.ToggleGroup type="single" asChild>
             <Flex gap={1}>
-              <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
-              <ListButton block={blocks['list-ordered']} format="ordered" location="toolbar" />
+              <ListButton block={blocks['list-unordered']!} format="unordered" location="toolbar" />
+              <ListButton block={blocks['list-ordered']!} format="ordered" location="toolbar" />
             </Flex>
           </Toolbar.ToggleGroup>
         </Flex>
@@ -818,8 +833,8 @@ const BlocksToolbar = () => {
       menu: (
         <>
           <Menu.Separator />
-          <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
-          <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
+          <ListButton block={blocks['list-unordered']!} format="unordered" location="menu" />
+          <ListButton block={blocks['list-ordered']!} format="ordered" location="menu" />
         </>
       ),
       key: 'block.list',
