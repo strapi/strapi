@@ -7,6 +7,7 @@
  * - {@link ./seed-media.js} — programmatic seed + CLI shim target
  * - {@link ./timeouts.js} — runner / Jest timeouts (also required directly from cli-runner)
  * - {@link ./constants.js} — shared seed filename prefix
+ * - {@link ./stop-remote-process.js} — reliable teardown for background remote Strapi
  */
 
 const path = require('path');
@@ -14,6 +15,7 @@ const path = require('path');
 const { countUploadFiles, getSeedUploadSignature } = require('./upload-db');
 const { seedTransferTestMedia } = require('./seed-media');
 const { getRemotePort, waitForHttpOk } = require('./http');
+const { stopRemoteStrapiProcess } = require('./stop-remote-process');
 const timeouts = require('./timeouts');
 
 const REPO_ROOT = path.join(__dirname, '..', '..', '..');
@@ -24,6 +26,7 @@ module.exports = {
   APP_TEMPLATE_CONSTANTS,
   getRemotePort,
   waitForHttpOk,
+  stopRemoteStrapiProcess,
   countUploadFiles,
   getSeedUploadSignature,
   seedTransferTestMedia,

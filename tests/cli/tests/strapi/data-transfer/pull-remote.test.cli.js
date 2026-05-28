@@ -23,6 +23,7 @@ const {
   getSeedUploadSignature,
   jestSuiteTimeoutMs,
   seedTransferTestMedia,
+  stopRemoteStrapiProcess,
   waitForHttpOk,
 } = require('../../../../utils/cli-transfer-remote-e2e');
 // eslint-disable-next-line import/extensions
@@ -80,13 +81,7 @@ describe('strapi transfer pull — remote to local (generated media)', () => {
   });
 
   afterAll(async () => {
-    if (remoteChild && !remoteChild.killed) {
-      remoteChild.kill('SIGTERM');
-      await new Promise((r) => setTimeout(r, 2000));
-      if (!remoteChild.killed) {
-        remoteChild.kill('SIGKILL');
-      }
-    }
+    await stopRemoteStrapiProcess(remoteChild);
   });
 
   it('pulls upload files from remote (counts + Strapi content hashes match)', async () => {
