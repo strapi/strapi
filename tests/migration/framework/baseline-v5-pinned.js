@@ -55,6 +55,10 @@ async function runV5PinnedBaseline(ctx, opts) {
     path.join(ctx.COMPLEX_DIR, 'scripts', 'seed-v5.js'),
     path.join(scriptsDir, 'seed-v5.js')
   );
+  fs.copyFileSync(
+    path.join(ctx.COMPLEX_DIR, 'scripts', 'require-fixture.js'),
+    path.join(scriptsDir, 'require-fixture.js')
+  );
 
   console.log(`\n🌱 Seeding (seed-v5.js) against Strapi ${initialVersion}...`);
   await execa('node', [path.join('scripts', 'seed-v5.js')], {

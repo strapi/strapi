@@ -9,98 +9,16 @@ const os = require('os');
 // CONFIGURATION
 // ============================================================================
 
-const BASE_COUNTS = {
-  basic: 5,
-  basicDp: { published: 3, drafts: 2 },
-  basicDpI18n: { published: 3, drafts: 2 },
-  relation: 5,
-  relationDp: { published: 5, drafts: 3 },
-  relationDpI18n: { published: 5, drafts: 3 },
-  /** Upload plugin `files` rows — required so v5 internal migration 5.0.0-02 exercises the files table */
-  mediaFiles: 10,
-  // Anti-pattern: high-cardinality M2M. At m=100 this produces ~2000 sources
-  // × ~2000 targets, crossing the 1000-row chunk boundary in v4→v5 migrations
-  // so cross-chunk code paths actually get exercised. Keep targets per source
-  // modest (10) to avoid quadratic blow-up on disk.
-  hcM2mSource: { published: 15, drafts: 5 },
-  hcM2mTarget: { published: 15, drafts: 5 },
-  hcM2mTargetsPerSource: 10,
-};
+const { requireFixture } = require('./require-fixture');
+const spec = requireFixture('spec');
+const { getSeedCountsForProfile } = requireFixture('derive-expectations');
+const { parseMultiplier } = requireFixture('resolve-context');
 
-function parseCliArgs(argv) {
-  const opts = { multiplier: 1 };
-
-  for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i];
-    if (arg === '--multiplier' && argv[i + 1] != null) {
-      opts.multiplier = Number(argv[i + 1]);
-      i += 1;
-      continue;
-    }
-
-    if (arg?.startsWith('--multiplier=')) {
-      opts.multiplier = Number(arg.split('=')[1]);
-      continue;
-    }
-
-    if (!Number.isNaN(Number(arg))) {
-      opts.multiplier = Number(arg);
-    }
-  }
-
-  const envMultiplier = process.env.SEED_MULTIPLIER;
-  if (!Number.isNaN(Number(envMultiplier))) {
-    opts.multiplier = Number(envMultiplier);
-  }
-
-  if (!Number.isFinite(opts.multiplier) || opts.multiplier <= 0) {
-    opts.multiplier = 1;
-  }
-
-  return opts;
-}
-
-function applyMultiplierToCounts(base, multiplier) {
-  const m = Number(multiplier) || 1;
-  return {
-    basic: base.basic * m,
-    basicDp: {
-      published: base.basicDp.published * m,
-      drafts: base.basicDp.drafts * m,
-    },
-    basicDpI18n: {
-      published: base.basicDpI18n.published * m,
-      drafts: base.basicDpI18n.drafts * m,
-    },
-    relation: base.relation * m,
-    relationDp: {
-      published: base.relationDp.published * m,
-      drafts: base.relationDp.drafts * m,
-    },
-    relationDpI18n: {
-      published: base.relationDpI18n.published * m,
-      drafts: base.relationDpI18n.drafts * m,
-    },
-    mediaFiles: base.mediaFiles * m,
-    hcM2mSource: {
-      published: base.hcM2mSource.published * m,
-      drafts: base.hcM2mSource.drafts * m,
-    },
-    hcM2mTarget: {
-      published: base.hcM2mTarget.published * m,
-      drafts: base.hcM2mTarget.drafts * m,
-    },
-    // Targets-per-source is intentionally NOT multiplied — it stays a constant
-    // fan-out so the total join-row count scales with the source count only.
-    hcM2mTargetsPerSource: base.hcM2mTargetsPerSource,
-  };
-}
-
-const { multiplier } = parseCliArgs(process.argv.slice(2));
+const multiplier = parseMultiplier(process.argv.slice(2));
 
 const CONFIG = {
-  counts: applyMultiplierToCounts(BASE_COUNTS, multiplier),
-  locales: ['en', 'fr'],
+  counts: getSeedCountsForProfile(spec, { profile: 'v4', multiplier }),
+  locales: spec.locales,
 };
 
 // ============================================================================
@@ -595,16 +513,15 @@ class ContentSeeder {
       }
     });
 
-    // Add self-references (parallelizable — each entry's update is independent).
-    await concurrentMap(entries.length, SEED_CONCURRENCY, async (i) => {
-      const entry = entries[i];
+    // Self-relations touch the same join row from both sides; keep serial to avoid MySQL deadlocks.
+    for (const entry of entries) {
       await this.strapi.entityService.update('api::relation.relation', entry.id, {
         data: {
           selfOne: entry.id,
           selfMany: [entry.id],
         },
       });
-    });
+    }
 
     this.results.relation = entries;
     return entries;
@@ -736,17 +653,16 @@ class ContentSeeder {
       }
     );
 
-    // Add self-references (each entry's update is independent, parallelizable).
+    // Self-relations touch the same join row from both sides; keep serial to avoid MySQL deadlocks.
     const allEntries = [...published, ...drafts];
-    await concurrentMap(allEntries.length, SEED_CONCURRENCY, async (i) => {
-      const entry = allEntries[i];
+    for (const entry of allEntries) {
       await this.strapi.entityService.update('api::relation-dp.relation-dp', entry.id, {
         data: {
           selfOne: entry.id,
           selfMany: [entry.id],
         },
       });
-    });
+    }
 
     // Add nested component with relations (reference-list -> references -> article) to first published entry for migration test
     if (published.length >= 2) {
@@ -878,8 +794,7 @@ class ContentSeeder {
     }
 
     const allEntries = [...published, ...drafts];
-    await concurrentMap(allEntries.length, SEED_CONCURRENCY, async (i) => {
-      const entry = allEntries[i];
+    for (const entry of allEntries) {
       await this.strapi.entityService.update('api::relation-dp-i18n.relation-dp-i18n', entry.id, {
         data: {
           selfOne: entry.id,
@@ -887,7 +802,7 @@ class ContentSeeder {
         },
         locale: entry.locale,
       });
-    });
+    }
 
     this.results.relationDpI18n = { published, drafts, all: [...published, ...drafts] };
     return this.results.relationDpI18n;

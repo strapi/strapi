@@ -567,6 +567,10 @@ console.log('✅ Created database development scripts');
 const seedScriptSource = path.join(SCRIPT_DIR, 'seed-v4.js');
 const seedScriptDest = path.join(v4ScriptsDir, 'seed.js');
 fs.copyFileSync(seedScriptSource, seedScriptDest);
+fs.copyFileSync(
+  path.join(SCRIPT_DIR, 'require-fixture.js'),
+  path.join(v4ScriptsDir, 'require-fixture.js')
+);
 try {
   fs.chmodSync(seedScriptDest, 0o755);
 } catch (error) {
