@@ -49,11 +49,18 @@ export type McpCapabilityAccess =
       auth: McpCapabilityAuth;
     };
 
+export type McpCapabilityTelemetry = {
+  source?: string;
+  /** Sanitized name override — replaces raw capability name in analytics */
+  name?: string;
+};
+
 /**
  * Base definition for Strapi MCP capabilities
  */
 export type McpCapabilityDefinition<Name extends string = string> = {
   name: Name;
+  telemetry?: McpCapabilityTelemetry;
 } & McpCapabilityAccess;
 
 /**
