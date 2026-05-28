@@ -34,6 +34,7 @@ import type { DefaultTheme } from 'styled-components';
 
 const {
   INJECT_COLUMN_IN_TABLE,
+  INJECT_LIST_VIEW_FILTERS,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
@@ -129,6 +130,7 @@ class StrapiApp {
     this.createCustomConfigurations(config ?? {});
 
     this.createHook(INJECT_COLUMN_IN_TABLE);
+    this.createHook(INJECT_LIST_VIEW_FILTERS);
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
