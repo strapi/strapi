@@ -349,6 +349,301 @@ describe('useDocument', () => {
 });
 
 /**
+ * Regression test: Non-localized fields should copy values from a sibling locale
+ * when creating a new locale draft. This inheritance must persist across form resets.
+ * This is now handled in `getInitialFormValues` to keep `initialValues` as the trusted source.
+ */
+describe('useDocument · getInitialFormValues · i18n non-localized inheritance', () => {
+  const I18N_CT_UID = 'api::i18n-bug.i18n-bug';
+
+  type AttributeMap = Record<string, Record<string, unknown>>;
+
+  const sharedButtonComponent = {
+    uid: 'shared.button',
+    apiID: 'button',
+    category: 'shared',
+    isDisplayed: true,
+    options: {},
+    info: { displayName: 'Button', description: '', icon: 'cursor' },
+    attributes: {
+      label: { type: 'string' },
+    },
+  };
+
+  /**
+   * Mocks `/content-manager/init` so the schema for `I18N_CT_UID` uses the supplied attributes.
+   * Other endpoints remain unchanged.
+   */
+  const mockSchema = (attributes: AttributeMap) => {
+    server.use(
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: [sharedButtonComponent],
+            contentTypes: [
+              {
+                uid: I18N_CT_UID,
+                isDisplayed: true,
+                apiID: 'i18n-bug',
+                kind: 'collectionType',
+                pluginOptions: { i18n: { localized: true } },
+                options: {},
+                info: {
+                  displayName: 'I18n Bug',
+                  singularName: 'i18n-bug',
+                  pluralName: 'i18n-bugs',
+                  description: '',
+                },
+                attributes: {
+                  documentId: { type: 'string' },
+                  ...attributes,
+                },
+              },
+            ],
+            fieldSizes: {},
+          },
+        })
+      )
+    );
+  };
+
+  /**
+   * Mocks the document GET for a missing-locale scenario:
+   * Returns empty `data` and, if given, a single sibling's values in `meta.availableLocales[0]`.
+   */
+  const mockMissingLocale = (sibling?: Record<string, unknown>) => {
+    server.use(
+      http.get('/content-manager/:collectionType/:uid/:id', () =>
+        HttpResponse.json({
+          data: {},
+          meta: {
+            availableLocales: sibling ? [sibling] : [],
+            availableStatus: [],
+          },
+        })
+      )
+    );
+  };
+
+  const localized = { pluginOptions: { i18n: { localized: true } } };
+  const nonLocalized = { pluginOptions: { i18n: { localized: false } } };
+
+  const renderUseDocument = () =>
+    renderHook(() =>
+      useDocument({
+        collectionType: 'collection-types',
+        model: I18N_CT_UID,
+        documentId: 'abc',
+      })
+    );
+
+  it('merges non-localized scalar values from meta.availableLocales[0] into the baseline', async () => {
+    mockSchema({
+      title: { type: 'string', ...nonLocalized },
+      body: { type: 'string', ...localized },
+    });
+    mockMissingLocale({
+      id: 1,
+      locale: 'en',
+      title: 'Inherited title',
+      body: 'should not leak',
+      updatedAt: '',
+      createdAt: '',
+      publishedAt: '',
+      status: 'draft',
+    });
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getInitialFormValues(true)).toEqual({
+      title: 'Inherited title',
+    });
+  });
+
+  it('inherits non-localized media values', async () => {
+    const cover = { id: 7, name: 'cover.png', url: '/uploads/cover.png' };
+    mockSchema({
+      cover: { type: 'media', multiple: false, ...nonLocalized },
+      body: { type: 'string', ...localized },
+    });
+    mockMissingLocale({
+      id: 1,
+      locale: 'en',
+      cover,
+      updatedAt: '',
+      createdAt: '',
+      publishedAt: '',
+      status: 'draft',
+    });
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getInitialFormValues(true)).toEqual({ cover });
+  });
+
+  it('returns an empty object if meta.availableLocales is empty', async () => {
+    mockSchema({
+      title: { type: 'string', ...nonLocalized },
+      body: { type: 'string', ...localized },
+    });
+    mockMissingLocale();
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getInitialFormValues(true)).toEqual({});
+  });
+
+  it('returns the current document data if document.id exists, ignoring meta.availableLocales', async () => {
+    mockSchema({
+      title: { type: 'string', ...nonLocalized },
+      body: { type: 'string', ...localized },
+    });
+    server.use(
+      http.get('/content-manager/:collectionType/:uid/:id', () =>
+        HttpResponse.json({
+          data: {
+            id: 99,
+            documentId: 'abc',
+            title: 'From the actual locale',
+            body: 'localized body',
+            createdAt: '',
+            updatedAt: '',
+            publishedAt: '',
+          },
+          meta: {
+            availableLocales: [
+              {
+                id: 1,
+                locale: 'en',
+                title: 'Should be ignored',
+                updatedAt: '',
+                createdAt: '',
+                publishedAt: '',
+                status: 'draft',
+              },
+            ],
+            availableStatus: [],
+          },
+        })
+      )
+    );
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getInitialFormValues()).toEqual({
+      documentId: 'abc',
+      title: 'From the actual locale',
+      body: 'localized body',
+    });
+  });
+
+  it('inherits scalar fields whose i18n pluginOptions are undefined (matches server isLocalizedAttribute semantics)', async () => {
+    mockSchema({
+      // No `pluginOptions` at all — created without the i18n plugin.
+      legacyTitle: { type: 'string' },
+      // Has `pluginOptions` but no i18n key.
+      legacySlug: { type: 'string', pluginOptions: {} },
+      // Explicitly non-localized — already covered elsewhere, kept here as a
+      // sanity check that mixed shapes coexist in the same schema.
+      author: { type: 'string', ...nonLocalized },
+      body: { type: 'string', ...localized },
+    });
+    mockMissingLocale({
+      id: 1,
+      locale: 'en',
+      legacyTitle: 'Inherited title',
+      legacySlug: 'inherited-slug',
+      author: 'Inherited author',
+      body: 'should not leak',
+      updatedAt: '',
+      createdAt: '',
+      publishedAt: '',
+      status: 'draft',
+    });
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getInitialFormValues(true)).toEqual({
+      legacyTitle: 'Inherited title',
+      legacySlug: 'inherited-slug',
+      author: 'Inherited author',
+    });
+  });
+
+  it('does not inherit fields when all are localized', async () => {
+    mockSchema({
+      body: { type: 'string', ...localized },
+      title: { type: 'string', ...localized },
+    });
+    mockMissingLocale({
+      id: 1,
+      locale: 'en',
+      title: 'EN title',
+      body: 'EN body',
+      updatedAt: '',
+      createdAt: '',
+      publishedAt: '',
+      status: 'draft',
+    });
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getInitialFormValues(true)).toEqual({});
+  });
+
+  it('does not inherit non-localized component, dynamiczone, or relation fields (these are outside server availableLocales scope)', async () => {
+    mockSchema({
+      slug: { type: 'string', ...nonLocalized },
+      cta: {
+        type: 'component',
+        component: 'shared.button',
+        repeatable: false,
+        ...nonLocalized,
+      },
+      blocks: {
+        type: 'dynamiczone',
+        components: ['shared.button'],
+        ...nonLocalized,
+      },
+      categories: {
+        type: 'relation',
+        relation: 'manyToMany',
+        target: 'api::category.category',
+        targetModel: 'api::category.category',
+        ...nonLocalized,
+      },
+    });
+    mockMissingLocale({
+      id: 1,
+      locale: 'en',
+      slug: 'inherited-slug',
+      cta: { label: 'Click me' },
+      blocks: [{ __component: 'shared.button', label: 'block-1' }],
+      categories: [{ id: 1 }, { id: 2 }],
+      updatedAt: '',
+      createdAt: '',
+      publishedAt: '',
+      status: 'draft',
+    });
+
+    const { result } = renderUseDocument();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const initial = result.current.getInitialFormValues(true) ?? {};
+
+    // Only non-localized scalar fields should be inherited. Component, dynamiczone,
+    // and relation values are not included, since they are not populated by the server in meta.availableLocales.
+    expect(initial).toEqual({ slug: 'inherited-slug' });
+  });
+});
+
+/**
  * useDoc is an abstraction around useDocument that extracts the model, collection type & id from the url
  * and passes this automatically to useDocument.
  */
