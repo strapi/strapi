@@ -147,6 +147,46 @@ const hasDraftAndPublish = async (trx: Knex, meta: any) => {
 };
 
 /**
+ * Join-column relations that are persisted on the row (e.g. createdBy), excluding virtual
+ * relations such as i18n `localizations` which reuse `document_id` and are not DB-owned.
+ */
+const isPersistedJoinColumnRelation = (attribute: any) =>
+  attribute?.type === 'relation' &&
+  !attribute.unstable_virtual &&
+  attribute.joinColumn &&
+  !attribute.joinTable;
+
+/**
+ * Column names copied when cloning a published row into a draft (stage 1).
+ * Scalars plus persisted join-column FKs; deduped so virtual relations cannot repeat columns.
+ */
+const getPublishedToDraftCloneColumns = (meta: { attributes: Record<string, unknown> }) => {
+  const seen = new Set<string>();
+  const columns: string[] = [];
+
+  const addColumn = (columnName: string | undefined) => {
+    if (!columnName || columnName === 'id' || seen.has(columnName)) {
+      return;
+    }
+    seen.add(columnName);
+    columns.push(columnName);
+  };
+
+  for (const attribute of Object.values(meta.attributes) as any[]) {
+    if (contentTypes.isScalarAttribute(attribute)) {
+      addColumn(attribute.columnName);
+      continue;
+    }
+
+    if (isPersistedJoinColumnRelation(attribute)) {
+      addColumn(attribute.joinColumn.name);
+    }
+  }
+
+  return columns;
+};
+
+/**
  * Copy published entries to draft rows, cloning scalar fields and join-column foreign keys.
  * Components, dynamic zones, and join-table relations are handled in later stages.
  */
@@ -161,22 +201,7 @@ async function copyPublishedEntriesToDraft({
 }) {
   const meta = db.metadata.get(uid);
 
-  const columnsToCopy = Object.values(meta.attributes).reduce((acc, attribute: any) => {
-    if (['id'].includes(attribute.columnName)) {
-      return acc;
-    }
-
-    if (contentTypes.isScalarAttribute(attribute)) {
-      acc.push(attribute.columnName);
-      return acc;
-    }
-
-    if (attribute.type === 'relation' && attribute.joinColumn && !attribute.joinTable) {
-      acc.push(attribute.joinColumn.name);
-    }
-
-    return acc;
-  }, [] as string[]);
+  const columnsToCopy = getPublishedToDraftCloneColumns(meta);
 
   /**
    * Query to copy the published entries into draft entries.
@@ -1728,7 +1753,7 @@ async function cloneComponentInstance({
   }
 
   for (const attribute of Object.values(componentMeta.attributes) as any) {
-    if (attribute.type !== 'relation') {
+    if (!isPersistedJoinColumnRelation(attribute)) {
       continue;
     }
 
@@ -2438,16 +2463,10 @@ async function updateJoinColumnRelations({
 
   // Find all JoinColumn relations (oneToOne, manyToOne without joinTable)
   for (const attribute of Object.values(meta.attributes) as any) {
-    if (attribute.type !== 'relation') {
+    if (!isPersistedJoinColumnRelation(attribute)) {
       continue;
     }
 
-    // Skip relations with joinTable (handled by copyRelationsToOtherContentTypes)
-    if (attribute.joinTable) {
-      continue;
-    }
-
-    // Only handle oneToOne and manyToOne relations that use joinColumn
     const joinColumn = attribute.joinColumn;
     if (!joinColumn) {
       continue;

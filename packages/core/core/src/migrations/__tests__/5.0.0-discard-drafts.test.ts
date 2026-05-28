@@ -5,6 +5,18 @@ import { discardDocumentDrafts } from '../database/5.0.0-discard-drafts';
 
 const ARTICLE_UID = 'api::article.article';
 
+const i18nLocalizationsAttribute = {
+  type: 'relation',
+  relation: 'oneToMany',
+  target: ARTICLE_UID,
+  unstable_virtual: true,
+  joinColumn: {
+    name: 'document_id',
+    referencedColumn: 'document_id',
+    referencedTable: 'articles',
+  },
+};
+
 const articleAttributes = {
   documentId: { type: 'string', columnName: 'document_id' },
   title: { type: 'string', columnName: 'title' },
@@ -12,6 +24,7 @@ const articleAttributes = {
   createdAt: { type: 'datetime', columnName: 'created_at' },
   updatedAt: { type: 'datetime', columnName: 'updated_at' },
   locale: { type: 'string', columnName: 'locale' },
+  localizations: i18nLocalizationsAttribute,
   createdBy: {
     type: 'relation',
     relation: 'oneToOne',
@@ -115,17 +128,6 @@ describe('5.0.0-discard-drafts migration', () => {
       table.integer('updated_by_id');
     });
 
-    await knexConnection('articles').insert({
-      id: 1,
-      document_id: 'doc1',
-      title: 'test1',
-      published_at: 1779746177147,
-      created_at: 1,
-      updated_at: 1,
-      created_by_id: 1,
-      updated_by_id: 1,
-    });
-
     setupStrapi(buildMigrationDb());
   });
 
@@ -134,7 +136,21 @@ describe('5.0.0-discard-drafts migration', () => {
   });
 
   describe('copyPublishedEntriesToDraft', () => {
-    it('copies join-column creator fields onto cloned draft rows', async () => {
+    beforeEach(async () => {
+      await knexConnection('articles').delete();
+      await knexConnection('articles').insert({
+        id: 1,
+        document_id: 'doc1',
+        title: 'test1',
+        published_at: 1779746177147,
+        created_at: 1,
+        updated_at: 1,
+        created_by_id: 1,
+        updated_by_id: 1,
+      });
+    });
+
+    it('copies join-column creator fields onto cloned draft rows (with i18n localizations virtual relation)', async () => {
       const db = buildMigrationDb();
       setupStrapi(db);
 
