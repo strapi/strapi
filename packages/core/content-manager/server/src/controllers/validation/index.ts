@@ -1,35 +1,37 @@
 import _ from 'lodash';
-import { yup, validateYupSchema, errors } from '@strapi/utils';
+import { Schema, UID } from '@strapi/types';
+import { z, errors } from '@strapi/utils';
+import { validateZodAsync, strapiID } from '../../validation/zod';
 import createModelConfigurationSchema from './model-configuration';
 
 const { PaginationError, ValidationError } = errors;
-const TYPES = ['singleType', 'collectionType'];
+const TYPES = ['singleType', 'collectionType'] as const;
 
 /**
  * Validates type kind
  */
-const kindSchema = yup.string().oneOf(TYPES).nullable();
+const kindSchema = z.enum(TYPES).nullable().optional();
 
-const bulkActionInputSchema = yup
-  .object({
-    documentIds: yup.array().of(yup.strapiID()).min(1).required(),
-  })
-  .required();
-
-const generateUIDInputSchema = yup.object({
-  contentTypeUID: yup.string().required(),
-  field: yup.string().required(),
-  data: yup.object().required(),
+const bulkActionInputSchema = z.object({
+  documentIds: z.array(strapiID).min(1),
 });
 
-const checkUIDAvailabilityInputSchema = yup.object({
-  contentTypeUID: yup.string().required(),
-  field: yup.string().required(),
-  value: yup
-    .string()
-    .matches(/^[A-Za-z0-9-_.~]*$/)
-    .required(),
+const generateUIDInputSchema = z.object({
+  contentTypeUID: z.string(),
+  field: z.string(),
+  data: z.looseObject({}),
 });
+
+const createCheckUIDAvailabilityInputSchema = (regex?: string) => {
+  const pattern = regex ? new RegExp(regex) : /^[A-Za-z0-9-_.~]*$/;
+  return z.object({
+    contentTypeUID: z.string(),
+    field: z.string(),
+    value: z.string().refine((value) => value === '' || pattern.test(value), {
+      error: `Must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"`,
+    }),
+  });
+};
 
 const validateUIDField = (contentTypeUID: any, field: any) => {
   const model = strapi.contentTypes[contentTypeUID];
@@ -58,10 +60,30 @@ const validatePagination = ({ page, pageSize }: any) => {
   }
 };
 
-const validateKind = validateYupSchema(kindSchema);
-const validateBulkActionInput = validateYupSchema(bulkActionInputSchema);
-const validateGenerateUIDInput = validateYupSchema(generateUIDInputSchema);
-const validateCheckUIDAvailabilityInput = validateYupSchema(checkUIDAvailabilityInputSchema);
+const validateKind = validateZodAsync(kindSchema);
+const validateBulkActionInput = validateZodAsync(bulkActionInputSchema);
+const validateGenerateUIDInput = validateZodAsync(generateUIDInputSchema);
+const validateCheckUIDAvailabilityInput = (body: {
+  contentTypeUID: UID.ContentType;
+  field: string;
+  value: string;
+}) => {
+  let regex: string | undefined;
+
+  const contentType =
+    body.contentTypeUID in strapi.contentTypes ? strapi.contentTypes[body.contentTypeUID] : null;
+
+  if (
+    contentType?.attributes[body.field] &&
+    `regex` in contentType.attributes[body.field] &&
+    (contentType.attributes[body.field] as Schema.Attribute.UID).regex
+  ) {
+    regex = (contentType?.attributes[body.field] as Schema.Attribute.UID).regex;
+  }
+
+  const schema = createCheckUIDAvailabilityInputSchema(regex);
+  return validateZodAsync(schema)(body);
+};
 
 export {
   createModelConfigurationSchema,

@@ -1,0 +1,89 @@
+{
+  "kind": "collectionType",
+  "collectionName": "dogs",
+  "info": {
+    "singularName": "dog",
+    "pluralName": "dogs",
+    "displayName": "Dog"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "age": {
+      "type": "integer"
+    },
+    "likesCats": {
+      "type": "boolean",
+      "default": false
+    },
+    "personality": {
+      "type": "enumeration",
+      "enum": ["playful", "guard", "lazy", "friendly"]
+    },
+    "bestFriendCats": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::cat.cat",
+      "inversedBy": "dogFriends",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "likesCats"
+            },
+            true
+          ]
+        }
+      }
+    },
+    "favoriteToy": {
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "personality"
+            },
+            "playful"
+          ]
+        }
+      }
+    },
+    "guardingSchedule": {
+      "type": "text",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "personality"
+            },
+            "guard"
+          ]
+        }
+      }
+    },
+    "preferredCatPersonality": {
+      "type": "enumeration",
+      "enum": ["friendly", "hunter", "lazy", "grumpy"],
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "likesCats"
+            },
+            true
+          ]
+        }
+      }
+    },
+    "favoriteTreat": {
+      "type": "string"
+    }
+  }
+}

@@ -97,6 +97,7 @@ export const ConfigureTheView = ({ config }: ConfigureTheViewProps) => {
                 startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
+                fullWidth
               >
                 {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
@@ -118,7 +119,6 @@ export const ConfigureTheView = ({ config }: ConfigureTheViewProps) => {
               onChange={handleChange}
             />
           </Layouts.Content>
-          x
           <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
             <ConfirmDialog onConfirm={handleConfirm} variant="default">
               {formatMessage({

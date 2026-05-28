@@ -1,12 +1,17 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { ComponentType } from 'react';
 
+import { Internal, Utils } from '@strapi/types';
 import invariant from 'invariant';
 
 import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 import type { AnySchema } from 'yup';
 
-type CustomFieldUID = `plugin::${string}.${string}` | `global::${string}`;
+type CustomFieldUID = Utils.String.Suffix<
+  | Internal.Namespace.WithSeparator<Internal.Namespace.Plugin>
+  | Internal.Namespace.WithSeparator<Internal.Namespace.Global>,
+  string
+>;
 
 type CustomFieldOptionInput =
   | 'text'

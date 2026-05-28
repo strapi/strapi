@@ -2,6 +2,7 @@ import type {} from 'koa-body';
 
 import admin from './admin';
 import apiToken from './api-token';
+import adminToken from './admin-token';
 import authenticatedUser from './authenticated-user';
 import authentication from './authentication';
 import permission from './permission';
@@ -10,11 +11,13 @@ import transfer from './transfer';
 import user from './user';
 import webhooks from './webhooks';
 import contentApi from './content-api';
-import { createHomepageController } from './homepage';
+import homepage from './homepage';
+import ai from '../ai/controllers/ai';
 
 export default {
   admin,
   'api-token': apiToken,
+  'admin-token': adminToken,
   'authenticated-user': authenticatedUser,
   authentication,
   permission,
@@ -23,5 +26,6 @@ export default {
   user,
   webhooks,
   'content-api': contentApi,
-  homepage: createHomepageController,
+  homepage,
+  ai,
 };

@@ -331,7 +331,9 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO', () => {
     it('Should reset the state and update the modifiedData object with the component field basic schema', () => {
-      const action = actions.resetPropsAndSetFormForAddingAnExistingCompo({});
+      const action = actions.resetPropsAndSetFormForAddingAnExistingCompo({
+        uid: 'api::address.address',
+      });
 
       const state = { ...initialState, modifiedData: { foo: 'bar' } };
       const expected = {
@@ -348,7 +350,9 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('RESET_PROPS_AND_SAVE_CURRENT_DATA', () => {
     it('Should reset the state and update the modifiedData and componentToCreate objects correctly', () => {
-      const action = actions.resetPropsAndSaveCurrentData({});
+      const action = actions.resetPropsAndSaveCurrentData({
+        uid: 'api::address.address',
+      });
 
       const state = {
         ...initialState,
@@ -446,6 +450,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: {
           test: true,
         },
+        uid: 'api::address.address',
       });
 
       expect(reducer(initialState, action)).toEqual(expected);
@@ -459,6 +464,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: '1',
+        uid: 'api::address.address',
       });
       const expected = {
         ...initialState,
@@ -480,6 +486,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: '2',
+        uid: 'api::address.address',
       });
 
       const expected = {
@@ -501,6 +508,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: '2',
+        uid: 'api::address.address',
       });
 
       const expected = {
@@ -522,6 +530,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: null,
+        uid: 'api::address.address',
       });
 
       const expected = {
@@ -542,6 +551,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: null,
+        uid: 'api::address.address',
       });
       const expected = { ...initialState, modifiedData: {} };
 
@@ -556,6 +566,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: null,
+        uid: 'api::address.address',
       });
       const expected = { ...initialState, modifiedData: {} };
 
@@ -570,6 +581,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: null,
+        uid: 'api::address.address',
       });
       const expected = {
         ...initialState,
@@ -591,6 +603,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: null,
+        uid: 'api::address.address',
       });
       const expected = { ...initialState, modifiedData: { type: 'enumeration', enum: [] } };
 
@@ -605,6 +618,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: null,
+        uid: 'api::address.address',
       });
       const expected = {
         ...initialState,
@@ -628,6 +642,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         isEditing: false,
         modifiedDataToSetForEditing: { name: null },
         step: null,
+        uid: 'api::address.address',
       });
       const expected = { ...initialState, modifiedData: { type: 'json', default: null } };
 

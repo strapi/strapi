@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@tests/utils';
+import { renderHook, waitFor } from '@tests/utils';
 
 import { useLazyComponents } from '../useLazyComponents';
 
@@ -27,7 +27,7 @@ describe('useLazyComponents', () => {
 
     expect(actualResult.current.lazyComponentStore['plugin::test.test']).toBeDefined();
 
-    act(() => actualResult.current.cleanup());
+    await waitFor(() => actualResult.current.cleanup());
 
     expect(actualResult.current.lazyComponentStore).toEqual({});
   });

@@ -105,6 +105,7 @@ Utility functions to modify the entity:
 interface Path {
   raw: string | null;
   attribute: string | null;
+  rawWithIndices: string | null;
 }
 ```
 
@@ -112,6 +113,7 @@ Tracks the traversal path:
 
 - **`raw`**: The traversal path on the entity
 - **`attribute`**: The same traversal path on the schema if the attibute exists
+- **`rawWithIndices`**: The traversal path on the entity including array indices using dot notation (e.g., `components.4.field.relations.2.name`)
 
 ### Parent
 

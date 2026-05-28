@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useForm, useField } from '@strapi/admin/strapi-admin';
+import { useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
   Box,
@@ -9,17 +9,17 @@ import {
   IconButton,
   useComposedRefs,
   Menu,
-  MenuItem,
   BoxComponent,
 } from '@strapi/design-system';
-import { Drag, More, Trash } from '@strapi/icons';
+import { Drag, More, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
+import { type EditFieldLayout, useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
@@ -36,9 +36,20 @@ interface DynamicComponentProps
   index: number;
   name: string;
   onAddComponent: (componentUid: string, index: number) => void;
-  onRemoveComponentClick: () => void;
+  onRemoveComponentClick: (index: number) => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
+  totalLength: number;
   children?: (props: InputRendererProps) => React.ReactNode;
+  /**
+   * When true, the component's accordion will be forced open and scrolled into view.
+   * Used by the parent DynamicZone to auto-expand newly added components.
+   */
+  forceOpen?: boolean;
+  /**
+   * Called after the forceOpen has been handled (accordion opened + scrolled),
+   * so the parent can clear the forced state.
+   */
+  onForceOpenHandled?: () => void;
 }
 
 const DynamicComponent = ({
@@ -53,26 +64,27 @@ const DynamicComponent = ({
   onCancel,
   dynamicComponentsByCategory = {},
   onAddComponent,
+  totalLength,
   children,
+  forceOpen,
+  onForceOpenHandled,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
-  const formValues = useForm('DynamicComponent', (state) => state.values);
+  const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  const isDesktop = useIsDesktop();
+
   const {
     edit: { components },
-  } = useDocLayout();
+  } = useDocumentLayout(currentDocumentMeta.model);
 
-  const title = React.useMemo(() => {
-    const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
+  const { mainField = 'id' } = components[componentUid]?.settings ?? {};
 
-    const mainFieldValue = getIn(formValues, `${name}.${index}.${mainField}`);
+  const mainFieldValue = useForm('DynamicComponent', (state) =>
+    getIn(state.values, `${name}.${index}.${mainField}`)
+  );
 
-    const displayedValue =
-      mainField === 'id' || !mainFieldValue ? '' : String(mainFieldValue).trim();
-
-    const mainValue = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
-
-    return mainValue;
-  }, [componentUid, components, formValues, name, index]);
+  const displayedValue = mainField === 'id' || !mainFieldValue ? '' : String(mainFieldValue).trim();
+  const displayTitle = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
   const { icon, displayName } = React.useMemo(() => {
     const [category] = componentUid.split('.');
@@ -80,8 +92,18 @@ const DynamicComponent = ({
       (component) => component.uid === componentUid
     ) ?? { icon: null, displayName: null };
 
-    return { icon, displayName };
-  }, [componentUid, dynamicComponentsByCategory]);
+    return {
+      icon,
+      displayName: formatMessage({
+        id: componentUid,
+        defaultMessage: displayName || componentUid,
+      }),
+    };
+  }, [componentUid, dynamicComponentsByCategory, formatMessage]);
+
+  const tempKey = useForm('DynamicComponent', (state) =>
+    getIn(state.values, `${name}.${index}.__temp_key__`)
+  ) as string | undefined;
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!disabled, {
@@ -89,7 +111,8 @@ const DynamicComponent = ({
       index,
       item: {
         index,
-        displayedValue: `${displayName} ${title}`,
+        id: tempKey,
+        displayedValue: `${displayName} ${displayTitle}`,
         icon,
       },
       onMoveItem: onMoveComponent,
@@ -102,23 +125,60 @@ const DynamicComponent = ({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
-  /**
-   * We don't need the accordion's to communicate with each other,
-   * so a unique value for their state is enough.
-   */
   const accordionValue = React.useId();
 
-  const { value = [], rawError } = useField(`${name}.${index}`);
+  /**
+   * Ref for the component container `<li>`, used to scroll the newly added
+   * component into view when `forceOpen` is set by the parent.
+   */
+  const componentRef = React.useRef<HTMLLIElement>(null);
 
-  const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
+  const componentPath = `${name}.${index}`;
+  const hasValue = useForm(
+    'DynamicComponent',
+    (state) => getIn(state.values, componentPath) != null
+  );
+  const isNewItem = useForm(
+    'DynamicComponent',
+    (state) => getIn(state.values, componentPath)?.id == null
+  );
+  const rawError = useForm('DynamicComponent', (state) => getIn(state.errors, componentPath));
+
+  const [collapseToOpen, setCollapseToOpen] = React.useState<string>(
+    isNewItem ? accordionValue : ''
+  );
 
   React.useEffect(() => {
-    if (rawError && value) {
+    if (rawError && hasValue) {
       setCollapseToOpen(accordionValue);
     }
-  }, [rawError, value, accordionValue]);
+  }, [rawError, hasValue, accordionValue]);
+
+  /**
+   * When the parent flags this component as newly added via `forceOpen`,
+   * expand the accordion and scroll it into view so the user can immediately
+   * start editing. Once handled, notify the parent so it can clear the flag.
+   */
+  React.useEffect(() => {
+    if (forceOpen) {
+      setCollapseToOpen(accordionValue);
+      requestAnimationFrame(() => {
+        componentRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+        onForceOpenHandled?.();
+      });
+    }
+  }, [forceOpen, accordionValue, onForceOpenHandled]);
 
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
+
+  const canMoveUp = index > 0;
+  const canMoveDown = index < totalLength - 1;
+  const handleRemoveCurrentComponent = React.useCallback(() => {
+    onRemoveComponentClick(index);
+  }, [onRemoveComponentClick, index]);
 
   const accordionActions = disabled ? null : (
     <>
@@ -129,25 +189,63 @@ const DynamicComponent = ({
             id: getTranslation('components.DynamicZone.delete-label'),
             defaultMessage: 'Delete {name}',
           },
-          { name: title }
+          { name: displayTitle }
         )}
-        onClick={onRemoveComponentClick}
+        onClick={handleRemoveCurrentComponent}
       >
         <Trash />
       </IconButton>
-      <IconButton
-        variant="ghost"
-        onClick={(e) => e.stopPropagation()}
-        data-handler-id={handlerId}
-        ref={dragRef}
-        label={formatMessage({
-          id: getTranslation('components.DragHandle-label'),
-          defaultMessage: 'Drag',
-        })}
-        onKeyDown={handleKeyDown}
-      >
-        <Drag />
-      </IconButton>
+      {isDesktop && (
+        <IconButton
+          variant="ghost"
+          onClick={(e) => e.stopPropagation()}
+          data-handler-id={handlerId}
+          ref={dragRef}
+          label={formatMessage({
+            id: getTranslation('components.DragHandle-label'),
+            defaultMessage: 'Drag',
+          })}
+          onKeyDown={handleKeyDown}
+        >
+          <Drag />
+        </IconButton>
+      )}
+      {!isDesktop && (
+        <>
+          {canMoveUp && (
+            <IconButton
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveComponent(index - 1, index);
+              }}
+              disabled={!canMoveUp}
+              label={formatMessage({
+                id: getTranslation('components.DynamicZone.move-up'),
+                defaultMessage: 'Move up',
+              })}
+            >
+              <ArrowUp />
+            </IconButton>
+          )}
+          {canMoveDown && (
+            <IconButton
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveComponent(index + 1, index);
+              }}
+              disabled={!canMoveDown}
+              label={formatMessage({
+                id: getTranslation('components.DynamicZone.move-down'),
+                defaultMessage: 'Move down',
+              })}
+            >
+              <ArrowDown />
+            </IconButton>
+          )}
+        </>
+      )}
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={0} paddingRight={0}>
           <IconButton
@@ -172,11 +270,13 @@ const DynamicComponent = ({
             <Menu.SubContent>
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
-                  <Menu.Label>{category}</Menu.Label>
+                  <Menu.Label>
+                    {formatMessage({ id: category, defaultMessage: category })}
+                  </Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index)}>
-                      {displayName}
-                    </MenuItem>
+                    <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index)}>
+                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
+                    </Menu.Item>
                   ))}
                 </React.Fragment>
               ))}
@@ -192,11 +292,13 @@ const DynamicComponent = ({
             <Menu.SubContent>
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
-                  <Menu.Label>{category}</Menu.Label>
+                  <Menu.Label>
+                    {formatMessage({ id: category, defaultMessage: category })}
+                  </Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
-                      {displayName}
-                    </MenuItem>
+                    <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
+                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
+                    </Menu.Item>
                   ))}
                 </React.Fragment>
               ))}
@@ -207,10 +309,10 @@ const DynamicComponent = ({
     </>
   );
 
-  const accordionTitle = title ? `${displayName} ${title}` : displayName;
+  const accordionTitle = displayTitle ? `${displayName} ${displayTitle}` : displayName;
 
   return (
-    <ComponentContainer tag="li" width="100%">
+    <ComponentContainer ref={componentRef} tag="li" width="100%">
       <Flex justifyContent="center">
         <Rectangle background="neutral200" />
       </Flex>
@@ -234,51 +336,14 @@ const DynamicComponent = ({
               </Accordion.Header>
               <Accordion.Content>
                 <AccordionContentRadius background="neutral0">
-                  <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
-                    <Grid.Root gap={4}>
-                      {components[componentUid]?.layout?.map((row, rowInd) => (
-                        <Grid.Item
-                          col={12}
-                          key={rowInd}
-                          s={12}
-                          xs={12}
-                          direction="column"
-                          alignItems="stretch"
-                        >
-                          <ResponsiveGridRoot gap={4}>
-                            {row.map(({ size, ...field }) => {
-                              const fieldName = `${name}.${index}.${field.name}`;
-
-                              const fieldWithTranslatedLabel = {
-                                ...field,
-                                label: formatMessage({
-                                  id: `content-manager.components.${componentUid}.${field.name}`,
-                                  defaultMessage: field.label,
-                                }),
-                              };
-
-                              return (
-                                <ResponsiveGridItem
-                                  col={size}
-                                  key={fieldName}
-                                  s={12}
-                                  xs={12}
-                                  direction="column"
-                                  alignItems="stretch"
-                                >
-                                  {children ? (
-                                    children({ ...fieldWithTranslatedLabel, name: fieldName })
-                                  ) : (
-                                    <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
-                                  )}
-                                </ResponsiveGridItem>
-                              );
-                            })}
-                          </ResponsiveGridRoot>
-                        </Grid.Item>
-                      ))}
-                    </Grid.Root>
-                  </Box>
+                  <DynamicComponentFields
+                    componentUid={componentUid}
+                    index={index}
+                    layout={components[componentUid]?.layout}
+                    name={name}
+                  >
+                    {children}
+                  </DynamicComponentFields>
                 </AccordionContentRadius>
               </Accordion.Content>
             </Accordion.Item>
@@ -320,5 +385,68 @@ const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
   margin: 0;
 `;
 
-export { DynamicComponent };
+interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'children'> {
+  componentUid: string;
+  index: number;
+  layout?: EditFieldLayout[][];
+  name: string;
+}
+
+const DynamicComponentFields = React.memo(
+  ({ children, componentUid, index, layout, name }: DynamicComponentFieldsProps) => {
+    const { formatMessage } = useIntl();
+
+    return (
+      <Box padding={{ initial: 4, medium: 6 }}>
+        <Grid.Root gap={4}>
+          {layout?.map((row, rowInd) => {
+            return (
+              <Grid.Item col={12} key={rowInd} xs={12} direction="column" alignItems="stretch">
+                <ResponsiveGridRoot gap={4}>
+                  {row.map(({ size, ...field }) => {
+                    const fieldName = `${name}.${index}.${field.name}`;
+
+                    const fieldWithTranslatedLabel = {
+                      ...field,
+                      label: formatMessage({
+                        id: `content-manager.components.${componentUid}.${field.name}`,
+                        defaultMessage: field.label,
+                      }),
+                    };
+
+                    return (
+                      <ResponsiveGridItem
+                        col={size}
+                        key={fieldName}
+                        s={12}
+                        xs={12}
+                        direction="column"
+                        alignItems="stretch"
+                      >
+                        {children ? (
+                          children({
+                            ...fieldWithTranslatedLabel,
+                            name: fieldName,
+                          })
+                        ) : (
+                          <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                        )}
+                      </ResponsiveGridItem>
+                    );
+                  })}
+                </ResponsiveGridRoot>
+              </Grid.Item>
+            );
+          })}
+        </Grid.Root>
+      </Box>
+    );
+  }
+);
+
+DynamicComponentFields.displayName = 'DynamicComponentFields';
+
+const MemoizedDynamicComponent = React.memo(DynamicComponent);
+
+export { MemoizedDynamicComponent as DynamicComponent };
 export type { DynamicComponentProps };

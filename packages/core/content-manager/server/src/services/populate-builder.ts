@@ -1,4 +1,4 @@
-import { isNil } from 'lodash/fp';
+import { isNil, merge } from 'lodash/fp';
 import type { UID } from '@strapi/types';
 import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
 
@@ -54,6 +54,19 @@ const populateBuilder = (uid: UID.Schema) => {
      */
     populateDeep(level = Infinity) {
       deepPopulateOptions.maxLevel = level;
+      return builder;
+    },
+
+    /**
+     * Override the populate for specific attributes, taking precedence over
+     * query-derived or deep populate defaults.
+     *
+     * @param overrides - Populate overrides to merge (e.g. { localizations: { fields: ['locale'] } })
+     */
+    withPopulateOverride(overrides: Record<string, any>) {
+      const prev = getInitialPopulate;
+      // merge(base, overrides): overrides win for overlapping keys, so e.g. localizations
+      getInitialPopulate = async () => merge((await prev()) || {}, overrides);
       return builder;
     },
 

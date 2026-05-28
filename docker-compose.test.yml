@@ -1,11 +1,9 @@
-version: '3'
-
 services:
   postgres:
     image: postgres
     restart: always
     volumes:
-      - pgdata_test:/var/lib/postgresql/data
+      - pgdata_test:/var/lib/postgresql
     environment:
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi

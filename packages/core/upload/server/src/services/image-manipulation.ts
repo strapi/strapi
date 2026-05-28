@@ -1,7 +1,8 @@
 import fs from 'fs';
 import { join } from 'path';
 import sharp from 'sharp';
-import { file as fileUtils } from '@strapi/utils';
+import crypto from 'crypto';
+import { strings, file as fileUtils } from '@strapi/utils';
 
 import { getService } from '../utils';
 
@@ -24,12 +25,12 @@ const isOptimizableFormat = (
   format !== undefined && FORMATS_TO_OPTIMIZE.includes(format);
 
 const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
-  new Promise((resolve, reject) => {
+  new Promise<void>((resolve, reject) => {
     const writeStream = fs.createWriteStream(path);
     // Reject promise if there is an error with the provided stream
     stream.on('error', reject);
     stream.pipe(writeStream);
-    writeStream.on('close', resolve);
+    writeStream.on('close', () => resolve());
     writeStream.on('error', reject);
   });
 
@@ -199,17 +200,17 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
   const originalDimensions = await getDimensions(file);
 
   const breakpoints = getBreakpoints();
-  return Promise.all(
-    Object.keys(breakpoints).map((key) => {
-      const breakpoint = breakpoints[key];
+  const results = [];
 
-      if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, { file, breakpoint });
-      }
+  for (const key of Object.keys(breakpoints)) {
+    const breakpoint = breakpoints[key];
 
-      return undefined;
-    })
-  );
+    if (breakpointSmallerThan(breakpoint, originalDimensions)) {
+      results.push(await generateBreakpoint(key, { file, breakpoint }));
+    }
+  }
+
+  return results;
 };
 
 const generateBreakpoint = async (
@@ -294,6 +295,13 @@ const isImage = async (file: UploadableFile) => {
   return format && FORMATS_TO_PROCESS.includes(format);
 };
 
+const generateFileName = (name: string) => {
+  const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+  const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
+
+  return `${baseName}_${randomSuffix()}`;
+};
+
 export default {
   isFaultyImage,
   isOptimizableImage,
@@ -303,4 +311,5 @@ export default {
   generateResponsiveFormats,
   generateThumbnail,
   optimize,
+  generateFileName,
 };

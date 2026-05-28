@@ -8,6 +8,8 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
+const MAX_DATE = new Date(2099, 11, 31);
+
 const DateInput = React.forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, type: _type, ...props }, ref) => {
     const { formatMessage } = useIntl();
@@ -28,7 +30,7 @@ const DateInput = React.forwardRef<HTMLInputElement, InputProps>(
       // Convert to UTC midnight
       const utcDate = toUTCMidnight(date);
       // Save as ISO string in UTC format
-      field.onChange(name, utcDate.toISOString());
+      field.onChange(name, utcDate.toISOString().split('T')[0]);
       setLastValidDate(utcDate);
     };
 
@@ -48,10 +50,14 @@ const DateInput = React.forwardRef<HTMLInputElement, InputProps>(
           onBlur={() => {
             // When the input is blurred, revert to the last valid date if the current value is invalid
             if (field.value && !value) {
-              field.onChange(name, lastValidDate?.toISOString() ?? null);
+              field.onChange(
+                name,
+                lastValidDate ? lastValidDate.toISOString().split('T')[0] : null
+              );
             }
           }}
           value={value}
+          maxDate={MAX_DATE}
           {...props}
         />
         <Field.Hint />

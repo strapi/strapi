@@ -18,6 +18,9 @@ const CM_COMPONENTS_MOCK_DATA = [
       id: {
         type: 'string',
       },
+      documentId: {
+        type: 'string',
+      },
       name: {
         type: 'string',
         default: 'toto',
@@ -371,6 +374,9 @@ const CM_CONTENT_TYPE_MOCK_DATA = [
       id: {
         type: 'string',
       },
+      documentId: {
+        type: 'string',
+      },
       name: {
         type: 'string',
       },
@@ -486,6 +492,9 @@ const CM_CONTENT_TYPE_MOCK_DATA = [
     options: { draftAndPublish: true },
     attributes: {
       id: {
+        type: 'string',
+      },
+      documentId: {
         type: 'string',
       },
       Title: {
@@ -695,6 +704,14 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
           sortable: true,
         },
       },
+      documentId: {
+        edit: {},
+        list: {
+          label: 'documentId',
+          searchable: true,
+          sortable: true,
+        },
+      },
       name: {
         edit: {
           label: 'name',
@@ -929,7 +946,7 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
       },
     },
     layouts: {
-      list: ['id', 'categories', 'cover', 'postal_code'],
+      list: ['documentId', 'categories', 'cover', 'postal_code'],
       edit: [
         [{ name: 'dz', size: 12 }],
         [

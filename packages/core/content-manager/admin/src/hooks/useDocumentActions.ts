@@ -6,11 +6,13 @@ import {
   useTracking,
   type TrackingEvent,
   useAPIErrorHandler,
-  useGuidedTour,
 } from '@strapi/admin/strapi-admin';
+import { useGetAiFeatureConfigQuery, useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModal';
+import { usePreviewContext } from '../preview/pages/Preview';
 import {
   useAutoCloneDocumentMutation,
   useCloneDocumentMutation,
@@ -58,7 +60,10 @@ type BulkOperationResponse<TResponse extends { data: any; error?: any }> =
   | Pick<TResponse, 'data'>
   | { error: BaseQueryError | SerializedError };
 
-type UseDocumentActions = () => {
+type UseDocumentActions = (
+  fromPreview?: boolean,
+  fromRelationModal?: boolean
+) => {
   /**
    * @description Attempts to clone a document based on the provided sourceId.
    * This will return a list of the fields as an error if it's unable to clone.
@@ -68,6 +73,7 @@ type UseDocumentActions = () => {
   autoClone: (args: {
     model: string;
     sourceId: string;
+    locale?: string;
   }) => Promise<OperationResponse<AutoClone.Response>>;
   clone: (
     args: {
@@ -187,7 +193,6 @@ type IUseDocumentActs = ReturnType<UseDocumentActions>;
  * return <Form method="PUT" onSubmit={handleSubmit} />
  * ```
  *
- * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document-operations} for more information
  */
 const useDocumentActions: UseDocumentActions = () => {
   const { toggleNotification } = useNotification();
@@ -195,7 +200,14 @@ const useDocumentActions: UseDocumentActions = () => {
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const setCurrentStep = useGuidedTour('useDocumentActions', (state) => state.setCurrentStep);
+  const { data: aiFeatureConfig } = useGetAiFeatureConfigQuery();
+  const isAiAvailable = useAIAvailability();
+
+  // Get metadata from context providers for tracking purposes
+  const previewContext = usePreviewContext('useDocumentActions', () => true, false);
+  const relationContext = useRelationModal('useDocumentActions', () => true, false);
+  const fromPreview = previewContext != undefined;
+  const fromRelationModal = relationContext != undefined;
 
   const [deleteDocument, { isLoading: isDeleting }] = useDeleteDocumentMutation();
   const _delete: IUseDocumentActs['delete'] = React.useCallback(
@@ -334,6 +346,7 @@ const useDocumentActions: UseDocumentActions = () => {
   );
 
   const [publishDocument, { isLoading: isPublishing }] = usePublishDocumentMutation();
+
   const publish: IUseDocumentActs['publish'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, data) => {
       try {
@@ -352,7 +365,14 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didPublishEntry', { documentId });
+        trackUsage('didPublishEntry', {
+          documentId,
+          fromPreview,
+          fromRelationModal,
+          ...(isAiAvailable
+            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
+            : {}),
+        });
 
         toggleNotification({
           type: 'success',
@@ -372,7 +392,15 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [trackUsage, publishDocument, toggleNotification, formatMessage, formatAPIError]
+    [
+      trackUsage,
+      publishDocument,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
   const [publishManyDocuments, { isLoading: isPublishingMany }] = usePublishManyDocumentsMutation();
@@ -439,7 +467,15 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didEditEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didEditEntry', {
+          ...trackerProperty,
+          documentId: res.data.data.documentId,
+          fromPreview,
+          fromRelationModal,
+          ...(isAiAvailable
+            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
+            : {}),
+        });
         toggleNotification({
           type: 'success',
           message: formatMessage({
@@ -460,7 +496,15 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [trackUsage, updateDocument, toggleNotification, formatMessage, formatAPIError]
+    [
+      trackUsage,
+      updateDocument,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
   const [unpublishDocument] = useUnpublishDocumentMutation();
@@ -570,8 +614,15 @@ const useDocumentActions: UseDocumentActions = () => {
 
           return { error: res.error };
         }
-
-        trackUsage('didCreateEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didCreateEntry', {
+          ...trackerProperty,
+          documentId: res.data.data.documentId,
+          fromPreview,
+          fromRelationModal,
+          ...(isAiAvailable
+            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
+            : {}),
+        });
 
         toggleNotification({
           type: 'success',
@@ -580,8 +631,6 @@ const useDocumentActions: UseDocumentActions = () => {
             defaultMessage: 'Saved document',
           }),
         });
-
-        setCurrentStep('contentManager.success');
 
         return res.data;
       } catch (err) {
@@ -595,16 +644,27 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [createDocument, formatAPIError, formatMessage, toggleNotification, trackUsage]
+    [
+      createDocument,
+      formatAPIError,
+      formatMessage,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      trackUsage,
+      isAiAvailable,
+      aiFeatureConfig,
+    ]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
   const autoClone: IUseDocumentActs['autoClone'] = React.useCallback(
-    async ({ model, sourceId }) => {
+    async ({ model, sourceId, locale }) => {
       try {
         const res = await autoCloneDocument({
           model,
           sourceId,
+          params: locale ? { locale } : undefined,
         });
 
         if ('error' in res) {
@@ -636,7 +696,8 @@ const useDocumentActions: UseDocumentActions = () => {
   const clone: IUseDocumentActs['clone'] = React.useCallback(
     async ({ model, documentId, params }, body, trackerProperty) => {
       try {
-        const { id: _id, ...restBody } = body;
+        // Omit id and documentId so they are not copied to the clone
+        const { id: _id, documentId: _documentId, ...restBody } = body;
 
         /**
          * If we're cloning we want to post directly to this endpoint
@@ -658,7 +719,12 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didCreateEntry', trackerProperty);
+        trackUsage('didCreateEntry', {
+          ...trackerProperty,
+          ...(isAiAvailable
+            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
+            : {}),
+        });
         toggleNotification({
           type: 'success',
           message: formatMessage({

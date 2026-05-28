@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { findAndClose, clickAndWait } from '../../utils/shared';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { findAndClose, clickAndWait } from '../../../utils/shared';
 
 type Field = {
   name: string;
@@ -15,7 +15,7 @@ type Field = {
 test.describe('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
 
     await page.goto('/admin');
     await login({ page });
@@ -199,7 +199,7 @@ test.describe('Uniqueness', () => {
         await findAndClose(page, 'Saved document');
 
         await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
-        await expect(page.getByText('Warning:2 errors occurred')).toBeVisible();
+        await findAndClose(page, '2 errors occurred', { role: 'alert' });
 
         await clickAndWait(page, page.getByRole('button', { name: 'Delete' }).nth(1));
       }
@@ -227,7 +227,7 @@ test.describe('Uniqueness', () => {
       await findAndClose(page, 'Saved document');
 
       await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
-      await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
+      await findAndClose(page, 'This attribute must be unique', { role: 'alert' });
 
       await navigateToListView(page);
       await changeLocale(page, 'French (fr)');

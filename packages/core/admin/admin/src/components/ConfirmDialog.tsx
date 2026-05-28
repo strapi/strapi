@@ -10,6 +10,7 @@ import { styled } from 'styled-components';
  * -----------------------------------------------------------------------------------------------*/
 interface ConfirmDialogProps extends Pick<ButtonProps, 'variant'>, Pick<Dialog.BodyProps, 'icon'> {
   onConfirm?: (e?: React.MouseEvent<HTMLButtonElement>) => Promise<void> | void;
+  onCancel?: (e?: React.MouseEvent<HTMLButtonElement>) => Promise<void> | void;
   children?: React.ReactNode;
   endAction?: React.ReactNode;
   startAction?: React.ReactNode;
@@ -52,6 +53,7 @@ const ConfirmDialog = ({
   children,
   icon = <StyledWarning />,
   onConfirm,
+  onCancel,
   variant = 'danger-light',
   startAction,
   endAction,
@@ -98,6 +100,9 @@ const ConfirmDialog = ({
               variant="tertiary"
               onClick={(e) => {
                 e.stopPropagation();
+                if (onCancel) {
+                  onCancel(e);
+                }
               }}
             >
               {formatMessage({

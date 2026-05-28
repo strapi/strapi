@@ -1,6 +1,39 @@
 import type { RouteObject } from 'react-router-dom';
 
-export const ROUTES_CE: RouteObject[] = [
+const ADMIN_TOKEN_ROUTES: RouteObject[] = [
+  {
+    lazy: async () => {
+      const { ProtectedListView } = await import('./pages/AdminTokens/ListView');
+
+      return {
+        Component: ProtectedListView,
+      };
+    },
+    path: 'admin-tokens',
+  },
+  {
+    lazy: async () => {
+      const { ProtectedCreateView } = await import('./pages/AdminTokens/CreateView');
+
+      return {
+        Component: ProtectedCreateView,
+      };
+    },
+    path: 'admin-tokens/create',
+  },
+  {
+    lazy: async () => {
+      const { ProtectedEditView } = await import('./pages/AdminTokens/EditView/EditViewPage');
+
+      return {
+        Component: ProtectedEditView,
+      };
+    },
+    path: 'admin-tokens/:id',
+  },
+];
+
+export const ROUTES_CE = (): RouteObject[] => [
   {
     lazy: async () => {
       const { ProtectedListPage } = await import('./pages/Roles/ListPage');
@@ -73,10 +106,10 @@ export const ROUTES_CE: RouteObject[] = [
   },
   {
     lazy: async () => {
-      const { ProtectedEditPage } = await import('./pages/Webhooks/EditPage');
+      const editWebhook = await import('./pages/Webhooks/EditPage');
 
       return {
-        Component: ProtectedEditPage,
+        Component: editWebhook.ProtectedEditPage,
       };
     },
     path: 'webhooks/:id',
@@ -121,6 +154,7 @@ export const ROUTES_CE: RouteObject[] = [
     },
     path: 'api-tokens/:id',
   },
+  ...ADMIN_TOKEN_ROUTES,
   {
     lazy: async () => {
       const { ProtectedCreateView } = await import('./pages/TransferTokens/CreateView');

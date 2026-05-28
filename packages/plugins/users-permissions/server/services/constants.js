@@ -1,0 +1,9 @@
+'use strict';
+
+module.exports = {
+  DEFAULT_ACCESS_TOKEN_LIFESPAN: 10 * 60, // 10 minutes
+  DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN: 30 * 24 * 60 * 60, // 30 days
+  DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN: 14 * 24 * 60 * 60, // 14 days
+  DEFAULT_MAX_SESSION_LIFESPAN: 1 * 24 * 60 * 60, // 1 day
+  DEFAULT_IDLE_SESSION_LIFESPAN: 2 * 60 * 60, // 2 hours
+};

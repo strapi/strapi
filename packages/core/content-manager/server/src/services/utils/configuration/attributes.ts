@@ -79,7 +79,7 @@ const isVisible = (schema: any, name: any) => {
     return false;
   }
 
-  if (isTimestamp(schema, name) || name === 'id') {
+  if (isTimestamp(schema, name) || name === 'id' || name === 'documentId') {
     return false;
   }
 
@@ -184,8 +184,9 @@ const getSortableAttributes = (schema: any) => {
     getWritableAttributes(model)
   );
 
+  const identifierField = _.has(schema.attributes, 'documentId') ? 'documentId' : 'id';
   return [
-    'id',
+    identifierField,
     ...validAttributes,
     ...nonVisibleWritableAttributes,
     CREATED_BY_ATTRIBUTE,

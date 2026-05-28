@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { type StrapiTheme } from '@strapi/design-system';
 
 import type { Modules } from '@strapi/types';
@@ -24,9 +26,13 @@ declare global {
       flags: {
         promoteEE?: boolean;
         nps?: boolean;
+        docLinks?: boolean;
       };
       projectType: 'Community' | 'Enterprise';
       telemetryDisabled: boolean;
+      ai: {
+        enabled: boolean;
+      };
     };
   }
 }

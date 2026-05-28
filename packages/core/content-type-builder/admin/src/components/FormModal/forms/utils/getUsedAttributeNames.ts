@@ -1,7 +1,8 @@
 export type SchemaData = {
   initialData: {
-    name: string;
-    targetAttribute: any;
+    name?: string;
+    targetAttribute?: any;
+    [key: string]: unknown;
   };
   modifiedData: object;
 };

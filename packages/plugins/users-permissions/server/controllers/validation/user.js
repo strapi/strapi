@@ -29,7 +29,18 @@ const createUserBodySchema = yup.object().shape({
 const updateUserBodySchema = yup.object().shape({
   email: yup.string().email().min(1),
   username: yup.string().min(1),
-  password: yup.string().min(1),
+  password: yup
+    .mixed()
+    .test(
+      'password-validation',
+      'Password must be at least 1 character',
+      function validatePassword(value) {
+        if (value == null || value === '') {
+          return true;
+        }
+        return typeof value === 'string' && value.length >= 1;
+      }
+    ),
   role: yup.lazy((value) =>
     typeof value === 'object'
       ? yup.object().shape({

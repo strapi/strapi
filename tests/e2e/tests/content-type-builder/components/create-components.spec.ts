@@ -1,18 +1,17 @@
 import { test } from '@playwright/test';
-import { resetFiles } from '../../../utils/file-reset';
-import { sharedSetup } from '../../../utils/setup';
-import { createComponent, type AddAttribute } from '../../../utils/content-types';
+import { resetFiles } from '../../../../utils/file-reset';
+import { sharedSetup } from '../../../../utils/setup';
+import { createComponent, type AddAttribute } from '../../../../utils/content-types';
 
 test.describe('Create a new component', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   test.beforeEach(async ({ page }) => {
     await sharedSetup('create-component', page, {
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       login: true,
-      skipTour: true,
       afterSetup: async () => {},
     });
   });
