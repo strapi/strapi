@@ -72,10 +72,7 @@ const signUrlsInText = async (text: string): Promise<string> => {
     // Find the file in the database by matching the URL or hash
     const files = await strapi.db.query(FILE_MODEL_UID).findMany({
       where: {
-        $or: [
-          { url: baseUrl },
-          { url: { $contains: baseUrl.split('/').pop() } },
-        ],
+        $or: [{ url: baseUrl }, { url: { $contains: baseUrl.split('/').pop() } }],
       },
       limit: 1,
     });
