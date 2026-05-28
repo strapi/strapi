@@ -3,6 +3,5 @@
   "compilerOptions": {
     "strict": false,
     "noEmit": true
-  },
-  "include": ["."]
+  }
 }
