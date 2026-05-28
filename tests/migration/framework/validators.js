@@ -5,16 +5,16 @@ const execa = require('execa');
 
 /**
  * @param {Record<string, string>} baseEnv
- * @param {{ dataOrigin: string, multiplier: number, skipJoinParity?: boolean }} extra
+ * @param {{ multiplier: number, dbEnv: object, validatorProfile: string, dataOrigin?: string }} extra
  */
-function buildValidateEnv(ctx, { multiplier, dbEnv, dataOrigin, skipJoinParity }) {
+function buildValidateEnv(ctx, { multiplier, dbEnv, validatorProfile, dataOrigin }) {
   return {
     ...process.env,
     ...dbEnv,
     MIGRATION_MULTIPLIER: String(multiplier),
     SEED_MULTIPLIER: String(multiplier),
-    MIGRATION_DATA_ORIGIN: dataOrigin,
-    ...(skipJoinParity ? { MIGRATION_SKIP_DP_JOIN_PARITY: '1' } : {}),
+    MIGRATION_VALIDATOR_PROFILE: validatorProfile,
+    ...(dataOrigin ? { MIGRATION_DATA_ORIGIN: dataOrigin } : {}),
   };
 }
 
@@ -44,8 +44,8 @@ const REGISTRY = {
       buildValidateEnv(ctx, {
         multiplier,
         dbEnv,
+        validatorProfile: 'full-v4-origin',
         dataOrigin: dataOrigin || 'v4',
-        skipJoinParity: false,
       }),
       multiplier
     );
@@ -57,8 +57,8 @@ const REGISTRY = {
       buildValidateEnv(ctx, {
         multiplier,
         dbEnv,
+        validatorProfile: 'full-v5-origin',
         dataOrigin: dataOrigin || 'v5',
-        skipJoinParity: false,
       }),
       multiplier
     );
@@ -71,7 +71,12 @@ const REGISTRY = {
   'full-ladder': async (ctx, { multiplier, dbEnv, dataOrigin = 'v4' }) => {
     await runValidationScript(
       ctx,
-      buildValidateEnv(ctx, { multiplier, dbEnv, dataOrigin, skipJoinParity: true }),
+      buildValidateEnv(ctx, {
+        multiplier,
+        dbEnv,
+        validatorProfile: 'full-ladder',
+        dataOrigin,
+      }),
       multiplier
     );
   },
