@@ -226,6 +226,45 @@ export class AssetsPage {
   }
 
   /**
+   * Get an editable text input inside the asset details drawer by its visible
+   * label (File name, Caption, Alternative text).
+   */
+  getAssetDetailsDrawerTextField(label: string) {
+    return this.assetDetailsDrawer.getByRole('textbox', { name: label });
+  }
+
+  /**
+   * Get the Location SingleSelect combobox inside the asset details drawer.
+   */
+  getAssetDetailsDrawerLocationSelect() {
+    return this.assetDetailsDrawer.getByRole('combobox', { name: /location/i });
+  }
+
+  /**
+   * Replace the value of an editable text field in the drawer.
+   */
+  async fillAssetDetailsDrawerText(label: string, value: string) {
+    const field = this.getAssetDetailsDrawerTextField(label);
+    await field.fill(value);
+  }
+
+  /**
+   * Open the Location select and choose the option with the given name
+   * (e.g. "Media Library" for the root).
+   */
+  async selectAssetDetailsDrawerLocation(name: string | RegExp) {
+    await this.getAssetDetailsDrawerLocationSelect().click();
+    await this.page.getByRole('option', { name }).click();
+  }
+
+  /**
+   * Click the Save button inside the asset details drawer.
+   */
+  async clickAssetDetailsDrawerSave() {
+    await this.assetDetailsDrawer.getByRole('button', { name: 'Save' }).click();
+  }
+
+  /**
    * Open the New menu and click "New folder"
    */
   async openCreateFolderDialog() {
