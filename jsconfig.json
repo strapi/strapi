@@ -20,6 +20,7 @@
     "**/*.test.api.js",
 
     ".github/actions",
+    "docs",
     "packages",
     "examples",
     "templates"
