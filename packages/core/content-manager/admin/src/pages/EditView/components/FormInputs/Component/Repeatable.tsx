@@ -63,7 +63,7 @@ const RepeatableComponent = ({
   const moveFieldRow = useForm('RepeatableComponent', (state) => state.moveFieldRow);
   const removeFieldRow = useForm('RepeatableComponent', (state) => state.removeFieldRow);
   const { max = Infinity } = attribute;
-  const value = Array.isArray(rawValue) ? rawValue : [];
+  const value = React.useMemo(() => (Array.isArray(rawValue) ? rawValue : []), [rawValue]);
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');

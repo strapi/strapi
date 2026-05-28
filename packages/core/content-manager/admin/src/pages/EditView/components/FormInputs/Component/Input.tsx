@@ -91,7 +91,7 @@ const ComponentInput = ({
           {props.children}
         </NonRepeatableComponent>
       ) : null}
-      {attribute.repeatable (
+      {attribute.repeatable && (
         <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
           {props.children}
         </RepeatableComponent>
