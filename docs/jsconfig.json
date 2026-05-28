@@ -9,7 +9,13 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": false,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@cmfcmf/docusaurus-search-local/src/server": [
+        "./node_modules/@cmfcmf/docusaurus-search-local/lib/server/index.js"
+      ]
+    }
   },
   "include": ["*.js"],
   "exclude": ["node_modules", "build", ".docusaurus", "static"]
