@@ -18,7 +18,10 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { get } = useFetchClient();
-  const { folderPath, _q, ...paramsExceptFolderAndQ } = query;
+  // Drop folderPath even when it's present — we filter on folder.id now, and
+  // forwarding folderPath to the API would duplicate the filter on the legacy
+  // (string-path) attribute.
+  const { folder, folderPath: _folderPath, _q, ...paramsExceptFolderAndQ } = query;
 
   let params: Query;
 
@@ -28,13 +31,24 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
       _q: encodeURIComponent(_q),
     };
   } else {
+    /**
+     * Filter on the folder id (matches useFolders + future admin). Previously
+     * this used folderPath, but folderPath and folder could drift out of sync
+     * via the URL (CM media picker, bookmarks, partial query updates) and
+     * cause subfolder assets to vanish until an upload triggered a refetch.
+     * See #23571.
+     */
     params = {
       ...paramsExceptFolderAndQ,
       filters: {
         $and: [
           ...(paramsExceptFolderAndQ?.filters?.$and ?? []),
           {
-            folderPath: { $eq: folderPath ?? '/' },
+            folder: {
+              id: folder ?? {
+                $null: true,
+              },
+            },
           },
         ],
       },

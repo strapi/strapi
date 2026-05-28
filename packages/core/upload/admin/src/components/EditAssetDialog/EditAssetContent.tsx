@@ -67,6 +67,12 @@ export interface Asset extends Omit<FileDefinition, 'folder'> {
 
 interface EditAssetContentProps {
   asset?: Asset;
+  /**
+   * Folder id to pre-fill the Location field with when the asset has no folder
+   * yet (e.g. a pending upload opened from inside a subfolder). Fixes #23576
+   * where the dialog always showed the Media Library root before upload.
+   */
+  initialFolderId?: string | number | null;
   canUpdate?: boolean;
   canCopyLink?: boolean;
   canDownload?: boolean;
@@ -87,9 +93,17 @@ interface FormInitialData {
   };
 }
 
+const toFolderId = (value: string | number | null | undefined): number | undefined => {
+  if (value === null || value === undefined) return undefined;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export const EditAssetContent = ({
   onClose,
   asset,
+  initialFolderId = null,
   canUpdate = false,
   canCopyLink = false,
   canDownload = false,
@@ -171,7 +185,7 @@ export const EditAssetContent = ({
     }
   };
 
-  const activeFolderId = asset?.folder?.id;
+  const activeFolderId = asset?.folder?.id ?? toFolderId(initialFolderId);
   const initialFormData = !folderStructureIsLoading && {
     name: asset?.name,
     alternativeText: asset?.alternativeText ?? undefined,

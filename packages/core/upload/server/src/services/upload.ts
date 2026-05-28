@@ -381,7 +381,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       caption: _.isNil(caption) ? dbFile.caption : caption,
       focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
       folder: _.isUndefined(folder) ? dbFile.folder : folder,
-      folderPath: _.isUndefined(folder) ? dbFile.path : await fileService.getFolderPath(folder),
+      // The file schema field is `folderPath`, not `path`. Reading `dbFile.path`
+      // wrote `undefined` to the column on metadata-only updates and corrupted
+      // folder-scoped queries over time (see #21904).
+      folderPath: _.isUndefined(folder)
+        ? dbFile.folderPath
+        : await fileService.getFolderPath(folder),
     };
 
     return update(id, newInfos, { user });
