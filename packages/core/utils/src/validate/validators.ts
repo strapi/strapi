@@ -344,7 +344,7 @@ const validatePopulateDotPathSegments = (
 
       try {
         if (!rest.length) {
-          if (isPopulatableAttribute(nestedAttribute)) {
+          if (nestedAttribute) {
             validated = true;
             break;
           }
@@ -566,25 +566,13 @@ export const validatePopulate = asyncCurry(
 
           // Handle recursive nested `populate` validation with the same include object
           if (key === 'populate') {
-            const morphParentAttribute = parent?.attribute ?? attribute;
-
-            if (isMorphLikeAttribute(morphParentAttribute)) {
-              validateMorphLikeNestedPopulate(value, {
-                path: path.raw,
-              });
-            }
             set(
               key,
               await validatePopulate(
                 {
                   schema,
                   getModel,
-                  parent: {
-                    key,
-                    path,
-                    schema,
-                    attribute: morphParentAttribute,
-                  },
+                  parent: { key, path, schema, attribute },
                   path,
                 },
                 value, // pass the nested populate value
