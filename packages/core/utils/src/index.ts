@@ -39,3 +39,5 @@ export * from './route-serialization';
 export * from './primitives';
 export * from './content-api-router';
 export * from './security';
+export * from './publication-filter';
+export * from './has-published-version-param';
