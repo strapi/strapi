@@ -79,9 +79,14 @@ export type DestroyTestSetupOptions = {
 };
 
 export const destroyTestSetup = async (
-  { strapi, builder },
+  testSetup: BuilderHelperReturn | undefined,
   options: DestroyTestSetupOptions = {}
 ) => {
+  if (!testSetup) {
+    return;
+  }
+
+  const { strapi, builder } = testSetup;
   await strapi.destroy();
   await builder.cleanup({ useGoldenRestore: options.useGoldenRestore });
 };

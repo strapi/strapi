@@ -13,6 +13,12 @@ const {
 /** Paths under the test app dir that CTB mutates (relative to app root). */
 const SNAPSHOT_DIRS = ['src/api', 'src/components'];
 
+/**
+ * Generated between test suites (not part of the golden baseline). Purged on restore so
+ * stale OpenAPI / plugin artifacts cannot reference deleted CTB content types.
+ */
+const PURGE_ON_RESTORE = ['src/extensions/documentation/documentation'];
+
 const SUPPORTED_CLIENTS = new Set(['sqlite', 'postgres', 'mysql']);
 
 const getAppDir = () => {
@@ -38,8 +44,13 @@ const rm = async (target) => {
 };
 
 const copyPath = async (source, dest) => {
-  await fs.promises.mkdir(path.dirname(dest), { recursive: true });
   await fs.promises.cp(source, dest, { recursive: true, force: true });
+};
+
+const purgeGeneratedPaths = async (appDir) => {
+  for (const rel of PURGE_ON_RESTORE) {
+    await rm(path.join(appDir, rel));
+  }
 };
 
 const captureFilesystem = async (appDir, goldenDir) => {
@@ -84,7 +95,16 @@ const captureGoldenSnapshot = async ({ strapi }) => {
   await fs.promises.mkdir(goldenDir, { recursive: true });
 
   await captureFilesystem(appDir, goldenDir);
-  const dbMeta = await captureDatabase(strapi, goldenDir);
+
+  // SQLite must be copied only after Strapi has closed the connection (and sidecars cleared).
+  let dbMeta;
+  if (client === 'sqlite') {
+    await strapi.destroy();
+    dbMeta = await captureDatabase(null, goldenDir);
+  } else {
+    dbMeta = await captureDatabase(strapi, goldenDir);
+    await strapi.destroy();
+  }
 
   return { goldenDir, client, dbMeta };
 };
@@ -119,11 +139,13 @@ const restoreGoldenSnapshot = async () => {
   }
 
   await restoreFilesystem(appDir, goldenDir);
+  await purgeGeneratedPaths(appDir);
   await restoreDatabase(goldenDir);
 };
 
 module.exports = {
   SNAPSHOT_DIRS,
+  PURGE_ON_RESTORE,
   captureGoldenSnapshot,
   restoreGoldenSnapshot,
   goldenSnapshotExists,

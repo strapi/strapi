@@ -42,6 +42,15 @@ const resolveSqlitePath = (appDir, filename) => {
   return path.isAbsolute(relative) ? relative : path.join(appDir, relative);
 };
 
+const SQLITE_SIDECAR_SUFFIXES = ['-wal', '-shm', '-journal'];
+
+/** Remove SQLite sidecar files so a restored data.db is not merged with stale WAL state. */
+const removeSqliteSidecars = async (dbPath) => {
+  await Promise.all(
+    SQLITE_SIDECAR_SUFFIXES.map((suffix) => fs.promises.rm(`${dbPath}${suffix}`, { force: true }))
+  );
+};
+
 const writeMeta = async (goldenDatabaseDir, meta) => {
   await fs.promises.writeFile(
     path.join(goldenDatabaseDir, META_FILE),
@@ -64,15 +73,17 @@ const captureDatabase = async (strapi, goldenDir) => {
   const goldenDatabaseDir = path.join(goldenDir, DATABASE_DIR);
   await fs.promises.mkdir(goldenDatabaseDir, { recursive: true });
 
-  const client = normalizeClient(strapi.db.config.connection.client);
+  const { client: envClient, connection } = readDatabaseMeta(appDir);
+  const client = strapi ? normalizeClient(strapi.db.config.connection.client) : envClient;
   const meta = { client, capturedAt: new Date().toISOString() };
 
   if (client === 'sqlite') {
-    const filename = strapi.config.get('database.connection.filename');
+    const filename = strapi?.config?.get('database.connection.filename') ?? connection.filename;
     const sqlitePath = resolveSqlitePath(appDir, filename);
     if (!fs.existsSync(sqlitePath)) {
       throw new Error(`golden-snapshot: sqlite database file not found at ${sqlitePath}`);
     }
+    await removeSqliteSidecars(sqlitePath);
     await fs.promises.copyFile(sqlitePath, path.join(goldenDatabaseDir, SQLITE_DUMP_FILE));
     meta.sqliteFilename = filename;
     await writeMeta(goldenDatabaseDir, meta);
@@ -108,7 +119,9 @@ const restoreSqliteFile = async (appDir, goldenDatabaseDir, meta) => {
 
   const target = resolveSqlitePath(appDir, meta.sqliteFilename);
   await fs.promises.mkdir(path.dirname(target), { recursive: true });
+  await removeSqliteSidecars(target);
   await fs.promises.copyFile(source, target);
+  await removeSqliteSidecars(target);
 };
 
 /**
@@ -117,6 +130,44 @@ const restoreSqliteFile = async (appDir, goldenDatabaseDir, meta) => {
  * @param {import('@strapi/types').Core.Strapi} strapi
  * @param {string} goldenDatabaseDir
  */
+const disableForeignKeyChecks = async (strapi, client) => {
+  if (client === 'postgres') {
+    await strapi.db.connection.raw('SET session_replication_role = replica');
+    return;
+  }
+
+  if (client === 'mysql') {
+    await strapi.db.connection.raw('SET FOREIGN_KEY_CHECKS = 0');
+  }
+};
+
+const enableForeignKeyChecks = async (strapi, client) => {
+  if (client === 'postgres') {
+    await strapi.db.connection.raw('SET session_replication_role = DEFAULT');
+    return;
+  }
+
+  if (client === 'mysql') {
+    await strapi.db.connection.raw('SET FOREIGN_KEY_CHECKS = 1');
+  }
+};
+
+const dropTableCascade = async (strapi, client, tableName) => {
+  const schema = strapi.db.getSchemaConnection();
+
+  if (client === 'postgres') {
+    await schema.raw('DROP TABLE IF EXISTS ?? CASCADE', [tableName]);
+    return;
+  }
+
+  if (client === 'mysql') {
+    await schema.raw('DROP TABLE IF EXISTS ??', [tableName]);
+    return;
+  }
+
+  await schema.schema.dropTableIfExists(tableName);
+};
+
 const restoreRelationalFromSnapshot = async (strapi, goldenDatabaseDir) => {
   const tablesPath = path.join(goldenDatabaseDir, TABLES_FILE);
   if (!fs.existsSync(tablesPath)) {
@@ -126,13 +177,15 @@ const restoreRelationalFromSnapshot = async (strapi, goldenDatabaseDir) => {
   const snapshot = JSON.parse(await fs.promises.readFile(tablesPath, 'utf8'));
   const goldenTables = new Set(snapshot.tables);
   const currentTables = await strapi.db.dialect.schemaInspector.getTables();
+  const client = normalizeClient(strapi.db.config.connection.client);
 
   await strapi.db.dialect.startSchemaUpdate();
+  await disableForeignKeyChecks(strapi, client);
 
   try {
     for (const tableName of currentTables) {
       if (!goldenTables.has(tableName)) {
-        await strapi.db.getSchemaConnection().schema.dropTableIfExists(tableName);
+        await dropTableCascade(strapi, client, tableName);
       }
     }
 
@@ -145,6 +198,7 @@ const restoreRelationalFromSnapshot = async (strapi, goldenDatabaseDir) => {
       }
     }
   } finally {
+    await enableForeignKeyChecks(strapi, client);
     await strapi.db.dialect.endSchemaUpdate();
   }
 };
@@ -193,4 +247,6 @@ module.exports = {
   restoreDatabase,
   databaseSnapshotExists,
   readDatabaseMeta,
+  removeSqliteSidecars,
+  resolveSqlitePath,
 };

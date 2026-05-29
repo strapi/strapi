@@ -102,7 +102,6 @@ const main = async ({ database, generateApp }, args) => {
       process.env.JWT_SECRET = process.env.JWT_SECRET || 'aSecret';
       const strapi = await createStrapiInstance({ logLevel: 'error' });
       const { goldenDir, client } = await captureGoldenSnapshot({ strapi });
-      await strapi.destroy();
       console.log(`[api-tests] golden snapshot captured at ${goldenDir} (${client})`);
     }
 
