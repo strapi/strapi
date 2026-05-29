@@ -17,6 +17,7 @@ import {
   useLoginMutation,
   useLogoutMutation,
 } from '../services/auth';
+import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { getOrCreateDeviceId } from '../utils/deviceId';
 import { setOnSessionExpired, setOnTokenUpdate } from '../utils/getFetchClient';
 
@@ -143,7 +144,7 @@ const AuthProvider = ({
   React.useEffect(() => {
     if (user) {
       if (user.preferedLanguage) {
-        dispatch(setLocale(user.preferedLanguage));
+        dispatch(setLocale(normalizeAdminLocale(user.preferedLanguage)));
       }
     }
   }, [dispatch, user]);
