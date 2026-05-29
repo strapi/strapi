@@ -7,16 +7,13 @@ import {
   Flex,
   FocusTrap,
   IconButton,
+  NumberInput,
   Portal,
-  TextInput,
   Typography,
 } from '@strapi/design-system';
 import { Crop, Link } from '@strapi/icons';
-// Raw cropperjs stylesheet, injected via createGlobalStyle. Without it the
-// cropper container collapses and the image/crop box don't render.
-import cropperCss from 'cropperjs/dist/cropper.css?raw';
 import { useIntl } from 'react-intl';
-import { createGlobalStyle, styled } from 'styled-components';
+import { styled } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/files';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -29,54 +26,88 @@ import type {
 } from '../../../../../../../shared/contracts/files';
 
 const FOCAL_DIAMETER_REM = 5.6;
-
-const CropperGlobalStyle = createGlobalStyle`${cropperCss}`;
+const HANDLE_PX = 12;
 
 /* -------------------------------------------------------------------------------------------------
  * Styled
  * -----------------------------------------------------------------------------------------------*/
 
-// Full-viewport takeover. z-index clears the whole theme ladder (tooltip 1000)
-// so nothing from the drawer beneath bleeds through.
+// Full-viewport takeover with a small inset so the editor reads as a card.
 const Overlay = styled(Flex)`
   position: fixed;
-  inset: 0;
   z-index: 1200;
   flex-direction: column;
+  top: ${({ theme }) => theme.spaces[1]};
+  left: ${({ theme }) => theme.spaces[1]};
+  right: ${({ theme }) => theme.spaces[1]};
+  bottom: ${({ theme }) => theme.spaces[1]};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  border: 1px solid ${({ theme }) => theme.colors.neutral150};
   background: ${({ theme }) => theme.colors.neutral0};
 `;
 
 const HeaderBar = styled(Flex)`
-  flex-shrink: 0;
+  width: 100%;
   gap: ${({ theme }) => theme.spaces[2]};
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[5]}`};
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+  background: ${({ theme }) => theme.colors.neutral0};
 `;
 
+// Fills the remaining space between header/footer; checkerboard pattern.
 const Body = styled(Box)`
+  width: 100%;
   position: relative;
   flex: 1;
   min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   background: repeating-conic-gradient(
       ${({ theme }) => theme.colors.neutral100} 0% 25%,
-      transparent 0% 50%
+      ${({ theme }) => theme.colors.neutral0} 0% 50%
     )
     50% / 20px 20px;
 `;
 
-// cropperjs replaces this <img>; the wrapper just centers it before init.
-const CropArea = styled.div`
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+// Wrapper sized to the image's natural aspect ratio so the <img> inside fills
+// it without letterboxing. Percentage-based positioning of the crop overlay
+// then maps directly to natural-px coordinates.
+const CropArea = styled.div<{ $aspect?: number }>`
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  ${({ $aspect }) => ($aspect ? `aspect-ratio: ${$aspect};` : '')}
 
   img {
-    max-width: 100%;
-    max-height: 100%;
+    display: block;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    -webkit-user-drag: none;
   }
+`;
+
+// Crop selection rectangle, positioned by % of CropArea. Inverts the dim
+// outside via box-shadow so the focused area shows full color.
+const CropOverlay = styled.div`
+  position: absolute;
+  border: 1px dashed ${({ theme }) => theme.colors.primary600};
+  box-shadow: 0 0 0 9999px rgba(33, 33, 52, 0.5);
+  cursor: move;
+`;
+
+const ResizeHandle = styled.button<{ $cursor: string }>`
+  position: absolute;
+  width: ${HANDLE_PX}px;
+  height: ${HANDLE_PX}px;
+  margin: -${HANDLE_PX / 2}px;
+  padding: 0;
+  border: 1px solid ${({ theme }) => theme.colors.primary600};
+  border-radius: 2px;
+  background: ${({ theme }) => theme.colors.neutral0};
+  cursor: ${({ $cursor }) => $cursor};
 `;
 
 const FocalPointHandle = styled.button`
@@ -89,7 +120,6 @@ const FocalPointHandle = styled.button`
   background: transparent;
   box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.neutral800};
   cursor: grab;
-  z-index: 10;
   padding: 0;
 
   &::after {
@@ -111,20 +141,21 @@ const FocalPointHandle = styled.button`
 
 const InfoBox = styled(Box)`
   position: absolute;
-  right: ${({ theme }) => theme.spaces[6]};
-  bottom: ${({ theme }) => theme.spaces[6]};
+  right: ${({ theme }) => theme.spaces[1]};
+  bottom: ${({ theme }) => theme.spaces[1]};
   width: 30rem;
-  padding: ${({ theme }) => theme.spaces[4]};
+  padding: ${({ theme }) => theme.spaces[3]};
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral800};
   z-index: 20;
 `;
 
 const FooterBar = styled(Flex)`
-  flex-shrink: 0;
+  width: 100%;
   justify-content: space-between;
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[5]}`};
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+  background: ${({ theme }) => theme.colors.neutral0};
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -139,6 +170,8 @@ interface AssetCropEditorProps {
   onSaveAsCopy: (file: globalThis.File, focalPoint: FocalPoint) => void;
 }
 
+type Corner = 'tl' | 'tr' | 'bl' | 'br';
+
 export const AssetCropEditor = ({
   asset,
   isBusy = false,
@@ -148,15 +181,16 @@ export const AssetCropEditor = ({
 }: AssetCropEditorProps) => {
   const { formatMessage } = useIntl();
   const imgRef = React.useRef<HTMLImageElement>(null);
-  const bodyRef = React.useRef<HTMLDivElement>(null);
+  const cropAreaRef = React.useRef<HTMLDivElement>(null);
 
   const {
+    init,
     crop,
-    stopCropping,
-    produceFile,
+    naturalSize,
     setCropSize,
+    setCropPosition,
     setAspectRatio,
-    getCropBoxData,
+    produceFile,
     width,
     height,
   } = useCropImg();
@@ -164,39 +198,76 @@ export const AssetCropEditor = ({
   const [aspectLocked, setAspectLocked] = React.useState(false);
   // Focal point as a percentage of the crop area (matches the {x,y} contract).
   const [focal, setFocal] = React.useState<FocalPoint>(asset.focalPoint ?? { x: 50, y: 50 });
-  const [cropBox, setCropBox] = React.useState({ left: 0, top: 0, width: 0, height: 0 });
 
   const imageUrl = prefixFileUrlWithBackendUrl(asset.url) as string;
 
-  // Mount cropper once the <img> has loaded, then mirror the crop box rect so
-  // the focal handle can be overlaid on it.
-  const refreshCropBox = React.useCallback(() => {
-    const data = getCropBoxData();
-    if (data) {
-      setCropBox({
-        left: data.left ?? 0,
-        top: data.top ?? 0,
-        width: data.width ?? 0,
-        height: data.height ?? 0,
-      });
-    }
-  }, [getCropBoxData]);
-
   const handleImageLoad = () => {
     if (imgRef.current) {
-      crop(imgRef.current);
-      // cropperjs dispatches `crop` on the <img> on every box change.
-      imgRef.current.addEventListener('crop', refreshCropBox);
+      init(imgRef.current);
     }
   };
 
-  React.useEffect(() => {
-    const img = imgRef.current;
-    return () => {
-      img?.removeEventListener('crop', refreshCropBox);
-      stopCropping();
+  // Map a pointer event to natural-px coordinates inside the image.
+  const pointerToNatural = (event: PointerEvent | React.PointerEvent) => {
+    const rect = cropAreaRef.current?.getBoundingClientRect();
+    if (!rect || !naturalSize.width || !naturalSize.height) return null;
+    const ratioX = naturalSize.width / rect.width;
+    const ratioY = naturalSize.height / rect.height;
+    return {
+      x: (event.clientX - rect.left) * ratioX,
+      y: (event.clientY - rect.top) * ratioY,
     };
-  }, [refreshCropBox, stopCropping]);
+  };
+
+  // Drag the entire crop rectangle.
+  const handleMovePointerDown = (event: React.PointerEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const start = pointerToNatural(event);
+    if (!start) return;
+    const startCrop = { ...crop };
+    const move = (e: PointerEvent) => {
+      const next = pointerToNatural(e);
+      if (!next) return;
+      setCropPosition({
+        x: startCrop.x + (next.x - start.x),
+        y: startCrop.y + (next.y - start.y),
+      });
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  // Resize from a corner; the opposite corner stays anchored.
+  const handleResizePointerDown = (corner: Corner) => (event: React.PointerEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const startCrop = { ...crop };
+    const anchorX =
+      corner === 'tl' || corner === 'bl' ? startCrop.x + startCrop.width : startCrop.x;
+    const anchorY =
+      corner === 'tl' || corner === 'tr' ? startCrop.y + startCrop.height : startCrop.y;
+    const move = (e: PointerEvent) => {
+      const point = pointerToNatural(e);
+      if (!point) return;
+      const x = Math.min(anchorX, point.x);
+      const y = Math.min(anchorY, point.y);
+      const w = Math.abs(point.x - anchorX);
+      const h = Math.abs(point.y - anchorY);
+      setCropPosition({ x, y });
+      setCropSize({ width: w, height: h });
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
 
   const toggleAspectLock = () => {
     setAspectLocked((locked) => {
@@ -206,17 +277,20 @@ export const AssetCropEditor = ({
     });
   };
 
-  // Drag the focal handle, clamped to the crop box.
+  // Drag the focal handle within the crop rectangle, clamped 0–100.
   const handleFocalPointerDown = (event: React.PointerEvent) => {
     event.preventDefault();
+    event.stopPropagation();
     const move = (e: PointerEvent) => {
-      const box = bodyRef.current?.getBoundingClientRect();
-      if (!box) return;
-      const px = e.clientX - box.left - cropBox.left;
-      const py = e.clientY - box.top - cropBox.top;
-      const x = Math.min(100, Math.max(0, (px / cropBox.width) * 100));
-      const y = Math.min(100, Math.max(0, (py / cropBox.height) * 100));
-      setFocal({ x: Math.round(x), y: Math.round(y) });
+      const point = pointerToNatural(e);
+      if (!point) return;
+      // Convert pointer to a percentage of the current crop area.
+      const px = ((point.x - crop.x) / crop.width) * 100;
+      const py = ((point.y - crop.y) / crop.height) * 100;
+      setFocal({
+        x: Math.round(Math.min(100, Math.max(0, px))),
+        y: Math.round(Math.min(100, Math.max(0, py))),
+      });
     };
     const up = () => {
       window.removeEventListener('pointermove', move);
@@ -246,9 +320,18 @@ export const AssetCropEditor = ({
     }
   };
 
+  const cropPercents =
+    naturalSize.width && naturalSize.height
+      ? {
+          left: (crop.x / naturalSize.width) * 100,
+          top: (crop.y / naturalSize.height) * 100,
+          width: (crop.width / naturalSize.width) * 100,
+          height: (crop.height / naturalSize.height) * 100,
+        }
+      : null;
+
   return (
     <Portal>
-      <CropperGlobalStyle />
       <FocusTrap onEscape={onClose}>
         <Overlay>
           <HeaderBar alignItems="center">
@@ -261,25 +344,75 @@ export const AssetCropEditor = ({
             </Typography>
           </HeaderBar>
 
-          <Body ref={bodyRef}>
-            <CropArea>
-              <img ref={imgRef} src={imageUrl} alt={asset.name} onLoad={handleImageLoad} />
-            </CropArea>
-
-            {cropBox.width > 0 ? (
-              <FocalPointHandle
-                type="button"
-                aria-label={formatMessage({
-                  id: getTranslationKey('asset-details.crop.focal-point'),
-                  defaultMessage: 'Focal point',
-                })}
-                style={{
-                  left: cropBox.left + (focal.x / 100) * cropBox.width,
-                  top: cropBox.top + (focal.y / 100) * cropBox.height,
-                }}
-                onPointerDown={handleFocalPointerDown}
+          <Body>
+            <CropArea
+              ref={cropAreaRef}
+              $aspect={
+                naturalSize.width && naturalSize.height
+                  ? naturalSize.width / naturalSize.height
+                  : undefined
+              }
+            >
+              <img
+                ref={imgRef}
+                src={imageUrl}
+                alt={asset.name}
+                crossOrigin="anonymous"
+                onLoad={handleImageLoad}
+                draggable={false}
               />
-            ) : null}
+
+              {cropPercents ? (
+                <CropOverlay
+                  style={{
+                    left: `${cropPercents.left}%`,
+                    top: `${cropPercents.top}%`,
+                    width: `${cropPercents.width}%`,
+                    height: `${cropPercents.height}%`,
+                  }}
+                  onPointerDown={handleMovePointerDown}
+                >
+                  <ResizeHandle
+                    type="button"
+                    aria-label="Resize top-left"
+                    $cursor="nwse-resize"
+                    style={{ left: 0, top: 0 }}
+                    onPointerDown={handleResizePointerDown('tl')}
+                  />
+                  <ResizeHandle
+                    type="button"
+                    aria-label="Resize top-right"
+                    $cursor="nesw-resize"
+                    style={{ right: 0, top: 0 }}
+                    onPointerDown={handleResizePointerDown('tr')}
+                  />
+                  <ResizeHandle
+                    type="button"
+                    aria-label="Resize bottom-left"
+                    $cursor="nesw-resize"
+                    style={{ left: 0, bottom: 0 }}
+                    onPointerDown={handleResizePointerDown('bl')}
+                  />
+                  <ResizeHandle
+                    type="button"
+                    aria-label="Resize bottom-right"
+                    $cursor="nwse-resize"
+                    style={{ right: 0, bottom: 0 }}
+                    onPointerDown={handleResizePointerDown('br')}
+                  />
+
+                  <FocalPointHandle
+                    type="button"
+                    aria-label={formatMessage({
+                      id: getTranslationKey('asset-details.crop.focal-point'),
+                      defaultMessage: 'Focal point',
+                    })}
+                    style={{ left: `${focal.x}%`, top: `${focal.y}%` }}
+                    onPointerDown={handleFocalPointerDown}
+                  />
+                </CropOverlay>
+              ) : null}
+            </CropArea>
 
             <InfoBox>
               <Flex direction="column" alignItems="stretch" gap={1} paddingBottom={3}>
@@ -302,30 +435,32 @@ export const AssetCropEditor = ({
                 <Flex direction="column" gap={2}>
                   <Field.Root name="crop-width">
                     <Field.Label textColor="neutral0">↔</Field.Label>
-                    <TextInput
-                      type="number"
+                    <NumberInput
                       aria-label={formatMessage({
                         id: getTranslationKey('asset-details.crop.width'),
                         defaultMessage: 'Width (px)',
                       })}
                       value={width}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setCropSize({ width: Number(e.target.value) })
-                      }
+                      min={1}
+                      max={naturalSize.width || undefined}
+                      onValueChange={(next) => {
+                        if (next !== undefined) setCropSize({ width: next });
+                      }}
                     />
                   </Field.Root>
                   <Field.Root name="crop-height">
                     <Field.Label textColor="neutral0">↕</Field.Label>
-                    <TextInput
-                      type="number"
+                    <NumberInput
                       aria-label={formatMessage({
                         id: getTranslationKey('asset-details.crop.height'),
                         defaultMessage: 'Height (px)',
                       })}
                       value={height}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setCropSize({ height: Number(e.target.value) })
-                      }
+                      min={1}
+                      max={naturalSize.height || undefined}
+                      onValueChange={(next) => {
+                        if (next !== undefined) setCropSize({ height: next });
+                      }}
                     />
                   </Field.Root>
                 </Flex>
@@ -344,30 +479,28 @@ export const AssetCropEditor = ({
                 <Flex direction="column" gap={2}>
                   <Field.Root name="focal-x">
                     <Field.Label textColor="neutral0">fa-x</Field.Label>
-                    <TextInput
-                      type="number"
+                    <NumberInput
                       aria-label={formatMessage({
                         id: getTranslationKey('asset-details.crop.focal-x'),
                         defaultMessage: 'Focal point X (px)',
                       })}
                       value={focalPxX}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setFocalPx('x', Number(e.target.value))
-                      }
+                      onValueChange={(next) => {
+                        if (next !== undefined) setFocalPx('x', next);
+                      }}
                     />
                   </Field.Root>
                   <Field.Root name="focal-y">
                     <Field.Label textColor="neutral0">fa-y</Field.Label>
-                    <TextInput
-                      type="number"
+                    <NumberInput
                       aria-label={formatMessage({
                         id: getTranslationKey('asset-details.crop.focal-y'),
                         defaultMessage: 'Focal point Y (px)',
                       })}
                       value={focalPxY}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setFocalPx('y', Number(e.target.value))
-                      }
+                      onValueChange={(next) => {
+                        if (next !== undefined) setFocalPx('y', next);
+                      }}
                     />
                   </Field.Root>
                 </Flex>

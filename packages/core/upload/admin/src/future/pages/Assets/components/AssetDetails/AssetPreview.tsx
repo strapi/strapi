@@ -41,11 +41,14 @@ const AssetContainer = styled(Flex)`
   height: 100%;
 `;
 
-const StyledImage = styled.img<{ $rotation?: number }>`
+const StyledImage = styled.img<{ $rotation?: number; $scale?: number }>`
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  transform: ${({ $rotation }) => ($rotation ? `rotate(${$rotation}deg)` : 'none')};
+  transform: ${({ $rotation = 0, $scale = 1 }) => `rotate(${$rotation}deg) scale(${$scale})`};
+  transform-origin: center;
+  transition: transform 300ms ease;
+  will-change: transform;
 `;
 
 /**
@@ -135,6 +138,37 @@ export const AssetPreview = ({ asset, rotation = 0, actions }: AssetPreviewProps
     setIsMediaLoaded(false);
   }, [mediaUrl]);
 
+  // After a 90°/270° rotation the image's pre-transform layout box is
+  // unchanged (CSS transforms don't reflow), so a landscape image overflows
+  // the 16:9 preview when on its side. Compute a uniform downscale so the
+  // rotated visual fits the container; re-evaluate on container resize.
+  const imageRef = React.useRef<HTMLImageElement>(null);
+  const [rotationScale, setRotationScale] = React.useState(1);
+  React.useEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
+    const recompute = () => {
+      const parent = image.parentElement;
+      if (!parent) return;
+      if (!rotation || rotation % 180 === 0) {
+        setRotationScale(1);
+        return;
+      }
+      const c = parent.getBoundingClientRect();
+      // offsetWidth/Height = pre-transform layout box (transforms ignored).
+      const w = image.offsetWidth;
+      const h = image.offsetHeight;
+      if (!w || !h || !c.width || !c.height) return;
+      // Rotated visual = h × w. Shrink until both fit container.
+      setRotationScale(Math.min(1, c.width / h, c.height / w));
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(image);
+    if (image.parentElement) ro.observe(image.parentElement);
+    return () => ro.disconnect();
+  }, [rotation, isMediaLoaded]);
+
   if (mime?.includes(AssetType.Image)) {
     const imageUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
@@ -145,9 +179,11 @@ export const AssetPreview = ({ asset, rotation = 0, actions }: AssetPreviewProps
           {actions ? <ActionsOverlay>{actions}</ActionsOverlay> : null}
           <AssetContainer>
             <StyledImage
+              ref={imageRef}
               src={imageUrl}
               alt={alternativeText || asset.name || ''}
               $rotation={rotation}
+              $scale={rotationScale}
               onLoad={() => setIsMediaLoaded(true)}
               onError={() => setIsMediaLoaded(true)}
             />

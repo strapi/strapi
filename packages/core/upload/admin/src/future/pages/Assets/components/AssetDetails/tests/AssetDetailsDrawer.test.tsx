@@ -5,10 +5,6 @@ import { AssetDetails } from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../../shared/contracts/files';
 
-// AssetCropEditor pulls in the cropperjs stylesheet as a raw string (a Vite
-// `?raw` import); stub it so jest can resolve the module.
-jest.mock('cropperjs/dist/cropper.css?raw', () => '', { virtual: true });
-
 const baseAsset = {
   id: 1,
   name: 'photo.png',
