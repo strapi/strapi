@@ -1,10 +1,10 @@
 /**
  * Empty populate sort must not set orderBy, so join-table connect order is preserved (#26426).
  *
- * GraphQL nested fields default to sort: []. REST can send other empty shapes via qs.
+ * GraphQL nested fields default to sort: []. REST clients typically omit sort or send empty
+ * strings (see REST cases below). qs `sort[]` → `[null]` is covered in @strapi/utils unit tests.
  */
 import type { Core } from '@strapi/types';
-import qs from 'qs';
 
 import { createTestSetup, destroyTestSetup } from '../../../../utils/builder-helper';
 import resources from '../resources/index';
@@ -71,8 +71,6 @@ describe('Empty populate sort', () => {
   });
 
   describe('REST Content API', () => {
-    const qsParseSettings = { strictNullHandling: true, arrayLimit: 100, depth: 20 };
-
     const getArticleCategoriesViaRest = async (
       title: string,
       query: Record<string, unknown>
@@ -115,47 +113,5 @@ describe('Empty populate sort', () => {
 
       expect(names).toEqual(['Cat2-EN', 'Cat1-EN']);
     });
-
-    testInTransaction(
-      'preserves connect order for REST populate[categories][sort][] (qs empty array)',
-      async () => {
-        const title = 'REST populate sort bracket empty array';
-
-        await strapi.documents(ARTICLE_UID).create({
-          locale: 'en',
-          data: {
-            title,
-            categories: ['Cat2', 'Cat1'],
-          },
-        });
-
-        const queryString = qs.stringify(
-          {
-            filters: { title: { $eq: title } },
-            locale: 'en',
-            status: 'draft',
-            populate: { categories: { sort: [] } },
-          },
-          { allowEmptyArrays: true }
-        );
-
-        const parsed = qs.parse(queryString, qsParseSettings);
-        expect(parsed.populate).toEqual({ categories: { sort: [null] } });
-
-        const res = await rqContent({
-          method: 'GET',
-          url: `/articles?${queryString}`,
-        });
-
-        expect(res.statusCode).toBe(200);
-        expect(res.body.data).toHaveLength(1);
-
-        const names = (res.body.data[0].categories as Array<{ name: string }>).map(
-          (category) => category.name
-        );
-
-        expect(names).toEqual(['Cat2-EN', 'Cat1-EN']);
-      }
-    );
   });
 });
