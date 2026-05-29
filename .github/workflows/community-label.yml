@@ -74,7 +74,7 @@ jobs:
       # immediately after auto-labeling instead.
       - name: Checkout base branch
         if: steps.check-label.outputs.labeled == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.repository.default_branch }}
 
@@ -91,6 +91,7 @@ jobs:
           linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
           linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
           linear-labels: ${{ vars.LINEAR_LABELS }}
+          linear-triage-state-id: ${{ vars.LINEAR_TRIAGE_STATE_ID }}
 
   triage:
     runs-on: ubuntu-latest
@@ -104,7 +105,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout base branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         # SECURITY: always checkout the base branch (default_branch), never the PR head.
         with:
           ref: ${{ github.event.repository.default_branch }}
@@ -121,3 +122,4 @@ jobs:
           linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
           linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
           linear-labels: ${{ vars.LINEAR_LABELS }}
+          linear-triage-state-id: ${{ vars.LINEAR_TRIAGE_STATE_ID }}
