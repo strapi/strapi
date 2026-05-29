@@ -66,6 +66,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
+    "@casl/ability": "6.7.5",
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
@@ -94,7 +95,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
     "prismjs": "1.30.0",
-    "qs": "6.15.0",
+    "qs": "6.15.2",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
     "react-helmet": "^6.1.0",
@@ -106,7 +107,8 @@
     "slate": "0.94.1",
     "slate-history": "0.93.0",
     "slate-react": "0.98.3",
-    "yup": "0.32.9"
+    "yup": "0.32.9",
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@strapi/admin": "5.46.1",
