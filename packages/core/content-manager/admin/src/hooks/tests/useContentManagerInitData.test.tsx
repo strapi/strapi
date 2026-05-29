@@ -6,7 +6,7 @@ import {
   server,
   waitFor,
 } from '@strapi/admin/strapi-admin/test';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { reducer } from '../../modules/reducers';
 import { useContentManagerInitData } from '../useContentManagerInitData';
@@ -54,35 +54,32 @@ describe('useContentManagerInitData', () => {
     const contentTypes = createContentTypes();
 
     server.use(
-      rest.get('/content-manager/init', (_req, res, ctx) =>
-        res(
-          ctx.json({
-            data: {
-              components: [],
-              contentTypes,
-              fieldSizes: {},
-            },
-          })
-        )
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: [],
+            contentTypes,
+            fieldSizes: {},
+          },
+        })
       ),
-      rest.get('/content-manager/content-types-settings', (_req, res, ctx) =>
-        res(
-          ctx.json({
-            data: [],
-          })
-        )
+      http.get('/content-manager/content-types-settings', () =>
+        HttpResponse.json({
+          data: [],
+        })
       ),
-      rest.post('/admin/permissions/check', async (req, res, ctx) => {
-        permissionCheckCalls += 1;
+      http.post<Record<string, never>, { permissions: Array<{ action: string }> }>(
+        '/admin/permissions/check',
+        async ({ request }) => {
+          permissionCheckCalls += 1;
 
-        const { permissions } = await req.json<{ permissions: Array<{ action: string }> }>();
+          const { permissions } = await request.json();
 
-        return res(
-          ctx.json({
+          return HttpResponse.json({
             data: permissions.map(() => true),
-          })
-        );
-      })
+          });
+        }
+      )
     );
 
     const permissions = contentTypes.map((contentType, index) => ({
@@ -112,35 +109,32 @@ describe('useContentManagerInitData', () => {
     const contentTypes = createContentTypes();
 
     server.use(
-      rest.get('/content-manager/init', (_req, res, ctx) =>
-        res(
-          ctx.json({
-            data: {
-              components: [],
-              contentTypes,
-              fieldSizes: {},
-            },
-          })
-        )
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: [],
+            contentTypes,
+            fieldSizes: {},
+          },
+        })
       ),
-      rest.get('/content-manager/content-types-settings', (_req, res, ctx) =>
-        res(
-          ctx.json({
-            data: [],
-          })
-        )
+      http.get('/content-manager/content-types-settings', () =>
+        HttpResponse.json({
+          data: [],
+        })
       ),
-      rest.post('/admin/permissions/check', async (req, res, ctx) => {
-        permissionCheckCalls += 1;
+      http.post<Record<string, never>, { permissions: Array<{ subject: string }> }>(
+        '/admin/permissions/check',
+        async ({ request }) => {
+          permissionCheckCalls += 1;
 
-        const { permissions } = await req.json<{ permissions: Array<{ subject: string }> }>();
+          const { permissions } = await request.json();
 
-        return res(
-          ctx.json({
+          return HttpResponse.json({
             data: permissions.map(({ subject }) => subject !== 'api::perf-b.perf-b'),
-          })
-        );
-      })
+          });
+        }
+      )
     );
 
     const permissions = contentTypes.map((contentType, index) => ({
@@ -173,28 +167,24 @@ describe('useContentManagerInitData', () => {
     const contentTypes = createContentTypes();
 
     server.use(
-      rest.get('/content-manager/init', (_req, res, ctx) =>
-        res(
-          ctx.json({
-            data: {
-              components: [],
-              contentTypes,
-              fieldSizes: {},
-            },
-          })
-        )
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: [],
+            contentTypes,
+            fieldSizes: {},
+          },
+        })
       ),
-      rest.get('/content-manager/content-types-settings', (_req, res, ctx) =>
-        res(
-          ctx.json({
-            data: [],
-          })
-        )
+      http.get('/content-manager/content-types-settings', () =>
+        HttpResponse.json({
+          data: [],
+        })
       ),
-      rest.post('/admin/permissions/check', async (_req, res, ctx) => {
+      http.post('/admin/permissions/check', async () => {
         permissionCheckCalls += 1;
 
-        return res(ctx.status(500), ctx.json({ error: { message: 'boom' } }));
+        return HttpResponse.json({ error: { message: 'boom' } }, { status: 500 });
       })
     );
 
@@ -225,32 +215,26 @@ describe('useContentManagerInitData', () => {
     const contentTypes = createContentTypes();
 
     server.use(
-      rest.get('/content-manager/init', (_req, res, ctx) =>
-        res(
-          ctx.json({
-            data: {
-              components: [],
-              contentTypes,
-              fieldSizes: {},
-            },
-          })
-        )
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: [],
+            contentTypes,
+            fieldSizes: {},
+          },
+        })
       ),
-      rest.get('/content-manager/content-types-settings', (_req, res, ctx) =>
-        res(
-          ctx.json({
-            data: [],
-          })
-        )
+      http.get('/content-manager/content-types-settings', () =>
+        HttpResponse.json({
+          data: [],
+        })
       ),
-      rest.post('/admin/permissions/check', async (_req, res, ctx) => {
+      http.post('/admin/permissions/check', async () => {
         permissionCheckCalls += 1;
 
-        return res(
-          ctx.json({
-            data: [],
-          })
-        );
+        return HttpResponse.json({
+          data: [],
+        });
       })
     );
 

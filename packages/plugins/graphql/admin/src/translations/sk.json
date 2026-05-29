@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "Pridáva GraphQL endpoint s predvolenými API metódami.",
+  "plugin.description.short": "Pridáva GraphQL endpoint s predvolenými API metódami.",
+  "plugin.name": "GraphQL"
+}

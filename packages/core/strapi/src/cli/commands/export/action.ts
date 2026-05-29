@@ -31,9 +31,6 @@ const {
 } = fileDataTransfer;
 
 const {
-  providers: { createLocalDirectoryDestinationProvider },
-} = directoryDataTransfer;
-const {
   providers: { createLocalStrapiSourceProvider },
 } = strapiDataTransfer;
 
@@ -184,6 +181,7 @@ const createDestinationProvider = (opts: CmdOptions) => {
     : undefined;
 
   if (format === 'dir') {
+    const { createLocalDirectoryDestinationProvider } = directoryDataTransfer.providers;
     const dirPath = path.isAbsolute(filepath) ? filepath : path.resolve(process.cwd(), filepath);
     return createLocalDirectoryDestinationProvider({
       directory: { path: dirPath },
