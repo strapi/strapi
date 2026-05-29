@@ -54,8 +54,8 @@ const cleanupDistDirectory = async ({
   try {
     const dirContent = await fs.readdir(distDir);
     const validFilenames = dirContent
-      // Ignore the admin build folder
-      .filter((filename) => filename !== 'build');
+      // Ignore the admin build folder and the TypeScript incremental cache
+      .filter((filename) => filename !== 'build' && !filename.endsWith('.tsbuildinfo'));
     for (const filename of validFilenames) {
       await fs.rm(path.resolve(distDir, filename), { recursive: true });
     }
