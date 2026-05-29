@@ -52,6 +52,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Pre-bundle lodash: design-system uses named imports (e.g. assignWith) but lodash
         // is CommonJS-only; pre-bundling converts it to ESM for the browser
         'lodash',
+        // Pre-bundle prismjs so plugin chunks get a valid ESM namespace (prismjs is UMD and can
+        // otherwise expose an empty object when bundled, causing "Prism is not defined" in admin).
+        'prismjs',
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
@@ -130,6 +133,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
       // where packages imported by plugins may not be resolvable from plugin chunks
       alias: {
+        react: getModulePath('react'),
+        'react-dom': getModulePath('react-dom'),
+        'react-router-dom': getModulePath('react-router-dom'),
+        'styled-components': getModulePath('styled-components'),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),
@@ -192,7 +199,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
   };
 };
 
-const USER_CONFIGS = ['vite.config.js', 'vite.config.mjs', 'vite.config.ts'];
+const USER_CONFIGS = ['vite.config.js', 'vite.config.mjs', 'vite.config.ts', 'vite.config.mts'];
 
 type UserViteConfig = (config: UserConfig) => UserConfig;
 

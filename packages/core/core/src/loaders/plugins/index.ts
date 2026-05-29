@@ -43,15 +43,25 @@ const applyUserExtension = async (plugins: Plugins) => {
   for (const pluginName of Object.keys(plugins)) {
     const plugin = plugins[pluginName];
     // first: load json schema
-    for (const ctName of Object.keys(plugin.contentTypes)) {
-      const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], extendedSchemas);
-      if (extendedSchema) {
+    const extendedContentTypes = get([pluginName, 'content-types'], extendedSchemas) ?? {};
+    for (const ctName of Object.keys(extendedContentTypes)) {
+      const extendedSchema = get([ctName, 'schema'], extendedContentTypes);
+      if (!extendedSchema) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      if (!plugin.contentTypes[ctName]) {
+        plugin.contentTypes[ctName] = { schema: extendedSchema };
+      } else {
         plugin.contentTypes[ctName].schema = {
           ...plugin.contentTypes[ctName].schema,
           ...extendedSchema,
         };
       }
     }
+
+    formatContentTypes(pluginName, plugin.contentTypes);
     // second: execute strapi-server extension
     const strapiServer = get([pluginName, 'strapi-server'], strapiServers);
     if (strapiServer) {

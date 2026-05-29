@@ -113,11 +113,11 @@ describe('DynamicComponent', () => {
 
     await screen.findByRole('button', { name: 'component - test' });
 
-    expect(screen.queryByText('INPUTS')).not.toBeInTheDocument();
+    expect(await screen.findByText('INPUTS')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'component - test' }));
 
-    expect(await screen.findByText('INPUTS')).toBeInTheDocument();
+    expect(screen.queryByText('INPUTS')).not.toBeInTheDocument();
   });
 
   describe('Keyboard drag and drop', () => {

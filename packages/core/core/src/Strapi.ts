@@ -1,4 +1,4 @@
-import * as globalAgent from 'global-agent';
+import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -7,7 +7,6 @@ import { Database } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
-import tsUtils from '@strapi/typescript-utils';
 import { loadConfiguration } from './configuration';
 
 import * as factories from './factories';
@@ -39,6 +38,16 @@ import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
 
+// Lazy: only resolved when `useTypescriptMigrations` is true (default false)
+let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
+const tsUtils = (): typeof import('@strapi/typescript-utils') => {
+  if (!lazyTsUtils) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyTsUtils = require('@strapi/typescript-utils');
+  }
+  return lazyTsUtils as typeof import('@strapi/typescript-utils');
+};
+
 class Strapi extends Container implements Core.Strapi {
   app: any;
 
@@ -60,6 +69,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get admin(): Core.Module {
     return this.get('admin');
+  }
+
+  get ai(): Modules.AI.AiNamespace {
+    return this.get('ai');
   }
 
   get EE(): boolean {
@@ -279,7 +292,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
       .add('db', () => {
-        const tsDir = tsUtils.resolveOutDirSync(this.dirs.app.root);
+        const tsDir = tsUtils().resolveOutDirSync(this.dirs.app.root);
         const tsMigrationsEnabled =
           this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
@@ -515,7 +528,7 @@ class Strapi extends Container implements Core.Strapi {
       return;
     }
 
-    globalAgent.bootstrap();
+    bootstrapGlobalAgent();
 
     if (httpProxy) {
       this.log.info(`Using HTTP proxy: ${httpProxy}`);

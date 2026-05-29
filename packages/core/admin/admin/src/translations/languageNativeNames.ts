@@ -3,7 +3,7 @@ export const languageNativeNames = {
   ca: 'Català',
   cs: 'Čeština',
   de: 'Deutsch',
-  dk: 'Dansk',
+  da: 'Dansk',
   en: 'English',
   'en-GB': 'English (United Kingdom)',
   es: 'Español',
@@ -36,4 +36,5 @@ export const languageNativeNames = {
   zh: '中文 (繁體)',
   sa: 'संस्कृत',
   hi: 'हिन्दी',
+  fi: 'Suomi',
 } as const;
