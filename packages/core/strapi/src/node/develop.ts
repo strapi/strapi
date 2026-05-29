@@ -148,11 +148,24 @@ const develop = async ({
             try {
               // Build without diagnostics in case schemas have changed
               await cleanupDistDirectory({ tsconfig, logger, timer });
-              await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+
+              // Disable incremental compilation during reload to prevent writing
+              // a stale .tsbuildinfo that could poison the worker's fresh compilation.
+              // Types (contentTypes.d.ts) haven't been regenerated yet at this point,
+              // so the incremental cache would record stale type state.
+              await tsUtils.compile(cwd, {
+                configOptions: {
+                  ignoreDiagnostics: true,
+                  options: { incremental: false, tsBuildInfoFile: null },
+                },
+              });
             } catch (err: unknown) {
               const message = err instanceof Error ? err.message : String(err);
               logger.error(`Error during TypeScript compilation on reload: ${message}`);
-              process.exit(1);
+              // Continue with reload — the new worker will regenerate types and recompile
+              logger.warn(
+                'Continuing with reload despite compilation error — worker will recompile with fresh types'
+              );
             }
           }
           logger.debug('cluster has the reload message, sending the worker kill message');
@@ -268,6 +281,15 @@ const develop = async ({
       if (tsconfig?.config) {
         timer.start('compilingTS');
         compilingTsSpinner.start();
+
+        // Delete stale .tsbuildinfo to ensure a clean incremental build
+        // after types have been freshly regenerated above
+        const tsBuildInfoFile = tsconfig.config.options?.tsBuildInfoFile;
+        if (tsBuildInfoFile) {
+          await fs.rm(tsBuildInfoFile, { force: true }).catch(() => {
+            // Ignore if file doesn't exist
+          });
+        }
 
         await cleanupDistDirectory({ tsconfig, logger, timer });
         await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
