@@ -279,7 +279,6 @@
   "relation.notAvailable": "No hay relaciones disponibles",
   "relation.publicationState.draft": "Borrador",
   "relation.publicationState.published": "Publicado",
-  "reviewWorkflows.stage.label": "Fase de revisión",
   "select.currently.selected": "{count} actualmente seleccionado",
   "success.record.clone": "Documento clonado",
   "success.record.discard": "Cambios descartados",

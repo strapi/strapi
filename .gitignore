@@ -123,7 +123,6 @@ dist
 ############################
 
 .vscode/
-!.vscode/settings.json
 front-workspace.code-workspace
 .yarnrc
 
@@ -157,6 +156,8 @@ tests/cli/.env
 ############################
 CLAUDE.local.md
 .claude
+.agents/local-skills
+.agents/local-state
 
 ############################
 # Strapi

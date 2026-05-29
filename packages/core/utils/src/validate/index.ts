@@ -20,6 +20,7 @@ import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '
 
 import { Model, Data } from '../types';
 import { ValidationError } from '../errors';
+import { validatePublicationFilterQueryParam } from '../publication-filter';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
@@ -165,6 +166,11 @@ const createAPIValidators = (opts: APIOptions) => {
   ) => {
     if (!schema) {
       throw new Error('Missing schema in validateQuery');
+    }
+
+    // Core allowlisted params are not covered by route.request.query Zod (see getExtraQueryKeysFromRoute).
+    if ('publicationFilter' in query) {
+      validatePublicationFilterQueryParam(query.publicationFilter);
     }
 
     if (strictParams) {
