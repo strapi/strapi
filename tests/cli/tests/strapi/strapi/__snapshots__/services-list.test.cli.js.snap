@@ -90,6 +90,8 @@ exports[`services:list should output list of services 1`] = `
 │ admin::condition                                     │
 │ admin::action                                        │
 │ admin::api-token                                     │
+│ admin::api-token-content-api                         │
+│ admin::api-token-admin                               │
 │ admin::transfer                                      │
 │ admin::project-settings                              │
 │ admin::encryption                                    │

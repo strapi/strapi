@@ -45,4 +45,47 @@ describe('transformChatToCTB', () => {
       expect(result).toMatchObject({ options: { draftAndPublish: true } });
     });
   });
+
+  describe('plugin content-types', () => {
+    it('preserves identity fields when updating an existing plugin content-type', () => {
+      const oldSchema: ContentType = {
+        uid: 'plugin::my-plugin.my-thing' as any,
+        modelType: 'contentType',
+        kind: 'collectionType',
+        plugin: 'my-plugin',
+        modelName: 'my-thing',
+        collectionName: 'my_plugin_my_things',
+        globalId: 'MyPluginMyThing',
+        visible: true,
+        status: 'UNCHANGED',
+        restrictRelationsTo: null,
+        info: {
+          displayName: 'My thing',
+          singularName: 'my-thing',
+          pluralName: 'my-things',
+        },
+        options: { draftAndPublish: false },
+        pluginOptions: { i18n: { localized: true } },
+        attributes: [],
+      };
+
+      const schema = makeSchema({
+        uid: 'plugin::my-plugin.my-thing',
+        name: 'Wrong Name From Ai',
+        action: 'update',
+        attributes: { title: { type: 'string' } },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.plugin).toBe('my-plugin');
+      expect(result.globalId).toBe('MyPluginMyThing');
+      expect(result.modelName).toBe('my-thing');
+      expect(result.collectionName).toBe('my_plugin_my_things');
+      expect(result.info.singularName).toBe('my-thing');
+      expect(result.info.pluralName).toBe('my-things');
+      expect(result.options).toMatchObject({ draftAndPublish: false });
+      expect(result.pluginOptions?.i18n).toMatchObject({ localized: true });
+    });
+  });
 });
