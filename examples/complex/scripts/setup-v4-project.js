@@ -37,6 +37,10 @@ const CONTENT_TYPES = [
   'relation',
   'relation-dp',
   'relation-dp-i18n',
+  // Anti-pattern stress schemas — added to exercise specific v4→v5 migration
+  // code paths that the baseline 6 types don't reach.
+  'hc-m2m-source',
+  'hc-m2m-target',
 ];
 
 console.log('Setting up Strapi v4 project at:', V4_PROJECT_DIR);
@@ -66,16 +70,21 @@ const packageJson = {
     'upgrade:dry': 'npx @strapi/upgrade latest --dry',
     'develop:postgres': 'node scripts/develop-with-db.js postgres',
     'develop:mysql': 'node scripts/develop-with-db.js mysql',
+    'develop:mariadb': 'node scripts/develop-with-db.js mariadb',
+    'develop:sqlite': 'node scripts/develop-with-db.js sqlite',
     // Run the simple seeder directly (no DB wrapper)
     seed: 'node scripts/seed.js',
     // Wrapper commands that will start DB containers when needed
     'seed:postgres': 'node scripts/seed-with-db.js postgres',
     'seed:mysql': 'node scripts/seed-with-db.js mysql',
+    'seed:mariadb': 'node scripts/seed-with-db.js mariadb',
+    'seed:sqlite': 'node scripts/seed-with-db.js sqlite',
   },
   dependencies: {
     '@strapi/plugin-i18n': '4.26.0',
     '@strapi/plugin-users-permissions': '4.26.0',
     '@strapi/strapi': '4.26.0',
+    'better-sqlite3': '9.6.0',
     entities: '2.2.0',
     mysql2: '3.20.0',
     pg: '8.20.0',
@@ -111,11 +120,30 @@ if (!fs.existsSync(configDir)) {
   fs.mkdirSync(configDir, { recursive: true });
 }
 
-// Write database.js
+// Write database.js — handles postgres, mysql, mariadb, sqlite.
+// Note: mariadb uses the mysql2 driver (wire-compatible); DATABASE_PORT differs (3307 vs 3306).
 const databaseConfig = `'use strict';
+
+const path = require('path');
 
 module.exports = ({ env }) => {
   const client = env('DATABASE_CLIENT', 'postgres');
+
+  if (client === 'sqlite') {
+    return {
+      connection: {
+        client: 'better-sqlite3',
+        connection: {
+          filename: path.resolve(
+            __dirname,
+            '..',
+            env('DATABASE_FILENAME', '.tmp/data.db')
+          ),
+        },
+        useNullAsDefault: true,
+      },
+    };
+  }
 
   if (client === 'postgres') {
     return {
@@ -135,6 +163,7 @@ module.exports = ({ env }) => {
     };
   }
 
+  // mysql + mariadb — both use mysql2 driver.
   return {
     connection: {
       client: 'mysql2',
@@ -501,14 +530,17 @@ if (!fs.existsSync(v4ScriptsDir)) {
   fs.mkdirSync(v4ScriptsDir, { recursive: true });
 }
 
-// Write shared db-utils.js for the v4 scripts
-const dbUtilsSource = path.join(SCRIPT_DIR, 'db-utils.js');
-const dbUtilsContents = fs.readFileSync(dbUtilsSource, 'utf8');
-fs.writeFileSync(path.join(v4ScriptsDir, 'db-utils.js'), dbUtilsContents);
-try {
-  fs.chmodSync(path.join(v4ScriptsDir, 'db-utils.js'), 0o755);
-} catch (error) {
-  // chmod might fail on Windows, that's okay
+// Write shared db-utils.js + compose.js for the v4 scripts.
+// compose.js is a dep of db-utils.js (runtime auto-detection for docker/podman).
+for (const name of ['db-utils.js', 'compose.js']) {
+  const src = path.join(SCRIPT_DIR, name);
+  const contents = fs.readFileSync(src, 'utf8');
+  fs.writeFileSync(path.join(v4ScriptsDir, name), contents);
+  try {
+    fs.chmodSync(path.join(v4ScriptsDir, name), 0o755);
+  } catch (error) {
+    // chmod might fail on Windows, that's okay
+  }
 }
 
 // Create develop-with-db.js script for v4 project
