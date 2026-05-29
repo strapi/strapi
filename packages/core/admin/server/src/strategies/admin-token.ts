@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
-import { extractToken, checkExpiry, updateLastUsedAt } from './api-token-utils';
+import { extractToken, checkExpiry } from './api-token-utils';
 import '@strapi/types';
 
 const { UnauthorizedError } = errors;
@@ -10,10 +10,6 @@ const { UnauthorizedError } = errors;
  * Authenticate an admin token. Rejects tokens with kind !== 'admin'.
  */
 export const authenticate = async (ctx: Context) => {
-  if (strapi.features.future.isEnabled('adminTokens') !== true) {
-    return { authenticated: false };
-  }
-
   const apiTokenService = getService('api-token-admin');
   const token = extractToken(ctx);
 
@@ -21,56 +17,14 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false };
   }
 
-  const apiToken = await apiTokenService.getByAccessKey(apiTokenService.hash(token));
+  const authResult = await apiTokenService.authenticateAdminToken(token);
 
-  if (apiToken === null || apiToken === undefined) {
-    return { authenticated: false };
+  if (authResult.authenticated === true) {
+    ctx.state.userAbility = authResult.ability;
+    ctx.state.user = authResult.user;
   }
 
-  // Defensive kind check — only handle admin tokens
-  if (apiToken.kind !== 'admin') {
-    return { authenticated: false };
-  }
-
-  const expiryError = checkExpiry(apiToken);
-  if (expiryError !== null) {
-    return { authenticated: false, error: expiryError };
-  }
-
-  await updateLastUsedAt(apiToken);
-
-  const owner = apiToken.adminUserOwner;
-  const ownerId =
-    // eslint-disable-next-line no-nested-ternary
-    owner === null || owner === undefined ? null : typeof owner === 'object' ? owner.id : owner;
-
-  if (ownerId === null) {
-    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
-  }
-
-  // Token populate does not load `roles`; reload the user like session auth (`admin` strategy)
-  // so `isSuperAdmin` and permission ceiling logic see the full admin user.
-  const user = await strapi.db
-    .query('admin::user')
-    .findOne({ where: { id: ownerId }, populate: ['roles'] });
-
-  if (user === null || user === undefined) {
-    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
-  }
-
-  if (user.isActive !== true || user.blocked === true) {
-    return { authenticated: false, error: new UnauthorizedError('Token owner is deactivated') };
-  }
-
-  const ability = await getService('permission').engine.generateTokenAbility(
-    apiToken.adminPermissions ?? [],
-    user
-  );
-
-  ctx.state.userAbility = ability;
-  ctx.state.user = user;
-
-  return { authenticated: true, credentials: apiToken, ability };
+  return authResult;
 };
 
 /**

@@ -6,6 +6,7 @@ import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
+import uniq from 'lodash/uniq';
 import { RouterProvider } from 'react-router-dom';
 
 import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/admin/src/constants';
@@ -28,12 +29,22 @@ import {
 } from './reducer';
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
+import { normalizeAdminLocale } from './translations/normalizeAdminLocale';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 import type { DefaultTheme } from 'styled-components';
 
+/**
+ * Canonical admin locale codes mapped to legacy translation file names still
+ * shipped by some plugins.
+ */
+const ADMIN_LOCALE_LEGACY_ALIASES: Record<string, string> = {
+  da: 'dk',
+};
+
 const {
   INJECT_COLUMN_IN_TABLE,
+  INJECT_LIST_VIEW_FILTERS,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
@@ -91,6 +102,7 @@ class StrapiApp {
   appPlugins: Record<string, StrapiAppPlugin>;
   plugins: Record<string, Plugin> = {};
   hooksDict: Record<string, ReturnType<typeof createHook>> = {};
+  private warnedLegacyLocalePairs = new Set<string>();
 
   admin = {
     injectionZones: {},
@@ -129,6 +141,7 @@ class StrapiApp {
     this.createCustomConfigurations(config ?? {});
 
     this.createHook(INJECT_COLUMN_IN_TABLE);
+    this.createHook(INJECT_LIST_VIEW_FILTERS);
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
@@ -251,10 +264,12 @@ class StrapiApp {
 
   createCustomConfigurations = (customConfig: NonNullable<StrapiAppConstructorArgs['config']>) => {
     if (customConfig.locales) {
-      this.configurations.locales = [
-        'en',
-        ...(customConfig.locales?.filter((loc) => loc !== 'en') || []),
-      ];
+      const extraLocales =
+        customConfig.locales
+          ?.filter((loc) => loc !== 'en')
+          .map((loc) => normalizeAdminLocale(loc)) || [];
+
+      this.configurations.locales = uniq(['en', ...extraLocales]);
     }
 
     if (customConfig.auth?.logo) {
@@ -400,6 +415,30 @@ class StrapiApp {
     }
   }
 
+  private mergePluginTranslationsByCanonical(pluginTradsBatch: Translation[]) {
+    return pluginTradsBatch.reduce<Record<string, Translation['data']>>((acc, current) => {
+      const canonicalLocale = normalizeAdminLocale(current.locale);
+
+      acc[canonicalLocale] = {
+        ...(current.locale === canonicalLocale ? acc[canonicalLocale] : current.data),
+        ...(current.locale === canonicalLocale ? current.data : acc[canonicalLocale]),
+      };
+
+      if (current.locale !== canonicalLocale && Object.keys(current.data).length > 0) {
+        const deprecationKey = `${canonicalLocale}:${current.locale}`;
+
+        if (!this.warnedLegacyLocalePairs.has(deprecationKey)) {
+          this.warnedLegacyLocalePairs.add(deprecationKey);
+          console.warn(
+            `[deprecated] Admin locale "${current.locale}" is deprecated. Rename translation files to "${canonicalLocale}.json".`
+          );
+        }
+      }
+
+      return acc;
+    }, {});
+  }
+
   async loadAdminTrads() {
     const adminLocales = await Promise.all(
       this.configurations.locales.map(async (locale) => {
@@ -432,14 +471,34 @@ class StrapiApp {
    * with the default ones.
    */
   async loadTrads(customTranslations: Record<string, Record<string, string>> = {}) {
+    const normalizedCustomTranslations = Object.keys(customTranslations).reduce<
+      Record<string, Record<string, string>>
+    >((acc, key) => {
+      const normalizedKey = normalizeAdminLocale(key);
+
+      acc[normalizedKey] = {
+        ...(acc[normalizedKey] || {}),
+        ...customTranslations[key],
+      };
+
+      return acc;
+    }, {});
+
     const adminTranslations = await this.loadAdminTrads();
+    const localesForPlugins = uniq(
+      this.configurations.locales.flatMap((locale) => {
+        const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
+
+        return legacyLocale ? [locale, legacyLocale] : [locale];
+      })
+    );
 
     const arrayOfPromises = Object.keys(this.appPlugins)
       .map((plugin) => {
         const registerTrads = this.appPlugins[plugin].registerTrads;
 
         if (registerTrads) {
-          return registerTrads({ locales: this.configurations.locales });
+          return registerTrads({ locales: localesForPlugins });
         }
 
         return null;
@@ -449,14 +508,7 @@ class StrapiApp {
     const pluginsTrads = (await Promise.all(arrayOfPromises)) as Array<Translation[]>;
     const mergedTrads = pluginsTrads.reduce<{ [locale: string]: Translation['data'] }>(
       (acc, currentPluginTrads) => {
-        const pluginTrads = currentPluginTrads.reduce<{ [locale: string]: Translation['data'] }>(
-          (acc1, current) => {
-            acc1[current.locale] = current.data;
-
-            return acc1;
-          },
-          {}
-        );
+        const pluginTrads = this.mergePluginTranslationsByCanonical(currentPluginTrads);
 
         Object.keys(pluginTrads).forEach((locale) => {
           acc[locale] = { ...acc[locale], ...pluginTrads[locale] };
@@ -473,7 +525,7 @@ class StrapiApp {
       acc[current] = {
         ...adminTranslations[current],
         ...(mergedTrads[current] || {}),
-        ...(customTranslations[current] ?? {}),
+        ...(normalizedCustomTranslations[current] ?? {}),
       };
 
       return acc;
@@ -509,8 +561,8 @@ class StrapiApp {
 
   render() {
     const localeNames = pick(languageNativeNames, this.configurations.locales || []);
-    const locale = (localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) ||
-      'en') as keyof typeof localeNames;
+    const storedLocale = localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
+    const locale = normalizeAdminLocale(storedLocale) as keyof typeof localeNames;
 
     this.store = configureStore(
       {

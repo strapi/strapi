@@ -6,12 +6,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import crypto from 'node:crypto';
 import path from 'node:path';
-import {
-  Configuration,
-  DefinePlugin,
-  HotModuleReplacementPlugin,
-  WebpackPluginInstance,
-} from 'webpack';
+import { Configuration, DefinePlugin, HotModuleReplacementPlugin } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import { loadStrapiMonorepo } from '../core/monorepo';
@@ -217,7 +212,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
         chunkFilename: '[name].[chunkhash].chunkhash.css',
         ignoreOrder: true,
       }),
-      ctx.options.stats && (new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance), // TODO: find out if this is an actual issue or just a ts bug
+      ctx.options.stats && new BundleAnalyzerPlugin(),
     ].filter(Boolean),
   };
 };
