@@ -2,7 +2,7 @@ import { Table, useQueryParams } from '@strapi/admin/strapi-admin';
 import { errors } from '@strapi/utils';
 import { within } from '@testing-library/react';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import {
@@ -96,16 +96,17 @@ describe('ConfirmDialogPublishAll', () => {
   // see RFC "Count draft relations" in Notion
   it.skip('should show the warning message with just 1 draft relation and 2 entries', async () => {
     server.use(
-      rest.get(
+      http.get(
         '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
-        (req, res, ctx) => {
-          return res.once(
-            ctx.status(200),
-            ctx.json({
+        () => {
+          return HttpResponse.json(
+            {
               data: 1,
-            })
+            },
+            { status: 200 }
           );
-        }
+        },
+        { once: true }
       )
     );
 
@@ -118,16 +119,17 @@ describe('ConfirmDialogPublishAll', () => {
 
   it.skip('should show the warning message with 2 draft relations and 2 entries', async () => {
     server.use(
-      rest.get(
+      http.get(
         '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
-        (req, res, ctx) => {
-          return res.once(
-            ctx.status(200),
-            ctx.json({
+        () => {
+          return HttpResponse.json(
+            {
               data: 2,
-            })
+            },
+            { status: 200 }
           );
-        }
+        },
+        { once: true }
       )
     );
 
@@ -142,16 +144,17 @@ describe('ConfirmDialogPublishAll', () => {
     const ERROR_MSG = 'The request has failed';
 
     server.use(
-      rest.get(
+      http.get(
         '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
-        (req, res, ctx) => {
-          return res.once(
-            ctx.status(500),
-            ctx.json({
+        () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError(ERROR_MSG),
-            })
+            },
+            { status: 500 }
           );
-        }
+        },
+        { once: true }
       )
     );
 
@@ -174,15 +177,14 @@ describe('ConfirmDialogPublishAll', () => {
     ]);
 
     server.use(
-      rest.get(
+      http.get(
         '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
-        (req, res, ctx) => {
-          return res.once(
-            ctx.json({
-              data: 2,
-            })
-          );
-        }
+        () => {
+          return HttpResponse.json({
+            data: 2,
+          });
+        },
+        { once: true }
       )
     );
 

@@ -1,7 +1,5 @@
 import type { RouteObject } from 'react-router-dom';
 
-const isAdminTokensFutureEnabled = () => window.strapi.future.isEnabled('adminTokens') === true;
-
 const ADMIN_TOKEN_ROUTES: RouteObject[] = [
   {
     lazy: async () => {
@@ -156,7 +154,7 @@ export const ROUTES_CE = (): RouteObject[] => [
     },
     path: 'api-tokens/:id',
   },
-  ...(isAdminTokensFutureEnabled() === true ? ADMIN_TOKEN_ROUTES : []),
+  ...ADMIN_TOKEN_ROUTES,
   {
     lazy: async () => {
       const { ProtectedCreateView } = await import('./pages/TransferTokens/CreateView');
