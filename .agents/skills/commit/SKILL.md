@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Use when creating git commits in the Strapi repo - enforces the type list and subject style from CONTRIBUTING.md "Git Conventions" and .commitlintrc.ts
+description: Use when writing any git commit message, PR title, or squash subject in the Strapi repo — enforces the type list, scope syntax, and subject style from CONTRIBUTING.md "Git Conventions" and .commitlintrc.ts. Trigger whenever a commit/PR subject is being drafted, even if the user didn't say the word "commit".
 ---
 
 # Strapi Commit Conventions
@@ -39,8 +39,6 @@ The full enforced list comes from [.commitlintrc.ts](../../../.commitlintrc.ts):
 | `revert`      | Reverting a previous commit                                            |
 | `release`     | Release commits (reserved for release tooling)                         |
 | `future`      | Work behind a future flag                                              |
-
-> Note: `CONTRIBUTING.md` shows `doc:` in one example; the enforced type is `docs`. Use `docs`.
 
 Types **not** in the list (and therefore rejected by commitlint): `perf`, `refactor`, `style`, `build`, `improvement`, `wip`.
 
