@@ -43,4 +43,5 @@ export interface ActionInputs {
   notionApiKey: string | null;
   notionDatabaseId: string | null;
   labelMap: Map<string, string> | null;
+  triageStateId: string | null;
 }

@@ -31,10 +31,6 @@ const {
 } = fileDataTransfer;
 
 const {
-  providers: { createLocalDirectorySourceProvider },
-} = directoryDataTransfer;
-
-const {
   providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
 } = strapiDataTransfer;
 
@@ -69,7 +65,9 @@ export default async (opts: CmdOptions) => {
 
   const backupPath = opts.file ?? '';
   const source = (await fs.stat(backupPath)).isDirectory()
-    ? createLocalDirectorySourceProvider({ directory: { path: backupPath } })
+    ? directoryDataTransfer.providers.createLocalDirectorySourceProvider({
+        directory: { path: backupPath },
+      })
     : createLocalFileSourceProvider(getLocalFileSourceOptions(opts));
 
   /**

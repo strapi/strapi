@@ -7,6 +7,7 @@ const {
   isVisibleAttribute,
   isScalarAttribute,
   getDoesAttributeRequireValidation,
+  isPrivateAttribute,
   hasDraftAndPublish,
 } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
@@ -216,7 +217,10 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
     (populateAcc: any, [attributeName, attribute]) => {
       if (isScalarAttribute(attribute)) {
         // If the scalar attribute requires validation, add it to the fields array
-        if (getDoesAttributeRequireValidation(attribute)) {
+        if (
+          getDoesAttributeRequireValidation(attribute) &&
+          !isPrivateAttribute(model, attributeName)
+        ) {
           populateAcc.fields = populateAcc.fields || [];
           populateAcc.fields.push(attributeName);
         }
@@ -224,7 +228,10 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
       }
 
       if (isMedia(attribute)) {
-        if (getDoesAttributeRequireValidation(attribute)) {
+        if (
+          getDoesAttributeRequireValidation(attribute) &&
+          !isPrivateAttribute(model, attributeName)
+        ) {
           populateAcc.populate = populateAcc.populate || {};
           populateAcc.populate[attributeName] = {
             populate: {
