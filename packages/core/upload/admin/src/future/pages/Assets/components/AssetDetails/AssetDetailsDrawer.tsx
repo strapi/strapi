@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   Blocker,
   Form,
+  useClipboard,
   useField,
   useForm,
   useNotification,
@@ -25,7 +26,15 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ArrowLineRight, FileError, Download, Trash, WarningCircle } from '@strapi/icons';
+import {
+  ArrowLineRight,
+  Download,
+  FileError,
+  Link,
+  Trash,
+  WarningCircle,
+  ArrowsCounterClockwise,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -39,7 +48,12 @@ import {
 } from '../../../../services/assets';
 import { useGetAllFoldersQuery } from '../../../../services/folders';
 import { useGetSettingsQuery } from '../../../../services/settings';
-import { formatBytes, getFileExtension } from '../../../../utils/files';
+import { downloadFile } from '../../../../utils/downloadFile';
+import {
+  formatBytes,
+  getFileExtension,
+  prefixFileUrlWithBackendUrl,
+} from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
@@ -55,6 +69,23 @@ interface DrawerToast {
   type: 'success' | 'danger';
   message: string;
 }
+
+/* -------------------------------------------------------------------------------------------------
+ * DrawerNotifyContext — exposes the in-drawer toast setter so deep descendants
+ * (footer action buttons) can report success/error without prop drilling.
+ * -----------------------------------------------------------------------------------------------*/
+
+type DrawerNotify = (toast: DrawerToast) => void;
+
+export const DrawerNotifyContext = React.createContext<DrawerNotify | null>(null);
+
+const useDrawerNotify = () => {
+  const ctx = React.useContext(DrawerNotifyContext);
+  if (!ctx) {
+    throw new Error('useDrawerNotify must be used within AssetDetails');
+  }
+  return ctx;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * useAssetDetailsParam - sync drawer visibility with URL ?{URL_PARAM}={id}
@@ -370,16 +401,110 @@ const DeleteAssetButton = ({ asset, folderId, closeDetails }: DeleteAssetButtonP
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * CopyLinkButton — write the absolute asset URL to the clipboard.
+ * -----------------------------------------------------------------------------------------------*/
+
+interface CopyLinkButtonProps {
+  asset: AssetWithPopulatedCreatedBy;
+}
+
+const CopyLinkButton = ({ asset }: CopyLinkButtonProps) => {
+  const { formatMessage } = useIntl();
+  const { copy } = useClipboard();
+  const notify = useDrawerNotify();
+
+  const handleCopy = async () => {
+    const url = prefixFileUrlWithBackendUrl(asset.url);
+    if (!url) return;
+    const didCopy = await copy(url);
+    notify({
+      type: didCopy ? 'success' : 'danger',
+      message: didCopy
+        ? formatMessage({
+            id: getTranslationKey('asset-details.copy-link.success'),
+            defaultMessage: 'Link copied.',
+          })
+        : formatMessage({
+            id: getTranslationKey('asset-details.copy-link.error'),
+            defaultMessage: 'Failed to copy the link.',
+          }),
+    });
+  };
+
+  return (
+    <IconButton
+      withTooltip={false}
+      label={formatMessage({
+        id: getTranslationKey('asset-details.copy-link.trigger'),
+        defaultMessage: 'Copy link',
+      })}
+      variant="tertiary"
+      onClick={handleCopy}
+    >
+      <Link />
+    </IconButton>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DownloadAssetButton — fetch the file and trigger a browser download.
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DownloadAssetButtonProps {
+  asset: AssetWithPopulatedCreatedBy;
+}
+
+const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
+  const { formatMessage } = useIntl();
+  const notify = useDrawerNotify();
+  const [isDownloading, setIsDownloading] = React.useState(false);
+
+  const handleDownload = async () => {
+    const url = prefixFileUrlWithBackendUrl(asset.url);
+    if (!url) return;
+    setIsDownloading(true);
+    try {
+      await downloadFile(url, asset.name);
+    } catch {
+      notify({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslationKey('asset-details.download.error'),
+          defaultMessage: 'Failed to download the file.',
+        }),
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <IconButton
+      withTooltip={false}
+      label={formatMessage({
+        id: getTranslationKey('asset-details.download.trigger'),
+        defaultMessage: 'Download',
+      })}
+      variant="tertiary"
+      onClick={handleDownload}
+      disabled={isDownloading}
+    >
+      <Download />
+    </IconButton>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * ReplaceAssetButton
  * -----------------------------------------------------------------------------------------------*/
 
 interface ReplaceAssetButtonProps {
   asset: AssetWithPopulatedCreatedBy;
-  onNotify: (toast: DrawerToast) => void;
 }
 
-const ReplaceAssetButton = ({ asset, onNotify }: ReplaceAssetButtonProps) => {
+const ReplaceAssetButton = ({ asset }: ReplaceAssetButtonProps) => {
   const { formatMessage } = useIntl();
+  const notify = useDrawerNotify();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [replaceAsset, { isLoading: isReplacing }] = useReplaceAssetMutation();
@@ -417,11 +542,11 @@ const ReplaceAssetButton = ({ asset, onNotify }: ReplaceAssetButtonProps) => {
           id: getTranslationKey('asset-details.replace.error'),
           defaultMessage: 'Failed to replace the file.',
         });
-      onNotify({ type: 'danger', message });
+      notify({ type: 'danger', message });
       return;
     }
 
-    onNotify({
+    notify({
       type: 'success',
       message: formatMessage({
         id: getTranslationKey('asset-details.replace.success'),
@@ -452,7 +577,7 @@ const ReplaceAssetButton = ({ asset, onNotify }: ReplaceAssetButtonProps) => {
         onClick={handleTriggerClick}
         disabled={isReplacing}
       >
-        <Download />
+        <ArrowsCounterClockwise />
       </IconButton>
       <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <Dialog.Content>
@@ -498,6 +623,23 @@ const ReplaceAssetButton = ({ asset, onNotify }: ReplaceAssetButtonProps) => {
         </Dialog.Content>
       </Dialog.Root>
     </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetImageActions - crop / rotate buttons overlaid on the image preview.
+ * Rendered inside <Form> so the rotate button can drive the `rotation` field.
+ * -----------------------------------------------------------------------------------------------*/
+
+interface AssetImageActionsProps {
+  asset: AssetWithPopulatedCreatedBy;
+}
+
+const AssetImageActions = ({ asset }: AssetImageActionsProps) => {
+  return (
+    <Flex direction="column" gap={2}>
+      <ReplaceAssetButton asset={asset} />
+    </Flex>
   );
 };
 
@@ -577,209 +719,215 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   return (
     // `key={asset.id}` resets the form when the drawer switches to a different
     // asset so cached values from the previous asset don't bleed in.
-    <FormShell>
-      <Form key={asset.id} method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
-        {({ modified, isSubmitting, values, resetForm }) => {
-          const nameIsEmpty = ((values as AssetFormState).name ?? '').trim() === '';
-          return (
-            <>
-              {/* Guards every close path (X button, ESC, route change, browser
+    <DrawerNotifyContext.Provider value={setDrawerToast}>
+      <FormShell>
+        <Form key={asset.id} method="POST" initialValues={initialValues} onSubmit={handleSubmit}>
+          {({ modified, isSubmitting, values, resetForm }) => {
+            const nameIsEmpty = ((values as AssetFormState).name ?? '').trim() === '';
+            return (
+              <>
+                {/* Guards every close path (X button, ESC, route change, browser
                 back) by intercepting the navigation when the form is dirty.
                 `onProceed` resets the form so the held navigation can complete.
                 Lives inside <Form> so it can read the form context. */}
-              <Blocker onProceed={resetForm} />
-              {drawerToast ? (
-                <DrawerToastSlot>
-                  <Alert
-                    variant={drawerToast.type === 'success' ? 'success' : 'danger'}
-                    closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
-                    onClose={() => setDrawerToast(null)}
-                  >
-                    {drawerToast.message}
-                  </Alert>
-                </DrawerToastSlot>
-              ) : null}
-              <Drawer.ScrollableContent>
-                <AssetPreview asset={asset} />
-                <Flex
-                  direction="column"
-                  alignItems="stretch"
-                  gap={4}
-                  paddingTop={4}
-                  paddingBottom={4}
-                  paddingLeft={5}
-                  paddingRight={5}
-                >
-                  <Typography variant="beta" fontWeight="semiBold" tag="h3">
-                    {formatMessage({
-                      id: getTranslationKey('asset-details.fileInfo'),
-                      defaultMessage: 'File info',
-                    })}
-                  </Typography>
+                <Blocker onProceed={resetForm} />
+                {drawerToast ? (
+                  <DrawerToastSlot>
+                    <Alert
+                      variant={drawerToast.type === 'success' ? 'success' : 'danger'}
+                      closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+                      onClose={() => setDrawerToast(null)}
+                    >
+                      {drawerToast.message}
+                    </Alert>
+                  </DrawerToastSlot>
+                ) : null}
+                <Drawer.ScrollableContent>
+                  <AssetPreview
+                    asset={asset}
+                    actions={isImage ? <AssetImageActions asset={asset} /> : null}
+                  />
                   <Flex
-                    wrap="wrap"
+                    direction="column"
+                    alignItems="stretch"
                     gap={4}
-                    background="neutral100"
                     paddingTop={4}
                     paddingBottom={4}
-                    paddingLeft={6}
-                    paddingRight={6}
-                    alignItems="flex-start"
+                    paddingLeft={5}
+                    paddingRight={5}
                   >
-                    <DetailItem
-                      label={formatMessage({
-                        id: getTranslationKey('asset-details.creationDate'),
-                        defaultMessage: 'Creation date',
+                    <Typography variant="beta" fontWeight="semiBold" tag="h3">
+                      {formatMessage({
+                        id: getTranslationKey('asset-details.fileInfo'),
+                        defaultMessage: 'File info',
                       })}
-                      value={
-                        asset.createdAt
-                          ? formatDate(new Date(asset.createdAt), {
-                              dateStyle: 'long',
-                              timeStyle: 'short',
-                            })
-                          : null
-                      }
-                    />
-                    <DetailItem
-                      label={formatMessage({
-                        id: getTranslationKey('asset-details.lastUpdated'),
-                        defaultMessage: 'Last updated',
-                      })}
-                      value={
-                        asset.updatedAt
-                          ? formatDate(new Date(asset.updatedAt), {
-                              dateStyle: 'long',
-                              timeStyle: 'short',
-                            })
-                          : null
-                      }
-                    />
-                    <DetailItem
-                      label={formatMessage({
-                        id: getTranslationKey('asset-details.createdBy'),
-                        defaultMessage: 'Created by',
-                      })}
-                      value={
-                        asset.createdBy
-                          ? (getDisplayName({
-                              firstname: asset.createdBy.firstname ?? undefined,
-                              lastname: asset.createdBy.lastname ?? undefined,
-                              username: asset.createdBy.username ?? undefined,
-                              email: asset.createdBy.email ?? undefined,
-                            }) ?? '-')
-                          : null
-                      }
-                    />
-                    <DetailItem
-                      label={formatMessage({
-                        id: getTranslationKey('asset-details.size'),
-                        defaultMessage: 'Size',
-                      })}
-                      value={asset.size ? formatBytes(asset.size, 1) : null}
-                    />
-                    {isImage && (asset.width != null || asset.height != null) && (
+                    </Typography>
+                    <Flex
+                      wrap="wrap"
+                      gap={4}
+                      background="neutral100"
+                      paddingTop={4}
+                      paddingBottom={4}
+                      paddingLeft={6}
+                      paddingRight={6}
+                      alignItems="flex-start"
+                    >
                       <DetailItem
                         label={formatMessage({
-                          id: getTranslationKey('asset-details.dimensions'),
-                          defaultMessage: 'Dimensions',
+                          id: getTranslationKey('asset-details.creationDate'),
+                          defaultMessage: 'Creation date',
                         })}
                         value={
-                          asset.width != null && asset.height != null
-                            ? `${asset.width} × ${asset.height}`
+                          asset.createdAt
+                            ? formatDate(new Date(asset.createdAt), {
+                                dateStyle: 'long',
+                                timeStyle: 'short',
+                              })
                             : null
                         }
                       />
+                      <DetailItem
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.lastUpdated'),
+                          defaultMessage: 'Last updated',
+                        })}
+                        value={
+                          asset.updatedAt
+                            ? formatDate(new Date(asset.updatedAt), {
+                                dateStyle: 'long',
+                                timeStyle: 'short',
+                              })
+                            : null
+                        }
+                      />
+                      <DetailItem
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.createdBy'),
+                          defaultMessage: 'Created by',
+                        })}
+                        value={
+                          asset.createdBy
+                            ? (getDisplayName({
+                                firstname: asset.createdBy.firstname ?? undefined,
+                                lastname: asset.createdBy.lastname ?? undefined,
+                                username: asset.createdBy.username ?? undefined,
+                                email: asset.createdBy.email ?? undefined,
+                              }) ?? '-')
+                            : null
+                        }
+                      />
+                      <DetailItem
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.size'),
+                          defaultMessage: 'Size',
+                        })}
+                        value={asset.size ? formatBytes(asset.size, 1) : null}
+                      />
+                      {isImage && (asset.width != null || asset.height != null) && (
+                        <DetailItem
+                          label={formatMessage({
+                            id: getTranslationKey('asset-details.dimensions'),
+                            defaultMessage: 'Dimensions',
+                          })}
+                          value={
+                            asset.width != null && asset.height != null
+                              ? `${asset.width} × ${asset.height}`
+                              : null
+                          }
+                        />
+                      )}
+                      <DetailItem
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.extension'),
+                          defaultMessage: 'Extension',
+                        })}
+                        value={getFileExtension(asset.ext)}
+                      />
+                      <DetailItem
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.assetId'),
+                          defaultMessage: 'Asset ID',
+                        })}
+                        value={String(asset.id)}
+                      />
+                    </Flex>
+                    <DetailField
+                      name="name"
+                      label={formatMessage({
+                        id: getTranslationKey('asset-details.fileName'),
+                        defaultMessage: 'File name',
+                      })}
+                      required
+                    />
+                    <LocationField
+                      label={formatMessage({
+                        id: getTranslationKey('asset-details.location'),
+                        defaultMessage: 'Location',
+                      })}
+                      rootLabel={formatMessage({
+                        id: getTranslationKey('plugin.home'),
+                        defaultMessage: 'Home',
+                      })}
+                      folders={folders}
+                    />
+                    {isImage && (
+                      <>
+                        <DetailField
+                          name="caption"
+                          label={formatMessage({
+                            id: getTranslationKey('asset-details.caption'),
+                            defaultMessage: 'Caption',
+                          })}
+                        />
+                        <DetailField
+                          name="alternativeText"
+                          label={formatMessage({
+                            id: getTranslationKey('asset-details.alternativeText'),
+                            defaultMessage: 'Alternative text',
+                          })}
+                        />
+                      </>
                     )}
-                    <DetailItem
-                      label={formatMessage({
-                        id: getTranslationKey('asset-details.extension'),
-                        defaultMessage: 'Extension',
-                      })}
-                      value={getFileExtension(asset.ext)}
-                    />
-                    <DetailItem
-                      label={formatMessage({
-                        id: getTranslationKey('asset-details.assetId'),
-                        defaultMessage: 'Asset ID',
-                      })}
-                      value={String(asset.id)}
-                    />
                   </Flex>
-                  <DetailField
-                    name="name"
-                    label={formatMessage({
-                      id: getTranslationKey('asset-details.fileName'),
-                      defaultMessage: 'File name',
-                    })}
-                    required
-                  />
-                  <LocationField
-                    label={formatMessage({
-                      id: getTranslationKey('asset-details.location'),
-                      defaultMessage: 'Location',
-                    })}
-                    rootLabel={formatMessage({
-                      id: getTranslationKey('plugin.home'),
-                      defaultMessage: 'Home',
-                    })}
-                    folders={folders}
-                  />
-                  {isImage && (
-                    <>
-                      <DetailField
-                        name="caption"
-                        label={formatMessage({
-                          id: getTranslationKey('asset-details.caption'),
-                          defaultMessage: 'Caption',
-                        })}
-                      />
-                      <DetailField
-                        name="alternativeText"
-                        label={formatMessage({
-                          id: getTranslationKey('asset-details.alternativeText'),
-                          defaultMessage: 'Alternative text',
-                        })}
-                      />
-                    </>
-                  )}
-                </Flex>
-              </Drawer.ScrollableContent>
-              <Flex
-                justifyContent="space-between"
-                alignItems="center"
-                gap={2}
-                padding={3}
-                borderColor="neutral150"
-                borderStyle="solid"
-                borderWidth="1px 0 0 0"
-                background="neutral0"
-              >
-                <Flex gap={2}>
-                  <DeleteAssetButton
-                    asset={asset}
-                    folderId={initialValues.folder}
-                    closeDetails={closeDetails}
-                  />
-                  <ReplaceAssetButton asset={asset} onNotify={setDrawerToast} />
-                </Flex>
-                <Button
-                  type="submit"
-                  variant="default"
-                  loading={isSubmitting}
-                  // File name is required; block submit when it's empty or whitespace so the API can't 400 on a blank value.
-                  disabled={!modified || isSubmitting || nameIsEmpty}
+                </Drawer.ScrollableContent>
+                <Flex
+                  justifyContent="space-between"
+                  alignItems="center"
+                  gap={2}
+                  padding={3}
+                  borderColor="neutral150"
+                  borderStyle="solid"
+                  borderWidth="1px 0 0 0"
+                  background="neutral0"
                 >
-                  {formatMessage({
-                    id: getTranslationKey('asset-details.save'),
-                    defaultMessage: 'Save changes',
-                  })}
-                </Button>
-              </Flex>
-            </>
-          );
-        }}
-      </Form>
-    </FormShell>
+                  <Flex gap={2}>
+                    <DeleteAssetButton
+                      asset={asset}
+                      folderId={initialValues.folder}
+                      closeDetails={closeDetails}
+                    />
+                    <CopyLinkButton asset={asset} />
+                    <DownloadAssetButton asset={asset} />
+                  </Flex>
+                  <Button
+                    type="submit"
+                    variant="default"
+                    loading={isSubmitting}
+                    // File name is required; block submit when it's empty or whitespace so the API can't 400 on a blank value.
+                    disabled={!modified || isSubmitting || nameIsEmpty}
+                  >
+                    {formatMessage({
+                      id: getTranslationKey('asset-details.save'),
+                      defaultMessage: 'Save changes',
+                    })}
+                  </Button>
+                </Flex>
+              </>
+            );
+          }}
+        </Form>
+      </FormShell>
+    </DrawerNotifyContext.Provider>
   );
 };
 

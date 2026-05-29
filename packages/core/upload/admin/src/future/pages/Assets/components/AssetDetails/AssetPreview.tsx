@@ -47,6 +47,17 @@ const StyledImage = styled.img`
   object-fit: contain;
 `;
 
+/**
+ * Top-right overlay slot for image actions (crop / rotate). Sits above the
+ * image (z-index 3 > AssetContainer 2) so the buttons stay clickable.
+ */
+const ActionsOverlay = styled(Flex)`
+  position: absolute;
+  top: ${({ theme }) => theme.spaces[3]};
+  right: ${({ theme }) => theme.spaces[3]};
+  z-index: 3;
+`;
+
 const StyledVideo = styled.video`
   max-width: 100%;
   max-height: 100%;
@@ -99,9 +110,10 @@ const AssetLoader = () => {
 
 interface AssetPreviewProps {
   asset: File | AssetWithPopulatedCreatedBy;
+  actions?: React.ReactNode;
 }
 
-export const AssetPreview = ({ asset }: AssetPreviewProps) => {
+export const AssetPreview = ({ asset, actions }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
   const { alternativeText, ext, mime, url, updatedAt } = asset;
   // Append the asset's `updatedAt` as a cache-buster so a freshly replaced
@@ -126,6 +138,7 @@ export const AssetPreview = ({ asset }: AssetPreviewProps) => {
       return (
         <PreviewContainer>
           {!isMediaLoaded && <AssetLoader />}
+          {actions ? <ActionsOverlay>{actions}</ActionsOverlay> : null}
           <AssetContainer>
             <StyledImage
               src={imageUrl}
