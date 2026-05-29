@@ -335,7 +335,6 @@
   "relation.notAvailable": "Geen relaties beschikbaar",
   "relation.publicationState.draft": "Concept",
   "relation.publicationState.published": "Gepubliceerd",
-  "reviewWorkflows.stage.label": "Beoordelingsfase",
   "select.currently.selected": "{count} nu geselecteerd",
   "success.record.clone": "Document gedupliceerd",
   "success.record.delete": "Verwijderd",

@@ -17,7 +17,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -41,6 +41,7 @@ jobs:
           linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
           linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
           linear-labels: ${{ vars.LINEAR_LABELS }}
+          linear-triage-state-id: ${{ vars.LINEAR_TRIAGE_STATE_ID }}
 
       - name: Post Linear weekly report
         uses: ./.github/actions/community-pr-triage
