@@ -45,7 +45,7 @@ jest.mock('@strapi/data-transfer', () => {
     directory: {
       ...actual.directory,
       providers: {
-        ...actual.directory.providers,
+        ...actual.directory?.providers,
         createLocalDirectorySourceProvider: jest.fn().mockReturnValue({
           name: 'testDirSource',
           type: 'source',
