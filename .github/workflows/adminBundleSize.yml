@@ -30,11 +30,12 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
 
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+      - name: Create install-and-build script
+        run: printf '#!/bin/sh\nset -e\nyarn install\nyarn build\n' > /tmp/install-and-build.sh
 
       - uses: preactjs/compressed-size-action@v2
         with:
+          install-script: 'sh /tmp/install-and-build.sh'
           build-script: 'build:size'
           pattern: '**/build/**/*.{js,css,html,svg}'
           strip-hash: "-([-\\w]{8})(\\.\\w+)$"
