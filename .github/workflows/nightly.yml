@@ -5,12 +5,29 @@ on:
     - cron: '0 0 * * 2-6'
 
 permissions:
-  contents: read # to fetch code (actions/checkout)
+  contents: read
 
 jobs:
+  test:
+    name: 'Smoke test before publish'
+    runs-on: ubuntu-latest
+    if: github.repository == 'strapi/strapi'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run unit tests
+        run: yarn test:unit:vitest
+
   publish:
     name: 'Publish'
     runs-on: ubuntu-latest
+    needs: [test]
     if: github.repository == 'strapi/strapi'
     steps:
       - uses: actions/checkout@v6
@@ -18,7 +35,7 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
       - run: yarn
       - run: ./scripts/pre-publish.sh --yes
         env:
