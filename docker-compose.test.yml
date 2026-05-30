@@ -10,6 +10,11 @@ services:
       POSTGRES_DB: strapi_test
     ports:
       - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U strapi']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mysql:
     image: mysql:8
@@ -24,6 +29,11 @@ services:
       - mysqldata_test:/var/lib/mysql
     ports:
       - '3306:3306'
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   pgdata_test:
