@@ -302,7 +302,16 @@ export const buildDataSchema = (
   const shape: Record<string, z.ZodTypeAny> = {};
 
   for (const [key, attr] of Object.entries(attributes)) {
+    // For component attributes, skip the permittedFields check.
+    // Permission check happens at the component level (parent key),
+    // not at the sub-field level. Using permittedFields here causes
+    // a mismatch: the schema includes all sub-fields (because the parent
+    // key is permitted), but sanitizeCreateInput() then removes
+    // sub-fields that the user cannot write to individually.
+    // See: https://github.com/strapi/strapi/issues/26509
+    const isComponent = (attr as { type?: string }).type === 'component';
     const isPermitted =
+      isComponent || // Always include component attributes (permission checked at parent level)
       permittedFields === null ||
       permittedFields === undefined ||
       permittedFields.has(key) === true;
