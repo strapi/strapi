@@ -488,7 +488,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
       <StyledMenuItem
         startIcon={Icon && <Icon />}
         onSelect={() => toggleList(format)}
-        isActive={isListActive()}
+        $isActive={isListActive()}
         disabled={isListDisabled()}
       >
         {formatMessage(block.label)}
@@ -578,7 +578,7 @@ const LinkButton = ({
       <StyledMenuItem
         startIcon={<Link />}
         onSelect={addLink}
-        isActive={isLinkActive()}
+        $isActive={isLinkActive()}
         disabled={isLinkDisabled()}
       >
         {formatMessage(label)}
@@ -598,17 +598,17 @@ const LinkButton = ({
   );
 };
 
-const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
+const StyledMenuItem = styled(Menu.Item)<{ $isActive: boolean }>`
   ${(props) =>
-    props.isActive &&
+    props.$isActive &&
     css`
       color: ${({ theme }) => theme.colors.primary600};
       font-weight: 600;
     `}
 
   svg {
-    fill: ${({ theme, isActive }) =>
-      isActive ? theme.colors.primary600 : theme.colors.neutral500};
+    fill: ${({ theme, $isActive }) =>
+      $isActive ? theme.colors.primary600 : theme.colors.neutral500};
   }
 `;
 
@@ -805,7 +805,7 @@ const BlocksToolbar = () => {
           />
         ),
         menu: (
-          <StyledMenuItem startIcon={<Icon />} onSelect={handleSelect} isActive={isActive}>
+          <StyledMenuItem startIcon={<Icon />} onSelect={handleSelect} $isActive={isActive}>
             {formatMessage(modifier.label)}
           </StyledMenuItem>
         ),

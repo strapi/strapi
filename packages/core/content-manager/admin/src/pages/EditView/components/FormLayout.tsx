@@ -22,13 +22,17 @@ export const ResponsiveGridItem =
    * for failing to parse the stylesheet.
    */
   process.env.NODE_ENV !== 'test'
-    ? styled(Grid.Item)<{ col: number }>`
+    ? styled(Grid.Item).withConfig({
+        shouldForwardProp: (prop) => prop !== 'col',
+      })<{ col: number }>`
         grid-column: span 12;
         ${({ theme }) => theme.breakpoints.medium} {
           ${({ col }) => col && `grid-column: span ${col};`}
         }
       `
-    : styled(Grid.Item)<{ col: number }>`
+    : styled(Grid.Item).withConfig({
+        shouldForwardProp: (prop) => prop !== 'col',
+      })<{ col: number }>`
         grid-column: span 12;
       `;
 
