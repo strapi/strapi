@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import resources from './resources/index';
+import { withoutFixtures as resources } from './resources/article-query';
 import { ARTICLE_UID } from './utils';
 
 type ApiEntry = {
