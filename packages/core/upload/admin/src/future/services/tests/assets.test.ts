@@ -4,11 +4,6 @@ import * as qs from 'qs';
 
 import { useGetAssetsQuery } from '../assets';
 
-/**
- * Regression coverage for the legacy folderPath/folder desync that caused
- * #23571 (and #21904 by extension). The future Media Library must always
- * filter assets by `folder.id` so subfolder views stay in sync with the URL.
- */
 describe('future assets service - getAssets filter shape', () => {
   let lastRequestParams: { filters?: { $and?: Array<{ folder?: { id: unknown } }> } } | undefined;
 

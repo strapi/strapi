@@ -7,18 +7,10 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 
 /**
- * Regression coverage for #24081 — Super Admin gets a 403 when navigating
- * into deeply nested folders. The original cause was the admin firing
- * `GET /upload/files?filters[folderPath][$eq]=/1/2/3` with raw slashes
- * inside the query value, which some reverse proxies / WAFs reject before
- * the request ever reaches Strapi. After switching the admin to filter on
- * `folder.id`, the request shape is `filters[folder][id]=N` and Strapi
- * itself must keep returning 200 for the super admin role at any depth.
- *
  * This test asserts that the id-based filter works for super admin against
  * nested folders, and that fetching the deep folder + its files succeeds.
  */
-describe('Upload | super admin nested folder access (#24081)', () => {
+describe('Upload | super admin nested folder access', () => {
   let strapi;
   let rq;
   const data = { folders: [], file: null };
