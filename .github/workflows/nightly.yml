@@ -8,8 +8,25 @@ permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
+  validate:
+    name: 'Validate'
+    runs-on: ubuntu-latest
+    if: github.repository == 'strapi/strapi'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run Vitest unit smoke
+        run: yarn test:unit:vitest
+
   publish:
     name: 'Publish'
+    needs: validate
     runs-on: ubuntu-latest
     if: github.repository == 'strapi/strapi'
     steps:
