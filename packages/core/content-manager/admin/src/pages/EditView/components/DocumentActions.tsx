@@ -1090,7 +1090,7 @@ const UpdateAction: DocumentActionComponent = ({
   );
   const { schema } = useDoc();
 
-  const suitableSchema = fromRelationModal ? relationalModalSchema : schema
+  const suitableSchema = fromRelationModal ? relationalModalSchema : schema;
   const hasDraftAndPublished = suitableSchema?.options?.draftAndPublish ?? false;
 
   const handleUpdate = async () => {
