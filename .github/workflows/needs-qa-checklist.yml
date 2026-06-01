@@ -13,7 +13,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -26,6 +25,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         with:
+          github_token: ${{ github.token }}
           anthropic_api_key: ${{ secrets.PR_QA_ANTHROPIC_API_KEY }}
           prompt: |
             REPO: ${{ github.repository }}
@@ -84,4 +84,4 @@ jobs:
             tied to files, behavior, or risks in the diff.
 
           claude_args: |
-            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh api:*)"
+            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*)"
