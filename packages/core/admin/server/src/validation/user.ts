@@ -1,5 +1,6 @@
 import { isUndefined } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
+import { mergeValidatedBody } from '../utils/merge-validated-body';
 import validators from './common-validators';
 
 const userCreationSchema = yup
@@ -52,8 +53,40 @@ const usersDeleteSchema = yup
   .noUnknown();
 
 export const validateUserCreationInput = validateYupSchema(userCreationSchema);
-export const validateProfileUpdateInput = validateYupSchema(profileUpdateSchema);
-export const validateUserUpdateInput = validateYupSchema(userUpdateSchema);
+const normalizeUpdateInput = (input: unknown) => {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+    return input;
+  }
+
+  const data = { ...input } as Record<string, unknown>;
+
+  if (typeof data.email === 'string') {
+    data.email = data.email.toLowerCase();
+  }
+
+  if (typeof data.firstname === 'string') {
+    data.firstname = data.firstname.trim();
+  }
+
+  return data;
+};
+
+const runProfileUpdateValidation = validateYupSchema(profileUpdateSchema);
+const runUserUpdateValidation = validateYupSchema(userUpdateSchema);
+
+export const validateProfileUpdateInput = async (input: unknown) => {
+  const data = normalizeUpdateInput(input);
+  const validated = await runProfileUpdateValidation(data);
+
+  return mergeValidatedBody(data as object, validated);
+};
+
+export const validateUserUpdateInput = async (input: unknown) => {
+  const data = normalizeUpdateInput(input);
+  const validated = await runUserUpdateValidation(data);
+
+  return mergeValidatedBody(data as object, validated);
+};
 export const validateUsersDeleteInput = validateYupSchema(usersDeleteSchema);
 export const schemas = {
   userCreationSchema,

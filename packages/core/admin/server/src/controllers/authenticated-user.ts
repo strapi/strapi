@@ -1,3 +1,4 @@
+import _ = require('lodash');
 import type { Context } from 'koa';
 import type { AdminUser } from '../../../shared/contracts/shared';
 
@@ -17,12 +18,12 @@ export default {
   async updateMe(ctx: Context) {
     const input = ctx.request.body as UpdateMe.Request['body'];
 
-    await validateProfileUpdateInput(input);
+    const data = (await validateProfileUpdateInput(input)) as UpdateMe.Request['body'];
 
     const userService = getService('user');
     const authServer = getService('auth');
 
-    const { currentPassword, ...userInfo } = input;
+    const { currentPassword, ...userInfo } = data;
 
     if (currentPassword && userInfo.password) {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
@@ -31,6 +32,20 @@ export default {
         // @ts-expect-error - refactor ctx bad request to take a second argument
         return ctx.badRequest('ValidationError', {
           currentPassword: ['Invalid credentials'],
+        });
+      }
+    }
+
+    if (_.has(userInfo, 'email')) {
+      const uniqueEmailCheck = await userService.exists({
+        id: { $ne: ctx.state.user.id },
+        email: userInfo.email,
+      });
+
+      if (uniqueEmailCheck) {
+        // @ts-expect-error - refactor ctx bad request to take a second argument
+        return ctx.badRequest('ValidationError', {
+          email: ['Email already taken'],
         });
       }
     }

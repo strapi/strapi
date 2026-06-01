@@ -1,8 +1,11 @@
 'use strict';
 
+const path = require('path');
+const fse = require('fs-extra');
 const { createAuthRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
+const modelsUtils = require('api-tests/models');
 const pluralize = require('pluralize');
 
 let strapi;
@@ -76,6 +79,13 @@ describe('Component Deletion and Cleanup Test', () => {
   });
 
   afterAll(async () => {
+    await modelsUtils.deleteContentType(testCollectionTypeUID, { strapi }).catch(() => {});
+    await modelsUtils.deleteComponent(componentUID, { strapi }).catch(() => {});
+    await modelsUtils.deleteComponent(componentKeepUID, { strapi }).catch(() => {});
+    await fse.remove(path.resolve('test-apps/api/src/api/contentwithcomponent'));
+    await fse.remove(path.resolve('test-apps/api/src/components/default/temporarycomponent.json'));
+    await fse.remove(path.resolve('test-apps/api/src/components/default/keepcomponent.json'));
+
     await strapi.destroy();
     await builder.cleanup();
   });
