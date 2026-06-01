@@ -45,9 +45,9 @@ const EmbeddedSocialMediaWrapper = styled<FlexComponent>(Flex)<{ $isFocused?: bo
       box-shadow: ${props.theme.colors.primary600} 0px 0px 0px 3px;
     `}
 
-  & > iframe {
+  &> iframe {
     height: auto;
-    min-height: 500px;
+    min-height: 390px;
     max-width: 100%;
     object-fit: contain;
   }
@@ -55,20 +55,17 @@ const EmbeddedSocialMediaWrapper = styled<FlexComponent>(Flex)<{ $isFocused?: bo
 
 const XMediaElement = ({ xUrl }: { xUrl: string }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   function loadTweet(id: string): void {
     const container = containerRef.current;
-    if (!container) return;
-    if (container.querySelector('iframe')) return;
+    if (!container || container.querySelector('iframe')) return;
     window.twttr.ready(() => {
       window.twttr.widgets
         .createTweet(id, container, {
           align: 'left',
+          width: '470',
         })
-        .then(function (el: any) {
-          setIsLoading(false);
-        })
+        .then(function (el: any) {})
         .catch(() => {
           console.error('Unable to load tweet');
         });
@@ -99,7 +96,7 @@ const XMediaElement = ({ xUrl }: { xUrl: string }) => {
     }
   }, []);
 
-  return <div ref={containerRef} style={{ opacity: isLoading ? 0 : 1 }}></div>;
+  return <div ref={containerRef} style={{ minWidth: 470, width: 'auto' }}></div>;
 };
 
 const YoutubeMediaElement = ({ youtubeUrl }: { youtubeUrl: string }) => {
@@ -108,6 +105,7 @@ const YoutubeMediaElement = ({ youtubeUrl }: { youtubeUrl: string }) => {
       src={youtubeUrl}
       width="640"
       height="390"
+      style={{ aspectRatio: '16/ 9' }}
       referrerPolicy="strict-origin-when-cross-origin"
     ></iframe>
   );
