@@ -5,29 +5,24 @@ import {
   Button,
   Dialog,
   Field,
+  Box,
   Flex,
   SingleSelect,
   SingleSelectOption,
   TextInput,
+  FlexComponent,
 } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import { Editor, Transforms, type Element } from 'slate';
-import { type RenderElementProps } from 'slate-react';
+import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
+import { styled, css } from 'styled-components';
 import * as yup from 'yup';
 
 import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
 import { type Block } from '../utils/types';
 
-declare global {
-  interface Window {
-    onYouTubePlayerAPIReady: () => void;
-    YT: any;
-    twttr: any;
-  }
-}
-
 const schema = yup.object({
-  socialMediaType: yup.mixed().oneOf(['youtube', 'x-post']),
+  socialMediaType: yup.mixed().oneOf(['youtube', 'x-post']).required(),
   socialMediaUrl: yup
     .string()
     .when('socialMediaType', {
@@ -36,22 +31,44 @@ const schema = yup.object({
     })
     .when('socialMediaType', {
       is: 'x-post',
-      then: (schema) => schema.matches(/https:\/\/x.com\/.*/, 'Use X Url'),
-    }),
+      then: (schema) => schema.matches(/https:\/\/x.com\/.*\/status\/\d{19}/, 'Use X Url'),
+    })
+    .required(),
 });
+
+const EmbeddedSocialMediaWrapper = styled<FlexComponent>(Flex)<{ $isFocused?: boolean }>`
+  transition-property: box-shadow;
+  transition-duration: 0.2s;
+  ${(props) =>
+    props.$isFocused &&
+    css`
+      box-shadow: ${props.theme.colors.primary600} 0px 0px 0px 3px;
+    `}
+
+  & > iframe {
+    height: auto;
+    min-height: 500px;
+    max-width: 100%;
+    object-fit: contain;
+  }
+`;
 
 const XMediaElement = ({ xUrl }: { xUrl: string }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   function loadTweet(id: string): void {
     const container = containerRef.current;
     if (!container) return;
+    if (container.querySelector('iframe')) return;
     window.twttr.ready(() => {
       window.twttr.widgets
         .createTweet(id, container, {
           align: 'left',
         })
-        .then(function (el: any) {})
+        .then(function (el: any) {
+          setIsLoading(false);
+        })
         .catch(() => {
           console.error('Unable to load tweet');
         });
@@ -59,11 +76,13 @@ const XMediaElement = ({ xUrl }: { xUrl: string }) => {
   }
 
   React.useEffect(() => {
+    // extract the Tweet ID from URL
     const url = new URL(xUrl);
     const pathname = url.pathname.split('/');
     const id = pathname[pathname.length - 1];
     const isXJsLoaded = document.getElementById('twitter-wjs');
     if (!isXJsLoaded) {
+      // check if twitter's/X's widgets.js exists if not then add it and as soon as it loads load the tweet
       const script = document.createElement('script');
       script.id = 'twitter-wjs';
       script.src = 'https://platform.twitter.com/widgets.js';
@@ -71,6 +90,7 @@ const XMediaElement = ({ xUrl }: { xUrl: string }) => {
       script.onload = () => loadTweet(id);
       document.body.appendChild(script);
     } else if (!window.twttr?.widgets) {
+      // wait for widgets.js to load before loading the tweet
       document.getElementById('twitter-wjs')?.addEventListener('load', () => {
         loadTweet(id);
       });
@@ -79,7 +99,7 @@ const XMediaElement = ({ xUrl }: { xUrl: string }) => {
     }
   }, []);
 
-  return <div ref={containerRef}></div>;
+  return <div ref={containerRef} style={{ opacity: isLoading ? 0 : 1 }}></div>;
 };
 
 const YoutubeMediaElement = ({ youtubeUrl }: { youtubeUrl: string }) => {
@@ -223,13 +243,13 @@ const isEmbedSocialMedia = (element: Element): element is Block<'embedded-social
   return element.type === 'embedded-social-media';
 };
 
-const EmbedSocialMedia = ({ attributes, children, element }: RenderElementProps) => {
-  if (!isEmbedSocialMedia(element)) {
-    return null;
-  }
-
-  const { socialMediaUrl, socialMediaType } = element.embedSocialMedia;
-
+const SocialMedia = ({
+  socialMediaUrl,
+  socialMediaType,
+}: {
+  socialMediaUrl: string;
+  socialMediaType: 'youtube' | 'x-post';
+}) => {
   switch (socialMediaType) {
     case 'youtube':
       return <YoutubeMediaElement youtubeUrl={socialMediaUrl} />;
@@ -238,6 +258,42 @@ const EmbedSocialMedia = ({ attributes, children, element }: RenderElementProps)
     default:
       break;
   }
+};
+
+const EmbedSocialMedia = ({ attributes, children, element }: RenderElementProps) => {
+  const editorIsFocused = useFocused();
+  const imageIsSelected = useSelected();
+
+  if (!isEmbedSocialMedia(element)) {
+    return null;
+  }
+
+  const { socialMediaUrl, socialMediaType } = element.embedSocialMedia;
+
+  return (
+    <Box {...attributes}>
+      {children}
+      <EmbeddedSocialMediaWrapper
+        background="neutral100"
+        contentEditable={false}
+        justifyContent="center"
+        $isFocused={editorIsFocused && imageIsSelected}
+        hasRadius
+      >
+        <SocialMedia socialMediaUrl={socialMediaUrl} socialMediaType={socialMediaType} />
+      </EmbeddedSocialMediaWrapper>
+    </Box>
+  );
+};
+
+const withEmbedSocialMedia = (editor: Editor) => {
+  const { isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === 'embedded-social-media' ? true : isVoid(element);
+  };
+
+  return editor;
 };
 
 const embeddedSocialMediaBlocks: Pick<BlocksStore, 'embedded-social-media'> = {
@@ -258,9 +314,17 @@ const embeddedSocialMediaBlocks: Pick<BlocksStore, 'embedded-social-media'> = {
     matchNode: (node) => node.type === 'embedded-social-media',
     isInBlocksSelector: true,
     dragHandleTopMargin: '-2px',
+    handleEnterKey(editor) {
+      Transforms.insertNodes(editor, {
+        type: 'paragraph',
+        children: [{ type: 'text', text: '' }],
+      });
+    },
     handleConvert(editor) {
       return () => <EmbedSocialMediaDialog />;
     },
+    snippets: ['!['],
+    plugin: withEmbedSocialMedia,
   },
 };
 
