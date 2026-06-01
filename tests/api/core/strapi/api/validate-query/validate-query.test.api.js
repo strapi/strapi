@@ -923,6 +923,16 @@ describe('Core API - Validate', () => {
         });
       });
 
+      it.each([
+        ['filters', { relations: { filters: { name_private: { $contains: 'Relation' } } } }],
+        ['sort', { relations: { sort: { password: 'asc' } } }],
+        ['fields', { relations: { fields: ['password'] } }],
+      ])('Returns 400 status on invalid nested populate %s', async (_label, populate) => {
+        const res = await rq.get('/api/documents', { qs: { populate } });
+
+        expect(res.status).toEqual(400);
+      });
+
       it.todo('Populates a nested relation');
 
       it.todo('Populates a media');

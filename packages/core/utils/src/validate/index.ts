@@ -9,7 +9,7 @@ import * as visitors from './visitors';
 import * as validators from './validators';
 import traverseEntity from '../traverse-entity';
 
-import { traverseQueryFilters, traverseQuerySort } from '../traverse';
+import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 
 import { Model, Data } from '../types';
 
@@ -68,7 +68,7 @@ const createContentAPIValidators = () => {
     if (!schema) {
       throw new Error('Missing schema in validateQuery');
     }
-    const { filters, sort, fields } = query;
+    const { filters, sort, fields, populate } = query;
 
     if (filters) {
       await validateFilters(filters, schema, { auth });
@@ -82,7 +82,10 @@ const createContentAPIValidators = () => {
       await validateFields(fields, schema);
     }
 
-    // TODO: validate populate
+    // a wildcard is always valid; its conversion will be handled by the entity service and can be optimized with sanitizer
+    if (populate && populate !== '*') {
+      await validatePopulate(populate, schema, { auth });
+    }
   };
 
   const validateFilters: ValidateFunc = async (filters, schema: Model, { auth } = {}) => {
@@ -125,12 +128,48 @@ const createContentAPIValidators = () => {
     return pipeAsync(...transforms)(fields);
   };
 
+  const validatePopulate: ValidateFunc = async (populate, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in validatePopulate');
+    }
+    const transforms = [validators.defaultValidatePopulate(schema)];
+
+    if (auth) {
+      transforms.push(
+        traverseQueryPopulate(visitors.throwRestrictedRelations(auth), { schema }),
+        traverseQueryPopulate(
+          async ({ key, value, schema, attribute }) => {
+            if (attribute) {
+              return;
+            }
+
+            if (key === 'sort') {
+              await validateSort(value, schema, { auth });
+            }
+
+            if (key === 'filters') {
+              await validateFilters(value, schema, { auth });
+            }
+
+            if (key === 'fields') {
+              await validateFields(value, schema);
+            }
+          },
+          { schema }
+        )
+      );
+    }
+
+    return pipeAsync(...transforms)(populate);
+  };
+
   return {
     input: validateInput,
     query: validateQuery,
     filters: validateFilters,
     sort: validateSort,
     fields: validateFields,
+    populate: validatePopulate,
   };
 };
 

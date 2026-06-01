@@ -54,47 +54,69 @@ export default ({ action, ability, model }: any) => {
     // TODO: sanitize relations to admin users in all sanitizers
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
-    const sanitizeFilters = pipeAsync(
-      traverse.traverseQueryFilters(removeDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFilters(omitDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
-      traverse.traverseQueryFilters(removePassword, { schema }),
-      traverse.traverseQueryFilters(
-        ({ key, value }, { remove }) => {
+    const createSanitizeFilters = (ctx: any) =>
+      pipeAsync(
+        traverse.traverseQueryFilters(removeDisallowedFields(permittedFields), ctx),
+        traverse.traverseQueryFilters(omitDisallowedAdminUserFields, ctx),
+        traverse.traverseQueryFilters(omitHiddenFields, ctx),
+        traverse.traverseQueryFilters(removePassword, ctx),
+        traverse.traverseQueryFilters(({ key, value }, { remove }) => {
           if (isObject(value) && isEmpty(value)) {
             remove(key);
           }
-        },
-        { schema }
-      )
-    );
+        }, ctx)
+      );
 
-    const sanitizeSort = pipeAsync(
-      traverse.traverseQuerySort(removeDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
-      traverse.traverseQuerySort(omitHiddenFields, { schema }),
-      traverse.traverseQuerySort(removePassword, { schema }),
-      traverse.traverseQuerySort(
-        ({ key, attribute, value }, { remove }) => {
+    const createSanitizeSort = (ctx: any) =>
+      pipeAsync(
+        traverse.traverseQuerySort(removeDisallowedFields(permittedFields), ctx),
+        traverse.traverseQuerySort(omitDisallowedAdminUserFields, ctx),
+        traverse.traverseQuerySort(omitHiddenFields, ctx),
+        traverse.traverseQuerySort(removePassword, ctx),
+        traverse.traverseQuerySort(({ key, attribute, value }, { remove }) => {
           if (!isScalarAttribute(attribute) && isEmpty(value)) {
             remove(key);
           }
-        },
-        { schema }
-      )
-    );
+        }, ctx)
+      );
+
+    const createSanitizeFields = (ctx: any) =>
+      pipeAsync(
+        traverse.traverseQueryFields(removeDisallowedFields(permittedFields), ctx),
+        traverse.traverseQueryFields(omitHiddenFields, ctx),
+        traverse.traverseQueryFields(removePassword, ctx)
+      );
+
+    const sanitizeFilters = createSanitizeFilters({ schema });
+    const sanitizeSort = createSanitizeSort({ schema });
+    const sanitizeFields = createSanitizeFields({ schema });
+
+    const sanitizeNestedPopulate = async ({ key, value, schema, attribute }: any, { set }: any) => {
+      if (attribute) {
+        return;
+      }
+
+      const nestedCtx = { schema };
+
+      if (key === 'sort') {
+        set(key, await createSanitizeSort(nestedCtx)(value));
+      }
+
+      if (key === 'filters') {
+        set(key, await createSanitizeFilters(nestedCtx)(value));
+      }
+
+      if (key === 'fields') {
+        set(key, await createSanitizeFields(nestedCtx)(value));
+      }
+    };
 
     const sanitizePopulate = pipeAsync(
       traverse.traverseQueryPopulate(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
       traverse.traverseQueryPopulate(omitHiddenFields, { schema }),
-      traverse.traverseQueryPopulate(removePassword, { schema })
-    );
-
-    const sanitizeFields = pipeAsync(
-      traverse.traverseQueryFields(removeDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFields(omitHiddenFields, { schema }),
-      traverse.traverseQueryFields(removePassword, { schema })
+      traverse.traverseQueryPopulate(removePassword, { schema }),
+      traverse.traverseQueryPopulate(sanitizeNestedPopulate, { schema })
     );
 
     return async (query: any) => {

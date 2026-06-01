@@ -104,7 +104,9 @@ const createContentAPISanitizers = () => {
     }
 
     if (populate) {
-      Object.assign(sanitizedQuery, { populate: await sanitizePopulate(populate, schema) });
+      Object.assign(sanitizedQuery, {
+        populate: await sanitizePopulate(populate, schema, { auth }),
+      });
     }
 
     return sanitizedQuery;
@@ -156,7 +158,29 @@ const createContentAPISanitizers = () => {
     const transforms = [sanitizers.defaultSanitizePopulate(schema)];
 
     if (auth) {
-      transforms.push(traverseQueryPopulate(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQueryPopulate(visitors.removeRestrictedRelations(auth), { schema }),
+        traverseQueryPopulate(
+          async ({ key, value, schema, attribute }, { set }) => {
+            if (attribute) {
+              return;
+            }
+
+            if (key === 'sort') {
+              set(key, await sanitizeSort(value, schema, { auth }));
+            }
+
+            if (key === 'filters') {
+              set(key, await sanitizeFilters(value, schema, { auth }));
+            }
+
+            if (key === 'fields') {
+              set(key, await sanitizeFields(value, schema));
+            }
+          },
+          { schema }
+        )
+      );
     }
 
     return pipeAsync(...transforms)(populate);

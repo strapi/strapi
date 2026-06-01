@@ -49,37 +49,65 @@ export default ({ action, ability, model }: any) => {
     // TODO: validate relations to admin users in all validators
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
-    const validateFilters = pipeAsync(
-      traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryFilters(throwPassword, { schema }),
-      traverse.traverseQueryFilters(
-        ({ key, value }) => {
+    const createValidateFilters = (ctx: any) =>
+      pipeAsync(
+        traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), ctx),
+        traverse.traverseQueryFilters(throwDisallowedAdminUserFields, ctx),
+        traverse.traverseQueryFilters(throwPassword, ctx),
+        traverse.traverseQueryFilters(({ key, value }) => {
           if (isObject(value) && isEmpty(value)) {
             throwInvalidParam({ key });
           }
-        },
-        { schema }
-      )
-    );
+        }, ctx)
+      );
 
-    const validateSort = pipeAsync(
-      traverse.traverseQuerySort(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
-      traverse.traverseQuerySort(throwPassword, { schema }),
-      traverse.traverseQuerySort(
-        ({ key, attribute, value }) => {
+    const createValidateSort = (ctx: any) =>
+      pipeAsync(
+        traverse.traverseQuerySort(throwDisallowedFields(permittedFields), ctx),
+        traverse.traverseQuerySort(throwDisallowedAdminUserFields, ctx),
+        traverse.traverseQuerySort(throwPassword, ctx),
+        traverse.traverseQuerySort(({ key, attribute, value }) => {
           if (!isScalarAttribute(attribute) && isEmpty(value)) {
             throwInvalidParam({ key });
           }
-        },
-        { schema }
-      )
-    );
+        }, ctx)
+      );
 
-    const validateFields = pipeAsync(
-      traverse.traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFields(throwPassword, { schema })
+    const createValidateFields = (ctx: any) =>
+      pipeAsync(
+        traverse.traverseQueryFields(throwDisallowedFields(permittedFields), ctx),
+        traverse.traverseQueryFields(throwPassword, ctx)
+      );
+
+    const validateFilters = createValidateFilters({ schema });
+    const validateSort = createValidateSort({ schema });
+    const validateFields = createValidateFields({ schema });
+
+    const validateNestedPopulate = async ({ key, value, schema, attribute }: any) => {
+      if (attribute) {
+        return;
+      }
+
+      const nestedCtx = { schema };
+
+      if (key === 'sort') {
+        await createValidateSort(nestedCtx)(value);
+      }
+
+      if (key === 'filters') {
+        await createValidateFilters(nestedCtx)(value);
+      }
+
+      if (key === 'fields') {
+        await createValidateFields(nestedCtx)(value);
+      }
+    };
+
+    const validatePopulate = pipeAsync(
+      traverse.traverseQueryPopulate(throwDisallowedFields(permittedFields), { schema }),
+      traverse.traverseQueryPopulate(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQueryPopulate(throwPassword, { schema }),
+      traverse.traverseQueryPopulate(validateNestedPopulate, { schema })
     );
 
     return async (query: any) => {
@@ -93,6 +121,10 @@ export default ({ action, ability, model }: any) => {
 
       if (query.fields) {
         await validateFields(query.fields);
+      }
+
+      if (query.populate) {
+        await validatePopulate(query.populate);
       }
 
       return true;
