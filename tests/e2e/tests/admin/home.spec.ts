@@ -9,7 +9,7 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -284,11 +284,19 @@ test.describe('Home as super admin', () => {
       await waitForRestart(page);
     }
   });
+
+  test('a super admin should see the deploy now widget', async ({ page }) => {
+    const deployWidget = page.getByLabel(/Deploy/i, { exact: true });
+    await expect(deployWidget).toBeVisible();
+    await expect(deployWidget.getByText('Ready to go live')).toBeVisible();
+    await expect(deployWidget.getByText('Deploy with Strapi Cloud')).toBeVisible();
+    await expect(deployWidget.getByRole('link', { name: /deploy now/i })).toBeVisible();
+  });
 });
 
 test.describe('Home as editor', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
   });
@@ -298,5 +306,11 @@ test.describe('Home as editor', () => {
   }) => {
     const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
     await expect(keyStatisticsWidget).not.toBeVisible();
+  });
+
+  test('a user should see the deploy now widget regardless of their role', async ({ page }) => {
+    const deployWidget = page.getByLabel(/Deploy/i, { exact: true });
+    await expect(deployWidget).toBeVisible();
+    await expect(deployWidget.getByRole('link', { name: /deploy now/i })).toBeVisible();
   });
 });

@@ -268,7 +268,6 @@
   "relation.notAvailable": "Keine Relationen verfügbar",
   "relation.publicationState.draft": "Entwurf",
   "relation.publicationState.published": "Veröffentlicht",
-  "reviewWorkflows.stage.label": "Prüfstadium",
   "select.currently.selected": "{count} aktuell ausgewählt",
   "success.record.clone": "Dokument dupliziert",
   "success.record.discard": "Änderungen verworfen",

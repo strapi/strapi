@@ -50,6 +50,39 @@ describe('Populate', () => {
         },
       },
     },
+    withLocalizations: {
+      uid: 'api::article.article',
+      modelName: 'Fake model with localizations',
+      pluginOptions: { i18n: { localized: true } },
+      attributes: {
+        title: {
+          type: 'string',
+        },
+        localizations: {
+          type: 'relation',
+          relation: 'oneToMany',
+          target: 'api::article.article',
+          visible: false,
+        },
+      },
+    },
+    withLocalizationsNotLocalized: {
+      uid: 'api::product.product',
+      modelName: 'Fake non-localized model with localizations attribute',
+      pluginOptions: {},
+      attributes: {
+        name: {
+          type: 'string',
+        },
+        localizations: {
+          type: 'relation',
+          relation: 'oneToMany',
+          target: 'api::product.product',
+          visible: false,
+          private: true,
+        },
+      },
+    },
   } as any;
 
   describe('getDeepPopulate', () => {
@@ -151,6 +184,62 @@ describe('Populate', () => {
 
       expect(result).toEqual({
         mediaAttrName: { populate: { folder: true } },
+      });
+    });
+
+    describe('initialPopulate override', () => {
+      test('defaults to validation populate for localizations', () => {
+        const uid = 'withLocalizations';
+
+        const result = getDeepPopulate(uid as any) as Record<string, any>;
+
+        // Default behavior: localizations gets validation populate (populated via getPopulateForValidation)
+        expect(result).toHaveProperty('localizations');
+        expect(result.localizations).toHaveProperty('populate');
+      });
+
+      test('initialPopulate overrides localizations with minimal fields', () => {
+        const uid = 'withLocalizations';
+
+        const result = getDeepPopulate(uid as any, {
+          initialPopulate: {
+            localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] },
+          } as any,
+        }) as Record<string, any>;
+
+        expect(result).toEqual({
+          localizations: {
+            fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'],
+          },
+        });
+      });
+
+      test('initialPopulate with false suppresses localizations populate', () => {
+        const uid = 'withLocalizations';
+
+        const result = getDeepPopulate(uid as any, {
+          initialPopulate: {
+            localizations: false,
+          } as any,
+        }) as Record<string, any>;
+
+        expect(result).toEqual({
+          localizations: false,
+        });
+      });
+
+      test('initialPopulate override works for any relation attribute', () => {
+        const uid = 'relationOTM';
+
+        const result = getDeepPopulate(uid as any, {
+          initialPopulate: {
+            relationAttrName: { fields: ['id', 'name'] },
+          } as any,
+        }) as Record<string, any>;
+
+        expect(result).toEqual({
+          relationAttrName: { fields: ['id', 'name'] },
+        });
       });
     });
   });

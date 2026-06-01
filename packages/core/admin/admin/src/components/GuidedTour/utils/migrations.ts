@@ -5,9 +5,34 @@ import { tours } from '../Tours';
 import type { State, ValidTourName } from '../Context';
 
 /**
- * Migrates tours added or removed from the tours object
+ * Build default tour state (used when stored state is missing tours)
+ */
+const getDefaultTours = () =>
+  (Object.keys(tours) as ValidTourName[]).reduce(
+    (acc, tourName) => {
+      acc[tourName] = { currentStep: 0, isCompleted: false, tourType: undefined };
+      return acc;
+    },
+    {} as State['tours']
+  );
+
+/**
+ * Migrates tours added or removed from the tours object.
+ * Handles missing or corrupted stored state (e.g. old localStorage without `tours`).
  */
 const migrateTours = (storedTourState: State) => {
+  if (!storedTourState?.tours || typeof storedTourState.tours !== 'object') {
+    return {
+      ...storedTourState,
+      tours: getDefaultTours(),
+      enabled: storedTourState?.enabled ?? true,
+      completedActions: Array.isArray(storedTourState?.completedActions)
+        ? storedTourState.completedActions
+        : [],
+      hidden: storedTourState?.hidden ?? false,
+    } as State;
+  }
+
   const storedTourNames = Object.keys(storedTourState.tours) as ValidTourName[];
   const currentTourNames = Object.keys(tours) as ValidTourName[];
 

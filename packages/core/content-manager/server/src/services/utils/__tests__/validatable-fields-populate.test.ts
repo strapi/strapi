@@ -77,6 +77,22 @@ describe('getPopulateForValidation', () => {
     });
   });
 
+  test('excludes top-level private required scalar fields', () => {
+    fakeModels.scalarWithPrivateRequired = {
+      modelName: 'Fake scalar model with private required field',
+      attributes: {
+        privateRequiredField: { type: 'string', required: true, private: true },
+        publicRequiredField: { type: 'string', required: true },
+      },
+    };
+
+    const result = getPopulateForValidation('scalarWithPrivateRequired' as any);
+
+    expect(result).toEqual({
+      fields: ['publicRequiredField'],
+    });
+  });
+
   test('with media model', () => {
     const uid = 'media';
 
@@ -85,6 +101,28 @@ describe('getPopulateForValidation', () => {
     expect(result).toEqual({
       populate: {
         mediaAttrName: {
+          populate: {
+            folder: true,
+          },
+        },
+      },
+    });
+  });
+
+  test('excludes private required media fields', () => {
+    fakeModels.mediaWithPrivateRequired = {
+      modelName: 'Fake media model with private required field',
+      attributes: {
+        privateMedia: { type: 'media', required: true, private: true },
+        publicMedia: { type: 'media', required: true },
+      },
+    };
+
+    const result = getPopulateForValidation('mediaWithPrivateRequired' as any);
+
+    expect(result).toEqual({
+      populate: {
+        publicMedia: {
           populate: {
             folder: true,
           },
@@ -114,6 +152,39 @@ describe('getPopulateForValidation', () => {
       const result = getPopulateForValidation(uid as any);
 
       expect(result).toEqual({}); // No required fields, so no populate
+    });
+
+    test('with component model containing private required fields', () => {
+      fakeModels.componentWithPrivateRequiredFields = {
+        modelName: 'Fake component with private required fields',
+        attributes: {
+          componentAttrName: {
+            type: 'component',
+            component: 'componentWithPrivateFields',
+          },
+        },
+      };
+
+      fakeModels.componentWithPrivateFields = {
+        modelName: 'Fake component with private fields',
+        attributes: {
+          privateRequiredField: { type: 'string', required: true, private: true },
+          publicRequiredField: { type: 'string', required: true },
+          privateOptionalField: { type: 'string', required: false, private: true },
+        },
+      };
+
+      const uid = 'componentWithPrivateRequiredFields';
+
+      const result = getPopulateForValidation(uid as any);
+
+      expect(result).toEqual({
+        populate: {
+          componentAttrName: {
+            fields: ['publicRequiredField'],
+          },
+        },
+      });
     });
 
     test('with nested components', () => {
@@ -188,6 +259,41 @@ describe('getPopulateForValidation', () => {
                     fields: ['subfield1'],
                   },
                 },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    test('excludes private required fields from dynamic zone components', () => {
+      fakeModels.componentWithPrivateFields = {
+        modelName: 'Fake component with private fields',
+        attributes: {
+          privateRequiredField: { type: 'string', required: true, private: true },
+          publicRequiredField: { type: 'string', required: true },
+          privateOptionalField: { type: 'string', required: false, private: true },
+        },
+      };
+
+      fakeModels.dynamicZoneWithPrivateComponent = {
+        modelName: 'Fake dynamic zone with private component fields',
+        attributes: {
+          dynZoneAttrName: {
+            type: 'dynamiczone',
+            components: ['componentWithPrivateFields'],
+          },
+        },
+      };
+
+      const result = getPopulateForValidation('dynamicZoneWithPrivateComponent' as any);
+
+      expect(result).toEqual({
+        populate: {
+          dynZoneAttrName: {
+            on: {
+              componentWithPrivateFields: {
+                fields: ['publicRequiredField'],
               },
             },
           },

@@ -16,6 +16,11 @@ const getRelationLabel = (relation: RelationResult, mainField?: MainField): stri
     return label;
   }
 
+  // Return numeric labels except for the internal 'id' field.
+  if (typeof label === 'number' && mainField?.name !== 'id') {
+    return String(label);
+  }
+
   return relation.documentId;
 };
 

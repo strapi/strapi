@@ -1,0 +1,59 @@
+# Manual trigger only.
+# Syncs all open community PRs to Linear (creates missing tickets, updates existing ones),
+# then generates a Linear project update and a full Notion report page.
+
+name: '[Manual] Community PR — Full Sync'
+
+on:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install action dependencies
+        run: npm ci
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Build action
+        run: npm run build
+        working-directory: .github/actions/community-pr-triage
+
+      - name: Sync all community PRs to Linear
+        uses: ./.github/actions/community-pr-triage
+        with:
+          mode: sync-all
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          linear-api-key: ${{ secrets.LINEAR_API_KEY }}
+          linear-cpr-team-id: ${{ vars.LINEAR_CPR_TEAM_ID }}
+          linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
+          linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
+          linear-labels: ${{ vars.LINEAR_LABELS }}
+          linear-triage-state-id: ${{ vars.LINEAR_TRIAGE_STATE_ID }}
+
+      - name: Post Linear weekly report
+        uses: ./.github/actions/community-pr-triage
+        with:
+          mode: linear-weekly-report
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          linear-api-key: ${{ secrets.LINEAR_API_KEY }}
+          linear-cpr-team-id: ${{ vars.LINEAR_CPR_TEAM_ID }}
+          linear-cms-team-id: ${{ vars.LINEAR_CMS_TEAM_ID }}
+          linear-project-id: ${{ vars.LINEAR_PROJECT_ID }}
+          linear-triage-view-url: 'https://linear.app/strapi/team/CPR/triage'
+          linear-labels: ${{ vars.LINEAR_LABELS }}
+          post-to-notion: 'true'
+          notion-api-key: ${{ secrets.NOTION_API_KEY }}
+          notion-database-id: ${{ vars.NOTION_DATABASE_ID }}

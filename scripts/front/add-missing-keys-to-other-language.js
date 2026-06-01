@@ -8,9 +8,8 @@
 'use strict';
 
 const { join, dirname } = require('path');
-const { promisify } = require('util');
 const fs = require('fs-extra');
-const glob = promisify(require('glob').glob);
+const { glob } = require('glob');
 const chalk = require('chalk');
 
 const updateMissingKeysToJSON = async (filePath) => {

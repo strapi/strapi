@@ -24,6 +24,6 @@ describe('Admin | UseCasePage', () => {
 
     await user.click(screen.getByRole('option', { name: 'Other' }));
 
-    expect(getByRole('textbox', { name: 'Other' })).toBeInTheDocument();
+    expect(await screen.findByRole('textbox', { name: 'Other' })).toBeInTheDocument();
   });
 });

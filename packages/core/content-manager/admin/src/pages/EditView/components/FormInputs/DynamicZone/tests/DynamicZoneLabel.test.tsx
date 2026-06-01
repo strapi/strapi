@@ -1,5 +1,5 @@
 import { Earth } from '@strapi/icons';
-import { render as renderRTL } from '@tests/utils';
+import { render as renderRTL, screen, waitFor } from '@tests/utils';
 
 import { DynamicZoneLabel, DynamicZoneLabelProps } from '../DynamicZoneLabel';
 
@@ -31,13 +31,13 @@ describe('DynamicZoneLabel', () => {
   });
 
   it('should always render the amount of components no matter the value', () => {
-    const { rerender, getByText } = render({ numberOfComponents: 0 });
+    const { rerender } = render({ numberOfComponents: 0 });
 
-    expect(getByText(/0/)).toBeInTheDocument();
+    expect(screen.getByText(/\(0\)/)).toBeInTheDocument();
 
     rerender(<Component numberOfComponents={2} />);
 
-    expect(getByText(/2/)).toBeInTheDocument();
+    return waitFor(() => expect(screen.getByText(/\(2\)/)).toBeInTheDocument());
   });
 
   it('should render an asteriks when the required prop is true', () => {

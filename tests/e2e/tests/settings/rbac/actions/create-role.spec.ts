@@ -20,7 +20,7 @@ test.describe('RBAC - Create Roles', () => {
     await sharedSetup('rbac-roles', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Navigate to the Roles management page

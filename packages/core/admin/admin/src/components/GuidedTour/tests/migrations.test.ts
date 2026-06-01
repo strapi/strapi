@@ -187,4 +187,49 @@ describe('GuidedTour | migrateTours', () => {
       GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
     ]);
   });
+
+  describe('when stored state has no tours or corrupted tours', () => {
+    it('should return state with default tours when tours is undefined', () => {
+      const storedState = {
+        enabled: true,
+        completedActions: [],
+        hidden: false,
+      } as unknown as State;
+
+      const migratedState = migrateTours(storedState);
+
+      expect(migratedState.tours).toBeDefined();
+      expect(Object.keys(migratedState.tours)).toEqual(
+        expect.arrayContaining(['contentTypeBuilder', 'contentManager', 'apiTokens', 'strapiCloud'])
+      );
+      expect(migratedState.enabled).toBe(true);
+      expect(migratedState.completedActions).toEqual([]);
+    });
+
+    it('should return state with default tours when tours is null', () => {
+      const storedState = { tours: null, enabled: true, completedActions: [] } as unknown as State;
+
+      const migratedState = migrateTours(storedState);
+
+      expect(migratedState.tours).toBeDefined();
+      expect(Object.keys(migratedState.tours)).toHaveLength(4);
+    });
+
+    it('should preserve enabled and completedActions when fixing missing tours', () => {
+      const storedState = {
+        enabled: false,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
+        hidden: true,
+      } as unknown as State;
+
+      const migratedState = migrateTours(storedState);
+
+      expect(migratedState.tours).toBeDefined();
+      expect(migratedState.enabled).toBe(false);
+      expect(migratedState.completedActions).toEqual([
+        GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+      ]);
+      expect(migratedState.hidden).toBe(true);
+    });
+  });
 });

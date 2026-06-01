@@ -16,9 +16,13 @@ export * from './plugin';
 type WrapAction = Omit<keyof EntityService, 'wrapParams' | 'wrapResult' | 'emitEvent'>;
 
 /**
- * @deprecated will be removed in the next major version
+ * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
+ * @see {@link https://docs.strapi.io/dev-docs/api/document-service} Document Service API
  */
 export interface EntityService {
+  /**
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
+   */
   wrapParams<
     TResult extends object = object,
     TContentTypeUID extends UID.ContentType = UID.ContentType,
@@ -29,13 +33,16 @@ export interface EntityService {
   ): Promise<TResult> | TResult;
 
   /**
-   * @deprecated will be removed in the next major version
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */
   wrapResult<TResult = any, TContentTypeUID extends UID.ContentType = UID.ContentType>(
     result: unknown,
     options?: { uid: TContentTypeUID; action: WrapAction; [key: string]: unknown }
   ): Promise<TResult> | TResult;
 
+  /**
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
+   */
   findMany<
     TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<
@@ -56,7 +63,7 @@ export interface EntityService {
   >;
 
   /**
-   * @deprecated will be removed in the next major version
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */
   findOne<
     TContentTypeUID extends UID.ContentType,
@@ -68,7 +75,7 @@ export interface EntityService {
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   /**
-   * @deprecated will be removed in the next major version
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */
   delete<
     TContentTypeUID extends UID.ContentType,
@@ -80,7 +87,7 @@ export interface EntityService {
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   /**
-   * @deprecated will be removed in the next major version
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */
   create<
     TContentTypeUID extends UID.ContentType,
@@ -91,7 +98,7 @@ export interface EntityService {
   ): Promise<Result<TContentTypeUID, TParams>>;
 
   /**
-   * @deprecated will be removed in the next major version
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */
   update<
     TContentTypeUID extends UID.ContentType,
@@ -103,7 +110,7 @@ export interface EntityService {
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   /**
-   * @deprecated will be removed in the next major version
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */
   findPage<
     TContentTypeUID extends UID.ContentType,
@@ -117,7 +124,7 @@ export interface EntityService {
   ): Promise<PaginatedResult<TContentTypeUID, TParams>>;
 
   /**
-   * @deprecated will be removed in the next major version
+   * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */
   count<TContentTypeUID extends UID.ContentType>(
     uid: TContentTypeUID,
@@ -125,7 +132,7 @@ export interface EntityService {
   ): Promise<number>;
 
   /**
-   * @deprecated
+   * @deprecated Will be removed in the next major version.
    * @internal
    */
   load<
@@ -139,7 +146,7 @@ export interface EntityService {
   ): Promise<any>;
 
   /**
-   * @deprecated
+   * @deprecated Will be removed in the next major version.
    * @internal
    */
   loadPages<

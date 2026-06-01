@@ -1,6 +1,13 @@
-import { isNil } from 'lodash/fp';
+import { isNil, omit } from 'lodash/fp';
 
-import { setCreatorFields, async, errors } from '@strapi/utils';
+import {
+  setCreatorFields,
+  async,
+  contentTypes,
+  errors,
+  parseHasPublishedVersionQueryParam,
+  hasPublishedVersionBooleanToPublicationFilterMode,
+} from '@strapi/utils';
 import type { Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
@@ -9,8 +16,186 @@ import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/c
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
+import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
+
+/**
+ * Returns documentIds for (documentId, locale) that have both draft and published,
+ * optionally filtered by whether the draft is newer than the published row.
+ * Uses strapi.documents only.
+ */
+const getDocumentIdsByDraftPublishRelation = async (
+  uid: UID.ContentType,
+  opts: {
+    locale?: string | string[] | null;
+    type: 'modified' | 'unmodified';
+  }
+): Promise<string[]> => {
+  const schema = strapi.getModel(uid);
+  if (!contentTypes.hasDraftAndPublish(schema)) {
+    return [];
+  }
+
+  const baseParams = {
+    fields: ['documentId', 'locale', 'updatedAt'],
+    page: 1,
+    pageSize: 10000,
+    ...(opts.locale != null &&
+      opts.locale !== '*' && {
+        locale: opts.locale as string,
+      }),
+  };
+
+  const [drafts, published] = await Promise.all([
+    strapi.documents(uid).findMany({ ...baseParams, status: 'draft' }),
+    strapi.documents(uid).findMany({ ...baseParams, status: 'published' }),
+  ]);
+
+  const publishedByKey = new Map<string, { updatedAt: string }>();
+  for (const p of published) {
+    const key = `${p.documentId}\t${String(p?.locale ?? '')}`;
+    publishedByKey.set(key, { updatedAt: p.updatedAt as string });
+  }
+
+  const ids: string[] = [];
+  const wantModified = opts.type === 'modified';
+  for (const d of drafts) {
+    const key = `${d.documentId}\t${String(d?.locale ?? '')}`;
+    const pub = publishedByKey.get(key);
+    if (pub) {
+      const dUpdated = d?.updatedAt ? new Date(d.updatedAt as string).getTime() : 0;
+      const pUpdated = pub?.updatedAt ? new Date(pub.updatedAt).getTime() : 0;
+      const isModified = dUpdated > pUpdated;
+      if (isModified === wantModified) {
+        ids.push(d.documentId as string);
+      }
+    }
+  }
+  return [...new Set(ids)];
+};
+
+/** Map from __status filter value to top-level query fields (mirrors client STATUS_PARAMS). */
+const STATUS_QUERY_FROM_FILTER: Record<string, Record<string, string>> = {
+  draft: { status: 'draft', publicationFilter: 'never-published-document' },
+  published: { status: 'published' },
+  'published-modified': { publicationStatusFilter: 'published-modified' },
+  'published-unmodified': { publicationStatusFilter: 'published-unmodified' },
+};
+
+/**
+ * Extracts __status from query.filters.$and into top-level status, publicationFilter,
+ * and publicationStatusFilter so list works with either transformed params or raw filter params.
+ */
+const normalizeStatusFromFilters = (query: Record<string, unknown>): void => {
+  const filters = query.filters as Record<string, unknown> | undefined;
+  if (!filters?.$and || !Array.isArray(filters.$and)) return;
+
+  const remainingFilters: unknown[] = [];
+  const statusValues: string[] = [];
+
+  for (const filter of filters.$and as Record<string, unknown>[]) {
+    const eq = (filter?.__status as Record<string, unknown>)?.$eq;
+    if (eq != null) {
+      statusValues.push(String(eq));
+    } else {
+      remainingFilters.push(filter);
+    }
+  }
+
+  if (statusValues.length === 0) return;
+
+  const q = query as Record<string, unknown>;
+  for (const value of statusValues) {
+    const toApply = STATUS_QUERY_FROM_FILTER[value];
+    if (toApply) Object.assign(q, toApply);
+  }
+
+  if (remainingFilters.length > 0) {
+    (filters as Record<string, unknown>).$and = remainingFilters;
+  } else {
+    delete q.filters;
+  }
+};
+
+/** Returns filters object that merges existing $and with a documentId $in filter. */
+const mergeDocumentIdFilter = (
+  existingFilters: Record<string, unknown> | undefined,
+  documentIds: string[]
+): Record<string, unknown> => {
+  const documentIdFilter = {
+    documentId: documentIds.length > 0 ? { $in: documentIds } : { $in: [] },
+  };
+  let existingAnd: unknown[];
+  if (existingFilters?.$and && Array.isArray(existingFilters.$and)) {
+    existingAnd = existingFilters.$and;
+  } else if (existingFilters && Object.keys(existingFilters).length > 0) {
+    existingAnd = [existingFilters];
+  } else {
+    existingAnd = [];
+  }
+  return { $and: [...existingAnd, documentIdFilter] };
+};
 
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
+
+/**
+ * Extracts the sort direction for the 'status' field from a sort parameter.
+ * Returns 'ASC', 'DESC', or null if status is not being sorted.
+ *
+ * The sort param can be a string ('status:ASC'), an array (['status:ASC']),
+ * or an object ({ status: 'ASC' }).
+ */
+const extractStatusSortOrder = (sort: unknown): 'ASC' | 'DESC' | null => {
+  if (!sort) return null;
+
+  if (typeof sort === 'string') {
+    const match = sort.match(/(?:^|,)\s*status:(ASC|DESC)\s*(?:,|$)/i);
+    return match ? (match[1].toUpperCase() as 'ASC' | 'DESC') : null;
+  }
+
+  if (Array.isArray(sort)) {
+    for (const item of sort) {
+      const result = extractStatusSortOrder(item);
+      if (result) return result;
+    }
+    return null;
+  }
+
+  if (typeof sort === 'object' && sort !== null && 'status' in sort) {
+    const dir = String((sort as Record<string, unknown>).status).toUpperCase();
+    return dir === 'ASC' || dir === 'DESC' ? dir : null;
+  }
+
+  return null;
+};
+
+/**
+ * Removes the 'status' field from a sort parameter, returning the remainder
+ * (or undefined if status was the only sort field).
+ */
+const removeStatusFromSort = (sort: unknown): unknown => {
+  if (!sort) return sort;
+
+  if (typeof sort === 'string') {
+    const cleaned = sort
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
+      .join(',');
+    return cleaned || undefined;
+  }
+
+  if (Array.isArray(sort)) {
+    const cleaned = sort.filter((item) => extractStatusSortOrder(item) === null);
+    return cleaned.length ? cleaned : undefined;
+  }
+
+  if (typeof sort === 'object' && sort !== null) {
+    const { status: _removed, ...rest } = sort as Record<string, unknown>;
+    return Object.keys(rest).length ? rest : undefined;
+  }
+
+  return sort;
+};
 
 /**
  * Create a new document.
@@ -126,6 +311,9 @@ export default {
     const { model } = ctx.params;
     const { query } = ctx.request;
 
+    // Normalize so status/publicationStatusFilter are set from filters.$and.__status when present
+    normalizeStatusFromFilters(query as Record<string, unknown>);
+
     const documentMetadata = getService('document-metadata');
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -134,28 +322,101 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
+    // Extract and remove 'status' sort before sanitization/validation, since status
+    // is not a real schema attribute and would be rejected by the permission checker.
+    // It is re-added after sanitization so the DB layer can handle it via a CASE expression.
+    const hasPublicationStatusFilter =
+      query.status !== undefined ||
+      query.hasPublishedVersion !== undefined ||
+      query.publicationStatusFilter !== undefined;
+    const rawStatusSortOrder = extractStatusSortOrder(query.sort);
+    // Disable status sort when a publication status filter is active — all results share the
+    // same status, making the sort a no-op.
+    const statusSortOrder = hasPublicationStatusFilter ? null : rawStatusSortOrder;
+    // Always strip 'status' from the sort before passing to the document service / permission
+    // checker — it is not a real schema attribute and would be rejected by validation.
+    const queryWithoutStatusSort = rawStatusSortOrder
+      ? { ...query, sort: removeStatusFromSort(query.sort) }
+      : query;
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryWithoutStatusSort);
 
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
       .countRelations({ toOne: false, toMany: true })
+      .withPopulateOverride(getPopulateForLocalizations(model))
       .build();
 
-    const { locale, status } = await getDocumentLocaleAndStatus(query, model);
+    // "Modified" is a UI-only filter; not a real document status. Read and strip it
+    // so we never pass it to validation or the document service.
+    const publicationStatusFilter = query.publicationStatusFilter;
+    const queryForValidation = { ...query };
+    delete queryForValidation.publicationStatusFilter;
+
+    const { locale, status } = await getDocumentLocaleAndStatus(queryForValidation, model);
+
+    const paramsForDocumentService = omit(['publicationStatusFilter'], permissionQuery) as Record<
+      string,
+      unknown
+    >;
+    let findPageParams: Record<string, unknown> = {
+      ...paramsForDocumentService,
+      populate,
+      locale,
+      status,
+    };
+
+    if (query.publicationFilter !== undefined) {
+      findPageParams.publicationFilter = query.publicationFilter;
+    } else {
+      const legacy = parseHasPublishedVersionQueryParam(query.hasPublishedVersion);
+      if (legacy !== undefined) {
+        findPageParams.publicationFilter =
+          hasPublishedVersionBooleanToPublicationFilterMode(legacy);
+      }
+    }
+
+    if (
+      publicationStatusFilter === 'published-modified' ||
+      publicationStatusFilter === 'published-unmodified'
+    ) {
+      const type = publicationStatusFilter === 'published-modified' ? 'modified' : 'unmodified';
+      const documentIds = await getDocumentIdsByDraftPublishRelation(model, { locale, type });
+      findPageParams = {
+        ...findPageParams,
+        status: 'published',
+        filters: mergeDocumentIdFilter(
+          paramsForDocumentService.filters as Record<string, unknown> | undefined,
+          documentIds
+        ),
+      };
+    }
+
+    if (statusSortOrder) {
+      const s = findPageParams.sort;
+      const statusSort = `status:${statusSortOrder}`;
+      if (!s) {
+        findPageParams.sort = statusSort;
+      } else if (Array.isArray(s)) {
+        findPageParams.sort = [...s, statusSort];
+      } else if (typeof s === 'string') {
+        findPageParams.sort = `${s},${statusSort}`;
+      } else {
+        findPageParams.sort = { ...(s as object), status: statusSortOrder };
+      }
+    }
 
     const { results: documents, pagination } = await documentManager.findPage(
-      { ...permissionQuery, populate, locale, status },
+      findPageParams as Parameters<typeof documentManager.findPage>[0],
       model
     );
 
-    // TODO: Skip this part if not necessary (if D&P disabled or columns not displayed in the view)
-    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
-      model,
-      documents
-    );
+    const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(model));
 
-    const statusByDocumentId = indexByDocumentId(documentsAvailableStatus);
+    const statusByDocumentId = hasDraftAndPublish
+      ? indexByDocumentId(await documentMetadata.getManyAvailableStatus(model, documents))
+      : new Map();
 
     const setStatus = (document: any) => {
       // Available status of document
@@ -188,10 +449,12 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
       .countRelations()
+      .withPopulateOverride(getPopulateForLocalizations(model))
       .build();
 
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
@@ -390,10 +653,12 @@ export default {
     const publishedDocument = await strapi.db.transaction(async () => {
       // Create or update document
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
+
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
         .populateDeep(Infinity)
         .countRelations()
+        .withPopulateOverride(getPopulateForLocalizations(model))
         .build();
 
       let document: any;
@@ -467,6 +732,34 @@ export default {
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
+  async bulkFindForValidation(ctx: any) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { documentIds, locale, sort } = ctx.request.body;
+
+    await validateBulkActionInput(ctx.request.body);
+
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const populate = await buildDeepPopulate(model as UID.CollectionType);
+
+    const documents = await strapi.documents(model as UID.CollectionType).findMany({
+      populate,
+      filters: { documentId: { $in: documentIds } } as any,
+      locale,
+      sort,
+      status: 'draft',
+    });
+
+    const results = await Promise.all(documents.map(permissionChecker.sanitizeOutput));
+
+    ctx.body = { results };
+  },
+
   async bulkPublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
@@ -493,10 +786,11 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { populate, locale, isPublished: false })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      populate,
+      locale,
+      isPublished: false,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -531,10 +825,10 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { locale, isPublished: true })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      locale,
+      isPublished: true,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -710,10 +1004,16 @@ export default {
 
     if (permissionChecker.requiresEntity.read()) {
       // Only load what we need for access checks
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
+
       const entity = await documentManager.findOne(id, model, {
         locale,
         status,
-        populate: {},
+        populate,
       });
 
       if (!entity) {
@@ -745,17 +1045,11 @@ export default {
       return ctx.forbidden();
     }
 
-    const documents = await documentManager.findMany(
-      {
-        filters: {
-          documentId: ids,
-        },
-        locale,
-      },
-      model
-    );
+    const count = await strapi.db.query(model).count({
+      where: { documentId: ids },
+    });
 
-    if (!documents) {
+    if (count === 0) {
       return ctx.notFound();
     }
 

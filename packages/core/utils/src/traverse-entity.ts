@@ -31,6 +31,8 @@ export interface VisitorOptions {
   path: Path;
   getModel(uid: string): Model;
   parent?: Parent;
+  /** Extra root-level keys allowed (e.g. registered input params). Only used when path.attribute === null. */
+  allowedExtraRootKeys?: string[];
 }
 
 export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtils) => void;
@@ -46,6 +48,8 @@ export interface TraverseOptions {
   path?: Path;
   parent?: Parent;
   getModel(uid: string): Model;
+  /** Extra root-level keys allowed (e.g. registered input params). Only used when path.attribute === null. */
+  allowedExtraRootKeys?: string[];
 }
 
 export interface Parent {
@@ -56,21 +60,38 @@ export interface Parent {
 }
 
 const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
-  const { path = { raw: null, attribute: null, rawWithIndices: null }, schema, getModel } = options;
+  const {
+    path = { raw: null, attribute: null, rawWithIndices: null },
+    schema,
+    getModel,
+    allowedExtraRootKeys,
+  } = options;
 
   let parent = options.parent;
 
   const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Data) => {
     const targetSchema = getModel(entry.__type!);
 
-    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
+    const traverseOptions: TraverseOptions = {
+      schema: targetSchema,
+      path,
+      getModel,
+      parent,
+      allowedExtraRootKeys,
+    };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const traverseRelationTarget =
     (schema: Model) => async (visitor: Visitor, path: Path, entry: Data) => {
-      const traverseOptions: TraverseOptions = { schema, path, getModel, parent };
+      const traverseOptions: TraverseOptions = {
+        schema,
+        path,
+        getModel,
+        parent,
+        allowedExtraRootKeys,
+      };
 
       return traverseEntity(visitor, traverseOptions, entry);
     };
@@ -79,20 +100,38 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = getModel(targetSchemaUID);
 
-    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
+    const traverseOptions: TraverseOptions = {
+      schema: targetSchema,
+      path,
+      getModel,
+      parent,
+      allowedExtraRootKeys,
+    };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const traverseComponent = async (visitor: Visitor, path: Path, schema: Model, entry: Data) => {
-    const traverseOptions: TraverseOptions = { schema, path, getModel, parent };
+    const traverseOptions: TraverseOptions = {
+      schema,
+      path,
+      getModel,
+      parent,
+      allowedExtraRootKeys,
+    };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
     const targetSchema = getModel(entry.__component!);
-    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
+    const traverseOptions: TraverseOptions = {
+      schema: targetSchema,
+      path,
+      getModel,
+      parent,
+      allowedExtraRootKeys,
+    };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
@@ -132,6 +171,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       path: newPath,
       getModel,
       parent,
+      allowedExtraRootKeys,
     };
 
     await visitor(visitorOptions, visitorUtils);
