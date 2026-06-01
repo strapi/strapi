@@ -301,6 +301,20 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   // Check if the url has a prepending slash, if not add a slash
   const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
+  const parseErrorResponse = async (response: Response): Promise<ErrorResponse | undefined> => {
+    try {
+      const result = await response.json();
+
+      if (result?.error) {
+        return { data: result };
+      }
+    } catch {
+      return undefined;
+    }
+
+    return undefined;
+  };
+
   // Add a response interceptor to return the response
   const responseInterceptor = async <TData = any>(
     response: Response,
@@ -309,7 +323,11 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   ): Promise<FetchResponse<TData>> => {
     if (responseType !== 'json') {
       if (!response.ok && !validateStatus?.(response.status)) {
-        const fetchError = new FetchError('Server Error');
+        const errorResponse = await parseErrorResponse(response);
+        const fetchError = new FetchError(
+          errorResponse?.data.error.message ?? 'Server Error',
+          errorResponse
+        );
         fetchError.status = response.status;
         throw fetchError;
       }
