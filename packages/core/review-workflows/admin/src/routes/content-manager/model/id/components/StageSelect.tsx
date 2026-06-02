@@ -180,16 +180,20 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
     }
   );
 
+  // Fall back to the URL `id` so the stages endpoint is still queried when the
+  // selected locale has no entry yet. The backend returns workflow metadata
+  // even when the entity for `documentId + locale` does not exist.
+  const stagesDocumentId = document?.documentId ?? id;
+
   const { data, isLoading: isLoadingStages } = useGetStagesQuery(
     {
       slug: collectionType,
       model: model,
-      // @ts-expect-error – `id` is not correctly typed in the DS.
-      id: document?.documentId,
+      id: stagesDocumentId,
       params,
     },
     {
-      skip: !document?.documentId,
+      skip: !stagesDocumentId || stagesDocumentId === 'create',
     }
   );
 
@@ -282,24 +286,35 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
     defaultMessage: 'Review stage',
   });
 
-  // When there's only one single stage in the workflow, the stages array is empty,
-  // showing a hint to the user saying that they don't have the permission to update this stage.
-  // Adding a check on the total number of stages in the workflow to show a more accurate message instead.
+  // The Edit View renders the Review Workflows panel even when the user
+  // switches to a locale that has not been saved yet. In that case the
+  // document for the selected locale does not exist and we cannot transition
+  // any stage until the entry is first saved, so surface a dedicated hint
+  // rather than the misleading "no permission" message.
+  const hasDocumentForLocale = Boolean(document?.documentId);
   const totalWorkflowStages = meta?.stageCount ?? 0;
   const canTransition = meta?.canTransition ?? true;
-  let reviewStageHint: string | false = false;
-  if (!isLoading && stages.length === 0) {
-    if (canTransition && totalWorkflowStages === 1) {
+
+  let reviewStageHint: string | undefined;
+  if (!isLoading) {
+    if (!hasDocumentForLocale) {
       reviewStageHint = formatMessage({
-        id: 'review-workflows.stages.single-stage',
-        defaultMessage:
-          'This workflow only has one stage. Add more stages to be able to update it here.',
+        id: 'review-workflows.stages.save-first',
+        defaultMessage: 'Save this entry to assign a workflow stage.',
       });
-    } else {
-      reviewStageHint = formatMessage({
-        id: 'review-workflows.stages.no-transition',
-        defaultMessage: 'You don’t have the permission to update this stage.',
-      });
+    } else if (stages.length === 0) {
+      if (canTransition && totalWorkflowStages === 1) {
+        reviewStageHint = formatMessage({
+          id: 'review-workflows.stages.single-stage',
+          defaultMessage:
+            'This workflow only has one stage. Add more stages to be able to update it here.',
+        });
+      } else {
+        reviewStageHint = formatMessage({
+          id: 'review-workflows.stages.no-transition',
+          defaultMessage: 'You don’t have the permission to update this stage.',
+        });
+      }
     }
   }
 

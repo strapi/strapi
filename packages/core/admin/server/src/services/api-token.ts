@@ -15,6 +15,7 @@ import {
 } from 'lodash/fp';
 import type { Core, Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
+import type { Ability } from '@casl/ability';
 import type {
   Update,
   ContentApiApiToken,
@@ -26,12 +27,17 @@ import constants from './constants';
 import { getService } from '../utils';
 import permissionDomain from '../domain/permission';
 import { validatePermissionsExist } from '../validation/permission';
+import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
 
 type AnyApiToken = ContentApiApiToken | AdminApiToken;
 
 const { SUPER_ADMIN_CODE } = constants;
 
-const { ValidationError, NotFoundError } = errors;
+const { ValidationError, NotFoundError, UnauthorizedError } = errors;
+
+export type AdminTokenAuthenticationResult =
+  | { authenticated: false; error?: InstanceType<typeof UnauthorizedError> }
+  | { authenticated: true; credentials: AdminApiToken; user: AdminUser; ability: Ability };
 
 const assertOwnerMatchesCallingUser = async (
   adminUserOwner: Data.ID,
@@ -66,6 +72,19 @@ const getOwnerId = (token: AdminApiToken): string => {
   return String(typeof owner === 'object' ? owner.id : owner);
 };
 
+const resolveAdminTokenOwnerId = (token: AdminApiToken): Data.ID | null => {
+  const owner = token.adminUserOwner;
+
+  if (owner === null || owner === undefined) {
+    return null;
+  }
+
+  if (typeof owner === 'object') {
+    return owner.id;
+  }
+
+  return owner;
+};
 
 const toAdminTokenOwner = (
   owner: AdminApiToken['adminUserOwner'] | null | undefined
@@ -102,6 +121,7 @@ const SELECT_FIELDS = [
 ];
 
 const POPULATE_FIELDS = ['permissions', 'adminPermissions', 'adminUserOwner'];
+const UPDATABLE_FIELDS = ['name', 'description', 'type'] as const;
 
 // TODO: we need to ensure the permissions are actually valid registered permissions!
 
@@ -662,6 +682,51 @@ const hash = (accessKey: string) => {
   return crypto.createHmac('sha512', salt).update(accessKey).digest('hex');
 };
 
+const authenticateAdminToken = async (
+  accessToken: string
+): Promise<AdminTokenAuthenticationResult> => {
+  const apiToken = (await getBy({ accessKey: hash(accessToken) })) as AdminApiToken | null;
+
+  if (apiToken === null || apiToken === undefined) {
+    return { authenticated: false };
+  }
+
+  if (apiToken.kind !== 'admin') {
+    return { authenticated: false };
+  }
+
+  const expiryError = checkExpiry(apiToken);
+  if (expiryError !== null) {
+    return { authenticated: false, error: expiryError };
+  }
+
+  const ownerId = resolveAdminTokenOwnerId(apiToken);
+  if (ownerId === null) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
+  }
+
+  const user = await strapi.db
+    .query('admin::user')
+    .findOne({ where: { id: ownerId }, populate: ['roles'] });
+
+  if (user === null || user === undefined) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
+  }
+
+  if (user.isActive !== true || user.blocked === true) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner is deactivated') };
+  }
+
+  await updateLastUsedAt(apiToken);
+
+  const ability = await getService('permission').engine.generateTokenAbility(
+    apiToken.adminPermissions ?? [],
+    user
+  );
+
+  return { authenticated: true, credentials: apiToken, user, ability };
+};
+
 const getExpirationFields = (lifespan: AnyApiToken['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
@@ -802,7 +867,7 @@ const regenerate = async (id: string | number): Promise<ContentApiApiToken | Adm
   const encryptedKey = encryptionService.encrypt(accessKey);
 
   const apiToken: AnyApiToken = await strapi.db.query('admin::api-token').update({
-    select: ['id', 'accessKey'],
+    select: ['id', 'accessKey', 'kind'],
     where: { id },
     data: {
       accessKey: hash(accessKey),
@@ -816,8 +881,9 @@ const regenerate = async (id: string | number): Promise<ContentApiApiToken | Adm
 
   return {
     ...apiToken,
+    kind: (apiToken.kind ?? 'content-api') as AnyApiToken['kind'],
     accessKey,
-  };
+  } as any;
 };
 
 const checkSaltIsDefined = () => {
@@ -885,7 +951,10 @@ const list = async <K extends AnyApiToken['kind']>(
         })
       : ({
           ...(omit(['permissions'], token) as object),
-          adminUserOwner: toAdminTokenOwner(token.adminUserOwner),
+          adminUserOwner:
+            token.adminUserOwner !== null && token.adminUserOwner !== undefined
+              ? toAdminTokenOwner(token.adminUserOwner)
+              : null,
         } as any)
   );
 };
@@ -914,14 +983,23 @@ const revoke = async (id: string | number): Promise<AnyApiToken> => {
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
 
-  if (deletedToken === null || deletedToken === undefined || deletedToken.kind !== 'admin') {
+  if (deletedToken === null || deletedToken === undefined) {
     return deletedToken;
   }
 
-  return {
+  if (deletedToken.kind === 'admin') {
+    return {
+      ...deletedToken,
+      adminUserOwner: toAdminTokenOwner(deletedToken.adminUserOwner),
+    };
+  }
+
+  // content-api tokens (including legacy null-kind rows): normalise shape
+  return omit(['adminPermissions', 'adminUserOwner'], {
     ...deletedToken,
-    adminUserOwner: toAdminTokenOwner(deletedToken.adminUserOwner),
-  };
+    kind: 'content-api' as const,
+    permissions: flattenTokenPermissions(deletedToken.permissions),
+  }) as ContentApiApiToken;
 };
 
 /**
@@ -955,17 +1033,18 @@ const update = async (
 
   const raw = attributes as Record<string, unknown>;
 
-  // kind is immutable after creation
-  if (raw.kind !== undefined && raw.kind !== null && raw.kind !== originalToken.kind) {
+  // kind is immutable after creation.
+  // Null-kind rows are legacy content-api tokens — treat null and 'content-api' as the same
+  // effective value so that clients echoing back the normalised kind from a GET don't get rejected.
+  const effectiveStoredKind = originalToken.kind ?? 'content-api';
+  if (raw.kind !== undefined && raw.kind !== null && raw.kind !== effectiveStoredKind) {
     throw new ValidationError('kind is immutable after creation');
   }
-
-  assertValidLifespan(attributes.lifespan);
 
   let clampedAdminPermissions: PermissionInput[] | undefined;
   let tokenOwnerUser: AdminUser | undefined;
 
-  if (originalToken.kind === 'content-api') {
+  if (originalToken.kind === null || originalToken.kind === 'content-api') {
     assertLegacyKindFields(attributes as ContentApiApiTokenBody);
 
     const incomingType = raw.type as ContentApiApiToken['type'] | undefined;
@@ -1020,14 +1099,20 @@ const update = async (
     }
   }
 
+  const baseData = pick(UPDATABLE_FIELDS, attributes) as Record<string, unknown>;
+
+  // Migrate legacy null-kind rows to the explicit value on first write
+  if (originalToken.kind === null) {
+    baseData.kind = 'content-api';
+  }
+
   const updatedToken = await strapi.db.query('admin::api-token').update({
     select: SELECT_FIELDS,
     where: { id },
-    // kind is immutable — strip it along with relation fields so the DB write is clean
-    data: omit(['kind', 'permissions', 'adminPermissions', 'adminUserOwner'], attributes) as object,
+    data: baseData,
   });
 
-  if (originalToken.kind === 'content-api') {
+  if (originalToken.kind === null || originalToken.kind === 'content-api') {
     const incomingPermissions = raw.permissions as string[] | null | undefined;
 
     // custom tokens need to have their permissions updated as well
@@ -1164,6 +1249,7 @@ export interface ContentApiTokenService extends SharedTokenMethods {
 }
 
 export interface AdminTokenService extends SharedTokenMethods {
+  authenticateAdminToken(accessToken: string): Promise<AdminTokenAuthenticationResult>;
   create(attributes: AdminTokenBody, callingUser: AdminUser): Promise<AdminApiToken>;
   list(callingUser: AdminUser): Promise<AdminApiToken[]>;
   getById(id: string | number, options?: GetByOptions): Promise<AdminApiToken | null>;
@@ -1233,6 +1319,7 @@ function createTokenService(
 
   const svc: AdminTokenService = {
     ...shared,
+    authenticateAdminToken,
     create: (attributes: AdminTokenBody, callingUser: AdminUser) =>
       create({ ...attributes, kind: 'admin' }, callingUser) as Promise<AdminApiToken>,
     list: (callingUser: AdminUser) =>
@@ -1271,6 +1358,7 @@ export {
   update,
   getByName,
   getBy,
+  authenticateAdminToken,
   assignAdminPermissionsToToken,
   enforceAdminPermissionsCeiling,
   reconcileTokenPermissionsToUserCeiling,

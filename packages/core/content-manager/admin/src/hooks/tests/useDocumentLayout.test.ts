@@ -429,8 +429,8 @@ describe('useDocumentLayout', () => {
     const orphanModelUid = 'api::orphan.footer';
 
     server.use(
-      http.get('/content-manager/init', () =>
-        HttpResponse.json({
+      http.get('/content-manager/init', () => {
+        return HttpResponse.json({
           data: {
             components: mockData.contentManager.components,
             contentTypes: [
@@ -453,8 +453,8 @@ describe('useDocumentLayout', () => {
               },
             ],
           },
-        })
-      ),
+        });
+      }),
       http.get('/content-manager/content-types/:model/configuration', ({ params }) => {
         if (params.model !== orphanModelUid) {
           const configuration =
@@ -522,14 +522,14 @@ describe('useDocumentLayout', () => {
     const secondModelUid = 'api::address.address';
 
     server.use(
-      http.get('/content-manager/init', () =>
-        HttpResponse.json({
+      http.get('/content-manager/init', () => {
+        return HttpResponse.json({
           data: {
             components: mockData.contentManager.components,
             contentTypes: mockData.contentManager.contentTypes,
           },
-        })
-      ),
+        });
+      }),
       http.get('/content-manager/content-types/:model/configuration', async ({ params }) => {
         if (params.model === firstModelUid) {
           return HttpResponse.json({ data: mockData.contentManager.singleTypeConfiguration });
