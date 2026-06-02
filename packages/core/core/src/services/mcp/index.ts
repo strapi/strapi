@@ -64,9 +64,7 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
     registerTool(tool: Modules.MCP.McpToolDefinition) {
       if (serverStatus !== 'idle') {
-        throw new Error(
-          '[MCP] Tools must be registered before MCP server starts. Register during plugin register().'
-        );
+        throw new Error('[MCP] Cannot register tools after the MCP server has started.');
       }
 
       toolDefinitions.define(tool);
@@ -74,18 +72,14 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
 
     registerPrompt(prompt) {
       if (serverStatus !== 'idle') {
-        throw new Error(
-          '[MCP] Prompts must be registered before MCP server starts. Register during plugin register().'
-        );
+        throw new Error('[MCP] Cannot register prompts after the MCP server has started.');
       }
       promptDefinitions.define(prompt);
     },
 
     registerResource(resource) {
       if (serverStatus !== 'idle') {
-        throw new Error(
-          '[MCP] Resources must be registered before MCP server starts. Register during plugin register().'
-        );
+        throw new Error('[MCP] Cannot register resources after the MCP server has started.');
       }
       resourceDefinitions.define(resource);
     },
