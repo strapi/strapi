@@ -28,6 +28,7 @@ import {
 import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus, WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
+import set from 'lodash/set';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
@@ -697,6 +698,16 @@ const RelationModalWithContext = ({
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const componentUID = useComponent('RelationsField', (state) => state.uid);
+  const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
+  const getParentFormValuesWithCurrentRelation = () => {
+    const parentFormValues = structuredClone(getParentFormValues());
+
+    if (fieldValue) {
+      set(parentFormValues, name, fieldValue);
+    }
+
+    return parentFormValues;
+  };
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -737,6 +748,7 @@ const RelationModalWithContext = ({
                   shouldBypassConfirmation: false,
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
+                  parentFormValues: getParentFormValuesWithCurrentRelation(),
                 },
               });
             }
