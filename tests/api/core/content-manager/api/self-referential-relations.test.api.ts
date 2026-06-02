@@ -158,4 +158,36 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     const draft = await getCategory(catA.documentId, 'draft');
     expect(draft.parent).toMatchObject({ count: 1 });
   });
+
+  test('regression: relation in published parent is preserved when only the child is independently republished', async () => {
+    // This directly reproduces the GitHub bug report:
+    // 1. "Home" is published with two children.
+    // 2. One child ("Category B") is independently edited and republished.
+    // 3. The child must still appear in Home's PUBLISHED relation list.
+    //    Before the fix, it was silently deleted.
+    const [catA, catB] = data.categories;
+
+    // Set catA (Home) to reference catB (Test 3122) via the unidirectional "related" field
+    await rq({
+      method: 'PUT',
+      url: `/content-manager/collection-types/api::category.category/${catA.documentId}`,
+      body: { name: 'Home', related: [{ documentId: catB.documentId, locale: null }] },
+    });
+
+    // Publish catA (Home) — now the published version has catB in its "related" list
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::category.category/${catA.documentId}/actions/publish`,
+    });
+
+    // Publish catB (the child) — previously this deleted the relation in Home's published version
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::category.category/${catB.documentId}/actions/publish`,
+    });
+
+    // catB must still appear in catA's PUBLISHED relation list
+    const publishedHome = await getCategory(catA.documentId, 'published');
+    expect(publishedHome.related).toMatchObject({ count: 1 });
+  });
 });
