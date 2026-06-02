@@ -1,4 +1,5 @@
 import { createTransformer } from '../convert-query-params';
+import { ValidationError } from '../errors';
 import { Model } from '../types';
 
 const models = {
@@ -86,7 +87,41 @@ describe('convert-query-params', () => {
     test.todo('partial filtering works');
   });
 
-  test.todo('convertSortQueryParams');
+  describe('convertSortQueryParams', () => {
+    it('accepts valid sort orders', () => {
+      expect(transformer.private_convertSortQueryParams('title:asc')).toEqual([{ title: 'asc' }]);
+      expect(transformer.private_convertSortQueryParams('title:desc')).toEqual([{ title: 'desc' }]);
+      expect(transformer.private_convertSortQueryParams('title:ASC')).toEqual([{ title: 'ASC' }]);
+      expect(transformer.private_convertSortQueryParams('title:DESC')).toEqual([{ title: 'DESC' }]);
+    });
+
+    it('defaults to asc when no order is specified', () => {
+      expect(transformer.private_convertSortQueryParams('title')).toEqual([{ title: 'asc' }]);
+    });
+
+    it('handles multiple sort fields', () => {
+      expect(transformer.private_convertSortQueryParams('title:asc,createdAt:desc')).toEqual([
+        { title: 'asc' },
+        { createdAt: 'desc' },
+      ]);
+    });
+
+    it('throws a ValidationError for invalid sort order suffix', () => {
+      expect(() => transformer.private_convertSortQueryParams('title:asc$')).toThrow(
+        ValidationError
+      );
+      expect(() => transformer.private_convertSortQueryParams('title:invalid')).toThrow(
+        /Invalid order/
+      );
+      expect(() => transformer.private_convertSortQueryParams('title:123')).toThrow(
+        /Invalid order/
+      );
+    });
+
+    it('throws a ValidationError for invalid sort param type', () => {
+      expect(() => transformer.private_convertSortQueryParams(123 as any)).toThrow(ValidationError);
+    });
+  });
 
   describe('convertStartQueryParams', () => {
     it('accepts valid non-negative integers', () => {
