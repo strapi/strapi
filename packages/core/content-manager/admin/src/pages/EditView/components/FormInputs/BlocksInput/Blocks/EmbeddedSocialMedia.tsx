@@ -103,6 +103,7 @@ const YoutubeMediaElement = ({ youtubeUrl }: { youtubeUrl: string }) => {
   return (
     <iframe
       src={youtubeUrl}
+      title="Youtube Video"
       width="640"
       height="390"
       style={{ aspectRatio: '16/ 9' }}
