@@ -70,6 +70,14 @@ export const ADMIN_PERMISSIONS_CE = {
       ],
       update: [{ action: 'admin::webhooks.update', subject: null }],
     },
+    'admin-tokens': {
+      main: [{ action: 'admin::admin-tokens.access', subject: null }],
+      create: [{ action: 'admin::admin-tokens.create', subject: null }],
+      delete: [{ action: 'admin::admin-tokens.delete', subject: null }],
+      read: [{ action: 'admin::admin-tokens.read', subject: null }],
+      update: [{ action: 'admin::admin-tokens.update', subject: null }],
+      regenerate: [{ action: 'admin::admin-tokens.regenerate', subject: null }],
+    },
     'api-tokens': {
       main: [{ action: 'admin::api-tokens.access', subject: null }],
       create: [{ action: 'admin::api-tokens.create', subject: null }],
@@ -104,6 +112,13 @@ export const HOOKS = {
    * @type {string}
    */
   INJECT_COLUMN_IN_TABLE: 'Admin/CM/pages/ListView/inject-column-in-table',
+
+  /**
+   * Hook that allows to mutate the displayed filters of the list view
+   * @constant
+   * @type {string}
+   */
+  INJECT_LIST_VIEW_FILTERS: 'Admin/CM/pages/ListView/inject-in-filters',
 
   /**
    * Hook that allows to mutate the CM's collection types links pre-set filters
@@ -203,6 +218,11 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       // Init the search params directly
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
+    },
+    {
+      intlLabel: { id: 'Settings.adminTokens.title', defaultMessage: 'Admin Tokens' },
+      to: '/settings/admin-tokens',
+      id: 'admin-tokens',
     },
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
     window.strapi?.flags?.promoteEE

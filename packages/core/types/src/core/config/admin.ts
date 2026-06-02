@@ -88,6 +88,7 @@ export interface FirstPublisedAtField {
 export interface Flags {
   nps?: boolean;
   promoteEE?: boolean;
+  docLinks?: boolean;
 }
 
 export interface PreviewHandlerParams {

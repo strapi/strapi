@@ -24,7 +24,10 @@ import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
-import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
+import {
+  PersistentQueryConfig,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
@@ -42,12 +45,17 @@ const EditViewPage = () => {
   const location = useLocation();
   const [
     {
-      query: { status },
+      query: { status, plugins },
     },
     setQuery,
-  ] = useQueryParams<{ status: 'draft' | 'published' }>({
+  ] = useQueryParams<{
+    status: 'draft' | 'published';
+    plugins?: { i18n?: { locale?: string } };
+  }>({
     status: 'draft',
   });
+
+  const activeLocale = plugins?.i18n?.locale;
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDesktop = useIsDesktop();
@@ -55,9 +63,19 @@ const EditViewPage = () => {
   const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
   const drawerHasContent = visiblePanels.length > 0;
 
-  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
+  const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
+    () => ({
+      STRAPI_LOCALE: {
+        paths: ['plugins.i18n.locale'],
+        scoped: false,
+      },
+    }),
+    []
+  );
 
-  const doc = useDoc();
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
+
+  const doc = useDoc({ skip: !isHydrated });
   const {
     document,
     meta,
@@ -111,7 +129,8 @@ const EditViewPage = () => {
 
   const { isLazyLoading } = useLazyComponents([]);
 
-  const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
+  const isLoading =
+    !isHydrated || isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
   const initialValues = getInitialFormValues(isCreatingDocument);
 
@@ -148,6 +167,7 @@ const EditViewPage = () => {
         </tours.contentManager.Introduction>
       )}
       <Form
+        key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}`}
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}

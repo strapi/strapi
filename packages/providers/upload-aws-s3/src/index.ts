@@ -87,7 +87,7 @@ export type UploadCommandOutput = (
   | CompleteMultipartUploadCommandOutput
   | AbortMultipartUploadCommandOutput
 ) & {
-  Location: string;
+  Location?: string;
   ETag?: string;
 };
 
@@ -485,10 +485,8 @@ export default {
       const uploadObj = new Upload(uploadOptions);
       const result = (await uploadObj.done()) as UploadCommandOutput;
 
-      // Construct the correct URL (handles S3-compatible provider quirks)
-      file.url = constructFileUrl(fileKey, result.Location);
+      file.url = constructFileUrl(fileKey, result.Location ?? '');
 
-      // Store ETag for potential future conditional updates
       if (result.ETag) {
         file.etag = result.ETag.replace(/"/g, '');
       }
@@ -516,8 +514,7 @@ export default {
 
       const result = (await uploadObj.done()) as UploadCommandOutput;
 
-      // Construct the correct URL (handles S3-compatible provider quirks)
-      file.url = constructFileUrl(fileKey, result.Location);
+      file.url = constructFileUrl(fileKey, result.Location ?? '');
 
       if (result.ETag) {
         file.etag = result.ETag.replace(/"/g, '');

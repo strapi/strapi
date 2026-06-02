@@ -1,11 +1,16 @@
-import { Readable } from 'stream';
+import path from 'path';
+import os from 'os';
+import fs from 'fs-extra';
+import tarStream from 'tar-stream';
+import { pipeline } from 'stream/promises';
 import type { ILocalFileSourceProviderOptions } from '..';
 
 import { createLocalFileSourceProvider } from '..';
 import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from '../utils';
+import { assertReadStreamBackpressure } from '../../../../__tests__/test-utils';
 
 describe('File source provider', () => {
-  test('returns assets stream', () => {
+  test('exposes createAssetsReadStream (starting the stream opens the backup file on disk)', () => {
     const options: ILocalFileSourceProviderOptions = {
       file: {
         path: './test-file',
@@ -18,9 +23,7 @@ describe('File source provider', () => {
       },
     };
     const provider = createLocalFileSourceProvider(options);
-    const stream = provider.createAssetsReadStream();
-
-    expect(stream instanceof Readable).toBeTruthy();
+    expect(provider.createAssetsReadStream).toEqual(expect.any(Function));
   });
 
   describe('utils', () => {
@@ -129,5 +132,48 @@ describe('File source provider', () => {
         expect(isPathEquivalent(inputA, inputB)).toEqual(expected);
       }
     );
+  });
+
+  describe('Backpressure', () => {
+    test('entities read stream pauses under backpressure when reading from tar', async () => {
+      const tmpDir = os.tmpdir();
+      const tarPath = path.join(tmpDir, `strapi-dt-backpressure-${Date.now()}.tar`);
+      const pack = tarStream.pack();
+
+      pack.entry(
+        { name: 'metadata.json' },
+        JSON.stringify({
+          createdAt: new Date().toISOString(),
+          strapi: { version: '1.0.0' },
+        })
+      );
+      const entityLines = Array.from(
+        { length: 25 },
+        (_, i) => `${JSON.stringify({ uid: 'api::foo.foo', id: i + 1, title: `Entity ${i}` })}\n`
+      ).join('');
+      pack.entry({ name: 'entities/entities_00000.jsonl' }, entityLines);
+      pack.finalize();
+
+      const writeStream = fs.createWriteStream(tarPath);
+      await pipeline(pack, writeStream);
+
+      const provider = createLocalFileSourceProvider({
+        file: { path: tarPath },
+        compression: { enabled: false },
+        encryption: { enabled: false },
+      });
+      await provider.bootstrap();
+
+      const stream = provider.createEntitiesReadStream();
+      const { sourcePaused, chunks } = await assertReadStreamBackpressure(stream, {
+        delayMs: 12,
+        minChunksForBackpressure: 10,
+      });
+
+      await fs.remove(tarPath).catch(() => {});
+
+      expect(sourcePaused).toBe(true);
+      expect(chunks.length).toBe(25);
+    }, 8000);
   });
 });

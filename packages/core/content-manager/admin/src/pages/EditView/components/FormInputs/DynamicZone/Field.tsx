@@ -13,6 +13,7 @@ import { useIntl } from 'react-intl';
 
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
+import { usePrev } from '../../../../../hooks/usePrev';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
@@ -59,6 +60,7 @@ const DynamicZone = ({
 
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
   const [liveText, setLiveText] = React.useState('');
+  const [openComponentKey, setOpenComponentKey] = React.useState<string | null>(null);
 
   const {
     currentDocument: { components, isLoading },
@@ -71,10 +73,37 @@ const DynamicZone = ({
 
   type DzWithTempKey =
     Schema.Attribute.GetDynamicZoneValue<Schema.Attribute.DynamicZone>[number] & {
-      __temp_key__: number;
+      __temp_key__: string;
     };
 
   const { value = [], error } = useField<Array<DzWithTempKey>>(name);
+
+  /**
+   * Track the previous value array to detect when a new component is added.
+   * When the array grows, we find the newly added item and force its accordion open.
+   * This mirrors the same pattern used in RepeatableComponent.
+   */
+  const prevValue = usePrev(value);
+
+  React.useEffect(() => {
+    if (prevValue && prevValue.length < value.length) {
+      const prevKeys = new Set(prevValue.map((v) => v.__temp_key__));
+      const newItem = value.find((v) => !prevKeys.has(v.__temp_key__));
+      if (newItem) {
+        setOpenComponentKey(newItem.__temp_key__);
+      }
+    } else if (openComponentKey !== null) {
+      // Component was removed before forceOpen was handled — clear stale key
+      const currentKeys = new Set(value.map((v) => v.__temp_key__));
+      if (!currentKeys.has(openComponentKey)) {
+        setOpenComponentKey(null);
+      }
+    }
+  }, [value, prevValue, openComponentKey]);
+
+  const handleForceOpenHandled = React.useCallback(() => {
+    setOpenComponentKey(null);
+  }, []);
 
   const dynamicComponentsByCategory = React.useMemo(() => {
     return attribute.components.reduce<
@@ -298,6 +327,8 @@ const DynamicZone = ({
                     onAddComponent={handleAddComponent}
                     dynamicComponentsByCategory={dynamicComponentsByCategory}
                     totalLength={dynamicDisplayedComponentsLength}
+                    forceOpen={openComponentKey === field.__temp_key__}
+                    onForceOpenHandled={handleForceOpenHandled}
                   >
                     {children}
                   </DynamicComponent>

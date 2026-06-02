@@ -160,13 +160,23 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
   const { isLoading: isLoadingSchemas, schemas } = useContentTypeSchema();
 
   const {
-    data,
+    currentData: data,
     isLoading: isLoadingConfigs,
     error,
-    isFetching: isFetchingConfigs,
   } = useGetContentTypeConfigurationQuery(model);
 
-  const isLoading = isLoadingSchemas || isFetchingConfigs || isLoadingConfigs;
+  const isConfigResolvedForModel = data?.contentType?.uid === model;
+  const isLoading = isLoadingSchemas || isLoadingConfigs || (!error && !isConfigResolvedForModel);
+  const stableLayoutsByModelRef = React.useRef(
+    new Map<
+      string,
+      {
+        edit: EditLayout;
+        list: ListLayout;
+        listViewConversionContext: ListViewConversionContext | null;
+      }
+    >()
+  );
 
   React.useEffect(() => {
     if (error) {
@@ -177,30 +187,54 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
     }
   }, [error, formatAPIError, toggleNotification]);
 
+  const resolvedLayouts = React.useMemo(() => {
+    if (!data || isLoading) {
+      return null;
+    }
+
+    const edit = formatEditLayout(data, { schemas, schema, components });
+    const list = formatListLayout(data, { schemas, schema, components });
+    const listViewConversionContext: ListViewConversionContext = {
+      componentConfigurations: data.components,
+      componentSchemas: components,
+      contentTypeSchemas: schemas,
+    };
+
+    return { edit, list, listViewConversionContext };
+  }, [data, isLoading, schemas, schema, components]);
+
+  React.useEffect(() => {
+    if (resolvedLayouts) {
+      stableLayoutsByModelRef.current.set(model, resolvedLayouts);
+    }
+  }, [model, resolvedLayouts]);
+
+  const stableLayouts = resolvedLayouts ?? stableLayoutsByModelRef.current.get(model) ?? null;
+
   const editLayout = React.useMemo(
     () =>
-      data && !isLoading
-        ? formatEditLayout(data, { schemas, schema, components })
-        : ({
-            layout: [],
-            components: {},
-            metadatas: {},
-            options: {},
-            settings: DEFAULT_SETTINGS,
-          } as EditLayout),
-    [data, isLoading, schemas, schema, components]
+      stableLayouts?.edit ??
+      ({
+        layout: [],
+        components: {},
+        metadatas: {},
+        options: {},
+        settings: DEFAULT_SETTINGS,
+      } as EditLayout),
+    [stableLayouts]
   );
 
-  const listLayout = React.useMemo(() => {
-    return data && !isLoading
-      ? formatListLayout(data, { schemas, schema, components })
-      : ({
-          layout: [],
-          metadatas: {},
-          options: {},
-          settings: DEFAULT_SETTINGS,
-        } as ListLayout);
-  }, [data, isLoading, schemas, schema, components]);
+  const listLayout = React.useMemo(
+    () =>
+      stableLayouts?.list ??
+      ({
+        layout: [],
+        metadatas: {},
+        options: {},
+        settings: DEFAULT_SETTINGS,
+      } as ListLayout),
+    [stableLayouts]
+  );
 
   const { layout: edit } = React.useMemo(
     () =>
@@ -211,17 +245,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
     [editLayout, query, runHookWaterfall]
   );
 
-  const listViewConversionContext = React.useMemo((): ListViewConversionContext | null => {
-    if (!data || isLoading) {
-      return null;
-    }
-
-    return {
-      componentConfigurations: data.components,
-      componentSchemas: components,
-      contentTypeSchemas: schemas,
-    };
-  }, [data, isLoading, components, schemas]);
+  const listViewConversionContext = stableLayouts?.listViewConversionContext ?? null;
 
   return {
     error,
@@ -290,17 +314,24 @@ const formatEditLayout = (
 
   const componentEditAttributes = Object.entries(data.components).reduce<EditLayout['components']>(
     (acc, [uid, configuration]) => {
+      const componentSchema = components[uid];
+
+      // Persisted configuration can reference component UIDs absent from `/init`.
+      if (!componentSchema) {
+        return acc;
+      }
+
       acc[uid] = {
         layout: convertEditLayoutToFieldLayouts(
           configuration.layouts.edit,
-          components[uid].attributes,
+          componentSchema.attributes,
           configuration.metadatas,
           { configurations: data.components, schemas: components }
         ),
         settings: {
           ...configuration.settings,
-          icon: components[uid].info.icon,
-          displayName: components[uid].info.displayName,
+          icon: componentSchema.info.icon,
+          displayName: componentSchema.info.displayName,
         },
       };
       return acc;
@@ -324,7 +355,7 @@ const formatEditLayout = (
     metadatas: editMetadatas,
     settings: {
       ...data.contentType.settings,
-      displayName: schema?.info.displayName,
+      displayName: schema?.info?.displayName,
     },
     options: {
       ...schema?.options,
@@ -363,11 +394,16 @@ const convertEditLayoutToFieldLayouts = (
           return null;
         }
 
-        const { edit: metadata } = metadatas[field.name];
+        const fieldMetadata = metadatas[field.name];
+        if (!fieldMetadata) {
+          return null;
+        }
+
+        const { edit: metadata } = fieldMetadata;
 
         const settings: Partial<Settings> =
           attribute.type === 'component' && components
-            ? components.configurations[attribute.component].settings
+            ? (components.configurations[attribute.component]?.settings ?? {})
             : {};
 
         return {
@@ -433,7 +469,7 @@ const formatListLayout = (
 
   return {
     layout: listAttributes,
-    settings: { ...data.contentType.settings, displayName: schema?.info.displayName },
+    settings: { ...data.contentType.settings, displayName: schema?.info?.displayName },
     metadatas: listMetadatas,
     options: {
       ...schema?.options,
@@ -473,10 +509,13 @@ const convertListLayoutToFieldLayouts = (
       }
 
       const metadata = metadatas[name];
+      if (!metadata) {
+        return null;
+      }
 
       const settings: Partial<Settings> =
         attribute.type === 'component' && components
-          ? components.configurations[attribute.component].settings
+          ? (components.configurations[attribute.component]?.settings ?? {})
           : {};
 
       return {

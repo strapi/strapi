@@ -479,14 +479,14 @@ const EditPage = () => {
       >
         <LimitsModal.Title>
           {formatMessage({
-            id: 'review-workflows.edit.page.workflows.limit.title',
+            id: 'review-workflows.workflows.limit.title',
             defaultMessage: 'You’ve reached the limit of workflows in your plan',
           })}
         </LimitsModal.Title>
 
         <LimitsModal.Body>
           {formatMessage({
-            id: 'review-workflows.edit.page.workflows.limit.body',
+            id: 'review-workflows.workflows.limit.body',
             defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
           })}
         </LimitsModal.Body>
@@ -498,14 +498,14 @@ const EditPage = () => {
       >
         <LimitsModal.Title>
           {formatMessage({
-            id: 'review-workflows.edit.page.stages.limit.title',
+            id: 'review-workflows.stages.limit.title',
             defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
           })}
         </LimitsModal.Title>
 
         <LimitsModal.Body>
           {formatMessage({
-            id: 'review-workflows.edit.page.stages.limit.body',
+            id: 'review-workflows.stages.limit.body',
             defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
           })}
         </LimitsModal.Body>
