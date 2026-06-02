@@ -1,5 +1,5 @@
 ---
-name: commit
+name: committing
 description: Use when writing any git commit message, PR title, or squash subject in the Strapi repo — enforces the type list, scope syntax, and subject style from CONTRIBUTING.md "Git Conventions" and .commitlintrc.ts. Trigger whenever a commit/PR subject is being drafted, even if the user didn't say the word "commit".
 ---
 
