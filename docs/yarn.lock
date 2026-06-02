@@ -2935,6 +2935,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@docusaurus/tsconfig@npm:3.10.1":
+  version: 3.10.1
+  resolution: "@docusaurus/tsconfig@npm:3.10.1"
+  checksum: 10c0/557eab379f82cc36e14d956f71b3ba81c71d535244b664a75fd1d2cc5e9c20c400b4ddf1f2b62a2c8c6c0b854d9192da5c651c719a51213cadcda94ca7f587b5
+  languageName: node
+  linkType: hard
+
 "@docusaurus/types@npm:3.10.1":
   version: 3.10.1
   resolution: "@docusaurus/types@npm:3.10.1"
@@ -4268,6 +4275,15 @@ __metadata:
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
+  languageName: node
+  linkType: hard
+
+"@types/mdast@npm:4.0.4":
+  version: 4.0.4
+  resolution: "@types/mdast@npm:4.0.4"
+  dependencies:
+    "@types/unist": "npm:*"
+  checksum: 10c0/84f403dbe582ee508fd9c7643ac781ad8597fcbfc9ccb8d4715a2c92e4545e5772cbd0dbdf18eda65789386d81b009967fdef01b24faf6640f817287f54d9c82
   languageName: node
   linkType: hard
 
@@ -6818,11 +6834,14 @@ __metadata:
   resolution: "docs@workspace:."
   dependencies:
     "@cmfcmf/docusaurus-search-local": "npm:2.0.1"
+    "@docusaurus/babel": "npm:3.10.1"
     "@docusaurus/core": "npm:3.10.1"
     "@docusaurus/module-type-aliases": "npm:3.10.1"
     "@docusaurus/preset-classic": "npm:3.10.1"
     "@docusaurus/theme-mermaid": "npm:3.10.1"
+    "@docusaurus/tsconfig": "npm:3.10.1"
     "@mdx-js/react": "npm:3.1.1"
+    "@types/mdast": "npm:4.0.4"
     "@types/react": "npm:18.3.2"
     "@types/react-dom": "npm:18.3.0"
     clsx: "npm:2.1.1"
