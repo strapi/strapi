@@ -84,7 +84,13 @@ export const delay = (seconds: number) => {
 };
 
 export const pollHealthCheck = async (interval = 1000, timeout = 30000) => {
-  const url = `http://127.0.0.1:${process.env.PORT ?? 1337}/_health`;
+  const port = process.env.PORT?.trim();
+  if (!port) {
+    throw new Error(
+      'pollHealthCheck: PORT is not set. Run e2e via `yarn test:e2e` so the browser runner sets PORT (and TEST_APP_PATH) for this process.'
+    );
+  }
+  const url = `http://127.0.0.1:${port}/_health`;
   console.log(`Starting to poll: ${url}`);
 
   let elapsed = 0;

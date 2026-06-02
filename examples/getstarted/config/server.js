@@ -41,4 +41,7 @@ module.exports = ({ env }) => ({
       // enabled: false,
     },
   },
+  mcp: {
+    enabled: true,
+  },
 });
