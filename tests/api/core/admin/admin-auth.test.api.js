@@ -516,6 +516,50 @@ describe('Admin Auth End to End', () => {
         },
       });
     });
+
+    test('Prevents race condition with concurrent requests', async () => {
+      // Delete all existing users to simulate fresh instance
+      await strapi.db.query('admin::user').deleteMany({});
+
+      const userInfo = {
+        email: 'race-test@strapi.io',
+        firstname: 'Race',
+        lastname: 'Test',
+        password: '1Test2azda3',
+      };
+
+      // Simulate concurrent requests
+      const requests = Array(5)
+        .fill(null)
+        .map(() =>
+          rq({
+            url: '/admin/register-admin',
+            method: 'POST',
+            body: userInfo,
+          })
+        );
+
+      const responses = await Promise.all(requests);
+
+      // Count successful registrations
+      const successCount = responses.filter((res) => res.statusCode === 200).length;
+      const failureCount = responses.filter((res) => res.statusCode === 400).length;
+
+      // Only one request should succeed
+      expect(successCount).toBe(1);
+      expect(failureCount).toBe(4);
+
+      // All failures should have the correct error message
+      responses
+        .filter((res) => res.statusCode === 400)
+        .forEach((res) => {
+          expect(res.body.error.message).toBe('You cannot register a new super admin');
+        });
+
+      // Clean up: restore super admin for other tests
+      await strapi.db.query('admin::user').deleteMany({});
+      await utils.createUser(superAdmin.loginInfo);
+    });
   });
 
   describe('POST /forgot-password', () => {
