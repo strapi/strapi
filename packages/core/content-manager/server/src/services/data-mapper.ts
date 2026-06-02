@@ -24,7 +24,7 @@ export default () => ({
       isDisplayed: isVisible(contentType),
       attributes: {
         id: {
-          type: 'integer',
+          type: 'biginteger',
         },
         ...formatAttributes(contentType),
         documentId: {

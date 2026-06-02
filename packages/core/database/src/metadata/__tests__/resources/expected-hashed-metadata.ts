@@ -9,7 +9,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -43,7 +43,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -89,18 +89,20 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes_comple5354f_lnk',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'complex_id',
             },
             inv_complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -156,7 +158,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -190,7 +192,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -264,18 +266,20 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes_comple3e8ce_lnk',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'complex_id',
             },
             inv_complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -344,7 +348,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -413,18 +417,20 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes_comple64178_lnk',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'complex_id',
             },
             inv_complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -480,7 +486,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -559,18 +565,20 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes_comple61dc1_lnk',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'complex_id',
             },
             inv_complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -654,7 +662,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'components_default_l807d8',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             longcomponentname: {
@@ -725,7 +733,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -775,18 +783,20 @@ export const expectedMetadataHashedResults = {
           tableName: 'componen56bca_complex_lnk',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -840,18 +850,20 @@ export const expectedMetadataHashedResults = {
           tableName: 'compon56bca_complexes_lnk',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -920,7 +932,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'components_default_l807d8',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             longcomponentname: {
@@ -991,7 +1003,7 @@ export const expectedMetadataHashedResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -1041,18 +1053,20 @@ export const expectedMetadataHashedResults = {
           tableName: 'componen56bca_complex_lnk',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -1106,18 +1120,20 @@ export const expectedMetadataHashedResults = {
           tableName: 'compon56bca_complexes_lnk',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -1187,7 +1203,7 @@ export const expectedMetadataHashedResults = {
         tableName: 'components_default_l807d8',
         attributes: {
           id: {
-            type: 'increments',
+            type: 'bigincrements',
             columnName: 'id',
           },
           longcomponentname: {
@@ -1258,7 +1274,7 @@ export const expectedMetadataHashedResults = {
         tableName: 'complexes',
         attributes: {
           id: {
-            type: 'increments',
+            type: 'bigincrements',
             columnName: 'id',
           },
           documentId: {
@@ -1312,18 +1328,20 @@ export const expectedMetadataHashedResults = {
         tableName: 'componen56bca_complex_lnk',
         attributes: {
           id: {
-            type: 'increments',
+            type: 'bigincrements',
             columnName: 'id',
           },
           long_component_name_id: {
-            type: 'integer',
+            type: 'biginteger',
+            internalIntegerId: true,
             column: {
               unsigned: true,
             },
             columnName: 'long_component_name_id',
           },
           complex_id: {
-            type: 'integer',
+            type: 'biginteger',
+            internalIntegerId: true,
             column: {
               unsigned: true,
             },
@@ -1377,18 +1395,20 @@ export const expectedMetadataHashedResults = {
         tableName: 'compon56bca_complexes_lnk',
         attributes: {
           id: {
-            type: 'increments',
+            type: 'bigincrements',
             columnName: 'id',
           },
           long_component_name_id: {
-            type: 'integer',
+            type: 'biginteger',
+            internalIntegerId: true,
             column: {
               unsigned: true,
             },
             columnName: 'long_component_name_id',
           },
           complex_id: {
-            type: 'integer',
+            type: 'biginteger',
+            internalIntegerId: true,
             column: {
               unsigned: true,
             },

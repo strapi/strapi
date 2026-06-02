@@ -4,7 +4,7 @@ export const baseMetadata = {
   tableName: 'complexes',
   attributes: {
     id: {
-      type: 'increments',
+      type: 'bigincrements',
       columnName: 'id',
     },
     documentId: {
@@ -33,7 +33,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -67,7 +67,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -113,18 +113,20 @@ export const expectedMetadataResults = {
           tableName: 'complexes_complexhasonecomplex_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'complex_id',
             },
             inv_complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -180,7 +182,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -214,7 +216,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -288,18 +290,20 @@ export const expectedMetadataResults = {
           tableName: 'complexes_complexhasmanycomplexes_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'complex_id',
             },
             inv_complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -368,7 +372,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -437,18 +441,20 @@ export const expectedMetadataResults = {
           tableName: 'complexes_complexhasandbelongstoonecomplex_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'complex_id',
             },
             inv_complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -504,7 +510,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -583,18 +589,20 @@ export const expectedMetadataResults = {
           tableName: 'complexes_complexeshasandbelongstomanycomplexes_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'complex_id',
             },
             inv_complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -676,7 +684,7 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             longcomponentname: {
@@ -747,7 +755,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -796,18 +804,20 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names_complex_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -861,18 +871,20 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names_complexes_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -943,7 +955,7 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             longcomponentname: {
@@ -1014,7 +1026,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -1064,18 +1076,20 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names_complex_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -1129,18 +1143,20 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names_complexes_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -1209,7 +1225,7 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             longcomponentname: {
@@ -1280,7 +1296,7 @@ export const expectedMetadataResults = {
           tableName: 'complexes',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             documentId: {
@@ -1330,18 +1346,20 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names_complex_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -1395,18 +1413,20 @@ export const expectedMetadataResults = {
           tableName: 'components_default_long_component_names_complexes_links',
           attributes: {
             id: {
-              type: 'increments',
+              type: 'bigincrements',
               columnName: 'id',
             },
             long_component_name_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
               columnName: 'long_component_name_id',
             },
             complex_id: {
-              type: 'integer',
+              type: 'biginteger',
+              internalIntegerId: true,
               column: {
                 unsigned: true,
               },
@@ -1476,7 +1496,7 @@ export const expectedMetadataResults = {
         tableName: 'components_default_long_component_names',
         attributes: {
           id: {
-            type: 'increments',
+            type: 'bigincrements',
             columnName: 'id',
           },
           longcomponentname: {
@@ -1547,7 +1567,7 @@ export const expectedMetadataResults = {
         tableName: 'complexes',
         attributes: {
           id: {
-            type: 'increments',
+            type: 'bigincrements',
             columnName: 'id',
           },
           documentId: {
@@ -1601,18 +1621,20 @@ export const expectedMetadataResults = {
         tableName: 'components_default_long_component_names_complex_links',
         attributes: {
           id: {
-            type: 'increments',
+            type: 'bigincrements',
             columnName: 'id',
           },
           long_component_name_id: {
-            type: 'integer',
+            type: 'biginteger',
+            internalIntegerId: true,
             column: {
               unsigned: true,
             },
             columnName: 'long_component_name_id',
           },
           complex_id: {
-            type: 'integer',
+            type: 'biginteger',
+            internalIntegerId: true,
             column: {
               unsigned: true,
             },
@@ -1666,18 +1688,20 @@ export const expectedMetadataResults = {
         tableName: 'components_default_long_component_names_complexes_links',
         attributes: {
           id: {
-            type: 'increments',
+            type: 'bigincrements',
             columnName: 'id',
           },
           long_component_name_id: {
-            type: 'integer',
+            type: 'biginteger',
+            internalIntegerId: true,
             column: {
               unsigned: true,
             },
             columnName: 'long_component_name_id',
           },
           complex_id: {
-            type: 'integer',
+            type: 'biginteger',
+            internalIntegerId: true,
             column: {
               unsigned: true,
             },

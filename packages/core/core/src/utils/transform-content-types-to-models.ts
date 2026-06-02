@@ -210,16 +210,16 @@ const createCompoLinkModel = (
     tableName: name,
     attributes: {
       [identifiers.ID_COLUMN]: {
-        type: 'increments',
+        type: 'bigincrements',
       },
       [entityId]: {
-        type: 'integer',
+        type: 'biginteger',
         column: {
           unsigned: true,
         },
       },
       [componentId]: {
-        type: 'integer',
+        type: 'biginteger',
         column: {
           unsigned: true,
         },
@@ -311,7 +311,7 @@ export const transformContentTypesToModels = (
       tableName: contentType.collectionName, // This gets shortened in metadata.loadModels(), so we don't shorten here or it will happen twice
       attributes: {
         [identifiers.ID_COLUMN]: {
-          type: 'increments',
+          type: 'bigincrements',
         },
         ...documentIdAttribute,
         ...transformAttributes(contentType, identifiers),

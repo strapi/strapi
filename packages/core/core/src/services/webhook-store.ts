@@ -14,7 +14,7 @@ const webhookModel: Model = {
   tableName: 'strapi_webhooks',
   attributes: {
     id: {
-      type: 'increments',
+      type: 'bigincrements',
     },
     name: {
       type: 'string',

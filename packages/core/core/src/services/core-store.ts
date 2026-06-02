@@ -7,7 +7,7 @@ const coreStoreModel: Model = {
   tableName: 'strapi_core_store_settings',
   attributes: {
     id: {
-      type: 'increments',
+      type: 'bigincrements',
     },
     key: {
       type: 'string',
