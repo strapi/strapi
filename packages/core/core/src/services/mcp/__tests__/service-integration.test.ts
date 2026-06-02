@@ -9,7 +9,10 @@ describe('MCP Service Integration', () => {
   let logInfoSpy: jest.Mock;
   let logErrorSpy: jest.Mock;
 
+  let mockTelemetrySend: jest.Mock;
+
   beforeEach(() => {
+    mockTelemetrySend = jest.fn().mockResolvedValue(true);
     logDebugSpy = jest.fn();
     logInfoSpy = jest.fn();
     logErrorSpy = jest.fn();
@@ -36,6 +39,9 @@ describe('MCP Service Integration', () => {
       server: {
         routes: mockServerRoutes,
         use: mockServerUse,
+      } as any,
+      telemetry: {
+        send: mockTelemetrySend,
       } as any,
     };
   });
@@ -130,6 +136,34 @@ describe('MCP Service Integration', () => {
       expect(logInfoSpy).toHaveBeenCalledWith(
         '[MCP] Server available at http://localhost:1337/mcp'
       );
+      expect(mockTelemetrySend).toHaveBeenCalledWith('didStartMcpServer', {
+        eventProperties: { path: '/mcp' },
+        groupProperties: {
+          numberOfTools: 1,
+          numberOfPrompts: 0,
+          numberOfResources: 0,
+        },
+      });
+    });
+
+    test('should not send start telemetry when service is disabled', async () => {
+      const disabledStrapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'server.mcp.enabled') {
+              return false;
+            }
+            return defaultValue;
+          }),
+        } as any,
+      };
+
+      const service = createMcpService(disabledStrapi as Core.Strapi);
+
+      await service.start();
+
+      expect(mockTelemetrySend).not.toHaveBeenCalled();
     });
   });
 
