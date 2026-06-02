@@ -79,4 +79,18 @@ describe('addFirstPublishedAtToDraft', () => {
     expect(result.media).toBe(mediaObj);
     expect(result.title).toBe('x');
   });
+
+  it('does not tag entry as modified when firstPublishedAt is set during first publish', async () => {
+    const serverUpdatedAt = new Date();
+    const draft = { id: 1, firstPublishedAt: null, title: 'test' };
+    update.mockResolvedValue({ id: 1, updatedAt: serverUpdatedAt });
+
+    const result = await addFirstPublishedAtToDraft(draft, update, contentType);
+
+    expect(result).not.toBe(draft);
+    expect(result.firstPublishedAt).toBeInstanceOf(Date);
+    // updatedAt is propagated from the server response so it matches
+    // firstPublishedAt — entry is published, not modified after publishing
+    expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(result.firstPublishedAt.getTime());
+  });
 });
