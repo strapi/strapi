@@ -89,8 +89,8 @@ describe('addFirstPublishedAtToDraft', () => {
 
     expect(result).not.toBe(draft);
     expect(result.firstPublishedAt).toBeInstanceOf(Date);
-    // updatedAt is propagated from the server response so it matches
-    // firstPublishedAt — entry is published, not modified after publishing
+    // updatedAt is propagated from the server response so it's equal to or greater
+    // than firstPublishedAt — entry is published, not modified after publishing
     expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(result.firstPublishedAt.getTime());
   });
 });
