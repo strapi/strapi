@@ -18,7 +18,7 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { get } = useFetchClient();
-  const { folder, _q, ...paramsExceptFolderAndQ } = query;
+  const { folder, folderPath: _folderPath, _q, ...paramsExceptFolderAndQ } = query;
 
   let params: Query;
 
