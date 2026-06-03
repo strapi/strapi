@@ -50,15 +50,18 @@ const load = async (
       for (const attribute of Object.values(dbModel.attributes) as any) {
         /**
          * Only consider unidirectional relations.
-         * Self-referential relations (model.uid === uid) are handled by selfReferentialRelations;
-         * processing them here would re-insert stale source FK values pointing to deleted entries.
+         * Bidirectional relations (inversedBy/mappedBy) are handled by bidirectionalRelations.
+         * Self-referential relations (model.uid === uid) are included here, but rows where
+         * the source entry is also being republished in this same operation are excluded —
+         * those are handled by selfReferentialRelations, which remaps both sides simultaneously.
+         * Without this guard, we would insert rows pointing to a source entry that is about
+         * to be deleted, creating stale foreign-key values.
          */
         if (
           attribute.type !== 'relation' ||
           attribute.target !== uid ||
           attribute.inversedBy ||
-          attribute.mappedBy ||
-          model.uid === uid
+          attribute.mappedBy
         ) {
           continue;
         }
@@ -78,12 +81,23 @@ const load = async (
         // NOTE: when the model has draft and publish, we can assume relation are only draft to draft & published to published
         const ids = oldVersions.map((entry) => entry.id);
 
-        const oldVersionsRelations = await strapi.db
+        let oldVersionsQuery = strapi.db
           .getConnection()
           .select('*')
           .from(joinTable.name)
-          .whereIn(targetColumnName, ids)
-          .transacting(trx);
+          .whereIn(targetColumnName, ids);
+
+        /**
+         * For self-referential relations, exclude join rows where the source entry is also
+         * being republished. When both sides are in the same publish batch, selfReferentialRelations
+         * already handles remapping them. Including them here too would insert a row whose
+         * source FK points at an entry that is about to be deleted.
+         */
+        if (model.uid === uid && ids.length > 0) {
+          oldVersionsQuery = oldVersionsQuery.whereNotIn(sourceColumnName, ids);
+        }
+
+        const oldVersionsRelations = await oldVersionsQuery.transacting(trx);
 
         if (oldVersionsRelations.length > 0) {
           updates.push({ joinTable, relations: oldVersionsRelations });
