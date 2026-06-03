@@ -8,6 +8,7 @@ import {
   McpCapabilityRegistryBase,
 } from './internal/McpCapabilityRegistry';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
+import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 
 export const makeMcpPromptDefinition = <Definition extends Modules.MCP.McpPromptDefinition>(
   prompt: Definition
@@ -28,11 +29,13 @@ export class McpPromptRegistry
   }
 
   bind(mcpServer: McpServer) {
+    const strapi = this.#strapi;
+
     super.register((definition) => {
       const { name, title, description, argsSchema, createHandler } = definition;
 
       return createSafeCapabilityRegistration({
-        strapi: this.#strapi,
+        strapi,
         capabilityType: 'Prompt',
         name,
         createHandler,
@@ -63,6 +66,14 @@ export class McpPromptRegistry
           };
         },
         registerWithSdk(safeHandler) {
+          const sdkHandler = wrapCapabilityHandlerForMetrics(
+            strapi,
+            'prompt',
+            name,
+            definition.telemetry,
+            safeHandler
+          );
+
           return mcpServer.registerPrompt(
             name,
             {
@@ -71,7 +82,7 @@ export class McpPromptRegistry
               // @ts-expect-error - Internal handler type mismatch due to optional argsSchema
               argsSchema,
             },
-            safeHandler
+            sdkHandler
           );
         },
       });

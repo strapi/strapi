@@ -7,6 +7,7 @@ import {
   type McpCapabilityRegistry,
   McpCapabilityRegistryBase,
 } from './internal/McpCapabilityRegistry';
+import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import type { McpAdminTokenAbility } from './authentication';
 
@@ -63,6 +64,8 @@ export class McpToolRegistry
   }
 
   bind(mcpServer: McpServer) {
+    const strapi = this.#strapi;
+
     super.register((definition) => {
       const { name, title, description, resolveInputSchema, resolveOutputSchema, createHandler } =
         definition;
@@ -76,7 +79,7 @@ export class McpToolRegistry
       const createHandlerWithContext = (strapi: Core.Strapi) => createHandler(strapi, context);
 
       return createSafeCapabilityRegistration({
-        strapi: this.#strapi,
+        strapi,
         capabilityType: 'Tool',
         name,
         createHandler: createHandlerWithContext,
@@ -109,11 +112,19 @@ export class McpToolRegistry
 
           // Adapt from our object-literal handler `({ args, extra })` to
           // the MCP SDK's positional form `(args, extra)` / `(extra)`.
-          const sdkHandler =
+          const baseHandler =
             inputSchema !== undefined
               ? (args: unknown, extra: unknown) =>
                   safeHandler({ args, extra } as Parameters<typeof safeHandler>[0])
               : (extra: unknown) => safeHandler({ extra } as Parameters<typeof safeHandler>[0]);
+
+          const sdkHandler = wrapCapabilityHandlerForMetrics(
+            strapi,
+            'tool',
+            name,
+            definition.telemetry,
+            baseHandler
+          );
 
           return mcpServer.registerTool(
             name,

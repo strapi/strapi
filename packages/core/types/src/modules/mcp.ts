@@ -49,11 +49,18 @@ export type McpCapabilityAccess =
       auth: McpCapabilityAuth;
     };
 
+export type McpCapabilityTelemetry = {
+  source?: string;
+  /** Sanitized name override — replaces raw capability name in analytics */
+  name?: string;
+};
+
 /**
  * Base definition for Strapi MCP capabilities
  */
 export type McpCapabilityDefinition<Name extends string = string> = {
   name: Name;
+  telemetry?: McpCapabilityTelemetry;
 } & McpCapabilityAccess;
 
 /**
@@ -180,7 +187,9 @@ export interface McpService {
 
   /**
    * Register a single MCP tool.
-   * Must be called during plugin register() phase, before MCP server starts.
+   * Register while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
+   * In Strapi's load lifecycle, this includes plugin register() and plugin bootstrap().
+   * Prefer bootstrap() when a tool depends on synced content-types, permissions, or database state.
    * @throws Error if called after MCP server has started
    */
   registerTool<
@@ -224,7 +233,9 @@ export interface McpService {
 
   /**
    * Register a single MCP prompt.
-   * Must be called during plugin register() phase, before MCP server starts.
+   * Register while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
+   * In Strapi's load lifecycle, this includes plugin register() and plugin bootstrap().
+   * Prefer bootstrap() when a prompt depends on synced content-types, permissions, or database state.
    * @throws Error if called after MCP server has started
    */
   registerPrompt<
@@ -258,7 +269,9 @@ export interface McpService {
 
   /**
    * Register a single MCP resource.
-   * Must be called during plugin register() phase, before MCP server starts.
+   * Register while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
+   * In Strapi's load lifecycle, this includes plugin register() and plugin bootstrap().
+   * Prefer bootstrap() when a resource depends on synced content-types, permissions, or database state.
    * @throws Error if called after MCP server has started
    */
   registerResource<Name extends string>(resource: {
