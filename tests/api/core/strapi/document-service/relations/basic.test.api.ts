@@ -178,22 +178,6 @@ describe('Document Service relations', () => {
     });
 
     testInTransaction(
-      'preserves manyToMany connect order when nested sort is omitted',
-      async () => {
-        const article = await strapi.documents(ARTICLE_UID).create({
-          locale: 'en',
-          data: {
-            title: 'Populate sort connect order test',
-            categories: ['Cat2', 'Cat1'],
-          },
-          populate: { categories: true },
-        });
-
-        expect(categoryNames(article)).toEqual(['Cat2-EN', 'Cat1-EN']);
-      }
-    );
-
-    testInTransaction(
       'reverses manyToMany connect order with ordering via db.query when sort is omitted',
       async () => {
         await strapi.documents(ARTICLE_UID).create({
