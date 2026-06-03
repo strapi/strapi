@@ -1,4 +1,3 @@
-import type * as Koa from 'koa';
 import type {} from 'koa-body';
 
 type ID = number | string;
@@ -86,20 +85,6 @@ export interface Model {
   };
   privateAttributes?: string[];
   attributes: Record<string, AnyAttribute>;
-}
-
-declare module 'koa' {
-  interface Request extends Koa.BaseRequest {
-    route: RouteInfo;
-  }
-}
-
-export interface RouteInfo {
-  endpoint: string;
-  controller: string;
-  action: string;
-  verb: string;
-  plugin: string;
 }
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };

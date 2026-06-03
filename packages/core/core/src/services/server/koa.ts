@@ -10,23 +10,21 @@ const addCustomMethods = (app: Koa) => {
   const delegator = delegate(app.context, 'response');
 
   /* errors */
-  for (let code = 400; code < 600; code += 1) {
-    const name = STATUS_CODES[code];
+  for (const [codeStr, name] of Object.entries(STATUS_CODES)) {
+    const code = Number(codeStr);
 
-    if (!name) {
-      throw new Error(`invalid status code: ${code}`);
+    if (name && code >= 400 && code < 600) {
+      const camelCasedName = camelCase(name) as keyof ContextDelegatedResponseErrorMethods;
+
+      app.response[camelCasedName] = function responseCode(message = name, details = {}) {
+        const httpError = createError(code, message, { details });
+        const { status, body } = formatHttpError(httpError);
+        this.status = status;
+        this.body = body;
+      };
+
+      delegator.method(camelCasedName);
     }
-
-    const camelCasedName = camelCase(name) as keyof ContextDelegatedResponseErrorMethods;
-
-    app.response[camelCasedName] = function responseCode(response = name, details = {}) {
-      const httpError = createError(code, response, { details });
-      const { status, body } = formatHttpError(httpError);
-      this.status = status;
-      this.body = body;
-    };
-
-    delegator.method(camelCasedName);
   }
 
   /* send, created, deleted */
