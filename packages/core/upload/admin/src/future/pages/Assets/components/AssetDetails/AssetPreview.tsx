@@ -111,9 +111,10 @@ const AssetLoader = () => {
 interface AssetPreviewProps {
   asset: File | AssetWithPopulatedCreatedBy;
   actions?: React.ReactNode;
+  isLoading?: boolean;
 }
 
-export const AssetPreview = ({ asset, actions }: AssetPreviewProps) => {
+export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
   const { alternativeText, ext, mime, url, updatedAt } = asset;
   // Append the asset's `updatedAt` as a cache-buster so a freshly replaced
@@ -137,7 +138,7 @@ export const AssetPreview = ({ asset, actions }: AssetPreviewProps) => {
     if (imageUrl) {
       return (
         <PreviewContainer>
-          {!isMediaLoaded && <AssetLoader />}
+          {(!isMediaLoaded || isLoading) && <AssetLoader />}
           {actions ? <ActionsOverlay>{actions}</ActionsOverlay> : null}
           <AssetContainer>
             <StyledImage
