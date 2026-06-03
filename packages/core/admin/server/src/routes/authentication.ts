@@ -10,9 +10,11 @@ export default [
   },
   {
     method: 'POST',
-    path: '/renew-token',
-    handler: 'authentication.renewToken',
-    config: { auth: false },
+    path: '/access-token',
+    handler: 'authentication.accessToken',
+    config: {
+      auth: false,
+    },
   },
   {
     method: 'POST',

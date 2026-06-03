@@ -17,12 +17,21 @@ import { styled } from 'styled-components';
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { tours } from '../../../../components/GuidedTour/Tours';
 import { RelativeTime } from '../../../../components/RelativeTime';
 import { Table as TableImpl } from '../../../../components/Table';
 import { useTracking } from '../../../../features/Tracking';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 
+import type { AdminTokenOwner } from '../../../../../../shared/contracts/shared';
 import type { Data } from '@strapi/types';
+
+const formatAdminUserName = (
+  owner: Pick<AdminTokenOwner, 'firstname' | 'lastname' | 'email' | 'username'>
+): string => {
+  const full = [owner.firstname, owner.lastname].filter(Boolean).join(' ');
+  return full || owner.username || owner.email || '';
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Table
@@ -38,6 +47,7 @@ interface TableProps
   };
   tokens: SanitizedTransferToken[] | ApiToken[];
   tokenType: 'api-token' | 'transfer-token';
+  showOwner?: boolean;
 }
 
 const Table = ({
@@ -47,6 +57,7 @@ const Table = ({
   tokens = [],
   onConfirmDelete,
   tokenType,
+  showOwner = false,
 }: TableProps) => {
   const [{ query }] = useQueryParams<{ sort?: string }>();
   const { formatMessage, locale } = useIntl();
@@ -83,59 +94,81 @@ const Table = ({
         <TableImpl.Empty />
         <TableImpl.Loading />
         <TableImpl.Body>
-          {sortedTokens.map((token) => (
-            <TableImpl.Row key={token.id} onClick={handleRowClick(token.id)}>
-              <TableImpl.Cell maxWidth="25rem">
-                <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                  {token.name}
-                </Typography>
-              </TableImpl.Cell>
-              <TableImpl.Cell maxWidth="25rem">
-                <Typography textColor="neutral800" ellipsis>
-                  {token.description}
-                </Typography>
-              </TableImpl.Cell>
-              <TableImpl.Cell>
-                <Typography textColor="neutral800">
-                  {/* @ts-expect-error One of the tokens doesn't have createdAt */}
-                  <RelativeTime timestamp={new Date(token.createdAt)} />
-                </Typography>
-              </TableImpl.Cell>
-              <TableImpl.Cell>
-                {token.lastUsedAt && (
-                  <Typography textColor="neutral800">
-                    <RelativeTime
-                      timestamp={new Date(token.lastUsedAt)}
-                      customIntervals={[
-                        {
-                          unit: 'hours',
-                          threshold: 1,
-                          text: formatMessage({
-                            id: 'Settings.apiTokens.lastHour',
-                            defaultMessage: 'last hour',
-                          }),
-                        },
-                      ]}
-                    />
+          {sortedTokens.map((token) => {
+            const GuidedTourTooltip =
+              token.name === 'Read Only' ? tours.apiTokens.ManageAPIToken : React.Fragment;
+            return (
+              <TableImpl.Row key={token.id} onClick={handleRowClick(token.id)}>
+                <TableImpl.Cell maxWidth="25rem">
+                  <Typography textColor="neutral800" fontWeight="bold" ellipsis>
+                    {token.name}
                   </Typography>
-                )}
-              </TableImpl.Cell>
-              {canUpdate || canRead || canDelete ? (
-                <TableImpl.Cell>
-                  <Flex justifyContent="end">
-                    {canUpdate && <UpdateButton tokenName={token.name} tokenId={token.id} />}
-                    {canDelete && (
-                      <DeleteButton
-                        tokenName={token.name}
-                        onClickDelete={() => onConfirmDelete?.(token.id)}
-                        tokenType={tokenType}
-                      />
-                    )}
-                  </Flex>
                 </TableImpl.Cell>
-              ) : null}
-            </TableImpl.Row>
-          ))}
+                <TableImpl.Cell maxWidth="25rem">
+                  <Typography textColor="neutral800" ellipsis>
+                    {token.description}
+                  </Typography>
+                </TableImpl.Cell>
+                <TableImpl.Cell>
+                  <Typography textColor="neutral800">
+                    {/* @ts-expect-error One of the tokens doesn't have createdAt */}
+                    <RelativeTime timestamp={new Date(token.createdAt)} />
+                  </Typography>
+                </TableImpl.Cell>
+                <TableImpl.Cell>
+                  {token.lastUsedAt && (
+                    <Typography textColor="neutral800">
+                      <RelativeTime
+                        timestamp={new Date(token.lastUsedAt)}
+                        customIntervals={[
+                          {
+                            unit: 'hours',
+                            threshold: 1,
+                            text: formatMessage({
+                              id: 'Settings.apiTokens.lastHour',
+                              defaultMessage: 'last hour',
+                            }),
+                          },
+                        ]}
+                      />
+                    </Typography>
+                  )}
+                </TableImpl.Cell>
+                {showOwner === true &&
+                  (() => {
+                    const apiToken = token as ApiToken;
+                    const owner = apiToken.kind === 'admin' ? apiToken.adminUserOwner : undefined;
+                    const ownerName =
+                      owner !== undefined && owner !== null && typeof owner === 'object'
+                        ? formatAdminUserName(owner)
+                        : '';
+                    return (
+                      <TableImpl.Cell maxWidth="20rem">
+                        <Typography textColor="neutral800" ellipsis>
+                          {ownerName}
+                        </Typography>
+                      </TableImpl.Cell>
+                    );
+                  })()}
+                {canUpdate || canRead || canDelete ? (
+                  <TableImpl.Cell>
+                    <Flex justifyContent="end">
+                      <GuidedTourTooltip>
+                        {canUpdate && <UpdateButton tokenName={token.name} tokenId={token.id} />}
+                      </GuidedTourTooltip>
+                      {canDelete && (
+                        <DeleteButton
+                          tokenName={token.name}
+                          onClickDelete={() => onConfirmDelete?.(token.id)}
+                          tokenType={tokenType}
+                        />
+                      )}
+                    </Flex>
+                  </TableImpl.Cell>
+                ) : null}
+              </TableImpl.Row>
+            );
+          })}
         </TableImpl.Body>
       </TableImpl.Content>
     </TableImpl.Root>

@@ -42,6 +42,10 @@ const labelModel = {
       target: 'api::article.article',
       targetAttribute: 'label',
     },
+    dz: {
+      type: 'dynamiczone',
+      components: ['default.component-with-relation'],
+    },
   },
   draftAndPublish: true,
   singularName: 'label',
@@ -49,6 +53,20 @@ const labelModel = {
   displayName: 'Label',
   description: '',
   collectionName: '',
+};
+
+const componentWithOneToManyRelation = {
+  displayName: 'component-with-relation',
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    articles: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::article.article',
+    },
+  },
 };
 
 const labels = [
@@ -60,6 +78,7 @@ const labels = [
 
 const articles = ({ label: labels }) => {
   const labelIds = labels.map((label) => label.id);
+
   return [
     {
       name: 'article 1',
@@ -100,13 +119,47 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
 
   beforeAll(async () => {
     await builder
-      .addContentTypes([articleModel, labelModel])
+      .addContentType(articleModel)
+      .addComponent(componentWithOneToManyRelation)
+      .addContentType(labelModel)
       .addFixtures(labelModel.singularName, labels)
       .addFixtures(articleModel.singularName, articles)
       .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+
+    // Add dynamic zones to test data
+    await strapi.documents('api::label.label').update({
+      documentId: 'label-1',
+      data: {
+        dz: [
+          {
+            __component: 'default.component-with-relation',
+            articles: ['article-1'],
+            name: 'TEST DZ',
+          },
+        ],
+      },
+    });
+    await strapi.documents('api::label.label').update({
+      documentId: 'label-2',
+      data: {
+        dz: [
+          {
+            __component: 'default.component-with-relation',
+            articles: ['article-2'],
+            name: 'TEST DZ',
+          },
+        ],
+      },
+    });
+    await strapi.documents('api::label.label').publish({
+      documentId: 'label-1',
+    });
+    await strapi.documents('api::label.label').publish({
+      documentId: 'label-2',
+    });
 
     graphqlQuery = (body) => {
       return rq({
@@ -236,6 +289,19 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
                 documentId
                 attributes {
                   name
+                  dz {
+                    ... on ComponentDefaultComponentWithRelation {
+                      articles_connection {
+                        data {
+                          documentId
+                          attributes {
+                            name
+                            publishedAt
+                          }
+                        }
+                      }
+                    }
+                  }
                   one_to_many_articles_connection {
                     data {
                       documentId
@@ -278,6 +344,13 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       ).toBe(2);
       expect(
         body.data.labels_connection.data[0].attributes.one_to_many_articles_connection.data.every(
+          (article) => article.attributes.publishedAt
+        )
+      ).toBe(true);
+      // Check dynamic zone with relations
+      expect(body.data.labels_connection.data[0].attributes.dz.length).toBe(1);
+      expect(
+        body.data.labels_connection.data[0].attributes.dz[0].articles_connection.data.every(
           (article) => article.attributes.publishedAt
         )
       ).toBe(true);
@@ -293,6 +366,19 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
                 publishedAt
                 attributes {
                   name
+                  dz {
+                    ... on ComponentDefaultComponentWithRelation {
+                      articles_connection {
+                        data {
+                          documentId
+                          attributes {
+                            name
+                            publishedAt
+                          }
+                        }
+                      }
+                    }
+                  }
                   one_to_many_articles_connection {
                     data {
                       documentId
@@ -318,7 +404,6 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       });
 
       const { body } = res;
-      console.dir(body, { depth: null });
 
       expect(res.statusCode).toBe(200);
       // Check the manyToMany response
@@ -339,6 +424,108 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
           (article) => article.attributes.publishedAt
         )
       ).toBe(false);
+      // Check dynamic zone with relations
+      expect(body.data.labels_connection.data[0].attributes.dz.length).toBe(1);
+      expect(
+        body.data.labels_connection.data[0].attributes.dz[0].articles_connection.data.every(
+          (article) => article.attributes.publishedAt
+        )
+      ).toBe(false);
+    });
+
+    // Regression test: combined root queries with different status args must not
+    // cross-contaminate each other's nested relations. Previously a single
+    // `context.rootQueryArgs` was overwritten by the last root field's args, so
+    // the draft branch would inherit `PUBLISHED` and yield empty/null relations.
+    test('Aliased draft + published root queries keep status isolated per branch', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            draft: labels_connection(status: DRAFT) {
+              data {
+                documentId
+                attributes {
+                  publishedAt
+                  articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
+                  one_to_many_articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            published: labels_connection(status: PUBLISHED) {
+              data {
+                documentId
+                attributes {
+                  publishedAt
+                  articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
+                  one_to_many_articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      const { body } = res;
+      expect(res.statusCode).toBe(200);
+
+      const draftLabels = body.data.draft.data;
+      const publishedLabels = body.data.published.data;
+
+      expect(draftLabels.length).toBeGreaterThan(0);
+      expect(publishedLabels.length).toBeGreaterThan(0);
+
+      // Parent rows themselves carry the status from their own args, so they
+      // remain correct even with the bug — we still assert it as a sanity check.
+      expect(draftLabels.every((l) => l.attributes.publishedAt === null)).toBe(true);
+      expect(publishedLabels.every((l) => l.attributes.publishedAt !== null)).toBe(true);
+
+      const flatten = (labels, key) => labels.flatMap((l) => l.attributes[key].data);
+
+      const draftM2M = flatten(draftLabels, 'articles_connection');
+      const draftO2M = flatten(draftLabels, 'one_to_many_articles_connection');
+      const publishedM2M = flatten(publishedLabels, 'articles_connection');
+      const publishedO2M = flatten(publishedLabels, 'one_to_many_articles_connection');
+
+      // Sanity: relations actually populated, otherwise `every` would pass vacuously.
+      expect(draftM2M.length).toBeGreaterThan(0);
+      expect(draftO2M.length).toBeGreaterThan(0);
+      expect(publishedM2M.length).toBeGreaterThan(0);
+      expect(publishedO2M.length).toBeGreaterThan(0);
+
+      // The actual regression assertion: nested relations must not pick up the
+      // sibling root's status.
+      expect(draftM2M.every((a) => a.attributes.publishedAt === null)).toBe(true);
+      expect(draftO2M.every((a) => a.attributes.publishedAt === null)).toBe(true);
+      expect(publishedM2M.every((a) => a.attributes.publishedAt !== null)).toBe(true);
+      expect(publishedO2M.every((a) => a.attributes.publishedAt !== null)).toBe(true);
     });
   });
 });

@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_default_links",
+  "info": {
+    "displayName": "links",
+    "icon": "link"
+  },
+  "options": {},
+  "attributes": {
+    "platform": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

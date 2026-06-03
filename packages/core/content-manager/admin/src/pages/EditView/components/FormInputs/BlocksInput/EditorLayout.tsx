@@ -32,7 +32,7 @@ const EditorLayout = ({
       {isExpandedMode && (
         <Modal.Root open={isExpandedMode} onOpenChange={onToggleExpand}>
           <Modal.Content style={{ maxWidth: 'unset', width: 'unset' }}>
-            <Flex height="90vh" width="90vw" alignItems="flex-start" direction="column">
+            <Flex height="90dvh" width="90dvw" alignItems="flex-start" direction="column">
               {children}
               <IconButton
                 position="absolute"

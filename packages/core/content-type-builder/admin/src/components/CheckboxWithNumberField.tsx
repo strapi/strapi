@@ -57,6 +57,7 @@ export const CheckboxWithNumberField = ({
                 disabled={disabled}
                 onChange={onChange}
                 value={value === null ? '' : value}
+                type="text"
               />
               <Field.Error />
             </Field.Root>

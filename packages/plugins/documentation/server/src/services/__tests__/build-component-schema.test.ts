@@ -73,7 +73,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            oneOf: [{ type: 'string' }, { type: 'number' }],
           },
           documentId: {
             type: 'string',
@@ -96,7 +96,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            oneOf: [{ type: 'string' }, { type: 'number' }],
           },
           documentId: {
             type: 'string',
@@ -150,7 +150,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            oneOf: [{ type: 'string' }, { type: 'number' }],
           },
           documentId: {
             type: 'string',
@@ -254,7 +254,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            oneOf: [{ type: 'string' }, { type: 'number' }],
           },
           documentId: {
             type: 'string',

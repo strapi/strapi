@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { Accordion, Box, Flex, FlexComponent, Typography } from '@strapi/design-system';
+import { Accordion, Box, Flex, FlexComponent, Tooltip, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
-import { RESPONSIVE_CONTAINER_BREAKPOINTS } from '../../FormLayout';
 
 interface ComponentCategoryProps {
   category: string;
@@ -50,12 +49,22 @@ const ComponentCategory = ({
               shrink={0}
               borderColor="neutral200"
             >
-              <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
+              <Flex
+                direction="column"
+                gap={1}
+                alignItems="center"
+                justifyContent="center"
+                width="100%"
+                paddingLeft={2}
+                paddingRight={2}
+              >
                 <ComponentIcon color="currentColor" background="primary200" icon={icon} />
 
-                <Typography variant="pi" fontWeight="bold">
-                  {displayName}
-                </Typography>
+                <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
+                  <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
+                    {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
+                  </Typography>
+                </Tooltip>
               </Flex>
             </ComponentBox>
           ))}
@@ -80,16 +89,21 @@ const Grid =
     ? styled(Box)`
         display: grid;
         grid-template-columns: repeat(auto-fill, 100%);
-        grid-gap: 4px;
+        grid-gap: 12px;
 
-        @container (min-width: ${() => RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+        ${({ theme }) => theme.breakpoints.medium} {
           grid-template-columns: repeat(auto-fill, 14rem);
+          grid-gap: 4px;
         }
       `
     : styled(Box)`
         display: grid;
         grid-template-columns: repeat(auto-fill, 100%);
-        grid-gap: 4px;
+        grid-gap: 12px;
+
+        ${({ theme }) => theme.breakpoints.medium} {
+          grid-gap: 4px;
+        }
       `;
 
 const ComponentBox = styled<FlexComponent<'button'>>(Flex)`

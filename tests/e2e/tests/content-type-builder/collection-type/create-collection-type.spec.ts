@@ -1,8 +1,8 @@
 import { test } from '@playwright/test';
-import { resetFiles } from '../../../utils/file-reset';
-import { createCollectionType, type AddAttribute } from '../../../utils/content-types';
-import { sharedSetup } from '../../../utils/setup';
-import { clickAndWait } from '../../../utils/shared';
+import { resetFiles } from '../../../../utils/file-reset';
+import { createCollectionType, type AddAttribute } from '../../../../utils/content-types';
+import { sharedSetup } from '../../../../utils/setup';
+import { clickAndWait } from '../../../../utils/shared';
 
 test.describe('Create collection type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -11,9 +11,8 @@ test.describe('Create collection type with all field types', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-ct', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));

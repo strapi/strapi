@@ -228,9 +228,29 @@ describe('customField forms', () => {
             },
           ],
         },
+        {
+          sectionTitle: {
+            id: 'form.attribute.condition.section',
+            defaultMessage: 'Conditions',
+          },
+          items: [
+            {
+              name: 'conditions',
+              type: 'condition-form',
+              intlLabel: {
+                id: 'form.attribute.condition.label',
+                defaultMessage: 'Visibility condition',
+              },
+              description: {
+                id: 'form.attribute.condition.desc',
+                defaultMessage: 'Show this field only when a boolean/enum condition matches.',
+              },
+            },
+          ],
+        },
       ];
 
-      expect(result.sections.length).toBe(1);
+      expect(result.sections.length).toBe(2);
       expect(result).toStrictEqual({ sections: expected });
     });
     it('adds a new advanced form section', () => {
@@ -250,6 +270,26 @@ describe('customField forms', () => {
         {
           sectionTitle: null,
           items: [],
+        },
+        {
+          sectionTitle: {
+            id: 'form.attribute.condition.section',
+            defaultMessage: 'Conditions',
+          },
+          items: [
+            {
+              name: 'conditions',
+              type: 'condition-form',
+              intlLabel: {
+                id: 'form.attribute.condition.label',
+                defaultMessage: 'Visibility condition',
+              },
+              description: {
+                id: 'form.attribute.condition.desc',
+                defaultMessage: 'Show this field only when a boolean/enum condition matches.',
+              },
+            },
+          ],
         },
         {
           sectionTitle: {
@@ -273,7 +313,7 @@ describe('customField forms', () => {
         },
       ];
 
-      expect(result.sections.length).toBe(2);
+      expect(result.sections.length).toBe(3);
       expect(result).toStrictEqual({ sections: expected });
     });
 
@@ -312,6 +352,26 @@ describe('customField forms', () => {
         },
         {
           sectionTitle: {
+            id: 'form.attribute.condition.section',
+            defaultMessage: 'Conditions',
+          },
+          items: [
+            {
+              name: 'conditions',
+              type: 'condition-form',
+              intlLabel: {
+                id: 'form.attribute.condition.label',
+                defaultMessage: 'Visibility condition',
+              },
+              description: {
+                id: 'form.attribute.condition.desc',
+                defaultMessage: 'Show this field only when a boolean/enum condition matches.',
+              },
+            },
+          ],
+        },
+        {
+          sectionTitle: {
             id: 'content-type-builder.modalForm.custom-fields.advanced.settings.extended',
             defaultMessage: 'Extended settings',
           },
@@ -332,7 +392,7 @@ describe('customField forms', () => {
         },
       ];
 
-      expect(result.sections.length).toBe(2);
+      expect(result.sections.length).toBe(3);
       expect(result).toStrictEqual({ sections: expected });
     });
   });

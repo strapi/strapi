@@ -1,9 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
-import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
-import { resetFiles } from '../../utils/file-reset';
-import { waitForRestart } from '../../utils/restart';
-import { sharedSetup } from '../../utils/setup';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  navToHeader,
+} from '../../../utils/shared';
+import { resetFiles } from '../../../utils/file-reset';
+import { waitForRestart } from '../../../utils/restart';
+import { sharedSetup } from '../../../utils/setup';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -43,9 +47,8 @@ describeOnCondition(edition === 'EE')('History', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('history-spec', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       resetAlways: true, // NOTE: this makes tests extremely slow, but it's necessary to ensure isolation between tests
     });
   });
@@ -253,7 +256,9 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(ARTICLE_CREATE_URL);
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas');
       await page
-        .getByRole('textbox', { name: 'slug This value is unique for the selected locale' })
+        .getByRole('textbox', {
+          name: 'slug',
+        })
         .fill('being-from-kansas');
       await page.getByRole('button', { name: 'Save' }).click();
       await page.waitForURL(ARTICLE_EDIT_URL);
@@ -447,10 +452,12 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Coach Beard').click();
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
       // Delete one of the authors, leaving only Coach Beard
       // Open the relation modal
       await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
+      await expect(page.getByRole('button', { name: 'Go to entry' })).toBeVisible();
       // Click to go to the related document
       await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
       await page.getByRole('button', { name: /more actions/i }).click();

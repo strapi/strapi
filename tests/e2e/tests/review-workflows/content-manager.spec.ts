@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -43,7 +43,7 @@ const checkStage = async (page) => {
 
 describeOnCondition(edition === 'EE')('content-manager', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });

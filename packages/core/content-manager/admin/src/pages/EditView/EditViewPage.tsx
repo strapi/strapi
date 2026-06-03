@@ -2,18 +2,21 @@ import * as React from 'react';
 
 import {
   Page,
-  Blocker,
   Form,
-  useForm,
   useRBAC,
   useNotification,
   useQueryParams,
+  tours,
+  Layouts,
+  useIsDesktop,
+  useIsMobile,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Main, Tabs } from '@strapi/design-system';
+import { Grid, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { ActionsDrawer } from '../../components/ActionsDrawer';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -21,40 +24,58 @@ import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
+import {
+  PersistentQueryConfig,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
+import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
-import { Panels } from './components/Panels';
+import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
+import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
  * -----------------------------------------------------------------------------------------------*/
 
-// Needs to be wrapped in a component to have access to the form context via a hook.
-// Using the Form component's render prop instead would cause unnecessary re-renders of Form children
-const BlockerWrapper = () => {
-  const resetForm = useForm('BlockerWrapper', (state) => state.resetForm);
-
-  // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-  return <Blocker onProceed={resetForm} />;
-};
-
 const EditViewPage = () => {
   const location = useLocation();
   const [
     {
-      query: { status },
+      query: { status, plugins },
     },
     setQuery,
-  ] = useQueryParams<{ status: 'draft' | 'published' }>({
+  ] = useQueryParams<{
+    status: 'draft' | 'published';
+    plugins?: { i18n?: { locale?: string } };
+  }>({
     status: 'draft',
   });
+
+  const activeLocale = plugins?.i18n?.locale;
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const isDesktop = useIsDesktop();
+  const isMobile = useIsMobile();
+  const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
+  const drawerHasContent = visiblePanels.length > 0;
 
-  const doc = useDoc();
+  const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
+    () => ({
+      STRAPI_LOCALE: {
+        paths: ['plugins.i18n.locale'],
+        scoped: false,
+      },
+    }),
+    []
+  );
+
+  const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
+
+  const doc = useDoc({ skip: !isHydrated });
   const {
     document,
     meta,
@@ -108,7 +129,8 @@ const EditViewPage = () => {
 
   const { isLazyLoading } = useLazyComponents([]);
 
-  const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
+  const isLoading =
+    !isHydrated || isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
   const initialValues = getInitialFormValues(isCreatingDocument);
 
@@ -136,19 +158,36 @@ const EditViewPage = () => {
   };
 
   return (
-    <Main paddingLeft={10} paddingRight={10}>
+    <Page.Main>
       <Page.Title>{pageTitle}</Page.Title>
+      {isSingleType && (
+        <tours.contentManager.Introduction>
+          {/* Invisible Anchor */}
+          <Box />
+        </tours.contentManager.Introduction>
+      )}
       <Form
+        key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}`}
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
         validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+          // removes hidden fields from the validation
+          // this is necessary because the yup schema doesn't know about the visibility conditions
+          // and we don't want to validate fields that are not visible
+          const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+            schema,
+            initialValues,
+            components,
+          });
+
           const yupSchema = createYupSchema(schema?.attributes, components, {
             status,
+            removedAttributes,
             ...options,
           });
 
-          return yupSchema.validate(values, { abortEarly: false });
+          return yupSchema.validate(cleanedValues, { abortEarly: false });
         }}
         initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
@@ -158,51 +197,82 @@ const EditViewPage = () => {
             status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
             title={pageTitle}
           />
-          <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
-            <Tabs.List
-              aria-label={formatMessage({
-                id: getTranslation('containers.edit.tabs.label'),
-                defaultMessage: 'Document status',
-              })}
-            >
-              {hasDraftAndPublished ? (
-                <>
-                  <StatusTab value="draft">
-                    {formatMessage({
-                      id: getTranslation('containers.edit.tabs.draft'),
-                      defaultMessage: 'draft',
-                    })}
-                  </StatusTab>
-                  <StatusTab
-                    disabled={!meta || meta.availableStatus.length === 0}
-                    value="published"
-                  >
-                    {formatMessage({
-                      id: getTranslation('containers.edit.tabs.published'),
-                      defaultMessage: 'published',
-                    })}
-                  </StatusTab>
-                </>
-              ) : null}
-            </Tabs.List>
-            <Grid.Root paddingTop={8} gap={4}>
-              <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
-                <Tabs.Content value="draft">
-                  <FormLayout layout={layout} document={doc} />
-                </Tabs.Content>
-                <Tabs.Content value="published">
-                  <FormLayout layout={layout} document={doc} />
-                </Tabs.Content>
-              </Grid.Item>
-              <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
-                <Panels />
-              </Grid.Item>
-            </Grid.Root>
-          </Tabs.Root>
-          <BlockerWrapper />
+          <Layouts.Content>
+            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+              <Tabs.List
+                aria-label={formatMessage({
+                  id: getTranslation('containers.edit.tabs.label'),
+                  defaultMessage: 'Document status',
+                })}
+              >
+                {hasDraftAndPublished ? (
+                  <>
+                    <StatusTab value="draft">
+                      {formatMessage({
+                        id: getTranslation('containers.edit.tabs.draft'),
+                        defaultMessage: 'draft',
+                      })}
+                    </StatusTab>
+                    <StatusTab
+                      disabled={!meta || meta.availableStatus.length === 0}
+                      value="published"
+                    >
+                      {formatMessage({
+                        id: getTranslation('containers.edit.tabs.published'),
+                        defaultMessage: 'published',
+                      })}
+                    </StatusTab>
+                  </>
+                ) : null}
+              </Tabs.List>
+              <Grid.Root
+                paddingTop={{
+                  initial: 6,
+                  medium: 4,
+                  large: 8,
+                }}
+                gap={4}
+              >
+                <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
+                  <Tabs.Content value="draft">
+                    <tours.contentManager.Fields>
+                      <Box />
+                    </tours.contentManager.Fields>
+                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
+                  </Tabs.Content>
+                  <Tabs.Content value="published">
+                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
+                  </Tabs.Content>
+                </Grid.Item>
+                {isDesktop && (
+                  <Grid.Item col={3} direction="column" alignItems="stretch">
+                    <Panels />
+                  </Grid.Item>
+                )}
+              </Grid.Root>
+            </Tabs.Root>
+            {!isDesktop && (
+              <>
+                <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
+                  <ActionsDrawer.Overlay />
+                  <ActionsDrawer.Header>
+                    <ActionsPanelContent />
+                  </ActionsDrawer.Header>
+                  <ActionsDrawer.Content>
+                    <Panels withActions={false} />
+                  </ActionsDrawer.Content>
+                </ActionsDrawer.Root>
+                {/* Adding a fixed height to the bottom of the page to prevent 
+                the actions drawer from covering the content
+                (40px button + 12px * 2 padding + 1px border) */}
+                <Box height="6.5rem" />
+              </>
+            )}
+          </Layouts.Content>
+          <Blocker />
         </>
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 
@@ -271,7 +341,9 @@ const ProtectedEditViewPage = () => {
     <Page.Protect permissions={permissions}>
       {({ permissions }) => (
         <DocumentRBAC permissions={permissions}>
-          <EditViewPage />
+          <PanelsProvider>
+            <EditViewPage />
+          </PanelsProvider>
         </DocumentRBAC>
       )}
     </Page.Protect>

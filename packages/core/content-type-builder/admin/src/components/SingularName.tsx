@@ -28,15 +28,22 @@ export const SingularName = ({
 }: SingularNameProps) => {
   const { formatMessage } = useIntl();
   const onChangeRef = useRef(onChange);
+  const previousValue = useRef(value);
+  const previousDisplayName = useRef(modifiedData?.displayName || '');
   const displayName = modifiedData?.displayName || '';
 
   useEffect(() => {
-    if (displayName) {
-      onChangeRef.current({ target: { name, value: nameToSlug(displayName) } });
-    } else {
+    if (displayName && displayName !== previousDisplayName.current) {
+      const newValue = nameToSlug(displayName);
+      onChangeRef.current({ target: { name, value: newValue } });
+      previousValue.current = newValue;
+      previousDisplayName.current = displayName;
+    } else if (!displayName) {
       onChangeRef.current({ target: { name, value: '' } });
+      previousValue.current = '';
+      previousDisplayName.current = '';
     }
-  }, [displayName, name]);
+  }, [displayName, name, value]);
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
@@ -50,7 +57,7 @@ export const SingularName = ({
   return (
     <Field.Root error={errorMessage} hint={hint} name={name}>
       <Field.Label>{label}</Field.Label>
-      <TextInput onChange={onChange} value={value || ''} />
+      <TextInput onChange={onChange} value={value || ''} type="text" />
       <Field.Error />
       <Field.Hint />
     </Field.Root>

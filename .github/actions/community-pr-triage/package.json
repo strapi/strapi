@@ -1,0 +1,21 @@
+{
+  "name": "community-pr-triage",
+  "version": "5.43.0",
+  "private": true,
+  "main": "dist/index.cjs",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
+    "@linear/sdk": "^37.0.0",
+    "@notionhq/client": "^2.2.15"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}

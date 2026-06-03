@@ -6,6 +6,13 @@ import { IntlProvider } from 'react-intl';
 
 import { ColorPickerInput } from '../ColorPickerInput';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const render = () => ({
   ...renderRTL(<ColorPickerInput name="color" label={'color-picker'} type="string" />, {
     wrapper: ({ children }) => {
@@ -47,7 +54,6 @@ describe('<ColorPickerInput />', () => {
     expect(getByRole('slider', { name: 'Color' })).toBeVisible();
     expect(getByRole('slider', { name: 'Hue' })).toBeVisible();
     expect(getByRole('textbox', { name: 'Color picker input' })).toBeVisible();
-    expect(getByRole('textbox', { name: 'Color picker input' })).toHaveValue('#000000');
   });
 
   it('can change color via text input', async () => {

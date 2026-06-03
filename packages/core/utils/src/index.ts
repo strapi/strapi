@@ -5,11 +5,19 @@ export { default as providerFactory } from './provider-factory';
 export { default as traverseEntity } from './traverse-entity';
 export { default as importDefault } from './import-default';
 export { generateInstallId } from './install-id';
+export { createModelCache } from './model-cache';
 
 export { validateYupSchema, validateYupSchemaSync } from './validators';
+export { formatYupErrors } from './format-yup-error';
 export { isOperator, isOperatorOfType } from './operators';
 
 export * as queryParams from './convert-query-params';
+export {
+  ALLOWED_QUERY_PARAM_KEYS,
+  RESERVED_INPUT_PARAM_KEYS,
+  SHARED_QUERY_PARAM_KEYS,
+} from './content-api-constants';
+export { type RouteLike } from './content-api-route-params';
 export * as sanitize from './sanitize';
 export * as validate from './validate';
 export * as pagination from './pagination';
@@ -24,7 +32,12 @@ export * as errors from './errors';
 export * as contentTypes from './content-types';
 export * as relations from './relations';
 export * as hooks from './hooks';
-export * as rulesEngine from './rules-engine';
 export * from './zod';
+export * from './validation';
+export * from './route-serialization';
 
 export * from './primitives';
+export * from './content-api-router';
+export * from './security';
+export * from './publication-filter';
+export * from './has-published-version-param';

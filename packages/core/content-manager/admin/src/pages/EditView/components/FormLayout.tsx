@@ -10,10 +10,6 @@ import { InputRenderer } from './InputRenderer';
 
 import type { UseDocument } from '../../../hooks/useDocument';
 
-export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
-  sm: '27.5rem', // 440px
-};
-
 export const ResponsiveGridRoot = styled(Grid.Root)`
   container-type: inline-size;
 `;
@@ -28,7 +24,7 @@ export const ResponsiveGridItem =
   process.env.NODE_ENV !== 'test'
     ? styled(Grid.Item)<{ col: number }>`
         grid-column: span 12;
-        @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+        ${({ theme }) => theme.breakpoints.medium} {
           ${({ col }) => col && `grid-column: span ${col};`}
         }
       `
@@ -37,7 +33,10 @@ export const ResponsiveGridItem =
       `;
 
 const panelStyles = {
-  padding: 6,
+  padding: {
+    initial: 4,
+    medium: 6,
+  },
   borderColor: 'neutral150',
   background: 'neutral0',
   hasRadius: true,
@@ -49,7 +48,7 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   document: ReturnType<UseDocument>;
 }
 
-const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
+const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const modelUid = document.schema?.uid;
 
@@ -83,34 +82,38 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
         return (
           <Box key={index} {...(hasBackground && panelStyles)}>
             <Flex direction="column" alignItems="stretch" gap={6}>
-              {panel.map((row, gridRowIndex) => (
-                <ResponsiveGridRoot key={gridRowIndex} gap={4}>
-                  {row.map(({ size, ...field }) => {
-                    return (
-                      <ResponsiveGridItem
-                        col={size}
-                        key={field.name}
-                        s={12}
-                        xs={12}
-                        direction="column"
-                        alignItems="stretch"
-                      >
-                        <InputRenderer
-                          {...field}
-                          label={getLabel(field.name, field.label)}
-                          document={document}
-                        />
-                      </ResponsiveGridItem>
-                    );
-                  })}
-                </ResponsiveGridRoot>
-              ))}
+              {panel.map((row, gridRowIndex) => {
+                return (
+                  <ResponsiveGridRoot key={gridRowIndex} gap={{ initial: 6, medium: 4 }}>
+                    {row.map(({ size, ...field }) => {
+                      return (
+                        <ResponsiveGridItem
+                          col={size}
+                          key={field.name}
+                          s={12}
+                          xs={12}
+                          direction="column"
+                          alignItems="stretch"
+                        >
+                          <InputRenderer
+                            {...field}
+                            label={getLabel(field.name, field.label)}
+                            document={document}
+                          />
+                        </ResponsiveGridItem>
+                      );
+                    })}
+                  </ResponsiveGridRoot>
+                );
+              })}
             </Flex>
           </Box>
         );
       })}
     </Flex>
   );
-};
+});
+
+FormLayout.displayName = 'FormLayout';
 
 export { FormLayout, FormLayoutProps };

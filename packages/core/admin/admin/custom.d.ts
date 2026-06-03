@@ -5,7 +5,6 @@ import { type StrapiTheme } from '@strapi/design-system';
 import type { Modules } from '@strapi/types';
 
 declare module 'styled-components' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface DefaultTheme extends StrapiTheme {}
 }
 
@@ -25,9 +24,13 @@ interface BrowserStrapi {
   flags: {
     promoteEE?: boolean;
     nps?: boolean;
+    docLinks?: boolean;
   };
   projectType: 'Community' | 'Enterprise';
   telemetryDisabled: boolean;
+  ai: {
+    enabled: boolean;
+  };
 }
 
 declare global {

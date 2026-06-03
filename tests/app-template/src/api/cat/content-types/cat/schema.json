@@ -1,0 +1,75 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cats",
+  "info": {
+    "singularName": "cat",
+    "pluralName": "cats",
+    "displayName": "Cat"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "age": {
+      "type": "integer"
+    },
+    "likesDogs": {
+      "type": "boolean",
+      "default": false
+    },
+    "personality": {
+      "type": "enumeration",
+      "enum": ["friendly", "hunter", "lazy", "grumpy"]
+    },
+    "dogFriends": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::dog.dog",
+      "mappedBy": "bestFriendCats",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "likesDogs"
+            },
+            true
+          ]
+        }
+      }
+    },
+    "huntingSkills": {
+      "type": "text",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "personality"
+            },
+            "hunter"
+          ]
+        }
+      }
+    },
+    "favoriteNapSpot": {
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "personality"
+            },
+            "lazy"
+          ]
+        }
+      }
+    },
+    "favoriteToy": {
+      "type": "string"
+    }
+  }
+}

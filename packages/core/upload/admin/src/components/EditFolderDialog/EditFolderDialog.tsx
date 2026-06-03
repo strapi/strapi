@@ -1,16 +1,7 @@
 import * as React from 'react';
 
-import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
-import {
-  Button,
-  Field,
-  Flex,
-  Grid,
-  Loader,
-  Modal,
-  TextInput,
-  Typography,
-} from '@strapi/design-system';
+import { useNotification } from '@strapi/admin/strapi-admin';
+import { Button, Field, Flex, Grid, Loader, Modal, Typography } from '@strapi/design-system';
 import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
@@ -20,6 +11,7 @@ import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../hooks/useTracking';
 import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils';
 import { ContextInfo } from '../ContextInfo/ContextInfo';
 import { SelectTree } from '../SelectTree/SelectTree';
@@ -90,6 +82,19 @@ export const EditFolderContent = ({
         name: '',
         parent: null,
       };
+
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  const handleKeyDown =
+    (handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void) =>
+    (event: React.KeyboardEvent<HTMLFormElement>) => {
+      if (event.key === 'Enter') {
+        if (event.target instanceof HTMLInputElement) {
+          handleSubmit(event);
+          event.preventDefault();
+        }
+      }
+    };
 
   const handleSubmit = async (
     values: ValuesSubmit,
@@ -183,8 +188,8 @@ export const EditFolderContent = ({
         onSubmit={handleSubmit}
         initialValues={initialFormData}
       >
-        {({ values, errors, handleChange, setFieldValue }) => (
-          <Form noValidate>
+        {({ values, errors, handleChange, setFieldValue, handleSubmit }) => (
+          <Form noValidate ref={formRef} onKeyDown={handleKeyDown(handleSubmit)}>
             <EditFolderModalHeader isEditing={isEditing} />
             <Modal.Body>
               <Grid.Root gap={4}>
@@ -232,7 +237,7 @@ export const EditFolderContent = ({
                         defaultMessage: 'Name',
                       })}
                     </Field.Label>
-                    <TextInput
+                    <Field.Input
                       value={values.name}
                       onChange={handleChange}
                       disabled={formDisabled}

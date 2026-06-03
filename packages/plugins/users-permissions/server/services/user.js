@@ -16,6 +16,11 @@ const { getService } = require('../utils');
 
 const USER_MODEL_UID = 'plugin::users-permissions.user';
 
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
+
 module.exports = ({ strapi }) => ({
   /**
    * Promise to count users
@@ -112,6 +117,12 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async remove(params) {
+    // Invalidate sessions for all affected users
+    const sessionManager = getSessionManager();
+    if (sessionManager && sessionManager.hasOrigin('users-permissions') && params.id) {
+      await sessionManager('users-permissions').invalidateRefreshToken(String(params.id));
+    }
+
     return strapi.db.query(USER_MODEL_UID).delete({ where: params });
   },
 

@@ -91,6 +91,8 @@ const Row = ({
   const { formatMessage } = useIntl();
 
   const categoryName = name.split('::').pop() ?? '';
+  const categoryDisplayName =
+    categoryName === 'upload' ? 'Media Library' : capitalise(categoryName.replace(/-/g, ' '));
 
   return (
     <Accordion.Item value={name}>
@@ -102,7 +104,7 @@ const Row = ({
             { category: categoryName }
           )} ${kind === 'plugins' ? 'plugin' : kind}`}
         >
-          {capitalise(categoryName)}
+          {categoryDisplayName}
         </Accordion.Trigger>
       </Accordion.Header>
       <Accordion.Content>
@@ -142,8 +144,13 @@ const SubCategory = ({
   subCategoryName,
   pathToData,
 }: SubCategoryProps) => {
-  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
-    usePermissionsDataManager();
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+    checkUserHasPermission,
+    userPermissions,
+  } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
 
@@ -225,12 +232,17 @@ const SubCategory = ({
         <Flex paddingTop={6} paddingBottom={6}>
           <Grid.Root gap={2} style={{ flex: 1 }}>
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
+              const userHasPermission = checkUserHasPermission(action, null);
+
               return (
-                <Grid.Item col={3} key={action} direction="column" alignItems="start">
-                  <CheckboxWrapper $disabled={isFormDisabled} $hasConditions={hasConditions}>
+                <Grid.Item col={4} m={6} xs={12} key={action} direction="column" alignItems="start">
+                  <CheckboxWrapper
+                    $disabled={isFormDisabled || !userHasPermission}
+                    $hasConditions={hasConditions}
+                  >
                     <Checkbox
                       name={checkboxName}
-                      disabled={isFormDisabled}
+                      disabled={isFormDisabled || !userHasPermission}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                       onCheckedChange={(value) => {
                         onChangeSimpleCheckbox({
@@ -262,6 +274,7 @@ const SubCategory = ({
               headerBreadCrumbs={[categoryName, subCategoryName]}
               actions={formattedActions}
               isFormDisabled={isFormDisabled}
+              isReadOnly={userPermissions !== undefined}
               onClose={() => {
                 setIsConditionModalOpen(false);
               }}

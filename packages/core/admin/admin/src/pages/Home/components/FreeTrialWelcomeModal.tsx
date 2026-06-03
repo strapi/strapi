@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import lightIllustration from '../../../assets/images/free-trial.png';
-import { usePersistentState } from '../../../hooks/usePersistentState';
+import { useScopedPersistentState } from '../../../hooks/usePersistentState';
 
 const StyledModalContent = styled(Modal.Content)`
   max-width: 51.6rem;
@@ -34,7 +34,7 @@ const StyledButton = styled(Button)`
 export const FreeTrialWelcomeModal = () => {
   const { formatMessage } = useIntl();
   const [open, setOpen] = useState(true);
-  const [previouslyOpen, setPreviouslyOpen] = usePersistentState(
+  const [previouslyOpen, setPreviouslyOpen] = useScopedPersistentState(
     'STRAPI_FREE_TRIAL_WELCOME_MODAL',
     false
   );

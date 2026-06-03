@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { usePersistentState } from '../usePersistentState';
 
@@ -8,7 +8,7 @@ describe('usePersistentState', () => {
     const [value, setValue] = result.current;
     expect(value).toBe(0);
 
-    act(() => {
+    await waitFor(() => {
       setValue(1);
     });
     const [updatedValue] = result.current;

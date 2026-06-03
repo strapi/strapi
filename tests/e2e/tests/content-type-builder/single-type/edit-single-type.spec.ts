@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { waitForRestart } from '../../../utils/restart';
-import { resetFiles } from '../../../utils/file-reset';
-import { navToHeader } from '../../../utils/shared';
-import { sharedSetup } from '../../../utils/setup';
+import { waitForRestart } from '../../../../utils/restart';
+import { resetFiles } from '../../../../utils/file-reset';
+import { navToHeader } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../utils/setup';
 
 test.describe('Edit single type', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -15,9 +15,8 @@ test.describe('Edit single type', () => {
     await resetFiles();
     await sharedSetup('ctb-edit-st', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);

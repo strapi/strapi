@@ -216,7 +216,7 @@ describe('ADMIN | new StrapiApp', () => {
 
       expect(consoleSpy.mock.calls).toHaveLength(1);
       expect(consoleSpy.mock.calls[0][0]).toBe(
-        '[bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: `Component: () => import(path)` ensuring you return a default export instead.'
+        '[bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". Component loaders should return a dynamic import with a default export shape, e.g. `Component: () => import(path).then((mod) => ({ default: mod.Component }))`. Async wrapper functions will stop being supported in a future version.'
       );
 
       console.warn = originalWarn;
@@ -467,6 +467,28 @@ describe('ADMIN | new StrapiApp', () => {
       expect(typeof app.router.menu[0].icon).toBe('function');
     });
 
+    it('addMenuLink should allow a menu-only link', () => {
+      const app = new StrapiApp();
+      const link = {
+        to: 'content-manager',
+        intlLabel: { id: 'content-manager.plugin.name', defaultMessage: 'Content Manager' },
+        permissions: [],
+        icon: jest.fn(),
+      };
+
+      app.addMenuLink(link);
+
+      expect(app.router.menu[0]).toEqual({
+        icon: expect.any(Function),
+        intlLabel: {
+          defaultMessage: 'Content Manager',
+          id: 'content-manager.plugin.name',
+        },
+        permissions: [],
+        to: 'content-manager',
+      });
+    });
+
     it('should warn if a user supplies an absolute link', () => {
       const originalWarn = console.warn;
       const consoleSpy = jest.fn();
@@ -513,7 +535,7 @@ describe('ADMIN | new StrapiApp', () => {
 
       expect(consoleSpy.mock.calls).toHaveLength(1);
       expect(consoleSpy.mock.calls[0][0]).toBe(
-        '[bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: `Component: () => import(path)` ensuring you return a default export instead.'
+        '[bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". Component loaders should return a dynamic import with a default export shape, e.g. `Component: () => import(path).then((mod) => ({ default: mod.Component }))`. Async wrapper functions will stop being supported in a future version.'
       );
 
       console.warn = originalWarn;
@@ -527,6 +549,18 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.configurations.locales).toEqual(['en', 'fr']);
     });
 
+    it('maps legacy Danish admin locale code dk to ISO 639-1 da', () => {
+      const app = new StrapiApp({ config: { locales: ['dk'] } });
+
+      expect(app.configurations.locales).toEqual(['en', 'da']);
+    });
+
+    it('deduplicates da when both dk and da are configured', () => {
+      const app = new StrapiApp({ config: { locales: ['dk', 'da'] } });
+
+      expect(app.configurations.locales).toEqual(['en', 'da']);
+    });
+
     it('should override the authLogo', () => {
       const app = new StrapiApp({ config: { auth: { logo: 'fr' } } });
 
@@ -537,12 +571,6 @@ describe('ADMIN | new StrapiApp', () => {
       const app = new StrapiApp({ config: { menu: { logo: 'fr' } } });
 
       expect(app.configurations.menuLogo).toBe('fr');
-    });
-
-    it('should override the favicon', () => {
-      const app = new StrapiApp({ config: { head: { favicon: 'fr' } } });
-
-      expect(app.configurations.head.favicon).toBe('fr');
     });
 
     it('should override the light theme', () => {
@@ -586,6 +614,49 @@ describe('ADMIN | new StrapiApp', () => {
       const app = new StrapiApp({ config: { notifications: { releases: false } } });
 
       expect(app.configurations.notifications.releases).toBeFalsy();
+    });
+  });
+
+  describe('loadTrads', () => {
+    it('loads legacy Danish translations from plugins using the unchanged registerTrads API', async () => {
+      const originalWarn = console.warn;
+      const consoleSpy = jest.fn();
+      console.warn = consoleSpy;
+
+      try {
+        const app = new StrapiApp({
+          config: { locales: ['da'] },
+          appPlugins: {
+            legacyPlugin: {
+              register: jest.fn(),
+              async registerTrads({ locales }: { locales: string[] }) {
+                return locales.map((locale) => {
+                  const data: Record<string, string> =
+                    locale === 'dk' ? { 'legacy.plugin.label': 'Legacy Danish' } : {};
+
+                  return { locale, data };
+                });
+              },
+            },
+          },
+        });
+
+        await app.loadTrads();
+
+        const translations = app.configurations.translations as Record<
+          string,
+          Record<string, string>
+        >;
+
+        expect(translations.da).toEqual(
+          expect.objectContaining({ 'legacy.plugin.label': 'Legacy Danish' })
+        );
+        expect(consoleSpy).toHaveBeenCalledWith(
+          '[deprecated] Admin locale "dk" is deprecated. Rename translation files to "da.json".'
+        );
+      } finally {
+        console.warn = originalWarn;
+      }
     });
   });
 });

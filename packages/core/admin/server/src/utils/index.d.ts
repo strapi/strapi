@@ -7,9 +7,10 @@ import encryption from '../services/encryption';
 import * as permission from '../services/permission';
 import * as contentType from '../services/content-type';
 import * as token from '../services/token';
-import * as apiToken from '../services/api-token';
+import type { ContentApiTokenService, AdminTokenService } from '../services/api-token';
 import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';
+import { homepageService } from '../services/homepage';
 
 type S = {
   role: typeof role;
@@ -20,10 +21,15 @@ type S = {
   token: typeof token;
   auth: typeof auth;
   metrics: typeof metrics;
-  'api-token': typeof apiToken;
+  /** @deprecated Use 'api-token-content-api' instead */
+  'api-token': ContentApiTokenService;
+  'api-token-content-api': ContentApiTokenService;
+  'api-token-admin': AdminTokenService;
   'project-settings': typeof projectSettings;
   transfer: typeof transfer;
   encryption: typeof encryption;
+  'guided-tour': ReturnType<typeof createGuidedTourService>;
+  homepage: ReturnType<typeof homepageService>;
 };
 
 type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };

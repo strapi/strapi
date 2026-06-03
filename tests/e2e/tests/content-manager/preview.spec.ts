@@ -1,17 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
-import { resetFiles } from '../../utils/file-reset';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
+import { resetFiles } from '../../../utils/file-reset';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
+    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resetFiles();
     await page.goto('/admin');
-    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
     await login({ page });
     await page.waitForURL('/admin');
   });
@@ -109,17 +108,39 @@ test.describe('Preview', () => {
       /\/preview\/api::article\.article\/.+\/en\/published$/
     );
   });
+
+  test('Publishing from preview with conditional fields should not trigger validation errors', async ({
+    page,
+  }) => {
+    // Navigate to an existing article
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    // Open the preview page
+    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+
+    // Try to publish - should work without conditional field validation errors
+    const publishButton = page.getByRole('button', { name: /publish/i });
+    await expect(publishButton).toBeEnabled();
+    await clickAndWait(page, publishButton);
+
+    // Verify publication succeeded and no error notifications appeared
+    await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
+
+    // Check that no validation error toast appeared
+    await expect(page.getByText(/There are validation errors in your document/i)).not.toBeVisible();
+  });
 });
 
 // TODO: add license check in condition
 describeOnCondition(edition === 'EE')('Advanced Preview', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, {
+    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, {
       coreStore: false,
     });
     await resetFiles();
     await page.goto('/admin');
-    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
     await login({ page });
     await page.waitForURL('/admin');
   });

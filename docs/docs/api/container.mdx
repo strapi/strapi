@@ -76,7 +76,7 @@ const config = container.get('config');
 // config.db === 'sqlite'
 ```
 
-⚠️ If the **resolver**, used in the [register function](#containerregistername-resolver), is a **function**, the value will be the result of this resolver function with `args` as parameter on the first call to `get`.
+⚠️ If the **resolver**, used in the register function, is a **function**, the value will be the result of this resolver function with `args` as parameter on the first call to `get`.
 
 Please pay attention that the resolver result value isn't awaited. So if resolver returns a promise, the value stored will be a promise.
 

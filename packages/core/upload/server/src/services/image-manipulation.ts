@@ -25,12 +25,12 @@ const isOptimizableFormat = (
   format !== undefined && FORMATS_TO_OPTIMIZE.includes(format);
 
 const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
-  new Promise((resolve, reject) => {
+  new Promise<void>((resolve, reject) => {
     const writeStream = fs.createWriteStream(path);
     // Reject promise if there is an error with the provided stream
     stream.on('error', reject);
     stream.pipe(writeStream);
-    writeStream.on('close', resolve);
+    writeStream.on('close', () => resolve());
     writeStream.on('error', reject);
   });
 
@@ -200,17 +200,17 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
   const originalDimensions = await getDimensions(file);
 
   const breakpoints = getBreakpoints();
-  return Promise.all(
-    Object.keys(breakpoints).map((key) => {
-      const breakpoint = breakpoints[key];
+  const results = [];
 
-      if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, { file, breakpoint });
-      }
+  for (const key of Object.keys(breakpoints)) {
+    const breakpoint = breakpoints[key];
 
-      return undefined;
-    })
-  );
+    if (breakpointSmallerThan(breakpoint, originalDimensions)) {
+      results.push(await generateBreakpoint(key, { file, breakpoint }));
+    }
+  }
+
+  return results;
 };
 
 const generateBreakpoint = async (

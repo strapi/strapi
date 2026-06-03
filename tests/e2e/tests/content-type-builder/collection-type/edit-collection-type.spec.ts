@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { waitForRestart } from '../../../utils/restart';
-import { resetFiles } from '../../../utils/file-reset';
-import { navToHeader } from '../../../utils/shared';
-import { sharedSetup } from '../../../utils/setup';
+import { waitForRestart } from '../../../../utils/restart';
+import { resetFiles } from '../../../../utils/file-reset';
+import { navToHeader } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../utils/setup';
 
 test.describe('Edit collection type', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -14,9 +14,8 @@ test.describe('Edit collection type', () => {
   test.beforeEach(async ({ page }) => {
     await resetFiles();
     await sharedSetup('ctb-edit-ct', page, {
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       login: true,
-      skipTour: true,
       resetFiles: true,
     });
 
