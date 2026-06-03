@@ -2,7 +2,13 @@ import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
 import { logout as logoutAction } from '../reducer';
-import { getFetchClient, type FetchOptions, ApiError, isFetchError } from '../utils/getFetchClient';
+import {
+  getFetchClient,
+  triggerSessionExpired,
+  type FetchOptions,
+  ApiError,
+  isFetchError,
+} from '../utils/getFetchClient';
 
 interface QueryArguments {
   url: string;
@@ -69,6 +75,11 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
           }
 
           dispatch(logoutAction());
+          // Notify the React layer so the active tab redirects to /auth/login.
+          // Without this, only other tabs (via the storage event) would react;
+          // the tab that originated the failing request would stay put until
+          // the user clicked something or refreshed.
+          triggerSessionExpired();
         }
       }
 

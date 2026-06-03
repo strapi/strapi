@@ -253,27 +253,35 @@ export class Upgrader implements UpgraderInterface {
 
     const dependencies = json.get<Record<string, string>>('dependencies', {});
     const devDependencies = json.get<Record<string, string>>('devDependencies', {});
-    const strapiDependencies = this.getScopedStrapiDependencies(dependencies);
-    const strapiDevDependencies = this.getScopedStrapiDependencies(devDependencies);
 
-    const totalToUpdate = strapiDependencies.length + strapiDevDependencies.length;
+    const strapiProductionDependencies = this.getScopedStrapiDependencies(dependencies);
+    const strapiDevelopmentDependencies = this.getScopedStrapiDependencies(devDependencies);
 
-    this.logger?.debug?.(`Found ${f.highlight(totalToUpdate)} dependency(ies) to update`);
-    strapiDependencies.forEach((dependency) =>
+    const strapiPackagesToUpgradeCount =
+      strapiProductionDependencies.length + strapiDevelopmentDependencies.length;
+
+    this.logger?.debug?.(
+      `Found ${f.highlight(strapiPackagesToUpgradeCount)} dependency(ies) to update`
+    );
+    strapiProductionDependencies.forEach((dependency) =>
       this.logger?.debug?.(`- ${dependency[0]} (${dependency[1]} -> ${this.target})`)
     );
-    strapiDevDependencies.forEach((dependency) =>
+    strapiDevelopmentDependencies.forEach((dependency) =>
       this.logger?.debug?.(
         `- ${dependency[0]} (devDependencies) (${dependency[1]} -> ${this.target})`
       )
     );
 
-    if (totalToUpdate === 0) {
+    if (strapiPackagesToUpgradeCount === 0) {
       return;
     }
 
-    strapiDependencies.forEach(([name]) => json.set(`dependencies.${name}`, this.target.raw));
-    strapiDevDependencies.forEach(([name]) => json.set(`devDependencies.${name}`, this.target.raw));
+    strapiProductionDependencies.forEach(([name]) =>
+      json.set(`dependencies.${name}`, this.target.raw)
+    );
+    strapiDevelopmentDependencies.forEach(([name]) =>
+      json.set(`devDependencies.${name}`, this.target.raw)
+    );
 
     const updatedPackageJSON = json.root();
 

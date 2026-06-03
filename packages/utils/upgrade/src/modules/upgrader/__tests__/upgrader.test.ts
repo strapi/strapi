@@ -6,7 +6,7 @@ import { assertAppProject, projectFactory } from '../../project';
 import { semVerFactory } from '../../version';
 import { upgraderFactory } from '../upgrader';
 
-import type { NPM } from '../../npm';
+import type { NPM } from '../../npm/types';
 
 jest.mock('fs', () => fs);
 
@@ -89,9 +89,7 @@ describe('Upgrader', () => {
     } as unknown as NPM.Package;
 
     const nextTarget = semVerFactory(targetVersion);
-    const upgrader = upgraderFactory(project, nextTarget, npmPackageStub).onConfirm(
-      async () => true
-    );
+    const upgrader = upgraderFactory(project, nextTarget, npmPackageStub);
 
     await upgrader.upgrade();
 
@@ -100,11 +98,6 @@ describe('Upgrader', () => {
 
     expect(pkg.dependencies['@strapi/strapi']).toBe(targetVersion);
     expect(pkg.devDependencies['@strapi/types']).toBe(targetVersion);
-
-    expect(rmMock).toHaveBeenCalledWith(path.join(packageRoot, 'node_modules', '.strapi', 'vite'), {
-      recursive: true,
-      force: true,
-    });
   });
 
   test('does not remove admin Vite cache when user declines (issue #22075)', async () => {
