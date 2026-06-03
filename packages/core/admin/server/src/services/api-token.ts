@@ -15,6 +15,7 @@ import {
 } from 'lodash/fp';
 import type { Core, Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
+import type { Ability } from '@casl/ability';
 import type {
   Update,
   ContentApiApiToken,
@@ -26,12 +27,17 @@ import constants from './constants';
 import { getService } from '../utils';
 import permissionDomain from '../domain/permission';
 import { validatePermissionsExist } from '../validation/permission';
+import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
 
 type AnyApiToken = ContentApiApiToken | AdminApiToken;
 
 const { SUPER_ADMIN_CODE } = constants;
 
-const { ValidationError, NotFoundError } = errors;
+const { ValidationError, NotFoundError, UnauthorizedError } = errors;
+
+export type AdminTokenAuthenticationResult =
+  | { authenticated: false; error?: InstanceType<typeof UnauthorizedError> }
+  | { authenticated: true; credentials: AdminApiToken; user: AdminUser; ability: Ability };
 
 const assertOwnerMatchesCallingUser = async (
   adminUserOwner: Data.ID,
@@ -64,6 +70,20 @@ const isSuperAdmin = (user: AdminUser | undefined): boolean =>
 const getOwnerId = (token: AdminApiToken): string => {
   const owner = token.adminUserOwner;
   return String(typeof owner === 'object' ? owner.id : owner);
+};
+
+const resolveAdminTokenOwnerId = (token: AdminApiToken): Data.ID | null => {
+  const owner = token.adminUserOwner;
+
+  if (owner === null || owner === undefined) {
+    return null;
+  }
+
+  if (typeof owner === 'object') {
+    return owner.id;
+  }
+
+  return owner;
 };
 
 const toAdminTokenOwner = (
@@ -662,6 +682,51 @@ const hash = (accessKey: string) => {
   return crypto.createHmac('sha512', salt).update(accessKey).digest('hex');
 };
 
+const authenticateAdminToken = async (
+  accessToken: string
+): Promise<AdminTokenAuthenticationResult> => {
+  const apiToken = (await getBy({ accessKey: hash(accessToken) })) as AdminApiToken | null;
+
+  if (apiToken === null || apiToken === undefined) {
+    return { authenticated: false };
+  }
+
+  if (apiToken.kind !== 'admin') {
+    return { authenticated: false };
+  }
+
+  const expiryError = checkExpiry(apiToken);
+  if (expiryError !== null) {
+    return { authenticated: false, error: expiryError };
+  }
+
+  const ownerId = resolveAdminTokenOwnerId(apiToken);
+  if (ownerId === null) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
+  }
+
+  const user = await strapi.db
+    .query('admin::user')
+    .findOne({ where: { id: ownerId }, populate: ['roles'] });
+
+  if (user === null || user === undefined) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner not found') };
+  }
+
+  if (user.isActive !== true || user.blocked === true) {
+    return { authenticated: false, error: new UnauthorizedError('Token owner is deactivated') };
+  }
+
+  await updateLastUsedAt(apiToken);
+
+  const ability = await getService('permission').engine.generateTokenAbility(
+    apiToken.adminPermissions ?? [],
+    user
+  );
+
+  return { authenticated: true, credentials: apiToken, user, ability };
+};
+
 const getExpirationFields = (lifespan: AnyApiToken['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
@@ -1184,6 +1249,7 @@ export interface ContentApiTokenService extends SharedTokenMethods {
 }
 
 export interface AdminTokenService extends SharedTokenMethods {
+  authenticateAdminToken(accessToken: string): Promise<AdminTokenAuthenticationResult>;
   create(attributes: AdminTokenBody, callingUser: AdminUser): Promise<AdminApiToken>;
   list(callingUser: AdminUser): Promise<AdminApiToken[]>;
   getById(id: string | number, options?: GetByOptions): Promise<AdminApiToken | null>;
@@ -1253,6 +1319,7 @@ function createTokenService(
 
   const svc: AdminTokenService = {
     ...shared,
+    authenticateAdminToken,
     create: (attributes: AdminTokenBody, callingUser: AdminUser) =>
       create({ ...attributes, kind: 'admin' }, callingUser) as Promise<AdminApiToken>,
     list: (callingUser: AdminUser) =>
@@ -1291,6 +1358,7 @@ export {
   update,
   getByName,
   getBy,
+  authenticateAdminToken,
   assignAdminPermissionsToToken,
   enforceAdminPermissionsCeiling,
   reconcileTokenPermissionsToUserCeiling,
