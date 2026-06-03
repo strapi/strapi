@@ -11,7 +11,6 @@
  * Helpers: tests/utils/cli-transfer-remote-e2e/
  */
 
-const { spawn } = require('child_process');
 const coffee = require('coffee');
 const execa = require('execa');
 
@@ -23,6 +22,7 @@ const {
   getSeedUploadSignature,
   jestSuiteTimeoutMs,
   seedTransferTestMedia,
+  startRemoteStrapiProcess,
   stopRemoteStrapiProcess,
   waitForHttpOk,
 } = require('../../../../utils/cli-transfer-remote-e2e');
@@ -61,15 +61,7 @@ describe('strapi transfer pull — remote to local (generated media)', () => {
     const remoteFilesAfterSeed = countUploadFiles(remotePath);
     expect(remoteFilesAfterSeed).toBeGreaterThan(0);
 
-    remoteChild = spawn('npm', ['run', '-s', 'start'], {
-      cwd: remotePath,
-      env: {
-        ...process.env,
-        PORT: REMOTE_PORT,
-        HOST: '127.0.0.1',
-      },
-      stdio: 'ignore',
-    });
+    remoteChild = startRemoteStrapiProcess(remotePath, { port: REMOTE_PORT });
 
     const base = `http://127.0.0.1:${REMOTE_PORT}`;
     await waitForHttpOk(`${base}/admin`);
