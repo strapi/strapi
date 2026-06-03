@@ -3,11 +3,14 @@ import os from 'node:os';
 import type { Logger } from '../../cli/utils/logger';
 import {
   findUndeclaredAdminPeerDeps,
+  hashPackageJson,
   installAdminPeerDeps,
   MissingAdminPeerDepsError,
+  readCachedHash,
   reexecCurrentCommand,
   reportMissingAdminPeerDeps,
   validateDeclaredAdminPeerDeps,
+  writeCachedHash,
 } from './dependencies';
 
 interface EnsureAdminDependenciesOptions {
@@ -36,6 +39,17 @@ const ensureAdminDependencies = async ({
     return { didInstall: false };
   }
 
+  // Hash-cache: skip the full check when package.json hasn't changed since
+  // the last successful pass. The cache lives under node_modules so it's
+  // already gitignored and disposable (a `yarn install` wipe re-runs it).
+  const currentHash = await hashPackageJson(cwd);
+  if (currentHash) {
+    const cachedHash = await readCachedHash(cwd);
+    if (cachedHash === currentHash) {
+      return { didInstall: false };
+    }
+  }
+
   const missing = await findUndeclaredAdminPeerDeps(cwd);
 
   if (missing.length > 0) {
@@ -57,6 +71,10 @@ const ensureAdminDependencies = async ({
   }
 
   await validateDeclaredAdminPeerDeps(cwd, logger);
+
+  if (currentHash) {
+    await writeCachedHash(cwd, currentHash);
+  }
 
   return { didInstall: false };
 };
