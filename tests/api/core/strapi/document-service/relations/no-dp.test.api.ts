@@ -292,6 +292,125 @@ describe('Relations interactions with disabled DP content types', () => {
     });
 
     describe('X to One relation', () => {
+      // Re-saving must not make a related entry vanish from the Edit View
+      // when only the related content type uses Draft & Publish.
+      testInTransaction('update preserves draft link for xToOne to DP target', async () => {
+        const shop = await shopDocuments.create({
+          data: {
+            name: 'Shop-create',
+            products_ow: { documentId: 'Skate', locale: 'en' },
+            products_oo: { documentId: 'Skate', locale: 'en' },
+            products_mo: { documentId: 'Skate', locale: 'en' },
+          },
+          locale: 'en',
+        });
+
+        await shopDocuments.update({
+          documentId: shop.documentId,
+          locale: 'en',
+          data: {
+            name: 'Shop-update',
+            products_ow: { documentId: 'Skate', locale: 'en' },
+            products_oo: { documentId: 'Skate', locale: 'en' },
+            products_mo: { documentId: 'Skate', locale: 'en' },
+          },
+        });
+
+        const draftShop = await shopDocuments.findOne({
+          documentId: shop.documentId,
+          populate: xToOneRelations,
+          status: 'draft',
+        });
+
+        const publishedShop = await shopDocuments.findOne({
+          documentId: shop.documentId,
+          populate: xToOneRelations,
+          status: 'published',
+        });
+
+        const draftRelation = { name: 'Skate-En', publishedAt: null };
+        const publishedRelation = { name: 'Skate-En', publishedAt: expect.any(String) };
+
+        expect(draftShop.products_ow).toMatchObject(draftRelation);
+        expect(draftShop.products_oo).toMatchObject(draftRelation);
+        expect(draftShop.products_mo).toMatchObject(draftRelation);
+
+        expect(publishedShop.products_ow).toMatchObject(publishedRelation);
+        expect(publishedShop.products_oo).toMatchObject(publishedRelation);
+        expect(publishedShop.products_mo).toMatchObject(publishedRelation);
+      });
+
+      testInTransaction(
+        'Updating xToOne to a new documentId relinks both draft and published target rows',
+        async () => {
+          const shop = await shopDocuments.create({
+            data: {
+              name: 'Shop-switch',
+              products_mo: { documentId: 'Skate', locale: 'en' },
+            },
+            locale: 'en',
+          });
+
+          await shopDocuments.update({
+            documentId: shop.documentId,
+            locale: 'en',
+            data: {
+              products_mo: { documentId: 'Candle', locale: 'en' },
+            },
+          });
+
+          const draftShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
+            populate: ['products_mo'],
+            status: 'draft',
+          });
+
+          expect(draftShop.products_mo).toMatchObject({
+            name: 'Candle-En',
+            publishedAt: null,
+          });
+        }
+      );
+
+      testInTransaction(
+        'xToOne set with multiple documentIds keeps only the last one and preserves draft link',
+        async () => {
+          // If two entries are sent for a single-entry field, keep the
+          // last and keep it fully linked (visible from the Edit View).
+          const shop = await shopDocuments.create({
+            data: {
+              name: 'Shop-multi',
+              products_mo: { documentId: 'Skate', locale: 'en' },
+            },
+            locale: 'en',
+          });
+
+          await shopDocuments.update({
+            documentId: shop.documentId,
+            locale: 'en',
+            data: {
+              products_mo: {
+                set: [
+                  { documentId: 'Skate', locale: 'en' },
+                  { documentId: 'Candle', locale: 'en' },
+                ],
+              },
+            },
+          });
+
+          const draftShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
+            populate: ['products_mo'],
+            status: 'draft',
+          });
+
+          expect(draftShop.products_mo).toMatchObject({
+            name: 'Candle-En',
+            publishedAt: null,
+          });
+        }
+      );
+
       testInTransaction('Can consecutively connect to draft and published versions', async () => {
         // XToOne relations are not connected with an array,
         // the only way to connect both draft and published versions

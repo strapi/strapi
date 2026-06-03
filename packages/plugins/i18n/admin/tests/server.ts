@@ -1,4 +1,4 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
 import { CreateLocale, GetLocales, Locale } from '../../shared/contracts/locales';
@@ -45,45 +45,46 @@ export const server = setupServer(
      * locales
      *
      */
-    rest.get('/i18n/locales', (req, res, ctx) => {
-      return res(ctx.json(LOCALES));
+    http.get('/i18n/locales', () => {
+      return HttpResponse.json(LOCALES);
     }),
-    rest.post('/i18n/locales', async (req, res, ctx) => {
-      const body = await req.json<Pick<Locale, 'code' | 'name' | 'isDefault'>>();
+    http.post<Record<string, never>, Pick<Locale, 'code' | 'name' | 'isDefault'>>(
+      '/i18n/locales',
+      async ({ request }) => {
+        const body = await request.json();
 
-      const newLocale = {
-        id: LOCALES.length + 1,
-        createdAt: '',
-        updatedAt: '',
-        ...body,
-      } satisfies CreateLocale.Response;
+        const newLocale = {
+          id: LOCALES.length + 1,
+          createdAt: '',
+          updatedAt: '',
+          ...body,
+        } satisfies CreateLocale.Response;
 
-      return res(ctx.json(newLocale));
+        return HttpResponse.json(newLocale);
+      }
+    ),
+    http.put('/i18n/locales/:id', () => {
+      return new HttpResponse();
     }),
-    rest.put('/i18n/locales/:id', (req, res, ctx) => {
-      return res(ctx.status(200));
-    }),
-    rest.delete('/i18n/locales/:id', (req, res, ctx) => {
-      if (req.params.id === '1') {
-        return res(ctx.status(200));
+    http.delete<{ id: string }>('/i18n/locales/:id', ({ params }) => {
+      if (params.id === '1') {
+        return new HttpResponse();
       }
 
-      return res(ctx.status(404));
+      return new HttpResponse(null, { status: 404 });
     }),
     /**
      *
      * iso-locales
      *
      */
-    rest.get('/i18n/iso-locales', (req, res, ctx) => {
-      return res(
-        ctx.json([
-          { code: 'af', name: 'Afrikaans (af)' },
-          { code: 'af-NA', name: 'Afrikaans (Namibia) (af-NA)' },
-          { code: 'af-ZA', name: 'Afrikaans (South Africa) (af-ZA)' },
-          { code: 'agq', name: 'Aghem (agq)' },
-        ])
-      );
+    http.get('/i18n/iso-locales', () => {
+      return HttpResponse.json([
+        { code: 'af', name: 'Afrikaans (af)' },
+        { code: 'af-NA', name: 'Afrikaans (Namibia) (af-NA)' },
+        { code: 'af-ZA', name: 'Afrikaans (South Africa) (af-ZA)' },
+        { code: 'agq', name: 'Aghem (agq)' },
+      ]);
     }),
   ]
 );

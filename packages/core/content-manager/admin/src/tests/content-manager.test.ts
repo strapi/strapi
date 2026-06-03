@@ -1,4 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
+import { JSX } from 'react';
+
 import { ContentManagerPlugin, DocumentActionComponent, PanelComponent } from '../content-manager';
 
 jest.mock('../pages/EditView/components/Panels', () => ({
@@ -40,10 +42,12 @@ describe('content-manager', () => {
           addDocumentAction: expect.any(Function),
           addDocumentHeaderAction: expect.any(Function),
           addEditViewSidePanel: expect.any(Function),
+          addRichTextBlocks: expect.any(Function),
           getBulkActions: expect.any(Function),
           getDocumentActions: expect.any(Function),
           getEditViewSidePanels: expect.any(Function),
           getHeaderActions: expect.any(Function),
+          getRichTextBlocks: expect.any(Function),
         },
         id: 'content-manager',
         injectionZones: {
@@ -77,10 +81,12 @@ describe('content-manager', () => {
         'addDocumentAction',
         'addDocumentHeaderAction',
         'addEditViewSidePanel',
+        'addRichTextBlocks',
         'getBulkActions',
         'getDocumentActions',
         'getEditViewSidePanels',
         'getHeaderActions',
+        'getRichTextBlocks',
       ]);
     });
   });
@@ -223,6 +229,112 @@ describe('content-manager', () => {
         plugin.addDocumentHeaderAction('I will break')
       ).toThrowError(
         'Expected the `actions` passed to `addDocumentHeaderAction` to be an array or a function, but received string'
+      );
+    });
+  });
+
+  describe('addRichTextBlocks', () => {
+    it('should let users add a new block with objects keys', () => {
+      const plugin = new ContentManagerPlugin();
+
+      plugin.addRichTextBlocks({
+        customBlock: {
+          isInBlocksSelector: true,
+          renderElement: () => null as unknown as JSX.Element,
+          matchNode: (node) => node.type === 'customBlock',
+          label: { defaultMessage: 'Custom Block' },
+        },
+      });
+
+      expect(plugin.richTextBlocksStore).toHaveProperty('customBlock');
+    });
+
+    it('should let users add a new block with a function', () => {
+      const plugin = new ContentManagerPlugin();
+
+      plugin.addRichTextBlocks((prev) => ({
+        ...prev,
+        customBlock: {
+          isInBlocksSelector: true,
+          renderElement: () => null as unknown as JSX.Element,
+          matchNode: (node) => node.type === 'customBlock',
+          label: { defaultMessage: 'Custom Block' },
+        },
+      }));
+
+      expect(plugin.richTextBlocksStore).toHaveProperty('customBlock');
+    });
+
+    it('should let users remove a block with a function', () => {
+      const plugin = new ContentManagerPlugin();
+
+      plugin.addRichTextBlocks({
+        customBlock: {
+          isInBlocksSelector: true,
+          renderElement: () => null as unknown as JSX.Element,
+          matchNode: (node) => node.type === 'customBlock',
+          label: { defaultMessage: 'Custom Block' },
+        },
+      });
+
+      expect(plugin.richTextBlocksStore).toHaveProperty('customBlock');
+
+      plugin.addRichTextBlocks((prev) => {
+        delete prev.customBlock;
+        return prev;
+      });
+
+      expect(plugin.richTextBlocksStore).not.toHaveProperty('customBlock');
+    });
+
+    it('should let users change an existing block', () => {
+      const plugin = new ContentManagerPlugin();
+
+      plugin.addRichTextBlocks({
+        customBlock: {
+          isInBlocksSelector: true,
+          renderElement: () => null as unknown as JSX.Element,
+          matchNode: (node) => node.type === 'customBlock',
+          label: { defaultMessage: 'Custom Block' },
+        },
+      });
+
+      expect(plugin.richTextBlocksStore.customBlock).toHaveProperty('label', {
+        defaultMessage: 'Custom Block',
+      });
+
+      plugin.addRichTextBlocks((prev) => ({
+        ...prev,
+        customBlock: {
+          ...prev.customBlock,
+          label: { defaultMessage: 'New Custom Block' },
+        },
+      }));
+
+      expect(plugin.richTextBlocksStore.customBlock).toHaveProperty('label', {
+        defaultMessage: 'New Custom Block',
+      });
+    });
+
+    it('should throw an error if you pass an invalid object', () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(() =>
+        // @ts-expect-error – testing it fails.
+        plugin.addRichTextBlocks('I will break')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Expected the \`blocks\` passed to \`addRichTextBlocks\` to be an object or a function, but received string"`
+      );
+    });
+
+    it('should throw an error if you pass an invalid function', () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(() =>
+        // @ts-expect-error – testing it fails.
+        plugin.addRichTextBlocks(() => 'I will break')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Expected the \`blocks\` passed to \`addRichTextBlocks\` to be an object or a function, but received string"`
       );
     });
   });
