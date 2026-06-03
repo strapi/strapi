@@ -1,6 +1,7 @@
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import semver, { SemVer } from 'semver';
 import resolveFrom from 'resolve-from';
 import execa, { CommonOptions, ExecaReturnValue } from 'execa';
@@ -8,6 +9,29 @@ import readPkgUp, { PackageJson } from 'read-pkg-up';
 
 import type { Logger } from '../../cli/utils/logger';
 import { getPackageManager } from './managers';
+
+const CACHE_PATH = path.join('node_modules', '.strapi', 'deps-check.hash');
+
+const hashPackageJson = async (cwd: string): Promise<string | null> => {
+  try {
+    const content = await fs.readFile(path.join(cwd, 'package.json'), 'utf8');
+    return crypto.createHash('sha1').update(content).digest('hex');
+  } catch {
+    return null;
+  }
+};
+
+const readCachedHash = (cwd: string): Promise<string | null> =>
+  fs.readFile(path.join(cwd, CACHE_PATH), 'utf8').catch(() => null);
+
+const writeCachedHash = async (cwd: string, hash: string): Promise<void> => {
+  try {
+    await fs.mkdir(path.dirname(path.join(cwd, CACHE_PATH)), { recursive: true });
+    await fs.writeFile(path.join(cwd, CACHE_PATH), hash, 'utf8');
+  } catch {
+    // best-effort cache write — silently ignore
+  }
+};
 
 /**
  * From V5 this will be imported from the package.json of `@strapi/strapi`.
@@ -257,5 +281,8 @@ export {
   getInstallCommandHint,
   MissingAdminPeerDepsError,
   getModule,
+  hashPackageJson,
+  readCachedHash,
+  writeCachedHash,
 };
 export type { AdminPeerDep, PackageJson };
