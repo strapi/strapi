@@ -136,7 +136,7 @@ jobs:
               const comment = '> This is a templated message\n\n' +
                 'Hello @' + context.payload.issue.user.login + ',\n\n' +
                 'We ask that you please follow the issue template.\n' +
-                'A proper issue submission let\'s us better understand the origin of your bug and therefore help you. You can see the template guidelines for bug reports [here](.github/ISSUE_TEMPLATE/BUG_REPORT.yml).\n\n' +
+                'A proper issue submission lets us better understand the origin of your bug and therefore help you. You can see the template guidelines for bug reports [here](.github/ISSUE_TEMPLATE/BUG_REPORT.yml).\n\n' +
                 'Please create a new issue and completely fill out the issue template, you can open a new issue [here](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/issues/new).\n\n' +
                 'Thank you.';
 
