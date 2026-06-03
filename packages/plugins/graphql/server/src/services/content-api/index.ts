@@ -188,12 +188,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Generate & register single type's definition
       if (kind === 'singleType') {
-        registerSingleType(contentType as Struct.SingleTypeSchema, registerOptions);
+        registerSingleType(contentType, registerOptions);
       }
 
       // Generate & register collection type's definition
       else if (kind === 'collectionType') {
-        registerCollectionType(contentType as Struct.CollectionTypeSchema, registerOptions);
+        registerCollectionType(contentType, registerOptions);
       }
     }
   };

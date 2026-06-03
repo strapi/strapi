@@ -257,54 +257,49 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         contentTypesMeta.map(async (meta) => {
           const strapiDBConnection = strapi.db.connection;
           const tableName = strapi.contentType(meta.uid).collectionName;
-          if (tableName) {
-            if (meta.hasDraftAndPublish) {
-              const draftDocuments = await strapiDBConnection(tableName)
-                .whereNull('published_at')
-                .whereIn('document_id', function () {
-                  this.select('document_id')
-                    .from(tableName)
-                    .groupBy('document_id')
-                    .havingRaw('COUNT(*) = 1');
-                })
-                .count('* as count')
-                .first();
-              countDocuments.draft += Number(draftDocuments?.count) || 0;
-            }
+          if (!tableName) return;
 
-            const publishedDocuments = meta.hasDraftAndPublish
-              ? await strapiDBConnection(tableName)
-                  .countDistinct('draft.document_id as count')
-                  .from(`${tableName} as draft`)
-                  .join(`${tableName} as published`, function () {
-                    this.on('draft.document_id', '=', 'published.document_id')
-                      .andOn('draft.updated_at', '=', 'published.updated_at')
-                      .andOnNull('draft.published_at')
-                      .andOnNotNull('published.published_at');
-                  })
-                  .first()
-              : await strapiDBConnection(tableName)
-                  .countDistinct('document_id as count')
-                  .from(`${tableName}`)
-                  .first();
+          if (!meta.hasDraftAndPublish) {
+            const publishedDocuments = await strapiDBConnection(tableName)
+              .countDistinct('document_id as count')
+              .first();
             countDocuments.published += Number(publishedDocuments?.count) || 0;
-
-            if (meta.hasDraftAndPublish) {
-              const modifiedDocuments = await strapiDBConnection(tableName)
-                .select('draft.document_id')
-                .from(`${tableName} as draft`)
-                .join(`${tableName} as published`, function () {
-                  this.on('draft.document_id', '=', 'published.document_id')
-                    .andOn('draft.updated_at', '!=', 'published.updated_at')
-                    .andOnNull('draft.published_at')
-                    .andOnNotNull('published.published_at');
-                })
-                .countDistinct('draft.document_id as count')
-                .groupBy('draft.document_id')
-                .first();
-              countDocuments.modified += Number(modifiedDocuments?.count) || 0;
-            }
+            return;
           }
+
+          // Classify each document_id into a single bucket (draft / published / modified)
+          // in one pass. Replaces three separate self-join queries that scaled poorly on
+          // large tables — see https://github.com/strapi/strapi/issues/25200.
+          const classified = strapiDBConnection(tableName)
+            .select('document_id')
+            .select(
+              strapiDBConnection.raw(
+                `CASE
+                  WHEN MAX(CASE WHEN published_at IS NOT NULL THEN 1 ELSE 0 END) = 0
+                    THEN 'draft'
+                  WHEN MAX(CASE WHEN published_at IS NULL THEN updated_at END) =
+                       MAX(CASE WHEN published_at IS NOT NULL THEN updated_at END)
+                    THEN 'published'
+                  ELSE 'modified'
+                END AS bucket`
+              )
+            )
+            .groupBy('document_id');
+
+          const counts = await strapiDBConnection
+            .from(classified.as('classified'))
+            .select(
+              strapiDBConnection.raw(
+                `COUNT(CASE WHEN bucket = 'draft' THEN 1 END) AS draft,
+                 COUNT(CASE WHEN bucket = 'published' THEN 1 END) AS published,
+                 COUNT(CASE WHEN bucket = 'modified' THEN 1 END) AS modified`
+              )
+            )
+            .first();
+
+          countDocuments.draft += Number(counts?.draft) || 0;
+          countDocuments.published += Number(counts?.published) || 0;
+          countDocuments.modified += Number(counts?.modified) || 0;
         })
       );
 

@@ -62,6 +62,28 @@ const foldersApi = uploadApi.injectEndpoints({
       transformResponse: (response: CreateFolders.Response) => response.data,
       invalidatesTags: [{ type: 'Folder', id: 'LIST' }],
     }),
+    /**
+     * Flat list of every folder, used to populate the "Location" select in the
+     * asset details drawer. No parent filter — we want the entire tree in one
+     * query so the select can render any destination folder.
+     */
+    getAllFolders: builder.query<Folder[], void>({
+      query: () => ({
+        url: '/upload/folders',
+        method: 'GET',
+      }),
+      transformResponse: (response: GetFolders.Response['data']) =>
+        ((response as any)?.data ?? response ?? []) as Folder[],
+      providesTags: (results) => {
+        if (results) {
+          return [
+            ...results.map(({ id }) => ({ type: 'Folder' as const, id })),
+            { type: 'Folder' as const, id: 'LIST' },
+          ];
+        }
+        return [{ type: 'Folder' as const, id: 'LIST' }];
+      },
+    }),
     getFolder: builder.query<FolderWithCounts, { id: number }>({
       query: ({ id }) => ({
         url: `/upload/folders/${id}`,
@@ -87,4 +109,9 @@ const foldersApi = uploadApi.injectEndpoints({
   }),
 });
 
-export const { useCreateFolderMutation, useGetFoldersQuery, useGetFolderQuery } = foldersApi;
+export const {
+  useCreateFolderMutation,
+  useGetFoldersQuery,
+  useGetFolderQuery,
+  useGetAllFoldersQuery,
+} = foldersApi;

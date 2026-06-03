@@ -67,6 +67,14 @@ export interface Http {
   [key: string]: unknown;
 }
 
+export interface McpConfig {
+  enabled: boolean;
+  /** Maximum time (ms) to wait for the MCP transport connection. Defaults to 5 000. */
+  connectTimeoutMs?: number;
+  /** Maximum time (ms) to wait for a single MCP request to complete. Defaults to 60 000. */
+  requestTimeoutMs?: number;
+}
+
 export interface Server {
   // required
   host: string;
@@ -88,4 +96,5 @@ export interface Server {
   openapi?: OpenAPI;
   webhooks?: Webhooks;
   http?: Http;
+  mcp?: McpConfig;
 }
