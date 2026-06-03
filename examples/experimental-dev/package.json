@@ -27,8 +27,8 @@
     "npm": ">=6.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "4.2.1",
+    "@vitejs/plugin-react": "6.0.2",
     "babel-plugin-react-compiler": "0.0.0-experimental-c23de8d-20240515",
-    "vite": "5.4.21"
+    "vite": "8.0.16"
   }
 }
