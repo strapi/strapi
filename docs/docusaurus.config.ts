@@ -1,12 +1,11 @@
-// @ts-check
-// Note: type annotations allow type checking and IDEs autocompletion
-const path = require('path');
-const {
-  themes: { github: lightCodeTheme, dracula: darkCodeTheme },
-} = require('prism-react-renderer');
+import { resolve } from 'path';
+import { themes } from 'prism-react-renderer';
+import type TypedocPlugin from 'docusaurus-plugin-typedoc';
+import type { Config } from '@docusaurus/types';
+import type * as Preset from '@docusaurus/preset-classic';
+import { remarkDesignSystemLinks } from './remark-design-system-links';
 
-/** @type {Parameters<import('docusaurus-plugin-typedoc')['default']>[1]} */
-const pluginTypedocOptions = {
+const pluginTypedocOptions: Parameters<typeof TypedocPlugin>[1] = {
   entryPoints: ['../packages/core/strapi/src/admin.ts'],
   tsconfig: '../packages/core/strapi/tsconfig.build.json',
   // `readme: 'none'` uses a single project page (no separate index). Together with
@@ -21,24 +20,22 @@ const pluginTypedocOptions = {
   watch: !!process.env.TYPEDOC_WATCH,
 };
 
-/** @type {Partial<Parameters<import('@cmfcmf/docusaurus-search-local/src/server')['default']>[1]>} */
+// Using `@cmfcmf/docusaurus-search-local` types are problematic
 const pluginSearchLocalOptions = {
   indexBlog: false,
 };
 
-/** @type {import('@docusaurus/preset-classic').Options} */
-const presetClassicOptions = {
+const presetClassicOptions: Preset.Options = {
   docs: {
     routeBasePath: '/',
-    sidebarPath: require.resolve('./sidebars.js'),
+    sidebarPath: require.resolve('./sidebars.ts'),
     editUrl: 'https://github.com/strapi/strapi/tree/main/docs/',
-    remarkPlugins: [require('./remark-design-system-links')],
+    remarkPlugins: [remarkDesignSystemLinks],
   },
   blog: false,
 };
 
-/** @type {import('@docusaurus/preset-classic').ThemeConfig} */
-const themeConfig = {
+const themeConfig: Preset.ThemeConfig = {
   navbar: {
     title: 'Contributor documentation',
     hideOnScroll: true,
@@ -82,13 +79,12 @@ const themeConfig = {
     ],
   },
   prism: {
-    theme: lightCodeTheme,
-    darkTheme: darkCodeTheme,
+    theme: themes.github,
+    darkTheme: themes.dracula,
   },
 };
 
-/** @type {import('@docusaurus/types').Config} */
-const config = {
+const config: Config = {
   title: 'Doc',
   tagline: 'Dinosaurs are cool',
   url: 'https://contributor.strapi.io',
@@ -120,7 +116,7 @@ const config = {
         return {
           resolve: {
             alias: {
-              react: path.resolve(__dirname, './node_modules/react'),
+              react: resolve(__dirname, './node_modules/react'),
             },
           },
         };
@@ -133,4 +129,4 @@ const config = {
   themeConfig,
 };
 
-module.exports = config;
+export default config;

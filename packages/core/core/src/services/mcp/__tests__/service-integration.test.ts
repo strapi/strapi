@@ -223,7 +223,7 @@ describe('MCP Service Integration', () => {
           auth: { policies: [{ action: 'test.action' }] },
           createHandler: jest.fn(),
         });
-      }).toThrow('[MCP] Tools must be registered before MCP server starts');
+      }).toThrow('[MCP] Cannot register tools after the MCP server has started.');
     });
   });
 

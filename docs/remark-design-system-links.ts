@@ -1,4 +1,6 @@
-const { visit } = require('unist-util-visit');
+import type { Transformer } from 'unified';
+import type { Root } from 'mdast';
+import { visit } from 'unist-util-visit';
 
 const DESIGN_SYSTEM = 'https://design-system.strapi.io';
 
@@ -7,7 +9,7 @@ const DESIGN_SYSTEM = 'https://design-system.strapi.io';
  * using paths like `[Label](../?path=/docs/foundations-responsive--docs)` which resolve as site-relative
  * URLs in Docusaurus and fail the link checker. Map them to the public Storybook host.
  */
-function remarkDesignSystemLinks() {
+export function remarkDesignSystemLinks(): Transformer<Root> {
   return (tree) => {
     visit(tree, 'link', (node) => {
       if (typeof node.url !== 'string') {
@@ -33,5 +35,3 @@ function remarkDesignSystemLinks() {
     });
   };
 }
-
-module.exports = remarkDesignSystemLinks;
