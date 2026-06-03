@@ -1,4 +1,4 @@
-import type { ProxyAgent } from 'undici';
+import type { Dispatcher } from 'undici';
 
 /**
  * strapi.fetch interface is currently an identical wrapper for Node fetch()
@@ -7,6 +7,6 @@ import type { ProxyAgent } from 'undici';
  * */
 
 export interface Fetch {
-  (input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response>;
-  dispatcher?: ProxyAgent;
+  (input: string | URL | Request, init?: RequestInit | undefined): Promise<Response>;
+  dispatcher?: Dispatcher;
 }
