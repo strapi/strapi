@@ -25,7 +25,7 @@ interface ComponentInputProps
    * We need layout to come from the props, and not via a hook, because Content History needs
    * a way to modify the normal component layout to add hidden fields.
    */
-  layout: EditFieldLayout[][];
+  layout: ReadonlyArray<ReadonlyArray<EditFieldLayout>>;
 }
 
 const ComponentInput = ({
