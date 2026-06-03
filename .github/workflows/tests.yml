@@ -583,7 +583,12 @@ jobs:
   sonarqube:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.head.repo.fork && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
+    # On pull requests, only run for local branches (is_local also excludes forks and
+    # Dependabot, which cannot access repository secrets such as SONAR_TOKEN). Pushes to
+    # develop/main still run the analysis.
+    if: >-
+      ${{ (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
+      && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
     needs: [conditions, unit_back, unit_front]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

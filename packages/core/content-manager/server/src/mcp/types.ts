@@ -23,6 +23,7 @@ export type McpToolsBuildContext = {
 
 export type DerivedTool = {
   name: string;
+  telemetry: { source: 'content-manager'; name: string };
   title: string;
   description: string;
   auth: Modules.MCP.McpCapabilityAuth;

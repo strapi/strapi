@@ -3,7 +3,7 @@ import { render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
 import { ComponentProvider } from '../../ComponentContext';
-import { RepeatableComponent } from '../Repeatable';
+import { RepeatableComponent, RepeatableComponentProps } from '../Repeatable';
 
 const FIELD_NAME = 'repeatableComponent';
 
@@ -57,12 +57,22 @@ describe('RepeatableComponent', () => {
       repeatable: true,
     },
     disabled: false,
-    layout: [[{ name: 'name', label: 'name', type: 'string', size: 12 }]],
+    layout: [
+      [
+        {
+          attribute: { type: 'string' },
+          name: 'name',
+          label: 'name',
+          type: 'string',
+          size: 12,
+        },
+      ],
+    ],
     mainField: { name: 'name', type: 'string' },
     name: FIELD_NAME,
     type: 'component',
     children: () => 'INPUTS',
-  } as const;
+  } satisfies RepeatableComponentProps;
 
   const render = (initialFormValues: Record<string, unknown>) =>
     renderRTL(
