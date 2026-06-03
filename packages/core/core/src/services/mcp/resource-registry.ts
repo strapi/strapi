@@ -10,6 +10,7 @@ import {
   McpCapabilityRegistryBase,
 } from './internal/McpCapabilityRegistry';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
+import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 
 export const makeMcpResourceDefinition = <Definition extends Modules.MCP.McpResourceDefinition>(
   resource: Definition
@@ -34,11 +35,13 @@ export class McpResourceRegistry
   }
 
   bind(mcpServer: McpServer) {
+    const strapi = this.#strapi;
+
     super.register((definition) => {
       const { name, uri, metadata, createHandler } = definition;
 
       return createSafeCapabilityRegistration({
-        strapi: this.#strapi,
+        strapi,
         capabilityType: 'Resource',
         name,
         createHandler,
@@ -65,7 +68,15 @@ export class McpResourceRegistry
           };
         },
         registerWithSdk(safeHandler) {
-          return mcpServer.registerResource(name, uri, metadata, safeHandler);
+          const sdkHandler = wrapCapabilityHandlerForMetrics(
+            strapi,
+            'resource',
+            name,
+            definition.telemetry,
+            safeHandler
+          );
+
+          return mcpServer.registerResource(name, uri, metadata, sdkHandler);
         },
       });
     });
