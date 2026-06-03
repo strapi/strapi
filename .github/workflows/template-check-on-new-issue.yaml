@@ -16,7 +16,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const issueBody = context.payload.issue.body;
+            const issueBody = context.payload.issue.body || '';
             const issueNumber = context.payload.issue.number;
 
             // Define the required checkboxes
@@ -104,8 +104,6 @@ jobs:
               content = content.replace(/^### .*?\n/i, '');
               // Remove the next section header if present
               content = content.replace(/\n### .*$/i, '');
-              // Remove the last section header if it's the end
-              content = content.replace(/\n### .*$/i, '');
               
               // Clean up the content
               content = content.trim();
@@ -149,5 +147,5 @@ jobs:
               
               console.log('Added "flag: invalid template" label, comment, and closed issue #' + issueNumber);
             } else {
-              console.log('All required items are present. No action needed.');
+              console.log('Added "flag: invalid template" label and comment on issue #' + issueNumber);
             }
