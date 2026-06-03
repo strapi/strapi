@@ -89,9 +89,7 @@ describe('updateFileInfo', () => {
   });
 
   test('moves the file to the root when folder is explicitly null', async () => {
-    // FileInfo.folder is typed as number | undefined, but the runtime accepts
-    // null as "no parent" (root). Cast to exercise that branch.
-    await uploadService.updateFileInfo(1, { folder: null as unknown as number });
+    await uploadService.updateFileInfo(1, { folder: null });
 
     const [{ data }] = update.mock.calls[0];
     expect(data).toMatchObject({
