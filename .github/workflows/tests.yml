@@ -583,10 +583,11 @@ jobs:
   sonarqube:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
-    # Dependabot PRs cannot access repository secrets (SONAR_TOKEN), so skip analysis.
+    # On pull requests, only run for local branches (is_local also excludes forks and
+    # Dependabot, which cannot access repository secrets such as SONAR_TOKEN). Pushes to
+    # develop/main still run the analysis.
     if: >-
-      ${{ !github.event.pull_request.head.repo.fork
-      && (github.event_name != 'pull_request' || (github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'))
+      ${{ (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
       && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
     needs: [conditions, unit_back, unit_front]
     steps:
