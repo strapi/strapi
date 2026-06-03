@@ -105,7 +105,7 @@ const getInstallCommandHint = (missing: AdminPeerDep[]) => {
     return `pnpm add --save-prod ${packages}`;
   }
 
-  return `npm install --save ${packages}`;
+  return `npm install --legacy-peer-deps --save ${packages}`;
 };
 
 const reportMissingAdminPeerDeps = (logger: Logger, missing: AdminPeerDep[]) => {

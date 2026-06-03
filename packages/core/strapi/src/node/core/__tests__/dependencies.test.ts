@@ -149,6 +149,14 @@ describe('admin peer dependency checks', () => {
         'pnpm add --save-prod react@^18.0.0'
       );
     });
+
+    it('uses npm with legacy peer deps when npm is the package manager', () => {
+      getPackageManagerMock.mockReturnValue('npm');
+
+      expect(getInstallCommandHint([{ name: 'react', wantedVersion: '^18.0.0' }])).toBe(
+        'npm install --legacy-peer-deps --save react@^18.0.0'
+      );
+    });
   });
 
   describe('reportMissingAdminPeerDeps', () => {
@@ -160,7 +168,7 @@ describe('admin peer dependency checks', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Please install them manually before re-running this command:',
         expect.any(String),
-        '  npm install --save react@^18.0.0'
+        '  npm install --legacy-peer-deps --save react@^18.0.0'
       );
     });
   });
