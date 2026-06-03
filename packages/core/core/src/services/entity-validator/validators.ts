@@ -46,7 +46,7 @@ const toNumberSafe = (value: unknown): number | undefined => {
 const BIG_INTEGER_REGEX = /^[+-]?\d+$/;
 
 const toBigIntegerString = (value: unknown): string | undefined => {
-  if (_.isNil(value)) {
+  if (value == null) {
     return undefined;
   }
 
@@ -75,24 +75,28 @@ const toBigIntegerString = (value: unknown): string | undefined => {
   return undefined;
 };
 
+const isValidBigInteger = (value: unknown): boolean => toBigIntegerString(value) != null;
+
+const isValidFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+const isValidInteger = (value: unknown): value is number =>
+  isValidFiniteNumber(value) && Number.isInteger(value);
+
 const shouldSkipUniqueValidation = (
   attrType: Schema.Attribute.AnyAttribute['type'],
   value: unknown
 ): boolean => {
   switch (attrType) {
-    case 'integer': {
-      return typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value);
-    }
+    case 'integer':
+      return !isValidInteger(value);
     case 'float':
-    case 'decimal': {
-      return typeof value !== 'number' || !Number.isFinite(value);
-    }
-    case 'biginteger': {
-      return _.isNil(toBigIntegerString(value));
-    }
-    default: {
+    case 'decimal':
+      return !isValidFiniteNumber(value);
+    case 'biginteger':
+      return !isValidBigInteger(value);
+    default:
       return false;
-    }
   }
 };
 
@@ -556,7 +560,7 @@ export const floatValidator = (
     .test(
       'is-finite-number',
       '${path} must be a finite number',
-      (value) => _.isNil(value) || Number.isFinite(value)
+      (value) => value == null || isValidFiniteNumber(value)
     );
 
   schema = addMinFloatValidator(schema, metas, options);
@@ -574,11 +578,11 @@ export const bigintegerValidator = (
     .mixed()
     .transform((value, originalValue) => toBigIntegerString(originalValue) ?? value)
     .test('is-biginteger', '${path} must be a valid integer', (value) => {
-      if (_.isNil(value)) {
+      if (value == null) {
         return true;
       }
 
-      return !_.isNil(toBigIntegerString(value));
+      return isValidBigInteger(value);
     });
 
   return addUniqueValidator(schema, metas, options);
