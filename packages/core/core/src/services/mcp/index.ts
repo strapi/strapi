@@ -7,6 +7,7 @@ import { McpConfiguration } from './internal/McpConfiguration';
 import { createMcpServerWithRegistries } from './internal/McpServerFactory';
 import { createOAuthDiscoveryFallbackMiddleware } from './middleware/oauthDiscoveryFallback';
 import { createMcpRoutes } from './routes';
+import { sendDidStartMcpServer } from './metrics/metrics';
 import { logToolDefinition } from './tools/log';
 
 /**
@@ -103,6 +104,13 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
       strapi.server.routes(routes);
 
       serverStatus = 'running';
+
+      sendDidStartMcpServer(strapi, {
+        path: config.path,
+        numberOfTools: toolDefinitions.size,
+        numberOfPrompts: promptDefinitions.size,
+        numberOfResources: resourceDefinitions.size,
+      });
 
       const baseUrl = strapi.config.get('server.url', 'http://localhost:1337');
       strapi.log.info(`[MCP] Server available at ${baseUrl}${config.path}`);
