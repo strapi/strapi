@@ -1,5 +1,5 @@
 import { isEmpty, isArray } from 'lodash/fp';
-import koaSession from 'koa-session';
+import { type SessionOptions, createSession } from 'koa-session';
 import type { Core } from '@strapi/types';
 
 const defaultConfig = {
@@ -15,7 +15,7 @@ const defaultConfig = {
   sameSite: undefined,
 };
 
-export const session: Core.MiddlewareFactory<Partial<koaSession.opts>> = (
+export const session: Core.MiddlewareFactory<Partial<SessionOptions>> = (
   userConfig,
   { strapi }
 ) => {
@@ -26,7 +26,7 @@ export const session: Core.MiddlewareFactory<Partial<koaSession.opts>> = (
     );
   }
 
-  const config: Partial<koaSession.opts> = { ...defaultConfig, ...userConfig };
+  const config: Partial<SessionOptions> = { ...defaultConfig, ...userConfig };
 
-  strapi.server.use(koaSession(config, strapi.server.app));
+  strapi.server.use(createSession(config, strapi.server.app));
 };

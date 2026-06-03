@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`admin:list-users should output list of admin users 1`] = `
+"│ ID │ Email               │ First Name │ Last Name │ Active │ Blocked │ Roles       │
+│ ** │ test.list@strapi.io │ ListTest   │ Admin     │ true   │ false   │ Super Admin │"
+`;

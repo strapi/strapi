@@ -11,6 +11,7 @@
     "dist/",
     ".cache/",
     ".tmp/",
+    ".strapi/",
     "src/admin/",
     "**/*.test.ts",
     "src/plugins/**"

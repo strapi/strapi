@@ -1,3 +1,5 @@
 module.exports = ({ env }) => ({
-  future: {},
+  future: {
+    unstableMediaLibrary: env.bool('UNSTABLE_MEDIA_LIBRARY', false),
+  },
 });

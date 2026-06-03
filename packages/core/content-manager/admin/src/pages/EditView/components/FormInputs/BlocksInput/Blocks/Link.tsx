@@ -206,7 +206,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         </Popover.Trigger>
         <Popover.Content onPointerDownOutside={handleClose}>
           <Flex padding={4} direction="column" gap={4}>
-            <Field.Root width="368px">
+            <Field.Root width={{ initial: '100%', medium: '368px' }}>
               <Flex direction="column" gap={1} alignItems="stretch">
                 <Field.Label>
                   {formatMessage({
@@ -227,7 +227,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                 />
               </Flex>
             </Field.Root>
-            <Field.Root width="368px">
+            <Field.Root width={{ initial: '100%', medium: '368px' }}>
               <Flex direction="column" gap={1} alignItems="stretch">
                 <Field.Label>
                   {formatMessage({
@@ -247,7 +247,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                 />
               </Flex>
             </Field.Root>
-            <Field.Root width="368px">
+            <Field.Root width={{ initial: '100%', medium: '368px' }}>
               <Flex direction="column" gap={1} alignItems="stretch">
                 <Field.Label>
                   {formatMessage({
@@ -266,7 +266,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                 />
               </Flex>
             </Field.Root>
-            <Field.Root width="368px">
+            <Field.Root width={{ initial: '100%', medium: '368px' }}>
               <Flex direction="column" gap={1} alignItems="stretch">
                 <Field.Label>
                   {formatMessage({
@@ -285,7 +285,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                 />
               </Flex>
             </Field.Root>
-            <Flex justifyContent="space-between" width="100%">
+            <Flex justifyContent="space-between" width={{ initial: '100%', medium: '368px' }}>
               <RemoveButton
                 variant="danger-light"
                 onClick={() => removeLink(editor)}

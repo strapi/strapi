@@ -191,20 +191,21 @@ const CreatePage = () => {
             <>
               <Layouts.Header
                 primaryAction={
-                  <Flex gap={2}>
+                  <Flex width="100%" gap={2}>
                     <Button
                       variant="secondary"
                       onClick={() => {
                         handleReset();
                         permissionsRef.current?.resetForm();
                       }}
+                      fullWidth
                     >
                       {formatMessage({
                         id: 'app.components.Button.reset',
                         defaultMessage: 'Reset',
                       })}
                     </Button>
-                    <Button type="submit" loading={isSubmitting} startIcon={<Check />}>
+                    <Button type="submit" loading={isSubmitting} startIcon={<Check />} fullWidth>
                       {formatMessage({
                         id: 'global.save',
                         defaultMessage: 'Save',
