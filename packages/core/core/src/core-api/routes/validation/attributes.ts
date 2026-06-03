@@ -5,7 +5,7 @@
  * of incoming data.
  */
 
-import { type Schema, UID } from '@strapi/types';
+import { type Core, type Schema, UID } from '@strapi/types';
 
 import {
   relations,
@@ -60,7 +60,7 @@ export const blocksToSchema = (): z.Schema => {
 export const booleanToSchema = (attribute: Schema.Attribute.Boolean): z.Schema => {
   const { writable, required, default: defaultValue } = attribute;
 
-  const schema = augmentSchema(z.boolean(), [
+  const schema = augmentSchema(z.boolean().nullable(), [
     maybeRequired(required),
     maybeWithDefault(defaultValue),
     maybeReadonly(writable),
@@ -75,11 +75,13 @@ export const booleanToSchema = (attribute: Schema.Attribute.Boolean): z.Schema =
  * @returns A Zod schema representing the component field.
  */
 export const componentToSchema = (
+  strapi: Core.Strapi,
   attribute: Schema.Attribute.Component<UID.Component, boolean>
 ): z.Schema => {
   const { writable, required, min, max, component, repeatable } = attribute;
 
   const componentSchema = safeSchemaCreation(
+    strapi,
     component,
     () => new CoreComponentRouteValidator(strapi, component).entry
   ) as z.ZodType;
@@ -267,6 +269,7 @@ export const jsonToSchema = (attribute: Schema.Attribute.JSON): z.Schema => {
  * @returns A Zod schema representing the media field.
  */
 export const mediaToSchema = (
+  strapi: Core.Strapi,
   attribute: Schema.Attribute.Media<Schema.Attribute.MediaKind | undefined, boolean>
 ): z.Schema => {
   const { writable, required, multiple } = attribute;
@@ -277,6 +280,7 @@ export const mediaToSchema = (
   const fileSchema = uploadPlugin.contentTypes.file as Struct.ContentTypeSchema;
 
   const mediaSchema = safeSchemaCreation(
+    strapi,
     fileSchema.uid,
     () => new CoreContentTypeRouteValidator(strapi, fileSchema.uid).document
   ) as z.ZodType;
@@ -293,7 +297,10 @@ export const mediaToSchema = (
  * @param attribute - The Relation attribute object from the Strapi schema.
  * @returns A Zod schema representing the relational field.
  */
-export const relationToSchema = (attribute: Schema.Attribute.Relation): z.Schema => {
+export const relationToSchema = (
+  strapi: Core.Strapi,
+  attribute: Schema.Attribute.Relation
+): z.Schema => {
   if (!('target' in attribute)) {
     return z.any();
   }
@@ -301,6 +308,7 @@ export const relationToSchema = (attribute: Schema.Attribute.Relation): z.Schema
   const { writable, required, target } = attribute as Schema.Attribute.RelationWithTarget;
 
   const targetSchema = safeSchemaCreation(
+    strapi,
     target,
     () => new CoreContentTypeRouteValidator(strapi, target).document
   ) as z.ZodType;
@@ -425,7 +433,7 @@ export const blocksToInputSchema = () => {
 export const booleanToInputSchema = (attribute: Schema.Attribute.Boolean) => {
   const { required, default: defaultValue } = attribute;
 
-  const baseSchema = z.enum(BOOLEAN_LITERAL_VALUES);
+  const baseSchema = z.enum(BOOLEAN_LITERAL_VALUES).nullable();
 
   const schema = augmentSchema(baseSchema, [
     maybeRequired(required),

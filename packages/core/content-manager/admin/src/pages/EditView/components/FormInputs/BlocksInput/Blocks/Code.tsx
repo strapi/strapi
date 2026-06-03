@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
-import * as Prism from 'prismjs';
+import * as PrismModule from 'prismjs';
 import { useIntl } from 'react-intl';
 import { BaseRange, Element, Editor, Node, NodeEntry, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
@@ -65,10 +65,33 @@ import 'prismjs/components/prism-tsx';
 import 'prismjs/components/prism-vbnet';
 import 'prismjs/components/prism-yaml';
 
+/**
+ * prismjs is UMD and may not expose a namespace when bundled by Vite; the content-manager
+ * index preloads it so `window.Prism` is set. Use that when the module import is empty.
+ */
+function resolvePrism(): typeof PrismModule | undefined {
+  if (typeof PrismModule !== 'undefined' && PrismModule?.languages) {
+    return PrismModule;
+  }
+
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const globalPrism = (window as Window & { Prism?: typeof PrismModule }).Prism;
+  return globalPrism;
+}
+
+const Prism = resolvePrism();
+
 type BaseRangeCustom = BaseRange & { className: string };
 
 export const decorateCode = ([node, path]: NodeEntry) => {
   const ranges: BaseRangeCustom[] = [];
+
+  // Prism can be undefined when the UMD bundle doesn't expose a namespace and window.Prism
+  // isn't set yet (e.g. this chunk ran before the content-manager preload). Skip decoration.
+  if (!Prism?.languages) return ranges;
 
   // make sure it is an Slate Element
   if (!Element.isElement(node) || node.type !== 'code') return ranges;
@@ -178,6 +201,33 @@ const CodeEditor = (props: RenderElementProps) => {
   );
 };
 
+const withCode = (editor: Editor) => {
+  const { insertData } = editor;
+
+  editor.insertData = (data) => {
+    const pastedText = data.getData('text/plain');
+
+    if (pastedText && editor.selection) {
+      // Check if we're currently inside a code block
+      const codeBlockEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'code',
+      });
+
+      if (codeBlockEntry) {
+        // We're inside a code block, handle the paste specially
+        // Replace the selected content with the pasted text, preserving newlines
+        Transforms.insertText(editor, pastedText);
+        return;
+      }
+    }
+
+    // For non-code blocks, use the default behavior
+    insertData(data);
+  };
+
+  return editor;
+};
+
 const codeBlocks: Pick<BlocksStore, 'code'> = {
   code: {
     renderElement: (props) => <CodeEditor {...props} />,
@@ -195,6 +245,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       pressEnterTwiceToExit(editor);
     },
     snippets: ['```'],
+    plugin: withCode,
   },
 };
 

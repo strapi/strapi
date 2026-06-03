@@ -1,6 +1,6 @@
 import { fireEvent } from '@testing-library/react';
 import { render, waitFor, act, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { NpsSurvey } from '../NpsSurvey';
 
@@ -121,9 +121,11 @@ describe('NPS survey', () => {
     console.error = jest.fn();
 
     server.use(
-      rest.post('https://analytics.strapi.io/submit-nps', (req, res, ctx) => {
-        return res.once(ctx.status(500));
-      })
+      http.post(
+        'https://analytics.strapi.io/submit-nps',
+        () => new HttpResponse(null, { status: 500 }),
+        { once: true }
+      )
     );
 
     const { getByRole, queryByText, findByText } = render(<NpsSurvey />);
@@ -140,12 +142,12 @@ describe('NPS survey', () => {
 
     expect(queryByText(/thank you very much for your feedback!/i)).not.toBeInTheDocument();
 
-    await act(async () => {
-      await jest.runAllTimersAsync();
-    });
+    jest.useRealTimers();
 
+    // Wait for the error notification to appear (with animation)
     await findByText('An error occurred');
 
+    jest.useFakeTimers();
     console.error = originalError;
   });
 

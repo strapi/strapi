@@ -1,4 +1,3 @@
-import inquirer from 'inquirer';
 import type { Question } from 'inquirer';
 
 import type { Scope, Options, DBClient, DBConfig } from '../types';
@@ -16,6 +15,7 @@ const DEFAULT_CONFIG: DBConfig = {
 };
 
 async function dbPrompt() {
+  const { default: inquirer } = await import('inquirer');
   const { useDefault } = await inquirer.prompt<{ useDefault: boolean }>([
     {
       type: 'confirm',
@@ -74,7 +74,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
   const hasDBOptions = DBOptions.some((key) => key in options);
 
   if (!hasDBOptions) {
-    if (options.quickstart) {
+    if (options.quickstart || options.nonInteractive) {
       return DEFAULT_CONFIG;
     }
 
@@ -105,9 +105,9 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
 }
 
 const sqlClientModule = {
-  mysql: { mysql2: '3.9.8' },
-  postgres: { pg: '8.8.0' },
-  sqlite: { 'better-sqlite3': '12.4.1' },
+  mysql: { mysql2: '3.20.0' },
+  postgres: { pg: '8.20.0' },
+  sqlite: { 'better-sqlite3': '12.8.0' },
 };
 
 export function addDatabaseDependencies(scope: Scope) {

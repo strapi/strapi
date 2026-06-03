@@ -1,19 +1,33 @@
-import * as tsUtils from '@strapi/typescript-utils';
-import { strings } from '@strapi/utils';
-import chokidar from 'chokidar';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import cluster from 'node:cluster';
-import { createStrapi } from '@strapi/core';
 
+import type chokidarType from 'chokidar';
+import type { createStrapi as CreateStrapi } from '@strapi/core';
 import type { CLIContext } from '../cli/types';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
-import { createBuildContext } from './create-build-context';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
+import type { Logger } from '../cli/utils/logger';
 
-import { writeStaticClientFiles } from './staticFiles';
+// Lazy: worker-only deps; primary cluster process should not pay for them
+const lazy = <T>(spec: string): (() => T) => {
+  let cached: T | undefined;
+  return (): T => {
+    if (cached === undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      cached = require(spec);
+    }
+    return cached as T;
+  };
+};
+const tsUtils = lazy<typeof import('@strapi/typescript-utils')>('@strapi/typescript-utils');
+const utils = lazy<typeof import('@strapi/utils')>('@strapi/utils');
+const chokidar = lazy<typeof chokidarType>('chokidar');
+const core = lazy<typeof import('@strapi/core')>('@strapi/core');
+const buildCtx = lazy<typeof import('./create-build-context')>('./create-build-context');
+const staticFs = lazy<typeof import('./staticFiles')>('./staticFiles');
 
 interface DevelopOptions extends CLIContext {
   /**
@@ -25,6 +39,7 @@ interface DevelopOptions extends CLIContext {
   polling?: boolean;
   open?: boolean;
   watchAdmin?: boolean;
+  buildAdmin?: boolean;
 }
 
 // This method removes all non-admin build files from the dist directory
@@ -52,8 +67,8 @@ const cleanupDistDirectory = async ({
   try {
     const dirContent = await fs.readdir(distDir);
     const validFilenames = dirContent
-      // Ignore the admin build folder
-      .filter((filename) => filename !== 'build');
+      // Ignore the admin build folder and the TypeScript incremental cache
+      .filter((filename) => filename !== 'build' && !filename.endsWith('.tsbuildinfo'));
     for (const filename of validFilenames) {
       await fs.rm(path.resolve(distDir, filename), { recursive: true });
     }
@@ -75,6 +90,7 @@ const develop = async ({
   logger,
   tsconfig,
   watchAdmin,
+  buildAdmin,
   ...options
 }: DevelopOptions) => {
   const timer = getTimer();
@@ -92,7 +108,12 @@ const develop = async ({
     if (tsconfig?.config) {
       // Build without diagnostics in case schemas have changed
       await cleanupDistDirectory({ tsconfig, logger, timer });
-      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+      try {
+        await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+      } catch (err: unknown) {
+        logger.error(`Error during initial TypeScript compilation: ${(err as Error).message}`);
+        // We don't return here because we want to attempt to start the server even if the initial compilation fails, as it can be fixed while the server is running
+      }
     }
 
     /**
@@ -100,12 +121,12 @@ const develop = async ({
      * sure that at least the admin is built for users & they can interact
      * with the application.
      */
-    if (!watchAdmin) {
+    if (!watchAdmin && buildAdmin) {
       timer.start('createBuildContext');
       const contextSpinner = logger.spinner(`Building build context`).start();
       console.log('');
 
-      const ctx = await createBuildContext({
+      const ctx = await buildCtx().createBuildContext({
         cwd,
         logger,
         tsconfig,
@@ -118,7 +139,7 @@ const develop = async ({
       timer.start('creatingAdmin');
       const adminSpinner = logger.spinner(`Creating admin`).start();
 
-      await writeStaticClientFiles(ctx);
+      await staticFs().writeStaticClientFiles(ctx);
 
       if (ctx.bundler === 'webpack') {
         const { build: buildWebpack } = await import('./webpack/build');
@@ -137,9 +158,15 @@ const develop = async ({
       switch (message) {
         case 'reload': {
           if (tsconfig?.config) {
-            // Build without diagnostics in case schemas have changed
-            await cleanupDistDirectory({ tsconfig, logger, timer });
-            await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+            try {
+              // Build without diagnostics in case schemas have changed
+              await cleanupDistDirectory({ tsconfig, logger, timer });
+              await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : String(err);
+              logger.error(`Error during TypeScript compilation on reload: ${message}`);
+              process.exit(1);
+            }
           }
           logger.debug('cluster has the reload message, sending the worker kill message');
           worker.send('kill');
@@ -166,7 +193,7 @@ const develop = async ({
     timer.start('loadStrapi');
     const loadStrapiSpinner = logger.spinner(`Loading Strapi`).start();
 
-    const strapi = createStrapi({
+    const strapi = core().createStrapi({
       appDir: cwd,
       distDir: tsconfig?.config.options.outDir ?? '',
       autoReload: true,
@@ -181,156 +208,202 @@ const develop = async ({
 
     const strapiInstance = await strapi.load();
 
-    if (watchAdmin) {
-      timer.start('createBuildContext');
-      const contextSpinner = logger.spinner(`Building build context`).start();
-      console.log('');
+    const contextSpinner = logger.spinner(`Building build context`);
+    const adminSpinner = logger.spinner(`Creating admin`);
+    const generatingTsSpinner = logger.spinner(`Generating types`);
+    const compilingTsSpinner = logger.spinner(`Compiling TS`);
 
-      const ctx = await createBuildContext({
-        cwd,
-        logger,
-        strapi,
-        tsconfig,
-        options,
-      });
-      const contextDuration = timer.end('createBuildContext');
-      contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
-      contextSpinner.succeed();
-
-      timer.start('creatingAdmin');
-      const adminSpinner = logger.spinner(`Creating admin`).start();
-
-      await writeStaticClientFiles(ctx);
-
-      if (ctx.bundler === 'webpack') {
-        const { watch: watchWebpack } = await import('./webpack/watch');
-        bundleWatcher = await watchWebpack(ctx);
-      } else if (ctx.bundler === 'vite') {
-        const { watch: watchVite } = await import('./vite/watch');
-        bundleWatcher = await watchVite(ctx);
-      }
-
-      const adminDuration = timer.end('creatingAdmin');
-      adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
-      adminSpinner.succeed();
-    }
-
-    const loadStrapiDuration = timer.end('loadStrapi');
-    loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
-    loadStrapiSpinner.succeed();
-
-    // For TS projects, type generation is a requirement for the develop command so that the server can restart
-    // For JS projects, we respect the experimental autogenerate setting
-    if (tsconfig?.config || strapi.config.get('typescript.autogenerate') !== false) {
-      timer.start('generatingTS');
-      const generatingTsSpinner = logger.spinner(`Generating types`).start();
-
-      await tsUtils.generators.generate({
-        strapi: strapiInstance,
-        pwd: cwd,
-        rootDir: undefined,
-        logger: { silent: true, debug: false },
-        artifacts: { contentTypes: true, components: true },
-      });
-
-      const generatingDuration = timer.end('generatingTS');
-      generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
-      generatingTsSpinner.succeed();
-    }
-
-    if (tsconfig?.config) {
-      timer.start('compilingTS');
-      const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
-
-      await cleanupDistDirectory({ tsconfig, logger, timer });
-      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
-
-      const compilingDuration = timer.end('compilingTS');
-      compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
-      compilingTsSpinner.succeed();
-    }
-
-    const restart = async () => {
-      if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
-        strapiInstance.reload.isReloading = true;
-        strapiInstance.reload();
+    let watcherStarted = false;
+    const ensureWatcher = () => {
+      if (!watcherStarted) {
+        watcherStarted = true;
+        startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
       }
     };
 
-    const watcher = chokidar
-      .watch(cwd, {
-        ignoreInitial: true,
-        usePolling: polling,
-        ignored: [
-          /(^|[/\\])\../, // dot files
-          /tmp/,
-          '**/src/admin/**',
-          '**/src/plugins/**/admin/**',
-          '**/dist/src/plugins/test/admin/**',
-          '**/documentation',
-          '**/documentation/**',
-          '**/node_modules',
-          '**/node_modules/**',
-          '**/plugins.json',
-          '**/build',
-          '**/build/**',
-          '**/log',
-          '**/log/**',
-          '**/logs',
-          '**/logs/**',
-          '**/*.log',
-          '**/index.html',
-          '**/public',
-          '**/public/**',
-          strapiInstance.dirs.static.public,
-          strings.joinBy('/', strapiInstance.dirs.static.public, '**'),
-          '**/*.db*',
-          '**/exports/**',
-          '**/dist/**',
-          '**/*.d.ts',
-          '**/.yalc/**',
-          '**/yalc.lock',
-          // TODO v6: watch only src folder by default, and flip this to watchIncludeFiles
-          ...strapiInstance.config.get('admin.watchIgnoreFiles', []),
-        ],
-      })
-      .on('add', (path) => {
-        strapiInstance.log.info(`File created: ${path}`);
-        restart();
-      })
-      .on('change', (path) => {
-        strapiInstance.log.info(`File changed: ${path}`);
-        restart();
-      })
-      .on('unlink', (path) => {
-        strapiInstance.log.info(`File deleted: ${path}`);
-        restart();
-      });
+    try {
+      if (watchAdmin) {
+        timer.start('createBuildContext');
+        contextSpinner.start();
 
-    process.on('message', async (message) => {
-      switch (message) {
-        case 'kill': {
-          logger.debug(
-            'child process has the kill message, destroying the strapi instance and sending the killed process message'
-          );
-          await watcher.close();
+        const ctx = await buildCtx().createBuildContext({
+          cwd,
+          logger,
+          strapi,
+          tsconfig,
+          options,
+        });
+        const contextDuration = timer.end('createBuildContext');
+        contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
+        contextSpinner.succeed();
 
-          await strapiInstance.destroy();
+        timer.start('creatingAdmin');
+        adminSpinner.start();
 
-          if (bundleWatcher) {
-            bundleWatcher.close();
-          }
-          process.send?.('killed');
-          break;
+        await staticFs().writeStaticClientFiles(ctx);
+
+        if (ctx.bundler === 'webpack') {
+          const { watch: watchWebpack } = await import('./webpack/watch');
+          bundleWatcher = await watchWebpack(ctx);
+        } else if (ctx.bundler === 'vite') {
+          const { watch: watchVite } = await import('./vite/watch');
+          bundleWatcher = await watchVite(ctx);
         }
-        default:
-          break;
-      }
-    });
 
-    strapiInstance.start();
+        const adminDuration = timer.end('creatingAdmin');
+        adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
+        adminSpinner.succeed();
+      }
+
+      const loadStrapiDuration = timer.end('loadStrapi');
+      loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
+      loadStrapiSpinner.succeed();
+
+      // For TS projects, type generation is a requirement for the develop command so that the server can restart
+      // For JS projects, we respect the experimental autogenerate setting
+      if (tsconfig?.config || strapi.config.get('typescript.autogenerate') !== false) {
+        timer.start('generatingTS');
+        generatingTsSpinner.start();
+
+        await tsUtils().generators.generate({
+          strapi: strapiInstance,
+          pwd: cwd,
+          rootDir: undefined,
+          logger: { silent: true, debug: false },
+          artifacts: { contentTypes: true, components: true },
+        });
+
+        const generatingDuration = timer.end('generatingTS');
+        generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
+        generatingTsSpinner.succeed();
+      }
+
+      if (tsconfig?.config) {
+        timer.start('compilingTS');
+        compilingTsSpinner.start();
+
+        await cleanupDistDirectory({ tsconfig, logger, timer });
+        await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+
+        const compilingDuration = timer.end('compilingTS');
+        compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
+        compilingTsSpinner.succeed();
+      }
+
+      ensureWatcher();
+
+      strapiInstance.start();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error(`Error during development: ${message}`);
+
+      if (loadStrapiSpinner.isSpinning) {
+        loadStrapiSpinner.fail();
+      }
+      // Fail any spinners that were left running.
+      if (contextSpinner.isSpinning) {
+        contextSpinner.fail();
+      }
+      if (compilingTsSpinner.isSpinning) {
+        compilingTsSpinner.fail();
+      }
+      if (adminSpinner.isSpinning) {
+        adminSpinner.fail();
+      }
+      if (generatingTsSpinner.isSpinning) {
+        generatingTsSpinner.fail();
+      }
+
+      ensureWatcher();
+    }
   }
 };
+
+function startWatcher(
+  strapiInstance: Awaited<ReturnType<typeof CreateStrapi>>,
+  cwd: string,
+  polling: boolean,
+  logger: Logger,
+  bundleWatcher?: WebpackWatcher | ViteWatcher
+) {
+  const restart = async () => {
+    if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
+      strapiInstance.reload.isReloading = true;
+      strapiInstance.reload();
+    }
+  };
+
+  const watcher = chokidar()
+    .watch(cwd, {
+      ignoreInitial: true,
+      usePolling: polling,
+      ignored: [
+        /(^|[/\\])\../, // dot files
+        /tmp/,
+        '**/src/admin/**',
+        '**/src/plugins/**/admin/**',
+        '**/dist/src/plugins/test/admin/**',
+        '**/documentation',
+        '**/documentation/**',
+        '**/node_modules',
+        '**/node_modules/**',
+        '**/plugins.json',
+        '**/build',
+        '**/build/**',
+        '**/log',
+        '**/log/**',
+        '**/logs',
+        '**/logs/**',
+        '**/*.log',
+        '**/index.html',
+        '**/public',
+        '**/public/**',
+        strapiInstance.dirs.static.public,
+        utils().strings.joinBy('/', strapiInstance.dirs.static.public, '**'),
+        '**/*.db*',
+        '**/exports/**',
+        '**/dist/**',
+        '**/*.d.ts',
+        '**/.yalc/**',
+        '**/yalc.lock',
+        // TODO v6: watch only src folder by default, and flip this to watchIncludeFiles
+        ...strapiInstance.config.get('admin.watchIgnoreFiles', []),
+      ],
+    })
+    .on('add', (path) => {
+      strapiInstance.log.info(`File created: ${path}`);
+      restart();
+    })
+    .on('change', (path) => {
+      strapiInstance.log.info(`File changed: ${path}`);
+      restart();
+    })
+    .on('unlink', (path) => {
+      strapiInstance.log.info(`File deleted: ${path}`);
+      restart();
+    });
+
+  process.on('message', async (message) => {
+    switch (message) {
+      case 'kill': {
+        logger.debug(
+          'child process has the kill message, destroying the strapi instance and sending the killed process message'
+        );
+        await watcher.close();
+
+        await strapiInstance.destroy();
+
+        if (bundleWatcher) {
+          bundleWatcher.close();
+        }
+        process.send?.('killed');
+        break;
+      }
+      default:
+        break;
+    }
+  });
+}
 
 export { develop };
 export type { DevelopOptions };

@@ -606,5 +606,123 @@ describe('user-permissions auth', () => {
         }
       }
     );
+
+    describe('refresh mode session invalidation', () => {
+      test('invalidates all sessions when changing password in refresh mode', async () => {
+        const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+        const generateRefreshToken = jest.fn(() => Promise.resolve({ token: 'new-refresh-token' }));
+        const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'new-access-token' }));
+
+        global.strapi = {
+          ...mockStrapi,
+          config: {
+            get: jest.fn((path) => {
+              if (path === 'plugin::users-permissions.jwtManagement') {
+                return 'refresh';
+              }
+              return {};
+            }),
+          },
+          db: {
+            query: jest.fn(() => ({
+              findOne: jest.fn(() => ({
+                id: 1,
+                password: 'CorrectPassword123',
+              })),
+            })),
+          },
+          sessionManager: jest.fn(() => ({
+            invalidateRefreshToken,
+            generateRefreshToken,
+            generateAccessToken,
+          })),
+          contentAPI: {
+            sanitize: {
+              output: jest.fn((user) => user),
+            },
+          },
+        };
+
+        const ctx = {
+          state: { user: { id: 1 } },
+          request: {
+            body: {
+              currentPassword: 'CorrectPassword123',
+              password: 'NewPassword123',
+              passwordConfirmation: 'NewPassword123',
+            },
+          },
+          send: jest.fn(),
+        };
+
+        const authorization = auth({ strapi: global.strapi });
+        await authorization.changePassword(ctx);
+
+        // Should invalidate all sessions (called without deviceId)
+        expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
+        expect(generateRefreshToken).toHaveBeenCalled();
+        expect(ctx.send).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('resetPassword refresh mode', () => {
+    test('invalidates all sessions when resetting password in refresh mode', async () => {
+      const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+      const generateRefreshToken = jest.fn(() => Promise.resolve({ token: 'new-refresh-token' }));
+      const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'new-access-token' }));
+
+      global.strapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn((path) => {
+            if (path === 'plugin::users-permissions.jwtManagement') {
+              return 'refresh';
+            }
+            return {};
+          }),
+        },
+        db: {
+          query: jest.fn(() => ({
+            findOne: jest.fn((query) => {
+              if (query.where.resetPasswordToken === 'valid-reset-token') {
+                return { id: 1, resetPasswordToken: 'valid-reset-token' };
+              }
+              return null;
+            }),
+          })),
+        },
+        sessionManager: jest.fn(() => ({
+          invalidateRefreshToken,
+          generateRefreshToken,
+          generateAccessToken,
+        })),
+        contentAPI: {
+          sanitize: {
+            output: jest.fn((user) => user),
+          },
+        },
+      };
+
+      const ctx = {
+        state: { auth: {} },
+        request: {
+          body: {
+            password: 'NewPassword123',
+            passwordConfirmation: 'NewPassword123',
+            code: 'valid-reset-token',
+          },
+        },
+        send: jest.fn(),
+      };
+
+      const authorization = auth({ strapi: global.strapi });
+      await authorization.resetPassword(ctx);
+
+      // Should invalidate all sessions (called without deviceId)
+      expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
+      expect(generateRefreshToken).toHaveBeenCalled();
+      expect(ctx.send).toHaveBeenCalledTimes(1);
+    });
   });
 });

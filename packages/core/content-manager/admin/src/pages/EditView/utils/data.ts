@@ -27,6 +27,33 @@ type AnyData = Omit<Document, 'id'>;
 const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
 
 /**
+ * @internal
+ * @description Returns the direct parent object for a dot-separated path.
+ */
+const getDirectParent = (data: unknown, path: string): unknown => {
+  if (!path) return undefined;
+  const isNumericIndex = (value: string) => /^\d+$/.test(value);
+  const segments = path.split('.');
+  const parentPath = segments.slice(0, -1);
+  let current: unknown = data;
+
+  for (const segment of parentPath) {
+    if (current == null) return undefined;
+
+    if (isNumericIndex(segment)) {
+      if (!Array.isArray(current)) return undefined;
+      current = current[Number(segment)];
+      continue;
+    }
+
+    if (typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+
+  return current;
+};
+
+/**
  * @internal This function is used to traverse the data and transform the values.
  * Given a predicate function, it will transform the value (using the given transform function)
  * if the predicate returns true. If it finds that the attribute is a component or dynamiczone,
@@ -35,7 +62,7 @@ const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
  * It is possible to break the ContentManager by using this function incorrectly, for example,
  * if you transform a number into a string but the attribute type is a number, the ContentManager
  * will not be able to save the data and the Form will likely crash because the component it's
- * passing the data too won't succesfully be able to handle the value.
+ * passing the data too won't successfully be able to handle the value.
  */
 const traverseData =
   (predicate: Predicate, transform: Transform) =>
@@ -50,6 +77,15 @@ const traverseData =
          * We also don't want to transform null or undefined values.
          */
         if (BLOCK_LIST_ATTRIBUTE_KEYS.includes(key) || value === null || value === undefined) {
+          acc[key] = value;
+          return acc;
+        }
+
+        // The schema may not contain the attribute when historical data references a
+        // component or field that no longer exists (e.g. a component detached from a
+        // dynamic zone via the content-type-builder). Pass the value through so the
+        // History view can still render the rest of the document.
+        if (!attribute) {
           acc[key] = value;
           return acc;
         }
@@ -173,19 +209,13 @@ const removeFieldsThatDontExistOnSchema = (schema: PartialSchema) => (data: AnyD
  * @internal
  * @description We need to remove null fields from the data-structure because it will pass it
  * to the specific inputs breaking them as most would prefer empty strings or `undefined` if
- * they're controlled / uncontrolled.
+ * they're controlled / uncontrolled. However, Boolean fields should preserve null values.
  */
-const removeNullValues = (data: AnyData) => {
-  return Object.entries(data).reduce<AnyData>((acc, [key, value]) => {
-    if (value === null) {
-      return acc;
-    }
-
-    acc[key] = value;
-
-    return acc;
-  }, {});
-};
+const removeNullValues = (schema: PartialSchema, components: ComponentsDictionary = {}) =>
+  traverseData(
+    (attribute, value) => value === null && attribute.type !== 'boolean',
+    () => undefined
+  )(schema, components);
 
 /* -------------------------------------------------------------------------------------------------
  * transformDocuments
@@ -203,7 +233,7 @@ const transformDocument =
     const transformations = pipe(
       removeFieldsThatDontExistOnSchema(schema),
       removeProhibitedFields(['password'])(schema, components),
-      removeNullValues,
+      removeNullValues(schema, components),
       prepareRelations(schema, components),
       prepareTempKeys(schema, components)
     );
@@ -498,5 +528,6 @@ export {
   removeFieldsThatDontExistOnSchema,
   transformDocument,
   handleInvisibleAttributes,
+  getDirectParent,
 };
 export type { AnyData };

@@ -1,4 +1,6 @@
-const adminConfig = ({ env }) => ({
+import type { Core } from '@strapi/strapi';
+
+const adminConfig = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Admin => ({
   auth: {
     secret: env('ADMIN_JWT_SECRET', 'example-token'),
   },
@@ -13,6 +15,7 @@ const adminConfig = ({ env }) => ({
   flags: {
     nps: env.bool('FLAG_NPS', true),
     promoteEE: env.bool('FLAG_PROMOTE_EE', true),
+    docLinks: env.bool('FLAG_DOC_LINKS', true),
   },
 });
 

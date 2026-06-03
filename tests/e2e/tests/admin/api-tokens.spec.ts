@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { navToHeader } from '../../utils/shared';
-import { sharedSetup } from '../../utils/setup';
+import { navToHeader } from '../../../utils/shared';
+import { sharedSetup } from '../../../utils/setup';
 
 const createAPIToken = async (page, tokenName, duration, type) => {
   await navToHeader(page, ['Settings', 'API Tokens', 'Create new API Token'], 'Create API Token');
@@ -23,7 +23,7 @@ test.describe('API Tokens', () => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
   });
 

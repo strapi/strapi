@@ -1,0 +1,76 @@
+name: PR Review with Progress Tracking
+
+# This workflow triggers an AI-powered code review when the 'AI Review' label is added to a pull request.
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  review-with-tracking:
+    if: ${{ github.event.label.name == 'AI Review' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: PR Review with Progress Tracking
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
+
+          # Your custom review instructions
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Perform a comprehensive code review with the following focus areas:
+
+            1. **Code Quality**
+               - Clean code principles and best practices
+               - Proper error handling and edge cases
+               - Code readability and maintainability
+
+            2. **Security**
+               - Check for potential security vulnerabilities
+               - Validate input sanitization
+               - Review authentication/authorization logic
+
+            3. **Performance**
+               - Identify potential performance bottlenecks
+               - Review database queries for efficiency
+               - Check for memory leaks or resource issues
+
+            4. **Testing**
+               - Verify adequate test coverage
+               - Review test quality and edge cases
+               - Check for missing test scenarios
+
+            5. **Documentation**
+               - Ensure code is properly documented
+               - Verify README updates for new features
+               - Check API documentation accuracy
+
+            6. **Impact Analysis**
+               - Identify and summarize the areas of the codebase impacted by these changes
+               - Assess potential ripple effects or regressions caused by this update
+               - Highlight any dependencies or modules that might require retesting or validation
+
+            7. **Bug Detection & Reliability**
+               - Identify any actual or potential bugs, including logic errors and incorrect assumptions
+               - Check for unintended side effects introduced by new changes
+               - Verify that input/output behavior aligns with expected functionality
+               - Flag areas with ambiguous or risky logic that may cause future regressions
+               - Recommend targeted fixes or refactoring where needed
+
+            Provide detailed feedback using inline comments for specific issues.
+            Use top-level comments for general observations or praise.
+
+          # Tools for comprehensive PR review
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"

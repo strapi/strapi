@@ -3,8 +3,8 @@ import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-sy
 import { ExternalLink, Check, SealCheck } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import darkIllustration from '../assets/purchase-page-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-illustration-light.svg';
+import darkIllustration from '../assets/purchase-page-illustration-dark.jpg';
+import lightIllustration from '../assets/purchase-page-illustration-light.jpg';
 import { useTypedSelector } from '../modules/hooks';
 
 const PurchaseReviewWorkflows = () => {

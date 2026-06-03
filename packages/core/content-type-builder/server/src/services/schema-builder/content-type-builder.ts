@@ -156,14 +156,13 @@ export default function createComponentBuilder() {
         throw new ApplicationError('contentType.alreadyExists');
       }
 
+      const dir = infos.plugin
+        ? path.join(strapi.dirs.app.extensions, infos.plugin, 'content-types', infos.singularName)
+        : path.join(strapi.dirs.app.api, infos.singularName, 'content-types', infos.singularName);
+
       const contentType = createSchemaHandler({
         modelName: infos.singularName,
-        dir: path.join(
-          strapi.dirs.app.api,
-          infos.singularName,
-          'content-types',
-          infos.singularName
-        ),
+        dir,
         filename: `schema.json`,
       });
 
@@ -368,10 +367,13 @@ export default function createComponentBuilder() {
  * @returns {string} uid
  */
 const createContentTypeUID = ({
+  plugin,
   singularName,
 }: {
+  plugin?: string;
   singularName: string;
-}): Internal.UID.ContentType => `api::${singularName}.${singularName}`;
+}): Internal.UID.ContentType =>
+  `${plugin ? `plugin` : `api`}::${plugin || singularName}.${singularName}`;
 
 const generateRelation = ({
   key,

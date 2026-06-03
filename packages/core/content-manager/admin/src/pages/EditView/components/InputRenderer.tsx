@@ -5,6 +5,8 @@ import {
   useForm,
   InputRenderer as FormInputRenderer,
   useField,
+  createRulesEngine,
+  type JsonLogicCondition,
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
@@ -16,6 +18,11 @@ import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
+import {
+  getConditionDependencyPaths,
+  getConditionDependencySubscriptionValue,
+} from '../../../utils/conditionalFields';
+import { getDirectParent } from '../utils/data';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -30,7 +37,7 @@ import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
-  document: ReturnType<UseDocument>;
+  document?: ReturnType<UseDocument>;
 };
 
 /**
@@ -41,14 +48,18 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({
+const BaseInputRenderer = ({
   visible,
   hint: providedHint,
-  document,
+  document: providedDocument,
   ...inputProps
 }: InputRendererProps) => {
+  const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  // Most edit-view fields can read the document from context, which avoids threading a
+  // frequently-changing `document` prop through nested component/DZ trees and reduces churn.
+  // Keep `providedDocument` as an explicit override for callers outside that default flow.
+  const document = providedDocument ?? currentDocument;
   const localeKey = document?.document?.locale || 'default';
-  const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);
@@ -91,6 +102,15 @@ const InputRenderer = ({
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const renderComponentInput = React.useCallback(
+    (componentInputProps: InputRendererProps) => (
+      <MemoizedInputRenderer
+        key={`input-${componentInputProps.name}-${localeKey}`}
+        {...componentInputProps}
+      />
+    ),
+    [localeKey]
+  );
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
@@ -174,27 +194,29 @@ const InputRenderer = ({
         />
       );
     case 'component':
+      // Preview focus/blur handlers are not used for data-structure roots (component/dynamic zone).
+      // Dropping them avoids unstable function props cascading through memoized component trees.
+      const { onBlur: _onComponentBlur, onFocus: _onComponentFocus, ...componentProps } = props;
+
       return (
         <ComponentInput
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...componentProps}
           hint={hint}
           layout={components[props.attribute.component].layout}
           disabled={fieldIsDisabled}
         >
-          {(componentInputProps) => (
-            <InputRenderer
-              key={`input-${componentInputProps.name}-${localeKey}`}
-              {...componentInputProps}
-            />
-          )}
+          {renderComponentInput}
         </ComponentInput>
       );
     case 'dynamiczone':
+      // Same rationale as `component` above: keep data-structure root props stable.
+      const { onBlur: _onDzBlur, onFocus: _onDzFocus, ...dynamicZoneProps } = props;
+
       return (
         <DynamicZone
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...dynamicZoneProps}
           hint={hint}
           disabled={fieldIsDisabled}
         />
@@ -263,6 +285,50 @@ const InputRenderer = ({
   }
 };
 
+// Reuse one rules engine instance instead of recreating it for every field render.
+const rulesEngine = createRulesEngine();
+
+/**
+ * A wrapper around BaseInputRenderer that conditionally renders it depending on the attribute's condition.
+ */
+const ConditionAwareInputRenderer = ({
+  condition,
+  ...props
+}: InputRendererProps & { condition: JsonLogicCondition }) => {
+  // Extract only the field paths the visibility rule depends on so unrelated form changes
+  // do not force this conditional field to re-render.
+  const conditionDependencyPaths = React.useMemo(
+    () => getConditionDependencyPaths(condition),
+    [condition]
+  );
+  const getValues = useForm(
+    'ConditionalInputRenderer',
+    (state) => (state as typeof state & { getValues: () => unknown }).getValues
+  );
+  const conditionSubscriptionValue = useForm('ConditionalInputRenderer', (state) => {
+    // Subscribe to a small, comparable snapshot of the parent scope instead of all form values.
+    return getConditionDependencySubscriptionValue(
+      getDirectParent(state.values, props.name),
+      conditionDependencyPaths
+    );
+  });
+
+  // When dependencies are known, read the latest parent scope lazily via getValues() so the
+  // rule still evaluates against fresh data without subscribing to every form change.
+  const targetValues =
+    conditionDependencyPaths === null
+      ? conditionSubscriptionValue
+      : getDirectParent(getValues(), props.name);
+
+  const isVisible = rulesEngine.evaluate(condition, targetValues);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return <BaseInputRenderer {...props} />;
+};
+
 const attributeHasCustomFieldProperty = (
   attribute: Schema.Attribute.AnyAttribute
 ): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
@@ -329,7 +395,22 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
   }
 };
 
-const MemoizedInputRenderer = React.memo(InputRenderer);
+/**
+ * Conditionally routes the exported InputRender component towards ConditionalInputRenderer
+ * (when there's a JSON logic condition on the attribute, or BaseInputRenderer otherwise.
+ * We do this because rendering a conditional field requires access to the values of
+ * other form fields, which causes many re-renders and performance issues on complex content
+ * types. By splitting the component into two, we isolate the performance issue to
+ * conditional fields only, not all edit view fields.
+ */
+const MemoizedInputRenderer = React.memo((props: InputRendererProps) => {
+  const condition = props.attribute.conditions?.visible;
+  if (condition) {
+    return <ConditionAwareInputRenderer {...props} condition={condition} />;
+  }
+
+  return <BaseInputRenderer {...props} />;
+});
 
 export type { InputRendererProps };
 export { MemoizedInputRenderer as InputRenderer, useFieldHint };

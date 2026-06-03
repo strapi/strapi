@@ -1,12 +1,36 @@
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import semver, { SemVer } from 'semver';
 import resolveFrom from 'resolve-from';
 import execa, { CommonOptions, ExecaReturnValue } from 'execa';
 import readPkgUp, { PackageJson } from 'read-pkg-up';
 import type { BuildOptions } from '../build';
 import { getPackageManager } from './managers';
+
+const CACHE_PATH = path.join('node_modules', '.strapi', 'deps-check.hash');
+
+const hashPackageJson = async (cwd: string): Promise<string | null> => {
+  try {
+    const content = await fs.readFile(path.join(cwd, 'package.json'), 'utf8');
+    return crypto.createHash('sha1').update(content).digest('hex');
+  } catch {
+    return null;
+  }
+};
+
+const readCachedHash = (cwd: string): Promise<string | null> =>
+  fs.readFile(path.join(cwd, CACHE_PATH), 'utf8').catch(() => null);
+
+const writeCachedHash = async (cwd: string, hash: string): Promise<void> => {
+  try {
+    await fs.mkdir(path.dirname(path.join(cwd, CACHE_PATH)), { recursive: true });
+    await fs.writeFile(path.join(cwd, CACHE_PATH), hash, 'utf8');
+  } catch {
+    // best-effort cache write — silently ignore
+  }
+};
 
 /**
  * From V5 this will be imported from the package.json of `@strapi/strapi`.
@@ -50,6 +74,17 @@ const checkRequiredDependencies = async ({
     return { didInstall: false };
   }
 
+  // Hash-cache: skip the full check when package.json hasn't changed since
+  // the last successful pass. The cache lives under node_modules so it's
+  // already gitignored and disposable (a `yarn install` wipe re-runs it).
+  const currentHash = await hashPackageJson(cwd);
+  if (currentHash) {
+    const cachedHash = await readCachedHash(cwd);
+    if (cachedHash === currentHash) {
+      return { didInstall: false };
+    }
+  }
+
   const pkg = await readPkgUp({ cwd });
 
   if (!pkg) {
@@ -77,7 +112,8 @@ const checkRequiredDependencies = async ({
         throw new Error(`Could not find dependencies in package.json at path: ${cwd}`);
       }
 
-      const declaredVersion = pkg.packageJson.dependencies[name];
+      const declaredVersion =
+        pkg.packageJson.dependencies[name] ?? pkg.packageJson.devDependencies?.[name];
 
       if (!declaredVersion) {
         acc.install.push({
@@ -173,6 +209,10 @@ const checkRequiredDependencies = async ({
     if (errors.length > 0 && process.env.NODE_ENV === 'development') {
       throw new Error(`${os.EOL}- ${errors.join(`${os.EOL}- `)}`);
     }
+  }
+
+  if (currentHash) {
+    await writeCachedHash(cwd, currentHash);
   }
 
   return { didInstall: false };

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  useTracking,
   useStrapiApp,
   useNotification,
   useAppInfo,
@@ -16,9 +15,12 @@ import isEqual from 'lodash/isEqual';
 import mapValues from 'lodash/mapValues';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { getTrad } from '../../utils/getTrad';
 import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
+import { useCTBTracking } from '../CTBSession/ctbSession';
+import { useCTBSession } from '../CTBSession/useCTBSession';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
 import { DataManagerContext, type DataManagerContextValue } from './DataManagerContext';
@@ -40,10 +42,30 @@ interface DataManagerProviderProps {
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_dataManagerProvider'] || initialState) as State;
 
+/**
+ * Tag types registered on the shared `adminApi` instance at runtime by
+ * `@strapi/content-manager` via `enhanceEndpoints({ addTagTypes: [...] })`
+ * (see packages/core/content-manager/admin/src/services/api.ts).
+ *
+ * The cast is only required because adminApi's compile-time tag union doesn't see
+ * tags added downstream from this side of the dependency graph.
+ */
+const CONTENT_MANAGER_SCHEMA_CACHE_TAGS = [
+  'InitialData',
+  'ContentTypesConfiguration',
+  'ContentTypeSettings',
+  'ComponentConfiguration',
+] as const;
+
+const invalidateContentManagerSchemaCaches = () =>
+  adminApi.util.invalidateTags(CONTENT_MANAGER_SCHEMA_CACHE_TAGS as never);
+
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
   const state = useSelector(selectState);
   const dispatchGuidedTour = useGuidedTour('DataManagerProvider', (s) => s.dispatch);
+  const location = useLocation();
+  const { sessionId: ctbSessionId, regenerateSessionId } = useCTBSession();
 
   const {
     components,
@@ -62,11 +84,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const plugin = getPlugin('content-type-builder');
   const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const refetchPermissions = useAuth('DataManagerProvider', (state) => state.refetchPermissions);
   const { onCloseModal } = useFormModalNavigation();
 
   const [isSaving, setIsSaving] = React.useState(false);
+  const previousLocationRef = React.useRef<string | null>(null);
 
   const isModified = React.useMemo(() => {
     return !(isEqual(components, initialComponents) && isEqual(contentTypes, initialContentTypes));
@@ -76,7 +99,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const isInDevelopmentMode = autoReload;
 
-  const getDataRef = React.useRef<any>();
+  const getDataRef = React.useRef<() => Promise<void>>(async () => undefined);
 
   getDataRef.current = async () => {
     try {
@@ -113,6 +136,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   React.useEffect(() => {
     getDataRef.current();
+    previousLocationRef.current = location.pathname;
 
     return () => {
       // Reload the plugin so the cycle is new again
@@ -120,6 +144,25 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Detect navigation away and back to CTB to regenerate session
+  React.useEffect(() => {
+    const currentPath = location.pathname;
+    const previousPath = previousLocationRef.current;
+    const CTB_PATH = '/plugins/content-type-builder';
+
+    if (previousPath) {
+      const isCTBPath = currentPath.includes(CTB_PATH);
+      const wasCTBPath = previousPath.includes(CTB_PATH);
+
+      // Regenerate session when returning to CTB after navigating away
+      if (!wasCTBPath && isCTBPath) {
+        regenerateSessionId();
+      }
+    }
+
+    previousLocationRef.current = currentPath;
+  }, [location.pathname, regenerateSessionId]);
 
   React.useEffect(() => {
     if (!autoReload) {
@@ -168,6 +211,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       contentTypes: mutatedCTs,
     });
 
+    // Track that the save button was clicked (includes session ID via useCTBTracking)
+    trackUsage('willUpdateCTBSchema', {
+      ...trackingEventProperties,
+      ctbSessionId,
+    });
+
     const isSendingContentTypes = Object.keys(state.current.contentTypes).length > 0;
 
     lockAppWithAutoreload();
@@ -176,15 +225,20 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await fetchClient.post(`/content-type-builder/update-schema`, { data: requestData });
 
       if (isSendingContentTypes) {
+        // Note: didCreateGuidedTourCollectionType doesn't accept properties
         trackUsage('didCreateGuidedTourCollectionType');
       }
 
       // Make sure the server has restarted
       await serverRestartWatcher();
+      // Generate new session ID after server restart
+      regenerateSessionId();
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
       // Update the app's permissions
       await updatePermissions();
+      // Refresh content-manager caches that depend on the CT/component schema.
+      dispatch(invalidateContentManagerSchemaCaches());
     } catch (err) {
       console.error({ err });
       toggleNotification({
@@ -192,7 +246,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
 
-      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: false });
+      trackUsage('didUpdateCTBSchema', {
+        ...trackingEventProperties,
+        success: false,
+        ctbSessionId,
+      });
     } finally {
       setIsSaving(false);
       unlockAppWithAutoreload();
@@ -203,7 +261,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       });
 
-      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: true });
+      trackUsage('didUpdateCTBSchema', {
+        ...trackingEventProperties,
+        success: true,
+        ctbSessionId,
+      });
     }
   };
 
@@ -276,6 +338,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
     removeAttribute(payload) {
       if (payload.forTarget === 'contentType') {
+        // Note: willDeleteFieldOfContentType doesn't accept properties
         trackUsage('willDeleteFieldOfContentType');
       }
 

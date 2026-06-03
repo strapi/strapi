@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { navToHeader, clickAndWait } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { navToHeader, clickAndWait } from '../../../utils/shared';
 import {
   addAttributesToContentType,
   removeAttributeFromComponent,
-} from '../../utils/content-types';
+} from '../../../utils/content-types';
 
 test.describe('Decimal field hint with min/max values', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });

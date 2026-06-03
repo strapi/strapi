@@ -1,10 +1,15 @@
 import { test, expect } from '@playwright/test';
 
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
-import { waitForRestart } from '../../utils/restart';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  navToHeader,
+} from '../../../utils/shared';
+import { waitForRestart } from '../../../utils/restart';
 
 interface ValidationType {
   field: string;
@@ -23,7 +28,7 @@ test.describe('Edit view', () => {
   test.describe.configure({ timeout: 500000 });
 
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -588,11 +593,74 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
   });
+
+  /**
+   * Regression test: Non-localized fields should stay pre-filled when switching between locale drafts,
+   * even if the draft is unsaved. Previously, switching back to a cached unsaved locale would clear
+   * non-localized values due to the prefill logic only running once.
+   */
+  test('non-localized fields remain pre-filled when revisiting an unsaved locale draft', async ({
+    page,
+  }) => {
+    // Add a non-localized field to the Products content type
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: /add another field to this collection type/i }).click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
+    await page.getByLabel('Name', { exact: true }).fill('nonTranslatableField');
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByLabel('Enable localization for this').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+
+    // Create and save a new entry in the English locale
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
+    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await page.getByLabel('name').fill('Revisit product');
+    await page.getByLabel('nonTranslatableField').fill('Shared across locales');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
+
+    // Go to the unsaved French locale draft; non-localized field should be inherited
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'French (fr)' }).click();
+    await expect(page.getByLabel('nonTranslatableField')).toHaveValue('Shared across locales');
+    await expect(page.getByLabel('name')).toHaveValue('');
+
+    // Switch back to English without saving French draft
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'English (en)' }).click();
+    await page
+      .getByRole('alertdialog', { name: 'Confirmation' })
+      .getByRole('button', { name: 'Confirm' })
+      .click();
+    await expect(page.getByLabel('name')).toHaveValue('Revisit product');
+
+    // Switch again to French locale; non-localized field should still be pre-filled
+    // Previously this would fail—field would be empty because prefill effect didn't rerun
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'French (fr)' }).click();
+    await expect(page.getByLabel('nonTranslatableField')).toHaveValue('Shared across locales');
+    await expect(page.getByLabel('name')).toHaveValue('');
+
+    // Cleanup: remove the non-localized field so other tests are not affected
+    await page.locator('role=link[name^="Content-Type Builder"]').last().click();
+    await page
+      .getByRole('alertdialog', { name: 'Confirmation' })
+      .getByRole('button', { name: 'Confirm' })
+      .click();
+    await navToHeader(page, ['Products'], 'Products');
+    await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+  });
 });
 
 describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(() => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -635,7 +703,7 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 't
   'Unstable edit view',
   () => {
     test.beforeEach(async ({ page }) => {
-      await resetDatabaseAndImportDataFromPath('with-admin.tar');
+      await resetDatabaseAndImportDataFromPath('with-admin');
       await page.goto('/admin');
       await login({ page });
     });
