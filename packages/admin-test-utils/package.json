@@ -78,14 +78,14 @@
   },
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
-    "@testing-library/react": "16.3.0",
+    "@testing-library/react": "16.3.2",
     "jest-styled-components": "7.1.1",
     "react-query": "3.39.3",
     "whatwg-fetch": "3.6.2"
   },
   "devDependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@testing-library/jest-dom": "6.4.5",
+    "@testing-library/jest-dom": "6.9.1",
     "eslint-config-custom": "5.47.1",
     "jest-environment-jsdom": "29.6.1",
     "styled-components": "6.4.1",

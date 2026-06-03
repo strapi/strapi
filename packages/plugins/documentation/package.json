@@ -85,7 +85,7 @@
     "@strapi/admin-test-utils": "5.47.1",
     "@strapi/strapi": "5.47.1",
     "@strapi/types": "5.47.1",
-    "@testing-library/react": "16.3.0",
+    "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
     "@types/fs-extra": "11.0.4",
     "@types/koa": "2.13.4",
