@@ -189,5 +189,60 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     // catB must still appear in catA's PUBLISHED relation list
     const publishedHome = await getCategory(catA.documentId, 'published');
     expect(publishedHome.related).toMatchObject({ count: 1 });
+
+    // The preserved relation must point at catB specifically — not just be "some" relation.
+    // This guards against the row being re-pointed to a wrong/stale target during the
+    // delete-and-recreate publish cycle.
+    const relatedRes = await rq({
+      method: 'GET',
+      url: `/content-manager/relations/api::category.category/${catA.documentId}/related`,
+      qs: { status: 'published' },
+    });
+    expect(relatedRes.statusCode).toBe(200);
+    expect(relatedRes.body.results).toHaveLength(1);
+    expect(relatedRes.body.results[0]).toMatchObject({ documentId: catB.documentId });
+
+    // DB-level guard for the cascade-delete assumption behind the fix.
+    // The fix relies on the old published target's join row being cascade-deleted
+    // before sync() re-inserts the re-pointed row. The CM relation endpoint above
+    // joins to live target rows, so it would silently hide an orphan row left
+    // pointing at the deleted old published target. Assert directly on the join
+    // table that (a) no orphan rows survive and (b) there is exactly one
+    // published-side link Home(pub) -> catB(pub). If the publish pipeline ever
+    // stops cascade-deleting the stale row, this fails even though the count above
+    // would still pass.
+    const connection = strapi.db.getConnection();
+    const categoryMeta = strapi.db.metadata.get('api::category.category');
+    const {
+      name: joinTableName,
+      joinColumn,
+      inverseJoinColumn,
+    } = categoryMeta.attributes.related.joinTable;
+
+    const liveCategoryIds = new Set(
+      (await connection.select('id').from(categoryMeta.tableName)).map((row: any) => row.id)
+    );
+
+    const joinRows = await connection.select('*').from(joinTableName);
+
+    // (a) No orphans: both sides of every row reference a live category row.
+    for (const row of joinRows) {
+      expect(liveCategoryIds.has(row[joinColumn.name])).toBe(true);
+      expect(liveCategoryIds.has(row[inverseJoinColumn.name])).toBe(true);
+    }
+
+    // (b) Exactly one published-side link, pointing Home(pub) -> catB(pub).
+    const [publishedA] = await strapi.db.query('api::category.category').findMany({
+      where: { documentId: catA.documentId, publishedAt: { $notNull: true } },
+      select: ['id'],
+    });
+    const [publishedB] = await strapi.db.query('api::category.category').findMany({
+      where: { documentId: catB.documentId, publishedAt: { $notNull: true } },
+      select: ['id'],
+    });
+
+    const publishedLinks = joinRows.filter((row: any) => row[joinColumn.name] === publishedA.id);
+    expect(publishedLinks).toHaveLength(1);
+    expect(publishedLinks[0][inverseJoinColumn.name]).toBe(publishedB.id);
   });
 });
