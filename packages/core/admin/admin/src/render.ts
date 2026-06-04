@@ -35,6 +35,7 @@ const renderAdmin = async (
     backendURL: createAbsoluteUrl(process.env.STRAPI_ADMIN_BACKEND_URL),
     isEE: false,
     isTrial: false,
+    isTrialLicense: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
     future: {
       isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => {

@@ -1,6 +1,5 @@
 import type { Context } from 'koa';
 import type { GetRoutes, GetPermissions } from '../../../shared/contracts/content-api';
-import '@strapi/types';
 
 export default {
   async getPermissions(ctx: Context) {

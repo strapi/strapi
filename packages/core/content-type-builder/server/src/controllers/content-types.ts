@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import type { Context } from 'koa';
-import type {} from 'koa-body';
 import type { Internal } from '@strapi/types';
 import { getService } from '../utils';
 import {

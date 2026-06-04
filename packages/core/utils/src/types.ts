@@ -1,5 +1,4 @@
 import type * as Koa from 'koa';
-import type {} from 'koa-body';
 
 type ID = number | string;
 

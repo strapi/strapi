@@ -3,6 +3,7 @@
   "version": "5.47.1",
   "private": true,
   "devDependencies": {
-    "@tsconfig/node20": "20.1.6"
+    "@tsconfig/node20": "20.1.6",
+    "koa-body": "6.0.1"
   }
 }
