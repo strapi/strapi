@@ -170,6 +170,11 @@ describe('Role controller', () => {
               assignPermissions,
               findOne: findOneRole,
               getSuperAdmin: jest.fn(() => undefined),
+              hooks: {
+                willValidateUpdatePermissions: {
+                  call: jest.fn((permissions) => Promise.resolve(permissions)),
+                },
+              },
             },
             permission: {
               sanitizePermission: jest.fn((permissions) => permissions),

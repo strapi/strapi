@@ -162,9 +162,7 @@ export default {
 
     await validatedUpdatePermissionsInput(input);
 
-    if (!role) {
-      return ctx.notFound('role.notFound');
-    }
+    await roleService.hooks.willValidateUpdatePermissions.call(input.permissions);
 
     const permissions = await roleService.assignPermissions(role.id, input.permissions);
 

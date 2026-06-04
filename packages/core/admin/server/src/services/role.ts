@@ -21,6 +21,7 @@ const { ApplicationError } = errors;
 
 const hooks = {
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
+  willValidateUpdatePermissions: createAsyncSeriesWaterfallHook(),
 };
 
 const ACTIONS = {

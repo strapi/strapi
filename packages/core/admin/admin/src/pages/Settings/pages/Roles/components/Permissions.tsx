@@ -24,6 +24,7 @@ import {
 import { difference } from '../utils/difference';
 import { ConditionForm, Form, createDefaultCTForm, createDefaultForm } from '../utils/forms';
 import { GenericLayout, formatLayout } from '../utils/layouts';
+import { hasLocaleValidationErrors } from '../utils/localePermissionValidation';
 import { formatPermissionsForAPI } from '../utils/permissions';
 import { updateConditionsToFalse } from '../utils/updateConditionsToFalse';
 import { updateValues, updateValuesWithPermissions } from '../utils/updateValues';
@@ -63,25 +64,34 @@ export interface PermissionsAPI {
     didUpdateConditions: boolean;
     permissionsToSend: Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>[];
   };
+  hasLocaleValidationErrors: () => boolean;
   resetForm: () => void;
   setFormAfterSubmit: () => void;
 }
 
 interface PermissionsProps {
   isFormDisabled?: boolean;
+  onLocaleValidationChange?: (hasErrors: boolean) => void;
   permissions?: Permission[];
   layout: PermissonContracts.GetAll.Response['data'];
   userPermissions?: AuthPermission[];
 }
 
 const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
-  ({ layout, isFormDisabled, permissions = [], userPermissions }, api) => {
+  (
+    { layout, isFormDisabled, onLocaleValidationChange, permissions = [], userPermissions },
+    api
+  ) => {
     const [{ initialData, layouts, modifiedData }, dispatch] = React.useReducer(
       reducer,
       initialState,
       () => init(layout, permissions)
     );
     const { formatMessage } = useIntl();
+
+    React.useEffect(() => {
+      onLocaleValidationChange?.(hasLocaleValidationErrors(modifiedData));
+    }, [modifiedData, onLocaleValidationChange]);
 
     React.useImperativeHandle(api, () => {
       return {
@@ -107,6 +117,9 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
           }
 
           return { permissionsToSend: formatPermissionsForAPI(modifiedData), didUpdateConditions };
+        },
+        hasLocaleValidationErrors() {
+          return hasLocaleValidationErrors(modifiedData);
         },
         resetForm() {
           dispatch({ type: 'RESET_FORM' });

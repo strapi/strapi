@@ -21,6 +21,7 @@ import {
 } from '../hooks/usePermissionsDataManager';
 import { cellWidth, firstRowWidth, rowHeight } from '../utils/constants';
 import { getCheckboxState } from '../utils/getCheckboxState';
+import { hasLocaleValidationErrorForSubject } from '../utils/localePermissionValidation';
 
 import { CollapseLabel } from './CollapseLabel';
 import { HiddenAction } from './HiddenAction';
@@ -54,6 +55,8 @@ const CollapsePropertyMatrix = ({
   propertyName,
   subject,
 }: CollapsePropertyMatrixProps) => {
+  const { formatMessage } = useIntl();
+  const { modifiedData } = usePermissionsDataManager();
   const propertyActions = React.useMemo(
     () =>
       availableActions.map((action) => {
@@ -67,9 +70,25 @@ const CollapsePropertyMatrix = ({
     [availableActions, propertyName]
   );
 
+  const contentTypeKind = pathToData.split('..')[0] as 'collectionTypes' | 'singleTypes';
+  const showLocaleValidationError =
+    propertyName === 'locales' &&
+    subject !== undefined &&
+    hasLocaleValidationErrorForSubject(modifiedData, contentTypeKind, subject);
+
   return (
     <Flex display="inline-flex" direction="column" alignItems="stretch" minWidth={0}>
       <Header label={label} headers={propertyActions} />
+      {showLocaleValidationError && (
+        <Box paddingLeft={6} paddingTop={2} paddingBottom={2}>
+          <Typography variant="pi" textColor="danger600">
+            {formatMessage({
+              id: 'Settings.roles.form.permissions.locales.validation',
+              defaultMessage: 'Permissions must apply to at least one locale.',
+            })}
+          </Typography>
+        </Box>
+      )}
       <Box>
         {childrenForm.map(({ children: childrenForm, label, value, required }, i) => (
           <ActionRow
