@@ -84,6 +84,6 @@
     "styled-components": "^5.2.1"
   },
   "engines": {
-    "node": ">=18.0.0 <=20.x.x"
+    "node": ">=18.0.0 <=22.x.x"
   }
 }
