@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, type ChangeEvent } from 'react';
+import { useRef, useCallback, useState, useEffect, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Layouts, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
@@ -16,7 +16,11 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useUploadFilesStreamMutation, useUploadFromUrlsMutation } from '../../services/api';
-import { useGetFoldersQuery } from '../../services/folders';
+import {
+  useGetFolderQuery,
+  useGetFolderStructureQuery,
+  useGetFoldersQuery,
+} from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
 
 import {
@@ -28,6 +32,7 @@ import { AssetsTable } from './components/AssetsTable';
 import { CreateFolderDialog } from './components/CreateFolderDialog';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
+import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { localStorageKeys, viewOptions } from './constants';
 import { useFolderInfo } from './hooks/useFolderInfo';
@@ -183,7 +188,23 @@ export const AssetsPage = () => {
   const { formatMessage } = useIntl();
   const { openDetails } = useAssetDetailsParam();
 
-  const { currentFolderId } = useFolderNavigation();
+  const { currentFolderId, navigateToFolderId, navigateToRoot } = useFolderNavigation();
+  const {
+    data: folderStructure = [],
+    isLoading: isFolderStructureLoading,
+    isError: isFolderStructureError,
+    refetch: refetchFolderStructure,
+  } = useGetFolderStructureQuery();
+  const { error: currentFolderError } = useGetFolderQuery(
+    { id: currentFolderId! },
+    { skip: currentFolderId === null }
+  );
+
+  useEffect(() => {
+    if (currentFolderError?.name === 'NotFoundError') {
+      navigateToRoot();
+    }
+  }, [currentFolderError, navigateToRoot]);
   const { title, itemCount } = useFolderInfo(currentFolderId);
   const itemCountLabel = formatMessage(
     {
@@ -192,6 +213,9 @@ export const AssetsPage = () => {
     },
     { count: itemCount }
   );
+  const pageHeaderTitle = title
+    ? `${title} (${itemCountLabel})`
+    : formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' });
 
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
 
@@ -262,14 +286,27 @@ export const AssetsPage = () => {
     <>
       <UploadDropZoneProvider onDrop={handleDrop}>
         <Box ref={uploadDropZoneRef}>
-          <Layouts.Root minHeight="100vh" background="neutral0">
+          <Layouts.Root
+            minHeight="100vh"
+            background="neutral0"
+            sideNav={
+              <FolderTree
+                folderStructure={folderStructure}
+                currentFolderId={currentFolderId}
+                onSelectFolder={navigateToFolderId}
+                isLoading={isFolderStructureLoading}
+                isError={isFolderStructureError}
+                onRetry={refetchFolderStructure}
+              />
+            }
+          >
             <VisuallyHidden>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
             </VisuallyHidden>
 
             <HeaderWrapper>
               <Layouts.Header
-                title={`${title} (${itemCountLabel})`}
+                title={pageHeaderTitle}
                 primaryAction={
                   <SimpleMenu
                     popoverPlacement="bottom-end"
