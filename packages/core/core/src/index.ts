@@ -1,3 +1,10 @@
+// Augmentation. Keep in entry point.
+// On build:types, nested imports may be removed from d.ts files because they are runtime only.
+// This works for Strapi consumers that use `@strapi/strapi`.
+// For Strapi consumers that use `@strapi/types` won't work.
+// Withing monorepo tsconfig/base.json takes care of this.
+import 'koa-body';
+
 import * as qs from 'qs';
 import type { Core } from '@strapi/types';
 

@@ -2,7 +2,7 @@
   "extends": "tsconfig/base.json",
   "include": ["src"],
   "compilerOptions": {
-    "types": ["lodash", "jest"],
+    "types": ["koa-body", "jest"],
     "esModuleInterop": true,
     "rootDir": "../",
     "baseUrl": "."

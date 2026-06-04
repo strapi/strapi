@@ -4,7 +4,7 @@
   "compilerOptions": {
     "rootDir": "../",
     "baseUrl": ".",
-    "types": ["lodash", "jest"],
+    "types": ["koa-body", "jest"],
     "esModuleInterop": true
   }
 }

@@ -11,6 +11,7 @@ declare module 'styled-components' {
 interface BrowserStrapi {
   backendURL: string;
   isEE: boolean;
+  isTrial: boolean;
   future: {
     isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => boolean;
   };

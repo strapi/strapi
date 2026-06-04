@@ -102,7 +102,6 @@
     "@types/micromatch": "^4.0.9",
     "@types/pluralize": "0.0.32",
     "koa": "2.16.4",
-    "koa-body": "6.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
