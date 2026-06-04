@@ -77,7 +77,7 @@
     "@strapi/content-manager": "5.47.1",
     "@strapi/database": "5.47.1",
     "@strapi/types": "5.47.1",
-    "@testing-library/react": "16.3.0",
+    "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
     "koa": "2.16.4",
     "msw": "2.13.4",
