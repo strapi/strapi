@@ -18,7 +18,7 @@ on:
 
 env:
   WAITING_ON_AUTHOR_DAYS: ${{ vars.WAITING_ON_AUTHOR_DAYS || '14' }}
-  STALE_DAYS: ${{ vars.STALE_DAYS || '7' }}
+  STALE_DAYS: ${{ vars.STALE_DAYS || '30' }}
 
 permissions: {}
 

@@ -16,7 +16,7 @@ Team reviews PR → leaves feedback → manually adds "waiting on author" label
 [GitHub Action] Removes "waiting on author", adds "stale"
                 Posts a stale warning comment
         │
-        │  (daily cron, still no activity after 7 more days)
+        │  (daily cron, still no activity after 30 more days)
         ▼
 [GitHub Action] Closes the PR
                 Posts a closing comment
