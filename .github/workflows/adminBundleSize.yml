@@ -33,7 +33,7 @@ jobs:
       - name: Create install-and-build script
         run: printf '#!/bin/sh\nset -e\nyarn install\nyarn build\n' > /tmp/install-and-build.sh
 
-      - uses: preactjs/compressed-size-action@v2
+      - uses: preactjs/compressed-size-action@v3
         with:
           install-script: 'sh /tmp/install-and-build.sh'
           build-script: 'build:size'

@@ -18,9 +18,6 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { get } = useFetchClient();
-  // Drop folderPath even when it's present — we filter on folder.id now, and
-  // forwarding folderPath to the API would duplicate the filter on the legacy
-  // (string-path) attribute.
   const { folder, folderPath: _folderPath, _q, ...paramsExceptFolderAndQ } = query;
 
   let params: Query;

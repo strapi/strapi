@@ -67,9 +67,6 @@ describe('useAssets', () => {
   });
 
   test('ignores legacy folderPath query and falls back to $null folder', async () => {
-    // Pre-existing URLs / bookmarks may still pass folderPath. Without an explicit
-    // folder id we treat the request as "root of media library" rather than a path
-    // string filter, which previously caused #23571 (assets vanishing in subfolders).
     const { result } = setup({ query: { folderPath: '/1/2' } });
 
     await waitFor(() => result.current.data);
