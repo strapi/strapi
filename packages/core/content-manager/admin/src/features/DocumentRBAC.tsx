@@ -167,6 +167,8 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
  */
 const extractAndDedupeFields = (permissions: Permission[] = []) => {
   const allFields = permissions.flatMap((permission) => permission.properties?.fields);
+   // An undefined entry means this permission grants access to all fields
+    // (no field-level restriction). Returning [] signals "no restriction" to callers.
   if (allFields.some((field) => field === undefined)) return [];
   return allFields.filter((field, index, arr): field is string => arr.indexOf(field) === index);
 };
