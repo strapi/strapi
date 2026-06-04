@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "4.2.1",
-    "babel-plugin-react-compiler": "0.0.0-experimental-c23de8d-20240515",
+    "babel-plugin-react-compiler": "0.0.0-experimental-9627644-20250520",
     "vite": "5.4.21"
   }
 }
