@@ -1,4 +1,4 @@
-import type { InlineConfig, UserConfig } from 'vite';
+import type { InlineConfig, PluginOption, UserConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 
@@ -9,6 +9,27 @@ import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
 import type { BuildContext } from '../create-build-context';
 import { buildFilesPlugin } from './plugins';
+
+const OBJECT_INSPECT_SHIM = '\0strapi-object-inspect';
+
+const objectInspectShimPlugin = (): PluginOption => ({
+  name: 'strapi:object-inspect-shim',
+  enforce: 'pre',
+  resolveId(id) {
+    if (id === 'object-inspect') {
+      return OBJECT_INSPECT_SHIM;
+    }
+
+    return null;
+  },
+  load(id) {
+    if (id === OBJECT_INSPECT_SHIM) {
+      return 'export default function inspect(value) { return String(value); }';
+    }
+
+    return null;
+  },
+});
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
@@ -140,9 +161,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),
+        'object-inspect': OBJECT_INSPECT_SHIM,
       },
     },
-    plugins: [react(), buildFilesPlugin(ctx)],
+    plugins: [react(), objectInspectShimPlugin(), buildFilesPlugin(ctx)],
   };
 };
 

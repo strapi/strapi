@@ -1,4 +1,4 @@
-import { errors } from '@strapi/utils';
+import type { errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import type { AdminTokenOwner, Permission } from './shared';
 import type { ApiTokenBase } from './content-api-token';

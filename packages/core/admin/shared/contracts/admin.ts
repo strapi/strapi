@@ -1,5 +1,5 @@
-import { Struct, UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import type { Struct, UID } from '@strapi/types';
+import type { errors } from '@strapi/utils';
 import type { File } from 'formidable';
 
 export interface Logo {

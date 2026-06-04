@@ -1,5 +1,5 @@
 import type { errors } from '@strapi/utils';
-import { Entity, Permission } from './shared';
+import type { Entity, Permission } from './shared';
 
 export interface Action {
   actionId: string;
