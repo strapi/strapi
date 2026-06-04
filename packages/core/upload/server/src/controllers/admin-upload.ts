@@ -110,6 +110,22 @@ export default {
     const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
     const replacedFile = await uploadService.replace(id, { data, file: validFiles[0] }, { user });
 
+    // Regenerate AI metadata for image replacements so the alt text / caption
+    // reflect the new file content. Mirrors the post-upload hook in
+    // `uploadFiles`; failure is logged and swallowed to keep the replace flow
+    // resilient when the AI provider is unavailable.
+    const aiMetadataService = getService('aiMetadata');
+    if (replacedFile?.mime?.startsWith('image/') && (await aiMetadataService.isEnabled())) {
+      try {
+        const metadataResults = await aiMetadataService.processFiles([replacedFile]);
+        await aiMetadataService.updateFilesWithAIMetadata([replacedFile], metadataResults, user);
+      } catch (error) {
+        strapi.log.warn('AI metadata generation failed on replace, proceeding without it', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
     // Sign file urls for private providers
     const signedFile = await getService('file').signFileUrls(replacedFile);
 
