@@ -69,6 +69,7 @@
     "@strapi/pack-up": "4.23.0",
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
+    "@types/inquirer": "6.5.0",
     "@types/lodash": "^4.14.191",
     "eslint-config-custom": "4.26.1",
     "tsconfig": "4.26.1"
