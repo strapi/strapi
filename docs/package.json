@@ -30,7 +30,9 @@
     "@babel/runtime": "7.29.2",
     "@babel/runtime-corejs3": "7.29.2",
     "uuid@^8.3.2": "11.1.1",
-    "qs@~6.14.0": "6.15.2"
+    "qs@~6.14.0": "6.15.2",
+    "serialize-javascript@^6.0.0": "7.0.5",
+    "serialize-javascript@^6.0.1": "7.0.5"
   },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "2.0.1",
