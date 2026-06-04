@@ -327,6 +327,8 @@ class StrapiApp {
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
   async register(customRegister?: unknown) {
+    const { backendURL } = window.strapi;
+
     this.widgets.register([
       {
         icon: User,
@@ -362,19 +364,23 @@ class StrapiApp {
         id: 'key-statistics',
         roles: ['strapi-super-admin'],
       },
-      {
-        icon: Cloud,
-        title: {
-          id: 'widget.deploy-now.title',
-          defaultMessage: 'Deploy',
-        },
-        component: async () => {
-          const { DeployNowWidget } = await import('./components/Widgets');
-          return DeployNowWidget;
-        },
-        pluginId: 'admin',
-        id: 'deploy-now',
-      },
+      ...(backendURL?.includes('localhost')
+        ? [
+            {
+              icon: Cloud,
+              title: {
+                id: 'widget.deploy-now.title',
+                defaultMessage: 'Deploy',
+              },
+              component: async () => {
+                const { DeployNowWidget } = await import('./components/Widgets');
+                return DeployNowWidget;
+              },
+              pluginId: 'admin',
+              id: 'deploy-now',
+            },
+          ]
+        : []),
     ]);
 
     Object.keys(this.appPlugins).forEach((plugin) => {
