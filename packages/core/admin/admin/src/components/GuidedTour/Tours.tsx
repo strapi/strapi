@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal } from '@strapi/design-system';
+import { Box, Popover, Portal, setOpacity } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
@@ -60,7 +60,7 @@ const GuidedTourOverlay = styled(Box)`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(50, 50, 77, 0.2);
+  background-color: ${({ theme }) => setOpacity(theme.colors.neutral800, 0.2)};
   z-index: 10;
 `;
 

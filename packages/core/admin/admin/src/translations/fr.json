@@ -347,6 +347,8 @@
   "app.components.PluginCard.more-details": "Plus de détails",
   "app.components.ToggleCheckbox.off-label": "Désactivé",
   "app.components.ToggleCheckbox.on-label": "Activé",
+  "app.components.UpsellBanner.close": "Fermer la bannière.",
+  "app.components.UpsellBanner.reopen": "Rouvrir la bannière.",
   "app.components.Users.MagicLink.connect": "Envoyez ce lien à l'utilisateur pour qu'il se connecte.",
   "app.components.Users.MagicLink.connect.sso": "Envoyez ce lien à l'utilisateur, la première connexion peut être effectué via un fournisseur SSO",
   "app.components.Users.ModalCreateBody.block-title.details": "Détails",
@@ -692,5 +694,8 @@
   "notification.success.apitokencreated": "Jeton d'API créé avec succès",
   "notification.success.apitokenedited": "Jeton d'API édité avec succès",
   "notification.success.transfertokencreated": "Jeton de transfert créé avec succès",
-  "notification.success.transfertokenedited": "Jeton de transfert édité avec succès"
+  "notification.success.transfertokenedited": "Jeton de transfert édité avec succès",
+  "HomePage.widget.deploy-now.title": "Prêt à mettre en ligne ?",
+  "HomePage.widget.deploy-now.description": "Déployez votre projet.",
+  "HomePage.widget.deploy-now.button": "Déployer maintenant"
 }

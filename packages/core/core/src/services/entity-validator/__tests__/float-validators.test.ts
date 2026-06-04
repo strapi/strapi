@@ -199,6 +199,23 @@ describe('Float validator', () => {
           select: ['id'],
         });
       });
+
+      test('it rejects infinite values before unique validation query', async () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.float(
+            {
+              attr: { type: 'float', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrFloatUnique', value: Infinity },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        await expect(validator(Infinity)).rejects.toBeInstanceOf(errors.YupValidationError);
+        expect(fakeFindOne).not.toHaveBeenCalled();
+      });
     });
   });
 

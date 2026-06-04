@@ -29,7 +29,7 @@ function createSearchTest(testFunction, description, searchTerm) {
 
 test.describe('Search', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
