@@ -12,7 +12,7 @@ test.describe('Create single type with all field types', () => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));

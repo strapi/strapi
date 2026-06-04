@@ -376,7 +376,9 @@ const cleanOrderColumns = async ({
     }
   };
 
-  return Promise.all([updateOrderColumn(), updateInverseOrderColumn()]);
+  // Run updates in a deterministic order to avoid lock cycles on the same join table.
+  await updateOrderColumn();
+  await updateInverseOrderColumn();
 };
 
 export {

@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS = {
   filterable: true,
   searchable: true,
   pageSize: 10,
+  relationOpenMode: 'modal' as const,
 };
 
 const settingsFields = [
@@ -19,6 +20,7 @@ const settingsFields = [
   'mainField',
   'defaultSortBy',
   'defaultSortOrder',
+  'relationOpenMode',
 ];
 
 const getModelSettings = pipe([propOr({}, 'config.settings'), pick(settingsFields)]);

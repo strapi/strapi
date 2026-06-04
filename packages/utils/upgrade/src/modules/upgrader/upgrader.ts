@@ -249,20 +249,36 @@ export class Upgrader implements UpgraderInterface {
     const json = createJSONTransformAPI(packageJSON);
 
     const dependencies = json.get<Record<string, string>>('dependencies', {});
-    const strapiDependencies = this.getScopedStrapiDependencies(dependencies);
+    const devDependencies = json.get<Record<string, string>>('devDependencies', {});
+
+    const strapiProductionDependencies = this.getScopedStrapiDependencies(dependencies);
+    const strapiDevelopmentDependencies = this.getScopedStrapiDependencies(devDependencies);
+
+    const strapiPackagesToUpgradeCount =
+      strapiProductionDependencies.length + strapiDevelopmentDependencies.length;
 
     this.logger?.debug?.(
-      `Found ${f.highlight(strapiDependencies.length)} dependency(ies) to update`
+      `Found ${f.highlight(strapiPackagesToUpgradeCount)} dependency(ies) to update`
     );
-    strapiDependencies.forEach((dependency) =>
+    strapiProductionDependencies.forEach((dependency) =>
       this.logger?.debug?.(`- ${dependency[0]} (${dependency[1]} -> ${this.target})`)
     );
+    strapiDevelopmentDependencies.forEach((dependency) =>
+      this.logger?.debug?.(
+        `- ${dependency[0]} (devDependencies) (${dependency[1]} -> ${this.target})`
+      )
+    );
 
-    if (strapiDependencies.length === 0) {
+    if (strapiPackagesToUpgradeCount === 0) {
       return;
     }
 
-    strapiDependencies.forEach(([name]) => json.set(`dependencies.${name}`, this.target.raw));
+    strapiProductionDependencies.forEach(([name]) =>
+      json.set(`dependencies.${name}`, this.target.raw)
+    );
+    strapiDevelopmentDependencies.forEach(([name]) =>
+      json.set(`devDependencies.${name}`, this.target.raw)
+    );
 
     const updatedPackageJSON = json.root();
 
@@ -372,6 +388,12 @@ export const upgraderFactory = (
 
   if (semver.eq(semverTarget, project.strapiVersion)) {
     throw new Error(`The project is already using v${semverTarget}`);
+  }
+
+  if (semver.lt(semverTarget, project.strapiVersion)) {
+    throw new Error(
+      `The target version v${semverTarget} must be greater than the current version v${project.strapiVersion}`
+    );
   }
 
   return new Upgrader(project, semverTarget, npmPackage);

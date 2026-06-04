@@ -1,24 +1,23 @@
 import * as React from 'react';
 
-import { createContext, type FieldValue, useIsMobile } from '@strapi/admin/strapi-admin';
+import {
+  createContext,
+  useStrapiApp,
+  type FieldValue,
+  useIsMobile,
+} from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
+import { flushSync } from 'react-dom';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
 
+import { ContentManagerPlugin } from '../../../../../content-manager';
 import { getTranslation } from '../../../../../utils/translations';
 
-import { codeBlocks } from './Blocks/Code';
-import { embeddedSocialMediaBlocks } from './Blocks/EmbeddedSocialMedia';
-import { headingBlocks } from './Blocks/Heading';
-import { imageBlocks } from './Blocks/Image';
-import { linkBlocks } from './Blocks/Link';
-import { listBlocks } from './Blocks/List';
-import { paragraphBlocks } from './Blocks/Paragraph';
-import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
@@ -32,14 +31,21 @@ import type { Schema } from '@strapi/types';
  * BlocksEditorProvider
  * -----------------------------------------------------------------------------------------------*/
 
+interface CustomNode extends Omit<Schema.Attribute.BlocksNode, 'type'> {
+  type: Schema.Attribute.BlocksNode['type'] | string;
+  level?: number;
+  format?: string;
+}
+
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
   /** Function to check if a given node is of this type of block */
-  matchNode: (node: Schema.Attribute.BlocksNode) => boolean;
+  matchNode: (node: Schema.Attribute.BlocksNode | CustomNode) => boolean;
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
   handleTab?: (editor: Editor) => void;
+  handleShiftTab?: (editor: Editor) => void;
   snippets?: string[];
   /** Adjust the vertical positioning of the drag-to-reorder grip icon */
   dragHandleTopMargin?: CSSProperties['marginTop'];
@@ -51,13 +57,13 @@ interface BaseBlock {
   isDraggable?: (element: Element) => boolean;
 }
 
-interface NonSelectorBlock extends BaseBlock {
-  isInBlocksSelector: false;
+export interface NonSelectorBlock extends BaseBlock {
+  isInBlocksSelector?: false;
 }
 
-interface SelectorBlock extends BaseBlock {
+export interface SelectorBlock extends BaseBlock {
   isInBlocksSelector: true;
-  icon: React.ComponentType;
+  icon?: React.ComponentType;
   label: MessageDescriptor;
 }
 
@@ -91,21 +97,25 @@ type BlocksStore = {
   [K in NonSelectorBlockKey]: NonSelectorBlock;
 };
 
+type RichTextBlocksStore = Partial<BlocksStore> & Record<string, SelectorBlock | NonSelectorBlock>;
+
 interface BlocksEditorContextValue {
-  blocks: BlocksStore;
+  blocks: RichTextBlocksStore;
   modifiers: ModifiersStore;
   disabled: boolean;
   name: string;
   setLiveText: (text: string) => void;
   isExpandedMode: boolean;
+  /** Push debounced Slate → form sync immediately (e.g. on Editable blur before Save). */
+  flushPendingFormSync: () => void;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
   createContext<BlocksEditorContextValue>('BlocksEditor');
 
-function useBlocksEditorContext(
-  consumerName: string
-): BlocksEditorContextValue & { editor: Editor } {
+function useBlocksEditorContext(consumerName: string): BlocksEditorContextValue & {
+  editor: Editor;
+} {
   const context = usePartialBlocksEditorContext(consumerName, (state) => state);
   const editor = useSlate();
 
@@ -194,19 +204,15 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     const { formatMessage } = useIntl();
     const isMobile = useIsMobile();
 
-    const blocks = React.useMemo(
-      () => ({
-        ...paragraphBlocks,
-        ...headingBlocks,
-        ...listBlocks,
-        ...linkBlocks,
-        ...imageBlocks,
-        ...quoteBlocks,
-        ...codeBlocks,
-        ...embeddedSocialMediaBlocks,
-      }),
-      []
-    ) satisfies BlocksStore;
+    const blocks = useStrapiApp(
+      'BlocksEditor',
+      (state) =>
+        (
+          state.plugins['content-manager']?.apis as
+            | ContentManagerPlugin['config']['apis']
+            | undefined
+        )?.getRichTextBlocks() ?? ({} as RichTextBlocksStore)
+    );
 
     const blockRegisteredPlugins = Object.values(blocks)
       .map((block) => block.plugin)
@@ -237,6 +243,22 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     const { key, incrementSlateUpdatesCount } = useResetKey(value);
 
     const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
+
+    const flushPendingFormSync = React.useCallback(() => {
+      if (!debounceTimeout.current) {
+        return;
+      }
+      clearTimeout(debounceTimeout.current);
+      debounceTimeout.current = null;
+      incrementSlateUpdatesCount();
+      // Ensure Strapi Form state updates before the next event (e.g. Save click) reads values.
+      flushSync(() => {
+        onChange(
+          name,
+          normalizeBlocksState(editor, editor.children) as Schema.Attribute.BlocksValue
+        );
+      });
+    }, [editor, incrementSlateUpdatesCount, name, onChange]);
 
     const handleSlateChange = React.useCallback(
       (state: Descendant[]) => {
@@ -321,6 +343,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             name={name}
             setLiveText={setLiveText}
             isExpandedMode={isExpandedMode}
+            flushPendingFormSync={flushPendingFormSync}
           >
             <EditorLayout
               error={error}
@@ -356,6 +379,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
 export {
   type BlocksStore,
+  type RichTextBlocksStore,
   type SelectorBlockKey,
   BlocksEditor,
   BlocksEditorProvider,

@@ -94,7 +94,7 @@ const ProfilePage = () => {
     } else {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   }, [formatMessage, notifyStatus, toggleNotification, user]);
@@ -165,7 +165,7 @@ const ProfilePage = () => {
       } else {
         toggleNotification({
           type: 'danger',
-          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }
     }
@@ -417,7 +417,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               })),
             ],
             placeholder: formatMessage({
-              id: 'components.Select.placeholder',
+              id: 'app.components.Select.placeholder',
               defaultMessage: 'Select',
             }),
             size: 6,

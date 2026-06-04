@@ -1,11 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../../../utils/shared';
+import {
+  clickAndWait,
+  findAndClose,
+  insertDynamicZoneComponent,
+  navToHeader,
+} from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -318,33 +323,27 @@ test.describe('Edit View', () => {
       await expect(componentsLocator.nth(1)).toHaveText(/content and image/i);
       await expect(componentsLocator.nth(2)).toHaveText(/product carousel/i);
 
-      // Add components at specific locations:
-      // - very last position
-      const moreActionsBtn1 = componentsLocator
-        .nth(1)
-        .getByRole('button', { name: /more actions/i });
-      await moreActionsBtn1.waitFor({ state: 'visible' });
-      await moreActionsBtn1.click({ force: true });
-      await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
-      await page.getByRole('menuitem', { name: /product carousel/i }).dispatchEvent('click');
+      // Add components at specific locations (stable accordion labels, not nth indices):
+      await insertDynamicZoneComponent(page, {
+        relativeToComponent: /content and image/i,
+        position: 'below',
+        componentToAdd: /product carousel/i,
+        expectedComponentCount: 4,
+      });
 
-      // - very first position
-      const moreActionsBtn2 = componentsLocator
-        .nth(0)
-        .getByRole('button', { name: /more actions/i });
-      await moreActionsBtn2.waitFor({ state: 'visible' });
-      await moreActionsBtn2.click({ force: true });
-      await page.getByRole('menuitem', { name: /add component above/i }).dispatchEvent('click');
-      await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
+      await insertDynamicZoneComponent(page, {
+        relativeToComponent: /product carousel - 23\/24 kits/i,
+        position: 'above',
+        componentToAdd: /hero image/i,
+        expectedComponentCount: 5,
+      });
 
-      // - middle position
-      const moreActionsBtn3 = componentsLocator
-        .nth(1)
-        .getByRole('button', { name: /more actions/i });
-      await moreActionsBtn3.waitFor({ state: 'visible' });
-      await moreActionsBtn3.click({ force: true });
-      await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
-      await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
+      await insertDynamicZoneComponent(page, {
+        relativeToComponent: /product carousel - 23\/24 kits/i,
+        position: 'below',
+        componentToAdd: /hero image/i,
+        expectedComponentCount: 6,
+      });
 
       // Make sure we get the desired components order
       const componentTexts = await page

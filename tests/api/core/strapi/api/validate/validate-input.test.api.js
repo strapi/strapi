@@ -262,6 +262,33 @@ describe('Core API - Validate', () => {
 
         await expect(strapi.contentAPI.validate.input(input, contentType)).resolves.not.toThrow();
       });
+
+      it('should accept id in repeatable component data', async () => {
+        const input = {
+          componentRepeat: [{ id: 1, name: 'A' }],
+        };
+
+        await expect(strapi.contentAPI.validate.input(input, contentType)).resolves.not.toThrow();
+      });
+
+      it('should accept mixed repeatable component data (some with id, some without)', async () => {
+        const input = {
+          componentRepeat: [{ id: 1, name: 'A' }, { name: 'B' }],
+        };
+
+        await expect(strapi.contentAPI.validate.input(input, contentType)).resolves.not.toThrow();
+      });
+
+      it('should accept id in dynamic zone component data', async () => {
+        const input = {
+          dz: [
+            { __component: 'default.component-a', id: 1, name: 'DZ A' },
+            { __component: 'default.component-b', id: 2, name: 'DZ B' },
+          ],
+        };
+
+        await expect(strapi.contentAPI.validate.input(input, contentType)).resolves.not.toThrow();
+      });
     });
   });
 
@@ -285,10 +312,15 @@ describe('Core API - Validate', () => {
                   name: 'Initial Nested Component Name',
                 },
               },
+              componentRepeat: [{ name: 'Initial Repeat 1' }, { name: 'Initial Repeat 2' }],
+              dz: [
+                { __component: 'default.component-a', name: 'Initial DZ A' },
+                { __component: 'default.component-b', name: 'Initial DZ B' },
+              ],
             },
           },
           qs: {
-            populate: ['componentA.nestedComponent'],
+            populate: ['componentA.nestedComponent', 'componentRepeat', 'dz'],
           },
         });
         createdDoc = createRes.body.data;
@@ -350,6 +382,80 @@ describe('Core API - Validate', () => {
           },
         });
         expect(res.status).toBe(method === 'post' ? 201 : 200);
+      });
+
+      it('should accept repeatable component data without id', async () => {
+        const res = await rq[method](url, {
+          body: {
+            data: {
+              ...validDocInput,
+              componentRepeat: [{ name: 'Repeat No ID' }],
+            },
+          },
+        });
+        expect(res.status).toBe(method === 'post' ? 201 : 200);
+      });
+
+      it('should accept repeatable component with id during UPDATE', async () => {
+        if (method === 'put') {
+          const getRes = await rq.get(url, {
+            qs: { populate: ['componentRepeat'] },
+          });
+          expect(getRes.status).toBe(200);
+          const repeatItems = getRes.body.data.componentRepeat;
+          expect(repeatItems).toBeDefined();
+          expect(repeatItems.length).toBeGreaterThan(0);
+
+          const res = await rq[method](url, {
+            body: {
+              data: {
+                ...validDocInput,
+                componentRepeat: [
+                  { id: repeatItems[0].id, name: 'Updated Repeat 1' },
+                  { name: 'New Repeat Item' },
+                ],
+              },
+            },
+            qs: { populate: ['componentRepeat'] },
+          });
+          expect(res.status).toBe(200);
+          expect(res.body.data.componentRepeat).toBeDefined();
+          expect(res.body.data.componentRepeat.length).toBe(2);
+          expect(res.body.data.componentRepeat[0].name).toBe('Updated Repeat 1');
+          expect(res.body.data.componentRepeat[1].name).toBe('New Repeat Item');
+        }
+      });
+
+      it('should accept dynamic zone component with id during UPDATE', async () => {
+        if (method === 'put') {
+          const getRes = await rq.get(url, {
+            qs: { populate: ['dz'] },
+          });
+          expect(getRes.status).toBe(200);
+          const dzItems = getRes.body.data.dz;
+          expect(dzItems).toBeDefined();
+          expect(dzItems.length).toBeGreaterThan(0);
+
+          const res = await rq[method](url, {
+            body: {
+              data: {
+                ...validDocInput,
+                dz: [
+                  {
+                    __component: dzItems[0].__component,
+                    id: dzItems[0].id,
+                    name: 'Updated DZ Item',
+                  },
+                ],
+              },
+            },
+            qs: { populate: ['dz'] },
+          });
+          expect(res.status).toBe(200);
+          expect(res.body.data.dz).toBeDefined();
+          expect(res.body.data.dz.length).toBe(1);
+          expect(res.body.data.dz[0].name).toBe('Updated DZ Item');
+        }
       });
 
       it('should accept id in component data during CREATE (validation/sanitization allow it, Document Service strips it)', async () => {
