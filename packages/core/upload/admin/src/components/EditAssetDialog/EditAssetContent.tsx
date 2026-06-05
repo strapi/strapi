@@ -67,6 +67,7 @@ export interface Asset extends Omit<FileDefinition, 'folder'> {
 
 interface EditAssetContentProps {
   asset?: Asset;
+  initialFolderId?: string | number | null;
   canUpdate?: boolean;
   canCopyLink?: boolean;
   canDownload?: boolean;
@@ -87,9 +88,23 @@ interface FormInitialData {
   };
 }
 
+const toFolderId = (value: string | number | null | undefined): number | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export const EditAssetContent = ({
   onClose,
   asset,
+  initialFolderId = null,
   canUpdate = false,
   canCopyLink = false,
   canDownload = false,
@@ -171,7 +186,7 @@ export const EditAssetContent = ({
     }
   };
 
-  const activeFolderId = asset?.folder?.id;
+  const activeFolderId = asset?.folder?.id ?? toFolderId(initialFolderId);
   const initialFormData = !folderStructureIsLoading && {
     name: asset?.name,
     alternativeText: asset?.alternativeText ?? undefined,

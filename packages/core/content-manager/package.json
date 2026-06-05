@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.46.1",
+  "version": "5.47.1",
   "description": "A powerful UI to easily manage your data.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -75,8 +75,8 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.2.0",
     "@strapi/icons": "2.2.0",
-    "@strapi/types": "5.46.1",
-    "@strapi/utils": "5.46.1",
+    "@strapi/types": "5.47.1",
+    "@strapi/utils": "5.47.1",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
@@ -111,9 +111,9 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.46.1",
-    "@strapi/database": "5.46.1",
-    "@testing-library/react": "16.3.0",
+    "@strapi/admin": "5.47.1",
+    "@strapi/database": "5.47.1",
+    "@testing-library/react": "16.3.2",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
     "@types/prismjs": "1.26.5",
