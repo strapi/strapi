@@ -36,7 +36,7 @@ jobs:
       - uses: preactjs/compressed-size-action@v3
         with:
           install-script: 'sh /tmp/install-and-build.sh'
-          build-script: 'build:size'
+          build-script: 'yarn run build:size'
           pattern: '**/build/**/*.{js,css,html,svg}'
           strip-hash: "-([-\\w]{8})(\\.\\w+)$"
           minimum-change-threshold: '5%'
