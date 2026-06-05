@@ -20,6 +20,7 @@ const populateBuilder = (uid: UID.Schema) => {
     countMany: false,
     countOne: false,
     maxLevel: -1,
+    relationMode: 'default' as 'default' | 'identity',
   };
 
   const builder = {
@@ -45,6 +46,16 @@ const populateBuilder = (uid: UID.Schema) => {
       if (!isNil(toOne)) {
         deepPopulateOptions.countOne = toOne;
       }
+      return builder;
+    },
+
+    /**
+     * Populate relations as identity-only document fields.
+     * Mutually exclusive with countRelations — this mode takes precedence.
+     * Used by MCP handlers to prevent target-scalar leaks at the DB layer.
+     */
+    relationsAsIdentity() {
+      deepPopulateOptions.relationMode = 'identity';
       return builder;
     },
 
@@ -81,7 +92,11 @@ const populateBuilder = (uid: UID.Schema) => {
         return initialPopulate;
       }
 
-      return getDeepPopulate(uid, { ...deepPopulateOptions, initialPopulate });
+      return getDeepPopulate(uid, {
+        ...deepPopulateOptions,
+        initialPopulate,
+        identityRelations: deepPopulateOptions.relationMode === 'identity',
+      });
     },
   };
 

@@ -1,5 +1,32 @@
-import { z } from '@strapi/utils';
+import strapiUtils, { z } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
+
+const { isAnyToMany } = strapiUtils.relations;
+
+const relationIdentity = z.object({
+  documentId: z.string(),
+  locale: z.string().optional(),
+  __type: z.string().optional(),
+});
+
+const buildAttributeSchema = (key: string, attributes: Struct.SchemaAttributes): z.ZodTypeAny => {
+  const attribute = attributes[key];
+
+  if (attribute?.type !== 'relation') {
+    return z.unknown().optional();
+  }
+
+  // admin::user relations are out of scope — left as unknown
+  if ((attribute as { target?: string }).target === 'admin::user') {
+    return z.unknown().optional();
+  }
+
+  if (isAnyToMany(attribute as Parameters<typeof isAnyToMany>[0])) {
+    return z.array(relationIdentity).optional();
+  }
+
+  return relationIdentity.nullable().optional();
+};
 
 const buildOutputDataSchema = (
   attributes: Struct.SchemaAttributes,
@@ -13,7 +40,9 @@ const buildOutputDataSchema = (
     return z.record(z.string(), z.unknown());
   }
 
-  const shape = Object.fromEntries(readableKeys.map((key) => [key, z.unknown().optional()]));
+  const shape = Object.fromEntries(
+    readableKeys.map((key) => [key, buildAttributeSchema(key, attributes)])
+  );
 
   return z.object(shape).loose();
 };
@@ -60,14 +89,16 @@ export const buildListOutputSchema = (
 
 /**
  * Builds the MCP output schema for a delete response (`{ data }`).
- * Field shape is constrained to `readFields` when non-null (RBAC field filtering).
+ * Delete handlers return an empty data object, so do not require document relation fields.
  */
 export const buildDeleteOutputSchema = (
-  attributes: Struct.SchemaAttributes,
-  readFields: Set<string> | null
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _attributes: Struct.SchemaAttributes,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _readFields: Set<string> | null
 ): z.ZodObject<z.ZodRawShape> =>
   z
     .object({
-      data: buildOutputDataSchema(attributes, readFields).nullable(),
+      data: z.object({}).loose().nullable(),
     })
     .loose();

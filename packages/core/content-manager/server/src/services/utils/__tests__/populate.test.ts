@@ -42,6 +42,38 @@ describe('Populate', () => {
         },
       },
     },
+    nonLocalizedTarget: {
+      uid: 'api::target.target',
+      modelName: 'Fake non-localized target',
+      pluginOptions: {},
+      attributes: {},
+    },
+    localizedTarget: {
+      uid: 'api::localized-target.localized-target',
+      modelName: 'Fake localized target',
+      pluginOptions: { i18n: { localized: true } },
+      attributes: {},
+    },
+    relationToNonLocalizedTarget: {
+      modelName: 'Fake relation to non-localized target model',
+      attributes: {
+        relationAttrName: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'nonLocalizedTarget',
+        },
+      },
+    },
+    relationToLocalizedTarget: {
+      modelName: 'Fake relation to localized target model',
+      attributes: {
+        relationAttrName: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'localizedTarget',
+        },
+      },
+    },
     media: {
       modelName: 'Fake media model',
       attributes: {
@@ -174,6 +206,26 @@ describe('Populate', () => {
 
       expect(result).toEqual({
         relationAttrName: { count: true },
+      });
+    });
+
+    test('with relation identity model - non-localized target', async () => {
+      const uid = 'relationToNonLocalizedTarget';
+
+      const result = getDeepPopulate(uid as any, { identityRelations: true });
+
+      expect(result).toEqual({
+        relationAttrName: { fields: ['documentId'] },
+      });
+    });
+
+    test('with relation identity model - localized target', async () => {
+      const uid = 'relationToLocalizedTarget';
+
+      const result = getDeepPopulate(uid as any, { identityRelations: true });
+
+      expect(result).toEqual({
+        relationAttrName: { fields: ['documentId', 'locale'] },
       });
     });
 

@@ -7,7 +7,7 @@ import { formatDocumentWithMetadata } from '../../controllers/utils/metadata';
 import { getPopulateForLocalizations } from '../../services/utils/populate';
 import { MCP_NOT_FOUND_DOCUMENT } from './constants';
 import { isContentTypeLocalized } from '../permissions';
-import { ok } from '../utils';
+import { ok, sanitizeAndShape } from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -66,7 +66,7 @@ export const singleCreateOrUpdate = async (
   const populate = await getService('populate-builder')(typedUid)
     .populateFromQuery(sanitizedQuery)
     .populateDeep(Infinity)
-    .countRelations()
+    .relationsAsIdentity()
     .withPopulateOverride(getPopulateForLocalizations(typedUid))
     .build();
 
@@ -120,8 +120,8 @@ export const singleCreateOrUpdate = async (
       });
     }
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(doc);
-    return formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
+    const shapedDocument = await sanitizeAndShape(permissionChecker, typedUid, doc);
+    return formatDocumentWithMetadata(permissionChecker, typedUid, shapedDocument);
   });
 
   return ok(formatted as Record<string, unknown>);
@@ -163,7 +163,7 @@ export const createSingleGetHandler =
     const populate = await getService('populate-builder')(typedUid)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
-      .countRelations()
+      .relationsAsIdentity()
       .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 
@@ -206,8 +206,8 @@ export const createSingleGetHandler =
       throw new errors.ForbiddenError();
     }
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
+    const shapedDocument = await sanitizeAndShape(permissionChecker, typedUid, version);
+    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, shapedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -255,7 +255,7 @@ export const createSingleDeleteHandler =
     const populate = await getService('populate-builder')(typedUid)
       .populateFromQuery(sanitizedQuery)
       .populateDeep(Infinity)
-      .countRelations()
+      .relationsAsIdentity()
       .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 
@@ -284,9 +284,9 @@ export const createSingleDeleteHandler =
       locale: localeForQuery,
     });
 
-    const sanitizedResult = await permissionChecker.sanitizeOutput(deletedEntity);
+    const shapedResult = await sanitizeAndShape(permissionChecker, typedUid, deletedEntity);
 
-    return ok({ data: sanitizedResult } as Record<string, unknown>);
+    return ok({ data: shapedResult } as Record<string, unknown>);
   };
 
 /**
@@ -340,8 +340,8 @@ export const createSinglePublishHandler =
       return publishResult?.at(0);
     });
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, sanitizedDocument);
+    const shapedDocument = await sanitizeAndShape(permissionChecker, typedUid, publishedDocument);
+    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, shapedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -404,7 +404,7 @@ export const createSingleUnpublishHandler =
       return asyncPipe.pipe(
         (doc: any) =>
           documentManager.unpublish(doc.documentId, typedUid, { locale: resolvedLocale }),
-        permissionChecker.sanitizeOutput,
+        (doc: unknown) => sanitizeAndShape(permissionChecker, typedUid, doc),
         (doc: any) => formatDocumentWithMetadata(permissionChecker, typedUid, doc)
       )(document);
     });
@@ -458,7 +458,7 @@ export const createSingleDiscardDraftHandler =
     const discardedDocument = await asyncPipe.pipe(
       (doc: any) =>
         documentManager.discardDraft(doc.documentId, typedUid, { locale: resolvedLocale }),
-      permissionChecker.sanitizeOutput,
+      (doc: unknown) => sanitizeAndShape(permissionChecker, typedUid, doc),
       (doc: any) => formatDocumentWithMetadata(permissionChecker, typedUid, doc)
     )(document);
 

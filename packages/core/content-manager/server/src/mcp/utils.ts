@@ -1,4 +1,6 @@
-import type { Modules } from '@strapi/types';
+import type { Modules, UID } from '@strapi/types';
+
+import { shapeRelationsForMcp } from './sanitizers/shape-relations';
 
 /**
  * Converts a Strapi content-type UID into a safe MCP tool-name segment.
@@ -11,6 +13,23 @@ export const slugifyUidForMcpToolName = (uid: string): string => {
     return `${modelNameParts[0]}`;
   }
   return `${namespace.toLowerCase()}_${modelNameParts[0]}`;
+};
+
+/**
+ * Single output chokepoint for MCP handlers.
+ * Applies permission-based sanitization then reduces every relation to identity-only shape.
+ * Must be called **before** formatDocumentWithMetadata so metadata helpers see the shaped doc.
+ */
+export const sanitizeAndShape = async (
+  permissionChecker: { sanitizeOutput: (doc: unknown) => Promise<unknown> },
+  uid: UID.Schema,
+  doc: unknown
+  // Return type is `any` so callers (like formatDocumentWithMetadata) accept it without casts.
+  // The shaping guarantee is behavioral, not structural.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> => {
+  const sanitized = await permissionChecker.sanitizeOutput(doc);
+  return shapeRelationsForMcp(uid, sanitized as Record<string, unknown>);
 };
 
 /** Wraps a plain object into the dual-representation MCP tool return value (text + structuredContent). */

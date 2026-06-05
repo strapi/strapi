@@ -12,7 +12,7 @@ import {
   MCP_NOT_FOUND_OR_PUBLISHED,
 } from './constants';
 import { isContentTypeLocalized } from '../permissions';
-import { ok } from '../utils';
+import { ok, sanitizeAndShape } from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -96,7 +96,7 @@ export const createCollectionListHandler =
     const populate = await getService('populate-builder')(uid)
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
-      .countRelations({ toOne: false, toMany: true })
+      .relationsAsIdentity()
       .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 
@@ -129,7 +129,7 @@ export const createCollectionListHandler =
 
     const results = await asyncPipe.map(
       documents,
-      asyncPipe.pipe(permissionChecker.sanitizeOutput, setStatus)
+      asyncPipe.pipe((doc: unknown) => sanitizeAndShape(permissionChecker, uid, doc), setStatus)
     );
 
     return ok({ results, pagination } as Record<string, unknown>);
@@ -162,7 +162,7 @@ export const createCollectionGetHandler =
     const populate = await getService('populate-builder')(uid)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
-      .countRelations()
+      .relationsAsIdentity()
       .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 
@@ -199,8 +199,8 @@ export const createCollectionGetHandler =
       throw new errors.ForbiddenError();
     }
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    const result = await formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument);
+    const shapedDocument = await sanitizeAndShape(permissionChecker, uid, version);
+    const result = await formatDocumentWithMetadata(permissionChecker, uid, shapedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -240,8 +240,8 @@ export const createCollectionCreateHandler =
         status,
       });
 
-      const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
-      return formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument, {
+      const shapedDocument = await sanitizeAndShape(permissionChecker, uid, document);
+      return formatDocumentWithMetadata(permissionChecker, uid, shapedDocument, {
         availableLocales: false,
         availableStatus: false,
       });
@@ -318,8 +318,8 @@ export const createCollectionUpdateHandler =
         { data: sanitizedData, locale: resolvedLocale }
       );
 
-      const sanitizedDocument = await permissionChecker.sanitizeOutput(updatedDocument);
-      return formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument);
+      const shapedDocument = await sanitizeAndShape(permissionChecker, uid, updatedDocument);
+      return formatDocumentWithMetadata(permissionChecker, uid, shapedDocument);
     });
 
     return ok(result as Record<string, unknown>);
@@ -374,9 +374,9 @@ export const createCollectionDeleteHandler =
     }
 
     const result = await documentManager.delete(documentId, uid, { locale: localeForQuery });
-    const sanitizedResult = await permissionChecker.sanitizeOutput(result);
+    const shapedResult = await sanitizeAndShape(permissionChecker, uid, result);
 
-    return ok({ data: sanitizedResult } as Record<string, unknown>);
+    return ok({ data: shapedResult } as Record<string, unknown>);
   };
 
 /**
@@ -433,8 +433,8 @@ export const createCollectionPublishHandler =
       return publishResult[0];
     });
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    const result = await formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument);
+    const shapedDocument = await sanitizeAndShape(permissionChecker, uid, publishedDocument);
+    const result = await formatDocumentWithMetadata(permissionChecker, uid, shapedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -499,8 +499,8 @@ export const createCollectionUnpublishHandler =
       return documentManager.unpublish(document.documentId, uid, { locale: resolvedLocale });
     });
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(unpublishedDocument);
-    const result = await formatDocumentWithMetadata(permissionChecker, uid, sanitizedDocument);
+    const shapedDocument = await sanitizeAndShape(permissionChecker, uid, unpublishedDocument);
+    const result = await formatDocumentWithMetadata(permissionChecker, uid, shapedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -550,7 +550,7 @@ export const createCollectionDiscardDraftHandler =
 
     const discardedDocument = await asyncPipe.pipe(
       (doc: any) => documentManager.discardDraft(doc.documentId, uid, { locale: resolvedLocale }),
-      permissionChecker.sanitizeOutput,
+      (doc: unknown) => sanitizeAndShape(permissionChecker, uid, doc),
       (doc: any) => formatDocumentWithMetadata(permissionChecker, uid, doc)
     )(document);
 
