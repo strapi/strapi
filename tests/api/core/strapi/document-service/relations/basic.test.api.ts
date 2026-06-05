@@ -193,6 +193,33 @@ describe('Document Service relations', () => {
       }
     );
 
+    // https://github.com/strapi/strapi/issues/26550
+    // GraphQL's SortArg defaults to `[]`, so nested relations are queried with an empty
+    // `orderBy`. An empty orderBy must NOT be treated as an explicit sort, otherwise the
+    // join-table connect/UI order is dropped (v5.47.0 regression from #26361).
+    testInTransaction.each([
+      ['empty array', []],
+      ['empty object', {}],
+    ])(
+      'preserves manyToMany connect order when nested orderBy is %s',
+      async (_label, emptyOrderBy) => {
+        await strapi.documents(ARTICLE_UID).create({
+          locale: 'en',
+          data: {
+            title: 'Populate empty orderBy test',
+            categories: ['Cat2', 'Cat1'],
+          },
+        });
+
+        const article = await strapi.db.query(ARTICLE_UID).findOne({
+          where: { title: 'Populate empty orderBy test', locale: 'en' },
+          populate: { categories: { orderBy: emptyOrderBy } },
+        });
+
+        expect(categoryNames(article)).toEqual(['Cat2-EN', 'Cat1-EN']);
+      }
+    );
+
     testInTransaction(
       'reverses manyToMany connect order with ordering via db.query when sort is omitted',
       async () => {
