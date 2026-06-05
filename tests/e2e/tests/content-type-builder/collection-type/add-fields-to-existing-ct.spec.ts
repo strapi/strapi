@@ -8,7 +8,7 @@ test.describe(
   'CTB - Add component, DZ, and relation to existing CT',
   { tag: ['@critical'] },
   () => {
-    // Long timeout — triggers server restarts
+    // Long timeout — triggers multiple server restarts
     test.describe.configure({ timeout: 500000 });
 
     test.beforeEach(async ({ page }) => {
@@ -26,7 +26,8 @@ test.describe(
     test('Adding a component, DZ, and relation to an existing CT renders them in the CM editor', async ({
       page,
     }) => {
-      const newAttributes: AddAttribute[] = [
+      // Step 1: add component + relation (one restart)
+      const componentAndRelation: AddAttribute[] = [
         {
           type: 'component',
           name: 'testcomponent',
@@ -40,6 +41,20 @@ test.describe(
             },
           },
         },
+        {
+          type: 'relation',
+          name: 'testrelation',
+          relation: {
+            type: 'oneWay',
+            target: { select: 'Author' },
+          },
+        },
+      ];
+
+      await addAttributesToContentType(page, 'Article', componentAndRelation);
+
+      // Step 2: add DZ separately (second restart — DZ inline creation closes the modal)
+      const dzAttribute: AddAttribute[] = [
         {
           type: 'dz',
           name: 'testdz',
@@ -61,20 +76,11 @@ test.describe(
             ],
           },
         },
-        {
-          type: 'relation',
-          name: 'testrelation',
-          relation: {
-            type: 'oneWay',
-            target: { select: 'Author' },
-          },
-        },
       ];
 
-      // Add fields to the existing Article CT
-      await addAttributesToContentType(page, 'Article', newAttributes);
+      await addAttributesToContentType(page, 'Article', dzAttribute);
 
-      // Navigate to CM and verify the new fields render in the edit view
+      // Navigate to CM and verify all three fields render in the edit view
       await navToHeader(page, ['Content Manager', 'Article'], 'Article');
       await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
 
