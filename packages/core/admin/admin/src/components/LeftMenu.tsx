@@ -62,8 +62,8 @@ const MenuDetails = styled(Flex)`
 `;
 
 const LeftMenu = ({
-  generalSectionLinks,
-  pluginsSectionLinks,
+  generalSectionLinks = [],
+  pluginsSectionLinks = [],
   topMobileNavigation,
   burgerMobileNavigation,
 }: LeftMenuProps) => {
