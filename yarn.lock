@@ -8842,7 +8842,7 @@ __metadata:
     "@swc/core": "npm:1.13.5"
     "@types/bcryptjs": "npm:2.4.3"
     "@types/configstore": "npm:5.0.1"
-    "@types/delegates": "npm:1.0.0"
+    "@types/delegates": "npm:1.0.3"
     "@types/fs-extra": "npm:11.0.4"
     "@types/global-agent": "npm:3.0.0"
     "@types/http-errors": "npm:2.0.4"
@@ -10450,10 +10450,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/delegates@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@types/delegates@npm:1.0.0"
-  checksum: 10c0/a1c956c8da7dd0a49bc56ef255ee3f502eed5865199f9ff6b687d5486b9b127a243a8834080ddd1079065b1ae2f8c4702508d9fc8b721022ed5c226a8ff51433
+"@types/delegates@npm:1.0.3":
+  version: 1.0.3
+  resolution: "@types/delegates@npm:1.0.3"
+  checksum: 10c0/5578306ca964b809e2b786c976ef1ca3f45495d094dca787a27eebeaae962b581d7f929ac120818b2d549eb0f17042e237250026c95340a5512cfe30d76b67f4
   languageName: node
   linkType: hard
 
