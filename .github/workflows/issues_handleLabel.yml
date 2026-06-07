@@ -20,12 +20,9 @@ jobs:
       # Unable to Reproduce Tasks
       - name: 'Comment: unable to reproduce'
         if: "${{ github.event.label.name == 'status: can not reproduce' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
+        uses: actions/github-script@v7
+        env:
+          ISSUE_BODY: |
             > This is a templated message
 
             Hello @${{ github.event.issue.user.login }},
@@ -36,16 +33,21 @@ jobs:
             Please note that issues labeled with `status: can not reproduce` will be closed in 14 days if there is no activity.
 
             Thank you!
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: process.env.ISSUE_BODY,
+            })
 
       # v3 Legacy Issues
       - name: 'Comment: unsupported v3 issues'
         if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
+        uses: actions/github-script@v7
+        env:
+          ISSUE_BODY: |
             > This is a templated message
 
             Hello @${{ github.event.issue.user.login }},
@@ -61,24 +63,33 @@ jobs:
             For now this issue is marked as closed.
 
             Thank You
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: process.env.ISSUE_BODY,
+            })
       - name: 'Close: unsupported v3 issues'
         if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: actions/github-script@v7
         with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'not_planned'
+          script: |
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              state_reason: 'not_planned',
+            })
 
       # v4 Legacy Issues
       - name: 'Comment: unsupported v4 issues'
         if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
+        uses: actions/github-script@v7
+        env:
+          ISSUE_BODY: |
             > This is a templated message
 
             Hello @${{ github.event.issue.user.login }},
@@ -98,24 +109,33 @@ jobs:
             For now this issue is marked as closed.
 
             Thank You
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: process.env.ISSUE_BODY,
+            })
       - name: 'Close: unsupported v4 issues'
         if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: actions/github-script@v7
         with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'not_planned'
+          script: |
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              state_reason: 'not_planned',
+            })
 
       # Feature request redirections
       - name: 'Comment: redirect feature request to canny'
         if: "${{ github.event.label.name == 'issue: feature request' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
+        uses: actions/github-script@v7
+        env:
+          ISSUE_BODY: |
             > This is a templated message
 
             Hello @${{ github.event.issue.user.login }},
@@ -130,24 +150,33 @@ jobs:
             In order to keep our GitHub issues clean and for valid bug reports this issue will be marked as closed, but please feel free to continue the discussion with other community members here.
 
             Thank you for your insight and have a good day.
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: process.env.ISSUE_BODY,
+            })
       - name: 'Close: redirect feature request to canny'
         if: "${{ github.event.label.name == 'issue: feature request' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: actions/github-script@v7
         with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'completed'
+          script: |
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              state_reason: 'completed',
+            })
 
       # Invalid bug report template actions
       - name: 'Comment: invalid bug report template'
         if: "${{ github.event.label.name == 'flag: invalid template' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
+        uses: actions/github-script@v7
+        env:
+          ISSUE_BODY: |
             > This is a templated message
 
             Hello @${{ github.event.issue.user.login }},
@@ -158,24 +187,33 @@ jobs:
             Please create a new issue and completely fill out the issue template, you can [open a new issue here](https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.yml).
 
             Thank you.
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: process.env.ISSUE_BODY,
+            })
       - name: 'Close: invalid bug report template'
         if: "${{ github.event.label.name == 'flag: invalid template' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: actions/github-script@v7
         with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'not_planned'
+          script: |
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              state_reason: 'not_planned',
+            })
 
       # Redirect questions to community sources
       - name: 'Comment: redirect question to community'
         if: "${{ github.event.label.name == 'flag: question' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
+        uses: actions/github-script@v7
+        env:
+          ISSUE_BODY: |
             > This is a templated message
 
             Hello @${{ github.event.issue.user.login }},
@@ -188,14 +226,26 @@ jobs:
             Please see the following contributing guidelines for asking a question [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
 
             Thank you.
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: process.env.ISSUE_BODY,
+            })
       - name: 'Close: redirect question to community'
         if: "${{ github.event.label.name == 'flag: question' }}"
-        uses: actions-cool/issues-helper@v3
+        uses: actions/github-script@v7
         with:
-          actions: 'close-issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          close-reason: 'complete'
+          script: |
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              state_reason: 'completed',
+            })
 
       - name: assign issues to DevExp squad project
         uses: actions/add-to-project@v0.4.1
