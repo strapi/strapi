@@ -119,7 +119,7 @@
     "@swc/core": "1.13.5",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
-    "@types/delegates": "1.0.0",
+    "@types/delegates": "1.0.3",
     "@types/fs-extra": "11.0.4",
     "@types/global-agent": "3.0.0",
     "@types/http-errors": "2.0.4",
