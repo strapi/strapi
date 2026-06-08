@@ -244,7 +244,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /upload/settings                                                                │
 │ PUT                │ /upload/settings                                                                │
 │ POST               │ /upload                                                                         │
-│ POST               │ /upload/unstable/stream                                                         │
+│ POST               │ /upload/unstable/upload-file                                                    │
 │ POST               │ /upload/unstable/stream-from-urls                                               │
 │ HEAD|GET           │ /upload/files                                                                   │
 │ HEAD|GET           │ /upload/files/:id                                                               │
