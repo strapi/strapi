@@ -33,10 +33,10 @@ const getMainField = (
 
   const mainFieldType =
     attribute.type === 'component'
-      ? components[attribute.component].attributes[mainFieldName].type
+      ? components[attribute.component]?.attributes[mainFieldName]?.type
       : // @ts-expect-error – `targetModel` does exist on the attribute for a relation.
         schemas.find((schema) => schema.uid === attribute.targetModel)?.attributes[mainFieldName]
-          .type;
+          ?.type;
 
   return {
     name: mainFieldName,

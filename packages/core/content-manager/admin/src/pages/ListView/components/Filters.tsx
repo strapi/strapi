@@ -182,11 +182,16 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
 
         const attribute = attributes[name];
 
-        if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
+        if (!attribute || NOT_ALLOWED_FILTERS.includes(attribute.type)) {
           return null;
         }
 
-        const { mainField: mainFieldName = '', label } = metadata[name].list;
+        const fieldMetadata = metadata[name];
+        if (!fieldMetadata) {
+          return null;
+        }
+
+        const { mainField: mainFieldName = '', label } = fieldMetadata.list;
 
         let filter: Filters.Filter = {
           name,
