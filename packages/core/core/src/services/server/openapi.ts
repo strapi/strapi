@@ -5,7 +5,6 @@ import type { Core } from '@strapi/types';
 
 type OpenAPIConfig = Core.Config.OpenAPI;
 type OpenAPIEndpointConfig = NonNullable<OpenAPIConfig['content-api']>;
-type OpenAPIAccessMode = NonNullable<NonNullable<OpenAPIEndpointConfig['access']>['mode']>;
 type OpenAPIRouteType = keyof OpenAPIConfig;
 
 interface ResolvedEndpointConfig {
@@ -14,7 +13,6 @@ interface ResolvedEndpointConfig {
   routePath: string;
   routerPrefix?: string;
   fullPath: string;
-  accessMode: OpenAPIAccessMode;
   cacheEnabled: boolean;
   cacheMaxAgeMs: number;
   absoluteCachePath: string;
@@ -22,7 +20,6 @@ interface ResolvedEndpointConfig {
 
 const DEFAULTS = {
   routePath: '/openapi.json',
-  accessMode: 'authenticated' as const,
   cacheEnabled: true,
   cacheMaxAgeMs: 60_000,
   cacheRelativeFilePaths: {
@@ -84,15 +81,6 @@ const resolveEndpointConfig = (
     type === 'content-api'
       ? joinPaths(normalizePath(apiPrefix), routePath)
       : joinPaths(routerPrefix!, routePath);
-  const accessMode = rawConfig?.access?.mode ?? DEFAULTS.accessMode;
-  const supportedAccessModes = ['public', 'authenticated'];
-
-  if (!supportedAccessModes.includes(accessMode)) {
-    throw new Error(
-      `Invalid OpenAPI access mode "${accessMode}" for "${type}". Expected one of: ${supportedAccessModes.join(', ')}`
-    );
-  }
-
   const cacheEnabled = rawConfig?.cache?.enabled ?? DEFAULTS.cacheEnabled;
   const cacheMaxAgeMs = rawConfig?.cache?.maxAgeMs ?? DEFAULTS.cacheMaxAgeMs;
   const configuredCachePath = rawConfig?.cache?.filePath ?? DEFAULTS.cacheRelativeFilePaths[type];
@@ -106,28 +94,10 @@ const resolveEndpointConfig = (
     routePath,
     routerPrefix,
     fullPath,
-    accessMode,
     cacheEnabled,
     cacheMaxAgeMs,
     absoluteCachePath,
   };
-};
-
-/**
- * Build the route `config` for an endpoint.
- *
- * - `public`: authentication is disabled.
- * - `authenticated`: rely on the default auth strategies for the route type
- *   (Content API tokens / users-permissions for `content-api`, admin auth for
- *   `admin`). No explicit `auth` key is set so the route is authenticated but
- *   not scoped.
- */
-const buildRouteConfig = (config: ResolvedEndpointConfig): Record<string, unknown> => {
-  if (config.accessMode === 'public') {
-    return { auth: false };
-  }
-
-  return {};
 };
 
 const resolveOpenAPIConfig = (strapi: Core.Strapi) => {
@@ -221,7 +191,11 @@ export const registerOpenAPIRoute = (strapi: Core.Strapi) => {
           info: {
             type: config.type,
           },
-          config: buildRouteConfig(config),
+          // Authentication is handled by the default strategies for the route
+          // type (Content API tokens / users-permissions for `content-api`,
+          // admin auth for `admin`). Public Content API access is granted via
+          // the users-permissions "Public" role like any other route.
+          config: {},
         },
       ],
     };

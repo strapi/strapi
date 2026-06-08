@@ -44,9 +44,6 @@ const defaultServerConfig = {
       route: {
         path: '/openapi.json',
       },
-      access: {
-        mode: 'authenticated',
-      },
       cache: {
         enabled: true,
         maxAgeMs: 60_000,
@@ -57,9 +54,6 @@ const defaultServerConfig = {
       enabled: false,
       route: {
         path: '/openapi.json',
-      },
-      access: {
-        mode: 'authenticated',
       },
       cache: {
         enabled: true,

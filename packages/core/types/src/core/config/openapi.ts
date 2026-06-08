@@ -1,11 +1,5 @@
-export type OpenAPIAccessMode = 'public' | 'authenticated';
-
 export interface OpenAPIRoute {
   path?: string;
-}
-
-export interface OpenAPIAccess {
-  mode?: OpenAPIAccessMode;
 }
 
 export interface OpenAPICache {
@@ -22,7 +16,6 @@ export interface OpenAPICache {
 export interface OpenAPIEndpoint {
   enabled?: boolean;
   route?: OpenAPIRoute;
-  access?: OpenAPIAccess;
   cache?: OpenAPICache;
 }
 

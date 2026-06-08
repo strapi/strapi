@@ -27,9 +27,6 @@ module.exports = () => ({
       route: {
         path: '/openapi.json',
       },
-      access: {
-        mode: 'authenticated', // public | authenticated
-      },
       cache: {
         enabled: true,
         maxAgeMs: 60_000,
@@ -40,9 +37,6 @@ module.exports = () => ({
       enabled: false,
       route: {
         path: '/openapi.json',
-      },
-      access: {
-        mode: 'authenticated',
       },
       cache: {
         enabled: true,
@@ -60,13 +54,22 @@ module.exports = () => ({
 - `server.openapi.admin`: config for the Admin API OpenAPI endpoint.
 - `enabled`: enables the endpoint when `true`.
 - `route.path`: endpoint subpath to register (resolved under `/api` for content-api and under `/admin` for admin by default).
-- `access.mode`: endpoint access mode (`public`, `authenticated`).
 - `cache.enabled`: enables file-based cache for generated output.
 - `cache.maxAgeMs`: cache validity in milliseconds.
 - `cache.filePath`: output file path for cached spec (absolute or app-root relative).
 
-### Security note
+### Access control
 
-By default, endpoints use `authenticated` access mode. You can explicitly set `public` for unauthenticated
-access. Exposing API specs may still be sensitive in some deployments, so both endpoints are disabled by
-default and should be explicitly opted into.
+Both endpoints are disabled by default and must be explicitly opted into.
+
+When enabled, access is handled by Strapi's standard authentication:
+
+- **Content API** (`/api/openapi.json`): requires an authenticated Content API caller (a
+  users-permissions user or an API token).
+- **Admin** (`/admin/openapi.json`): requires an authenticated admin user.
+
+Exposing API specs can be sensitive in some deployments, so review who can reach each endpoint before
+enabling it.
+
+> Fine-grained, permission-based access control (including making the Content API spec publicly readable
+> through the users-permissions **Public** role) is added in a follow-up change.
