@@ -86,6 +86,8 @@ const createFirstAdmin = async (
   attributes: Omit<Partial<AdminUserCreationPayload>, 'registrationToken' | 'isActive' | 'roles'>
 ): Promise<AdminUser> => {
   const createdUser = await strapi.db.transaction(async ({ trx }) => {
+    // Serialize first-admin creation across processes by locking a stable role row.
+    // SQLite ignores FOR UPDATE, but falls back to its single-writer transaction behavior.
     const superAdminRole = await strapi.db
       .queryBuilder('admin::role')
       .select(['id'])

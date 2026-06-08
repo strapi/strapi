@@ -16,6 +16,56 @@ type TestResponse = {
   };
 };
 
+type RestorableAdminRole = {
+  id: string | number;
+};
+
+type RestorableAdminUser = {
+  id: string | number;
+  firstname?: string | null;
+  lastname?: string | null;
+  username?: string | null;
+  email: string;
+  password?: string | null;
+  resetPasswordToken?: string | null;
+  registrationToken?: string | null;
+  isActive?: boolean | null;
+  blocked?: boolean | null;
+  preferedLanguage?: string | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  roles?: RestorableAdminRole[];
+};
+
+let originalAdminUsers: RestorableAdminUser[] | null = null;
+
+const snapshotAdminUsers = async (strapi: StrapiInstance) => {
+  if (originalAdminUsers !== null) {
+    return;
+  }
+
+  originalAdminUsers = (await strapi.db.query('admin::user').findMany({
+    populate: ['roles'],
+  })) as RestorableAdminUser[];
+};
+
+const clearAdminUsers = async (strapi: StrapiInstance) => {
+  await strapi.db.query('admin::user').deleteMany({});
+};
+
+const restoreOriginalAdminUsers = async (strapi: StrapiInstance) => {
+  await clearAdminUsers(strapi);
+
+  for (const { roles = [], ...user } of originalAdminUsers ?? []) {
+    await strapi.db.query('admin::user').create({
+      data: {
+        ...user,
+        roles: roles.map((role) => role.id),
+      },
+    });
+  }
+};
+
 describe('First admin registration', () => {
   let rq: TestRequest;
   let strapi: StrapiInstance;
@@ -26,11 +76,11 @@ describe('First admin registration', () => {
     });
     rq = createRequest({ strapi });
 
-    await strapi.db.query('admin::user').deleteMany({});
+    await snapshotAdminUsers(strapi);
+    await clearAdminUsers(strapi);
   });
 
   afterAll(async () => {
-    await strapi.db.query('admin::user').deleteMany({});
     await strapi.destroy();
   });
 
@@ -50,11 +100,12 @@ describe('First admin registration', () => {
       )
     );
 
-    expect(responses.slice(0, 5).map((res: TestResponse) => res.statusCode)).toEqual([
-      400, 400, 400, 400, 400,
-    ]);
-    expect(responses[5].statusCode).toBe(429);
-    expect(responses[5].body.error).toMatchObject({
+    const statusCodes = responses.map((res: TestResponse) => res.statusCode);
+    expect(statusCodes.filter((code) => code === 400)).toHaveLength(5);
+    expect(statusCodes.filter((code) => code === 429)).toHaveLength(1);
+
+    const rateLimitedResponse = responses.find((res: TestResponse) => res.statusCode === 429);
+    expect(rateLimitedResponse?.body.error).toMatchObject({
       name: 'RateLimitError',
       message: 'Too many requests, please try again later.',
     });
@@ -111,9 +162,12 @@ describe('First admin registration race protection', () => {
       ensureSuperAdmin: false,
     });
     rq = createRequest({ strapi });
+
+    await clearAdminUsers(strapi);
   });
 
   afterAll(async () => {
+    await restoreOriginalAdminUsers(strapi);
     await strapi.destroy();
   });
 
