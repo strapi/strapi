@@ -5,17 +5,20 @@ import type { Core } from '@strapi/types';
 
 type OpenAPIConfig = Core.Config.OpenAPI;
 type OpenAPIEndpointConfig = NonNullable<OpenAPIConfig['content-api']>;
-type OpenAPIAccessMode = NonNullable<NonNullable<OpenAPIEndpointConfig['access']>['mode']>;
+type OpenAPIAccess = NonNullable<OpenAPIEndpointConfig['access']>;
 type OpenAPIRouteType = keyof OpenAPIConfig;
+
+// Future flag gating the (still unstable) OpenAPI HTTP endpoints.
+const FUTURE_FLAG = 'unstableOpenapi';
+
+const SUPPORTED_ACCESS: OpenAPIAccess[] = ['disabled', 'public', 'authenticated'];
 
 interface ResolvedEndpointConfig {
   type: OpenAPIRouteType;
-  enabled: boolean;
+  access: OpenAPIAccess;
   routePath: string;
   routerPrefix?: string;
   fullPath: string;
-  accessMode: OpenAPIAccessMode;
-  accessRoles: string[];
   cacheEnabled: boolean;
   cacheMaxAgeMs: number;
   absoluteCachePath: string;
@@ -23,7 +26,7 @@ interface ResolvedEndpointConfig {
 
 const DEFAULTS = {
   routePath: '/openapi.json',
-  accessMode: 'authenticated' as const,
+  access: 'disabled' as const,
   cacheEnabled: true,
   cacheMaxAgeMs: 60_000,
   cacheRelativeFilePaths: {
@@ -85,30 +88,19 @@ const resolveEndpointConfig = (
     type === 'content-api'
       ? joinPaths(normalizePath(apiPrefix), routePath)
       : joinPaths(routerPrefix!, routePath);
-  const accessMode = rawConfig?.access?.mode ?? DEFAULTS.accessMode;
-  const supportedAccessModes = ['public', 'authenticated'];
+  const access = rawConfig?.access ?? DEFAULTS.access;
 
-  if (!supportedAccessModes.includes(accessMode)) {
+  if (!SUPPORTED_ACCESS.includes(access)) {
     throw new Error(
-      `Invalid OpenAPI access mode "${accessMode}" for "${type}". Expected one of: ${supportedAccessModes.join(', ')}`
+      `Invalid OpenAPI access "${access}" for "${type}". Expected one of: ${SUPPORTED_ACCESS.join(', ')}`
     );
   }
 
-  const accessRoles = rawConfig?.access?.roles;
-
-  if (accessRoles !== undefined && !Array.isArray(accessRoles)) {
-    throw new Error(
-      `Invalid OpenAPI roles configuration for "${type}". Expected an array of scopes.`
-    );
+  // The admin spec is never public.
+  if (type === 'admin' && access === 'public') {
+    throw new Error('OpenAPI admin endpoint does not support access "public"');
   }
 
-  const normalizedAccessRoles = accessRoles ?? [];
-
-  if (normalizedAccessRoles.length > 0 && accessMode !== 'authenticated') {
-    throw new Error(
-      `OpenAPI endpoint "${type}" only supports roles when access.mode is "authenticated"`
-    );
-  }
   const cacheEnabled = rawConfig?.cache?.enabled ?? DEFAULTS.cacheEnabled;
   const cacheMaxAgeMs = rawConfig?.cache?.maxAgeMs ?? DEFAULTS.cacheMaxAgeMs;
   const configuredCachePath = rawConfig?.cache?.filePath ?? DEFAULTS.cacheRelativeFilePaths[type];
@@ -118,30 +110,32 @@ const resolveEndpointConfig = (
 
   return {
     type,
-    enabled: rawConfig?.enabled === true,
+    access,
     routePath,
     routerPrefix,
     fullPath,
-    accessMode,
-    accessRoles: normalizedAccessRoles,
     cacheEnabled,
     cacheMaxAgeMs,
     absoluteCachePath,
   };
 };
 
-const getRouteAuthConfig = (config: ResolvedEndpointConfig) => {
-  if (config.accessMode === 'public') {
-    return false as const;
+/**
+ * Build the route `config` (auth + policies) for an endpoint.
+ *
+ * - `admin`: requires an authenticated admin via the `admin::isAuthenticatedAdmin`
+ *   policy. Only `authenticated` reaches here (`public` is rejected for admin).
+ *   Granular per-permission RBAC is intentionally left for a later iteration.
+ * - `content-api`: `authenticated` relies on the standard Content API auth
+ *   (authenticated users-permissions user or full-access API token); `public`
+ *   disables auth so anyone can read the spec.
+ */
+const buildRouteConfig = (config: ResolvedEndpointConfig): Record<string, unknown> => {
+  if (config.type === 'admin') {
+    return { policies: ['admin::isAuthenticatedAdmin'] };
   }
 
-  if (config.accessRoles.length > 0) {
-    return {
-      scope: config.accessRoles,
-    };
-  }
-
-  return {};
+  return config.access === 'public' ? { auth: false } : {};
 };
 
 const resolveOpenAPIConfig = (strapi: Core.Strapi) => {
@@ -150,7 +144,7 @@ const resolveOpenAPIConfig = (strapi: Core.Strapi) => {
   return [
     resolveEndpointConfig(strapi, rawConfig['content-api'], 'content-api'),
     resolveEndpointConfig(strapi, rawConfig.admin, 'admin'),
-  ].filter((config) => config.enabled);
+  ].filter((config) => config.access !== 'disabled');
 };
 
 const readCache = async (cachePath: string, maxAgeMs: number) => {
@@ -181,6 +175,12 @@ const generateDocument = (strapi: Core.Strapi, type: OpenAPIRouteType) => {
 };
 
 export const registerOpenAPIRoute = (strapi: Core.Strapi) => {
+  // The OpenAPI HTTP endpoints are still experimental and only registered when
+  // the `future.unstableOpenapi` flag is explicitly enabled.
+  if (!strapi.features.future.isEnabled(FUTURE_FLAG)) {
+    return;
+  }
+
   const configs = resolveOpenAPIConfig(strapi);
 
   if (!configs.length) {
@@ -235,9 +235,7 @@ export const registerOpenAPIRoute = (strapi: Core.Strapi) => {
           info: {
             type: config.type,
           },
-          config: {
-            auth: getRouteAuthConfig(config),
-          },
+          config: buildRouteConfig(config),
         },
       ],
     };

@@ -37,11 +37,16 @@ let ctx = createCtx();
 
 const createStrapiMock = (
   openapiConfig: Record<string, unknown> = {},
-  options: { apiPrefix?: string; adminPath?: string } = {}
+  options: { apiPrefix?: string; adminPath?: string; futureFlagEnabled?: boolean } = {}
 ) => {
-  const { apiPrefix = '/api', adminPath = '/admin' } = options;
+  const { apiPrefix = '/api', adminPath = '/admin', futureFlagEnabled = true } = options;
 
   return {
+    features: {
+      future: {
+        isEnabled: jest.fn((name: string) => name === 'unstableOpenapi' && futureFlagEnabled),
+      },
+    },
     config: {
       get: jest.fn((key: string, defaultValue?: unknown) => {
         if (key === 'server.openapi') {
@@ -87,16 +92,30 @@ describe('registerOpenAPIRoute', () => {
     expect(strapi.server.routes).not.toHaveBeenCalled();
   });
 
-  test('registers one route per enabled endpoint', () => {
+  test('does not register route when the unstableOpenapi future flag is disabled', () => {
+    const strapi = createStrapiMock(
+      {
+        'content-api': { access: 'authenticated' },
+        admin: { access: 'authenticated' },
+      },
+      { futureFlagEnabled: false }
+    );
+
+    registerOpenAPIRoute(strapi as any);
+
+    expect(strapi.server.routes).not.toHaveBeenCalled();
+  });
+
+  test('registers one route per configured endpoint', () => {
     const strapi = createStrapiMock({
       'content-api': {
-        enabled: true,
+        access: 'authenticated',
         route: {
           path: '/spec.json',
         },
       },
       admin: {
-        enabled: true,
+        access: 'authenticated',
       },
     });
 
@@ -110,23 +129,22 @@ describe('registerOpenAPIRoute', () => {
     expect(contentApiRouter.routes).toHaveLength(1);
     expect(contentApiRouter.routes[0].method).toBe('GET');
     expect(contentApiRouter.routes[0].path).toBe('/spec.json');
-    expect(contentApiRouter.routes[0].config.auth).toEqual({});
+    expect(contentApiRouter.routes[0].config.auth).toBeUndefined();
 
     expect(adminRouter.type).toBe('admin');
     expect(adminRouter.prefix).toBe('/admin');
     expect(adminRouter.routes).toHaveLength(1);
     expect(adminRouter.routes[0].method).toBe('GET');
     expect(adminRouter.routes[0].path).toBe('/openapi.json');
-    expect(adminRouter.routes[0].config.auth).toEqual({});
+    // admin endpoint requires an authenticated admin
+    expect(adminRouter.routes[0].config.policies).toEqual(['admin::isAuthenticatedAdmin']);
+    expect(adminRouter.routes[0].config.auth).toBeUndefined();
   });
 
-  test('supports public access mode', () => {
+  test('content-api public access disables auth', () => {
     const strapi = createStrapiMock({
       'content-api': {
-        enabled: true,
-        access: {
-          mode: 'public',
-        },
+        access: 'public',
       },
     });
 
@@ -137,14 +155,24 @@ describe('registerOpenAPIRoute', () => {
     expect(contentApiRouter.routes[0].config.auth).toBe(false);
   });
 
-  test('supports authenticated access mode with scoped auth', () => {
+  test('content-api authenticated access uses default content API auth (no scope)', () => {
+    const strapi = createStrapiMock({
+      'content-api': {
+        access: 'authenticated',
+      },
+    });
+
+    registerOpenAPIRoute(strapi as any);
+
+    expect(strapi.server.routes).toHaveBeenCalledTimes(1);
+    const [contentApiRouter] = (strapi.server.routes as jest.Mock).mock.calls[0];
+    expect(contentApiRouter.routes[0].config.auth).toBeUndefined();
+  });
+
+  test('admin authenticated access requires an authenticated admin', () => {
     const strapi = createStrapiMock({
       admin: {
-        enabled: true,
-        access: {
-          mode: 'authenticated',
-          roles: ['admin::users.read', 'admin::roles.read'],
-        },
+        access: 'authenticated',
       },
     });
 
@@ -152,9 +180,20 @@ describe('registerOpenAPIRoute', () => {
 
     expect(strapi.server.routes).toHaveBeenCalledTimes(1);
     const [adminRouter] = (strapi.server.routes as jest.Mock).mock.calls[0];
-    expect(adminRouter.routes[0].config.auth).toEqual({
-      scope: ['admin::users.read', 'admin::roles.read'],
+    expect(adminRouter.routes[0].config.policies).toEqual(['admin::isAuthenticatedAdmin']);
+    expect(adminRouter.routes[0].config.auth).toBeUndefined();
+  });
+
+  test('throws when the admin endpoint is configured as public', () => {
+    const strapi = createStrapiMock({
+      admin: {
+        access: 'public',
+      },
     });
+
+    expect(() => registerOpenAPIRoute(strapi as any)).toThrow(
+      'OpenAPI admin endpoint does not support access "public"'
+    );
   });
 
   test('serves fresh file cache when available', async () => {
@@ -162,7 +201,7 @@ describe('registerOpenAPIRoute', () => {
     const document = { openapi: '3.1.0', info: { title: 'Cached' } };
     const strapi = createStrapiMock({
       'content-api': {
-        enabled: true,
+        access: 'authenticated',
         cache: {
           enabled: true,
           maxAgeMs: 60_000,
@@ -190,7 +229,7 @@ describe('registerOpenAPIRoute', () => {
     const document = { openapi: '3.1.0', info: { title: 'Generated', version: '1.0.0' } };
     const strapi = createStrapiMock({
       'content-api': {
-        enabled: true,
+        access: 'authenticated',
         cache: {
           enabled: true,
           maxAgeMs: 50,
@@ -216,10 +255,10 @@ describe('registerOpenAPIRoute', () => {
   test('does not expose admin route when admin endpoint is disabled', () => {
     const strapi = createStrapiMock({
       'content-api': {
-        enabled: true,
+        access: 'authenticated',
       },
       admin: {
-        enabled: false,
+        access: 'disabled',
       },
     });
 
@@ -233,7 +272,7 @@ describe('registerOpenAPIRoute', () => {
   test('supports admin paths that include admin prefix without double prefixing', () => {
     const strapi = createStrapiMock({
       admin: {
-        enabled: true,
+        access: 'authenticated',
         route: {
           path: '/admin/spec.json',
         },
@@ -253,13 +292,13 @@ describe('registerOpenAPIRoute', () => {
     const strapi = createStrapiMock(
       {
         'content-api': {
-          enabled: true,
+          access: 'authenticated',
           route: {
             path: '/openapi.json',
           },
         },
         admin: {
-          enabled: true,
+          access: 'authenticated',
         },
       },
       { adminPath: '/api' }
@@ -270,34 +309,15 @@ describe('registerOpenAPIRoute', () => {
     );
   });
 
-  test('throws when roles are used with public mode', () => {
+  test('throws for unsupported access values', () => {
     const strapi = createStrapiMock({
       admin: {
-        enabled: true,
-        access: {
-          mode: 'public',
-          roles: ['admin::users.read'],
-        },
+        access: 'unknown-access',
       },
     });
 
     expect(() => registerOpenAPIRoute(strapi as any)).toThrow(
-      'OpenAPI endpoint "admin" only supports roles when access.mode is "authenticated"'
-    );
-  });
-
-  test('throws for unsupported access modes', () => {
-    const strapi = createStrapiMock({
-      admin: {
-        enabled: true,
-        access: {
-          mode: 'unknown-mode',
-        },
-      },
-    });
-
-    expect(() => registerOpenAPIRoute(strapi as any)).toThrow(
-      'Invalid OpenAPI access mode "unknown-mode" for "admin". Expected one of: public, authenticated'
+      'Invalid OpenAPI access "unknown-access" for "admin". Expected one of: disabled, public, authenticated'
     );
   });
 });

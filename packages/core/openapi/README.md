@@ -14,23 +14,32 @@ This command generates a `content-api` specification by default.
 
 ## Expose `/openapi.json` from the server
 
-Strapi can expose a generated OpenAPI document over HTTP using the core generator.
+> **Experimental / unstable.** The HTTP endpoints are gated behind the
+> `future.unstableOpenapi` flag. Their config and behaviour may change without
+> following semver until the feature is stabilised.
 
-Add `server.openapi` config in your app:
+First, enable the feature flag:
+
+```js
+// config/features.js
+module.exports = () => ({
+  future: {
+    unstableOpenapi: true,
+  },
+});
+```
+
+Then add `server.openapi` config in your app:
 
 ```js
 // config/server.js
 module.exports = () => ({
   openapi: {
     'content-api': {
-      enabled: true,
+      // 'disabled' (default) | 'public' | 'authenticated'
+      access: 'public',
       route: {
         path: '/openapi.json',
-      },
-      access: {
-        mode: 'authenticated', // public | authenticated
-        // Optional scopes to further restrict authenticated access:
-        // roles: ['plugin::users-permissions.authenticated'],
       },
       cache: {
         enabled: true,
@@ -39,13 +48,10 @@ module.exports = () => ({
       },
     },
     admin: {
-      enabled: false,
+      // 'disabled' (default) | 'authenticated' ('public' is not allowed)
+      access: 'authenticated',
       route: {
         path: '/openapi.json',
-      },
-      access: {
-        mode: 'authenticated',
-        roles: ['admin::marketplace.read'],
       },
       cache: {
         enabled: true,
@@ -61,17 +67,28 @@ module.exports = () => ({
 
 - `server.openapi['content-api']`: config for the Content API OpenAPI endpoint.
 - `server.openapi.admin`: config for the Admin API OpenAPI endpoint.
-- `enabled`: enables the endpoint when `true`.
+- `access`: controls exposure and protection in a single setting (default `disabled`). See below.
 - `route.path`: endpoint subpath to register (resolved under `/api` for content-api and under `/admin` for admin by default).
-- `access.mode`: endpoint access mode (`public`, `authenticated`).
-- `access.roles`: optional auth scopes when `access.mode` is `authenticated`.
 - `cache.enabled`: enables file-based cache for generated output.
 - `cache.maxAgeMs`: cache validity in milliseconds.
 - `cache.filePath`: output file path for cached spec (absolute or app-root relative).
 
-### Security note
+### Access control
 
-By default, endpoints use `authenticated` access mode. You can explicitly set `public` for unauthenticated
-access, or add `access.roles` to further restrict authenticated users/tokens by scope. Exposing API specs
-may still be sensitive in some deployments, so both endpoints are disabled by default and should be
-explicitly opted into.
+A single `access` value per endpoint controls both whether the endpoint exists and how it is protected
+(in addition to enabling the feature flag). Access is governed by Strapi's existing auth, not by a
+bespoke access surface:
+
+- `disabled` (default): the endpoint is not registered.
+- `public` (**content-api only**): no authentication — anyone can read the spec.
+- `authenticated`:
+  - **Content API** (`/api/openapi.json`): requires standard Content API auth — an authenticated
+    users-permissions user or a full-access API token.
+  - **Admin** (`/admin/openapi.json`): requires an authenticated admin (any role). Granular
+    per-permission RBAC is intentionally left for a later iteration.
+
+The admin endpoint is never public; setting `access: 'public'` for it throws at startup.
+
+> **Security note:** a `public` content-api spec describes your entire Content API surface — including
+> content types that are not publicly readable — to anyone. If you need a gated spec, use the admin
+> endpoint or `authenticated`. Review who can reach each endpoint before enabling it.
