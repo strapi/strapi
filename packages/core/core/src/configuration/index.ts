@@ -40,12 +40,9 @@ const defaultServerConfig = {
   },
   openapi: {
     'content-api': {
-      enabled: false,
+      access: 'disabled',
       route: {
         path: '/openapi.json',
-      },
-      access: {
-        mode: 'authenticated',
       },
       cache: {
         enabled: true,
@@ -54,12 +51,9 @@ const defaultServerConfig = {
       },
     },
     admin: {
-      enabled: false,
+      access: 'disabled',
       route: {
         path: '/openapi.json',
-      },
-      access: {
-        mode: 'authenticated',
       },
       cache: {
         enabled: true,
