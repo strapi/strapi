@@ -37,16 +37,11 @@ let ctx = createCtx();
 
 const createStrapiMock = (
   openapiConfig: Record<string, unknown> = {},
-  options: { apiPrefix?: string; adminPath?: string; futureFlagEnabled?: boolean } = {}
+  options: { apiPrefix?: string; adminPath?: string } = {}
 ) => {
-  const { apiPrefix = '/api', adminPath = '/admin', futureFlagEnabled = true } = options;
+  const { apiPrefix = '/api', adminPath = '/admin' } = options;
 
   return {
-    features: {
-      future: {
-        isEnabled: jest.fn((name: string) => name === 'unstableOpenapi' && futureFlagEnabled),
-      },
-    },
     config: {
       get: jest.fn((key: string, defaultValue?: unknown) => {
         if (key === 'server.openapi') {
@@ -86,20 +81,6 @@ describe('registerOpenAPIRoute', () => {
 
   test('does not register route when disabled', () => {
     const strapi = createStrapiMock({});
-
-    registerOpenAPIRoute(strapi as any);
-
-    expect(strapi.server.routes).not.toHaveBeenCalled();
-  });
-
-  test('does not register route when the unstableOpenapi future flag is disabled', () => {
-    const strapi = createStrapiMock(
-      {
-        'content-api': { access: 'authenticated' },
-        admin: { access: 'authenticated' },
-      },
-      { futureFlagEnabled: false }
-    );
 
     registerOpenAPIRoute(strapi as any);
 

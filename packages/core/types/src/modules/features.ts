@@ -1,7 +1,6 @@
 export interface FeaturesConfig {
   future?: {
     unstableMediaLibrary?: boolean;
-    unstableOpenapi?: boolean;
   };
 }
 

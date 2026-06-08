@@ -4,10 +4,9 @@ import { createStrapiInstance } from 'api-tests/strapi';
 import { createRequest, createContentAPIRequest, createAuthRequest } from 'api-tests/request';
 
 /**
- * API tests for the access control of the (unstable) OpenAPI HTTP endpoints.
+ * API tests for the access control of the OpenAPI HTTP endpoints.
  *
- * The endpoints are gated behind the `future.unstableOpenapi` flag and rely on
- * Strapi's existing auth (no bespoke OpenAPI permission):
+ * The endpoints rely on Strapi's existing auth (no bespoke OpenAPI permission):
  *  - content-api (`/api/openapi.json`): controlled by `server.openapi['content-api'].access`.
  *    `authenticated` requires standard Content API auth (authenticated user or
  *    full-access API token); `public` disables auth entirely.
@@ -17,10 +16,6 @@ import { createRequest, createContentAPIRequest, createAuthRequest } from 'api-t
 
 const CONTENT_API_PATH = '/api/openapi.json';
 const ADMIN_PATH = '/admin/openapi.json';
-
-const enableUnstableOpenapi = (instance: Core.Strapi) => {
-  instance.config.set('features', { future: { unstableOpenapi: true } });
-};
 
 const expectOpenAPIDocument = (body: any) => {
   expect(body).toBeDefined();
@@ -38,7 +33,6 @@ describe('OpenAPI endpoints – access control', () => {
       strapi = await createStrapiInstance({
         bypassAuth: false,
         register: ({ strapi: instance }) => {
-          enableUnstableOpenapi(instance);
           instance.config.set('server.openapi', {
             'content-api': { access: 'authenticated' },
           });
@@ -108,7 +102,6 @@ describe('OpenAPI endpoints – access control', () => {
       strapi = await createStrapiInstance({
         bypassAuth: false,
         register: ({ strapi: instance }) => {
-          enableUnstableOpenapi(instance);
           instance.config.set('server.openapi', {
             'content-api': { access: 'public' },
           });
@@ -145,7 +138,6 @@ describe('OpenAPI endpoints – access control', () => {
       strapi = await createStrapiInstance({
         bypassAuth: false,
         register: ({ strapi: instance }) => {
-          enableUnstableOpenapi(instance);
           instance.config.set('server.openapi', {
             admin: { access: 'authenticated' },
           });

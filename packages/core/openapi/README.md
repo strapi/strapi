@@ -14,22 +14,8 @@ This command generates a `content-api` specification by default.
 
 ## Expose `/openapi.json` from the server
 
-> **Experimental / unstable.** The HTTP endpoints are gated behind the
-> `future.unstableOpenapi` flag. Their config and behaviour may change without
-> following semver until the feature is stabilised.
-
-First, enable the feature flag:
-
-```js
-// config/features.js
-module.exports = () => ({
-  future: {
-    unstableOpenapi: true,
-  },
-});
-```
-
-Then add `server.openapi` config in your app:
+Strapi can expose a generated OpenAPI document over HTTP. Both endpoints are
+disabled by default; opt in per endpoint via `server.openapi`:
 
 ```js
 // config/server.js
@@ -75,9 +61,8 @@ module.exports = () => ({
 
 ### Access control
 
-A single `access` value per endpoint controls both whether the endpoint exists and how it is protected
-(in addition to enabling the feature flag). Access is governed by Strapi's existing auth, not by a
-bespoke access surface:
+A single `access` value per endpoint controls both whether the endpoint exists and how it is protected.
+Access is governed by Strapi's existing auth, not by a bespoke access surface:
 
 - `disabled` (default): the endpoint is not registered.
 - `public` (**content-api only**): no authentication — anyone can read the spec.

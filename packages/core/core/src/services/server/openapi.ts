@@ -8,9 +8,6 @@ type OpenAPIEndpointConfig = NonNullable<OpenAPIConfig['content-api']>;
 type OpenAPIAccess = NonNullable<OpenAPIEndpointConfig['access']>;
 type OpenAPIRouteType = keyof OpenAPIConfig;
 
-// Future flag gating the (still unstable) OpenAPI HTTP endpoints.
-const FUTURE_FLAG = 'unstableOpenapi';
-
 const SUPPORTED_ACCESS: OpenAPIAccess[] = ['disabled', 'public', 'authenticated'];
 
 interface ResolvedEndpointConfig {
@@ -175,12 +172,6 @@ const generateDocument = (strapi: Core.Strapi, type: OpenAPIRouteType) => {
 };
 
 export const registerOpenAPIRoute = (strapi: Core.Strapi) => {
-  // The OpenAPI HTTP endpoints are still experimental and only registered when
-  // the `future.unstableOpenapi` flag is explicitly enabled.
-  if (!strapi.features.future.isEnabled(FUTURE_FLAG)) {
-    return;
-  }
-
   const configs = resolveOpenAPIConfig(strapi);
 
   if (!configs.length) {
