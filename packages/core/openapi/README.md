@@ -60,16 +60,16 @@ module.exports = () => ({
 
 ### Access control
 
-Both endpoints are disabled by default and must be explicitly opted into.
+Both endpoints are disabled by default and must be explicitly opted into. There is no access
+configuration: enabling an endpoint exposes it with a fixed access policy.
 
-When enabled, access is handled by Strapi's standard authentication:
-
-- **Content API** (`/api/openapi.json`): requires an authenticated Content API caller (a
-  users-permissions user or an API token).
+- **Content API** (`/api/openapi.json`): **public** when enabled. The document describes the public
+  Content API, so the spec is served without authentication.
 - **Admin** (`/admin/openapi.json`): requires an authenticated admin user.
 
-Exposing API specs can be sensitive in some deployments, so review who can reach each endpoint before
-enabling it.
+Exposing API specs can be sensitive in some deployments, so only enable the endpoint you need.
 
-> Fine-grained, permission-based access control (including making the Content API spec publicly readable
-> through the users-permissions **Public** role) is added in a follow-up change.
+> Fine-grained, permission-based access control (RBAC for the admin endpoint, and gating the Content API
+> spec behind a permission that can be granted to the users-permissions **Public** role) is added in a
+> follow-up change. When that lands, a public Content API spec will require granting that permission to
+> the Public role.

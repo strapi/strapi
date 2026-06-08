@@ -110,14 +110,41 @@ describe('registerOpenAPIRoute', () => {
     expect(contentApiRouter.routes).toHaveLength(1);
     expect(contentApiRouter.routes[0].method).toBe('GET');
     expect(contentApiRouter.routes[0].path).toBe('/spec.json');
-    // no explicit auth: relies on the default strategies for the route type
-    expect(contentApiRouter.routes[0].config.auth).toBeUndefined();
+    // content-api spec is public when the endpoint is enabled
+    expect(contentApiRouter.routes[0].config.auth).toBe(false);
 
     expect(adminRouter.type).toBe('admin');
     expect(adminRouter.prefix).toBe('/admin');
     expect(adminRouter.routes).toHaveLength(1);
     expect(adminRouter.routes[0].method).toBe('GET');
     expect(adminRouter.routes[0].path).toBe('/openapi.json');
+    // admin spec requires an authenticated admin (default admin auth)
+    expect(adminRouter.routes[0].config.auth).toBeUndefined();
+  });
+
+  test('content-api spec is public when enabled', () => {
+    const strapi = createStrapiMock({
+      'content-api': {
+        enabled: true,
+      },
+    });
+
+    registerOpenAPIRoute(strapi as any);
+
+    const [contentApiRouter] = (strapi.server.routes as jest.Mock).mock.calls[0];
+    expect(contentApiRouter.routes[0].config.auth).toBe(false);
+  });
+
+  test('admin spec requires authentication when enabled', () => {
+    const strapi = createStrapiMock({
+      admin: {
+        enabled: true,
+      },
+    });
+
+    registerOpenAPIRoute(strapi as any);
+
+    const [adminRouter] = (strapi.server.routes as jest.Mock).mock.calls[0];
     expect(adminRouter.routes[0].config.auth).toBeUndefined();
   });
 

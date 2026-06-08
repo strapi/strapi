@@ -100,6 +100,25 @@ const resolveEndpointConfig = (
   };
 };
 
+/**
+ * Build the route `config` for an endpoint.
+ *
+ * Access is intentionally minimal here: there is no access configuration.
+ *
+ * - `content-api`: the spec is public when the endpoint is enabled (an OpenAPI
+ *   document describing the public Content API).
+ * - `admin`: requires an authenticated admin user (the default admin auth).
+ *
+ * Fine-grained, permission-based access control is added in a follow-up.
+ */
+const buildRouteConfig = (config: ResolvedEndpointConfig): Record<string, unknown> => {
+  if (config.type === 'content-api') {
+    return { auth: false };
+  }
+
+  return {};
+};
+
 const resolveOpenAPIConfig = (strapi: Core.Strapi) => {
   const rawConfig = strapi.config.get('server.openapi', {}) as OpenAPIConfig;
 
@@ -191,11 +210,7 @@ export const registerOpenAPIRoute = (strapi: Core.Strapi) => {
           info: {
             type: config.type,
           },
-          // Authentication is handled by the default strategies for the route
-          // type (Content API tokens / users-permissions for `content-api`,
-          // admin auth for `admin`). Public Content API access is granted via
-          // the users-permissions "Public" role like any other route.
-          config: {},
+          config: buildRouteConfig(config),
         },
       ],
     };
