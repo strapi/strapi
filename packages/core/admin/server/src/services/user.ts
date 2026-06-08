@@ -19,7 +19,7 @@ import constants from './constants';
 
 const { SUPER_ADMIN_CODE } = constants;
 
-const { ValidationError } = errors;
+const { ApplicationError, ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
 
@@ -43,7 +43,7 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
  * Create and save a user in database
  * @param attributes A partial user object
  */
-const create = async (
+const createUserInDatabase = async (
   // isActive is added in the controller, it's not sent by the API.
   attributes: Partial<AdminUserCreationPayload> & { isActive?: true }
 ): Promise<AdminUser> => {
@@ -62,9 +62,60 @@ const create = async (
     .query('admin::user')
     .create({ data: user, populate: ['roles'] });
 
+  return createdUser;
+};
+
+const emitUserCreated = (user: AdminUser) => {
   getService('metrics').sendDidInviteUser();
 
-  strapi.eventHub.emit('user.create', { user: sanitizeUser(createdUser) });
+  strapi.eventHub.emit('user.create', { user: sanitizeUser(user) });
+};
+
+const create = async (
+  // isActive is added in the controller, it's not sent by the API.
+  attributes: Partial<AdminUserCreationPayload> & { isActive?: true }
+): Promise<AdminUser> => {
+  const createdUser = await createUserInDatabase(attributes);
+
+  emitUserCreated(createdUser);
+
+  return createdUser;
+};
+
+const createFirstAdmin = async (
+  attributes: Omit<Partial<AdminUserCreationPayload>, 'registrationToken' | 'isActive' | 'roles'>
+): Promise<AdminUser> => {
+  const createdUser = await strapi.db.transaction(async ({ trx }) => {
+    const superAdminRole = await strapi.db
+      .queryBuilder('admin::role')
+      .select(['id'])
+      .where({ code: SUPER_ADMIN_CODE })
+      .first()
+      .transacting(trx)
+      .forUpdate()
+      .execute<AdminRole | undefined>();
+
+    if (!superAdminRole) {
+      throw new ApplicationError(
+        "Cannot register the first admin because the super admin role doesn't exist."
+      );
+    }
+
+    const hasAdmin = await exists();
+
+    if (hasAdmin) {
+      throw new ApplicationError('You cannot register a new super admin');
+    }
+
+    return createUserInDatabase({
+      ...attributes,
+      registrationToken: null,
+      isActive: true,
+      roles: [superAdminRole.id],
+    });
+  });
+
+  emitUserCreated(createdUser);
 
   return createdUser;
 };
@@ -415,6 +466,7 @@ const getLanguagesInUse = async (): Promise<string[]> => {
 };
 export default {
   create,
+  createFirstAdmin,
   updateById,
   exists,
   findRegistrationInfo,
