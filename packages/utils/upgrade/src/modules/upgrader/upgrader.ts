@@ -437,6 +437,12 @@ export const upgraderFactory = (
     throw new Error(`The project is already using v${semverTarget}`);
   }
 
+  if (semver.lt(semverTarget, project.strapiVersion)) {
+    throw new Error(
+      `The target version v${semverTarget} must be greater than the current version v${project.strapiVersion}`
+    );
+  }
+
   return new Upgrader(project, semverTarget, npmPackage);
 };
 

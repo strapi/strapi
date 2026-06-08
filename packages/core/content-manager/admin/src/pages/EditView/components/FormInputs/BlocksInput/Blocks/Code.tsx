@@ -165,6 +165,7 @@ const CodeEditor = (props: RenderElementProps) => {
           right={0}
           padding={1}
           hasRadius
+          zIndex={1}
         >
           <SingleSelect
             onChange={(open) => {

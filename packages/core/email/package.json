@@ -75,7 +75,7 @@
   "devDependencies": {
     "@strapi/admin": "5.47.1",
     "@strapi/types": "5.47.1",
-    "@testing-library/react": "16.3.0",
+    "@testing-library/react": "16.3.2",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
     "koa": "2.16.4",

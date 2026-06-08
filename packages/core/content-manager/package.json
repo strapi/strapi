@@ -113,7 +113,7 @@
   "devDependencies": {
     "@strapi/admin": "5.47.1",
     "@strapi/database": "5.47.1",
-    "@testing-library/react": "16.3.0",
+    "@testing-library/react": "16.3.2",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
     "@types/prismjs": "1.26.5",
