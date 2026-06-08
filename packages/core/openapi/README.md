@@ -29,8 +29,6 @@ module.exports = () => ({
       },
       access: {
         mode: 'authenticated', // public | authenticated
-        // Optional scopes to further restrict authenticated access:
-        // roles: ['plugin::users-permissions.authenticated'],
       },
       cache: {
         enabled: true,
@@ -45,7 +43,6 @@ module.exports = () => ({
       },
       access: {
         mode: 'authenticated',
-        roles: ['admin::marketplace.read'],
       },
       cache: {
         enabled: true,
@@ -64,7 +61,6 @@ module.exports = () => ({
 - `enabled`: enables the endpoint when `true`.
 - `route.path`: endpoint subpath to register (resolved under `/api` for content-api and under `/admin` for admin by default).
 - `access.mode`: endpoint access mode (`public`, `authenticated`).
-- `access.roles`: optional auth scopes when `access.mode` is `authenticated`.
 - `cache.enabled`: enables file-based cache for generated output.
 - `cache.maxAgeMs`: cache validity in milliseconds.
 - `cache.filePath`: output file path for cached spec (absolute or app-root relative).
@@ -72,6 +68,5 @@ module.exports = () => ({
 ### Security note
 
 By default, endpoints use `authenticated` access mode. You can explicitly set `public` for unauthenticated
-access, or add `access.roles` to further restrict authenticated users/tokens by scope. Exposing API specs
-may still be sensitive in some deployments, so both endpoints are disabled by default and should be
-explicitly opted into.
+access. Exposing API specs may still be sensitive in some deployments, so both endpoints are disabled by
+default and should be explicitly opted into.

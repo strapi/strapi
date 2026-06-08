@@ -6,11 +6,6 @@ export interface OpenAPIRoute {
 
 export interface OpenAPIAccess {
   mode?: OpenAPIAccessMode;
-  /**
-   * Authorization scopes required when access mode is `authenticated`.
-   * If omitted, any authenticated user/token is allowed.
-   */
-  roles?: string[];
 }
 
 export interface OpenAPICache {

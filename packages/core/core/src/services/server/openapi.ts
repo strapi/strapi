@@ -15,7 +15,6 @@ interface ResolvedEndpointConfig {
   routerPrefix?: string;
   fullPath: string;
   accessMode: OpenAPIAccessMode;
-  accessRoles: string[];
   cacheEnabled: boolean;
   cacheMaxAgeMs: number;
   absoluteCachePath: string;
@@ -94,21 +93,6 @@ const resolveEndpointConfig = (
     );
   }
 
-  const accessRoles = rawConfig?.access?.roles;
-
-  if (accessRoles !== undefined && !Array.isArray(accessRoles)) {
-    throw new Error(
-      `Invalid OpenAPI roles configuration for "${type}". Expected an array of scopes.`
-    );
-  }
-
-  const normalizedAccessRoles = accessRoles ?? [];
-
-  if (normalizedAccessRoles.length > 0 && accessMode !== 'authenticated') {
-    throw new Error(
-      `OpenAPI endpoint "${type}" only supports roles when access.mode is "authenticated"`
-    );
-  }
   const cacheEnabled = rawConfig?.cache?.enabled ?? DEFAULTS.cacheEnabled;
   const cacheMaxAgeMs = rawConfig?.cache?.maxAgeMs ?? DEFAULTS.cacheMaxAgeMs;
   const configuredCachePath = rawConfig?.cache?.filePath ?? DEFAULTS.cacheRelativeFilePaths[type];
@@ -123,22 +107,24 @@ const resolveEndpointConfig = (
     routerPrefix,
     fullPath,
     accessMode,
-    accessRoles: normalizedAccessRoles,
     cacheEnabled,
     cacheMaxAgeMs,
     absoluteCachePath,
   };
 };
 
-const getRouteAuthConfig = (config: ResolvedEndpointConfig) => {
+/**
+ * Build the route `config` for an endpoint.
+ *
+ * - `public`: authentication is disabled.
+ * - `authenticated`: rely on the default auth strategies for the route type
+ *   (Content API tokens / users-permissions for `content-api`, admin auth for
+ *   `admin`). No explicit `auth` key is set so the route is authenticated but
+ *   not scoped.
+ */
+const buildRouteConfig = (config: ResolvedEndpointConfig): Record<string, unknown> => {
   if (config.accessMode === 'public') {
-    return false as const;
-  }
-
-  if (config.accessRoles.length > 0) {
-    return {
-      scope: config.accessRoles,
-    };
+    return { auth: false };
   }
 
   return {};
@@ -235,9 +221,7 @@ export const registerOpenAPIRoute = (strapi: Core.Strapi) => {
           info: {
             type: config.type,
           },
-          config: {
-            auth: getRouteAuthConfig(config),
-          },
+          config: buildRouteConfig(config),
         },
       ],
     };
