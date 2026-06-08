@@ -27,6 +27,9 @@ const config = {
   notifications: { releases: false },
 };
 
+/**
+ * @param {import('@strapi/strapi/admin').StrapiApp} app
+ */
 const bootstrap = (app) => {
   console.log(app);
 };

@@ -1,3 +1,6 @@
+/**
+ * @type {import('@strapi/strapi').Core.Config.Database<'sqlite'>['connection']}
+ */
 const sqlite = {
   client: 'sqlite',
   connection: {
@@ -6,6 +9,9 @@ const sqlite = {
   useNullAsDefault: true,
 };
 
+/**
+ * @type {import('@strapi/strapi').Core.Config.Database<'postgres'>['connection']}
+ */
 const postgres = {
   client: 'postgres',
   connection: {
@@ -17,6 +23,9 @@ const postgres = {
   },
 };
 
+/**
+ * @type {import('@strapi/strapi').Core.Config.Database<'mysql'>['connection']}
+ */
 const mysql = {
   client: 'mysql',
   connection: {
@@ -28,6 +37,9 @@ const mysql = {
   },
 };
 
+/**
+ * @type {import('@strapi/strapi').Core.Config.Database<'mysql'>['connection']}
+ */
 const mariadb = {
   client: 'mysql',
   connection: {
@@ -39,6 +51,9 @@ const mariadb = {
   },
 };
 
+/**
+ * @type {Record<string, import('@strapi/strapi').Core.Config.Database['connection']>}
+ */
 const db = {
   mysql,
   sqlite,

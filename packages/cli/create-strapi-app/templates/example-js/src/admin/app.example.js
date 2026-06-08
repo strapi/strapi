@@ -29,6 +29,9 @@ const config = {
   ],
 };
 
+/**
+ * @param {import('@strapi/strapi/admin').StrapiApp} app
+ */
 const bootstrap = (app) => {
   console.log(app);
 };

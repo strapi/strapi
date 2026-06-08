@@ -1,3 +1,5 @@
+import type * as UID from '../../uid';
+
 export interface ApiToken {
   salt: string;
 }
@@ -101,7 +103,7 @@ export interface PreviewHandlerParams {
 export interface PreviewConfig {
   allowedOrigins?: string[];
   handler: (
-    uid: string,
+    uid: UID.ContentType,
     params: PreviewHandlerParams
   ) => string | null | undefined | Promise<string | null | undefined>;
 }

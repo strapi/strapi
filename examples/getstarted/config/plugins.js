@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * @returns {import('@strapi/strapi').Core.Config.Plugin}
+ */
 module.exports = () => ({
   graphql: {
     enabled: true,
