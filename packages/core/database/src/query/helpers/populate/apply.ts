@@ -20,7 +20,7 @@ const getJoinTableOrderBy = (
   populateValue: Record<string, unknown>,
   joinTable: { orderBy?: Record<string, 'asc' | 'desc'> }
 ) => {
-  if (populateValue.orderBy || !joinTable.orderBy) {
+  if (!_.isEmpty(populateValue.orderBy) || !joinTable.orderBy) {
     return undefined;
   }
 

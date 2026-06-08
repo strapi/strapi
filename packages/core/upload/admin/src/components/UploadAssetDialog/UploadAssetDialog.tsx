@@ -156,6 +156,7 @@ export const UploadAssetDialog = ({
           <EditAssetContent
             onClose={handleAssetEditValidation}
             asset={assetToEdit as Asset}
+            initialFolderId={folderId}
             canUpdate
             canCopyLink={false}
             canDownload={false}

@@ -204,6 +204,22 @@ describe('Validate visitors util', () => {
       );
     });
 
+    test.each([
+      ['empty sort array', []],
+      ['qs empty array (sort[])', [null]],
+      ['empty sort string', ''],
+      ['comma-only sort string', ','],
+      ['array of empty strings', ['']],
+    ])('accepts nested populate sort with no meaningful order (%s)', async (_label, sortValue) => {
+      const populate = {
+        category: {
+          sort: sortValue,
+        },
+      };
+
+      await expect(validators.defaultValidatePopulate(ctx, populate)).resolves.not.toThrow();
+    });
+
     test('throws ValidationError for private fields in nested sort within populate', async () => {
       const populate = {
         category: {
