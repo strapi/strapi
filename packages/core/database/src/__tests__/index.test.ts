@@ -201,6 +201,57 @@ describe('Database', () => {
 
         await db.destroy();
       });
+
+      it(`should not call commit on transactor already finalised (avoid double finalisation) with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        const commitSpy = jest.fn();
+        const trx = {
+          commit: commitSpy,
+          rollback: jest.fn(),
+          isCompleted: () => true,
+        };
+        const transactionOverride = jest.fn(async () => trx);
+        Object.defineProperty(db.connection, 'transaction', {
+          value: transactionOverride,
+          configurable: true,
+        });
+
+        const result = await db.transaction(async () => 'ok');
+        expect(result).toBe('ok');
+        expect(commitSpy).toHaveBeenCalledTimes(0);
+
+        await db.destroy();
+      });
+
+      it(`should not call rollback on transactor already finalised (avoid double finalisation) with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        const rollbackSpy = jest.fn();
+        const trx = {
+          commit: jest.fn(),
+          rollback: rollbackSpy,
+          isCompleted: () => true,
+        };
+        const transactionOverride = jest.fn(async () => trx);
+        Object.defineProperty(db.connection, 'transaction', {
+          value: transactionOverride,
+          configurable: true,
+        });
+
+        try {
+          await db.transaction(async () => {
+            throw new Error('test');
+          });
+        } catch {
+          // ignore
+        }
+        expect(rollbackSpy).toHaveBeenCalledTimes(0);
+
+        await db.destroy();
+      });
     });
   });
 });
