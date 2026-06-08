@@ -16,7 +16,7 @@ import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
-import { Widgets } from './core/apis/Widgets';
+import { Widgets, type WidgetArgs } from './core/apis/Widgets';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
@@ -314,7 +314,7 @@ class StrapiApp {
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
   async register(customRegister?: unknown) {
-    const widgets = [
+    const widgets: WidgetArgs[] = [
       {
         icon: User,
         title: {
