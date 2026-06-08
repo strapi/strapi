@@ -4,11 +4,16 @@ import * as openapi from '@strapi/openapi';
 import type { Core } from '@strapi/types';
 
 type OpenAPIConfig = Core.Config.OpenAPI;
-type OpenAPIEndpointConfig = NonNullable<OpenAPIConfig['content-api']>;
-type OpenAPIAccess = NonNullable<OpenAPIEndpointConfig['access']>;
 type OpenAPIRouteType = keyof OpenAPIConfig;
+type OpenAPIEndpointConfig = NonNullable<OpenAPIConfig[OpenAPIRouteType]>;
+type OpenAPIAccess =
+  | NonNullable<NonNullable<OpenAPIConfig['content-api']>['access']>
+  | NonNullable<NonNullable<OpenAPIConfig['admin']>['access']>;
 
-const SUPPORTED_ACCESS: OpenAPIAccess[] = ['disabled', 'public', 'authenticated'];
+const SUPPORTED_ACCESS = {
+  'content-api': ['disabled', 'public'],
+  admin: ['disabled', 'authenticated'],
+} as const satisfies Record<OpenAPIRouteType, readonly OpenAPIAccess[]>;
 
 interface ResolvedEndpointConfig {
   type: OpenAPIRouteType;
@@ -86,16 +91,12 @@ const resolveEndpointConfig = (
       ? joinPaths(normalizePath(apiPrefix), routePath)
       : joinPaths(routerPrefix!, routePath);
   const access = rawConfig?.access ?? DEFAULTS.access;
+  const supportedAccess = SUPPORTED_ACCESS[type];
 
-  if (!SUPPORTED_ACCESS.includes(access)) {
+  if (!(supportedAccess as readonly OpenAPIAccess[]).includes(access)) {
     throw new Error(
-      `Invalid OpenAPI access "${access}" for "${type}". Expected one of: ${SUPPORTED_ACCESS.join(', ')}`
+      `Invalid OpenAPI access "${access}" for "${type}". Expected one of: ${supportedAccess.join(', ')}`
     );
-  }
-
-  // The admin spec is never public.
-  if (type === 'admin' && access === 'public') {
-    throw new Error('OpenAPI admin endpoint does not support access "public"');
   }
 
   const cacheEnabled = rawConfig?.cache?.enabled ?? DEFAULTS.cacheEnabled;
@@ -121,18 +122,17 @@ const resolveEndpointConfig = (
  * Build the route `config` (auth + policies) for an endpoint.
  *
  * - `admin`: requires an authenticated admin via the `admin::isAuthenticatedAdmin`
- *   policy. Only `authenticated` reaches here (`public` is rejected for admin).
+ *   policy.
  *   Granular per-permission RBAC is intentionally left for a later iteration.
- * - `content-api`: `authenticated` relies on the standard Content API auth
- *   (authenticated users-permissions user or full-access API token); `public`
- *   disables auth so anyone can read the spec.
+ * - `content-api`: only supports public access for now, which disables auth so
+ *   anyone can read the spec.
  */
 const buildRouteConfig = (config: ResolvedEndpointConfig): Record<string, unknown> => {
   if (config.type === 'admin') {
     return { policies: ['admin::isAuthenticatedAdmin'] };
   }
 
-  return config.access === 'public' ? { auth: false } : {};
+  return { auth: false };
 };
 
 const resolveOpenAPIConfig = (strapi: Core.Strapi) => {

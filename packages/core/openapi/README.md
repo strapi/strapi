@@ -22,7 +22,7 @@ disabled by default; opt in per endpoint via `server.openapi`:
 module.exports = () => ({
   openapi: {
     'content-api': {
-      // 'disabled' (default) | 'public' | 'authenticated'
+      // 'disabled' (default) | 'public'
       access: 'public',
       route: {
         path: '/openapi.json',
@@ -66,14 +66,12 @@ Access is governed by Strapi's existing auth, not by a bespoke access surface:
 
 - `disabled` (default): the endpoint is not registered.
 - `public` (**content-api only**): no authentication — anyone can read the spec.
-- `authenticated`:
-  - **Content API** (`/api/openapi.json`): requires standard Content API auth — an authenticated
-    users-permissions user or a full-access API token.
-  - **Admin** (`/admin/openapi.json`): requires an authenticated admin (any role). Granular
-    per-permission RBAC is intentionally left for a later iteration.
+- `authenticated` (**admin only**): requires an authenticated admin (any role). Granular
+  per-permission RBAC is intentionally left for a later iteration.
 
-The admin endpoint is never public; setting `access: 'public'` for it throws at startup.
+The content-api endpoint is only available as public for now. The admin endpoint is never public.
+Unsupported access values throw at startup.
 
 > **Security note:** a `public` content-api spec describes your entire Content API surface — including
 > content types that are not publicly readable — to anyone. If you need a gated spec, use the admin
-> endpoint or `authenticated`. Review who can reach each endpoint before enabling it.
+> endpoint with `authenticated`. Review who can reach each endpoint before enabling it.
