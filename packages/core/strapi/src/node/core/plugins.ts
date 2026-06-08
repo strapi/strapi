@@ -134,11 +134,18 @@ const getEnabledPlugins = async ({
   }
 
   for (const [userPluginName, userPluginConfig] of Object.entries(userPluginsFile)) {
-    if (!isPluginConfigEnabled(userPluginConfig)) {
-      continue;
-    }
-
-    if (typeof userPluginConfig === 'object' && userPluginConfig.resolve) {
+    /**
+     * Local plugins must be explicitly enabled to be registered, matching the
+     * server-side loader (`@strapi/core` get-enabled-plugins), which drops a
+     * `{ resolve }` declaration without a truthy `enabled`. Treating an omitted
+     * `enabled` as enabled here would bundle the plugin into the admin while the
+     * server leaves it unloaded.
+     */
+    if (
+      typeof userPluginConfig === 'object' &&
+      userPluginConfig.enabled &&
+      userPluginConfig.resolve
+    ) {
       const sysPath = convertModulePathToSystemPath(userPluginConfig.resolve);
       plugins[userPluginName] = {
         name: userPluginName,
