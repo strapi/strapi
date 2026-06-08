@@ -21,7 +21,7 @@ export const slugifyUidForMcpToolName = (uid: string): string => {
  * Must be called **before** formatDocumentWithMetadata so metadata helpers see the shaped doc.
  */
 export const sanitizeAndShape = async (
-  permissionChecker: { sanitizeOutput: (doc: unknown) => Promise<unknown> },
+  permissionChecker: { sanitizeOutput: (doc: unknown) => Promise<Record<string, unknown>> },
   uid: UID.Schema,
   doc: unknown
   // Return type is `any` so callers (like formatDocumentWithMetadata) accept it without casts.
@@ -29,7 +29,7 @@ export const sanitizeAndShape = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> => {
   const sanitized = await permissionChecker.sanitizeOutput(doc);
-  return shapeRelationsForMcp(uid, sanitized as Record<string, unknown>);
+  return shapeRelationsForMcp(uid, sanitized);
 };
 
 /** Wraps a plain object into the dual-representation MCP tool return value (text + structuredContent). */

@@ -109,7 +109,10 @@ const shapeRelationToIdentity: Parameters<typeof traverseEntity>[0] = (
  * This covers leak family #1 (relation targets) and #2 (localizations full draft rows)
  * with the same single mechanism.
  */
-export const shapeRelationsForMcp = async (uid: UID.Schema, data: Record<string, unknown>) => {
+export const shapeRelationsForMcp = async (
+  uid: UID.Schema,
+  data: Record<string, unknown>
+): Promise<Record<string, unknown>> => {
   return traverseEntity(
     shapeRelationToIdentity,
     {
@@ -118,7 +121,7 @@ export const shapeRelationsForMcp = async (uid: UID.Schema, data: Record<string,
     },
     // @ts-expect-error — traverseEntity expects Data; post-sanitize documents are compatible at runtime
     data
-  ) as Promise<Record<string, unknown>>;
+  );
 };
 
 // Export for unit-testing without a full strapi instance

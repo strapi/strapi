@@ -79,7 +79,6 @@ function getPopulateForRelation(
 
   // MCP identity mode: fetch only stable identity fields from the DB layer.
   // Morph relations cannot use flat fields; they are populated normally and shaped post-fetch.
-  // TODO @Nico morph identity incl. __type — use fragment populate per target once tested.
   if (identityRelations === true) {
     const isMorph = (attribute as { relation?: string }).relation?.toLowerCase().includes('morph');
     if (isMorph !== true) {
@@ -151,10 +150,7 @@ function getPopulateFor(
     case 'relation':
       // @ts-expect-error - TODO: support populate count typing
       return {
-        [attributeName]: getPopulateForRelation(attribute, model, attributeName, {
-          ...options,
-          identityRelations: options.identityRelations,
-        }),
+        [attributeName]: getPopulateForRelation(attribute, model, attributeName, options),
       };
     case 'component':
       return {

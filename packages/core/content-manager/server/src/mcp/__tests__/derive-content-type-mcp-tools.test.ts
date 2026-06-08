@@ -13,19 +13,6 @@ import {
 } from '../derive-content-type-mcp-tools';
 import { ACTIONS } from '../../services/permission-checker';
 
-/**
- * Phased per: .agents/local-state/2026-05-25-fine-tune-content-management-tools/003-merged-analysis-and-implementation-plan.md
- *
- * | Phase | Scope in this file |
- * |-------|-------------------|
- * | 1 ✅  | Handler contract tests (list/get/create/delete + update/publish/unpublish/discard + single write/publish/unpublish/discard + publish schema contract) |
- * | 2     | `buildDataSchema`, `buildSortSchema`, `buildFiltersSchema`, `getComponentLeafPaths` — update imports when extracted to `mcp/schemas/*` |
- * | 3     | Component permission narrowing — tighten Zod to permitted leaf paths only (F4 partial, F7) |
- * | 4 ✅  | F1 global.strapi DI, F2 single unpublish transaction result, F3 shared permission checker |
- * | 5     | Populate depth presets per operation (F5, F14) — assert `populateDeep` depth in handler tests |
- * | 6     | Optional follow-ups (F6, F8, F12–F20) — not covered here yet |
- */
-
 // ---------------------------------------------------------------------------
 // Type helpers derived from the source module's exported signatures
 // ---------------------------------------------------------------------------
@@ -2667,12 +2654,6 @@ describe('schema: publish tool behavior contract', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 5 — Populate depth presets (F5, F14)
-// TODO @Nico Phase 5: add describe('handler populate presets') asserting populateDeep depth
-//   per operation — list=1, get=bounded, single read/write/delete=bounded, lifecycle=shallow
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
 // Phase 1 — Handler contract tests (locale edge cases, pre-existing)
 // ---------------------------------------------------------------------------
 
@@ -2726,12 +2707,6 @@ describe('single-type handler: delete on non-localized CT', () => {
     );
   });
 });
-
-// ---------------------------------------------------------------------------
-// Relation identity regression tests (security fix: #9185)
-// Verify that every op uses relationsAsIdentity() and routes output through
-// sanitizeAndShape (which calls shapeRelationsForMcp).
-// ---------------------------------------------------------------------------
 
 describe('relation identity: populate-builder uses relationsAsIdentity', () => {
   const uid = 'api::article.article';
