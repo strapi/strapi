@@ -66,7 +66,6 @@ export const singleCreateOrUpdate = async (
   const populate = await getService('populate-builder')(typedUid)
     .populateFromQuery(sanitizedQuery)
     .populateDeep(Infinity)
-    .relationsAsIdentity()
     .withPopulateOverride(getPopulateForLocalizations(typedUid))
     .build();
 
@@ -163,7 +162,6 @@ export const createSingleGetHandler =
     const populate = await getService('populate-builder')(typedUid)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
-      .relationsAsIdentity()
       .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 
@@ -255,7 +253,6 @@ export const createSingleDeleteHandler =
     const populate = await getService('populate-builder')(typedUid)
       .populateFromQuery(sanitizedQuery)
       .populateDeep(Infinity)
-      .relationsAsIdentity()
       .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 

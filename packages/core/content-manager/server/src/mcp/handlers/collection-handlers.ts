@@ -96,7 +96,6 @@ export const createCollectionListHandler =
     const populate = await getService('populate-builder')(uid)
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
-      .relationsAsIdentity()
       .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 
@@ -162,7 +161,6 @@ export const createCollectionGetHandler =
     const populate = await getService('populate-builder')(uid)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
-      .relationsAsIdentity()
       .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 

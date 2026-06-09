@@ -29,16 +29,6 @@ type PopulateOptions = {
   countMany?: boolean;
   countOne?: boolean;
   maxLevel?: number;
-  /** When true, relations are populated as identity-only document fields. */
-  identityRelations?: boolean;
-};
-
-const isTargetLocalized = (uid: string): boolean => {
-  const targetModel = strapi.getModel(uid as UID.Schema) as
-    | { pluginOptions?: { i18n?: { localized?: boolean } } }
-    | undefined;
-
-  return targetModel?.pluginOptions?.i18n?.localized === true;
 };
 
 /**
@@ -53,7 +43,7 @@ function getPopulateForRelation(
   attribute: Schema.Attribute.AnyAttribute,
   model: Model,
   attributeName: string,
-  { countMany, countOne, initialPopulate, identityRelations }: PopulateOptions
+  { countMany, countOne, initialPopulate }: PopulateOptions
 ) {
   const isManyRelation = isAnyToMany(attribute);
 
@@ -74,24 +64,6 @@ function getPopulateForRelation(
 
   // always populate createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
-    return true;
-  }
-
-  // MCP identity mode: fetch only stable identity fields from the DB layer.
-  // Morph relations cannot use flat fields; they are populated normally and shaped post-fetch.
-  if (identityRelations === true) {
-    const isMorph = (attribute as { relation?: string }).relation?.toLowerCase().includes('morph');
-    if (isMorph !== true) {
-      const targetUid = (attribute as { target?: string }).target;
-      const fields = ['documentId'];
-
-      if (targetUid !== undefined && isTargetLocalized(targetUid)) {
-        fields.push('locale');
-      }
-
-      return { fields };
-    }
-    // fall through to full populate for morphs; shapeRelationsForMcp normalizes post-fetch
     return true;
   }
 
@@ -188,7 +160,6 @@ const getDeepPopulate = (
     countMany = false,
     countOne = false,
     maxLevel = Infinity,
-    identityRelations = false,
   }: PopulateOptions = {},
   level = 1
 ) => {
@@ -215,7 +186,6 @@ const getDeepPopulate = (
             countMany,
             countOne,
             maxLevel,
-            identityRelations,
           },
           level
         )

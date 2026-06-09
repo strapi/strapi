@@ -157,7 +157,6 @@ const makePopulateBuilder = () => {
     populateFromQuery: jest.fn().mockReturnThis(),
     populateDeep: jest.fn().mockReturnThis(),
     countRelations: jest.fn().mockReturnThis(),
-    relationsAsIdentity: jest.fn().mockReturnThis(),
     withPopulateOverride: jest.fn().mockReturnThis(),
     build: jest.fn(() => Promise.resolve({})),
   };
@@ -2708,7 +2707,7 @@ describe('single-type handler: delete on non-localized CT', () => {
   });
 });
 
-describe('relation identity: populate-builder uses relationsAsIdentity', () => {
+describe('relation populate: read handlers call populateDeep and withPopulateOverride', () => {
   const uid = 'api::article.article';
   const model = baseModel({ uid, attributes: { title: { type: 'string' } } as TestAttrs });
   const context = { userAbility: makeUserAbility(), user: mockUser };
@@ -2722,18 +2721,19 @@ describe('relation identity: populate-builder uses relationsAsIdentity', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('list_* uses relationsAsIdentity, not countRelations', async () => {
+  it('list_* calls populateDeep and withPopulateOverride, not countRelations', async () => {
     const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
     const listTool = tools.find((t) => t.name === 'list_article')!;
     const handler = listTool.createHandler(strapiForTest, context);
     await handler({ args: {}, extra: mockExtra });
 
     const builder = getBuilderFromMock();
-    expect(builder.relationsAsIdentity).toHaveBeenCalled();
+    expect(builder.populateDeep).toHaveBeenCalled();
+    expect(builder.withPopulateOverride).toHaveBeenCalled();
     expect(builder.countRelations).not.toHaveBeenCalled();
   });
 
-  it('get_* uses relationsAsIdentity, not countRelations', async () => {
+  it('get_* calls populateDeep and withPopulateOverride, not countRelations', async () => {
     const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
     const getTool = tools.find((t) => t.name === 'get_article')!;
 
@@ -2742,7 +2742,8 @@ describe('relation identity: populate-builder uses relationsAsIdentity', () => {
     await handler({ args: { documentId: 'doc-1' }, extra: mockExtra });
 
     const builder = getBuilderFromMock();
-    expect(builder.relationsAsIdentity).toHaveBeenCalled();
+    expect(builder.populateDeep).toHaveBeenCalled();
+    expect(builder.withPopulateOverride).toHaveBeenCalled();
     expect(builder.countRelations).not.toHaveBeenCalled();
   });
 });
