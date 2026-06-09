@@ -1,9 +1,9 @@
 ---
-name: writing-skills
-description: Creates new agent skills with progressive disclosure and bundled resources. Use when the user wants to create, write, or build a new skill.
+name: writing-a-skill
+description: Create a new agent skill with progressive disclosure and bundled resources. Use when the user wants to create, write, or build a new skill.
 ---
 
-# Writing Skills
+# Writing a Skill
 
 ## Process
 
