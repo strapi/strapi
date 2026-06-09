@@ -164,7 +164,7 @@
     "semver": "7.7.4",
     "style-loader": "3.3.4",
     "typescript": "5.4.5",
-    "vite": "5.4.21",
+    "vite": "6.4.2",
     "webpack": "5.106.2",
     "webpack-bundle-analyzer": "5.3.0",
     "webpack-dev-middleware": "6.1.3",
