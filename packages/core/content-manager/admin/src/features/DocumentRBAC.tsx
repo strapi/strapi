@@ -170,7 +170,8 @@ const extractAndDedupeFields = (permissions: Permission[] = []) => {
   // An undefined entry means this permission grants access to all fields
   // (no field-level restriction). Returning [] signals "no restriction" to callers.
   if (allFields.some((field) => field === undefined)) return [];
-  return allFields.filter((field, index, arr): field is string => arr.indexOf(field) === index);
+  // Deduplicate fields
+  return Array.from(new Set(allFields as string[]));
 };
 
 /**

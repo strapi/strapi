@@ -328,6 +328,7 @@ describe('Permissions Manager', () => {
       const result = getPermissionFields('read', subject('Article', {}));
 
       expect(result.shouldIncludeAll).toBe(true);
+      expect(result.hasAtLeastOneRegistered).toBe(true);
       expect(result.permittedFields).toEqual([]);
     });
   });
