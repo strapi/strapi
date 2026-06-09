@@ -152,8 +152,7 @@ describe('DocumentRBAC', () => {
     });
   });
 
-  // #26012: canReadFields must be the union of all roles' fields, not just the last role's.
-  describe('Bug #1 — multi-role field union: two restricted roles', () => {
+  describe('multi-role field union with restricted roles', () => {
     const role1Read = {
       id: 900,
       action: 'plugin::content-manager.explorer.read',
@@ -199,9 +198,7 @@ describe('DocumentRBAC', () => {
     });
   });
 
-  // #26012: a role with unrestricted field access (fields: undefined) must not be
-  // narrowed down to the restricted role's field list.
-  describe('Bug #2 — unrestricted role fields (undefined) silenced by typeof check', () => {
+  describe('unrestricted field access combined with restricted roles', () => {
     const permUnrestricted = {
       id: 902,
       action: 'plugin::content-manager.explorer.read',

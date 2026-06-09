@@ -317,9 +317,7 @@ describe('Permissions Manager', () => {
     });
   });
 
-  // #26012: an unrestricted rule (fields: undefined) mixed with a restricted rule must
-  // still produce shouldIncludeAll = true, not be narrowed to the restricted fields.
-  describe('Bug #3 — rule.fields || [] collapses unrestricted rule to zero fields', () => {
+  describe('unrestricted rules combined with restricted rules', () => {
     test('shouldIncludeAll is true when any rule has no field restriction', () => {
       const ability = defineAbility((can: any) => {
         can('read', 'Article', undefined);
