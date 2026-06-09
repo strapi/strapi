@@ -548,7 +548,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const deletedRows = await this.createQueryBuilder(uid)
         .where(where)
         .delete()
-        .execute<number>();
+        .execute<number>({ mapResults: false });
 
       const result = { count: deletedRows };
 
