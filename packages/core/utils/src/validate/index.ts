@@ -136,7 +136,6 @@ const createContentAPIValidators = () => {
 
     if (auth) {
       transforms.push(
-        traverseQueryPopulate(visitors.throwRestrictedRelations(auth), { schema }),
         traverseQueryPopulate(
           async ({ key, value, schema, attribute }) => {
             if (attribute) {

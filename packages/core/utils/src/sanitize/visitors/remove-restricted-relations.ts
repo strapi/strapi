@@ -19,9 +19,15 @@ export default (auth: unknown): Visitor =>
     }
 
     const handleMorphRelation = async () => {
+      const elements = (data as Record<string, MorphArray>)[key];
+
+      if (!Array.isArray(elements)) {
+        return;
+      }
+
       const newMorphValue: Record<string, unknown>[] = [];
 
-      for (const element of (data as Record<string, MorphArray>)[key]) {
+      for (const element of elements) {
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 

@@ -156,9 +156,7 @@ const defaultValidatePopulate = curry((schema: Model, populate: unknown) => {
         }
       },
       { schema }
-    ),
-    // private fields cannot be populated
-    traverseQueryPopulate(throwPrivate, { schema })
+    )
   )(populate);
 });
 
