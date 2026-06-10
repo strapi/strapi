@@ -26,19 +26,15 @@ export default {
 
     const { currentPassword, ...userInfo } = data;
 
-    if (currentPassword && userInfo.password) {
+    const isChangingPassword = Boolean(currentPassword && userInfo.password);
+
+    if (isChangingPassword) {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
 
       if (!isValid) {
         return ctx.badRequest('ValidationError', {
           currentPassword: ['Invalid credentials'],
         });
-      }
-
-      // Invalidate all sessions when password changes for security
-      const sessionManager = getSessionManager();
-      if (sessionManager && sessionManager.hasOrigin('admin')) {
-        await sessionManager('admin').invalidateRefreshToken(String(ctx.state.user.id));
       }
     }
 
@@ -52,6 +48,16 @@ export default {
         return ctx.badRequest('ValidationError', {
           email: ['Email already taken'],
         });
+      }
+    }
+
+    // Invalidate all sessions when password changes for security. This must run only once the
+    // update is going to be persisted, so a rejected request (e.g. duplicate email) does not log
+    // the user out without applying any change.
+    if (isChangingPassword) {
+      const sessionManager = getSessionManager();
+      if (sessionManager && sessionManager.hasOrigin('admin')) {
+        await sessionManager('admin').invalidateRefreshToken(String(ctx.state.user.id));
       }
     }
 

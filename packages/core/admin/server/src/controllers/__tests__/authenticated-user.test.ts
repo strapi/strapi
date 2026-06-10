@@ -363,7 +363,7 @@ describe('Authenticated User Controller', () => {
       expect(updateById).toHaveBeenCalled();
     });
 
-    test('Runs password branch before email uniqueness (sessions may invalidate even when email is taken)', async () => {
+    test('Does not invalidate sessions when the email is already taken', async () => {
       const invalidateRefreshToken = jest.fn(() => Promise.resolve());
       const sessionManagerFn = jest.fn(() => ({ invalidateRefreshToken }));
       Object.assign(sessionManagerFn, {
@@ -395,8 +395,8 @@ describe('Authenticated User Controller', () => {
 
       await authenticatedUserController.updateMe(ctx);
 
-      expect(invalidateRefreshToken).toHaveBeenCalled();
       expect(exists).toHaveBeenCalled();
+      expect(invalidateRefreshToken).not.toHaveBeenCalled();
       expect(updateById).not.toHaveBeenCalled();
       expect(badRequest).toHaveBeenCalledWith('ValidationError', {
         email: ['Email already taken'],
