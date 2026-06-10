@@ -12,6 +12,7 @@ interface CategoryEntry {
   parent?: CategoryRelation | null;
   children?: CategoryRelation[];
   related?: CategoryRelation[];
+  relatedMany?: CategoryRelation[];
 }
 
 const builder = createTestBuilder();
@@ -39,10 +40,16 @@ const category = {
       target: 'api::category.category',
       targetAttribute: 'children',
     },
-    // Unidirectional self-referential
+    // Unidirectional self-referential (one to many)
     related: {
       type: 'relation',
       relation: 'oneToMany',
+      target: 'api::category.category',
+    },
+    // Unidirectional self-referential (many to many)
+    relatedMany: {
+      type: 'relation',
+      relation: 'manyToMany',
       target: 'api::category.category',
     },
   },
@@ -58,6 +65,50 @@ const getCategory = async (
     qs: { status },
   });
   return res.body.data as CategoryEntry;
+};
+
+const createCategory = async (name: string): Promise<CategoryEntry> => {
+  const res = await rq({
+    method: 'POST',
+    url: '/content-manager/collection-types/api::category.category',
+    body: { name },
+  });
+
+  return res.body.data as CategoryEntry;
+};
+
+const updateCategory = async (documentId: string, body: Record<string, unknown>) =>
+  rq({
+    method: 'PUT',
+    url: `/content-manager/collection-types/api::category.category/${documentId}`,
+    body,
+  });
+
+const publishCategory = async (documentId: string) =>
+  rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
+  });
+
+const discardCategory = async (documentId: string) =>
+  rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/api::category.category/${documentId}/actions/discard`,
+  });
+
+// Returns the target documentIds linked through `field` for the given status.
+const getRelationTargets = async (
+  documentId: string,
+  field: string,
+  status: 'draft' | 'published'
+): Promise<string[]> => {
+  const res = await rq({
+    method: 'GET',
+    url: `/content-manager/relations/api::category.category/${documentId}/${field}`,
+    qs: { status },
+  });
+
+  return res.body.results.map((result: { documentId: string }) => result.documentId);
 };
 
 describe('CM API - Self-referential relations with Draft & Publish', () => {
@@ -244,5 +295,88 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     const publishedLinks = joinRows.filter((row: any) => row[joinColumn.name] === publishedA.id);
     expect(publishedLinks).toHaveLength(1);
     expect(publishedLinks[0][inverseJoinColumn.name]).toBe(publishedB.id);
+  });
+
+  // A single entry whose unidirectional relation points at itself must keep that relation in
+  // its published version: during the delete-and-recreate publish cycle the self-link has to
+  // be re-pointed to the entry's own published version rather than dropped. These cover the
+  // unidirectional `oneToMany` and `manyToMany` self-links; the bidirectional `parent`
+  // self-link is covered by the tests above.
+  test('unidirectional oneToMany self-link (entry to itself) is preserved after first publish', async () => {
+    const cat = await createCategory('OneToMany self publish');
+
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+
+    expect(await getRelationTargets(cat.documentId, 'related', 'draft')).toEqual([cat.documentId]);
+
+    await publishCategory(cat.documentId);
+
+    // The published self-link must exist and point at the entry itself.
+    expect(await getRelationTargets(cat.documentId, 'related', 'published')).toEqual([
+      cat.documentId,
+    ]);
+  });
+
+  test('unidirectional manyToMany self-link (entry to itself) is preserved after first publish', async () => {
+    const cat = await createCategory('ManyToMany self publish');
+
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      relatedMany: [{ documentId: cat.documentId, locale: null }],
+    });
+
+    expect(await getRelationTargets(cat.documentId, 'relatedMany', 'draft')).toEqual([
+      cat.documentId,
+    ]);
+
+    await publishCategory(cat.documentId);
+
+    expect(await getRelationTargets(cat.documentId, 'relatedMany', 'published')).toEqual([
+      cat.documentId,
+    ]);
+  });
+
+  test('unidirectional self-link (entry to itself) is preserved when added before a republish', async () => {
+    const cat = await createCategory('Self republish');
+
+    // First publish with no self-link, so a published version already exists.
+    await publishCategory(cat.documentId);
+    expect(await getRelationTargets(cat.documentId, 'related', 'published')).toEqual([]);
+
+    // Add the self-link on the draft, then republish.
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+    await publishCategory(cat.documentId);
+
+    expect(await getRelationTargets(cat.documentId, 'related', 'published')).toEqual([
+      cat.documentId,
+    ]);
+  });
+
+  test('unidirectional self-link (entry to itself) is preserved after discarding the draft', async () => {
+    const cat = await createCategory('Self discard');
+
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+    await publishCategory(cat.documentId);
+
+    // Modify the draft (keeping the self-link), then discard back to the published version.
+    await updateCategory(cat.documentId, {
+      name: `${cat.name} - modified`,
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+    await discardCategory(cat.documentId);
+
+    expect(await getRelationTargets(cat.documentId, 'related', 'draft')).toEqual([cat.documentId]);
+    expect(await getRelationTargets(cat.documentId, 'related', 'published')).toEqual([
+      cat.documentId,
+    ]);
   });
 });
