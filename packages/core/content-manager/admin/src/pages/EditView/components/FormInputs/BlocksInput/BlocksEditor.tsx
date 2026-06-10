@@ -216,10 +216,15 @@ interface BlocksEditorProps
     BlocksContentProps {
   disabled?: boolean;
   name: string;
+  /** When true, sync form state on every keystroke (Live Preview popover). */
+  livePreviewSync?: boolean;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
+  (
+    { disabled = false, name, onChange, value, error, livePreviewSync = false, ...contentProps },
+    forwardedRef
+  ) => {
     const { formatMessage } = useIntl();
     const isMobile = useIsMobile();
 
@@ -288,7 +293,8 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
            * Slate handles the state of the editor internally. We just need to keep Strapi's form
            * state in sync with it in order to make sure that things like the "modified" state
            * isn't broken. Updating the whole state on every change is very expensive however,
-           * so we debounce calls to onChange to mitigate input lag.
+           * so we debounce calls to onChange to mitigate input lag — except in the Live Preview
+           * popover, where each update must reach the preview iframe immediately.
            *
            * Bump the reset-key counter immediately (not inside the debounce). Otherwise any
            * value-prop identity change during the 300ms window — e.g. clicking the blocks
@@ -296,12 +302,15 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
            * the editor, wiping the pending input (blocks e2e flake).
            */
           incrementSlateUpdatesCount();
+          if (livePreviewSync) {
+            onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
+            return;
+          }
 
           if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
           }
 
-          // Set a new debounce timeout
           debounceTimeout.current = setTimeout(() => {
             // Normalize the state (empty editor becomes null)
             onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
@@ -309,7 +318,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           }, 300);
         }
       },
-      [editor, incrementSlateUpdatesCount, name, onChange]
+      [editor, incrementSlateUpdatesCount, livePreviewSync, name, onChange]
     );
 
     // Clean up the timeout on unmount
