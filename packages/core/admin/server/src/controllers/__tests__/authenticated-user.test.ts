@@ -1,8 +1,9 @@
 /* eslint-env jest */
 
 /**
- * Mock validation so this suite does not load `validation/user` → `@strapi/utils` (built `dist/`).
- * Production `validateProfileUpdateInput` returns merge(raw, yupResult); mocks must return that merged shape.
+ * Validation is mocked so this suite does not pull in `validation/user` → `@strapi/utils`
+ * (which resolves to built `dist/`). Validation behavior is covered separately in
+ * `validation/__tests__/user.test.ts`.
  */
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
@@ -16,16 +17,15 @@ jest.mock('../../validation/user', () => ({
 
 const mockValidateProfileUpdateInput = jest.mocked(validateProfileUpdateInput);
 
-/** Mirrors other controller __tests__: one file per controller (`authenticated-user.ts`). */
 const setStrapi = (value: object) => {
   (globalThis as any).strapi = value;
 };
 
 describe('Authenticated User Controller', () => {
   beforeEach(() => {
-    mockValidateProfileUpdateInput.mockImplementation(async (input: unknown) => ({
-      ...(input as object),
-    }));
+    mockValidateProfileUpdateInput.mockImplementation(
+      async (input: unknown) => ({ ...(input as object) }) as any
+    );
   });
 
   afterEach(() => {
@@ -113,21 +113,16 @@ describe('Authenticated User Controller', () => {
       });
     });
 
-    test('Uses payload from validateProfileUpdateInput for uniqueness and persistence (normalized email)', async () => {
-      mockValidateProfileUpdateInput.mockImplementation(async (input: unknown) => ({
-        ...(input as object),
-        email: 'normalized@example.com',
-      }));
-
+    test('Lowercases email before validation, uniqueness check, and persistence', async () => {
       const exists = jest.fn(() => Promise.resolve(false));
       const updatedUser = {
         id: currentUser.id,
-        email: 'normalized@example.com',
+        email: 'kept@example.com',
         firstname: 'Kai',
       };
       const updateById = jest.fn(() => Promise.resolve(updatedUser));
       const sanitizeUser = jest.fn((u) => u);
-      const body = { email: 'NORMALIZED@EXAMPLE.COM', firstname: 'Kai' };
+      const body = { email: 'KEPT@EXAMPLE.COM', firstname: 'Kai' };
 
       setStrapi({
         admin: {
@@ -142,12 +137,16 @@ describe('Authenticated User Controller', () => {
 
       await authenticatedUserController.updateMe(ctx);
 
+      expect(mockValidateProfileUpdateInput).toHaveBeenCalledWith({
+        email: 'kept@example.com',
+        firstname: 'Kai',
+      });
       expect(exists).toHaveBeenCalledWith({
         id: { $ne: currentUser.id },
-        email: 'normalized@example.com',
+        email: 'kept@example.com',
       });
       expect(updateById).toHaveBeenCalledWith(currentUser.id, {
-        email: 'normalized@example.com',
+        email: 'kept@example.com',
         firstname: 'Kai',
       });
     });
