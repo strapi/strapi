@@ -213,7 +213,9 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       assetsDir: '',
       minify,
       sourcemap: sourcemaps,
-      rollupOptions: {
+      // Vite 8 bundles with Rolldown; `rollupOptions` is a deprecated alias kept
+      // only for back-compat. Use the non-deprecated key directly.
+      rolldownOptions: {
         input: {
           strapi: ctx.entry,
         },
