@@ -32,6 +32,12 @@ The following are the most important packages (not exhaustive — run `yarn work
 | `@strapi/permissions`              | RBAC engine                                               |
 | `@strapi/plugin-users-permissions` | JWT authentication                                        |
 
+### Skills directories
+
+Shared skills live under `.agents/skills/<name>/`. Tool-specific skill directories (e.g. `.claude/skills/`) should be symlinks to `.agents/skills/` — each AI tool has its own well-known location.
+
+Personal/in-progress skills go under `.agents/local-skills/` (gitignored). See [.agents/skills/writing-skills/SKILL.md](.agents/skills/writing-skills/SKILL.md) for authoring guidance.
+
 ---
 
 ## Architecture
