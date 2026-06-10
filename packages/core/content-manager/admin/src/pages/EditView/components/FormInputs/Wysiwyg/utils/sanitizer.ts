@@ -1,7 +1,7 @@
 import DOMPurify from 'dompurify';
 
 /**
- * Attribute allowlist mirrors the prior sanitize-html configuration:
+ * Attribute allowlist. Starts from the prior sanitize-html configuration:
  *   '*':    href, align, alt, center, width, height, type, controls, target
  *   img:    src, alt
  *   source: src, type
@@ -10,6 +10,14 @@ import DOMPurify from 'dompurify';
  * of the original allowlist is used. Tags that the prior config never reached
  * (script, iframe, etc.) are stripped wholesale by DOMPurify's default tag
  * allowlist, so per-tag attribute scoping is not security-relevant here.
+ *
+ * `class` and `title` are additions over the old config (which stripped both):
+ *   - class: mdRenderer.ts emits `hljs`/`language-*` on code blocks (so the
+ *     highlight.js solarized-dark stylesheet applies) and `footnote-ref`/
+ *     `footnote-backref` on footnotes. Stripping it left those styles dead.
+ *   - title: link/image tooltips and the markdown-it abbr plugin (`<abbr title>`).
+ * Both are inert in admin-authored content behind the tag allowlist; neither
+ * can escalate.
  */
 const ALLOWED_ATTR = [
   'href',
@@ -22,6 +30,8 @@ const ALLOWED_ATTR = [
   'type',
   'controls',
   'target',
+  'class',
+  'title',
 ];
 
 /**

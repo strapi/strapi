@@ -12,6 +12,9 @@ import { sanitize } from '../sanitizer';
  *       source: src, type
  *   - allowedSchemes:   http, https, ftp, mailto, tel (+ protocol-relative)
  *
+ * Plus two additions over the old config: `class` (highlight.js + footnote
+ * styling, emitted by mdRenderer.ts) and `title` (link/image/abbr tooltips).
+ *
  * Anything outside that allowlist must be stripped.
  */
 describe('Wysiwyg sanitize', () => {
@@ -71,11 +74,32 @@ describe('Wysiwyg sanitize', () => {
       const html = '<table><tbody><tr><td align="center">x</td></tr></tbody></table>';
       expect(sanitize(html)).toContain('align="center"');
     });
+
+    it('keeps class on code blocks (highlight.js styling)', () => {
+      expect(sanitize('<pre class="hljs language-js">x</pre>')).toContain(
+        'class="hljs language-js"'
+      );
+    });
+
+    it('keeps class on footnote refs', () => {
+      expect(sanitize('<sup class="footnote-ref"><span>1</span></sup>')).toContain(
+        'class="footnote-ref"'
+      );
+    });
+
+    it('keeps title on anchors', () => {
+      expect(sanitize('<a href="https://example.com" title="tip">x</a>')).toContain('title="tip"');
+    });
+
+    it('keeps title on abbreviations', () => {
+      expect(sanitize('<abbr title="HyperText Markup Language">HTML</abbr>')).toContain(
+        'title="HyperText Markup Language"'
+      );
+    });
   });
 
   describe('disallowed attributes are stripped', () => {
     it.each([
-      ['class', '<pre class="hljs language-js">x</pre>'],
       ['id', '<p id="footnote-1">x</p>'],
       ['style', '<p style="color:red">x</p>'],
       ['onclick', '<a href="https://x" onclick="alert(1)">x</a>'],
