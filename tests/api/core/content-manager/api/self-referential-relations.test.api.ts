@@ -339,7 +339,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     ]);
   });
 
-  test('unidirectional self-link (entry to itself) is preserved when added before a republish', async () => {
+  test('unidirectional oneToMany self-link (entry to itself) is preserved when added before a republish', async () => {
     const cat = await createCategory('Self republish');
 
     // First publish with no self-link, so a published version already exists.
@@ -358,7 +358,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     ]);
   });
 
-  test('unidirectional self-link (entry to itself) is preserved after discarding the draft', async () => {
+  test('unidirectional oneToMany self-link (entry to itself) is preserved after discarding the draft', async () => {
     const cat = await createCategory('Self discard');
 
     await updateCategory(cat.documentId, {
