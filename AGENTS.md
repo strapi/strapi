@@ -40,6 +40,8 @@ The AI-tooling well-known locations are **symlink targets** maintained by `yarn 
 
 Run `yarn ai-tooling:sync` after adding or removing a skill in `.ai/skills/` to keep all three target dirs up to date. Links are local-only (gitignored target dirs) — only `.ai/skills/` content is committed.
 
+On **Windows**, the CLI creates directory **junctions** (no extra setup). Directory symlinks require Developer Mode or an elevated shell.
+
 ```bash
 yarn ai-tooling:sync    # idempotent — create/prune .ai links in all 3 tool dirs
 yarn ai-tooling:unlink  # remove only .ai-sourced links (leaves brain links intact)

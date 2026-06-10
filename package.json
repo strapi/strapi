@@ -52,6 +52,7 @@
     "ai-tooling:sync": "tsx scripts/ai-tooling/index.ts sync",
     "ai-tooling:unlink": "tsx scripts/ai-tooling/index.ts unlink",
     "ai-tooling:status": "tsx scripts/ai-tooling/index.ts status",
+    "ai-tooling:test": "tsx --test scripts/ai-tooling/__tests__/*.test.ts",
     "postinstall": "husky",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",

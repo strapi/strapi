@@ -4,10 +4,68 @@ import path from 'node:path';
 export const SOURCE_PATH = '.ai/skills';
 export const TARGET_PATHS = ['.agents/skills', '.claude/skills', '.cursor/skills'] as const;
 
-// Every target dir is depth-2 from repo root (e.g. .cursor/skills), source is also depth-2 (.ai/skills),
-// so the relative link body is identical for all targets:
-//   <repo>/.cursor/skills/<name> -> ../../.ai/skills/<name>
-export const linkBody = (name: string): string => path.join('..', '..', SOURCE_PATH, name);
+const isWin = process.platform === 'win32';
+const LINK_TYPE = isWin ? 'junction' : 'dir';
+
+const assertDepth2 = (rel: string): void => {
+  const segments = rel.split(/[/\\]/).filter((s) => s.length > 0);
+  if (segments.length !== 2) {
+    throw new Error(`TARGET_PATHS entry must be depth-2 from repo root, got: ${rel}`);
+  }
+};
+
+for (const targetRel of TARGET_PATHS) {
+  assertDepth2(targetRel);
+}
+
+/** Case-insensitive on Windows; exact on POSIX. */
+export const pathsEqual = (
+  a: string,
+  b: string,
+  platform: NodeJS.Platform = process.platform
+): boolean => (platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b);
+
+/** True when `resolved` is under `skillsRoot` (handles trailing sep + casing). */
+export const isUnderSkillsRoot = (
+  resolved: string,
+  skillsRoot: string,
+  platform: NodeJS.Platform = process.platform
+): boolean => {
+  const sep = platform === 'win32' ? path.win32.sep : path.sep;
+  const root = skillsRoot.endsWith(sep) ? skillsRoot : skillsRoot + sep;
+  return platform === 'win32'
+    ? resolved.toLowerCase().startsWith(root.toLowerCase())
+    : resolved.startsWith(root);
+};
+
+export const linkTargetFor = (
+  repoRoot: string,
+  targetPath: string,
+  name: string,
+  platform: NodeJS.Platform = process.platform
+): string => {
+  const sourceAbs = path.join(repoRoot, SOURCE_PATH, name);
+  if (platform === 'win32') {
+    return sourceAbs;
+  }
+  return path.relative(path.dirname(targetPath), sourceAbs);
+};
+
+export const createSkillLink = (repoRoot: string, targetPath: string, name: string): void => {
+  const target = linkTargetFor(repoRoot, targetPath, name);
+  try {
+    fs.symlinkSync(target, targetPath, LINK_TYPE);
+  } catch (err) {
+    if (isWin && err instanceof Error && 'code' in err && err.code === 'EPERM') {
+      throw new Error(
+        'ai-tooling: cannot create skill link on Windows (permission denied). ' +
+          'Enable Developer Mode (Settings → System → For developers) or run the shell as Administrator.',
+        { cause: err }
+      );
+    }
+    throw err;
+  }
+};
 
 // ── Logger ─────────────────────────────────────────────────────────────────────
 
@@ -51,13 +109,13 @@ export const listSourceSkills = (repoRoot: string): string[] => {
 
 // ── Ownership detection ────────────────────────────────────────────────────────
 
-type EntryKind =
+export type EntryKind =
   | { kind: 'absent' }
-  | { kind: 'ours'; correct: boolean } // our link; correct = points at the right skill
-  | { kind: 'foreign-link' } // symlink elsewhere (e.g. .brain) — skip & warn
-  | { kind: 'real' }; // real file/dir — skip & warn
+  | { kind: 'ours'; correct: boolean }
+  | { kind: 'foreign-link' }
+  | { kind: 'real' };
 
-const classify = (repoRoot: string, targetPath: string, name: string): EntryKind => {
+export const classify = (repoRoot: string, targetPath: string, name: string): EntryKind => {
   let lst: fs.Stats;
   try {
     lst = fs.lstatSync(targetPath);
@@ -70,12 +128,11 @@ const classify = (repoRoot: string, targetPath: string, name: string): EntryKind
   const linkTargetRaw = fs.readlinkSync(targetPath);
   const resolved = path.resolve(path.dirname(targetPath), linkTargetRaw);
 
-  // Trailing sep prevents sibling dirs like `.ai/skills-archive` from matching.
-  const skillsRoot = path.join(repoRoot, SOURCE_PATH) + path.sep;
-  if (resolved.startsWith(skillsRoot) === false) return { kind: 'foreign-link' };
+  const skillsRoot = path.join(repoRoot, SOURCE_PATH);
+  if (isUnderSkillsRoot(resolved, skillsRoot) === false) return { kind: 'foreign-link' };
 
   const expected = path.resolve(path.join(repoRoot, SOURCE_PATH, name));
-  return { kind: 'ours', correct: resolved === expected };
+  return { kind: 'ours', correct: pathsEqual(resolved, expected) };
 };
 
 // ── sync ──────────────────────────────────────────────────────────────────────
@@ -88,28 +145,25 @@ export const sync = (repoRoot: string, log: Logger): number => {
     const targetDir = path.join(repoRoot, targetRel);
     fs.mkdirSync(targetDir, { recursive: true });
 
-    // Link or re-point each source skill.
     for (const name of skills) {
       const p = path.join(targetDir, name);
       const k = classify(repoRoot, p, name);
 
       if (k.kind === 'absent') {
-        fs.symlinkSync(linkBody(name), p);
+        createSkillLink(repoRoot, p, name);
         log.add(targetRel, name, 'linked');
       } else if (k.kind === 'ours' && k.correct === false) {
         fs.unlinkSync(p);
-        fs.symlinkSync(linkBody(name), p);
+        createSkillLink(repoRoot, p, name);
         log.add(targetRel, name, 'relinked');
       } else if (k.kind === 'ours') {
         log.add(targetRel, name, 'ok');
       } else {
-        // foreign-link | real — skip & warn; collision surfaces via non-zero exit.
         warnings += 1;
         log.warn(targetRel, name, k.kind as LogWarnKind);
       }
     }
 
-    // Prune stale ours-links (source skill deleted or renamed).
     for (const entry of fs.readdirSync(targetDir)) {
       if (skills.includes(entry) === true) continue;
       const p = path.join(targetDir, entry);
@@ -121,7 +175,6 @@ export const sync = (repoRoot: string, log: Logger): number => {
   }
 
   log.flush();
-  // Non-zero exit signals collisions so they surface in CI / terminal.
   return warnings > 0 ? 1 : 0;
 };
 
@@ -139,7 +192,6 @@ export const unlink = (repoRoot: string, log: Logger): number => {
         fs.unlinkSync(p);
         log.add(targetRel, entry, 'pruned');
       }
-      // All non-ours entries (foreign-link, real, absent) are silently skipped.
     }
   }
 
@@ -164,7 +216,6 @@ export const status = (repoRoot: string, _log: Logger): number => {
 
     const entries: StatusEntry[] = [];
 
-    // Report on each source skill.
     for (const name of skills) {
       const p = path.join(targetDir, name);
       const k = classify(repoRoot, p, name);
@@ -180,7 +231,6 @@ export const status = (repoRoot: string, _log: Logger): number => {
       }
     }
 
-    // Report stale ours-links not in source.
     if (fs.existsSync(targetDir) === true) {
       for (const entry of fs.readdirSync(targetDir)) {
         if (skills.includes(entry) === true) continue;
