@@ -540,14 +540,15 @@ export const createEntityManager = (db: Database): EntityManager => {
       return entity;
     },
 
-    // TODO: where do we handle relation processing for many queries ?
+    // TODO: unlike delete(), deleteMany does not run deleteRelations() per removed row.
     async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
-      const { where } = params;
-
+      // Only apply filter criteria (_q / where / filters), same as count — not full findMany params.
+      // limit, offset, orderBy, populate, etc. must be ignored: populate throws on delete results,
+      // and pagination keys can make deleteMany diverge from findMany or delete an unexpected slice.
       const deletedRows = await this.createQueryBuilder(uid)
-        .where(where)
+        .init(pick(['_q', 'where', 'filters'], params))
         .delete()
         .execute<number>({ mapResults: false });
 

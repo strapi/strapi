@@ -355,7 +355,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       // constructor is not the same identity as the one this module closes over. Name
       // comparison is realm-agnostic.
       if ((error as Error | null)?.name === 'SyntaxError' && response.ok) {
-        return { data: [], status: response.status } as FetchResponse<any>;
+        return { data: {}, status: response.status } as FetchResponse<any>;
       } else {
         throw error;
       }
