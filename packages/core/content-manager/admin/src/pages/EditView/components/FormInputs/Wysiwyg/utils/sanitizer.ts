@@ -1,4 +1,8 @@
-import DOMPurify from 'dompurify';
+import createDOMPurify from 'dompurify';
+
+// Own instance, so the data: hook below stays scoped to this module instead of
+// mutating the library-wide singleton shared with any other DOMPurify consumer.
+const DOMPurify = createDOMPurify(window);
 
 /**
  * Attribute allowlist. Starts from the prior sanitize-html configuration:
@@ -44,8 +48,7 @@ const ALLOWED_URI_REGEXP = /^(?:(?:https?|ftp|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[
  * DOMPurify permits `data:` URIs on media tags (img/source/video/audio)
  * through its internal DATA_URI_TAGS allowlist, *bypassing* ALLOWED_URI_REGEXP.
  * The prior sanitize-html config stripped every `data:` URI, so strip them here
- * too for parity. Registered once on the module's DOMPurify instance, which is
- * the only consumer in the admin.
+ * too for parity.
  */
 const URL_ATTRIBUTES = ['src', 'href', 'xlink:href'];
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {

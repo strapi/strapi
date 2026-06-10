@@ -1,22 +1,6 @@
 import { md } from '../mdRenderer';
 import { sanitize } from '../sanitizer';
 
-/**
- * These tests pin down the contract that the markdown preview's HTML sanitizer
- * is expected to honor. They mirror the prior sanitize-html configuration:
- *
- *   - allowedTags:      false (all standard markdown tags pass through)
- *   - allowedAttributes:
- *       '*':    href, align, alt, center, width, height, type, controls, target
- *       img:    src, alt
- *       source: src, type
- *   - allowedSchemes:   http, https, ftp, mailto, tel (+ protocol-relative)
- *
- * Plus two additions over the old config: `class` (highlight.js + footnote
- * styling, emitted by mdRenderer.ts) and `title` (link/image/abbr tooltips).
- *
- * Anything outside that allowlist must be stripped.
- */
 describe('Wysiwyg sanitize', () => {
   describe('tags rendered by markdown-it pass through', () => {
     it.each([
