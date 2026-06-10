@@ -34,9 +34,17 @@ The following are the most important packages (not exhaustive — run `yarn work
 
 ### Skills directories
 
-Shared skills live under `.agents/skills/<name>/`. Tool-specific skill directories (e.g. `.claude/skills/`) should be symlinks to `.agents/skills/` — each AI tool has its own well-known location.
+**`.ai/skills/`** is the canonical source for committed repo skills. Each subdirectory containing a `SKILL.md` is a skill.
 
-Personal/in-progress skills go under `.agents/local-skills/` (gitignored). See [.agents/skills/writing-skills/SKILL.md](.agents/skills/writing-skills/SKILL.md) for authoring guidance.
+The AI-tooling well-known locations are **symlink targets** maintained by `yarn ai-tooling:sync`: `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`.
+
+Run `yarn ai-tooling:sync` after adding or removing a skill in `.ai/skills/` to keep all three target dirs up to date. Links are local-only (gitignored target dirs) — only `.ai/skills/` content is committed.
+
+```bash
+yarn ai-tooling:sync    # idempotent — create/prune .ai links in all 3 tool dirs
+yarn ai-tooling:unlink  # remove only .ai-sourced links (leaves brain links intact)
+yarn ai-tooling:status  # read-only report: linked / missing / conflict / stale
+```
 
 ---
 
@@ -59,6 +67,7 @@ Personal/in-progress skills go under `.agents/local-skills/` (gitignored). See [
 # Initial setup (run once after cloning)
 yarn install
 yarn setup                    # clean + build all packages
+yarn ai-tooling:sync          # link .ai/skills into .agents/ .claude/ .cursor/
 ```
 
 ---
