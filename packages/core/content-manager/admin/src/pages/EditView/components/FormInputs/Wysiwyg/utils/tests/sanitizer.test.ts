@@ -141,6 +141,21 @@ describe('Wysiwyg sanitize', () => {
       const result = sanitize('<img src="javascript:alert(1)" alt="x" />');
       expect(result.toLowerCase()).not.toContain('javascript:');
     });
+
+    /**
+     * DOMPurify allows `data:` URIs on media tags (img/source/video/audio) via
+     * its internal DATA_URI_TAGS allowlist, bypassing ALLOWED_URI_REGEXP. The
+     * prior sanitize-html config stripped all `data:` URIs; an afterSanitizeAttributes
+     * hook restores that, so none survive — not even inline images.
+     */
+    it.each([
+      '<img src="data:image/png;base64,iVBORw0KGgo=" alt="x" />',
+      '<img src="data:image/svg+xml,<svg onload=alert(1)>" alt="x" />',
+      '<img src="data:text/html;base64,PHNjcmlwdD4=" alt="x" />',
+      '<source src="data:video/mp4;base64,AAA" type="video/mp4" />',
+    ])('strips data: URIs from media tags: %s', (html) => {
+      expect(sanitize(html).toLowerCase()).not.toContain('data:');
+    });
   });
 
   describe('script handling', () => {

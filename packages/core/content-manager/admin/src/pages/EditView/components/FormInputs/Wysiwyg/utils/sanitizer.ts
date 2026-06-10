@@ -40,6 +40,26 @@ const ALLOWED_ATTR = [
  */
 const ALLOWED_URI_REGEXP = /^(?:(?:https?|ftp|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i;
 
+/**
+ * DOMPurify permits `data:` URIs on media tags (img/source/video/audio)
+ * through its internal DATA_URI_TAGS allowlist, *bypassing* ALLOWED_URI_REGEXP.
+ * The prior sanitize-html config stripped every `data:` URI, so strip them here
+ * too for parity. Registered once on the module's DOMPurify instance, which is
+ * the only consumer in the admin.
+ */
+const URL_ATTRIBUTES = ['src', 'href', 'xlink:href'];
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  if (typeof node.getAttribute !== 'function') {
+    return;
+  }
+  for (const attr of URL_ATTRIBUTES) {
+    const value = node.getAttribute(attr);
+    if (value && /^\s*data:/i.test(value)) {
+      node.removeAttribute(attr);
+    }
+  }
+});
+
 const sanitize = (html: string): string =>
   DOMPurify.sanitize(html, {
     ALLOWED_ATTR,
