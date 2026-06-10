@@ -26,6 +26,7 @@ import type {
   ForgotPassword,
   Login,
   Register,
+  RegisterAdmin,
   RegistrationInfo,
   ResetPassword,
 } from '../../../shared/contracts/authentication';
@@ -175,30 +176,11 @@ export default {
   },
 
   async registerAdmin(ctx: Context) {
-    const input = ctx.request.body as Register.Request['body'];
+    const input = ctx.request.body as RegisterAdmin.Request['body'];
 
     await validateAdminRegistrationInput(input);
 
-    const hasAdmin = await getService('user').exists();
-
-    if (hasAdmin) {
-      throw new ApplicationError('You cannot register a new super admin');
-    }
-
-    const superAdminRole = await getService('role').getSuperAdmin();
-
-    if (!superAdminRole) {
-      throw new ApplicationError(
-        "Cannot register the first admin because the super admin role doesn't exist."
-      );
-    }
-
-    const user = await getService('user').create({
-      ...input,
-      registrationToken: null,
-      isActive: true,
-      roles: superAdminRole ? [superAdminRole.id] : [],
-    });
+    const user = await getService('user').createFirstAdmin(input);
 
     strapi.telemetry.send('didCreateFirstAdmin');
 
@@ -234,7 +216,7 @@ export default {
           accessToken,
           user: getService('user').sanitizeUser(user),
         },
-      };
+      } satisfies RegisterAdmin.Response;
     } catch (error) {
       strapi.log.error('Failed to create admin refresh session during register-admin', error);
       return ctx.internalServerError();

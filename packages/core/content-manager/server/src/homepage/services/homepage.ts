@@ -8,6 +8,13 @@ import type {
   RecentDocument,
 } from '../../../../shared/contracts/homepage';
 
+import {
+  buildHomepageQueryFields,
+  compactSanitizedFields,
+  resolveReadableMainField,
+  resolveTitleField,
+} from './homepage-query-utils';
+
 const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
 
@@ -62,6 +69,13 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     uid: RecentDocument['contentTypeUid'];
   };
 
+  const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
+  const getPermissionChecker = (uid: string) =>
+    permissionCheckerService.create({
+      userAbility: strapi.requestContext.get()?.state.userAbility,
+      model: uid,
+    });
+
   const getContentTypesMeta = (
     allowedContentTypeUids: RecentDocument['contentTypeUid'][],
     configurations: ContentTypeConfiguration[]
@@ -69,28 +83,17 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     return allowedContentTypeUids.map((uid) => {
       const configuration = configurations.find((config) => config.uid === uid);
       const contentType = strapi.contentType(uid);
-      const fields = ['documentId', 'updatedAt'];
-
-      // Add fields required to get the status if D&P is enabled
+      const mainField = resolveReadableMainField(
+        contentType,
+        configuration,
+        getPermissionChecker(uid)
+      );
+      const fields = buildHomepageQueryFields(contentType, mainField);
       const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
-      if (hasDraftAndPublish) {
-        fields.push('publishedAt');
-      }
-
-      // Only add the main field if it's defined
-      if (configuration?.settings.mainField) {
-        fields.push(configuration.settings.mainField);
-      }
-
-      // Only add locale if it's localized
-      const isLocalized = (contentType.pluginOptions?.i18n as any)?.localized;
-      if (isLocalized) {
-        fields.push('locale');
-      }
 
       return {
         fields,
-        mainField: configuration!.settings.mainField,
+        mainField,
         contentType,
         hasDraftAndPublish,
         uid,
@@ -127,12 +130,27 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
-  const getPermissionChecker = (uid: string) =>
-    permissionCheckerService.create({
-      userAbility: strapi.requestContext.get()?.state.userAbility,
-      model: uid,
+  const sanitizeHomepageQuery = async (
+    meta: ContentTypeMeta,
+    additionalQueryParams?: Record<string, unknown>
+  ) => {
+    const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
+      limit: MAX_DOCUMENTS,
+      fields: meta.fields,
+      ...additionalQueryParams,
+      locale: '*',
     });
+
+    const sanitizedFields = compactSanitizedFields(permissionQuery.fields);
+    if (sanitizedFields !== undefined) {
+      permissionQuery.fields = sanitizedFields;
+    }
+
+    return {
+      permissionQuery,
+      titleField: resolveTitleField(meta.mainField, sanitizedFields),
+    };
+  };
 
   return {
     async addStatusToDocuments(documents: RecentDocument[]): Promise<RecentDocument[]> {
@@ -183,17 +201,15 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const recentDocuments = await Promise.all(
         contentTypesMeta.map(async (meta) => {
-          const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
-            limit: MAX_DOCUMENTS,
-            fields: meta.fields,
-            ...additionalQueryParams,
-            locale: '*',
-          });
+          const { permissionQuery, titleField } = await sanitizeHomepageQuery(
+            meta,
+            additionalQueryParams
+          );
 
           const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
           const populate = additionalQueryParams?.populate as string[];
 
-          return formatDocuments(docs, meta, populate);
+          return formatDocuments(docs, { ...meta, mainField: titleField }, populate);
         })
       );
 

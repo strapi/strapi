@@ -7,7 +7,10 @@ import { IEntity } from '../../../../types';
 /**
  * Generate and consume content-types streams in order to stream each entity individually
  */
-export const createEntitiesStream = (strapi: Core.Strapi): Readable => {
+export const createEntitiesStream = (
+  strapi: Core.Strapi,
+  options: { onWarning?: (message: string) => void } = {}
+): Readable => {
   const contentTypes: Struct.ContentTypeSchema[] = Object.values(strapi.contentTypes);
 
   async function* contentTypeStreamGenerator() {
@@ -38,8 +41,15 @@ export const createEntitiesStream = (strapi: Core.Strapi): Readable => {
           for await (const entity of stream) {
             yield { entity, contentType };
           }
-        } catch {
-          // ignore
+        } catch (error) {
+          // Surface the failure instead of silently dropping the remaining
+          // entities of this content type: every entity skipped here leaves
+          // dangling links pointing at rows that were never transferred
+          const message = error instanceof Error ? error.message : String(error);
+
+          options.onWarning?.(
+            `Failed to read all entities of type "${contentType.uid}" from the source, the remaining entities of this type were skipped: ${message}`
+          );
         } finally {
           stream.destroy();
         }
