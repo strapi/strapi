@@ -321,43 +321,22 @@ export const transformContentTypesToModels = (
       lifecycles: contentType?.lifecycles ?? {},
     };
 
-    // Document lookups: secondary btree indexes declared here so syncSchema creates them safely
-    // (instead of DDL in internal migration `5.0.0-06-add-document-id-indexes`, which is a no-op).
-    // Matches former migration branching: standalone document_id plus one composite when applicable.
+    // Document lookups: secondary btree index declared here so syncSchema owns it
+    // (instead of DDL in internal migration `5.0.0-06-add-document-id-indexes`, now a no-op).
+    // Keep the exact same name/columns schema sync already produced so existing databases
+    // see no index diff on upgrade (a rename would orphan the old index, since the schema
+    // builder's dropIndex is a silent no-op unless forceMigration is enabled).
     if (contentType.modelType === 'contentType') {
-      const documentIdColumn = identifiers.getColumnName(_.snakeCase('documentId'));
-      const secondaryIndexes = [
+      model.indexes = [
+        ...(model.indexes || []),
         {
-          name: identifiers.getIndexName([contentType.collectionName, 'document_id']),
-          columns: [documentIdColumn],
+          name: identifiers.getIndexName([contentType.collectionName, 'documents']),
+          // Filter attributes that are not in the schema
+          columns: ['documentId', 'locale', 'publishedAt']
+            .filter((n) => model.attributes[n])
+            .map((name) => identifiers.getColumnName(_.snakeCase(name))),
         },
       ];
-
-      const hasLocale = Boolean(model.attributes.locale);
-      const hasPublishedAt = Boolean(model.attributes.publishedAt);
-
-      if (hasLocale && hasPublishedAt) {
-        secondaryIndexes.push({
-          name: identifiers.getIndexName([contentType.collectionName, 'documents']),
-          columns: ['documentId', 'locale', 'publishedAt'].map((n) =>
-            identifiers.getColumnName(_.snakeCase(n))
-          ),
-        });
-      } else if (hasLocale) {
-        secondaryIndexes.push({
-          name: identifiers.getIndexName([contentType.collectionName, 'documents_locale']),
-          columns: ['documentId', 'locale'].map((n) => identifiers.getColumnName(_.snakeCase(n))),
-        });
-      } else if (hasPublishedAt) {
-        secondaryIndexes.push({
-          name: identifiers.getIndexName([contentType.collectionName, 'documents_published']),
-          columns: ['documentId', 'publishedAt'].map((n) =>
-            identifiers.getColumnName(_.snakeCase(n))
-          ),
-        });
-      }
-
-      model.indexes = [...(model.indexes || []), ...secondaryIndexes];
     }
 
     models.push(model);
