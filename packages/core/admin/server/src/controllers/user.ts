@@ -8,6 +8,7 @@ import {
   validateUsersDeleteInput,
 } from '../validation/user';
 import { getService } from '../utils';
+import { normalizeEmail } from '../utils/normalize-email';
 import {
   Create,
   DeleteMany,
@@ -93,9 +94,9 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params as Update.Params;
-    const { body: input } = ctx.request as Update.Request;
+    const data = normalizeEmail((ctx.request as Update.Request).body);
 
-    const data = (await validateUserUpdateInput(input)) as typeof input;
+    await validateUserUpdateInput(data);
 
     if (_.has(data, 'email')) {
       const uniqueEmailCheck = await getService('user').exists({

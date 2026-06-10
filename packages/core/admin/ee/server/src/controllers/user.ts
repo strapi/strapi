@@ -5,6 +5,7 @@ import { pick, isNil } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { validateUserCreationInput } from '../validation/user';
 import { validateUserUpdateInput } from '../../../../server/src/validation/user';
+import { normalizeEmail } from '../../../../server/src/utils/normalize-email';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
 
@@ -65,9 +66,9 @@ export default {
 
   async update(ctx: Context) {
     const { id } = ctx.params;
-    const { body: input } = ctx.request;
+    const data = normalizeEmail(ctx.request.body);
 
-    const data = (await validateUserUpdateInput(input)) as typeof input;
+    await validateUserUpdateInput(data);
 
     if (_.has(data, 'email')) {
       const uniqueEmailCheck = await getService('user').exists({

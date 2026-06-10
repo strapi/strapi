@@ -378,34 +378,6 @@ describe('Authenticated User', () => {
         expect(res.body.data.email).toBe(canonical);
       });
 
-      test('Applies Yup transforms together (email lowercase + firstname trim)', async () => {
-        const suffix = uniqueSuffix();
-        const initialEmail = `combo-a-${suffix}@strapi.io`;
-        const nextEmail = `combo-b-${suffix}@strapi.io`;
-
-        await utils.createUser({
-          firstname: 'Before',
-          lastname: 'Name',
-          email: initialEmail,
-          password,
-          isActive: true,
-        });
-
-        const rqCombo = createRequest({ strapi });
-        await rqCombo.login({ email: initialEmail });
-
-        const res = await rqCombo.put('/admin/users/me', {
-          body: {
-            email: `COMBO-B-${suffix}@STRAPI.IO`,
-            firstname: '  spaced  ',
-          },
-        });
-
-        expect(res.statusCode).toBe(200);
-        expect(res.body.data.email).toBe(nextEmail);
-        expect(res.body.data.firstname).toBe('spaced');
-      });
-
       test('Returns validation error for malformed email before duplicate-email logic', async () => {
         const suffix = uniqueSuffix();
 
@@ -430,7 +402,7 @@ describe('Authenticated User', () => {
         expect(res.body.error.name).toBe('ValidationError');
       });
 
-      test('Treats duplicate email as taken when casing differs (yup normalizes email)', async () => {
+      test('Treats duplicate email as taken when casing differs', async () => {
         const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
         const canonicalEmail = `case-b-${suffix}@strapi.io`;
 

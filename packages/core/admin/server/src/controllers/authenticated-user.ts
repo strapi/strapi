@@ -2,6 +2,7 @@ import type { Context } from 'koa';
 import type { AdminUser } from '../../../shared/contracts/shared';
 
 import { getService } from '../utils';
+import { normalizeEmail } from '../utils/normalize-email';
 import { validateProfileUpdateInput } from '../validation/user';
 import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
 import { getSessionManager } from '../../../shared/utils/session-auth';
@@ -16,9 +17,9 @@ export default {
   },
 
   async updateMe(ctx: Context) {
-    const input = ctx.request.body as UpdateMe.Request['body'];
+    const data = normalizeEmail(ctx.request.body as UpdateMe.Request['body']);
 
-    const data = (await validateProfileUpdateInput(input)) as UpdateMe.Request['body'];
+    await validateProfileUpdateInput(data);
 
     const userService = getService('user');
     const authServer = getService('auth');
