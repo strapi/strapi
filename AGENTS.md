@@ -1,7 +1,7 @@
 # Strapi Monorepo — Agent Guide
 
 Strapi is an open-source headless CMS.
-Yarn workspaces + Nx monorepo. Node ≥20 ≤24, Yarn 4.
+Yarn workspaces + Nx monorepo. Node ≥20 ≤26, Yarn 4.
 Target branch: `develop` (not `main`). All PRs go to `develop`.
 
 ---
@@ -31,6 +31,12 @@ The following are the most important packages (not exhaustive — run `yarn work
 | `@strapi/types`                    | Shared TypeScript type definitions                        |
 | `@strapi/permissions`              | RBAC engine                                               |
 | `@strapi/plugin-users-permissions` | JWT authentication                                        |
+
+### Skills directories
+
+Shared skills live under `.agents/skills/<name>/`. Tool-specific skill directories (e.g. `.claude/skills/`) should be symlinks to `.agents/skills/` — each AI tool has its own well-known location.
+
+Personal/in-progress skills go under `.agents/local-skills/` (gitignored). See [.agents/skills/writing-skills/SKILL.md](.agents/skills/writing-skills/SKILL.md) for authoring guidance.
 
 ---
 
@@ -220,11 +226,7 @@ yarn prettier:check # check only
 - Branch from `develop`, target `develop` — never `main`.
 - Link the issue you're fixing in the description.
 - All tests must pass before merging.
-- PR description must use this template:
-  - **What does it do?** — technical changes made
-  - **Why is it needed?** — problem being solved
-  - **How to test it?** — steps to reproduce and verify
-  - **Related issue(s)/PR(s)** — links
+- PR description must follow [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).
 
 ---
 

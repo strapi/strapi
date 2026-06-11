@@ -68,7 +68,7 @@
     "@strapi/icons": "2.2.0",
     "@strapi/utils": "5.47.1",
     "bcryptjs": "2.4.3",
-    "cheerio": "^1.0.0",
+    "cheerio": "^1.2.0",
     "formik": "2.4.5",
     "fs-extra": "11.3.4",
     "immer": "9.0.21",
@@ -108,7 +108,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {
