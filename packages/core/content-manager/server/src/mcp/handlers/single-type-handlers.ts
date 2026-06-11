@@ -7,7 +7,8 @@ import { formatDocumentWithMetadata } from '../../controllers/utils/metadata';
 import { getPopulateForLocalizations } from '../../services/utils/populate';
 import { MCP_NOT_FOUND_DOCUMENT } from './constants';
 import { isContentTypeLocalized } from '../permissions';
-import { ok, sanitizeAndShape } from '../utils';
+import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
+import { ok, sanitizeFormatShape } from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -119,8 +120,7 @@ export const singleCreateOrUpdate = async (
       });
     }
 
-    const shapedDocument = await sanitizeAndShape(permissionChecker, typedUid, doc);
-    return formatDocumentWithMetadata(permissionChecker, typedUid, shapedDocument);
+    return sanitizeFormatShape(permissionChecker, typedUid, doc);
   });
 
   return ok(formatted as Record<string, unknown>);
@@ -204,8 +204,7 @@ export const createSingleGetHandler =
       throw new errors.ForbiddenError();
     }
 
-    const shapedDocument = await sanitizeAndShape(permissionChecker, typedUid, version);
-    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, shapedDocument);
+    const result = await sanitizeFormatShape(permissionChecker, typedUid, version);
 
     return ok(result as Record<string, unknown>);
   };
@@ -281,7 +280,9 @@ export const createSingleDeleteHandler =
       locale: localeForQuery,
     });
 
-    const shapedResult = await sanitizeAndShape(permissionChecker, typedUid, deletedEntity);
+    // Delete returns `{ data }` without metadata — no status to compute, so sanitize + shape only.
+    const sanitizedResult = await permissionChecker.sanitizeOutput(deletedEntity);
+    const shapedResult = await shapeRelationsForMcp(typedUid, sanitizedResult);
 
     return ok({ data: shapedResult } as Record<string, unknown>);
   };
@@ -337,8 +338,7 @@ export const createSinglePublishHandler =
       return publishResult?.at(0);
     });
 
-    const shapedDocument = await sanitizeAndShape(permissionChecker, typedUid, publishedDocument);
-    const result = await formatDocumentWithMetadata(permissionChecker, typedUid, shapedDocument);
+    const result = await sanitizeFormatShape(permissionChecker, typedUid, publishedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -401,8 +401,7 @@ export const createSingleUnpublishHandler =
       return asyncPipe.pipe(
         (doc: any) =>
           documentManager.unpublish(doc.documentId, typedUid, { locale: resolvedLocale }),
-        (doc: unknown) => sanitizeAndShape(permissionChecker, typedUid, doc),
-        (doc: any) => formatDocumentWithMetadata(permissionChecker, typedUid, doc)
+        (doc: unknown) => sanitizeFormatShape(permissionChecker, typedUid, doc)
       )(document);
     });
 
@@ -455,8 +454,7 @@ export const createSingleDiscardDraftHandler =
     const discardedDocument = await asyncPipe.pipe(
       (doc: any) =>
         documentManager.discardDraft(doc.documentId, typedUid, { locale: resolvedLocale }),
-      (doc: unknown) => sanitizeAndShape(permissionChecker, typedUid, doc),
-      (doc: any) => formatDocumentWithMetadata(permissionChecker, typedUid, doc)
+      (doc: unknown) => sanitizeFormatShape(permissionChecker, typedUid, doc)
     )(document);
 
     return ok(discardedDocument as Record<string, unknown>);

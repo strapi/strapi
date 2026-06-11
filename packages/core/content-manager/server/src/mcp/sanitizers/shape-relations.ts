@@ -11,10 +11,22 @@ const MANY_RELATION_TYPES = new Set([
   'morphMany',
 ]);
 
+/**
+ * Canonical "is this relation a list" predicate for the MCP output boundary.
+ * Both the runtime shaping (reduceToIdentity) and the registered output schemas
+ * (output-schemas.ts) MUST use this single definition — the MCP SDK validates
+ * structuredContent against the schema, so any divergence fails the tool call.
+ * Intentionally broader than `relations.isAnyToMany` from @strapi/utils, which
+ * ignores `manyWay` and the morph variants.
+ */
+export const isManyRelationForMcp = (attribute: { relation?: string }): boolean =>
+  MANY_RELATION_TYPES.has(attribute.relation ?? '');
+
 type RelationIdentity = {
   documentId: string;
   locale?: string;
   __type?: string;
+  status?: string;
 };
 
 /**
@@ -42,6 +54,13 @@ const pickIdentity = (entry: unknown): RelationIdentity | undefined => {
     identity.__type = obj.__type;
   }
 
+  // Preserve the computed publish status on `localizations` entries — it is
+  // calculated by formatDocumentWithMetadata BEFORE shaping (calculate, then strip).
+  // Non-localization relation entries never carry a string `status`, so this is a no-op for them.
+  if (typeof obj.status === 'string') {
+    identity.status = obj.status;
+  }
+
   return identity;
 };
 
@@ -55,7 +74,7 @@ const reduceToIdentity = (
   attribute: { relation?: string },
   value: unknown
 ): RelationIdentity | RelationIdentity[] | null => {
-  const isMany = MANY_RELATION_TYPES.has(attribute.relation ?? '');
+  const isMany = isManyRelationForMcp(attribute);
 
   if (isMany) {
     if (Array.isArray(value)) {

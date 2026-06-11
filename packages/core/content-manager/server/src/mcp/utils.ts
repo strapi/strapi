@@ -1,5 +1,7 @@
 import type { Modules, UID } from '@strapi/types';
 
+import { formatDocumentWithMetadata } from '../controllers/utils/metadata';
+import type { GetMetadataOptions } from '../services/document-metadata';
 import { shapeRelationsForMcp } from './sanitizers/shape-relations';
 
 /**
@@ -15,21 +17,42 @@ export const slugifyUidForMcpToolName = (uid: string): string => {
   return `${namespace.toLowerCase()}_${modelNameParts[0]}`;
 };
 
+type McpPermissionChecker = {
+  sanitizeOutput: (doc: unknown) => Promise<Record<string, unknown>>;
+};
+
 /**
- * Single output chokepoint for MCP handlers.
- * Applies permission-based sanitization then reduces every relation to identity-only shape.
- * Must be called **before** formatDocumentWithMetadata so metadata helpers see the shaped doc.
+ * Output chokepoint for MCP handlers returning `{ data, meta }`.
+ * Order matters — calculate, then strip:
+ * 1. permission-based sanitization,
+ * 2. formatDocumentWithMetadata — computes `data.status` and `localizations[].status`
+ *    from `publishedAt`/`updatedAt`, which relation shaping removes,
+ * 3. relation shaping on the formatted `data` (identity-only relations; the
+ *    freshly-computed `localizations[].status` survives via RelationIdentity).
+ *
+ * Handlers that do NOT attach metadata (delete, list) compose
+ * `permissionChecker.sanitizeOutput` + `shapeRelationsForMcp` directly instead.
  */
-export const sanitizeAndShape = async (
-  permissionChecker: { sanitizeOutput: (doc: unknown) => Promise<Record<string, unknown>> },
-  uid: UID.Schema,
-  doc: unknown
-  // Return type is `any` so callers (like formatDocumentWithMetadata) accept it without casts.
-  // The shaping guarantee is behavioral, not structural.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> => {
+export const sanitizeFormatShape = async (
+  permissionChecker: McpPermissionChecker,
+  uid: UID.ContentType,
+  doc: unknown,
+  opts?: GetMetadataOptions
+): Promise<Record<string, unknown>> => {
   const sanitized = await permissionChecker.sanitizeOutput(doc);
-  return shapeRelationsForMcp(uid, sanitized);
+  const formatted = await formatDocumentWithMetadata(
+    permissionChecker,
+    uid,
+    sanitized as unknown as Parameters<typeof formatDocumentWithMetadata>[2],
+    opts
+  );
+
+  if (formatted.data === null || formatted.data === undefined) {
+    return formatted;
+  }
+
+  const shapedData = await shapeRelationsForMcp(uid, formatted.data as Record<string, unknown>);
+  return { ...formatted, data: shapedData };
 };
 
 /** Wraps a plain object into the dual-representation MCP tool return value (text + structuredContent). */

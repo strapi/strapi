@@ -1,11 +1,17 @@
 /**
  * Unit tests for shape-relations.ts
  *
- * Tests reduceToIdentity (pure) and shapeRelationsForMcp (via mocked strapi + traverseEntity).
- * A separate describe block exercises the real traverseEntity so nested component relations are
- * shaped correctly without mocking the traversal engine.
+ * Tests reduceToIdentity / isManyRelationForMcp (pure) and shapeRelationsForMcp through the
+ * REAL traverseEntity engine — only `strapi.getModel` is stubbed. Mocking the traversal would
+ * mean mocking the logic under test (it has hidden contracts: recursion into relation targets,
+ * components, dynamic zones), so it is intentionally not mocked here.
  */
-import { reduceToIdentity, MANY_RELATION_TYPES } from '../shape-relations';
+import {
+  reduceToIdentity,
+  isManyRelationForMcp,
+  MANY_RELATION_TYPES,
+  shapeRelationsForMcp,
+} from '../shape-relations';
 
 // ---------------------------------------------------------------------------
 // reduceToIdentity — pure tests, no strapi dependency
@@ -116,146 +122,157 @@ describe('reduceToIdentity', () => {
     ]);
   });
 
-  // ── MANY_RELATION_TYPES set ──────────────────────────────────────────────
+  // ── status preservation (calculate, then strip) ─────────────────────────
 
-  it('MANY_RELATION_TYPES covers expected relation kinds', () => {
+  it('preserves a string status on entries (computed localization status)', () => {
+    const attr = { relation: 'oneToMany' };
+    const value = [
+      { documentId: 'loc1', locale: 'fr', status: 'modified', publishedAt: '2024-01-01' },
+      { documentId: 'loc2', locale: 'it', status: 'draft', publishedAt: null },
+    ];
+    expect(reduceToIdentity(attr, value)).toEqual([
+      { documentId: 'loc1', locale: 'fr', status: 'modified' },
+      { documentId: 'loc2', locale: 'it', status: 'draft' },
+    ]);
+  });
+
+  it('ignores a non-string status', () => {
+    const attr = { relation: 'oneToOne' };
+    expect(reduceToIdentity(attr, { documentId: 'a', status: 42 })).toEqual({ documentId: 'a' });
+  });
+
+  // ── cardinality predicate ────────────────────────────────────────────────
+
+  it('isManyRelationForMcp covers expected relation kinds', () => {
     for (const kind of ['oneToMany', 'manyToMany', 'manyWay', 'morphToMany', 'morphMany']) {
+      expect(isManyRelationForMcp({ relation: kind })).toBe(true);
       expect(MANY_RELATION_TYPES.has(kind)).toBe(true);
     }
   });
 
-  it('MANY_RELATION_TYPES does not include to-one kinds', () => {
+  it('isManyRelationForMcp rejects to-one kinds', () => {
     for (const kind of ['oneToOne', 'manyToOne', 'oneWay', 'morphToOne', 'morphOne']) {
+      expect(isManyRelationForMcp({ relation: kind })).toBe(false);
       expect(MANY_RELATION_TYPES.has(kind)).toBe(false);
     }
   });
+
+  it('isManyRelationForMcp handles a missing relation kind', () => {
+    expect(isManyRelationForMcp({})).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
-// shapeRelationsForMcp — integration-style with mocked strapi + traverseEntity
+// shapeRelationsForMcp — real traverseEntity, stubbed strapi.getModel
 // ---------------------------------------------------------------------------
 
-// Mock traverseEntity to directly invoke the visitor so we don't need a real
-// schema structure. We replicate the attribute iteration that traverseEntity does
-// for top-level keys.
-jest.mock('@strapi/utils', () => {
-  const actual = jest.requireActual('@strapi/utils');
-  return {
-    ...actual,
-    traverseEntity: jest.fn(async (visitor, options, entity) => {
-      const { schema } = options;
-      const result = { ...entity };
-
-      for (const [key, attribute] of Object.entries(schema?.attributes ?? {})) {
-        const value = result[key];
-        // Simulate VisitorUtils.set
-        const set = jest.fn((k: string, v: unknown) => {
-          result[k] = v;
-        });
-        visitor(
-          { key, value, attribute, path: { raw: key, attribute: key }, data: result },
-          { set }
-        );
-      }
-
-      return result;
-    }),
+describe('shapeRelationsForMcp (real traverseEntity)', () => {
+  const useModels = (models: Record<string, unknown>) => {
+    (global as Record<string, unknown>).strapi = {
+      getModel: (uid: string) => models[uid],
+    } as unknown as typeof strapi;
   };
-});
 
-describe('shapeRelationsForMcp', () => {
-  // Import after mocks are set up
-  // We use jest.isolateModules so each test gets a fresh module referencing mockStrapi
-  const makeStrapi = (attributes: Record<string, unknown>) =>
-    ({
-      getModel: jest.fn(() => ({ attributes, uid: 'api::test.test' })),
-    }) as unknown as typeof strapi;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
+  const makeArticleModel = (attributes: Record<string, unknown>) => ({
+    'api::test.test': { uid: 'api::test.test', attributes },
   });
 
   it('reduces a to-one relation to identity', async () => {
-    const fakeStrapi = makeStrapi({
-      category: { type: 'relation', relation: 'manyToOne', target: 'api::category.category' },
-    });
-    (global as any).strapi = fakeStrapi;
+    useModels(
+      makeArticleModel({
+        category: { type: 'relation', relation: 'manyToOne', target: 'api::category.category' },
+      })
+    );
 
-    const { shapeRelationsForMcp } = await import('../shape-relations');
-
-    const result = await shapeRelationsForMcp('api::test.test' as any, {
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
       title: 'Article',
       category: { documentId: 'cat1', locale: 'en', secretField: 'LEAKED' },
     });
 
     expect(result.category).toEqual({ documentId: 'cat1', locale: 'en' });
-    expect((result.category as any).secretField).toBeUndefined();
   });
 
   it('reduces a to-many relation to identity array', async () => {
-    const fakeStrapi = makeStrapi({
-      tags: { type: 'relation', relation: 'manyToMany', target: 'api::tag.tag' },
-    });
-    (global as any).strapi = fakeStrapi;
+    useModels(
+      makeArticleModel({
+        tags: { type: 'relation', relation: 'manyToMany', target: 'api::tag.tag' },
+      })
+    );
 
-    const { shapeRelationsForMcp } = await import('../shape-relations');
-
-    const result = await shapeRelationsForMcp('api::test.test' as any, {
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
       tags: [{ documentId: 't1', label: 'LEAKED' }, { documentId: 't2' }],
     });
 
     expect(result.tags).toEqual([{ documentId: 't1' }, { documentId: 't2' }]);
   });
 
+  it('manyWay relation returns an identity ARRAY (matches the registered output schema)', async () => {
+    useModels(
+      makeArticleModel({
+        tags: { type: 'relation', relation: 'manyWay', target: 'api::tag.tag' },
+      })
+    );
+
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
+      tags: [{ documentId: 't1', label: 'LEAKED' }],
+    });
+
+    expect(Array.isArray(result.tags)).toBe(true);
+    expect(result.tags).toEqual([{ documentId: 't1' }]);
+  });
+
   it('leaves admin::user relations untouched', async () => {
     const createdBy = { id: 1, email: 'admin@example.com', firstname: 'Admin' };
-    const fakeStrapi = makeStrapi({
-      createdBy: { type: 'relation', relation: 'manyToOne', target: 'admin::user' },
-    });
-    (global as any).strapi = fakeStrapi;
+    useModels(
+      makeArticleModel({
+        createdBy: { type: 'relation', relation: 'manyToOne', target: 'admin::user' },
+      })
+    );
 
-    const { shapeRelationsForMcp } = await import('../shape-relations');
-
-    const result = await shapeRelationsForMcp('api::test.test' as any, { createdBy });
+    const result = await shapeRelationsForMcp('api::test.test' as never, { createdBy });
 
     // admin::user skipped — full record preserved
     expect(result.createdBy).toEqual(createdBy);
   });
 
-  it('reduces localizations to identity array (fixes leak family #2)', async () => {
-    const fakeStrapi = makeStrapi({
-      localizations: { type: 'relation', relation: 'oneToMany', target: 'api::test.test' },
-    });
-    (global as any).strapi = fakeStrapi;
+  it('reduces localizations to identity array and PRESERVES the computed status', async () => {
+    useModels(
+      makeArticleModel({
+        localizations: { type: 'relation', relation: 'oneToMany', target: 'api::test.test' },
+      })
+    );
 
-    const { shapeRelationsForMcp } = await import('../shape-relations');
-
-    const result = await shapeRelationsForMcp('api::test.test' as any, {
+    // formatDocumentWithMetadata runs BEFORE shaping and stamps `status` on each
+    // localization entry — shaping must keep it while stripping everything else.
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
       title: 'Hello',
       localizations: [
         {
           documentId: 'loc1',
           locale: 'fr',
+          status: 'modified',
           publishedAt: '2024-01-01',
+          updatedAt: '2024-02-01',
           title: 'Bonjour',
           somePrivateField: 'LEAKED',
         },
       ],
     });
 
-    expect(result.localizations).toEqual([{ documentId: 'loc1', locale: 'fr' }]);
+    expect(result.localizations).toEqual([
+      { documentId: 'loc1', locale: 'fr', status: 'modified' },
+    ]);
   });
 
   it('leaves non-relation attributes untouched', async () => {
-    const fakeStrapi = makeStrapi({
-      title: { type: 'string' },
-      content: { type: 'richtext' },
-    });
-    (global as any).strapi = fakeStrapi;
+    useModels(
+      makeArticleModel({
+        title: { type: 'string' },
+        content: { type: 'richtext' },
+      })
+    );
 
-    const { shapeRelationsForMcp } = await import('../shape-relations');
-
-    const result = await shapeRelationsForMcp('api::test.test' as any, {
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
       title: 'My Article',
       content: 'Some content',
     });
@@ -265,14 +282,13 @@ describe('shapeRelationsForMcp', () => {
   });
 
   it('normalizes a {count} to-many to []', async () => {
-    const fakeStrapi = makeStrapi({
-      tags: { type: 'relation', relation: 'oneToMany', target: 'api::tag.tag' },
-    });
-    (global as any).strapi = fakeStrapi;
+    useModels(
+      makeArticleModel({
+        tags: { type: 'relation', relation: 'oneToMany', target: 'api::tag.tag' },
+      })
+    );
 
-    const { shapeRelationsForMcp } = await import('../shape-relations');
-
-    const result = await shapeRelationsForMcp('api::test.test' as any, {
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
       tags: { count: 3 },
     });
 
@@ -280,14 +296,13 @@ describe('shapeRelationsForMcp', () => {
   });
 
   it('morphToOne: __type survives shaping and other fields are stripped', async () => {
-    const fakeStrapi = makeStrapi({
-      related: { type: 'relation', relation: 'morphToOne' },
-    });
-    (global as any).strapi = fakeStrapi;
+    useModels(
+      makeArticleModel({
+        related: { type: 'relation', relation: 'morphToOne' },
+      })
+    );
 
-    const { shapeRelationsForMcp } = await import('../shape-relations');
-
-    const result = await shapeRelationsForMcp('api::test.test' as any, {
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
       related: {
         documentId: 'morph1',
         __type: 'api::article.article',
@@ -301,48 +316,51 @@ describe('shapeRelationsForMcp', () => {
       __type: 'api::article.article',
       locale: 'en',
     });
-    expect((result.related as any).secretField).toBeUndefined();
   });
 
-  it('morphToMany: __type survives shaping on each entry', async () => {
-    const fakeStrapi = makeStrapi({
-      items: { type: 'relation', relation: 'morphToMany' },
-    });
-    (global as any).strapi = fakeStrapi;
+  it('morphToMany: returns an identity ARRAY with __type on each entry', async () => {
+    useModels(
+      makeArticleModel({
+        items: { type: 'relation', relation: 'morphToMany' },
+      })
+    );
 
-    const { shapeRelationsForMcp } = await import('../shape-relations');
-
-    const result = await shapeRelationsForMcp('api::test.test' as any, {
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
       items: [
         { documentId: 'a', __type: 'api::article.article', secretField: 'LEAKED' },
         { documentId: 'b', __type: 'api::tag.tag' },
       ],
     });
 
+    expect(Array.isArray(result.items)).toBe(true);
     expect(result.items).toEqual([
       { documentId: 'a', __type: 'api::article.article' },
       { documentId: 'b', __type: 'api::tag.tag' },
     ]);
   });
-});
 
-// ---------------------------------------------------------------------------
-// Real traverseEntity — nested component + dynamic zone relations
-//
-// These tests bypass the module-level traverseEntity mock by using
-// jest.isolateModules so we get the genuine traversal engine.  This proves
-// that relations nested inside components and dynamic zones are shaped
-// correctly — not just top-level ones.
-// ---------------------------------------------------------------------------
+  it('morphMany: returns an identity ARRAY (matches the registered output schema)', async () => {
+    useModels(
+      makeArticleModel({
+        boxes: {
+          type: 'relation',
+          relation: 'morphMany',
+          target: 'api::box.box',
+          morphBy: 'related',
+        },
+      })
+    );
 
-describe('shapeRelationsForMcp (real traverseEntity) — nested relations', () => {
-  const makeModels = (models: Record<string, unknown>) =>
-    ({
-      getModel: jest.fn((uid: string) => models[uid]),
-    }) as unknown as typeof strapi;
+    const result = await shapeRelationsForMcp('api::test.test' as never, {
+      boxes: [{ documentId: 'b1', __type: 'api::box.box', secretField: 'LEAKED' }],
+    });
+
+    expect(Array.isArray(result.boxes)).toBe(true);
+    expect(result.boxes).toEqual([{ documentId: 'b1', __type: 'api::box.box' }]);
+  });
 
   it('relation inside a component: nested relation fields are reduced to identity', async () => {
-    const models = {
+    useModels({
       'api::article.article': {
         uid: 'api::article.article',
         attributes: {
@@ -356,26 +374,48 @@ describe('shapeRelationsForMcp (real traverseEntity) — nested relations', () =
           title: { type: 'string' },
         },
       },
-    };
-
-    let shapeRelationsForMcp: (uid: any, data: any) => Promise<any>;
-    jest.isolateModules(() => {
-      jest.unmock('@strapi/utils');
-      (global as any).strapi = makeModels(models);
-      // eslint-disable-next-line @typescript-eslint/no-require-imports, node/no-missing-require
-      ({ shapeRelationsForMcp } = require('../shape-relations'));
     });
 
-    const result = await shapeRelationsForMcp!('api::article.article' as any, {
+    const result = await shapeRelationsForMcp('api::article.article' as never, {
       seo: {
         author: { documentId: 'auth1', name: 'LEAKED', email: 'LEAKED' },
         title: 'My Title',
       },
     });
 
-    expect((result.seo as any).author).toEqual({ documentId: 'auth1' });
-    expect((result.seo as any).author.name).toBeUndefined();
-    expect((result.seo as any).author.email).toBeUndefined();
-    expect((result.seo as any).title).toBe('My Title');
+    expect((result.seo as Record<string, unknown>).author).toEqual({ documentId: 'auth1' });
+    expect((result.seo as Record<string, unknown>).title).toBe('My Title');
+  });
+
+  it('relation inside a dynamic zone entry is reduced to identity', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          blocks: { type: 'dynamiczone', components: ['shared.quote'] },
+        },
+      },
+      'shared.quote': {
+        uid: 'shared.quote',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+          text: { type: 'string' },
+        },
+      },
+    });
+
+    const result = await shapeRelationsForMcp('api::article.article' as never, {
+      blocks: [
+        {
+          __component: 'shared.quote',
+          author: { documentId: 'auth1', email: 'LEAKED' },
+          text: 'Some quote',
+        },
+      ],
+    });
+
+    const [block] = result.blocks as Array<Record<string, unknown>>;
+    expect(block.author).toEqual({ documentId: 'auth1' });
+    expect(block.text).toBe('Some quote');
   });
 });

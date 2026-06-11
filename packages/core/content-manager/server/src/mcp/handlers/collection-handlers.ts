@@ -12,7 +12,8 @@ import {
   MCP_NOT_FOUND_OR_PUBLISHED,
 } from './constants';
 import { isContentTypeLocalized } from '../permissions';
-import { ok, sanitizeAndShape } from '../utils';
+import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
+import { ok, sanitizeFormatShape } from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -126,9 +127,15 @@ export const createCollectionListHandler =
       return document;
     };
 
+    // Calculate, then strip: setStatus reads top-level publishedAt/updatedAt, so it must
+    // run before relation shaping reduces the document at the output boundary.
     const results = await asyncPipe.map(
       documents,
-      asyncPipe.pipe((doc: unknown) => sanitizeAndShape(permissionChecker, uid, doc), setStatus)
+      asyncPipe.pipe(
+        (doc: unknown) => permissionChecker.sanitizeOutput(doc),
+        setStatus,
+        (doc: Record<string, unknown>) => shapeRelationsForMcp(uid, doc)
+      )
     );
 
     return ok({ results, pagination } as Record<string, unknown>);
@@ -197,8 +204,7 @@ export const createCollectionGetHandler =
       throw new errors.ForbiddenError();
     }
 
-    const shapedDocument = await sanitizeAndShape(permissionChecker, uid, version);
-    const result = await formatDocumentWithMetadata(permissionChecker, uid, shapedDocument);
+    const result = await sanitizeFormatShape(permissionChecker, uid, version);
 
     return ok(result as Record<string, unknown>);
   };
@@ -238,8 +244,7 @@ export const createCollectionCreateHandler =
         status,
       });
 
-      const shapedDocument = await sanitizeAndShape(permissionChecker, uid, document);
-      return formatDocumentWithMetadata(permissionChecker, uid, shapedDocument, {
+      return sanitizeFormatShape(permissionChecker, uid, document, {
         availableLocales: false,
         availableStatus: false,
       });
@@ -316,8 +321,7 @@ export const createCollectionUpdateHandler =
         { data: sanitizedData, locale: resolvedLocale }
       );
 
-      const shapedDocument = await sanitizeAndShape(permissionChecker, uid, updatedDocument);
-      return formatDocumentWithMetadata(permissionChecker, uid, shapedDocument);
+      return sanitizeFormatShape(permissionChecker, uid, updatedDocument);
     });
 
     return ok(result as Record<string, unknown>);
@@ -372,7 +376,9 @@ export const createCollectionDeleteHandler =
     }
 
     const result = await documentManager.delete(documentId, uid, { locale: localeForQuery });
-    const shapedResult = await sanitizeAndShape(permissionChecker, uid, result);
+    // Delete returns `{ data }` without metadata — no status to compute, so sanitize + shape only.
+    const sanitizedResult = await permissionChecker.sanitizeOutput(result);
+    const shapedResult = await shapeRelationsForMcp(uid, sanitizedResult);
 
     return ok({ data: shapedResult } as Record<string, unknown>);
   };
@@ -431,8 +437,7 @@ export const createCollectionPublishHandler =
       return publishResult[0];
     });
 
-    const shapedDocument = await sanitizeAndShape(permissionChecker, uid, publishedDocument);
-    const result = await formatDocumentWithMetadata(permissionChecker, uid, shapedDocument);
+    const result = await sanitizeFormatShape(permissionChecker, uid, publishedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -497,8 +502,7 @@ export const createCollectionUnpublishHandler =
       return documentManager.unpublish(document.documentId, uid, { locale: resolvedLocale });
     });
 
-    const shapedDocument = await sanitizeAndShape(permissionChecker, uid, unpublishedDocument);
-    const result = await formatDocumentWithMetadata(permissionChecker, uid, shapedDocument);
+    const result = await sanitizeFormatShape(permissionChecker, uid, unpublishedDocument);
 
     return ok(result as Record<string, unknown>);
   };
@@ -548,8 +552,7 @@ export const createCollectionDiscardDraftHandler =
 
     const discardedDocument = await asyncPipe.pipe(
       (doc: any) => documentManager.discardDraft(doc.documentId, uid, { locale: resolvedLocale }),
-      (doc: unknown) => sanitizeAndShape(permissionChecker, uid, doc),
-      (doc: any) => formatDocumentWithMetadata(permissionChecker, uid, doc)
+      (doc: unknown) => sanitizeFormatShape(permissionChecker, uid, doc)
     )(document);
 
     return ok(discardedDocument as Record<string, unknown>);

@@ -1,12 +1,14 @@
-import strapiUtils, { z } from '@strapi/utils';
+import { z } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 
-const { isAnyToMany } = strapiUtils.relations;
+import { isManyRelationForMcp } from '../sanitizers/shape-relations';
 
 const relationIdentity = z.object({
   documentId: z.string(),
   locale: z.string().optional(),
   __type: z.string().optional(),
+  // Computed publish status preserved on `localizations` entries (calculate, then strip).
+  status: z.string().optional(),
 });
 
 const buildAttributeSchema = (key: string, attributes: Struct.SchemaAttributes): z.ZodTypeAny => {
@@ -21,7 +23,9 @@ const buildAttributeSchema = (key: string, attributes: Struct.SchemaAttributes):
     return z.unknown().optional();
   }
 
-  if (isAnyToMany(attribute as Parameters<typeof isAnyToMany>[0])) {
+  // Must match the runtime shaping cardinality (shape-relations.ts) — the MCP SDK
+  // validates structuredContent against this schema, so a mismatch fails the tool call.
+  if (isManyRelationForMcp(attribute as { relation?: string })) {
     return z.array(relationIdentity).optional();
   }
 
