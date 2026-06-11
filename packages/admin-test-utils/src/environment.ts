@@ -25,7 +25,12 @@ type EnvContext = ConstructorParameters<typeof TestEnvironment>[1];
  *   3. `patchRequestBodyStash`  — work around undici's
  *                                 `Request.clone() locks original stream`
  *                                 behaviour that msw triggers on every
- *                                 handler dispatch.
+ *                                 handler dispatch; also bridges jsdom-realm
+ *                                 `FormData` bodies to Node/undici `FormData`
+ *                                 inside the Request constructor Proxy so
+ *                                 undici emits a real `multipart/form-data`
+ *                                 body instead of stringifying to
+ *                                 `"[object FormData]"`.
  *
  * Each patch owns its own state, its own sanity checks, and its own teardown.
  * The orchestrator keeps the teardown stack in setup order and pops in
