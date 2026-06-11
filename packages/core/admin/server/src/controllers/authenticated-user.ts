@@ -28,7 +28,7 @@ export default {
 
     const isChangingPassword = Boolean(currentPassword && userInfo.password);
 
-    if (isChangingPassword) {
+    if (currentPassword && userInfo.password) {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
 
       if (!isValid) {
