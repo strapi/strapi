@@ -118,6 +118,11 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
  * still reflects the old (pre-rename) schema.
  */
 const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
+  // 'always-off' never generates. 'always-on' and 'modal' both generate a
+  // migration for every rename that reaches the server: in 'modal' mode the
+  // admin prompts the user and strips any refused rename from the payload before
+  // sending, so by the time we get here the remaining renames are exactly the
+  // accepted ones.
   if (getRenameMigrationMode() === 'always-off') {
     return;
   }
@@ -218,6 +223,11 @@ export const getSchema = async () => {
   return {
     contentTypes,
     components,
+    settings: {
+      // Surface the rename-migration mode so the admin can decide whether to
+      // prompt (modal), always generate, or never generate rename migrations.
+      renameMigrations: getRenameMigrationMode(),
+    },
   };
 };
 
