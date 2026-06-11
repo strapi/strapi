@@ -6,7 +6,7 @@ import { destroyOnSignal, resolveWorkingDirectories, createUpdateNotifier } from
 
 export { default as compileStrapi } from './compile';
 export * as factories from './factories';
-export * as mcp from './mcp';
+export * as ai from './ai';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
   const strapi = new Strapi({
