@@ -39,15 +39,19 @@ export type McpHandlerContext = {
   user: { id: string | number };
 };
 
-export type McpCapabilityAccess =
-  | {
-      devModeOnly: true;
-      auth?: never;
-    }
-  | {
-      devModeOnly?: never;
-      auth: McpCapabilityAuth;
-    };
+/** Access variant for dev-mode-only capabilities (no auth policies). */
+export type McpDevModeAccess = {
+  devModeOnly: true;
+  auth?: never;
+};
+
+/** Access variant for capabilities gated by CASL auth policies. */
+export type McpAuthAccess = {
+  devModeOnly?: never;
+  auth: McpCapabilityAuth;
+};
+
+export type McpCapabilityAccess = McpDevModeAccess | McpAuthAccess;
 
 export type McpCapabilityTelemetry = {
   source?: string;
@@ -102,6 +106,33 @@ export type McpToolHandlerReturn<
 export type McpToolSchemaResolver<Schema> = (context: McpHandlerContext) => Schema;
 
 /**
+ * Access-agnostic fields of a Strapi MCP tool definition.
+ * Shared by the `defineTool` builder ({@link McpToolBuilder}) and
+ * `McpService.registerTool`, then intersected with an access variant
+ * ({@link McpDevModeAccess} or {@link McpAuthAccess}).
+ */
+export type McpToolDefinitionFields<
+  Name extends string = string,
+  InputSchema extends z.ZodObject<z.ZodRawShape> | undefined =
+    | z.ZodObject<z.ZodRawShape>
+    | undefined,
+  OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
+  Title extends string = string,
+  Description extends string = string,
+> = {
+  name: Name;
+  title: Title;
+  description: Description;
+  telemetry?: McpCapabilityTelemetry;
+  resolveInputSchema?: McpToolSchemaResolver<InputSchema>;
+  resolveOutputSchema: McpToolSchemaResolver<OutputSchema>;
+  createHandler: (
+    strapi: Core.Strapi,
+    context: McpHandlerContext
+  ) => McpToolHandler<NoInfer<InputSchema>, NoInfer<OutputSchema>>;
+};
+
+/**
  * Definition for Strapi MCP tools
  */
 export type McpToolDefinition<
@@ -112,16 +143,38 @@ export type McpToolDefinition<
   OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
   Title extends string = string,
   Description extends string = string,
-> = McpCapabilityDefinition<Name> & {
-  title: Title;
-  description: Description;
-  resolveInputSchema?: McpToolSchemaResolver<InputSchema>;
-  resolveOutputSchema: McpToolSchemaResolver<OutputSchema>;
-  createHandler: (
-    strapi: Core.Strapi,
-    context: McpHandlerContext
-  ) => McpToolHandler<NoInfer<InputSchema>, NoInfer<OutputSchema>>;
-};
+> = McpToolDefinitionFields<Name, InputSchema, OutputSchema, Title, Description> &
+  McpCapabilityAccess;
+
+/**
+ * Builder for Strapi MCP tool definitions, exposed publicly as `mcp.defineTool`.
+ * Identity at runtime — its only job is to infer and narrow the access variant
+ * (`devModeOnly` vs `auth`) so the result is directly assignable to
+ * {@link McpService.registerTool}.
+ */
+export interface McpToolBuilder {
+  <
+    Name extends string,
+    OutputSchema extends z.ZodObject<z.ZodRawShape>,
+    Title extends string,
+    Description extends string,
+    InputSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
+  >(
+    tool: McpToolDefinitionFields<Name, InputSchema, OutputSchema, Title, Description> &
+      McpDevModeAccess
+  ): McpToolDefinitionFields<Name, InputSchema, OutputSchema, Title, Description> &
+    McpDevModeAccess;
+  <
+    Name extends string,
+    OutputSchema extends z.ZodObject<z.ZodRawShape>,
+    Title extends string,
+    Description extends string,
+    InputSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
+  >(
+    tool: McpToolDefinitionFields<Name, InputSchema, OutputSchema, Title, Description> &
+      McpAuthAccess
+  ): McpToolDefinitionFields<Name, InputSchema, OutputSchema, Title, Description> & McpAuthAccess;
+}
 
 /**
  * Callback function for Strapi MCP prompts
@@ -135,6 +188,27 @@ export type McpPromptCallback<ArgsSchema extends z.ZodObject<z.ZodRawShape> | un
     : (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) => Promise<GetPromptResult>;
 
 /**
+ * Access-agnostic fields of a Strapi MCP prompt definition.
+ * Shared by the `definePrompt` builder ({@link McpPromptBuilder}) and
+ * `McpService.registerPrompt`, then intersected with an access variant.
+ */
+export type McpPromptDefinitionFields<
+  Name extends string = string,
+  ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined =
+    | z.ZodObject<z.ZodRawShape>
+    | undefined,
+  Title extends string = string,
+  Description extends string = string,
+> = {
+  name: Name;
+  title: Title;
+  description: Description;
+  argsSchema?: ArgsSchema;
+  telemetry?: McpCapabilityTelemetry;
+  createHandler: (strapi: Core.Strapi) => McpPromptCallback<ArgsSchema>;
+};
+
+/**
  * Definition for Strapi MCP prompts
  */
 export type McpPromptDefinition<
@@ -144,12 +218,30 @@ export type McpPromptDefinition<
     | undefined,
   Title extends string = string,
   Description extends string = string,
-> = McpCapabilityDefinition<Name> & {
-  title: Title;
-  description: Description;
-  argsSchema?: ArgsSchema;
-  createHandler: (strapi: Core.Strapi) => McpPromptCallback<ArgsSchema>;
-};
+> = McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpCapabilityAccess;
+
+/**
+ * Builder for Strapi MCP prompt definitions, exposed publicly as `mcp.definePrompt`.
+ * Identity at runtime — narrows the access variant for {@link McpService.registerPrompt}.
+ */
+export interface McpPromptBuilder {
+  <
+    Name extends string,
+    ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined,
+    Title extends string,
+    Description extends string,
+  >(
+    prompt: McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpDevModeAccess
+  ): McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpDevModeAccess;
+  <
+    Name extends string,
+    ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined,
+    Title extends string,
+    Description extends string,
+  >(
+    prompt: McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpAuthAccess
+  ): McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpAuthAccess;
+}
 
 /**
  * Callback function for Strapi MCP resources
@@ -160,13 +252,36 @@ export type McpResourceCallback = (
 ) => Promise<ReadResourceResult>;
 
 /**
- * Definition for Strapi MCP resources
+ * Access-agnostic fields of a Strapi MCP resource definition.
+ * Shared by the `defineResource` builder ({@link McpResourceBuilder}) and
+ * `McpService.registerResource`, then intersected with an access variant.
  */
-export type McpResourceDefinition<Name extends string = string> = McpCapabilityDefinition<Name> & {
+export type McpResourceDefinitionFields<Name extends string = string> = {
+  name: Name;
   uri: string;
   metadata: ResourceMetadata;
+  telemetry?: McpCapabilityTelemetry;
   createHandler: (strapi: Core.Strapi) => McpResourceCallback;
 };
+
+/**
+ * Definition for Strapi MCP resources
+ */
+export type McpResourceDefinition<Name extends string = string> =
+  McpResourceDefinitionFields<Name> & McpCapabilityAccess;
+
+/**
+ * Builder for Strapi MCP resource definitions, exposed publicly as `mcp.defineResource`.
+ * Identity at runtime — narrows the access variant for {@link McpService.registerResource}.
+ */
+export interface McpResourceBuilder {
+  <Name extends string>(
+    resource: McpResourceDefinitionFields<Name> & McpDevModeAccess
+  ): McpResourceDefinitionFields<Name> & McpDevModeAccess;
+  <Name extends string>(
+    resource: McpResourceDefinitionFields<Name> & McpAuthAccess
+  ): McpResourceDefinitionFields<Name> & McpAuthAccess;
+}
 
 export type McpServiceStatus = 'idle' | 'starting' | 'running' | 'stopping' | 'error';
 
@@ -200,38 +315,20 @@ export interface McpService {
     Title extends string,
     Description extends string,
     InputSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
-  >(tool: {
-    name: Name;
-    title: Title;
-    description: Description;
-    resolveInputSchema?: McpToolSchemaResolver<InputSchema>;
-    resolveOutputSchema: McpToolSchemaResolver<OutputSchema>;
-    devModeOnly: true;
-    auth?: never;
-    createHandler: (
-      strapi: Core.Strapi,
-      context: McpHandlerContext
-    ) => McpToolHandler<NoInfer<InputSchema>, NoInfer<OutputSchema>>;
-  }): void;
+  >(
+    tool: McpToolDefinitionFields<Name, InputSchema, OutputSchema, Title, Description> &
+      McpDevModeAccess
+  ): void;
   registerTool<
     Name extends string,
     OutputSchema extends z.ZodObject<z.ZodRawShape>,
     Title extends string,
     Description extends string,
     InputSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
-  >(tool: {
-    name: Name;
-    title: Title;
-    description: Description;
-    resolveInputSchema?: McpToolSchemaResolver<InputSchema>;
-    resolveOutputSchema: McpToolSchemaResolver<OutputSchema>;
-    devModeOnly?: never;
-    auth: McpCapabilityAuth;
-    createHandler: (
-      strapi: Core.Strapi,
-      context: McpHandlerContext
-    ) => McpToolHandler<NoInfer<InputSchema>, NoInfer<OutputSchema>>;
-  }): void;
+  >(
+    tool: McpToolDefinitionFields<Name, InputSchema, OutputSchema, Title, Description> &
+      McpAuthAccess
+  ): void;
 
   /**
    * Register a single MCP prompt.
@@ -244,29 +341,17 @@ export interface McpService {
     ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined,
     Title extends string,
     Description extends string,
-  >(prompt: {
-    name: Name;
-    title: Title;
-    description: Description;
-    argsSchema?: ArgsSchema;
-    devModeOnly: true;
-    auth?: never;
-    createHandler: (strapi: Core.Strapi) => McpPromptCallback<ArgsSchema>;
-  }): void;
+  >(
+    prompt: McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpDevModeAccess
+  ): void;
   registerPrompt<
     Name extends string,
     ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined,
     Title extends string,
     Description extends string,
-  >(prompt: {
-    name: Name;
-    title: Title;
-    description: Description;
-    argsSchema?: ArgsSchema;
-    devModeOnly?: never;
-    auth: McpCapabilityAuth;
-    createHandler: (strapi: Core.Strapi) => McpPromptCallback<ArgsSchema>;
-  }): void;
+  >(
+    prompt: McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpAuthAccess
+  ): void;
 
   /**
    * Register a single MCP resource.
@@ -274,22 +359,12 @@ export interface McpService {
    * In Strapi's load lifecycle, call only from the register phase (plugin register() or app register()).
    * @throws Error if called after the MCP server has started
    */
-  registerResource<Name extends string>(resource: {
-    name: Name;
-    uri: string;
-    metadata: ResourceMetadata;
-    devModeOnly: true;
-    auth?: never;
-    createHandler: (strapi: Core.Strapi) => McpResourceCallback;
-  }): void;
-  registerResource<Name extends string>(resource: {
-    name: Name;
-    uri: string;
-    metadata: ResourceMetadata;
-    devModeOnly?: never;
-    auth: McpCapabilityAuth;
-    createHandler: (strapi: Core.Strapi) => McpResourceCallback;
-  }): void;
+  registerResource<Name extends string>(
+    resource: McpResourceDefinitionFields<Name> & McpDevModeAccess
+  ): void;
+  registerResource<Name extends string>(
+    resource: McpResourceDefinitionFields<Name> & McpAuthAccess
+  ): void;
 
   /**
    * Start the MCP server

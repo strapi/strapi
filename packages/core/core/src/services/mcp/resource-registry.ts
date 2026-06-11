@@ -12,9 +12,38 @@ import {
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 
-export const makeMcpResourceDefinition = <Definition extends Modules.MCP.McpResourceDefinition>(
-  resource: Definition
-): Definition => resource;
+/**
+ * Defines a Strapi MCP resource with full type inference, ready to pass to
+ * `strapi.ai.mcp.registerResource()`. Exposed publicly as `mcp.defineResource`.
+ *
+ * The returned value is the definition unchanged — this builder only exists to
+ * infer the `name` and narrow the access variant (`devModeOnly` vs `auth`) so the
+ * result is directly assignable to `registerResource`.
+ *
+ * @param resource - The resource definition. Provide either `devModeOnly: true`
+ * (dev-only, no auth) or an `auth` policy set — never both.
+ * @returns The same definition, with its access variant narrowed.
+ *
+ * @example
+ * ```ts
+ * import { mcp } from '@strapi/strapi';
+ *
+ * const appInfo = mcp.defineResource({
+ *   name: 'app-info',
+ *   uri: 'strapi://app/info',
+ *   metadata: { description: 'Metadata about the app', mimeType: 'application/json' },
+ *   devModeOnly: true,
+ *   createHandler: (strapi) => async (uri) => ({
+ *     contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify({ ok: true }) }],
+ *   }),
+ * });
+ *
+ * // later, in register() or bootstrap():
+ * strapi.ai.mcp.registerResource(appInfo);
+ * ```
+ */
+export const makeMcpResourceDefinition = ((definition: Modules.MCP.McpResourceDefinition) =>
+  definition) as unknown as Modules.MCP.McpResourceBuilder;
 
 export class McpResourceRegistry
   extends McpCapabilityRegistryBase<
