@@ -230,10 +230,40 @@ describe('U&P users REST relation handling (issue 26606)', () => {
 
     test('PUT silently ignores an unrecognized field (200, no-op)', async () => {
       const user = await createUser();
+      const before = await readUser(user.id);
 
       const res = await putUser(user.id, { thisFieldDoesNotExist: 'value' });
 
       expect(res.statusCode).toBe(200);
+      const after = await readUser(user.id);
+      expect(after.username).toBe(before.username);
+      expect(after.email).toBe(before.email);
+      expect(after).not.toHaveProperty('thisFieldDoesNotExist');
+    });
+
+    // Regression guard for https://github.com/strapi/strapi/pull/26101
+    //
+    // Before #26101 an unrecognized attribute carrying a relation-style
+    // `documentId` connect payload was silently dropped (200, no-op). #26101
+    // tightened numeric validation, which turned this same payload into a 500
+    // because the bogus value reached the DB layer. Routing the user service
+    // through the Document Service restores the original 200/no-op: unknown
+    // attributes are never traversed as relations, so nothing is written and a
+    // valid relation is left untouched.
+    test('PUT silently ignores an unknown relation-looking attribute (200, no-op)', async () => {
+      const article = await createArticle('unknown relation noop');
+      const user = await createUser({ favoriteArticles: { connect: [article.id] } });
+
+      const res = await putUser(user.id, {
+        notARealRelation: { connect: [article.documentId] },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const after = await readUser(user.id);
+      // the unknown key is ignored and the real relation is left as-is
+      expect(after).not.toHaveProperty('notARealRelation');
+      expect(after.favoriteArticles).toHaveLength(1);
+      expect(after.favoriteArticles[0].id).toBe(article.id);
     });
   });
 
