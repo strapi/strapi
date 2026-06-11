@@ -459,6 +459,37 @@ describe('Content Type Builder - component rename preserves data', () => {
     expect(statusCode).toBe(200);
     expect(body.data.panel.label).toBe('Hello');
   });
+
+  test('renaming a field inside the component preserves the embedded value', async () => {
+    // Rename `label -> title` on the component itself (a scalar column on the
+    // component's own table, shared across every type that embeds it).
+    const res = await updateSchema({
+      contentTypes: [],
+      components: [
+        {
+          action: 'update',
+          uid: COMP_UID,
+          category: 'default',
+          displayName: 'Rename Box',
+          icon: 'apps',
+          renames: [{ oldName: 'label', newName: 'title' }],
+          attributes: [{ action: 'update', name: 'title', properties: { type: 'string' } }],
+        },
+      ],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restartCmp();
+
+    const { statusCode, body } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${HOST_UID}/${hostDocId}`,
+    });
+    expect(statusCode).toBe(200);
+    // The value followed the column rename inside the component.
+    expect(body.data.panel.title).toBe('Hello');
+    expect(body.data.panel.label ?? null).toBeNull();
+  });
 });
 
 describe('Content Type Builder - media rename preserves data', () => {
