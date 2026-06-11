@@ -58,11 +58,14 @@ const RENAME_TABLE_SNIPPET = `    // {{comment}}
       await knex.schema.renameTable('{{from}}', '{{to}}');
     }`;
 
-// Components and dynamic zones store the attribute name as a *value* in the
-// `field` column of a shared link table — a guarded data `UPDATE`, not DDL.
+// Components, dynamic zones and media store the attribute name as a *value* in
+// the `field` column of a link table — a guarded data `UPDATE`, not DDL. Media
+// uses the shared `files_related_morphs` table, so the update must also be
+// scoped by the owning type (`related_type`); components/DZ use a per-type link
+// table and need no such filter.
 const UPDATE_COMPONENT_FIELD_SNIPPET = `    // {{comment}}
     if (await knex.schema.hasColumn('{{table}}', '{{fieldColumn}}')) {
-      await knex('{{table}}').where('{{fieldColumn}}', '{{from}}').update('{{fieldColumn}}', '{{to}}');
+      await knex('{{table}}').where('{{fieldColumn}}', '{{from}}'){{typeFilter}}.update('{{fieldColumn}}', '{{to}}');
     }`;
 
 const interpolate = (template: string, values: Record<string, string>): string => {
@@ -79,7 +82,9 @@ const interpolate = (template: string, values: Record<string, string>): string =
  *
  * - `renameColumn`: scalar attributes and relation join columns (`<field>_id`).
  * - `renameTable`: relations backed by a join/link table.
- * - `updateComponentField`: components & dynamic zones (link-table `field` value).
+ * - `updateComponentField`: components, dynamic zones & media (link-table `field`
+ *   value). Media additionally scopes the update by `related_type` since it uses
+ *   the shared `files_related_morphs` table.
  */
 export type PhysicalOp =
   | { kind: 'renameColumn'; table: string; from: string; to: string; comment: string }
@@ -91,6 +96,9 @@ export type PhysicalOp =
       from: string;
       to: string;
       comment: string;
+      // Optional extra equality filter (used by media on the shared morph table).
+      typeColumn?: string;
+      typeValue?: string;
     };
 
 export const renderOperation = (op: PhysicalOp): string => {
@@ -101,14 +109,20 @@ export const renderOperation = (op: PhysicalOp): string => {
         from: op.from,
         to: op.to,
       });
-    case 'updateComponentField':
+    case 'updateComponentField': {
+      const typeFilter =
+        op.typeColumn && op.typeValue !== undefined
+          ? `.where('${op.typeColumn}', '${op.typeValue}')`
+          : '';
       return interpolate(UPDATE_COMPONENT_FIELD_SNIPPET, {
         comment: op.comment,
         table: op.table,
         fieldColumn: op.fieldColumn,
         from: op.from,
         to: op.to,
+        typeFilter,
       });
+    }
     case 'renameColumn':
     default:
       return interpolate(RENAME_COLUMN_SNIPPET, {

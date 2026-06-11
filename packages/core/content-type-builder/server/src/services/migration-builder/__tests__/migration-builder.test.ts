@@ -32,6 +32,7 @@ const createStrapiMock = ({
     getColumnName: jest.fn((name: string) => name),
     getJoinColumnAttributeIdName: jest.fn((name: string) => `${name}_id`),
     getJoinTableName: jest.fn((table: string, name: string) => `${table}_${name}_lnk`),
+    FIELD_COLUMN: 'field',
   };
 
   (metadata as any).identifiers = idents;
@@ -336,11 +337,25 @@ describe('MigrationBuilder', () => {
             joinTable: { name: 'articles_related_morphs' },
             morphColumn: { typeColumn: { name: 'related_type' } },
           },
-          // media -> unsupported (shared files morph table, keyed by related type)
+          // media -> shared files morph table, scoped by related_type
           cover: {
             type: 'relation',
             relation: 'morphToMany',
             joinTable: { name: 'files_related_morphs', on: { field: 'cover' } },
+          },
+        },
+      },
+      // The upload file model exposes the shared morph table used by all media.
+      'plugin::upload.file': {
+        tableName: 'files',
+        attributes: {
+          related: {
+            type: 'relation',
+            relation: 'morphToMany',
+            joinTable: {
+              name: 'files_related_morphs',
+              morphColumn: { typeColumn: { name: 'related_type' } },
+            },
           },
         },
       },
@@ -406,17 +421,43 @@ describe('MigrationBuilder', () => {
       expect(builder.getUnsupported()).toHaveLength(0);
     });
 
-    it('records morph relations and media as unsupported', () => {
+    it('updates the shared morph table (scoped by related_type) for media fields', () => {
+      const strapi = createStrapiMock({ metas: relMeta, schema: relSchema });
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::article.article', { oldName: 'cover', newName: 'image' });
+
+      const result = builder.build()!;
+      expect(result.content).toContain("hasColumn('files_related_morphs', 'field')");
+      expect(result.content).toContain(
+        "knex('files_related_morphs').where('field', 'cover').where('related_type', 'api::article.article').update('field', 'image')"
+      );
+      expect(builder.getUnsupported()).toHaveLength(0);
+    });
+
+    it('treats a field on the shared upload morph table as media even without a schema type', () => {
+      // Hardening: if the schema-type lookup is unavailable, a media field must
+      // still be detected (and scoped by related_type) rather than falling into
+      // the unscoped component branch and corrupting other types' media.
+      const strapi = createStrapiMock({ metas: relMeta /* no schema provided */ });
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::article.article', { oldName: 'cover', newName: 'image' });
+
+      const result = builder.build()!;
+      expect(result.content).toContain(
+        "knex('files_related_morphs').where('field', 'cover').where('related_type', 'api::article.article').update('field', 'image')"
+      );
+      expect(builder.getUnsupported()).toHaveLength(0);
+    });
+
+    it('records polymorphic morph relations as unsupported', () => {
       const strapi = createStrapiMock({ metas: relMeta, schema: relSchema });
       const builder = createMigrationBuilder({ strapi });
       builder.addRenameAttribute('api::article.article', { oldName: 'related', newName: 'links' });
-      builder.addRenameAttribute('api::article.article', { oldName: 'cover', newName: 'image' });
 
       expect(builder.hasChanges()).toBe(false);
       expect(builder.getUnsupported()).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ oldName: 'related', reason: 'unsupported-type' }),
-          expect.objectContaining({ oldName: 'cover', reason: 'unsupported-type' }),
         ])
       );
     });

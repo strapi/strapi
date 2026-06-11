@@ -461,6 +461,116 @@ describe('Content Type Builder - component rename preserves data', () => {
   });
 });
 
+describe('Content Type Builder - media rename preserves data', () => {
+  const MEDIA_HOST_UID = 'api::media-host.media-host';
+
+  const restartMedia = async () => {
+    await strapi.destroy();
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+  };
+
+  let hostDocId;
+  let fileId;
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      contentTypes: [
+        {
+          action: 'create',
+          uid: MEDIA_HOST_UID,
+          displayName: 'Media Host',
+          singularName: 'media-host',
+          pluralName: 'media-hosts',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [
+            { action: 'create', name: 'cover', properties: { type: 'media', multiple: false } },
+          ],
+        },
+      ],
+      components: [],
+    });
+    await restartMedia();
+
+    // Seed a file row directly (no real upload needed) and link it via the media field.
+    const file = await strapi.db.query('plugin::upload.file').create({
+      data: {
+        name: 'pic.png',
+        hash: 'pic_hash',
+        ext: '.png',
+        mime: 'image/png',
+        size: 1,
+        url: '/uploads/pic.png',
+        provider: 'local',
+        folderPath: '/',
+      },
+    });
+    fileId = file.id;
+
+    const host = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${MEDIA_HOST_UID}`,
+      body: { cover: fileId },
+    });
+    expect(host.statusCode).toBe(201);
+    hostDocId = host.body.data.documentId;
+  });
+
+  afterAll(async () => {
+    await updateSchema({
+      contentTypes: [{ action: 'delete', uid: MEDIA_HOST_UID }],
+      components: [],
+    });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('renaming a media field preserves the linked file (scoped by related_type)', async () => {
+    const morphTable =
+      strapi.db.metadata.get('plugin::upload.file').attributes.related.joinTable.name;
+    const before = await strapi.db.connection(morphTable).where('field', 'cover').select('*');
+    expect(before.length).toBeGreaterThanOrEqual(1);
+
+    const res = await updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: MEDIA_HOST_UID,
+          displayName: 'Media Host',
+          draftAndPublish: false,
+          renames: [{ oldName: 'cover', newName: 'photo' }],
+          attributes: [
+            { action: 'update', name: 'photo', properties: { type: 'media', multiple: false } },
+          ],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restartMedia();
+
+    // The morph row's `field` value was migrated from `cover` to `photo`.
+    const photoRows = await strapi.db.connection(morphTable).where('field', 'photo').select('*');
+    expect(photoRows).toHaveLength(1);
+    const coverRows = await strapi.db.connection(morphTable).where('field', 'cover').select('*');
+    expect(coverRows).toHaveLength(0);
+
+    // And the file still resolves under the new field name.
+    const { statusCode, body } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${MEDIA_HOST_UID}/${hostDocId}`,
+    });
+    expect(statusCode).toBe(200);
+    expect(body.data.photo).toBeTruthy();
+    expect(body.data.photo.id).toBe(fileId);
+  });
+});
+
 describe('Content Type Builder - delete-then-reuse-name guard', () => {
   const EDGE_UID = 'api::edge-test.edge-test';
 

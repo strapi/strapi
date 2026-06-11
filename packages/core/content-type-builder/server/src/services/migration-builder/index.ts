@@ -35,16 +35,27 @@ export interface BuiltMigration {
  * - `joinTable`: a relation backed by a join/link table (the table name encodes
  *   the owning attribute name).
  * - `component`: a component or dynamic zone — the attribute name is a *value* in
- *   the shared link table's `field` column, so it is an `UPDATE`, not DDL.
+ *   the per-type link table's `field` column, so it is an `UPDATE`, not DDL.
+ * - `media`: like `component`, but stored in the shared `files_related_morphs`
+ *   table, so the `UPDATE` is additionally scoped by `related_type` (the uid).
  * - `skip`: recognised but needs no DB change (e.g. the inverse side of a
  *   bidirectional relation — the join table is named from the owning side).
- * - `unsupported`: cannot be migrated automatically (morph relations, media).
+ * - `unsupported`: cannot be migrated automatically (polymorphic morph relations,
+ *   which are not creatable through the CTB UI anyway).
  */
 type Resolved =
   | { kind: 'scalarColumn'; table: string; from: string }
   | { kind: 'joinColumn'; table: string; from: string }
   | { kind: 'joinTable'; from: string }
   | { kind: 'component'; table: string; fieldColumn: string; from: string }
+  | {
+      kind: 'media';
+      table: string;
+      fieldColumn: string;
+      typeColumn: string;
+      typeValue: string;
+      from: string;
+    }
   | { kind: 'skip' }
   | { kind: 'unsupported'; reason: UnsupportedRename['reason'] };
 
@@ -105,6 +116,30 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     return model?.attributes?.[name]?.type as string | undefined;
   };
 
+  // Resolves the shared upload morph table (e.g. `files_related_morphs`) and its
+  // `related_type` column from the file model's `related` morph attribute. This
+  // is the single table every media field across all types writes to, keyed by
+  // (`field` = attribute name, `related_type` = owning uid).
+  const resolveUploadMorphTable = ():
+    | { table: string; fieldColumn: string; typeColumn: string }
+    | undefined => {
+    if (!db.metadata.has('plugin::upload.file')) {
+      return undefined;
+    }
+    const fileMeta = db.metadata.get('plugin::upload.file');
+    const related = (fileMeta.attributes as Record<string, any>)?.related;
+    const joinTable = related?.joinTable;
+    const morphColumn = joinTable?.morphColumn ?? related?.morphColumn;
+    if (!joinTable?.name || !morphColumn?.typeColumn?.name) {
+      return undefined;
+    }
+    return {
+      table: joinTable.name,
+      fieldColumn: identifiers.FIELD_COLUMN,
+      typeColumn: morphColumn.typeColumn.name,
+    };
+  };
+
   /**
    * Classifies the *first* hop of a rename by inspecting the live metadata, which
    * still reflects the pre-rename schema. Continuation hops never reach here —
@@ -119,16 +154,33 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     const joinTable = attribute.joinTable;
+    const upload = resolveUploadMorphTable();
 
-    // Components & dynamic zones: the attribute name is a value in the link
-    // table's `field` column. Media is also a morph join table but lives in the
-    // shared `files_related_morphs` table (keyed by related type too), so it is
-    // not safe to rewrite here — fall through to unsupported.
-    if (
-      joinTable?.on &&
-      typeof joinTable.on === 'object' &&
-      schemaTypeOf(uid, oldName) !== 'media'
-    ) {
+    // Media: the attribute name is a value in the shared `files_related_morphs`
+    // `field` column, scoped by `related_type` (the owning uid). Detect it by
+    // schema type OR by the join table being the shared upload table — the
+    // latter guard is critical so a media field can never fall through to the
+    // unscoped component branch and corrupt other types' media on the shared
+    // table.
+    const isMedia =
+      schemaTypeOf(uid, oldName) === 'media' || (!!upload && joinTable?.name === upload.table);
+    if (isMedia) {
+      if (upload) {
+        return {
+          kind: 'media',
+          table: upload.table,
+          fieldColumn: upload.fieldColumn,
+          typeColumn: upload.typeColumn,
+          typeValue: uid,
+          from: oldName,
+        };
+      }
+      return { kind: 'unsupported', reason: 'unsupported-type' };
+    }
+
+    // Components & dynamic zones: the attribute name is a value in the per-type
+    // link table's `field` column.
+    if (joinTable?.on && typeof joinTable.on === 'object') {
       const fieldColumn = Object.keys(joinTable.on).find((key) => joinTable.on[key] === oldName);
       if (fieldColumn) {
         return { kind: 'component', table: joinTable.name, fieldColumn, from: oldName };
@@ -136,7 +188,8 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     if (attribute.type === 'relation') {
-      // Morph relations (incl. media) need polymorphic/shared-table handling.
+      // Polymorphic morph relations need shared-table handling and are not
+      // creatable through the CTB UI, so they are left unsupported.
       if (isMorphRelation(attribute) || attribute.morphColumn) {
         return { kind: 'unsupported', reason: 'unsupported-type' };
       }
@@ -210,6 +263,23 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
                 from: resolved.from,
                 to,
                 comment,
+              };
+        return { op, next: { ...resolved, from: to } };
+      }
+      case 'media': {
+        const to = newName;
+        const op: PhysicalOp | null =
+          resolved.from === to
+            ? null
+            : {
+                kind: 'updateComponentField',
+                table: resolved.table,
+                fieldColumn: resolved.fieldColumn,
+                from: resolved.from,
+                to,
+                comment,
+                typeColumn: resolved.typeColumn,
+                typeValue: resolved.typeValue,
               };
         return { op, next: { ...resolved, from: to } };
       }

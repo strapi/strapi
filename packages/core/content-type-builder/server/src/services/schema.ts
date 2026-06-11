@@ -137,7 +137,7 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
   if (unsupported.length > 0) {
     const fields = unsupported.map((u) => `${u.uid}.${u.oldName}`).join(', ');
     strapi.log.warn(
-      `[content-type-builder] Could not generate a rename migration for ${unsupported.length} field(s) (polymorphic/morph relations and media fields are not yet supported): ${fields}. Data in these fields may not be preserved.`
+      `[content-type-builder] Could not generate a rename migration for ${unsupported.length} field(s) (polymorphic/morph relations are not supported): ${fields}. Data in these fields may not be preserved.`
     );
   }
 
