@@ -74,7 +74,12 @@ const DrawerContainer = styled(Flex)<DrawerContainerProps>`
   right: 0;
   padding: ${({ theme }) => theme.spaces[2]};
   max-width: 100%;
-  z-index: 1000;
+  /* Sit just below the overlay token (300) so that:
+     - popovers (500) and tooltips (1000) rendered from descendant components
+       surface above the drawer panel,
+     - AlertDialog overlays (300) and contents (310) opened from inside the
+       drawer (e.g. the asset details "delete" confirm) cover the drawer. */
+  z-index: 200;
   overflow: hidden;
   width: ${({ width }) => width ?? '400px'};
   max-height: ${({ maxHeight }) => maxHeight ?? '100vh'};
@@ -124,7 +129,7 @@ const CollapsibleContent = styled(Box)<CollapsibleContentProps>`
   transition: grid-template-rows 0.3s ease-in-out;
 
   > div {
-    overflow: ${({ $isVisible }) => ($isVisible ? 'auto' : 'hidden')};
+    overflow: hidden;
     min-height: 0;
   }
 `;

@@ -27,7 +27,16 @@ import { PaginationError, ValidationError } from './errors';
 import { isOperator } from './operators';
 
 import parseType from './parse-type';
+import type { PublicationFilterMode } from './publication-filter';
+import {
+  getMeaningfulSortSegments,
+  hasSort,
+  type SortParams,
+  type SortParamsObject,
+} from './sort-query';
 import { Model } from './types';
+
+export type { SortParams, SortParamsObject } from './sort-query';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE } = constants;
 
@@ -37,12 +46,42 @@ export interface SortMap {
   [key: string]: SortOrder | SortMap;
 }
 
-export interface SortParamsObject {
-  [key: string]: SortOrder | SortParamsObject;
+type FieldsParams = string | string[];
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
+
+function isEmptySortMap(sortMap: SortMap): boolean {
+  const keys = Object.keys(sortMap);
+
+  if (keys.length === 0) {
+    return true;
+  }
+
+  return keys.every((key) => {
+    const value = sortMap[key];
+
+    if (typeof value === 'string') {
+      return value.trim().length === 0;
+    }
+
+    if (isPlainObject(value)) {
+      return isEmptySortMap(value as SortMap);
+    }
+
+    return true;
+  });
 }
 
-type SortParams = string | string[] | SortParamsObject | SortParamsObject[];
-type FieldsParams = string | string[];
+/** Drops empty sort maps so a trailing comma does not leave a truthy but meaningless `orderBy`. */
+function normalizeOrderBy(orderBy: OrderByQuery): OrderByQuery | undefined {
+  if (Array.isArray(orderBy)) {
+    const filtered = orderBy.filter((sortMap) => !isEmptySortMap(sortMap));
+
+    return filtered.length > 0 ? filtered : undefined;
+  }
+
+  return isEmptySortMap(orderBy) ? undefined : orderBy;
+}
 
 type FiltersParams = unknown;
 
@@ -80,9 +119,10 @@ export interface Params {
   page?: number | string;
   pageSize?: number | string;
   status?: 'draft' | 'published';
+  publicationFilter?: PublicationFilterMode;
   /**
-   * Filter documents by whether they have a published version.
-   * Use with `status: 'draft'` to find documents that have never been published.
+   * @deprecated Replaced by `publicationFilter` (`never-published`, `has-published-version`, …).
+   * Retained for backward compatibility with existing REST and GraphQL clients.
    */
   hasPublishedVersion?: boolean | 'true' | 'false';
 }
@@ -147,7 +187,6 @@ const convertOrderingQueryParams = (ordering: unknown) => {
   return ordering;
 };
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
 const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
 
@@ -180,30 +219,35 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   };
 
   const convertStringSortQueryParam = (sortQuery: string): SortMap[] => {
-    return sortQuery.split(',').map((value) => convertSingleSortQueryParam(value));
+    return getMeaningfulSortSegments(sortQuery).map((segment) =>
+      convertSingleSortQueryParam(segment)
+    );
   };
 
   const convertSingleSortQueryParam = (sortQuery: string): SortMap => {
-    if (!sortQuery) {
+    const trimmed = sortQuery.trim();
+
+    if (!trimmed) {
       return {};
     }
 
-    if (!isString(sortQuery)) {
+    if (!isString(trimmed)) {
       throw new Error('Invalid sort query');
     }
 
     // split field and order param with default order to ascending
-    const [field, order = 'asc'] = sortQuery.split(':');
+    const [rawField, order = 'asc'] = trimmed.split(':');
+    const field = rawField.trim();
 
     if (field.length === 0) {
       throw new Error('Field cannot be empty');
     }
 
-    validateOrder(order);
+    validateOrder(order.trim());
 
     // TODO: field should be a valid path on an object model
 
-    return _.set({}, field, order);
+    return _.set({}, field, order.trim());
   };
 
   const convertNestedSortQueryParam = (sortQuery: SortParamsObject): SortMap => {
@@ -213,16 +257,36 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // this is a deep sort
       if (isPlainObject(order)) {
-        transformedSort[field] = convertNestedSortQueryParam(order);
+        const nested = convertNestedSortQueryParam(order as SortParamsObject);
+
+        if (!isEmptySortMap(nested)) {
+          transformedSort[field] = nested;
+        }
       } else if (typeof order === 'string') {
-        validateOrder(order);
-        transformedSort[field] = order;
+        const trimmedOrder = order.trim();
+
+        if (trimmedOrder.length > 0) {
+          validateOrder(trimmedOrder);
+          transformedSort[field] = trimmedOrder;
+        }
       } else {
         throw Error(`Invalid sort type expected object or string got ${typeof order}`);
       }
     }
 
     return transformedSort;
+  };
+
+  const applySortToQuery = (query: Query, sortParam?: SortParams | null) => {
+    if (!hasSort(sortParam)) {
+      return;
+    }
+
+    const orderBy = normalizeOrderBy(convertSortQueryParams(sortParam));
+
+    if (orderBy !== undefined) {
+      query.orderBy = orderBy;
+    }
   };
 
   /**
@@ -504,9 +568,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    if (sort) {
-      query.orderBy = convertSortQueryParams(sort);
-    }
+    applySortToQuery(query, sort);
 
     if (filters) {
       query.where = convertFiltersQueryParams(filters, schema);
@@ -716,9 +778,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       query._q = _q;
     }
 
-    if (!isNil(sort)) {
-      query.orderBy = convertSortQueryParams(sort);
-    }
+    applySortToQuery(query, sort);
 
     if (!isNil(filters)) {
       query.where = convertFiltersQueryParams(filters, schema);
