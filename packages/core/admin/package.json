@@ -166,7 +166,7 @@
     "@types/pluralize": "0.0.32",
     "@types/react-window": "1.8.8",
     "@types/sanitize-html": "2.13.0",
-    "@vitejs/plugin-react-swc": "3.6.0",
+    "@vitejs/plugin-react-swc": "3.11.0",
     "koa-body": "6.0.1",
     "msw": "2.13.4",
     "react": "18.3.1",
