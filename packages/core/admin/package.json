@@ -166,7 +166,7 @@
     "@types/pluralize": "0.0.32",
     "@types/react-window": "1.8.8",
     "@types/sanitize-html": "2.13.0",
-    "@vitejs/plugin-react-swc": "3.6.0",
+    "@vitejs/plugin-react-swc": "3.11.0",
     "koa-body": "6.0.1",
     "msw": "2.13.4",
     "react": "18.3.1",
@@ -184,7 +184,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
   "nx": {

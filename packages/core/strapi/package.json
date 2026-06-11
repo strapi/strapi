@@ -129,7 +129,7 @@
     "@strapi/upload": "5.47.1",
     "@strapi/utils": "5.47.1",
     "@types/nodemon": "1.19.6",
-    "@vitejs/plugin-react-swc": "3.6.0",
+    "@vitejs/plugin-react-swc": "3.11.0",
     "boxen": "5.1.2",
     "browserslist": "^4.23.0",
     "browserslist-to-esbuild": "2.1.1",
@@ -194,7 +194,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }
