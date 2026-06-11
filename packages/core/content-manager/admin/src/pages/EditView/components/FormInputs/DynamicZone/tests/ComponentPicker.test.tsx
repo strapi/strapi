@@ -69,4 +69,15 @@ describe('ComponentPicker', () => {
 
     expect(onClickAddComponent).toHaveBeenCalledWith('blog.test-como');
   });
+
+  it('should call onClickCopyComponent with the componentUid when the copy action is clicked', async () => {
+    const onClickCopyComponent = jest.fn();
+    const { user } = render({
+      onClickCopyComponent,
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Copy' }));
+
+    expect(onClickCopyComponent).toHaveBeenCalledWith('blog.test-como');
+  });
 });

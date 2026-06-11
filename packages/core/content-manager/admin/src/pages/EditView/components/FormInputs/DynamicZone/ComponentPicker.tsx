@@ -10,18 +10,24 @@ interface ComponentPickerProps {
   dynamicComponentsByCategory?: Record<string, NonNullable<ComponentCategoryProps['components']>>;
   isOpen?: boolean;
   onClickAddComponent: (componentUid: string) => void;
+  onClickCopyComponent?: (componentUid: string) => void;
 }
 
 const ComponentPicker = ({
   dynamicComponentsByCategory = {},
   isOpen,
   onClickAddComponent,
+  onClickCopyComponent,
 }: ComponentPickerProps) => {
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
 
   const handleAddComponentToDz = (componentUid: string) => () => {
     onClickAddComponent(componentUid);
+  };
+
+  const handleCopyComponentToDz = (componentUid: string) => () => {
+    onClickCopyComponent?.(componentUid);
   };
 
   if (!isOpen) {
@@ -58,6 +64,7 @@ const ComponentPicker = ({
               category={category}
               components={components}
               onAddComponent={handleAddComponentToDz}
+              onCopyComponent={onClickCopyComponent ? handleCopyComponentToDz : undefined}
               variant={index % 2 === 1 ? 'primary' : 'secondary'}
             />
           ))}

@@ -102,6 +102,7 @@ describe('RepeatableComponent', () => {
     render({ [FIELD_NAME]: null });
 
     expect(screen.getByRole('button', { name: /No entry yet/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy from existing' })).toBeInTheDocument();
   });
 
   it('renders the empty initializer when the field value is undefined', () => {
