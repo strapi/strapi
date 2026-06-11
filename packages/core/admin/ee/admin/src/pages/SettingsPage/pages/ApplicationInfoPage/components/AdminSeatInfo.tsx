@@ -8,7 +8,7 @@ import { selectAdminPermissions } from '../../../../../../../../admin/src/select
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
 const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
-const MANAGE_SUBSCRIPTION_URL = 'https://billing-portal.apps.staging.strapi.team';
+const MANAGE_SUBSCRIPTION_URL = 'https://billing.strapi.io';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -85,14 +85,14 @@ export const AdminSeatInfoEE = () => {
         )}
       </Flex>
       {type === 'gold' ? (
-        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />}>
+        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />} target="_blank">
           {formatMessage({
             id: 'Settings.application.ee.admin-seats.support',
             defaultMessage: 'Contact sales',
           })}
         </Link>
       ) : (
-        <Link href={MANAGE_SUBSCRIPTION_URL} isExternal endIcon={<ExternalLink />}>
+        <Link href={MANAGE_SUBSCRIPTION_URL} isExternal endIcon={<ExternalLink />} target="_blank">
           {formatMessage({
             id: 'Settings.application.ee.admin-seats.add-seats',
             defaultMessage: 'Manage subscription',

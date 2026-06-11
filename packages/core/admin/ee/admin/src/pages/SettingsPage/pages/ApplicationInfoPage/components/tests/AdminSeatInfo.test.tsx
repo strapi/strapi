@@ -66,11 +66,11 @@ describe('<AdminSeatInfo />', () => {
 
     const { getByText } = render(<AdminSeatInfoEE />);
 
-    expect(getByText('Manage seats')).toBeInTheDocument();
+    expect(getByText('Manage subscription')).toBeInTheDocument();
     // eslint-disable-next-line testing-library/no-node-access
-    expect(getByText('Manage seats').closest('a')).toHaveAttribute(
+    expect(getByText('Manage subscription').closest('a')).toHaveAttribute(
       'href',
-      'https://strapi.io/billing/manage-seats'
+      'https://billing.strapi.io'
     );
   });
 

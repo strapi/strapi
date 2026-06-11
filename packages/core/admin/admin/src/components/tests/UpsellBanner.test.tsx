@@ -52,7 +52,7 @@ describe('UpsellBanner', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Upgrade now' })).toHaveAttribute(
       'href',
-      'https://billing-portal.apps.staging.strapi.team'
+      'https://billing.strapi.io'
     );
     expect(screen.getByRole('link', { name: 'Upgrade now' })).toHaveAttribute('target', '_blank');
   });
@@ -99,7 +99,7 @@ describe('UpsellBanner', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Keep Growth plan' })).toHaveAttribute(
       'href',
-      'https://billing-portal.apps.staging.strapi.team'
+      'https://billing.strapi.io'
     );
     expect(screen.getByRole('link', { name: 'Keep Growth plan' })).toHaveAttribute(
       'target',
