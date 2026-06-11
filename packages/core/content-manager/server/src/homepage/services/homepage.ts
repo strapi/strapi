@@ -50,7 +50,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     // Deduplicate subjects using a Set: the JOIN across permission -> role -> users produces one row
-    // per role the user belongs, so a multi-role user gets duplicate subjects.
+    // per role the user belongs to, so a multi-role user gets duplicate subjects.
     // Using a Set collapses them to unique content type UID.
     return [
       ...new Set(
