@@ -4,8 +4,10 @@ import { mapValues } from 'lodash/fp';
 import type { Schema } from '@strapi/types';
 
 import createBuilder from './schema-builder';
+import { createMigrationBuilder } from './migration-builder';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
+import type { RenameMigrationMode } from '../config';
 import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
 
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
@@ -62,6 +64,86 @@ const removeDeletedUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
       }
     });
   });
+};
+
+interface CollectedRename {
+  uid: string;
+  oldName: string;
+  newName: string;
+}
+
+const getRenameMigrationMode = (): RenameMigrationMode => {
+  try {
+    return strapi.plugin('content-type-builder').config('renameMigrations', 'modal');
+  } catch {
+    return 'modal';
+  }
+};
+
+/**
+ * Collects attribute renames from the update-schema payload. The admin sends an
+ * ordered `renames` array per updated content-type / component: the exact path
+ * of rename hops the user performed (e.g. `a -> tmp`, `b -> a`, `tmp -> b` for a
+ * swap). Order is preserved so the generated migration can replay each hop
+ * verbatim — which is inherently collision-free because the Content-Type Builder
+ * never allows two fields to share a name at any instant.
+ */
+const collectRenames = (schema: CTBSchema): CollectedRename[] => {
+  const renames: CollectedRename[] = [];
+
+  type RenameHop = { oldName?: string; newName?: string };
+  type RenameAwareEntry = { action?: string; uid: string; renames?: RenameHop[] };
+
+  const collectFrom = (entries: RenameAwareEntry[]) => {
+    entries
+      .filter((entry) => entry.action === 'update' && Array.isArray(entry.renames))
+      .forEach((entry) => {
+        entry.renames!.forEach((hop) => {
+          if (hop.oldName && hop.newName && hop.oldName !== hop.newName) {
+            renames.push({ uid: entry.uid, oldName: hop.oldName, newName: hop.newName });
+          }
+        });
+      });
+  };
+
+  collectFrom(schema.contentTypes as unknown as RenameAwareEntry[]);
+  collectFrom(schema.components as unknown as RenameAwareEntry[]);
+
+  return renames;
+};
+
+/**
+ * Generates a single data-preserving rename migration for the accepted renames
+ * in this save. Must run before the server reloads, while `strapi.db.metadata`
+ * still reflects the old (pre-rename) schema.
+ */
+const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
+  if (getRenameMigrationMode() === 'always-off') {
+    return;
+  }
+
+  const renames = collectRenames(schema);
+  if (renames.length === 0) {
+    return;
+  }
+
+  const migrationBuilder = createMigrationBuilder({ strapi });
+
+  for (const { uid, oldName, newName } of renames) {
+    migrationBuilder.addRenameAttribute(uid, { oldName, newName });
+  }
+
+  const unsupported = migrationBuilder.getUnsupported();
+  if (unsupported.length > 0) {
+    const fields = unsupported.map((u) => `${u.uid}.${u.oldName}`).join(', ');
+    strapi.log.warn(
+      `[content-type-builder] Could not generate a rename migration for ${unsupported.length} field(s) (polymorphic/morph relations and media fields are not yet supported): ${fields}. Data in these fields may not be preserved.`
+    );
+  }
+
+  if (migrationBuilder.hasChanges()) {
+    await migrationBuilder.writeFiles();
+  }
 };
 
 const formatAttributes = (model: any) => {
@@ -255,6 +337,10 @@ export const updateSchema = async (schema: CTBSchema) => {
   const APIsToDelete = contentTypes
     .filter((ct: any) => ct.action === 'delete')
     .map((ct: any) => ct.uid);
+
+  // Generate rename migrations before reloading, while strapi.db.metadata still
+  // reflects the pre-rename schema (the controller triggers the reload after this).
+  await generateRenameMigrations(schema);
 
   await builder.writeFiles();
 

@@ -30,6 +30,22 @@ const contentTypeServiceMock = {
   generateAPI: jest.fn().mockResolvedValue(undefined),
 };
 
+const migrationBuilderMock = {
+  addRenameAttribute: jest.fn(),
+  hasChanges: jest.fn().mockReturnValue(true),
+  getUnsupported: jest.fn().mockReturnValue([]),
+  writeFiles: jest.fn().mockResolvedValue('/migrations/file.js'),
+};
+
+jest.mock('../migration-builder', () => ({
+  createMigrationBuilder: jest.fn(() => migrationBuilderMock),
+}));
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
+const { createMigrationBuilder } = require('../migration-builder');
+
+let renameMode = 'modal';
+
 const getServiceMock = jest.fn().mockImplementation((service) => {
   if (service === 'content-types') {
     return contentTypeServiceMock;
@@ -55,6 +71,9 @@ describe('Content Type Builder - Schema service', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    renameMode = 'modal';
+    migrationBuilderMock.hasChanges.mockReturnValue(true);
+    migrationBuilderMock.getUnsupported.mockReturnValue([]);
 
     // Mock strapi global
     global.strapi = {
@@ -63,6 +82,14 @@ describe('Content Type Builder - Schema service', () => {
       },
       log: {
         error: jest.fn(),
+        warn: jest.fn(),
+      },
+      // The global unit-test setup wires `strapi.plugin = (name) => strapi.plugins[name]`,
+      // so we expose the plugin config through `plugins` here.
+      plugins: {
+        'content-type-builder': {
+          config: (_key: string, defaultValue: unknown) => renameMode ?? defaultValue,
+        },
       },
     } as any;
   });
@@ -716,6 +743,128 @@ describe('Content Type Builder - Schema service', () => {
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
       expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', {
         contentType: mockContentType,
+      });
+    });
+  });
+
+  describe('rename migrations', () => {
+    const schemaWithRenames = (
+      renames: Array<{ oldName: string; newName: string }>
+    ): CTBSchema => ({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: 'api::article.article',
+          displayName: 'Article',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          pluginOptions: {},
+          options: {},
+          renames,
+          attributes: [
+            {
+              action: 'update',
+              name: 'heading',
+              properties: { type: 'string' },
+            } as any,
+          ],
+        } as any,
+      ],
+      components: [],
+    });
+
+    it('generates a rename migration from the ordered renames array', async () => {
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(createMigrationBuilder).toHaveBeenCalledTimes(1);
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
+        oldName: 'title',
+        newName: 'heading',
+      });
+      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledTimes(1);
+    });
+
+    it('forwards every rename hop in order (e.g. a user-routed swap)', async () => {
+      await updateSchema(
+        schemaWithRenames([
+          { oldName: 'title', newName: 'tmp' },
+          { oldName: 'subtitle', newName: 'title' },
+          { oldName: 'tmp', newName: 'subtitle' },
+        ])
+      );
+
+      expect(migrationBuilderMock.addRenameAttribute.mock.calls).toEqual([
+        ['api::article.article', { oldName: 'title', newName: 'tmp' }],
+        ['api::article.article', { oldName: 'subtitle', newName: 'title' }],
+        ['api::article.article', { oldName: 'tmp', newName: 'subtitle' }],
+      ]);
+    });
+
+    it('does not generate a migration when renameMigrations is always-off', async () => {
+      renameMode = 'always-off';
+
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.addRenameAttribute).not.toHaveBeenCalled();
+      expect(migrationBuilderMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('ignores no-op renames where oldName equals newName', async () => {
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'title' }]));
+
+      expect(migrationBuilderMock.addRenameAttribute).not.toHaveBeenCalled();
+    });
+
+    it('does not call writeFiles when the builder has no supported changes', async () => {
+      migrationBuilderMock.hasChanges.mockReturnValue(false);
+
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledTimes(1);
+      expect(migrationBuilderMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('warns when some renames are unsupported', async () => {
+      migrationBuilderMock.getUnsupported.mockReturnValue([
+        {
+          uid: 'api::article.article',
+          oldName: 'author',
+          newName: 'writer',
+          reason: 'unsupported-type',
+        },
+      ]);
+      migrationBuilderMock.hasChanges.mockReturnValue(false);
+
+      await updateSchema(schemaWithRenames([{ oldName: 'author', newName: 'writer' }]));
+
+      expect(strapi.log.warn).toHaveBeenCalled();
+    });
+
+    it('collects renames from updated components as well', async () => {
+      const schema: CTBSchema = {
+        contentTypes: [],
+        components: [
+          {
+            action: 'update',
+            uid: 'default.seo',
+            displayName: 'Seo',
+            renames: [{ oldName: 'title', newName: 'metaTitle' }],
+            attributes: [
+              {
+                action: 'update',
+                name: 'metaTitle',
+                properties: { type: 'string' },
+              } as any,
+            ],
+          } as any,
+        ],
+      };
+
+      await updateSchema(schema);
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('default.seo', {
+        oldName: 'title',
+        newName: 'metaTitle',
       });
     });
   });
