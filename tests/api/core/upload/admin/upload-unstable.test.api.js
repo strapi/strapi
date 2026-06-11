@@ -92,87 +92,6 @@ const makeRawRequest = (strapi, options) => {
   });
 };
 
-/**
- * Create a multipart form data request for file upload with SSE streaming
- */
-const makeMultipartSSERequest = (strapi, options) => {
-  return new Promise((resolve, reject) => {
-    const { path: urlPath, headers, files, fields = {} } = options;
-
-    const serverAddress = strapi.server.httpServer.address();
-    const port = typeof serverAddress === 'object' ? serverAddress.port : serverAddress;
-
-    const boundary = `----FormBoundary${Date.now()}`;
-    let body = '';
-
-    // Add fields
-    for (const [key, value] of Object.entries(fields)) {
-      body += `--${boundary}\r\n`;
-      body += `Content-Disposition: form-data; name="${key}"\r\n\r\n`;
-      body += `${typeof value === 'object' ? JSON.stringify(value) : value}\r\n`;
-    }
-
-    // Add files
-    const fileBuffers = [];
-    for (const file of files) {
-      const fileContent = fs.readFileSync(file.path);
-      const filename = path.basename(file.path);
-
-      body += `--${boundary}\r\n`;
-      body += `Content-Disposition: form-data; name="files"; filename="${filename}"\r\n`;
-      body += `Content-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`;
-
-      fileBuffers.push({
-        prefix: body,
-        content: fileContent,
-      });
-      body = '\r\n';
-    }
-
-    body += `--${boundary}--\r\n`;
-
-    // Build the complete body buffer
-    const bodyParts = [];
-    for (let i = 0; i < fileBuffers.length; i++) {
-      bodyParts.push(Buffer.from(fileBuffers[i].prefix, 'utf8'));
-      bodyParts.push(fileBuffers[i].content);
-    }
-    bodyParts.push(Buffer.from(body, 'utf8'));
-    const fullBody = Buffer.concat(bodyParts);
-
-    const reqOptions = {
-      hostname: '127.0.0.1',
-      port,
-      path: urlPath,
-      method: 'POST',
-      headers: {
-        ...headers,
-        'Content-Type': `multipart/form-data; boundary=${boundary}`,
-        'Content-Length': fullBody.length,
-      },
-    };
-
-    const req = http.request(reqOptions, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk.toString();
-      });
-      res.on('end', () => {
-        resolve({
-          statusCode: res.statusCode,
-          headers: res.headers,
-          body: data,
-          events: parseSSEEvents(data),
-        });
-      });
-    });
-
-    req.on('error', reject);
-    req.write(fullBody);
-    req.end();
-  });
-};
-
 describe('Upload SSE Streaming', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
@@ -183,12 +102,12 @@ describe('Upload SSE Streaming', () => {
     await strapi.destroy();
   });
 
-  describe('POST /upload/unstable/stream - File streaming upload', () => {
+  describe('POST /upload/unstable/upload-file - Single file upload', () => {
     describe('Authentication', () => {
       test('Rejects unauthenticated requests', async () => {
         const res = await makeRawRequest(strapi, {
           method: 'POST',
-          path: '/upload/unstable/stream',
+          path: '/upload/unstable/upload-file',
           headers: {},
           formData: true,
         });
@@ -199,11 +118,9 @@ describe('Upload SSE Streaming', () => {
 
     describe('Validation', () => {
       test('Rejects when no files are provided', async () => {
-        // Since we're using createAuthRequest, we need to get the token differently
-        // Let's use the regular endpoint first to verify behavior
         const res = await rq({
           method: 'POST',
-          url: '/upload/unstable/stream',
+          url: '/upload/unstable/upload-file',
           formData: {},
         });
 
@@ -211,172 +128,63 @@ describe('Upload SSE Streaming', () => {
       });
     });
 
-    describe('SSE Events', () => {
-      let authToken;
-
-      beforeAll(async () => {
-        // Get auth token for raw requests
-        const loginRes = await rq({
+    describe('Upload', () => {
+      test('Uploads a single file and returns the created File', async () => {
+        const res = await rq({
           method: 'POST',
-          url: '/admin/login',
-          body: {
-            email: 'admin@strapi.io',
-            password: 'Password123',
+          url: '/upload/unstable/upload-file',
+          formData: {
+            files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
           },
         });
-        authToken = loginRes.body?.data?.token;
+
+        expect(res.statusCode).toBe(201);
+        // The endpoint returns the created File object directly (not an array).
+        expect(res.body).toHaveProperty('id');
+        expect(res.body).toHaveProperty('url');
+        expect(res.body.mime).toMatch(/^image\//);
       });
 
-      test('Streams file:uploading and file:complete events for successful upload', async () => {
-        if (!authToken) {
-          // Skip if we couldn't get auth token (super admin setup may differ)
-          return;
-        }
-
-        const res = await makeMultipartSSERequest(strapi, {
-          path: '/upload/unstable/stream',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-          files: [{ path: path.join(__dirname, '../utils/rec.jpg'), type: 'image/jpeg' }],
-        });
-
-        expect(res.statusCode).toBe(200);
-        expect(res.headers['content-type']).toBe('text/event-stream');
-
-        // Check for expected events
-        const eventTypes = res.events.map((e) => e.event);
-        expect(eventTypes).toContain('file:uploading');
-        expect(eventTypes).toContain('stream:complete');
-
-        // Verify file:uploading event structure
-        const uploadingEvent = res.events.find((e) => e.event === 'file:uploading');
-        expect(uploadingEvent).toBeDefined();
-        expect(uploadingEvent.data).toMatchObject({
-          index: 0,
-          total: 1,
-        });
-
-        // Verify stream:complete event structure
-        const completeEvent = res.events.find((e) => e.event === 'stream:complete');
-        expect(completeEvent).toBeDefined();
-        expect(completeEvent.data).toHaveProperty('data');
-        expect(completeEvent.data).toHaveProperty('errors');
-      });
-
-      test('Streams events for multiple files', async () => {
-        if (!authToken) {
-          return;
-        }
-
-        const res = await makeMultipartSSERequest(strapi, {
-          path: '/upload/unstable/stream',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-          files: [
-            { path: path.join(__dirname, '../utils/rec.jpg'), type: 'image/jpeg' },
-            { path: path.join(__dirname, '../utils/rec.jpg'), type: 'image/jpeg' },
-          ],
-        });
-
-        expect(res.statusCode).toBe(200);
-
-        // Should have uploading events for each file
-        const uploadingEvents = res.events.filter((e) => e.event === 'file:uploading');
-        expect(uploadingEvents.length).toBe(2);
-
-        // Check totals are correct
-        expect(uploadingEvents[0].data.total).toBe(2);
-        expect(uploadingEvents[1].data.total).toBe(2);
-
-        // Check indices
-        expect(uploadingEvents[0].data.index).toBe(0);
-        expect(uploadingEvents[1].data.index).toBe(1);
-      });
-
-      test('Includes fileInfo in upload', async () => {
-        if (!authToken) {
-          return;
-        }
-
+      test('Applies fileInfo metadata to the uploaded file', async () => {
         const fileInfo = {
           name: 'custom-name',
           caption: 'Test caption',
           alternativeText: 'Test alt text',
         };
 
-        const res = await makeMultipartSSERequest(strapi, {
-          path: '/upload/unstable/stream',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-          files: [{ path: path.join(__dirname, '../utils/rec.jpg'), type: 'image/jpeg' }],
-          fields: {
+        const res = await rq({
+          method: 'POST',
+          url: '/upload/unstable/upload-file',
+          formData: {
+            files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
             fileInfo: JSON.stringify(fileInfo),
           },
         });
 
-        expect(res.statusCode).toBe(200);
-
-        const completeEvent = res.events.find((e) => e.event === 'stream:complete');
-        expect(completeEvent).toBeDefined();
-
-        // If upload was successful, check the file has the custom metadata
-        if (completeEvent.data.data && completeEvent.data.data.length > 0) {
-          const uploadedFile = completeEvent.data.data[0];
-          expect(uploadedFile.caption).toBe('Test caption');
-          expect(uploadedFile.alternativeText).toBe('Test alt text');
-        }
+        expect(res.statusCode).toBe(201);
+        expect(res.body.caption).toBe('Test caption');
+        expect(res.body.alternativeText).toBe('Test alt text');
       });
     });
 
     describe('File restriction', () => {
-      let authToken;
-
-      beforeAll(async () => {
-        const loginRes = await rq({
-          method: 'POST',
-          url: '/admin/login',
-          body: {
-            email: 'admin@strapi.io',
-            password: 'Password123',
-          },
-        });
-        authToken = loginRes.body?.data?.token;
-      });
-
       afterEach(() => {
         // Reset config after each test
         strapi.config.set('plugin::upload.security', {});
       });
 
-      test('Reports file:error event when MIME type is denied', async () => {
-        if (!authToken) {
-          return;
-        }
-
+      test('Returns a validation error when MIME type is denied', async () => {
         strapi.config.set('plugin::upload.security', { deniedTypes: ['image/*'] });
 
-        const res = await makeMultipartSSERequest(strapi, {
-          path: '/upload/unstable/stream',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
+        const res = await rq({
+          method: 'POST',
+          url: '/upload/unstable/upload-file',
+          formData: {
+            files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
           },
-          files: [{ path: path.join(__dirname, '../utils/rec.jpg'), type: 'image/jpeg' }],
         });
 
-        expect(res.statusCode).toBe(200);
-
-        // Should have file:error event
-        const errorEvent = res.events.find((e) => e.event === 'file:error');
-        expect(errorEvent).toBeDefined();
-        expect(errorEvent.data).toHaveProperty('message');
-
-        // stream:complete should report errors
-        const completeEvent = res.events.find((e) => e.event === 'stream:complete');
-        expect(completeEvent).toBeDefined();
-        expect(completeEvent.data.errors.length).toBeGreaterThan(0);
+        expect(res.statusCode).toBe(400);
       });
     });
   });

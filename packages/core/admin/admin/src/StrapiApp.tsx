@@ -17,7 +17,7 @@ import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
-import { Widgets } from './core/apis/Widgets';
+import { Widgets, type WidgetArgs } from './core/apis/Widgets';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
@@ -327,7 +327,7 @@ class StrapiApp {
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
   async register(customRegister?: unknown) {
-    this.widgets.register([
+    const widgets: WidgetArgs[] = [
       {
         icon: User,
         title: {
@@ -362,7 +362,10 @@ class StrapiApp {
         id: 'key-statistics',
         roles: ['strapi-super-admin'],
       },
-      {
+    ];
+
+    if ('strapi-cloud' in this.appPlugins) {
+      widgets.push({
         icon: Cloud,
         title: {
           id: 'widget.deploy-now.title',
@@ -374,8 +377,10 @@ class StrapiApp {
         },
         pluginId: 'admin',
         id: 'deploy-now',
-      },
-    ]);
+      });
+    }
+
+    this.widgets.register(widgets);
 
     Object.keys(this.appPlugins).forEach((plugin) => {
       this.appPlugins[plugin].register(this);
