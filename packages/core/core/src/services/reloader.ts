@@ -6,18 +6,46 @@ export const createReloader = (strapi: Core.Strapi) => {
     isWatching: true,
   };
 
-  function reload() {
-    if (state.shouldReload > 0) {
-      // Reset the reloading state
-      state.shouldReload -= 1;
-      reload.isReloading = false;
-      return;
+async function reload() {
+  if (state.shouldReload > 0) {
+    state.shouldReload -= 1;
+    reload.isReloading = false;
+    return;
+  }
+
+  if (strapi.config.get('autoReload')) {
+    const server = strapi.server?.httpServer;
+    if (server) {
+      const timeout: number =
+        strapi.config.get('server.shutdownTimeout', 30_000);
+
+      strapi.log.info(
+        `[reloader] Draining in-flight requests before reload ` +
+        `(timeout: ${timeout}ms)...`
+      );
+
+      server.closeIdleConnections();
+
+      await new Promise<void>((resolve) => {
+        const t = setTimeout(() => {
+          strapi.log.warn(
+            '[reloader] Drain timeout reached, proceeding with reload'
+          );
+          resolve();
+        }, timeout);
+
+        server.close(() => {
+          clearTimeout(t);
+          resolve();
+        });
+      });
     }
 
-    if (strapi.config.get('autoReload')) {
-      process.send?.('reload');
-    }
+    process.send?.('reload');
   }
+}
+
+  
 
   Object.defineProperty(reload, 'isWatching', {
     configurable: true,
