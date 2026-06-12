@@ -1,6 +1,6 @@
 ---
-name: committing
-description: Use when writing any git commit message, PR title, or squash subject in the Strapi repo — enforces the type list, scope syntax, and subject style from CONTRIBUTING.md "Git Conventions" and .commitlintrc.ts. Trigger whenever a commit/PR subject is being drafted, even if the user didn't say the word "commit".
+name: git-conventions
+description: Use when writing any git commit message, PR title, or squash subject in the Strapi repo. Trigger whenever a commit/PR subject is being drafted, even if the user didn't say the word "commit".
 ---
 
 # Strapi Commit Conventions
@@ -68,18 +68,3 @@ Prefer a scope: `type(scope): subject` (e.g. `fix(core/core): xxx`). The scope p
 - CI/workflow files only? → `ci`
 - Security advisory or hardening? → `security`
 - Behind a future flag? → `future`
-
-## Examples
-
-From [CONTRIBUTING.md](../../../CONTRIBUTING.md):
-
-```
-feat: introduce document service
-fix: unable to publish documents due to missing permissions
-chore: refactor data-fetching in EditView to use react-query
-docs: document service API reference
-```
-
-## Tooling
-
-Run the `commit` script (`pnpm commit` / `yarn commit`) to use the interactive commit CLI that helps construct a compliant message.
