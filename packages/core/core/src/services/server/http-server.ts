@@ -63,6 +63,31 @@ const createHTTPServer = (strapi: Core.Strapi, koaApp: Koa): Server => {
     });
   };
 
+process.once('SIGTERM', async () => {
+    const timeout: number =
+      strapi.config.get('server.shutdownTimeout', 30_000);
+
+    strapi.log.info(
+      `[server] SIGTERM received — draining connections (${timeout}ms timeout)`
+    );
+
+    server.closeIdleConnections();
+
+    await new Promise<void>((resolve) => {
+      const t = setTimeout(() => {
+        strapi.log.warn('[server] Forced close after timeout');
+        resolve();
+      }, timeout);
+
+      server.close(() => {
+        clearTimeout(t);
+        resolve();
+      });
+    });
+
+    process.exit(0);
+  });
+  
   return Object.assign(server, { destroy });
 };
 
