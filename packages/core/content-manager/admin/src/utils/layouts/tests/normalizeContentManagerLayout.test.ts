@@ -193,6 +193,18 @@ describe('normalizeContentManagerLayout', () => {
     expect(normalized.components['shared.orphan']).toBeUndefined();
   });
 
+  it('drops content-type layout fields whose component schema is unavailable', () => {
+    const normalized = normalizeContentManagerLayout(data, {
+      schema: contentTypeSchema,
+      components: {},
+      schemas: [contentTypeSchema, relationSchema],
+    });
+
+    expect(normalized.contentType.layouts.edit).toEqual([[{ name: 'title', size: 6 }]]);
+    expect(normalized.contentType.layouts.list).toEqual(['title', 'category']);
+    expect(normalized.contentType.metadatas.seo).toBeUndefined();
+  });
+
   it('drops stale nested component layout fields and metadata', () => {
     const normalized = normalizeContentManagerLayout(data, {
       schema: contentTypeSchema,

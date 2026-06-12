@@ -16,8 +16,8 @@ interface MediaFile {
       url?: string;
     };
   };
-  mime: string;
-  name: string;
+  mime?: string | null;
+  name?: string | null;
   url: string;
 }
 
@@ -35,15 +35,9 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
   if (mime?.includes('image')) {
     const thumbnail = formats?.thumbnail?.url;
     const mediaURL = prefixFileUrlWithBackendUrl(thumbnail) || fileURL;
+    const mediaLabel = alternativeText || name || undefined;
 
-    return (
-      <Avatar.Item
-        src={mediaURL}
-        alt={alternativeText || name}
-        fallback={alternativeText || name}
-        preview
-      />
-    );
+    return <Avatar.Item src={mediaURL} alt={mediaLabel} fallback={mediaLabel} preview />;
   }
 
   const fileExtension = getFileExtension(ext);

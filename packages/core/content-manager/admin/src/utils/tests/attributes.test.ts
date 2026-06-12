@@ -1,5 +1,11 @@
 import { checkIfAttributeIsDisplayable, getMainField } from '../attributes';
 
+import type { Schema } from '@strapi/types';
+
+type RelationAttributeWithTargetModel = Schema.Attribute.Relation & {
+  targetModel: string;
+};
+
 describe('attributes', () => {
   describe('checkIfAttributeIsDisplayable', () => {
     it('should return false if the relation is morph', () => {
@@ -58,18 +64,14 @@ describe('attributes', () => {
     });
 
     it('falls back to id when a relation main field cannot be resolved', () => {
-      expect(
-        getMainField(
-          {
-            type: 'relation',
-            relation: 'oneToOne',
-            target: 'api::missing.missing',
-            targetModel: 'api::missing.missing',
-          } as any,
-          'title',
-          { schemas: [], components: {} }
-        )
-      ).toEqual({
+      const relationAttribute = {
+        type: 'relation',
+        relation: 'oneToOne',
+        target: 'api::missing.missing',
+        targetModel: 'api::missing.missing',
+      } satisfies RelationAttributeWithTargetModel;
+
+      expect(getMainField(relationAttribute, 'title', { schemas: [], components: {} })).toEqual({
         name: 'id',
         type: 'custom',
       });

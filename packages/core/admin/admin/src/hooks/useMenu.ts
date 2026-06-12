@@ -181,6 +181,24 @@ const normalizeMenuLinks = (links: unknown): MenuItem[] => {
     return [];
   }
 
+  const isValidIcon = (icon: unknown) => {
+    if (typeof icon === 'string' || typeof icon === 'function' || React.isValidElement(icon)) {
+      return true;
+    }
+
+    if (!icon || typeof icon !== 'object') {
+      return false;
+    }
+
+    const reactType = (icon as { $$typeof?: symbol }).$$typeof;
+
+    return (
+      reactType === Symbol.for('react.forward_ref') ||
+      reactType === Symbol.for('react.memo') ||
+      reactType === Symbol.for('react.lazy')
+    );
+  };
+
   return links.reduce<MenuItem[]>((acc, link) => {
     if (!link || typeof link !== 'object') {
       return acc;
@@ -190,9 +208,9 @@ const normalizeMenuLinks = (links: unknown): MenuItem[] => {
 
     if (
       typeof candidate.to !== 'string' ||
-      !candidate.icon ||
-      !candidate.intlLabel?.id ||
-      !candidate.intlLabel.defaultMessage
+      !isValidIcon(candidate.icon) ||
+      typeof candidate.intlLabel?.id !== 'string' ||
+      typeof candidate.intlLabel.defaultMessage !== 'string'
     ) {
       return acc;
     }

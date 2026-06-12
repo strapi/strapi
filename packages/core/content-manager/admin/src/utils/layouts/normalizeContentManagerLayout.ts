@@ -247,6 +247,17 @@ const normalizeSettings = (settings: Settings, attributes: Attributes | undefine
   };
 };
 
+const hasResolvableComponent = (
+  attribute: SchemaUtils.Attribute.AnyAttribute | undefined,
+  context: Pick<NormalizationContext, 'components'>
+) => {
+  if (!attribute || !('component' in attribute) || typeof attribute.component !== 'string') {
+    return true;
+  }
+
+  return Boolean(context.components[attribute.component]);
+};
+
 const normalizeMetadatas = (
   metadatas: Metadatas,
   attributes: Attributes | undefined,
@@ -255,7 +266,7 @@ const normalizeMetadatas = (
   return Object.entries(metadatas).reduce<Metadatas>((acc, [name, metadata]) => {
     const attribute = attributes?.[name];
 
-    if (!attribute) {
+    if (!attribute || !hasResolvableComponent(attribute, context)) {
       return acc;
     }
 
@@ -286,9 +297,14 @@ const normalizeMetadatas = (
 const normalizeLayouts = (
   layouts: Layouts,
   attributes: Attributes | undefined,
-  metadatas: Metadatas
+  metadatas: Metadatas,
+  context: Pick<NormalizationContext, 'components'>
 ) => {
-  const hasRenderableField = (name: string) => Boolean(attributes?.[name] && metadatas[name]);
+  const hasRenderableField = (name: string) => {
+    const attribute = attributes?.[name];
+
+    return Boolean(attribute && metadatas[name] && hasResolvableComponent(attribute, context));
+  };
 
   return {
     edit: (layouts.edit ?? [])
@@ -304,7 +320,7 @@ const normalizeConfiguration = <TConfiguration extends Configuration>(
   context: Pick<NormalizationContext, 'components' | 'schemas'>
 ) => {
   const metadatas = normalizeMetadatas(configuration.metadatas, attributes, context);
-  const layouts = normalizeLayouts(configuration.layouts, attributes, metadatas);
+  const layouts = normalizeLayouts(configuration.layouts, attributes, metadatas, context);
 
   return {
     ...configuration,

@@ -45,11 +45,7 @@ const SortDisplayedFields = ({ metadatas }: SortDisplayedFieldsProps) => {
     return Object.entries(schema.attributes).reduce<Array<FormData['layout'][number]>>(
       (acc, [name, attribute]) => {
         if (!displayedFieldNames.includes(name) && checkIfAttributeIsDisplayable(attribute)) {
-          const metadata = metadatas[name];
-
-          if (!metadata) {
-            return acc;
-          }
+          const metadata = metadatas[name] || { label: name };
 
           acc.push({
             name,

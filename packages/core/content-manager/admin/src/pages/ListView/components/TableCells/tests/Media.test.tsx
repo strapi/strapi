@@ -8,7 +8,6 @@ describe('Media cell content', () => {
     const { getByText } = render(
       <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
         <MediaSingle
-          // @ts-expect-error - reproduces malformed relation/media data received by the list view.
           mime={undefined}
           url="/uploads/file.pdf"
           ext=".pdf"
