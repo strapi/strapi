@@ -3,9 +3,7 @@
   "compilerOptions": {
     "rootDir": "../",
     "paths": {
-      "@tests/*": ["./tests/*"],
-      "msw": ["../../admin/node_modules/msw"],
-      "msw/*": ["../../admin/node_modules/msw/*"]
+      "@tests/*": ["./tests/*"]
     }
   },
   "include": ["./src", "../shared", "./tests", "./custom.d.ts"]
