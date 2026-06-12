@@ -83,6 +83,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /api/email                                                                      │
 │ POST               │ /api/upload                                                                     │
 │ HEAD|GET           │ /api/upload/files                                                               │
+│ HEAD|GET           │ /api/upload/files/page                                                          │
 │ HEAD|GET           │ /api/upload/files/:id                                                           │
 │ DELETE             │ /api/upload/files/:id                                                           │
 │ HEAD|GET           │ /api/i18n/locales                                                               │
