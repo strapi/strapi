@@ -411,21 +411,55 @@ module.exports = ({ strapi }) => ({
       return ctx.notFound();
     }
 
-    // Invalidate all sessions for the authenticated user, or by deviceId if provided
     if (!ctx.state.user) {
       return ctx.unauthorized('Missing authentication');
     }
 
-    const deviceId = extractDeviceId(ctx.request.body);
+    const userId = String(ctx.state.user.id);
+    const sessionManager = strapi.sessionManager('users-permissions');
+    const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+    const body = ctx.request.body || {};
+    const scope = typeof body.scope === 'string' ? body.scope : undefined;
+    const deviceId = extractDeviceId(body);
+
     try {
-      await strapi
-        .sessionManager('users-permissions')
-        .invalidateRefreshToken(String(ctx.state.user.id), deviceId);
+      if (scope === 'all') {
+        // Explicit global logout: revoke every session for the user. This was the
+        // previous default behavior and is now opt-in to avoid surprising clients.
+        await sessionManager.invalidateRefreshToken(userId);
+      } else if (deviceId) {
+        // Targeted logout of a specific device family (backward compatible).
+        await sessionManager.invalidateRefreshToken(userId, deviceId);
+      } else {
+        // Default: log out only the session backing this request ("this device").
+        let currentSessionId = ctx.state.session?.id;
+
+        // Prefer the refresh token (httpOnly cookie or body) since it always points
+        // at the active session record, even after rotations.
+        const cookieName = upSessions?.cookie?.name || 'strapi_up_refresh';
+        const refreshToken =
+          ctx.cookies.get(cookieName) ||
+          (typeof body.refreshToken === 'string' ? body.refreshToken : undefined);
+
+        if (refreshToken) {
+          const validation = await sessionManager.validateRefreshToken(refreshToken);
+          if (validation.isValid) {
+            currentSessionId = validation.sessionId;
+          }
+        }
+
+        if (currentSessionId) {
+          await sessionManager.revokeSessionById(userId, currentSessionId);
+        } else {
+          // Could not identify the current session; fall back to a full logout so
+          // the request never leaves a session the caller believes is closed.
+          await sessionManager.invalidateRefreshToken(userId);
+        }
+      }
     } catch (err) {
       strapi.log.error('UP logout failed', err);
     }
 
-    const upSessions = strapi.config.get('plugin::users-permissions.sessions');
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
       const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';

@@ -98,6 +98,8 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /api/auth/change-password                                                       │
 │ POST               │ /api/auth/refresh                                                               │
 │ POST               │ /api/auth/logout                                                                │
+│ HEAD|GET           │ /api/auth/sessions                                                              │
+│ DELETE             │ /api/auth/sessions/:sessionId                                                   │
 │ HEAD|GET           │ /api/users/count                                                                │
 │ HEAD|GET           │ /api/users                                                                      │
 │ HEAD|GET           │ /api/users/me                                                                   │
@@ -133,6 +135,9 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/users/me                                                                 │
 │ PUT                │ /admin/users/me                                                                 │
 │ HEAD|GET           │ /admin/users/me/permissions                                                     │
+│ HEAD|GET           │ /admin/users/me/sessions                                                        │
+│ DELETE             │ /admin/users/me/sessions                                                        │
+│ DELETE             │ /admin/users/me/sessions/:sessionId                                             │
 │ POST               │ /admin/users                                                                    │
 │ HEAD|GET           │ /admin/users                                                                    │
 │ HEAD|GET           │ /admin/users/:id                                                                │

@@ -13,11 +13,24 @@ export interface ParsedUserAgent {
   deviceName?: string;
 }
 
+/**
+ * Upper bound on the User-Agent length we are willing to scan. Real-world UA
+ * strings are comfortably under this, and browser/OS tokens always appear early,
+ * so clamping protects against pathologically large attacker-controlled headers
+ * without losing accuracy for legitimate clients.
+ */
+const MAX_UA_LENGTH = 1024;
+
 const detectBrowser = (ua: string): string | undefined => {
   // Order matters: more specific tokens must be checked first.
   if (/\bEdg(?:e|A|iOS)?\//.test(ua)) return 'Edge';
   if (/\b(?:OPR|Opera)\//.test(ua)) return 'Opera';
   if (/\b(?:SamsungBrowser)\//.test(ua)) return 'Samsung Internet';
+  // Chromium forks below ship a "Chrome/" token too, so they must be matched
+  // before the generic Chrome check or they'd all collapse into "Chrome".
+  if (/\bVivaldi\//.test(ua)) return 'Vivaldi';
+  if (/\b(?:YaBrowser|Yowser)\//.test(ua)) return 'Yandex Browser';
+  if (/\bBrave\//.test(ua)) return 'Brave';
   if (/\b(?:Firefox|FxiOS)\//.test(ua)) return 'Firefox';
   if (/\b(?:Chrome|CriOS|Chromium)\//.test(ua)) return 'Chrome';
   // Safari ships "Safari/xxx" but so do Chrome/Edge; only treat as Safari when no Chrome token.
@@ -47,8 +60,11 @@ export const parseUserAgent = (userAgent?: string | null): ParsedUserAgent => {
     return {};
   }
 
-  const browser = detectBrowser(userAgent);
-  const os = detectOS(userAgent);
+  // Clamp before scanning so an oversized header cannot drive the regex work.
+  const ua = userAgent.length > MAX_UA_LENGTH ? userAgent.slice(0, MAX_UA_LENGTH) : userAgent;
+
+  const browser = detectBrowser(ua);
+  const os = detectOS(ua);
 
   let deviceName: string | undefined;
   if (browser && os) {

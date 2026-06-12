@@ -38,6 +38,29 @@ describe('parseUserAgent', () => {
     expect(parseUserAgent(ua)).toEqual(expected);
   });
 
+  it.each([
+    [
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Vivaldi/6.5.3206.63',
+      { browser: 'Vivaldi', os: 'Windows', deviceName: 'Vivaldi on Windows' },
+    ],
+    [
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
+      { browser: 'Yandex Browser', os: 'Windows', deviceName: 'Yandex Browser on Windows' },
+    ],
+    [
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Brave/1.62',
+      { browser: 'Brave', os: 'macOS', deviceName: 'Brave on macOS' },
+    ],
+  ])('detects Chromium-based browsers that masquerade as Chrome: %s', (ua, expected) => {
+    expect(parseUserAgent(ua)).toEqual(expected);
+  });
+
+  it('clamps absurdly long User-Agent strings before scanning', () => {
+    // Tokens placed beyond the scan limit are intentionally not detected.
+    const padded = `${'A'.repeat(5000)} Chrome/120.0.0.0 Safari/537.36`;
+    expect(parseUserAgent(padded)).toEqual({});
+  });
+
   it('falls back to OS-only or browser-only labels', () => {
     expect(parseUserAgent('Mozilla/5.0 (Windows NT 10.0)')).toEqual({
       os: 'Windows',

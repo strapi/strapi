@@ -182,6 +182,77 @@ describe('UP Content API - Active Sessions', () => {
         .deleteMany({ where: { origin: 'users-permissions' } });
     });
 
+    it('logout revokes only the current session by default', async () => {
+      const login1 = await loginUser();
+      const login2 = await loginUser();
+      const session1 = sessionIdFromToken(login1.body.jwt);
+      const session2 = sessionIdFromToken(login2.body.jwt);
+
+      const res = await createAuthRequest().setToken(login1.body.jwt)({
+        method: 'POST',
+        url: '/logout',
+        body: { refreshToken: login1.body.refreshToken },
+      });
+      expect(res.statusCode).toBe(200);
+
+      // The other session survives and is still listed.
+      const list = await createAuthRequest().setToken(login2.body.jwt)({
+        method: 'GET',
+        url: '/sessions',
+      });
+      const ids = list.body.data.map((s) => s.id);
+      expect(ids).toContain(session2);
+      expect(ids).not.toContain(session1);
+
+      // The logged-out refresh token can no longer rotate, the other one still can.
+      const refreshOld = await createAuthRequest()({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: login1.body.refreshToken },
+      });
+      expect(refreshOld.statusCode).toBe(401);
+
+      const refreshOther = await createAuthRequest()({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: login2.body.refreshToken },
+      });
+      expect(refreshOther.statusCode).toBe(200);
+
+      await strapi.db
+        .query('admin::session')
+        .deleteMany({ where: { origin: 'users-permissions' } });
+    });
+
+    it('logout with scope "all" revokes every session of the user', async () => {
+      const login1 = await loginUser();
+      const login2 = await loginUser();
+
+      const res = await createAuthRequest().setToken(login1.body.jwt)({
+        method: 'POST',
+        url: '/logout',
+        body: { scope: 'all' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const refresh1 = await createAuthRequest()({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: login1.body.refreshToken },
+      });
+      const refresh2 = await createAuthRequest()({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: login2.body.refreshToken },
+      });
+      expect(refresh1.statusCode).toBe(401);
+      expect(refresh2.statusCode).toBe(401);
+
+      await strapi.db
+        .query('admin::session')
+        .deleteMany({ where: { origin: 'users-permissions' } });
+    });
+
     it('cannot revoke a session that belongs to another user', async () => {
       const login1 = await loginUser();
       const otherLogin = await loginUser(internals.otherUser);
