@@ -107,18 +107,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
+      // cannot replace with more than one file
+      if (Array.isArray(filesInput) && filesInput.length > 1) {
+        throw new ValidationError('Cannot replace a file with multiple ones');
+      }
+
+      const files = Array.isArray(filesInput) ? filesInput[0] : filesInput;
+
       const {
         validFiles,
         filteredBody,
         errors: validationErrors,
-      } = await prepareUploadRequest(filesInput, body, strapi);
+      } = await prepareUploadRequest(files, body, strapi);
       if (validFiles.length === 0) {
         throw new errors.ValidationError(validationErrors[0].message);
-      }
-
-      // cannot replace with more than one file
-      if (Array.isArray(filesInput)) {
-        throw new ValidationError('Cannot replace a file with multiple ones');
       }
 
       if (!id || (typeof id !== 'string' && typeof id !== 'number')) {
