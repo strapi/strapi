@@ -71,7 +71,8 @@ const useSettingsMenu = (): {
     (state) => state.checkUserHasPermissions
   );
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
-  const settings = useStrapiApp('useSettingsMenu', (state) => normalizeSettings(state.settings));
+  const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
+  const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
   const permissions = useSelector(selectAdminPermissions);
 
   /**

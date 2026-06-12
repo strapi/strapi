@@ -30,7 +30,8 @@ export interface Menu {
 
 const useMenu = (shouldUpdateStrapi: boolean) => {
   const checkUserHasPermissions = useAuth('useMenu', (state) => state.checkUserHasPermissions);
-  const menu = useStrapiApp('useMenu', (state) => normalizeMenuLinks(state.menu));
+  const rawMenu = useStrapiApp('useMenu', (state) => state.menu);
+  const menu = React.useMemo(() => normalizeMenuLinks(rawMenu), [rawMenu]);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
