@@ -9735,7 +9735,7 @@ __metadata:
     "@types/node": "npm:24.10.0"
     "@types/nodemon": "npm:1.19.6"
     "@types/webpack-bundle-analyzer": "npm:4.7.0"
-    "@types/webpack-hot-middleware": "npm:2.25.9"
+    "@types/webpack-hot-middleware": "npm:2.25.12"
     "@vitejs/plugin-react-swc": "npm:3.11.0"
     boxen: "npm:5.1.2"
     browserslist: "npm:^4.23.0"
@@ -11728,14 +11728,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/webpack-hot-middleware@npm:2.25.9":
-  version: 2.25.9
-  resolution: "@types/webpack-hot-middleware@npm:2.25.9"
+"@types/webpack-hot-middleware@npm:2.25.12":
+  version: 2.25.12
+  resolution: "@types/webpack-hot-middleware@npm:2.25.12"
   dependencies:
     "@types/connect": "npm:*"
     tapable: "npm:^2.2.0"
     webpack: "npm:^5"
-  checksum: 10c0/612d234149a2a04422650ba7ab886a699d052b18103d78384a2dc589f93b7fa6fda6046a516eede4d1c7aaeb04402cc6fd4ced17295fb6edb496d958e64c4dfd
+  checksum: 10c0/78b5f5126d2d66ef9637ae89784b8fc55de2ac5d9d413a92d08d69c660503cdc3d005fbd89de13dc7d91200c38e6ba5a240f052efb5bb8d549862d53860e13bf
   languageName: node
   linkType: hard
 
