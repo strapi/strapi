@@ -276,6 +276,46 @@ describe('normalizeContentManagerLayout', () => {
 });
 
 describe('response shape normalization', () => {
+  it('emits development warnings when malformed response shapes are repaired', () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalWarn = console.warn;
+
+    process.env.NODE_ENV = 'development';
+    console.warn = jest.fn();
+
+    try {
+      normalizeContentTypeConfigurationResponse(
+        {
+          contentType: {
+            settings: undefined,
+            metadatas: undefined,
+            layouts: {
+              edit: [[{ name: 'title' }]],
+              list: ['title', false],
+            },
+          },
+        },
+        'api::article.article'
+      );
+
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Received malformed settings')
+      );
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Received malformed metadatas')
+      );
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Dropped malformed edit layout field')
+      );
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Dropped malformed list layout field')
+      );
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+      console.warn = originalWarn;
+    }
+  });
+
   it('normalizes malformed content-type configuration response shapes', () => {
     const normalized = normalizeContentTypeConfigurationResponse(
       {
