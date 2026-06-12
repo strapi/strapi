@@ -10683,13 +10683,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node20@npm:20.1.6":
-  version: 20.1.6
-  resolution: "@tsconfig/node20@npm:20.1.6"
-  checksum: 10c0/736bca8c405222e78f77da068bf705b398e3afb3f2ec3c1d2a8792505283863bef8cca5646358fcbabd3b07c6fbbf0b1acdf09aa182254fe60eb519827737f09
-  languageName: node
-  linkType: hard
-
 "@tybys/wasm-util@npm:^0.10.1":
   version: 0.10.1
   resolution: "@tybys/wasm-util@npm:0.10.1"
@@ -15173,7 +15166,7 @@ __metadata:
     "@actions/github": "npm:^6.0.0"
     "@linear/sdk": "npm:^37.0.0"
     "@notionhq/client": "npm:^2.2.15"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:^22.0.0"
     tsup: "npm:^8.0.0"
     typescript: "npm:^5.4.0"
   languageName: unknown
@@ -15202,7 +15195,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:^22"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
     better-sqlite3: "npm:12.8.0"
@@ -16626,7 +16619,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:^22"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
     better-sqlite3: "npm:12.8.0"
@@ -30601,8 +30594,6 @@ __metadata:
 "tsconfig@npm:5.49.0, tsconfig@workspace:packages/utils/tsconfig":
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
-  dependencies:
-    "@tsconfig/node20": "npm:20.1.6"
   languageName: unknown
   linkType: soft
 
