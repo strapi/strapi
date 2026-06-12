@@ -23,6 +23,7 @@ const defaultConfig = {
     host: process.env.HOST || os.hostname() || 'localhost',
     port: Number(process.env.PORT) || 1337,
     proxy: false,
+    shutdownTimeout: 30_000,
     cron: { enabled: false },
     admin: { autoOpen: false },
     dirs: { public: './public' },
