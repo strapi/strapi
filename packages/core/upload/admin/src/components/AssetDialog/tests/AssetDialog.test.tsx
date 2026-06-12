@@ -14,6 +14,12 @@ jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolders');
 jest.mock('../../../hooks/useAssets');
 jest.mock('../../../hooks/useModalQueryParams');
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {

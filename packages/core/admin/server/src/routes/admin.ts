@@ -66,4 +66,20 @@ export default [
       ],
     },
   },
+  {
+    method: 'GET',
+    path: '/license-trial-time-left',
+    handler: 'admin.licenseTrialTimeLeft',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/guided-tour-meta',
+    handler: 'admin.getGuidedTourMeta',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
 ];

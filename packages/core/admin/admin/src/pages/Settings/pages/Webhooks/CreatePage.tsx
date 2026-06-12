@@ -15,4 +15,4 @@ const ProtectedCreatePage = () => {
   );
 };
 
-export { ProtectedCreatePage, EditPage as CreatePage };
+export { ProtectedCreatePage };

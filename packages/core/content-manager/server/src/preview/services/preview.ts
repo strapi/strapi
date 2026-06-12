@@ -12,18 +12,23 @@ const createPreviewService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async getPreviewUrl(uid: UID.ContentType, params: HandlerParams) {
+      const isConfigured = config.isConfigured();
+
+      if (!isConfigured) {
+        throw new errors.NotFoundError('Preview config not found');
+      }
+
       const handler = config.getPreviewHandler();
 
       try {
         // Try to get the preview URL from the user-defined handler
-        return handler(uid, params);
+        const url = await handler(uid, params);
+        return url;
       } catch (error) {
         // Log the error and throw a generic error
         strapi.log.error(`Failed to get preview URL: ${error}`);
         throw new errors.ApplicationError('Failed to get preview URL');
       }
-
-      return;
     },
   };
 };

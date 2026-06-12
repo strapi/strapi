@@ -36,6 +36,13 @@ describe('Upload plugin bootstrap function', () => {
       admin: {
         services: { permission: { actionProvider: { registerMany } } },
       },
+      ai: {
+        admin: {
+          isEnabled() {
+            return false;
+          },
+        },
+      },
       log: {
         error() {},
       },
@@ -81,6 +88,7 @@ describe('Upload plugin bootstrap function', () => {
 
     expect(setStore).toHaveBeenCalledWith({
       value: {
+        aiMetadata: true,
         autoOrientation: false,
         sizeOptimization: true,
         responsiveDimensions: true,

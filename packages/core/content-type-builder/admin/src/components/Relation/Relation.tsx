@@ -11,6 +11,7 @@ interface RelationProps {
   modifiedData: Record<string, any>;
   onChange: (value: any) => void;
   naturePickerType: string;
+  targetUid: string;
 }
 
 export const Relation = ({
@@ -19,6 +20,7 @@ export const Relation = ({
   modifiedData,
   naturePickerType,
   onChange,
+  targetUid,
 }: RelationProps) => {
   const relationType = getRelationType(modifiedData.relation, modifiedData.targetAttribute);
 
@@ -37,6 +39,7 @@ export const Relation = ({
         oneThatIsCreatingARelationWithAnother={mainBoxHeader}
         relationType={relationType!}
         target={modifiedData.target}
+        targetUid={targetUid}
       />
       <RelationFormBox
         disabled={['oneWay', 'manyWay'].includes(relationType!)}

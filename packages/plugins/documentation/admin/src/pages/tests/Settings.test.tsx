@@ -1,8 +1,15 @@
 import { fireEvent, render, waitFor } from '@strapi/strapi/admin/test';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { server } from '../../../../tests/server';
 import { SettingsPage } from '../Settings';
+
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 
 describe('SettingsPage', () => {
   it('renders the setting page correctly', async () => {
@@ -22,12 +29,10 @@ describe('SettingsPage', () => {
 
   it('should automatically render the password field if the server restricted access property is true', async () => {
     server.use(
-      rest.get('*/getInfos', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            documentationAccess: { restrictedAccess: true },
-          })
-        );
+      http.get('*/getInfos', () => {
+        return HttpResponse.json({
+          documentationAccess: { restrictedAccess: true },
+        });
       })
     );
 

@@ -9,7 +9,7 @@ export const CONFIG_FILENAME = 'config.json';
 
 export type LocalConfig = {
   token?: string;
-  deviceId?: string;
+  installId?: string;
 };
 
 async function checkDirectoryExists(directoryPath: string) {

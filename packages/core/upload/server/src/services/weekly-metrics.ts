@@ -5,6 +5,7 @@ import type { Core } from '@strapi/types';
 
 import { getWeeklyCronScheduleAt } from '../utils/cron';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
+import { getService } from '../utils';
 
 type MetricStoreValue = {
   lastWeeklyUpdate?: number;
@@ -101,7 +102,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async sendMetrics() {
     const metrics = await this.computeMetrics();
-    strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', {
+    await getService('metrics').trackUsage('didSendUploadPropertiesOnceAWeek', {
       groupProperties: { metrics },
     });
 
@@ -117,7 +118,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     let weeklySchedule = currentSchedule;
 
     if (!weeklySchedule || !lastWeeklyUpdate || lastWeeklyUpdate + ONE_WEEK < now.getTime()) {
-      weeklySchedule = getWeeklyCronScheduleAt(add(now, { minutes: 5 }));
+      weeklySchedule = getWeeklyCronScheduleAt(add(now, { seconds: 15 }));
       await setMetricsStoreValue({ ...metricsInfoStored, weeklySchedule });
 
       return weeklySchedule;

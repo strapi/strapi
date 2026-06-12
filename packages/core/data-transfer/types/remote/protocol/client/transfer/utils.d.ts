@@ -6,8 +6,24 @@ export type CreateTransferMessage<T extends string, U = unknown> = {
   transferID: string;
 } & U;
 
+export type TransferAssetChecksum = {
+  algorithm: 'sha256';
+  value: string;
+};
+
 export type TransferAssetFlow = { assetID: string } & (
   | { action: 'start'; data: Omit<IAsset, 'stream'> }
-  | { action: 'stream'; data: Buffer }
-  | { action: 'end' }
+  /** Legacy in-process / default JSON: Buffer serializes to `{ type: 'Buffer'; data: number[] }` on the wire. */
+  | { action: 'stream'; data: Buffer; encoding?: undefined }
+  /**
+   * Legacy Buffer JSON shape sent by {@link createTransferAssetStreamChunkLegacy} for remotes that
+   * predate #23479 and do `Buffer.from(item.data.data)` directly in their push handler.
+   */
+  | { action: 'stream'; data: { type: 'Buffer'; data: number[] }; encoding?: undefined }
+  /**
+   * Canonical wire form for asset bytes (push + pull). Built with `createTransferAssetStreamChunk`.
+   * Decoders also accept legacy Buffer JSON and plain base64 strings without `encoding`.
+   */
+  | { action: 'stream'; data: string; encoding?: 'base64' }
+  | { action: 'end'; checksum?: TransferAssetChecksum }
 );

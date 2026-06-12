@@ -1,7 +1,8 @@
 import fs from 'fs';
 import { join } from 'path';
 import sharp from 'sharp';
-import { file as fileUtils } from '@strapi/utils';
+import crypto from 'crypto';
+import { strings, file as fileUtils } from '@strapi/utils';
 
 import { getService } from '../utils';
 
@@ -11,6 +12,13 @@ type Dimensions = {
   width: number | null;
   height: number | null;
 };
+
+// TODO: remove after upgrading sharp to >=0.34.2 (pageHeight added to OutputInfo types)
+declare module 'sharp' {
+  interface OutputInfo {
+    pageHeight?: number;
+  }
+}
 
 const { bytesToKbytes } = fileUtils;
 
@@ -24,12 +32,12 @@ const isOptimizableFormat = (
   format !== undefined && FORMATS_TO_OPTIMIZE.includes(format);
 
 const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
-  new Promise((resolve, reject) => {
+  new Promise<void>((resolve, reject) => {
     const writeStream = fs.createWriteStream(path);
     // Reject promise if there is an error with the provided stream
     stream.on('error', reject);
     stream.pipe(writeStream);
-    writeStream.on('close', resolve);
+    writeStream.on('close', () => resolve());
     writeStream.on('error', reject);
   });
 
@@ -72,7 +80,7 @@ const resizeFileTo = async (
 
   let newInfo;
   if (!file.filepath) {
-    const transform = sharp()
+    const transform = sharp({ animated: true })
       .resize(options)
       .on('info', (info) => {
         newInfo = info;
@@ -80,10 +88,10 @@ const resizeFileTo = async (
 
     await writeStreamToFile(file.getStream().pipe(transform), filePath);
   } else {
-    newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
+    newInfo = await sharp(file.filepath, { animated: true }).resize(options).toFile(filePath);
   }
 
-  const { width, height, size } = newInfo ?? {};
+  const { width, height, size, pageHeight } = newInfo ?? {};
 
   const newFile: UploadableFile = {
     name,
@@ -97,7 +105,7 @@ const resizeFileTo = async (
 
   Object.assign(newFile, {
     width,
-    height,
+    height: pageHeight ?? height,
     size: size ? bytesToKbytes(size) : 0,
     sizeInBytes: size,
   });
@@ -134,9 +142,9 @@ const optimize = async (file: UploadableFile) => {
   if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
     let transformer;
     if (!file.filepath) {
-      transformer = sharp();
+      transformer = sharp({ animated: true });
     } else {
-      transformer = sharp(file.filepath);
+      transformer = sharp(file.filepath, { animated: true });
     }
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
@@ -159,7 +167,12 @@ const optimize = async (file: UploadableFile) => {
       newInfo = await transformer.toFile(filePath);
     }
 
-    const { width: newWidth, height: newHeight, size: newSize } = newInfo ?? {};
+    const {
+      width: newWidth,
+      height: newHeight,
+      size: newSize,
+      pageHeight: newPageHeight,
+    } = newInfo ?? {};
 
     const newFile = { ...file };
 
@@ -173,7 +186,7 @@ const optimize = async (file: UploadableFile) => {
 
     return Object.assign(newFile, {
       width: newWidth,
-      height: newHeight,
+      height: newPageHeight ?? newHeight,
       size: newSize ? bytesToKbytes(newSize) : 0,
       sizeInBytes: newSize,
     });
@@ -199,17 +212,17 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
   const originalDimensions = await getDimensions(file);
 
   const breakpoints = getBreakpoints();
-  return Promise.all(
-    Object.keys(breakpoints).map((key) => {
-      const breakpoint = breakpoints[key];
+  const results = [];
 
-      if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, { file, breakpoint });
-      }
+  for (const key of Object.keys(breakpoints)) {
+    const breakpoint = breakpoints[key];
 
-      return undefined;
-    })
-  );
+    if (breakpointSmallerThan(breakpoint, originalDimensions)) {
+      results.push(await generateBreakpoint(key, { file, breakpoint }));
+    }
+  }
+
+  return results;
 };
 
 const generateBreakpoint = async (
@@ -294,6 +307,13 @@ const isImage = async (file: UploadableFile) => {
   return format && FORMATS_TO_PROCESS.includes(format);
 };
 
+const generateFileName = (name: string) => {
+  const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+  const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
+
+  return `${baseName}_${randomSuffix()}`;
+};
+
 export default {
   isFaultyImage,
   isOptimizableImage,
@@ -303,4 +323,5 @@ export default {
   generateResponsiveFormats,
   generateThumbnail,
   optimize,
+  generateFileName,
 };

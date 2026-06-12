@@ -1,12 +1,13 @@
-import { machineID } from '@strapi/utils';
+import { generateInstallId, env } from '@strapi/utils';
 
-export const sendEvent = async (event: string, uuid: string) => {
+export const sendEvent = async (event: string, uuid: string, installId?: any) => {
+  const analyticsUrl = env('STRAPI_ANALYTICS_URL', 'https://analytics.strapi.io');
   try {
-    await fetch('https://analytics.strapi.io/api/v2/track', {
+    await fetch(`${analyticsUrl}/api/v2/track`, {
       method: 'POST',
       body: JSON.stringify({
         event,
-        deviceId: machineID(),
+        deviceId: generateInstallId(uuid, installId),
         groupProperties: { projectId: uuid },
       }),
       headers: {

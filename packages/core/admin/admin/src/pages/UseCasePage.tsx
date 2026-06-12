@@ -82,7 +82,7 @@ const UseCasePage = () => {
   const handleSubmit = async (event: React.FormEvent, skipPersona: boolean) => {
     event.preventDefault();
     try {
-      await fetch('https://analytics.strapi.io/register', {
+      await fetch(`${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +148,11 @@ const UseCasePage = () => {
                   <Field.Label>
                     {formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
                   </Field.Label>
-                  <TextInput value={otherRole} onChange={(e) => setOtherRole(e.target.value)} />
+                  <TextInput
+                    type="text"
+                    value={otherRole}
+                    onChange={(e) => setOtherRole(e.target.value)}
+                  />
                 </Field.Root>
               )}
               <Button type="submit" size="L" fullWidth disabled={!role}>

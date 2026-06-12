@@ -3,13 +3,20 @@ import type { File as FormidableFile } from 'formidable';
 export type InputFile = FormidableFile & {
   path?: string;
   tmpWorkingDirectory?: string;
+  provider?: string;
 };
+
+export interface FocalPoint {
+  x: number;
+  y: number;
+}
 
 export interface File {
   id: number;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
+  focalPoint?: FocalPoint | null;
   width?: number;
   height?: number;
   formats?: Record<string, unknown>;
@@ -24,7 +31,7 @@ export interface File {
   provider?: string;
   provider_metadata?: Record<string, unknown>;
   isUrlSigned?: boolean;
-  folder?: number;
+  folder?: number | null;
   folderPath?: string;
   related?: {
     id: string | number;
@@ -58,6 +65,11 @@ export interface Config {
   sizeLimit?: number;
   providerOptions: Record<string, unknown>;
   actionOptions: Record<string, unknown>;
+  sharp?: {
+    cache?: boolean;
+    concurrency?: number;
+  };
+  concurrentUploadSize?: number;
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {
@@ -72,5 +84,6 @@ export type FileInfo = {
   name?: string | null;
   alternativeText?: string | null;
   caption?: string | null;
-  folder?: number;
+  focalPoint?: FocalPoint | null;
+  folder?: number | null;
 };

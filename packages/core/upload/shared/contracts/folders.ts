@@ -37,6 +37,8 @@ export interface Folder {
   children?: number[];
   path?: string;
   files?: File[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type FolderNode = Partial<Omit<Folder, 'children'>> & {

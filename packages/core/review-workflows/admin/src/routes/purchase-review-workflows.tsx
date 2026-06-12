@@ -1,10 +1,10 @@
-import { Layouts } from '@strapi/admin/strapi-admin';
+import { Layouts, RESPONSIVE_DEFAULT_SPACING } from '@strapi/admin/strapi-admin';
 import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
 import { ExternalLink, Check, SealCheck } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import darkIllustration from '../assets/purchase-page-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-illustration-light.svg';
+import darkIllustration from '../assets/purchase-page-illustration-dark.jpg';
+import lightIllustration from '../assets/purchase-page-illustration-light.jpg';
 import { useTypedSelector } from '../modules/hooks';
 
 const PurchaseReviewWorkflows = () => {
@@ -13,7 +13,7 @@ const PurchaseReviewWorkflows = () => {
 
   const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Layouts.Header
           title={formatMessage({
@@ -22,8 +22,8 @@ const PurchaseReviewWorkflows = () => {
           })}
         />
         <Box
-          marginLeft={10}
-          marginRight={10}
+          marginLeft={RESPONSIVE_DEFAULT_SPACING}
+          marginRight={RESPONSIVE_DEFAULT_SPACING}
           shadow="filterShadow"
           hasRadius
           background="neutral0"
@@ -31,7 +31,7 @@ const PurchaseReviewWorkflows = () => {
           overflow={'hidden'}
         >
           <Grid.Root>
-            <Grid.Item col={6} s={12} alignItems={'flex-start'}>
+            <Grid.Item col={6} xs={12} alignItems={'flex-start'}>
               <Flex direction="column" alignItems="flex-start" padding={7} width={'100%'}>
                 <Flex>
                   <SealCheck fill="primary600" width={`24px`} height={`24px`} />
@@ -115,7 +115,7 @@ const PurchaseReviewWorkflows = () => {
                 </Flex>
               </Flex>
             </Grid.Item>
-            <Grid.Item col={6} s={12} background="primary100" minHeight={'280px'}>
+            <Grid.Item col={6} xs={12} background="primary100" minHeight={'280px'}>
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <img
                   src={illustration}
@@ -137,7 +137,7 @@ const PurchaseReviewWorkflows = () => {
           </Grid.Root>
         </Box>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

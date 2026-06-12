@@ -1,4 +1,4 @@
-import * as globalAgent from 'global-agent';
+import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -7,7 +7,6 @@ import { Database } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
-import tsUtils from '@strapi/typescript-utils';
 import { loadConfiguration } from './configuration';
 
 import * as factories from './factories';
@@ -29,11 +28,25 @@ import createAuth from './services/auth';
 import createCustomFields from './services/custom-fields';
 import createContentAPI from './services/content-api';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
+import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
+import { createContentSourceMapsService } from './services/content-source-maps';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
+
+import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+
+// Lazy: only resolved when `useTypescriptMigrations` is true (default false)
+let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
+const tsUtils = (): typeof import('@strapi/typescript-utils') => {
+  if (!lazyTsUtils) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyTsUtils = require('@strapi/typescript-utils');
+  }
+  return lazyTsUtils as typeof import('@strapi/typescript-utils');
+};
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -56,6 +69,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get admin(): Core.Module {
     return this.get('admin');
+  }
+
+  get ai(): Modules.AI.AiNamespace {
+    return this.get('ai');
   }
 
   get EE(): boolean {
@@ -135,6 +152,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get telemetry(): Modules.Metrics.TelemetryService {
     return this.get('telemetry');
+  }
+
+  get sessionManager(): Modules.SessionManager.SessionManagerService {
+    return this.get('sessionManager');
   }
 
   get store(): Modules.CoreStore.CoreStore {
@@ -271,9 +292,9 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
       .add('db', () => {
-        const tsDir = tsUtils.resolveOutDirSync(this.dirs.app.root);
-        const tsMigrationsEnabled =
-          this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
+        const useTSM = this.config.get('database.settings.useTypescriptMigrations') === true;
+        const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;
+        const tsMigrationsEnabled = useTSM && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
         return new Database(
           _.merge(this.config.get('database'), {
@@ -286,7 +307,8 @@ class Strapi extends Container implements Core.Strapi {
           })
         );
       })
-      .add('reload', () => createReloader(this));
+      .add('reload', () => createReloader(this))
+      .add('content-source-maps', () => createContentSourceMapsService(this));
   }
 
   sendStartupTelemetry() {
@@ -301,6 +323,7 @@ class Strapi extends Container implements Core.Strapi {
           numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
           numberOfComponents: _.size(this.components),
           numberOfDynamicZones: getNumberOfDynamicZones(),
+          numberOfConditionalFields: getNumberOfConditionalFields(),
           numberOfCustomControllers: Object.values<Core.Controller>(this.controllers).filter(
             // TODO: Fix this at the content API loader level to prevent future types issues
             (controller) => controller !== undefined && factories.isCustomController(controller)
@@ -439,11 +462,29 @@ class Strapi extends Container implements Core.Strapi {
       contentTypes: this.contentTypes,
     });
 
+    // NOTE: commenting out repair logic for now as it is causing relationship loss in some cases
+    // will revisit soon in the future PR
+
     const status = await this.db.schema.sync();
 
-    // if schemas have changed, run repairs
+    // // if schemas have changed, run repairs
     if (status === 'CHANGED') {
       await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+      await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
+    }
+
+    const alreadyRanComponentRepair = await this.store.get({
+      type: 'strapi',
+      key: 'unidirectional-join-table-repair-ran',
+    });
+
+    if (!alreadyRanComponentRepair) {
+      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
+      await this.store.set({
+        type: 'strapi',
+        key: 'unidirectional-join-table-repair-ran',
+        value: true,
+      });
     }
 
     if (this.EE) {
@@ -487,7 +528,7 @@ class Strapi extends Container implements Core.Strapi {
       return;
     }
 
-    globalAgent.bootstrap();
+    bootstrapGlobalAgent();
 
     if (httpProxy) {
       this.log.info(`Using HTTP proxy: ${httpProxy}`);

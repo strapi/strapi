@@ -29,7 +29,13 @@ function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true })
     [data]
   );
 
-  return { license: data?.data, getFeature, isError, isLoading };
+  return {
+    license: data?.data,
+    getFeature,
+    isError,
+    isLoading,
+    isTrial: data?.data?.isTrial ?? false,
+  };
 }
 
 export { useLicenseLimits };

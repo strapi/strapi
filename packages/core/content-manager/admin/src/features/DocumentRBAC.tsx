@@ -54,35 +54,39 @@ const [DocumentRBACProvider, useDocumentRBAC] = createContext<DocumentRBACContex
 interface DocumentRBACProps {
   children: React.ReactNode;
   permissions: Permission[] | null;
+  model?: string;
 }
 
 /**
  * @internal This component is not meant to be used outside of the Content Manager plugin.
- * It depends on knowing the slug/model of the content-type using the params of the URL.
+ * It depends on knowing the slug/model of the content-type using the params of the URL or the model if it is passed as arg.
  * If you do use the hook outside of the context, we default to `false` for all actions.
  *
  * It then creates an list of `can{Action}` that are passed to the context for consumption
  * within the app to enforce RBAC.
  */
-const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
+const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
   const { slug } = useParams<{ slug: string }>();
 
-  if (!slug) {
-    throw new Error('Cannot find the slug param in the URL');
+  if (!slug && !model) {
+    throw new Error('Cannot find the slug param in the URL or the model prop is not provided.');
   }
+
+  const contentTypeUid = model ?? slug;
+
   const [{ rawQuery }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
   const userPermissions = useAuth('DocumentRBAC', (state) => state.permissions);
 
   const contentTypePermissions = React.useMemo(() => {
     const contentTypePermissions = userPermissions.filter(
-      (permission) => permission.subject === slug
+      (permission) => permission.subject === contentTypeUid
     );
     return contentTypePermissions.reduce<Record<string, Permission[]>>((acc, permission) => {
       const [action] = permission.action.split('.').slice(-1);
-      return { ...acc, [action]: [permission] };
+      return { ...acc, [action]: [...(acc[action] ?? []), permission] };
     }, {});
-  }, [slug, userPermissions]);
+  }, [contentTypeUid, userPermissions]);
 
   const { isLoading, allowedActions } = useRBAC(
     contentTypePermissions,
@@ -161,13 +165,14 @@ const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
 /**
  * @internal it's really small, but it's used three times in a row and DRY for something this straight forward.
  */
-const extractAndDedupeFields = (permissions: Permission[] = []) =>
-  permissions
-    .flatMap((permission) => permission.properties?.fields)
-    .filter(
-      (field, index, arr): field is string =>
-        arr.indexOf(field) === index && typeof field === 'string'
-    );
+const extractAndDedupeFields = (permissions: Permission[] = []) => {
+  const allFields = permissions.flatMap((permission) => permission.properties?.fields);
+  // An undefined entry means this permission grants access to all fields
+  // (no field-level restriction). Returning [] signals "no restriction" to callers.
+  if (allFields.some((field) => field === undefined)) return [];
+  // Deduplicate fields
+  return Array.from(new Set(allFields as string[]));
+};
 
 /**
  * @internal removes numerical strings from arrays.

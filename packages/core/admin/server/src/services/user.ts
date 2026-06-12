@@ -19,9 +19,14 @@ import constants from './constants';
 
 const { SUPER_ADMIN_CODE } = constants;
 
-const { ValidationError } = errors;
+const { ApplicationError, ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
+
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
 
 /**
  * Remove private user fields
@@ -38,7 +43,7 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
  * Create and save a user in database
  * @param attributes A partial user object
  */
-const create = async (
+const createUserInDatabase = async (
   // isActive is added in the controller, it's not sent by the API.
   attributes: Partial<AdminUserCreationPayload> & { isActive?: true }
 ): Promise<AdminUser> => {
@@ -57,9 +62,62 @@ const create = async (
     .query('admin::user')
     .create({ data: user, populate: ['roles'] });
 
+  return createdUser;
+};
+
+const emitUserCreated = (user: AdminUser) => {
   getService('metrics').sendDidInviteUser();
 
-  strapi.eventHub.emit('user.create', { user: sanitizeUser(createdUser) });
+  strapi.eventHub.emit('user.create', { user: sanitizeUser(user) });
+};
+
+const create = async (
+  // isActive is added in the controller, it's not sent by the API.
+  attributes: Partial<AdminUserCreationPayload> & { isActive?: true }
+): Promise<AdminUser> => {
+  const createdUser = await createUserInDatabase(attributes);
+
+  emitUserCreated(createdUser);
+
+  return createdUser;
+};
+
+const createFirstAdmin = async (
+  attributes: Omit<Partial<AdminUserCreationPayload>, 'registrationToken' | 'isActive' | 'roles'>
+): Promise<AdminUser> => {
+  const createdUser = await strapi.db.transaction(async ({ trx }) => {
+    // Serialize first-admin creation across processes by locking a stable role row.
+    // SQLite ignores FOR UPDATE, but falls back to its single-writer transaction behavior.
+    const superAdminRole = await strapi.db
+      .queryBuilder('admin::role')
+      .select(['id'])
+      .where({ code: SUPER_ADMIN_CODE })
+      .first()
+      .transacting(trx)
+      .forUpdate()
+      .execute<AdminRole | undefined>();
+
+    if (!superAdminRole) {
+      throw new ApplicationError(
+        "Cannot register the first admin because the super admin role doesn't exist."
+      );
+    }
+
+    const hasAdmin = await exists();
+
+    if (hasAdmin) {
+      throw new ApplicationError('You cannot register a new super admin');
+    }
+
+    return createUserInDatabase({
+      ...attributes,
+      registrationToken: null,
+      isActive: true,
+      roles: [superAdminRole.id],
+    });
+  });
+
+  emitUserCreated(createdUser);
 
   return createdUser;
 };
@@ -159,6 +217,31 @@ const isLastSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
 
   return superAdminRole.usersCount === 1 && hasSuperAdminRole(user);
+};
+
+/**
+ * Check if a user is the first super admin
+ * @param userId user's id to look for
+ */
+const isFirstSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
+  const currentUser = (await findOne(userId)) as AdminUser | null;
+
+  if (!currentUser || !hasSuperAdminRole(currentUser)) return false;
+
+  const [oldestUser] = await strapi.db.query('admin::user').findMany({
+    populate: {
+      roles: {
+        where: {
+          code: { $eq: SUPER_ADMIN_CODE },
+        },
+      },
+    },
+    orderBy: { createdAt: 'asc' },
+    limit: 1,
+    select: ['id'],
+  });
+
+  return oldestUser.id === currentUser.id;
 };
 
 /**
@@ -274,6 +357,12 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
 
+  // Invalidate all sessions for the deleted user
+  const sessionManager = getSessionManager();
+  if (sessionManager && sessionManager.hasOrigin('admin')) {
+    await sessionManager('admin').invalidateRefreshToken(String(id));
+  }
+
   strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
 
   return deletedUser;
@@ -302,6 +391,12 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
       where: { id },
       populate: ['roles'],
     });
+
+    // Invalidate all sessions for the deleted user
+    const sessionManager = getSessionManager();
+    if (sessionManager && sessionManager.hasOrigin('admin')) {
+      await sessionManager('admin').invalidateRefreshToken(String(id));
+    }
 
     deletedUsers.push(deletedUser);
   }
@@ -371,9 +466,9 @@ const getLanguagesInUse = async (): Promise<string[]> => {
 
   return users.map((user) => user.preferedLanguage || 'en');
 };
-
 export default {
   create,
+  createFirstAdmin,
   updateById,
   exists,
   findRegistrationInfo,
@@ -390,4 +485,5 @@ export default {
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
   getLanguagesInUse,
+  isFirstSuperAdminUser,
 };

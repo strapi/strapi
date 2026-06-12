@@ -33,3 +33,17 @@ export type AnyAttribute =
   | Attribute.Time
   | Attribute.Timestamp
   | Attribute.UID;
+
+/**
+ * Represents only populatable attributes.
+ *
+ * @see {@link Attribute.PopulatableKind} for a list of all the populatable attribute types.
+ */
+export type PopulatableAttribute = Extract<AnyAttribute, { type: Attribute.PopulatableKind }>;
+
+/**
+ * Represents only non-populatable attributes.
+ *
+ * @see {@link Attribute.NonPopulatableKind} for a list of all the non-populatable attribute types.
+ */
+export type ScalarAttribute = Extract<AnyAttribute, { type: Attribute.NonPopulatableKind }>;

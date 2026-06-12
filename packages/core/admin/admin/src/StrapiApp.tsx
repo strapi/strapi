@@ -1,14 +1,15 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
+import { Cloud, Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
+import uniq from 'lodash/uniq';
 import { RouterProvider } from 'react-router-dom';
-import { DefaultTheme } from 'styled-components';
 
-import { ADMIN_PERMISSIONS_EE } from '../../ee/admin/src/constants';
+import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/admin/src/constants';
 
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
@@ -16,6 +17,7 @@ import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
+import { Widgets, type WidgetArgs } from './core/apis/Widgets';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
@@ -27,11 +29,22 @@ import {
 } from './reducer';
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
+import { normalizeAdminLocale } from './translations/normalizeAdminLocale';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
+import type { DefaultTheme } from 'styled-components';
+
+/**
+ * Canonical admin locale codes mapped to legacy translation file names still
+ * shipped by some plugins.
+ */
+const ADMIN_LOCALE_LEGACY_ALIASES: Record<string, string> = {
+  da: 'dk',
+};
 
 const {
   INJECT_COLUMN_IN_TABLE,
+  INJECT_LIST_VIEW_FILTERS,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
@@ -40,7 +53,6 @@ const {
 interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>> {
   config?: {
     auth?: { logo: string };
-    head?: { favicon: string };
     locales?: string[];
     menu?: { logo: string };
     notifications?: { releases: boolean };
@@ -90,6 +102,7 @@ class StrapiApp {
   appPlugins: Record<string, StrapiAppPlugin>;
   plugins: Record<string, Plugin> = {};
   hooksDict: Record<string, ReturnType<typeof createHook>> = {};
+  private warnedLegacyLocalePairs = new Set<string>();
 
   admin = {
     injectionZones: {},
@@ -99,7 +112,6 @@ class StrapiApp {
 
   configurations = {
     authLogo: Logo,
-    head: { favicon: '' },
     locales: ['en'],
     menuLogo: Logo,
     notifications: { releases: true },
@@ -121,6 +133,7 @@ class StrapiApp {
   reducers: ReducersMapObject = {};
   store: Store | null = null;
   customFields = new CustomFields();
+  widgets = new Widgets();
 
   constructor({ config, appPlugins }: StrapiAppConstructorArgs = {}) {
     this.appPlugins = appPlugins || {};
@@ -128,6 +141,7 @@ class StrapiApp {
     this.createCustomConfigurations(config ?? {});
 
     this.createHook(INJECT_COLUMN_IN_TABLE);
+    this.createHook(INJECT_LIST_VIEW_FILTERS);
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
@@ -250,10 +264,12 @@ class StrapiApp {
 
   createCustomConfigurations = (customConfig: NonNullable<StrapiAppConstructorArgs['config']>) => {
     if (customConfig.locales) {
-      this.configurations.locales = [
-        'en',
-        ...(customConfig.locales?.filter((loc) => loc !== 'en') || []),
-      ];
+      const extraLocales =
+        customConfig.locales
+          ?.filter((loc) => loc !== 'en')
+          .map((loc) => normalizeAdminLocale(loc)) || [];
+
+      this.configurations.locales = uniq(['en', ...extraLocales]);
     }
 
     if (customConfig.auth?.logo) {
@@ -262,10 +278,6 @@ class StrapiApp {
 
     if (customConfig.menu?.logo) {
       this.configurations.menuLogo = customConfig.menu.logo;
-    }
-
-    if (customConfig.head?.favicon) {
-      this.configurations.head.favicon = customConfig.head.favicon;
     }
 
     if (customConfig.theme) {
@@ -315,6 +327,61 @@ class StrapiApp {
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
   async register(customRegister?: unknown) {
+    const widgets: WidgetArgs[] = [
+      {
+        icon: User,
+        title: {
+          id: 'widget.profile.title',
+          defaultMessage: 'Profile',
+        },
+        component: async () => {
+          const { ProfileWidget } = await import('./components/Widgets');
+          return ProfileWidget;
+        },
+        pluginId: 'admin',
+        id: 'profile-info',
+        link: {
+          label: {
+            id: 'global.profile.settings',
+            defaultMessage: 'Profile settings',
+          },
+          href: '/me',
+        },
+      },
+      {
+        icon: TrendUp,
+        title: {
+          id: 'widget.key-statistics.title',
+          defaultMessage: 'Project statistics',
+        },
+        component: async () => {
+          const { KeyStatisticsWidget } = await import('./components/Widgets');
+          return KeyStatisticsWidget;
+        },
+        pluginId: 'admin',
+        id: 'key-statistics',
+        roles: ['strapi-super-admin'],
+      },
+    ];
+
+    if ('strapi-cloud' in this.appPlugins) {
+      widgets.push({
+        icon: Cloud,
+        title: {
+          id: 'widget.deploy-now.title',
+          defaultMessage: 'Deploy',
+        },
+        component: async () => {
+          const { DeployNowWidget } = await import('./components/Widgets');
+          return DeployNowWidget;
+        },
+        pluginId: 'admin',
+        id: 'deploy-now',
+      });
+    }
+
+    this.widgets.register(widgets);
+
     Object.keys(this.appPlugins).forEach((plugin) => {
       this.appPlugins[plugin].register(this);
     });
@@ -322,6 +389,59 @@ class StrapiApp {
     if (isFunction(customRegister)) {
       customRegister(this);
     }
+
+    // Register Audit Logs widget at the end of the widgets array
+    if (window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)) {
+      this.widgets.register([
+        {
+          icon: Clock,
+          title: {
+            id: 'widget.last-activity.title',
+            defaultMessage: 'Last activity',
+          },
+          component: async () => {
+            const { AuditLogsWidget } = await import(
+              '../../ee/admin/src/components/AuditLogs/Widgets'
+            );
+            return AuditLogsWidget;
+          },
+          pluginId: 'admin',
+          id: 'audit-logs',
+          link: {
+            label: {
+              id: 'widget.last-activity.link',
+              defaultMessage: 'Open Audit Logs',
+            },
+            href: `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC`,
+          },
+          permissions: [{ action: 'admin::audit-logs.read' }],
+        },
+      ]);
+    }
+  }
+
+  private mergePluginTranslationsByCanonical(pluginTradsBatch: Translation[]) {
+    return pluginTradsBatch.reduce<Record<string, Translation['data']>>((acc, current) => {
+      const canonicalLocale = normalizeAdminLocale(current.locale);
+
+      acc[canonicalLocale] = {
+        ...(current.locale === canonicalLocale ? acc[canonicalLocale] : current.data),
+        ...(current.locale === canonicalLocale ? current.data : acc[canonicalLocale]),
+      };
+
+      if (current.locale !== canonicalLocale && Object.keys(current.data).length > 0) {
+        const deprecationKey = `${canonicalLocale}:${current.locale}`;
+
+        if (!this.warnedLegacyLocalePairs.has(deprecationKey)) {
+          this.warnedLegacyLocalePairs.add(deprecationKey);
+          console.warn(
+            `[deprecated] Admin locale "${current.locale}" is deprecated. Rename translation files to "${canonicalLocale}.json".`
+          );
+        }
+      }
+
+      return acc;
+    }, {});
   }
 
   async loadAdminTrads() {
@@ -356,14 +476,34 @@ class StrapiApp {
    * with the default ones.
    */
   async loadTrads(customTranslations: Record<string, Record<string, string>> = {}) {
+    const normalizedCustomTranslations = Object.keys(customTranslations).reduce<
+      Record<string, Record<string, string>>
+    >((acc, key) => {
+      const normalizedKey = normalizeAdminLocale(key);
+
+      acc[normalizedKey] = {
+        ...(acc[normalizedKey] || {}),
+        ...customTranslations[key],
+      };
+
+      return acc;
+    }, {});
+
     const adminTranslations = await this.loadAdminTrads();
+    const localesForPlugins = uniq(
+      this.configurations.locales.flatMap((locale) => {
+        const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
+
+        return legacyLocale ? [locale, legacyLocale] : [locale];
+      })
+    );
 
     const arrayOfPromises = Object.keys(this.appPlugins)
       .map((plugin) => {
         const registerTrads = this.appPlugins[plugin].registerTrads;
 
         if (registerTrads) {
-          return registerTrads({ locales: this.configurations.locales });
+          return registerTrads({ locales: localesForPlugins });
         }
 
         return null;
@@ -373,14 +513,7 @@ class StrapiApp {
     const pluginsTrads = (await Promise.all(arrayOfPromises)) as Array<Translation[]>;
     const mergedTrads = pluginsTrads.reduce<{ [locale: string]: Translation['data'] }>(
       (acc, currentPluginTrads) => {
-        const pluginTrads = currentPluginTrads.reduce<{ [locale: string]: Translation['data'] }>(
-          (acc1, current) => {
-            acc1[current.locale] = current.data;
-
-            return acc1;
-          },
-          {}
-        );
+        const pluginTrads = this.mergePluginTranslationsByCanonical(currentPluginTrads);
 
         Object.keys(pluginTrads).forEach((locale) => {
           acc[locale] = { ...acc[locale], ...pluginTrads[locale] };
@@ -397,7 +530,7 @@ class StrapiApp {
       acc[current] = {
         ...adminTranslations[current],
         ...(mergedTrads[current] || {}),
-        ...(customTranslations[current] ?? {}),
+        ...(normalizedCustomTranslations[current] ?? {}),
       };
 
       return acc;
@@ -433,8 +566,8 @@ class StrapiApp {
 
   render() {
     const localeNames = pick(languageNativeNames, this.configurations.locales || []);
-    const locale = (localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) ||
-      'en') as keyof typeof localeNames;
+    const storedLocale = localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
+    const locale = normalizeAdminLocale(storedLocale) as keyof typeof localeNames;
 
     this.store = configureStore(
       {

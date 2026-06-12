@@ -11,6 +11,18 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const { getService } = require('../utils');
 const usersPermissionsActions = require('./users-permissions-actions');
+const {
+  DEFAULT_ACCESS_TOKEN_LIFESPAN,
+  DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
+  DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
+  DEFAULT_MAX_SESSION_LIFESPAN,
+  DEFAULT_IDLE_SESSION_LIFESPAN,
+} = require('../services/constants');
+
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
 
 const initGrant = async (pluginStore) => {
   const allProviders = getService('providers-registry').getAll();
@@ -112,6 +124,25 @@ module.exports = async ({ strapi }) => {
     .actionProvider.registerMany(usersPermissionsActions.actions);
 
   await getService('users-permissions').initialize();
+
+  // Define users-permissions origin configuration for sessionManager
+  const upConfig = strapi.config.get('plugin::users-permissions');
+  const sessionManager = getSessionManager();
+
+  if (sessionManager) {
+    sessionManager.defineOrigin('users-permissions', {
+      jwtSecret: upConfig.jwtSecret || strapi.config.get('admin.auth.secret'),
+      accessTokenLifespan: upConfig.sessions?.accessTokenLifespan || DEFAULT_ACCESS_TOKEN_LIFESPAN,
+      maxRefreshTokenLifespan:
+        upConfig.sessions?.maxRefreshTokenLifespan || DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
+      idleRefreshTokenLifespan:
+        upConfig.sessions?.idleRefreshTokenLifespan || DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
+      maxSessionLifespan: upConfig.sessions?.maxSessionLifespan || DEFAULT_MAX_SESSION_LIFESPAN,
+      idleSessionLifespan: upConfig.sessions?.idleSessionLifespan || DEFAULT_IDLE_SESSION_LIFESPAN,
+      algorithm: upConfig.jwt?.algorithm,
+      jwtOptions: upConfig.jwt || {},
+    });
+  }
 
   if (!strapi.config.get('plugin::users-permissions.jwtSecret')) {
     if (process.env.NODE_ENV !== 'development') {

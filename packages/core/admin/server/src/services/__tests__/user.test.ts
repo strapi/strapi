@@ -439,6 +439,111 @@ describe('User', () => {
     });
   });
 
+  describe('Session invalidation on user deletion', () => {
+    test('deleteById invalidates user sessions when sessionManager exists', async () => {
+      const user = { id: 2, roles: [] };
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const deleteFn = jest.fn(() => user);
+      const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+      const hasOrigin = jest.fn(() => true);
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: jest.fn() },
+        sessionManager: jest.fn(() => ({ invalidateRefreshToken })),
+        db: { query: () => ({ findOne, delete: deleteFn }) },
+      } as any;
+
+      // Add hasOrigin method to sessionManager
+      (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
+
+      const res = await deleteById(user.id);
+
+      expect(hasOrigin).toHaveBeenCalledWith('admin');
+      expect(invalidateRefreshToken).toHaveBeenCalledWith('2');
+      expect(deleteFn).toHaveBeenCalledWith({ where: { id: user.id }, populate: ['roles'] });
+      expect(res).toEqual(user);
+    });
+
+    test('deleteById handles sessionManager without admin origin', async () => {
+      const user = { id: 2, roles: [] };
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const deleteFn = jest.fn(() => user);
+      const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+      const hasOrigin = jest.fn(() => false);
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: jest.fn() },
+        sessionManager: jest.fn(() => ({ invalidateRefreshToken })),
+        db: { query: () => ({ findOne, delete: deleteFn }) },
+      } as any;
+
+      (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
+
+      const res = await deleteById(user.id);
+
+      expect(hasOrigin).toHaveBeenCalledWith('admin');
+      expect(invalidateRefreshToken).not.toHaveBeenCalled();
+      expect(deleteFn).toHaveBeenCalledWith({ where: { id: user.id }, populate: ['roles'] });
+      expect(res).toEqual(user);
+    });
+
+    test('deleteByIds invalidates sessions for all deleted users', async () => {
+      const users = [{ id: 2 }, { id: 3 }];
+      const count = jest.fn(() => Promise.resolve(users.length));
+      const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 3 }));
+      const deleteFn = jest
+        .fn()
+        .mockImplementationOnce(() => users[0])
+        .mockImplementationOnce(() => users[1]);
+      const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+      const hasOrigin = jest.fn(() => true);
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: jest.fn() },
+        sessionManager: jest.fn(() => ({ invalidateRefreshToken })),
+        db: { query: () => ({ count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+      } as any;
+
+      (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
+
+      const res = await deleteByIds([2, 3]);
+
+      expect(invalidateRefreshToken).toHaveBeenCalledTimes(2);
+      expect(invalidateRefreshToken).toHaveBeenNthCalledWith(1, '2');
+      expect(invalidateRefreshToken).toHaveBeenNthCalledWith(2, '3');
+      expect(res).toEqual(users);
+    });
+
+    test('deleteByIds propagates session invalidation failures', async () => {
+      const users = [{ id: 2 }];
+      const count = jest.fn(() => Promise.resolve(users.length));
+      const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
+      const deleteFn = jest.fn(() => users[0]);
+      const invalidateRefreshToken = jest.fn(() => Promise.reject(new Error('Session error')));
+      const hasOrigin = jest.fn(() => true);
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: jest.fn() },
+        sessionManager: jest.fn(() => ({ invalidateRefreshToken })),
+        db: { query: () => ({ count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+      } as any;
+
+      (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
+
+      // Should throw when session invalidation fails
+      await expect(deleteByIds([2])).rejects.toThrow('Session error');
+
+      expect(invalidateRefreshToken).toHaveBeenCalledWith('2');
+      expect(deleteFn).toHaveBeenCalledWith({ where: { id: 2 }, populate: ['roles'] });
+    });
+  });
+
   describe('exists', () => {
     test('Return true if the user already exists', async () => {
       const count = jest.fn(() => Promise.resolve(1));

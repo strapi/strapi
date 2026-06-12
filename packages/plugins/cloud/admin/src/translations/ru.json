@@ -1,0 +1,21 @@
+{
+  "Plugin.name": "Развертывание",
+  "Homepage.title": "Разверните бесплатно с помощью Strapi Cloud!",
+  "Homepage.subTitle": "Начните с полностью бесплатного плана — без кредитной карты и ограничения по времени.",
+  "Homepage.deploy.title": "Выберите предпочтительный способ развертывания",
+  "Homepage.deploy.ariaLabel": "Параметры развертывания",
+  "Homepage.deploy.git.badge": "Рекомендуется",
+  "Homepage.deploy.git.title": "Развертывание в Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "Разверните проект с GitHub или GitLab напрямую в Strapi Cloud",
+  "Homepage.deploy.git.button": "Развернуть в Strapi Cloud",
+  "Homepage.deploy.cli.title": "Развертывание через CLI",
+  "Homepage.deploy.cli.subTitle": "Используйте командную строку для прямого развертывания вашего проекта Strapi",
+  "Homepage.deploy.cli.ariaLabel": "Система управления пакетами",
+  "Homepage.deploy.cli.copy": "Копировать",
+  "Homepage.deploy.documentation": "Возникли трудности? Ознакомьтесь с нашей документацией",
+  "Homepage.freePlan.api": "2 500 API-запросов",
+  "Homepage.freePlan.storage": "10 ГБ хранилища",
+  "Homepage.freePlan.bandwidth": "10 ГБ трафика ресурсов",
+  "Homepage.freePlan.cdn": "Глобальный CDN",
+  "Homepage.freePlan.pushToDeploy": "Push для развертывания"
+}

@@ -3,6 +3,9 @@ import { join } from 'node:path';
 import chalk from 'chalk';
 import execa from 'execa';
 import fse from 'fs-extra';
+import semver from 'semver';
+
+import { createGrowthSsoTrial } from '@strapi/cloud-cli';
 
 import { copyTemplate } from './utils/template';
 import { tryGitInit } from './utils/git';
@@ -14,7 +17,42 @@ import { isStderrError } from './types';
 import type { Scope } from './types';
 import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
-import { getInstallArgs } from './utils/get-package-manager-args';
+import { getInstallArgs, getPackageManagerVersion } from './utils/get-package-manager-args';
+
+const yarnNodeModulesConfig = 'nodeLinker: node-modules\n';
+
+const getUserAgentPackageManagerVersion = (packageManager: Scope['packageManager']) => {
+  const userAgent = process.env.npm_config_user_agent ?? '';
+  const [agent] = userAgent.split(' ');
+  const [name, version] = agent.split('/');
+
+  if (name !== packageManager || version === undefined) {
+    return null;
+  }
+
+  return semver.coerce(version)?.version ?? null;
+};
+
+const shouldWriteYarnNodeModulesConfig = async (packageManager: Scope['packageManager']) => {
+  if (packageManager !== 'yarn') {
+    return false;
+  }
+
+  const userAgentVersion = getUserAgentPackageManagerVersion(packageManager);
+
+  if (userAgentVersion) {
+    return semver.gte(userAgentVersion, '3.0.0');
+  }
+
+  try {
+    const packageManagerVersion = await getPackageManagerVersion(packageManager);
+    const normalizedVersion = semver.coerce(packageManagerVersion)?.version;
+
+    return normalizedVersion ? semver.gte(normalizedVersion, '3.0.0') : false;
+  } catch {
+    return false;
+  }
+};
 
 async function createStrapi(scope: Scope) {
   const { rootPath } = scope;
@@ -97,10 +135,31 @@ async function createApp(scope: Scope) {
     // create config/database
     await fse.writeFile(join(rootPath, '.env'), generateDotEnv(scope));
 
+    if (
+      (await shouldWriteYarnNodeModulesConfig(packageManager)) &&
+      !(await fse.pathExists(join(rootPath, '.yarnrc.yml')))
+    ) {
+      await fse.writeFile(join(rootPath, '.yarnrc.yml'), yarnNodeModulesConfig);
+    }
+
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
   } catch (err) {
     await fse.remove(rootPath);
     throw err;
+  }
+
+  // Create and save a growth sso trial license
+  if (scope.shouldCreateGrowthSsoTrial) {
+    try {
+      const data = await createGrowthSsoTrial({ strapiVersion: scope.strapiVersion });
+
+      if (data?.license) {
+        fse.writeFile(join(rootPath, 'license.txt'), data.license);
+        logger.log('Your 30 days trial will be applied automatically to your project. Enjoy!');
+      }
+    } catch (error) {
+      logger.error('Error while trying to create your trial. Please try again later.');
+    }
   }
 
   if (installDependencies) {

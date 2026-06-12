@@ -17,22 +17,24 @@ describe('schemas ', () => {
           pluginB: { foo: 'bar' },
         },
         kind: 'test',
-        attributes: {
-          one: {
+        attributes: [
+          {
+            name: 'one',
             type: 'string',
             pluginOptions: {
               i18n: { localized: true },
             },
             required: true,
           },
-          two: {
+          {
+            name: 'two',
             type: 'number',
             pluginOptions: {
               pluginA: { test: true },
               i18n: { localized: true },
             },
           },
-        },
+        ],
       };
 
       const expected = {
@@ -41,19 +43,21 @@ describe('schemas ', () => {
           pluginB: { foo: 'bar' },
         },
         kind: 'test',
-        attributes: {
-          one: {
+        attributes: [
+          {
+            name: 'one',
             type: 'string',
             pluginOptions: {},
             required: true,
           },
-          two: {
+          {
+            name: 'two',
             type: 'number',
             pluginOptions: {
               pluginA: { test: true },
             },
           },
-        },
+        ],
       };
 
       // @ts-expect-error – Test purposes
@@ -68,22 +72,24 @@ describe('schemas ', () => {
           pluginB: { foo: 'bar' },
         },
         kind: 'test',
-        attributes: {
-          one: {
+        attributes: [
+          {
+            name: 'one',
             type: 'string',
             pluginOptions: {
               i18n: { localized: true },
             },
             required: true,
           },
-          two: {
+          {
+            name: 'two',
             type: 'number',
             pluginOptions: {
               pluginA: { test: true },
               i18n: { localized: true },
             },
           },
-        },
+        ],
       };
 
       expect(
@@ -103,33 +109,38 @@ describe('schemas ', () => {
     it('should set the pluginOptions.i18n.localized to true an all attributes', () => {
       const nextSchema = {
         pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
-        attributes: {
-          cover: { type: 'media', pluginOptions: { pluginA: { ok: true } } },
-          name: {
+        attributes: [
+          { name: 'cover', type: 'media', pluginOptions: { pluginA: { ok: true } } },
+          {
+            name: 'name',
             type: 'text',
             pluginOptions: { pluginA: { ok: true }, i18n: { localized: false } },
           },
-          price: {
+          {
+            name: 'price',
             type: 'text',
           },
-        },
+        ],
       };
       const expected = {
         pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
-        attributes: {
-          cover: {
+        attributes: [
+          {
+            name: 'cover',
             type: 'media',
             pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
           },
-          name: {
+          {
+            name: 'name',
             type: 'text',
             pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
           },
-          price: {
+          {
+            name: 'price',
             type: 'text',
             pluginOptions: { i18n: { localized: true } },
           },
-        },
+        ],
       };
 
       // @ts-expect-error – Test purposes

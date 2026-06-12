@@ -23,7 +23,7 @@ import {
   Tbody,
 } from '@strapi/design-system';
 import { ArrowsCounterClockwise, CheckCircle, CrossCircle, Pencil } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { useIntl, type IntlShape } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
@@ -34,13 +34,14 @@ import { useDocumentActions } from '../../../../hooks/useDocumentActions';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import { contentManagerApi } from '../../../../services/api';
 import {
-  useGetAllDocumentsQuery,
+  useGetDocumentsForValidationQuery,
   usePublishManyDocumentsMutation,
 } from '../../../../services/documents';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
 import { DocumentStatus } from '../../../EditView/components/DocumentStatus';
+import { transformDocument } from '../../../EditView/utils/data';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
@@ -66,42 +67,38 @@ const TableComponent = styled(RawTable)`
  * EntryValidationText
  * -----------------------------------------------------------------------------------------------*/
 
-const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessage: any) => {
+export const formatErrorMessages = (
+  errors: FormErrors,
+  parentKey: string,
+  formatMessage: IntlShape['formatMessage']
+) => {
+  if (!errors) return [];
+
   const messages: string[] = [];
 
   Object.entries(errors).forEach(([key, value]) => {
     const currentKey = parentKey ? `${parentKey}.${key}` : key;
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      if ('id' in value && 'defaultMessage' in value) {
-        messages.push(
-          formatMessage(
-            {
-              id: `${value.id}.withField`,
-              defaultMessage: value.defaultMessage,
-            },
-            { field: currentKey }
-          )
-        );
-      } else {
-        messages.push(
-          ...formatErrorMessages(
-            // @ts-expect-error TODO: check why value is not compatible with FormErrors
-            value,
-            currentKey,
-            formatMessage
-          )
-        );
-      }
-    } else {
+    if (!value) return;
+    const isErrorMessageDescriptor =
+      typeof value === 'object' && 'id' in value && 'defaultMessage' in value;
+    if (isErrorMessageDescriptor || typeof value === 'string') {
+      const id = isErrorMessageDescriptor ? value.id : value;
+      const defaultMessage = isErrorMessageDescriptor
+        ? (value.defaultMessage as string)
+        : (value as string);
       messages.push(
         formatMessage(
           {
-            id: `${value}.withField`,
-            defaultMessage: value,
+            id: `${id}.withField`,
+            defaultMessage,
           },
           { field: currentKey }
         )
+      );
+    } else {
+      messages.push(
+        ...formatErrorMessages(value as unknown as FormErrors, currentKey, formatMessage)
       );
     }
   });
@@ -125,8 +122,8 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
     return (
       <Flex gap={2}>
         <CrossCircle fill="danger600" />
-        <Tooltip description={validationErrorsMessages}>
-          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+        <Tooltip label={validationErrorsMessages}>
+          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="bold" ellipsis>
             {validationErrorsMessages}
           </TypographyMaxWidth>
         </Tooltip>
@@ -152,7 +149,7 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
     return (
       <Flex gap={2}>
         <ArrowsCounterClockwise fill="alternative600" />
-        <Typography>
+        <Typography textColor="alternative600" fontWeight="bold">
           {formatMessage({
             id: 'content-manager.bulk-publish.modified',
             defaultMessage: 'Ready to publish changes',
@@ -165,7 +162,7 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
   return (
     <Flex gap={2}>
       <CheckCircle fill="success600" />
-      <Typography>
+      <Typography textColor="success600" fontWeight="bold">
         {formatMessage({
           id: 'app.utils.ready-to-publish',
           defaultMessage: 'Ready to publish',
@@ -187,7 +184,7 @@ interface SelectedEntriesTableContentProps {
 }
 
 const TABLE_HEADERS = [
-  { name: 'id', label: 'id' },
+  { name: 'documentId', label: 'documentId' },
   { name: 'name', label: 'name' },
   { name: 'status', label: 'status' },
   { name: 'publicationStatus', label: 'Publication status' },
@@ -208,7 +205,8 @@ const SelectedEntriesTableContent = ({
     },
   } = useDocLayout();
 
-  const shouldDisplayMainField = mainField != null && mainField !== 'id';
+  const shouldDisplayMainField =
+    mainField != null && mainField !== 'id' && mainField !== 'documentId';
 
   return (
     <Table.Content>
@@ -226,7 +224,7 @@ const SelectedEntriesTableContent = ({
           <Table.Row key={row.id}>
             <Table.CheckboxCell id={row.id} />
             <Table.Cell>
-              <Typography>{row.id}</Typography>
+              <Typography>{row.documentId}</Typography>
             </Table.Cell>
             {shouldDisplayMainField && (
               <Table.Cell>
@@ -290,14 +288,22 @@ interface PublicationStatusSummaryProps {
   count: number;
   icon: React.ReactNode;
   message: string;
+  textColor: string;
 }
 
-const PublicationStatusSummary = ({ count, icon, message }: PublicationStatusSummaryProps) => {
+const PublicationStatusSummary = ({
+  count,
+  icon,
+  message,
+  textColor,
+}: PublicationStatusSummaryProps) => {
   return (
     <Flex justifyContent="space-between" flex={1} gap={3}>
       <Flex gap={2}>
         {icon}
-        <Typography>{message}</Typography>
+        <Typography textColor={textColor} fontWeight="bold">
+          {message}
+        </Typography>
       </Flex>
       <Typography fontWeight="bold">{count}</Typography>
     </Flex>
@@ -330,6 +336,7 @@ const PublicationStatusGrid = ({
           <Tr>
             <Td>
               <PublicationStatusSummary
+                textColor="success600"
                 count={entriesReadyToPublishCount}
                 icon={<CheckCircle fill="success600" />}
                 message={formatMessage({
@@ -340,6 +347,7 @@ const PublicationStatusGrid = ({
             </Td>
             <Td>
               <PublicationStatusSummary
+                textColor="success600"
                 count={entriesPublishedCount}
                 icon={<CheckCircle fill="success600" />}
                 message={formatMessage({
@@ -352,6 +360,7 @@ const PublicationStatusGrid = ({
           <Tr>
             <Td>
               <PublicationStatusSummary
+                textColor="alternative600"
                 count={entriesModifiedCount}
                 icon={<ArrowsCounterClockwise fill="alternative600" />}
                 message={formatMessage({
@@ -362,6 +371,7 @@ const PublicationStatusGrid = ({
             </Td>
             <Td>
               <PublicationStatusSummary
+                textColor="danger600"
                 count={entriesWithErrorsCount}
                 icon={<CrossCircle fill="danger600" />}
                 message={formatMessage({
@@ -404,60 +414,59 @@ const SelectedEntriesModalContent = ({
   const [{ query }] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
-  // Fetch the documents based on the selected entries and update the modal table
-  const { data, isLoading, isFetching, refetch } = useGetAllDocumentsQuery(
+  // Fetch via findOne (same as edit view) so we get the exact same data structure.
+  // The list API returns a different structure that causes false validation errors.
+  const {
+    data: documents = [],
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetDocumentsForValidationQuery(
     {
       model,
-      params: {
-        page: '1',
-        pageSize: documentIds.length.toString(),
-        sort: query.sort,
-        filters: {
-          documentId: {
-            $in: documentIds,
-          },
-        },
-        locale: query.plugins?.i18n?.locale,
-      },
+      documentIds,
+      locale: query.plugins?.i18n?.locale,
+      sort: query.sort,
     },
-    {
-      selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
-    }
+    { skip: documentIds.length === 0 }
   );
 
-  // Validate the entries based on the schema to show errors if any
+  // Transform and validate like the edit view - transformDocument prepares data
+  // for validation (relations, temp keys, etc.)
   const { rows, validationErrors } = React.useMemo(() => {
-    if (data.length > 0 && schema) {
-      const validate = createYupSchema(
-        schema.attributes,
-        components,
-        // Since this is the "Publish" action, the validation
-        // schema must enforce the rules for published entities
-        { status: 'published' }
-      );
+    if (documents.length > 0 && schema) {
+      const validate = createYupSchema(schema.attributes, components, { status: 'published' });
+      const transform = transformDocument(schema, components);
       const validationErrors: Record<TableRow['documentId'], FormErrors> = {};
-      const rows = data.map((entry: Document) => {
+      // Re-order documents to match the list view selection order, and restore the
+      // correct status (draft fetch returns 'draft' even for 'modified' documents)
+      const documentsMap = new Map(documents.map((doc: Document) => [doc.documentId, doc]));
+      const listViewStatusMap = new Map(
+        listViewSelectedEntries.map(({ documentId, status }) => [documentId, status])
+      );
+      const orderedDocuments = documentIds
+        .map((id) => {
+          const doc = documentsMap.get(id);
+          if (!doc) return undefined;
+          return { ...doc, status: listViewStatusMap.get(id) ?? doc.status } as Document;
+        })
+        .filter((doc): doc is Document => doc !== undefined);
+      const rows = orderedDocuments.map((entry: Document) => {
+        const transformed = transform(entry);
         try {
-          validate.validateSync(entry, { abortEarly: false });
-
+          validate.validateSync(transformed, { abortEarly: false });
           return entry;
         } catch (e) {
           if (e instanceof ValidationError) {
             validationErrors[entry.documentId] = getYupValidationErrors(e);
           }
-
           return entry;
         }
       });
-
       return { rows, validationErrors };
     }
-
-    return {
-      rows: [],
-      validationErrors: {},
-    };
-  }, [components, data, schema]);
+    return { rows: [], validationErrors: {} };
+  }, [components, documents, documentIds, listViewSelectedEntries, schema]);
 
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 

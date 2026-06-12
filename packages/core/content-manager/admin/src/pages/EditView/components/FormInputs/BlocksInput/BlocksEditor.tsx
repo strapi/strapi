@@ -1,30 +1,29 @@
 import * as React from 'react';
 
-import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
+import {
+  createContext,
+  useStrapiApp,
+  type FieldValue,
+  useIsMobile,
+} from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
+import { flushSync } from 'react-dom';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor } from 'slate';
+import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
 
+import { ContentManagerPlugin } from '../../../../../content-manager';
 import { getTranslation } from '../../../../../utils/translations';
 
-import { codeBlocks } from './Blocks/Code';
-import { headingBlocks } from './Blocks/Heading';
-import { imageBlocks } from './Blocks/Image';
-import { linkBlocks } from './Blocks/Link';
-import { listBlocks } from './Blocks/List';
-import { paragraphBlocks } from './Blocks/Paragraph';
-import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
-import { withImages } from './plugins/withImages';
-import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
+import { isNonNullable } from './utils/types';
 
 import type { Schema } from '@strapi/types';
 
@@ -32,24 +31,39 @@ import type { Schema } from '@strapi/types';
  * BlocksEditorProvider
  * -----------------------------------------------------------------------------------------------*/
 
+interface CustomNode extends Omit<Schema.Attribute.BlocksNode, 'type'> {
+  type: Schema.Attribute.BlocksNode['type'] | string;
+  level?: number;
+  format?: string;
+}
+
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  matchNode: (node: Schema.Attribute.BlocksNode) => boolean;
+  /** Function to check if a given node is of this type of block */
+  matchNode: (node: Schema.Attribute.BlocksNode | CustomNode) => boolean;
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
   handleTab?: (editor: Editor) => void;
+  handleShiftTab?: (editor: Editor) => void;
   snippets?: string[];
+  /** Adjust the vertical positioning of the drag-to-reorder grip icon */
   dragHandleTopMargin?: CSSProperties['marginTop'];
+  /** A Slate plugin: function that will wrap the editor creation */
+  plugin?: (editor: Editor) => Editor;
+  /**
+   * Function that checks if an element should be draggable
+   * @default () => true */
+  isDraggable?: (element: Element) => boolean;
 }
 
-interface NonSelectorBlock extends BaseBlock {
-  isInBlocksSelector: false;
+export interface NonSelectorBlock extends BaseBlock {
+  isInBlocksSelector?: false;
 }
 
-interface SelectorBlock extends BaseBlock {
+export interface SelectorBlock extends BaseBlock {
   isInBlocksSelector: true;
-  icon: React.ComponentType;
+  icon?: React.ComponentType;
   label: MessageDescriptor;
 }
 
@@ -82,21 +96,25 @@ type BlocksStore = {
   [K in NonSelectorBlockKey]: NonSelectorBlock;
 };
 
+type RichTextBlocksStore = Partial<BlocksStore> & Record<string, SelectorBlock | NonSelectorBlock>;
+
 interface BlocksEditorContextValue {
-  blocks: BlocksStore;
+  blocks: RichTextBlocksStore;
   modifiers: ModifiersStore;
   disabled: boolean;
   name: string;
   setLiveText: (text: string) => void;
   isExpandedMode: boolean;
+  /** Push debounced Slate → form sync immediately (e.g. on Editable blur before Save). */
+  flushPendingFormSync: () => void;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
   createContext<BlocksEditorContextValue>('BlocksEditor');
 
-function useBlocksEditorContext(
-  consumerName: string
-): BlocksEditorContextValue & { editor: Editor } {
+function useBlocksEditorContext(consumerName: string): BlocksEditorContextValue & {
+  editor: Editor;
+} {
   const context = usePartialBlocksEditorContext(consumerName, (state) => state);
   const editor = useSlate();
 
@@ -112,13 +130,6 @@ function useBlocksEditorContext(
 
 const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
-`;
-
-const ExpandIconButton = styled(IconButton)`
-  position: absolute;
-  bottom: 1.2rem;
-  right: 1.2rem;
-  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 `;
 
 /**
@@ -154,13 +165,31 @@ function useResetKey(value?: Schema.Attribute.BlocksValue): {
     }
   }, [value]);
 
-  return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
+  const incrementSlateUpdatesCount = React.useCallback(() => {
+    slateUpdatesCount.current += 1;
+  }, []);
+
+  return { key, incrementSlateUpdatesCount };
 }
 
 const pipe =
   (...fns: ((baseEditor: Editor) => Editor)[]) =>
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
+
+/**
+ * Normalize the blocks state to null if the editor state is considered empty,
+ * otherwise return the state
+ */
+const normalizeBlocksState = (
+  editor: Editor,
+  value: Schema.Attribute.BlocksValue | Descendant[]
+): Schema.Attribute.BlocksValue | Descendant[] | null => {
+  const isEmpty =
+    value.length === 1 && Editor.isEmpty(editor, value[0] as Schema.Attribute.BlocksNode);
+
+  return isEmpty ? null : value;
+};
 
 interface BlocksEditorProps
   extends Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
@@ -172,16 +201,28 @@ interface BlocksEditorProps
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
+    const isMobile = useIsMobile();
+
+    const blocks = useStrapiApp(
+      'BlocksEditor',
+      (state) =>
+        (
+          state.plugins['content-manager']?.apis as
+            | ContentManagerPlugin['config']['apis']
+            | undefined
+        )?.getRichTextBlocks() ?? ({} as RichTextBlocksStore)
+    );
+
+    const blockRegisteredPlugins = Object.values(blocks)
+      .map((block) => block.plugin)
+      .filter(isNonNullable);
+
     const [editor] = React.useState(() =>
-      pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
+      pipe(withHistory, withStrapiSchema, withReact, ...blockRegisteredPlugins)(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
-    const [isExpandedMode, setIsExpandedMode] = React.useState(false);
-
-    const handleToggleExpand = () => {
-      setIsExpandedMode((prev) => !prev);
-    };
+    const [isExpandedMode, handleToggleExpand] = React.useReducer((prev) => !prev, false);
 
     /**
      * Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
@@ -200,25 +241,82 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     const { key, incrementSlateUpdatesCount } = useResetKey(value);
 
-    const handleSlateChange = (state: Descendant[]) => {
-      const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
+    const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
-      if (isAstChange) {
-        incrementSlateUpdatesCount();
-
-        onChange(name, state as Schema.Attribute.BlocksValue);
+    const flushPendingFormSync = React.useCallback(() => {
+      if (!debounceTimeout.current) {
+        return;
       }
-    };
+      clearTimeout(debounceTimeout.current);
+      debounceTimeout.current = null;
+      incrementSlateUpdatesCount();
+      // Ensure Strapi Form state updates before the next event (e.g. Save click) reads values.
+      flushSync(() => {
+        onChange(
+          name,
+          normalizeBlocksState(editor, editor.children) as Schema.Attribute.BlocksValue
+        );
+      });
+    }, [editor, incrementSlateUpdatesCount, name, onChange]);
 
-    const blocks: BlocksStore = {
-      ...paragraphBlocks,
-      ...headingBlocks,
-      ...listBlocks,
-      ...linkBlocks,
-      ...imageBlocks,
-      ...quoteBlocks,
-      ...codeBlocks,
-    };
+    const handleSlateChange = React.useCallback(
+      (state: Descendant[]) => {
+        const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
+
+        if (isAstChange) {
+          /**
+           * Slate handles the state of the editor internally. We just need to keep Strapi's form
+           * state in sync with it in order to make sure that things like the "modified" state
+           * isn't broken. Updating the whole state on every change is very expensive however,
+           * so we debounce calls to onChange to mitigate input lag.
+           */
+          if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+          }
+
+          // Set a new debounce timeout
+          debounceTimeout.current = setTimeout(() => {
+            incrementSlateUpdatesCount();
+
+            // Normalize the state (empty editor becomes null)
+            onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
+            debounceTimeout.current = null;
+          }, 300);
+        }
+      },
+      [editor, incrementSlateUpdatesCount, name, onChange]
+    );
+
+    // Clean up the timeout on unmount
+    React.useEffect(() => {
+      return () => {
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+      };
+    }, []);
+
+    // Ensure the editor is in sync after discard
+    React.useEffect(() => {
+      // Never deselect while the editor is actively focused (typing / editing),
+      if (ReactEditor.isFocused(editor)) {
+        return;
+      }
+
+      // Normalize empty states for comparison to avoid losing focus on the editor when content is deleted
+      const normalizedValue = value?.length ? value : null;
+      const normalizedEditorState = normalizeBlocksState(editor, editor.children);
+
+      // Compare the field value with the editor state to check for a stale selection
+      if (
+        normalizedValue &&
+        normalizedEditorState &&
+        JSON.stringify(normalizedEditorState) !== JSON.stringify(normalizedValue)
+      ) {
+        // When there is a diff, unset selection to avoid an invalid state
+        Transforms.deselect(editor);
+      }
+    }, [editor, value]);
 
     return (
       <>
@@ -231,7 +329,9 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
         <Slate
           editor={editor}
-          initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
+          initialValue={
+            value?.length ? value : [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
+          }
           onChange={handleSlateChange}
           key={key}
         >
@@ -242,18 +342,23 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             name={name}
             setLiveText={setLiveText}
             isExpandedMode={isExpandedMode}
+            flushPendingFormSync={flushPendingFormSync}
           >
             <EditorLayout
               error={error}
               disabled={disabled}
-              onCollapse={handleToggleExpand}
+              onToggleExpand={handleToggleExpand}
               ariaDescriptionId={ariaDescriptionId}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
               <BlocksContent {...contentProps} />
-              {!isExpandedMode && (
-                <ExpandIconButton
+              {!isExpandedMode && !isMobile && (
+                <IconButton
+                  position="absolute"
+                  bottom="1.2rem"
+                  right="1.2rem"
+                  shadow="filterShadow"
                   label={formatMessage({
                     id: getTranslation('components.Blocks.expand'),
                     defaultMessage: 'Expand',
@@ -261,7 +366,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
                   onClick={handleToggleExpand}
                 >
                   <Expand />
-                </ExpandIconButton>
+                </IconButton>
               )}
             </EditorLayout>
           </BlocksEditorProvider>
@@ -273,9 +378,11 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
 export {
   type BlocksStore,
+  type RichTextBlocksStore,
   type SelectorBlockKey,
   BlocksEditor,
   BlocksEditorProvider,
   useBlocksEditorContext,
   isSelectorBlockKey,
+  normalizeBlocksState,
 };

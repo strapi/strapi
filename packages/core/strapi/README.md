@@ -92,13 +92,15 @@ Complete installation requirements can be found in the documentation under <a hr
 
 Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
 
-| Strapi Version  | Recommended | Minimum |
-| --------------- | ----------- | ------- |
-| 5.0.0 and up    | 20.x        | 18.x    |
-| 4.14.5 and up   | 20.x        | 18.x    |
-| 4.11.0 and up   | 18.x        | 16.x    |
-| 4.3.9 to 4.10.x | 18.x        | 14.x    |
-| 4.0.x to 4.3.8  | 16.x        | 14.x    |
+| Strapi Version    | Recommended | Minimum |
+| ----------------- | ----------- | ------- |
+| 5.48.1 and up     | 24.x        | 22.x    |
+| 5.31.0 to v5.48.0 | 24.x        | 20.x    |
+| 5.0.0 to 5.30.1   | 20.x        | 18.x    |
+| 4.14.5 and up     | 20.x        | 18.x    |
+| 4.11.0 and up     | 18.x        | 16.x    |
+| 4.3.9 to 4.10.x   | 18.x        | 14.x    |
+| 4.0.x to 4.3.8    | 16.x        | 14.x    |
 
 **Database:**
 
@@ -115,9 +117,8 @@ Database driver packages often have their own minimum versions for each version 
 
 | Node Version | PostgreSQL (pg) | MySQL (mysql2) | SQLite (better-sqlite3) |
 | ------------ | --------------- | -------------- | ----------------------- |
-| 18           | pg@8.x          | mysql2@2.x     | better-sqlite3@7.6.2    |
-| 20           | pg@8.x          | mysql2@3.x     | better-sqlite3@9.4.x    |
 | 22           | pg@8.x          | mysql2@3.x     | better-sqlite3@11.x     |
+| 24           | pg@8.x          | mysql2@3.x     | better-sqlite3@12.x     |
 
 **We recommend always using the latest version of Strapi stable to start your new projects**.
 

@@ -17,6 +17,7 @@
   "EditPage.form.roles": "Role details",
   "Email.template.data.loaded": "Email templates has been loaded",
   "Email.template.email_confirmation": "Email address confirmation",
+  "Email.template.reset_password": "Reset password",
   "Email.template.form.edit.label": "Edit a template",
   "Email.template.table.action.label": "action",
   "Email.template.table.icon.label": "icon",

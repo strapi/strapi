@@ -1,17 +1,18 @@
 import os from 'os';
 import path from 'path';
-import crypto from 'crypto';
 import fs from 'fs';
 import fse from 'fs-extra';
 import _ from 'lodash';
 import { extension } from 'mime-types';
 import {
+  async,
   sanitize,
-  strings,
   contentTypes as contentTypesUtils,
   errors,
   file as fileUtils,
+  pagination as paginationUtils,
 } from '@strapi/utils';
+import { has, toNumber, isNil } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -47,21 +48,15 @@ const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+  const fileService = getService('file');
 
-  const generateFileName = (name: string) => {
-    const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
-
-    return `${baseName}_${randomSuffix()}`;
-  };
-
-  const sendMediaMetrics = (data: Pick<File, 'caption' | 'alternativeText'>) => {
+  const sendMediaMetrics = async (data: Pick<File, 'caption' | 'alternativeText'>) => {
     if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-      strapi.telemetry.send('didSaveMediaWithCaption');
+      await getService('metrics').trackUsage('didSaveMediaWithCaption');
     }
 
     if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-      strapi.telemetry.send('didSaveMediaWithAlternativeText');
+      await getService('metrics').trackUsage('didSaveMediaWithAlternativeText');
     }
   };
 
@@ -133,6 +128,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     } = {}
   ): Promise<Omit<UploadableFile, 'getStream'>> {
     const fileService = getService('file');
+    const imageManipulationService = getService('image-manipulation');
 
     if (!isValidFilename(filename)) {
       throw new ApplicationError('File name contains invalid characters');
@@ -154,9 +150,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
+      focalPoint: fileInfo.focalPoint,
       folder: fileInfo.folder,
       folderPath: await fileService.getFolderPath(fileInfo.folder),
-      hash: generateFileName(basename),
+      hash: imageManipulationService.generateFileName(basename),
       ext,
       mime: type,
       size: bytesToKbytes(size),
@@ -191,10 +188,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     fileInfo: FileInfo,
     metas?: Metas
   ): Promise<UploadableFile> {
+    // Prefer detected MIME type from security validation. Treat application/octet-stream as
+    // undeclared so we use detected type when the client sends no real Content-Type.
+    const detected = (file as any).detectedMimeType;
+    const declared = file.mimetype || '';
+    const mimeType =
+      detected ||
+      (declared && declared !== 'application/octet-stream' ? declared : undefined) ||
+      'application/octet-stream';
+
     const currentFile = (await formatFileInfo(
       {
         filename: file.originalFilename ?? 'unamed',
-        type: file.mimetype ?? 'application/octet-stream',
+        type: mimeType,
         size: file.size,
       },
       fileInfo,
@@ -229,7 +235,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       files,
     }: {
       data: Record<string, unknown>;
-      files: InputFile | InputFile[];
+      files: InputFile[];
     },
     opts?: CommonOptions
   ) {
@@ -237,8 +243,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // create temporary folder to store files for stream manipulation
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
-    let uploadedFiles: any[] = [];
-
+    const uploadedFiles = [];
     try {
       const { fileInfo, ...metas } = data;
 
@@ -250,9 +255,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return uploadFileAndPersist(fileData, { user });
       };
 
-      uploadedFiles = await Promise.all(
-        fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
+      const concurrentUploadSize = Math.max(
+        1,
+        strapi.config.get<Config>('plugin::upload').concurrentUploadSize ?? 1
       );
+
+      const fileBatches = _.chunk(
+        fileArray.map((file, idx) => ({ file, fileInfo: fileInfoArray[idx] || {} })),
+        concurrentUploadSize
+      );
+
+      for (const batch of fileBatches) {
+        const results = await Promise.all(
+          batch.map(({ file, fileInfo }) => doUpload(file, fileInfo))
+        );
+        uploadedFiles.push(...results);
+      }
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);
@@ -345,7 +363,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function updateFileInfo(
     id: ID,
-    { name, alternativeText, caption, folder }: FileInfo,
+    { name, alternativeText, caption, focalPoint, folder }: FileInfo,
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
@@ -363,8 +381,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       name: newName,
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
+      focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
       folder: _.isUndefined(folder) ? dbFile.folder : folder,
-      folderPath: _.isUndefined(folder) ? dbFile.path : await fileService.getFolderPath(folder),
+      folderPath: _.isUndefined(folder)
+        ? dbFile.folderPath
+        : await fileService.getFolderPath(folder),
     };
 
     return update(id, newInfos, { user });
@@ -442,7 +463,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    sendMediaMetrics(fileValues);
+    await sendMediaMetrics(fileValues);
 
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
@@ -462,7 +483,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    sendMediaMetrics(fileValues);
+    await sendMediaMetrics(fileValues);
 
     const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -471,27 +492,130 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  function findOne(id: ID, populate = {}) {
+  async function findOne(id: ID, populate = {}) {
     const query = strapi.get('query-params').transform(FILE_MODEL_UID, {
       populate,
     });
 
-    return strapi.db.query(FILE_MODEL_UID).findOne({
+    const file = await strapi.db.query(FILE_MODEL_UID).findOne({
       where: { id },
       ...query,
     });
+
+    if (!file) return file;
+
+    // Sign file URLs if using private provider
+    return fileService.signFileUrls(file);
   }
 
-  function findMany(query: any = {}): Promise<File[]> {
-    return strapi.db
+  async function findMany(query: any = {}): Promise<File[]> {
+    const files = await strapi.db
       .query(FILE_MODEL_UID)
       .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
+
+    // Sign file URLs if using private provider
+    return async.map(files, (file: File) => fileService.signFileUrls(file));
   }
 
-  function findPage(query: any = {}) {
-    return strapi.db
+  async function findPage(query: any = {}) {
+    const result = await strapi.db
       .query(FILE_MODEL_UID)
       .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
+
+    // Sign file URLs if using private provider
+    const signedResults = await async.map(result.results, (file: File) =>
+      fileService.signFileUrls(file)
+    );
+
+    return {
+      ...result,
+      results: signedResults,
+    };
+  }
+
+  /**
+   * Resolve whether the count query should run, mirroring core-api's `shouldCount`.
+   * Defaults to the `api.rest.withCount` config (true) when not specified on the request.
+   */
+  function resolveWithCount(pagination: Record<string, unknown>): boolean {
+    if (has('withCount', pagination)) {
+      const withCount = pagination.withCount;
+
+      if (typeof withCount === 'boolean') {
+        return withCount;
+      }
+
+      if (typeof withCount === 'undefined') {
+        return false;
+      }
+
+      if (['true', 't', '1', 1].includes(withCount as string | number)) {
+        return true;
+      }
+
+      if (['false', 'f', '0', 0].includes(withCount as string | number)) {
+        return false;
+      }
+
+      throw new errors.ValidationError(
+        'Invalid withCount parameter. Expected "t","1","true","false","0","f"'
+      );
+    }
+
+    return Boolean(strapi.config.get('api.rest.withCount', true));
+  }
+
+  /**
+   * REST-aware paginated find for the content API.
+   *
+   * Unlike `findPage` (used by the admin API), this honors the standard nested
+   * `pagination` query object (`pagination[page]`, `pagination[pageSize]`,
+   * `pagination[start]`, `pagination[limit]`, `pagination[withCount]`) and the
+   * `api.rest.defaultLimit` / `api.rest.maxLimit` / `api.rest.withCount` config,
+   * exactly like every other Strapi REST collection-type endpoint.
+   */
+  async function findAndCountPage(query: any = {}) {
+    const { pagination = {} } = query;
+
+    const defaultLimit = toNumber(strapi.config.get('api.rest.defaultLimit', 25));
+    const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;
+
+    // Whether the consumer used page-based pagination (default) vs offset-based.
+    const isOffset = has('start', pagination) || has('limit', pagination);
+    const isPaged = !isOffset;
+
+    // Resolve start/limit applying defaults and the maxLimit cap.
+    const { start, limit } = paginationUtils.withDefaultPagination(pagination, {
+      defaults: { offset: { limit: defaultLimit }, page: { pageSize: defaultLimit } },
+      maxLimit: maxLimit || -1,
+    });
+
+    // Feed the transform the resolved offset/limit so it ignores the nested
+    // `pagination` object (which it cannot read) and applies real bounds.
+    const transformed = strapi
+      .get('query-params')
+      .transform(FILE_MODEL_UID, { ...query, pagination: undefined, start, limit });
+
+    const shouldCount = resolveWithCount(pagination);
+
+    const [results, total] = await Promise.all([
+      strapi.db.query(FILE_MODEL_UID).findMany(transformed),
+      shouldCount ? strapi.db.query(FILE_MODEL_UID).count(transformed) : Promise.resolve(undefined),
+    ]);
+
+    const signedResults = await async.map(results, (file: File) => fileService.signFileUrls(file));
+
+    const transform = isPaged
+      ? paginationUtils.transformPagedPaginationInfo
+      : paginationUtils.transformOffsetPaginationInfo;
+
+    const paginationInfo = transform({ start, limit }, total as number);
+
+    return {
+      results: signedResults,
+      // Omit total & pageCount when counting is disabled (withCount=false).
+      pagination: isNil(total) ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
+    };
   }
 
   async function remove(file: File) {
@@ -527,11 +651,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res as Settings | null;
   }
 
-  function setSettings(value: Settings) {
+  async function setSettings(value: Settings) {
     if (value.responsiveDimensions === true) {
-      strapi.telemetry.send('didEnableResponsiveDimensions');
+      await getService('metrics').trackUsage('didEnableResponsiveDimensions');
     } else {
-      strapi.telemetry.send('didDisableResponsiveDimensions');
+      await getService('metrics').trackUsage('didDisableResponsiveDimensions');
     }
 
     return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
@@ -561,6 +685,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     findOne,
     findMany,
     findPage,
+    findAndCountPage,
     remove,
     getSettings,
     setSettings,

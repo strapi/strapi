@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { clickAndWait, navToHeader } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { clickAndWait, navToHeader } from '../../../utils/shared';
 
 function createSearchTest(testFunction, description, searchTerm) {
   testFunction(description, async ({ page }) => {
@@ -29,7 +29,7 @@ function createSearchTest(testFunction, description, searchTerm) {
 
 test.describe('Search', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');

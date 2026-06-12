@@ -6,11 +6,13 @@ import { Initializer } from './components/Initializer';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-const name = 'Deploy';
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
+
+const pluginName = 'Deploy';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     const { backendURL } = window.strapi;
 
     // Only add the plugin menu link and registering it if the project is on development (localhost).
@@ -19,20 +21,17 @@ export default {
         to: `plugins/${pluginId}`,
         icon: Cloud,
         intlLabel: {
-          id: `${pluginId}.plugin.name`,
-          defaultMessage: name,
+          id: `${pluginId}.Plugin.name`,
+          defaultMessage: pluginName,
         },
-        Component: async () => {
-          const { App } = await import('./pages/App');
-
-          return App;
-        },
+        Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
+        permissions: [],
       });
       const plugin = {
         id: pluginId,
         initializer: Initializer,
         isReady: false,
-        name,
+        name: pluginName,
       };
 
       app.registerPlugin(plugin);

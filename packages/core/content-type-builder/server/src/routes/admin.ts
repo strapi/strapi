@@ -1,3 +1,5 @@
+import { isDevelopmentMode } from '../middlewares';
+
 export default {
   type: 'admin',
   routes: [
@@ -51,6 +53,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -64,6 +67,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -77,6 +81,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -116,6 +121,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -129,6 +135,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -142,6 +149,7 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
@@ -155,12 +163,54 @@ export default {
             config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
+        middlewares: [isDevelopmentMode],
       },
     },
     {
       method: 'DELETE',
       path: '/component-categories/:name',
       handler: 'component-categories.deleteCategory',
+      config: {
+        policies: [
+          {
+            name: 'admin::hasPermissions',
+            config: { actions: ['plugin::content-type-builder.read'] },
+          },
+        ],
+        middlewares: [isDevelopmentMode],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/schema',
+      handler: 'schema.getSchema',
+      config: {
+        policies: [
+          {
+            name: 'admin::hasPermissions',
+            config: { actions: ['plugin::content-type-builder.read'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/update-schema',
+      handler: 'schema.updateSchema',
+      config: {
+        policies: [
+          {
+            name: 'admin::hasPermissions',
+            config: { actions: ['plugin::content-type-builder.read'] },
+          },
+        ],
+        middlewares: [isDevelopmentMode],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/update-schema-status',
+      handler: 'schema.getUpdateSchemaStatus',
       config: {
         policies: [
           {

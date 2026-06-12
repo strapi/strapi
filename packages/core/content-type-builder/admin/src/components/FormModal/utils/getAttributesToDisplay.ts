@@ -2,7 +2,7 @@ import { MAX_COMPONENT_DEPTH } from '../../../constants';
 import { getComponentDepth } from '../../../utils/getMaxDepth';
 
 import type { IconByType } from '../../AttributeIcon';
-import type { NestedComponent } from '../../DataManagerProvider/utils/retrieveNestedComponents';
+import type { NestedComponent } from '../../DataManager/utils/retrieveNestedComponents';
 import type { Internal } from '@strapi/types';
 
 export const getAttributesToDisplay = (

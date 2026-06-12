@@ -41,7 +41,7 @@ export default ({ strapi }: Context) => {
         ? get('info.singularName', contentType)
         : get('info.pluralName', contentType);
 
-    const transformedPlugin = upperFirst(camelCase(plugin));
+    const transformedPlugin = plugin ? upperFirst(camelCase(plugin)) : '';
     const transformedModelName = upperFirst(camelCase(name || singular(modelName)));
 
     return `${transformedPlugin}${transformedModelName}`;

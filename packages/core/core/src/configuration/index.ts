@@ -18,28 +18,54 @@ dotenv.config({ path: process.env.ENV_PATH });
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
+const defaultServerConfig = {
+  host: process.env.HOST || os.hostname() || 'localhost',
+  port: Number(process.env.PORT) || 1337,
+  proxy: false,
+  cron: { enabled: false },
+  admin: { autoOpen: false },
+  dirs: { public: './public' },
+  transfer: {
+    remote: {
+      enabled: true,
+    },
+  },
+  logger: {
+    updates: {
+      enabled: true,
+    },
+    startup: {
+      enabled: true,
+    },
+  },
+  openapi: {
+    'content-api': {
+      access: 'disabled',
+      route: {
+        path: '/openapi.json',
+      },
+      cache: {
+        enabled: true,
+        maxAgeMs: 60_000,
+        filePath: '.strapi/openapi/content-api.json',
+      },
+    },
+    admin: {
+      access: 'disabled',
+      route: {
+        path: '/openapi.json',
+      },
+      cache: {
+        enabled: true,
+        maxAgeMs: 60_000,
+        filePath: '.strapi/openapi/admin.json',
+      },
+    },
+  },
+} satisfies Partial<Core.Config.Server>;
+
 const defaultConfig = {
-  server: {
-    host: process.env.HOST || os.hostname() || 'localhost',
-    port: Number(process.env.PORT) || 1337,
-    proxy: false,
-    cron: { enabled: false },
-    admin: { autoOpen: false },
-    dirs: { public: './public' },
-    transfer: {
-      remote: {
-        enabled: true,
-      },
-    },
-    logger: {
-      updates: {
-        enabled: true,
-      },
-      startup: {
-        enabled: true,
-      },
-    },
-  } satisfies Partial<Core.Config.Server>,
+  server: defaultServerConfig,
   admin: {} satisfies Partial<Core.Config.Admin>,
   api: {
     rest: {
@@ -60,6 +86,7 @@ export const loadConfiguration = (opts: StrapiOptions) => {
     autoReload,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
+    installId: _.get(pkgJSON, 'strapi.installId'),
     packageJsonStrapi: _.omit(_.get(pkgJSON, 'strapi', {}), 'uuid'),
     info: {
       ...pkgJSON,

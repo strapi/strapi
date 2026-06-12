@@ -5,7 +5,7 @@ export type ContentTypeKind = 'collectionType' | 'singleType';
 
 export type ModelType = 'contentType' | 'component';
 
-export type Schema = ContentTypeSchema | ComponentSchema;
+export type Schema = CollectionTypeSchema | SingleTypeSchema | ComponentSchema;
 
 /**
  * A loaded instance of a Strapi Schema accessible to the server.
@@ -48,6 +48,11 @@ export interface BaseSchema {
    * Optional property. Specifies the custom table name for the Schema if any.
    */
   collectionName?: string;
+
+  /**
+   * What plugin this schema belongs to if any
+   */
+  plugin?: string;
 
   /**
    * Contains information related to naming and display characteristics of the Schema.

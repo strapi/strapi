@@ -1,8 +1,28 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Typography,
+  TypographyProps,
+  useCallbackRef,
+  IconButton,
+} from '@strapi/design-system';
+import { Question } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import { useLocation, Link } from 'react-router-dom';
 
+import {
+  HEIGHT_TOP_NAVIGATION,
+  HEIGHT_TOP_NAVIGATION_MEDIUM,
+  RESPONSIVE_DEFAULT_SPACING,
+} from '../../constants/theme';
+import { useTracking } from '../../features/Tracking';
+import { useDeviceType } from '../../hooks/useDeviceType';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
+import { useIsMobile } from '../../hooks/useMediaQuery';
+
+import { getMatchingDocLink, type DocLink } from './utils/getMatchingDocLink';
 
 /* -------------------------------------------------------------------------------------------------
  * BaseHeaderLayout
@@ -15,32 +35,67 @@ interface BaseHeaderLayoutProps extends Omit<TypographyProps<'div'>, 'tag'> {
   subtitle?: React.ReactNode;
   sticky?: boolean;
   width?: number;
+  docLink?: DocLink | null;
 }
 
 const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>(
   (
-    { navigationAction, primaryAction, secondaryAction, subtitle, title, sticky, width, ...props },
+    {
+      navigationAction,
+      primaryAction,
+      secondaryAction,
+      subtitle,
+      title,
+      sticky,
+      width,
+      docLink,
+      ...props
+    },
     ref
   ) => {
+    const isMobile = useIsMobile();
     const isSubtitleString = typeof subtitle === 'string';
+
+    const { formatMessage } = useIntl();
+    const { trackUsage } = useTracking();
+
+    const docLinkButton = docLink ? (
+      <IconButton
+        onClick={() => trackUsage('didClickOnDocLink', { from: docLink.path, to: docLink.link })}
+        size="S"
+        label={formatMessage({
+          id: 'app.HeaderLayout.docLink.label',
+          defaultMessage: 'Learn more on our documentation',
+        })}
+        to={docLink.link}
+        tag={Link}
+        target="_blank"
+      >
+        <Question />
+      </IconButton>
+    ) : null;
 
     if (sticky) {
       return (
         <Box
+          display="flex"
           paddingLeft={6}
           paddingRight={6}
-          paddingTop={3}
-          paddingBottom={3}
+          paddingTop={2}
+          paddingBottom={2}
           position="fixed"
           top={0}
-          right={0}
           background="neutral0"
           shadow="tableShadow"
           width={`${width}px`}
-          zIndex={1}
+          zIndex={2}
+          minHeight={{
+            initial: HEIGHT_TOP_NAVIGATION,
+            medium: HEIGHT_TOP_NAVIGATION_MEDIUM,
+          }}
           data-strapi-header-sticky
         >
-          <Flex justifyContent="space-between">
+          <Flex alignItems="center" justifyContent="space-between" wrap="wrap" width="100%" gap={2}>
             <Flex>
               {navigationAction && <Box paddingRight={3}>{navigationAction}</Box>}
               <Box>
@@ -57,7 +112,14 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
               </Box>
               {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
             </Flex>
-            <Flex>{primaryAction ? <Box paddingLeft={2}>{primaryAction}</Box> : undefined}</Flex>
+            <Flex>
+              {primaryAction ? (
+                <Flex gap={2}>
+                  {docLinkButton}
+                  {primaryAction}
+                </Flex>
+              ) : undefined}
+            </Flex>
           </Flex>
         </Box>
       );
@@ -66,30 +128,85 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     return (
       <Box
         ref={ref}
-        paddingLeft={10}
-        paddingRight={10}
-        paddingBottom={8}
-        paddingTop={navigationAction ? 6 : 8}
+        paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+        paddingRight={RESPONSIVE_DEFAULT_SPACING}
+        paddingBottom={{
+          initial: 4,
+          large: 8,
+        }}
+        paddingTop={{
+          initial: 4,
+          large: navigationAction ? 6 : 8,
+        }}
         background="neutral100"
         data-strapi-header
       >
-        {navigationAction ? <Box paddingBottom={2}>{navigationAction}</Box> : null}
-        <Flex justifyContent="space-between">
-          <Flex minWidth={0}>
-            <Typography tag="h1" variant="alpha" {...props}>
-              {title}
-            </Typography>
-            {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
-          </Flex>
-          {primaryAction}
+        <Flex direction="column" alignItems="initial" gap={3}>
+          {navigationAction}
+          {!isMobile ? (
+            <>
+              <Flex justifyContent="space-between" wrap="wrap" gap={4}>
+                <Flex minWidth={0}>
+                  <Typography
+                    tag="h1"
+                    variant="alpha"
+                    {...props}
+                    style={{
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                      maxWidth: '100%',
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                  {secondaryAction && <Box paddingLeft={4}>{secondaryAction}</Box>}
+                </Flex>
+                <Box paddingLeft={4} marginLeft="auto">
+                  <Flex gap={2}>
+                    {docLinkButton}
+                    {primaryAction}
+                  </Flex>
+                </Box>
+              </Flex>
+              {isSubtitleString ? (
+                <Typography variant="epsilon" textColor="neutral600" tag="p">
+                  {subtitle}
+                </Typography>
+              ) : (
+                subtitle
+              )}
+            </>
+          ) : (
+            <>
+              <Typography
+                tag="h1"
+                variant="alpha"
+                {...props}
+                style={{
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word',
+                  maxWidth: '100%',
+                }}
+              >
+                {title}
+              </Typography>
+              {isSubtitleString ? (
+                <Typography variant="epsilon" textColor="neutral600" tag="p">
+                  {subtitle}
+                </Typography>
+              ) : (
+                subtitle
+              )}
+              {(primaryAction || secondaryAction) && (
+                <Flex gap={3}>
+                  {secondaryAction}
+                  {docLinkButton}
+                  {primaryAction}
+                </Flex>
+              )}
+            </>
+          )}
         </Flex>
-        {isSubtitleString ? (
-          <Typography variant="epsilon" textColor="neutral600" tag="p">
-            {subtitle}
-          </Typography>
-        ) : (
-          subtitle
-        )}
       </Box>
     );
   }
@@ -105,6 +222,12 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   const baseHeaderLayoutRef = React.useRef<HTMLDivElement>(null);
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
   const [isVisible, setIsVisible] = React.useState(true);
+  const deviceType = useDeviceType();
+  const location = useLocation();
+  const docLink = React.useMemo(() => {
+    if (window.strapi.flags.docLinks === false) return null;
+    return getMatchingDocLink(location.pathname);
+  }, [location]);
 
   const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
     root: null,
@@ -112,26 +235,43 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     threshold: 0,
   });
 
-  useResizeObserver(containerRef, () => {
-    if (containerRef.current) {
-      setHeaderSize(containerRef.current.getBoundingClientRect());
+  useResizeObserver([containerRef, baseHeaderLayoutRef], () => {
+    const headerContainer = baseHeaderLayoutRef.current ?? containerRef.current;
+
+    if (headerContainer) {
+      const newSize = headerContainer.getBoundingClientRect();
+
+      setHeaderSize((prevSize) => {
+        // Only update if size actually changed
+        if (!prevSize || prevSize.height !== newSize.height || prevSize.width !== newSize.width) {
+          return newSize;
+        }
+        return prevSize;
+      });
     }
   });
 
   React.useEffect(() => {
-    if (baseHeaderLayoutRef.current) {
-      setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
+    if (baseHeaderLayoutRef.current || containerRef.current) {
+      const headerContainer = baseHeaderLayoutRef.current ?? containerRef.current;
+      setHeaderSize(headerContainer?.getBoundingClientRect() ?? null);
     }
-  }, [baseHeaderLayoutRef]);
+  }, [containerRef]);
+
+  if (deviceType === 'mobile') {
+    return <BaseHeaderLayout {...props} docLink={docLink} />;
+  }
 
   return (
-    <>
-      <div style={{ height: headerSize?.height }} ref={containerRef}>
-        {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} />}
+    <div ref={containerRef}>
+      <div style={{ height: headerSize?.height }}>
+        {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} docLink={docLink} />}
       </div>
 
-      {!isVisible && <BaseHeaderLayout {...props} sticky width={headerSize?.width} />}
-    </>
+      {!isVisible && (
+        <BaseHeaderLayout {...props} sticky width={headerSize?.width} docLink={docLink} />
+      )}
+    </div>
   );
 };
 

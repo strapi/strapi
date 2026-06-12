@@ -25,7 +25,14 @@ export const hasSuperAdminRole = (user: AdminUser) => {
   return user.roles.filter((role: AdminRole) => role.code === SUPER_ADMIN_CODE).length > 0;
 };
 
-export const ADMIN_USER_ALLOWED_FIELDS = ['id', 'firstname', 'lastname', 'username'];
+export const ADMIN_USER_ALLOWED_FIELDS = [
+  'id',
+  'firstname',
+  'lastname',
+  'username',
+  'email',
+  'isActive',
+];
 
 export default {
   createUser,
