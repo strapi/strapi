@@ -1,10 +1,11 @@
-# CTB Rename — Open Questions for Ben
+# CTB Rename — Build Decisions (resolved)
 
-Small decisions made during the build that I'd like you to confirm. I picked a
-reasonable default for each (marked **[assumed]**) and kept going; flag any you
-want changed.
+Decisions made during the build, all now confirmed with Ben. Kept as a record so
+the next person understands _why_ the implementation looks the way it does. None
+of these are blocking; see `CTB_RENAME_PLAN.md` for the live status and remaining
+work.
 
-> Status legend: 🟡 = awaiting your confirmation. Nothing here blocked progress.
+> Status legend: ✅ = decided/confirmed. (No 🟡 items remain.)
 
 ---
 
@@ -63,34 +64,40 @@ No Handlebars dependency was added. The database file builder uses a tiny
 internal renderer because the runtime template surface is intentionally small and
 must stay coupled to the migration runner's JS-only contract.
 
-## 5. Relation / join-table renames 🟡
+## 5. Relation / component / media attribute renames ✅ (resolved — implemented)
 
-MVP covers **scalar attribute** column renames (incl. v5 long-name hashing) and
-single-owner relation **join columns**. Renaming the _backing join table_ of a
-many-to-many, and component/dynamic-zone specifics (CG-979/CG-1001), are stubbed
-with TODOs and guarded.
+**Attribute** renames now cover, using real v5 identifiers and guarded steps:
 
-**[assumed]** Scalar + join-column for MVP; join-table / component-attr renames
-as a fast follow. OK?
+- scalar columns;
+- single-owner relation **join columns** (`<field>_id`) → `renameColumn`;
+- relation **join/link tables** (the backing table whose name encodes the owning
+  attribute) → `renameTable`;
+- **components & dynamic zones** (attribute name stored as a value in the per-type
+  `_cmps` link table's `field` column) → guarded `updateRows`;
+- **media** (attribute name stored in the shared `files_related_morphs` table,
+  scoped by `related_type` = owning uid) → guarded `updateRows`.
 
-## 6. Migration filename timestamp precision 🟡
+The inverse side of a bidirectional relation is a no-op (the join table is named
+from the owning side). **Polymorphic `morph*` relations are left unsupported**
+(reported via `getUnsupported()`; `schema.ts` logs a warning) — they aren't
+creatable through the CTB UI anyway.
 
-The CLI migration generator uses second precision (`2026.06.11T15.39.50`). For
-auto-generated rename migrations I use **millisecond** precision
-(`...50.123.rename-fields.js`) because multiple saves can occur within the same
-second and second-precision names collided (Umzug skipped the second one →
-silent data loss; caught by the API integration test). `writeFiles` also appends
-`-1`, `-2`, … if a same-named file already exists.
+**Still out of scope** (separate, larger work tracked in the plan): renaming a
+**content-type** (table) or a **component** itself. Only **attribute** renames
+exist today — the builder exposes `addRenameAttribute` only.
 
-**[assumed]** Millisecond precision + collision suffix. OK?
+## 6. Migration filename timestamp precision ✅ (resolved — millisecond + collision suffix)
 
-## 7. Index renaming 🟡
+Auto-generated migrations use **millisecond** precision
+(`2026.06.11T15.39.50.123.rename-fields.js`). The CLI generator's second
+precision collided when several saves land in the same second (Umzug skipped the
+second file → silent data loss; caught by the API integration test). The writer
+also appends `-1`, `-2`, … if a same-named file already exists. This logic now
+lives in the generic database file builder
+(`packages/core/database/src/migrations/file-builder.ts`).
 
-I do **not** rename indexes in the generated migration for MVP; I let schema-sync
-rebuild them. Open item in the plan (§6).
+## 7. Index renaming ✅ (resolved for MVP — deferred to schema-sync)
 
-**[assumed]** Leave index handling to sync for now. OK?
-
----
-
-_Resolved questions will be moved below this line._
+The generated migration does **not** rename indexes; schema-sync rebuilds them
+after the column/table rename. Revisit only if sync churn or index-name drift
+becomes a real problem (see plan "Schema-sync interaction").

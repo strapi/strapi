@@ -6,10 +6,49 @@
 > - Problem doc: https://app.notion.com/p/37c8f35980748110aba9fc8aef982424
 > - RFC: https://app.notion.com/p/1428f3598074800e8bf0cc6b022630c4
 > - POC PR: https://github.com/strapi/strapi/pull/22191
-> - Linear: CMS-635 (also fixes CG-979, CG-1001)
-> - Branch: `develop`
+> - Linear: CMS-635 (related: CG-979, CG-1001)
+> - Open PR: https://github.com/strapi/strapi/pull/26622 (draft)
+> - Branch: `ben/ctb-rename-migration-builder` (base: `develop`)
 
 ---
+
+## Handoff status (2026-06-12)
+
+**Implemented & tested (attribute renames):**
+
+- Admin captures ordered rename hops per type and serializes them as a `renames[]`
+  array (`reducer.ts`, `utils/cleanData.ts`). Confirmation modal in `prompt` mode
+  (`DataManager/RenameMigrationModal.tsx`), wired in `DataManagerProvider.tsx`.
+- Server `services/schema.ts` collects accepted renames and drives a CTB **rename
+  resolver** (`services/migration-builder/index.ts`) that classifies each hop
+  against pre-reload `strapi.db.metadata` and emits primitive DB operations.
+- Generic **migration file builder** lives in `@strapi/database`
+  (`migrations/file-builder.ts`, exposed as `strapi.db.migrations.createFileBuilder()`):
+  `renameColumn` / `renameTable` / `updateRows`, guarded JS rendering, millisecond
+  timestamps, collision suffixes.
+- Coverage: scalar columns, relation join columns, relation join/link tables,
+  components & dynamic zones, media (shared morph table, scoped by `related_type`).
+  Ordered-path replay (chains/swaps/shifts/rename-back) with no synthetic temp
+  column. Polymorphic `morph*` relations reported as unsupported (warned, not
+  auto-migrated).
+- Config `renameMigrations: 'prompt' | 'always' | 'never'` (default `'prompt'`),
+  surfaced to the admin via the schema endpoint.
+- Tests: `migration-builder.test.ts`, `schema.test.ts`, `config.test.ts`,
+  `file-builder.test.ts`, `fresh-db-rename.test.ts` (real sqlite),
+  `tests/api/core/content-type-builder/rename-migration.test.api.js`, plus admin
+  reducer/cleanData/modal tests.
+
+**Not yet done (start here):**
+
+1. **Content-type and component _level_ renames** (the table / component itself) —
+   only **attribute** renames exist. Needs `addRenameContentType` /
+   `addRenameComponent` (+ `_cmps` `component_type` bookkeeping). This is the main
+   remaining scope and what fully closes CG-1001.
+2. **Fresh-DB ordering on postgres & mysql** — only proven on sqlite; guards are
+   driver-sensitive.
+3. **(optional) CLI** `strapi rename:field` reusing the same resolver + file builder.
+
+See "Suggested build order → Remaining" for the full list.
 
 ## Goal
 
@@ -51,10 +90,10 @@ When a user renames an attribute (later: content-type/component) in the CTB, gen
 ### CTB save flow
 
 - Batch route: `POST /content-type-builder/update-schema` → `controllers/schema.ts` (dev-only). Sets `strapi.reload.isWatching = false`, calls `getService('schema').updateSchema(data)`, then `setImmediate(() => strapi.reload())`.
-- `services/schema.ts`: builds changes, `builder.writeFiles()`, emits events. **Has a TODO: "handle renaming migrations here by comparing attr name & attr.properties.name" — THIS is the backend hook point.**
+- `services/schema.ts`: builds changes, calls `generateRenameMigrations()` before reload, then `builder.writeFiles()`, emits events.
 - Disk writes: `services/schema-builder/schema-handler.ts` `flush()`.
 - Admin state: `admin/src/components/DataManager/reducer.ts` tracks `contentTypes`/`components` + per-attr `status` (NEW/CHANGED/REMOVED/UNCHANGED). `editAttribute` gets original `name` + new object → **transient old→new is available here**.
-- Admin save: `DataManager/DataManagerProvider.tsx` `saveSchema()` → serializes via `utils/cleanData.ts` (emits `{ action, name, properties }`, **drops `name` from properties — no `oldName` today**), posts, polls `useServerRestartWatcher.ts`.
+- Admin save: `DataManager/DataManagerProvider.tsx` `saveSchema()` → serializes via `utils/cleanData.ts` (includes ordered `renames[]` per updated type), optionally prompts via `RenameMigrationModal`, posts, polls `useServerRestartWatcher.ts`.
 - Save button: `ContentTypeBuilderNav/ContentTypeBuilderNav.tsx`. Per-modal finish: `FormModalEndActions.tsx`.
 
 ### Config + JS/TS
@@ -67,7 +106,7 @@ When a user renames an attribute (later: content-type/component) in the CTB, gen
 
 ## Architecture
 
-### 1. Capture rename intent (admin)
+### 1. Capture rename intent (admin) — IMPLEMENTED
 
 POC used a single `renamed: <oldName>` field. **Productionize into an ordered model** (user can do `a→b`, new `a`, `a→c` in one session).
 
@@ -75,7 +114,7 @@ POC used a single `renamed: <oldName>` field. **Productionize into an ordered mo
 - Derive from `status === 'CHANGED'` attrs where key changed, captured at `editAttribute` time. **Keep order.**
 - Serialize through `cleanData.ts` → backend gets explicit ordered `renames` array on the update-schema payload (NOT inferred from diff).
 
-### 2. Config option — `content-type-builder/server/src/config.ts`
+### 2. Config option — `content-type-builder/server/src/config.ts` — IMPLEMENTED
 
 ```javascript
 module.exports = {
@@ -95,25 +134,31 @@ Read via `strapi.plugin('content-type-builder').config('renameMigrations', 'prom
 - `always`: generate for every rename, no prompt.
 - `prompt` (default): prompt per rename, remember answers.
 
-### 3. Modal UX + deferred collection
+### 3. Modal UX + deferred collection — IMPLEMENTED
 
-- On closing edit-field modal (`FormModalEndActions.tsx`), if config is `prompt`, ask: **"Do you want to generate a migration for this field so that you keep the data in it?"** (Yes/No per rename).
-- **Write NOTHING yet.** Store answer alongside pending rename (`generate: true|false`).
-- Only on global **Save** (`ContentTypeBuilderNav`/`saveSchema`) is the request sent with accepted renames.
-- Result: **ONE** migration file per save containing all accepted renames (e.g. `..._rename_fields.js`).
+- On global **Save** (`DataManagerProvider.tsx` `saveSchema()`), if config is
+  `'prompt'`, a single confirmation modal (`RenameMigrationModal.tsx`) lists all
+  pending rename hops across the save. Each hop has a checkbox (default: checked /
+  preserve data). The user can uncheck a hop (field will be dropped and recreated
+  empty) or cancel the whole save.
+- **Write NOTHING until Save.** The modal only filters which renames reach the
+  server; the server generates one migration file for all accepted hops.
+- In `'always'` mode the modal is skipped. In `'never'` mode the server ignores
+  renames entirely (legacy data-loss behaviour).
 
-### 4. Backend: CTB resolver + generic migration file builder
+### 4. Backend: CTB resolver + generic migration file builder — IMPLEMENTED
 
 Promote POC `server/src/services/migration-builder/index.ts` into a real CTB
 resolver, invoked from `services/schema.ts` (batch path) so all accepted renames
 land in one file. Drive from config + payload renames.
 
-CTB resolver responsibilities:
+CTB resolver responsibilities (implemented today):
 
-- `addRenameAttribute(uid, { oldName, newName })`: rename column; update relation join columns/tables; (optional) rename indexes.
-- (later) `addRenameContentType`, `addRenameComponent`, `addDeleteComponent`, etc.
-- Resolve Strapi-specific intent into physical DB operations by using old
-  metadata (`strapi.db.metadata`) before reload.
+- `addRenameAttribute(uid, { oldName, newName })`: classifies the hop against
+  pre-reload metadata and enqueues the appropriate primitive operation(s) on the
+  database file builder (scalar column, join column, join table, component/DZ
+  link-table `field` update, media morph-table update).
+- (future) `addRenameContentType`, `addRenameComponent`, `addDeleteComponent`, etc.
 
 **CRITICAL: use real DB identifiers, NOT `snakeCase`.** POC used `snakeCase(name)`; production must resolve true names via `strapi.db.metadata` + `Database.identifiers` (v5 long-identifier hashing means names don't map 1:1). Builder reads from **old** metadata (before reload).
 
@@ -217,9 +262,9 @@ Ideally **no** sync changes: migration renames column first, sync sees expected 
 
 Watch for:
 
-- Index names no longer matching → sync rebuilds → consider renaming indexes in migration.
+- Index names no longer matching → sync rebuilds → index renaming intentionally deferred to sync (see questions doc #7).
 - `forceMigration` default `true` → drops active → ensure rename lands before any drop decision.
-- **TS runtime gap**: `users.ts` only globs `*.js`/`*.sql`. Decide: (a) keep emitting JS, or (b) extend glob/resolver for compiled TS in `outDir`. **Open implementation item.**
+- **TS runtime gap**: resolved — always emit `.js` (runner only globs `*.{js,sql}`).
 
 ---
 
@@ -245,41 +290,48 @@ Avoid "generate migration only" (inaccurate once schemas edited). Later:
 
 ## Test plan (§9)
 
-**Unit — MigrationBuilder** (`content-type-builder/server/__tests__`):
+**Unit — CTB rename resolver** (`content-type-builder/server/src/services/migration-builder/__tests__/migration-builder.test.ts`) — ✅ done:
 
 - `addRenameAttribute` emits correct knex with **real identifiers** (mock `strapi.db.metadata`), incl. long-name hashed (v5).
 - Ordered multi-rename: `a→b`, new `a`, `a→c` → correct, non-colliding, ordered.
 - Ordered-path replay: `a→b→c` chain, `a→b→a` rename-back, user-routed `a↔b` swap, two-field `a→b, c→a` shift → all replayed verbatim, no synthetic temp column.
-- Relation fixups: renaming relation-backing attr updates join column/table.
-- Template rendering: always JS (`module.exports`), even when `useTypescriptMigrations` is enabled (a `.ts` file would never be globbed by the runner → data loss).
-- `writeFiles` collapses to single file; filename derivation; creates dir if missing.
+- Relation fixups: join column, join/link table, component/DZ link-table `field` update, media morph table (scoped by `related_type`), inverse-side no-op, polymorphic morph unsupported.
+- Always JS (`module.exports`), even when `useTypescriptMigrations` is enabled.
+- `writeFiles` collapses to single file; filename derivation; creates dir if missing; collision suffix.
 - Guarded steps: generated code contains existence checks.
-- Config: `never`→nothing, `always`→file, `prompt`→honors per-rename flags.
 
-**Admin/front-end** (`content-type-builder/admin/__tests__`, Vitest/RTL):
+**Unit — database file builder** (`packages/core/database/src/migrations/__tests__/file-builder.test.ts`) — ✅ done:
 
-- `editAttribute` records ordered pending rename w/ correct old/new.
-- Modal only in `prompt` mode; suppressed otherwise.
-- Nothing written before Save; on Save payload = exactly accepted renames.
-- `cleanData`/`stateToRequestData` serializes `renames` array.
-- Reducer order-of-ops stress (rename/recreate/rename same name).
+- Renders guarded `renameColumn`, `renameTable`, `updateRows` (multi-where).
+- Millisecond timestamp + collision suffix + CommonJS output.
 
-**API integration** (`tests/api/`, follow POC `cleanup-after-delete.test.api.js`: create schema, seed, `restart()`, assert DB):
+**Unit — schema service** (`content-type-builder/server/src/services/__tests__/schema.test.ts`) — ✅ done:
 
-- **Happy path**: CT w/ data → rename attr → restart → column renamed, data preserved, API returns under new name.
-- **Rename + re-add**: `a→b` + new `a` → `b` keeps data, `a` empty.
-- **No migration when off**: `never` → data dropped (locks the contrast).
-- **Component attr rename** + **dynamic zone** (CG-979).
-- Run across **sqlite + postgres + mysql** (guards are driver-sensitive).
+- `generateRenameMigrations` wired; `never` skips; ordered hops replayed; component renames collected.
 
-**Fresh-DB / ordering (critical):**
+**Admin/front-end** — ✅ done:
 
-- Generate rename migration in DB A → point app at empty DB B → first boot must NOT crash, migration **recorded executed** in `strapi_migrations`, sync creates correct final schema.
-- Boot again → no re-run, no double-rename.
+- `reducerRenameAttribute.test.ts`: `editAttribute` records ordered pending rename w/ correct old/new.
+- `cleanDataRename.test.ts`: `stateToRequestData` serializes `renames` array.
+- `renameMigrationModal.test.ts`: `collectPendingRenames` / `applyRenameDecisions`.
 
-**CLI** (`tests/cli/`, if shipped): `rename:field` updates `schema.json` + writes one migration; idempotent re-run.
+**API integration** (`tests/api/core/content-type-builder/rename-migration.test.api.js`) — ✅ done (sqlite):
 
-**Regression:** existing CTB save/restart, sync, migration-runner tests pass; no change when `never`.
+- Happy path: CT w/ data → rename attr → restart → column renamed, data preserved.
+- Swap migration (ordered hops).
+- Relation join-column rename.
+- Component attr rename.
+- Media field rename.
+- Delete-then-reuse-name guard.
+
+**Still needed:**
+
+- **No migration when off**: `never` → data dropped (contrast test).
+- **Dynamic zone** end-to-end (CG-979) — unit coverage exists; API test may need expansion.
+- Run across **postgres + mysql** (guards are driver-sensitive).
+- **Fresh-DB / ordering (critical)**: generate rename migration in DB A → point app at empty DB B → first boot must NOT crash, migration **recorded executed**, sync creates correct final schema. (sqlite unit test exists; pg/mysql not yet.)
+- **CLI** (`tests/cli/`, if shipped): `rename:field` updates `schema.json` + writes one migration.
+- **Regression:** existing CTB save/restart, sync, migration-runner tests pass; no change when `never`.
 
 ---
 
@@ -287,8 +339,8 @@ Avoid "generate migration only" (inaccurate once schemas edited). Later:
 
 - **v5 identifier hashing**: long names hashed; never assume name==DB id. Use `Database.identifiers`/metadata. (PR #19732.)
 - **Components `_cmps` cleanup**: deleting/renaming components touches `{model}_cmps` rows (`component_type`). Builder must encode this (POC `addDeleteComponent`). Bugs: #20931 + support tickets.
-- **Component attr rename ≠ normal attr rename** (POC TODO in `components.ts`). Handle separately.
-- **Confirmed bugs fixed**: CG-979 (dynamic zone rename loses data), CG-1001 (component rename blocks reusing old name).
+- **Component attr rename**: handled via link-table `field` value update (same path as dynamic zones). **Component _level_ rename** (the component itself) is still out of scope.
+- **Related bugs**: CG-979 (dynamic zone rename loses data) — **addressed** (DZ attribute renames now preserve data via the link-table `field` update). CG-1001 (renaming a component blocks reusing its old name) — **not yet**; requires component-_level_ rename support (see Remaining #8).
 - **Graceful type changes** (later): safe conversions (number↔text, date→text, date→unix int) w/ data-loss warnings. Out of MVP.
 - **Helpers vs raw knex**: leaning inline knex for MVP transparency; revisit.
 - **Down migrations**: skip for MVP; only meaningful with full coverage.
@@ -296,24 +348,26 @@ Avoid "generate migration only" (inaccurate once schemas edited). Later:
 
 ---
 
-## Open questions to resolve during build (§11)
+## Build decisions (§11)
 
-See **`CTB_RENAME_QUESTIONS.md`** for decisions needing Ben's confirmation.
-
-Resolved during build:
+All decisions are resolved — see **`CTB_RENAME_QUESTIONS.md`** for the full record
+and rationale.
 
 - ✅ Runner records guarded no-op migrations as executed on fresh DB (`fresh-db-rename.test.ts`).
-- ✅ Payload shape: per-attribute `oldName` on `action: 'update'` attributes (order preserved via attributes array).
-- ✅ Timestamp bugs fixed: migration filenames use a full **millisecond** timestamp (`2026.06.11T15.39.50.123`), not bare `2026` and not second-precision. Auto-generated saves can land in the same second, so second precision collided and Umzug skipped the second migration (silent data loss). `writeFiles` also appends a `-N` suffix if a file with the same name somehow exists.
+- ✅ Payload shape: ordered `renames: [{ oldName, newName }, …]` per updated content-type / component (the exact path of hops, so swaps/chains replay verbatim). NOT inferred from a diff.
+- ✅ Builder ownership: generic file rendering/writing extracted to `@strapi/database` (`migrations/file-builder.ts`); CTB keeps only Strapi-domain rename resolution.
+- ✅ Config modes renamed to `prompt` / `always` / `never` (default `prompt`).
+- ✅ Always emit `.js` (never `.ts`) — runner only globs `*.{js,sql}`.
+- ✅ Timestamp bugs fixed: migration filenames use a full **millisecond** timestamp (`2026.06.11T15.39.50.123`), not bare `2026` and not second-precision. `writeFiles` also appends a `-N` suffix on collision.
+- ✅ Index renaming intentionally deferred to schema-sync (see questions doc #7).
 - ⬜ Provider order `[user, internal]` vs old internal-first — guarded no-ops assumed safe; not explicitly tested against internal migrations.
-- ⬜ TS runtime / index renaming — see questions doc.
 
 ---
 
 ## Key files (where to work) (§12)
 
-- **Admin intent/modal/serialize**: `content-type-builder/admin/src/components/DataManager/{reducer.ts,DataManagerProvider.tsx,utils/cleanData.ts}`, `components/FormModalEndActions.tsx`, `components/ContentTypeBuilderNav/ContentTypeBuilderNav.tsx`.
-- **Backend hook**: `content-type-builder/server/src/services/schema.ts` (rename TODO), `services/migration-builder/` (CTB resolver), `server/src/config.ts`.
+- **Backend hook**: `content-type-builder/server/src/services/schema.ts`, `services/migration-builder/` (CTB rename resolver), `server/src/config.ts`.
+- **Admin intent/modal/serialize**: `content-type-builder/admin/src/components/DataManager/{reducer.ts,DataManagerProvider.tsx,RenameMigrationModal.tsx,utils/cleanData.ts}`.
 - **DB internals**: `core/database/src/migrations/{users.ts,index.ts,common.ts,storage.ts}`, `core/database/src/schema/{index.ts,diff.ts,builder.ts,schema.ts}`.
 - **Generic migration file builder**: `core/database/src/migrations/file-builder.ts`.
 - **Startup order**: `packages/core/core/src/Strapi.ts`.
@@ -322,16 +376,19 @@ Resolved during build:
 
 ## Suggested build order
 
-### Done (2026-06-11)
+### Done
 
 1. ✅ Fresh-DB no-op recording — `packages/core/database/src/migrations/__tests__/fresh-db-rename.test.ts` (real sqlite DB).
 2. ✅ Backend: `renameMigrations` config + CTB rename resolver (real identifiers) wired into `services/schema.ts`, using the generic database migration file builder for guarded JS output.
 3. ✅ API integration happy-path — `tests/api/core/content-type-builder/rename-migration.test.api.js` (sqlite; rename preserves data + rename+re-add).
-4. ✅ Admin: ordered rename capture in reducer (`oldName` tracking) + serialization in `cleanData.ts`.
+4. ✅ Admin: ordered rename capture in reducer + serialization in `cleanData.ts`.
+5. ✅ Admin: confirmation modal + per-rename opt-out (`prompt` mode) + config surfaced to admin (`RenameMigrationModal.tsx`).
+6. ✅ Attribute-rename coverage: scalar, relation join column, relation join/link table, component, dynamic zone, media (morph relations reported unsupported).
+7. ✅ Extract generic migration file builder into `@strapi/database` (`migrations/file-builder.ts`).
 
 ### Remaining
 
-5. ⬜ Admin: modal UX + per-rename opt-out (`prompt` mode) + expose config to admin.
-6. ⬜ Fresh-DB ordering across pg/mysql drivers (sqlite proven).
-7. ⬜ (optional) CLI `rename:field`.
-8. ⬜ Relation / component / dynamic-zone rename support (MVP skips these with a warning).
+8. ⬜ **Content-type & component _level_ renames** (the table / component itself), incl. `_cmps` `component_type` bookkeeping — the main remaining scope; fully closes CG-1001.
+9. ⬜ Fresh-DB ordering across pg/mysql drivers (sqlite proven).
+10. ⬜ (optional) CLI `rename:field` reusing the resolver + file builder.
+11. ⬜ Verify provider order `[user, internal]` doesn't interact badly with internal migrations on a fresh DB.
