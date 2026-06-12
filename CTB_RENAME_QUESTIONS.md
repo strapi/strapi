@@ -82,9 +82,17 @@ from the owning side). **Polymorphic `morph*` relations are left unsupported**
 (reported via `getUnsupported()`; `schema.ts` logs a warning) — they aren't
 creatable through the CTB UI anyway.
 
-**Still out of scope** (separate, larger work tracked in the plan): renaming a
-**content-type** (table) or a **component** itself. Only **attribute** renames
-exist today — the builder exposes `addRenameAttribute` only.
+**Component-_level_ renames are now also covered** (CG-1001): moving a component
+to a new category changes its uid, and the builder exposes
+`addRenameComponent({ oldUid, newUid })`, which migrates the `component_type`
+value in every `*_cmps` link table that references it. The component's own data
+table keeps its `collectionName` (the CTB never renames it), so no table rename
+is required.
+
+**Out of scope by design:** renaming a **content-type** (its table / uid). The
+CTB cannot change a content type's `collectionName` or `uid` — `editContentType`
+only edits `displayName`/`kind`/options — so a content-type rename is purely
+cosmetic and has nothing to migrate.
 
 ## 6. Migration filename timestamp precision ✅ (resolved — millisecond + collision suffix)
 

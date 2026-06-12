@@ -1,9 +1,20 @@
 import path from 'path';
 import os from 'os';
 import fse from 'fs-extra';
-
+import { type Knex } from 'knex';
 import { Database } from '../../index';
+import { createMigrationsProvider } from '../index';
 import { createUserMigrationProvider } from '../users';
+
+jest.mock('../internal-migrations', () => ({ internalMigrations: [] }));
+
+type DriverName = 'sqlite' | 'postgres' | 'mysql';
+
+interface DriverContext {
+  driver: DriverName;
+  workDir: string;
+  schema?: string;
+}
 
 /**
  * Mirrors the shape of the migration the Content-Type Builder generates for an
@@ -13,7 +24,10 @@ import { createUserMigrationProvider } from '../users';
  */
 const GUARDED_RENAME_MIGRATION = `module.exports = {
   async up(knex) {
-    if (await knex.schema.hasColumn('articles', 'old_title')) {
+    if (
+      (await knex.schema.hasTable('articles')) &&
+      (await knex.schema.hasColumn('articles', 'old_title'))
+    ) {
       await knex.schema.alterTable('articles', (table) => {
         table.renameColumn('old_title', 'new_title');
       });
@@ -31,17 +45,26 @@ const GUARDED_RENAME_MIGRATION = `module.exports = {
  */
 const SWAP_RENAME_MIGRATION = `module.exports = {
   async up(knex) {
-    if (await knex.schema.hasColumn('articles', 'title_a')) {
+    if (
+      (await knex.schema.hasTable('articles')) &&
+      (await knex.schema.hasColumn('articles', 'title_a'))
+    ) {
       await knex.schema.alterTable('articles', (table) => {
         table.renameColumn('title_a', 'tmp_field');
       });
     }
-    if (await knex.schema.hasColumn('articles', 'title_b')) {
+    if (
+      (await knex.schema.hasTable('articles')) &&
+      (await knex.schema.hasColumn('articles', 'title_b'))
+    ) {
       await knex.schema.alterTable('articles', (table) => {
         table.renameColumn('title_b', 'title_a');
       });
     }
-    if (await knex.schema.hasColumn('articles', 'tmp_field')) {
+    if (
+      (await knex.schema.hasTable('articles')) &&
+      (await knex.schema.hasColumn('articles', 'tmp_field'))
+    ) {
       await knex.schema.alterTable('articles', (table) => {
         table.renameColumn('tmp_field', 'title_b');
       });
@@ -51,7 +74,121 @@ const SWAP_RENAME_MIGRATION = `module.exports = {
 };
 `;
 
-const createSqliteDatabase = (workDir: string): Database => {
+const GUARDED_PRIMITIVES_MIGRATION = `module.exports = {
+  async up(knex) {
+    if (
+      (await knex.schema.hasTable('articles')) &&
+      (await knex.schema.hasColumn('articles', 'old_title'))
+    ) {
+      await knex.schema.alterTable('articles', (table) => {
+        table.renameColumn('old_title', 'new_title');
+      });
+    }
+    if (
+      (await knex.schema.hasTable('old_articles_tags_links')) &&
+      !(await knex.schema.hasTable('new_articles_tags_links'))
+    ) {
+      await knex.schema.renameTable('old_articles_tags_links', 'new_articles_tags_links');
+    }
+    if (
+      (await knex.schema.hasTable('articles_cmps')) &&
+      (await knex.schema.hasColumn('articles_cmps', 'component_type'))
+    ) {
+      await knex('articles_cmps')
+        .where('component_type', 'default.old-box')
+        .update('component_type', 'default.new-box');
+    }
+  },
+  async down() {},
+};
+`;
+
+const GUARDED_RENAME_TABLE_MIGRATION = `module.exports = {
+  async up(knex) {
+    if (
+      (await knex.schema.hasTable('old_articles_tags_links')) &&
+      !(await knex.schema.hasTable('new_articles_tags_links'))
+    ) {
+      await knex.schema.renameTable('old_articles_tags_links', 'new_articles_tags_links');
+    }
+  },
+  async down() {},
+};
+`;
+
+const GUARDED_UPDATE_ROWS_MIGRATION = `module.exports = {
+  async up(knex) {
+    if (
+      (await knex.schema.hasTable('articles_cmps')) &&
+      (await knex.schema.hasColumn('articles_cmps', 'component_type'))
+    ) {
+      await knex('articles_cmps')
+        .where('component_type', 'default.old-box')
+        .update('component_type', 'default.new-box');
+    }
+  },
+  async down() {},
+};
+`;
+
+const GUARDED_ORDER_MARKER_MIGRATION = `module.exports = {
+  async up(knex) {
+    if (await knex.schema.hasTable('internal_order_markers')) {
+      await knex('internal_order_markers').insert({ name: 'user-ran-after-internal' });
+    }
+  },
+  async down() {},
+};
+`;
+
+const createDatabase = ({ driver, workDir, schema }: DriverContext): Database => {
+  if (driver === 'postgres') {
+    return new Database({
+      connection: {
+        client: 'postgres',
+        // `schema` isolates parallel pg test runs; it is not part of knex's
+        // connection typings, so assert the shape.
+        connection: {
+          host: '127.0.0.1',
+          port: 5432,
+          database: 'strapi_test',
+          user: 'strapi',
+          password: 'strapi',
+          schema,
+        } as Knex.PgConnectionConfig,
+        pool: { min: 0, max: 1 },
+        acquireConnectionTimeout: 1000,
+      },
+      settings: {
+        migrations: { dir: path.join(workDir, 'migrations') },
+        runMigrations: true,
+        forceMigration: true,
+      },
+    });
+  }
+
+  if (driver === 'mysql') {
+    return new Database({
+      connection: {
+        client: 'mysql',
+        connection: {
+          host: '127.0.0.1',
+          port: 3306,
+          database: 'strapi_test',
+          user: 'strapi',
+          password: 'strapi',
+        },
+        pool: { min: 0, max: 1 },
+        acquireConnectionTimeout: 1000,
+      },
+      settings: {
+        migrations: { dir: path.join(workDir, 'migrations') },
+        runMigrations: true,
+        forceMigration: true,
+      },
+    });
+  }
+
   return new Database({
     connection: {
       client: 'sqlite',
@@ -78,106 +215,295 @@ const getExecutedMigrations = async (db: Database): Promise<string[]> => {
   return rows.map((row: { name: string }) => row.name);
 };
 
-describe('user migration runner — guarded rename on a fresh database', () => {
-  let workDir: string;
-  let db: Database;
+const getExecutedInternalMigrations = async (db: Database): Promise<string[]> => {
+  const rows = await db.connection('strapi_migrations_internal').select('name');
+  return rows.map((row: { name: string }) => row.name);
+};
 
-  beforeEach(() => {
-    workDir = fse.mkdtempSync(path.join(os.tmpdir(), 'ctb-freshdb-'));
-  });
+const resetMysqlTables = async (db: Database) => {
+  await db.connection.raw('SET FOREIGN_KEY_CHECKS = 0');
+  for (const table of [
+    'strapi_migrations',
+    'strapi_migrations_internal',
+    'articles',
+    'old_articles_tags_links',
+    'new_articles_tags_links',
+    'articles_cmps',
+    'internal_order_markers',
+  ]) {
+    await db.connection.schema.dropTableIfExists(table);
+  }
+  await db.connection.raw('SET FOREIGN_KEY_CHECKS = 1');
+};
 
-  afterEach(async () => {
-    if (db) {
-      await db.destroy();
+const prepareDatabase = async (db: Database, context: DriverContext) => {
+  if (context.driver === 'postgres' && context.schema) {
+    await db.connection.raw(`CREATE SCHEMA IF NOT EXISTS "${context.schema}"`);
+  }
+
+  if (context.driver === 'mysql') {
+    await resetMysqlTables(db);
+  }
+};
+
+const cleanupDatabase = async (db: Database, context: DriverContext) => {
+  if (context.driver === 'postgres' && context.schema) {
+    await db.connection.raw(`DROP SCHEMA IF EXISTS "${context.schema}" CASCADE`);
+  }
+
+  if (context.driver === 'mysql') {
+    await resetMysqlTables(db);
+  }
+};
+
+const connectOrSkip = async (context: DriverContext): Promise<Database | null> => {
+  const db = createDatabase(context);
+
+  try {
+    await db.connection.raw('SELECT 1');
+    await prepareDatabase(db, context);
+    return db;
+  } catch (error) {
+    await db.destroy();
+
+    if (context.driver !== 'sqlite') {
+      const cause = error instanceof Error ? error.message : String(error);
+      // eslint-disable-next-line no-console
+      console.warn(`Skipping ${context.driver} fresh-DB rename migration tests: ${cause}`);
+      return null;
     }
-    fse.removeSync(workDir);
-  });
 
-  it('records a guarded no-op migration as executed on a fresh (empty) DB', async () => {
-    writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', GUARDED_RENAME_MIGRATION);
+    throw error;
+  }
+};
 
-    db = createSqliteDatabase(workDir);
-    const provider = createUserMigrationProvider(db);
+const drivers: DriverName[] = ['sqlite', 'postgres', 'mysql'];
 
-    expect(await provider.shouldRun()).toBe(true);
+describe.each(drivers)(
+  'user migration runner — guarded rename on a fresh %s database',
+  (driver) => {
+    let workDir: string;
+    let db: Database | null;
+    let context: DriverContext;
 
-    // Must not throw even though `articles` does not exist on the fresh DB.
-    await expect(provider.up()).resolves.not.toThrow();
-
-    const executed = await getExecutedMigrations(db);
-    expect(executed).toContain('2026.01.01.00.00.00.rename-fields.js');
-  });
-
-  it('does not re-run (and therefore cannot double-rename) once recorded', async () => {
-    writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', GUARDED_RENAME_MIGRATION);
-
-    db = createSqliteDatabase(workDir);
-    const provider = createUserMigrationProvider(db);
-
-    // First boot: fresh DB, guarded no-op, recorded as executed.
-    await provider.up();
-    expect(await provider.shouldRun()).toBe(false);
-
-    // Simulate schema-sync creating the table afterwards with the *new* column.
-    await db.connection.schema.createTable('articles', (table) => {
-      table.increments('id');
-      table.string('new_title');
+    beforeEach(async () => {
+      workDir = fse.mkdtempSync(path.join(os.tmpdir(), 'ctb-freshdb-'));
+      context = {
+        driver,
+        workDir,
+        schema:
+          driver === 'postgres'
+            ? `ctb_freshdb_${Date.now()}_${Math.random().toString(36).slice(2)}`
+            : undefined,
+      };
+      db = await connectOrSkip(context);
     });
 
-    // Second boot: migration is already recorded, so it must not run again and
-    // must not wrongly rename the freshly-created `new_title` column.
-    expect(await provider.shouldRun()).toBe(false);
-    await provider.up();
-
-    expect(await db.connection.schema.hasColumn('articles', 'new_title')).toBe(true);
-    expect(await db.connection.schema.hasColumn('articles', 'old_title')).toBe(false);
-  });
-
-  it('renames the column (preserving data) when the old column exists', async () => {
-    writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', GUARDED_RENAME_MIGRATION);
-
-    db = createSqliteDatabase(workDir);
-
-    // Seed an existing table with data under the old column name.
-    await db.connection.schema.createTable('articles', (table) => {
-      table.increments('id');
-      table.string('old_title');
+    afterEach(async () => {
+      if (db) {
+        await cleanupDatabase(db, context);
+        await db.destroy();
+      }
+      fse.removeSync(workDir);
     });
-    await db.connection('articles').insert({ old_title: 'Hello' });
 
-    const provider = createUserMigrationProvider(db);
-    await provider.up();
+    it('records guarded no-op primitives as executed on a fresh (empty) DB', async () => {
+      if (!db) {
+        return;
+      }
 
-    expect(await db.connection.schema.hasColumn('articles', 'new_title')).toBe(true);
-    expect(await db.connection.schema.hasColumn('articles', 'old_title')).toBe(false);
+      writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', GUARDED_PRIMITIVES_MIGRATION);
 
-    const rows = await db.connection('articles').select('new_title');
-    expect(rows).toEqual([{ new_title: 'Hello' }]);
+      const provider = createUserMigrationProvider(db);
 
-    const executed = await getExecutedMigrations(db);
-    expect(executed).toContain('2026.01.01.00.00.00.rename-fields.js');
-  });
+      expect(await provider.shouldRun()).toBe(true);
 
-  it('swaps two columns (preserving both values) when a cyclic rename migration runs', async () => {
-    writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', SWAP_RENAME_MIGRATION);
+      // Must not throw even though the target tables/columns do not exist yet.
+      await expect(provider.up()).resolves.not.toThrow();
 
-    db = createSqliteDatabase(workDir);
-
-    await db.connection.schema.createTable('articles', (table) => {
-      table.increments('id');
-      table.string('title_a');
-      table.string('title_b');
+      const executed = await getExecutedMigrations(db);
+      expect(executed).toContain('2026.01.01.00.00.00.rename-fields.js');
     });
-    await db.connection('articles').insert({ title_a: 'Value A', title_b: 'Value B' });
 
-    const provider = createUserMigrationProvider(db);
-    await provider.up();
+    it('does not re-run (and therefore cannot double-rename) once recorded', async () => {
+      if (!db) {
+        return;
+      }
 
-    expect(await db.connection.schema.hasColumn('articles', 'title_a')).toBe(true);
-    expect(await db.connection.schema.hasColumn('articles', 'title_b')).toBe(true);
-    expect(await db.connection.schema.hasColumn('articles', 'tmp_field')).toBe(false);
+      writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', GUARDED_RENAME_MIGRATION);
 
-    const rows = await db.connection('articles').select('title_a', 'title_b');
-    expect(rows).toEqual([{ title_a: 'Value B', title_b: 'Value A' }]);
-  });
-});
+      const provider = createUserMigrationProvider(db);
+
+      // First boot: fresh DB, guarded no-op, recorded as executed.
+      await provider.up();
+      expect(await provider.shouldRun()).toBe(false);
+
+      // Simulate schema-sync creating the table afterwards with the *new* column.
+      await db.connection.schema.createTable('articles', (table) => {
+        table.increments('id');
+        table.string('new_title');
+      });
+
+      // Second boot: migration is already recorded, so it must not run again and
+      // must not wrongly rename the freshly-created `new_title` column.
+      expect(await provider.shouldRun()).toBe(false);
+      await provider.up();
+
+      expect(await db.connection.schema.hasColumn('articles', 'new_title')).toBe(true);
+      expect(await db.connection.schema.hasColumn('articles', 'old_title')).toBe(false);
+    });
+
+    it('renames the column (preserving data) when the old column exists', async () => {
+      if (!db) {
+        return;
+      }
+
+      writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', GUARDED_RENAME_MIGRATION);
+
+      // Seed an existing table with data under the old column name.
+      await db.connection.schema.createTable('articles', (table) => {
+        table.increments('id');
+        table.string('old_title');
+      });
+      await db.connection('articles').insert({ old_title: 'Hello' });
+
+      const provider = createUserMigrationProvider(db);
+      await provider.up();
+
+      expect(await db.connection.schema.hasColumn('articles', 'new_title')).toBe(true);
+      expect(await db.connection.schema.hasColumn('articles', 'old_title')).toBe(false);
+
+      const rows = await db.connection('articles').select('new_title');
+      expect(rows).toEqual([{ new_title: 'Hello' }]);
+
+      const executed = await getExecutedMigrations(db);
+      expect(executed).toContain('2026.01.01.00.00.00.rename-fields.js');
+    });
+
+    it('swaps two columns (preserving both values) when a cyclic rename migration runs', async () => {
+      if (!db) {
+        return;
+      }
+
+      writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', SWAP_RENAME_MIGRATION);
+
+      await db.connection.schema.createTable('articles', (table) => {
+        table.increments('id');
+        table.string('title_a');
+        table.string('title_b');
+      });
+      await db.connection('articles').insert({ title_a: 'Value A', title_b: 'Value B' });
+
+      const provider = createUserMigrationProvider(db);
+      await provider.up();
+
+      expect(await db.connection.schema.hasColumn('articles', 'title_a')).toBe(true);
+      expect(await db.connection.schema.hasColumn('articles', 'title_b')).toBe(true);
+      expect(await db.connection.schema.hasColumn('articles', 'tmp_field')).toBe(false);
+
+      const rows = await db.connection('articles').select('title_a', 'title_b');
+      expect(rows).toEqual([{ title_a: 'Value B', title_b: 'Value A' }]);
+    });
+
+    it('renames a table (preserving rows) when the old table exists', async () => {
+      if (!db) {
+        return;
+      }
+
+      writeMigration(
+        workDir,
+        '2026.01.01.00.00.00.rename-fields.js',
+        GUARDED_RENAME_TABLE_MIGRATION
+      );
+
+      await db.connection.schema.createTable('old_articles_tags_links', (table) => {
+        table.increments('id');
+        table.integer('article_id');
+      });
+      await db.connection('old_articles_tags_links').insert({ article_id: 12 });
+
+      const provider = createUserMigrationProvider(db);
+      await provider.up();
+
+      expect(await db.connection.schema.hasTable('new_articles_tags_links')).toBe(true);
+      expect(await db.connection.schema.hasTable('old_articles_tags_links')).toBe(false);
+
+      const rows = await db.connection('new_articles_tags_links').select('article_id');
+      expect(rows).toEqual([{ article_id: 12 }]);
+    });
+
+    it('updates guarded rows when the target table and guard column exist', async () => {
+      if (!db) {
+        return;
+      }
+
+      writeMigration(
+        workDir,
+        '2026.01.01.00.00.00.rename-fields.js',
+        GUARDED_UPDATE_ROWS_MIGRATION
+      );
+
+      await db.connection.schema.createTable('articles_cmps', (table) => {
+        table.increments('id');
+        table.string('component_type');
+        table.string('field');
+      });
+      await db.connection('articles_cmps').insert([
+        { component_type: 'default.old-box', field: 'zone' },
+        { component_type: 'default.other-box', field: 'zone' },
+      ]);
+
+      const provider = createUserMigrationProvider(db);
+      await provider.up();
+
+      const rows = await db.connection('articles_cmps').select('component_type').orderBy('id');
+      expect(rows).toEqual([
+        { component_type: 'default.new-box' },
+        { component_type: 'default.other-box' },
+      ]);
+    });
+
+    it('runs guarded user migrations before registered internal migrations on a fresh DB', async () => {
+      if (!db) {
+        return;
+      }
+
+      writeMigration(
+        workDir,
+        '2026.01.01.00.00.00.order-marker.js',
+        GUARDED_ORDER_MARKER_MIGRATION
+      );
+
+      const provider = createMigrationsProvider(db);
+      await provider.providers.internal.register({
+        name: '2026.01.01.00.00.01-internal-order-marker',
+        async up(knex) {
+          await knex.schema.createTable('internal_order_markers', (table) => {
+            table.increments('id');
+            table.string('name');
+          });
+          await knex('internal_order_markers').insert({ name: 'internal-ran' });
+        },
+        async down() {
+          /* no-op */
+        },
+      });
+
+      await expect(provider.up()).resolves.not.toThrow();
+
+      const rows = await db.connection('internal_order_markers').select('name');
+      expect(rows).toEqual([{ name: 'internal-ran' }]);
+
+      expect(await getExecutedMigrations(db)).toContain('2026.01.01.00.00.00.order-marker.js');
+      expect(await getExecutedInternalMigrations(db)).toContain(
+        '2026.01.01.00.00.01-internal-order-marker'
+      );
+
+      expect(await provider.shouldRun()).toBe(false);
+      await provider.up();
+      expect(await db.connection('internal_order_markers').select('name')).toEqual([
+        { name: 'internal-ran' },
+      ]);
+    });
+  }
+);

@@ -32,7 +32,10 @@ const createTestMigrationFileBuilder = ({ migrationsDir }: { migrationsDir?: str
   const renderOperation = (op: Operation): string => {
     if (op.kind === 'renameColumn') {
       return `    // ${op.comment ?? ''}
-    if (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.from)})) {
+    if (
+      (await knex.schema.hasTable(${quote(op.table)})) &&
+      (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.from)}))
+    ) {
       await knex.schema.alterTable(${quote(op.table)}, (table) => {
         table.renameColumn(${quote(op.from)}, ${quote(op.to)});
       });
@@ -55,7 +58,10 @@ const createTestMigrationFileBuilder = ({ migrationsDir }: { migrationsDir?: str
       .join('');
 
     return `    // ${op.comment ?? ''}
-    if (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.guardColumn ?? setColumn)})) {
+    if (
+      (await knex.schema.hasTable(${quote(op.table)})) &&
+      (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.guardColumn ?? setColumn)}))
+    ) {
       await knex(${quote(op.table)})${where}.update(${quote(setColumn)}, ${quote(setValue)});
     }`;
   };
@@ -125,10 +131,14 @@ const createStrapiMock = ({
   migrationsDir?: string;
   useTypescriptMigrations?: boolean;
   identifiers?: Partial<Record<string, jest.Mock>>;
-  // schema attribute types per uid, used by the builder to distinguish e.g.
+  // schema attribute descriptors per uid, used by the builder to distinguish e.g.
   // media (unsupported) from components/dynamic zones that share the same
-  // morph-join-table metadata shape.
-  schema?: Record<string, Record<string, { type: string }>>;
+  // morph-join-table metadata shape, and to resolve which owners reference a
+  // renamed component (via `component` / `components`).
+  schema?: Record<
+    string,
+    Record<string, { type: string; component?: string; components?: string[] }>
+  >;
 } = {}) => {
   const metadata = new Map<string, any>(Object.entries(metas));
 
@@ -265,8 +275,10 @@ describe('MigrationBuilder', () => {
       });
 
       const result = builder.build()!;
+      expect(result.content).toContain('await knex.schema.hasTable');
       expect(result.content).toContain('await knex.schema.hasColumn');
-      expect(result.content).toMatch(/if \(await knex\.schema\.hasColumn/);
+      expect(result.content).toContain("hasTable('articles')");
+      expect(result.content).toContain("hasColumn('articles', 'old_title')");
     });
 
     it('skips no-op renames where the resolved column does not change', () => {
@@ -587,6 +599,153 @@ describe('MigrationBuilder', () => {
         ['articles_tags_lnk', 'articles_temp_lnk'],
         ['articles_temp_lnk', 'articles_labels_lnk'],
       ]);
+      expect(builder.getUnsupported()).toHaveLength(0);
+    });
+  });
+
+  describe('addRenameComponent (component-level renames)', () => {
+    // A component's uid is `<category>.<name>`; moving it to a new category
+    // changes the uid. The component's own data table keeps its collectionName,
+    // so the only data to preserve is the `component_type` reference stored in
+    // every owner's `*_cmps` link table.
+    const componentMeta = {
+      // content-type owner using the component as a plain `component` attribute
+      'api::article.article': {
+        tableName: 'articles',
+        attributes: {
+          hero: {
+            type: 'relation',
+            relation: 'oneToOne',
+            joinTable: { name: 'articles_cmps', on: { field: 'hero' } },
+          },
+        },
+      },
+      // content-type owner using the component inside a dynamic zone
+      'api::page.page': {
+        tableName: 'pages',
+        attributes: {
+          blocks: {
+            type: 'relation',
+            relation: 'morphToMany',
+            joinTable: { name: 'pages_cmps', on: { field: 'blocks' } },
+          },
+        },
+      },
+      // the component model itself (its presence makes the rename "known")
+      'default.hero': { tableName: 'components_default_heroes', attributes: {} },
+    };
+    // The pre-reload schema (strapi.contentTypes) the builder scans to discover
+    // which owners reference the component and via which attribute.
+    const componentSchema = {
+      'api::article.article': { hero: { type: 'component', component: 'default.hero' } },
+      'api::page.page': { blocks: { type: 'dynamiczone', components: ['default.hero'] } },
+    };
+
+    const updatesFrom = (content: string): string[][] =>
+      [
+        ...content.matchAll(
+          /knex\('([^']+)'\)\.where\('component_type', '([^']+)'\)\.update\('component_type', '([^']+)'\)/g
+        ),
+      ].map((m) => [m[1], m[2], m[3]]);
+
+    it('updates component_type in every owner link table, guarded for fresh-DB', () => {
+      const strapi = createStrapiMock({ metas: componentMeta, schema: componentSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameComponent({ oldUid: 'default.hero', newUid: 'shared.hero' });
+
+      const result = builder.build()!;
+      expect(result.content).toContain("hasColumn('articles_cmps', 'component_type')");
+      expect(result.content).toContain("hasColumn('pages_cmps', 'component_type')");
+      expect(updatesFrom(result.content)).toEqual(
+        expect.arrayContaining([
+          ['articles_cmps', 'default.hero', 'shared.hero'],
+          ['pages_cmps', 'default.hero', 'shared.hero'],
+        ])
+      );
+      expect(builder.getUnsupported()).toHaveLength(0);
+    });
+
+    it('emits a single update per link table even when used by several attributes', () => {
+      const strapi = createStrapiMock({
+        metas: {
+          'api::article.article': {
+            tableName: 'articles',
+            attributes: {
+              hero: {
+                type: 'relation',
+                relation: 'oneToOne',
+                joinTable: { name: 'articles_cmps', on: { field: 'hero' } },
+              },
+              footer: {
+                type: 'relation',
+                relation: 'oneToOne',
+                joinTable: { name: 'articles_cmps', on: { field: 'footer' } },
+              },
+            },
+          },
+          'default.hero': { tableName: 'components_default_heroes', attributes: {} },
+        },
+        schema: {
+          'api::article.article': {
+            hero: { type: 'component', component: 'default.hero' },
+            footer: { type: 'component', component: 'default.hero' },
+          },
+        },
+      });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameComponent({ oldUid: 'default.hero', newUid: 'shared.hero' });
+
+      const updates = updatesFrom(builder.build()!.content);
+      expect(updates).toEqual([['articles_cmps', 'default.hero', 'shared.hero']]);
+    });
+
+    it('replays a component-uid chain verbatim (a -> b -> c) reusing resolved tables', () => {
+      const strapi = createStrapiMock({ metas: componentMeta, schema: componentSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      // The user moved the component category twice before saving.
+      builder.addRenameComponent({ oldUid: 'default.hero', newUid: 'tmp.hero' });
+      builder.addRenameComponent({ oldUid: 'tmp.hero', newUid: 'shared.hero' });
+
+      const updates = updatesFrom(builder.build()!.content);
+      expect(updates).toEqual(
+        expect.arrayContaining([
+          ['articles_cmps', 'default.hero', 'tmp.hero'],
+          ['pages_cmps', 'default.hero', 'tmp.hero'],
+          ['articles_cmps', 'tmp.hero', 'shared.hero'],
+          ['pages_cmps', 'tmp.hero', 'shared.hero'],
+        ])
+      );
+      expect(builder.getUnsupported()).toHaveLength(0);
+    });
+
+    it('records an unknown component as unsupported (model-not-found)', () => {
+      const strapi = createStrapiMock({ metas: componentMeta, schema: componentSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameComponent({ oldUid: 'default.ghost', newUid: 'shared.ghost' });
+
+      expect(builder.hasChanges()).toBe(false);
+      expect(builder.getUnsupported()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ oldName: 'default.ghost', reason: 'model-not-found' }),
+        ])
+      );
+    });
+
+    it('produces no changes for a known component that is not used anywhere', () => {
+      const strapi = createStrapiMock({
+        metas: { 'default.hero': { tableName: 'components_default_heroes', attributes: {} } },
+        schema: {},
+      });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameComponent({ oldUid: 'default.hero', newUid: 'shared.hero' });
+
+      expect(builder.hasChanges()).toBe(false);
+      expect(builder.build()).toBeNull();
       expect(builder.getUnsupported()).toHaveLength(0);
     });
   });

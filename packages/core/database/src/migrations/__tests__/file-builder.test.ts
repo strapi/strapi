@@ -27,6 +27,7 @@ describe('MigrationFileBuilder', () => {
 
       const result = builder.build({ name: 'rename-fields' });
       expect(result).not.toBeNull();
+      expect(result!.content).toContain("hasTable('articles')");
       expect(result!.content).toContain("hasColumn('articles', 'old_title')");
       expect(result!.content).toContain("renameColumn('old_title', 'new_title')");
     });
@@ -61,6 +62,7 @@ describe('MigrationFileBuilder', () => {
       });
 
       const result = builder.build({ name: 'rename-fields' })!;
+      expect(result.content).toContain("hasTable('files_related_morphs')");
       expect(result.content).toContain("hasColumn('files_related_morphs', 'field')");
       expect(result.content).toContain(
         "knex('files_related_morphs').where('field', 'cover').where('related_type', 'api::article.article').update('field', 'image')"

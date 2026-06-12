@@ -38,17 +38,57 @@
   `tests/api/core/content-type-builder/rename-migration.test.api.js`, plus admin
   reducer/cleanData/modal tests.
 
-**Not yet done (start here):**
+**Also implemented & tested (component-_level_ renames — CG-1001):**
 
-1. **Content-type and component _level_ renames** (the table / component itself) —
-   only **attribute** renames exist. Needs `addRenameContentType` /
-   `addRenameComponent` (+ `_cmps` `component_type` bookkeeping). This is the main
-   remaining scope and what fully closes CG-1001.
-2. **Fresh-DB ordering on postgres & mysql** — only proven on sqlite; guards are
-   driver-sensitive.
-3. **(optional) CLI** `strapi rename:field` reusing the same resolver + file builder.
+- Moving a component to a new **category** changes its uid (`<category>.<name>`).
+  The admin now persists that category change on existing components
+  (`reducer.ts` `updateComponentSchema` + `FormModal.tsx`), so it is serialized on
+  save. `services/schema.ts` derives the new uid exactly as `editComponent` does
+  and calls a new resolver `addRenameComponent({ oldUid, newUid })`.
+- The resolver (`services/migration-builder/index.ts`) scans the pre-reload schema
+  for every content-type / component that references the component (as a
+  `component` attribute or inside a `dynamiczone`), resolves each owner's physical
+  `*_cmps` link table from `strapi.db.metadata`, and emits a guarded `updateRows`
+  migrating the `component_type` value `oldUid → newUid` (deduped per table,
+  in-flight tracking so a category-change chain replays verbatim). The component's
+  own data table keeps its `collectionName` (the CTB never renames it), so no table
+  rename is needed.
+- Tests: unit (`migration-builder.test.ts` — single/multi-owner/DZ/chain/unknown/
+  no-usage), `schema.test.ts` (component-rename collection + `never`), admin
+  `reducerRenameComponent.test.ts`, and an API integration test
+  (`rename-migration.test.api.js` — moving a component to a new category preserves
+  embedded dynamic-zone data across restart).
 
-See "Suggested build order → Remaining" for the full list.
+**Content-type _level_ renames — N/A (no DB change possible):** a content type's
+`collectionName` and `uid` are immutable in the CTB (`editContentType` only changes
+`displayName`/`kind`/options, never `collectionName`). Renaming a content type is
+purely cosmetic, so there is no table to migrate and no `addRenameContentType` is
+needed.
+
+**Also implemented & tested (optional CLI — `strapi rename:field`):**
+
+- `strapi rename:field <uid> <oldName> <newName>` renames a content-type/component
+  attribute **and** generates the data-preserving migration in one invocation. A
+  thin CLI command (`packages/core/strapi/src/cli/commands/content-types/rename-field.ts`)
+  boots a loaded strapi and delegates to a new
+  `schema.renameAttribute(uid, oldName, newName)` service, which reuses the regular
+  `updateSchema` → `generateRenameMigrations` → `createMigrationBuilder` flow (no
+  duplicated rename logic, resolved against pre-reload metadata, honours
+  `renameMigrations` mode + the same unsupported warning).
+- Tests: `services/__tests__/schema.test.ts` (happy path, `never`, validation
+  errors) and `tests/cli/tests/strapi/strapi/rename-field.test.cli.ts` (schema.json
+  updated + one guarded `*.rename-fields.js` migration).
+
+- `rename:component <uid> <newCategory>` is also implemented
+  (`packages/core/strapi/src/cli/commands/components/rename.ts` → new
+  `schema.renameComponent` service): moving a component to a new category changes
+  its uid and emits the `component_type` migration across every `*_cmps` table that
+  embeds it. Tested in `schema.test.ts` + `tests/cli/.../rename-component.test.cli.ts`.
+
+**Not yet done:** nothing — all planned work (including the optional CLI for both
+field and component renames) is complete. Possible follow-up only:
+`rename:contentType` (cosmetic — a content type's uid/collectionName is immutable,
+so there is nothing to migrate).
 
 ## Goal
 
@@ -158,7 +198,11 @@ CTB resolver responsibilities (implemented today):
   pre-reload metadata and enqueues the appropriate primitive operation(s) on the
   database file builder (scalar column, join column, join table, component/DZ
   link-table `field` update, media morph-table update).
-- (future) `addRenameContentType`, `addRenameComponent`, `addDeleteComponent`, etc.
+- `addRenameComponent({ oldUid, newUid })`: component-_level_ rename (category /
+  uid change). Resolves every `*_cmps` link table referencing the component and
+  emits a guarded `component_type` `updateRows` (`oldUid → newUid`).
+- (future) `addDeleteComponent`, etc. (`addRenameContentType` is not needed — a
+  content type's table/uid is immutable in the CTB).
 
 **CRITICAL: use real DB identifiers, NOT `snakeCase`.** POC used `snakeCase(name)`; production must resolve true names via `strapi.db.metadata` + `Database.identifiers` (v5 long-identifier hashing means names don't map 1:1). Builder reads from **old** metadata (before reload).
 
@@ -238,21 +282,28 @@ content-type / component (not inferred per-attribute, so intermediate hops survi
 **Approach: guarded existence checks** (preferred over blind try/catch — don't mask real errors):
 
 ```javascript
-if (await knex.schema.hasColumn('<table>', '<oldCol>')) {
+if (
+  (await knex.schema.hasTable('<table>')) &&
+  (await knex.schema.hasColumn('<table>', '<oldCol>'))
+) {
   await knex.schema.alterTable('<table>', (t) => t.renameColumn('<oldCol>', '<newCol>'));
 }
 ```
 
+- Always check `hasTable` before `hasColumn`: MySQL throws from `hasColumn` when
+  the table is missing, while sqlite/postgres return a safe falsey result.
 - `hasTable`/`hasColumn` cleaner than catching driver-specific errors (sqlite/pg/mysql/mariadb differ).
 - Umzug records migration as executed once `up()` resolves without throwing → swallowed no-op still gets written to `strapi_migrations`, won't re-run.
-- **Add a test for exactly this** (fresh DB no-op recorded as complete).
+- ✅ Tested on sqlite/postgres/mysql: fresh DB no-op recorded as complete, no
+  double-rename after sync creates the final schema, and `renameColumn`,
+  `renameTable`, `updateRows` primitives are covered.
 
 **Verify during impl:**
 
 - Provider order `[user, internal]`: fresh-DB rename-before-internal doesn't interact badly (guarded no-ops should be safe).
 - Sync idempotency: after guarded no-op, sync creates new column from new schema — confirm no leftover `strapi_database_schema` state causes a follow-up drop.
-- Transactions: existence-check + rename consistent inside trx for all 4 DBs.
-- If uniform existence-check impossible across drivers, document per-driver fallback here.
+- Transactions: existence-check + rename consistent inside trx for sqlite/pg/mysql.
+- Follow-up: mariadb still not explicitly covered.
 
 ---
 
@@ -326,11 +377,17 @@ Avoid "generate migration only" (inaccurate once schemas edited). Later:
 
 **Still needed:**
 
-- **No migration when off**: `never` → data dropped (contrast test).
-- **Dynamic zone** end-to-end (CG-979) — unit coverage exists; API test may need expansion.
-- Run across **postgres + mysql** (guards are driver-sensitive).
-- **Fresh-DB / ordering (critical)**: generate rename migration in DB A → point app at empty DB B → first boot must NOT crash, migration **recorded executed**, sync creates correct final schema. (sqlite unit test exists; pg/mysql not yet.)
-- **CLI** (`tests/cli/`, if shipped): `rename:field` updates `schema.json` + writes one migration.
+- ✅ **No migration when off**: `never` → data dropped (contrast test).
+- **Dynamic zone** end-to-end (CG-979) — unit coverage exists; API test may need expansion. (Component-_level_ rename now has an end-to-end DZ API test in `rename-migration.test.api.js`.)
+- ✅ Run across **postgres + mysql** (guards are driver-sensitive).
+- ✅ **Fresh-DB / ordering (critical)**: guarded no-op migrations do not crash on
+  empty DBs, are recorded executed, and do not double-rename after sync creates the
+  final schema (sqlite/postgres/mysql unit coverage). Provider order is explicitly
+  covered with a synthetic internal migration in the same runner pass.
+- ✅ **CLI** (`tests/cli/`): `rename:field` updates `schema.json` + writes one migration
+  (`rename-field.test.cli.ts`) and `rename:component` moves the component + writes the
+  `component_type` migration (`rename-component.test.cli.ts`); plus `schema.test.ts`
+  unit coverage for `renameAttribute` / `renameComponent`.
 - **Regression:** existing CTB save/restart, sync, migration-runner tests pass; no change when `never`.
 
 ---
@@ -339,8 +396,8 @@ Avoid "generate migration only" (inaccurate once schemas edited). Later:
 
 - **v5 identifier hashing**: long names hashed; never assume name==DB id. Use `Database.identifiers`/metadata. (PR #19732.)
 - **Components `_cmps` cleanup**: deleting/renaming components touches `{model}_cmps` rows (`component_type`). Builder must encode this (POC `addDeleteComponent`). Bugs: #20931 + support tickets.
-- **Component attr rename**: handled via link-table `field` value update (same path as dynamic zones). **Component _level_ rename** (the component itself) is still out of scope.
-- **Related bugs**: CG-979 (dynamic zone rename loses data) — **addressed** (DZ attribute renames now preserve data via the link-table `field` update). CG-1001 (renaming a component blocks reusing its old name) — **not yet**; requires component-_level_ rename support (see Remaining #8).
+- **Component attr rename**: handled via link-table `field` value update (same path as dynamic zones). **Component _level_ rename** (moving the component to a new category → new uid) — **implemented** via `addRenameComponent` (`component_type` updates across every `*_cmps` table). The component's own data table keeps its `collectionName`.
+- **Related bugs**: CG-979 (dynamic zone rename loses data) — **addressed** (DZ attribute renames now preserve data via the link-table `field` update). CG-1001 (renaming a component blocks reusing its old name) — **addressed**; component-_level_ renames now migrate `component_type` references so the old uid is freed cleanly.
 - **Graceful type changes** (later): safe conversions (number↔text, date→text, date→unix int) w/ data-loss warnings. Out of MVP.
 - **Helpers vs raw knex**: leaning inline knex for MVP transparency; revisit.
 - **Down migrations**: skip for MVP; only meaningful with full coverage.
@@ -360,7 +417,9 @@ and rationale.
 - ✅ Always emit `.js` (never `.ts`) — runner only globs `*.{js,sql}`.
 - ✅ Timestamp bugs fixed: migration filenames use a full **millisecond** timestamp (`2026.06.11T15.39.50.123`), not bare `2026` and not second-precision. `writeFiles` also appends a `-N` suffix on collision.
 - ✅ Index renaming intentionally deferred to schema-sync (see questions doc #7).
-- ⬜ Provider order `[user, internal]` vs old internal-first — guarded no-ops assumed safe; not explicitly tested against internal migrations.
+- ✅ Provider order `[user, internal]` vs old internal-first — verified in
+  `fresh-db-rename.test.ts`: guarded user migrations run and record before a
+  registered internal migration, and the internal migration still runs safely.
 
 ---
 
@@ -378,7 +437,7 @@ and rationale.
 
 ### Done
 
-1. ✅ Fresh-DB no-op recording — `packages/core/database/src/migrations/__tests__/fresh-db-rename.test.ts` (real sqlite DB).
+1. ✅ Fresh-DB no-op recording — `packages/core/database/src/migrations/__tests__/fresh-db-rename.test.ts` (real sqlite/postgres/mysql when reachable).
 2. ✅ Backend: `renameMigrations` config + CTB rename resolver (real identifiers) wired into `services/schema.ts`, using the generic database migration file builder for guarded JS output.
 3. ✅ API integration happy-path — `tests/api/core/content-type-builder/rename-migration.test.api.js` (sqlite; rename preserves data + rename+re-add).
 4. ✅ Admin: ordered rename capture in reducer + serialization in `cleanData.ts`.
@@ -388,7 +447,9 @@ and rationale.
 
 ### Remaining
 
-8. ⬜ **Content-type & component _level_ renames** (the table / component itself), incl. `_cmps` `component_type` bookkeeping — the main remaining scope; fully closes CG-1001.
-9. ⬜ Fresh-DB ordering across pg/mysql drivers (sqlite proven).
-10. ⬜ (optional) CLI `rename:field` reusing the resolver + file builder.
-11. ⬜ Verify provider order `[user, internal]` doesn't interact badly with internal migrations on a fresh DB.
+8. ✅ **Component _level_ renames** (category / uid change) incl. `_cmps` `component_type` bookkeeping — closes CG-1001. (Content-type _level_ renames are N/A: collectionName/uid are immutable in the CTB, so there is no table to migrate.)
+9. ✅ Fresh-DB ordering across pg/mysql drivers.
+10. ✅ Verify provider order `[user, internal]` doesn't interact badly with internal migrations on a fresh DB.
+11. ✅ (optional) CLI `rename:field` + `rename:component` reusing the resolver + file
+    builder (via `schema.renameAttribute` / `schema.renameComponent`). Follow-up only:
+    `rename:contentType` (cosmetic — nothing to migrate).

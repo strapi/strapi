@@ -144,6 +144,7 @@ type UpdateComponentSchemaPayload = {
   data: {
     icon: string;
     displayName: string;
+    category?: string;
   };
   uid: Internal.UID.Component;
 };
@@ -608,6 +609,11 @@ const slice = createUndoRedoSlice(
             displayName: data.displayName,
             icon: data.icon,
           },
+          // A component's category is part of its uid (`<category>.<name>`), so a
+          // category change is a component-level rename. Persist it here so it is
+          // serialized on save; the server derives the new uid and generates a
+          // data-preserving migration for the `component_type` references.
+          ...(data.category ? { category: data.category } : {}),
         });
       },
       updateComponentUid: (state, action: PayloadAction<UpdateComponentUIDPayload>) => {

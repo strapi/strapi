@@ -6,6 +6,8 @@
 
 'use strict';
 
+const fse = require('fs-extra');
+
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
@@ -67,6 +69,16 @@ const listEntries = (uid = CT_UID) =>
 const hasColumn = async (column) => {
   const { tableName } = strapi.db.metadata.get(CT_UID);
   return strapi.db.connection.schema.hasColumn(tableName, column);
+};
+
+const listRenameMigrationFiles = () => {
+  const migrationsDir = strapi.db.config.settings.migrations.dir;
+
+  if (!fse.existsSync(migrationsDir)) {
+    return [];
+  }
+
+  return fse.readdirSync(migrationsDir).filter((file) => file.endsWith('.rename-fields.js'));
 };
 
 describe('Content Type Builder - rename migration preserves data', () => {
@@ -492,6 +504,128 @@ describe('Content Type Builder - component rename preserves data', () => {
   });
 });
 
+describe('Content Type Builder - component-level rename (category change) preserves data', () => {
+  // Moving a component to a new category changes its uid (`<category>.<name>`).
+  // The component's own data table keeps its collectionName, but every
+  // `*_cmps` link table stores the component uid in a `component_type` column,
+  // which must be migrated so the embedded rows are not orphaned (and dropped by
+  // the orphan-morph-type repair) on the next boot.
+  const MOVABLE_UID = 'default.movable';
+  const MOVED_UID = 'shared.movable';
+  const DZ_HOST_UID = 'api::dzhost.dzhost';
+
+  const restartMove = async () => {
+    await strapi.destroy();
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+  };
+
+  let hostDocId;
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      components: [
+        {
+          action: 'create',
+          uid: MOVABLE_UID,
+          category: 'default',
+          displayName: 'Movable',
+          icon: 'apps',
+          attributes: [{ action: 'create', name: 'label', properties: { type: 'string' } }],
+        },
+      ],
+      contentTypes: [
+        {
+          action: 'create',
+          uid: DZ_HOST_UID,
+          displayName: 'Dz Host',
+          singularName: 'dzhost',
+          pluralName: 'dzhosts',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [
+            {
+              action: 'create',
+              name: 'zone',
+              properties: { type: 'dynamiczone', components: [MOVABLE_UID] },
+            },
+          ],
+        },
+      ],
+    });
+    await restartMove();
+
+    const host = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${DZ_HOST_UID}`,
+      body: { zone: [{ __component: MOVABLE_UID, label: 'Hi' }] },
+    });
+    expect(host.statusCode).toBe(201);
+    hostDocId = host.body.data.documentId;
+  });
+
+  afterAll(async () => {
+    await updateSchema({
+      contentTypes: [{ action: 'delete', uid: DZ_HOST_UID }],
+      components: [{ action: 'delete', uid: MOVED_UID }],
+    });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('moving a component to a new category preserves embedded dynamic-zone data', async () => {
+    const cmpsTable = strapi.db.metadata.get(DZ_HOST_UID).attributes.zone.joinTable.name;
+    const before = await strapi.db
+      .connection(cmpsTable)
+      .where('component_type', MOVABLE_UID)
+      .select('*');
+    expect(before).toHaveLength(1);
+
+    // Send only the component update with the new category; the server moves the
+    // schema file, rewrites references in the host, and generates the migration.
+    const res = await updateSchema({
+      contentTypes: [],
+      components: [
+        {
+          action: 'update',
+          uid: MOVABLE_UID,
+          category: 'shared',
+          displayName: 'Movable',
+          icon: 'apps',
+          attributes: [{ action: 'update', name: 'label', properties: { type: 'string' } }],
+        },
+      ],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restartMove();
+
+    // The component now lives under the new uid.
+    expect(strapi.db.metadata.has(MOVED_UID)).toBe(true);
+    expect(strapi.db.metadata.has(MOVABLE_UID)).toBe(false);
+
+    // The component_type references were migrated, not orphaned.
+    const movedRows = await strapi.db.connection(cmpsTable).where('component_type', MOVED_UID);
+    expect(movedRows).toHaveLength(1);
+    const staleRows = await strapi.db.connection(cmpsTable).where('component_type', MOVABLE_UID);
+    expect(staleRows).toHaveLength(0);
+
+    // And the embedded dynamic-zone data still resolves under the new uid.
+    const { statusCode, body } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${DZ_HOST_UID}/${hostDocId}`,
+      qs: { populate: ['zone'] },
+    });
+    expect(statusCode).toBe(200);
+    expect(body.data.zone).toHaveLength(1);
+    expect(body.data.zone[0].__component).toBe(MOVED_UID);
+    expect(body.data.zone[0].label).toBe('Hi');
+  });
+});
+
 describe('Content Type Builder - media rename preserves data', () => {
   const MEDIA_HOST_UID = 'api::media-host.media-host';
 
@@ -680,5 +814,84 @@ describe('Content Type Builder - delete-then-reuse-name guard', () => {
     expect(body.results).toHaveLength(1);
     expect(body.results[0].alpha).toBe('A');
     expect(body.results[0].beta).toBe('B');
+  });
+});
+
+describe('Content Type Builder - rename migrations disabled', () => {
+  const NEVER_UID = 'api::never-rename.never-rename';
+
+  const restartNever = async () => {
+    await strapi.destroy();
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+  };
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      contentTypes: [
+        {
+          action: 'create',
+          uid: NEVER_UID,
+          displayName: 'Never Rename',
+          singularName: 'never-rename',
+          pluralName: 'never-renames',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [{ action: 'create', name: 'title', properties: { type: 'string' } }],
+        },
+      ],
+      components: [],
+    });
+    await restartNever();
+
+    const created = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${NEVER_UID}`,
+      body: { title: 'Legacy data' },
+    });
+    expect(created.statusCode).toBe(201);
+  });
+
+  afterAll(async () => {
+    await updateSchema({ contentTypes: [{ action: 'delete', uid: NEVER_UID }], components: [] });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test("keeps legacy drop-and-recreate behavior when renameMigrations is 'never'", async () => {
+    // The CTB schema service reads the plugin config at save time, so setting the
+    // loaded test app's config here exercises the real `never` branch.
+    strapi.config.set('plugin::content-type-builder.renameMigrations', 'never');
+    const migrationFilesBefore = listRenameMigrationFiles();
+
+    const res = await updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: NEVER_UID,
+          displayName: 'Never Rename',
+          draftAndPublish: false,
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+    expect(listRenameMigrationFiles()).toEqual(migrationFilesBefore);
+
+    await restartNever();
+
+    const { tableName } = strapi.db.metadata.get(NEVER_UID);
+    expect(await strapi.db.connection.schema.hasColumn(tableName, 'heading')).toBe(true);
+    expect(await strapi.db.connection.schema.hasColumn(tableName, 'title')).toBe(false);
+
+    const { statusCode, body } = await listEntries(NEVER_UID);
+    expect(statusCode).toBe(200);
+    expect(body.results).toHaveLength(1);
+    expect(body.results[0].heading ?? null).toBeNull();
   });
 });

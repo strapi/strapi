@@ -112,6 +112,31 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
   return renames;
 };
 
+interface CollectedComponentRename {
+  oldUid: string;
+  newUid: string;
+}
+
+/**
+ * Collects component-level renames from the update-schema payload. A component's
+ * uid is `<category>.<name>`; the CTB only lets the *category* change on an edit
+ * (the name part is preserved), so a new category yields a new uid. We derive the
+ * new uid exactly as the schema builder's `editComponent` does so the generated
+ * migration targets the same uid the reload will write to disk.
+ */
+const collectComponentRenames = (schema: CTBSchema): CollectedComponentRename[] => {
+  type ComponentEntry = { action?: string; uid?: string; category?: string };
+
+  return (schema.components as unknown as ComponentEntry[])
+    .filter((entry) => entry.action === 'update' && !!entry.uid && !!entry.category)
+    .map((entry) => {
+      const [, nameUID] = entry.uid!.split('.');
+      const newUid = `${utils.strings.nameToSlug(entry.category!)}.${nameUID}`;
+      return { oldUid: entry.uid!, newUid };
+    })
+    .filter((rename) => rename.oldUid !== rename.newUid);
+};
+
 /**
  * Generates a single data-preserving rename migration for the accepted renames
  * in this save. Must run before the server reloads, while `strapi.db.metadata`
@@ -127,7 +152,8 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
   }
 
   const renames = collectRenames(schema);
-  if (renames.length === 0) {
+  const componentRenames = collectComponentRenames(schema);
+  if (renames.length === 0 && componentRenames.length === 0) {
     return;
   }
 
@@ -135,6 +161,10 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
 
   for (const { uid, oldName, newName } of renames) {
     migrationBuilder.addRenameAttribute(uid, { oldName, newName });
+  }
+
+  for (const { oldUid, newUid } of componentRenames) {
+    migrationBuilder.addRenameComponent({ oldUid, newUid });
   }
 
   const unsupported = migrationBuilder.getUnsupported();
@@ -148,6 +178,165 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
   if (migrationBuilder.hasChanges()) {
     await migrationBuilder.writeFiles();
   }
+};
+
+/**
+ * Renames a single attribute on a content-type or component and generates the
+ * data-preserving migration in one step. Used by the `strapi rename:field` CLI
+ * command so scripted / non-UI workflows get the same behaviour as the admin.
+ *
+ * It reuses the regular `updateSchema` path (and therefore the same rename
+ * resolver via `generateRenameMigrations`), so the migration is resolved against
+ * the pre-reload `strapi.db.metadata` exactly like the admin save. The caller is
+ * responsible for not reloading before this resolves (the CLI simply exits).
+ */
+export const renameAttribute = async (
+  uid: string,
+  oldName: string,
+  newName: string
+): Promise<void> => {
+  const { ApplicationError } = utils.errors;
+
+  if (!oldName || !newName) {
+    throw new ApplicationError('Both an old and a new attribute name are required');
+  }
+
+  if (oldName === newName) {
+    throw new ApplicationError(`Cannot rename "${oldName}" to itself`);
+  }
+
+  const contentType = (strapi.contentTypes as Record<string, any>)[uid];
+  const component = (strapi.components as Record<string, any>)[uid];
+  const model = contentType ?? component;
+
+  if (!model) {
+    throw new ApplicationError(`No content-type or component found for uid "${uid}"`);
+  }
+
+  if (!model.attributes?.[oldName]) {
+    throw new ApplicationError(`Attribute "${oldName}" does not exist on "${uid}"`);
+  }
+
+  if (model.attributes?.[newName]) {
+    throw new ApplicationError(`Attribute "${newName}" already exists on "${uid}"`);
+  }
+
+  // Reuse the formatted, CTB-visible attributes (same shape the admin sends) so
+  // the schema edit matches an admin save and the renamed key is the only change.
+  const formattedSchema = await getSchema();
+  const isComponent = Boolean(component);
+  const entry = isComponent
+    ? (formattedSchema.components as Record<string, any>)[uid]
+    : (formattedSchema.contentTypes as Record<string, any>)[uid];
+
+  const attributes = entry.attributes.map(({ name, ...properties }: Record<string, any>) => ({
+    action: 'update',
+    name: name === oldName ? newName : name,
+    properties,
+  }));
+
+  const renames = [{ oldName, newName }];
+
+  const payload = isComponent
+    ? {
+        contentTypes: [],
+        components: [
+          {
+            action: 'update',
+            uid,
+            category: model.category,
+            displayName: model.info?.displayName,
+            icon: model.info?.icon,
+            description: model.info?.description,
+            pluginOptions: model.pluginOptions,
+            renames,
+            attributes,
+          },
+        ],
+      }
+    : {
+        contentTypes: [
+          {
+            action: 'update',
+            uid,
+            kind: model.kind,
+            displayName: model.info?.displayName,
+            description: model.info?.description,
+            draftAndPublish: Boolean(model.options?.draftAndPublish),
+            options: model.options,
+            pluginOptions: model.pluginOptions,
+            renames,
+            attributes,
+          },
+        ],
+        components: [],
+      };
+
+  await updateSchema(payload as unknown as CTBSchema);
+};
+
+/**
+ * Moves a component to a new category (which changes its uid from
+ * `<oldCategory>.<name>` to `<newCategory>.<name>`) and generates the migration
+ * that preserves embedded data, in one step. Used by `strapi rename:component`.
+ *
+ * Like `renameAttribute`, it reuses the regular `updateSchema` path so the
+ * component rename is resolved by the same `generateRenameMigrations` →
+ * `createMigrationBuilder` flow the admin uses (which migrates the
+ * `component_type` value in every `*_cmps` link table referencing the component).
+ */
+export const renameComponent = async (uid: string, newCategory: string): Promise<void> => {
+  const { ApplicationError } = utils.errors;
+
+  if (!newCategory) {
+    throw new ApplicationError('A new category is required');
+  }
+
+  const component = (strapi.components as Record<string, any>)[uid];
+
+  if (!component) {
+    throw new ApplicationError(`No component found for uid "${uid}"`);
+  }
+
+  // A component uid is `<category>.<name>`; only the category can change (the
+  // name part is preserved), exactly as `editComponent` derives the new uid.
+  const [, nameUID] = uid.split('.');
+  const newUid = `${utils.strings.nameToSlug(newCategory)}.${nameUID}`;
+
+  if (newUid === uid) {
+    throw new ApplicationError(`Component "${uid}" is already in category "${newCategory}"`);
+  }
+
+  if ((strapi.components as Record<string, any>)[newUid]) {
+    throw new ApplicationError(`A component "${newUid}" already exists`);
+  }
+
+  const formattedSchema = await getSchema();
+  const entry = (formattedSchema.components as Record<string, any>)[uid];
+
+  const attributes = entry.attributes.map(({ name, ...properties }: Record<string, any>) => ({
+    action: 'update',
+    name,
+    properties,
+  }));
+
+  const payload = {
+    contentTypes: [],
+    components: [
+      {
+        action: 'update',
+        uid,
+        category: newCategory,
+        displayName: component.info?.displayName,
+        icon: component.info?.icon,
+        description: component.info?.description,
+        pluginOptions: component.pluginOptions,
+        attributes,
+      },
+    ],
+  };
+
+  await updateSchema(payload as unknown as CTBSchema);
 };
 
 const formatAttributes = (model: any) => {

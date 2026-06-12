@@ -67,7 +67,10 @@ module.exports = {
 `;
 
 const RENAME_COLUMN_SNIPPET = `    // {{comment}}
-    if (await knex.schema.hasColumn({{table}}, {{from}})) {
+    if (
+      (await knex.schema.hasTable({{table}})) &&
+      (await knex.schema.hasColumn({{table}}, {{from}}))
+    ) {
       await knex.schema.alterTable({{table}}, (table) => {
         table.renameColumn({{from}}, {{to}});
       });
@@ -82,7 +85,10 @@ const RENAME_TABLE_SNIPPET = `    // {{comment}}
     }`;
 
 const UPDATE_ROWS_SNIPPET = `    // {{comment}}
-    if (await knex.schema.hasColumn({{table}}, {{guardColumn}})) {
+    if (
+      (await knex.schema.hasTable({{table}})) &&
+      (await knex.schema.hasColumn({{table}}, {{guardColumn}}))
+    ) {
       await knex({{table}}){{where}}.update({{set}});
     }`;
 
