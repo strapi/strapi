@@ -110,4 +110,4 @@ Enable package debug output from the package directory:
 cd packages/core/openapi && DEBUG=strapi:core:openapi:* yarn test:unit
 ```
 
-See [Technologies](../technologies) for the debug namespace conventions.
+See [Technologies](../01-technologies.md) for the debug namespace conventions.
