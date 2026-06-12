@@ -36,6 +36,8 @@ export * from './zod';
 export * from './validation';
 export * from './route-serialization';
 
+export { parseUserAgent, getDeviceName, type ParsedUserAgent } from './user-agent';
+
 export * from './primitives';
 export * from './content-api-router';
 export * from './security';

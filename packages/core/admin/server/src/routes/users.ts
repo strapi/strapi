@@ -24,6 +24,30 @@ export default [
     },
   },
   {
+    method: 'GET',
+    path: '/users/me/sessions',
+    handler: 'authenticated-session.list',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'DELETE',
+    path: '/users/me/sessions',
+    handler: 'authenticated-session.revokeAll',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'DELETE',
+    path: '/users/me/sessions/:sessionId',
+    handler: 'authenticated-session.revoke',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
     method: 'POST',
     path: '/users',
     handler: 'user.create',

@@ -37,6 +37,34 @@ const extractDeviceId = (requestBody) => {
   return typeof deviceId === 'string' && deviceId.length > 0 ? deviceId : undefined;
 };
 
+/**
+ * Captures generic, origin-defined session metadata from the request. The session
+ * manager stores this verbatim; consumers can display it as active devices.
+ */
+const buildSessionMetadata = (ctx) => {
+  const deviceName = utils.getDeviceName(ctx.request.headers['user-agent']);
+
+  return {
+    loginAt: new Date().toISOString(),
+    ip: ctx.request.ip,
+    ...(deviceName ? { deviceName } : {}),
+  };
+};
+
+const sanitizeSession = (session, currentSessionId) => {
+  const metadata = session.metadata || {};
+
+  return {
+    id: session.sessionId,
+    deviceId: session.deviceId,
+    deviceName: typeof metadata.deviceName === 'string' ? metadata.deviceName : undefined,
+    current: Boolean(currentSessionId) && session.sessionId === currentSessionId,
+    loginAt: typeof metadata.loginAt === 'string' ? metadata.loginAt : undefined,
+    lastActiveAt: session.createdAt ? new Date(session.createdAt).toISOString() : undefined,
+    ip: typeof metadata.ip === 'string' ? metadata.ip : undefined,
+  };
+};
+
 module.exports = ({ strapi }) => ({
   async callback(ctx) {
     const provider = ctx.params.provider || 'local';
@@ -98,7 +126,10 @@ module.exports = ({ strapi }) => ({
 
         const refresh = await strapi
           .sessionManager('users-permissions')
-          .generateRefreshToken(String(user.id), deviceId, { type: 'refresh' });
+          .generateRefreshToken(String(user.id), deviceId, {
+            type: 'refresh',
+            metadata: buildSessionMetadata(ctx),
+          });
 
         const access = await strapi
           .sessionManager('users-permissions')
@@ -157,7 +188,10 @@ module.exports = ({ strapi }) => ({
 
         const refresh = await strapi
           .sessionManager('users-permissions')
-          .generateRefreshToken(String(user.id), deviceId, { type: 'refresh' });
+          .generateRefreshToken(String(user.id), deviceId, {
+            type: 'refresh',
+            metadata: buildSessionMetadata(ctx),
+          });
 
         const access = await strapi
           .sessionManager('users-permissions')
@@ -399,6 +433,53 @@ module.exports = ({ strapi }) => ({
     }
     return ctx.send({ ok: true });
   },
+  async getSessions(ctx) {
+    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    if (mode !== 'refresh') {
+      return ctx.notFound();
+    }
+
+    if (!ctx.state.user) {
+      return ctx.unauthorized('Missing authentication');
+    }
+
+    const currentSessionId = ctx.state.session?.id;
+    const sessions = await strapi
+      .sessionManager('users-permissions')
+      .listSessions(String(ctx.state.user.id));
+
+    const data = sessions
+      .map((session) => sanitizeSession(session, currentSessionId))
+      .sort((a, b) => {
+        if (a.current !== b.current) {
+          return a.current ? -1 : 1;
+        }
+        return (b.lastActiveAt || '').localeCompare(a.lastActiveAt || '');
+      });
+
+    return ctx.send({ data });
+  },
+  async revokeSession(ctx) {
+    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    if (mode !== 'refresh') {
+      return ctx.notFound();
+    }
+
+    if (!ctx.state.user) {
+      return ctx.unauthorized('Missing authentication');
+    }
+
+    const { sessionId } = ctx.params;
+    const revoked = await strapi
+      .sessionManager('users-permissions')
+      .revokeSessionById(String(ctx.state.user.id), sessionId);
+
+    if (!revoked) {
+      return ctx.notFound('Session not found');
+    }
+
+    return ctx.send({ data: {} });
+  },
   async connect(ctx, next) {
     const grant = require('grant').koa();
 
@@ -617,7 +698,10 @@ module.exports = ({ strapi }) => ({
 
       const refresh = await strapi
         .sessionManager('users-permissions')
-        .generateRefreshToken(String(user.id), deviceId, { type: 'refresh' });
+        .generateRefreshToken(String(user.id), deviceId, {
+          type: 'refresh',
+          metadata: buildSessionMetadata(ctx),
+        });
 
       const access = await strapi
         .sessionManager('users-permissions')
