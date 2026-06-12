@@ -45,3 +45,5 @@ export {
   setAdminPermissionsPhaseMetricsRecorder,
   setRequestWorkTraceParentContextResolver,
 } from './observability/with-admin-permissions-span';
+export * from './publication-filter';
+export * from './has-published-version-param';

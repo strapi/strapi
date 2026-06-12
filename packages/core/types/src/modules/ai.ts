@@ -1,3 +1,5 @@
+import type * as MCP from './mcp';
+
 /**
  * AI service for the admin panel. Only present at runtime when EE + cms-ai feature is active
  */
@@ -26,4 +28,5 @@ export type AiAdminService = {
 
 export type AiNamespace = {
   admin: AiAdminService;
+  mcp: MCP.McpService;
 };

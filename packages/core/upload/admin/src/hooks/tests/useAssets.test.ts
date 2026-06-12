@@ -23,7 +23,7 @@ describe('useAssets', () => {
     jest.clearAllMocks();
   });
 
-  test('fetches data from the right URL if no query was set', async () => {
+  test('fetches data filtered by a $null folder when no query was set', async () => {
     setup();
 
     const { get } = useFetchClient();
@@ -32,8 +32,10 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            folderPath: {
-              $eq: '/',
+            folder: {
+              id: {
+                $null: true,
+              },
             },
           },
         ],
@@ -43,7 +45,28 @@ describe('useAssets', () => {
     await waitFor(() => expect(get).toBeCalledWith(`/upload/files`, { params: expected }));
   });
 
-  test('fetches data from the right URL if a query was set', async () => {
+  test('fetches data filtered by folder.id when a folder query was set', async () => {
+    const { result } = setup({ query: { folder: 7 } });
+
+    await waitFor(() => result.current.data);
+    const { get } = useFetchClient();
+
+    const expected = {
+      filters: {
+        $and: [
+          {
+            folder: {
+              id: 7,
+            },
+          },
+        ],
+      },
+    };
+
+    await waitFor(() => expect(get).toBeCalledWith(`/upload/files`, { params: expected }));
+  });
+
+  test('ignores legacy folderPath query and falls back to $null folder', async () => {
     const { result } = setup({ query: { folderPath: '/1/2' } });
 
     await waitFor(() => result.current.data);
@@ -53,8 +76,10 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            folderPath: {
-              $eq: '/1/2',
+            folder: {
+              id: {
+                $null: true,
+              },
             },
           },
         ],
@@ -66,7 +91,7 @@ describe('useAssets', () => {
 
   test('allows to merge filter query params using filters.$and', async () => {
     const { result } = setup({
-      query: { folderPath: '/1/2', filters: { $and: [{ something: 'true' }] } },
+      query: { folder: 7, filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.data);
@@ -79,8 +104,8 @@ describe('useAssets', () => {
             something: 'true',
           },
           {
-            folderPath: {
-              $eq: '/1/2',
+            folder: {
+              id: 7,
             },
           },
         ],
@@ -90,9 +115,9 @@ describe('useAssets', () => {
     await waitFor(() => expect(get).toBeCalledWith(`/upload/files`, { params: expected }));
   });
 
-  test('does not use folderPath filter in params if _q', async () => {
+  test('does not use folder filter in params if _q', async () => {
     const { result } = setup({
-      query: { folderPath: '/1/2', _q: 'something', filters: { $and: [{ something: 'true' }] } },
+      query: { folder: 7, _q: 'something', filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.data);
@@ -115,7 +140,7 @@ describe('useAssets', () => {
   test('correctly encodes the search query _q', async () => {
     const _q = 'something&else';
     const { result } = setup({
-      query: { folderPath: '/1/2', _q, filters: { $and: [{ something: 'true' }] } },
+      query: { folder: 7, _q, filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.data);

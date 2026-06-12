@@ -67,7 +67,7 @@ const resolvePerfArtifactEnv = ({ perfArtifacts, perfArtifactSuffix }) => {
 
 const runAllTests = async (args, perfOpts) => {
   // Required for Jest: code run under Jest (including app code loaded by tests) can execute in a context
-  // where Node treats dynamic import() as VM-bound; from Node v20.10+ that requires this flag.
+  // where Node treats dynamic import() as VM-bound; supported Node versions require this flag.
   // ESM-only deps (e.g. file-type in upload) use dynamic import(); without the flag we get
   // ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING_FLAG. Other dynamic imports (plop, prettier) run in the
   // main process (CLI/scripts) or browser (admin), so they never hit this.

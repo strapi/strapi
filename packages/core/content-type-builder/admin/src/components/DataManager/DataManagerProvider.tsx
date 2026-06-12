@@ -42,6 +42,24 @@ interface DataManagerProviderProps {
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_dataManagerProvider'] || initialState) as State;
 
+/**
+ * Tag types registered on the shared `adminApi` instance at runtime by
+ * `@strapi/content-manager` via `enhanceEndpoints({ addTagTypes: [...] })`
+ * (see packages/core/content-manager/admin/src/services/api.ts).
+ *
+ * The cast is only required because adminApi's compile-time tag union doesn't see
+ * tags added downstream from this side of the dependency graph.
+ */
+const CONTENT_MANAGER_SCHEMA_CACHE_TAGS = [
+  'InitialData',
+  'ContentTypesConfiguration',
+  'ContentTypeSettings',
+  'ComponentConfiguration',
+] as const;
+
+const invalidateContentManagerSchemaCaches = () =>
+  adminApi.util.invalidateTags(CONTENT_MANAGER_SCHEMA_CACHE_TAGS as never);
+
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
   const state = useSelector(selectState);
@@ -81,7 +99,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const isInDevelopmentMode = autoReload;
 
-  const getDataRef = React.useRef<any>();
+  const getDataRef = React.useRef<() => Promise<void>>(async () => undefined);
 
   getDataRef.current = async () => {
     try {
@@ -219,6 +237,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await getDataRef.current();
       // Update the app's permissions
       await updatePermissions();
+      // Refresh content-manager caches that depend on the CT/component schema.
+      dispatch(invalidateContentManagerSchemaCaches());
     } catch (err) {
       console.error({ err });
       toggleNotification({

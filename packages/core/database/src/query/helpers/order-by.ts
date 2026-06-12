@@ -41,6 +41,38 @@ export const buildStatusSortExpression = (
   );
 };
 
+/** DB handle accepted by {@link buildStatusSortExpression}. */
+type StatusSortDb = Parameters<typeof buildStatusSortExpression>[0];
+
+/**
+ * Shape passed to Knex `orderBy` for compound ordering. Knex accepts `Knex.Raw` in the column
+ * position at runtime; generated typings sometimes only list string.
+ */
+export type KnexOrderByColumnDescriptor = {
+  column: string | knex.Knex.Raw;
+  order?: 'asc' | 'desc';
+};
+
+/**
+ * Maps processed {@link OrderByValue} entries to descriptors Knex can consume. Translates the
+ * virtual `status` sort into a parameterized raw SQL expression.
+ */
+export const toKnexOrderByDescriptor = (
+  db: StatusSortDb,
+  tableName: string,
+  rootTableAlias: string,
+  entry: OrderByValue
+): KnexOrderByColumnDescriptor => {
+  if ('rawExpression' in entry) {
+    return {
+      column: buildStatusSortExpression(db, tableName, rootTableAlias, entry.isI18n),
+      order: entry.order,
+    };
+  }
+
+  return { column: entry.column, order: entry.order };
+};
+
 export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[] => {
   const { db, uid, qb, alias } = ctx;
   const meta = db.metadata.get(uid);

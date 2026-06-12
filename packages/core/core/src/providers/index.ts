@@ -2,6 +2,7 @@ import admin from './admin';
 import ai from './ai';
 import coreStore from './coreStore';
 import cron from './cron';
+import mcp from './mcp';
 import performanceMonitor from './performance-monitor';
 import observabilityTracing from './observability-tracing';
 import observabilityPerformanceMetrics from './observability-performance-metrics';
@@ -27,4 +28,5 @@ export const providers: NamedProvider[] = [
   { name: 'webhooks', definition: webhooks },
   { name: 'telemetry', definition: telemetry },
   { name: 'cron', definition: cron },
+  { name: 'mcp', definition: mcp },
 ];

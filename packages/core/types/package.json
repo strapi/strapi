@@ -1,6 +1,6 @@
 {
   "name": "@strapi/types",
-  "version": "5.45.0",
+  "version": "5.48.0",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
@@ -47,18 +47,19 @@
     "@casl/ability": "6.7.5",
     "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
-    "@strapi/database": "5.45.0",
-    "@strapi/logger": "5.45.0",
-    "@strapi/permissions": "5.45.0",
-    "@strapi/utils": "5.45.0",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@strapi/database": "5.48.0",
+    "@strapi/logger": "5.48.0",
+    "@strapi/permissions": "5.48.0",
+    "@strapi/utils": "5.48.0",
     "commander": "8.3.0",
     "json-logic-js": "2.0.5",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
     "node-schedule": "2.1.1",
-    "typedoc": "0.25.10",
-    "typedoc-github-wiki-theme": "1.1.0",
-    "typedoc-plugin-markdown": "3.17.1",
+    "typedoc": "0.28.19",
+    "typedoc-github-wiki-theme": "2.1.0",
+    "typedoc-plugin-markdown": "4.11.0",
     "zod": "3.25.67"
   },
   "devDependencies": {
@@ -68,14 +69,14 @@
     "@types/koa": "2.13.4",
     "@types/koa__router": "12.0.0",
     "@types/node-schedule": "2.1.7",
-    "eslint-config-custom": "5.45.0",
+    "eslint-config-custom": "5.48.0",
     "lodash": "4.18.1",
-    "tsconfig": "5.45.0",
+    "tsconfig": "5.48.0",
     "typescript": "5.4.5",
     "undici": "6.25.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }
