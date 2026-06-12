@@ -45,7 +45,7 @@ Additionally, the package centralizes all exports for the public API in an `src/
 
 This approach decouples the package root exports from the public programmatic API it exposes.
 
-For step-by-step extension guides, see the [Contributing](./contributing/overview) section.
+For step-by-step extension guides, see the [Contributing](./contributing/00-overview.md) section.
 
 ## Design Pattern
 
