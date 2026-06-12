@@ -24,6 +24,21 @@ export type PerformanceHomeQuickStats = {
   slowOrErrorQueriesAttributedToRequests: number;
 };
 
+/** Live in-memory snapshot for the current process within a rolling window. */
+export type PerformanceHomeLive = {
+  source: 'live';
+  databasePerformanceEnabled: boolean;
+  requestTimelineEnabled: boolean;
+  /** Width of the rolling window in milliseconds (e.g. 900000 for 15 min). */
+  windowMs: number;
+  /** Always the local instance for the in-memory aggregator (not cluster/fleet-wide). */
+  scope: 'instance';
+  generatedAt: string;
+  quickStats: PerformanceHomeQuickStats;
+  slowestRoutes: PerformanceRouteAgg[];
+  topSqlFingerprints: PerformanceFingerprintRow[];
+};
+
 export type PerformanceHomeMetrics =
   | {
       source: 'none';
@@ -31,6 +46,7 @@ export type PerformanceHomeMetrics =
       requestTimelineEnabled: boolean;
       hint: string;
     }
+  | PerformanceHomeLive
   | {
       source: 'artifact';
       databasePerformanceEnabled: boolean;

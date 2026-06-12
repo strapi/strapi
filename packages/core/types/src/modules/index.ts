@@ -24,3 +24,4 @@ export type * as WebhookRunner from './webhook-runner';
 export type * as WebhookStore from './webhook-store';
 export type * as Permissions from './permissions';
 export type * as PerformanceEvents from './performance-events';
+export type * as PerformanceMetrics from './performance-metrics';

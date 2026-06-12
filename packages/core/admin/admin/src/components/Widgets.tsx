@@ -404,6 +404,63 @@ const PerformanceQuickStatsContextPopover = ({
   );
 };
 
+const PerformanceLiveContextPopover = ({
+  windowMinutes,
+  databasePerformanceEnabled,
+  requestTimelineEnabled,
+}: {
+  windowMinutes: number;
+  databasePerformanceEnabled: boolean;
+  requestTimelineEnabled: boolean;
+}) => {
+  const { formatMessage } = useIntl();
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger>
+        <IconButton
+          type="button"
+          variant="tertiary"
+          size="S"
+          label={formatMessage({
+            id: 'widget.performance-quick.context-trigger',
+            defaultMessage: 'How this data is computed',
+          })}
+        >
+          <Information />
+        </IconButton>
+      </Popover.Trigger>
+      <Popover.Content side="bottom" align="end" style={{ maxWidth: '32rem' }}>
+        <Flex direction="column" gap={3} alignItems="flex-start" padding={4}>
+          <Typography variant="omega" textColor="neutral600">
+            {formatMessage(
+              {
+                id: 'widget.performance-live.caption',
+                defaultMessage:
+                  'Live, in-memory rolling window of the last {minutes} min for this instance only — not cluster-wide, historical, or persisted across restarts.',
+              },
+              { minutes: windowMinutes }
+            )}
+          </Typography>
+          <Typography variant="omega" textColor="neutral600">
+            {formatMessage(
+              {
+                id: 'widget.performance.flags',
+                defaultMessage: 'DB perf: {db} · Request timeline: {req}',
+              },
+              {
+                db: databasePerformanceEnabled ? 'on' : 'off',
+                req: requestTimelineEnabled ? 'on' : 'off',
+              }
+            )}
+          </Typography>
+        </Flex>
+      </Popover.Content>
+    </Popover.Root>
+  );
+};
+
 const PerformanceQuickStatsWidget = () => {
   const { formatMessage } = useIntl();
   const { formatInt, formatMs, formatPct } = usePerformanceMetricsFormatters();
@@ -421,7 +478,7 @@ const PerformanceQuickStatsWidget = () => {
     return <Widget.NoData>{data.hint}</Widget.NoData>;
   }
 
-  if (!data.fileFound) {
+  if (data.source === 'artifact' && !data.fileFound) {
     return (
       <Widget.NoData>
         {formatMessage({
@@ -433,29 +490,28 @@ const PerformanceQuickStatsWidget = () => {
     );
   }
 
-  const {
-    quickStats: q,
-    tailWindow,
-    linesScanned,
-    batchesParsed,
-    lastGeneratedAt,
-    databasePerformanceEnabled,
-    requestTimelineEnabled,
-  } = data;
-  const kb = perfTailKb(tailWindow.maxTailBytes);
+  const { quickStats: q, databasePerformanceEnabled, requestTimelineEnabled } = data;
 
   return (
     <Flex direction="column" gap={2} flex={1} minHeight={0} width="100%">
       <Flex justifyContent="flex-end" alignItems="center" shrink={0} width="100%">
-        <PerformanceQuickStatsContextPopover
-          tailWindowLines={tailWindow.maxNonEmptyLines}
-          tailWindowKb={kb}
-          databasePerformanceEnabled={databasePerformanceEnabled}
-          requestTimelineEnabled={requestTimelineEnabled}
-          lastGeneratedAt={lastGeneratedAt}
-          linesScanned={linesScanned}
-          batchesParsed={batchesParsed}
-        />
+        {data.source === 'live' ? (
+          <PerformanceLiveContextPopover
+            windowMinutes={Math.max(1, Math.round(data.windowMs / 60000))}
+            databasePerformanceEnabled={databasePerformanceEnabled}
+            requestTimelineEnabled={requestTimelineEnabled}
+          />
+        ) : (
+          <PerformanceQuickStatsContextPopover
+            tailWindowLines={data.tailWindow.maxNonEmptyLines}
+            tailWindowKb={perfTailKb(data.tailWindow.maxTailBytes)}
+            databasePerformanceEnabled={databasePerformanceEnabled}
+            requestTimelineEnabled={requestTimelineEnabled}
+            lastGeneratedAt={data.lastGeneratedAt}
+            linesScanned={data.linesScanned}
+            batchesParsed={data.batchesParsed}
+          />
+        )}
       </Flex>
       <Box flex={1} minHeight={0} width="100%" overflow="auto">
         <Grid>
@@ -584,7 +640,7 @@ const PerformanceQuickStatsWidget = () => {
               <Typography variant="omega" textColor="neutral600">
                 {formatMessage({
                   id: 'widget.performance-quick.slow-sql-hint',
-                  defaultMessage: 'In artifact window',
+                  defaultMessage: 'In current window',
                 })}
               </Typography>
               <Typography variant="alpha" fontWeight="bold">
@@ -646,7 +702,7 @@ const PerformanceRoutesSqlWidget = () => {
     return <Widget.NoData>{data.hint}</Widget.NoData>;
   }
 
-  if (!data.fileFound) {
+  if (data.source === 'artifact' && !data.fileFound) {
     return (
       <Widget.NoData>
         {formatMessage({
@@ -666,7 +722,7 @@ const PerformanceRoutesSqlWidget = () => {
         {formatMessage({
           id: 'widget.performance-routes.empty',
           defaultMessage:
-            'No HTTP request summaries or slow SQL rows in the current artifact tail. Generate traffic or widen the tail in code if you need more history.',
+            'No HTTP request summaries or slow SQL rows in the current window yet. Generate some traffic and check back.',
         })}
       </Widget.NoData>
     );

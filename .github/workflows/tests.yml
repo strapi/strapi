@@ -673,7 +673,9 @@ jobs:
         continue-on-error: true
 
       - name: Summarize API performance artifacts
-        run: node scripts/summarize-api-perf-artifacts.mjs downloaded-api-perf --out api-perf-summary.md
+        run: |
+          node scripts/summarize-api-perf-artifacts.mjs downloaded-api-perf --out api-perf-summary.md
+          cat api-perf-summary.md >> "$GITHUB_STEP_SUMMARY"
         continue-on-error: true
 
       - name: Upload API performance summary

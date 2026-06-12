@@ -20,6 +20,11 @@ export interface Strapi extends Container {
    * Prefer over raw `eventHub.on` for perf signals.
    */
   performanceEvents: Modules.PerformanceEvents.PerformanceEventsPublicApi;
+  /**
+   * Live, per-instance rolling performance metrics derived from `performance.*` hub events.
+   * In-memory only (no storage); reflects traffic served by this process within the rolling window.
+   */
+  performanceMetrics: Modules.PerformanceMetrics.PerformanceLiveMetrics;
   startupLogger: StartupLogger;
   cron: Modules.Cron.CronService;
   store: Modules.CoreStore.CoreStore;

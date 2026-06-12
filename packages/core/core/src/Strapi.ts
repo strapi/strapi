@@ -44,6 +44,7 @@ import { createContentSourceMapsService } from './services/content-source-maps';
 import {
   bridgeDatabasePerformanceEvents,
   createPerformanceEventsPublicApi,
+  createPerformanceLiveMetrics,
 } from './services/performance';
 
 import { coreStoreModel } from './services/core-store';
@@ -163,6 +164,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get performanceEvents(): Modules.PerformanceEvents.PerformanceEventsPublicApi {
     return this.get('performanceEvents');
+  }
+
+  get performanceMetrics(): Modules.PerformanceMetrics.PerformanceLiveMetrics {
+    return this.get('performanceMetrics');
   }
 
   get fs(): Core.StrapiFS {
@@ -353,6 +358,7 @@ class Strapi extends Container implements Core.Strapi {
         })
       )
       .add('performanceEvents', () => createPerformanceEventsPublicApi(this))
+      .add('performanceMetrics', () => createPerformanceLiveMetrics(this))
       .add('startupLogger', () => utils.createStartupLogger(this))
       .add('logger', () => logger)
       .add('fetch', () => utils.createStrapiFetch(this))

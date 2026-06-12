@@ -3,6 +3,7 @@ import { arithmeticMean, percentileNearestSorted } from '@strapi/utils';
 
 import type {
   PerformanceFingerprintRow,
+  PerformanceHomeLive,
   PerformanceHomeMetrics,
   PerformanceHomeQuickStats,
   PerformanceRouteAgg,
@@ -84,9 +85,38 @@ function finalizeRoutes(map: Map<string, RouteBucket>, limit: number): Performan
   return rows.slice(0, limit);
 }
 
+/**
+ * Maps the core in-memory live snapshot onto the admin widget contract. Preferred source: it works
+ * the instant performance tracking is enabled, with no artifact file or config beyond tracking.
+ */
+function buildLiveHomeMetrics(strapi: Core.Strapi): PerformanceHomeLive | null {
+  const liveMetrics = strapi.performanceMetrics;
+  if (!liveMetrics || typeof liveMetrics.isActive !== 'function' || !liveMetrics.isActive()) {
+    return null;
+  }
+
+  const snap = liveMetrics.snapshot();
+  return {
+    source: 'live',
+    databasePerformanceEnabled: snap.databasePerformanceEnabled,
+    requestTimelineEnabled: snap.requestTrackingEnabled,
+    windowMs: snap.windowMs,
+    scope: snap.scope,
+    generatedAt: snap.generatedAt,
+    quickStats: snap.quickStats,
+    slowestRoutes: snap.slowestRoutes,
+    topSqlFingerprints: snap.topSqlFingerprints,
+  };
+}
+
 export async function buildPerformanceHomeMetrics(
   strapi: Core.Strapi
 ): Promise<PerformanceHomeMetrics> {
+  const live = buildLiveHomeMetrics(strapi);
+  if (live) {
+    return live;
+  }
+
   const ctx = await readPerformanceArtifactContext(strapi);
 
   if (!ctx.ok) {

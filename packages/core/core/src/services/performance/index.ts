@@ -8,3 +8,4 @@ export { PERFORMANCE_ARTIFACT_BATCH_SCHEMA_VERSION } from './artifact';
 
 export { bridgeDatabasePerformanceEvents } from './events';
 export { createPerformanceEventsPublicApi } from './events-public-api';
+export { createPerformanceLiveMetrics } from './live-metrics';
