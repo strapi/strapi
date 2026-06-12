@@ -326,6 +326,24 @@ const getTargetAttributes = (
   return undefined;
 };
 
+const hasTargetSchema = (
+  attribute: SchemaUtils.Attribute.AnyAttribute,
+  { schemas }: Pick<NormalizationContext, 'schemas'>
+) => {
+  if (attribute.type !== 'relation') {
+    return true;
+  }
+
+  const target =
+    'targetModel' in attribute
+      ? attribute.targetModel
+      : 'target' in attribute
+        ? attribute.target
+        : undefined;
+
+  return schemas.some((schema) => schema.uid === target);
+};
+
 const normalizeMainField = (
   attribute: SchemaUtils.Attribute.AnyAttribute,
   mainField: string | undefined,
@@ -338,6 +356,10 @@ const normalizeMainField = (
   const targetAttributes = getTargetAttributes(attribute, context);
 
   if (!targetAttributes) {
+    if (attribute.type === 'relation' && !hasTargetSchema(attribute, context)) {
+      return mainField;
+    }
+
     return attribute.type === 'component' || attribute.type === 'relation' ? 'id' : mainField;
   }
 

@@ -63,7 +63,7 @@ describe('attributes', () => {
       });
     });
 
-    it('falls back to id when a relation main field cannot be resolved', () => {
+    it('keeps the relation main field when the target schema is unavailable', () => {
       const relationAttribute = {
         type: 'relation',
         relation: 'oneToOne',
@@ -72,6 +72,47 @@ describe('attributes', () => {
       } satisfies RelationAttributeWithTargetModel;
 
       expect(getMainField(relationAttribute, 'title', { schemas: [], components: {} })).toEqual({
+        name: 'title',
+        type: 'custom',
+      });
+    });
+
+    it('falls back to id when a relation target schema exists but the main field cannot be resolved', () => {
+      const relationAttribute = {
+        type: 'relation',
+        relation: 'oneToOne',
+        target: 'api::category.category',
+        targetModel: 'api::category.category',
+      } satisfies RelationAttributeWithTargetModel;
+
+      expect(
+        getMainField(relationAttribute, 'deletedTitle', {
+          schemas: [
+            {
+              uid: 'api::category.category',
+              isDisplayed: true,
+              apiID: 'category',
+              modelType: 'contentType',
+              kind: 'collectionType',
+              modelName: 'category',
+              globalId: 'Category',
+              info: {
+                displayName: 'Category',
+                singularName: 'category',
+                pluralName: 'categories',
+              },
+              options: {},
+              pluginOptions: {},
+              attributes: {
+                title: {
+                  type: 'string',
+                },
+              },
+            },
+          ],
+          components: {},
+        })
+      ).toEqual({
         name: 'id',
         type: 'custom',
       });

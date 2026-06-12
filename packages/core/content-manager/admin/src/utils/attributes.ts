@@ -47,12 +47,11 @@ const getMainField = (
         : 'target' in attribute
           ? attribute.target
           : undefined;
-    const mainFieldType = schemas.find((schema) => schema.uid === target)?.attributes?.[
-      mainFieldName
-    ]?.type;
+    const targetSchema = schemas.find((schema) => schema.uid === target);
+    const mainFieldType = targetSchema?.attributes?.[mainFieldName]?.type;
 
     return {
-      name: mainFieldType ? mainFieldName : 'id',
+      name: !targetSchema || mainFieldType ? mainFieldName : 'id',
       type: mainFieldType ?? 'custom',
     };
   }

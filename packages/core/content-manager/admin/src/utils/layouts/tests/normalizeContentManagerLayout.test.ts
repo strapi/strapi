@@ -273,6 +273,41 @@ describe('normalizeContentManagerLayout', () => {
 
     expect(normalized.contentType.metadatas.category?.list.mainField).toBe('id');
   });
+
+  it('keeps relation main fields when the relation target schema is unavailable', () => {
+    const normalized = normalizeContentManagerLayout(
+      {
+        ...data,
+        contentType: {
+          ...data.contentType,
+          metadatas: {
+            ...data.contentType.metadatas,
+            category: {
+              edit: {
+                label: 'Category',
+                description: '',
+                placeholder: '',
+                visible: true,
+                editable: true,
+                mainField: 'name',
+              } as object,
+              list: { label: 'Category', mainField: 'name' },
+            },
+          },
+        },
+      },
+      {
+        schema: contentTypeSchema,
+        components: { [componentUid]: componentSchema },
+        schemas: [contentTypeSchema],
+      }
+    );
+
+    expect(
+      (normalized.contentType.metadatas.category?.edit as { mainField?: string }).mainField
+    ).toBe('name');
+    expect(normalized.contentType.metadatas.category?.list.mainField).toBe('name');
+  });
 });
 
 describe('response shape normalization', () => {

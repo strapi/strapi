@@ -217,7 +217,7 @@ describe('useDocumentLayout', () => {
             hint: '',
             label: 'categories',
             mainField: {
-              name: 'id',
+              name: 'name',
               type: 'custom',
             },
             name: 'categories',
@@ -368,7 +368,7 @@ describe('useDocumentLayout', () => {
         },
         label: 'categories',
         mainField: {
-          name: 'id',
+          name: 'name',
           type: 'custom',
         },
         name: 'categories',
