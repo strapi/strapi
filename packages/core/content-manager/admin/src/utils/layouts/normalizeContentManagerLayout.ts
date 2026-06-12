@@ -34,9 +34,9 @@ type ComponentNormalizationContext = {
 type Attributes = Schema['attributes'] | Component['attributes'];
 
 const DEFAULT_RESPONSE_SETTINGS: Settings = {
-  bulkable: false,
-  filterable: false,
-  searchable: false,
+  bulkable: true,
+  filterable: true,
+  searchable: true,
   pageSize: 10,
   mainField: 'id',
   defaultSortBy: '',
