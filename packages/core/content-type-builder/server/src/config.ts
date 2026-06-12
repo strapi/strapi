@@ -3,11 +3,11 @@
  * in the Content-Type Builder generates a database migration that preserves the
  * underlying data instead of letting schema-sync drop and recreate the column.
  *
- * - 'always-off': never generate a rename migration (legacy behaviour).
- * - 'always-on':  generate a migration for every rename, without prompting.
- * - 'modal':      prompt the user per rename (default).
+ * - 'never':  never generate a rename migration (legacy behaviour).
+ * - 'always': generate a migration for every rename, without prompting.
+ * - 'prompt': prompt the user per rename (default).
  */
-export const RENAME_MIGRATION_MODES = ['modal', 'always-on', 'always-off'] as const;
+export const RENAME_MIGRATION_MODES = ['prompt', 'always', 'never'] as const;
 
 export type RenameMigrationMode = (typeof RENAME_MIGRATION_MODES)[number];
 
@@ -17,7 +17,7 @@ export interface ContentTypeBuilderConfig {
 
 export default {
   default: {
-    renameMigrations: 'modal',
+    renameMigrations: 'prompt',
   } satisfies ContentTypeBuilderConfig,
   validator(config: Partial<ContentTypeBuilderConfig>) {
     if (

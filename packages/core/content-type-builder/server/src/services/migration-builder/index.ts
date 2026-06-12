@@ -1,10 +1,6 @@
-import path from 'path';
-import fse from 'fs-extra';
 import { snakeCase } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
-
-import { renderMigration, type PhysicalOp } from './templates';
 
 export interface RenameNames {
   oldName: string;
@@ -59,30 +55,35 @@ type Resolved =
   | { kind: 'skip' }
   | { kind: 'unsupported'; reason: UnsupportedRename['reason'] };
 
-/**
- * Produces a sortable, filesystem-safe timestamp (e.g. `2026.06.11T15.16.00.123`).
- *
- * Based on the migration generator's format
- * (packages/generators/generators/src/plops/utils/get-formatted-date.ts) but
- * keeps milliseconds: unlike the CLI generator (driven by humans, one file at a
- * time), these migrations are generated automatically and several saves can land
- * in the same second, so second precision would produce colliding filenames.
- */
-const getFormattedTimestamp = (date: Date = new Date()): string => {
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-    .toJSON()
-    .replace(/[-:]/g, '.')
-    .replace(/Z$/, '');
-};
-
 interface MigrationBuilderDeps {
   strapi: Core.Strapi;
+}
+
+interface MigrationFileBuilder {
+  renameColumn(op: { table: string; from: string; to: string; comment?: string }): void;
+  renameTable(op: { from: string; to: string; comment?: string }): void;
+  updateRows(op: {
+    table: string;
+    guardColumn?: string;
+    where: Record<string, string>;
+    set: Record<string, string>;
+    comment?: string;
+  }): void;
+  hasChanges(): boolean;
+  build(options: { name: string }): BuiltMigration | null;
+  writeFiles(options: { name: string }): Promise<string | null>;
+}
+
+interface MigrationProviderWithFileBuilder {
+  createFileBuilder(): MigrationFileBuilder;
 }
 
 export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   const { db } = strapi;
 
-  const operations: PhysicalOp[] = [];
+  const migrationFileBuilder = (
+    db.migrations as typeof db.migrations & MigrationProviderWithFileBuilder
+  ).createFileBuilder();
   const unsupported: UnsupportedRename[] = [];
 
   const { identifiers } = db.metadata;
@@ -223,12 +224,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
    * Computes the destination identifier for a resolved artifact given the new
    * field name, and the next in-flight state (with `from` advanced to `to`).
    */
-  const advance = (
-    uid: string,
-    resolved: Resolved,
-    oldName: string,
-    newName: string
-  ): { op: PhysicalOp | null; next: Resolved } => {
+  const advance = (uid: string, resolved: Resolved, oldName: string, newName: string): Resolved => {
     const meta = db.metadata.get(uid);
     const comment = `${uid}: rename field "${oldName}" -> "${newName}"`;
 
@@ -239,52 +235,54 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
           resolved.kind === 'joinColumn'
             ? identifiers.getJoinColumnAttributeIdName(snakeCase(newName))
             : resolveColumn(newName);
-        const op: PhysicalOp | null =
-          resolved.from === to
-            ? null
-            : { kind: 'renameColumn', table: resolved.table, from: resolved.from, to, comment };
-        return { op, next: { ...resolved, from: to } };
+        if (resolved.from !== to) {
+          migrationFileBuilder.renameColumn({
+            table: resolved.table,
+            from: resolved.from,
+            to,
+            comment,
+          });
+        }
+        return { ...resolved, from: to };
       }
       case 'joinTable': {
         const to = identifiers.getJoinTableName(snakeCase(meta.tableName), snakeCase(newName));
-        const op: PhysicalOp | null =
-          resolved.from === to ? null : { kind: 'renameTable', from: resolved.from, to, comment };
-        return { op, next: { ...resolved, from: to } };
+        if (resolved.from !== to) {
+          migrationFileBuilder.renameTable({ from: resolved.from, to, comment });
+        }
+        return { ...resolved, from: to };
       }
       case 'component': {
         const to = newName;
-        const op: PhysicalOp | null =
-          resolved.from === to
-            ? null
-            : {
-                kind: 'updateComponentField',
-                table: resolved.table,
-                fieldColumn: resolved.fieldColumn,
-                from: resolved.from,
-                to,
-                comment,
-              };
-        return { op, next: { ...resolved, from: to } };
+        if (resolved.from !== to) {
+          migrationFileBuilder.updateRows({
+            table: resolved.table,
+            guardColumn: resolved.fieldColumn,
+            where: { [resolved.fieldColumn]: resolved.from },
+            set: { [resolved.fieldColumn]: to },
+            comment,
+          });
+        }
+        return { ...resolved, from: to };
       }
       case 'media': {
         const to = newName;
-        const op: PhysicalOp | null =
-          resolved.from === to
-            ? null
-            : {
-                kind: 'updateComponentField',
-                table: resolved.table,
-                fieldColumn: resolved.fieldColumn,
-                from: resolved.from,
-                to,
-                comment,
-                typeColumn: resolved.typeColumn,
-                typeValue: resolved.typeValue,
-              };
-        return { op, next: { ...resolved, from: to } };
+        if (resolved.from !== to) {
+          migrationFileBuilder.updateRows({
+            table: resolved.table,
+            guardColumn: resolved.fieldColumn,
+            where: {
+              [resolved.fieldColumn]: resolved.from,
+              [resolved.typeColumn]: resolved.typeValue,
+            },
+            set: { [resolved.fieldColumn]: to },
+            comment,
+          });
+        }
+        return { ...resolved, from: to };
       }
       default:
-        return { op: null, next: resolved };
+        return resolved;
     }
   };
 
@@ -318,21 +316,8 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       return;
     }
 
-    const { op, next } = advance(uid, resolved, oldName, newName);
-    if (op) {
-      operations.push(op);
-    }
+    const next = advance(uid, resolved, oldName, newName);
     markInFlight(uid, newName, next);
-  };
-
-  const resolveMigrationsDir = (): string => {
-    const configuredDir = db.config?.settings?.migrations?.dir;
-    if (configuredDir) {
-      return configuredDir;
-    }
-
-    const appRoot = strapi.dirs?.app?.root;
-    return path.join(appRoot ?? process.cwd(), 'database', 'migrations');
   };
 
   return {
@@ -341,7 +326,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     },
 
     hasChanges(): boolean {
-      return operations.length > 0;
+      return migrationFileBuilder.hasChanges();
     },
 
     getUnsupported(): UnsupportedRename[] {
@@ -349,38 +334,11 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     },
 
     build(): BuiltMigration | null {
-      if (operations.length === 0) {
-        return null;
-      }
-
-      const timestamp = getFormattedTimestamp();
-      const content = renderMigration({ timestamp, operations });
-      // Always `.js`: the runner only globs `*.{js,sql}` and `.ts` files would
-      // never execute (see templates.ts for the full rationale).
-      const filename = `${timestamp}.rename-fields.js`;
-
-      return { filename, content };
+      return migrationFileBuilder.build({ name: 'rename-fields' });
     },
 
     async writeFiles(): Promise<string | null> {
-      const built = this.build();
-      if (!built) {
-        return null;
-      }
-
-      const dir = resolveMigrationsDir();
-      await fse.ensureDir(dir);
-
-      // Guard against the (rare) case where a file with the same timestamp
-      // already exists, so we never silently overwrite a pending migration.
-      let filePath = path.join(dir, built.filename);
-      for (let suffix = 1; await fse.pathExists(filePath); suffix += 1) {
-        filePath = path.join(dir, built.filename.replace(/\.js$/, `-${suffix}.js`));
-      }
-
-      await fse.writeFile(filePath, built.content, 'utf8');
-
-      return filePath;
+      return migrationFileBuilder.writeFiles({ name: 'rename-fields' });
     },
   };
 };

@@ -97,9 +97,9 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const [isSaving, setIsSaving] = React.useState(false);
   const previousLocationRef = React.useRef<string | null>(null);
 
-  // Rename-migration mode from server config ('modal' | 'always-on' |
-  // 'always-off'), read from the schema response on load.
-  const renameMigrationModeRef = React.useRef<'modal' | 'always-on' | 'always-off'>('modal');
+  // Rename-migration mode from server config ('prompt' | 'always' | 'never'),
+  // read from the schema response on load.
+  const renameMigrationModeRef = React.useRef<'prompt' | 'always' | 'never'>('prompt');
 
   // When `modal` mode prompts the user, we hold the pending renames plus the
   // promise resolver here so `saveSchema` can await the decision.
@@ -232,12 +232,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       contentTypes: mutatedCTs,
     });
 
-    // In `modal` mode, prompt the user per rename before saving: accepting keeps
+    // In `prompt` mode, prompt the user per rename before saving: accepting keeps
     // the rename in the payload (the server generates a data-preserving
     // migration for it), refusing strips it (the field is dropped and recreated
-    // empty). `always-on` skips the prompt; the server ignores renames entirely
-    // in `always-off`.
-    if (renameMigrationModeRef.current === 'modal') {
+    // empty). `always` skips the prompt; the server ignores renames entirely
+    // in `never`.
+    if (renameMigrationModeRef.current === 'prompt') {
       const pendingRenames = collectPendingRenames(requestData);
 
       if (pendingRenames.length > 0) {

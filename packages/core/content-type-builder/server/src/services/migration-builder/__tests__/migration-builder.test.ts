@@ -5,6 +5,111 @@ import { snakeCase } from 'lodash/fp';
 
 import { createMigrationBuilder } from '..';
 
+const quote = (value: string) => `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+
+const getFormattedTimestamp = (date: Date = new Date()): string => {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toJSON()
+    .replace(/[-:]/g, '.')
+    .replace(/Z$/, '');
+};
+
+const createTestMigrationFileBuilder = ({ migrationsDir }: { migrationsDir?: string } = {}) => {
+  type Operation =
+    | { kind: 'renameColumn'; table: string; from: string; to: string; comment?: string }
+    | { kind: 'renameTable'; from: string; to: string; comment?: string }
+    | {
+        kind: 'updateRows';
+        table: string;
+        guardColumn?: string;
+        where: Record<string, string>;
+        set: Record<string, string>;
+        comment?: string;
+      };
+
+  const operations: Operation[] = [];
+
+  const renderOperation = (op: Operation): string => {
+    if (op.kind === 'renameColumn') {
+      return `    // ${op.comment ?? ''}
+    if (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.from)})) {
+      await knex.schema.alterTable(${quote(op.table)}, (table) => {
+        table.renameColumn(${quote(op.from)}, ${quote(op.to)});
+      });
+    }`;
+    }
+
+    if (op.kind === 'renameTable') {
+      return `    // ${op.comment ?? ''}
+    if (
+      (await knex.schema.hasTable(${quote(op.from)})) &&
+      !(await knex.schema.hasTable(${quote(op.to)}))
+    ) {
+      await knex.schema.renameTable(${quote(op.from)}, ${quote(op.to)});
+    }`;
+    }
+
+    const [setColumn, setValue] = Object.entries(op.set)[0];
+    const where = Object.entries(op.where)
+      .map(([column, value]) => `.where(${quote(column)}, ${quote(value)})`)
+      .join('');
+
+    return `    // ${op.comment ?? ''}
+    if (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.guardColumn ?? setColumn)})) {
+      await knex(${quote(op.table)})${where}.update(${quote(setColumn)}, ${quote(setValue)});
+    }`;
+  };
+
+  return {
+    renameColumn(op: Omit<Extract<Operation, { kind: 'renameColumn' }>, 'kind'>): void {
+      operations.push({ kind: 'renameColumn', ...op });
+    },
+    renameTable(op: Omit<Extract<Operation, { kind: 'renameTable' }>, 'kind'>): void {
+      operations.push({ kind: 'renameTable', ...op });
+    },
+    updateRows(op: Omit<Extract<Operation, { kind: 'updateRows' }>, 'kind'>): void {
+      operations.push({ kind: 'updateRows', ...op });
+    },
+    hasChanges(): boolean {
+      return operations.length > 0;
+    },
+    build({ name }: { name: string }) {
+      if (operations.length === 0) {
+        return null;
+      }
+      const timestamp = getFormattedTimestamp();
+      const body = operations.map(renderOperation).join('\n\n');
+      return {
+        filename: `${timestamp}.${name}.js`,
+        content: `'use strict';
+
+module.exports = {
+  async up(knex) {
+${body}
+  },
+  async down(knex) {
+  },
+};
+`,
+      };
+    },
+    async writeFiles({ name }: { name: string }) {
+      const built = this.build({ name });
+      if (!built || !migrationsDir) {
+        return null;
+      }
+
+      fs.ensureDirSync(migrationsDir);
+      let filePath = path.join(migrationsDir, built.filename);
+      for (let suffix = 1; fs.pathExistsSync(filePath); suffix += 1) {
+        filePath = path.join(migrationsDir, built.filename.replace(/\.js$/, `-${suffix}.js`));
+      }
+      fs.writeFileSync(filePath, built.content, 'utf8');
+      return filePath;
+    },
+  };
+};
+
 /**
  * Build a fake `strapi` with a metadata map + identifiers, mirroring the shape
  * the real `strapi.db.metadata` exposes (see packages/core/database metadata).
@@ -42,18 +147,24 @@ const createStrapiMock = ({
     models[uid] = { attributes: attrs };
   }
 
+  const db = {
+    metadata,
+    config: {
+      settings: {
+        migrations: { dir: migrationsDir },
+        useTypescriptMigrations,
+      },
+    },
+  };
+
+  (db as any).migrations = {
+    createFileBuilder: () => createTestMigrationFileBuilder({ migrationsDir }),
+  };
+
   return {
     contentTypes: models,
     components: {},
-    db: {
-      metadata,
-      config: {
-        settings: {
-          migrations: { dir: migrationsDir },
-          useTypescriptMigrations,
-        },
-      },
-    },
+    db,
     dirs: {
       app: { root: migrationsDir ? path.dirname(path.dirname(migrationsDir)) : process.cwd() },
     },

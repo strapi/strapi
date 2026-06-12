@@ -2,8 +2,8 @@ import config, { RENAME_MIGRATION_MODES } from '../config';
 
 describe('content-type-builder config', () => {
   describe('default', () => {
-    it("defaults renameMigrations to 'modal'", () => {
-      expect(config.default.renameMigrations).toBe('modal');
+    it("defaults renameMigrations to 'prompt'", () => {
+      expect(config.default.renameMigrations).toBe('prompt');
     });
   });
 

@@ -74,9 +74,9 @@ interface CollectedRename {
 
 const getRenameMigrationMode = (): RenameMigrationMode => {
   try {
-    return strapi.plugin('content-type-builder').config('renameMigrations', 'modal');
+    return strapi.plugin('content-type-builder').config('renameMigrations', 'prompt');
   } catch {
-    return 'modal';
+    return 'prompt';
   }
 };
 
@@ -118,12 +118,11 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
  * still reflects the old (pre-rename) schema.
  */
 const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
-  // 'always-off' never generates. 'always-on' and 'modal' both generate a
-  // migration for every rename that reaches the server: in 'modal' mode the
-  // admin prompts the user and strips any refused rename from the payload before
-  // sending, so by the time we get here the remaining renames are exactly the
-  // accepted ones.
-  if (getRenameMigrationMode() === 'always-off') {
+  // 'never' never generates. 'always' and 'prompt' both generate a migration
+  // for every rename that reaches the server: in 'prompt' mode the admin prompts
+  // the user and strips any refused rename from the payload before sending, so
+  // by the time we get here the remaining renames are exactly the accepted ones.
+  if (getRenameMigrationMode() === 'never') {
     return;
   }
 
@@ -225,7 +224,7 @@ export const getSchema = async () => {
     components,
     settings: {
       // Surface the rename-migration mode so the admin can decide whether to
-      // prompt (modal), always generate, or never generate rename migrations.
+      // prompt, always generate, or never generate rename migrations.
       renameMigrations: getRenameMigrationMode(),
     },
   };

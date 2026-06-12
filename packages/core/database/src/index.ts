@@ -6,7 +6,14 @@ import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
+import {
+  createMigrationsProvider,
+  MigrationProvider,
+  type Migration,
+  type BuiltMigrationFile,
+  type MigrationFileBuilder,
+  type MigrationFileOperation,
+} from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
@@ -271,4 +278,12 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration };
+export type {
+  Model,
+  JoinTable,
+  Identifiers,
+  Migration,
+  BuiltMigrationFile,
+  MigrationFileBuilder,
+  MigrationFileOperation,
+};

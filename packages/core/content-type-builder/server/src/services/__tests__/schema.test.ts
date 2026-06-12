@@ -44,7 +44,7 @@ jest.mock('../migration-builder', () => ({
 // eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
 const { createMigrationBuilder } = require('../migration-builder');
 
-let renameMode = 'modal';
+let renameMode = 'prompt';
 
 const getServiceMock = jest.fn().mockImplementation((service) => {
   if (service === 'content-types') {
@@ -71,7 +71,7 @@ describe('Content Type Builder - Schema service', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
-    renameMode = 'modal';
+    renameMode = 'prompt';
     migrationBuilderMock.hasChanges.mockReturnValue(true);
     migrationBuilderMock.getUnsupported.mockReturnValue([]);
 
@@ -800,8 +800,8 @@ describe('Content Type Builder - Schema service', () => {
       ]);
     });
 
-    it('does not generate a migration when renameMigrations is always-off', async () => {
-      renameMode = 'always-off';
+    it('does not generate a migration when renameMigrations is never', async () => {
+      renameMode = 'never';
 
       await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
 
