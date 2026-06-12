@@ -7,7 +7,7 @@ import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
-const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
+const BILLING_SELF_HOSTED_URL = 'mailto:sales@strapi.io';
 const MANAGE_SUBSCRIPTION_URL = 'https://billing.strapi.io';
 
 export const AdminSeatInfoEE = () => {
