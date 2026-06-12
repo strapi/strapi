@@ -30,7 +30,7 @@ export interface Menu {
 
 const useMenu = (shouldUpdateStrapi: boolean) => {
   const checkUserHasPermissions = useAuth('useMenu', (state) => state.checkUserHasPermissions);
-  const menu = useStrapiApp('useMenu', (state) => state.menu);
+  const menu = useStrapiApp('useMenu', (state) => normalizeMenuLinks(state.menu));
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
@@ -136,11 +136,12 @@ const getGeneralLinks = async (
   shouldUpdateStrapi: boolean = false,
   checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
+  const generalSectionLinks = normalizeMenuLinks(generalSectionRawLinks);
   const generalSectionLinksPermissions = await Promise.all(
-    generalSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
+    generalSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
-  const authorizedGeneralSectionLinks = generalSectionRawLinks.filter(
+  const authorizedGeneralSectionLinks = generalSectionLinks.filter(
     (_, index) => generalSectionLinksPermissions[index].length > 0
   );
 
@@ -163,15 +164,46 @@ const getPluginSectionLinks = async (
   pluginsSectionRawLinks: MenuItem[],
   checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
+  const pluginSectionLinks = normalizeMenuLinks(pluginsSectionRawLinks);
   const pluginSectionLinksPermissions = await Promise.all(
-    pluginsSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
+    pluginSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
-  const authorizedPluginSectionLinks = pluginsSectionRawLinks.filter(
+  const authorizedPluginSectionLinks = pluginSectionLinks.filter(
     (_, index) => pluginSectionLinksPermissions[index].length > 0
   );
 
   return authorizedPluginSectionLinks;
 };
 
-export { useMenu };
+const normalizeMenuLinks = (links: unknown): MenuItem[] => {
+  if (!Array.isArray(links)) {
+    return [];
+  }
+
+  return links.reduce<MenuItem[]>((acc, link) => {
+    if (!link || typeof link !== 'object') {
+      return acc;
+    }
+
+    const candidate = link as Partial<MenuItem>;
+
+    if (
+      typeof candidate.to !== 'string' ||
+      !candidate.icon ||
+      !candidate.intlLabel?.id ||
+      !candidate.intlLabel.defaultMessage
+    ) {
+      return acc;
+    }
+
+    acc.push({
+      ...candidate,
+      permissions: Array.isArray(candidate.permissions) ? candidate.permissions : [],
+    } as MenuItem);
+
+    return acc;
+  }, []);
+};
+
+export { useMenu, normalizeMenuLinks };

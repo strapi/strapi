@@ -217,8 +217,8 @@ describe('useDocumentLayout', () => {
             hint: '',
             label: 'categories',
             mainField: {
-              name: 'name',
-              type: 'string',
+              name: 'id',
+              type: 'custom',
             },
             name: 'categories',
             placeholder: '',
@@ -368,8 +368,8 @@ describe('useDocumentLayout', () => {
         },
         label: 'categories',
         mainField: {
-          name: 'name',
-          type: 'string',
+          name: 'id',
+          type: 'custom',
         },
         name: 'categories',
         searchable: false,
@@ -586,6 +586,229 @@ describe('useDocumentLayout', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.edit.settings.displayName).toBe('Address');
     expect(result.current.edit.layout.length).toBeGreaterThan(0);
+  });
+
+  it('does not crash when switching between single types where one has a repeatable component (regression CMS-1077)', async () => {
+    const simpleAUid = 'api::simple-test-a.simple-test-a';
+    const simpleCUid = 'api::simple-test-c.simple-test-c';
+    const componentUid = 'simple-test.entry';
+
+    const simpleAConfiguration = {
+      contentType: {
+        uid: simpleAUid,
+        settings: {
+          bulkable: false,
+          filterable: false,
+          searchable: false,
+          pageSize: 10,
+          mainField: 'title',
+          defaultSortBy: '',
+          defaultSortOrder: 'ASC',
+        },
+        metadatas: {
+          title: {
+            edit: {
+              label: 'title',
+              description: '',
+              placeholder: '',
+              visible: true,
+              editable: true,
+            },
+            list: {
+              label: 'title',
+              searchable: true,
+              sortable: true,
+            },
+          },
+        },
+        options: {},
+        layouts: {
+          edit: [[{ name: 'title', size: 12 }]],
+          list: ['title'],
+        },
+      },
+      components: {},
+    };
+
+    const simpleCConfiguration = {
+      contentType: {
+        uid: simpleCUid,
+        settings: {
+          bulkable: false,
+          filterable: false,
+          searchable: false,
+          pageSize: 10,
+          mainField: 'id',
+          defaultSortBy: '',
+          defaultSortOrder: 'ASC',
+        },
+        metadatas: {
+          entries: {
+            edit: {
+              label: 'entries',
+              description: '',
+              placeholder: '',
+              visible: true,
+              editable: true,
+            },
+            list: {
+              label: 'entries',
+              searchable: false,
+              sortable: false,
+            },
+          },
+        },
+        options: {},
+        layouts: {
+          edit: [[{ name: 'entries', size: 12 }]],
+          list: ['entries'],
+        },
+      },
+      components: {
+        [componentUid]: {
+          layouts: {
+            edit: [[{ name: 'label', size: 12 }]],
+          },
+          metadatas: {
+            label: {
+              edit: {
+                label: 'label',
+                description: '',
+                placeholder: '',
+                visible: true,
+                editable: true,
+              },
+              list: {
+                label: 'label',
+                searchable: true,
+                sortable: true,
+              },
+            },
+          },
+          settings: {
+            mainField: 'label',
+          },
+          isComponent: true,
+        },
+      },
+    };
+
+    server.use(
+      http.get('/content-manager/init', () => {
+        return HttpResponse.json({
+          data: {
+            components: [
+              {
+                uid: componentUid,
+                category: 'simple-test',
+                apiId: 'entry',
+                info: {
+                  displayName: 'Simple Test Entry',
+                },
+                options: {},
+                attributes: {
+                  label: {
+                    type: 'string',
+                  },
+                },
+              },
+            ],
+            contentTypes: [
+              {
+                uid: simpleAUid,
+                isDisplayed: true,
+                apiID: 'simple-test-a',
+                kind: 'singleType',
+                info: {
+                  singularName: 'simple-test-a',
+                  pluralName: 'simple-test-as',
+                  displayName: 'Simple Test A',
+                  name: 'Simple Test A',
+                  description: '',
+                },
+                options: {
+                  draftAndPublish: false,
+                },
+                pluginOptions: {},
+                attributes: {
+                  title: {
+                    type: 'string',
+                  },
+                },
+              },
+              {
+                uid: simpleCUid,
+                isDisplayed: true,
+                apiID: 'simple-test-c',
+                kind: 'singleType',
+                info: {
+                  singularName: 'simple-test-c',
+                  pluralName: 'simple-test-cs',
+                  displayName: 'Simple Test C',
+                  name: 'Simple Test C',
+                  description: '',
+                },
+                options: {
+                  draftAndPublish: false,
+                },
+                pluginOptions: {},
+                attributes: {
+                  entries: {
+                    type: 'component',
+                    component: componentUid,
+                    repeatable: true,
+                  },
+                },
+              },
+            ],
+          },
+        });
+      }),
+      http.get('/content-manager/content-types/:model/configuration', async ({ params }) => {
+        if (params.model === simpleCUid) {
+          await delay(75);
+          return HttpResponse.json({ data: simpleCConfiguration });
+        }
+
+        if (params.model === simpleAUid) {
+          return HttpResponse.json({ data: simpleAConfiguration });
+        }
+
+        return HttpResponse.json({ data: mockData.contentManager.collectionTypeConfiguration });
+      })
+    );
+
+    const { result, rerender } = renderHook(({ model }) => useDocumentLayout(model), {
+      initialProps: { model: simpleAUid },
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.edit.settings.displayName).toBe('Simple Test A');
+
+    rerender({ model: simpleCUid });
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.edit.layout).toEqual([]);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.edit.settings.displayName).toBe('Simple Test C');
+    expect(result.current.edit.layout[0][0][0]).toMatchObject({
+      name: 'entries',
+      type: 'component',
+      mainField: {
+        name: 'label',
+        type: 'string',
+      },
+    });
+
+    rerender({ model: simpleAUid });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.edit.settings.displayName).toBe('Simple Test A');
+    expect(result.current.edit.layout[0][0][0]).toMatchObject({
+      name: 'title',
+      type: 'string',
+    });
   });
 });
 

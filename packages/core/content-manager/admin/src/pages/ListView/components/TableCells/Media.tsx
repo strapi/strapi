@@ -32,7 +32,7 @@ const getFileExtension = (ext: string) => (ext && ext[0] === '.' ? ext.substring
 const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSingleProps) => {
   const fileURL = prefixFileUrlWithBackendUrl(url)!;
 
-  if (mime.includes('image')) {
+  if (mime?.includes('image')) {
     const thumbnail = formats?.thumbnail?.url;
     const mediaURL = prefixFileUrlWithBackendUrl(thumbnail) || fileURL;
 
@@ -47,7 +47,7 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
   }
 
   const fileExtension = getFileExtension(ext);
-  const fileName = name.length > 100 ? `${name.substring(0, 100)}...` : name;
+  const fileName = name && name.length > 100 ? `${name.substring(0, 100)}...` : name;
 
   return (
     <Tooltip label={fileName}>

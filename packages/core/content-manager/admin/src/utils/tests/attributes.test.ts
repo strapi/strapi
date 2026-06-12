@@ -1,4 +1,4 @@
-import { checkIfAttributeIsDisplayable } from '../attributes';
+import { checkIfAttributeIsDisplayable, getMainField } from '../attributes';
 
 describe('attributes', () => {
   describe('checkIfAttributeIsDisplayable', () => {
@@ -36,6 +36,43 @@ describe('attributes', () => {
       } as const;
 
       expect(checkIfAttributeIsDisplayable(attribute)).toBeTruthy();
+    });
+  });
+
+  describe('getMainField', () => {
+    it('falls back to id when a component main field cannot be resolved', () => {
+      expect(
+        getMainField(
+          {
+            type: 'component',
+            component: 'missing.component',
+            repeatable: false,
+          },
+          'title',
+          { schemas: [], components: {} }
+        )
+      ).toEqual({
+        name: 'id',
+        type: 'custom',
+      });
+    });
+
+    it('falls back to id when a relation main field cannot be resolved', () => {
+      expect(
+        getMainField(
+          {
+            type: 'relation',
+            relation: 'oneToOne',
+            target: 'api::missing.missing',
+            targetModel: 'api::missing.missing',
+          } as any,
+          'title',
+          { schemas: [], components: {} }
+        )
+      ).toEqual({
+        name: 'id',
+        type: 'custom',
+      });
     });
   });
 });

@@ -31,16 +31,35 @@ const getMainField = (
     return undefined;
   }
 
-  const mainFieldType =
-    attribute.type === 'component'
-      ? components[attribute.component].attributes[mainFieldName].type
-      : // @ts-expect-error – `targetModel` does exist on the attribute for a relation.
-        schemas.find((schema) => schema.uid === attribute.targetModel)?.attributes[mainFieldName]
-          .type;
+  if (attribute.type === 'component') {
+    const mainFieldType = components[attribute.component]?.attributes?.[mainFieldName]?.type;
+
+    return {
+      name: mainFieldType ? mainFieldName : 'id',
+      type: mainFieldType ?? 'custom',
+    };
+  }
+
+  if (attribute.type === 'relation') {
+    const target =
+      'targetModel' in attribute
+        ? attribute.targetModel
+        : 'target' in attribute
+          ? attribute.target
+          : undefined;
+    const mainFieldType = schemas.find((schema) => schema.uid === target)?.attributes?.[
+      mainFieldName
+    ]?.type;
+
+    return {
+      name: mainFieldType ? mainFieldName : 'id',
+      type: mainFieldType ?? 'custom',
+    };
+  }
 
   return {
     name: mainFieldName,
-    type: mainFieldType ?? 'string',
+    type: 'string',
   };
 };
 

@@ -12,6 +12,7 @@ import { HOOKS } from '../constants/hooks';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 import { BaseQueryError } from '../utils/api';
 import { getMainField } from '../utils/attributes';
+import { normalizeContentManagerLayout } from '../utils/layouts/normalizeContentManagerLayout';
 
 import { useContentTypeSchema } from './useContentTypeSchema';
 import {
@@ -192,10 +193,11 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
       return null;
     }
 
-    const edit = formatEditLayout(data, { schemas, schema, components });
-    const list = formatListLayout(data, { schemas, schema, components });
+    const normalizedData = normalizeContentManagerLayout(data, { schemas, schema, components });
+    const edit = formatEditLayout(normalizedData, { schemas, schema, components });
+    const list = formatListLayout(normalizedData, { schemas, schema, components });
     const listViewConversionContext: ListViewConversionContext = {
-      componentConfigurations: data.components,
+      componentConfigurations: normalizedData.components,
       componentSchemas: components,
       contentTypeSchemas: schemas,
     };
