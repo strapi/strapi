@@ -181,18 +181,12 @@ export async function buildPerformanceHomeMetrics(
             method?: string;
             route?: string;
             slowQueryCount?: number;
-            slowOrErrorQueryEvents?: number;
           };
           const durationMs = typeof ev.durationMs === 'number' ? ev.durationMs : 0;
           const dbTotalMs = typeof ev.dbTotalMs === 'number' ? ev.dbTotalMs : 0;
           const method = typeof ev.method === 'string' ? ev.method : '';
           const route = typeof ev.route === 'string' ? ev.route : '';
-          const slowQ =
-            (typeof ev.slowQueryCount === 'number' ? ev.slowQueryCount : undefined) ??
-            (typeof ev.slowOrErrorQueryEvents === 'number'
-              ? ev.slowOrErrorQueryEvents
-              : undefined) ??
-            0;
+          const slowQ = typeof ev.slowQueryCount === 'number' ? ev.slowQueryCount : 0;
 
           durations.push(durationMs);
           dbTotals.push(dbTotalMs);

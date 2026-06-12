@@ -11,9 +11,8 @@ import type {
   PublicRequestSummaryPayload,
 } from '../performance/event-payloads';
 import { PERFORMANCE_HUB_EVENT } from '../performance/hub-events';
-import { mapDatabaseClientToDbSystem } from './opentelemetry-tracing-utils';
+import { mapDatabaseClientToDbSystem, SERVICE_NAME_ATTR } from './opentelemetry-tracing-utils';
 
-const SERVICE_NAME_ATTR = 'service.name';
 const MAX_ATTR_LEN = 128;
 
 type MetricsObsConfig = NonNullable<NonNullable<Core.Config.Server['observability']>['metrics']>;

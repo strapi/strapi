@@ -74,7 +74,6 @@ export async function readPerformanceArtifactContext(
   const artifactPath = strapi.config.get('database.performance.artifactPath') as string | undefined;
   const databasePerformanceEnabled = strapi.config.get('database.performance.enabled') === true;
   const requestTimelineEnabled =
-    strapi.config.get('server.performance.requestSummaryEnabled') === true ||
     strapi.config.get('server.performance.requestTrackingEnabled') === true;
 
   if (!isArtifactOutput(output) || !artifactPath || typeof artifactPath !== 'string') {

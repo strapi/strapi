@@ -37,7 +37,7 @@ describe('performance event payloads', () => {
     expect(err.errorCode).toBe('E');
   });
 
-  it('aliases slowQueryCount to slowOrErrorQueryEvents on summaries', () => {
+  it('builds request summary payloads', () => {
     const s = buildPublicRequestSummaryPayload({
       requestId: 'r1',
       durationMs: 10,
@@ -52,7 +52,19 @@ describe('performance event payloads', () => {
 
     expect(s.schemaVersion).toBe(1);
     expect(s.slowQueryCount).toBe(1);
-    expect(s.slowOrErrorQueryEvents).toBe(1);
+    expect(Object.keys(s)).toEqual([
+      'schemaVersion',
+      'eventVersion',
+      'requestId',
+      'durationMs',
+      'method',
+      'route',
+      'path',
+      'statusCode',
+      'dbQueryCount',
+      'dbTotalMs',
+      'slowQueryCount',
+    ]);
   });
 
   it('builds request start and stage payloads', () => {

@@ -119,39 +119,6 @@ describe('Performance artifact writer', () => {
     expect(doc.events[1].event).toMatchObject({ id: '3' });
   });
 
-  it('falls back to legacy artifactMaxEvents / artifactFlushIntervalMs keys', async () => {
-    const strapi = {
-      config: {
-        get(key: string, def?: unknown) {
-          const map: Record<string, unknown> = {
-            'database.performance.output': 'both',
-            'database.performance.artifactPath': artifactPath,
-            'database.performance.artifactFlushIntervalMs': 120_000,
-            'database.performance.artifactMaxEvents': 2,
-            'server.performance.slowRequestMs': 500,
-            'info.strapi': '1.0.0',
-          };
-          return map[key] ?? def;
-        },
-      },
-      eventHub: createEventHub(),
-    } as any;
-
-    const dispose = attachPerformanceArtifactWriter(strapi);
-
-    await strapi.eventHub.emit(PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW, { id: 'a', durationMs: 10 });
-    await strapi.eventHub.emit(PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW, { id: 'b', durationMs: 20 });
-    await strapi.eventHub.emit(PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW, { id: 'c', durationMs: 30 });
-
-    await dispose();
-
-    const content = (await readFile(artifactPath, 'utf8')).trim();
-    const doc = JSON.parse(content);
-
-    expect(doc.events).toHaveLength(2);
-    expect(doc.events[0].event).toMatchObject({ id: 'b' });
-  });
-
   it('rotates the artifact file when it exceeds artifactMaxFileBytes before append', async () => {
     const filler = 'x'.repeat(120);
     await writeFile(artifactPath, filler, 'utf8');
@@ -199,7 +166,6 @@ describe('Performance artifact writer', () => {
       dbQueryCount: 0,
       dbTotalMs: 0,
       slowQueryCount: 0,
-      slowOrErrorQueryEvents: 0,
     });
 
     await dispose();

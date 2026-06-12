@@ -89,28 +89,27 @@ Payload (**v1**): `schemaVersion`, `eventVersion`, `requestId`, `stage`, `stageD
 
 ### `performance.request.summary`
 
-Emitted when **`server.performance.requestSummaryEnabled`** or **`server.performance.requestTrackingEnabled`** is true, after the HTTP response finishes, **only if** the request was sampled (`server.performance.requestSampleRate`, default `0.1`) **or** the wall time is at least **`server.performance.slowRequestMs`** (default `500`).
+Emitted when **`server.performance.requestTrackingEnabled`** is true, after the HTTP response finishes, **only if** the request was sampled (`server.performance.requestSampleRate`, default `0.1`) **or** the wall time is at least **`server.performance.slowRequestMs`** (default `500`).
 
 Payload (**v1**): `schemaVersion`, `eventVersion`, plus
 
-| Field                    | Required | Notes                                            |
-| ------------------------ | -------- | ------------------------------------------------ |
-| `requestId`              | yes      | Correlates with DB events when context exists    |
-| `durationMs`             | yes      | Wall time for the HTTP request                   |
-| `method`                 | yes      |                                                  |
-| `route`                  | yes      | Matched route pattern when available, else path  |
-| `path`                   | yes      | Raw path (may be higher cardinality)             |
-| `statusCode`             | yes      | HTTP status at end of request                    |
-| `dbQueryCount`           | yes      | Queries attributed to this request               |
-| `dbTotalMs`              | yes      | Sum of DB time from telemetry hook               |
-| `slowQueryCount`         | yes      | Slow or failed query **events** for this request |
-| `slowOrErrorQueryEvents` | yes      | Deprecated alias of `slowQueryCount`             |
+| Field            | Required | Notes                                            |
+| ---------------- | -------- | ------------------------------------------------ |
+| `requestId`      | yes      | Correlates with DB events when context exists    |
+| `durationMs`     | yes      | Wall time for the HTTP request                   |
+| `method`         | yes      |                                                  |
+| `route`          | yes      | Matched route pattern when available, else path  |
+| `path`           | yes      | Raw path (may be higher cardinality)             |
+| `statusCode`     | yes      | HTTP status at end of request                    |
+| `dbQueryCount`   | yes      | Queries attributed to this request               |
+| `dbTotalMs`      | yes      | Sum of DB time from telemetry hook               |
+| `slowQueryCount` | yes      | Slow or failed query **events** for this request |
 
 ## Rate limiting
 
 Slow-query and request summaries can be high volume if thresholds are low. Use **`database.performance.sampleRate`**, **`slowQueryMs`**, **`server.performance.requestSampleRate`**, **`server.performance.slowRequestMs`**, and production-safe capture flags. Plugin handlers should be **non-blocking** and **cheap**; never `await` remote exporters on the hot path inside the listener—queue work instead.
 
-When **`database.performance.output`** is **`artifact`** or **`both`** and **`database.performance.artifactPath`** is set, core appends structured JSON Lines batches (one JSON object per line) that include DB perf rows and request timeline rows when emitted. Prefer **`database.performance.flushIntervalMs`** / **`database.performance.maxEvents`** (legacy: **`artifactFlushIntervalMs`** / **`artifactMaxEvents`**).
+When **`database.performance.output`** is **`artifact`** or **`both`** and **`database.performance.artifactPath`** is set, core appends structured JSON Lines batches (one JSON object per line) that include DB perf rows and request timeline rows when emitted. Use **`database.performance.flushIntervalMs`** / **`database.performance.maxEvents`** to tune artifact batching.
 
 ## See also
 

@@ -70,10 +70,6 @@ export interface PublicRequestSummaryPayload {
   dbTotalMs: number;
   /** Count of slow or failed DB queries recorded for this request (spec field name). */
   slowQueryCount: number;
-  /**
-   * @deprecated Use `slowQueryCount`. Retained for backward compatibility with earlier payloads.
-   */
-  slowOrErrorQueryEvents: number;
 }
 
 export function buildPublicDatabaseQueryPerformancePayload(
@@ -93,16 +89,12 @@ export function buildPublicDatabaseQueryPerformancePayload(
 }
 
 export function buildPublicRequestSummaryPayload(
-  fields: Omit<
-    PublicRequestSummaryPayload,
-    'schemaVersion' | 'eventVersion' | 'slowOrErrorQueryEvents' | 'slowQueryCount'
-  > & { slowQueryCount: number }
+  fields: Omit<PublicRequestSummaryPayload, 'schemaVersion' | 'eventVersion'>
 ): PublicRequestSummaryPayload {
   return {
     schemaVersion: PERFORMANCE_PUBLIC_SCHEMA_VERSION,
     eventVersion: PERFORMANCE_REQUEST_SUMMARY_EVENT_VERSION,
     ...fields,
-    slowOrErrorQueryEvents: fields.slowQueryCount,
   };
 }
 

@@ -18,7 +18,7 @@ module.exports = ({ env }) => {
   return {
     ...base,
     performance: {
-      requestSummaryEnabled: true,
+      requestTrackingEnabled: true,
       requestSampleRate: Math.min(
         1,
         Math.max(0, Number.parseFloat(env('STRAPI_CI_PERF_REQUEST_SAMPLE_RATE', '1')) || 1)

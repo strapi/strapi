@@ -10,6 +10,7 @@ import {
   resolveDatabasePerformanceMaxEvents,
 } from './database-config';
 import { PERFORMANCE_ARTIFACT_REQUEST_EVENTS, PERFORMANCE_HUB_EVENT } from './hub-events';
+import { clampPositiveInt } from '../../utils/server-performance-tracking';
 
 /** JSON Lines: one envelope object per line; `schemaVersion` on each line (additive within major). */
 export const PERFORMANCE_ARTIFACT_BATCH_SCHEMA_VERSION = 1 as const;
@@ -27,7 +28,11 @@ type ArtifactFingerprintAgg = { fingerprint: string; count: number; totalMs: num
 export type PerformanceArtifactSummaryV1 = {
   /** Count of DB perf rows in this batch (slow + error events only in current producers). */
   totalQueriesObserved: number;
-  /** Same as `totalQueriesObserved` for this batch — all captured rows are slow or error path. */
+  /**
+   * Number of slow/error query events in this batch. Intentionally equal to
+   * `totalQueriesObserved` while producers only capture the slow/error path; kept as a distinct,
+   * named field so the artifact schema stays stable if non-slow rows are ever captured.
+   */
   slowQueryCount: number;
   p50Ms: number;
   p95Ms: number;
@@ -49,13 +54,6 @@ export type PerformanceArtifactEnvelopeV1 = {
 };
 
 const shouldCaptureArtifact = (output: unknown) => output === 'artifact' || output === 'both';
-
-function clampPositiveInt(value: unknown, fallback: number): number {
-  if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
-    return fallback;
-  }
-  return value;
-}
 
 function pickDefined<T extends Record<string, unknown>>(obj: T | undefined, keys: (keyof T)[]) {
   const out: Record<string, unknown> = {};
@@ -84,12 +82,9 @@ function buildRedactedPerfSnapshot(strapi: Core.Strapi): Record<string, unknown>
       'captureBindings',
       'flushIntervalMs',
       'maxEvents',
-      'artifactFlushIntervalMs',
-      'artifactMaxEvents',
       'artifactMaxFileBytes',
     ]),
     server: pickDefined(srvPerf, [
-      'requestSummaryEnabled',
       'requestTrackingEnabled',
       'slowRequestMs',
       'requestSampleRate',

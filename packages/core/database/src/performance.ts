@@ -16,6 +16,27 @@ export interface DatabasePerformanceConfig {
   notifyQueryTelemetry?: (info: DatabaseQueryTelemetryInfo) => void;
 }
 
+/**
+ * Raw Knex query lifecycle event payload (emitted on `query` / `query-response` / `query-error`).
+ * Shared so DB perf listeners and OpenTelemetry tracing both avoid `any`.
+ */
+export interface KnexQueryEvent {
+  __knexQueryUid?: string;
+  sql?: string;
+  method?: string;
+  bindings?: unknown[];
+  queryContext?: { requestId?: string; [key: string]: unknown };
+}
+
+/** Per-query state tracked between the `query` event and its terminal response/error event. */
+export interface InflightQueryState {
+  startedAt: number;
+  sql?: string;
+  bindings?: unknown[];
+  method?: string;
+  requestId?: string;
+}
+
 export interface DatabaseQueryPerfEvent {
   type: 'query.slow' | 'query.error';
   timestamp: string;

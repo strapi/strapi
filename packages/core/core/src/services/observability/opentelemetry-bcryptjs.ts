@@ -38,6 +38,10 @@ function recordBcryptSpan<T>(name: 'compare' | 'hash', run: () => T): T {
 /**
  * Wraps bcryptjs `compare` / `hash` so password work appears in traces (e.g. between Knex spans on login).
  * Skips callback-style calls; patches the resolved module once per process when tracing is enabled.
+ *
+ * Trade-off: this mutates the shared `bcryptjs` module exports for the whole process (reversible via
+ * {@link disposeBcryptjsTracing}). It only patches the single instance that `require('bcryptjs')`
+ * resolves here, so any separately-bundled/duplicated copy of bcryptjs would remain untraced.
  */
 export function attachBcryptjsTracing(strapi: Core.Strapi): void {
   if (!isTracingOn(strapi) || compareOriginal) {

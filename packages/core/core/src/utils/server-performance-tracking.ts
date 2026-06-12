@@ -1,11 +1,8 @@
 import type { Core } from '@strapi/types';
 
-/** True when per-request perf ids / summaries should run (supports spec alias `requestTrackingEnabled`). */
+/** True when per-request perf ids / summaries should run. */
 export function isServerRequestPerfTrackingEnabled(strapi: Core.Strapi): boolean {
-  return (
-    strapi.config.get('server.performance.requestSummaryEnabled') === true ||
-    strapi.config.get('server.performance.requestTrackingEnabled') === true
-  );
+  return strapi.config.get('server.performance.requestTrackingEnabled') === true;
 }
 
 function clampUnitInterval(value: unknown, fallback: number): number {
@@ -15,7 +12,8 @@ function clampUnitInterval(value: unknown, fallback: number): number {
   return Math.min(1, Math.max(0, value));
 }
 
-function clampPositiveInt(value: unknown, fallback: number): number {
+/** Returns `value` when it is a finite, non-negative number; otherwise `fallback`. */
+export function clampPositiveInt(value: unknown, fallback: number): number {
   if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
     return fallback;
   }

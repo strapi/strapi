@@ -43,7 +43,6 @@ function createCtxWithResHooks(): {
 }
 
 function mockStrapi(opts: {
-  requestSummary?: boolean;
   requestTracking?: boolean;
   dbPerf?: boolean;
   requestSampleRate?: number;
@@ -53,7 +52,6 @@ function mockStrapi(opts: {
   emit: jest.Mock;
 }): Core.Strapi {
   const {
-    requestSummary = false,
     requestTracking = false,
     dbPerf = false,
     requestSampleRate = 1,
@@ -66,9 +64,6 @@ function mockStrapi(opts: {
   return {
     config: {
       get(key: string, def?: unknown) {
-        if (key === 'server.performance.requestSummaryEnabled') {
-          return requestSummary;
-        }
         if (key === 'server.performance.requestTrackingEnabled') {
           return requestTracking;
         }
@@ -108,7 +103,7 @@ describe('runRequestPerformanceMiddleware', () => {
     >();
 
     const strapi = mockStrapi({
-      requestSummary: true,
+      requestTracking: true,
       perfStats,
       emit,
     });
@@ -147,7 +142,6 @@ describe('runRequestPerformanceMiddleware', () => {
         dbQueryCount: 2,
         dbTotalMs: 20,
         slowQueryCount: 1,
-        slowOrErrorQueryEvents: 1,
       })
     );
     expect(perfStats.has(requestId)).toBe(false);
@@ -183,7 +177,7 @@ describe('runRequestPerformanceMiddleware', () => {
     const perfStats = new Map();
 
     const strapi = mockStrapi({
-      requestSummary: true,
+      requestTracking: true,
       requestSampleRate: 0.5,
       slowRequestMs: 500,
       perfStats,
@@ -205,7 +199,7 @@ describe('runRequestPerformanceMiddleware', () => {
     const perfStats = new Map();
 
     const strapi = mockStrapi({
-      requestSummary: true,
+      requestTracking: true,
       requestSampleRate: 0.5,
       slowRequestMs: 5,
       perfStats,
@@ -235,7 +229,7 @@ describe('runRequestPerformanceMiddleware', () => {
     const perfStats = new Map();
 
     const strapi = mockStrapi({
-      requestSummary: true,
+      requestTracking: true,
       emitStageEvents: true,
       perfStats,
       emit,

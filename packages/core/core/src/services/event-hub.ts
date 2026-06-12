@@ -7,11 +7,23 @@ export interface EventHubSubscriberErrorInfo {
 }
 
 export interface CreateEventHubOptions {
-  /** Invoked when a subscriber or named listener throws; emit still completes for other handlers. */
+  /**
+   * Invoked when a subscriber or named listener throws; emit still completes for other handlers.
+   * When omitted, failures are logged via `console.warn` (see {@link defaultOnSubscriberError})
+   * rather than silently dropped.
+   */
   onSubscriberError?(error: unknown, info: EventHubSubscriberErrorInfo): void;
 }
 
 export interface EventHub {
+  /**
+   * Emits an event to every subscriber and named listener, awaiting each in turn.
+   *
+   * Behavior note: a throwing subscriber/listener does NOT reject `emit` and does NOT prevent the
+   * remaining handlers from running. Each failure is isolated and routed to `onSubscriberError`
+   * (defaulting to a `console.warn`). This differs from the historical behavior where the first
+   * throwing listener would reject the returned promise.
+   */
   emit(eventName: string, ...args: unknown[]): Promise<void>;
   subscribe(subscriber: Subscriber): () => void;
   unsubscribe(subscriber: Subscriber): void;
@@ -26,10 +38,19 @@ export interface EventHub {
 }
 
 /**
+ * Fallback handler used when no `onSubscriberError` is supplied. Logs rather than silently
+ * swallowing so a failing handler is always observable, even for ad-hoc/external hub instances.
+ */
+function defaultOnSubscriberError(error: unknown, info: EventHubSubscriberErrorInfo): void {
+  // eslint-disable-next-line no-console
+  console.warn(`[event-hub] ${info.phase} handler failed for "${info.eventName}":`, error);
+}
+
+/**
  * The event hub is Strapi's event control center.
  */
 export default function createEventHub(options?: CreateEventHubOptions): EventHub {
-  const { onSubscriberError } = options ?? {};
+  const { onSubscriberError = defaultOnSubscriberError } = options ?? {};
   const listeners = new Map();
 
   // Default subscriber to easily add listeners with the on() method

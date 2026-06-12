@@ -1,5 +1,8 @@
 export const MAX_DB_STATEMENT_LENGTH = 4096;
 
+/** OpenTelemetry resource attribute key for the logical service name. */
+export const SERVICE_NAME_ATTR = 'service.name';
+
 export function truncateSql(sql: string, maxLen = MAX_DB_STATEMENT_LENGTH): string {
   if (sql.length <= maxLen) {
     return sql;

@@ -59,7 +59,7 @@ const applyCiPerformanceArtifactTestConfig = (strapi) => {
   const srvPerf = strapi.config.get('server.performance') || {};
   strapi.config.set('server.performance', {
     ...srvPerf,
-    requestSummaryEnabled: true,
+    requestTrackingEnabled: true,
     requestSampleRate: Math.min(1, Math.max(0, floatEnv('STRAPI_CI_PERF_REQUEST_SAMPLE_RATE', 1))),
     slowRequestMs: intEnv('STRAPI_CI_PERF_SLOW_REQUEST_MS', 500),
     emitStageEvents: process.env.STRAPI_CI_PERF_EMIT_STAGES === 'true',

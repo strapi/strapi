@@ -400,21 +400,27 @@ class Strapi extends Container implements Core.Strapi {
             : {};
         /* eslint-enable object-shorthand */
 
-        const db = new Database(
-          _.merge(
-            {},
-            this.config.get('database'),
-            {
-              logger,
-              settings: {
-                migrations: {
-                  dir: path.join(projectDir, 'database/migrations'),
-                },
+        const dbConfig = _.merge(
+          {},
+          this.config.get('database'),
+          {
+            logger,
+            settings: {
+              migrations: {
+                dir: path.join(projectDir, 'database/migrations'),
               },
             },
-            perfRequestHooks
-          )
+          },
+          perfRequestHooks
         );
+
+        // `output` is a core-owned sink concern (read directly below for the bridge/artifact);
+        // keep the DB's `performance` config purely about query capture.
+        if (dbConfig.performance && typeof dbConfig.performance === 'object') {
+          delete (dbConfig.performance as { output?: unknown }).output;
+        }
+
+        const db = new Database(dbConfig);
 
         const perfOutput = this.config.get('database.performance.output', 'none');
         bridgeDatabasePerformanceEvents({

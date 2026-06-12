@@ -23,9 +23,17 @@ import {
   DatabaseQueryTelemetryInfo,
   DatabaseResolvedPerformanceConfig,
   DEFAULT_DATABASE_PERFORMANCE_CONFIG,
+  InflightQueryState,
+  KnexQueryEvent,
   normalizeSqlFingerprint,
   toQueryType,
 } from './performance';
+
+/**
+ * Safety cap for the in-flight query map: if a query never emits a terminal
+ * `query-response`/`query-error` event (e.g. pool destroyed mid-flight), its entry would linger.
+ */
+const MAX_INFLIGHT_QUERIES = 10_000;
 
 export { isKnexQuery } from './utils/knex';
 
@@ -163,18 +171,9 @@ class Database {
       return;
     }
 
-    const inflightQueries = new Map<
-      string,
-      {
-        startedAt: number;
-        sql?: string;
-        bindings?: unknown[];
-        method?: string;
-        requestId?: string;
-      }
-    >();
+    const inflightQueries = new Map<string, InflightQueryState>();
 
-    this.connection.on('query', (queryData: any) => {
+    this.connection.on('query', (queryData: KnexQueryEvent) => {
       const queryId = queryData?.__knexQueryUid;
       if (!queryId) {
         return;
@@ -187,13 +186,20 @@ class Database {
         method: queryData?.method,
         requestId: queryData?.queryContext?.requestId,
       });
+
+      if (inflightQueries.size > MAX_INFLIGHT_QUERIES) {
+        const oldestQueryId = inflightQueries.keys().next().value;
+        if (oldestQueryId !== undefined) {
+          inflightQueries.delete(oldestQueryId);
+        }
+      }
     });
 
-    this.connection.on('query-response', (_response: unknown, queryData: any) => {
+    this.connection.on('query-response', (_response: unknown, queryData: KnexQueryEvent) => {
       this.finalizeQueryTrace({ inflightQueries, queryData, success: true });
     });
 
-    this.connection.on('query-error', (error: any, queryData: any) => {
+    this.connection.on('query-error', (error: { code?: string }, queryData: KnexQueryEvent) => {
       this.finalizeQueryTrace({
         inflightQueries,
         queryData,
@@ -209,17 +215,8 @@ class Database {
     success,
     errorCode,
   }: {
-    inflightQueries: Map<
-      string,
-      {
-        startedAt: number;
-        sql?: string;
-        bindings?: unknown[];
-        method?: string;
-        requestId?: string;
-      }
-    >;
-    queryData: any;
+    inflightQueries: Map<string, InflightQueryState>;
+    queryData: KnexQueryEvent;
     success: boolean;
     errorCode?: string;
   }) {
@@ -503,4 +500,6 @@ export type {
   DatabaseQueryTelemetryInfo,
   DatabasePerformanceConfig,
   DatabasePerformanceSubscriber,
+  KnexQueryEvent,
+  InflightQueryState,
 };

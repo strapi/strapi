@@ -72,14 +72,10 @@ export interface Database<TClient extends ClientKind = ClientKind> {
     output?: 'none' | 'log' | 'artifact' | 'both';
     /** Append-only JSON Lines artifact path (used when `output` is `artifact` or `both`) */
     artifactPath?: string;
-    /** Flush interval for artifact batches (ms). Preferred over {@link artifactFlushIntervalMs}. */
+    /** Flush interval for artifact batches (ms). */
     flushIntervalMs?: number;
-    /** Max buffered perf rows before each flush (rolling window). Preferred over {@link artifactMaxEvents}. */
+    /** Max buffered perf rows before each flush (rolling window). */
     maxEvents?: number;
-    /** @deprecated Use {@link flushIntervalMs}. */
-    artifactFlushIntervalMs?: number;
-    /** @deprecated Use {@link maxEvents}. */
-    artifactMaxEvents?: number;
     /**
      * When set to a positive byte size, the performance JSON Lines file is renamed to
      * `{artifactPath}.rotated.{timestamp}.jsonl` before the next append once the file reaches this size.

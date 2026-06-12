@@ -69,10 +69,6 @@ export interface ServerPerformance {
   /**
    * When true, assigns a per-request id, aggregates DB query timings, and emits
    * `performance.request.summary` on the event hub when the HTTP response finishes.
-   */
-  requestSummaryEnabled?: boolean;
-  /**
-   * Spec name for the same behavior as {@link requestSummaryEnabled}; either flag enables tracking.
    * See contributor docs: performance hub events.
    */
   requestTrackingEnabled?: boolean;

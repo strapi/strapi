@@ -1,5 +1,6 @@
 import type { Context as KoaContext, Next } from 'koa';
 import type { Core } from '@strapi/types';
+import type { KnexQueryEvent } from '@strapi/database';
 import { setRequestWorkTraceParentContextResolver } from '@strapi/utils';
 import {
   context,
@@ -31,12 +32,17 @@ import {
 import {
   inferDbOperation,
   mapDatabaseClientToDbSystem,
+  SERVICE_NAME_ATTR,
   truncateSql,
 } from './opentelemetry-tracing-utils';
 import { disposeBcryptjsTracing } from './opentelemetry-bcryptjs';
 import requestCtx from '../request-context';
 
-const SERVICE_NAME_ATTR = 'service.name';
+/**
+ * Safety cap for the in-flight DB span map: if a query never emits a terminal event
+ * (e.g. pool destroyed mid-flight), the oldest span is evicted and ended once we exceed this.
+ */
+const MAX_INFLIGHT_DB_SPANS = 10_000;
 
 /**
  * Koa `ctx.state` entry: OpenTelemetry `Context` for the innermost traced HTTP handler
@@ -100,13 +106,6 @@ function setKoaOtelHandlerContext(koaCtx: KoaContext, otelCtx: OtelContext): voi
 
 function clearKoaOtelHandlerContext(koaCtx: KoaContext): void {
   delete (koaCtx.state as Record<string | symbol, unknown>)[STRAPI_OTEL_KOA_HANDLER_CONTEXT];
-}
-
-/** Knex query event payload (`query`, `query-response`, `query-error`). */
-interface KnexQueryEvent {
-  __knexQueryUid?: string;
-  sql?: string;
-  method?: string;
 }
 
 interface KnexEmitter {
@@ -248,9 +247,9 @@ export function registerOpenTelemetryTracing(strapi: Core.Strapi): void {
   }
 
   if (nodeProvider) {
-    strapi.log.warn(
-      '[observability.tracing] OpenTelemetry tracer provider already registered; skipping duplicate init.'
-    );
+    // Intentionally called from several bootstrap entry points (load/start/register and the
+    // observability-tracing provider) so startup spans are captured early; subsequent calls are
+    // a silent no-op rather than a warning.
     return;
   }
 
@@ -334,6 +333,17 @@ export function attachKnexQueryTracing(strapi: Core.Strapi): void {
     }
 
     inflight.set(uid, span);
+
+    // Safety valve: if a query never emits a terminal event (e.g. pool destroyed mid-flight),
+    // its entry would linger forever. Evict and end the oldest span once we exceed the cap.
+    if (inflight.size > MAX_INFLIGHT_DB_SPANS) {
+      const oldestUid = inflight.keys().next().value;
+      if (oldestUid !== undefined) {
+        const staleSpan = inflight.get(oldestUid);
+        inflight.delete(oldestUid);
+        staleSpan?.end();
+      }
+    }
   };
 
   const finish = (queryData: KnexQueryEvent, ok: boolean, error?: unknown) => {

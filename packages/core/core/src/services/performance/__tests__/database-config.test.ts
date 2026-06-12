@@ -21,24 +21,17 @@ function mockStrapi(map: Record<string, unknown>): Core.Strapi {
 }
 
 describe('resolveDatabasePerformanceFlushIntervalMs', () => {
-  it('prefers flushIntervalMs over legacy', () => {
+  it('uses flushIntervalMs when set', () => {
     expect(
       resolveDatabasePerformanceFlushIntervalMs(
         mockStrapi({
           'database.performance.flushIntervalMs': 3000,
-          'database.performance.artifactFlushIntervalMs': 9999,
         })
       )
     ).toBe(3000);
   });
 
-  it('falls back to legacy then default', () => {
-    expect(
-      resolveDatabasePerformanceFlushIntervalMs(
-        mockStrapi({ 'database.performance.artifactFlushIntervalMs': 8000 })
-      )
-    ).toBe(8000);
-
+  it('falls back to the default', () => {
     expect(resolveDatabasePerformanceFlushIntervalMs(mockStrapi({}))).toBe(
       DEFAULT_DATABASE_PERF_FLUSH_INTERVAL_MS
     );
@@ -46,24 +39,17 @@ describe('resolveDatabasePerformanceFlushIntervalMs', () => {
 });
 
 describe('resolveDatabasePerformanceMaxEvents', () => {
-  it('prefers maxEvents over legacy', () => {
+  it('uses maxEvents when set', () => {
     expect(
       resolveDatabasePerformanceMaxEvents(
         mockStrapi({
           'database.performance.maxEvents': 50,
-          'database.performance.artifactMaxEvents': 999,
         })
       )
     ).toBe(50);
   });
 
-  it('falls back to legacy then default', () => {
-    expect(
-      resolveDatabasePerformanceMaxEvents(
-        mockStrapi({ 'database.performance.artifactMaxEvents': 7 })
-      )
-    ).toBe(7);
-
+  it('falls back to the default', () => {
     expect(resolveDatabasePerformanceMaxEvents(mockStrapi({}))).toBe(
       DEFAULT_DATABASE_PERF_MAX_EVENTS
     );

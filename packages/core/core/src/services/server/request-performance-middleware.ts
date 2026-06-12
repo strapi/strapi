@@ -27,41 +27,46 @@ export async function runRequestPerformanceMiddleware(
   next: () => Promise<void>
 ): Promise<void> {
   const dbPerformanceEnabled = strapi.config.get('database.performance.enabled') === true;
-  const requestSummaryEnabled = isServerRequestPerfTrackingEnabled(strapi);
-  const emitSettings = getServerRequestPerformanceEmitSettings(strapi);
+  const requestTrackingEnabled = isServerRequestPerfTrackingEnabled(strapi);
 
-  if (dbPerformanceEnabled || requestSummaryEnabled) {
+  // A request id is needed for DB correlation even when only DB perf (not request tracking) is on.
+  if (dbPerformanceEnabled || requestTrackingEnabled) {
     ctx.state.strapiPerfRequestId = randomUUID();
   }
 
   const requestId = ctx.state.strapiPerfRequestId as string | undefined;
+
+  // Nothing to summarize unless request tracking is on; skip the per-request emit/listener work.
+  if (!requestTrackingEnabled || !requestId) {
+    await next();
+    return;
+  }
+
+  const emitSettings = getServerRequestPerformanceEmitSettings(strapi);
   const startedAt = Date.now();
 
-  if (requestSummaryEnabled && requestId) {
-    ctx.state.strapiPerfSampled =
-      emitSettings.requestSampleRate >= 1 ? true : Math.random() < emitSettings.requestSampleRate;
-    ctx.state.strapiPerfStagesEnabled =
-      emitSettings.emitStageEvents === true && requestSummaryEnabled;
+  ctx.state.strapiPerfSampled =
+    emitSettings.requestSampleRate >= 1 ? true : Math.random() < emitSettings.requestSampleRate;
+  ctx.state.strapiPerfStagesEnabled = emitSettings.emitStageEvents === true;
 
-    const emitStart = ctx.state.strapiPerfSampled === true || emitSettings.emitStageEvents === true;
+  const emitStart = ctx.state.strapiPerfSampled === true || emitSettings.emitStageEvents === true;
 
-    if (emitStart) {
-      strapi.eventHub
-        .emit(
-          PERFORMANCE_HUB_EVENT.REQUEST_START,
-          buildPublicRequestStartPayload({
-            requestId,
-            method: ctx.method,
-            path: ctx.path,
-          })
-        )
-        .catch(() => {});
-    }
+  if (emitStart) {
+    strapi.eventHub
+      .emit(
+        PERFORMANCE_HUB_EVENT.REQUEST_START,
+        buildPublicRequestStartPayload({
+          requestId,
+          method: ctx.method,
+          path: ctx.path,
+        })
+      )
+      .catch(() => {});
   }
 
   let summaryTracked = false;
   const trackSummary = () => {
-    if (!requestSummaryEnabled || !requestId || summaryTracked) {
+    if (summaryTracked) {
       return;
     }
     summaryTracked = true;
@@ -116,10 +121,8 @@ export async function runRequestPerformanceMiddleware(
     }
   };
 
-  if (requestSummaryEnabled && requestId) {
-    ctx.res.once('finish', trackSummary);
-    ctx.res.once('close', trackSummary);
-  }
+  ctx.res.once('finish', trackSummary);
+  ctx.res.once('close', trackSummary);
 
   await next();
 }
