@@ -43,6 +43,11 @@ interface FitlersContextValue {
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
 
+const DATETIME_FILTERS = [
+  ...BASE_FILTERS.filter(({ value }) => value === '$null' || value === '$notNull'),
+  ...NUMERIC_FILTERS,
+];
+
 const getFilterDetails = (
   filterEntry: Record<string, unknown>,
   options: Filters.Filter[]
@@ -185,7 +190,18 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   const setEditingFilter = useFilters('Popover', ({ setEditingFilter }) => setEditingFilter);
 
   const initialValues = React.useMemo(() => {
-    return editingFilter ?? { name: options[0]?.name, filter: BASE_FILTERS[0].value };
+    const values = editingFilter ?? {
+      name: options[0]?.name,
+      filter: getDefaultFilterOperator(options[0]),
+    };
+    const filter = options.find((filter) => filter.name === values.name);
+    const operatorValues = getFilterOperatorValues(filter);
+
+    if (operatorValues.includes(values.filter)) {
+      return values;
+    }
+
+    return { ...values, filter: getDefaultFilterOperator(filter), value: undefined };
   }, [editingFilter, options]);
 
   if (options.length === 0) {
@@ -265,7 +281,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
               : 'create'
           }
         >
-          {({ values: formValues, modified, isSubmitting }) => {
+          {({ values: formValues, modified, isSubmitting, onChange }) => {
             const filter = options.find((filter) => filter.name === formValues.name);
             const Input = filter?.input || InputRenderer;
             return (
@@ -281,6 +297,13 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                       label: filter.label,
                       value: filter.name,
                     })),
+                    onChange: (value: string) => {
+                      const nextFilter = options.find((filter) => filter.name === value);
+
+                      onChange('name', value);
+                      onChange('filter', getDefaultFilterOperator(nextFilter));
+                      onChange('value', undefined);
+                    },
                     placholder: formatMessage({
                       id: 'app.utils.select-field',
                       defaultMessage: 'Select field',
@@ -378,7 +401,7 @@ const getFilterList = (filter?: Filters.Filter): FilterOption[] => {
     }
 
     case 'datetime': {
-      return [...BASE_FILTERS, ...NUMERIC_FILTERS];
+      return DATETIME_FILTERS;
     }
 
     case 'enumeration': {
@@ -388,6 +411,14 @@ const getFilterList = (filter?: Filters.Filter): FilterOption[] => {
     default:
       return [...BASE_FILTERS, ...IS_SENSITIVE_FILTERS];
   }
+};
+
+const getFilterOperatorValues = (filter?: Filters.Filter): string[] => {
+  return (filter?.operators ?? getFilterList(filter)).map(({ value }) => value);
+};
+
+const getDefaultFilterOperator = (filter?: Filters.Filter): string => {
+  return getFilterOperatorValues(filter)[0] ?? BASE_FILTERS[0].value;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -488,30 +519,32 @@ const AttributeTag = ({
 
   let formattedValue: string = value;
 
-  switch (type) {
-    case 'date':
-      formattedValue = formatDate(value, { dateStyle: 'full' });
-      break;
-    case 'datetime':
-      formattedValue = formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
-      break;
-    case 'time':
-      const [hour, minute] = value.split(':');
-      const date = new Date();
-      date.setHours(Number(hour));
-      date.setMinutes(Number(minute));
+  if (!FILTERS_WITH_NO_VALUE.includes(operator)) {
+    switch (type) {
+      case 'date':
+        formattedValue = formatDate(value, { dateStyle: 'full' });
+        break;
+      case 'datetime':
+        formattedValue = formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
+        break;
+      case 'time':
+        const [hour, minute] = value.split(':');
+        const date = new Date();
+        date.setHours(Number(hour));
+        date.setMinutes(Number(minute));
 
-      formattedValue = formatTime(date, {
-        hour: 'numeric',
-        minute: 'numeric',
-      });
-      break;
-    case 'float':
-    case 'integer':
-    case 'biginteger':
-    case 'decimal':
-      formattedValue = formatNumber(Number(value));
-      break;
+        formattedValue = formatTime(date, {
+          hour: 'numeric',
+          minute: 'numeric',
+        });
+        break;
+      case 'float':
+      case 'integer':
+      case 'biginteger':
+      case 'decimal':
+        formattedValue = formatNumber(Number(value));
+        break;
+    }
   }
 
   // Handle custom input
