@@ -16,6 +16,11 @@ export type TransferAssetFlow = { assetID: string } & (
   /** Legacy in-process / default JSON: Buffer serializes to `{ type: 'Buffer'; data: number[] }` on the wire. */
   | { action: 'stream'; data: Buffer; encoding?: undefined }
   /**
+   * Legacy Buffer JSON shape sent by {@link createTransferAssetStreamChunkLegacy} for remotes that
+   * predate #23479 and do `Buffer.from(item.data.data)` directly in their push handler.
+   */
+  | { action: 'stream'; data: { type: 'Buffer'; data: number[] }; encoding?: undefined }
+  /**
    * Canonical wire form for asset bytes (push + pull). Built with `createTransferAssetStreamChunk`.
    * Decoders also accept legacy Buffer JSON and plain base64 strings without `encoding`.
    */

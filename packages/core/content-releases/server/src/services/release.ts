@@ -306,10 +306,17 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
                 const contentType = contentTypeUid as UID.ContentType;
                 const { publish, unpublish } = formattedActions[contentType];
 
-                await Promise.all([
-                  ...publish.map((params) => strapi.documents(contentType).publish(params)),
-                  ...unpublish.map((params) => strapi.documents(contentType).unpublish(params)),
-                ]);
+                // Serialize within a content type: concurrent publishes of related documents
+                // can race on shared join-table state (notably self-referential relations) and
+                // leave inconsistent FK rows when one branch deletes a row another branch is
+                // about to reference.
+                for (const params of publish) {
+                  await strapi.documents(contentType).publish(params);
+                }
+
+                for (const params of unpublish) {
+                  await strapi.documents(contentType).unpublish(params);
+                }
               }
             });
 

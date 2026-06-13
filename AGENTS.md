@@ -1,7 +1,7 @@
 # Strapi Monorepo — Agent Guide
 
 Strapi is an open-source headless CMS.
-Yarn workspaces + Nx monorepo. Node ≥20 ≤24, Yarn 4.
+Yarn workspaces + Nx monorepo. Node ≥22 ≤26, Yarn 4.
 Target branch: `develop` (not `main`). All PRs go to `develop`.
 
 ---
@@ -32,6 +32,12 @@ The following are the most important packages (not exhaustive — run `yarn work
 | `@strapi/permissions`              | RBAC engine                                               |
 | `@strapi/plugin-users-permissions` | JWT authentication                                        |
 
+### Skills directories
+
+Shared skills live under `.agents/skills/<name>/`. Tool-specific skill directories (e.g. `.claude/skills/`) should be symlinks to `.agents/skills/` — each AI tool has its own well-known location.
+
+Personal/in-progress skills go under `.agents/local-skills/` (gitignored). See [.agents/skills/writing-skills/SKILL.md](.agents/skills/writing-skills/SKILL.md) for authoring guidance.
+
 ---
 
 ## Architecture
@@ -39,6 +45,7 @@ The following are the most important packages (not exhaustive — run `yarn work
 - **`Strapi` class** — The DI container and central hub. Accessed as a `strapi` parameter injected through the factory pattern (e.g. `createService(strapi)`). Never use `global.strapi` — always prefer proper dependency injection. Provides `strapi.documents`, `strapi.db`, `strapi.log`, etc. Lifecycle: Register → Bootstrap → Start → Destroy (`start()` calls `load()` internally, which runs register + bootstrap).
 - **Server / Admin split** — Koa.js HTTP server (`@strapi/strapi`) + React/Redux admin (`@strapi/admin`). Packages with both concerns export dual entry points: `strapi-server` (Node.js logic) and `strapi-admin` (UI components).
 - **Document Service** — The primary high-level API for content (`strapi.documents`). Replaced the legacy Entity Service. Always use this for reading/writing content — never raw DB queries unless you're working inside `@strapi/database` itself.
+- **Polymorphic (morph\*) relations** — Contributor doc: [docs/docs/docs/01-core/database/01-relations/polymorphic-relations.md](docs/docs/docs/01-core/database/01-relations/polymorphic-relations.md) (storage, DB populate, and how `getDeepPopulate` / relation traversal interact with `morphToOne` and join-based morphs).
 - **Plugin system** — Plugins register routes, controllers, services, content types, and middleware via the same `strapi-server` / `strapi-admin` dual structure. Official plugins live in `packages/plugins/`.
 - **Content Types** — Defined using a JSON-based notation (not JSON Schema spec). Each content type has a `schema.json` file — see any `packages/core/content-manager/server/src/content-types/` for examples. The database layer auto-generates tables from them. Never write raw migrations for content type changes.
 - **EE / CE split** — Some features are Enterprise Edition only, gated at runtime. See EE toggles in the Testing section below.
@@ -219,11 +226,7 @@ yarn prettier:check # check only
 - Branch from `develop`, target `develop` — never `main`.
 - Link the issue you're fixing in the description.
 - All tests must pass before merging.
-- PR description must use this template:
-  - **What does it do?** — technical changes made
-  - **Why is it needed?** — problem being solved
-  - **How to test it?** — steps to reproduce and verify
-  - **Related issue(s)/PR(s)** — links
+- PR description must follow [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) — do not invent your own sections.
 
 ---
 

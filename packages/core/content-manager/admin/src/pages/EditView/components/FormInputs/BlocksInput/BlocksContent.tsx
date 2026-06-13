@@ -330,7 +330,7 @@ const baseRenderLeaf = (props: ExtendedRenderLeafProps, modifiers: ModifiersStor
 
 type BaseRenderElementProps = Direction & {
   props: RenderElementProps['children'];
-  blocks: BlocksStore;
+  blocks: Partial<BlocksStore>;
   editor: Editor;
   isMobile: boolean;
 };
@@ -345,8 +345,13 @@ const baseRenderElement = ({
 }: BaseRenderElementProps) => {
   const { element } = props;
 
-  const blockMatch = Object.values(blocks).find((block) => block.matchNode(element));
+  const blockMatch = Object.values(blocks).find((block) => block?.matchNode(element));
   const block = blockMatch || blocks.paragraph;
+
+  if (!block) {
+    return <></>;
+  }
+
   const nodePath = ReactEditor.findPath(editor, element);
 
   const isDraggable = block.isDraggable?.(element) ?? true;
@@ -455,7 +460,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
 
     // Check if the text node starts with a known snippet
     const blockMatchingSnippet = Object.values(blocks).find((block) => {
-      return block.snippets?.includes(textNode.text);
+      return block?.snippets?.includes(textNode.text);
     });
 
     if (blockMatchingSnippet?.handleConvert) {
@@ -479,7 +484,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
     if (!selectedBlock) {
       return;
     }
@@ -494,7 +499,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     if (selectedBlock.handleEnterKey) {
       selectedBlock.handleEnterKey(editor);
     } else {
-      blocks.paragraph.handleEnterKey!(editor);
+      blocks.paragraph?.handleEnterKey!(editor);
     }
   };
 
@@ -504,7 +509,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
 
     if (!selectedBlock) {
       return;
@@ -521,7 +526,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
     if (!selectedBlock) {
       return;
     }
@@ -559,8 +564,11 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     // Find the right block-specific handlers for enter and backspace key presses
     switch (event.key) {
       case 'Enter':
-        event.preventDefault();
-        return handleEnter(event);
+        if (!event.nativeEvent.isComposing) {
+          event.preventDefault();
+          return handleEnter(event);
+        }
+        break;
       case 'Backspace':
         return handleBackspaceEvent(event);
       case 'Tab':

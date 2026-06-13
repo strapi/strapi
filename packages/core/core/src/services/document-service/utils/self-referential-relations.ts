@@ -1,10 +1,10 @@
 /* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash/fp';
-import type { UID } from '@strapi/types';
+import type { Data, UID } from '@strapi/types';
 import type { JoinTable } from '@strapi/database';
 
 interface VersionEntry {
-  id: string;
+  id: Data.ID;
   locale: string;
 }
 
@@ -95,15 +95,15 @@ const sync = async (
 
   const targetEntriesByLocale = keyBy('locale', targetEntries);
 
-  // Map source entry IDs → target entry IDs based on locale (string keys for DB/driver consistency)
+  // Keys stringified for object lookup; values keep the original DB type so PostgreSQL integer columns receive integers, not strings
   const idMapping = sourceEntries.reduce(
     (acc, sourceEntry) => {
       const targetEntry = targetEntriesByLocale[sourceEntry.locale];
       if (!targetEntry) return acc;
-      acc[String(sourceEntry.id)] = String(targetEntry.id);
+      acc[String(sourceEntry.id)] = targetEntry.id;
       return acc;
     },
-    {} as Record<string, string>
+    {} as Record<string, Data.ID>
   );
 
   const batchSize = strapi.db.dialect.getBatchInsertSize();

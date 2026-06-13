@@ -12,7 +12,6 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { HistoryVersionDataResponse } from '../../../../shared/contracts/history-versions';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -79,15 +78,29 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       : field.value;
   }
 
+  // Be defensive about the shape: admin-user relations are sanitized to a
+  // plain user object on the server, and historical version data can carry
+  // shapes that pre-date the `{ results, meta }` contract. Treat anything
+  // without an array `results` as "no relations".
+  const hasResultsShape =
+    !!formattedFieldValue &&
+    typeof formattedFieldValue === 'object' &&
+    Array.isArray((formattedFieldValue as { results?: unknown }).results);
+  const missingCount =
+    hasResultsShape &&
+    typeof (formattedFieldValue as { meta?: { missingCount?: number } }).meta?.missingCount ===
+      'number'
+      ? (formattedFieldValue as { meta: { missingCount: number } }).meta.missingCount
+      : 0;
+
   if (
-    !formattedFieldValue ||
-    (formattedFieldValue.results.length === 0 && formattedFieldValue.meta.missingCount === 0)
+    !hasResultsShape ||
+    ((formattedFieldValue as { results: unknown[] }).results.length === 0 && missingCount === 0)
   ) {
     return (
       <>
         <Field.Label action={props.labelAction}>{props.label}</Field.Label>
         <Box marginTop={1}>
-          {/* @ts-expect-error – we dont need closeLabel */}
           <StyledAlert variant="default">
             {formatMessage({
               id: 'content-manager.history.content.no-relations',
@@ -99,7 +112,10 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
     );
   }
 
-  const { results, meta } = formattedFieldValue;
+  const { results, meta } = formattedFieldValue as {
+    results: RelationResult[];
+    meta: { missingCount: number };
+  };
 
   return (
     <Box>
@@ -143,7 +159,6 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         </Flex>
       )}
       {meta.missingCount > 0 && (
-        /* @ts-expect-error – we dont need closeLabel */
         <StyledAlert
           marginTop={1}
           variant="warning"
@@ -293,6 +308,34 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
 
   // Label action is unrelated to i18n, don't touch it.
   return labelAction;
+};
+
+/**
+ * Resolve the layout, configuration metadata and schema attributes needed to
+ * render a component field on the history page. Returns `null` when any of
+ * those are missing — happens when the component schema referenced by the
+ * version was deleted via the Content-Type Builder, in which case the caller
+ * should render a fallback instead of crashing on the destructuring.
+ */
+const resolveComponentRenderResources = (
+  componentUID: string,
+  componentsLayout: { [uid: string]: { layout: unknown } | undefined },
+  configurationComponents: { [uid: string]: { metadatas: unknown } | undefined },
+  components: { [uid: string]: { attributes: unknown } | undefined }
+) => {
+  const componentLayout = componentsLayout[componentUID];
+  const componentConfiguration = configurationComponents[componentUID];
+  const componentSchema = components[componentUID];
+
+  if (!componentLayout || !componentConfiguration || !componentSchema) {
+    return null;
+  }
+
+  return {
+    layout: componentLayout.layout,
+    metadatas: componentConfiguration.metadatas,
+    schemaAttributes: componentSchema.attributes,
+  };
 };
 
 /**
@@ -452,14 +495,33 @@ const VersionInputRenderer = ({
   switch (props.type) {
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
-    case 'component':
-      const { layout } = componentsLayout[props.attribute.component];
+    case 'component': {
+      const renderResources = resolveComponentRenderResources(
+        props.attribute.component,
+        componentsLayout,
+        configuration.components,
+        components
+      );
+
+      // The component schema referenced by this version is no longer present
+      // (deleted via the Content-Type Builder). Render the label only so the
+      // rest of the page still loads instead of crashing on the lookups below.
+      if (!renderResources) {
+        return <Field.Label>{props.label}</Field.Label>;
+      }
+
+      const { layout, metadatas, schemaAttributes } = renderResources as {
+        layout: Array<EditFieldLayout[]>;
+        metadatas: Parameters<typeof getRemaingFieldsLayout>[0]['metadatas'];
+        schemaAttributes: Parameters<typeof getRemaingFieldsLayout>[0]['schemaAttributes'];
+      };
+
       // Components can only have one panel, so only save the first layout item
       const [remainingFieldsLayout] = getRemaingFieldsLayout({
         layout: [layout],
-        metadatas: configuration.components[props.attribute.component].metadatas,
+        metadatas,
         fieldSizes,
-        schemaAttributes: components[props.attribute.component].attributes,
+        schemaAttributes,
       });
 
       return (
@@ -473,6 +535,7 @@ const VersionInputRenderer = ({
           {(inputProps) => <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />}
         </ComponentInput>
       );
+    }
     case 'dynamiczone':
       return (
         <DynamicZone
@@ -550,4 +613,4 @@ const attributeHasCustomFieldProperty = (
   'customField' in attribute && typeof attribute.customField === 'string';
 
 export type { VersionInputRendererProps };
-export { VersionInputRenderer };
+export { VersionInputRenderer, CustomRelationInput, resolveComponentRenderResources };

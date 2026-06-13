@@ -10,7 +10,9 @@ import {
   contentTypes as contentTypesUtils,
   errors,
   file as fileUtils,
+  pagination as paginationUtils,
 } from '@strapi/utils';
+import { has, toNumber, isNil } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -241,8 +243,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // create temporary folder to store files for stream manipulation
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
-    let uploadedFiles: any[] = [];
-
+    const uploadedFiles = [];
     try {
       const { fileInfo, ...metas } = data;
 
@@ -254,9 +255,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return uploadFileAndPersist(fileData, { user });
       };
 
-      uploadedFiles = await Promise.all(
-        fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
+      const concurrentUploadSize = Math.max(
+        1,
+        strapi.config.get<Config>('plugin::upload').concurrentUploadSize ?? 1
       );
+
+      const fileBatches = _.chunk(
+        fileArray.map((file, idx) => ({ file, fileInfo: fileInfoArray[idx] || {} })),
+        concurrentUploadSize
+      );
+
+      for (const batch of fileBatches) {
+        const results = await Promise.all(
+          batch.map(({ file, fileInfo }) => doUpload(file, fileInfo))
+        );
+        uploadedFiles.push(...results);
+      }
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);
@@ -369,7 +383,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       caption: _.isNil(caption) ? dbFile.caption : caption,
       focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
       folder: _.isUndefined(folder) ? dbFile.folder : folder,
-      folderPath: _.isUndefined(folder) ? dbFile.path : await fileService.getFolderPath(folder),
+      folderPath: _.isUndefined(folder)
+        ? dbFile.folderPath
+        : await fileService.getFolderPath(folder),
     };
 
     return update(id, newInfos, { user });
@@ -517,6 +533,91 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     };
   }
 
+  /**
+   * Resolve whether the count query should run, mirroring core-api's `shouldCount`.
+   * Defaults to the `api.rest.withCount` config (true) when not specified on the request.
+   */
+  function resolveWithCount(pagination: Record<string, unknown>): boolean {
+    if (has('withCount', pagination)) {
+      const withCount = pagination.withCount;
+
+      if (typeof withCount === 'boolean') {
+        return withCount;
+      }
+
+      if (typeof withCount === 'undefined') {
+        return false;
+      }
+
+      if (['true', 't', '1', 1].includes(withCount as string | number)) {
+        return true;
+      }
+
+      if (['false', 'f', '0', 0].includes(withCount as string | number)) {
+        return false;
+      }
+
+      throw new errors.ValidationError(
+        'Invalid withCount parameter. Expected "t","1","true","false","0","f"'
+      );
+    }
+
+    return Boolean(strapi.config.get('api.rest.withCount', true));
+  }
+
+  /**
+   * REST-aware paginated find for the content API.
+   *
+   * Unlike `findPage` (used by the admin API), this honors the standard nested
+   * `pagination` query object (`pagination[page]`, `pagination[pageSize]`,
+   * `pagination[start]`, `pagination[limit]`, `pagination[withCount]`) and the
+   * `api.rest.defaultLimit` / `api.rest.maxLimit` / `api.rest.withCount` config,
+   * exactly like every other Strapi REST collection-type endpoint.
+   */
+  async function findAndCountPage(query: any = {}) {
+    const { pagination = {} } = query;
+
+    const defaultLimit = toNumber(strapi.config.get('api.rest.defaultLimit', 25));
+    const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;
+
+    // Whether the consumer used page-based pagination (default) vs offset-based.
+    const isOffset = has('start', pagination) || has('limit', pagination);
+    const isPaged = !isOffset;
+
+    // Resolve start/limit applying defaults and the maxLimit cap.
+    const { start, limit } = paginationUtils.withDefaultPagination(pagination, {
+      defaults: { offset: { limit: defaultLimit }, page: { pageSize: defaultLimit } },
+      maxLimit: maxLimit || -1,
+    });
+
+    // Feed the transform the resolved offset/limit so it ignores the nested
+    // `pagination` object (which it cannot read) and applies real bounds.
+    const transformed = strapi
+      .get('query-params')
+      .transform(FILE_MODEL_UID, { ...query, pagination: undefined, start, limit });
+
+    const shouldCount = resolveWithCount(pagination);
+
+    const [results, total] = await Promise.all([
+      strapi.db.query(FILE_MODEL_UID).findMany(transformed),
+      shouldCount ? strapi.db.query(FILE_MODEL_UID).count(transformed) : Promise.resolve(undefined),
+    ]);
+
+    const signedResults = await async.map(results, (file: File) => fileService.signFileUrls(file));
+
+    const transform = isPaged
+      ? paginationUtils.transformPagedPaginationInfo
+      : paginationUtils.transformOffsetPaginationInfo;
+
+    const paginationInfo = transform({ start, limit }, total as number);
+
+    return {
+      results: signedResults,
+      // Omit total & pageCount when counting is disabled (withCount=false).
+      pagination: isNil(total) ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
+    };
+  }
+
   async function remove(file: File) {
     const config = strapi.config.get<Config>('plugin::upload');
 
@@ -584,6 +685,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     findOne,
     findMany,
     findPage,
+    findAndCountPage,
     remove,
     getSettings,
     setSettings,

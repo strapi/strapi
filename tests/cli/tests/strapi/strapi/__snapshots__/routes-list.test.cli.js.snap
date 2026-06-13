@@ -36,6 +36,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ DELETE             │ /api/conditions/:id                                                             │
 │ POST               │ /api/config/ratelimit/enable                                                    │
 │ POST               │ /api/config/permissions/prune                                                   │
+│ POST               │ /api/config/permissions/resync-super-admin                                      │
 │ POST               │ /api/config/resettransfertoken                                                  │
 │ HEAD|GET           │ /api/countries                                                                  │
 │ HEAD|GET           │ /api/countries/:id                                                              │
@@ -82,6 +83,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /api/email                                                                      │
 │ POST               │ /api/upload                                                                     │
 │ HEAD|GET           │ /api/upload/files                                                               │
+│ HEAD|GET           │ /api/upload/files/page                                                          │
 │ HEAD|GET           │ /api/upload/files/:id                                                           │
 │ DELETE             │ /api/upload/files/:id                                                           │
 │ HEAD|GET           │ /api/i18n/locales                                                               │
@@ -158,6 +160,13 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/api-tokens/:id                                                           │
 │ PUT                │ /admin/api-tokens/:id                                                           │
 │ POST               │ /admin/api-tokens/:id/regenerate                                                │
+│ POST               │ /admin/admin-tokens                                                             │
+│ HEAD|GET           │ /admin/admin-tokens                                                             │
+│ DELETE             │ /admin/admin-tokens/:id                                                         │
+│ HEAD|GET           │ /admin/admin-tokens/:id                                                         │
+│ PUT                │ /admin/admin-tokens/:id                                                         │
+│ POST               │ /admin/admin-tokens/:id/regenerate                                              │
+│ HEAD|GET           │ /admin/admin-tokens/:id/owner-permissions                                       │
 │ HEAD|GET           │ /admin/content-api/permissions                                                  │
 │ HEAD|GET           │ /admin/content-api/routes                                                       │
 │ HEAD|GET           │ /admin/transfer/runner/push                                                     │
@@ -236,7 +245,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /upload/settings                                                                │
 │ PUT                │ /upload/settings                                                                │
 │ POST               │ /upload                                                                         │
-│ POST               │ /upload/unstable/stream                                                         │
+│ POST               │ /upload/unstable/upload-file                                                    │
 │ POST               │ /upload/unstable/stream-from-urls                                               │
 │ HEAD|GET           │ /upload/files                                                                   │
 │ HEAD|GET           │ /upload/files/:id                                                               │

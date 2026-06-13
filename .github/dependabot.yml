@@ -1,70 +1,240 @@
+# Dependabot policy for the Strapi monorepo:
+# - Security advisories: open immediately; npm families grouped, others individual.
+# - Version updates: max 10 open npm PRs / 3 actions PRs, weekly on Sundays.
+# - Cooldown (npm): 30d patch / 60d minor / 90d major before version-update PRs.
+# - Cooldown (github-actions): default-days only — semver-specific fields are unsupported.
+# - Security advisories bypass cooldown.
+# - Majors: manual only for npm version updates (see ignore); security majors still open.
 version: 2
 updates:
+  # Yarn workspaces monorepo — scan package.json files from the repo root.
   - package-ecosystem: npm
     directory: /
+    # Version-update groups: one PR per toolchain family instead of one PR per package.
     groups:
       babel:
+        applies-to: version-updates
         patterns:
           - '@babel/*'
           - 'babel-*'
 
       eslint:
+        applies-to: version-updates
         patterns:
           - 'eslint'
           - 'eslint-*'
           - '@typescript-eslint/*'
 
       jest:
+        applies-to: version-updates
         patterns:
           - 'jest'
           - 'jest-*'
 
+      nx:
+        applies-to: version-updates
+        patterns:
+          - 'nx'
+          - '@nx/*'
+
+      prettier:
+        applies-to: version-updates
+        patterns:
+          - 'prettier'
+
       react:
+        applies-to: version-updates
         patterns:
           - 'react'
           - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+          - '@types/react-*'
 
       react-dnd:
+        applies-to: version-updates
         patterns:
           - 'react-dnd'
           - 'react-dnd-*'
 
       redux:
+        applies-to: version-updates
         patterns:
           - '@reduxjs/toolkit'
           - 'react-redux'
 
       richtext-editor:
+        applies-to: version-updates
         patterns:
           - 'markdown-it'
           - 'markdown-it-*'
 
+      rollup:
+        applies-to: version-updates
+        patterns:
+          - 'rollup'
+          - '@rollup/*'
+          - 'rollup-plugin-*'
+
       storybook:
+        applies-to: version-updates
         patterns:
           - 'storybook'
           - '@storybook/*'
 
       testing-library:
+        applies-to: version-updates
         patterns:
           - '@testing-library/*'
 
+      typescript:
+        applies-to: version-updates
+        patterns:
+          - 'typescript'
+
+      vite:
+        applies-to: version-updates
+        patterns:
+          - 'vite'
+          - '@vitejs/*'
+
+      vitest:
+        applies-to: version-updates
+        patterns:
+          - 'vitest'
+
       webpack:
+        applies-to: version-updates
         patterns:
           - 'webpack'
-          - 'webpack-cli'
-          - 'webpack-dev-server'
+          - 'webpack-*'
+          - 'html-webpack-plugin'
+          - 'mini-css-extract-plugin'
 
+      # Security update groups override GitHub's default npm_and_yarn mega-PR.
+      # Related families stay grouped; all other advisories open one PR per dependency.
+      babel-security:
+        applies-to: security-updates
+        patterns:
+          - '@babel/*'
+          - 'babel-*'
+
+      eslint-security:
+        applies-to: security-updates
+        patterns:
+          - 'eslint'
+          - 'eslint-*'
+          - '@typescript-eslint/*'
+
+      jest-security:
+        applies-to: security-updates
+        patterns:
+          - 'jest'
+          - 'jest-*'
+
+      nx-security:
+        applies-to: security-updates
+        patterns:
+          - 'nx'
+          - '@nx/*'
+
+      prettier-security:
+        applies-to: security-updates
+        patterns:
+          - 'prettier'
+
+      react-security:
+        applies-to: security-updates
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+          - '@types/react-*'
+
+      react-dnd-security:
+        applies-to: security-updates
+        patterns:
+          - 'react-dnd'
+          - 'react-dnd-*'
+
+      redux-security:
+        applies-to: security-updates
+        patterns:
+          - '@reduxjs/toolkit'
+          - 'react-redux'
+
+      richtext-editor-security:
+        applies-to: security-updates
+        patterns:
+          - 'markdown-it'
+          - 'markdown-it-*'
+
+      rollup-security:
+        applies-to: security-updates
+        patterns:
+          - 'rollup'
+          - '@rollup/*'
+          - 'rollup-plugin-*'
+
+      storybook-security:
+        applies-to: security-updates
+        patterns:
+          - 'storybook'
+          - '@storybook/*'
+
+      testing-library-security:
+        applies-to: security-updates
+        patterns:
+          - '@testing-library/*'
+
+      typescript-security:
+        applies-to: security-updates
+        patterns:
+          - 'typescript'
+
+      vite-security:
+        applies-to: security-updates
+        patterns:
+          - 'vite'
+          - '@vitejs/*'
+
+      vitest-security:
+        applies-to: security-updates
+        patterns:
+          - 'vitest'
+
+      webpack-security:
+        applies-to: security-updates
+        patterns:
+          - 'webpack'
+          - 'webpack-*'
+          - 'html-webpack-plugin'
+          - 'mini-css-extract-plugin'
+
+    # Conventional commit prefix; scope comes from the updated package name.
     commit-message:
       prefix: 'chore'
       include: 'scope'
+    # Check once per week to limit PR noise; Sunday evening UTC.
     schedule:
       interval: weekly
       day: sunday
       time: '22:00'
-    open-pull-requests-limit: 0
+    # Cap concurrent open version-update PRs; security updates are not limited here.
+    open-pull-requests-limit: 10
+    # Wait for releases to stabilise before opening version-update PRs.
+    # Security advisories are not affected by cooldown.
+    cooldown:
+      default-days: 30
+      semver-patch-days: 30
+      semver-minor-days: 60
+      semver-major-days: 90
+    # Bump package.json ranges to the resolved version (not widen or lock).
     versioning-strategy: increase
+    # Block automated major version updates; review and merge majors manually.
     ignore:
-      # Only allow patch as minor babel versions need to be upgraded all together
+      # Babel minor/major bumps must land together — only allow patch updates here.
       - dependency-name: '@babel/*'
         update-types:
           - 'version-update:semver-major'
@@ -72,16 +242,26 @@ updates:
 
       - dependency-name: '*'
         update-types:
-          - 'version-update:semver-patch'
           - 'version-update:semver-major'
 
     labels:
       - 'source: dependencies'
       - 'pr: chore'
 
+  # Workflow actions in .github/workflows (and action.yml at the repo root).
   - package-ecosystem: github-actions
-    open-pull-requests-limit: 0
+    # Fewer concurrent PRs than npm — workflow changes need closer review.
+    open-pull-requests-limit: 3
     directory: /
+    groups:
+      # Override org-level grouped security updates; each action gets its own PR.
+      security-individual:
+        applies-to: security-updates
+        patterns:
+          - '*'
+        exclude-patterns:
+          - '*'
+
     commit-message:
       prefix: 'chore'
       include: 'scope'
@@ -89,6 +269,9 @@ updates:
       interval: weekly
       day: sunday
       time: '22:00'
+    # github-actions supports default-days only (no semver-major/minor/patch-days).
+    cooldown:
+      default-days: 30
     labels:
       - 'source: dependencies'
       - 'pr: chore'
