@@ -33,6 +33,10 @@ import type { Global, Teardown } from './types';
  *         falls back to `toString` (`"[object Blob]"` → size 13).
  *         Polyfilling `File` too "fixes" that chain but breaks the next:
  *         jsdom's `FileReader` / `Image` only accept jsdom-realm `File`/`Blob`.
+ *     The jsdom-realm `FormData` that app code builds and passes to `fetch` is
+ *     instead bridged to a Node-realm `FormData` inside the `Request`
+ *     constructor Proxy in `patchRequestBodyStash` (see request-body-stash.ts),
+ *     which intercepts before undici's Request constructor sees the body.
  *
  *   - `URL` / `URLSearchParams` — NOT polyfilled. jsdom already provides
  *     browser-spec versions, and Node's `URL.createObjectURL` only accepts

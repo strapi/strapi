@@ -1,33 +1,52 @@
+import { isForeignFormData, bridgeFormDataBody } from './request-formdata-realm';
 import type { Global, Teardown } from './types';
 
 /* -------------------------------------------------------------------------------------------------
- * Request body stash for msw v2 + undici
+ * Request body stash + FormData realm bridge for msw v2 + undici
  *
- * The problem
- * -----------
+ * Problem 1: Body unusable (clone/tee lock)
+ * -----------------------------------------
  * MSW v2's `RequestHandler.run()` calls `request.clone()` BEFORE invoking the
  * resolver (to keep a copy around for post-hoc logging). Under Node's undici,
  * `Request.clone()` tees the underlying `ReadableStream`, which locks the
  * original body — so when the resolver then does `await request.json()`,
  * undici throws `TypeError: Body is unusable: Body has already been read`.
  *
- * The fix
- * -------
- * Stash the stringified body on every `new Request(…)` under a private Symbol,
- * and have `.text()` / `.json()` return the stash when present. Handlers get
- * what the test fired off regardless of how many times msw clones the request
- * internally. The stash is read-through: if an existing stashed Request is
- * passed as the first argument to `new Request(original, init)`, the stash
- * propagates to the new instance.
+ * Fix: Stash the stringified body on every `new Request(…)` under a private
+ * Symbol, and have `.text()` / `.json()` return the stash when present.
+ * Handlers get what the test fired off regardless of how many times msw clones
+ * the request internally. The stash is read-through: if an existing stashed
+ * Request is passed as the first argument to `new Request(original, init)`, the
+ * stash propagates to the new instance.
  *
- * Scope
- * -----
- * Only string bodies are stashed. `FormData` / `Blob` / `ArrayBuffer` bodies
- * are not — no current handler in the repo reads those shapes, and extending
- * the stash to cover them needs realm-aware handling (see node-globals.ts).
- * A handler that calls `request.formData()` or `request.arrayBuffer()` under
- * this env will hit the undici "Body is unusable" error directly; widen this
- * patch if that case arises.
+ * Problem 2: jsdom-realm FormData → "text/plain" coercion
+ * --------------------------------------------------------
+ * `applyNodeGlobals` keeps jsdom's `FormData` on the global (see node-globals.ts
+ * for the rationale). App code builds a jsdom-realm `FormData` and passes it to
+ * `getFetchClient.post(…)`. msw v2's `FetchInterceptor` constructs a
+ * `new FetchRequest(input, init)` (where `FetchRequest extends Request`) from
+ * the original `fetch()` arguments. undici's `Request` constructor does not
+ * recognise a foreign-realm `FormData` and calls `.toString()` on it, producing
+ * the string `"[object FormData]"` with `Content-Type: text/plain`.
+ *
+ * Fix: In the same Request constructor Proxy (problem 1's fix), detect a
+ * jsdom-realm `FormData` in `init.body` and replace it with a Node/undici
+ * `FormData` **before** calling `Reflect.construct`. Only string-valued entries
+ * are bridged synchronously; see `request-formdata-realm.ts` for the rationale
+ * and the TODO for File/Blob entries.
+ *
+ * Why the Request constructor proxy, not a fetch wrapper
+ * -------------------------------------------------------
+ * msw's `FetchInterceptor` wraps `globalThis.fetch` and constructs a
+ * `FetchRequest` from the call arguments immediately. By the time a patched
+ * outer `fetch` wrapper would run, msw has already consumed the body through
+ * that construction. Intercepting the `Request` constructor (which `FetchRequest`
+ * inherits) is the earliest point where we can replace the body.
+ *
+ * Scope / stash
+ * -------------
+ * Only string bodies and bridged FormData bodies are handled here. `Blob` /
+ * `ArrayBuffer` bodies are not stashed — no current handler reads those shapes.
  * -----------------------------------------------------------------------------------------------*/
 
 const BODY_STASH = Symbol('strapi.mswBodyStash');
@@ -57,6 +76,18 @@ function stashFor(
   return undefined;
 }
 
+/**
+ * If `init.body` is a jsdom-realm `FormData`, bridge it to a Node/undici
+ * `FormData` synchronously and return a new `init` with the replaced body.
+ * Returns the original `init` unchanged if no bridging is needed.
+ */
+function bridgeInit(init: RequestInit | undefined): RequestInit | undefined {
+  if (init !== undefined && isForeignFormData(init.body)) {
+    return { ...init, body: bridgeFormDataBody(init.body) };
+  }
+  return init;
+}
+
 export function patchRequestBodyStash(global: Global): Teardown {
   const NativeRequest = global.Request as typeof Request;
   const jsdomJSON = global.JSON as typeof JSON;
@@ -67,7 +98,9 @@ export function patchRequestBodyStash(global: Global): Teardown {
   const PatchedRequest = new Proxy(NativeRequest, {
     construct(target, args) {
       const [input, init] = args as [RequestInfo | URL | undefined, RequestInit | undefined];
-      const request = Reflect.construct(target, args) as Stashed;
+      const bridgedInit = bridgeInit(init);
+      const bridgedArgs = bridgedInit !== init ? [input, bridgedInit] : args;
+      const request = Reflect.construct(target, bridgedArgs) as Stashed;
       const body = stashFor(input, init, NativeRequest);
       if (body !== undefined) {
         Object.defineProperty(request, BODY_STASH, { value: body });
