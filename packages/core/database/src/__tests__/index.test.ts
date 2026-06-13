@@ -1,6 +1,7 @@
 import knex from 'knex';
 import { Database, DatabaseConfig } from '../index';
 import createQueryBuilder from '../query/query-builder';
+import { applyWhere } from '../query/helpers/where';
 import type { Model } from '../types';
 
 // create an in-memory db connection to test
@@ -424,5 +425,89 @@ describe('Query builder pagination order stability (GH #26030)', () => {
     expect(lower).not.toContain('`t0`.`id`');
 
     await dbNoId.destroy();
+  });
+});
+
+const wildcardFilterModel: Model = {
+  uid: 'api::wildcard-filter.article',
+  singularName: 'wildcard-filter-article',
+  tableName: 'wildcard_filter_articles',
+  attributes: {
+    id: { type: 'integer' },
+    title: { type: 'string' },
+  },
+};
+
+describe('Query builder LIKE wildcard filters (GH #26468)', () => {
+  let db: Database;
+
+  const getWhereSql = (where: Record<string, unknown>) => {
+    const query = createQueryBuilder(wildcardFilterModel.uid, db)
+      .init({
+        select: ['title'],
+        where,
+        orderBy: { title: 'asc' },
+      })
+      .getKnexQuery()
+      .toSQL();
+
+    return {
+      sql: query.sql.toLowerCase(),
+      bindings: query.bindings,
+    };
+  };
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'debug').mockImplementation(() => {});
+
+    db = new Database(paginationQueryBuilderConfig);
+    await db.init({ models: [wildcardFilterModel] });
+  });
+
+  afterEach(async () => {
+    await db.destroy();
+  });
+
+  it('treats percent and underscore as literal text in LIKE filters', async () => {
+    const contains = getWhereSql({ title: { $contains: '100%' } });
+    expect(contains.sql).toContain("like ? escape '\\'");
+    expect(contains.bindings).toContain('%100\\%%');
+
+    const startsWith = getWhereSql({ title: { $startsWith: 'code_' } });
+    expect(startsWith.sql).toContain("like ? escape '\\'");
+    expect(startsWith.bindings).toContain('code\\_%');
+  });
+
+  it('does not treat wildcards as patterns in case-insensitive filters', async () => {
+    const containsi = getWhereSql({ title: { $containsi: 'case%' } });
+    expect(containsi.sql).toContain("like lower(?) escape '\\'");
+    expect(containsi.bindings).toContain('%case\\%%');
+
+    const eqi = getWhereSql({ title: { $eqi: 'case% value' } });
+    expect(eqi.sql).toContain(' = lower(?)');
+    expect(eqi.sql).not.toContain(' like ');
+    expect(eqi.bindings).toContain('case% value');
+  });
+
+  it('escapes backslashes before applying the LIKE escape character', async () => {
+    const contains = getWhereSql({ title: { $contains: 'C:\\Temp' } });
+    expect(contains.sql).toContain("like ? escape '\\'");
+    expect(contains.bindings).toContain('%C:\\\\Temp%');
+  });
+
+  it('keeps MySQL LIKE SQL compatible while escaping bound wildcard values', () => {
+    const qb = knex({ client: 'mysql' }).from('wildcard_filter_articles');
+
+    applyWhere(qb, { title: { $contains: '100%' } });
+
+    const query = qb.toSQL();
+    const sql = query.sql.toLowerCase();
+
+    expect(sql).toContain('like ?');
+    expect(sql).not.toContain('escape');
+    expect(query.bindings).toContain('%100\\%%');
   });
 });

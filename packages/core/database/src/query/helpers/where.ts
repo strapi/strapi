@@ -223,6 +223,43 @@ type Operator =
   | '$endsWithi'
   | '$jsonSupersetOf';
 
+const LIKE_ESCAPE_CHARACTER = '\\';
+const LIKE_SPECIAL_CHARACTERS = `%_${LIKE_ESCAPE_CHARACTER}`;
+
+const escapeLikeValue = (value: unknown) => {
+  return `${value}`
+    .split('')
+    .reduce(
+      (escapedValue, char) =>
+        LIKE_SPECIAL_CHARACTERS.includes(char)
+          ? `${escapedValue}${LIKE_ESCAPE_CHARACTER}${char}`
+          : `${escapedValue}${char}`,
+      ''
+    );
+};
+
+const getLikeEscapeClause = (qb: Knex.QueryBuilder) => {
+  return ['mysql', 'mysql2'].includes(qb.client.dialect) ? '' : " ESCAPE '\\'";
+};
+
+const applyLike = (
+  qb: Knex.QueryBuilder,
+  column: any,
+  value: unknown,
+  { prefix = '', suffix = '', caseInsensitive = false, not = false } = {}
+) => {
+  const operator = not ? 'NOT LIKE' : 'LIKE';
+  const pattern = `${prefix}${escapeLikeValue(value)}${suffix}`;
+  const escapeClause = getLikeEscapeClause(qb);
+
+  if (caseInsensitive) {
+    qb.whereRaw(`${fieldLowerFn(qb)} ${operator} LOWER(?)${escapeClause}`, [column, pattern]);
+    return;
+  }
+
+  qb.whereRaw(`?? ${operator} ?${escapeClause}`, [column, pattern]);
+};
+
 // TODO: add type casting per operator at some point
 const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, value: any) => {
   if (Array.isArray(value) && !isOperatorOfType('array', operator)) {
@@ -270,7 +307,7 @@ const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, v
         qb.whereNull(column);
         break;
       }
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} = LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$ne': {
@@ -287,7 +324,7 @@ const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, v
         qb.whereNotNull(column);
         break;
       }
-      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} <> LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$gt': {
@@ -327,38 +364,43 @@ const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, v
       break;
     }
     case '$startsWith': {
-      qb.where(column, 'like', `${value}%`);
+      applyLike(qb, column, value, { suffix: '%' });
       break;
     }
     case '$startsWithi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}%`]);
+      applyLike(qb, column, value, { suffix: '%', caseInsensitive: true });
       break;
     }
     case '$endsWith': {
-      qb.where(column, 'like', `%${value}`);
+      applyLike(qb, column, value, { prefix: '%' });
       break;
     }
     case '$endsWithi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}`]);
+      applyLike(qb, column, value, { prefix: '%', caseInsensitive: true });
       break;
     }
     case '$contains': {
-      qb.where(column, 'like', `%${value}%`);
+      applyLike(qb, column, value, { prefix: '%', suffix: '%' });
       break;
     }
 
     case '$notContains': {
-      qb.whereNot(column, 'like', `%${value}%`);
+      applyLike(qb, column, value, { prefix: '%', suffix: '%', not: true });
       break;
     }
 
     case '$containsi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}%`]);
+      applyLike(qb, column, value, { prefix: '%', suffix: '%', caseInsensitive: true });
       break;
     }
 
     case '$notContainsi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `%${value}%`]);
+      applyLike(qb, column, value, {
+        prefix: '%',
+        suffix: '%',
+        caseInsensitive: true,
+        not: true,
+      });
       break;
     }
 
