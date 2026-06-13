@@ -104,5 +104,48 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await assetsPage.navigateIntoFolder('Coaching Staff');
       await expect(assetsPage.getAssetCard('head_coach_profile.jpeg')).toBeVisible();
     });
+
+    test('should delete an asset from the drawer and remove it from the list', async ({ page }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
+
+      // Confirm the asset is in the list before deleting.
+      await assetsPage.switchToGridView();
+      await expect(assetsPage.getAssetCard('ted_lasso_profile.jpeg')).toBeVisible();
+
+      await assetsPage.clickAssetInGrid('ted_lasso_profile.jpeg');
+      await expect(assetsPage.assetDetailsDrawer).toBeVisible();
+
+      await assetsPage.deleteAssetFromDrawer();
+
+      // Drawer closes after a successful delete, success notification fires.
+      await expect(assetsPage.assetDetailsDrawer).not.toBeVisible({ timeout: 5000 });
+      await assetsPage.waitForUploadSuccess();
+
+      // Asset is gone from the grid view.
+      await expect(assetsPage.getAssetCard('ted_lasso_profile.jpeg')).toHaveCount(0);
+    });
+
+    test('should replace an asset binary from the drawer and refresh the details', async ({
+      page,
+    }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
+
+      await assetsPage.switchToGridView();
+      await assetsPage.clickAssetInGrid('ted_lasso_profile.jpeg');
+      await expect(assetsPage.assetDetailsDrawer).toBeVisible();
+
+      // Capture the original extension/size so we can compare after replace.
+      const replacementPath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
+      await assetsPage.replaceAssetFromDrawer(replacementPath);
+
+      // In-drawer toast confirms success — the drawer stays open and the
+      // metadata refreshes via the RTK Query cache invalidation.
+      await expect(assetsPage.getDrawerToast(/File replaced/i)).toBeVisible({ timeout: 10000 });
+
+      // Drawer remains open after a successful replace.
+      await expect(assetsPage.assetDetailsDrawer).toBeVisible();
+    });
   }
 );

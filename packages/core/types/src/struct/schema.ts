@@ -5,7 +5,7 @@ export type ContentTypeKind = 'collectionType' | 'singleType';
 
 export type ModelType = 'contentType' | 'component';
 
-export type Schema = ContentTypeSchema | ComponentSchema;
+export type Schema = CollectionTypeSchema | SingleTypeSchema | ComponentSchema;
 
 /**
  * A loaded instance of a Strapi Schema accessible to the server.
