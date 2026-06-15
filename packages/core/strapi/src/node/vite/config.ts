@@ -1,5 +1,4 @@
 import type { InlineConfig, UserConfig } from 'vite';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
@@ -11,6 +10,7 @@ import type { BuildContext } from '../create-build-context';
 import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
   const designSystemLinked = isDesignSystemLinked();

@@ -476,7 +476,7 @@ describe('ADMIN | new StrapiApp', () => {
         icon: jest.fn(),
       };
 
-      app.addMenuLink(link as Parameters<typeof app.addMenuLink>[0]);
+      app.addMenuLink(link);
 
       expect(app.router.menu[0]).toEqual({
         icon: expect.any(Function),
@@ -549,6 +549,18 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.configurations.locales).toEqual(['en', 'fr']);
     });
 
+    it('maps legacy Danish admin locale code dk to ISO 639-1 da', () => {
+      const app = new StrapiApp({ config: { locales: ['dk'] } });
+
+      expect(app.configurations.locales).toEqual(['en', 'da']);
+    });
+
+    it('deduplicates da when both dk and da are configured', () => {
+      const app = new StrapiApp({ config: { locales: ['dk', 'da'] } });
+
+      expect(app.configurations.locales).toEqual(['en', 'da']);
+    });
+
     it('should override the authLogo', () => {
       const app = new StrapiApp({ config: { auth: { logo: 'fr' } } });
 
@@ -602,6 +614,49 @@ describe('ADMIN | new StrapiApp', () => {
       const app = new StrapiApp({ config: { notifications: { releases: false } } });
 
       expect(app.configurations.notifications.releases).toBeFalsy();
+    });
+  });
+
+  describe('loadTrads', () => {
+    it('loads legacy Danish translations from plugins using the unchanged registerTrads API', async () => {
+      const originalWarn = console.warn;
+      const consoleSpy = jest.fn();
+      console.warn = consoleSpy;
+
+      try {
+        const app = new StrapiApp({
+          config: { locales: ['da'] },
+          appPlugins: {
+            legacyPlugin: {
+              register: jest.fn(),
+              async registerTrads({ locales }: { locales: string[] }) {
+                return locales.map((locale) => {
+                  const data: Record<string, string> =
+                    locale === 'dk' ? { 'legacy.plugin.label': 'Legacy Danish' } : {};
+
+                  return { locale, data };
+                });
+              },
+            },
+          },
+        });
+
+        await app.loadTrads();
+
+        const translations = app.configurations.translations as Record<
+          string,
+          Record<string, string>
+        >;
+
+        expect(translations.da).toEqual(
+          expect.objectContaining({ 'legacy.plugin.label': 'Legacy Danish' })
+        );
+        expect(consoleSpy).toHaveBeenCalledWith(
+          '[deprecated] Admin locale "dk" is deprecated. Rename translation files to "da.json".'
+        );
+      } finally {
+        console.warn = originalWarn;
+      }
     });
   });
 });

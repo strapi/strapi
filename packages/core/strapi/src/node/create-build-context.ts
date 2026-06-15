@@ -102,7 +102,7 @@ const createBuildContext = async <TOptions extends BaseOptions>({
   const envKeys = Object.keys(env);
 
   if (envKeys.length > 0) {
-    logger.info(
+    logger.debug(
       [
         'Including the following ENV variables as part of the JS bundle:',
         ...envKeys.map((key) => `    - ${key}`),
