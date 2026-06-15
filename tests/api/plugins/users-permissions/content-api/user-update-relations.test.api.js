@@ -98,12 +98,14 @@ const createPublishedOptIn = async () => {
 
   await strapi.documents('api::opt-in.opt-in').publish({ documentId: optIn.documentId });
 
+  // Keep the draft row different from the published row so tests can prove the populated
+  // relation selected the published version rather than the later draft.
   await strapi.documents('api::opt-in.opt-in').update({
     documentId: optIn.documentId,
     data: { caption: 'Drafted Opt-In Modified' },
   });
 
-  const [publishedOptIn] = await strapi.documents('api::opt-in.opt-in').findMany({
+  const publishedOptIn = await strapi.documents('api::opt-in.opt-in').findFirst({
     status: 'published',
     filters: { documentId: optIn.documentId },
   });
@@ -389,6 +391,32 @@ describe('U&P users REST relation handling (issue 26606)', () => {
 
       expect(updatedUser.optIns).toHaveLength(1);
       expect(updatedUser.optIns[0]).toMatchObject({
+        id: optIn.id,
+        documentId: optIn.documentId,
+        caption: 'Drafted Opt-In',
+        publishedAt: expect.any(String),
+      });
+    });
+
+    test('PUT connects a users-permissions user to a published DP target', async () => {
+      const user = await createUser();
+      const optIn = await createPublishedOptIn();
+
+      const res = await putUser(user.id, {
+        optIns: {
+          connect: {
+            documentId: optIn.documentId,
+            status: 'published',
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const after = await readUser(user.id);
+      expect(after.optIns).toHaveLength(1);
+      expect(after.optIns[0]).toMatchObject({
+        id: optIn.id,
         documentId: optIn.documentId,
         caption: 'Drafted Opt-In',
         publishedAt: expect.any(String),
