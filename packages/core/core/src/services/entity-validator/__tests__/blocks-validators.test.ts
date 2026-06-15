@@ -196,6 +196,17 @@ const validCodeBlock = [
     children: [{ type: 'text', text: 'const test = "whatever"' }],
   },
 ];
+const validEmbeddedSocialMediaBlock = [
+  {
+    type: 'embedded-social-media',
+    embedSocialMedia: {
+      socialMediaUrl: 'https://www.youtube.com/watch?v=rXQjamG0s1I',
+      socialMediaType: 'youtube',
+    },
+    children: [{ type: 'text', text: '' }],
+  },
+];
+
 describe('Blocks validator', () => {
   describe('Paragraph', () => {
     it('Should accept a valid paragraph schema', async () => {
@@ -494,6 +505,42 @@ describe('Blocks validator', () => {
       expect(validator(mixed)).rejects.toThrow(errors.YupValidationError);
       // Bad version
       expect(validator(mixed)).rejects.toThrow(errors.YupValidationError);
+    });
+  });
+  describe('Embedded Social Media', () => {
+    it('Should accept a valid embedded social media schema', async () => {
+      const validator = strapiUtils.validateYupSchema(
+        Validators.blocks(
+          {
+            attr: { type: 'embedded-social-media' },
+          },
+          { isDraft: false }
+        )
+      );
+      expect(await validator(validEmbeddedSocialMediaBlock)).toEqual(validEmbeddedSocialMediaBlock);
+    });
+    it('Should throw an error given an invalid embedded social media schema', async () => {
+      const validator = strapiUtils.validateYupSchema(
+        Validators.blocks(
+          {
+            attr: { type: 'embedded-social-media' },
+          },
+          { isDraft: false }
+        )
+      );
+      // Bad embedded social media object
+      await expect(
+        validator([
+          {
+            type: 'embedded-social-media',
+            children: [{ type: 'text', text: '' }],
+            embedSocialMedia: {
+              socialMediaUrl: null,
+              socialMediaType: null,
+            },
+          },
+        ])
+      ).rejects.toThrow(errors.YupValidationError);
     });
   });
 });

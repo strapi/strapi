@@ -11,14 +11,27 @@ module.exports = [
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-          'frame-src': ["'self'"], // URLs that will be loaded in an iframe (e.g. Content Preview)
+          'frame-src': ["'self'", 'https://www.youtube.com', 'https://platform.twitter.com'], // URLs that will be loaded in an iframe (e.g. Content Preview)
           // Needed to load the `@vercel/stega` lib on the dummy-preview page
-          'script-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+          'script-src': [
+            "'self'",
+            "'unsafe-inline'",
+            'https://cdn.jsdelivr.net',
+            'https://platform.twitter.com',
+            'https://www.youtube.com',
+          ],
         },
       },
     },
   },
-  'strapi::cors',
+  {
+    name: 'strapi::cors',
+    config: {
+      enabled: true,
+      headers: '*',
+      origin: ['*'],
+    },
+  },
   'strapi::poweredBy',
   'strapi::query',
   'strapi::body',

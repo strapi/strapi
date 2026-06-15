@@ -82,6 +82,7 @@ const selectorBlockKeys = [
   'image',
   'quote',
   'code',
+  'embedded-social-media',
 ] as const;
 
 type SelectorBlockKey = (typeof selectorBlockKeys)[number];

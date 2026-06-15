@@ -45,8 +45,22 @@ interface BrowserStrapi {
   telemetryDisabled: boolean;
 }
 
+interface TwttrWidgetCreateTweetOptions {
+  [key: string]: string;
+}
+
 declare global {
   interface Window {
     strapi: BrowserStrapi;
+    twttr: {
+      ready: (fn: () => void) => void;
+      widgets: {
+        createTweet: (
+          id: string,
+          container: Element,
+          {}: TwttrWidgetCreateTweetOptions
+        ) => Promise<any>;
+      };
+    };
   }
 }
