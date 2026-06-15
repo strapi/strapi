@@ -41,7 +41,26 @@ test.describe('RBAC - Permissions enforcement', { tag: ['@critical'] }, () => {
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
 
-    // Step 5: Assert the Publish button is disabled
+    // Step 5: Assert the UI hides the action — the Publish button is disabled
     await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
+
+    // Step 6: Assert the API enforces it too — a direct publish call returns 403.
+    // UI hiding alone is not sufficient; the publish route's hasPermissions policy
+    // (config: ['plugin::content-manager.explorer.publish']) must reject the request.
+    // The documentId is taken from the edit-view URL we are currently on.
+    const documentId = page.url().match(/collection-types\/api::article\.article\/([^/?#]+)/)?.[1];
+    expect(documentId, 'expected a documentId in the edit-view URL').toBeTruthy();
+
+    const apiLogin = await page.request.post('/admin/login', {
+      data: { email: AUTHOR_EMAIL_ADDRESS, password: AUTHOR_PASSWORD },
+    });
+    const token = (await apiLogin.json()).data?.token;
+    expect(token, 'API login as the author failed').toBeTruthy();
+
+    const publishRes = await page.request.post(
+      `/content-manager/collection-types/api::article.article/${documentId}/actions/publish?locale=en`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    expect(publishRes.status()).toBe(403);
   });
 });
