@@ -544,6 +544,7 @@ function previewScript(config) {
   /**
    * @typedef {{ element: HTMLElement | Window; type: keyof HTMLElementEventMap | 'message'; handler: EventListener; }} EventListenerEntry
    * @typedef {EventListenerEntry[]} EventListenersList
+   * @typedef {{ eventListeners: EventListenersList; cleanup: () => void; }} EventHandlers
    */
 
   /**
@@ -1136,6 +1137,11 @@ function previewScript(config) {
    * @param {HighlightManager} highlightManager
    */
   const setupEventHandlers = (highlightManager) => {
+    /** @type {string | null} */
+    let blocksEditActiveField = null;
+    /** @type {(() => void) | null} */
+    let blocksEditClickOutsideHandler = null;
+
     /**
      * @param {HTMLElement} el
      * @param {string | null} url
@@ -1285,6 +1291,11 @@ function previewScript(config) {
       if (!event.data?.type) return;
       if (event.source !== window.parent || event.origin !== parentOrigin) return;
 
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_SCROLL) {
+        window.scrollBy(event.data.payload.deltaX, event.data.payload.deltaY);
+        return;
+      }
+
       // The user typed in an input, reflect the change in the preview
       if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
         const { field, value } = event.data.payload;
@@ -1294,7 +1305,12 @@ function previewScript(config) {
         // to the host frontend — we re-dispatch as a CustomEvent so integrators
         // (e.g. BlocksRenderer in dummy-preview) can re-render without DOM patching.
         if (isBlocksValue(value)) {
-          forwardBlocksFieldChange(field, value);
+          // Suppress live DOM updates while this field is being edited inline — the iframe content
+          // is hidden by CSS, and re-rendering it would create un-stega'd elements that bypass the
+          // hide rule and produce duplicate visible text alongside the editor overlay.
+          if (field !== blocksEditActiveField) {
+            forwardBlocksFieldChange(field, value);
+          }
           return;
         }
 
@@ -1457,6 +1473,47 @@ function previewScript(config) {
         highlightManager.focusedHighlights.length = 0;
         highlightManager.setFocusedField(null);
       }
+
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_START) {
+        const { fieldPath } = event.data.payload;
+        blocksEditActiveField = fieldPath;
+        // Inject CSS to hide host-rendered blocks content (hides existing + future elements)
+        const styleId = `strapi-blocks-hide-${fieldPath}`;
+        document.getElementById(styleId)?.remove();
+        const style = document.createElement('style');
+        style.id = styleId;
+        // The CSS selector targets all elements whose data-strapi-source contains fieldPath=<path>
+        style.textContent = `[${SOURCE_ATTRIBUTE}*="fieldPath=${fieldPath}"] { visibility: hidden !important; }`;
+        document.head.appendChild(style);
+        // Disable pointer events on the highlight so it can't be double-clicked during editing
+        const matchingGroups = highlightManager.findGroupForPath(fieldPath);
+        matchingGroups.forEach((group) => {
+          group.highlight.style.pointerEvents = 'none';
+        });
+        // Notify the admin when the user clicks anywhere in the iframe so the session can close
+        blocksEditClickOutsideHandler = () => {
+          sendMessage(INTERNAL_EVENTS.STRAPI_CLICK_OUTSIDE_BLOCKS, null);
+        };
+        document.addEventListener('click', blocksEditClickOutsideHandler);
+        return;
+      }
+
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_END) {
+        const { fieldPath } = event.data.payload;
+        blocksEditActiveField = null;
+        if (blocksEditClickOutsideHandler) {
+          document.removeEventListener('click', blocksEditClickOutsideHandler);
+          blocksEditClickOutsideHandler = null;
+        }
+        // Remove the CSS rule to restore host content visibility
+        document.getElementById(`strapi-blocks-hide-${fieldPath}`)?.remove();
+        // Restore pointer events on the highlight
+        const matchingGroups = highlightManager.findGroupForPath(fieldPath);
+        matchingGroups.forEach((group) => {
+          group.highlight.style.pointerEvents = '';
+        });
+        return;
+      }
     };
 
     window.addEventListener('message', handleMessage);
@@ -1468,14 +1525,22 @@ function previewScript(config) {
       handler: /** @type {EventListener} */ (handleMessage),
     };
 
-    return [...highlightManager.eventListeners, messageEventListener];
+    return {
+      eventListeners: [...highlightManager.eventListeners, messageEventListener],
+      cleanup: () => {
+        if (blocksEditClickOutsideHandler) {
+          document.removeEventListener('click', blocksEditClickOutsideHandler);
+          blocksEditClickOutsideHandler = null;
+        }
+      },
+    };
   };
 
   /**
    * @param {HTMLElement} overlay
    * @param {ReturnType<typeof setupObservers>} observers
    * @param {ReturnType<typeof setupScrollManagement>} scrollManager
-   * @param {EventListenersList} eventHandlers
+   * @param {EventHandlers} eventHandlers
    * @param {HighlightManager} highlightManager
    */
   const createCleanupSystem = (
@@ -1496,16 +1561,20 @@ function previewScript(config) {
       // Clear all pending click timeouts
       highlightManager.clearAllPendingClicks();
 
-      // Remove highlight event listeners
-      eventHandlers.forEach(({ element, type, handler }) => {
+      // Remove highlight event listeners and session-specific cleanup
+      eventHandlers.eventListeners.forEach(({ element, type, handler }) => {
         element.removeEventListener(type, handler);
       });
+      eventHandlers.cleanup();
 
       // Clean up CSS styles
       const existingStyles = document.getElementById(HIGHLIGHT_STYLES_ID);
       if (existingStyles) {
         existingStyles.remove();
       }
+
+      // Remove any active blocks edit style tags
+      document.querySelectorAll('[id^="strapi-blocks-hide-"]').forEach((el) => el.remove());
 
       overlay.remove();
     };

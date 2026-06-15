@@ -14,6 +14,8 @@ import {
   PreviewFieldError,
 } from '../utils/fieldUtils';
 
+import type { Schema } from '@strapi/types';
+
 /* -------------------------------------------------------------------------------------------------
  * Context utils
  * -----------------------------------------------------------------------------------------------*/
@@ -42,6 +44,10 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
   const iframeRef = usePreviewContext('InputPopover', (state) => state.iframeRef);
   const popoverField = usePreviewContext('InputPopover', (state) => state.popoverField);
   const setPopoverField = usePreviewContext('InputPopover', (state) => state.setPopoverField);
+  const setBlocksEditSession = usePreviewContext(
+    'InputPopover',
+    (state) => state.setBlocksEditSession
+  );
   const document = usePreviewContext('InputPopover', (state) => state.document);
   const schema = usePreviewContext('InputPopover', (state) => state.schema);
   const components = usePreviewContext('InputPopover', (state) => state.components);
@@ -91,6 +97,16 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
             document,
           });
 
+          // Route blocks fields to the inline blocks edit session instead of the popover
+          if (attribute.type === 'blocks') {
+            setBlocksEditSession({
+              fieldPath: fieldMetaData.path,
+              position: event.data.payload.position,
+              attribute: attribute as Schema.Attribute.Blocks,
+            });
+            return;
+          }
+
           // We're able to handle the field, set it in context so the popover can pick it up
           setPopoverField({ ...fieldMetaData, position: event.data.payload.position, attribute });
         } catch (error) {
@@ -119,7 +135,16 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [components, document, iframeRef, schema, setPopoverField, toggleNotification, formatMessage]);
+  }, [
+    components,
+    document,
+    iframeRef,
+    schema,
+    setBlocksEditSession,
+    setPopoverField,
+    toggleNotification,
+    formatMessage,
+  ]);
   if (!popoverField || !iframeRef.current) {
     return null;
   }

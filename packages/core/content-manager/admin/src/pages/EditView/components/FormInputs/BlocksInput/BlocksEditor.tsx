@@ -218,11 +218,25 @@ interface BlocksEditorProps
   name: string;
   /** When true, sync form state on every keystroke (Live Preview popover). */
   livePreviewSync?: boolean;
+  /** When true, renders the editor without the EditorLayout shell (used for Live Preview inline editing). */
+  isLivePreviewInline?: boolean;
+  /** Optional node rendered inside the Slate provider (used for floating toolbars that need Slate context). */
+  floatingToolbar?: React.ReactNode;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   (
-    { disabled = false, name, onChange, value, error, livePreviewSync = false, ...contentProps },
+    {
+      disabled = false,
+      name,
+      onChange,
+      value,
+      error,
+      livePreviewSync = false,
+      isLivePreviewInline = false,
+      floatingToolbar,
+      ...contentProps
+    },
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();
@@ -378,31 +392,38 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             isExpandedMode={isExpandedMode}
             flushPendingFormSync={flushPendingFormSync}
           >
-            <EditorLayout
-              error={error}
-              disabled={disabled}
-              onToggleExpand={handleToggleExpand}
-              ariaDescriptionId={ariaDescriptionId}
-            >
-              <BlocksToolbar />
-              <EditorDivider width="100%" />
-              <BlocksContent {...contentProps} />
-              {!isExpandedMode && !isMobile && (
-                <IconButton
-                  position="absolute"
-                  bottom="1.2rem"
-                  right="1.2rem"
-                  shadow="filterShadow"
-                  label={formatMessage({
-                    id: getTranslation('components.Blocks.expand'),
-                    defaultMessage: 'Expand',
-                  })}
-                  onClick={handleToggleExpand}
-                >
-                  <Expand />
-                </IconButton>
-              )}
-            </EditorLayout>
+            {isLivePreviewInline ? (
+              <>
+                {floatingToolbar}
+                <BlocksContent {...contentProps} hideDragHandles />
+              </>
+            ) : (
+              <EditorLayout
+                error={error}
+                disabled={disabled}
+                onToggleExpand={handleToggleExpand}
+                ariaDescriptionId={ariaDescriptionId}
+              >
+                <BlocksToolbar />
+                <EditorDivider width="100%" />
+                <BlocksContent {...contentProps} />
+                {!isExpandedMode && !isMobile && (
+                  <IconButton
+                    position="absolute"
+                    bottom="1.2rem"
+                    right="1.2rem"
+                    shadow="filterShadow"
+                    label={formatMessage({
+                      id: getTranslation('components.Blocks.expand'),
+                      defaultMessage: 'Expand',
+                    })}
+                    onClick={handleToggleExpand}
+                  >
+                    <Expand />
+                  </IconButton>
+                )}
+              </EditorLayout>
+            )}
           </BlocksEditorProvider>
         </Slate>
       </>
