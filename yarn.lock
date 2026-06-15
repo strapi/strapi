@@ -8713,7 +8713,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15"
     "@types/fs-extra": "npm:11.0.4"
-    "@types/invariant": "npm:2.2.36"
+    "@types/invariant": "npm:2.2.37"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/jsonwebtoken": "npm:9.0.3"
     "@types/koa-passport": "npm:6.0.1"
@@ -10945,10 +10945,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/invariant@npm:2.2.36":
-  version: 2.2.36
-  resolution: "@types/invariant@npm:2.2.36"
-  checksum: 10c0/a349043eb3831aa2e3ac7432315057227b7857e5c52f72605d1bc6f5ad402768c720998ed95b92704e379cd859bc23fa852eefd9f737a20eea51a16b652220be
+"@types/invariant@npm:2.2.37":
+  version: 2.2.37
+  resolution: "@types/invariant@npm:2.2.37"
+  checksum: 10c0/f57ed8445036ebda8bc93804f088c2a13050bbeef4e4bc6ed531a70e2869250dbe59413f2a9ed7d8f3efa960f191e8dfca9d25414d63cbf604d348428f8c5b75
   languageName: node
   linkType: hard
 
