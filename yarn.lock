@@ -8823,7 +8823,7 @@ __metadata:
     jwks-rsa: "npm:3.1.0"
     lodash: "npm:4.18.1"
     minimatch: "npm:10.2.5"
-    open: "npm:8.4.0"
+    open: "npm:8.4.2"
     ora: "npm:5.4.1"
     pkg-up: "npm:3.1.0"
     tar: "npm:7.5.11"
@@ -9070,7 +9070,7 @@ __metadata:
     lodash: "npm:4.18.1"
     mime-types: "npm:2.1.35"
     node-schedule: "npm:2.1.1"
-    open: "npm:8.4.0"
+    open: "npm:8.4.2"
     ora: "npm:5.4.1"
     package-json: "npm:7.0.0"
     pkg-up: "npm:3.1.0"
@@ -25208,18 +25208,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"open@npm:8.4.0":
-  version: 8.4.0
-  resolution: "open@npm:8.4.0"
-  dependencies:
-    define-lazy-prop: "npm:^2.0.0"
-    is-docker: "npm:^2.1.1"
-    is-wsl: "npm:^2.2.0"
-  checksum: 10c0/585596580226cbeb7262f36b5acc7eed05211dc26980020a2527f829336b8b07fd79cdc4240f4d995b5615f635e0a59ebb0261c4419fef91edd5d4604c463f18
-  languageName: node
-  linkType: hard
-
-"open@npm:^8.4.0":
+"open@npm:8.4.2, open@npm:^8.4.0":
   version: 8.4.2
   resolution: "open@npm:8.4.2"
   dependencies:
