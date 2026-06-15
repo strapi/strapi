@@ -95,7 +95,7 @@
     "koa-compose": "4.1.0",
     "koa-compress": "5.1.1",
     "koa-favicon": "2.1.0",
-    "koa-helmet": "7.0.2",
+    "koa-helmet": "7.1.0",
     "koa-ip": "^2.1.3",
     "koa-session": "7.0.2",
     "koa-static": "5.0.0",
