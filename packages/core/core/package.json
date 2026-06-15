@@ -102,7 +102,7 @@
     "lodash": "4.18.1",
     "mime-types": "2.1.35",
     "node-schedule": "2.1.1",
-    "open": "8.4.0",
+    "open": "8.4.2",
     "ora": "5.4.1",
     "package-json": "7.0.0",
     "pkg-up": "3.1.0",
