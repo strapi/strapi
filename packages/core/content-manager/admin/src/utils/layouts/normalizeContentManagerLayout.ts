@@ -347,7 +347,8 @@ const hasTargetSchema = (
 const normalizeMainField = (
   attribute: SchemaUtils.Attribute.AnyAttribute,
   mainField: string | undefined,
-  context: Pick<NormalizationContext, 'components' | 'schemas'>
+  context: Pick<NormalizationContext, 'components' | 'schemas'>,
+  path: string
 ) => {
   if (!mainField) {
     return mainField;
@@ -360,13 +361,29 @@ const normalizeMainField = (
       return mainField;
     }
 
-    return attribute.type === 'component' || attribute.type === 'relation' ? 'id' : mainField;
+    if (attribute.type !== 'component' && attribute.type !== 'relation') {
+      return mainField;
+    }
+
+    warnOnceInDevelopment(`Reset invalid mainField "${mainField}" at "${path}" to "id".`);
+
+    return 'id';
   }
 
-  return hasAttribute(targetAttributes, mainField) ? mainField : 'id';
+  if (hasAttribute(targetAttributes, mainField)) {
+    return mainField;
+  }
+
+  warnOnceInDevelopment(`Reset invalid mainField "${mainField}" at "${path}" to "id".`);
+
+  return 'id';
 };
 
-const normalizeSettings = (settings: Settings, attributes: Attributes | undefined) => {
+const normalizeSettings = (
+  settings: Settings,
+  attributes: Attributes | undefined,
+  path: string
+) => {
   if (
     !settings.mainField ||
     hasAttribute(attributes, settings.mainField) ||
@@ -374,6 +391,8 @@ const normalizeSettings = (settings: Settings, attributes: Attributes | undefine
   ) {
     return settings;
   }
+
+  warnOnceInDevelopment(`Reset invalid mainField "${settings.mainField}" at "${path}" to "id".`);
 
   return {
     ...settings,
@@ -395,12 +414,21 @@ const hasResolvableComponent = (
 const normalizeMetadatas = (
   metadatas: Metadatas,
   attributes: Attributes | undefined,
-  context: Pick<NormalizationContext, 'components' | 'schemas'>
+  context: Pick<NormalizationContext, 'components' | 'schemas'>,
+  path: string
 ) => {
   return Object.entries(metadatas).reduce<Metadatas>((acc, [name, metadata]) => {
     const attribute = attributes?.[name];
 
-    if (!attribute || !hasResolvableComponent(attribute, context)) {
+    if (!attribute) {
+      warnOnceInDevelopment(`Dropped metadata for unknown field "${path}.metadatas.${name}".`);
+      return acc;
+    }
+
+    if (!hasResolvableComponent(attribute, context)) {
+      warnOnceInDevelopment(
+        `Dropped metadata for field "${path}.metadatas.${name}" because its component schema is unavailable.`
+      );
       return acc;
     }
 
@@ -413,14 +441,20 @@ const normalizeMetadatas = (
               mainField: normalizeMainField(
                 attribute,
                 (metadata.edit as { mainField?: string }).mainField,
-                context
+                context,
+                `${path}.metadatas.${name}.edit.mainField`
               ),
             }
           : {}),
       },
       list: {
         ...metadata.list,
-        mainField: normalizeMainField(attribute, metadata.list.mainField, context),
+        mainField: normalizeMainField(
+          attribute,
+          metadata.list.mainField,
+          context,
+          `${path}.metadatas.${name}.list.mainField`
+        ),
       },
     };
 
@@ -432,7 +466,8 @@ const normalizeLayouts = (
   layouts: Layouts,
   attributes: Attributes | undefined,
   metadatas: Metadatas,
-  context: Pick<NormalizationContext, 'components'>
+  context: Pick<NormalizationContext, 'components'>,
+  path: string
 ) => {
   const hasRenderableField = (name: string) => {
     const attribute = attributes?.[name];
@@ -442,9 +477,31 @@ const normalizeLayouts = (
 
   return {
     edit: (layouts.edit ?? [])
-      .map((row) => row.filter((field) => hasRenderableField(field.name)))
+      .map((row, rowIndex) =>
+        row.filter((field) => {
+          const isRenderable = hasRenderableField(field.name);
+
+          if (!isRenderable) {
+            warnOnceInDevelopment(
+              `Dropped non-renderable edit layout field "${path}.layouts.edit.${rowIndex}.${field.name}".`
+            );
+          }
+
+          return isRenderable;
+        })
+      )
       .filter((row) => row.length > 0),
-    list: (layouts.list ?? []).filter((name) => hasRenderableField(name)),
+    list: (layouts.list ?? []).filter((name, index) => {
+      const isRenderable = hasRenderableField(name);
+
+      if (!isRenderable) {
+        warnOnceInDevelopment(
+          `Dropped non-renderable list layout field "${path}.layouts.list.${index}.${name}".`
+        );
+      }
+
+      return isRenderable;
+    }),
   };
 };
 
@@ -453,12 +510,13 @@ const normalizeConfiguration = <TConfiguration extends Configuration>(
   attributes: Attributes | undefined,
   context: Pick<NormalizationContext, 'components' | 'schemas'>
 ) => {
-  const metadatas = normalizeMetadatas(configuration.metadatas, attributes, context);
-  const layouts = normalizeLayouts(configuration.layouts, attributes, metadatas, context);
+  const path = configuration.uid ?? 'configuration';
+  const metadatas = normalizeMetadatas(configuration.metadatas, attributes, context, path);
+  const layouts = normalizeLayouts(configuration.layouts, attributes, metadatas, context, path);
 
   return {
     ...configuration,
-    settings: normalizeSettings(configuration.settings, attributes),
+    settings: normalizeSettings(configuration.settings, attributes, `${path}.settings.mainField`),
     metadatas,
     layouts,
   };

@@ -134,6 +134,8 @@ type ResolvedLayoutCacheEntry = {
 };
 
 const RESOLVED_LAYOUT_CACHE_LIMIT = 25;
+// Module-level cache keeps resolved layout object identities stable across hook instances
+// when RTK Query returns the same schema/configuration references.
 const resolvedLayoutCache: ResolvedLayoutCacheEntry[] = [];
 
 const getCachedResolvedLayouts = ({

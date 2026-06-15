@@ -231,6 +231,41 @@ describe('normalizeContentManagerLayout', () => {
     expect(normalized.components[componentUid]?.settings.mainField).toBe('id');
   });
 
+  it('emits development warnings when semantic normalization drops entries or resets main fields', () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalWarn = console.warn;
+
+    process.env.NODE_ENV = 'development';
+    console.warn = jest.fn();
+
+    try {
+      normalizeContentManagerLayout(data, {
+        schema: contentTypeSchema,
+        components: {},
+        schemas: [contentTypeSchema, relationSchema],
+      });
+
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Dropped metadata for unknown field')
+      );
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('because its component schema is unavailable')
+      );
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Dropped non-renderable edit layout field')
+      );
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Dropped non-renderable list layout field')
+      );
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Reset invalid mainField "deletedName"')
+      );
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+      console.warn = originalWarn;
+    }
+  });
+
   it('normalizes relation main fields when relation attributes only expose target', () => {
     const targetOnlySchema = {
       ...contentTypeSchema,

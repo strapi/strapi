@@ -18,6 +18,8 @@ const EMPTY_COMPONENTS: ComponentsDictionary = {};
 
 type InitialData = GetInitData.Response['data'];
 
+// Module-level cache preserves schema derivation identities across hook instances;
+// `useMemo` would only stabilize values inside a single component tree.
 const schemaInfoCache = new WeakMap<
   InitialData,
   Map<
