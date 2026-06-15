@@ -9053,6 +9053,7 @@ __metadata:
     fs-extra: "npm:11.3.4"
     glob: "npm:13.0.6"
     global-agent: "npm:4.1.3"
+    helmet: "npm:6.2.0"
     http-errors: "npm:2.0.0"
     inquirer: "npm:9.3.8"
     is-docker: "npm:2.2.1"
@@ -19787,6 +19788,13 @@ __metadata:
     "@types/set-cookie-parser": "npm:^2.4.10"
     set-cookie-parser: "npm:^3.0.1"
   checksum: 10c0/c269730a88a12c88718037aa71f178601f2b193ba8a37e276b6ced6b8f7e06fc1ac051f2a7acb0a8b4cc878407066555fdcdbb270e90374baaa472cb26af0c30
+  languageName: node
+  linkType: hard
+
+"helmet@npm:6.2.0":
+  version: 6.2.0
+  resolution: "helmet@npm:6.2.0"
+  checksum: 10c0/52d97adfdb151ebdc08e5d78eb93eebfb7e8e3e0563e68664828138dc6ab2d9d512b4ae71e1f8c6fcf8ddc38f87908325971d95dcabaafd4fde1f5b0faabeb8c
   languageName: node
   linkType: hard
 
