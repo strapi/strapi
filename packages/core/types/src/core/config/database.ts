@@ -48,7 +48,10 @@ type SqliteConnection = {
 export interface Database<TClient extends ClientKind = ClientKind> {
   connection: {
     client: TClient;
-    connection: IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>;
+    connection:
+      | IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>
+      | (() => Promise<IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>>)
+      | (() => IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>);
     debug?: boolean;
     pool?: PoolConfig;
     acquireConnectionTimeout?: number;
