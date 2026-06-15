@@ -190,7 +190,7 @@
     "rollup-plugin-html": "0.2.1",
     "semver": "7.7.4",
     "stream-chain": "2.2.5",
-    "stream-json": "1.8.0",
+    "stream-json": "1.9.1",
     "supertest": "7.2.2",
     "syncpack": "13.0.4",
     "tar": "7.5.11",

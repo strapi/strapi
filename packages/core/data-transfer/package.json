@@ -64,7 +64,7 @@
     "resolve-cwd": "3.0.0",
     "semver": "7.7.4",
     "stream-chain": "2.2.5",
-    "stream-json": "1.8.0",
+    "stream-json": "1.9.1",
     "tar": "7.5.11",
     "tar-stream": "2.2.0",
     "ws": "8.20.1"
@@ -78,7 +78,7 @@
     "@types/node": "24.10.0",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
-    "@types/stream-json": "1.7.3",
+    "@types/stream-json": "1.7.8",
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
     "knex": "3.0.1",
