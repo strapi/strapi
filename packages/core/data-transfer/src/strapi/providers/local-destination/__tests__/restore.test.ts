@@ -6,7 +6,7 @@ import {
   setGlobalStrapi,
   getStrapiModels,
 } from '../../../../__tests__/test-utils';
-import { IConfiguration } from '../../../../../types';
+import { IConfiguration } from '../../../../types';
 
 const entities = [
   {

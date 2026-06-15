@@ -15,7 +15,11 @@ import { ChevronDown, Files, Folder, GridFour as GridIcon, Link, List } from '@s
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useUploadFilesStreamMutation, useUploadFromUrlsMutation } from '../../services/api';
+import {
+  useUploadFilesStreamMutation,
+  useUploadFromUrlsMutation,
+  useUploadFilesMutation,
+} from '../../services/api';
 import {
   useGetFolderQuery,
   useGetFolderStructureQuery,
@@ -231,7 +235,7 @@ export const AssetsPage = () => {
   const uploadDropZoneRef = useRef<HTMLDivElement>(null);
 
   // Upload handlers
-  const [uploadFilesStream] = useUploadFilesStreamMutation();
+  const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
@@ -252,7 +256,7 @@ export const AssetsPage = () => {
 
     formData.append('fileInfo', JSON.stringify(fileInfoArray));
     try {
-      await uploadFilesStream({ formData, totalFiles: files.length }).unwrap();
+      await uploadFiles({ formData, totalFiles: files.length }).unwrap();
     } catch (error) {
       // Error is already dispatched to store from the API queryFn
     }
