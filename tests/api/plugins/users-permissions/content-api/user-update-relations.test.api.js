@@ -53,6 +53,26 @@ const articleModel = {
   collectionName: '',
 };
 
+const optInModel = {
+  attributes: {
+    caption: {
+      type: 'string',
+    },
+    user: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'plugin::users-permissions.user',
+      targetAttribute: 'optIns',
+    },
+  },
+  draftAndPublish: true,
+  displayName: 'OptIn',
+  singularName: 'opt-in',
+  pluralName: 'opt-ins',
+  description: '',
+  collectionName: '',
+};
+
 let userSeq = 0;
 const createUser = async (overrides = {}) => {
   userSeq += 1;
@@ -71,10 +91,30 @@ const createUser = async (overrides = {}) => {
 const createArticle = (title = 'Article') =>
   strapi.db.query('api::article.article').create({ data: { title } });
 
+const createPublishedOptIn = async () => {
+  const optIn = await strapi.documents('api::opt-in.opt-in').create({
+    data: { caption: 'Drafted Opt-In' },
+  });
+
+  await strapi.documents('api::opt-in.opt-in').publish({ documentId: optIn.documentId });
+
+  await strapi.documents('api::opt-in.opt-in').update({
+    documentId: optIn.documentId,
+    data: { caption: 'Drafted Opt-In Modified' },
+  });
+
+  const [publishedOptIn] = await strapi.documents('api::opt-in.opt-in').findMany({
+    status: 'published',
+    filters: { documentId: optIn.documentId },
+  });
+
+  return publishedOptIn;
+};
+
 const readUser = (id) =>
   strapi.db.query('plugin::users-permissions.user').findOne({
     where: { id },
-    populate: ['favoriteArticles', 'favoriteArticle', 'role'],
+    populate: ['favoriteArticles', 'favoriteArticle', 'role', 'optIns'],
   });
 
 const putUser = (id, body) => rq({ method: 'PUT', url: `/users/${id}`, body });
@@ -82,7 +122,7 @@ const putUser = (id, body) => rq({ method: 'PUT', url: `/users/${id}`, body });
 describe('U&P users REST relation handling (issue 26606)', () => {
   beforeAll(async () => {
     builder = createTestBuilder();
-    await builder.addContentType(articleModel).build();
+    await builder.addContentTypes([articleModel, optInModel]).build();
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
 
@@ -328,6 +368,31 @@ describe('U&P users REST relation handling (issue 26606)', () => {
       const after = await readUser(user.id);
       expect(after.favoriteArticle).not.toBeNull();
       expect(after.favoriteArticle.documentId).toBe(article.documentId);
+    });
+
+    test('Document Service connects a users-permissions user to a published DP target', async () => {
+      const user = await createUser();
+      const optIn = await createPublishedOptIn();
+
+      const updatedUser = await strapi.documents('plugin::users-permissions.user').update({
+        documentId: user.documentId,
+        data: {
+          optIns: {
+            connect: {
+              documentId: optIn.documentId,
+              status: 'published',
+            },
+          },
+        },
+        populate: 'optIns',
+      });
+
+      expect(updatedUser.optIns).toHaveLength(1);
+      expect(updatedUser.optIns[0]).toMatchObject({
+        documentId: optIn.documentId,
+        caption: 'Drafted Opt-In',
+        publishedAt: expect.any(String),
+      });
     });
   });
 });
