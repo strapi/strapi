@@ -16,11 +16,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
-import {
-  useGetFolderQuery,
-  useGetFolderStructureQuery,
-  useGetFoldersQuery,
-} from '../../services/folders';
+import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
 
 import {
@@ -189,12 +185,8 @@ export const AssetsPage = () => {
   const { openDetails } = useAssetDetailsParam();
 
   const { currentFolderId, navigateToFolderId, navigateToRoot } = useFolderNavigation();
-  const {
-    data: folderStructure = [],
-    isLoading: isFolderStructureLoading,
-    isError: isFolderStructureError,
-    refetch: refetchFolderStructure,
-  } = useGetFolderStructureQuery();
+  // Deleted or missing folders (404) need a fetch — handled here, not in
+  // `useFolderNavigation` (which only strips malformed ?folder= values).
   const { error: currentFolderError } = useGetFolderQuery(
     { id: currentFolderId! },
     { skip: currentFolderId === null }
@@ -290,14 +282,7 @@ export const AssetsPage = () => {
             minHeight="100vh"
             background="neutral0"
             sideNav={
-              <FolderTree
-                folderStructure={folderStructure}
-                currentFolderId={currentFolderId}
-                onSelectFolder={navigateToFolderId}
-                isLoading={isFolderStructureLoading}
-                isError={isFolderStructureError}
-                onRetry={refetchFolderStructure}
-              />
+              <FolderTree currentFolderId={currentFolderId} onSelectFolder={navigateToFolderId} />
             }
           >
             <VisuallyHidden>

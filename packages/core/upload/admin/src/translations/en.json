@@ -252,6 +252,5 @@
   "sidebar.tree.collapse": "Collapse {name}",
   "sidebar.tree.empty": "No folders yet",
   "sidebar.tree.loading": "Loading folders...",
-  "sidebar.tree.error": "Could not load folders.",
-  "sidebar.tree.retry": "Try again"
+  "sidebar.tree.error": "Could not load folders."
 }

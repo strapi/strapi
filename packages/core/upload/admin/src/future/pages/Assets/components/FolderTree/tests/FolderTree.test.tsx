@@ -4,6 +4,12 @@ import { FolderTree } from '../FolderTree';
 
 import type { FolderNode } from '../../../../../../../../shared/contracts/folders';
 
+const mockUseGetFolderStructureQuery = jest.fn();
+
+jest.mock('../../../../../services/folders', () => ({
+  useGetFolderStructureQuery: (...args: unknown[]) => mockUseGetFolderStructureQuery(...args),
+}));
+
 const structure: FolderNode[] = [
   {
     id: 1,
@@ -22,7 +28,6 @@ const structure: FolderNode[] = [
 
 const renderTree = (overrides: Partial<React.ComponentProps<typeof FolderTree>> = {}) => {
   const defaultProps: React.ComponentProps<typeof FolderTree> = {
-    folderStructure: structure,
     currentFolderId: null,
     onSelectFolder: jest.fn(),
   };
@@ -31,6 +36,15 @@ const renderTree = (overrides: Partial<React.ComponentProps<typeof FolderTree>> 
 };
 
 describe('FolderTree', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseGetFolderStructureQuery.mockReturnValue({
+      data: structure,
+      isLoading: false,
+      isError: false,
+    });
+  });
+
   it('renders the sidebar landmarks (title, Home, FOLDERS section)', () => {
     renderTree();
 
@@ -47,6 +61,13 @@ describe('FolderTree', () => {
     expect(screen.getByRole('button', { name: 'Top B' })).toBeInTheDocument();
     // Inner folders are hidden until their parent is expanded
     expect(screen.queryByRole('button', { name: 'Inner A1' })).not.toBeInTheDocument();
+  });
+
+  it('does not render an expand control on leaf folders', () => {
+    renderTree();
+
+    expect(screen.queryByRole('button', { name: /expand top b/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /collapse top b/i })).not.toBeInTheDocument();
   });
 
   it('marks "Home" as the active row when currentFolderId is null', () => {
@@ -96,37 +117,81 @@ describe('FolderTree', () => {
     expect(screen.getByRole('button', { name: 'Inner A1' })).toBeInTheDocument();
   });
 
+  it('puts aria-expanded on the chevron toggle, not the folder row', () => {
+    renderTree();
+
+    const expandButton = screen.getByRole('button', { name: /expand top a/i });
+    expect(expandButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('button', { name: 'Top A' })).not.toHaveAttribute('aria-expanded');
+  });
+
   it('renders the empty-state copy when no folders exist', () => {
-    renderTree({ folderStructure: [] });
+    mockUseGetFolderStructureQuery.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderTree();
 
     expect(screen.getByText('No folders yet')).toBeInTheDocument();
   });
 
   it('shows a loader while folder structure is loading', () => {
-    renderTree({ folderStructure: [], isLoading: true });
+    mockUseGetFolderStructureQuery.mockReturnValue({
+      data: [],
+      isLoading: true,
+      isError: false,
+    });
+
+    renderTree();
 
     expect(screen.getByText('Loading folders...')).toBeInTheDocument();
     expect(screen.queryByText('No folders yet')).not.toBeInTheDocument();
   });
 
-  it('shows an error message and retry when folder structure fails to load', () => {
-    const onRetry = jest.fn();
-    renderTree({ folderStructure: [], isError: true, onRetry });
+  it('shows an error message when folder structure fails to load', () => {
+    mockUseGetFolderStructureQuery.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: true,
+    });
+
+    renderTree();
 
     expect(screen.getByText('Could not load folders.')).toBeInTheDocument();
     expect(screen.queryByText('No folders yet')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
-
-    expect(onRetry).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
   });
 
   it('keeps Home usable while folder structure is loading', () => {
+    mockUseGetFolderStructureQuery.mockReturnValue({
+      data: structure,
+      isLoading: true,
+      isError: false,
+    });
+
     const onSelectFolder = jest.fn();
-    renderTree({ isLoading: true, onSelectFolder });
+    renderTree({ onSelectFolder });
 
     fireEvent.click(screen.getByRole('button', { name: 'Home' }));
 
     expect(onSelectFolder).toHaveBeenCalledWith(null);
+  });
+
+  it('marks the active folder with aria-current="page"', () => {
+    renderTree({ currentFolderId: 5 });
+
+    expect(screen.getByRole('button', { name: 'Top B' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: 'Top A' })).not.toHaveAttribute('aria-current');
+  });
+
+  it('calls onToggle (and not onSelectFolder) when the chevron is clicked', () => {
+    const onSelectFolder = jest.fn();
+    renderTree({ onSelectFolder });
+
+    fireEvent.click(screen.getByRole('button', { name: /expand top a/i }));
+
+    expect(onSelectFolder).not.toHaveBeenCalled();
   });
 });
