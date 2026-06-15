@@ -69,7 +69,7 @@ export const createSkillLink = (repoRoot: string, targetPath: string, name: stri
 
 // ── Logger ─────────────────────────────────────────────────────────────────────
 
-export type LogAction = 'linked' | 'relinked' | 'pruned' | 'ok';
+export type LogAction = 'linked' | 'relinked' | 'forced' | 'pruned' | 'ok';
 export type LogWarnKind = 'foreign-link' | 'real';
 export type LogStatus = 'linked' | 'missing' | 'conflict' | 'stale';
 
@@ -153,10 +153,24 @@ export const classify = (repoRoot: string, targetPath: string, name: string): En
   return { kind: 'ours', correct: pathsEqual(resolved, expected) };
 };
 
+const removeSkillEntry = (targetPath: string): void => {
+  const lst = fs.lstatSync(targetPath);
+  if (lst.isSymbolicLink() === true) {
+    fs.unlinkSync(targetPath);
+    return;
+  }
+  fs.rmSync(targetPath, { recursive: true, force: true });
+};
+
+export type SyncOptions = {
+  force?: boolean;
+};
+
 // ── sync ──────────────────────────────────────────────────────────────────────
 
-export const sync = (repoRoot: string, log: Logger): number => {
+export const sync = (repoRoot: string, log: Logger, options: SyncOptions = {}): number => {
   const skills = listSourceSkills(repoRoot);
+  const force = options.force === true;
   let warnings = 0;
 
   for (const targetRel of TARGET_PATHS) {
@@ -176,6 +190,10 @@ export const sync = (repoRoot: string, log: Logger): number => {
         log.add(targetRel, name, 'relinked');
       } else if (k.kind === 'ours') {
         log.add(targetRel, name, 'ok');
+      } else if (force === true) {
+        removeSkillEntry(p);
+        createSkillLink(repoRoot, p, name);
+        log.add(targetRel, name, 'forced');
       } else {
         warnings += 1;
         log.warn(targetRel, name, k.kind as LogWarnKind);

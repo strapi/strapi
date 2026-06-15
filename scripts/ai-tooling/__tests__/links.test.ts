@@ -153,6 +153,57 @@ describe('sync round-trip', () => {
       fs.rmSync(repoRoot, { recursive: true, force: true });
     }
   });
+
+  it('overwrites foreign symlinks and real dirs when force is true', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-sync-force-'));
+    try {
+      const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
+      fs.mkdirSync(sourceDir, { recursive: true });
+      fs.writeFileSync(path.join(sourceDir, 'SKILL.md'), '# foo');
+
+      const brainDir = path.join(repoRoot, '.brain/skills/brain-skill');
+      fs.mkdirSync(brainDir, { recursive: true });
+
+      const cursorDir = path.join(repoRoot, '.cursor/skills');
+      fs.mkdirSync(cursorDir, { recursive: true });
+
+      const foreignPath = path.join(cursorDir, 'foo');
+      fs.symlinkSync(path.relative(path.dirname(foreignPath), brainDir), foreignPath, 'dir');
+
+      const realPath = path.join(repoRoot, '.claude/skills', 'foo');
+      fs.mkdirSync(realPath, { recursive: true });
+      fs.writeFileSync(path.join(realPath, 'SKILL.md'), '# stale copy');
+
+      const log = makeLogger();
+      assert.equal(sync(repoRoot, log, { force: true }), 0);
+
+      for (const targetRel of TARGET_PATHS) {
+        const linkedPath = path.join(repoRoot, targetRel, 'foo');
+        assert.equal(fs.lstatSync(linkedPath).isSymbolicLink(), true);
+        assert.deepEqual(classify(repoRoot, linkedPath, 'foo'), { kind: 'ours', correct: true });
+      }
+    } finally {
+      fs.rmSync(repoRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('returns warning exit code on collisions without force', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-sync-warn-'));
+    try {
+      const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
+      fs.mkdirSync(sourceDir, { recursive: true });
+      fs.writeFileSync(path.join(sourceDir, 'SKILL.md'), '# foo');
+
+      const realPath = path.join(repoRoot, '.cursor/skills', 'foo');
+      fs.mkdirSync(realPath, { recursive: true });
+
+      const log = makeLogger();
+      assert.equal(sync(repoRoot, log), 1);
+      assert.equal(fs.lstatSync(realPath).isDirectory(), true);
+    } finally {
+      fs.rmSync(repoRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('createSkillLink', () => {
