@@ -7,6 +7,7 @@ interface RawTable {
 }
 
 interface RawColumn {
+  table_name: string;
   data_type: string;
   column_name: string;
   character_maximum_length: number;
@@ -17,13 +18,20 @@ interface RawColumn {
 }
 
 interface RawIndex {
-  Key_name: string;
-  Column_name: string;
-  Non_unique: boolean | string;
+  table_name: string;
+  key_name: string;
+  column_name: string;
+  non_unique: number | string;
 }
 
 interface RawForeignKey {
+  table_name: string;
   constraint_name: string;
+  column_name: string;
+  referenced_table_name: string | null;
+  referenced_column_name: string | null;
+  on_update: string;
+  on_delete: string;
 }
 
 const SQL_QUERIES = {
@@ -34,8 +42,9 @@ const SQL_QUERIES = {
     WHERE table_type = 'BASE TABLE'
     AND table_schema = schema();
   `,
-  LIST_COLUMNS: /* sql */ `
+  BULK_COLUMNS: /* sql */ `
     SELECT
+      c.table_name as table_name,
       c.data_type as data_type,
       c.column_name as column_name,
       c.character_maximum_length as character_maximum_length,
@@ -45,39 +54,41 @@ const SQL_QUERIES = {
       c.column_key as column_key
     FROM information_schema.columns c
     WHERE table_schema = database()
-    AND table_name = ?;
+    AND table_name in (:tables);
   `,
-  INDEX_LIST: /* sql */ `
-    show index from ??;
-  `,
-  FOREIGN_KEY_LIST: /* sql */ `
+  BULK_INDEXES: /* sql */ `
     SELECT
-      tc.constraint_name as constraint_name
-    FROM information_schema.table_constraints tc
-    WHERE tc.constraint_type = 'FOREIGN KEY'
-    AND tc.table_schema = database()
-    AND tc.table_name = ?;
+      s.table_name as table_name,
+      s.index_name as key_name,
+      s.column_name as column_name,
+      s.non_unique as non_unique
+    FROM information_schema.statistics s
+    WHERE s.table_schema = database()
+    AND s.table_name in (:tables)
+    ORDER BY s.table_name, s.index_name, s.seq_in_index;
   `,
-  FOREIGN_KEY_REFERENCES: /* sql */ `
+  BULK_FOREIGN_KEYS: /* sql */ `
     SELECT
-      kcu.constraint_name as constraint_name,
+      tc.table_name as table_name,
+      tc.constraint_name as constraint_name,
       kcu.column_name as column_name,
       kcu.referenced_table_name as referenced_table_name,
-      kcu.referenced_column_name as referenced_column_name
-    FROM information_schema.key_column_usage kcu
-    WHERE kcu.constraint_name in (?)
-    AND kcu.table_schema = database()
-    AND kcu.table_name = ?;
-  `,
-  FOREIGN_KEY_REFERENTIALS_CONSTRAINTS: /* sql */ `
-    SELECT
-      rc.constraint_name as constraint_name,
+      kcu.referenced_column_name as referenced_column_name,
       rc.update_rule as on_update,
       rc.delete_rule as on_delete
-    FROM information_schema.referential_constraints AS rc
-    WHERE rc.constraint_name in (?)
-    AND rc.constraint_schema = database()
-    AND rc.table_name = ?;
+    FROM information_schema.table_constraints tc
+    JOIN information_schema.key_column_usage kcu
+      ON tc.constraint_name = kcu.constraint_name
+      AND tc.table_schema = kcu.table_schema
+      AND tc.table_name = kcu.table_name
+    JOIN information_schema.referential_constraints rc
+      ON tc.constraint_name = rc.constraint_name
+      AND tc.table_schema = rc.constraint_schema
+      AND tc.table_name = rc.table_name
+    WHERE tc.constraint_type = 'FOREIGN KEY'
+    AND tc.table_schema = database()
+    AND tc.table_name in (:tables)
+    ORDER BY tc.table_name, tc.constraint_name, kcu.ordinal_position;
   `,
 };
 
@@ -146,20 +157,23 @@ export default class MysqlSchemaInspector implements SchemaInspector {
 
     const tables = await this.getTables();
 
-    schema.tables = await Promise.all(
-      tables.map(async (tableName) => {
-        const columns = await this.getColumns(tableName);
-        const indexes = await this.getIndexes(tableName);
-        const foreignKeys = await this.getForeignKeys(tableName);
+    if (tables.length === 0) {
+      return schema;
+    }
 
-        return {
-          name: tableName,
-          columns,
-          indexes,
-          foreignKeys,
-        };
-      })
-    );
+    // Run 3 bulk queries in parallel instead of N+1 per-table queries
+    const [allColumns, allIndexes, allForeignKeys] = await Promise.all([
+      this.getBulkColumns(tables),
+      this.getBulkIndexes(tables),
+      this.getBulkForeignKeys(tables),
+    ]);
+
+    schema.tables = tables.map((tableName) => ({
+      name: tableName,
+      columns: allColumns.get(tableName) ?? [],
+      indexes: allIndexes.get(tableName) ?? [],
+      foreignKeys: allForeignKeys.get(tableName) ?? [],
+    }));
 
     return schema;
   }
@@ -170,15 +184,21 @@ export default class MysqlSchemaInspector implements SchemaInspector {
     return rows.map((row) => row.table_name);
   }
 
-  async getColumns(tableName: string): Promise<Column[]> {
-    const [rows] = await this.db.connection.raw<[RawColumn[]]>(SQL_QUERIES.LIST_COLUMNS, [
-      tableName,
-    ]);
+  async getBulkColumns(tableNames: string[]): Promise<Map<string, Column[]>> {
+    if (tableNames.length === 0) {
+      return new Map();
+    }
 
-    return rows.map((row) => {
+    const [rows] = await this.db.connection.raw<[RawColumn[]]>(SQL_QUERIES.BULK_COLUMNS, {
+      tables: this.db.connection.raw(tableNames.map(() => '?').join(', '), tableNames),
+    });
+
+    const result = new Map<string, Column[]>();
+
+    for (const row of rows) {
       const { type, args = [], ...rest } = toStrapiType(row);
 
-      return {
+      const column: Column = {
         type,
         args,
         defaultTo: row.column_default,
@@ -187,82 +207,127 @@ export default class MysqlSchemaInspector implements SchemaInspector {
         unsigned: row.column_type.endsWith(' unsigned'),
         ...rest,
       };
-    });
+
+      const existing = result.get(row.table_name);
+      if (existing) {
+        existing.push(column);
+      } else {
+        result.set(row.table_name, [column]);
+      }
+    }
+
+    return result;
   }
 
-  async getIndexes(tableName: string): Promise<Index[]> {
-    const [rows] = await this.db.connection.raw<[RawIndex[]]>(SQL_QUERIES.INDEX_LIST, [tableName]);
+  async getColumns(tableName: string): Promise<Column[]> {
+    const result = await this.getBulkColumns([tableName]);
+    return result.get(tableName) ?? [];
+  }
 
-    const ret: Record<RawIndex['Key_name'], Index> = {};
+  async getBulkIndexes(tableNames: string[]): Promise<Map<string, Index[]>> {
+    if (tableNames.length === 0) {
+      return new Map();
+    }
+
+    const [rows] = await this.db.connection.raw<[RawIndex[]]>(SQL_QUERIES.BULK_INDEXES, {
+      tables: this.db.connection.raw(tableNames.map(() => '?').join(', '), tableNames),
+    });
+
+    // Group by table, then by key_name
+    const byTable = new Map<string, Map<string, Index>>();
 
     for (const index of rows) {
-      if (index.Column_name === 'id') {
+      if (index.column_name === 'id') {
         continue;
       }
 
-      if (!ret[index.Key_name]) {
+      let tableIndexes = byTable.get(index.table_name);
+      if (!tableIndexes) {
+        tableIndexes = new Map();
+        byTable.set(index.table_name, tableIndexes);
+      }
+
+      const existing = tableIndexes.get(index.key_name);
+      if (existing) {
+        existing.columns.push(index.column_name);
+      } else {
         const indexInfo: Index = {
-          columns: [index.Column_name],
-          name: index.Key_name,
+          columns: [index.column_name],
+          name: index.key_name,
         };
-        if (!index.Non_unique || index.Non_unique === '0') {
+        if (!index.non_unique || index.non_unique === '0') {
           indexInfo.type = 'unique';
         }
-
-        ret[index.Key_name] = indexInfo;
-      } else {
-        ret[index.Key_name].columns.push(index.Column_name);
+        tableIndexes.set(index.key_name, indexInfo);
       }
     }
 
-    return Object.values(ret);
+    const result = new Map<string, Index[]>();
+    for (const [tableName, tableIndexes] of byTable) {
+      result.set(tableName, Array.from(tableIndexes.values()));
+    }
+
+    return result;
+  }
+
+  async getIndexes(tableName: string): Promise<Index[]> {
+    const result = await this.getBulkIndexes([tableName]);
+    return result.get(tableName) ?? [];
+  }
+
+  async getBulkForeignKeys(tableNames: string[]): Promise<Map<string, ForeignKey[]>> {
+    if (tableNames.length === 0) {
+      return new Map();
+    }
+
+    const [rows] = await this.db.connection.raw<[RawForeignKey[]]>(SQL_QUERIES.BULK_FOREIGN_KEYS, {
+      tables: this.db.connection.raw(tableNames.map(() => '?').join(', '), tableNames),
+    });
+
+    // Group by table_name, then by constraint_name
+    const byTable = new Map<string, Map<string, ForeignKey>>();
+
+    for (const row of rows) {
+      let tableFKs = byTable.get(row.table_name);
+      if (!tableFKs) {
+        tableFKs = new Map();
+        byTable.set(row.table_name, tableFKs);
+      }
+
+      let fk = tableFKs.get(row.constraint_name);
+      if (!fk) {
+        fk = {
+          name: row.constraint_name,
+          columns: [row.column_name],
+          referencedColumns: row.referenced_column_name ? [row.referenced_column_name] : [],
+          referencedTable: row.referenced_table_name,
+          onUpdate: row.on_update?.toUpperCase() ?? null,
+          onDelete: row.on_delete?.toUpperCase() ?? null,
+        } as unknown as ForeignKey;
+        tableFKs.set(row.constraint_name, fk);
+      } else {
+        if (!fk.columns.includes(row.column_name)) {
+          fk.columns.push(row.column_name);
+        }
+        if (
+          row.referenced_column_name &&
+          !fk.referencedColumns.includes(row.referenced_column_name)
+        ) {
+          fk.referencedColumns.push(row.referenced_column_name);
+        }
+      }
+    }
+
+    const result = new Map<string, ForeignKey[]>();
+    for (const [tableName, tableFKs] of byTable) {
+      result.set(tableName, Array.from(tableFKs.values()));
+    }
+
+    return result;
   }
 
   async getForeignKeys(tableName: string): Promise<ForeignKey[]> {
-    const [rows] = await this.db.connection.raw<[RawForeignKey[]]>(SQL_QUERIES.FOREIGN_KEY_LIST, [
-      tableName,
-    ]);
-
-    const ret: Record<RawForeignKey['constraint_name'], ForeignKey> = {};
-
-    for (const fk of rows) {
-      ret[fk.constraint_name] = {
-        name: fk.constraint_name,
-        columns: [],
-        referencedColumns: [],
-        referencedTable: null,
-        onUpdate: null,
-        onDelete: null,
-      } as unknown as ForeignKey;
-    }
-
-    const contraintNames = Object.keys(ret);
-
-    if (contraintNames.length > 0) {
-      const [fkReferences] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENCES, [
-        contraintNames,
-        tableName,
-      ]);
-
-      for (const fkReference of fkReferences) {
-        ret[fkReference.constraint_name].referencedTable = fkReference.referenced_table_name;
-        ret[fkReference.constraint_name].columns.push(fkReference.column_name);
-        ret[fkReference.constraint_name].referencedColumns.push(fkReference.referenced_column_name);
-      }
-
-      const [fkReferentialConstraints] = await this.db.connection.raw(
-        SQL_QUERIES.FOREIGN_KEY_REFERENTIALS_CONSTRAINTS,
-        [contraintNames, tableName]
-      );
-
-      for (const fkReferentialConstraint of fkReferentialConstraints) {
-        ret[fkReferentialConstraint.constraint_name].onUpdate =
-          fkReferentialConstraint.on_update.toUpperCase();
-        ret[fkReferentialConstraint.constraint_name].onDelete =
-          fkReferentialConstraint.on_delete.toUpperCase();
-      }
-    }
-
-    return Object.values(ret);
+    const result = await this.getBulkForeignKeys([tableName]);
+    return result.get(tableName) ?? [];
   }
 }
