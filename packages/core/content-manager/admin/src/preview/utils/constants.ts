@@ -10,6 +10,10 @@ export const INTERNAL_EVENTS = {
   STRAPI_FIELD_CHANGE: 'strapiFieldChange',
   STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
   STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
+  STRAPI_BLOCKS_EDIT_START: 'strapiBlocksEditStart',
+  STRAPI_BLOCKS_EDIT_END: 'strapiBlocksEditEnd',
+  STRAPI_SCROLL: 'strapiScroll',
+  STRAPI_CLICK_OUTSIDE_BLOCKS: 'strapiClickOutsideBlocks',
 } as const;
 
 /**

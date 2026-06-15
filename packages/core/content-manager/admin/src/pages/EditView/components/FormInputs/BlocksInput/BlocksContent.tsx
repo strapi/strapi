@@ -333,6 +333,7 @@ type BaseRenderElementProps = Direction & {
   blocks: Partial<BlocksStore>;
   editor: Editor;
   isMobile: boolean;
+  hideDragHandles?: boolean;
 };
 
 const baseRenderElement = ({
@@ -342,6 +343,7 @@ const baseRenderElement = ({
   dragDirection,
   setDragDirection,
   isMobile,
+  hideDragHandles,
 }: BaseRenderElementProps) => {
   const { element } = props;
 
@@ -356,7 +358,7 @@ const baseRenderElement = ({
 
   const isDraggable = block.isDraggable?.(element) ?? true;
 
-  if (!isDraggable || isMobile) {
+  if (!isDraggable || isMobile || hideDragHandles) {
     return block.renderElement(props);
   }
 
@@ -380,6 +382,8 @@ interface BlocksContentProps {
   autoFocus?: boolean;
   onFocus?: React.FocusEventHandler<HTMLElement>;
   onBlur?: React.FocusEventHandler<HTMLElement>;
+  hideDragHandles?: boolean;
+  onEscape?: () => void;
 }
 
 const BlocksContent = ({
@@ -388,6 +392,8 @@ const BlocksContent = ({
   autoFocus,
   onFocus,
   onBlur,
+  hideDragHandles,
+  onEscape,
 }: BlocksContentProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode, flushPendingFormSync } =
     useBlocksEditorContext('BlocksContent');
@@ -445,8 +451,16 @@ const BlocksContent = ({
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
     (props: RenderElementProps) =>
-      baseRenderElement({ props, blocks, editor, dragDirection, setDragDirection, isMobile }),
-    [blocks, editor, dragDirection, isMobile, setDragDirection]
+      baseRenderElement({
+        props,
+        blocks,
+        editor,
+        dragDirection,
+        setDragDirection,
+        isMobile,
+        hideDragHandles,
+      }),
+    [blocks, editor, dragDirection, isMobile, setDragDirection, hideDragHandles]
   );
 
   const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -583,6 +597,9 @@ const BlocksContent = ({
       case 'Tab':
         return handleTab(event);
       case 'Escape':
+        if (onEscape) {
+          return onEscape();
+        }
         return ReactEditor.blur(editor);
     }
     handleKeyboardShortcuts(event);
@@ -600,7 +617,7 @@ const BlocksContent = ({
    */
 
   const handleScrollSelectionIntoView = React.useCallback(() => {
-    if (!editor.selection || !blocksRef.current) {
+    if (!editor.selection || !blocksRef.current || hideDragHandles) {
       return;
     }
 
@@ -617,22 +634,22 @@ const BlocksContent = ({
         behavior: 'smooth',
       });
     }
-  }, [editor]);
+  }, [editor, hideDragHandles]);
 
   return (
     <Box
       ref={blocksRef}
       grow={1}
       width="100%"
-      overflow="auto"
+      overflow={hideDragHandles ? 'hidden' : 'auto'}
       fontSize={2}
-      background="neutral0"
+      background={hideDragHandles ? undefined : 'neutral0'}
       color="neutral800"
       lineHeight={6}
-      paddingLeft={{ initial: 4, medium: 0 }}
-      paddingRight={7}
-      paddingTop={6}
-      paddingBottom={3}
+      paddingLeft={hideDragHandles ? 0 : { initial: 4, medium: 0 }}
+      paddingRight={hideDragHandles ? 0 : 7}
+      paddingTop={hideDragHandles ? 0 : 6}
+      paddingBottom={hideDragHandles ? 0 : 3}
     >
       <StyledEditable
         aria-labelledby={ariaLabelId}
