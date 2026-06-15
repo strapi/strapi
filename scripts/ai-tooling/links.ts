@@ -71,10 +71,15 @@ export const createSkillLink = (repoRoot: string, targetPath: string, name: stri
 
 export type LogAction = 'linked' | 'relinked' | 'pruned' | 'ok';
 export type LogWarnKind = 'foreign-link' | 'real';
+export type LogStatus = 'linked' | 'missing' | 'conflict' | 'stale';
 
 export type Logger = {
   add: (targetRel: string, name: string, action: LogAction) => void;
   warn: (targetRel: string, name: string, kind: LogWarnKind) => void;
+  section: (targetRel: string) => void;
+  statusEntry: (status: LogStatus, name: string, detail?: string) => void;
+  statusEmpty: () => void;
+  blank: () => void;
   flush: () => void;
 };
 
@@ -86,6 +91,19 @@ export const makeLogger = (): Logger => {
     },
     warn: (targetRel, name, kind) => {
       lines.push(`  SKIP     ${targetRel}/${name}  [collision: ${kind}]`);
+    },
+    section: (targetRel) => {
+      lines.push(`\n${targetRel}/`);
+    },
+    statusEntry: (status, name, detail) => {
+      const suffix = detail !== undefined ? `  [${detail}]` : '';
+      lines.push(`  ${status.padEnd(8)} ${name}${suffix}`);
+    },
+    statusEmpty: () => {
+      lines.push('  (no source skills and no stale links)');
+    },
+    blank: () => {
+      lines.push('');
     },
     flush: () => {
       for (const line of lines) {
@@ -203,16 +221,16 @@ export const unlink = (repoRoot: string, log: Logger): number => {
 
 type StatusEntry = {
   name: string;
-  status: 'linked' | 'missing' | 'conflict' | 'stale';
+  status: LogStatus;
   detail?: string;
 };
 
-export const status = (repoRoot: string, _log: Logger): number => {
+export const status = (repoRoot: string, log: Logger): number => {
   const skills = listSourceSkills(repoRoot);
 
   for (const targetRel of TARGET_PATHS) {
     const targetDir = path.join(repoRoot, targetRel);
-    console.log(`\n${targetRel}/`);
+    log.section(targetRel);
 
     const entries: StatusEntry[] = [];
 
@@ -242,14 +260,14 @@ export const status = (repoRoot: string, _log: Logger): number => {
     }
 
     if (entries.length === 0) {
-      console.log('  (no source skills and no stale links)');
+      log.statusEmpty();
     }
     for (const e of entries) {
-      const detail = e.detail !== undefined ? `  [${e.detail}]` : '';
-      console.log(`  ${e.status.padEnd(8)} ${e.name}${detail}`);
+      log.statusEntry(e.status, e.name, e.detail);
     }
   }
 
-  console.log('');
+  log.blank();
+  log.flush();
   return 0;
 };
