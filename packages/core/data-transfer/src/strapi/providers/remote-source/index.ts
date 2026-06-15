@@ -14,9 +14,9 @@ import type {
   ProviderType,
   StageTotalsEstimate,
   TransferStage,
-} from '../../../../types';
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
-import { Client, Server, Auth } from '../../../../types/remote/protocol';
+import { Client, Server, Auth } from '../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
