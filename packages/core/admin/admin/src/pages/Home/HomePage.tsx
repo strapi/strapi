@@ -31,8 +31,8 @@ import {
   isLastWidgetInRow,
   canResizeBetweenWidgets,
   getWidgetWidth,
-  hideDeployNowWidgetInProduction,
 } from '../../utils/widgetLayout';
+import { hideDeployNowWidgetInProduction } from '../../utils/widgetVisibility';
 
 import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
