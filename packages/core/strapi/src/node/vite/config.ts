@@ -201,7 +201,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
          * plus clientPort pushes browsers toward host:5173-style URLs that fail behind proxies that
          * only expose the Strapi server port (#23491, #23008).
          */
-        server: ctx.options.hmrServer,
+        server: ctx.strapi.server.httpServer,
       },
     },
     appType: 'custom',

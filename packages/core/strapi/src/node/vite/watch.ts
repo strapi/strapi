@@ -11,8 +11,6 @@ interface ViteWatcher {
 }
 
 const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
-  ctx.options.hmrServer = ctx.strapi.server.httpServer;
-
   const finalConfig = await mergeConfigWithUserConfig(await resolveDevelopmentConfig(ctx), ctx);
 
   ctx.logger.debug('Vite config', finalConfig);

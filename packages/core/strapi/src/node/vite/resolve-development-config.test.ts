@@ -18,11 +18,13 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
       env: {},
       runtimeDir: `${process.cwd()}/.strapi/client`,
       logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-      strapi: { internal_config: {} },
+      // HMR must bind to Strapi's own http.Server so websockets reuse the app port behind a proxy.
+      // Mock that real source instead of injecting the server via options, so the test guards the
+      // strapi.server.httpServer -> config wiring that actually fixes #23491.
+      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
       bundler: 'vite' as const,
       options: {
         open: false,
-        hmrServer: mockHttpServer,
       },
       plugins: [],
       tsconfig: undefined,
