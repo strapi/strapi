@@ -7,7 +7,6 @@ jest.mock(
       hasDraftAndPublish: jest.fn(() => false),
     },
   }),
-  { virtual: true }
 );
 
 describe('homepage service', () => {
