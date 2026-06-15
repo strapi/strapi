@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate QA checklist
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@v1.0.123
         env:
           GH_TOKEN: ${{ github.token }}
         with:
