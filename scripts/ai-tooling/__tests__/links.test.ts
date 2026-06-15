@@ -12,6 +12,7 @@ import {
   isUnderSkillsRoot,
   linkTargetFor,
   listSourceSkills,
+  hasMissingLinks,
   makeLogger,
   pathsEqual,
   sync,
@@ -200,6 +201,45 @@ describe('sync round-trip', () => {
       const log = makeLogger();
       assert.equal(sync(repoRoot, log), 1);
       assert.equal(fs.lstatSync(realPath).isDirectory(), true);
+    } finally {
+      fs.rmSync(repoRoot, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('hasMissingLinks', () => {
+  it('returns false when there are no source skills', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-missing-'));
+    try {
+      assert.equal(hasMissingLinks(repoRoot), false);
+    } finally {
+      fs.rmSync(repoRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('returns true when a source skill is not linked in a target dir', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-missing-'));
+    try {
+      const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
+      fs.mkdirSync(sourceDir, { recursive: true });
+      fs.writeFileSync(path.join(sourceDir, 'SKILL.md'), '# foo');
+
+      assert.equal(hasMissingLinks(repoRoot), true);
+    } finally {
+      fs.rmSync(repoRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('returns false when all source skills are linked in every target dir', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-missing-'));
+    try {
+      const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
+      fs.mkdirSync(sourceDir, { recursive: true });
+      fs.writeFileSync(path.join(sourceDir, 'SKILL.md'), '# foo');
+
+      const log = makeLogger();
+      assert.equal(sync(repoRoot, log), 0);
+      assert.equal(hasMissingLinks(repoRoot), false);
     } finally {
       fs.rmSync(repoRoot, { recursive: true, force: true });
     }

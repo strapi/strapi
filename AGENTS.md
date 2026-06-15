@@ -68,7 +68,7 @@ yarn ai-tooling:status  # read-only report: linked / missing / conflict / stale
 ```bash
 # Initial setup (run once after cloning)
 yarn install
-yarn setup                    # clean + build all packages
+yarn setup                    # clean + build all packages; hints to run ai-tooling:sync if links are missing
 yarn ai-tooling:sync          # link .ai/skills into .agents/ .claude/ .cursor/
 ```
 

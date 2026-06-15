@@ -125,6 +125,31 @@ export const listSourceSkills = (repoRoot: string): string[] => {
     .map((e) => e.name);
 };
 
+/** True when any source skill is not linked in at least one target directory. */
+export const hasMissingLinks = (repoRoot: string): boolean => {
+  const skills = listSourceSkills(repoRoot);
+  if (skills.length === 0) return false;
+
+  for (const targetRel of TARGET_PATHS) {
+    const targetDir = path.join(repoRoot, targetRel);
+    for (const name of skills) {
+      const entry = classify(repoRoot, path.join(targetDir, name), name);
+      if (entry.kind === 'absent') return true;
+    }
+  }
+
+  return false;
+};
+
+export const SETUP_HINT_LINES = [
+  '',
+  '────────────────────────────────────────────────────────',
+  '  AI tooling missing initialization: run  yarn ai-tooling:sync',
+  '  Links repo skills (.ai/skills/) into .agents/, .claude/, .cursor/',
+  '────────────────────────────────────────────────────────',
+  '',
+] as const;
+
 // ── Ownership detection ────────────────────────────────────────────────────────
 
 export type EntryKind =
