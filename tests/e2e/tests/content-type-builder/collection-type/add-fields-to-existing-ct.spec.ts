@@ -26,69 +26,65 @@ test.describe(
     test('Adding a component, DZ, and relation to an existing CT renders them in the CM editor', async ({
       page,
     }) => {
-      // Step 1: add component + relation (one restart)
-      const componentAndRelation: AddAttribute[] = [
-        {
-          type: 'component',
-          name: 'testcomponent',
-          component: {
-            options: {
-              repeatable: false,
-              name: 'TestComponent',
-              icon: 'alien',
-              categoryCreate: 'testcategorycomp',
-              attributes: [{ type: 'text', name: 'componenttext' }],
-            },
+      // Each field type is added in a separate call + restart.
+      // Relations self-click Finish internally, so they cannot be the last item
+      // in a multi-attribute addAttributesToContentType call.
+
+      const component: AddAttribute = {
+        type: 'component',
+        name: 'testcomponent',
+        component: {
+          options: {
+            repeatable: false,
+            name: 'TestComponent',
+            icon: 'alien',
+            categoryCreate: 'testcategorycomp',
+            attributes: [{ type: 'text', name: 'componenttext' }],
           },
         },
-        {
-          type: 'relation',
-          name: 'testrelation',
-          relation: {
-            type: 'oneWay',
-            target: { select: 'Author' },
-          },
+      };
+
+      const relation: AddAttribute = {
+        type: 'relation',
+        name: 'testrelation',
+        relation: {
+          type: 'oneWay',
+          target: { select: 'Author' },
         },
-      ];
+      };
 
-      await addAttributesToContentType(page, 'Article', componentAndRelation);
-
-      // Step 2: add DZ separately (second restart — DZ inline creation closes the modal)
-      const dzAttribute: AddAttribute[] = [
-        {
-          type: 'dz',
-          name: 'testdz',
-          dz: {
-            components: [
-              {
-                type: 'component',
-                name: 'TestDZComponent',
-                component: {
-                  options: {
-                    repeatable: false,
-                    name: 'TestDZComponent',
-                    icon: 'moon',
-                    categoryCreate: 'testcategorydz',
-                    attributes: [{ type: 'text', name: 'dztext' }],
-                  },
+      const dz: AddAttribute = {
+        type: 'dz',
+        name: 'testdz',
+        dz: {
+          components: [
+            {
+              type: 'component',
+              name: 'TestDZComponent',
+              component: {
+                options: {
+                  repeatable: false,
+                  name: 'TestDZComponent',
+                  icon: 'moon',
+                  categoryCreate: 'testcategorydz',
+                  attributes: [{ type: 'text', name: 'dztext' }],
                 },
               },
-            ],
-          },
+            },
+          ],
         },
-      ];
+      };
 
-      await addAttributesToContentType(page, 'Article', dzAttribute);
+      await addAttributesToContentType(page, 'Article', [component]);
+      await addAttributesToContentType(page, 'Article', [relation]);
+      await addAttributesToContentType(page, 'Article', [dz]);
 
       // Navigate to CM and verify all three fields render in the edit view
       await navToHeader(page, ['Content Manager', 'Article'], 'Article');
       await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
 
-      // Component renders
       await expect(page.getByText('testcomponent', { exact: false })).toBeVisible();
-      // DZ renders
       await expect(page.getByRole('button', { name: /Add a component to testdz/i })).toBeVisible();
-      // Relation renders
       await expect(page.getByRole('combobox', { name: /testrelation/i })).toBeVisible();
     });
   }

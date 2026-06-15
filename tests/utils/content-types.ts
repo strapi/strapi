@@ -405,17 +405,26 @@ export const addComponentAttribute = async (
   const useExistingLabel = attribute.component.useExisting ? 'false' : 'true';
   await page.click(`label[for="${useExistingLabel}"]`);
 
+  const selectButton = page.getByRole('button', { name: 'Select a component' });
+  const configureButton = page.getByRole('button', { name: 'Configure the component' });
+
+  // Wait for either action button to appear before deciding which branch to take.
+  // webkit/firefox are slow enough that isVisible({timeout:0}) fires before the render.
+  await selectButton
+    .or(configureButton)
+    .first()
+    .waitFor({ state: 'visible', timeout: 10000 })
+    .catch(() => {});
+
   // if "select a component"
-  if (await page.getByRole('button', { name: 'Select a component' }).isVisible({ timeout: 0 })) {
-    await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
+  if (await selectButton.isVisible()) {
+    await clickAndWait(page, selectButton);
     await fillAddComponentAttribute(page, attribute.component);
   }
   // if "configure a component"
-  else if (
-    await page.getByRole('button', { name: 'Configure the component' }).isVisible({ timeout: 0 })
-  ) {
+  else if (await configureButton.isVisible()) {
     await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
-    await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
+    await clickAndWait(page, configureButton);
   }
   // if using an existing component
   else if (attribute.component.useExisting) {
@@ -435,12 +444,20 @@ export const addComponentAttribute = async (
       name: new RegExp('Add first field to the component', 'i'),
     });
     const addAnotherFieldButton = page.getByRole('button', {
-      name: new RegExp('Add another field', 'i'),
+      name: new RegExp('Add another field to this component', 'i'),
     });
 
-    if (await addFirstFieldButton.isVisible({ timeout: 0 })) {
+    // "Add first field to the component" is specific to the component being configured and
+    // won't clash with the background CT's "Add another field" button.
+    // Wait for it to appear, then fall back to "Add another field to this component".
+    if (
+      await addFirstFieldButton
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       await clickAndWait(page, addFirstFieldButton);
-    } else if (await addAnotherFieldButton.isVisible({ timeout: 0 })) {
+    } else if (await addAnotherFieldButton.isVisible()) {
       await clickAndWait(page, addAnotherFieldButton);
     }
 
@@ -634,7 +651,11 @@ export const addAttributes = async (
       // Creating a DZ closes the modal when components are added; there is no Finish on the CT field list.
       !isDynamicZoneAttribute(attribute)
     ) {
-      await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
+      // Components and relations handle their own Finish click internally; only click if still visible.
+      const finishBtn = page.getByRole('button', { name: 'Finish' });
+      if (await finishBtn.isVisible({ timeout: 0 })) {
+        await finishBtn.click({ force: true });
+      }
     }
   }
 };
