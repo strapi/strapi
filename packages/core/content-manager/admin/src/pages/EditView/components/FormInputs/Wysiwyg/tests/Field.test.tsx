@@ -40,23 +40,6 @@ const render = ({
   );
 
 describe('Wysiwyg render and actions buttons', () => {
-  /**
-   * There's a warning about our sanitizeHtml function that we allow `script`
-   * and `style` tags, yet there's no tests or comments as to why we allow everything
-   * or rather if we should keep allowing everything as the library goes.
-   *
-   * So, this just shuts the console up for us 🤷🏻‍♀️
-   */
-  const originalWarn = console.warn;
-
-  beforeAll(() => {
-    console.warn = jest.fn();
-  });
-
-  afterAll(() => {
-    console.warn = originalWarn;
-  });
-
   it('should render the Wysiwyg', async () => {
     const { getByText } = render();
 
