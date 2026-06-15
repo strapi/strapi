@@ -1,8 +1,8 @@
 import { Writable, Readable } from 'stream';
 import type { Core } from '@strapi/types';
 
-import type { IAsset, IFile } from '../../../../types';
-import type { Transaction } from '../../../../types/utils';
+import type { IAsset, IFile } from '../../../types';
+import type { Transaction } from '../../../types/utils';
 
 export interface CreateAssetsDestinationWritableOptions {
   strapi: Core.Strapi;
