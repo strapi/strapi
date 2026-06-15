@@ -56,13 +56,14 @@ reviews:
         Prettier rules: single quotes, semicolons, 2-space indent, trailing
         commas (es5), 100-char print width, always wrap arrow params. Flag use of
         `any`, unhandled promises, and missing input validation. Server-side code
-        uses the global `strapi` variable. Validation should use Zod via
-        `@strapi/utils` (validateZod / validateZodAsync), not yup.
+        uses the global `strapi` variable. New validation should prefer Zod 
+        (validateZod/validateZodAsync); existing yup is being migrated — don't flag it.
     - path: 'packages/**/*.test.{ts,tsx,js,jsx}'
       instructions: >-
-        Tests run under Jest (unit/api/front) and Vitest. Prefer behavioural
-        assertions over implementation detail. Check that new logic has matching
-        test coverage.
+        Unit testing is migrating from Jest to Vitest — prefer Vitest for new
+        unit tests (for now). Jest still runs the bulk of the existing
+        unit/api/front suites. Prefer behavioural assertions over implementation
+        detail. Check that new logic has matching test coverage.
     - path: '.github/workflows/**'
       instructions: >-
         Validate GitHub Actions workflows for pinned action versions, correct
