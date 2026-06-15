@@ -14,6 +14,7 @@ import { WidgetResizeHandle } from '../../components/ResizeIndicator';
 import { Widget } from '../../components/WidgetHelpers';
 import { WidgetRoot } from '../../components/WidgetRoot';
 import { useEnterprise } from '../../ee';
+import { useAppInfo } from '../../features/AppInfo';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useWidgets } from '../../features/Widgets';
@@ -30,6 +31,7 @@ import {
   isLastWidgetInRow,
   canResizeBetweenWidgets,
   getWidgetWidth,
+  hideDeployNowWidgetInProduction,
 } from '../../utils/widgetLayout';
 
 import { AddWidgetModal } from './components/AddWidgetModal';
@@ -107,7 +109,11 @@ const HomePageCE = () => {
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
-  const allWidgets = React.useMemo(() => getAllWidgets(), [getAllWidgets]);
+  const currentEnvironment = useAppInfo('HomePageCE', (state) => state.currentEnvironment);
+  const allWidgets = React.useMemo(
+    () => hideDeployNowWidgetInProduction(getAllWidgets(), currentEnvironment),
+    [getAllWidgets, currentEnvironment]
+  );
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
   const { data: homepageLayout, isLoading: _isLoadingLayout } = useGetHomepageLayoutQuery();
   // Prefetch expensive widget data as soon as the homepage route is active.
