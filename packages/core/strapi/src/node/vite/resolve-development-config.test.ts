@@ -3,6 +3,11 @@ import http from 'node:http';
 import { resolveDevelopmentConfig } from './config';
 import type { BuildContext } from '../create-build-context';
 
+jest.mock('browserslist-to-esbuild', () => ({
+  __esModule: true,
+  default: jest.fn(() => ['chrome100']),
+}));
+
 describe('resolveDevelopmentConfig (Vite admin dev)', () => {
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {
     const mockHttpServer = http.createServer();
