@@ -15,11 +15,7 @@ import { ChevronDown, Files, Folder, GridFour as GridIcon, Link, List } from '@s
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import {
-  useUploadFilesStreamMutation,
-  useUploadFromUrlsMutation,
-  useUploadFilesMutation,
-} from '../../services/api';
+import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import {
   useGetFolderQuery,
   useGetFolderStructureQuery,
