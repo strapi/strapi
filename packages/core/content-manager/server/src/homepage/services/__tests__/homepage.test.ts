@@ -1,13 +1,12 @@
 import { createHomepageService } from '../homepage';
 
-jest.mock(
-  '@strapi/utils',
-  () => ({
-    contentTypes: {
-      hasDraftAndPublish: jest.fn(() => false),
-    },
-  }),
-);
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  contentTypes: {
+    ...jest.requireActual('@strapi/utils').contentTypes,
+    hasDraftAndPublish: jest.fn(() => false),
+  },
+}));
 
 describe('homepage service', () => {
   describe('queryLastDocuments', () => {
@@ -86,6 +85,9 @@ describe('homepage service', () => {
         plugin: jest.fn(() => ({
           service: jest.fn(() => ({
             create: jest.fn(() => ({
+              cannot: {
+                read: jest.fn(() => false),
+              },
               sanitizedQuery: {
                 read: jest.fn(async (query: unknown) => query),
               },
