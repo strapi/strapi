@@ -31,7 +31,6 @@ reviews:
     drafts: false
     base_branches:
       - develop
-      - main
       - 'releases/.*'
 
   # Keep generated/vendored/large artifacts out of the review.
@@ -56,9 +55,11 @@ reviews:
         Prettier rules: single quotes, semicolons, 2-space indent, trailing
         commas (es5), 100-char print width, always wrap arrow params. Flag use of
         `any`, unhandled promises, and missing input validation. Server-side code
-        uses the global `strapi` variable. New validation should prefer Zod 
-        (validateZod/validateZodAsync); existing yup is being migrated — don't flag it.
-    - path: 'packages/**/*.test.{ts,tsx,js,jsx}'
+        receives `strapi` via dependency injection (factory pattern, e.g.
+        `createService(strapi)`); flag uses of `global.strapi`. New validation
+        should prefer Zod (validateZod/validateZodAsync); existing yup is being
+        migrated — don't flag it.
+    - path: '{packages/**,tests/**}/**/*.test.{ts,tsx,js,jsx}'
       instructions: >-
         Unit testing is migrating from Jest to Vitest — prefer Vitest for new
         unit tests (for now). Jest still runs the bulk of the existing
@@ -95,7 +96,10 @@ reviews:
       enabled: true
 
 chat:
-  auto_reply: true
+  # On a high-traffic repo, only respond when explicitly invoked
+  # (e.g. `@coderabbitai review` / `resolve` / `help`) rather than
+  # auto-replying to every comment in a thread.
+  auto_reply: false
 
 knowledge_base:
   opt_out: false
