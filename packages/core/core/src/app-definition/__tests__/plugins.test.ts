@@ -4,6 +4,7 @@ import {
   loadProgrammaticPlugins,
   getAdminPluginResolutions,
 } from '../plugins';
+import { definePlugin } from '../define-plugin';
 
 const makeStrapi = () => {
   const pluginsAdd = jest.fn();
@@ -61,6 +62,19 @@ describe('getAdminPluginResolutions', () => {
       { name: 'users-permissions', resolve: undefined },
     ]);
   });
+
+  it('accepts the array (definePlugin) form, keyed by each entry name', () => {
+    const result = getAdminPluginResolutions([
+      definePlugin({
+        name: 'content-manager',
+        plugin: { register() {} } as any,
+        resolve: '@strapi/content-manager',
+      }),
+      definePlugin({ name: 'i18n', plugin: { register() {} } as any, enabled: false }),
+    ]);
+
+    expect(result).toEqual([{ name: 'content-manager', resolve: '@strapi/content-manager' }]);
+  });
 });
 
 describe('normalizePluginModule', () => {
@@ -94,6 +108,21 @@ describe('loadProgrammaticPlugins', () => {
     const registered = pluginsAdd.mock.calls.map((c) => c[0]);
     expect(registered).toEqual(['users-permissions', 'upload']);
     expect(validator).toHaveBeenCalledWith({ provider: 'x' });
+    expect(configSet).toHaveBeenCalledWith(
+      'enabledPlugins',
+      expect.objectContaining({ 'users-permissions': expect.any(Object) })
+    );
+  });
+
+  it('registers the array (definePlugin) form keyed by each entry name', () => {
+    const { strapi, pluginsAdd, configSet } = makeStrapi();
+
+    loadProgrammaticPlugins(strapi, [
+      definePlugin({ name: 'users-permissions', plugin: { register() {} } as any }),
+      definePlugin({ name: 'i18n', plugin: { register() {} } as any, enabled: false }),
+    ]);
+
+    expect(pluginsAdd.mock.calls.map((c) => c[0])).toEqual(['users-permissions']);
     expect(configSet).toHaveBeenCalledWith(
       'enabledPlugins',
       expect.objectContaining({ 'users-permissions': expect.any(Object) })

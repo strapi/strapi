@@ -1,4 +1,5 @@
 import { defineApp } from '../define-app';
+import { definePlugin } from '../define-plugin';
 import { isAppDefinition } from '../brand';
 import { fromDisk } from '../sources';
 import * as is from '../attributes';
@@ -64,9 +65,32 @@ describe('defineApp', () => {
       expect(() => defineApp({ routes: 42 })).toThrow(/routes/);
     });
 
+    it('rejects invalid components', () => {
+      // @ts-expect-error testing runtime guard
+      expect(() => defineApp({ components: 'nope' })).toThrow(/components/);
+    });
+
+    it('accepts an in-code components array', () => {
+      expect(() =>
+        defineApp({
+          components: [{ uid: 'default.dish', displayName: 'Dish', attributes: {} }],
+        })
+      ).not.toThrow();
+    });
+
     it('rejects invalid plugins', () => {
       // @ts-expect-error testing runtime guard
       expect(() => defineApp({ plugins: 42 })).toThrow(/plugins/);
+    });
+
+    it('accepts an array of definePlugin entries', () => {
+      expect(() =>
+        defineApp({
+          plugins: [
+            definePlugin({ name: 'users-permissions', plugin: { register() {} } as never }),
+          ],
+        })
+      ).not.toThrow();
     });
 
     it('rejects a non-disk `from`', () => {

@@ -16,9 +16,24 @@ const assert = require('node:assert');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const request = require('supertest');
-const { defineApp, defineConfig, fromDisk, createStrapi } = require('@strapi/strapi');
+const {
+  defineApp,
+  defineComponent,
+  definePlugin,
+  defineConfig,
+  fromDisk,
+  createStrapi,
+} = require('@strapi/strapi');
 const is = require('@strapi/strapi/attributes');
 const { recommendedPlugins } = require('@strapi/strapi/plugins');
+
+// The recommended preset as the array (definePlugin) form: each map entry is
+// re-expressed as a definePlugin result carrying its own canonical name. Proves
+// the array form boots end-to-end with no plugin-package changes.
+const recommendedPluginsArray = () =>
+  Object.entries(recommendedPlugins()).map(([name, entry]) =>
+    definePlugin({ name, plugin: entry.plugin, resolve: entry.resolve })
+  );
 
 const baseConfig = (filename) =>
   defineConfig({
@@ -78,6 +93,114 @@ test('G2: in-code app — custom route, auto-CRUD, document service, schema', as
 
     const found = await strapi.documents('api::article.article').findMany({});
     assert.strictEqual(found.length, 1, 'document service findMany returns the created entry');
+  } finally {
+    await strapi.destroy();
+  }
+});
+
+test('Phase 3: definePlugin array form boots and registers plugins by name', async () => {
+  // The array form (`plugins: [definePlugin({ name, plugin })]`) must behave
+  // identically to the name-keyed map: the canonical name travels on the value,
+  // so the runtime registry keys (and `plugin::<name>.*` UIDs) line up and
+  // auto-CRUD still works.
+  const app = defineApp({
+    config: baseConfig('.tmp/plugin-array.db'),
+    plugins: recommendedPluginsArray(),
+    contentTypes: [
+      {
+        singularName: 'tag',
+        pluralName: 'tags',
+        displayName: 'Tag',
+        attributes: { label: is.string({ required: true }) },
+      },
+    ],
+  });
+
+  const strapi = createStrapi({ app, serveAdminPanel: false });
+  await strapi.start();
+
+  try {
+    // Plugins are enabled, keyed by their canonical name (no scan, no map keys).
+    const enabled = Object.keys(strapi.config.get('enabledPlugins')).sort();
+    assert.deepStrictEqual(
+      enabled,
+      [
+        'content-manager',
+        'content-releases',
+        'content-type-builder',
+        'email',
+        'i18n',
+        'review-workflows',
+        'upload',
+      ],
+      'array form enables every plugin keyed by its canonical name'
+    );
+
+    // i18n's plugin UID resolves — proves the name carried on the value lines up.
+    assert.ok(strapi.plugin('i18n'), 'plugin("i18n") resolves from the array form');
+
+    // Auto-CRUD (which reads strapi.plugin("i18n")) still works end-to-end.
+    const model = strapi.getModel('api::tag.tag');
+    const hasTable = await strapi.db.connection.schema.hasTable(model.collectionName);
+    assert.strictEqual(hasTable, true, 'DB schema synced with the array plugin form');
+
+    const created = await strapi.documents('api::tag.tag').create({ data: { label: 'news' } });
+    assert.strictEqual(created.label, 'news', 'document service works with the array plugin form');
+  } finally {
+    await strapi.destroy();
+  }
+});
+
+test('Phase 3: in-code defineComponent resolves on a content type component attribute', async () => {
+  // Closes the loop the unit tests cannot: a content type's `component`
+  // attribute references an in-code `defineComponent` by uid, and the component
+  // data round-trips through DB schema sync + the document service.
+  const seo = defineComponent({
+    uid: 'shared.seo',
+    displayName: 'SEO',
+    attributes: { metaTitle: is.string({ required: true }), keywords: is.text() },
+  });
+
+  const app = defineApp({
+    config: baseConfig('.tmp/component.db'),
+    plugins: recommendedPlugins(),
+    components: [seo],
+    contentTypes: [
+      {
+        singularName: 'page',
+        pluralName: 'pages',
+        displayName: 'Page',
+        attributes: {
+          title: is.string({ required: true }),
+          seo: is.component({ component: 'shared.seo' }),
+        },
+      },
+    ],
+  });
+
+  const strapi = createStrapi({ app, serveAdminPanel: false });
+  await strapi.start();
+
+  try {
+    // The in-code component is registered and its DB table is synced.
+    const componentModel = strapi.getModel('shared.seo');
+    assert.ok(componentModel, 'in-code component shared.seo is registered');
+    assert.strictEqual(componentModel.modelType, 'component', 'registered as a component');
+
+    const compTable = await strapi.db.connection.schema.hasTable(componentModel.collectionName);
+    assert.strictEqual(compTable, true, 'DB schema synced for the in-code component');
+
+    // The content type's component attribute references it and round-trips.
+    const created = await strapi.documents('api::page.page').create({
+      data: { title: 'Home', seo: { metaTitle: 'Welcome', keywords: 'a,b' } },
+      populate: ['seo'],
+    });
+    assert.strictEqual(created.seo.metaTitle, 'Welcome', 'component data is created');
+
+    const found = await strapi
+      .documents('api::page.page')
+      .findOne({ documentId: created.documentId, populate: ['seo'] });
+    assert.strictEqual(found.seo.metaTitle, 'Welcome', 'component data round-trips on find');
   } finally {
     await strapi.destroy();
   }

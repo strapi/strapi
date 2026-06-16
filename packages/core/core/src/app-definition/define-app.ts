@@ -15,10 +15,14 @@ const validateShape = (def: AppInput): void => {
     throw new TypeError('defineApp(definition) requires a definition object');
   }
 
-  const { contentTypes, routes, plugins, from } = def;
+  const { contentTypes, components, routes, plugins, from } = def;
 
   if (contentTypes !== undefined && !Array.isArray(contentTypes) && !isDiskSource(contentTypes)) {
     throw new TypeError('`contentTypes` must be an array or a fromDisk() source');
+  }
+
+  if (components !== undefined && !Array.isArray(components) && !isDiskSource(components)) {
+    throw new TypeError('`components` must be an array or a fromDisk() source');
   }
 
   if (
@@ -30,8 +34,15 @@ const validateShape = (def: AppInput): void => {
     throw new TypeError('`routes` must be a builder function, an array, or a fromDisk() source');
   }
 
-  if (plugins !== undefined && !isPlainObject(plugins) && !isDiskSource(plugins)) {
-    throw new TypeError('`plugins` must be a record of plugin entries or a fromDisk() source');
+  if (
+    plugins !== undefined &&
+    !isPlainObject(plugins) &&
+    !Array.isArray(plugins) &&
+    !isDiskSource(plugins)
+  ) {
+    throw new TypeError(
+      '`plugins` must be a record of plugin entries, an array of definePlugin() results, or a fromDisk() source'
+    );
   }
 
   if (from !== undefined && !isDiskSource(from)) {

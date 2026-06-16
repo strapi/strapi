@@ -3,7 +3,53 @@ import { env } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 
 import { getGlobalId } from '../domain/content-type';
-import type { PluginEntry, PluginModule } from './types';
+import { isDefinedPlugin } from './brand';
+import type { DefinedPlugin, PluginEntry, PluginModule } from './types';
+
+/**
+ * The two non-disk shapes the programmatic `plugins` field accepts: the
+ * name-keyed map or an array of {@link definePlugin} results. Both consumers
+ * (`loadProgrammaticPlugins` at runtime, `getAdminPluginResolutions` for the
+ * admin build) normalize this to the map form via {@link normalizePluginsInput}.
+ */
+export type ProgrammaticPlugins = Record<string, PluginEntry> | DefinedPlugin[];
+
+/**
+ * Normalize the programmatic `plugins` field into the canonical name-keyed map.
+ *
+ * The map form is returned as-is. The array form (each entry a
+ * {@link definePlugin} result) is keyed by each entry's own `name`, so the
+ * registry UIDs (`plugin::<name>.*`) and admin `resolve` hint line up exactly
+ * as they do for the map form. Throws on a duplicate name or a non-definePlugin
+ * array entry (a bare module has no name to key on).
+ */
+export const normalizePluginsInput = (
+  plugins: ProgrammaticPlugins
+): Record<string, PluginEntry> => {
+  if (!Array.isArray(plugins)) {
+    return plugins;
+  }
+
+  const map: Record<string, PluginEntry> = {};
+
+  for (const entry of plugins) {
+    if (!isDefinedPlugin(entry)) {
+      throw new Error(
+        'The `plugins` array only accepts definePlugin(...) entries (a bare module has no name to key on)'
+      );
+    }
+
+    const { name, plugin, enabled, config, resolve } = entry;
+
+    if (map[name]) {
+      throw new Error(`Duplicate plugin "${name}" in the \`plugins\` array`);
+    }
+
+    map[name] = { plugin, enabled, config, resolve };
+  }
+
+  return map;
+};
 
 /**
  * Same default plugin shape the file-based loader uses, so a programmatic
@@ -102,8 +148,9 @@ export interface AdminPluginResolution {
  * admin panel without a `package.json` scan.
  */
 export const getAdminPluginResolutions = (
-  pluginsMap: Record<string, PluginEntry>
+  plugins: ProgrammaticPlugins
 ): AdminPluginResolution[] => {
+  const pluginsMap = normalizePluginsInput(plugins);
   const resolutions: AdminPluginResolution[] = [];
 
   for (const name of Object.keys(pluginsMap)) {
@@ -140,8 +187,9 @@ export const normalizePluginModule = (mod: PluginModule): Core.Plugin => {
  */
 export const loadProgrammaticPlugins = (
   strapi: Core.Strapi,
-  pluginsMap: Record<string, PluginEntry>
+  plugins: ProgrammaticPlugins
 ): void => {
+  const pluginsMap = normalizePluginsInput(plugins);
   const enabledPlugins: Record<string, unknown> = {};
   const loaded: Record<string, Core.Plugin> = {};
 

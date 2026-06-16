@@ -1,4 +1,4 @@
-import type { AppDefinition } from './types';
+import type { AppDefinition, DefinedPlugin } from './types';
 import type { DiskSource } from './sources';
 
 /**
@@ -11,6 +11,7 @@ import type { DiskSource } from './sources';
  */
 export const APP_DEFINITION = Symbol.for('strapi.appDefinition');
 export const DISK_SOURCE = Symbol.for('strapi.diskSource');
+export const PLUGIN_DEFINITION = Symbol.for('strapi.pluginDefinition');
 
 const isObject = (v: unknown): v is Record<PropertyKey, unknown> =>
   typeof v === 'object' && v !== null;
@@ -26,3 +27,9 @@ export const isAppDefinition = (v: unknown): v is AppDefinition =>
  */
 export const isDiskSource = (v: unknown): v is DiskSource =>
   isObject(v) && (v as Record<symbol, unknown>)[DISK_SOURCE] === true;
+
+/**
+ * Detects a value produced by `definePlugin()`.
+ */
+export const isDefinedPlugin = (v: unknown): v is DefinedPlugin =>
+  isObject(v) && (v as Record<symbol, unknown>)[PLUGIN_DEFINITION] === true;

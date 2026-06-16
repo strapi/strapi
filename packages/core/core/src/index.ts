@@ -12,21 +12,28 @@ export * as factories from './factories';
 
 export {
   defineApp,
+  defineComponent,
+  definePlugin,
   defineConfig,
   defineDatabaseConfig,
   defineServerConfig,
   fromDisk,
   isAppDefinition,
   isDiskSource,
+  isDefinedPlugin,
   getAdminPluginResolutions,
 } from './app-definition';
 export type {
   AppDefinition,
   AppInput,
   AppContentType,
+  AppComponent,
   AppConfig,
   PluginEntry,
   PluginModule,
+  PluginsInput,
+  DefinedPlugin,
+  DefinePluginInput,
   RouteBuilder,
   DiskSource,
   AdminPluginResolution,
