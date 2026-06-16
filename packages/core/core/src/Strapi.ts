@@ -18,6 +18,8 @@ import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
 import { createServer } from './services/server';
 import { createReloader } from './services/reloader';
+import { createClusterService, isPrimary } from './services/cluster';
+
 
 import { providers } from './providers';
 import createEntityService from './services/entity-service';
@@ -299,6 +301,7 @@ class Strapi extends Container implements Core.Strapi {
         );
       })
       .add('reload', () => createReloader(this))
+      this.add('cluster', () => createClusterService(this));
       .add('content-source-maps', () => createContentSourceMapsService(this));
   }
 
