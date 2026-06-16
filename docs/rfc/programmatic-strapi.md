@@ -458,7 +458,14 @@ precompiled); `compileStrapi` remains a CLI-only concern.
       `strapi.documents(uid)` UID-constrained and attribute-aware with no runtime change.
       `fromDisk(...)` sources infer `never`. Exposed from `@strapi/strapi`.
 - Hot-reload parity for programmatic apps in `strapi develop`.
-- Codemod: scaffolded app → single-file `defineApp`.
+- [x] Codemod: scaffolded app → single-file `defineApp`. `scaffoldToDefineApp({ projectRoot })`
+      scans `src/api/**/schema.json` and `src/components/**/*.json`, inlines content types and
+      components (generated source uses `is.*` attribute builders), and references config,
+      plugins, policies, middlewares, and lifecycles explicitly via `fromDisk(...)` or the
+      top-level `from` fallback when they cannot be statically inlined. Empty `config/plugins`
+      maps to `recommendedPlugins()` in generated source; non-empty config uses the
+      `plugins: fromDisk()` legacy bridge. Factory auto-CRUD boilerplate is ignored; custom API
+      code triggers a warning + `from: fromDisk('.')`. Exposed from `@strapi/strapi`.
 - Recipes for embedding Strapi inside existing Koa/Express/Next servers.
 
 ## Resolved decisions (from design discussion)

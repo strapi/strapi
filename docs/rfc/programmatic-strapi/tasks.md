@@ -246,6 +246,13 @@ checked only after `yarn build` + the relevant tests pass.
    booted server can't observe types — the coverage lives in compile-time assertions
    (`infer.test.ts`, checked by `yarn test:ts`). `globalId`/`category` are typed as
    `string` placeholders since they're runtime-generated, not declared in code.
+10. **Scaffold codemod is a library API, not a CLI command (Phase 3).** `scaffoldToDefineApp`
+    lives in `@strapi/core` / `@strapi/strapi` (not `@strapi/upgrade`) because it produces a
+    programmatic definition rather than patching user source files in place. Config/plugins with
+    `env()` factories and custom API code stay on disk via explicit `fromDisk(...)` /
+    `from: fromDisk('.')` references — the generated `app.ts` is a starting point, not a
+    fully inlined zero-file app. Empty `config/plugins` maps to `recommendedPlugins()` in
+    generated source; non-empty plugin config uses the `plugins: fromDisk()` legacy bridge.
 
 ## Deferred (tracked, not Phase 1)
 
@@ -283,7 +290,18 @@ checked only after `yarn build` + the relevant tests pass.
         with zero runtime cost. `fromDisk(...)` sources infer `never` (discovered the
         file-based way). Exposed via `@strapi/core` → `@strapi/strapi`. Compile-time
         assertions: `__tests__/infer.test.ts`.
-  - [ ] Codemod: scaffolded app → single-file `defineApp`.
+  - [x] Codemod: scaffolded app → single-file `defineApp`. `scaffoldToDefineApp({ projectRoot })`
+        (`app-definition/scaffold-to-define-app.ts` + `print-define-app-source.ts`) scans
+        `src/api/**/schema.json` and `src/components/**/*.json`, inlines content types and
+        components (attributes via `is.*` builders in generated source), and references config,
+        plugins, policies, middlewares, and lifecycles explicitly via `fromDisk(...)` or the
+        top-level `from` fallback when they cannot be statically inlined. Empty `config/plugins`
+        maps to `recommendedPlugins()` in generated source; non-empty config uses the
+        `plugins: fromDisk()` legacy bridge. Factory auto-CRUD boilerplate is ignored; custom
+        API code triggers a warning + `from: fromDisk('.')`. Exposed via `@strapi/core` →
+        `@strapi/strapi`. Unit tests: `__tests__/scaffold-to-define-app.test.ts` + fixture under
+        `__tests__/resources/scaffolded-app/`; end-to-end boot proof in
+        `examples/single-file/integration.test.cjs`.
   - [ ] Embedding recipes (Koa/Express/Next).
   - [ ] `strapi develop` parity / hot-reload for programmatic apps (P9 — admin-watch coupled).
   - [ ] ESM-native execution (dual-build packaging fix; see open questions).
