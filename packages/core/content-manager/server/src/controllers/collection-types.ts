@@ -981,8 +981,11 @@ export default {
       }
     }
 
-    // We filter out documentsIds that maybe doesn't exist in a specific locale
-    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
+    // We filter out documentsIds that maybe doesn't exist in a specific locale.
+    // With draft & publish, findLocales returns a row per publication state, so the
+    // same documentId can appear twice (draft + published). Deduplicate to avoid
+    // deleting (and running document service middleware for) the same document twice.
+    const localeDocumentsIds = [...new Set(documentLocales.map((document) => document.documentId))];
 
     const { count } = await documentManager.deleteMany(localeDocumentsIds, model, { locale });
 

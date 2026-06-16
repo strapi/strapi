@@ -3,7 +3,7 @@ import { omit } from 'lodash/fp';
 import chalk from 'chalk';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
-import { IConfiguration, Transaction } from '../../../../../../types';
+import { IConfiguration, Transaction } from '../../../../../types';
 
 const omitInvalidCreationAttributes = omit(['id']);
 

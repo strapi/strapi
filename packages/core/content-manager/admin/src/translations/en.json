@@ -40,6 +40,7 @@
   "components.DynamicZone.move-up-label": "Move component up",
   "components.DynamicZone.pick-compo": "Pick one component",
   "components.DynamicZone.required": "Component is required",
+  "components.DynamicZone.unknown-component": "Unknown component",
   "components.DynamicZone.move-up": "Move up",
   "components.DynamicZone.move-down": "Move down",
   "components.EmptyAttributesBlock.button": "Go to settings page",
