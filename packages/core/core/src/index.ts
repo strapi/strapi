@@ -108,6 +108,32 @@ export const startStrapi = async (
   return strapi;
 };
 
+/**
+ * Boot a programmatic Strapi instance **without** binding an HTTP port.
+ *
+ * Runs `register` → `bootstrap` (same as {@link Core.Strapi.load}) and mounts
+ * routes/middleware on `strapi.server.app` so you can embed Strapi in an
+ * existing Koa/Express/Next host via `strapi.server.app.callback()`.
+ *
+ * Pair with your host server's `listen()` — do not call {@link startStrapi} when
+ * embedding (that owns the port).
+ */
+export const loadStrapi = async (
+  app: AppDefinition,
+  options: StartStrapiOptions = {}
+): Promise<Core.Strapi> => {
+  const strapi = createStrapi({
+    serveAdminPanel: hasAdminBuild(options),
+    ...options,
+    app,
+  });
+
+  await strapi.load();
+  strapi.server.mount();
+
+  return strapi;
+};
+
 // Augment Koa query type based on Strapi query middleware
 
 declare module 'koa' {
