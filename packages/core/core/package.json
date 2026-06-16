@@ -36,6 +36,13 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./attributes": {
+      "types": "./dist/attributes.d.ts",
+      "source": "./src/attributes.ts",
+      "import": "./dist/attributes.mjs",
+      "require": "./dist/attributes.js",
+      "default": "./dist/attributes.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

@@ -35,6 +35,8 @@ import { createContentSourceMapsService } from './services/content-source-maps';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
+import { setAppDefinition } from './app-definition/context';
+import type { AppDefinition } from './app-definition/types';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
 
@@ -57,6 +59,13 @@ class Strapi extends Container implements Core.Strapi {
 
   constructor(opts: StrapiOptions) {
     super();
+
+    // Programmatic mode (ADR-0001): stash the app definition so the loaders can
+    // resolve resources from it. `config` is consumed here at STAGE 1 via
+    // loadConfiguration; everything else is consumed at the register phase.
+    if (opts.app) {
+      setAppDefinition(this, opts.app);
+    }
 
     this.internal_config = loadConfiguration(opts);
 
@@ -603,6 +612,13 @@ export interface StrapiOptions {
   distDir: string;
   autoReload?: boolean;
   serveAdminPanel?: boolean;
+  /**
+   * Programmatic app definition (a `defineApp(...)` result). When present,
+   * Strapi runs in programmatic mode (ADR-0001). Its `config` is merged into
+   * `loadConfiguration` at construction (STAGE 1); everything else is consumed
+   * at the register phase.
+   */
+  app?: AppDefinition;
 }
 
 export default Strapi;

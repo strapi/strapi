@@ -1,0 +1,8 @@
+node_modules
+.tmp
+.strapi
+.strapi-updater.json
+public/uploads/*
+!public/uploads/.gitkeep
+test-results
+playwright-report
