@@ -6,6 +6,6 @@
     "outDir": "../dist",
     "noEmit": false
   },
-  "include": ["./src", "./custom.d.ts", "../shared"],
+  "include": ["./src", "../shared"],
   "exclude": ["node_modules", "**/__mocks__", "./src/**/tests", "**/*.test.*"]
 }

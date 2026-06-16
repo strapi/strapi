@@ -6,11 +6,10 @@ import { type BaseEditor } from 'slate';
 import { type HistoryEditor } from 'slate-history';
 import { type ReactEditor } from 'slate-react';
 
-import type { LinkEditor } from './src/pages/EditView/components/FormInputs/BlocksInput/Blocks/Link';
+import type { LinkEditor } from './pages/EditView/components/FormInputs/BlocksInput/Blocks/Link';
 import type { Schema } from '@strapi/types';
 
 declare module 'styled-components' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface DefaultTheme extends StrapiTheme {}
 }
 

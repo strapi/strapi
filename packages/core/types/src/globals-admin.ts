@@ -5,6 +5,3 @@ declare global {
     strapi?: BrowserStrapi;
   }
 }
-
-// Keep this file a module
-export {};

@@ -42,8 +42,6 @@ const renderAdmin = async (
         return features?.future?.[name] === true;
       },
     },
-    // eslint-disable-next-line
-    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision. Cannot use @ts-expect-error because of build:code and build:types context collision.
     features: {
       SSO: 'sso',
       AUDIT_LOGS: 'audit-logs',
@@ -107,8 +105,7 @@ const renderAdmin = async (
     console.error(err);
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - conflicting global.Strapi with window.BrowserStrapi
+  // @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
   window.strapi = browserStrapi;
 
   const app = new StrapiApp({

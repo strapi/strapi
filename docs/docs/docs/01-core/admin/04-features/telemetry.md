@@ -218,7 +218,7 @@ window.strapi.telemetryDisabled = process.env.STRAPI_TELEMETRY_DISABLED === 'tru
 window.strapi.projectType = 'Community' | 'Enterprise'; // updated after /admin/project-type
 ```
 
-Typed in `packages/core/admin/admin/custom.d.ts`.
+Typed in `packages/core/types/src/admin/browser-strapi.ts`.
 
 ---
 

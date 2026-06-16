@@ -134,8 +134,7 @@ const browserStrapi: Admin.BrowserStrapi = {
   },
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - conflicting global.Strapi with window.BrowserStrapi
+// @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
 window.strapi = browserStrapi;
 
 /* -------------------------------------------------------------------------------------------------
