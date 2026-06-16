@@ -1,6 +1,8 @@
 import { Job, Spec } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
 import type { Core } from '@strapi/types';
+import { isPrimary } from './cluster';
+
 
 interface JobSpec {
   job: Job;
@@ -79,8 +81,16 @@ const createCronService = () => {
     },
 
     start() {
-      jobsSpecs.forEach(({ job, options }) => job.schedule(options));
+      if (!isPrimary()) {
+        strapi.log.info(
+          '[cron] Worker process — cron jobs disabled on non-primary instances'
+        );
+        return this;
+      }
       running = true;
+      for (const { job, options } of jobsSpecs) {
+        job.schedule(options);
+      }
       return this;
     },
 
