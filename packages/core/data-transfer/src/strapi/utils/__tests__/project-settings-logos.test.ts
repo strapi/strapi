@@ -1,6 +1,7 @@
 import { mkdtemp, mkdir, writeFile, rm } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import { Readable } from 'stream';
 
 import { collect, createMockedQueryBuilder, getStrapiFactory } from '../../../__tests__/test-utils';
 import { createConfigurationStream } from '../../providers/local-source/configuration';
@@ -120,7 +121,7 @@ describe('Project settings logos transfer', () => {
     );
   });
 
-  test('restore uploads admin logos and strips transfer buffers before persisting', async () => {
+  test('restore uploads admin logos with destination provider and strips transfer buffers before persisting', async () => {
     const uploadStream = jest.fn(async (file: { url?: string }) => {
       file.url = '/uploads/restored.png';
     });
@@ -141,17 +142,19 @@ describe('Project settings logos transfer', () => {
         },
       },
       config: {
-        get: () => ({ provider: 'local' }),
+        get: () => ({ provider: 'aws-s3' }),
       },
     })();
 
     const settings = {
       menuLogo: {
         ...createLogo('menu'),
+        provider: 'local',
         __transferBuffer: Buffer.from('menu-logo').toString('base64'),
       },
       authLogo: {
         ...createLogo('auth'),
+        provider: 'cloudinary',
         __transferBuffer: Buffer.from('auth-logo').toString('base64'),
       },
     };
@@ -163,6 +166,21 @@ describe('Project settings logos transfer', () => {
     expect(restored.authLogo?.__transferBuffer).toBeUndefined();
     expect(restored.menuLogo?.url).toBe('/uploads/restored.png');
     expect(restored.authLogo?.url).toBe('/uploads/restored.png');
+    expect(restored.menuLogo?.provider).toBe('aws-s3');
+    expect(restored.authLogo?.provider).toBe('aws-s3');
+    // Re-upload always targets the destination provider with a reconstructed mime type
+    // (admin logos do not persist their mime), so remote providers serve the correct Content-Type.
+    expect(uploadStream).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ provider: 'aws-s3', mime: 'image/png' })
+    );
+    expect(uploadStream).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ provider: 'aws-s3', mime: 'image/png' })
+    );
+    // The reconstructed mime type is transfer-only and is not persisted back to core-store.
+    expect(restored.menuLogo).not.toHaveProperty('mime');
+    expect(restored.authLogo).not.toHaveProperty('mime');
   });
 
   test('restoreConfigs persists project settings without transfer buffers', async () => {
@@ -363,6 +381,113 @@ describe('Project settings logos transfer', () => {
 
       expect(uploadStream).not.toHaveBeenCalled();
       expect(JSON.parse(result.data.value)).toBe('en');
+    });
+  });
+
+  describe('remote upload providers', () => {
+    const remoteLogo = {
+      name: 'menu-logo.png',
+      hash: 'menu_logo',
+      url: 'https://cdn.example.com/menu_logo.png',
+      width: 100,
+      height: 100,
+      ext: '.png',
+      size: 123,
+      provider: 'aws-s3',
+    };
+
+    const remoteRow = {
+      id: 1,
+      key: PROJECT_SETTINGS_CORE_STORE_KEY,
+      type: 'object',
+      environment: null,
+      tag: null,
+      value: { menuLogo: remoteLogo, authLogo: null },
+    };
+
+    const fetchResponse = (body: string) => ({
+      status: 200,
+      body: Readable.toWeb(Readable.from(Buffer.from(body))),
+    });
+
+    test('export fetches the public URL when the provider does not serve private files', async () => {
+      const fetch = jest.fn(async () => fetchResponse('remote-menu-logo'));
+      const isPrivate = jest.fn().mockResolvedValue(false);
+      const getSignedUrl = jest.fn();
+
+      const strapi = getStrapiFactory({
+        fetch,
+        log: { warn: jest.fn() },
+        plugins: { upload: { provider: { isPrivate, getSignedUrl } } },
+        config: { get: () => ({ provider: 'aws-s3' }) },
+      })();
+
+      const exported = await enrichProjectSettingsForExport(strapi, remoteRow);
+
+      expect(getSignedUrl).not.toHaveBeenCalled();
+      expect(fetch).toHaveBeenCalledWith('https://cdn.example.com/menu_logo.png');
+      expect(exported.value.menuLogo?.__transferBuffer).toBe(
+        Buffer.from('remote-menu-logo').toString('base64')
+      );
+    });
+
+    test('export signs the URL when the source provider serves private files', async () => {
+      const fetch = jest.fn(async () => fetchResponse('private-menu-logo'));
+      const isPrivate = jest.fn().mockResolvedValue(true);
+      const getSignedUrl = jest
+        .fn()
+        .mockResolvedValue({ url: 'https://cdn.example.com/menu_logo.png?signature=abc' });
+
+      const strapi = getStrapiFactory({
+        fetch,
+        log: { warn: jest.fn() },
+        plugins: { upload: { provider: { isPrivate, getSignedUrl } } },
+        config: { get: () => ({ provider: 'aws-s3' }) },
+      })();
+
+      const exported = await enrichProjectSettingsForExport(strapi, remoteRow);
+
+      expect(getSignedUrl).toHaveBeenCalledWith(remoteLogo);
+      expect(fetch).toHaveBeenCalledWith('https://cdn.example.com/menu_logo.png?signature=abc');
+      expect(exported.value.menuLogo?.__transferBuffer).toBe(
+        Buffer.from('private-menu-logo').toString('base64')
+      );
+    });
+
+    test('export does not sign when the logo belongs to a different provider than the source', async () => {
+      const fetch = jest.fn(async () => fetchResponse('remote-menu-logo'));
+      const isPrivate = jest.fn().mockResolvedValue(true);
+      const getSignedUrl = jest.fn();
+
+      const strapi = getStrapiFactory({
+        fetch,
+        log: { warn: jest.fn() },
+        plugins: { upload: { provider: { isPrivate, getSignedUrl } } },
+        // Source instance is configured with a different provider than the stored logo.
+        config: { get: () => ({ provider: 'cloudinary' }) },
+      })();
+
+      await enrichProjectSettingsForExport(strapi, remoteRow);
+
+      expect(getSignedUrl).not.toHaveBeenCalled();
+      expect(fetch).toHaveBeenCalledWith('https://cdn.example.com/menu_logo.png');
+    });
+
+    test('export warns and skips the buffer when the remote logo cannot be fetched', async () => {
+      const warn = jest.fn();
+      const fetch = jest.fn(async () => ({ status: 403, body: null }));
+
+      const strapi = getStrapiFactory({
+        fetch,
+        log: { warn },
+        plugins: { upload: { provider: { isPrivate: jest.fn().mockResolvedValue(false) } } },
+        config: { get: () => ({ provider: 'aws-s3' }) },
+      })();
+
+      const exported = await enrichProjectSettingsForExport(strapi, remoteRow);
+
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('could not be fetched'));
+      expect(exported.value.menuLogo?.__transferBuffer).toBeUndefined();
     });
   });
 });
