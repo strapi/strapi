@@ -8,7 +8,7 @@ import {
   validateUpdateContentTypeInput,
   validateKind,
 } from './validation/content-type';
-import { isContentTypeVisible } from '../services/content-types';
+import { isContentTypeVisible, isContentTypeEditable } from '../services/content-types';
 
 /**
  * Telemetry uses a bounded HTTP timeout (~1s in the metrics sender); cap how long we defer
@@ -129,6 +129,10 @@ export default {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
+    if (!isContentTypeEditable(strapi.contentTypes[uid])) {
+      return ctx.send({ error: 'contentType.programmatic.readonly' }, 400);
+    }
+
     try {
       await validateUpdateContentTypeInput(body);
     } catch (error) {
@@ -159,6 +163,10 @@ export default {
 
     if (!_.has(strapi.contentTypes, uid)) {
       return ctx.send({ error: 'contentType.notFound' }, 404);
+    }
+
+    if (!isContentTypeEditable(strapi.contentTypes[uid])) {
+      return ctx.send({ error: 'contentType.programmatic.readonly' }, 400);
     }
 
     try {

@@ -43,10 +43,17 @@ export type PluginModule = Core.Plugin | ((opts: { env: unknown }) => Core.Plugi
 
 /**
  * A plugin map entry: a bare module, or a module with enable/config options.
+ *
+ * `resolve` is an optional hint — the npm package base specifier (e.g.
+ * `@strapi/content-manager`) — used **only** by the admin build (`buildAdmin`)
+ * to import the plugin's `strapi-admin` frontend entry. It is ignored at
+ * runtime. When omitted, `buildAdmin` falls back to the `@strapi/<name>` and
+ * `<name>` conventions, and skips the plugin if no `strapi-admin` export is
+ * resolvable.
  */
 export type PluginEntry =
   | PluginModule
-  | { plugin: PluginModule; enabled?: boolean; config?: object };
+  | { plugin: PluginModule; enabled?: boolean; config?: object; resolve?: string };
 
 /**
  * A lifecycle function composed into `strapi.app` and run by `runUserLifecycles`.

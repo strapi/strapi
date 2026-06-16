@@ -15,7 +15,13 @@ export { routeVerbs, resolveRoutes } from './routes';
 export { setAppDefinition, getAppDefinition } from './context';
 export { runProgrammaticLoaders } from './load';
 export { buildApiModules, normalizeContentType, CUSTOM_API_NAME } from './normalize';
-export { loadProgrammaticPlugins, normalizePluginModule, unwrapPluginEntry } from './plugins';
+export {
+  loadProgrammaticPlugins,
+  normalizePluginModule,
+  unwrapPluginEntry,
+  getAdminPluginResolutions,
+} from './plugins';
+export type { AdminPluginResolution } from './plugins';
 
 export * as attributes from './attributes';
 

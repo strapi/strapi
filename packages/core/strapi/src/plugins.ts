@@ -37,22 +37,35 @@ const lazy =
   };
 
 /**
+ * Build a plugin entry from a first-party package base (e.g.
+ * `@strapi/content-manager`): the server module is resolved lazily from
+ * `<base>/strapi-server`, and the `resolve` hint lets `buildAdmin` import the
+ * matching `<base>/strapi-admin` frontend entry without scanning `package.json`.
+ */
+const firstParty = (base: string): PluginEntry =>
+  ({
+    plugin: lazy(`${base}/strapi-server`),
+    resolve: base,
+  }) as unknown as PluginEntry;
+
+/**
  * The familiar set of first-party server plugins that the legacy runtime always
  * loaded (the former `INTERNAL_PLUGINS`), keyed by canonical plugin name. These
  * are imported and added explicitly — nothing is scanned.
+ *
+ * Each entry carries a `resolve` hint (the npm package base) so the admin build
+ * (`buildAdmin`) can import the plugin's `strapi-admin` frontend entry.
  *
  * Note: auto-CRUD route generation currently reads `strapi.plugin('i18n')`, so
  * `i18n` is required whenever a programmatic content type uses the default
  * `api: true`. See the zero-plugin boot note in the RFC.
  */
 export const recommendedPlugins = (): Record<string, PluginEntry> => ({
-  'content-manager': lazy('@strapi/content-manager/strapi-server') as unknown as PluginEntry,
-  'content-type-builder': lazy(
-    '@strapi/content-type-builder/strapi-server'
-  ) as unknown as PluginEntry,
-  email: lazy('@strapi/email/strapi-server') as unknown as PluginEntry,
-  upload: lazy('@strapi/upload/strapi-server') as unknown as PluginEntry,
-  i18n: lazy('@strapi/i18n/strapi-server') as unknown as PluginEntry,
-  'content-releases': lazy('@strapi/content-releases/strapi-server') as unknown as PluginEntry,
-  'review-workflows': lazy('@strapi/review-workflows/strapi-server') as unknown as PluginEntry,
+  'content-manager': firstParty('@strapi/content-manager'),
+  'content-type-builder': firstParty('@strapi/content-type-builder'),
+  email: firstParty('@strapi/email'),
+  upload: firstParty('@strapi/upload'),
+  i18n: firstParty('@strapi/i18n'),
+  'content-releases': firstParty('@strapi/content-releases'),
+  'review-workflows': firstParty('@strapi/review-workflows'),
 });

@@ -46,6 +46,23 @@ describe('normalizeContentType', () => {
     expect(normalizeContentType({ ...article, api: false }).autoCrud).toBe(false);
   });
 
+  it('tags the schema with a programmatic origin (for CTB read-only)', () => {
+    const { definition } = normalizeContentType(article);
+    expect(definition.schema.pluginOptions).toMatchObject({
+      'content-type-builder': { origin: 'programmatic' },
+    });
+  });
+
+  it('preserves existing content-type-builder pluginOptions alongside the origin tag', () => {
+    const { definition } = normalizeContentType({
+      ...article,
+      pluginOptions: { 'content-type-builder': { visible: false } },
+    });
+    expect(definition.schema.pluginOptions).toMatchObject({
+      'content-type-builder': { visible: false, origin: 'programmatic' },
+    });
+  });
+
   it.each([
     [{ ...article, singularName: undefined }, /singularName/],
     [{ ...article, pluralName: undefined }, /pluralName/],

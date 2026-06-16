@@ -129,6 +129,57 @@ isDiskSource` + types (via `@strapi/core`). → E4 _(ADR-0005)_
       `is.*`, `recommendedPlugins`) — RFC + example README.
 - [x] RFC + ADRs updated for decisions changed during implementation (see Findings below).
 
+## Phase 2 — Admin
+
+Build and serve the admin **panel** for a programmatic (no-files) app. Boxes are
+checked only after `yarn build` + the relevant tests pass.
+
+- [x] **P1. `resolve` hint on plugin entries** — `PluginEntry` object form gains an
+      optional `resolve` (npm package base) consumed **only** by the admin build;
+      `recommendedPlugins()` now returns `{ plugin, resolve: '@strapi/<name>' }` per
+      entry. `unwrapPluginEntry` surfaces it; `getAdminPluginResolutions(map)` derives
+      the enabled `{ name, resolve }` set. Runtime behavior unchanged.
+      _(app-definition/`plugins.ts`, `strapi/src/plugins.ts`)_
+- [x] **P2. Programmatic frontend-plugin derivation** — `getProgrammaticPlugins({ app, cwd })`
+      maps each enabled plugin to the package whose `strapi-admin` export resolves
+      (via `resolve` hint, then `@strapi/<name>`, then `<name>`); server-only plugins
+      (no `strapi-admin`) are skipped, exactly like `getMapOfPluginsWithAdmin` does for
+      file-based apps. A `plugins: fromDisk()` source returns `null` → legacy discovery.
+      **No `package.json` scan** (ADR-0006). _(`node/core/programmatic-plugins.ts`)_
+- [x] **P3. `createBuildContext` accepts object input** — new `app?` arg. When present
+      the Strapi instance is created from the definition and the plugin set comes from
+      P2 instead of `getEnabledPlugins`. Legacy (file-based) path untouched.
+      _(`node/create-build-context.ts`)_
+- [x] **P4. `buildAdmin({ app, dir })` façade** — async façade over the node build
+      pipeline (writeStaticClientFiles + vite/webpack) that takes a `defineApp(...)`
+      definition directly; skips the `strapi build` TS-compile + admin-dependency steps
+      (caller's responsibility, ADR-0009/0017). Exposed from `@strapi/strapi` via a lazy
+      dynamic import so runtime imports stay cheap. _(`node/build-admin.ts`, `strapi/src/index.ts`)_
+- [x] **P5. Serve the panel when a build exists** — `startStrapi` auto-detects a build at
+      `<distDir>/build/index.html` and sets `serveAdminPanel` accordingly (explicit
+      option still wins); headless otherwise. The admin server route already serves
+      `<dist>/build`. _(`core/src/index.ts`)_
+- [x] **P6. CTB read-only for programmatic content types** — the normalizer stamps
+      `pluginOptions['content-type-builder'].origin = 'programmatic'`; CTB exposes
+      `getContentTypeOrigin`/`isContentTypeEditable` + an `editable` flag on
+      `formatContentType`, and the `updateContentType`/`deleteContentType` controllers
+      reject programmatic CTs with `contentType.programmatic.readonly` (they have no
+      `schema.json` to write back to). File-based CTs carry no tag and stay editable.
+      _(`app-definition/normalize.ts`, `content-type-builder/server/.../content-types.ts`)_
+- [x] **P7. Example + browser proof** — `examples/programmatic-server` split into
+      `app.ts` (definition) + `index.ts` (`startStrapi`) + `build-admin.ts`
+      (`buildAdmin({ app })`). Its Playwright smoke test builds the panel from the
+      programmatic definition and asserts it **renders in a real browser** (title,
+      `#strapi` mounted, registration form), alongside the existing public/auth-gated
+      route assertions. Run with a timeout (`--global-timeout=240000`).
+- [x] **P8. Tests** — `getAdminPluginResolutions` + `resolve` unwrap, `getProgrammaticPlugins`
+      (mocked resolution), normalizer origin tag, `recommendedPlugins()` resolve hints,
+      CTB `editable`/origin + controller read-only gating. Full `yarn test:unit`: 4077
+      pass, 0 fail. Example e2e (4 tests incl. admin render) green.
+- [ ] **P9. (Stretch) `strapi develop` parity** — deferred; admin/bundler + cluster-watch
+      coupled. `buildAdmin` covers the build-once-then-serve path; live admin watch for
+      programmatic apps remains Phase 3 (hot-reload parity).
+
 ## Findings during implementation (log)
 
 1. **No true zero-plugin boot (D5).** The always-on admin server registers
@@ -150,11 +201,41 @@ isDiskSource` + types (via `@strapi/core`). → E4 _(ADR-0005)_
 4. **Headless apps still need admin secrets.** Because admin always loads (ADR-0007), a
    programmatic app must supply `admin.apiToken.salt`, `admin.auth.secret`,
    `admin.transfer.token.salt` (read from env in real apps).
+5. **Admin build needs a frontend-plugin source, not a `package.json` scan (Phase 2).**
+   The file-based build derives the admin's plugin set from `info.dependencies` +
+   `config/plugins.js`. Programmatic apps have neither, so the in-memory `app.plugins`
+   map is the source of truth: each entry carries an optional `resolve` hint (npm
+   package base) that `buildAdmin` maps to `<base>/strapi-admin`. `recommendedPlugins()`
+   sets `resolve: '@strapi/<name>'`; absent a hint, `buildAdmin` falls back to the
+   `@strapi/<name>` then `<name>` conventions and skips plugins with no `strapi-admin`
+   export — matching how `getMapOfPluginsWithAdmin` filters file-based plugins. Verified:
+   the example's generated `.strapi/client/app.js` imports all 7 recommended plugins'
+   `strapi-admin` entries and the panel renders in a browser. _(ADR-0006, Phase 2)_
+6. **`buildAdmin` is exposed from `@strapi/strapi` via a lazy dynamic import.** The node
+   build pipeline (vite/webpack/prettier) is heavy; importing it eagerly from the main
+   entry would bloat every runtime `import '@strapi/strapi'`. The `buildAdmin` named
+   export therefore `await import('./node/build-admin')` on first call, keeping the
+   runtime surface cheap while still living at the top-level public API.
+7. **CTB editability gates on an origin tag, reusing `pluginOptions['content-type-builder']`.**
+   Confirming the Phase 1 open question: CTB edits write `schema.json` to a path resolved
+   from `strapi.dirs.app.api/<apiName>/.../schema.json`. Programmatic CTs have no such
+   file, so writing would silently scaffold a stray file the loader never reads. The
+   normalizer stamps `origin: 'programmatic'` in the existing
+   `pluginOptions['content-type-builder']` object (same place as `visible`), and the CTB
+   reads it (`isContentTypeEditable`) to (a) expose `editable: false` to the admin and
+   (b) reject `updateContentType`/`deleteContentType` server-side. No new schema field or
+   UID→path machinery invented. _(Phase 2 open question resolved)_
+8. **`strapi develop` parity stays deferred.** `develop` couples the admin bundler/watch
+   with a cluster fork + chokidar file watch keyed off disk paths; a programmatic app has
+   no files to watch. `buildAdmin` + `startStrapi` cover build-once-then-serve, which is
+   the Phase 2 goal. Live programmatic admin watch is folded into the Phase 3 hot-reload
+   item. _(ADR-0016)_
 
 ## Deferred (tracked, not Phase 1)
 
-- **Phase 2:** `buildAdmin({ app, dir })`; serve panel; CTB read-only for programmatic
-  content types (origin tag); `strapi develop` parity; no-files admin build (rework
-  builder to accept object input).
+- **Phase 2 (done):** `buildAdmin({ app, dir })`; serve panel; CTB read-only for
+  programmatic content types (origin tag); no-files admin build (builder reworked to
+  accept object input). _(P1–P8 above.)_
 - **Phase 3:** `defineComponent`, `definePlugin({ name })` + array plugin form;
-  end-to-end type inference into `strapi.documents`; codemod; embedding recipes.
+  end-to-end type inference into `strapi.documents`; codemod; embedding recipes;
+  `strapi develop` parity / hot-reload for programmatic apps (P9 — admin-watch coupled).

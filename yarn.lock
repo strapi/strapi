@@ -17962,6 +17962,7 @@ __metadata:
     "@strapi/strapi": "workspace:*"
     "@types/node": "npm:^20"
     better-sqlite3: "npm:12.8.0"
+    typescript: "npm:^5"
   languageName: unknown
   linkType: soft
 

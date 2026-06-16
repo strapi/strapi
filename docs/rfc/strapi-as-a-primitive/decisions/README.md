@@ -23,6 +23,8 @@ Status legend: **Accepted** (agreed in design discussion), **Proposed**, **Super
 | [0011](./0011-apiname-defaults-to-singular.md)       | `apiName` defaults to `singularName`                                     | Accepted |
 | [0012](./0012-route-verb-del.md)                     | Route DSL verbs `get/post/put/patch/del`                                 | Accepted |
 | [0013](./0013-guard-missing-package-json.md)         | Guard missing `package.json` for no-files apps                           | Accepted |
+| [0014](./0014-programmatic-admin-build.md)           | Programmatic admin build (`buildAdmin`) feeds the pipeline object input  | Accepted |
+| [0015](./0015-ctb-readonly-programmatic.md)          | Programmatic content types are read-only in the Content-Type Builder     | Accepted |
 
 ## Mapping to RFC "Resolved decisions"
 

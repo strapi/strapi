@@ -71,6 +71,13 @@ export const normalizeContentType = (ct: AppContentType) => {
   const apiName = ct.apiName ?? singularName;
   const kind = ct.kind ?? 'collectionType';
 
+  // Tag the content type's origin so the Content-Type Builder can make
+  // programmatic (in-code) content types read-only — they have no schema.json
+  // to write back to (Phase 2). File-based content types carry no such tag.
+  const ctbPluginOptions = (ct.pluginOptions as Record<string, unknown>)?.[
+    'content-type-builder'
+  ] as Record<string, unknown> | undefined;
+
   const schema: Record<string, unknown> = {
     kind,
     collectionName: ct.collectionName || singularName,
@@ -81,7 +88,13 @@ export const normalizeContentType = (ct: AppContentType) => {
       ...(ct.description ? { description: ct.description } : {}),
     },
     options: ct.options ?? {},
-    pluginOptions: ct.pluginOptions ?? {},
+    pluginOptions: {
+      ...(ct.pluginOptions ?? {}),
+      'content-type-builder': {
+        ...ctbPluginOptions,
+        origin: 'programmatic',
+      },
+    },
     attributes: { ...attributes },
   };
 

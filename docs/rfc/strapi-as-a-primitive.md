@@ -412,13 +412,25 @@ precompiled); `compileStrapi` remains a CLI-only concern.
       auto-CRUD. See Open questions.)_
 - [ ] Example app under `examples/` (headless).
 
-### Phase 2 — Admin
+### Phase 2 — Admin ✅ (implemented)
 
-- Async `buildAdmin({ app, dir })` façade over the node build pipeline.
-- Admin served when a build exists; CTB **read-only** for programmatic content types,
-  **writable** only for file-backed ones (tagged by origin: `programmatic` vs `file`).
-- No-files admin build: rework the builder to accept direct object input instead of
-  always reading disk (the harder, deferred piece).
+- [x] Async `buildAdmin({ app, dir })` façade over the node build pipeline — accepts the
+      `defineApp(...)` definition directly (no file scan). Exposed from `@strapi/strapi`
+      via a lazy dynamic import.
+- [x] No-files admin build: `createBuildContext` reworked to accept object input. The
+      frontend plugin set is derived from the in-memory `app.plugins` map (each entry's
+      optional `resolve` hint → `<base>/strapi-admin`), **never** a `package.json` scan.
+- [x] Admin served when a build exists: `startStrapi` auto-detects `<distDir>/build` and
+      flips `serveAdminPanel` (explicit option still wins); headless otherwise.
+- [x] CTB **read-only** for programmatic content types, **writable** only for file-backed
+      ones — tagged by origin (`pluginOptions['content-type-builder'].origin =
+  'programmatic'`). `formatContentType` exposes `editable`; the update/delete
+      controllers reject programmatic CTs.
+- [x] End-to-end proof: `examples/programmatic-server` builds the panel from the
+      programmatic definition and a Playwright smoke test asserts it renders in a real
+      browser.
+- `strapi develop` parity (live admin watch for programmatic apps) is deferred to Phase 3
+  — it is coupled to the cluster + bundler watch and disk file watching.
 
 ### Phase 3 — Ecosystem & DX
 
@@ -456,10 +468,14 @@ precompiled); `compileStrapi` remains a CLI-only concern.
 
 ## Open questions
 
-- **CTB editability mechanism**: confirm how the Content-Type Builder currently
-  decides editability (likely a `pluginOptions['content-type-builder']` flag + UID→path
-  resolution) so the `programmatic` origin tag reuses it rather than inventing new
-  logic. (Phase 2.)
+- **CTB editability mechanism** — _resolved in Phase 2_: CTB writes `schema.json` to a
+  path derived from `strapi.dirs.app.api/<apiName>/content-types/<singularName>/`. A
+  programmatic content type has no such file, so the normalizer stamps
+  `pluginOptions['content-type-builder'].origin = 'programmatic'` (the same plugin-options
+  bag that already holds `visible`). The CTB reuses it via `isContentTypeEditable` to
+  expose `editable: false` to the admin and to reject `updateContentType`/`deleteContentType`
+  server-side (`contentType.programmatic.readonly`). No new schema field or UID→path logic
+  was invented.
 - **Hard-required internal plugins** — _resolved during implementation_: a **true
   zero-plugin boot is not possible**. The always-on admin server registers
   `/forgot-password`, whose route config references the `plugin::email.rateLimit`

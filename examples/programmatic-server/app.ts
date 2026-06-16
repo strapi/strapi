@@ -1,16 +1,21 @@
 /**
- * Strapi as a primitive — the smallest possible host.
+ * The programmatic ("Strapi as a primitive") app definition.
  *
- * A single file that *defines* a Strapi app and *starts* it. No `config/**`, no
- * `src/api/**`, no `package.json` plugin scan — the programmatic definition is
- * the single source of truth.
+ * A single file that *defines* a Strapi app with no `config/**`, no
+ * `src/api/**`, and no `package.json` plugin scan — the programmatic definition
+ * is the single source of truth. It is imported by:
  *
- * Run it with `yarn start` (which is just `node index.cjs`). The HTTP port can
- * be overridden with `PORT` / `HOST` (used by the Playwright smoke test).
+ *   - `index.ts`        — starts the server (`startStrapi`),
+ *   - `build-admin.ts`  — builds the admin panel (`buildAdmin`).
+ *
+ * Authored in TypeScript and compiled to CommonJS (`tsc` → `dist/`). Programmatic
+ * apps run under CommonJS in Phase 1 (the published `.mjs` bundles use bare
+ * directory imports Node's strict ESM resolver rejects). The HTTP port can be
+ * overridden with `PORT` / `HOST` (used by the Playwright smoke test).
  */
-const { defineApp, defineConfig, startStrapi } = require('@strapi/strapi');
-const is = require('@strapi/strapi/attributes');
-const { recommendedPlugins } = require('@strapi/strapi/plugins');
+import { defineApp, defineConfig } from '@strapi/strapi';
+import * as is from '@strapi/strapi/attributes';
+import { recommendedPlugins } from '@strapi/strapi/plugins';
 
 const PORT = Number(process.env.PORT) || 1337;
 const HOST = process.env.HOST || '127.0.0.1';
@@ -35,7 +40,8 @@ const app = defineApp({
   }),
 
   // Imported and added explicitly — nothing is scanned. `email` is required by
-  // the always-on admin server; `i18n` is required for auto-CRUD routing.
+  // the always-on admin server; `i18n` is required for auto-CRUD routing. Each
+  // entry carries a `resolve` hint so `buildAdmin` can bundle its frontend.
   plugins: recommendedPlugins(),
 
   contentTypes: [
@@ -48,6 +54,8 @@ const app = defineApp({
         content: is.text(),
       },
       // api defaults to `true` -> REST CRUD auto-generated at /api/articles.
+      // In the admin panel, this content type is **read-only** in the
+      // Content-Type Builder (it is defined in code, not on disk).
     },
   ],
 
@@ -79,8 +87,4 @@ const app = defineApp({
   },
 });
 
-startStrapi(app).catch((error) => {
-  // eslint-disable-next-line no-console
-  console.error(error);
-  process.exit(1);
-});
+export default app;

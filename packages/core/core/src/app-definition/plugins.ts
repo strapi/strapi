@@ -47,6 +47,8 @@ interface UnwrappedEntry {
   module: PluginModule;
   enabled: boolean;
   userConfig: object;
+  /** npm package base used by the admin build to import `strapi-admin`. */
+  resolve?: string;
 }
 
 /**
@@ -75,10 +77,46 @@ export const unwrapPluginEntry = (entry: PluginEntry): UnwrappedEntry => {
       module: entry.plugin,
       enabled: entry.enabled !== false,
       userConfig: entry.config ?? {},
+      resolve: entry.resolve,
     };
   }
 
   return { module: entry as PluginModule, enabled: true, userConfig: {} };
+};
+
+/**
+ * A programmatic plugin's admin-build descriptor: its canonical name and the
+ * optional npm package base (`resolve`) used to import its `strapi-admin`
+ * frontend entry. Disabled plugins are omitted. Consumed by the admin build
+ * (`buildAdmin`) so it can derive the frontend plugin set from the in-memory
+ * definition instead of scanning `package.json` (ADR-0006, Phase 2).
+ */
+export interface AdminPluginResolution {
+  name: string;
+  resolve?: string;
+}
+
+/**
+ * Derive the enabled plugins' admin-build descriptors from a programmatic
+ * `plugins` map. Used by `buildAdmin` to know which plugins to bundle into the
+ * admin panel without a `package.json` scan.
+ */
+export const getAdminPluginResolutions = (
+  pluginsMap: Record<string, PluginEntry>
+): AdminPluginResolution[] => {
+  const resolutions: AdminPluginResolution[] = [];
+
+  for (const name of Object.keys(pluginsMap)) {
+    const { enabled, resolve } = unwrapPluginEntry(pluginsMap[name]);
+
+    if (!enabled) {
+      continue;
+    }
+
+    resolutions.push({ name, resolve });
+  }
+
+  return resolutions;
 };
 
 /**

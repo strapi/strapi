@@ -1,4 +1,9 @@
-import { unwrapPluginEntry, normalizePluginModule, loadProgrammaticPlugins } from '../plugins';
+import {
+  unwrapPluginEntry,
+  normalizePluginModule,
+  loadProgrammaticPlugins,
+  getAdminPluginResolutions,
+} from '../plugins';
 
 const makeStrapi = () => {
   const pluginsAdd = jest.fn();
@@ -29,7 +34,32 @@ describe('unwrapPluginEntry', () => {
       module: mod,
       enabled: false,
       userConfig: { a: 1 },
+      resolve: undefined,
     });
+  });
+
+  it('surfaces the admin-build `resolve` hint', () => {
+    const mod = { register() {} };
+    expect(unwrapPluginEntry({ plugin: mod as any, resolve: '@strapi/upload' })).toMatchObject({
+      module: mod,
+      enabled: true,
+      resolve: '@strapi/upload',
+    });
+  });
+});
+
+describe('getAdminPluginResolutions', () => {
+  it('returns name + resolve hint for enabled plugins, dropping disabled ones', () => {
+    const result = getAdminPluginResolutions({
+      'content-manager': { plugin: { register() {} } as any, resolve: '@strapi/content-manager' },
+      'users-permissions': { register() {} } as any,
+      i18n: { plugin: { register() {} } as any, enabled: false },
+    });
+
+    expect(result).toEqual([
+      { name: 'content-manager', resolve: '@strapi/content-manager' },
+      { name: 'users-permissions', resolve: undefined },
+    ]);
   });
 });
 

@@ -2,6 +2,18 @@ import { yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 /**
+ * Database config narrowed per client so the `client` literal discriminates the
+ * `connection` shape (e.g. `client: 'sqlite'` ⇒ `connection: { filename }`,
+ * `client: 'postgres'` ⇒ the server connection fields). `Core.Config.Database`
+ * defaults its client to the full `ClientKind` union, which would otherwise
+ * force every connection to the SQL-server shape and reject SQLite.
+ */
+export type DatabaseConfig =
+  | Core.Config.Database<'sqlite'>
+  | Core.Config.Database<'mysql'>
+  | Core.Config.Database<'postgres'>;
+
+/**
  * Config that can be passed to `defineApp({ config })`.
  *
  * Mirrors the top-level config domains the legacy `config/*` directory produces
@@ -11,7 +23,7 @@ import type { Core } from '@strapi/types';
  * from legacy (ADR-0008).
  */
 export interface AppConfig {
-  database?: Core.Config.Database;
+  database?: DatabaseConfig;
   server?: Partial<Core.Config.Server>;
   admin?: Partial<Core.Config.Admin>;
   api?: Partial<Core.Config.Api>;
@@ -55,7 +67,7 @@ const throwClearError = (domain: string, error: unknown): never => {
 /**
  * Typed + startup-validated database config factory.
  */
-export const defineDatabaseConfig = <T extends Core.Config.Database>(config: T): T => {
+export const defineDatabaseConfig = <T extends DatabaseConfig>(config: T): T => {
   try {
     databaseSchema.validateSync(config, { strict: true, abortEarly: false });
   } catch (error) {

@@ -5,8 +5,11 @@ import { defineConfig, devices } from '@playwright/test';
  *
  * Unlike the main `tests/e2e` harness (which generates a full scaffolded app and
  * builds the admin panel), this boots the *programmatic* headless server from
- * `index.cjs` and drives a real browser against it — proof that the
- * `defineApp` + `startStrapi` host actually serves HTTP in a browser.
+ * the compiled `dist/index.js` and drives a real browser against it — proof that
+ * the `defineApp` + `startStrapi` host actually serves HTTP in a browser.
+ *
+ * `test:e2e` runs `tsc` first, so `dist/index.js` exists before `webServer`
+ * starts it.
  */
 const PORT = Number(process.env.PORT) || 1343;
 const HOST = process.env.HOST || '127.0.0.1';
@@ -26,6 +29,10 @@ export default defineConfig({
   timeout: 30 * 1000,
   expect: { timeout: 10 * 1000 },
 
+  /* Hard cap on the whole run so a hung browser/server can't get us stuck,
+   * regardless of how the test is invoked (it covers the ~180s webServer boot). */
+  globalTimeout: 240 * 1000,
+
   reporter: [['list']],
 
   use: {
@@ -37,7 +44,7 @@ export default defineConfig({
 
   /* Boot the programmatic server before the tests and tear it down after. */
   webServer: {
-    command: 'node index.cjs',
+    command: 'node dist/index.js',
     url: `${baseURL}/api/hello`,
     env: {
       PORT: String(PORT),

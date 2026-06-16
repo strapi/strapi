@@ -1,3 +1,5 @@
+import path from 'node:path';
+import fs from 'node:fs';
 import * as qs from 'qs';
 import type { Core } from '@strapi/types';
 
@@ -16,6 +18,7 @@ export {
   fromDisk,
   isAppDefinition,
   isDiskSource,
+  getAdminPluginResolutions,
 } from './app-definition';
 export type {
   AppDefinition,
@@ -26,6 +29,7 @@ export type {
   PluginModule,
   RouteBuilder,
   DiskSource,
+  AdminPluginResolution,
 } from './app-definition';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
@@ -49,17 +53,31 @@ export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi 
 export type StartStrapiOptions = Partial<Omit<StrapiOptions, 'app'>>;
 
 /**
- * Primary Phase 1 entry point for programmatic apps. Builds a Strapi instance
- * from a `defineApp(...)` result and starts it. Defaults to headless
- * (`serveAdminPanel: false`) — the admin server module still loads, only the
- * panel is not built/served (ADR-0007, ADR-0009).
+ * Whether a built admin panel exists under the resolved dist dir
+ * (`<distDir>/build/index.html`). Used by {@link startStrapi} to decide whether
+ * to serve the panel by default.
+ */
+const hasAdminBuild = (options: StartStrapiOptions): boolean => {
+  const { distDir } = resolveWorkingDirectories(options);
+  return fs.existsSync(path.join(distDir, 'build', 'index.html'));
+};
+
+/**
+ * Primary entry point for programmatic apps. Builds a Strapi instance from a
+ * `defineApp(...)` result and starts it.
+ *
+ * The admin **panel** is served automatically when a build exists at
+ * `<distDir>/build` (produced by `buildAdmin`), and stays headless otherwise —
+ * the admin server module always loads either way (ADR-0007). Pass an explicit
+ * `serveAdminPanel` to override the auto-detection.
  */
 export const startStrapi = async (
   app: AppDefinition,
   options: StartStrapiOptions = {}
 ): Promise<Core.Strapi> => {
   const strapi = createStrapi({
-    serveAdminPanel: false,
+    // Serve the panel only when a real build is present; headless otherwise.
+    serveAdminPanel: hasAdminBuild(options),
     ...options,
     app,
   });
