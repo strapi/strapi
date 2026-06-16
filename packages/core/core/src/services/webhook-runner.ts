@@ -1,7 +1,7 @@
 /**
  * The event hub is Strapi's event control center.
  */
-
+import { isPrimary } from './cluster';
 import createdDebugger from 'debug';
 import _ from 'lodash';
 import type { Logger } from '@strapi/logger';
@@ -96,6 +96,7 @@ class WebhookRunner {
 
     this.listeners.set(event, listen);
     this.eventHub.on(event, listen);
+   
   }
 
   async executeListener({ event, info }: Event) {
@@ -149,19 +150,24 @@ class WebhookRunner {
       });
   }
 
-  add(webhook: Webhook) {
-    debug(`Registering webhook '${webhook.id}'`);
-    const { events } = webhook;
+add(webhook: Webhook) {
+  debug(`Registering webhook '${webhook.id}'`);
+  const { events } = webhook;
 
-    events.forEach((event) => {
-      if (this.webhooksMap.has(event)) {
-        this.webhooksMap.get(event)?.push(webhook);
-      } else {
-        this.webhooksMap.set(event, [webhook]);
-        this.createListener(event);
-      }
-    });
+  if (!isPrimary()) {
+    debug(`Skipping webhook registration on non-primary worker`);
+    return;
   }
+
+  events.forEach((event) => {
+    if (this.webhooksMap.has(event)) {
+      this.webhooksMap.get(event)?.push(webhook);
+    } else {
+      this.webhooksMap.set(event, [webhook]);
+      this.createListener(event);
+    }
+  });
+}
 
   update(webhook: Webhook) {
     debug(`Refreshing webhook '${webhook.id}'`);
