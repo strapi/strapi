@@ -1,8 +1,9 @@
-import type { Core } from '@strapi/types';
+import _ from 'lodash';
+import type { Core, Struct, UID } from '@strapi/types';
 
 import { getGlobalId } from '../domain/content-type';
 import * as factories from '../factories';
-import type { AppContentType } from './types';
+import type { AppComponent, AppContentType } from './types';
 
 /**
  * Synthetic API namespace used to host custom top-level routes (and any
@@ -173,4 +174,65 @@ export const buildApiModules = (
   }
 
   return modules;
+};
+
+const snake = (value: string): string => value.replace(/-/g, '_');
+
+/**
+ * Normalize a single programmatic component into the `Struct.ComponentSchema`
+ * the `components` registry expects. Mirrors the file-based loader
+ * (`loadComponentsFromDir`): `uid`/`category`/`modelName`/`modelType`/`globalId`
+ * and a `__schema__` snapshot are stamped onto the schema; `collectionName` and
+ * `globalId` fall back to deterministic defaults when omitted.
+ */
+export const normalizeComponent = (
+  component: AppComponent
+): { uid: UID.Component; schema: Struct.ComponentSchema } => {
+  const { uid, displayName, attributes, description, icon, options, collectionName, globalId } =
+    component;
+
+  const [category, modelName] = uid.split('.');
+  const componentUid = uid as UID.Component;
+
+  const schema = {
+    collectionName: collectionName || `components_${snake(category)}_${snake(modelName)}`,
+    info: {
+      displayName,
+      ...(description ? { description } : {}),
+      ...(icon ? { icon } : {}),
+    },
+    options: options ?? {},
+    attributes: { ...attributes },
+    uid: componentUid,
+    category,
+    modelType: 'component' as const,
+    modelName,
+    globalId: globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
+  };
+
+  // Mirror the loader's reload snapshot. Assigned after construction so the
+  // snapshot does not contain itself.
+  (schema as { __schema__?: unknown }).__schema__ = _.cloneDeep(schema);
+
+  return { uid: componentUid, schema: schema as unknown as Struct.ComponentSchema };
+};
+
+/**
+ * Build the `{ [uid]: ComponentSchema }` map from in-code components, ready to
+ * register via `strapi.get('components').add(...)`. Throws on a duplicate uid.
+ */
+export const buildComponentMap = (
+  components: AppComponent[] = []
+): Record<UID.Component, Struct.ComponentSchema> => {
+  const map = {} as Record<UID.Component, Struct.ComponentSchema>;
+
+  for (const component of components) {
+    const { uid, schema } = normalizeComponent(component);
+    if (map[uid]) {
+      throw new Error(`Duplicate programmatic component "${uid}"`);
+    }
+    map[uid] = schema;
+  }
+
+  return map;
 };

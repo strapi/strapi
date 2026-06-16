@@ -100,6 +100,25 @@ describe('runProgrammaticLoaders', () => {
     expect(appApi![1].routes.custom.routes).toHaveLength(1);
   });
 
+  it('registers in-code components in the components registry', async () => {
+    const { strapi, calls } = createStrapi();
+    await runProgrammaticLoaders(
+      strapi,
+      defineApp({
+        components: [
+          { uid: 'default.dish', displayName: 'Dish', attributes: { name: is.string() } },
+        ],
+      })
+    );
+
+    expect(calls.components).toHaveLength(1);
+    expect(calls.components[0]['default.dish']).toMatchObject({
+      uid: 'default.dish',
+      category: 'default',
+      modelType: 'component',
+    });
+  });
+
   it('registers in-code policies under global::', async () => {
     const { strapi, calls } = createStrapi();
     const policy = () => true;

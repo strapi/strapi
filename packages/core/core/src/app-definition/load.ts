@@ -3,9 +3,9 @@ import type { Core } from '@strapi/types';
 
 import { isDiskSource } from './brand';
 import { resolveRoutes } from './routes';
-import { buildApiModules } from './normalize';
+import { buildApiModules, buildComponentMap } from './normalize';
 import { loadProgrammaticPlugins } from './plugins';
-import type { AppContentType, AppDefinition, Lifecycle } from './types';
+import type { AppComponent, AppContentType, AppDefinition, Lifecycle } from './types';
 import type { RouteBuilder } from './routes';
 
 import { loadAPIsFromDir } from '../loaders/apis';
@@ -102,14 +102,25 @@ const registerApiModules = (strapi: Core.Strapi, modules: Record<string, unknown
   }
 };
 
-/** Components are disk-only in Phase 1 (ADR-0004 / RFC decision 18). */
+/**
+ * In-code components (via `defineComponent`) are normalized and registered;
+ * a `fromDisk` source loads a components directory via the legacy core; the
+ * `from` fallback fills from `<root>/src/components`.
+ */
 const loadComponents = async (
   strapi: Core.Strapi,
   app: AppDefinition,
   rootPath?: string
 ): Promise<void> => {
-  if (isDiskSource(app.components)) {
-    await loadComponentsFromDir(strapi, app.components.path);
+  const source = app.components;
+
+  if (isDiskSource(source)) {
+    await loadComponentsFromDir(strapi, source.path);
+    return;
+  }
+
+  if (Array.isArray(source)) {
+    strapi.get('components').add(buildComponentMap(source as AppComponent[]));
     return;
   }
 
