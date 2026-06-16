@@ -222,6 +222,45 @@ describe('metrics', () => {
     fetch.mockClear();
   });
 
+  test('Rate limits MCP request lifecycle events', async () => {
+    const { send } = metrics({
+      config: {
+        get(path: string | string[]) {
+          return get(path, this);
+        },
+        uuid: 'test',
+        environment: 'dev',
+        info: {
+          strapi: '0.0.0',
+        },
+      },
+      server: {
+        use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
+      cron: {
+        add: jest.fn(),
+      },
+      fetch,
+    } as any);
+
+    await send('didUseMcpServer');
+    await send('didUseMcpServer');
+    await send('didStartMcpServer');
+    await send('didStartMcpServer');
+
+    expect(fetch).toHaveBeenCalledTimes(2);
+
+    fetch.mockClear();
+  });
+
   test('Does not include EE fields when absent', () => {
     const { send } = metrics({
       config: {

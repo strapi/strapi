@@ -3,7 +3,7 @@ import { chain } from 'stream-chain';
 import { set } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 
-import type { IConfiguration } from '../../../../types';
+import type { IConfiguration } from '../../../types';
 import { enrichProjectSettingsForExport } from '../../utils/project-settings-logos';
 
 /**

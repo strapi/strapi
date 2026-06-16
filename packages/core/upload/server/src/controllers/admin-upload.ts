@@ -35,7 +35,11 @@ export default {
         );
 
         const updated = await uploadService.updateFileInfo(id, fileInfo as any, { user });
-        return pm.sanitizeOutput(updated, { action: ACTIONS.read });
+
+        // Sign file urls for private providers
+        const signedFile = await getService('file').signFileUrls(updated);
+
+        return pm.sanitizeOutput(signedFile, { action: ACTIONS.read });
       }
     );
 
@@ -65,7 +69,10 @@ export default {
 
     const file = await uploadService.updateFileInfo(id, data.fileInfo as any, { user });
 
-    ctx.body = await pm.sanitizeOutput(file, { action: ACTIONS.read });
+    // Sign file urls for private providers
+    const signedFile = await getService('file').signFileUrls(file);
+
+    ctx.body = await pm.sanitizeOutput(signedFile, { action: ACTIONS.read });
   },
 
   async replaceFile(ctx: Context) {
@@ -102,6 +109,22 @@ export default {
 
     const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
     const replacedFile = await uploadService.replace(id, { data, file: validFiles[0] }, { user });
+
+    // Regenerate AI metadata for image replacements so the alt text / caption
+    // reflect the new file content. Mirrors the post-upload hook in
+    // `uploadFiles`; failure is logged and swallowed to keep the replace flow
+    // resilient when the AI provider is unavailable.
+    const aiMetadataService = getService('aiMetadata');
+    if (replacedFile?.mime?.startsWith('image/') && (await aiMetadataService.isEnabled())) {
+      try {
+        const metadataResults = await aiMetadataService.processFiles([replacedFile]);
+        await aiMetadataService.updateFilesWithAIMetadata([replacedFile], metadataResults, user);
+      } catch (error) {
+        strapi.log.warn('AI metadata generation failed on replace, proceeding without it', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
 
     // Sign file urls for private providers
     const signedFile = await getService('file').signFileUrls(replacedFile);
@@ -185,16 +208,14 @@ export default {
 
   /**
    * @experimental
-   * Stream upload files with SSE streaming for per-file progress
+   * Upload a single file and return the created File.
    *
-   * Streams Server-Sent Events as each file is validated and uploaded:
-   * - file:uploading — when processing starts for a file
-   * - file:complete  — when a file is successfully uploaded
-   * - file:error     — when a file fails validation or upload
-   * - stream:complete — final summary with all results
-   *
+   * Accepts one file per request (multipart `files` + `fileInfo`) and returns a
+   * single `File` object. Unlike `uploadFiles`, it does **not** run AI metadata
+   * generation inline — that responsibility is decoupled and will be handled by a
+   * background job. Auth and permission checks mirror `POST /upload`.
    */
-  async unstable_uploadFilesStream(ctx: Context) {
+  async unstable_uploadFile(ctx: Context) {
     const {
       state: { userAbility, user },
       request: { body, files: { files } = {} },
@@ -215,104 +236,53 @@ export default {
       throw new errors.ApplicationError('Files are empty');
     }
 
-    // Take manual control of the response for SSE streaming
-    ctx.respond = false;
-    const res = ctx.res;
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-    });
+    // Accept a single file per request; ignore any extras defensively.
+    const file = Array.isArray(files) ? files[0] : files;
+    const fileName = file.originalFilename || 'unknown';
 
-    const writeSSE = (event: string, data: Record<string, unknown>) => {
-      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    // Parse the single fileInfo object from the multipart body.
+    let fileInfo: UploadFileInfo = {
+      name: fileName,
+      caption: null,
+      alternativeText: null,
+      folder: null,
     };
-
-    // Normalize files to an array
-    const filesArray = Array.isArray(files) ? files : [files];
-    const total = filesArray.length;
-
-    // Parse fileInfo from body
-    // Multipart forms send fileInfo as either:
-    //   - An array of JSON strings (one per file)
-    //   - A single JSON string (one file, or a JSON-encoded array)
-    let parsedFileInfo: UploadFileInfo[] = [];
     if (body?.fileInfo) {
       const raw = body.fileInfo;
-      if (Array.isArray(raw)) {
-        parsedFileInfo = raw.map((fi: unknown) =>
-          typeof fi === 'string' ? JSON.parse(fi) : fi
-        ) as UploadFileInfo[];
-      } else if (typeof raw === 'string') {
-        const parsed = JSON.parse(raw);
-        // Handle case where a single string contains a JSON array
-        parsedFileInfo = (Array.isArray(parsed) ? parsed : [parsed]) as UploadFileInfo[];
+      if (typeof raw === 'string') {
+        fileInfo = JSON.parse(raw);
+      } else if (Array.isArray(raw)) {
+        fileInfo = (typeof raw[0] === 'string' ? JSON.parse(raw[0]) : raw[0]) as UploadFileInfo;
       } else {
-        parsedFileInfo = [raw as UploadFileInfo];
+        fileInfo = raw as UploadFileInfo;
       }
     }
 
-    const uploadErrors: FileUploadError[] = [];
-    const successfulFiles: any[] = [];
+    // Validate this single file using security checks.
+    const { validFiles, errors: validationErrors } = await prepareUploadRequest(
+      file,
+      { fileInfo: JSON.stringify(fileInfo) },
+      strapi
+    );
 
-    // Process each file sequentially with inline validation
-    for (let i = 0; i < filesArray.length; i += 1) {
-      const file = filesArray[i];
-      const fileName = file.originalFilename || 'unknown';
-      const fileInfo: UploadFileInfo = parsedFileInfo[i] || {
-        name: fileName,
-        caption: null,
-        alternativeText: null,
-        folder: null,
-      };
-
-      writeSSE('file:uploading', { name: fileName, index: i, total, size: file.size || 0 });
-
-      try {
-        // Validate this single file using security checks
-        const { validFiles, errors: validationErrors } = await prepareUploadRequest(
-          file,
-          { fileInfo: JSON.stringify(fileInfo) },
-          strapi
-        );
-
-        if (validFiles.length === 0) {
-          const errorMessage = validationErrors[0]?.message || 'Validation failed';
-          uploadErrors.push({ name: fileName, message: errorMessage });
-          writeSSE('file:error', { name: fileName, index: i, message: errorMessage });
-        } else {
-          // Validate using the already-parsed single fileInfo object directly
-          const data = await validateUploadBody({ fileInfo }, false);
-          const [uploadedFile] = await uploadService.upload(
-            { data, files: [validFiles[0]] },
-            { user }
-          );
-
-          // Sign file url
-          const signedFile = await getService('file').signFileUrls(uploadedFile);
-          successfulFiles.push(signedFile);
-
-          writeSSE('file:complete', { name: fileName, index: i, file: signedFile });
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        uploadErrors.push({ name: fileName, message: errorMessage });
-        writeSSE('file:error', { name: fileName, index: i, message: errorMessage });
-      }
+    if (validFiles.length === 0) {
+      throw new errors.ValidationError(validationErrors[0]?.message || 'Validation failed');
     }
 
-    // Track image upload metric once if any images were uploaded
-    if (successfulFiles.some((file) => file.mime?.startsWith('image/'))) {
+    const data = await validateUploadBody({ fileInfo }, false);
+    const [uploadedFile] = await uploadService.upload({ data, files: [validFiles[0]] }, { user });
+
+    if (uploadedFile.mime?.startsWith('image/')) {
       await getService('metrics').trackUsage('didUploadImage');
     }
 
-    // Send final stream summary
-    writeSSE('stream:complete', {
-      data: await pm.sanitizeOutput(successfulFiles, { action: ACTIONS.read }),
-      errors: uploadErrors,
-    });
+    // No inline AI metadata generation — intentionally decoupled for the async job.
 
-    res.end();
+    // Sign file url for private providers.
+    const signedFile = await getService('file').signFileUrls(uploadedFile);
+
+    ctx.body = await pm.sanitizeOutput(signedFile, { action: ACTIONS.read });
+    ctx.status = 201;
   },
 
   /**

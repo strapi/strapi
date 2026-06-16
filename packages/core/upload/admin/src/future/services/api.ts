@@ -4,17 +4,22 @@ import { adminApi } from '@strapi/admin/strapi-admin';
 import {
   openUploadProgress,
   setFileUploading,
+  setFileProgress,
   setFileComplete,
   setFileError,
-  updateProgress,
   setUploadFailed,
   retryCancelledFiles,
 } from '../store/uploadProgress';
+import { createRafBatcher } from '../utils/createRafBatcher';
 import { getFilenameFromUrl } from '../utils/files';
+
+import { uploadFileViaXHR, UploadAbortedError } from './uploadFileViaXHR';
 
 import type {
   CreateFilesStream,
   CreateFilesStreamEvents,
+  File as UploadedFile,
+  UploadFileInfo,
 } from '../../../../shared/contracts/files';
 
 interface UploadFilesArgs {
@@ -43,53 +48,43 @@ interface RootState {
 }
 
 /**
- * Stores original File objects for retry functionality.
- *
- * Similar to abortControllers, File objects cannot be stored in Redux state
- * (they are not serializable). This Map allows us to retry cancelled uploads
- * by retrieving the original files using the uploadId.
+ * A single file plus the `fileInfo` it was queued with.
+ * Retained in {@link uploadRegistry} so cancelled files can be retried without
+ * the user re-selecting them. `File`/`AbortController` are non-serializable, so
+ * they live here rather than in Redux.
  */
-const uploadedFiles = new Map<number, File[]>();
+interface UploadEntry {
+  file: File;
+  fileInfo: UploadFileInfo;
+}
 
 /**
- * Registers files for a specific upload to enable retry.
+ * Stores the original upload entries for a batch (keyed by uploadId) to enable retry.
  */
-const registerUploadedFiles = (uploadId: number, files: File[]) => {
-  uploadedFiles.set(uploadId, files);
+const uploadRegistry = new Map<number, UploadEntry[]>();
+
+const registerUploadEntries = (uploadId: number, entries: UploadEntry[]) => {
+  uploadRegistry.set(uploadId, entries);
 };
 
-/**
- * Retrieves stored files for an upload.
- */
-const getUploadedFiles = (uploadId: number): File[] | undefined => {
-  return uploadedFiles.get(uploadId);
+const getUploadEntries = (uploadId: number): UploadEntry[] | undefined => {
+  return uploadRegistry.get(uploadId);
 };
 
 /**
  * Manages abort controllers for in-flight uploads.
  *
  * Design decision: Uses a Map to track uploads by their unique uploadId.
- * This approach is necessary because:
- * 1. Redux state cannot store function references (abort controllers)
- * 2. RTK Query's signal is only accessible within the queryFn
- * 3. The upload is triggered in AssetsPage but cancelled from UploadProgressDialog
- *
- * The uploadId ensures we abort the correct upload even if multiple uploads
- * are queued, though the current UI prevents simultaneous uploads.
+ * Redux state cannot store function references (abort controllers), RTK Query's
+ * signal is only accessible within the queryFn, and the upload is triggered in
+ * AssetsPage but cancelled from UploadProgressDialog.
  */
 const abortControllers = new Map<number, AbortController>();
 
-/**
- * Registers an abort controller for a specific upload.
- * Called internally when an upload starts.
- */
 const registerAbortController = (uploadId: number, controller: AbortController) => {
   abortControllers.set(uploadId, controller);
 };
 
-/**
- * Removes an abort controller when an upload completes or is aborted.
- */
 const unregisterAbortController = (uploadId: number) => {
   abortControllers.delete(uploadId);
 };
@@ -105,6 +100,100 @@ export const abortUpload = (uploadId: number) => {
     unregisterAbortController(uploadId);
   }
 };
+
+/**
+ * Error shape returned by upload operations.
+ * Matches RTK Query's expected return type for queryFn.
+ */
+interface UploadError {
+  name: 'UnknownError';
+  message: string;
+  status?: number;
+}
+
+type SequentialUploadResult =
+  | { data: UploadedFile[]; error?: undefined }
+  | { error: UploadError; data?: undefined };
+
+/**
+ * Uploads the given entry indices one at a time through the single-file endpoint.
+ *
+ * For each file: dispatches "uploading", wires `XHR.upload.onprogress` through a
+ * per-frame batcher to `setFileProgress`, awaits the XHR, then dispatches
+ * "complete" or "error". Each file is wrapped in its own try/catch so one failure
+ * does not stop the batch. An abort stops the loop without starting further files.
+ */
+const runSequentialUpload = async ({
+  entries,
+  indices,
+  token,
+  uploadId,
+  abortController,
+  dispatch,
+}: {
+  entries: UploadEntry[];
+  indices: number[];
+  token: string | null | undefined;
+  uploadId: number;
+  abortController: AbortController;
+  dispatch: Dispatch;
+}): Promise<SequentialUploadResult> => {
+  const url = `${window.strapi.backendURL}/upload/unstable/upload-file`;
+  const uploaded: UploadedFile[] = [];
+
+  for (const index of indices) {
+    if (abortController.signal.aborted) {
+      break;
+    }
+
+    const entry = entries[index];
+    if (!entry) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    const fileName = entry.fileInfo?.name ?? entry.file.name;
+
+    dispatch(setFileUploading({ name: fileName, index, size: entry.file.size }));
+
+    const formData = new FormData();
+    formData.append('files', entry.file);
+    formData.append('fileInfo', JSON.stringify(entry.fileInfo));
+
+    // Coalesce high-frequency progress events into one dispatch per frame.
+    const batcher = createRafBatcher<number>((bytes) => {
+      dispatch(setFileProgress({ index, bytes }));
+    });
+
+    try {
+      const file = await uploadFileViaXHR(url, token, formData, abortController.signal, (bytes) =>
+        batcher.schedule(bytes)
+      );
+      batcher.cancel();
+      uploaded.push(file);
+      dispatch(setFileComplete({ index, file }));
+    } catch (err) {
+      batcher.cancel();
+
+      if (err instanceof UploadAbortedError) {
+        // Batch was cancelled — stop without starting further files.
+        // cancelUpload (dispatched from the dialog) marks the remaining rows.
+        break;
+      }
+
+      const message = err instanceof Error ? err.message : 'Upload failed';
+      dispatch(setFileError({ index, name: fileName, message }));
+    }
+  }
+
+  unregisterAbortController(uploadId);
+
+  return { data: uploaded };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * URL upload flow (SSE) — kept as-is for this iteration
+ * -----------------------------------------------------------------------------------------------*/
 
 /**
  * Parses a raw SSE text chunk into event/data pairs.
@@ -139,39 +228,6 @@ const parseSSEEvents = (chunk: string): Array<{ event: string; data: string }> =
 };
 
 /**
- * Makes a streaming upload request to the server.
- *
- * We use fetch directly instead of RTK Query's fetchBaseQuery because:
- * 1. We need access to the raw Response to read the body as a stream
- * 2. RTK Query's baseQuery awaits the full response and parses it as JSON,
- *    which doesn't work for Server-Sent Events (SSE) streaming
- * 3. The stream must be read incrementally via response.body.getReader()
- *    to dispatch progress updates as files upload
- */
-const fetchUploadStream = async ({
-  token,
-  formData,
-  signal,
-}: {
-  token: string | null | undefined;
-  formData: FormData;
-  signal: AbortSignal;
-}): Promise<Response> => {
-  const backendURL = window.strapi.backendURL;
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  return fetch(`${backendURL}/upload/unstable/stream`, {
-    method: 'POST',
-    headers,
-    body: formData,
-    signal,
-  });
-};
-
-/**
  * Makes a streaming upload-from-URLs request to the server.
  * Sends URLs as JSON body instead of FormData.
  */
@@ -203,29 +259,16 @@ const fetchUrlUploadStream = async ({
 };
 
 /**
- * Options for processing an SSE upload stream.
- */
-interface ProcessSSEStreamOptions {
-  response: Response;
-  dispatch: Dispatch;
-  indexMapper?: (serverIndex: number) => number;
-}
-
-/**
- * Processes an SSE stream from the upload endpoint.
+ * Processes an SSE stream from the URL upload endpoint.
  * Dispatches Redux actions for each file event and returns the final result.
- *
- * @param options.response - The fetch Response object with SSE body
- * @param options.dispatch - Redux dispatch function
- * @param options.indexMapper - Optional function to map server indices to state indices (for retry)
- * @param options.logPrefix - Optional prefix for console logs
- * @returns The stream result or null if no files completed
  */
 const processSSEStream = async ({
   response,
   dispatch,
-  indexMapper = (i) => i,
-}: ProcessSSEStreamOptions): Promise<CreateFilesStream.Response | null> => {
+}: {
+  response: Response;
+  dispatch: Dispatch;
+}): Promise<CreateFilesStream.Response | null> => {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
   let streamResult: CreateFilesStream.Response | null = null;
@@ -255,52 +298,27 @@ const processSSEStream = async ({
 
     for (const { event, data } of events) {
       const parsed = JSON.parse(data);
-      const mappedIndex = indexMapper(parsed.index as number);
+      const index = parsed.index as number;
 
       switch (event) {
         case 'file:fetching': {
           // URL is being fetched server-side - mark as uploading (processing)
-          dispatch(
-            setFileUploading({
-              name: parsed.url as string,
-              index: mappedIndex,
-              total: parsed.total as number,
-              size: 0,
-            })
-          );
+          dispatch(setFileUploading({ name: parsed.url as string, index, size: 0 }));
           break;
         }
         case 'file:uploading': {
           const payload = parsed as CreateFilesStreamEvents.FileUploadingEvent;
-          dispatch(
-            setFileUploading({
-              name: payload.name,
-              index: mappedIndex,
-              total: payload.total,
-              size: payload.size,
-            })
-          );
+          dispatch(setFileUploading({ name: payload.name, index, size: payload.size }));
           break;
         }
         case 'file:complete': {
           const payload = parsed as CreateFilesStreamEvents.FileCompleteEvent;
-          dispatch(
-            setFileComplete({
-              index: mappedIndex,
-              file: payload.file,
-            })
-          );
+          dispatch(setFileComplete({ index, file: payload.file }));
           break;
         }
         case 'file:error': {
           const payload = parsed as CreateFilesStreamEvents.FileErrorEvent;
-          dispatch(
-            setFileError({
-              index: mappedIndex,
-              name: payload.name,
-              message: payload.message,
-            })
-          );
+          dispatch(setFileError({ index, name: payload.name, message: payload.message }));
           break;
         }
         case 'stream:complete': {
@@ -320,117 +338,6 @@ const processSSEStream = async ({
   return streamResult;
 };
 
-/**
- * Options for performing a streaming upload.
- */
-interface PerformStreamUploadOptions {
-  token: string | null | undefined;
-  formData: FormData;
-  abortController: AbortController;
-  uploadId: number;
-  dispatch: Dispatch;
-  indexMapper?: (serverIndex: number) => number;
-  onUploadFailed?: (message: string) => void;
-}
-
-/**
- * Error shape returned by upload operations.
- */
-interface UploadError {
-  name: 'UnknownError';
-  message: string;
-  status?: number;
-}
-
-/**
- * Result of a streaming upload operation.
- * Matches RTK Query's expected return type for queryFn.
- */
-type UploadResult =
-  | { data: CreateFilesStream.Response; error?: undefined }
-  | { error: UploadError; data?: undefined };
-
-/**
- * Performs the actual streaming upload to the server.
- * Shared by uploadFilesStream, retryCancelledFilesStream, and uploadFromUrls.
- *
- * @param options - Upload configuration
- * @returns The upload result or error
- */
-const performStreamUpload = async ({
-  token,
-  formData,
-  abortController,
-  uploadId,
-  dispatch,
-  indexMapper = (i) => i,
-  onUploadFailed = (message) => dispatch(setUploadFailed({ message })),
-}: PerformStreamUploadOptions): Promise<UploadResult> => {
-  try {
-    const response = await fetchUploadStream({
-      token,
-      formData,
-      signal: abortController.signal,
-    });
-
-    if (!response.ok || !response.body) {
-      unregisterAbortController(uploadId);
-
-      let errorMessage = 'Upload request failed';
-      try {
-        const errorData = await response.json();
-        if (errorData.error?.message) {
-          errorMessage = errorData.error.message;
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        }
-      } catch {
-        errorMessage = `Upload failed with status ${response.status}`;
-      }
-
-      onUploadFailed(errorMessage);
-
-      return {
-        error: {
-          name: 'UnknownError',
-          message: errorMessage,
-          status: response.status,
-        },
-      };
-    }
-
-    const streamResult = await processSSEStream({
-      response,
-      dispatch,
-      indexMapper,
-    });
-
-    unregisterAbortController(uploadId);
-
-    if (streamResult && streamResult.data.length > 0) {
-      return { data: streamResult };
-    }
-
-    return { data: { data: [], errors: [] } };
-  } catch (err) {
-    unregisterAbortController(uploadId);
-
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      return { error: { name: 'UnknownError', message: 'Upload cancelled' } };
-    }
-
-    const errorMessage = err instanceof Error ? err.message : 'Network error occurred';
-    onUploadFailed(errorMessage);
-
-    return {
-      error: {
-        name: 'UnknownError',
-        message: errorMessage,
-      },
-    };
-  }
-};
-
 const uploadApi = adminApi
   .enhanceEndpoints({
     addTagTypes: ['Asset', 'Folder'],
@@ -438,39 +345,50 @@ const uploadApi = adminApi
   .injectEndpoints({
     endpoints: (builder) => ({
       /**
-       * Stream upload files to the /upload/unstable/stream endpoint.
-       * Reads SSE stream for per-file progress updates.
+       * Upload files sequentially, one request per file, to `/upload/unstable/upload-file`.
+       * Real per-file byte progress comes from `XHR.upload.onprogress`.
        */
-      uploadFilesStream: builder.mutation<CreateFilesStream.Response, UploadFilesArgs>({
+      uploadFiles: builder.mutation<UploadedFile[], UploadFilesArgs>({
         queryFn: async ({ formData, totalFiles }, { dispatch, getState }) => {
           const token = (getState() as RootState).admin_app?.token;
 
-          // Extract file names and sizes from FormData
+          // Extract the original files and their per-file fileInfo from the combined FormData.
           const files = formData.getAll('files') as File[];
           const fileInfoJson = formData.get('fileInfo') as string;
-          const fileInfo = JSON.parse(fileInfoJson) as Array<{ name: string }>;
-          const fileNames = fileInfo.map((info) => info.name);
-          const fileSizes = files.map((file) => file.size);
+          const fileInfoArray = JSON.parse(fileInfoJson) as UploadFileInfo[];
+
+          const entries: UploadEntry[] = files.map((file, index) => ({
+            file,
+            fileInfo: fileInfoArray[index] ?? {
+              name: file.name,
+              caption: null,
+              alternativeText: null,
+              folder: null,
+            },
+          }));
+
+          const fileNames = entries.map((entry) => entry.fileInfo.name ?? entry.file.name);
+          const fileSizes = entries.map((entry) => entry.file.size);
 
           // Open the progress dialog
           dispatch(openUploadProgress({ totalFiles, fileNames, fileSizes }));
-          dispatch(updateProgress(0));
 
           // Get the uploadId from state after dispatching
           const uploadId = (getState() as RootState).uploadProgress.uploadId;
 
-          // Store original files for retry functionality
-          registerUploadedFiles(uploadId, files);
+          // Store original entries for retry functionality
+          registerUploadEntries(uploadId, entries);
 
-          // Create abort controller for this upload
+          // One AbortController per batch
           const abortController = new AbortController();
           registerAbortController(uploadId, abortController);
 
-          return performStreamUpload({
+          return runSequentialUpload({
+            entries,
+            indices: entries.map((_, index) => index),
             token,
-            formData,
-            abortController,
             uploadId,
+            abortController,
             dispatch,
           });
         },
@@ -479,71 +397,41 @@ const uploadApi = adminApi
 
       /**
        * Retry uploading cancelled files.
-       * Retrieves original File objects and re-uploads only the cancelled ones.
+       * Maps cancelled rows back to their original entries and re-runs only those
+       * through the same sequential loop with a fresh AbortController.
        */
-      retryCancelledFilesStream: builder.mutation<CreateFilesStream.Response, void>({
+      retryCancelledFiles: builder.mutation<UploadedFile[], void>({
         queryFn: async (_, { dispatch, getState }) => {
-          const token = (getState() as RootState).admin_app?.token;
           const { uploadId, files: stateFiles } = (getState() as RootState).uploadProgress;
+          const token = (getState() as RootState).admin_app?.token;
 
-          // Get cancelled files with their original indices
-          const cancelledFiles = stateFiles.filter((f) => f.status === 'cancelled');
-          if (cancelledFiles.length === 0) {
+          const cancelledIndices = stateFiles
+            .filter((f) => f.status === 'cancelled')
+            .map((f) => f.index);
+
+          if (cancelledIndices.length === 0) {
             return { error: { name: 'UnknownError', message: 'No cancelled files to retry' } };
           }
 
-          // Get the original File objects
-          const originalFiles = getUploadedFiles(uploadId);
-          if (!originalFiles) {
+          const entries = getUploadEntries(uploadId);
+          if (!entries) {
             return { error: { name: 'UnknownError', message: 'Original files not found' } };
           }
 
-          // Build mapping from new index to original index
-          const indexMapping = cancelledFiles.map((f) => f.index);
-          const filesToRetry = cancelledFiles.map((f) => originalFiles[f.index]);
-
-          // Reset cancelled files to pending
+          // Reset cancelled files back to pending
           dispatch(retryCancelledFiles());
 
-          // Build FormData for retry
-          const formData = new FormData();
-          const fileInfoArray = filesToRetry.map((file) => ({
-            name: file.name,
-            caption: null,
-            alternativeText: null,
-            folder: null, // TODO: preserve folder from original upload if needed
-          }));
-
-          filesToRetry.forEach((file) => {
-            formData.append('files', file);
-          });
-          formData.append('fileInfo', JSON.stringify(fileInfoArray));
-
-          // Create abort controller for this retry
+          // Fresh AbortController for the retry run
           const abortController = new AbortController();
           registerAbortController(uploadId, abortController);
 
-          // Custom error handler: mark individual retried files as failed
-          const onUploadFailed = (message: string) => {
-            for (const originalIndex of indexMapping) {
-              dispatch(
-                setFileError({
-                  index: originalIndex,
-                  name: stateFiles[originalIndex].name,
-                  message,
-                })
-              );
-            }
-          };
-
-          return performStreamUpload({
+          return runSequentialUpload({
+            entries,
+            indices: cancelledIndices,
             token,
-            formData,
-            abortController,
             uploadId,
+            abortController,
             dispatch,
-            indexMapper: (serverIndex) => indexMapping[serverIndex],
-            onUploadFailed,
           });
         },
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
@@ -551,7 +439,7 @@ const uploadApi = adminApi
 
       /**
        * Upload files from URLs.
-       * Sends URLs to the server which fetches and uploads them.
+       * Sends URLs to the server which fetches and uploads them (SSE flow, unchanged).
        */
       uploadFromUrls: builder.mutation<CreateFilesStream.Response, UploadFromUrlsArgs>({
         queryFn: async ({ urls, folderId }, { dispatch, getState }) => {
@@ -567,7 +455,6 @@ const uploadApi = adminApi
               fileNames,
             })
           );
-          dispatch(updateProgress(0));
 
           // Get the uploadId from state after dispatching
           const uploadId = (getState() as RootState).uploadProgress.uploadId;
@@ -647,9 +534,6 @@ const uploadApi = adminApi
     }),
   });
 
-export const {
-  useUploadFilesStreamMutation,
-  useRetryCancelledFilesStreamMutation,
-  useUploadFromUrlsMutation,
-} = uploadApi;
+export const { useUploadFilesMutation, useRetryCancelledFilesMutation, useUploadFromUrlsMutation } =
+  uploadApi;
 export { uploadApi };
