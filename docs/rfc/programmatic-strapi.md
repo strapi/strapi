@@ -446,7 +446,17 @@ precompiled); `compileStrapi` remains a CLI-only concern.
       internally (`normalizePluginsInput`), so the runtime UIDs (`plugin::<name>.*`) and the
       admin `resolve` hint line up with **zero plugin-package changes** (decision 12). Exposed
       from `@strapi/strapi`.
-- End-to-end type inference from `defineApp` into `strapi.documents(...)`.
+- [x] End-to-end type inference from `defineApp` into `strapi.documents(...)`. `defineApp`
+      is a `<const TInput>` generic returning `BrandedApp<TInput>` (`AppDefinition & TInput`),
+      so a definition's literal `singularName`/`uid`/attribute types are preserved (array
+      fields relaxed to `readonly` so `const` inference doesn't widen; the `[APP_DEFINITION]`
+      brand stays present). `infer.ts` maps that into the registry shapes Strapi already keys
+      on — `RegisterContentTypes<typeof app>` / `RegisterComponents<typeof app>` build
+      `{ [uid]: schema }` maps assignable to `Public.ContentTypeSchemas` /
+      `Public.ComponentSchemas` — which a user merges via `declare module '@strapi/strapi'`
+      (the same declaration-merging hook the file-based codegen uses), making
+      `strapi.documents(uid)` UID-constrained and attribute-aware with no runtime change.
+      `fromDisk(...)` sources infer `never`. Exposed from `@strapi/strapi`.
 - Hot-reload parity for programmatic apps in `strapi develop`.
 - Codemod: scaffolded app → single-file `defineApp`.
 - Recipes for embedding Strapi inside existing Koa/Express/Next servers.

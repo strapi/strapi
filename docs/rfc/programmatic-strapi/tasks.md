@@ -230,6 +230,22 @@ checked only after `yarn build` + the relevant tests pass.
    no files to watch. `buildAdmin` + `startStrapi` cover build-once-then-serve, which is
    the Phase 2 goal. Live programmatic admin watch is folded into the Phase 3 hot-reload
    item. _(ADR-0016)_
+9. **Type inference reuses declaration merging, not a new runtime path.** The win is
+   purely compile-time, so it rides Strapi's existing global registries
+   (`Public.ContentTypeSchemas` / `Public.ComponentSchemas`) rather than inventing a
+   parallel system: `RegisterContentTypes<typeof app>` produces the exact `{ [uid]: schema }`
+   shape the file-based `strapi ts:generate-types` codegen emits, so a user merges it with
+   `declare module '@strapi/strapi' { interface ... }` and gets the same UID-constrained,
+   attribute-aware `strapi.documents` the file-based path already has — no document-service
+   changes. Two preconditions surfaced: (a) `defineApp` had to become a `<const TInput>`
+   generic so literals (`'article'`, attribute brands) don't widen, which forced the
+   `AppInput` array fields and `ProgrammaticPlugins` to accept `readonly` arrays; and
+   (b) `BrandedApp` had to be `AppDefinition & TInput` (not `TInput & { brand }`) so
+   contextual typing can never drop the `[APP_DEFINITION]` brand at a call site. Because
+   the benefit is type-only, no `examples/single-file` runtime assertion was added — a
+   booted server can't observe types — the coverage lives in compile-time assertions
+   (`infer.test.ts`, checked by `yarn test:ts`). `globalId`/`category` are typed as
+   `string` placeholders since they're runtime-generated, not declared in code.
 
 ## Deferred (tracked, not Phase 1)
 
@@ -253,7 +269,20 @@ checked only after `yarn build` + the relevant tests pass.
         `__tests__/define-plugin.test.ts` + array cases in `plugins.test.ts`/`define-app.test.ts`;
         end-to-end proof (array boots, plugins keyed by name, auto-CRUD) + a `defineComponent`
         component-attribute round-trip in `examples/single-file/integration.test.cjs`.
-  - [ ] End-to-end type inference into `strapi.documents`.
+  - [x] End-to-end type inference into `strapi.documents`. `defineApp` is now a
+        `<const TInput>` generic returning `BrandedApp<TInput>` (`AppDefinition & TInput`),
+        so the literal `singularName`/`pluralName`/`uid`/attribute types of an in-code
+        definition survive instead of widening (array fields in `types.ts`/`plugins.ts`
+        relaxed to `readonly` for `const` inference; the brand stays present). `infer.ts`
+        turns that definition into the registry shapes Strapi already keys on:
+        `RegisterContentTypes<App>` / `RegisterComponents<App>` (plus `ContentTypeUIDs`,
+        `ComponentUIDs`, `InferContentTypeSchema`) build `{ [uid]: schema }` maps assignable
+        to `Public.ContentTypeSchemas` / `Public.ComponentSchemas`. Users merge them via
+        `declare module '@strapi/strapi'` — the same declaration-merging hook the file-based
+        codegen uses — making `strapi.documents(uid)` UID-constrained and attribute-aware
+        with zero runtime cost. `fromDisk(...)` sources infer `never` (discovered the
+        file-based way). Exposed via `@strapi/core` → `@strapi/strapi`. Compile-time
+        assertions: `__tests__/infer.test.ts`.
   - [ ] Codemod: scaffolded app → single-file `defineApp`.
   - [ ] Embedding recipes (Koa/Express/Next).
   - [ ] `strapi develop` parity / hot-reload for programmatic apps (P9 — admin-watch coupled).
