@@ -286,7 +286,7 @@ The existing app-content loaders are refactored in place into path-parametric co
 Public packaging:
 
 - `@strapi/strapi` re-exports `defineApp`, `defineConfig`, `isAppDefinition`,
-  `createStrapi`, `startStrapi`, and types.
+  `createStrapi`, `startStrapi`, `loadStrapi`, and types.
 - `@strapi/strapi/attributes` — new subpath export for the `is.*` builders.
 
 ### Data flow (programmatic mode)
@@ -376,6 +376,10 @@ const strapi = createStrapi({ app });
 await strapi.register(); // init only
 await strapi.bootstrap(); // set up data model / jobs
 await strapi.start(); // listen
+
+// embed in an existing host (no listen — host owns the port)
+const strapi = await loadStrapi(app);
+host.use('/strapi', strapi.server.app.callback()); // Express example
 ```
 
 `startStrapi(app)` is the primary Phase 1 entry. `strapi start` also works once
@@ -466,7 +470,11 @@ precompiled); `compileStrapi` remains a CLI-only concern.
       maps to `recommendedPlugins()` in generated source; non-empty config uses the
       `plugins: fromDisk()` legacy bridge. Factory auto-CRUD boilerplate is ignored; custom API
       code triggers a warning + `from: fromDisk('.')`. Exposed from `@strapi/strapi`.
-- Recipes for embedding Strapi inside existing Koa/Express/Next servers.
+- [x] Embedding recipes (Koa/Express/Next). `loadStrapi(app)` boots without `listen()` and
+      mounts `strapi.server.app` for host delegation via `callback()`. Runnable recipes under
+      `examples/embedding/` (Koa path delegation, Express `/strapi` mount, Next custom server).
+      Exposed from `@strapi/core` → `@strapi/strapi`. Unit test: `load-strapi.test.ts`; host
+      integration: `examples/embedding/integration.test.cjs`.
 
 ## Resolved decisions (from design discussion)
 

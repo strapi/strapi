@@ -253,6 +253,14 @@ checked only after `yarn build` + the relevant tests pass.
     `from: fromDisk('.')` references — the generated `app.ts` is a starting point, not a
     fully inlined zero-file app. Empty `config/plugins` maps to `recommendedPlugins()` in
     generated source; non-empty plugin config uses the `plugins: fromDisk()` legacy bridge.
+11. **Embedding uses `loadStrapi`, not `startStrapi`.** `startStrapi` calls `load()` then
+    `listen()` and owns the port. For Koa/Express/Next hosts, `loadStrapi(app)` runs the same
+    boot (`register` → `bootstrap`, including `initMiddlewares` + `initRouting`) and calls
+    `server.mount()` so `strapi.server.app.callback()` is ready — but leaves listening to the
+    host. `server.mount()` is required before `callback()` serves routes (same as the internal
+    `listen()` path). Path-prefix mounts (e.g. Express `app.use('/strapi', callback)`) strip the
+    prefix before Strapi sees the request; Koa hosts either delegate matching paths or rewrite
+    `ctx.url` explicitly. Recipes live in `examples/embedding/`.
 
 ## Deferred (tracked, not Phase 1)
 
@@ -302,6 +310,14 @@ checked only after `yarn build` + the relevant tests pass.
         `@strapi/strapi`. Unit tests: `__tests__/scaffold-to-define-app.test.ts` + fixture under
         `__tests__/resources/scaffolded-app/`; end-to-end boot proof in
         `examples/single-file/integration.test.cjs`.
-  - [ ] Embedding recipes (Koa/Express/Next).
+  - [x] Embedding recipes (Koa/Express/Next). `loadStrapi(app, opts?)` (`core/src/index.ts`)
+        is the explicit counterpart to `startStrapi`: runs `load()` + `server.mount()` without
+        `listen()`, so the host owns the HTTP port and delegates via
+        `strapi.server.app.callback()`. Runnable recipes under `examples/embedding/` — shared
+        `app.cjs`, `koa-host.cjs` (path delegation), `express-host.cjs` (mount at `/strapi`),
+        `next-host.cjs` (Next custom server + `/strapi` mount). No extra magic helpers beyond
+        `loadStrapi`; path-prefix stripping is the host's responsibility (Express does it
+        automatically). Unit test: `__tests__/load-strapi.test.ts`; host integration:
+        `examples/embedding/integration.test.cjs`.
   - [ ] `strapi develop` parity / hot-reload for programmatic apps (P9 — admin-watch coupled).
   - [ ] ESM-native execution (dual-build packaging fix; see open questions).
