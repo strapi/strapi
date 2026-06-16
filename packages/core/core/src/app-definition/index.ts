@@ -9,6 +9,13 @@ export { defineApp } from './define-app';
 export type { BrandedApp } from './define-app';
 export { defineComponent } from './define-component';
 export { definePlugin } from './define-plugin';
+export { scaffoldToDefineApp } from './scaffold-to-define-app';
+export { printDefineAppSource } from './print-define-app-source';
+export type {
+  ScaffoldToDefineAppOptions,
+  ScaffoldToDefineAppResult,
+} from './scaffold-to-define-app';
+export type { PrintDefineAppSourceOptions } from './print-define-app-source';
 export { defineConfig, defineDatabaseConfig, defineServerConfig } from './config';
 export { fromDisk } from './sources';
 export {

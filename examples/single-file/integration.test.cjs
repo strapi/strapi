@@ -23,6 +23,7 @@ const {
   defineConfig,
   fromDisk,
   createStrapi,
+  scaffoldToDefineApp,
 } = require('@strapi/strapi');
 const is = require('@strapi/strapi/attributes');
 const { recommendedPlugins } = require('@strapi/strapi/plugins');
@@ -225,6 +226,38 @@ test('G3: fromDisk content types boot and register their model', async () => {
 
     const hasTable = await strapi.db.connection.schema.hasTable(model.collectionName);
     assert.strictEqual(hasTable, true, 'fromDisk content type schema synced');
+  } finally {
+    await strapi.destroy();
+  }
+});
+
+test('Phase 3: scaffoldToDefineApp — converted fixture boots with inlined CTs', async () => {
+  const fixtureRoot = path.join(
+    __dirname,
+    '../../packages/core/core/src/app-definition/__tests__/resources/scaffolded-app'
+  );
+  const { definition } = scaffoldToDefineApp({ projectRoot: fixtureRoot });
+
+  const app = defineApp({
+    ...definition,
+    config: baseConfig('.tmp/codemod.db'),
+    plugins: recommendedPlugins(),
+  });
+
+  const strapi = createStrapi({ app, serveAdminPanel: false });
+  await strapi.start();
+
+  try {
+    const article = strapi.getModel('api::article.article');
+    assert.ok(article, 'codemod-inlined article content type is registered');
+    assert.strictEqual(article.info.singularName, 'article');
+
+    const quote = strapi.getModel('shared.quote');
+    assert.ok(quote, 'codemod-inlined shared.quote component is registered');
+    assert.strictEqual(quote.modelType, 'component');
+
+    const hasArticleTable = await strapi.db.connection.schema.hasTable(article.collectionName);
+    assert.strictEqual(hasArticleTable, true, 'article schema synced after codemod conversion');
   } finally {
     await strapi.destroy();
   }

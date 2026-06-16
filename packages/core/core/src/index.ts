@@ -18,6 +18,8 @@ export {
   defineDatabaseConfig,
   defineServerConfig,
   fromDisk,
+  scaffoldToDefineApp,
+  printDefineAppSource,
   isAppDefinition,
   isDiskSource,
   isDefinedPlugin,
@@ -46,6 +48,9 @@ export type {
   ComponentUIDs,
   InferContentTypeSchema,
   InferComponentSchema,
+  ScaffoldToDefineAppOptions,
+  ScaffoldToDefineAppResult,
+  PrintDefineAppSourceOptions,
 } from './app-definition';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
