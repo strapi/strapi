@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-Each ADR captures one architecturally significant decision for **Strapi as a Primitive**:
+Each ADR captures one architecturally significant decision for **Programmatic Strapi**:
 its context, the decision, consequences, and alternatives considered. ADRs are immutable
 once accepted; supersede rather than edit.
 

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Browser-level smoke test for the programmatic ("Strapi as a primitive") host.
+ * Browser-level smoke test for the programmatic Strapi host.
  *
  * The server is booted by Playwright's `webServer` (see `playwright.config.ts`)
  * straight from the compiled `index.ts` — i.e. `defineApp(...)` +
@@ -19,8 +19,8 @@ test('renders the programmatic server page in a real browser', async ({ page }) 
 
   expect(response?.ok(), 'GET /api/hello should respond 2xx').toBeTruthy();
 
-  await expect(page).toHaveTitle('Strapi as a primitive');
-  await expect(page.locator('#heading')).toHaveText('Strapi as a primitive');
+  await expect(page).toHaveTitle('Programmatic Strapi');
+  await expect(page.locator('#heading')).toHaveText('Programmatic Strapi');
   await expect(page.locator('#status')).toHaveText('The programmatic server is running.');
 });
 

@@ -2,7 +2,7 @@
   "name": "example-single-file",
   "version": "0.0.0",
   "private": true,
-  "description": "Strapi as a primitive — single-file headless app (defineApp + startStrapi)",
+  "description": "Programmatic Strapi — single-file headless app (defineApp + startStrapi)",
   "scripts": {
     "start": "node start.cjs",
     "test": "node integration.test.cjs"

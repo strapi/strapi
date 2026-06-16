@@ -1,6 +1,6 @@
 # C4 L1 — System Context
 
-How a **programmatic Strapi app** (Strapi used as a primitive) sits among its users and
+How a **programmatic Strapi app** sits among its users and
 the external systems it interacts with. At this zoom level nothing changes versus a
 legacy Strapi app except _who authors the application and how_ — the runtime still talks
 to the same database, clients, plugins, and email/upload providers.
@@ -34,11 +34,11 @@ graph TB
 
 ## Actors
 
-| Actor          | Relationship                                                                                                                                                                                                                 |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Developer**  | Either authors an app declaratively in TypeScript (`defineApp`) and runs it (`startStrapi` / `strapi start`), **or** uses the existing file-scaffolding + CLI flow. The primitive flow is new; the legacy flow is unchanged. |
-| **API Client** | Calls the REST Content API. Identical surface whether the app is programmatic or legacy (same routing, sanitization, RBAC).                                                                                                  |
-| **Admin User** | Uses the admin panel. **Out of scope for Phase 1** (no panel built/served); Phase 2.                                                                                                                                         |
+| Actor          | Relationship                                                                                                                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Developer**  | Either authors an app declaratively in TypeScript (`defineApp`) and runs it (`startStrapi` / `strapi start`), **or** uses the existing file-scaffolding + CLI flow. The programmatic flow is new; the legacy flow is unchanged. |
+| **API Client** | Calls the REST Content API. Identical surface whether the app is programmatic or legacy (same routing, sanitization, RBAC).                                                                                                     |
+| **Admin User** | Uses the admin panel. **Out of scope for Phase 1** (no panel built/served); Phase 2.                                                                                                                                            |
 
 ## External systems
 
@@ -57,6 +57,6 @@ graph TB
 - **Zero breaking changes.** The legacy mode path is byte-for-byte unchanged; this is the
   top constraint (ADR-0002).
 - **Same external contracts.** Database, Content API, plugin, and provider contracts are
-  unchanged — the primitive only changes _how the application is described and started_.
+  unchanged — the programmatic API only changes _how the application is described and started_.
 
 See [L2 — Containers](./02-containers.md) for the package/runtime breakdown.

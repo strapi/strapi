@@ -1,5 +1,5 @@
 /**
- * The programmatic ("Strapi as a primitive") app definition.
+ * The programmatic Strapi app definition.
  *
  * A single file that *defines* a Strapi app with no `config/**`, no
  * `src/api/**`, and no `package.json` plugin scan — the programmatic definition
@@ -69,11 +69,11 @@ const app = defineApp({
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Strapi as a primitive</title>
+    <title>Programmatic Strapi</title>
   </head>
   <body>
     <main>
-      <h1 id="heading">Strapi as a primitive</h1>
+      <h1 id="heading">Programmatic Strapi</h1>
       <p id="status">The programmatic server is running.</p>
     </main>
   </body>

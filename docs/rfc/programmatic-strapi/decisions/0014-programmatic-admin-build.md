@@ -7,8 +7,8 @@
 The admin build pipeline (`createBuildContext` → `writeStaticClientFiles` → vite/webpack)
 was written for **scaffolded, file-based apps**: it creates a Strapi instance by scanning
 `appDir`, and derives the admin's frontend plugin set from `strapi.config.info.dependencies`
-(the app's `package.json` deps) plus `config/plugins.js`. A programmatic ("Strapi as a
-primitive") app has neither a scannable project layout nor a `package.json` plugin list —
+(the app's `package.json` deps) plus `config/plugins.js`. A programmatic app has neither a
+scannable project layout nor a `package.json` plugin list —
 the `defineApp(...)` definition is the single source of truth (ADR-0001, ADR-0006).
 
 ## Decision

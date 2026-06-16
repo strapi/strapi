@@ -1,4 +1,4 @@
-# single-file — Strapi as a primitive
+# single-file — Programmatic Strapi
 
 A complete headless Strapi app defined in **one file** via `defineApp(...)`,
 started with `startStrapi(app)`.

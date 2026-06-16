@@ -1,4 +1,4 @@
-# programmatic-server — Strapi as a primitive (host + admin panel + browser smoke test)
+# programmatic-server — Programmatic Strapi (host + admin panel + browser smoke test)
 
 A minimal host defined in code with **no `config/**`, no `src/api/**`, no
 `package.json` plugin scan** — the programmatic definition is the single source

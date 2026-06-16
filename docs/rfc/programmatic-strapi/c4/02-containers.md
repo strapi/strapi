@@ -1,7 +1,7 @@
 # C4 L2 — Containers
 
 "Containers" here are the **packages / deployable+importable units** and the runtime
-process. For a primitive, the "container" is mostly _your Node process_ that imports
+process. For a programmatic app, the "container" is mostly _your Node process_ that imports
 `@strapi/strapi`.
 
 ```mermaid

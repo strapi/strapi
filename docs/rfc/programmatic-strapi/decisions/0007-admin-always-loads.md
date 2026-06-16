@@ -4,7 +4,7 @@
 
 ## Context
 
-The "primitive / headless" framing suggested a pure API with no admin at all. Code review
+The "programmatic / headless" framing suggested a pure API with no admin at all. Code review
 shows `admin` is an always-on **provider** (not a plugin): it `require`s
 `@strapi/admin/strapi-server` at init and registers `admin::user` plus permission content
 types. Every content type also gets `createdBy`/`updatedBy` relations targeting

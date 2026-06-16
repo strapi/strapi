@@ -26,5 +26,5 @@ Guard the `package.json` read in `loadConfiguration`:
 
 ## Alternatives considered
 
-- **Require a `package.json` always.** Rejected: defeats the "import and run" primitive
+- **Require a `package.json` always.** Rejected: defeats the "import and run" programmatic
   goal.

@@ -1,14 +1,14 @@
-# Strapi as a Primitive — Design Set
+# Programmatic Strapi — Design Set
 
-This folder is the structured design package for **Strapi as a Primitive**, derived
-from the narrative RFC at [`../strapi-as-a-primitive.md`](../strapi-as-a-primitive.md).
+This folder is the structured design package for **Programmatic Strapi**, derived
+from the narrative RFC at [`../programmatic-strapi.md`](../programmatic-strapi.md).
 
 The RFC remains the prose source of truth (motivation, discussion, trade-offs). The
 files here re-express that design using the [C4 model](https://c4model.com/) plus
 Architecture Decision Records (ADRs) and an implementation checklist, so the plan is
 navigable top-down and each significant decision is individually traceable.
 
-## What is "Strapi as a Primitive"?
+## What is "Programmatic Strapi"?
 
 Make Strapi usable as a **library you import and wire up** (`defineApp` + `startStrapi`)
 in addition to the existing scaffolded-app + CLI experience — with **zero breaking
@@ -18,7 +18,7 @@ changes** to legacy apps. See the RFC summary for the canonical example.
 
 | Document                                               | C4 level / purpose                                                                                |
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| [`c4/01-system-context.md`](./c4/01-system-context.md) | **L1 — System Context.** Who uses Strapi-as-a-primitive and the systems it touches.               |
+| [`c4/01-system-context.md`](./c4/01-system-context.md) | **L1 — System Context.** Who uses Programmatic Strapi and the systems it touches.                 |
 | [`c4/02-containers.md`](./c4/02-containers.md)         | **L2 — Containers.** Packages/exports and how a programmatic app runs.                            |
 | [`c4/03-components.md`](./c4/03-components.md)         | **L3 — Components.** The `app-definition` module + refactored loaders inside `@strapi/core`.      |
 | [`c4/04-code.md`](./c4/04-code.md)                     | **L4 — Code.** Key types, signatures, brands, and integration seams.                              |

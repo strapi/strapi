@@ -1,6 +1,6 @@
 /* eslint-disable */
 /**
- * End-to-end integration test for "Strapi as a primitive" (Phase 1).
+ * End-to-end integration test for Programmatic Strapi (Phase 1).
  *
  * Boots a fully programmatic app (no `config/**`, no `src/api/**`, no
  * `package.json` plugin scan), then asserts:

@@ -1,15 +1,15 @@
-# RFC: Strapi as a Primitive
+# RFC: Programmatic Strapi
 
 > Status: **Draft / Phase 1 design agreed — implementation not started**
-> Branch: `feat/strapi-as-a-primitive`
+> Branch: `feat/import-strapi`
 >
 > This is the narrative source of truth. A structured C4 view, per-decision ADRs, and
 > the implementation checklist derived from it live in
-> [`docs/rfc/strapi-as-a-primitive/`](./strapi-as-a-primitive/README.md).
+> [`docs/rfc/programmatic-strapi/`](./programmatic-strapi/README.md).
 
 ## Summary
 
-Make Strapi usable as a **library primitive** — something you `import` and wire up
+Make Strapi usable as a **programmatic library** — something you `import` and wire up
 inside your own Node project — in addition to the existing "scaffolded app you run
 with the CLI" experience.
 
@@ -424,7 +424,7 @@ precompiled); `compileStrapi` remains a CLI-only concern.
       flips `serveAdminPanel` (explicit option still wins); headless otherwise.
 - [x] CTB **read-only** for programmatic content types, **writable** only for file-backed
       ones — tagged by origin (`pluginOptions['content-type-builder'].origin =
-  'programmatic'`). `formatContentType` exposes `editable`; the update/delete
+'programmatic'`). `formatContentType` exposes `editable`; the update/delete
       controllers reject programmatic CTs.
 - [x] End-to-end proof: `examples/programmatic-server` builds the panel from the
       programmatic definition and a Playwright smoke test asserts it renders in a real

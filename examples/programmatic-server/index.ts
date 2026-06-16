@@ -1,5 +1,5 @@
 /**
- * Start the programmatic ("Strapi as a primitive") server.
+ * Start the programmatic Strapi server.
  *
  * `startStrapi(app)` serves the admin **panel** automatically when a build
  * exists at `<cwd>/build` (produced by `build-admin.ts` / `buildAdmin`), and

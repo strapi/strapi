@@ -5,7 +5,7 @@
 ## Context
 
 Strapi has a large installed base of file-based apps and a published public API. The
-primitive must be purely additive — no existing app, type, export, or runtime behavior
+programmatic API must be purely additive — no existing app, type, export, or runtime behavior
 may change.
 
 ## Decision

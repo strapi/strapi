@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Self-contained Playwright smoke test for "Strapi as a primitive".
+ * Self-contained Playwright smoke test for Programmatic Strapi.
  *
  * Unlike the main `tests/e2e` harness (which generates a full scaffolded app and
  * builds the admin panel), this boots the *programmatic* headless server from

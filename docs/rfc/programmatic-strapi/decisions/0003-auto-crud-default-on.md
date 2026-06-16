@@ -19,7 +19,7 @@ producing CRUD at `/api/<pluralName>` — matching legacy behavior. `api: false`
 
 - Parity with legacy expectations; the screenshot example "just works".
 - Reuses battle-tested factories — no new CRUD code paths.
-- Opt-out preserves the "primitive" feel for users who want only custom routes.
+- Opt-out preserves the minimal, programmatic feel for users who want only custom routes.
 
 ## Alternatives considered
 

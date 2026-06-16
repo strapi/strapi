@@ -1,5 +1,5 @@
 /**
- * `app-definition` — the programmatic ("Strapi as a primitive") surface.
+ * `app-definition` — the programmatic Strapi surface.
  *
  * Internals live in `@strapi/core`; the public surface is re-exported via
  * `@strapi/strapi` (and the `is.*` builders via `@strapi/strapi/attributes`).

@@ -2,7 +2,7 @@
   "name": "example-programmatic-server",
   "version": "0.0.0",
   "private": true,
-  "description": "Strapi as a primitive — minimal single-file host (defineApp + startStrapi) with a Playwright browser smoke test",
+  "description": "Programmatic Strapi — minimal single-file host (defineApp + startStrapi) with a Playwright browser smoke test",
   "scripts": {
     "build": "tsc",
     "build:admin": "tsc && node dist/build-admin.js",

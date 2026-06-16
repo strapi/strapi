@@ -1,5 +1,5 @@
 /**
- * Build the admin **panel** for the programmatic ("Strapi as a primitive") app.
+ * Build the admin **panel** for the programmatic Strapi app.
  *
  * `buildAdmin({ app })` is the Phase 2 façade over Strapi's node build pipeline:
  * it accepts the `defineApp(...)` definition directly (no `config/**` /
