@@ -6,6 +6,7 @@
  */
 
 export { defineApp } from './define-app';
+export type { BrandedApp } from './define-app';
 export { defineComponent } from './define-component';
 export { definePlugin } from './define-plugin';
 export { defineConfig, defineDatabaseConfig, defineServerConfig } from './config';
@@ -40,6 +41,20 @@ export {
 export type { AdminPluginResolution, ProgrammaticPlugins } from './plugins';
 
 export * as attributes from './attributes';
+
+export type {
+  RegisterContentTypes,
+  RegisterComponents,
+  ContentTypeUID,
+  ContentTypeUIDs,
+  ComponentUID,
+  ComponentUIDs,
+  InferContentTypeSchema,
+  InferComponentSchema,
+  InCodeContentTypes,
+  InCodeComponents,
+  ContentTypeApiName,
+} from './infer';
 
 export type { AppConfig } from './config';
 export type { DiskSource, Source } from './sources';

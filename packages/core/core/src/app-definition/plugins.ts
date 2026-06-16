@@ -12,7 +12,7 @@ import type { DefinedPlugin, PluginEntry, PluginModule } from './types';
  * (`loadProgrammaticPlugins` at runtime, `getAdminPluginResolutions` for the
  * admin build) normalize this to the map form via {@link normalizePluginsInput}.
  */
-export type ProgrammaticPlugins = Record<string, PluginEntry> | DefinedPlugin[];
+export type ProgrammaticPlugins = Record<string, PluginEntry> | readonly DefinedPlugin[];
 
 /**
  * Normalize the programmatic `plugins` field into the canonical name-keyed map.
@@ -26,13 +26,15 @@ export type ProgrammaticPlugins = Record<string, PluginEntry> | DefinedPlugin[];
 export const normalizePluginsInput = (
   plugins: ProgrammaticPlugins
 ): Record<string, PluginEntry> => {
+  // `Array.isArray` does not narrow a `readonly` array out of the union, so the
+  // two branches are disambiguated with explicit casts.
   if (!Array.isArray(plugins)) {
-    return plugins;
+    return plugins as Record<string, PluginEntry>;
   }
 
   const map: Record<string, PluginEntry> = {};
 
-  for (const entry of plugins) {
+  for (const entry of plugins as readonly DefinedPlugin[]) {
     if (!isDefinedPlugin(entry)) {
       throw new Error(
         'The `plugins` array only accepts definePlugin(...) entries (a bare module has no name to key on)'

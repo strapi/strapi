@@ -29,6 +29,7 @@ export type {
   AppContentType,
   AppComponent,
   AppConfig,
+  BrandedApp,
   PluginEntry,
   PluginModule,
   PluginsInput,
@@ -37,6 +38,14 @@ export type {
   RouteBuilder,
   DiskSource,
   AdminPluginResolution,
+  RegisterContentTypes,
+  RegisterComponents,
+  ContentTypeUID,
+  ContentTypeUIDs,
+  ComponentUID,
+  ComponentUIDs,
+  InferContentTypeSchema,
+  InferComponentSchema,
 } from './app-definition';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {

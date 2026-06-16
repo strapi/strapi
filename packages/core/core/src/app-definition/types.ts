@@ -123,7 +123,7 @@ export interface DefinedPlugin extends DefinePluginInput {
  * array of {@link definePlugin} results, or a `fromDisk()` legacy-discovery
  * bridge.
  */
-export type PluginsInput = Record<string, PluginEntry> | DefinedPlugin[] | DiskSource;
+export type PluginsInput = Record<string, PluginEntry> | readonly DefinedPlugin[] | DiskSource;
 
 /**
  * A lifecycle function composed into `strapi.app` and run by `runUserLifecycles`.
@@ -139,11 +139,16 @@ export interface AppDefinition {
   /** Consumed at STAGE 1 (loadConfiguration) — see ADR-0008. */
   config?: Source<AppConfig>;
 
-  /** Strict, explicit content types (ADR-0004). */
-  contentTypes?: Source<AppContentType[]>;
+  /**
+   * Strict, explicit content types (ADR-0004). Declared `readonly` so a
+   * `defineApp({ contentTypes: [...] })` literal keeps its element types (and
+   * the per-content-type names/attributes) for the {@link RegisterContentTypes}
+   * type-inference helper — a mutable array is still assignable here.
+   */
+  contentTypes?: Source<readonly AppContentType[]>;
 
   /** Route DSL factory or explicit route inputs. */
-  routes?: Source<RouteBuilder | Core.RouteInput[]>;
+  routes?: Source<RouteBuilder | readonly Core.RouteInput[]>;
 
   controllers?: Source<Record<string, Core.Controller>>;
   services?: Source<Record<string, Core.Service>>;
@@ -156,7 +161,7 @@ export interface AppDefinition {
    * (`<category>.<name>`); that component must be provided here or loaded from
    * disk (ADR-0004).
    */
-  components?: Source<AppComponent[]>;
+  components?: Source<readonly AppComponent[]>;
 
   /**
    * Import-and-add plugins (ADR-0006). Either a map keyed by canonical name, an
