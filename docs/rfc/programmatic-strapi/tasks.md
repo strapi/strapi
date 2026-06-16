@@ -236,6 +236,25 @@ checked only after `yarn build` + the relevant tests pass.
 - **Phase 2 (done):** `buildAdmin({ app, dir })`; serve panel; CTB read-only for
   programmatic content types (origin tag); no-files admin build (builder reworked to
   accept object input). _(P1–P8 above.)_
-- **Phase 3:** `defineComponent`, `definePlugin({ name })` + array plugin form;
-  end-to-end type inference into `strapi.documents`; codemod; embedding recipes;
-  `strapi develop` parity / hot-reload for programmatic apps (P9 — admin-watch coupled).
+- **Phase 3 (in progress):**
+  - [x] `defineComponent` — in-code components normalized into the `components` registry
+        (`app-definition/define-component.ts` + `normalizeComponent`/`buildComponentMap` in
+        `normalize.ts`; `loadComponents` in `load.ts` handles the in-code array alongside the
+        existing `fromDisk`/`from` paths). Identity is an explicit `uid` (`<category>.<name>`,
+        both kebab-case). Exposed via `@strapi/core` → `@strapi/strapi`. Unit tests:
+        `__tests__/define-component.test.ts` + component cases in `load.test.ts`/`define-app.test.ts`.
+  - [x] `definePlugin({ name })` + array plugin form (`plugins: [definePlugin({ name, plugin })]`).
+        `definePlugin` (`app-definition/define-plugin.ts`, branded `PLUGIN_DEFINITION`) carries
+        the canonical name on the value; `normalizePluginsInput` (`plugins.ts`) folds the array
+        back into the name-keyed map so `loadProgrammaticPlugins`/`getAdminPluginResolutions`
+        (runtime + admin build) are unchanged — UIDs (`plugin::<name>.*`) and the admin `resolve`
+        hint still line up with zero plugin-package changes (ADR-0006). The map form keeps
+        working. Exposed via `@strapi/core` → `@strapi/strapi`. Unit tests:
+        `__tests__/define-plugin.test.ts` + array cases in `plugins.test.ts`/`define-app.test.ts`;
+        end-to-end proof (array boots, plugins keyed by name, auto-CRUD) + a `defineComponent`
+        component-attribute round-trip in `examples/single-file/integration.test.cjs`.
+  - [ ] End-to-end type inference into `strapi.documents`.
+  - [ ] Codemod: scaffolded app → single-file `defineApp`.
+  - [ ] Embedding recipes (Koa/Express/Next).
+  - [ ] `strapi develop` parity / hot-reload for programmatic apps (P9 — admin-watch coupled).
+  - [ ] ESM-native execution (dual-build packaging fix; see open questions).

@@ -434,7 +434,18 @@ precompiled); `compileStrapi` remains a CLI-only concern.
 
 ### Phase 3 — Ecosystem & DX
 
-- `defineComponent`, `definePlugin`.
+- [x] `defineComponent` — in-code components (`components: [defineComponent({...})]`),
+      normalized into the `components` registry alongside the existing `fromDisk` path.
+      Identity is an explicit `uid` (`<category>.<name>`, both kebab-case); no
+      filename-derived names. Supersedes the Phase 1 "components are disk-only" limit
+      (decision 18). Exposed from `@strapi/strapi`.
+- [x] `definePlugin({ name })` + array plugin form — `definePlugin` carries the canonical
+      name **on the value** (`{ name, plugin, enabled?, config?, resolve? }`), unlocking the
+      array form `plugins: [definePlugin({ name: 'users-permissions', plugin: usersPermissions })]`
+      next to the existing name-keyed map. Both forms normalize to the same name-keyed map
+      internally (`normalizePluginsInput`), so the runtime UIDs (`plugin::<name>.*`) and the
+      admin `resolve` hint line up with **zero plugin-package changes** (decision 12). Exposed
+      from `@strapi/strapi`.
 - End-to-end type inference from `defineApp` into `strapi.documents(...)`.
 - Hot-reload parity for programmatic apps in `strapi develop`.
 - Codemod: scaffolded app → single-file `defineApp`.
