@@ -105,7 +105,7 @@
     "node-schedule": "2.1.1",
     "open": "8.4.2",
     "ora": "5.4.1",
-    "package-json": "7.0.0",
+    "package-json": "10.0.1",
     "pkg-up": "3.1.0",
     "qs": "6.15.2",
     "resolve.exports": "2.0.2",
