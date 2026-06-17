@@ -1,4 +1,4 @@
-name: Notify docs team on "flag: requires manual documentation" label
+name: 'Notify docs team on "flag: requires manual documentation" label'
 
 on:
   pull_request:
