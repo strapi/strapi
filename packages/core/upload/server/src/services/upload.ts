@@ -341,7 +341,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * an atomic replace can use it. Formats that no longer exist on the new image
    * are deleted; formats that didn't exist on the old image are uploaded fresh.
    */
-  async function uploadImageReplacing(fileData: UploadableFile, oldFile: File) {
+  async function replaceImage(fileData: UploadableFile, oldFile: File) {
     const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
       getService('image-manipulation');
 
@@ -488,14 +488,24 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ext: dbFile.ext,
       });
 
-      // clear old formats — uploadImageReplacing / replace will set new ones
+      // clear old formats — replaceImage / replace will set new ones
       _.set(fileData, 'formats', {});
 
       if (dbFile.provider === config.provider) {
         if (await isImage(fileData)) {
-          await uploadImageReplacing(fileData, dbFile);
+          await replaceImage(fileData, dbFile);
         } else {
+          // The new file is not an image, so it has no formats. Replace the main
+          // file, then delete any formats the old image left behind — otherwise
+          // they're orphaned in storage since the DB record no longer tracks them.
           await getService('provider').replace(fileData, dbFile);
+          if (dbFile.formats) {
+            await Promise.all(
+              Object.keys(dbFile.formats).map((key) =>
+                strapi.plugin('upload').provider.delete(dbFile.formats![key] as File)
+              )
+            );
+          }
         }
       } else if (await isImage(fileData)) {
         // Cross-provider replacement: no delete on the old provider, upload to the new one.
