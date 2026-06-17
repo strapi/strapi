@@ -88,12 +88,18 @@ const resolvePermissionPropertyValues = (
   property: SubjectProperty,
   matchingPermission?: Permission
 ): string[] => {
-  const storedValues = matchingPermission?.properties[property.value] ?? [];
+  const rawValue = matchingPermission?.properties[property.value];
+
+  // null means "all locales" — expand to every available locale rather than
+  // folding into [] which would then narrow to [defaultLocale] on save.
+  if (rawValue === null && property.value === 'locales') {
+    return (property.children ?? []).map((child) => child.value);
+  }
+
+  const storedValues: string[] = Array.isArray(rawValue) ? rawValue : [];
 
   const shouldDefaultToLocale =
-    property.value === 'locales' &&
-    matchingPermission !== undefined &&
-    (!Array.isArray(storedValues) || storedValues.length === 0);
+    property.value === 'locales' && matchingPermission !== undefined && storedValues.length === 0;
 
   if (!shouldDefaultToLocale) {
     return storedValues;
