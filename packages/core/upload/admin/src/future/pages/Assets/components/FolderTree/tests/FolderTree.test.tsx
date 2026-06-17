@@ -63,11 +63,37 @@ describe('FolderTree', () => {
     expect(screen.queryByRole('button', { name: 'Inner A1' })).not.toBeInTheDocument();
   });
 
-  it('does not render an expand control on leaf folders', () => {
-    renderTree();
+  it('toggles a leaf folder chevron without revealing children or navigating', () => {
+    const onSelectFolder = jest.fn();
+    renderTree({ onSelectFolder });
 
-    expect(screen.queryByRole('button', { name: /expand top b/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /collapse top b/i })).not.toBeInTheDocument();
+    const expandLeaf = screen.getByRole('button', { name: /expand top b/i });
+    expect(expandLeaf).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(expandLeaf);
+
+    expect(onSelectFolder).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: /collapse top b/i })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(screen.queryByRole('button', { name: 'Inner A1' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /collapse top b/i }));
+
+    expect(screen.getByRole('button', { name: /expand top b/i })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+  });
+
+  it('does not auto-expand the destination folder when navigating to a leaf', () => {
+    renderTree({ currentFolderId: 5 });
+
+    expect(screen.getByRole('button', { name: /expand top b/i })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
   });
 
   it('marks "Home" as the active row when currentFolderId is null', () => {

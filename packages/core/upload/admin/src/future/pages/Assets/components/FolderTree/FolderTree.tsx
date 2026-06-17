@@ -191,7 +191,7 @@ const FolderTreeItem = ({
   const id = node.id;
   const name = node.name ?? '';
   const hasChildren = (node.children?.length ?? 0) > 0;
-  const expanded = hasChildren && isExpanded(id);
+  const isFolderExpanded = isExpanded(id);
   const isActive = currentFolderId === id;
 
   // TODO: full `role="tree"` + arrow-key treeview navigation before revamp GA
@@ -199,26 +199,26 @@ const FolderTreeItem = ({
   return (
     <li>
       <Flex alignItems="center" paddingLeft={`${level * INDENT_PER_LEVEL_REM}rem`} gap={1}>
-        {hasChildren ? (
-          <IconButton
-            label={formatMessage(
-              {
-                id: getTranslationKey(expanded ? 'sidebar.tree.collapse' : 'sidebar.tree.expand'),
-                defaultMessage: expanded ? 'Collapse {name}' : 'Expand {name}',
-              },
-              { name }
-            )}
-            onClick={(event: React.MouseEvent) => {
-              event.stopPropagation();
-              onToggle(id);
-            }}
-            variant="ghost"
-            withTooltip={false}
-            aria-expanded={expanded}
-          >
-            <RotatingChevron $expanded={expanded} fill="neutral500" />
-          </IconButton>
-        ) : null}
+        <IconButton
+          label={formatMessage(
+            {
+              id: getTranslationKey(
+                isFolderExpanded ? 'sidebar.tree.collapse' : 'sidebar.tree.expand'
+              ),
+              defaultMessage: isFolderExpanded ? 'Collapse {name}' : 'Expand {name}',
+            },
+            { name }
+          )}
+          onClick={(event: React.MouseEvent) => {
+            event.stopPropagation();
+            onToggle(id);
+          }}
+          variant="ghost"
+          withTooltip={false}
+          aria-expanded={isFolderExpanded}
+        >
+          <RotatingChevron $expanded={isFolderExpanded} fill="neutral500" />
+        </IconButton>
 
         <Box flex="1" minWidth={0}>
           <RowButton
@@ -234,7 +234,7 @@ const FolderTreeItem = ({
         </Box>
       </Flex>
 
-      {expanded && (
+      {hasChildren && isFolderExpanded && (
         <Box tag="ul" margin={0} padding={0} style={{ listStyle: 'none' }}>
           {node.children.map((child) => (
             <FolderTreeItem
