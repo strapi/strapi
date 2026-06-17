@@ -155,6 +155,16 @@ const TruncatedFolderName = ({ name, isActive }: { name: string; isActive: boole
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * NavList — unstyled list for tree rows
+ * -----------------------------------------------------------------------------------------------*/
+
+const NavList = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`;
+
+/* -------------------------------------------------------------------------------------------------
  * FolderTreeItem — single tree row (internal)
  * -----------------------------------------------------------------------------------------------*/
 
@@ -235,7 +245,7 @@ const FolderTreeItem = ({
       </Flex>
 
       {hasChildren && isFolderExpanded && (
-        <Box tag="ul" margin={0} padding={0} style={{ listStyle: 'none' }}>
+        <NavList>
           {node.children.map((child) => (
             <FolderTreeItem
               key={child.id ?? child.name}
@@ -247,7 +257,7 @@ const FolderTreeItem = ({
               onSelect={onSelect}
             />
           ))}
-        </Box>
+        </NavList>
       )}
     </li>
   );
@@ -256,12 +266,6 @@ const FolderTreeItem = ({
 /* -------------------------------------------------------------------------------------------------
  * FolderTree — public sidebar component
  * -----------------------------------------------------------------------------------------------*/
-
-const NavList = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-`;
 
 const SidebarNav = styled(Flex)`
   /* TODO: reconcile 25.6rem (Figma) with admin WIDTH_SIDE_NAVIGATION (23.2rem) */
