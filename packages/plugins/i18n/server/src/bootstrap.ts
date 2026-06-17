@@ -101,8 +101,6 @@ export default async () => {
   // Hooks & Models
   registerModelsHooks();
 
-  await actions.repairLegacyPermissionsWithLocales();
-
   // AI Localizations
   if (strapi.ai.admin.isEnabled() === true) {
     getService('ai-localizations').setupMiddleware();

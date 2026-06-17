@@ -1,6 +1,5 @@
 import { isArray, getOr, prop } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { UID } from '@strapi/types';
 import { getService } from '../../utils';
 
 const { ApplicationError } = errors;
@@ -120,80 +119,6 @@ const needsLocalesPatch = (properties: Record<string, unknown> = {}) => {
   return Array.isArray(locales) && locales.length === 0;
 };
 
-const getLocalizedContentType = (subject: string) => {
-  return strapi.getModel(subject as UID.Schema);
-};
-
-/**
- * Patches stored role permissions on localized content types when `properties.locales`
- * is missing or empty (e.g. after enabling i18n on an existing type). Without this,
- * the engine treats locale scope as "none" and roles lose access. `locales: null` is left
- * unchanged (all locales). Runs on bootstrap and after content-type sync.
- */
-const repairLegacyPermissionsWithLocales = async () => {
-  try {
-    const defaultLocaleCode = await getService('locales').getDefaultLocale();
-
-    if (!defaultLocaleCode) {
-      return;
-    }
-
-    const { isLocalizedContentType } = getService('content-types');
-    const permissionService = strapi.service('admin::permission');
-    const { actionProvider } = permissionService;
-    const allPermissions = await permissionService.findMany({});
-
-    const permissionsToPatch = [];
-
-    for (const permission of allPermissions) {
-      const { action, subject, properties = {} } = permission;
-
-      if (!subject) {
-        continue;
-      }
-
-      const model = getLocalizedContentType(subject);
-
-      if (!model || !isLocalizedContentType(model)) {
-        continue;
-      }
-
-      const appliesToLocales = await actionProvider.appliesToProperty('locales', action, subject);
-
-      if (!appliesToLocales) {
-        continue;
-      }
-
-      if (!needsLocalesPatch(properties)) {
-        continue;
-      }
-
-      permissionsToPatch.push(permission);
-    }
-
-    await Promise.all(
-      permissionsToPatch.map((permission) => {
-        const { properties = {} } = permission;
-
-        return strapi.db.query('admin::permission').update({
-          where: { id: permission.id },
-          data: {
-            properties: {
-              ...properties,
-              locales: [defaultLocaleCode],
-            },
-          },
-        });
-      })
-    );
-  } catch (error) {
-    strapi.log.error(
-      'Failed to repair legacy i18n permissions with default locale access. Role permissions on localized content types may be incomplete.',
-      error
-    );
-  }
-};
-
 const validateRolePermissionsLocales = async (permissions: any[]) => {
   const { isLocalizedContentType } = getService('content-types');
   const { actionProvider } = strapi.service('admin::permission');
@@ -205,7 +130,7 @@ const validateRolePermissionsLocales = async (permissions: any[]) => {
       continue;
     }
 
-    const model = getLocalizedContentType(subject);
+    const model = strapi.getModel(subject);
 
     if (!model || !isLocalizedContentType(model)) {
       continue;
@@ -227,6 +152,71 @@ const validateRolePermissionsLocales = async (permissions: any[]) => {
     if (locales === undefined || (Array.isArray(locales) && locales.length === 0)) {
       throw new ApplicationError('Permissions must apply to at least one locale.');
     }
+  }
+};
+
+/**
+ * Repairs role permissions on content types that just had i18n enabled in this sync.
+ * Only patches permissions where `properties.locales` is missing or `[]`; leaves `null` alone.
+ * Safe to run at `afterSync` time because it does not depend on the actionProvider.
+ */
+const repairPermissionsForNewlyLocalizedTypes = async ({
+  oldContentTypes,
+  contentTypes,
+}: {
+  oldContentTypes: Record<string, any> | null | undefined;
+  contentTypes: Record<string, any>;
+}) => {
+  if (!oldContentTypes) {
+    return;
+  }
+
+  const { isLocalizedContentType } = getService('content-types');
+
+  const newlyLocalizedUids: string[] = [];
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
+    if (
+      !isLocalizedContentType(oldContentTypes[uid]) &&
+      isLocalizedContentType(contentTypes[uid])
+    ) {
+      newlyLocalizedUids.push(uid);
+    }
+  }
+
+  if (newlyLocalizedUids.length === 0) {
+    return;
+  }
+
+  try {
+    const defaultLocaleCode = await getService('locales').getDefaultLocale();
+    if (!defaultLocaleCode) {
+      return;
+    }
+
+    const permissionService = strapi.service('admin::permission');
+    const allPermissions = await permissionService.findMany({});
+
+    await Promise.all(
+      allPermissions
+        .filter(
+          (permission: any) =>
+            newlyLocalizedUids.includes(permission.subject) &&
+            needsLocalesPatch(permission.properties)
+        )
+        .map((permission: any) =>
+          strapi.db.query('admin::permission').update({
+            where: { id: permission.id },
+            data: {
+              properties: { ...(permission.properties ?? {}), locales: [defaultLocaleCode] },
+            },
+          })
+        )
+    );
+  } catch (error) {
+    strapi.log.error('Failed to repair i18n permissions for newly localized content types.', error);
   }
 };
 
@@ -284,6 +274,6 @@ export default {
   registerI18nActionsHooks,
   updateActionsProperties,
   syncSuperAdminPermissionsWithLocales,
-  repairLegacyPermissionsWithLocales,
+  repairPermissionsForNewlyLocalizedTypes,
   validateRolePermissionsLocales,
 };

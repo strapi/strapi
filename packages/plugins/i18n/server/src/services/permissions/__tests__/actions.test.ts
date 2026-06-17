@@ -133,20 +133,18 @@ describe('i18n permissions actions', () => {
     });
   });
 
-  describe('repairLegacyPermissionsWithLocales', () => {
+  describe('repairPermissionsForNewlyLocalizedTypes', () => {
     const explorerReadAction = 'plugin::content-manager.explorer.read';
 
-    const setupRepairMocks = ({
-      findMany,
-      appliesToProperty = jest.fn(() => Promise.resolve(true)),
-    }: {
-      findMany: jest.Mock;
-      appliesToProperty?: jest.Mock;
-    }) => {
+    const nonLocalizedModel = {
+      uid: 'api::article.article',
+      pluginOptions: { i18n: { localized: false } },
+    };
+
+    const setupRepairMocks = ({ findMany }: { findMany: jest.Mock }) => {
       const update = jest.fn();
 
       global.strapi = {
-        getModel: jest.fn(() => localizedModel),
         contentTypes: {
           [localizedModel.uid]: localizedModel,
         },
@@ -154,9 +152,6 @@ describe('i18n permissions actions', () => {
           services: {
             permission: {
               findMany,
-              actionProvider: {
-                appliesToProperty,
-              },
             },
           },
         },
@@ -171,7 +166,10 @@ describe('i18n permissions actions', () => {
       return { update };
     };
 
-    test('patches permissions with missing locales on localized content types', async () => {
+    const oldTypes = { [localizedModel.uid]: nonLocalizedModel };
+    const newTypes = { [localizedModel.uid]: localizedModel };
+
+    test('patches permissions with missing locales when i18n is just enabled', async () => {
       const findMany = jest.fn(() =>
         Promise.resolve([
           {
@@ -185,47 +183,22 @@ describe('i18n permissions actions', () => {
 
       const { update } = setupRepairMocks({ findMany });
 
-      const { repairLegacyPermissionsWithLocales } = actionsService;
-
-      await repairLegacyPermissionsWithLocales();
+      await actionsService.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes: oldTypes,
+        contentTypes: newTypes,
+      });
 
       expect(update).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: {
-          properties: {
-            fields: ['title'],
-            locales: ['en'],
-          },
-        },
+        data: { properties: { fields: ['title'], locales: ['en'] } },
       });
     });
 
-    test('does not patch permissions that already have locales selected', async () => {
+    test('patches permissions with empty locales when i18n is just enabled', async () => {
       const findMany = jest.fn(() =>
         Promise.resolve([
           {
             id: 2,
-            action: explorerReadAction,
-            subject: localizedModel.uid,
-            properties: { fields: ['title'], locales: ['en'] },
-          },
-        ])
-      );
-
-      const { update } = setupRepairMocks({ findMany });
-
-      const { repairLegacyPermissionsWithLocales } = actionsService;
-
-      await repairLegacyPermissionsWithLocales();
-
-      expect(update).not.toHaveBeenCalled();
-    });
-
-    test('patches permissions with empty locales arrays on localized content types', async () => {
-      const findMany = jest.fn(() =>
-        Promise.resolve([
-          {
-            id: 3,
             action: explorerReadAction,
             subject: localizedModel.uid,
             properties: { fields: ['title'], locales: [] },
@@ -235,41 +208,35 @@ describe('i18n permissions actions', () => {
 
       const { update } = setupRepairMocks({ findMany });
 
-      const { repairLegacyPermissionsWithLocales } = actionsService;
-
-      await repairLegacyPermissionsWithLocales();
+      await actionsService.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes: oldTypes,
+        contentTypes: newTypes,
+      });
 
       expect(update).toHaveBeenCalledWith({
-        where: { id: 3 },
-        data: {
-          properties: {
-            fields: ['title'],
-            locales: ['en'],
-          },
-        },
+        where: { id: 2 },
+        data: { properties: { fields: ['title'], locales: ['en'] } },
       });
     });
 
-    test('does not patch permissions when locales do not apply to the action', async () => {
+    test('does not patch permissions that already have locales selected', async () => {
       const findMany = jest.fn(() =>
         Promise.resolve([
           {
-            id: 4,
-            action: 'plugin::content-manager.explorer.create',
+            id: 3,
+            action: explorerReadAction,
             subject: localizedModel.uid,
-            properties: { fields: ['title'] },
+            properties: { fields: ['title'], locales: ['en'] },
           },
         ])
       );
 
-      const { update } = setupRepairMocks({
-        findMany,
-        appliesToProperty: jest.fn(() => Promise.resolve(false)),
+      const { update } = setupRepairMocks({ findMany });
+
+      await actionsService.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes: oldTypes,
+        contentTypes: newTypes,
       });
-
-      const { repairLegacyPermissionsWithLocales } = actionsService;
-
-      await repairLegacyPermissionsWithLocales();
 
       expect(update).not.toHaveBeenCalled();
     });
@@ -278,7 +245,7 @@ describe('i18n permissions actions', () => {
       const findMany = jest.fn(() =>
         Promise.resolve([
           {
-            id: 5,
+            id: 4,
             action: explorerReadAction,
             subject: localizedModel.uid,
             properties: { fields: ['title'], locales: null },
@@ -288,11 +255,49 @@ describe('i18n permissions actions', () => {
 
       const { update } = setupRepairMocks({ findMany });
 
-      const { repairLegacyPermissionsWithLocales } = actionsService;
-
-      await repairLegacyPermissionsWithLocales();
+      await actionsService.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes: oldTypes,
+        contentTypes: newTypes,
+      });
 
       expect(update).not.toHaveBeenCalled();
+    });
+
+    test('does not patch permissions when the content type was already localized', async () => {
+      const findMany = jest.fn(() =>
+        Promise.resolve([
+          {
+            id: 5,
+            action: explorerReadAction,
+            subject: localizedModel.uid,
+            properties: { fields: ['title'] },
+          },
+        ])
+      );
+
+      const { update } = setupRepairMocks({ findMany });
+
+      // Both old and new are already localized — not a newly-localized type
+      await actionsService.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes: { [localizedModel.uid]: localizedModel },
+        contentTypes: newTypes,
+      });
+
+      expect(update).not.toHaveBeenCalled();
+      expect(findMany).not.toHaveBeenCalled();
+    });
+
+    test('does nothing when oldContentTypes is null', async () => {
+      const findMany = jest.fn();
+      const { update } = setupRepairMocks({ findMany });
+
+      await actionsService.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes: null,
+        contentTypes: newTypes,
+      });
+
+      expect(update).not.toHaveBeenCalled();
+      expect(findMany).not.toHaveBeenCalled();
     });
   });
 });
