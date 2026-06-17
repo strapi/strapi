@@ -8858,7 +8858,7 @@ __metadata:
     "@types/prismjs": "npm:1.26.5"
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
-    dompurify: "npm:3.4.5"
+    dompurify: "npm:3.4.9"
     fractional-indexing: "npm:3.2.0"
     highlight.js: "npm:^10.4.1"
     immer: "npm:9.0.21"
@@ -16337,15 +16337,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:3.4.5":
-  version: 3.4.5
-  resolution: "dompurify@npm:3.4.5"
+"dompurify@npm:3.4.9":
+  version: 3.4.9
+  resolution: "dompurify@npm:3.4.9"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10c0/4bcc953b0f33c61f07fd1b928342dd301dd94401a6058bff7cb47abd57892c797abe6d03118aa8056b36ea067bfe460324bea37fcaf57c0d906ed48e7ac32020
+  checksum: 10c0/e03d88d5959dcaae172357002d74e47e66fc6685cac8928fe4b02982f7b4051e2b8ff70279e4e6fb13be112c0e5cae11439ab960c06c487cb91a3c1a18baed49
   languageName: node
   linkType: hard
 
