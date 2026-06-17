@@ -99,7 +99,7 @@ chat:
   # On a high-traffic repo, only respond when explicitly invoked
   # (e.g. `@coderabbitai review` / `resolve` / `help`) rather than
   # auto-replying to every comment in a thread.
-  auto_reply: false
+  auto_reply: true
 
 knowledge_base:
   opt_out: false
