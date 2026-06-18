@@ -29523,7 +29523,6 @@ __metadata:
     glob: "npm:13.0.6"
     husky: "npm:9.1.7"
     inquirer: "npm:9.3.8"
-    jest: "npm:29.6.0"
     jest-cli: "npm:29.6.0"
     jest-watch-typeahead: "npm:2.2.2"
     lint-staged: "npm:16.4.0"
