@@ -15,7 +15,7 @@ import {
   Tr,
   Typography,
 } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { SignOut } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -143,7 +143,7 @@ const SessionsPage = () => {
           sessions.length > 0 ? (
             <Dialog.Root>
               <Dialog.Trigger>
-                <Button variant="danger-light" startIcon={<Trash />}>
+                <Button variant="danger-light" startIcon={<SignOut />}>
                   {formatMessage({
                     id: 'Settings.sessions.revokeAll',
                     defaultMessage: 'Log out of all devices',
@@ -255,7 +255,7 @@ const SessionsPage = () => {
                             })}
                             variant="ghost"
                           >
-                            <Trash />
+                            <SignOut />
                           </IconButton>
                         </Dialog.Trigger>
                         <ConfirmDialog onConfirm={() => handleRevoke(session)}>
