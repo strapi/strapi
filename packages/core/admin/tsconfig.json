@@ -4,7 +4,8 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
-    "outDir": "./dist/cli"
+    "outDir": "./dist/cli",
+    "types": ["@testing-library/jest-dom"]
   },
   "include": ["_internal"]
 }

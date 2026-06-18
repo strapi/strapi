@@ -112,6 +112,7 @@
     "@types/koa-range": "0.3.5",
     "@types/koa-static": "4.0.2",
     "formidable": "3.5.4",
+    "jest": "29.6.0",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
     "msw": "2.13.4",

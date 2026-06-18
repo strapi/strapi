@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@strapi/types": "5.48.0",
-    "@types/debug": "^4"
+    "@types/debug": "^4",
+    "jest": "29.6.0"
   }
 }
