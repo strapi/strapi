@@ -202,12 +202,8 @@ class Router {
     links?: never
   ): void;
   public addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink
-  ): void;
-  public addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink[]
+    section: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
+    link: UnloadedSettingsLink | UnloadedSettingsLink[]
   ): void;
   public addSettingsLink(
     section:
