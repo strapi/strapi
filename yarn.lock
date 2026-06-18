@@ -18327,7 +18327,7 @@ __metadata:
     express: "npm:4.21.2"
     koa: "npm:2.16.4"
     next: "npm:15.5.9"
-    supertest: "npm:7.1.4"
+    supertest: "npm:7.2.2"
     typescript: "npm:^5"
   languageName: unknown
   linkType: soft
@@ -18351,7 +18351,7 @@ __metadata:
     "@strapi/strapi": "workspace:*"
     "@types/node": "npm:^20"
     better-sqlite3: "npm:12.8.0"
-    supertest: "npm:7.1.4"
+    supertest: "npm:7.2.2"
     typescript: "npm:^5"
   languageName: unknown
   linkType: soft
@@ -30482,7 +30482,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"superagent@npm:^10.2.3, superagent@npm:^10.3.0":
+"superagent@npm:^10.3.0":
   version: 10.3.0
   resolution: "superagent@npm:10.3.0"
   dependencies:
@@ -30496,16 +30496,6 @@ __metadata:
     mime: "npm:2.6.0"
     qs: "npm:^6.14.1"
   checksum: 10c0/7792ec2ba3a877eb1db57ad9149bf0e108688a40af0e75084bdc4bba82604b7962248267159565be4f5ab8aa392f1285a08d2e5a8cb2c3b0a51932499caf6ee6
-  languageName: node
-  linkType: hard
-
-"supertest@npm:7.1.4":
-  version: 7.1.4
-  resolution: "supertest@npm:7.1.4"
-  dependencies:
-    methods: "npm:^1.1.2"
-    superagent: "npm:^10.2.3"
-  checksum: 10c0/b4cd2af4ac19f620b5969ca174a72653132a92b031d0bea3b24fdd222fadaa2cca24ea37f3be3d01739fe6f55f1c32e8edd27eaad92d908e4190dd1e532cdf47
   languageName: node
   linkType: hard
 
