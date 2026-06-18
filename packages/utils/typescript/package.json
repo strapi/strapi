@@ -36,7 +36,9 @@
   "scripts": {
     "lint": "run -T eslint .",
     "test": "run -T jest",
-    "test:watch": "run -T jest --watch"
+    "test:watch": "run -T jest --watch",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
     "chalk": "4.1.2",
