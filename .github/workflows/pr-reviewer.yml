@@ -3,11 +3,59 @@ name: PR Review with Progress Tracking
 # This workflow triggers an AI-powered code review when the 'AI Review' label is added to a pull request.
 on:
   pull_request:
-    types: [labeled]
+    types: [opened]
 
 jobs:
+  # Gate job: resolve org membership via the API rather than trusting
+  # `author_association`, which is a per-event snapshot and reports private
+  # org members as CONTRIBUTOR (the same blind spot community-label.yml hits).
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      is_member: ${{ steps.check.outputs.is_member }}
+    steps:
+      - name: Check org membership
+        id: check
+        uses: actions/github-script@v7
+        with:
+          # NOTE: the default GITHUB_TOKEN cannot read *private* org membership,
+          # so it would reintroduce the author_association blind spot. Use a PAT
+          # or GitHub App installation token with org `members:read`.
+          github-token: ${{ secrets.ORG_READ_TOKEN }}
+          script: |
+            const username = context.payload.pull_request.user.login;
+
+            // Bots are never org members; skip the lookup.
+            if (username && username.includes('[bot]')) {
+              core.info(`Skipped — ${username} is a bot`);
+              core.setOutput('is_member', 'false');
+              return;
+            }
+
+            try {
+              // Org-wide membership (replaces MEMBER || OWNER).
+              // For a narrower group, swap for:
+              //   github.rest.teams.getMembershipForUserInOrg({
+              //     org: context.repo.owner, team_slug: 'maintainers', username })
+              await github.rest.orgs.checkMembershipForUser({
+                org: context.repo.owner,
+                username,
+              });
+              core.info(`${username} is an org member`);
+              core.setOutput('is_member', 'true');
+            } catch (error) {
+              if (error.status === 404) {
+                core.info(`${username} is not an org member`);
+                core.setOutput('is_member', 'false');
+              } else {
+                // Don't fail-open on transient/API errors.
+                core.setFailed(`Membership check failed: ${error.message}`);
+              }
+            }
+
   review-with-tracking:
-    if: ${{ github.event.label.name == 'AI Review' }}
+    needs: gate
+    if: ${{ needs.gate.outputs.is_member == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -20,7 +68,9 @@ jobs:
           fetch-depth: 0
 
       - name: PR Review with Progress Tracking
-        uses: anthropics/claude-code-action@v1.0.123
+        uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
         with:
           anthropic_api_key: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
 
