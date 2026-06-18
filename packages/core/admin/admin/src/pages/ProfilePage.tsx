@@ -417,7 +417,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               })),
             ],
             placeholder: formatMessage({
-              id: 'components.Select.placeholder',
+              id: 'app.components.Select.placeholder',
               defaultMessage: 'Select',
             }),
             size: 6,

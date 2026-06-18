@@ -1,6 +1,13 @@
 import { isNil, omit } from 'lodash/fp';
 
-import { setCreatorFields, async, contentTypes, errors } from '@strapi/utils';
+import {
+  setCreatorFields,
+  async,
+  contentTypes,
+  errors,
+  parseHasPublishedVersionQueryParam,
+  hasPublishedVersionBooleanToPublicationFilterMode,
+} from '@strapi/utils';
 import type { Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
@@ -68,14 +75,14 @@ const getDocumentIdsByDraftPublishRelation = async (
 
 /** Map from __status filter value to top-level query fields (mirrors client STATUS_PARAMS). */
 const STATUS_QUERY_FROM_FILTER: Record<string, Record<string, string>> = {
-  draft: { status: 'draft', hasPublishedVersion: 'false' },
+  draft: { status: 'draft', publicationFilter: 'never-published-document' },
   published: { status: 'published' },
   'published-modified': { publicationStatusFilter: 'published-modified' },
   'published-unmodified': { publicationStatusFilter: 'published-unmodified' },
 };
 
 /**
- * Extracts __status from query.filters.$and into top-level status, hasPublishedVersion,
+ * Extracts __status from query.filters.$and into top-level status, publicationFilter,
  * and publicationStatusFilter so list works with either transformed params or raw filter params.
  */
 const normalizeStatusFromFilters = (query: Record<string, unknown>): void => {
@@ -129,6 +136,66 @@ const mergeDocumentIdFilter = (
 };
 
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
+
+/**
+ * Extracts the sort direction for the 'status' field from a sort parameter.
+ * Returns 'ASC', 'DESC', or null if status is not being sorted.
+ *
+ * The sort param can be a string ('status:ASC'), an array (['status:ASC']),
+ * or an object ({ status: 'ASC' }).
+ */
+const extractStatusSortOrder = (sort: unknown): 'ASC' | 'DESC' | null => {
+  if (!sort) return null;
+
+  if (typeof sort === 'string') {
+    const match = sort.match(/(?:^|,)\s*status:(ASC|DESC)\s*(?:,|$)/i);
+    return match ? (match[1].toUpperCase() as 'ASC' | 'DESC') : null;
+  }
+
+  if (Array.isArray(sort)) {
+    for (const item of sort) {
+      const result = extractStatusSortOrder(item);
+      if (result) return result;
+    }
+    return null;
+  }
+
+  if (typeof sort === 'object' && sort !== null && 'status' in sort) {
+    const dir = String((sort as Record<string, unknown>).status).toUpperCase();
+    return dir === 'ASC' || dir === 'DESC' ? dir : null;
+  }
+
+  return null;
+};
+
+/**
+ * Removes the 'status' field from a sort parameter, returning the remainder
+ * (or undefined if status was the only sort field).
+ */
+const removeStatusFromSort = (sort: unknown): unknown => {
+  if (!sort) return sort;
+
+  if (typeof sort === 'string') {
+    const cleaned = sort
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
+      .join(',');
+    return cleaned || undefined;
+  }
+
+  if (Array.isArray(sort)) {
+    const cleaned = sort.filter((item) => extractStatusSortOrder(item) === null);
+    return cleaned.length ? cleaned : undefined;
+  }
+
+  if (typeof sort === 'object' && sort !== null) {
+    const { status: _removed, ...rest } = sort as Record<string, unknown>;
+    return Object.keys(rest).length ? rest : undefined;
+  }
+
+  return sort;
+};
 
 /**
  * Create a new document.
@@ -255,7 +322,24 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
+    // Extract and remove 'status' sort before sanitization/validation, since status
+    // is not a real schema attribute and would be rejected by the permission checker.
+    // It is re-added after sanitization so the DB layer can handle it via a CASE expression.
+    const hasPublicationStatusFilter =
+      query.status !== undefined ||
+      query.hasPublishedVersion !== undefined ||
+      query.publicationStatusFilter !== undefined;
+    const rawStatusSortOrder = extractStatusSortOrder(query.sort);
+    // Disable status sort when a publication status filter is active — all results share the
+    // same status, making the sort a no-op.
+    const statusSortOrder = hasPublicationStatusFilter ? null : rawStatusSortOrder;
+    // Always strip 'status' from the sort before passing to the document service / permission
+    // checker — it is not a real schema attribute and would be rejected by validation.
+    const queryWithoutStatusSort = rawStatusSortOrder
+      ? { ...query, sort: removeStatusFromSort(query.sort) }
+      : query;
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryWithoutStatusSort);
 
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
@@ -283,9 +367,14 @@ export default {
       status,
     };
 
-    // Pass through hasPublishedVersion so "Draft" filter returns only drafts with no published version
-    if (query.hasPublishedVersion !== undefined) {
-      findPageParams.hasPublishedVersion = query.hasPublishedVersion;
+    if (query.publicationFilter !== undefined) {
+      findPageParams.publicationFilter = query.publicationFilter;
+    } else {
+      const legacy = parseHasPublishedVersionQueryParam(query.hasPublishedVersion);
+      if (legacy !== undefined) {
+        findPageParams.publicationFilter =
+          hasPublishedVersionBooleanToPublicationFilterMode(legacy);
+      }
     }
 
     if (
@@ -302,6 +391,20 @@ export default {
           documentIds
         ),
       };
+    }
+
+    if (statusSortOrder) {
+      const s = findPageParams.sort;
+      const statusSort = `status:${statusSortOrder}`;
+      if (!s) {
+        findPageParams.sort = statusSort;
+      } else if (Array.isArray(s)) {
+        findPageParams.sort = [...s, statusSort];
+      } else if (typeof s === 'string') {
+        findPageParams.sort = `${s},${statusSort}`;
+      } else {
+        findPageParams.sort = { ...(s as object), status: statusSortOrder };
+      }
     }
 
     const { results: documents, pagination } = await documentManager.findPage(
@@ -878,8 +981,11 @@ export default {
       }
     }
 
-    // We filter out documentsIds that maybe doesn't exist in a specific locale
-    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
+    // We filter out documentsIds that maybe doesn't exist in a specific locale.
+    // With draft & publish, findLocales returns a row per publication state, so the
+    // same documentId can appear twice (draft + published). Deduplicate to avoid
+    // deleting (and running document service middleware for) the same document twice.
+    const localeDocumentsIds = [...new Set(documentLocales.map((document) => document.documentId))];
 
     const { count } = await documentManager.deleteMany(localeDocumentsIds, model, { locale });
 

@@ -137,7 +137,7 @@ class Router {
 
   public addMenuLink = (
     link: Omit<MenuItem, 'Component'> & {
-      Component: () => Promise<{ default: React.ComponentType }>;
+      Component?: () => Promise<{ default: React.ComponentType }>;
     }
   ) => {
     invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
@@ -202,12 +202,8 @@ class Router {
     links?: never
   ): void;
   public addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink
-  ): void;
-  public addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink[]
+    section: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
+    link: UnloadedSettingsLink | UnloadedSettingsLink[]
   ): void;
   public addSettingsLink(
     section:

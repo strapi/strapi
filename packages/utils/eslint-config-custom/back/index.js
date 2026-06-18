@@ -1,4 +1,7 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('eslint').Linter.Config} */
+const config = {
   extends: '@strapi/eslint-config/back/javascript',
   parserOptions: {
     ecmaVersion: 2021,
@@ -40,3 +43,5 @@ module.exports = {
     ],
   },
 };
+
+module.exports = config;

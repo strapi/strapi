@@ -1,5 +1,4 @@
 import type { InlineConfig, UserConfig } from 'vite';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
@@ -11,6 +10,7 @@ import type { BuildContext } from '../create-build-context';
 import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
   const designSystemLinked = isDesignSystemLinked();
@@ -43,6 +43,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom/client',
         'styled-components',
         'react-router-dom',
+        // Admin + RTK Query share react-redux context; pre-bundle so dev chunks cannot load a
+        // second copy (avoids "could not find react-redux context value" after upgrades / hoisting).
+        'react-redux',
+        '@reduxjs/toolkit',
         // Pre-bundle design-system so plugin custom field chunks (dynamic imports) resolve
         // to the same instance as the main app. Otherwise TooltipProvider/DesignSystemProvider
         // context from the root is not seen by components in plugin chunks.
@@ -52,6 +56,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Pre-bundle lodash: design-system uses named imports (e.g. assignWith) but lodash
         // is CommonJS-only; pre-bundling converts it to ESM for the browser
         'lodash',
+        // Pre-bundle prismjs so plugin chunks get a valid ESM namespace (prismjs is UMD and can
+        // otherwise expose an empty object when bundled, causing "Prism is not defined" in admin).
+        'prismjs',
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
@@ -103,7 +110,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'react-colorful',
               'react-dnd-html5-backend',
               'react-window',
-              'sanitize-html',
               'semver',
               'semver/functions/lt',
               'semver/functions/valid',
@@ -123,6 +129,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom',
         'react-router-dom',
         'styled-components',
+        'react-redux',
+        '@reduxjs/toolkit',
         '@strapi/design-system',
         '@radix-ui/react-tooltip',
         'lodash',
@@ -134,6 +142,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom': getModulePath('react-dom'),
         'react-router-dom': getModulePath('react-router-dom'),
         'styled-components': getModulePath('styled-components'),
+        'react-redux': getModulePath('react-redux'),
+        '@reduxjs/toolkit': getModulePath('@reduxjs/toolkit'),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),

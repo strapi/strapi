@@ -11,6 +11,22 @@ import { ID, RelationalAttribute, Relation } from '../../../types';
 // TODO: ...and completely restrict the strapi_ prefix for an attribute name in the future
 const joinColPrefix = '__strapi' as const;
 
+/**
+ * Join-table `order` preserves connect order when no explicit populate sort is set.
+ * When `populateValue.orderBy` is present, join-table ordering must not take precedence
+ * over the target attribute sort (see query-builder join vs root orderBy ordering).
+ */
+const getJoinTableOrderBy = (
+  populateValue: Record<string, unknown>,
+  joinTable: { orderBy?: Record<string, 'asc' | 'desc'> }
+) => {
+  if (!_.isEmpty(populateValue.orderBy) || !joinTable.orderBy) {
+    return undefined;
+  }
+
+  return _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy);
+};
+
 type Context = {
   db: Database;
   qb: QueryBuilder;
@@ -154,7 +170,7 @@ const XtoOne = async (
         rootColumn: joinTable.inverseJoinColumn.referencedColumn,
         rootTable: qb.alias,
         on: joinTable.on,
-        orderBy: joinTable.orderBy,
+        orderBy: getJoinTableOrderBy(populateValue, joinTable),
       })
       .addSelect(joinColSelect)
       .where({ [joinColAlias]: referencedValues })
@@ -281,7 +297,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
         rootColumn: joinTable.inverseJoinColumn.referencedColumn,
         rootTable: qb.alias,
         on: joinTable.on,
-        orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
+        orderBy: getJoinTableOrderBy(populateValue, joinTable),
       })
       .addSelect(joinColSelect)
       .where({ [joinColAlias]: referencedValues })
@@ -370,7 +386,7 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
       rootColumn: joinTable.inverseJoinColumn.referencedColumn,
       rootTable: populateQb.alias,
       on: joinTable.on,
-      orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
+      orderBy: getJoinTableOrderBy(populateValue, joinTable),
     })
     .addSelect(joinColSelect)
     .where({ [joinColAlias]: referencedValues })
@@ -464,7 +480,7 @@ const morphX = async (
           ...(joinTable.on || {}),
           field: attributeName,
         },
-        orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
+        orderBy: getJoinTableOrderBy(populateValue, joinTable),
       })
       .addSelect([`${alias}.${idColumn.name}`, `${alias}.${typeColumn.name}`])
       .where({
@@ -574,10 +590,8 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
       const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => fromRow(targetMeta, rowOrRows);
 
       return (map[type][id] || []).map((row) => {
-        return {
-          [typeField]: type,
-          ...fromTargetRow(row),
-        };
+        // Spread target first so a same-named user attribute cannot override the morph type UID
+        return { ...fromTargetRow(row), [typeField]: type };
       });
     });
 
@@ -650,7 +664,8 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
       fromRow(db.metadata.get(type), rowOrRows);
 
     const row = fromTargetRow(_.first(matchingRows));
-    result[attributeName] = row ? { [typeField]: type, ...row } : row;
+    // Spread target first so a same-named user attribute cannot override the morph type UID
+    result[attributeName] = row ? { ...row, [typeField]: type } : row;
   });
 };
 
