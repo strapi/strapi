@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
-    "supertest": "7.1.4",
+    "supertest": "7.2.2",
     "typescript": "^5"
   },
   "engines": {
