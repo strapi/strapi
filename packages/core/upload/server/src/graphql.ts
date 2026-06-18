@@ -21,16 +21,12 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
 
   const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
-  /**
-   * Register Upload's types, queries & mutations to the content API using the GraphQL extension API
-   */
+
   getGraphQLService('extension').use(({ nexus }: { nexus: any }) => {
     const { inputObjectType, extendType, nonNull } = nexus;
 
-    // Represents the input data payload for the file's information
     const fileInfoInputType = inputObjectType({
       name: FILE_INFO_INPUT_TYPE_NAME,
-
       definition(t: any) {
         t.string('name');
         t.string('alternativeText');
@@ -49,14 +45,21 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
           type: nonNull(fileTypeName),
 
           args: {
-            id: nonNull('ID'),
+            id: 'ID',
+            documentId: 'ID',
             info: FILE_INFO_INPUT_TYPE_NAME,
           },
 
-          async resolve(parent: unknown, args: { id: number; info: any }) {
-            const { id, info } = args;
+          async resolve(parent: unknown, args: { id?: number; documentId?: string; info: any }) {
+            const { id, documentId, info } = args;
 
-            return getUploadService('upload').updateFileInfo(id, info);
+            if (!id && !documentId) {
+              throw new Error('You must provide either an id or a documentId');
+            }
+
+            // Using documentId if available, otherwise falling back to id
+            const params = documentId ? { documentId } : { id };
+            return getUploadService('upload').updateFileInfo(params, info);
           },
         });
 
@@ -67,13 +70,19 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
           type: fileTypeName,
 
           args: {
-            id: nonNull('ID'),
+            id: 'ID',
+            documentId: 'ID',
           },
 
-          async resolve(parent: unknown, args: { id: number }) {
-            const { id } = args;
+          async resolve(parent: unknown, args: { id?: number; documentId?: string }) {
+            const { id, documentId } = args;
 
-            const file = await getUploadService('upload').findOne(id);
+            if (!id && !documentId) {
+              throw new Error('You must provide either an id or a documentId');
+            }
+
+            const params = documentId ? { documentId } : { id };
+            const file = await getUploadService('upload').findOne(params);
 
             if (!file) {
               return null;
@@ -88,7 +97,6 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
     return {
       types: [fileInfoInputType, mutations],
       resolversConfig: {
-        // Use custom scopes for the upload file CRUD operations
         'Query.uploadFiles': { auth: { scope: 'plugin::upload.content-api.find' } },
         'Query.uploadFiles_connection': { auth: { scope: 'plugin::upload.content-api.find' } },
         'Query.uploadFile': { auth: { scope: 'plugin::upload.content-api.findOne' } },
