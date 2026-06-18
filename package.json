@@ -193,7 +193,7 @@
     "stream-json": "1.9.1",
     "supertest": "7.2.2",
     "syncpack": "13.0.4",
-    "tar": "7.5.11",
+    "tar": "7.5.16",
     "ts-jest": "29.1.0",
     "typescript": "5.4.5",
     "vitest": "catalog:",
