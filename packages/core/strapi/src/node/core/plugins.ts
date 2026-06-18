@@ -70,6 +70,16 @@ const validatePackageHasStrapi = (
 const validatePackageIsPlugin = (pkg: PackageJson): pkg is StrapiPlugin =>
   validatePackageHasStrapi(pkg) && pkg.strapi.kind === 'plugin';
 
+type UserPluginConfig = boolean | { enabled?: boolean; resolve?: string };
+
+const isPluginConfigEnabled = (config: UserPluginConfig): boolean => {
+  if (typeof config === 'boolean') {
+    return config;
+  }
+
+  return config.enabled !== false;
+};
+
 const getEnabledPlugins = async ({
   cwd,
   logger,
@@ -89,6 +99,10 @@ const getEnabledPlugins = async ({
 
   logger.debug("Dependencies from user's project", os.EOL, deps);
 
+  const userPluginsFile = await loadUserPluginsFile(strapi.dirs.app.config);
+
+  logger.debug("User's plugins file", os.EOL, userPluginsFile);
+
   for (const dep of Object.keys(deps)) {
     const pkg = await getModule(dep, cwd);
 
@@ -104,6 +118,12 @@ const getEnabledPlugins = async ({
         );
       }
 
+      const userPluginConfig = userPluginsFile[name];
+
+      if (userPluginConfig !== undefined && !isPluginConfigEnabled(userPluginConfig)) {
+        continue;
+      }
+
       plugins[name] = {
         name,
         importName: camelCase(name),
@@ -113,12 +133,19 @@ const getEnabledPlugins = async ({
     }
   }
 
-  const userPluginsFile = await loadUserPluginsFile(strapi.dirs.app.config);
-
-  logger.debug("User's plugins file", os.EOL, userPluginsFile);
-
   for (const [userPluginName, userPluginConfig] of Object.entries(userPluginsFile)) {
-    if (userPluginConfig.enabled && userPluginConfig.resolve) {
+    /**
+     * Local plugins must be explicitly enabled to be registered, matching the
+     * server-side loader (`@strapi/core` get-enabled-plugins), which drops a
+     * `{ resolve }` declaration without a truthy `enabled`. Treating an omitted
+     * `enabled` as enabled here would bundle the plugin into the admin while the
+     * server leaves it unloaded.
+     */
+    if (
+      typeof userPluginConfig === 'object' &&
+      userPluginConfig.enabled &&
+      userPluginConfig.resolve
+    ) {
       const sysPath = convertModulePathToSystemPath(userPluginConfig.resolve);
       plugins[userPluginName] = {
         name: userPluginName,
@@ -139,7 +166,7 @@ const getEnabledPlugins = async ({
 
 const PLUGIN_CONFIGS = ['plugins.js', 'plugins.mjs', 'plugins.ts'];
 
-type UserPluginConfigFile = Record<string, { enabled: boolean; resolve: string }>;
+type UserPluginConfigFile = Record<string, UserPluginConfig>;
 
 const loadUserPluginsFile = async (root: string): Promise<UserPluginConfigFile> => {
   for (const file of PLUGIN_CONFIGS) {

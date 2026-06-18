@@ -698,6 +698,39 @@ describe('Admin Content API Token CRUD (api)', () => {
     });
   });
 
+  test('Updates a legacy content-api token with null kind (db-backed)', async () => {
+    const token = await createValidToken({
+      type: 'read-only',
+    });
+
+    // Simulate a legacy row created before kind was persisted.
+    const updatedRows = await strapi.db
+      .connection('strapi_api_tokens')
+      .where({ id: token.id })
+      .update({
+        kind: null,
+      });
+
+    expect(updatedRows).toBe(1);
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'PUT',
+      body: {
+        name: token.name,
+        description: 'updated description',
+        type: token.type,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      id: token.id,
+      description: 'updated description',
+      kind: 'content-api',
+    });
+  });
+
   test('Retrieves a custom token (successfully)', async () => {
     const token = await createValidToken({
       type: 'custom',
@@ -1032,5 +1065,58 @@ describe('Admin Content API Token CRUD (api)', () => {
     expect(getRes.statusCode).toBe(200);
     expect(getRes.body.data.accessKey).toBe(decryptedKey);
     expect(getRes.body.data.accessKey).toBe(createRes.body.data.accessKey);
+  });
+
+  test('Revokes a legacy content-api token with null kind and returns kind: content-api (db-backed)', async () => {
+    const token = await createValidToken({ type: 'read-only' });
+
+    await strapi.db.connection('strapi_api_tokens').where({ id: token.id }).update({ kind: null });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.kind).toBe('content-api');
+  });
+
+  test('Revoke response for a content-api token does not include adminPermissions or adminUserOwner', async () => {
+    const token = await createValidToken({ type: 'read-only' });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect('adminPermissions' in res.body.data).toBe(false);
+    expect('adminUserOwner' in res.body.data).toBe(false);
+  });
+
+  test('Regenerated api token response includes kind: content-api', async () => {
+    const token = await createValidToken({ type: 'read-only' });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data.kind).toBe('content-api');
+  });
+
+  test('Regenerates a legacy content-api token with null kind and returns kind: content-api (db-backed)', async () => {
+    const token = await createValidToken({ type: 'read-only' });
+
+    await strapi.db.connection('strapi_api_tokens').where({ id: token.id }).update({ kind: null });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data.kind).toBe('content-api');
   });
 });

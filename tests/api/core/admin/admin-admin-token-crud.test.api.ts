@@ -26,12 +26,7 @@ describe('Admin Admin Token CRUD (api)', () => {
   };
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance({
-      // @ts-expect-error - the JS test helper supports `register`, but its TS type is incomplete
-      register({ strapi: instance }) {
-        instance.config.set('features.future.adminTokens', true);
-      },
-    });
+    strapi = await createStrapiInstance();
     strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key');
 
     rq = await createAuthRequest({ strapi });

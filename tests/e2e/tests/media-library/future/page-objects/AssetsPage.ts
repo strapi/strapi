@@ -226,6 +226,92 @@ export class AssetsPage {
   }
 
   /**
+   * Get an editable text input inside the asset details drawer by its visible
+   * label (File name, Caption, Alternative text).
+   */
+  getAssetDetailsDrawerTextField(label: string) {
+    return this.assetDetailsDrawer.getByRole('textbox', { name: label });
+  }
+
+  /**
+   * Get the Location SingleSelect combobox inside the asset details drawer.
+   */
+  getAssetDetailsDrawerLocationSelect() {
+    return this.assetDetailsDrawer.getByRole('combobox', { name: /location/i });
+  }
+
+  /**
+   * Replace the value of an editable text field in the drawer.
+   */
+  async fillAssetDetailsDrawerText(label: string, value: string) {
+    const field = this.getAssetDetailsDrawerTextField(label);
+    await field.fill(value);
+  }
+
+  /**
+   * Open the Location select and choose the option with the given name
+   * (e.g. "Media Library" for the root).
+   */
+  async selectAssetDetailsDrawerLocation(name: string | RegExp) {
+    await this.getAssetDetailsDrawerLocationSelect().click();
+    await this.page.getByRole('option', { name }).click();
+  }
+
+  /**
+   * Click the Save button inside the asset details drawer.
+   */
+  async clickAssetDetailsDrawerSave() {
+    await this.assetDetailsDrawer.getByRole('button', { name: 'Save' }).click();
+  }
+
+  /**
+   * Click the trash icon in the drawer footer and confirm the dialog.
+   * Returns once the confirm dialog has been dismissed.
+   */
+  async deleteAssetFromDrawer() {
+    await this.assetDetailsDrawer.getByRole('button', { name: /Delete this/i }).click();
+
+    // Confirm dialog renders in a Radix portal at body root — query off `page`,
+    // not the drawer locator.
+    const confirmDialog = this.page
+      .getByRole('alertdialog')
+      .filter({ hasText: /Delete this media file\?/i });
+    await expect(confirmDialog).toBeVisible();
+    await confirmDialog.getByRole('button', { name: 'Confirm' }).click();
+  }
+
+  /**
+   * Click the replace icon in the drawer footer, confirm the dialog, and set
+   * the file picked by the native file chooser. Returns once the upload
+   * request has been initiated (the chooser was satisfied).
+   *
+   * Use `getDrawerToast(...)` to assert the in-drawer success toast.
+   */
+  async replaceAssetFromDrawer(filePath: string) {
+    await this.assetDetailsDrawer.getByRole('button', { name: /Replace this/i }).click();
+
+    const confirmDialog = this.page
+      .getByRole('alertdialog')
+      .filter({ hasText: /Replace this media file\?/i });
+    await expect(confirmDialog).toBeVisible();
+
+    // Continue triggers `fileInputRef.current?.click()` which opens the native
+    // chooser. Wait for the chooser event BEFORE clicking so we don't miss it.
+    const fileChooserPromise = this.page.waitForEvent('filechooser');
+    await confirmDialog.getByRole('button', { name: 'Continue' }).click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles(filePath);
+  }
+
+  /**
+   * Get the in-drawer alert toast (above the preview). Matches the substring
+   * shown in the success/error message.
+   */
+  getDrawerToast(message: string | RegExp) {
+    return this.assetDetailsDrawer.getByText(message);
+  }
+
+  /**
    * Open the New menu and click "New folder"
    */
   async openCreateFolderDialog() {

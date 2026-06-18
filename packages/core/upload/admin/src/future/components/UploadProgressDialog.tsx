@@ -12,11 +12,16 @@ import {
   Upload,
 } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled, keyframes } from 'styled-components';
+import { styled } from 'styled-components';
 
-import { abortUpload, useRetryCancelledFilesStreamMutation } from '../services/api';
+import { abortUpload, useRetryCancelledFilesMutation } from '../services/api';
 import { useTypedDispatch, useTypedSelector } from '../store/hooks';
-import { closeUploadProgress, toggleMinimize, cancelUpload } from '../store/uploadProgress';
+import {
+  closeUploadProgress,
+  toggleMinimize,
+  cancelUpload,
+  selectAggregateProgress,
+} from '../store/uploadProgress';
 import { getTranslationKey } from '../utils/translations';
 
 import { Drawer } from './Drawer';
@@ -196,20 +201,25 @@ const HEADER_COLOR_MAP = {
 const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const { formatMessage } = useIntl();
 
-  const { isMinimized, progress, files, uploadId, totalFiles } = useTypedSelector(
+  const { isMinimized, files, uploadId, totalFiles } = useTypedSelector(
     (state) => state.uploadProgress
   );
+  const progress = useTypedSelector(selectAggregateProgress);
   const dispatch = useTypedDispatch();
-  const [retryCancelledFiles] = useRetryCancelledFilesStreamMutation();
+  const [retryCancelledFiles] = useRetryCancelledFilesMutation();
 
-  const isComplete = progress === 100;
-  const isAllUploaded = isComplete && files.every((f) => f.status !== 'uploading');
-  const isAllErrored = isComplete && files.length > 0 && files.every((f) => f.status === 'error');
+  // The batch is complete once every file has reached a terminal state. Byte-weighted
+  // progress can't be used here because errored/cancelled rows never reach 100%.
+  const isComplete =
+    files.length > 0 &&
+    files.every((f) => f.status === 'complete' || f.status === 'error' || f.status === 'cancelled');
+  const isAllUploaded = isComplete;
+  const isAllErrored = isComplete && files.every((f) => f.status === 'error');
   const hasCancelledFiles = files.some((f) => f.status === 'cancelled');
   const successfulCount = files.filter((f) => f.status === 'complete').length;
   const errorCount = files.filter((f) => f.status === 'error').length;
   // Success includes partial success (some files succeeded, even if some failed)
-  const isSuccess = isComplete && isAllUploaded && successfulCount > 0 && !hasCancelledFiles;
+  const isSuccess = isComplete && successfulCount > 0 && !hasCancelledFiles;
   const status = ((): HeaderStatusProps['status'] => {
     if (isAllErrored) return 'error';
     if (isSuccess) return 'success';
@@ -298,35 +308,30 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
  * UploadProgressDialog
  * -----------------------------------------------------------------------------------------------*/
 
-const indeterminate = keyframes`
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(400%);
-  }
-`;
-
-const IndeterminateBar = styled.div`
+const ProgressTrack = styled.div`
   width: 100%;
   height: ${({ theme }) => theme.spaces[1]};
   background-color: ${({ theme }) => theme.colors.neutral200};
   border-radius: 4px;
   overflow: hidden;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 25%;
-    background-color: ${({ theme }) => theme.colors.primary700};
-    border-radius: 4px;
-    animation: ${indeterminate} 1.5s ease-in-out infinite;
-  }
 `;
+
+const ProgressIndicator = styled.div<{ $percent: number }>`
+  height: 100%;
+  width: ${({ $percent }) => $percent}%;
+  background-color: ${({ theme }) => theme.colors.primary700};
+  border-radius: 4px;
+  transition: width 0.15s linear;
+`;
+
+const DeterminateBar = ({ percent }: { percent: number }) => {
+  const clamped = Math.min(100, Math.max(0, Math.round(percent)));
+  return (
+    <ProgressTrack role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={clamped}>
+      <ProgressIndicator $percent={clamped} />
+    </ProgressTrack>
+  );
+};
 
 const FileRow = ({
   icon,
@@ -358,6 +363,7 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   const isCancelled = file.status === 'cancelled';
 
   if (isCurrentFile) {
+    const percent = file.size > 0 ? (file.uploadedBytes / file.size) * 100 : 0;
     return (
       <FileRow icon={<ArrowsCounterClockwise fill="secondary600" />} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
@@ -366,7 +372,7 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
             defaultMessage: 'Uploading...',
           })}
         </Typography>
-        <IndeterminateBar />
+        <DeterminateBar percent={percent} />
       </FileRow>
     );
   }
