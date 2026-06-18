@@ -85,15 +85,18 @@
   },
   "devDependencies": {
     "@reduxjs/toolkit": "1.9.7",
+    "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "eslint-config-custom": "5.48.0",
     "jest-environment-jsdom": "29.6.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "styled-components": "6.4.1",
     "tsconfig": "5.48.0"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.9.7",
-    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/jest-dom": "^6.0.0",
     "jest-environment-jsdom": "^29.0.0",
     "styled-components": "^6.0.0"
   },

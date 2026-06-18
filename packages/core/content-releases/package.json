@@ -83,6 +83,7 @@
     "@strapi/admin-test-utils": "5.48.0",
     "@strapi/content-manager": "5.48.0",
     "@testing-library/dom": "10.4.1",
+    "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
     "@types/koa": "2.13.4",
