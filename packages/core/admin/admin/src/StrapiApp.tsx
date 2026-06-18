@@ -216,6 +216,12 @@ class StrapiApp {
     links: UnloadedSettingsLink[]
   ) => this.router.addSettingsLink(section, links);
 
+  /**
+   * Register one or more settings links under an existing or new section.
+   *
+   * @param sectionId - Section id string, or section metadata to create a new section
+   * @param link - A single link or an array of links to register
+   */
   addSettingsLink = (
     sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
     link: UnloadedSettingsLink | UnloadedSettingsLink[]

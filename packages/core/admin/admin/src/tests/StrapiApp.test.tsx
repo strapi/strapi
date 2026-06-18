@@ -178,11 +178,18 @@ describe('ADMIN | new StrapiApp', () => {
           intlLabel: { id: 'bar', defaultMessage: 'bar' },
           permissions: [],
         },
+        {
+          Component: jest.fn(),
+          to: 'baz',
+          id: 'baz',
+          intlLabel: { id: 'baz', defaultMessage: 'baz' },
+          permissions: [],
+        },
       ];
 
       app.addSettingsLink('global', links);
 
-      expect(app.router.settings.global.links).toHaveLength(1);
+      expect(app.router.settings.global.links).toHaveLength(2);
       expect(app.router.settings.global.links).toEqual([
         {
           id: 'bar',
@@ -192,6 +199,15 @@ describe('ADMIN | new StrapiApp', () => {
           },
           permissions: [],
           to: 'bar',
+        },
+        {
+          id: 'baz',
+          intlLabel: {
+            defaultMessage: 'baz',
+            id: 'baz',
+          },
+          permissions: [],
+          to: 'baz',
         },
       ]);
     });
