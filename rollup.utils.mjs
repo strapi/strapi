@@ -12,6 +12,7 @@ import html from 'rollup-plugin-html';
 
 const isExernal = (id) => !path.isAbsolute(id) && !id.startsWith('.');
 
+/** @returns {import('rollup').RollupOptions['plugins']} */
 const basePlugins = () => [
   image(),
   html(),
@@ -81,6 +82,7 @@ const baseConfig = (opts = {}) => {
   });
 };
 
+/** @returns {import('rollup').RollupOptions['output']} */
 const baseOutput = ({ outDir, rootDir }) => {
   return [
     {
@@ -91,6 +93,7 @@ const baseOutput = ({ outDir, rootDir }) => {
       format: 'cjs',
       sourcemap: true,
       preserveModules: true,
+      interop: 'auto',
       ...(rootDir ? { preserveModulesRoot: rootDir } : {}),
     },
     {
@@ -100,6 +103,7 @@ const baseOutput = ({ outDir, rootDir }) => {
       format: 'esm',
       sourcemap: true,
       preserveModules: true,
+      interop: 'auto',
       ...(rootDir ? { preserveModulesRoot: rootDir } : {}),
     },
   ];
