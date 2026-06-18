@@ -1,4 +1,12 @@
 import { traverseQueryPopulate } from '../traverse';
+import {
+  defaultValidatePopulate,
+  POPULATE_TRAVERSALS,
+  FILTER_TRAVERSALS,
+  SORT_TRAVERSALS,
+  FIELDS_TRAVERSALS,
+  validatePopulate,
+} from '../validate/validators';
 
 describe('traverseQueryPopulate', () => {
   global.strapi = {
@@ -245,6 +253,50 @@ describe('traverseQueryPopulate', () => {
           name: 'test',
         },
       },
+    });
+  });
+
+  /**
+   * When qs parses indexed populate keys beyond arrayLimit (default 100), populate is a plain
+   * object with consecutive numeric string keys instead of an array. Validation runs on that
+   * shape before convert-query-params — see #25632 / PR #25916.
+   */
+  describe('qs arrayLimit exceeded (indexed populate notation)', () => {
+    const schema = {
+      kind: 'collectionType' as const,
+      attributes: {
+        title: { type: 'string' as const },
+        slug: { type: 'string' as const },
+      },
+    };
+
+    const getModel = jest.fn(() => schema);
+
+    const populateAsQsObject = Object.fromEntries(
+      Array.from({ length: 101 }, (_, index) => [String(index), `field${index}`])
+    );
+
+    beforeEach(() => {
+      global.strapi = { getModel } as any;
+    });
+
+    test('defaultValidatePopulate throws a clear arrayLimit error', async () => {
+      await expect(
+        defaultValidatePopulate({ schema, getModel }, populateAsQsObject)
+      ).rejects.toThrow(
+        'Too many populate entries (101). The maximum number of populate entries when using array notation is 100.'
+      );
+    });
+
+    test('validatePopulate does not throw the misleading Invalid key 2 error', async () => {
+      await expect(
+        validatePopulate({ schema, getModel }, populateAsQsObject, {
+          filters: FILTER_TRAVERSALS,
+          sort: SORT_TRAVERSALS,
+          fields: FIELDS_TRAVERSALS,
+          populate: POPULATE_TRAVERSALS,
+        })
+      ).rejects.not.toThrow(/Invalid key 2/);
     });
   });
 });
