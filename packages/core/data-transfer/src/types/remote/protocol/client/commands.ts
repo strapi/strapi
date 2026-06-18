@@ -17,6 +17,12 @@ export type InitCommand = CreateCommand<
     options?: Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'>;
     transfer: TransferMethod;
     checksums?: boolean;
+    /**
+     * Opt-in request for the compact base64 asset-chunk wire format. Remotes that understand it
+     * echo it back in {@link InitMessage}; older remotes ignore it and the client falls back to
+     * the legacy `{ type: 'Buffer', data: number[] }` shape they can still decode.
+     */
+    assetEncoding?: 'base64';
   }
 >;
 export type TransferKind = InitCommand['params']['transfer'];

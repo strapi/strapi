@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-mailgun",
-  "version": "5.47.1",
+  "version": "5.48.0",
   "description": "Mailgun provider for strapi email plugin",
   "keywords": [
     "email",
@@ -47,13 +47,13 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.47.1",
-    "form-data": "4.0.4",
+    "@strapi/utils": "5.48.0",
+    "form-data": "4.0.6",
     "mailgun.js": "10.2.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.47.1",
-    "tsconfig": "5.47.1"
+    "eslint-config-custom": "5.48.0",
+    "tsconfig": "5.48.0"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

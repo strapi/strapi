@@ -43,6 +43,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom/client',
         'styled-components',
         'react-router-dom',
+        // Admin + RTK Query share react-redux context; pre-bundle so dev chunks cannot load a
+        // second copy (avoids "could not find react-redux context value" after upgrades / hoisting).
+        'react-redux',
+        '@reduxjs/toolkit',
         // Pre-bundle design-system so plugin custom field chunks (dynamic imports) resolve
         // to the same instance as the main app. Otherwise TooltipProvider/DesignSystemProvider
         // context from the root is not seen by components in plugin chunks.
@@ -106,7 +110,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'react-colorful',
               'react-dnd-html5-backend',
               'react-window',
-              'sanitize-html',
               'semver',
               'semver/functions/lt',
               'semver/functions/valid',
@@ -126,6 +129,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom',
         'react-router-dom',
         'styled-components',
+        'react-redux',
+        '@reduxjs/toolkit',
         '@strapi/design-system',
         '@radix-ui/react-tooltip',
         'lodash',
@@ -137,6 +142,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom': getModulePath('react-dom'),
         'react-router-dom': getModulePath('react-router-dom'),
         'styled-components': getModulePath('styled-components'),
+        'react-redux': getModulePath('react-redux'),
+        '@reduxjs/toolkit': getModulePath('@reduxjs/toolkit'),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),

@@ -34,6 +34,34 @@ const buildFoldersHandler = () =>
     })
   );
 
+const captureUpdateRequest = (responseAsset: AssetWithPopulatedCreatedBy = baseAsset) => {
+  let resolveRequest: (request: { id: string | null; body: FormData }) => void;
+  let rejectRequest: (error: unknown) => void;
+
+  const requestPromise = new Promise<{ id: string | null; body: FormData }>((resolve, reject) => {
+    resolveRequest = resolve;
+    rejectRequest = reject;
+  });
+
+  server.use(
+    http.post('/upload', async ({ request }) => {
+      try {
+        const url = new URL(request.url, 'http://localhost:1337');
+        resolveRequest({
+          id: url.searchParams.get('id'),
+          body: await request.formData(),
+        });
+      } catch (error) {
+        rejectRequest(error);
+      }
+
+      return HttpResponse.json(responseAsset);
+    })
+  );
+
+  return requestPromise;
+};
+
 const buildSettingsHandler = (aiMetadata = false) =>
   http.get('/upload/settings', () =>
     HttpResponse.json({
@@ -62,14 +90,7 @@ describe('AssetDetails (asset details drawer body)', () => {
   });
 
   it('enables save when a field is edited and submits the new fileInfo to the update endpoint', async () => {
-    let captured: { id: string | null; body: FormData | null } = { id: null, body: null };
-    server.use(
-      http.post('/upload', async ({ request }) => {
-        const url = new URL(request.url);
-        captured = { id: url.searchParams.get('id'), body: await request.formData() };
-        return HttpResponse.json({ ...baseAsset, name: 'updated.png' });
-      })
-    );
+    const updateRequest = captureUpdateRequest({ ...baseAsset, name: 'updated.png' });
 
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
@@ -81,9 +102,10 @@ describe('AssetDetails (asset details drawer body)', () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
 
-    await waitFor(() => expect(captured.id).toBe('1'));
+    const captured = await updateRequest;
+    expect(captured.id).toBe('1');
 
-    const rawFileInfo = captured.body?.get('fileInfo');
+    const rawFileInfo = captured.body.get('fileInfo');
     expect(typeof rawFileInfo).toBe('string');
     const fileInfo = JSON.parse(rawFileInfo as string);
     expect(fileInfo).toMatchObject({
@@ -106,13 +128,7 @@ describe('AssetDetails (asset details drawer body)', () => {
   });
 
   it('sends the selected folder id when the location changes to a non-root folder', async () => {
-    let captured: { body: FormData | null } = { body: null };
-    server.use(
-      http.post('/upload', async ({ request }) => {
-        captured = { body: await request.formData() };
-        return HttpResponse.json({ ...baseAsset, folder: 2 });
-      })
-    );
+    const updateRequest = captureUpdateRequest({ ...baseAsset, folder: 2 });
 
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
 
@@ -124,20 +140,14 @@ describe('AssetDetails (asset details drawer body)', () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
 
-    await waitFor(() => expect(captured.body).not.toBeNull());
-    const fileInfo = JSON.parse(captured.body!.get('fileInfo') as string);
+    const captured = await updateRequest;
+    const fileInfo = JSON.parse(captured.body.get('fileInfo') as string);
     expect(fileInfo.folder).toBe(2);
   });
 
   it('keeps location selectable and dirty-tracks the move back to the Media Library root', async () => {
     const assetInFolder = { ...baseAsset, folder: 2 };
-    let captured: { body: FormData | null } = { body: null };
-    server.use(
-      http.post('/upload', async ({ request }) => {
-        captured = { body: await request.formData() };
-        return HttpResponse.json({ ...assetInFolder, folder: null });
-      })
-    );
+    const updateRequest = captureUpdateRequest({ ...assetInFolder, folder: null });
 
     const { user } = render(<AssetDetails asset={assetInFolder} closeDetails={jest.fn()} />);
 
@@ -149,8 +159,8 @@ describe('AssetDetails (asset details drawer body)', () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
 
-    await waitFor(() => expect(captured.body).not.toBeNull());
-    const fileInfo = JSON.parse(captured.body!.get('fileInfo') as string);
+    const captured = await updateRequest;
+    const fileInfo = JSON.parse(captured.body.get('fileInfo') as string);
     expect(fileInfo.folder).toBeNull();
   });
 
@@ -200,21 +210,21 @@ describe('AssetDetails (asset details drawer body)', () => {
   });
 
   it('opens the confirm dialog when the trigger is clicked and uploads the file picked after Continue', async () => {
-    // FormData parsing in msw under jsdom hangs when the body contains a real
-    // File blob, so we capture the request metadata only (id + content-type +
-    // presence of a body) rather than re-parsing the multipart payload here.
-    let captured: { id: string | null; contentType: string | null; hasBody: boolean } = {
+    // The admin test environment stashes the jsdom `FormData` body on the
+    // Request (see admin-test-utils request-body-stash), so `request.formData()`
+    // reliably returns the picked file here instead of relying on undici's
+    // cross-realm multipart serialization (which yields a `text/plain` body).
+    let captured: { id: string | null; file: FormDataEntryValue | null } = {
       id: null,
-      contentType: null,
-      hasBody: false,
+      file: null,
     };
     server.use(
       http.post('/upload', async ({ request }) => {
-        const url = new URL(request.url);
+        const url = new URL(request.url, 'http://localhost:1337');
+        const body = await request.formData();
         captured = {
           id: url.searchParams.get('id'),
-          contentType: request.headers.get('content-type'),
-          hasBody: request.body !== null,
+          file: body.get('files'),
         };
         return HttpResponse.json({ ...baseAsset, name: 'replacement.png' });
       })
@@ -242,8 +252,8 @@ describe('AssetDetails (asset details drawer body)', () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
 
     await waitFor(() => expect(captured.id).toBe('1'));
-    expect(captured.contentType).toMatch(/multipart\/form-data/);
-    expect(captured.hasBody).toBe(true);
+    expect(captured.file).toBeInstanceOf(File);
+    expect((captured.file as File).name).toBe('replacement.png');
     // Success toast renders inside the drawer, above the preview, not in the
     // global notifications region.
     await screen.findByText(/File replaced\./i);
