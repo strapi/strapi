@@ -42,7 +42,7 @@ const isQsArrayLimitPopulateObject = (value: unknown): value is Record<string, s
     return false;
   }
 
-  return keys.every((key) => typeof value[key] === 'string');
+  return Object.values(value).every((entry) => typeof entry === 'string');
 };
 
 const throwQsArrayLimitPopulateError = (entryCount: number) => {
