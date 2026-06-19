@@ -14,7 +14,7 @@ reviews:
   high_level_summary: true
   high_level_summary_in_walkthrough: true
   poem: false
-  review_status: true
+  review_status: false
   collapse_walkthrough: false
   # Surface a sequence diagram for non-trivial control-flow changes.
   sequence_diagrams: true
