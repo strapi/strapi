@@ -613,6 +613,48 @@ export default {
       },
 
       /**
+       * Replaces an existing object in S3. Since `PutObject` with the same key
+       * overwrites the existing object, this is just an upload of the new file
+       * — and if the key changed, we delete the old object afterwards so we
+       * never leave the bucket in a state where the asset is missing.
+       */
+      async replaceStream(newFile: File, oldFile: File, customParams = {}) {
+        const newKey = getFileKey(newFile);
+        const oldKey = getFileKey(oldFile);
+
+        await upload(newFile, customParams);
+
+        if (newKey !== oldKey) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { Bucket, Key, ...safeParams } = customParams as any;
+          const command = new DeleteObjectCommand({
+            ...safeParams,
+            Bucket: config.params.Bucket,
+            Key: oldKey,
+          });
+          await s3Client.send(command);
+        }
+      },
+
+      async replace(newFile: File, oldFile: File, customParams = {}) {
+        const newKey = getFileKey(newFile);
+        const oldKey = getFileKey(oldFile);
+
+        await upload(newFile, customParams);
+
+        if (newKey !== oldKey) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { Bucket, Key, ...safeParams } = customParams as any;
+          const command = new DeleteObjectCommand({
+            ...safeParams,
+            Bucket: config.params.Bucket,
+            Key: oldKey,
+          });
+          await s3Client.send(command);
+        }
+      },
+
+      /**
        * Uploads a file only if it matches the expected ETag (optimistic locking).
        * Throws PreconditionFailed error if ETag does not match.
        */

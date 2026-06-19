@@ -8,7 +8,7 @@ import {
   setGlobalStrapi,
   getStrapiModels,
 } from '../../../../__tests__/test-utils';
-import type { IEntity } from '../../../../../types';
+import type { IEntity } from '../../../../types';
 
 afterEach(() => {
   jest.clearAllMocks();

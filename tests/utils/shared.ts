@@ -749,6 +749,53 @@ export const isElementBefore = async (firstLocator, secondLocator) => {
   }, secondHandle);
 };
 
+type DynamicZoneInsertPosition = 'above' | 'below';
+
+/**
+ * Insert a component in a dynamic zone relative to an existing component.
+ *
+ * Radix nested menus need a real click on the sub-trigger to open the picker; only the leaf
+ * component item uses `dispatchEvent('click')` (see DynamicComponent unit tests).
+ */
+export const insertDynamicZoneComponent = async (
+  page: Page,
+  options: {
+    relativeToComponent: RegExp | string;
+    position: DynamicZoneInsertPosition;
+    componentToAdd: RegExp | string;
+    expectedComponentCount?: number;
+  }
+) => {
+  const { relativeToComponent, position, componentToAdd, expectedComponentCount } = options;
+
+  const componentItem = page.getByRole('listitem').filter({
+    has: page.getByRole('button', { name: relativeToComponent }),
+  });
+
+  await expect(componentItem).toHaveCount(1);
+
+  const moreActionsBtn = componentItem.getByRole('button', { name: /more actions/i });
+  await moreActionsBtn.scrollIntoViewIfNeeded();
+  await moreActionsBtn.click();
+
+  const insertLabel = position === 'above' ? /add component above/i : /add component below/i;
+  const insertMenuItem = page.getByRole('menuitem', { name: insertLabel });
+  await expect(insertMenuItem).toBeVisible();
+  await insertMenuItem.click();
+
+  const componentMenuItem = page.getByRole('menuitem', { name: componentToAdd }).last();
+  await expect(componentMenuItem).toBeVisible();
+  await componentMenuItem.dispatchEvent('click');
+
+  const components = page.getByRole('listitem').filter({ has: page.getByRole('heading') });
+
+  if (expectedComponentCount !== undefined) {
+    await expect(components).toHaveCount(expectedComponentCount);
+  } else {
+    await expect(insertMenuItem).toBeHidden();
+  }
+};
+
 /**
  * Ensures that the specified checkbox is in the desired checked state.
  * If the checkbox's current state does not match the desired state, it clicks the checkbox to toggle it.

@@ -121,6 +121,22 @@ describe('create-strapi-app', () => {
     }
   });
 
+  it('allows pnpm to build better-sqlite3 for SQLite projects', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-pnpm'])
+        .expect('code', 0)
+        .end();
+
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+
+      expect(pkg.dependencies).toMatchObject({ 'better-sqlite3': expect.any(String) });
+      expect(pkg.pnpm).toMatchObject({ onlyBuiltDependencies: ['better-sqlite3'] });
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
   it('scaffolds inside an existing Yarn workspace monorepo', async () => {
     const monorepoDir = mkProjectDir();
     const projectDir = path.join(monorepoDir, 'packages', 'strapi-app');
