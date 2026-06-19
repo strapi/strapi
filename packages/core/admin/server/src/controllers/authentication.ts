@@ -2,7 +2,7 @@ import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
-import { errors, getDeviceName } from '@strapi/utils';
+import { errors, buildSessionMetadata } from '@strapi/utils';
 import { getService } from '../utils';
 import {
   REFRESH_COOKIE_NAME,
@@ -33,20 +33,6 @@ import type {
 import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError, ValidationError } = errors;
-
-/**
- * Captures generic, origin-defined session metadata from the request. The session
- * manager stores this verbatim; the admin uses it to display active devices.
- */
-const buildSessionMetadata = (ctx: Context): Record<string, unknown> => {
-  const deviceName = getDeviceName(ctx.request.headers['user-agent']);
-
-  return {
-    loginAt: new Date().toISOString(),
-    ip: ctx.request.ip,
-    ...(deviceName ? { deviceName } : {}),
-  };
-};
 
 export default {
   login: compose([
@@ -99,7 +85,10 @@ export default {
           'admin'
         ).generateRefreshToken(userId, deviceId, {
           type: rememberMe ? 'refresh' : 'session',
-          metadata: buildSessionMetadata(ctx),
+          metadata: buildSessionMetadata({
+            ip: ctx.request.ip,
+            userAgent: ctx.request.headers['user-agent'],
+          }),
         });
 
         const cookieOptions = buildCookieOptionsWithExpiry(
@@ -163,7 +152,10 @@ export default {
         'admin'
       ).generateRefreshToken(userId, deviceId, {
         type: rememberMe ? 'refresh' : 'session',
-        metadata: buildSessionMetadata(ctx),
+        metadata: buildSessionMetadata({
+          ip: ctx.request.ip,
+          userAgent: ctx.request.headers['user-agent'],
+        }),
       });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
@@ -214,7 +206,10 @@ export default {
         'admin'
       ).generateRefreshToken(userId, deviceId, {
         type: rememberMe ? 'refresh' : 'session',
-        metadata: buildSessionMetadata(ctx),
+        metadata: buildSessionMetadata({
+          ip: ctx.request.ip,
+          userAgent: ctx.request.headers['user-agent'],
+        }),
       });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
@@ -278,7 +273,10 @@ export default {
         'admin'
       ).generateRefreshToken(userId, deviceId, {
         type: 'session',
-        metadata: buildSessionMetadata(ctx),
+        metadata: buildSessionMetadata({
+          ip: ctx.request.ip,
+          userAgent: ctx.request.headers['user-agent'],
+        }),
       });
 
       // No rememberMe flow here; expire with session by default (session cookie)

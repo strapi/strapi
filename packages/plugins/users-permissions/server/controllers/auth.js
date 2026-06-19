@@ -23,6 +23,7 @@ const {
 } = require('./validation/auth');
 
 const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
+const { buildSessionMetadata, sanitizeSessionEntry, sortSessionsForDisplay } = utils;
 
 const sanitizeUser = (user, ctx) => {
   const { auth } = ctx.state;
@@ -37,33 +38,11 @@ const extractDeviceId = (requestBody) => {
   return typeof deviceId === 'string' && deviceId.length > 0 ? deviceId : undefined;
 };
 
-/**
- * Captures generic, origin-defined session metadata from the request. The session
- * manager stores this verbatim; consumers can display it as active devices.
- */
-const buildSessionMetadata = (ctx) => {
-  const deviceName = utils.getDeviceName(ctx.request.headers['user-agent']);
-
-  return {
-    loginAt: new Date().toISOString(),
+const buildSessionMetadataFromContext = (ctx) =>
+  buildSessionMetadata({
     ip: ctx.request.ip,
-    ...(deviceName ? { deviceName } : {}),
-  };
-};
-
-const sanitizeSession = (session, currentSessionId) => {
-  const metadata = session.metadata || {};
-
-  return {
-    id: session.sessionId,
-    deviceId: session.deviceId,
-    deviceName: typeof metadata.deviceName === 'string' ? metadata.deviceName : undefined,
-    current: Boolean(currentSessionId) && session.sessionId === currentSessionId,
-    loginAt: typeof metadata.loginAt === 'string' ? metadata.loginAt : undefined,
-    lastActiveAt: session.createdAt ? new Date(session.createdAt).toISOString() : undefined,
-    ip: typeof metadata.ip === 'string' ? metadata.ip : undefined,
-  };
-};
+    userAgent: ctx.request.headers['user-agent'],
+  });
 
 module.exports = ({ strapi }) => ({
   async callback(ctx) {
@@ -128,7 +107,7 @@ module.exports = ({ strapi }) => ({
           .sessionManager('users-permissions')
           .generateRefreshToken(String(user.id), deviceId, {
             type: 'refresh',
-            metadata: buildSessionMetadata(ctx),
+            metadata: buildSessionMetadataFromContext(ctx),
           });
 
         const access = await strapi
@@ -190,7 +169,7 @@ module.exports = ({ strapi }) => ({
           .sessionManager('users-permissions')
           .generateRefreshToken(String(user.id), deviceId, {
             type: 'refresh',
-            metadata: buildSessionMetadata(ctx),
+            metadata: buildSessionMetadataFromContext(ctx),
           });
 
         const access = await strapi
@@ -482,14 +461,9 @@ module.exports = ({ strapi }) => ({
       .sessionManager('users-permissions')
       .listSessions(String(ctx.state.user.id));
 
-    const data = sessions
-      .map((session) => sanitizeSession(session, currentSessionId))
-      .sort((a, b) => {
-        if (a.current !== b.current) {
-          return a.current ? -1 : 1;
-        }
-        return (b.lastActiveAt || '').localeCompare(a.lastActiveAt || '');
-      });
+    const data = sortSessionsForDisplay(
+      sessions.map((session) => sanitizeSessionEntry(session, currentSessionId))
+    );
 
     return ctx.send({ data });
   },
@@ -734,7 +708,7 @@ module.exports = ({ strapi }) => ({
         .sessionManager('users-permissions')
         .generateRefreshToken(String(user.id), deviceId, {
           type: 'refresh',
-          metadata: buildSessionMetadata(ctx),
+          metadata: buildSessionMetadataFromContext(ctx),
         });
 
       const access = await strapi

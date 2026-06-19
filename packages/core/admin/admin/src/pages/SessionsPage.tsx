@@ -55,63 +55,77 @@ const SessionsPage = () => {
     navigate('/auth/login');
   }, [logout, navigate]);
 
-  const handleRevoke = async (session: SanitizedAdminSession) => {
-    try {
-      const res = await revokeSession(session.id);
-
-      if ('error' in res) {
-        toggleNotification({
-          type: 'danger',
-          message: isBaseQueryError(res.error)
-            ? formatAPIError(res.error)
-            : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
-        });
-        return;
-      }
-
-      // Ending the current session logs the user out everywhere it is in use.
-      if (session.current) {
-        await handleLogoutAndRedirect();
-        return;
-      }
-
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: 'Settings.sessions.revoke.success',
-          defaultMessage: 'Session ended',
-        }),
-      });
-    } catch {
+  const notifyError = React.useCallback(
+    (error?: unknown) => {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        message:
+          error && isBaseQueryError(error)
+            ? formatAPIError(error)
+            : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
-    }
+    },
+    [formatAPIError, formatMessage, toggleNotification]
+  );
+
+  const runSessionMutation = React.useCallback(
+    async (
+      action: () => Promise<{ error?: unknown } | { data: unknown } | void>,
+      onSuccess: () => void | Promise<void>
+    ) => {
+      try {
+        const res = await action();
+
+        if (res && 'error' in res && res.error) {
+          notifyError(res.error);
+          return;
+        }
+
+        await onSuccess();
+      } catch {
+        notifyError();
+      }
+    },
+    [notifyError]
+  );
+
+  const handleRevoke = async (session: SanitizedAdminSession) => {
+    await runSessionMutation(
+      () => revokeSession(session.id),
+      async () => {
+        if (session.current) {
+          await handleLogoutAndRedirect();
+          return;
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'Settings.sessions.revoke.success',
+            defaultMessage: 'Session ended',
+          }),
+        });
+      }
+    );
+  };
+
+  const handleRevokeOthers = async () => {
+    await runSessionMutation(
+      () => revokeAllSessions({ keepCurrent: true }),
+      () => {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'Settings.sessions.revokeOthers.success',
+            defaultMessage: 'Other sessions ended',
+          }),
+        });
+      }
+    );
   };
 
   const handleRevokeAll = async () => {
-    try {
-      const res = await revokeAllSessions(undefined);
-
-      if (res && 'error' in res) {
-        toggleNotification({
-          type: 'danger',
-          message: isBaseQueryError(res.error)
-            ? formatAPIError(res.error)
-            : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
-        });
-        return;
-      }
-
-      // A global logout invalidates the current session too, so send the user to login.
-      await handleLogoutAndRedirect();
-    } catch {
-      toggleNotification({
-        type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
-      });
-    }
+    await runSessionMutation(() => revokeAllSessions(undefined), handleLogoutAndRedirect);
   };
 
   if (isLoading) {
@@ -141,23 +155,44 @@ const SessionsPage = () => {
         })}
         primaryAction={
           sessions.length > 0 ? (
-            <Dialog.Root>
-              <Dialog.Trigger>
-                <Button variant="danger-light" startIcon={<SignOut />}>
+            <Flex gap={2}>
+              {sessions.length > 1 ? (
+                <Dialog.Root>
+                  <Dialog.Trigger>
+                    <Button variant="secondary" startIcon={<SignOut />}>
+                      {formatMessage({
+                        id: 'Settings.sessions.revokeOthers',
+                        defaultMessage: 'Log out of other devices',
+                      })}
+                    </Button>
+                  </Dialog.Trigger>
+                  <ConfirmDialog onConfirm={handleRevokeOthers}>
+                    {formatMessage({
+                      id: 'Settings.sessions.revokeOthers.confirm',
+                      defaultMessage:
+                        'Are you sure? This will end every other active session. You will stay signed in on this device.',
+                    })}
+                  </ConfirmDialog>
+                </Dialog.Root>
+              ) : null}
+              <Dialog.Root>
+                <Dialog.Trigger>
+                  <Button variant="danger-light" startIcon={<SignOut />}>
+                    {formatMessage({
+                      id: 'Settings.sessions.revokeAll',
+                      defaultMessage: 'Log out of all devices',
+                    })}
+                  </Button>
+                </Dialog.Trigger>
+                <ConfirmDialog onConfirm={handleRevokeAll}>
                   {formatMessage({
-                    id: 'Settings.sessions.revokeAll',
-                    defaultMessage: 'Log out of all devices',
+                    id: 'Settings.sessions.revokeAll.confirm',
+                    defaultMessage:
+                      'Are you sure? This will end every active session, including this one, and you will need to log in again.',
                   })}
-                </Button>
-              </Dialog.Trigger>
-              <ConfirmDialog onConfirm={handleRevokeAll}>
-                {formatMessage({
-                  id: 'Settings.sessions.revokeAll.confirm',
-                  defaultMessage:
-                    'Are you sure? This will end every active session, including this one, and you will need to log in again.',
-                })}
-              </ConfirmDialog>
-            </Dialog.Root>
+                </ConfirmDialog>
+              </Dialog.Root>
+            </Flex>
           ) : undefined
         }
       />
@@ -188,7 +223,7 @@ const SessionsPage = () => {
                   <Typography variant="sigma">
                     {formatMessage({
                       id: 'Settings.sessions.lastActiveAt',
-                      defaultMessage: 'Last active',
+                      defaultMessage: 'Last used',
                     })}
                   </Typography>
                 </Th>

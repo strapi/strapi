@@ -1,9 +1,8 @@
 import type { Context } from 'koa';
-import type { Modules } from '@strapi/types';
+import { sanitizeSessionEntry, sortSessionsForDisplay } from '@strapi/utils';
 
 import { getSessionManager } from '../../../shared/utils/session-auth';
 import type {
-  SanitizedAdminSession,
   GetSessions,
   DeleteSession,
   DeleteAllSessions,
@@ -14,29 +13,6 @@ const ORIGIN = 'admin';
 const getCurrentSessionId = (ctx: Context): string | undefined => {
   const session = ctx.state.session as { id?: string } | undefined;
   return typeof session?.id === 'string' ? session.id : undefined;
-};
-
-const sanitizeSession = (
-  session: Modules.SessionManager.SessionEntry,
-  currentSessionId?: string
-): SanitizedAdminSession => {
-  const metadata = (session.metadata ?? {}) as {
-    loginAt?: unknown;
-    ip?: unknown;
-    deviceName?: unknown;
-  };
-
-  return {
-    id: session.sessionId,
-    deviceId: session.deviceId,
-    deviceName: typeof metadata.deviceName === 'string' ? metadata.deviceName : undefined,
-    current: Boolean(currentSessionId) && session.sessionId === currentSessionId,
-    loginAt: typeof metadata.loginAt === 'string' ? metadata.loginAt : undefined,
-    // The active record is re-created on each rotation, so its creation time is the
-    // best available "last used" signal without an extra write per request.
-    lastActiveAt: session.createdAt ? new Date(session.createdAt).toISOString() : undefined,
-    ip: typeof metadata.ip === 'string' ? metadata.ip : undefined,
-  };
 };
 
 export default {
@@ -50,15 +26,9 @@ export default {
     const currentSessionId = getCurrentSessionId(ctx);
     const sessions = await sessionManager(ORIGIN).listSessions(userId);
 
-    const data = sessions
-      .map((session) => sanitizeSession(session, currentSessionId))
-      // Surface the current session first, then most recently active.
-      .sort((a, b) => {
-        if (a.current !== b.current) {
-          return a.current ? -1 : 1;
-        }
-        return (b.lastActiveAt ?? '').localeCompare(a.lastActiveAt ?? '');
-      });
+    const data = sortSessionsForDisplay(
+      sessions.map((session) => sanitizeSessionEntry(session, currentSessionId))
+    );
 
     ctx.body = { data } satisfies GetSessions.Response;
   },
