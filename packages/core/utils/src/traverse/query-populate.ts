@@ -32,7 +32,7 @@ const isQsArrayLimitPopulateObject = (value: unknown): value is Record<string, s
 
   const keys = Object.keys(value);
 
-  if (keys.length === 0) {
+  if (keys.length === 0 || keys.length <= DEFAULT_QS_ARRAY_LIMIT) {
     return false;
   }
 

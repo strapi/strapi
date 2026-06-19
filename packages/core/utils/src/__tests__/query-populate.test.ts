@@ -298,5 +298,15 @@ describe('traverseQueryPopulate', () => {
         })
       ).rejects.not.toThrow(/Invalid key 2/);
     });
+
+    test('does not throw arrayLimit error when numeric-key object is within the limit', async () => {
+      const populateWithinLimit = Object.fromEntries(
+        Array.from({ length: 100 }, (_, index) => [String(index), `field${index}`])
+      );
+
+      await expect(
+        defaultValidatePopulate({ schema, getModel }, populateWithinLimit)
+      ).rejects.not.toThrow(/Too many populate entries/);
+    });
   });
 });
