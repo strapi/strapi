@@ -1,4 +1,8 @@
-import type { Modules } from '@strapi/types';
+import type { Modules, UID } from '@strapi/types';
+
+import { formatDocumentWithMetadata } from '../controllers/utils/metadata';
+import type { GetMetadataOptions } from '../services/document-metadata';
+import { shapeRelationsForMcp } from './sanitizers/shape-relations';
 
 /**
  * Converts a Strapi content-type UID into a safe MCP tool-name segment.
@@ -11,6 +15,44 @@ export const slugifyUidForMcpToolName = (uid: string): string => {
     return `${modelNameParts[0]}`;
   }
   return `${namespace.toLowerCase()}_${modelNameParts[0]}`;
+};
+
+type McpPermissionChecker = {
+  sanitizeOutput: (doc: unknown) => Promise<Record<string, unknown>>;
+};
+
+/**
+ * Output chokepoint for MCP handlers returning `{ data, meta }`.
+ * Order matters — calculate, then strip:
+ * 1. permission-based sanitization,
+ * 2. formatDocumentWithMetadata — computes `data.status` and `localizations[].status`
+ *    from `publishedAt`/`updatedAt`, which relation shaping removes,
+ * 3. relation shaping on the formatted `data` (identity-only relations; the
+ *    freshly-computed `localizations[].status` survives via RelationIdentity).
+ *
+ * Handlers that do NOT attach metadata (delete, list) compose
+ * `permissionChecker.sanitizeOutput` + `shapeRelationsForMcp` directly instead.
+ */
+export const sanitizeFormatShape = async (
+  permissionChecker: McpPermissionChecker,
+  uid: UID.ContentType,
+  doc: unknown,
+  opts?: GetMetadataOptions
+): Promise<Record<string, unknown>> => {
+  const sanitized = await permissionChecker.sanitizeOutput(doc);
+  const formatted = await formatDocumentWithMetadata(
+    permissionChecker,
+    uid,
+    sanitized as unknown as Parameters<typeof formatDocumentWithMetadata>[2],
+    opts
+  );
+
+  if (formatted.data === null || formatted.data === undefined) {
+    return formatted;
+  }
+
+  const shapedData = await shapeRelationsForMcp(uid, formatted.data as Record<string, unknown>);
+  return { ...formatted, data: shapedData };
 };
 
 /** Wraps a plain object into the dual-representation MCP tool return value (text + structuredContent). */
