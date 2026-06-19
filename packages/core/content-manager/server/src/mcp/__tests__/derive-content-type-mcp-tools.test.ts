@@ -296,12 +296,57 @@ jest.mock('@strapi/utils', () => {
 });
 
 // ---------------------------------------------------------------------------
+// slugifyUidForMcpToolName
+// ---------------------------------------------------------------------------
+
+describe('slugifyUidForMcpToolName', () => {
+  it('maps api UIDs to the first model-name segment only', () => {
+    expect(slugifyUidForMcpToolName('api::article.article')).toBe('article');
+  });
+
+  it('maps plugin UIDs to namespace-model_content-type per documented format', () => {
+    expect(slugifyUidForMcpToolName('plugin::i18n.locale')).toBe('plugin-i18n_locale');
+  });
+
+  it('includes the content-type suffix so plugin models with the same prefix stay unique', () => {
+    expect(slugifyUidForMcpToolName('plugin::cms-basics.page')).toBe('plugin-cms-basics_page');
+    expect(slugifyUidForMcpToolName('plugin::cms-basics.settings')).toBe(
+      'plugin-cms-basics_settings'
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Tool structure tests (unchanged from original)
 // ---------------------------------------------------------------------------
 
 describe('deriveDisplayedContentTypeMcpToolDefinitions', () => {
-  it('maps uid segments into a stable tool name slug', () => {
-    expect(slugifyUidForMcpToolName('api::article.article')).toBe('article');
+  it('derives unique tool names for plugin content types that share a model-name prefix', () => {
+    const models = [
+      baseModel({
+        uid: 'plugin::cms-basics.page',
+        apiID: 'page',
+        kind: 'collectionType',
+      }),
+      baseModel({
+        uid: 'plugin::cms-basics.settings',
+        apiID: 'settings',
+        kind: 'singleType',
+      }),
+    ];
+
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, models);
+    const names = tools.map((tool) => tool.name);
+    const uniqueNames = new Set(names);
+
+    expect(uniqueNames.size).toBe(names.length);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'list_plugin-cms-basics_page',
+        'get_plugin-cms-basics_settings',
+        'write_plugin-cms-basics_settings',
+      ])
+    );
   });
 
   it('emits list/get with explorer.read for a collection type', () => {
