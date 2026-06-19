@@ -66,7 +66,7 @@ ${error.stack}
                 <Typography fontSize={4} fontWeight="bold" textAlign="center">
                   {formatMessage({
                     id: 'app.error.chunk.title',
-                    defaultMessage: 'Taking longer than expected',
+                    defaultMessage: "This screen couldn't be loaded",
                   })}
                 </Typography>
                 <Typography variant="omega" textAlign="center">

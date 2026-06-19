@@ -4,7 +4,7 @@ import type { Plugin, UserConfig } from 'vite';
  * Testing lazy admin chunks (delay / synthetic failure)
  * -----------------------------------------------------
  * In dev, this plugin can slow down or fail specific JavaScript chunk responses so you can watch
- * Suspense loading states and chunk retry behavior in the browser.
+ * LazyOutlet loading states and chunk retry behavior in the browser.
  *
  * Easiest way to try it
  * ---------------------
@@ -13,8 +13,8 @@ import type { Plugin, UserConfig } from 'vite';
  *
  *   STRAPI_ADMIN_TEST_CHUNK_MATCH=InstalledPlugins STRAPI_ADMIN_TEST_CHUNK_DELAY_MS=5000 yarn develop
  *
- * Log in to the admin, then open Settings → Plugins (sidebar). You should see the loading
- * state for a few seconds, then the Plugins screen. Nothing here matches until you visit that page,
+ * Log in to the admin, then open Settings → Plugins (sidebar). You should see a loading
+ * spinner in the settings content column for a few seconds, then the Plugins screen. Nothing here matches until you visit that page,
  * so the rest of the admin works normally until you navigate there.
  *
  * Flaky chunks (retry path):

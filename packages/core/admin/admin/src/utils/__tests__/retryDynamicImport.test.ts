@@ -116,5 +116,37 @@ describe('retryDynamicImport', () => {
       expect(wrapped.lazy).not.toBe(route.lazy);
       expect(wrapped.children?.[0].lazy).not.toBe(route.children?.[0].lazy);
     });
+
+    it('retries transient chunk errors from wrapped lazy loaders', async () => {
+      jest.useFakeTimers();
+      jest.spyOn(Math, 'random').mockReturnValue(0);
+
+      let calls = 0;
+      const chunkError = new TypeError(
+        'Failed to fetch dynamically imported module: https://cdn.example/chunk.js'
+      );
+
+      const wrapped = wrapRouteObjectLazyWithRetry({
+        lazy: async () => {
+          calls += 1;
+
+          if (calls < 2) {
+            throw chunkError;
+          }
+
+          return { Component: () => null };
+        },
+      });
+
+      const resultPromise = wrapped.lazy!();
+
+      await jest.runAllTimersAsync();
+
+      await expect(resultPromise).resolves.toEqual({ Component: expect.any(Function) });
+      expect(calls).toBe(2);
+
+      jest.useRealTimers();
+      jest.restoreAllMocks();
+    });
   });
 });

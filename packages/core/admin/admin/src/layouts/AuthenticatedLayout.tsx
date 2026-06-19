@@ -5,10 +5,10 @@ import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
 
+import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
@@ -135,14 +135,11 @@ const AdminLayout = () => {
               >
                 <UpsellBanner />
                 {/*
-                 * Nested Suspense so lazy route chunks (Home, plugins, settings, etc.) show
-                 * Page.Loading in the main column while LeftMenu stays mounted. Without this,
-                 * suspend can bubble to the root Suspense in App and produce a blank shell
-                 * (e.g. white viewport) until the chunk resolves.
+                 * Top-level Suspense only — nested layouts (Settings, Content Manager) use
+                 * LazyOutlet with useNavigation so in-app navigations show loading in the content
+                 * column without hiding section side navs.
                  */}
-                <React.Suspense fallback={<Page.Loading />}>
-                  <Outlet />
-                </React.Suspense>
+                <LazyOutlet suspenseOnly />
               </Flex>
             </Flex>
           </Box>
