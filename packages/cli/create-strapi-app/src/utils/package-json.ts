@@ -1,12 +1,12 @@
 import { join } from 'path';
-import { kebabCase, merge } from 'lodash';
+import { kebabCase, mergeWith } from 'lodash';
 import fse from 'fs-extra';
 
 import { engines } from './engines';
 import type { Scope } from '../types';
 
 type PnpmPackageConfig = {
-  onlyBuiltDependencies?: unknown;
+  onlyBuiltDependencies?: string[];
   [key: string]: unknown;
 };
 
@@ -14,6 +14,15 @@ type PackageJson = {
   pnpm?: PnpmPackageConfig;
   [key: string]: unknown;
 };
+
+const mergePackageJson = (existingPkg: PackageJson, pkg: PackageJson) =>
+  mergeWith({}, existingPkg, pkg, (_objValue, srcValue) => {
+    if (Array.isArray(srcValue)) {
+      return srcValue;
+    }
+
+    return undefined;
+  });
 
 const getPnpmOnlyBuiltDependencies = (scope: Scope, existingPkg: PackageJson) => {
   if (scope.packageManager !== 'pnpm' || scope.database.client !== 'sqlite') {
@@ -58,7 +67,7 @@ export async function createPackageJSON(scope: Scope) {
   };
 
   // copy templates
-  await fse.writeJSON(pkgJSONPath, sortPackageJson(merge(existingPkg, pkg)), {
+  await fse.writeJSON(pkgJSONPath, sortPackageJson(mergePackageJson(existingPkg, pkg)), {
     spaces: 2,
   });
 }
