@@ -62,6 +62,7 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
+    "@types/jest": "29.5.2",
     "@types/jscodeshift": "17.3.0",
     "copyfiles": "2.4.1",
     "eslint-config-custom": "5.48.0",

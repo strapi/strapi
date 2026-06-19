@@ -154,6 +154,7 @@
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/fs-extra": "11.0.4",
     "@types/invariant": "2.2.37",
+    "@types/jest": "29.5.2",
     "@types/json-logic-js": "2.0.8",
     "@types/jsonwebtoken": "9.0.3",
     "@types/koa-passport": "6.0.1",

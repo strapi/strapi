@@ -8711,6 +8711,7 @@ __metadata:
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15"
     "@types/fs-extra": "npm:11.0.4"
     "@types/invariant": "npm:2.2.37"
+    "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/jsonwebtoken": "npm:9.0.3"
     "@types/koa-passport": "npm:6.0.1"
@@ -8806,6 +8807,7 @@ __metadata:
     "@strapi/utils": "npm:5.48.0"
     "@types/cli-progress": "npm:3.11.5"
     "@types/eventsource": "npm:1.1.15"
+    "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
     axios: "npm:1.18.0"
     boxen: "npm:5.1.2"
@@ -8922,6 +8924,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
@@ -8972,6 +8975,7 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/micromatch": "npm:^4.0.9"
     "@types/pluralize": "npm:0.0.32"
     ai: "npm:5.0.52"
@@ -9146,6 +9150,7 @@ __metadata:
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/utils": "npm:5.48.0"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     ajv: "npm:8.20.0"
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
@@ -9211,6 +9216,7 @@ __metadata:
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     "@types/lodash": "npm:^4.14.191"
     jest: "npm:29.6.0"
@@ -9275,6 +9281,7 @@ __metadata:
     "@strapi/typescript-utils": "npm:5.48.0"
     "@strapi/utils": "npm:5.48.0"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/jscodeshift": "npm:17.3.0"
     chalk: "npm:4.1.2"
     copyfiles: "npm:2.4.1"
@@ -9308,6 +9315,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/jest": "npm:29.5.2"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
@@ -9360,6 +9368,7 @@ __metadata:
   dependencies:
     "@strapi/types": "npm:5.48.0"
     "@types/debug": "npm:^4"
+    "@types/jest": "npm:29.5.2"
     debug: "npm:4.3.4"
     jest: "npm:29.6.0"
     openapi-types: "npm:12.1.3"
@@ -9373,6 +9382,7 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@strapi/utils": "npm:5.48.0"
+    "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.48.0"
     jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
@@ -9419,6 +9429,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/jest": "npm:29.5.2"
     jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-colorful: "npm:5.6.1"
@@ -9454,6 +9465,7 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     "@types/swagger-ui-dist": "npm:3.30.4"
     bcryptjs: "npm:2.4.3"
@@ -9502,6 +9514,7 @@ __metadata:
     "@strapi/types": "npm:5.48.0"
     "@strapi/utils": "npm:5.48.0"
     "@types/graphql-depth-limit": "npm:1.1.5"
+    "@types/jest": "npm:29.5.2"
     "@types/koa-bodyparser": "npm:4.3.12"
     "@types/koa__cors": "npm:5.0.0"
     cross-env: "npm:^7.0.3"
@@ -9540,6 +9553,7 @@ __metadata:
     "@strapi/design-system": "npm:2.2.0"
     "@strapi/icons": "npm:2.2.0"
     "@strapi/strapi": "npm:5.48.0"
+    "@types/jest": "npm:29.5.2"
     jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -9566,6 +9580,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/jest": "npm:29.5.2"
     bcryptjs: "npm:2.4.3"
     formik: "npm:2.4.5"
     grant: "npm:5.4.24"
@@ -9616,6 +9631,7 @@ __metadata:
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
     "@strapi/utils": "npm:5.48.0"
+    "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.48.0"
     form-data: "npm:4.0.6"
     jest: "npm:29.6.0"
@@ -9628,6 +9644,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@types/jest": "npm:29.5.2"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.48.0"
     jest: "npm:29.6.0"
@@ -9651,6 +9668,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
+    "@types/jest": "npm:29.5.2"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.48.0"
     jest: "npm:29.6.0"
@@ -9717,6 +9735,7 @@ __metadata:
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
+    "@types/jest": "npm:29.5.2"
     fractional-indexing: "npm:3.2.0"
     jest: "npm:29.6.0"
     msw: "npm:2.13.4"
@@ -9880,6 +9899,7 @@ __metadata:
   resolution: "@strapi/typescript-utils@workspace:packages/utils/typescript"
   dependencies:
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     fs-extra: "npm:11.3.4"
@@ -9929,6 +9949,7 @@ __metadata:
     "@strapi/types": "npm:5.48.0"
     "@strapi/utils": "npm:5.48.0"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/jscodeshift": "npm:17.3.0"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
@@ -9974,6 +9995,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/byte-size": "npm:8.1.2"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     "@types/koa-range": "npm:0.3.5"
     "@types/koa-static": "npm:4.0.2"
@@ -10022,6 +10044,7 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     "@types/node": "npm:24.10.0"
     date-fns: "npm:2.30.0"
@@ -14526,7 +14549,9 @@ __metadata:
   dependencies:
     "@actions/core": "npm:1.11.1"
     "@actions/github": "npm:6.0.0"
+    "@types/jest": "npm:29.5.2"
     "@vercel/ncc": "npm:0.38.2"
+    jest: "npm:29.6.0"
   languageName: unknown
   linkType: soft
 
@@ -28171,6 +28196,9 @@ __metadata:
 "scripts-front@workspace:scripts/front":
   version: 0.0.0-use.local
   resolution: "scripts-front@workspace:scripts/front"
+  dependencies:
+    "@types/jest": "npm:29.5.2"
+    jest: "npm:29.6.0"
   languageName: unknown
   linkType: soft
 
