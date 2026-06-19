@@ -1,8 +1,8 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { resetFiles } from '../../../../utils/file-reset';
 import { createSingleType, type AddAttribute } from '../../../../utils/content-types';
 import { sharedSetup } from '../../../../utils/setup';
-import { clickAndWait } from '../../../../utils/shared';
+import { clickAndWait, navToHeader } from '../../../../utils/shared';
 
 test.describe('Create single type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -200,6 +200,11 @@ test.describe('Create single type with all field types', () => {
       };
 
       await createSingleType(page, options);
+
+      // Verify the single type is usable in the Content Manager. Single types open directly to the
+      // edit form (no list view), so a scalar field should render. Closes #2 (visible in CM).
+      await navToHeader(page, ['Content Manager', options.name], options.name);
+      await expect(page.getByRole('textbox', { name: 'testtext' })).toBeVisible();
     }
   );
 });
