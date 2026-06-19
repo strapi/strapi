@@ -38,8 +38,28 @@ mirroring its path, and follows this structure:
   (messages, labels, statuses, etc.) is preserved verbatim.
 
 > These docs are generated and kept in sync via the `userstory-e2e` skill
-> (`.claude/skills/userstory-e2e/`). Run it to regenerate or update after specs
+> (`.agents/skills/userstory-e2e/`). Run it to regenerate or update after specs
 > change.
+
+## Keeping e2e specs in sync (stories → tests)
+
+The reverse direction is automated by a CLI command:
+
+```bash
+# from a Strapi app — report drift between these docs and the Vitest e2e specs
+strapi user-stories:sync-e2e            # read-only; non-zero exit if specs are missing/drifted
+strapi user-stories:sync-e2e --write    # create missing *.vitest.spec.ts skeletons
+strapi user-stories:sync-e2e --write --force  # also regenerate specs that have drifted
+```
+
+For each story file it reads the `> Source:` path and maps it to the matching
+`*.vitest.spec.ts` (e.g. `tests/e2e/tests/admin/login.spec.ts` →
+`login.vitest.spec.ts`), emitting one `test()` per acceptance criterion, keyed by a
+stable `AC<n.m>` id. It **never overwrites** an existing spec without `--force`, so
+hand-written test bodies are safe — it reports the drift instead. The generated
+skeletons are `test.todo` stubs; fill in the bodies by hand or with the Playwright
+MCP (see [`tests/e2e/README.md`](../../tests/e2e/README.md)). The Vitest e2e specs run
+via `yarn test:e2e:vitest`.
 
 ## Index
 
