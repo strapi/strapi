@@ -260,6 +260,12 @@ test.describe('Edit View', () => {
       // The document was only saved as a draft, so the published tab stays disabled
       await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
 
+      // Ctrl + S is an alias for saving a draft
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American draft via Ctrl+S');
+      await page.keyboard.press('Control+s');
+      await findAndClose(page, 'Saved Document');
+      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+
       // Restore the title for the publish assertions below
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
       await page.getByRole('textbox', { name: 'title' }).press('Enter');

@@ -84,6 +84,38 @@ describe('DocumentActions', () => {
     ).toBeGreaterThan(0);
   });
 
+  it('should show the save keyboard shortcut hint on the secondary action', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          { id: '1', label: 'Publish', type: 'publish', onClick: jest.fn() },
+          { id: '2', label: 'Save', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Save' }));
+
+    expect((await screen.findAllByText('Ctrl / Cmd + Enter to save')).length).toBeGreaterThan(0);
+  });
+
+  it('should show the publish keyboard shortcut hint on the secondary action', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          { id: '1', label: 'Save', onClick: jest.fn() },
+          { id: '2', label: 'Publish', type: 'publish', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(
+      (await screen.findAllByText('Ctrl / Cmd + Shift + Enter to publish')).length
+    ).toBeGreaterThan(0);
+  });
+
   it('should not show a keyboard shortcut hint when the action is disabled', async () => {
     const { user } = render(
       <DocumentActions actions={[{ id: '1', label: 'Save', onClick: jest.fn(), disabled: true }]} />

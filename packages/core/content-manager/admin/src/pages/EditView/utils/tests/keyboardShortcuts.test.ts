@@ -23,6 +23,10 @@ describe('getEditViewShortcut', () => {
     it('is case-insensitive for the S alias (e.g. CapsLock on)', () => {
       expect(getEditViewShortcut(createEvent({ key: 'S', metaKey: true }))).toBe('save');
     });
+
+    it('is case-insensitive for Enter (e.g. CapsLock on)', () => {
+      expect(getEditViewShortcut(createEvent({ key: 'ENTER', metaKey: true }))).toBe('save');
+    });
   });
 
   describe('publish', () => {
