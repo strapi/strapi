@@ -61,10 +61,10 @@
     "lodash": "4.18.1",
     "node-machine-id": "^1.1.10",
     "ora": "^5.4.1",
-    "rollup": "4.60.1",
+    "rollup": "4.60.4",
     "semver": "7.7.4",
     "sort-package-json": "2.10.0",
-    "tar": "7.5.11"
+    "tar": "7.5.16"
   },
   "devDependencies": {
     "@types/async-retry": "^1",

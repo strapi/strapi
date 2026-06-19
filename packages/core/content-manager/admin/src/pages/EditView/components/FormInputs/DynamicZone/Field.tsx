@@ -109,7 +109,13 @@ const DynamicZone = ({
     return attribute.components.reduce<
       NonNullable<DynamicComponentProps['dynamicComponentsByCategory']>
     >((acc, componentUid) => {
-      const { category, info } = components[componentUid] ?? { info: {} };
+      const componentSchema = components[componentUid];
+
+      if (!componentSchema) {
+        return acc;
+      }
+
+      const { category, info } = componentSchema;
 
       const component = { uid: componentUid, displayName: info.displayName, icon: info.icon };
 
@@ -131,9 +137,14 @@ const DynamicZone = ({
 
   const handleAddComponent = React.useCallback(
     (uid: string, position?: number) => {
+      const schema = components[uid];
+
+      if (!schema) {
+        return;
+      }
+
       setAddComponentIsOpen(false);
 
-      const schema = components[uid];
       const form = createDefaultForm(schema, components);
       const transformations = pipe(transformDocument(schema, components), (data) => ({
         ...data,

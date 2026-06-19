@@ -29,6 +29,12 @@ jest.mock('@strapi/utils', () => ({
   },
 }));
 
+const rmMock = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('node:fs/promises', () => ({
+  rm: (...args: unknown[]) => rmMock(...args),
+}));
+
 const mockedCodemodRunnerFactory = codemodRunnerFactory as jest.MockedFunction<
   typeof codemodRunnerFactory
 >;
@@ -380,5 +386,144 @@ describe('Upgrader', () => {
       expect(report.success).toBe(true);
       expect(readPackageJson().dependencies['@strapi/strapi']).toBe('5.9.0');
     });
+  });
+
+  test('removes admin Vite cache when user confirms (issue #22075)', async () => {
+    vol.fromNestedJSON(
+      {
+        package: {
+          'package.json': JSON.stringify(
+            {
+              name: 'strapi-upgrade-test-app',
+              version: '1.0.0',
+              dependencies: { '@strapi/strapi': '5.8.1' },
+            },
+            null,
+            2
+          ),
+        },
+      },
+      cwd
+    );
+
+    const packageRoot = path.join(cwd, 'package');
+    const project = projectFactory(packageRoot);
+    assertAppProject(project);
+
+    const npmPackageStub: NPM.Package = {
+      name: '@strapi/strapi',
+      get isLoaded() {
+        return true;
+      },
+      refresh: jest.fn().mockResolvedValue(undefined),
+      versionExists: jest.fn(),
+      getVersionsDict: jest.fn(() => ({})),
+      getVersionsAsList: jest.fn(() => []),
+      findVersion: jest.fn((semverTarget) => ({ version: semverTarget.raw })),
+      findVersionsInRange: jest.fn(),
+    } as unknown as NPM.Package;
+
+    rmMock.mockClear();
+
+    const upgrader = upgraderFactory(project, semVerFactory('5.9.0'), npmPackageStub).onConfirm(
+      async () => true
+    );
+
+    await upgrader.upgrade();
+
+    expect(rmMock).toHaveBeenCalledWith(path.join(packageRoot, 'node_modules', '.strapi', 'vite'), {
+      recursive: true,
+      force: true,
+    });
+  });
+
+  test('does not remove admin Vite cache when user declines (issue #22075)', async () => {
+    vol.fromNestedJSON(
+      {
+        package: {
+          'package.json': JSON.stringify(
+            {
+              name: 'strapi-upgrade-test-app',
+              version: '1.0.0',
+              dependencies: { '@strapi/strapi': '5.8.1' },
+            },
+            null,
+            2
+          ),
+        },
+      },
+      cwd
+    );
+
+    const packageRoot = path.join(cwd, 'package');
+    const project = projectFactory(packageRoot);
+    assertAppProject(project);
+
+    const npmPackageStub: NPM.Package = {
+      name: '@strapi/strapi',
+      get isLoaded() {
+        return true;
+      },
+      refresh: jest.fn().mockResolvedValue(undefined),
+      versionExists: jest.fn(),
+      getVersionsDict: jest.fn(() => ({})),
+      getVersionsAsList: jest.fn(() => []),
+      findVersion: jest.fn((semverTarget) => ({ version: semverTarget.raw })),
+      findVersionsInRange: jest.fn(),
+    } as unknown as NPM.Package;
+
+    rmMock.mockClear();
+
+    const upgrader = upgraderFactory(project, semVerFactory('5.9.0'), npmPackageStub).onConfirm(
+      async () => false
+    );
+
+    await upgrader.upgrade();
+
+    expect(rmMock).not.toHaveBeenCalled();
+  });
+
+  test('does not remove admin Vite cache without explicit confirmation callback', async () => {
+    vol.fromNestedJSON(
+      {
+        package: {
+          'package.json': JSON.stringify(
+            {
+              name: 'strapi-upgrade-test-app',
+              version: '1.0.0',
+              dependencies: { '@strapi/strapi': '5.8.1' },
+            },
+            null,
+            2
+          ),
+        },
+      },
+      cwd
+    );
+
+    const packageRoot = path.join(cwd, 'package');
+    const project = projectFactory(packageRoot);
+    assertAppProject(project);
+
+    const npmPackageStub: NPM.Package = {
+      name: '@strapi/strapi',
+      get isLoaded() {
+        return true;
+      },
+      refresh: jest.fn().mockResolvedValue(undefined),
+      versionExists: jest.fn(),
+      getVersionsDict: jest.fn(() => ({})),
+      getVersionsAsList: jest.fn(() => []),
+      findVersion: jest.fn((semverTarget) => ({ version: semverTarget.raw })),
+      findVersionsInRange: jest.fn(),
+    } as unknown as NPM.Package;
+
+    rmMock.mockClear();
+
+    const upgrader = upgraderFactory(project, semVerFactory('5.9.0'), npmPackageStub);
+
+    await upgrader.upgrade();
+
+    expect(rmMock).not.toHaveBeenCalled();
   });
 });

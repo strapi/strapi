@@ -2,9 +2,11 @@ import { uploadApi } from './api';
 
 import type {
   Folder,
+  FolderNode,
   CreateFolders,
   GetFolder,
   GetFolders,
+  GetFolderStructure,
 } from '../../../../shared/contracts/folders';
 
 export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
@@ -60,7 +62,31 @@ const foldersApi = uploadApi.injectEndpoints({
         data: body,
       }),
       transformResponse: (response: CreateFolders.Response) => response.data,
-      invalidatesTags: [{ type: 'Folder', id: 'LIST' }],
+      invalidatesTags: [
+        { type: 'Folder', id: 'LIST' },
+        { type: 'Folder', id: 'STRUCTURE' },
+      ],
+    }),
+    /**
+     * Hierarchical folder tree used by the FolderTree sidebar. Returned as a
+     * single nested array — the server walks the folders table once and
+     * assembles parent/child relationships.
+     *
+     * TODO: filter results like `admin-folder.find` for folder-scoped roles
+     * (v1 returns all folders; relies on global `plugin::upload.read`).
+     */
+    getFolderStructure: builder.query<FolderNode[], void>({
+      query: () => ({
+        url: '/upload/folder-structure',
+        method: 'GET',
+      }),
+      // TODO: align GetFolderStructure contract with the real /upload/folder-structure
+      // envelope and drop this defensive unwrap (data[] vs { data: [] }).
+      transformResponse: (response: GetFolderStructure.Response['data']) =>
+        ((response as unknown as { data: FolderNode[] })?.data ??
+          (response as unknown as FolderNode[]) ??
+          []) as FolderNode[],
+      providesTags: [{ type: 'Folder', id: 'STRUCTURE' }],
     }),
     /**
      * Flat list of every folder, used to populate the "Location" select in the
@@ -114,4 +140,5 @@ export const {
   useGetFoldersQuery,
   useGetFolderQuery,
   useGetAllFoldersQuery,
+  useGetFolderStructureQuery,
 } = foldersApi;
