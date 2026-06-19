@@ -1,0 +1,22 @@
+name: Publish Preview Packages
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish Preview Packages
+    runs-on: ubuntu-latest
+    if: github.repository == 'strapi/strapi'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn build # Strapi needs a build before publishing (build:code + build:types)
+      - run: yarn dlx pkg-pr-new publish './packages/*' './packages/*/*'
