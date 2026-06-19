@@ -136,11 +136,22 @@ const AuthProvider = ({
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
+    const hasUnsavedChanges = (window as any).__STRAPI_UNSAVED_CHANGES__;
+
+    if (hasUnsavedChanges) {
+      const shouldLogout = window.confirm(
+        'You have unsaved changes. Logging out will discard them. Continue?'
+      );
+
+      if (!shouldLogout) {
+        return;
+      }
+    }
+
     dispatch(adminApi.util.resetApiState());
     dispatch(logoutAction());
     navigate('/auth/login');
   }, [dispatch, navigate]);
-
   React.useEffect(() => {
     if (user) {
       if (user.preferedLanguage) {

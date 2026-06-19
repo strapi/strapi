@@ -806,6 +806,15 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   // This hook will be triggered on dev mode because of the live reloads but it's fine as it's only for that scenario
   useWarnIfUnsavedChanges(modified && !isSubmitting);
 
+  React.useEffect(() => {
+    (window as any).__STRAPI_UNSAVED_CHANGES__ = modified && !isSubmitting;
+  }, [modified, isSubmitting]);
+
+  React.useEffect(() => {
+    return () => {
+      delete (window as any).__STRAPI_UNSAVED_CHANGES__;
+    };
+  }, []);
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     return (
       !isSubmitting &&
