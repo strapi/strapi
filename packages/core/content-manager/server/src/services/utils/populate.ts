@@ -302,7 +302,7 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
  */
 const draftCountPopulateCache = new Map<string, { populate: any; hasRelations: boolean }>();
 
-const getDeepPopulateDraftCount = (uid: UID.Schema) => {
+const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelations: boolean } => {
   const cached = draftCountPopulateCache.get(uid);
   if (cached) {
     return cached;
