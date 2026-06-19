@@ -361,10 +361,65 @@ export class AssetsPage {
   /**
    * Upload files from URLs using the import from URL dialog
    */
-  async uploadFilesFromUrl(urls: string | string[]) {
-    await this.openImportFromUrlDialog();
-    const urlsArray = Array.isArray(urls) ? urls : [urls];
-    await this.urlTextarea.fill(urlsArray.join('\n'));
-    await this.importFromUrlDialog.getByRole('button', { name: 'Upload' }).click();
+  /**
+   * Drag a file or folder onto a folder target using pointer events (dnd-kit).
+   * Moves the pointer more than 8px before dropping to satisfy activation distance.
+   */
+  async dragItemToFolder(
+    itemName: string,
+    folderName: string,
+    view: 'grid' | 'table' = 'grid',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
+
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!itemBox || !targetBox) {
+      throw new Error(
+        `Could not resolve drag source "${itemName}" or target folder "${folderName}"`
+      );
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(endX, endY, { steps: 12 });
+    await this.page.mouse.up();
+  }
+
+  /**
+   * Drag a folder row/card onto itself (invalid shallow drop).
+   */
+  async dragFolderToSelf(folderName: string, view: 'grid' | 'table' = 'table') {
+    const folder = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
+
+    const box = await folder.boundingBox();
+    if (!box) {
+      throw new Error(`Could not resolve folder "${folderName}"`);
+    }
+
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.up();
   }
 }
