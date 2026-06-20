@@ -182,6 +182,13 @@ describe('Simple Test GraphQL Users API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body.errors).toBeUndefined();
       expect(body.data.updateUsersPermissionsUser.data.attributes.username).toBe('User Test');
+
+      // Verify the role was actually assigned (not just that the mutation
+      // returned without error).
+      const updated = await strapi.db
+        .query('plugin::users-permissions.user')
+        .findOne({ where: { id: data.user.id }, populate: ['role'] });
+      expect(updated.role.id).toBe(role.id);
     });
 
     test('Delete a user', async () => {
