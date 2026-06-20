@@ -882,7 +882,7 @@ class TransferEngine<
         } else {
           this.panic(
             new Error(
-              `Unknwon error when executing "beforeTransfer" on the ${provider.name} provider`
+              `Unknown error when executing "beforeTransfer" on the ${provider.name} provider`
             )
           );
         }

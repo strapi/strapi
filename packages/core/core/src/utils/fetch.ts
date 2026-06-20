@@ -14,7 +14,7 @@ export const createStrapiFetch = (
 ): Modules.Fetch.Fetch => {
   const { logs = true } = options ?? {};
 
-  function strapiFetch(url: string | URL | Request | URL, options?: RequestInit) {
+  function strapiFetch(url: string | URL | Request, options?: RequestInit) {
     const fetchOptions: RequestInit = {
       ...options,
     };
