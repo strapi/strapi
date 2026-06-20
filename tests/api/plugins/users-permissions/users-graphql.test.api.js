@@ -150,6 +150,40 @@ describe('Simple Test GraphQL Users API End to End', () => {
       });
     });
 
+    // Regression for https://github.com/strapi/strapi/issues/24343 — the `role`
+    // relation is exposed as an `ID` scalar in GraphQL, so it must accept a
+    // `documentId` string (the v5 default), consistent with REST. A numeric id
+    // worked already; a documentId previously failed validation downstream.
+    test('Update a user role by documentId', async () => {
+      const role = await strapi.db
+        .query('plugin::users-permissions.role')
+        .findOne({ where: { type: 'authenticated' } });
+
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          mutation updateUser($id: ID!, $data: UsersPermissionsUserInput!) {
+            updateUsersPermissionsUser(id: $id, data: $data) {
+              data {
+                attributes {
+                  username
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          id: data.user.id,
+          data: { role: role.documentId },
+        },
+      });
+
+      const { body } = res;
+
+      expect(res.statusCode).toBe(200);
+      expect(body.errors).toBeUndefined();
+      expect(body.data.updateUsersPermissionsUser.data.attributes.username).toBe('User Test');
+    });
+
     test('Delete a user', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `

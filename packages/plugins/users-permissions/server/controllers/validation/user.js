@@ -6,6 +6,17 @@ const deleteRoleSchema = yup.object().shape({
   role: yup.strapiID().required(),
 });
 
+// A role relation entry may be referenced by numeric `id` (legacy) or by
+// `documentId` (the v5 default), but must carry at least one of them.
+const roleRelationEntrySchema = yup
+  .object()
+  .shape({ id: yup.strapiID(), documentId: yup.strapiID() })
+  .test(
+    'id-or-documentId',
+    'Relation entry must include an id or documentId',
+    (entry) => !!entry && (entry.id != null || entry.documentId != null)
+  );
+
 const createUserBodySchema = yup.object().shape({
   email: yup.string().email().required(),
   username: yup.string().min(1).required(),
@@ -17,7 +28,7 @@ const createUserBodySchema = yup.object().shape({
           .shape({
             connect: yup
               .array()
-              .of(yup.object().shape({ id: yup.strapiID().required() }))
+              .of(roleRelationEntrySchema)
               .min(1, 'Users must have a role')
               .required(),
           })
@@ -44,20 +55,22 @@ const updateUserBodySchema = yup.object().shape({
   role: yup.lazy((value) =>
     typeof value === 'object'
       ? yup.object().shape({
-          connect: yup
-            .array()
-            .of(yup.object().shape({ id: yup.strapiID().required() }))
-            .required(),
+          // connect/disconnect are each optional (matching core relation inputs),
+          // but a role must remain: reject disconnecting every role without
+          // connecting a replacement.
+          connect: yup.array().of(roleRelationEntrySchema),
           disconnect: yup
             .array()
-            .test('CheckDisconnect', 'Cannot remove role', function test(disconnectValue) {
-              if (value.connect.length === 0 && disconnectValue.length > 0) {
+            .of(roleRelationEntrySchema)
+            .test('CheckDisconnect', 'Cannot remove role', function test(disconnect) {
+              const connectValue = value.connect || [];
+              const disconnectValue = disconnect || [];
+              if (connectValue.length === 0 && disconnectValue.length > 0) {
                 return false;
               }
 
               return true;
-            })
-            .required(),
+            }),
         })
       : yup.strapiID()
   ),
