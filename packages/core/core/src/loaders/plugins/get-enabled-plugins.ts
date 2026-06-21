@@ -51,7 +51,7 @@ const validatePluginName = (pluginName: string) => {
   }
 };
 
-const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
+export const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
   if (typeof declaration === 'boolean') {
     return { enabled: declaration };
   }
@@ -72,7 +72,10 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
       try {
         pathToPlugin = dirname(require.resolve(declaration.resolve));
       } catch (e) {
-        pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
+        // Local plugins are loaded from the dist root so that compiled TS output is
+        // picked up in production. For JS projects dist.root === appDir, so source
+        // .js plugins keep resolving unchanged.
+        pathToPlugin = resolve(strapi.dirs.dist.root, declaration.resolve);
 
         if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
           throw new Error(`${declaration.resolve} couldn't be resolved`);
