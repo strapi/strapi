@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { dirname, join, resolve } from 'path';
+import { dirname, join, relative, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
 import _ from 'lodash';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
@@ -44,6 +44,44 @@ const INTERNAL_PLUGINS = [
 ];
 
 const isStrapiPlugin = (info: PluginInfo) => get('strapi.kind', info) === 'plugin';
+
+interface PluginDirs {
+  dist: { root: string };
+  app: { root: string };
+}
+
+/**
+ * Tolerantly load the package.json for a local (declared) plugin.
+ *
+ * Strategy:
+ *  1. Try `pathToPlugin/package.json` (the dist path — correct for compiled TS and JS).
+ *  2. On failure, fall back to the equivalent path under `dirs.app.root` (the source tree).
+ *     For JS projects `dist.root === app.root`, so step 2 is a no-op retry of the same path.
+ *  3. If both fail, return `null` instead of throwing so the plugin can still load via its
+ *     strapi-server entry point.
+ *
+ * `requireFn` defaults to `require` and is injectable for unit testing.
+ */
+export const loadPluginPackageInfo = (
+  pathToPlugin: string,
+  dirs: PluginDirs,
+  requireFn: (id: string) => unknown = require
+): Record<string, unknown> | null => {
+  const distPkgPath = join(pathToPlugin, 'package.json');
+  try {
+    return requireFn(distPkgPath) as Record<string, unknown>;
+  } catch {
+    // dist package.json missing — try app-root (source) equivalent
+    const relToDistRoot = relative(dirs.dist.root, pathToPlugin);
+    const srcPkgPath = join(dirs.app.root, relToDistRoot, 'package.json');
+    try {
+      return requireFn(srcPkgPath) as Record<string, unknown>;
+    } catch {
+      // both paths unavailable — degrade gracefully
+      return null;
+    }
+  }
+};
 
 const validatePluginName = (pluginName: string) => {
   if (!strings.isKebabCase(pluginName)) {
@@ -150,11 +188,11 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
 
     // for manually resolved plugins
     if (pathToPlugin) {
-      const packagePath = join(pathToPlugin, 'package.json');
-      const packageInfo = require(packagePath);
+      const packageInfo = loadPluginPackageInfo(pathToPlugin, strapi.dirs);
 
-      if (isStrapiPlugin(packageInfo)) {
-        declaredPlugins[pluginName].info = packageInfo.strapi || {};
+      if (packageInfo && isStrapiPlugin(packageInfo as unknown as PluginInfo)) {
+        declaredPlugins[pluginName].info =
+          (packageInfo as { strapi?: Record<string, unknown> }).strapi || {};
         declaredPlugins[pluginName].packageInfo = packageInfo;
       }
     }
