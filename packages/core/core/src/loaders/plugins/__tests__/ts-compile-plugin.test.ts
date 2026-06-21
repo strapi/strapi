@@ -16,10 +16,11 @@ import os from 'os';
 import fsExtra from 'fs-extra';
 
 // @strapi/typescript-utils is a JS package (no type declarations shipped)
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const tsUtils: {
+type TsUtils = {
   compile: (dir: string, opts?: { configOptions?: Record<string, unknown> }) => Promise<void>;
-} = require('@strapi/typescript-utils');
+};
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const tsUtils = require('@strapi/typescript-utils') as TsUtils;
 
 // Paths inside the tmp dir that assertions reference
 let tmpDir: string;
@@ -61,10 +62,7 @@ const PLUGIN_PACKAGE_JSON = JSON.stringify(
   2
 );
 
-/**
- * Mirror the Task 2 tsconfig template exactly.
- * Key: resolveJsonModule + src/**‌/*.json include means package.json SHOULD reach dist.
- */
+// Kept faithfully in sync with packages/cli/create-strapi-app/templates/vanilla/tsconfig.json
 const PROJECT_TSCONFIG = JSON.stringify(
   {
     compilerOptions: {
@@ -75,15 +73,27 @@ const PROJECT_TSCONFIG = JSON.stringify(
       strict: false,
       skipLibCheck: true,
       forceConsistentCasingInFileNames: true,
+      incremental: true,
       esModuleInterop: true,
       resolveJsonModule: true,
-      noEmitOnError: false,
+      noEmitOnError: true,
       noImplicitThis: true,
       outDir: 'dist',
       rootDir: '.',
     },
-    include: ['./**/*.ts', './**/*.js', 'src/**/*.json'],
-    exclude: ['node_modules/', 'dist/', 'src/plugins/**/admin/**', 'src/plugins/**/strapi-admin.*'],
+    include: ['./', './**/*.ts', './**/*.js', 'src/**/*.json'],
+    exclude: [
+      'node_modules/',
+      'build/',
+      'dist/',
+      '.cache/',
+      '.tmp/',
+      '.strapi/',
+      'src/admin/',
+      '**/*.test.*',
+      'src/plugins/**/admin/**',
+      'src/plugins/**/strapi-admin.*',
+    ],
   },
   null,
   2
@@ -110,8 +120,7 @@ beforeAll(async () => {
   compiledJsPath = path.join(tmpDir, 'dist', PLUGIN_SRC_REL, 'strapi-server.js');
   compiledPkgJsonPath = path.join(tmpDir, 'dist', PLUGIN_SRC_REL, 'package.json');
 
-  // Run the same compile call as develop.ts:
-  //   tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: true } })
+  // Invokes the same @strapi/typescript-utils compile() the server uses at startup
   await tsUtils.compile(tmpDir, { configOptions: { ignoreDiagnostics: true } });
 });
 
@@ -131,7 +140,7 @@ describe('Task 4b: TS local plugin compile → dist proof', () => {
   it('emitted JS is loadable (require-able) CommonJS module', () => {
     // The JS file must be valid CJS that Node can require without errors
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require(compiledJsPath);
+    const mod: Record<string, unknown> = require(compiledJsPath);
     // The default export is the factory function
     const factory = mod.default ?? mod;
     expect(typeof factory).toBe('function');
