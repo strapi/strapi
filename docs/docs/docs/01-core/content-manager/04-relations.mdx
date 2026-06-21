@@ -96,7 +96,7 @@ Inside the reducer we reduce the array of `relationalFieldPaths` to an object wi
 as the base. If there is `modifiedData` in the browser i.e. you've made changes to the entity and saved those changes,
 we just replace the first level of the field with the `modifiedData` so the data structure is preserved and we're not
 loosing the relations we had already loaded in the component. If the first part of the path is highlighted as the
-`relationalField` then we simply replace that intial object with an empty array.
+`relationalField` then we simply replace that initial object with an empty array.
 
 However, if the first part of the path is either a repeatable component, a dynamic zone or a regular component then we
 recursively find the relation fields and replace the object with an array. This is handled by the `findLeafByPathAndReplace`
@@ -119,7 +119,7 @@ the beginning of the list. This is the expected behaviour, to keep the order of 
 :::
 
 The `RelationInput` component takes the field in `modifiedData` as its source of truth. You could therefore consider this to
-be the `browserState` and `initialData` to be the `serverState`. When relations are loaded they're added to both the `intialData`
+be the `browserState` and `initialData` to be the `serverState`. When relations are loaded they're added to both the `initialData`
 and `modifiedData` objects, but when you connect/disconnect only the `modifiedData` is updated. This is useful when we're preparing
 data for the api.
 
