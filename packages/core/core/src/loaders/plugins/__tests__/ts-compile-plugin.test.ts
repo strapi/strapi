@@ -26,6 +26,7 @@ const tsUtils = require('@strapi/typescript-utils') as TsUtils;
 let tmpDir: string;
 let compiledJsPath: string;
 let compiledPkgJsonPath: string;
+let compiledJsPluginPath: string;
 
 const PLUGIN_NAME = 'ts-fixture';
 const PLUGIN_SRC_REL = `src/plugins/${PLUGIN_NAME}`;
@@ -62,6 +63,27 @@ const PLUGIN_PACKAGE_JSON = JSON.stringify(
   2
 );
 
+const JS_PLUGIN_NAME = 'js-fixture';
+const JS_PLUGIN_SRC_REL = `src/plugins/${JS_PLUGIN_NAME}`;
+
+// CommonJS module — no TS syntax, authored in plain JS
+const STRAPI_SERVER_JS = `'use strict';
+module.exports = () => ({ register() {}, bootstrap() {} });
+`;
+
+const JS_PLUGIN_PACKAGE_JSON = JSON.stringify(
+  {
+    name: JS_PLUGIN_NAME,
+    version: '0.0.0',
+    strapi: {
+      kind: 'plugin',
+      name: JS_PLUGIN_NAME,
+    },
+  },
+  null,
+  2
+);
+
 // Kept faithfully in sync with packages/cli/create-strapi-app/templates/vanilla/tsconfig.json
 const PROJECT_TSCONFIG = JSON.stringify(
   {
@@ -76,6 +98,7 @@ const PROJECT_TSCONFIG = JSON.stringify(
       incremental: true,
       esModuleInterop: true,
       resolveJsonModule: true,
+      allowJs: true,
       noEmitOnError: true,
       noImplicitThis: true,
       outDir: 'dist',
@@ -119,6 +142,21 @@ beforeAll(async () => {
 
   compiledJsPath = path.join(tmpDir, 'dist', PLUGIN_SRC_REL, 'strapi-server.js');
   compiledPkgJsonPath = path.join(tmpDir, 'dist', PLUGIN_SRC_REL, 'package.json');
+  compiledJsPluginPath = path.join(tmpDir, 'dist', JS_PLUGIN_SRC_REL, 'strapi-server.js');
+
+  // Write JS fixture (plain JS plugin — tests allowJs: true)
+  const jsPluginSrcDir = path.join(tmpDir, JS_PLUGIN_SRC_REL);
+  await fsExtra.ensureDir(jsPluginSrcDir);
+  await fs.promises.writeFile(
+    path.join(jsPluginSrcDir, 'strapi-server.js'),
+    STRAPI_SERVER_JS,
+    'utf8'
+  );
+  await fs.promises.writeFile(
+    path.join(jsPluginSrcDir, 'package.json'),
+    JS_PLUGIN_PACKAGE_JSON,
+    'utf8'
+  );
 
   // Invokes the same @strapi/typescript-utils compile() the server uses at startup
   await tsUtils.compile(tmpDir, { configOptions: { ignoreDiagnostics: true } });
@@ -184,5 +222,15 @@ describe('Task 4b: TS local plugin compile → dist proof', () => {
     const pkg = require(compiledPkgJsonPath);
     expect(pkg.name).toBe(PLUGIN_NAME);
     expect(pkg.strapi?.kind).toBe('plugin');
+  });
+});
+
+describe('allowJs regression: JS-authored local plugin emits to dist', () => {
+  it('strapi-server.js from JS-authored plugin is emitted to dist (allowJs: true fix)', () => {
+    // RED before allowJs is added to the tsconfig template (and the in-test tsconfig).
+    // GREEN after allowJs: true is set — proves tsc emits .js inputs to dist.
+    // Without allowJs, tsc silently ignores .js input files and they never appear in dist,
+    // breaking local plugins authored in plain JS in TS projects.
+    expect(fs.existsSync(compiledJsPluginPath)).toBe(true);
   });
 });

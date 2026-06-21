@@ -10,6 +10,7 @@
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "allowJs": true, // Emit JS source files (e.g. JS-authored local plugins) into dist alongside compiled TS
     "noEmitOnError": true,
     "noImplicitThis": true,
     "outDir": "dist",
