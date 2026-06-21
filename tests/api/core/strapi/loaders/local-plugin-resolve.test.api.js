@@ -1,33 +1,29 @@
 'use strict';
 
 /**
- * Integration test: a locally-resolved plugin registered via a relative `resolve`
- * path loads and serves a route end-to-end.
+ * Integration test: a local plugin registered via a relative `resolve` path
+ * loads and serves a route end-to-end.
  *
  * What is being proven
  * --------------------
- * Task 1 (`fix(core): resolve local plugins from dist root`) changed the fallback
- * in `get-enabled-plugins.ts` so that when `require.resolve()` cannot find a local
- * plugin path (because it is a relative path like `./src/plugins/ts-fixture`, not a
- * node module), Strapi resolves it against `strapi.dirs.dist.root` rather than
- * `strapi.dirs.app.root`.  In a TypeScript project `distDir` points to the compiled
- * output directory (e.g. `dist/`), so the compiled `strapi-server.js` produced from
- * `strapi-server.ts` is found there.  In a JS project (including this test harness)
- * `distDir === appDir`, so the behaviour is unchanged for existing apps.
+ * The fix in `get-enabled-plugins.ts` changed the fallback so that when
+ * `require.resolve()` cannot find a local plugin path (because it is a
+ * relative path like `./src/plugins/my-plugin`, not a node module), Strapi
+ * resolves it against `strapi.dirs.dist.root` rather than `strapi.dirs.app.root`.
  *
- * This test exercises the Task 1 code path end-to-end using the standard API-test
- * harness:
- *   1. Writes a local plugin (`strapi-server.js` – the compiled form of a TS entry)
- *      into the generated test-app's `src/plugins/ts-fixture/` directory.
- *   2. Registers the plugin in the test-app's `config/plugins.js` using a relative
- *      `resolve` path (matching the real-world TS-plugin usage).
- *   3. Boots a Strapi instance and asserts that `GET /api/ts-fixture/ping` → 200.
+ * This test guards that resolve/load path end-to-end:
+ *   1. Writes a local plugin (`strapi-server.js`) into the generated test-app's
+ *      `src/plugins/local-fixture/` directory.
+ *   2. Registers the plugin in the test-app's `config/plugins.js` using a
+ *      relative `resolve` path (the pattern a user writes for a local plugin).
+ *   3. Boots a Strapi instance and asserts that GET /api/local-fixture/ping → 200.
  *   4. Restores all modified files in `afterAll`.
  *
- * The fixture server file intentionally carries the `.js` extension (the compiled
- * output that `tsc` / the tsconfig from Task 2 would emit from `strapi-server.ts`).
- * The source-level TypeScript behaviour – and the distDir ≠ appDir distinction – is
- * covered by the unit test added in Task 1.
+ * Important: the API-test harness is JS-only (`distDir === appDir`, no `tsc`
+ * step). This test therefore cannot exercise a real TypeScript source file — the
+ * fixture is plain JS. The TypeScript compile→dist→load path (where distDir ≠
+ * appDir) is covered by the Task 1 unit test and a manual build/start smoke
+ * test. Do NOT interpret this test as integration-testing TypeScript compilation.
  */
 
 const path = require('path');
@@ -48,11 +44,11 @@ const { createContentAPIRequest } = require('api-tests/request');
  */
 const PLUGIN_PACKAGE_JSON_CONTENT = JSON.stringify(
   {
-    name: 'ts-fixture',
+    name: 'local-fixture',
     version: '0.0.0',
     strapi: {
       kind: 'plugin',
-      name: 'ts-fixture',
+      name: 'local-fixture',
     },
   },
   null,
@@ -60,9 +56,8 @@ const PLUGIN_PACKAGE_JSON_CONTENT = JSON.stringify(
 );
 
 /**
- * The compiled server entry for the local ts-fixture plugin.
- * In a real TS project this file is produced by `tsc` from `strapi-server.ts`.
- * We write it as plain JS so the test is self-contained inside the JS test-app.
+ * Minimal server entry for the local fixture plugin.
+ * Plain JS — the harness is a JS-only app; no TypeScript compilation occurs.
  */
 const PLUGIN_SERVER_CONTENT = `'use strict';
 module.exports = () => ({
@@ -84,7 +79,7 @@ module.exports = () => ({
   controllers: {
     ping: {
       index(ctx) {
-        ctx.body = { ok: true, lang: 'ts' };
+        ctx.body = { ok: true, lang: 'js' };
       },
     },
   },
@@ -92,14 +87,14 @@ module.exports = () => ({
 `;
 
 /**
- * plugins.js that registers the local fixture via a relative resolve path –
- * the exact pattern a user would write for a local TS plugin.
+ * plugins.js that registers the local fixture via a relative resolve path —
+ * the exact pattern a user would write for a local plugin.
  */
 const PLUGINS_CONFIG_CONTENT = `'use strict';
 module.exports = () => ({
-  'ts-fixture': {
+  'local-fixture': {
     enabled: true,
-    resolve: './src/plugins/ts-fixture',
+    resolve: './src/plugins/local-fixture',
   },
 });
 `;
@@ -114,15 +109,20 @@ let pluginDir;
 let pluginFile;
 let pluginsConfigPath;
 let originalPluginsConfig;
+let srcPluginsDirCreatedByTest;
 
 beforeAll(async () => {
   dotenv.config({ path: process.env.ENV_PATH });
   const baseDir = path.dirname(process.env.ENV_PATH);
 
   // Paths to files we will create / overwrite
-  pluginDir = path.join(baseDir, 'src', 'plugins', 'ts-fixture');
+  const srcPluginsDir = path.join(baseDir, 'src', 'plugins');
+  pluginDir = path.join(srcPluginsDir, 'local-fixture');
   pluginFile = path.join(pluginDir, 'strapi-server.js');
   pluginsConfigPath = path.join(baseDir, 'config', 'plugins.js');
+
+  // Track whether src/plugins already existed so afterAll can clean up safely
+  srcPluginsDirCreatedByTest = !fs.existsSync(srcPluginsDir);
 
   // Save original plugins.js so we can restore it
   originalPluginsConfig = fs.existsSync(pluginsConfigPath)
@@ -135,9 +135,9 @@ beforeAll(async () => {
   fs.writeFileSync(pluginFile, PLUGIN_SERVER_CONTENT);
   fs.writeFileSync(pluginsConfigPath, PLUGINS_CONFIG_CONTENT);
 
-  // Boot Strapi – bypassAuth so the content-api authenticator is registered
+  // Boot Strapi — bypassAuth so the content-api authenticator is registered
   strapiInstance = await createStrapiInstance();
-  rq = createContentAPIRequest({ strapi: strapiInstance });
+  rq = await createContentAPIRequest({ strapi: strapiInstance });
 });
 
 afterAll(async () => {
@@ -157,13 +157,24 @@ afterAll(async () => {
   if (pluginDir && fs.existsSync(pluginDir)) {
     fs.rmSync(pluginDir, { recursive: true, force: true });
   }
+
+  // Remove src/plugins only if this test created it and it is now empty
+  if (srcPluginsDirCreatedByTest) {
+    const srcPluginsDir = path.dirname(pluginDir);
+    if (fs.existsSync(srcPluginsDir)) {
+      const remaining = fs.readdirSync(srcPluginsDir);
+      if (remaining.length === 0) {
+        fs.rmdirSync(srcPluginsDir);
+      }
+    }
+  }
 });
 
-describe('Local plugin loading (simulates compiled TS-only plugin)', () => {
-  test('GET /api/ts-fixture/ping returns 200 with expected body', async () => {
-    const res = await rq({ method: 'GET', url: '/ts-fixture/ping' });
+describe('Local plugin registered via relative resolve path loads and serves a route', () => {
+  test('GET /api/local-fixture/ping returns 200 with expected body', async () => {
+    const res = await rq({ method: 'GET', url: '/local-fixture/ping' });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ ok: true, lang: 'ts' });
+    expect(res.body).toEqual({ ok: true, lang: 'js' });
   });
 });
