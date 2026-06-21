@@ -38,6 +38,13 @@ describe('Permissions Engine', () => {
         return { id: 125 };
       },
     },
+    {
+      name: 'hasId200',
+      category: 'default',
+      async handler() {
+        return { id: 200 };
+      },
+    },
   ];
 
   const providers = {
@@ -462,6 +469,67 @@ describe('Permissions Engine', () => {
         expect(ability.can('remove', 'all')).toBeTruthy();
         expect(ability.can('view', 'all')).toBeFalsy();
       });
+    });
+  });
+
+  describe('multi-role condition merging', () => {
+    it('[condA] + [condB] = [condA OR condB]: both conditions grant access independently', async () => {
+      const permissions = [
+        {
+          action: 'read',
+          subject: 'article',
+          properties: { fields: ['**'] },
+          conditions: ['hasId125'],
+        },
+        {
+          action: 'read',
+          subject: 'article',
+          properties: { fields: ['**'] },
+          conditions: ['hasId200'],
+        },
+      ];
+
+      const { ability, registerFunctions } = await buildEngineWithAbility({ permissions });
+
+      expect(ability.can('read', subject('article', { id: 125 }))).toBe(true);
+      expect(ability.can('read', subject('article', { id: 200 }))).toBe(true);
+      expect(ability.can('read', subject('article', { id: 999 }))).toBe(false);
+
+      expect(registerFunctions[0]).toBeCalledWith({
+        ..._.omit(permissions[0], ['conditions']),
+        condition: { $and: [{ $or: [{ id: 125 }] }] },
+      });
+      expect(registerFunctions[1]).toBeCalledWith({
+        ..._.omit(permissions[1], ['conditions']),
+        condition: { $and: [{ $or: [{ id: 200 }] }] },
+      });
+    });
+
+    it('[condA] + [] = []: unconditional permission grants unrestricted access', async () => {
+      const permissions = [
+        {
+          action: 'read',
+          subject: 'article',
+          properties: { fields: ['**'] },
+          conditions: ['hasId125'],
+        },
+        {
+          action: 'read',
+          subject: 'article',
+          properties: { fields: ['**'] },
+        },
+      ];
+
+      const { ability, registerFunctions } = await buildEngineWithAbility({ permissions });
+
+      expect(ability.can('read', 'article')).toBe(true);
+      expect(ability.can('read', subject('article', { id: 999 }))).toBe(true);
+
+      expect(registerFunctions[0]).toBeCalledWith({
+        ..._.omit(permissions[0], ['conditions']),
+        condition: { $and: [{ $or: [{ id: 125 }] }] },
+      });
+      expect(registerFunctions[1]).toBeCalledWith(_.omit(permissions[1], ['conditions']));
     });
   });
 

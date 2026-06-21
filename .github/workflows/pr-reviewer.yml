@@ -15,12 +15,12 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: PR Review with Progress Tracking
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@v1.0.123
         with:
           anthropic_api_key: ${{ secrets.PR_REVIEW_ANTHROPIC_API_KEY }}
 

@@ -5,7 +5,7 @@ import { clickAndWait, findAndClose } from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -253,6 +253,24 @@ test.describe('Edit View', () => {
       await page.getByRole('textbox', { name: 'title' }).press('Enter');
       await findAndClose(page, 'Saved Document');
 
+      // Ctrl + Enter saves a draft (without publishing)
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American draft');
+      await page.keyboard.press('Control+Enter');
+      await findAndClose(page, 'Saved Document');
+      // The document was only saved as a draft, so the published tab stays disabled
+      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+
+      // Ctrl + S is an alias for saving a draft
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American draft via Ctrl+S');
+      await page.keyboard.press('Control+s');
+      await findAndClose(page, 'Saved Document');
+      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+
+      // Restore the title for the publish assertions below
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
+      await page.getByRole('textbox', { name: 'title' }).press('Enter');
+      await findAndClose(page, 'Saved Document');
+
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'true'
@@ -265,8 +283,8 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
       await expect(page.getByText('Modified')).not.toBeVisible();
 
-      // Press Ctrl + Enter to publish the document
-      await page.keyboard.press('Control+Enter');
+      // Press Ctrl + Shift + Enter to publish the document
+      await page.keyboard.press('Control+Shift+Enter');
       await findAndClose(page, 'Published Document');
 
       /**

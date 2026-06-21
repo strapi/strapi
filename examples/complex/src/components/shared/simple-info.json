@@ -1,0 +1,10 @@
+{
+  "collectionName": "components_shared_simple_infos",
+  "info": { "displayName": "simple-info", "description": "Simple info block" },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "description": { "type": "text" },
+    "count": { "type": "integer" },
+    "active": { "type": "boolean", "default": true }
+  }
+}

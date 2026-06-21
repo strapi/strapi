@@ -29,12 +29,12 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
 
 describeOnCondition(edition === 'EE')('Release page', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
 
     await navToHeader(page, ['Releases'], 'Releases');
-    page.getByRole('link', { name: `${releaseName}` }).click();
+    await page.getByRole('link', { name: `${releaseName}` }).click();
     await page.waitForURL('/admin/plugins/content-releases/*');
   });
 

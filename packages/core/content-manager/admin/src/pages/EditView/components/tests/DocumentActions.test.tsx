@@ -54,7 +54,76 @@ describe('DocumentActions', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
+  it('should show the save keyboard shortcut hint on the primary action by default', async () => {
+    const { user } = render(
+      <DocumentActions actions={[{ id: '1', label: 'Save', onClick: jest.fn() }]} />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Save' }));
+
+    expect((await screen.findAllByText('Ctrl / Cmd + Enter to save')).length).toBeGreaterThan(0);
+  });
+
+  it('should show the publish keyboard shortcut hint when the primary action is a publish action', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[{ id: '1', label: 'Publish', type: 'publish', onClick: jest.fn() }]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(
+      (await screen.findAllByText('Ctrl / Cmd + Shift + Enter to publish')).length
+    ).toBeGreaterThan(0);
+  });
+
+  it('should show the save keyboard shortcut hint on the secondary action', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          { id: '1', label: 'Publish', type: 'publish', onClick: jest.fn() },
+          { id: '2', label: 'Save', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Save' }));
+
+    expect((await screen.findAllByText('Ctrl / Cmd + Enter to save')).length).toBeGreaterThan(0);
+  });
+
+  it('should show the publish keyboard shortcut hint on the secondary action', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          { id: '1', label: 'Save', onClick: jest.fn() },
+          { id: '2', label: 'Publish', type: 'publish', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(
+      (await screen.findAllByText('Ctrl / Cmd + Shift + Enter to publish')).length
+    ).toBeGreaterThan(0);
+  });
+
+  it('should not show a keyboard shortcut hint when the action is disabled', async () => {
+    const { user } = render(
+      <DocumentActions actions={[{ id: '1', label: 'Save', onClick: jest.fn(), disabled: true }]} />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Save' }));
+
+    expect(screen.queryByText('Ctrl / Cmd + Enter to save')).not.toBeInTheDocument();
   });
 
   it('should render a notification if either of the button actions has been pressed and the notification dialog props are provided', async () => {
@@ -200,7 +269,10 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it("should render an actions's icon if provided", async () => {

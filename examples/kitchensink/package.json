@@ -10,25 +10,26 @@
     "develop": "strapi develop",
     "develop:ce": "STRAPI_DISABLE_EE=true strapi develop",
     "start": "strapi start",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@strapi/provider-email-mailgun": "workspace:*",
     "@strapi/provider-upload-aws-s3": "workspace:*",
     "@strapi/provider-upload-cloudinary": "workspace:*",
     "@strapi/strapi": "workspace:*",
-    "better-sqlite3": "12.4.1",
-    "lodash": "4.17.21",
-    "mysql2": "3.9.8",
+    "better-sqlite3": "12.8.0",
+    "lodash": "4.18.1",
+    "mysql2": "3.20.0",
     "passport-google-oauth2": "0.2.0",
-    "pg": "8.11.1",
+    "pg": "8.20.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.22.3",
-    "styled-components": "6.1.8"
+    "react-router-dom": "6.30.3",
+    "styled-components": "6.4.1"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

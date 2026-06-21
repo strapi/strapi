@@ -1,3 +1,5 @@
+import type { OpenAPI } from './openapi';
+
 export interface App {
   keys: string[];
 }
@@ -28,6 +30,12 @@ export interface ServerTransfer {
   remote?:
     | {
         enabled?: boolean;
+        /**
+         * Max milliseconds without forward progress while pulling assets from a remote instance
+         * (`strapi transfer --from …`). Maps to the remote source provider stall timeout.
+         * Omit to use the package default (typically several minutes for large files over JSON/WS).
+         */
+        assetIdleTimeoutMs?: number;
       }
     | undefined;
 }
@@ -41,6 +49,7 @@ export interface Proxy {
   http?: string;
   https?: string;
   fetch?: string;
+  koa?: boolean;
 }
 
 export interface Webhooks {
@@ -56,6 +65,14 @@ export interface Http {
       }
     | undefined;
   [key: string]: unknown;
+}
+
+export interface McpConfig {
+  enabled: boolean;
+  /** Maximum time (ms) to wait for the MCP transport connection. Defaults to 5 000. */
+  connectTimeoutMs?: number;
+  /** Maximum time (ms) to wait for a single MCP request to complete. Defaults to 60 000. */
+  requestTimeoutMs?: number;
 }
 
 export interface Server {
@@ -76,6 +93,8 @@ export interface Server {
   logger?: Logger;
   transfer?: ServerTransfer;
   admin?: ServerAdmin;
+  openapi?: OpenAPI;
   webhooks?: Webhooks;
   http?: Http;
+  mcp?: McpConfig;
 }
