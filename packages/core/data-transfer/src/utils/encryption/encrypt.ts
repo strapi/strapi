@@ -1,29 +1,32 @@
 import { createCipheriv, Cipheriv, scryptSync, CipherKey, BinaryLike } from 'crypto';
 import { EncryptionStrategy, Strategies, Algorithm } from '../../types';
 
+// Salt for key derivation — must not be empty to prevent precomputation attacks
+const KDF_SALT = 'strapi-data-transfer';
+
 // different key values depending on algorithm chosen
 const getEncryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {
   const strategies: Strategies = {
     'aes-128-ecb'(key: string): Cipheriv {
-      const hashedKey = scryptSync(key, '', 16);
+      const hashedKey = scryptSync(key, KDF_SALT, 16);
       const initVector: BinaryLike | null = null;
       const securityKey: CipherKey = hashedKey;
       return createCipheriv(algorithm, securityKey, initVector);
     },
     aes128(key: string): Cipheriv {
-      const hashedKey = scryptSync(key, '', 32);
+      const hashedKey = scryptSync(key, KDF_SALT, 32);
       const initVector: BinaryLike | null = hashedKey.subarray(16);
       const securityKey: CipherKey = hashedKey.subarray(0, 16);
       return createCipheriv(algorithm, securityKey, initVector);
     },
     aes192(key: string): Cipheriv {
-      const hashedKey = scryptSync(key, '', 40);
+      const hashedKey = scryptSync(key, KDF_SALT, 40);
       const initVector: BinaryLike | null = hashedKey.subarray(24);
       const securityKey: CipherKey = hashedKey.subarray(0, 24);
       return createCipheriv(algorithm, securityKey, initVector);
     },
     aes256(key: string): Cipheriv {
-      const hashedKey = scryptSync(key, '', 48);
+      const hashedKey = scryptSync(key, KDF_SALT, 48);
       const initVector: BinaryLike | null = hashedKey.subarray(32);
       const securityKey: CipherKey = hashedKey.subarray(0, 32);
       return createCipheriv(algorithm, securityKey, initVector);
