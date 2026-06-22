@@ -49,9 +49,9 @@ jobs:
 
       - name: Update experimental build comment
         if: success()
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: thollander/actions-comment-pull-request@v2
         with:
-          header: experimental-pr-build
+          comment_tag: experimental-pr-build
           message: |
             ## Experimental build
 
