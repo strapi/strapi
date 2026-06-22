@@ -54,7 +54,7 @@ test.describe('Edit View', () => {
 
       // Add another relation to the entry
       await page.getByRole('combobox', { name: 'authors' }).click();
-      await page.getByLabel('BeardymanDraft').click();
+      await page.getByLabel('Ted LassoDraft').click();
       // Attempt to publish the entry again
       await page.getByRole('button', { name: 'Publish' }).click();
 
