@@ -218,7 +218,6 @@ yarn prettier:check # check only
 - Use parameterized queries — never interpolate user input into raw SQL or database queries.
 - Validate and sanitize all user input at controller/service boundaries.
 - When working with EE-gated features, do not bypass license checks.
-- **Never run `gh release`** — not `create`, `delete`, `upload`, `edit`, or any other subcommand; not for screenshots, assets, experiments, or “just checking”. Official GitHub Releases are created only by `publish-release.yml` / release engineers. See [Notes for Agents](#notes-for-agents).
 
 ---
 
@@ -237,4 +236,3 @@ yarn prettier:check # check only
 - **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps and some root devDeps.
 - **Entity Service is deprecated** — always use the Document Service (`strapi.documents`) for content operations.
 - **Lifecycle phases** — `strapi.isLoaded` must be `true` before accessing services. Plugins and DB are not available until after the `load()` phase.
-- **Never run `gh release`** — Under no circumstances run any `gh release` subcommand (`create`, `delete`, `upload`, `edit`, `download`, `view`, etc.). Do not use GitHub Releases or ad-hoc git tags for agent/PR work (screenshots, experimental builds, temp assets, image hosting, cleanup, or anything else). Official semver releases are handled only by `publish-release.yml` / `publish.sh`. Experimental npm builds use `pre-publish.sh` with `--git-tag false --changelog false` (npm dist-tag only). For PR images, ask the user to drag-and-drop into the GitHub PR editor, or commit under `docs/`.
