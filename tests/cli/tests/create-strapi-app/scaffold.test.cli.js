@@ -46,9 +46,17 @@ describe('create-strapi-app', () => {
       const apiConfig = fs.readFileSync(path.join(projectDir, 'config', 'api.ts'), 'utf8');
       expect(apiConfig).toContain('strictParams: true');
 
+      const serverConfig = fs.readFileSync(path.join(projectDir, 'config', 'server.ts'), 'utf8');
+      expect(serverConfig).toContain('populateRelations: env.bool(');
+
       const pluginsConfig = fs.readFileSync(path.join(projectDir, 'config', 'plugins.ts'), 'utf8');
       expect(pluginsConfig).toContain("jwtManagement: 'refresh'");
+      expect(pluginsConfig).toContain('httpOnly: true');
+      expect(pluginsConfig).toContain('allowedTypes:');
       expect(pluginsConfig).toContain('application/x-executable');
+
+      const envFile = fs.readFileSync(path.join(projectDir, '.env'), 'utf8');
+      expect(envFile).toMatch(/^JWT_SECRET=.+/m);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }

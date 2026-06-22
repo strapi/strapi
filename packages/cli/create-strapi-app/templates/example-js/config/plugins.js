@@ -1,3 +1,14 @@
+const allowedMediaTypes = [
+  'image/*',
+  'video/*',
+  'audio/*',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.*',
+  'text/plain',
+  'text/csv',
+];
+
 const deniedExecutableTypes = [
   'application/vnd.microsoft.portable-executable',
   'application/x-msdownload',
@@ -13,11 +24,15 @@ module.exports = () => ({
   'users-permissions': {
     config: {
       jwtManagement: 'refresh',
+      sessions: {
+        httpOnly: true,
+      },
     },
   },
   upload: {
     config: {
       security: {
+        allowedTypes: allowedMediaTypes,
         deniedTypes: deniedExecutableTypes,
       },
     },
