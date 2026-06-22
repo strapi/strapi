@@ -379,4 +379,21 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
       cat.documentId,
     ]);
   });
+
+  test('countDraftRelations ignores self-referential relations', async () => {
+    const cat = await createCategory('Self count');
+
+    await updateCategory(cat.documentId, {
+      name: cat.name,
+      parent: { documentId: cat.documentId, locale: null },
+      related: [{ documentId: cat.documentId, locale: null }],
+    });
+
+    const { body } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/api::category.category/${cat.documentId}/actions/countDraftRelations`,
+    });
+
+    expect(body.data).toBe(0);
+  });
 });

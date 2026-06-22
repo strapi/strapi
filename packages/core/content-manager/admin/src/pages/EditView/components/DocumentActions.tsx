@@ -53,6 +53,85 @@ import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
 import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
+import type { ComponentsDictionary, Schema } from '../../../hooks/useDocument';
+
+/**
+ * Counts draft relations in unsaved form values, excluding self-referential relations
+ * (preserved on publish via document-service self-referential-relations).
+ */
+const countLocalDraftRelations = (
+  data: Record<string, unknown>,
+  schema: Schema | undefined,
+  components: ComponentsDictionary,
+  contentTypeUid: string
+): number => {
+  if (!schema?.attributes) {
+    return 0;
+  }
+
+  return Object.keys(schema.attributes).reduce((sum, attributeName) => {
+    const attribute = schema.attributes[attributeName];
+    const value = data[attributeName];
+
+    if (!value) {
+      return sum;
+    }
+
+    switch (attribute.type) {
+      case 'relation': {
+        if (!('target' in attribute) || attribute.target === contentTypeUid) {
+          return sum;
+        }
+
+        if (typeof value === 'object' && value !== null && 'connect' in value) {
+          const relations = (value as RelationsFormValue).connect || [];
+          return sum + relations.filter((relation) => relation.status === 'draft').length;
+        }
+
+        return sum;
+      }
+      case 'component': {
+        const componentItems = Array.isArray(value) ? value : [value];
+        const componentSchema = components[attribute.component];
+
+        return (
+          sum +
+          componentItems.reduce(
+            (componentSum, componentValue) =>
+              componentSum +
+              countLocalDraftRelations(
+                componentValue as Record<string, unknown>,
+                componentSchema,
+                components,
+                contentTypeUid
+              ),
+            0
+          )
+        );
+      }
+      case 'dynamiczone': {
+        return (
+          sum +
+          (value as Array<Record<string, unknown>>).reduce((zoneSum, componentValue) => {
+            const componentUid = componentValue.__component as string;
+
+            return (
+              zoneSum +
+              countLocalDraftRelations(
+                componentValue,
+                components[componentUid],
+                components,
+                contentTypeUid
+              )
+            );
+          }, 0)
+        );
+      }
+      default:
+        return sum;
+    }
+  }, 0);
+};
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -78,6 +157,10 @@ interface DocumentActionDescription {
    */
   variant?: ButtonProps['variant'];
   loading?: ButtonProps['loading'];
+  /**
+   * Increment to open a configured dialog without a button click (e.g. keyboard shortcut).
+   */
+  dialogRequestId?: number;
 }
 
 interface DialogOptions {
@@ -278,6 +361,12 @@ const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActi
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { toggleNotification } = useNotification();
 
+  React.useEffect(() => {
+    if (action.dialogRequestId && action.dialog) {
+      setDialogId(action.id);
+    }
+  }, [action.dialog, action.dialogRequestId, action.id]);
+
   const handleClick = (action: DocumentActionButtonProps) => async (e: React.MouseEvent) => {
     const { onClick = () => false, dialog, id } = action;
 
@@ -397,6 +486,14 @@ const DocumentActionsMenu = ({
       setIsOpen(open);
     }
   };
+
+  React.useEffect(() => {
+    actions.forEach((action) => {
+      if (action.dialogRequestId && action.dialog) {
+        setDialogId(action.id);
+      }
+    });
+  }, [actions]);
 
   return (
     <Menu.Root open={isOpen} onOpenChange={handleOpenChange}>
@@ -620,6 +717,7 @@ const PublishAction: DocumentActionComponent = ({
   ] = useGetDraftRelationCountQuery();
   const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
   const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
+  const [draftRelationsDialogRequestId, setDraftRelationsDialogRequestId] = React.useState(0);
 
   const [{ rawQuery }] = useQueryParams();
 
@@ -678,77 +776,59 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    const localDraftRelations = new Set();
-
-    /**
-     * Extracts draft relations from the provided data object.
-     * It checks for a connect array of relations.
-     * If a relation has a status of 'draft', its id is added to the localDraftRelations set.
-     */
-    const extractDraftRelations = (data: Omit<RelationsFormValue, 'disconnect'>) => {
-      const relations = data.connect || [];
-      relations.forEach((relation) => {
-        if (relation.status === 'draft') {
-          localDraftRelations.add(relation.id);
-        }
-      });
-    };
-
-    /**
-     * Recursively traverses the provided data object to extract draft relations from arrays within 'connect' keys.
-     * If the data is an object, it looks for 'connect' keys to pass their array values to extractDraftRelations.
-     * It recursively calls itself for any non-null objects it contains.
-     */
-    const traverseAndExtract = (data: { [field: string]: any }) => {
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'connect' && Array.isArray(value)) {
-          extractDraftRelations({ connect: value });
-        } else if (typeof value === 'object' && value !== null) {
-          traverseAndExtract(value);
-        }
-      });
-    };
-
     if (!documentId || modified) {
-      traverseAndExtract(formValues);
-      setLocalCountOfDraftRelations(localDraftRelations.size);
+      setLocalCountOfDraftRelations(
+        countLocalDraftRelations(formValues, schema, components, model)
+      );
     } else {
       setLocalCountOfDraftRelations(0);
     }
-  }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
+  }, [components, documentId, formValues, model, modified, schema]);
 
-  React.useEffect(() => {
-    if (!document || !document.documentId || isListView) {
+  const fetchDraftRelationsCount = React.useCallback(async () => {
+    if (!document?.documentId || isListView) {
       return;
     }
 
-    const fetchDraftRelationsCount = async () => {
-      const { data, error } = await countDraftRelations({
-        collectionType,
-        model,
-        documentId,
-        params: currentDocumentMeta.params,
-      });
+    const { data, error } = await countDraftRelations({
+      collectionType,
+      model,
+      documentId,
+      params: currentDocumentMeta.params,
+    });
 
-      if (error) {
-        throw error;
-      }
+    if (error) {
+      throw error;
+    }
 
-      if (data) {
-        setServerCountOfDraftRelations(data.data);
-      }
+    if (data) {
+      setServerCountOfDraftRelations(data.data);
+    }
+  }, [
+    collectionType,
+    countDraftRelations,
+    currentDocumentMeta.params,
+    document?.documentId,
+    documentId,
+    isListView,
+    model,
+  ]);
+
+  React.useEffect(() => {
+    fetchDraftRelationsCount();
+  }, [fetchDraftRelationsCount, document?.updatedAt]);
+
+  React.useEffect(() => {
+    const handleWindowFocus = () => {
+      fetchDraftRelationsCount();
     };
 
-    fetchDraftRelationsCount();
-  }, [
-    isListView,
-    document,
-    documentId,
-    countDraftRelations,
-    collectionType,
-    model,
-    currentDocumentMeta.params,
-  ]);
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [fetchDraftRelationsCount]);
   const parentDocumentMetaToUpdate = documentHistory?.at(-2) ?? rootDocumentMeta;
   const parentDocumentData = useDocument(
     {
@@ -972,9 +1052,16 @@ const PublishAction: DocumentActionComponent = ({
 
       e.preventDefault();
 
-      if (!isDisabled && !hasDraftRelations) {
-        performPublish();
+      if (isDisabled) {
+        return;
       }
+
+      if (hasDraftRelations) {
+        setDraftRelationsDialogRequestId((current) => current + 1);
+        return;
+      }
+
+      performPublish();
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -993,6 +1080,7 @@ const PublishAction: DocumentActionComponent = ({
     loading: isLoading,
     position: ['panel', 'preview', 'relation-modal'],
     disabled: isDisabled,
+    dialogRequestId: hasDraftRelations ? draftRelationsDialogRequestId : undefined,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',

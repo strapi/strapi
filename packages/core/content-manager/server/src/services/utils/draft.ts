@@ -30,6 +30,10 @@ const sumDraftCounts = (entity: any, uid: any): number => {
         if (!targetModel || !hasDraftAndPublish(targetModel)) {
           return sum;
         }
+        // Self-referential relations are preserved on publish (see self-referential-relations.ts).
+        if (attribute.target === uid) {
+          return sum;
+        }
         if (isVisibleAttribute(model, attributeName)) {
           return sum + value.count;
         }

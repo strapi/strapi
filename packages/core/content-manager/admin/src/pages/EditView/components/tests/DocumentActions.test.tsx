@@ -160,6 +160,54 @@ describe('DocumentActions', () => {
     expect(onClick2).toHaveBeenCalled();
   });
 
+  it('should open the dialog when dialogRequestId is incremented', async () => {
+    const onConfirm = jest.fn();
+
+    const { rerender } = render(
+      <DocumentActions
+        actions={[
+          {
+            id: '1',
+            label: 'Publish',
+            onClick: jest.fn(),
+            dialog: {
+              type: 'dialog',
+              title: 'Confirmation',
+              content: 'Draft relations will not be included.',
+              confirmLabel: 'Publish without relations',
+              onConfirm,
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    rerender(
+      <DocumentActions
+        actions={[
+          {
+            id: '1',
+            label: 'Publish',
+            onClick: jest.fn(),
+            dialogRequestId: 1,
+            dialog: {
+              type: 'dialog',
+              title: 'Confirmation',
+              content: 'Draft relations will not be included.',
+              confirmLabel: 'Publish without relations',
+              onConfirm,
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Draft relations will not be included.')).toBeInTheDocument();
+  });
+
   it('should render a custom confirm label when provided', async () => {
     const onConfirm = jest.fn();
 
