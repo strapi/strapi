@@ -1,0 +1,68 @@
+name: 'Publish PR Experimental'
+
+# Publishes an experimental prerelease when the `publish-experimental` label is present.
+# Uses the same version scheme and dist tag as the manual Publish Prerelease workflow.
+on:
+  pull_request:
+    types: [labeled, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: experimental-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: 'Publish experimental'
+    runs-on: ubuntu-latest
+    if: |
+      github.repository == 'strapi/strapi' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'publish-experimental') &&
+      (github.event.action == 'synchronize' || github.event.label.name == 'publish-experimental')
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - run: yarn
+
+      - name: Publish prerelease
+        run: ./scripts/pre-publish.sh --yes
+        env:
+          VERSION: '0.0.0-experimental.${{ github.event.pull_request.head.sha }}'
+          DIST_TAG: experimental
+
+      - name: Resolve commit metadata
+        id: meta
+        run: echo "short=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Update experimental build comment
+        if: success()
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: experimental-pr-build
+          message: |
+            ## Experimental build
+
+            | | |
+            |---|---|
+            | **Version** | `0.0.0-experimental.${{ github.event.pull_request.head.sha }}` |
+            | **Dist tag** | `experimental` |
+            | **Commit** | [`${{ steps.meta.outputs.short }}`](https://github.com/${{ github.repository }}/commit/${{ github.event.pull_request.head.sha }}) |
+
+            ```bash
+            npm install @strapi/strapi@0.0.0-experimental.${{ github.event.pull_request.head.sha }}
+            ```
+
+            All `@strapi/*` packages must be installed at the same version.
