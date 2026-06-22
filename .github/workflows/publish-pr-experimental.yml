@@ -2,6 +2,8 @@ name: 'Publish PR Experimental'
 
 # Publishes an experimental prerelease when the `publish-experimental` label is present.
 # Uses the same version scheme and dist tag as the manual Publish Prerelease workflow.
+# npm only — pre-publish.sh disables git tags and changelog; this workflow must NEVER create
+# GitHub Releases or git tags on the repository.
 on:
   pull_request:
     types: [labeled, synchronize]

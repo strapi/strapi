@@ -218,6 +218,7 @@ yarn prettier:check # check only
 - Use parameterized queries — never interpolate user input into raw SQL or database queries.
 - Validate and sanitize all user input at controller/service boundaries.
 - When working with EE-gated features, do not bypass license checks.
+- **Never create GitHub Releases, prereleases, or git tags** on this repo (see [Notes for Agents](#notes-for-agents)).
 
 ---
 
@@ -236,3 +237,4 @@ yarn prettier:check # check only
 - **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps and some root devDeps.
 - **Entity Service is deprecated** — always use the Document Service (`strapi.documents`) for content operations.
 - **Lifecycle phases** — `strapi.isLoaded` must be `true` before accessing services. Plugins and DB are not available until after the `load()` phase.
+- **No ad-hoc GitHub Releases or tags** — Never run `gh release create`, `gh release upload`, or push git tags to `strapi/strapi` for agent/PR work (screenshots, experimental builds, temp assets, etc.). Official semver releases go through `publish-release.yml` / `publish.sh` only. Experimental npm builds use `pre-publish.sh` with `--git-tag false --changelog false` (npm dist-tag only — no GitHub Release). For PR images, ask the user to drag-and-drop into the GitHub PR editor, or commit under `docs/` — do not host files on Releases.
