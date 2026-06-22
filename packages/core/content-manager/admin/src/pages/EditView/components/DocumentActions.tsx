@@ -54,6 +54,7 @@ import { useRelationModal } from './FormInputs/Relations/RelationModal';
 import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
 import type { ComponentsDictionary, Schema } from '../../../hooks/useDocument';
+import type { Component } from '../../../../../shared/contracts/components';
 
 /**
  * Counts draft relations in unsaved form values, excluding self-referential relations
@@ -61,7 +62,7 @@ import type { ComponentsDictionary, Schema } from '../../../hooks/useDocument';
  */
 const countLocalDraftRelations = (
   data: Record<string, unknown>,
-  schema: Schema | undefined,
+  schema: Schema | Component | undefined,
   components: ComponentsDictionary,
   contentTypeUid: string
 ): number => {
