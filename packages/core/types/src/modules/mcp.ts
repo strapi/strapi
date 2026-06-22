@@ -173,6 +173,9 @@ export type McpServiceStatus = 'idle' | 'starting' | 'running' | 'stopping' | 'e
 /**
  * Service providing Model Context Protocol (MCP) capabilities.
  * Available on strapi.ai.mcp.
+ *
+ * Call `registerTool`, `registerPrompt`, and `registerResource` only during
+ * Strapi's register phase. The MCP HTTP server starts during bootstrap.
  */
 export interface McpService {
   /**
@@ -187,10 +190,9 @@ export interface McpService {
 
   /**
    * Register a single MCP tool.
-   * Register while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
-   * In Strapi's load lifecycle, this includes plugin register() and plugin bootstrap().
-   * Prefer bootstrap() when a tool depends on synced content-types, permissions, or database state.
-   * @throws Error if called after MCP server has started
+   * Must be called while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
+   * In Strapi's load lifecycle, call only from the register phase (plugin register() or app register()).
+   * @throws Error if called after the MCP server has started
    */
   registerTool<
     Name extends string,
@@ -233,10 +235,9 @@ export interface McpService {
 
   /**
    * Register a single MCP prompt.
-   * Register while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
-   * In Strapi's load lifecycle, this includes plugin register() and plugin bootstrap().
-   * Prefer bootstrap() when a prompt depends on synced content-types, permissions, or database state.
-   * @throws Error if called after MCP server has started
+   * Must be called while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
+   * In Strapi's load lifecycle, call only from the register phase (plugin register() or app register()).
+   * @throws Error if called after the MCP server has started
    */
   registerPrompt<
     Name extends string,
@@ -269,10 +270,9 @@ export interface McpService {
 
   /**
    * Register a single MCP resource.
-   * Register while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
-   * In Strapi's load lifecycle, this includes plugin register() and plugin bootstrap().
-   * Prefer bootstrap() when a resource depends on synced content-types, permissions, or database state.
-   * @throws Error if called after MCP server has started
+   * Must be called while strapi.ai.mcp is idle, before strapi.ai.mcp.start() runs.
+   * In Strapi's load lifecycle, call only from the register phase (plugin register() or app register()).
+   * @throws Error if called after the MCP server has started
    */
   registerResource<Name extends string>(resource: {
     name: Name;
