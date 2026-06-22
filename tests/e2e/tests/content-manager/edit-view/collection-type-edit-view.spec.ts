@@ -15,51 +15,52 @@ test.describe('Edit View', () => {
       /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
 
-    // TODO: Skip this test for now since there is a known bug with the draft relations check
-    test.fixme(
-      'as a user I want to be warned if I try to publish content that has draft relations',
-      async ({ page }) => {
-        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-        await page.getByRole('link', { name: 'Create new entry' }).click();
+    test('as a user I want to be warned if I try to publish content that has draft relations', async ({
+      page,
+    }) => {
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await page.getByRole('link', { name: 'Create new entry' }).click();
 
-        // Wait for the URL to match the CREATE_URL pattern
-        await page.waitForURL(CREATE_URL);
+      // Wait for the URL to match the CREATE_URL pattern
+      await page.waitForURL(CREATE_URL);
 
-        // Add a new relation to the entry
-        await page.getByRole('combobox', { name: 'authors' }).click();
-        await page.getByLabel('Coach BeardDraft').click();
-        // Attempt to publish the entry
-        await page.getByRole('button', { name: 'Publish' }).click();
+      // Add a new relation to the entry
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('Coach BeardDraft').click();
+      // Attempt to publish the entry
+      await page.getByRole('button', { name: 'Publish' }).click();
 
-        // Verify that a warning about a single draft relation is displayed
-        await expect(page.getByText('This entry is related to 1')).toBeVisible();
-        await page.getByRole('button', { name: 'Cancel' }).click();
+      // Verify that a warning about a single draft relation is displayed
+      await expect(page.getByText('This entry is related to 1')).toBeVisible();
+      await page.getByRole('button', { name: 'Cancel' }).click();
 
-        // Save the current state of the entry
-        await page.getByRole('button', { name: 'Save' }).click();
-        await findAndClose(page, 'Saved Document');
+      // Save the current state of the entry
+      await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
-        // Add another relation to the entry
-        await page.getByRole('combobox', { name: 'authors' }).click();
-        await page.getByLabel('Led TassoDraft').click();
-        // Attempt to publish the entry again
-        await page.getByRole('button', { name: 'Publish' }).click();
+      // Add another relation to the entry
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('Led TassoDraft').click();
+      // Attempt to publish the entry again
+      await page.getByRole('button', { name: 'Publish' }).click();
 
-        // Verify that a warning about two draft relations is displayed
-        await expect(page.getByText('This entry is related to 2')).toBeVisible();
-        await page.getByRole('button', { name: 'Cancel' }).click();
+      // Verify that a warning about two draft relations is displayed
+      await expect(page.getByText('This entry is related to 2')).toBeVisible();
+      await page.getByRole('button', { name: 'Cancel' }).click();
 
-        // Save the current state of the entry
-        await page.getByRole('button', { name: 'Save' }).click();
-        await findAndClose(page, 'Saved Document');
+      // Save the current state of the entry
+      await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
-        // Attempt to publish the entry once more
-        await page.getByRole('button', { name: 'Publish' }).click();
+      // Add another relation to the entry
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('BeardymanDraft').click();
+      // Attempt to publish the entry again
+      await page.getByRole('button', { name: 'Publish' }).click();
 
-        // Verify that the warning about three draft relations is still displayed
-        await expect(page.getByText('This entry is related to 3')).toBeVisible();
-      }
-    );
+      // Verify that a warning about three draft relations is displayed
+      await expect(page.getByText('This entry is related to 3')).toBeVisible();
+    });
 
     test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
       page,

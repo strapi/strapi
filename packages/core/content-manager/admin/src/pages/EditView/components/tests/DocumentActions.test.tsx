@@ -160,6 +160,37 @@ describe('DocumentActions', () => {
     expect(onClick2).toHaveBeenCalled();
   });
 
+  it('should render a custom confirm label when provided', async () => {
+    const onConfirm = jest.fn();
+
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          {
+            id: '1',
+            label: 'Publish',
+            onClick: jest.fn(),
+            dialog: {
+              type: 'dialog',
+              title: 'Confirmation',
+              content: 'Draft relations will not be included.',
+              confirmLabel: 'Publish without relations',
+              onConfirm,
+            },
+          },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(screen.getByRole('button', { name: 'Publish without relations' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Publish without relations' }));
+
+    expect(onConfirm).toHaveBeenCalled();
+  });
+
   it('should render a dialog if either of the button actions has been pressed and the dialog props are provided', async () => {
     const onClick = jest.fn();
     const onConfirm = jest.fn();

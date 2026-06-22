@@ -85,6 +85,7 @@ interface DialogOptions {
   title: string;
   content?: React.ReactNode;
   variant?: ButtonProps['variant'];
+  confirmLabel?: string;
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
 }
@@ -476,6 +477,7 @@ const DocumentActionConfirmDialog = ({
   onConfirm,
   title,
   content,
+  confirmLabel,
   isOpen,
   variant = 'secondary',
   loading,
@@ -513,10 +515,11 @@ const DocumentActionConfirmDialog = ({
             </Button>
           </Dialog.Cancel>
           <Button onClick={handleConfirm} variant={variant} fullWidth loading={loading}>
-            {formatMessage({
-              id: 'app.components.Button.confirm',
-              defaultMessage: 'Confirm',
-            })}
+            {confirmLabel ??
+              formatMessage({
+                id: 'app.components.Button.confirm',
+                defaultMessage: 'Confirm',
+              })}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>
@@ -709,6 +712,8 @@ const PublishAction: DocumentActionComponent = ({
     if (!documentId || modified) {
       traverseAndExtract(formValues);
       setLocalCountOfDraftRelations(localDraftRelations.size);
+    } else {
+      setLocalCountOfDraftRelations(0);
     }
   }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
 
@@ -929,11 +934,11 @@ const PublishAction: DocumentActionComponent = ({
     }
   };
 
-  const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
-  // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
-  // see RFC "Count draft relations" in Notion
-  const enableDraftRelationsCount = false;
-  const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
+  const totalDraftRelations =
+    !documentId || modified
+      ? Math.max(localCountOfDraftRelations, serverCountOfDraftRelations)
+      : serverCountOfDraftRelations;
+  const hasDraftRelations = totalDraftRelations > 0;
 
   /**
    * Disabled when:
@@ -1005,21 +1010,32 @@ const PublishAction: DocumentActionComponent = ({
       ? {
           type: 'dialog',
           variant: 'danger',
-          footer: null,
           title: formatMessage({
-            id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.title`),
+            id: getTranslation('popUpWarning.warning.has-draft-relations.title'),
             defaultMessage: 'Confirmation',
           }),
-          content: formatMessage(
-            {
-              id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.message`),
-              defaultMessage:
-                'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. Publishing it could leave broken links in your app.',
-            },
-            {
-              count: totalDraftRelations,
-            }
+          content: (
+            <>
+              {formatMessage(
+                {
+                  id: getTranslation('popUpWarning.warning.has-draft-relations.message'),
+                  defaultMessage:
+                    'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. Those relations will not be included in the published version.',
+                },
+                {
+                  count: totalDraftRelations,
+                }
+              )}{' '}
+              {formatMessage({
+                id: getTranslation('popUpWarning.warning.publish-question'),
+                defaultMessage: 'Do you still want to publish?',
+              })}
+            </>
           ),
+          confirmLabel: formatMessage({
+            id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
+            defaultMessage: 'Publish without relations',
+          }),
           onConfirm: async () => {
             await performPublish();
           },
