@@ -2,8 +2,9 @@ import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
+import type { Span } from '@opentelemetry/api';
 import { Logger, createLogger } from '@strapi/logger';
-import { Database } from '@strapi/database';
+import { Database, type DatabaseQueryTelemetryInfo } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
@@ -19,6 +20,14 @@ import { createServer } from './services/server';
 import { createReloader } from './services/reloader';
 
 import { providers } from './providers';
+import {
+  beginDeferredStartupRootSpan,
+  continueDeferredStartupRootSpan,
+  endDeferredStartupRootSpan,
+  registerOpenTelemetryTracing,
+  withStartupSpan,
+  withStartupTraceChildPhase,
+} from './services/observability/opentelemetry-tracing';
 import createEntityService from './services/entity-service';
 import createQueryParamService from './services/query-params';
 
@@ -32,11 +41,19 @@ import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 import { createContentSourceMapsService } from './services/content-source-maps';
+import {
+  bridgeDatabasePerformanceEvents,
+  createPerformanceEventsPublicApi,
+  createPerformanceLiveMetrics,
+} from './services/performance';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+
+import { isServerRequestPerfTrackingEnabled } from './utils/server-performance-tracking';
+import { mergeQueryTelemetryIntoStats, type PerfQueryAgg } from './utils/perf-query-stats';
 
 // Lazy: only resolved when `useTypescriptMigrations` is true (default false)
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
@@ -53,6 +70,9 @@ class Strapi extends Container implements Core.Strapi {
 
   isLoaded: boolean = false;
 
+  /** Root `strapi.startup` span left open after `load()` until `start()` runs listen (develop path). */
+  private deferredStartupRootSpan?: Span;
+
   internal_config: Record<string, unknown> = {};
 
   constructor(opts: StrapiOptions) {
@@ -62,8 +82,8 @@ class Strapi extends Container implements Core.Strapi {
 
     this.registerInternalServices();
 
-    for (const provider of providers) {
-      provider.init?.(this);
+    for (const { definition } of providers) {
+      definition.init?.(this);
     }
   }
 
@@ -140,6 +160,14 @@ class Strapi extends Container implements Core.Strapi {
 
   get eventHub(): Modules.EventHub.EventHub {
     return this.get('eventHub');
+  }
+
+  get performanceEvents(): Modules.PerformanceEvents.PerformanceEventsPublicApi {
+    return this.get('performanceEvents');
+  }
+
+  get performanceMetrics(): Modules.PerformanceMetrics.PerformanceLiveMetrics {
+    return this.get('performanceMetrics');
   }
 
   get fs(): Core.StrapiFS {
@@ -252,16 +280,49 @@ class Strapi extends Container implements Core.Strapi {
 
   async start() {
     try {
-      if (!this.isLoaded) {
-        await this.load();
+      registerOpenTelemetryTracing(this as Core.Strapi);
+
+      const deferred = this.deferredStartupRootSpan;
+
+      if (deferred) {
+        try {
+          await continueDeferredStartupRootSpan(deferred, async () => {
+            await withStartupSpan(this as Core.Strapi, 'strapi.startup.listen', () =>
+              this.listen()
+            );
+          });
+        } finally {
+          endDeferredStartupRootSpan(deferred);
+          this.deferredStartupRootSpan = undefined;
+        }
+
+        return this;
       }
 
-      await this.listen();
+      await withStartupSpan(
+        this as Core.Strapi,
+        'strapi.startup',
+        async () => {
+          if (!this.isLoaded) {
+            await this.registerAndBootstrap();
+            this.isLoaded = true;
+          }
+
+          await withStartupSpan(this as Core.Strapi, 'strapi.startup.listen', () => this.listen());
+        },
+        { root: true }
+      );
 
       return this;
     } catch (error) {
       return this.stopWithError(error);
     }
+  }
+
+  /** Runs `register` then `bootstrap` (used by `load` and `start`). */
+  private async registerAndBootstrap(): Promise<void> {
+    await this.register();
+    await this.bootstrap();
   }
 
   // TODO: split into more providers
@@ -281,7 +342,23 @@ class Strapi extends Container implements Core.Strapi {
       .add('auth', createAuth())
       .add('server', () => createServer(this))
       .add('fs', () => createStrapiFs(this))
-      .add('eventHub', () => createEventHub())
+      .add('eventHub', () =>
+        createEventHub({
+          onSubscriberError: (error, { eventName, phase }) => {
+            try {
+              this.log.warn(
+                `[event-hub] ${phase} handler failed for "${eventName}": ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            } catch {
+              console.warn('[strapi:event-hub]', phase, eventName, error);
+            }
+          },
+        })
+      )
+      .add('performanceEvents', () => createPerformanceEventsPublicApi(this))
+      .add('performanceMetrics', () => createPerformanceLiveMetrics(this))
       .add('startupLogger', () => utils.createStartupLogger(this))
       .add('logger', () => logger)
       .add('fetch', () => utils.createStrapiFetch(this))
@@ -289,6 +366,10 @@ class Strapi extends Container implements Core.Strapi {
       .add('requestContext', requestContext)
       .add('customFields', createCustomFields(this))
       .add('entityValidator', entityValidator)
+      .add(
+        'perfQueryStats',
+        () => new Map<string, { count: number; totalMs: number; slowOrErrorEvents: number }>()
+      )
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
       .add('db', () => {
@@ -296,16 +377,75 @@ class Strapi extends Container implements Core.Strapi {
         const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;
         const tsMigrationsEnabled = useTSM && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
-        return new Database(
-          _.merge(this.config.get('database'), {
+        const dbPerformanceEnabled = this.config.get('database.performance.enabled') === true;
+        const requestPerfTrackingEnabled = isServerRequestPerfTrackingEnabled(this);
+
+        /* eslint-disable object-shorthand -- arrows preserve outer Strapi `this`; method shorthand binds wrong `this` */
+        const perfRequestHooks =
+          dbPerformanceEnabled || requestPerfTrackingEnabled
+            ? {
+                performance: {
+                  getRequestId: () => {
+                    const ctx = requestContext.get();
+                    return (ctx?.state as { strapiPerfRequestId?: string } | undefined)
+                      ?.strapiPerfRequestId;
+                  },
+                  ...(requestPerfTrackingEnabled
+                    ? {
+                        notifyQueryTelemetry: ({
+                          durationMs,
+                          requestId,
+                          slowOrErrorEventEmitted,
+                        }: DatabaseQueryTelemetryInfo) => {
+                          if (!requestId) {
+                            return;
+                          }
+
+                          mergeQueryTelemetryIntoStats(
+                            this.get('perfQueryStats') as Map<string, PerfQueryAgg>,
+                            requestId,
+                            durationMs,
+                            slowOrErrorEventEmitted
+                          );
+                        },
+                      }
+                    : {}),
+                },
+              }
+            : {};
+        /* eslint-enable object-shorthand */
+
+        const dbConfig = _.merge(
+          {},
+          this.config.get('database'),
+          {
             logger,
             settings: {
               migrations: {
                 dir: path.join(projectDir, 'database/migrations'),
               },
             },
-          })
+          },
+          perfRequestHooks
         );
+
+        // `output` is a core-owned sink concern (read directly below for the bridge/artifact);
+        // keep the DB's `performance` config purely about query capture.
+        if (dbConfig.performance && typeof dbConfig.performance === 'object') {
+          delete (dbConfig.performance as { output?: unknown }).output;
+        }
+
+        const db = new Database(dbConfig);
+
+        const perfOutput = this.config.get('database.performance.output', 'none');
+        bridgeDatabasePerformanceEvents({
+          db,
+          eventHub: this.eventHub,
+          logger,
+          output: perfOutput,
+        });
+
+        return db;
       })
       .add('reload', () => createReloader(this))
       .add('content-source-maps', () => createContentSourceMapsService(this));
@@ -410,111 +550,204 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async load() {
-    await this.register();
-    await this.bootstrap();
+    registerOpenTelemetryTracing(this as Core.Strapi);
+
+    const span = await beginDeferredStartupRootSpan(this as Core.Strapi, () =>
+      this.registerAndBootstrap()
+    );
+
+    if (span) {
+      this.deferredStartupRootSpan = span;
+    }
 
     this.isLoaded = true;
 
     return this;
   }
 
+  withStartupTraceChild<T>(spanName: string, fn: () => Promise<T>): Promise<T> {
+    return withStartupTraceChildPhase(
+      this.deferredStartupRootSpan,
+      this as Core.Strapi,
+      spanName,
+      fn
+    );
+  }
+
   async register() {
-    // @ts-expect-error: init is internal
-    this.ee.init(this.dirs.app.root, this.log);
+    registerOpenTelemetryTracing(this as Core.Strapi);
 
-    for (const provider of providers) {
-      await provider.register?.(this);
-    }
+    await withStartupSpan(this as Core.Strapi, 'strapi.startup.register', async () => {
+      // @ts-expect-error: init is internal
+      this.ee.init(this.dirs.app.root, this.log);
 
-    await this.runPluginsLifecycles(utils.LIFECYCLES.REGISTER);
-    await this.runUserLifecycles(utils.LIFECYCLES.REGISTER);
+      for (const { name, definition } of providers) {
+        await withStartupSpan(
+          this as Core.Strapi,
+          `strapi.startup.provider.register.${name}`,
+          async () => {
+            await definition.register?.(this);
+          }
+        );
+      }
 
-    // NOTE: Swap type customField for underlying data type
-    utils.convertCustomFieldType(this);
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.plugins.lifecycle.register', () =>
+        this.runPluginsLifecycles(utils.LIFECYCLES.REGISTER)
+      );
+
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.user.lifecycle.register', () =>
+        this.runUserLifecycles(utils.LIFECYCLES.REGISTER)
+      );
+
+      // NOTE: Swap type customField for underlying data type
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.register.custom_fields', () =>
+        Promise.resolve(utils.convertCustomFieldType(this))
+      );
+    });
 
     return this;
   }
 
   async bootstrap() {
-    this.configureGlobalProxy();
+    await withStartupSpan(this as Core.Strapi, 'strapi.startup.bootstrap', async () => {
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.bootstrap.configure_proxy', () =>
+        Promise.resolve(this.configureGlobalProxy())
+      );
 
-    const models = [
-      ...utils.transformContentTypesToModels(
-        [...Object.values(this.contentTypes), ...Object.values(this.components)],
-        this.db.metadata.identifiers
-      ),
-      ...this.get('models').get(),
-    ];
+      const models = await withStartupSpan(
+        this as Core.Strapi,
+        'strapi.startup.bootstrap.build_models',
+        async () => [
+          ...utils.transformContentTypesToModels(
+            [...Object.values(this.contentTypes), ...Object.values(this.components)],
+            this.db.metadata.identifiers
+          ),
+          ...this.get('models').get(),
+        ]
+      );
 
-    await this.db.init({ models });
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.bootstrap.db.init', () =>
+        this.db.init({ models })
+      );
 
-    let oldContentTypes;
-    if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
-      oldContentTypes = await this.store.get({
-        type: 'strapi',
-        name: 'content_types',
-        key: 'schema',
-      });
-    }
+      let oldContentTypes: unknown;
+      await withStartupSpan(
+        this as Core.Strapi,
+        'strapi.startup.bootstrap.content_types.before_sync',
+        async () => {
+          if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
+            oldContentTypes = await this.store.get({
+              type: 'strapi',
+              name: 'content_types',
+              key: 'schema',
+            });
+          }
 
-    await this.hook('strapi::content-types.beforeSync').call({
-      oldContentTypes,
-      contentTypes: this.contentTypes,
-    });
+          await this.hook('strapi::content-types.beforeSync').call({
+            oldContentTypes,
+            contentTypes: this.contentTypes,
+          });
+        }
+      );
 
-    // NOTE: commenting out repair logic for now as it is causing relationship loss in some cases
-    // will revisit soon in the future PR
+      // NOTE: commenting out repair logic for now as it is causing relationship loss in some cases
+      // will revisit soon in the future PR
 
-    const status = await this.db.schema.sync();
+      const status = await withStartupSpan(
+        this as Core.Strapi,
+        'strapi.startup.bootstrap.db.schema_sync',
+        () => this.db.schema.sync()
+      );
 
-    // // if schemas have changed, run repairs
-    if (status === 'CHANGED') {
-      await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
-      await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
-    }
+      // // if schemas have changed, run repairs
+      if (status === 'CHANGED') {
+        await withStartupSpan(
+          this as Core.Strapi,
+          'strapi.startup.bootstrap.db.repair_morph',
+          async () => {
+            await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+            await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
+          }
+        );
+      }
 
-    const alreadyRanComponentRepair = await this.store.get({
-      type: 'strapi',
-      key: 'unidirectional-join-table-repair-ran',
-    });
-
-    if (!alreadyRanComponentRepair) {
-      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
-      await this.store.set({
+      const alreadyRanComponentRepair = await this.store.get({
         type: 'strapi',
         key: 'unidirectional-join-table-repair-ran',
-        value: true,
       });
-    }
 
-    if (this.EE) {
-      await utils.ee.checkLicense({ strapi: this });
-    }
+      if (!alreadyRanComponentRepair) {
+        await withStartupSpan(
+          this as Core.Strapi,
+          'strapi.startup.bootstrap.db.repair_join_tables',
+          async () => {
+            await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
+            await this.store.set({
+              type: 'strapi',
+              key: 'unidirectional-join-table-repair-ran',
+              value: true,
+            });
+          }
+        );
+      }
 
-    await this.hook('strapi::content-types.afterSync').call({
-      oldContentTypes,
-      contentTypes: this.contentTypes,
+      if (this.EE) {
+        await withStartupSpan(this as Core.Strapi, 'strapi.startup.bootstrap.ee.license', () =>
+          utils.ee.checkLicense({ strapi: this })
+        );
+      }
+
+      await withStartupSpan(
+        this as Core.Strapi,
+        'strapi.startup.bootstrap.content_types.after_sync',
+        async () => {
+          await this.hook('strapi::content-types.afterSync').call({
+            oldContentTypes,
+            contentTypes: this.contentTypes,
+          });
+
+          await this.store.set({
+            type: 'strapi',
+            name: 'content_types',
+            key: 'schema',
+            value: this.contentTypes,
+          });
+        }
+      );
+
+      await withStartupSpan(
+        this as Core.Strapi,
+        'strapi.startup.bootstrap.server.init',
+        async () => {
+          await this.server.initMiddlewares();
+          this.server.initRouting();
+        }
+      );
+
+      await withStartupSpan(
+        this as Core.Strapi,
+        'strapi.startup.bootstrap.content_api.permissions',
+        () => this.contentAPI.permissions.registerActions()
+      );
+
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.plugins.lifecycle.bootstrap', () =>
+        this.runPluginsLifecycles(utils.LIFECYCLES.BOOTSTRAP)
+      );
+
+      for (const { name, definition } of providers) {
+        await withStartupSpan(
+          this as Core.Strapi,
+          `strapi.startup.provider.bootstrap.${name}`,
+          async () => {
+            await definition.bootstrap?.(this);
+          }
+        );
+      }
+
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.user.lifecycle.bootstrap', () =>
+        this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP)
+      );
     });
-
-    await this.store.set({
-      type: 'strapi',
-      name: 'content_types',
-      key: 'schema',
-      value: this.contentTypes,
-    });
-
-    await this.server.initMiddlewares();
-    this.server.initRouting();
-
-    await this.contentAPI.permissions.registerActions();
-
-    await this.runPluginsLifecycles(utils.LIFECYCLES.BOOTSTRAP);
-
-    for (const provider of providers) {
-      await provider.bootstrap?.(this);
-    }
-
-    await this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP);
 
     return this;
   }
@@ -542,11 +775,14 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async destroy() {
+    endDeferredStartupRootSpan(this.deferredStartupRootSpan);
+    this.deferredStartupRootSpan = undefined;
+
     this.log.info('Shutting down Strapi');
     await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
 
-    for (const provider of providers) {
-      await provider.destroy?.(this);
+    for (const { definition } of providers) {
+      await definition.destroy?.(this);
     }
 
     await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);

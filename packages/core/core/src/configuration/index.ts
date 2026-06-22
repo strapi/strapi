@@ -38,6 +38,27 @@ const defaultServerConfig = {
       enabled: true,
     },
   },
+  performance: {
+    requestTrackingEnabled: false,
+    emitStageEvents: false,
+  },
+  observability: {
+    tracing: {
+      enabled: false,
+      serviceName: 'strapi',
+      consoleExporter: false,
+      otlp: {
+        enabled: false,
+      },
+    },
+    metrics: {
+      enabled: false,
+      serviceName: 'strapi',
+      otlp: {
+        enabled: false,
+      },
+    },
+  },
   openapi: {
     'content-api': {
       access: 'disabled',
@@ -72,6 +93,11 @@ const defaultConfig = {
       prefix: '/api',
     },
   } satisfies Partial<Core.Config.Api>,
+  database: {
+    performance: {
+      enabled: false,
+    },
+  } satisfies Partial<Core.Config.Database>,
 };
 
 export const loadConfiguration = (opts: StrapiOptions) => {

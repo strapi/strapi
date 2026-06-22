@@ -368,6 +368,34 @@ class StrapiApp {
         id: 'key-statistics',
         roles: ['strapi-super-admin'],
       },
+      {
+        icon: TrendUp,
+        title: {
+          id: 'widget.performance-quick.title',
+          defaultMessage: 'HTTP performance (window)',
+        },
+        component: async () => {
+          const { PerformanceQuickStatsWidget } = await import('./components/Widgets');
+          return PerformanceQuickStatsWidget;
+        },
+        pluginId: 'admin',
+        id: 'performance-quick-stats',
+        roles: ['strapi-super-admin'],
+      },
+      {
+        icon: Clock,
+        title: {
+          id: 'widget.performance-routes.title',
+          defaultMessage: 'Slow routes & SQL',
+        },
+        component: async () => {
+          const { PerformanceRoutesSqlWidget } = await import('./components/Widgets');
+          return PerformanceRoutesSqlWidget;
+        },
+        pluginId: 'admin',
+        id: 'performance-routes-sql',
+        roles: ['strapi-super-admin'],
+      },
     ];
 
     if ('strapi-cloud' in this.appPlugins) {

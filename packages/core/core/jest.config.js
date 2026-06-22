@@ -5,6 +5,9 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['@swc/jest'],
   },
+  moduleNameMapper: {
+    '^@strapi/utils$': '<rootDir>/../utils/src/index.ts',
+  },
   testMatch: ['<rootDir>/**/*.test.ts'],
   displayName: 'Core Strapi',
 };

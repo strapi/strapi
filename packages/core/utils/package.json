@@ -47,6 +47,7 @@
     "watch": "run -T  rollup -c -w"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "2.30.0",
     "execa": "5.1.1",

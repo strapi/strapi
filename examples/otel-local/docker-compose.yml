@@ -1,0 +1,16 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.57.0
+    ports:
+      - '16686:16686' # UI — http://localhost:16686 (no auth in local all-in-one)
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.103.1
+    command: ['--config=/etc/otel-collector-config.yaml']
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - '4317:4317' # OTLP gRPC
+      - '4318:4318' # OTLP HTTP (Strapi uses this with full /v1/traces or /v1/metrics URLs)
+    depends_on:
+      - jaeger

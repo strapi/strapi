@@ -1,0 +1,50 @@
+[
+  {
+    "uid": "api::basic.basic",
+    "pluralPath": "basics",
+    "locale": null,
+    "draftAndPublish": false
+  },
+  {
+    "uid": "api::basic-dp.basic-dp",
+    "pluralPath": "basic-dps",
+    "locale": null,
+    "draftAndPublish": true
+  },
+  {
+    "uid": "api::basic-dp-i18n.basic-dp-i18n",
+    "pluralPath": "basic-dp-i18ns",
+    "locale": "en",
+    "draftAndPublish": true
+  },
+  {
+    "uid": "api::relation.relation",
+    "pluralPath": "relations",
+    "locale": null,
+    "draftAndPublish": false
+  },
+  {
+    "uid": "api::relation-dp.relation-dp",
+    "pluralPath": "relation-dps",
+    "locale": null,
+    "draftAndPublish": true
+  },
+  {
+    "uid": "api::relation-dp-i18n.relation-dp-i18n",
+    "pluralPath": "relation-dp-i18ns",
+    "locale": "en",
+    "draftAndPublish": true
+  },
+  {
+    "uid": "api::hc-m2m-source.hc-m2m-source",
+    "pluralPath": "hc-m2m-sources",
+    "locale": null,
+    "draftAndPublish": true
+  },
+  {
+    "uid": "api::hc-m2m-target.hc-m2m-target",
+    "pluralPath": "hc-m2m-targets",
+    "locale": null,
+    "draftAndPublish": true
+  }
+]

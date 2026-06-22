@@ -9,6 +9,8 @@ import registerAllRoutes from './register-routes';
 import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
+import { withHttpServerTracing } from '../observability/opentelemetry-tracing';
+import { runRequestPerformanceMiddleware } from './request-performance-middleware';
 
 const healthCheck: Core.MiddlewareHandler = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
@@ -21,7 +23,13 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     keys: strapi.config.get('server.app.keys'),
   });
 
-  app.use((ctx, next) => requestCtx.run(ctx, () => next()));
+  app.use((ctx, next) =>
+    requestCtx.run(ctx, async () => {
+      await withHttpServerTracing(strapi, ctx, async () => {
+        await runRequestPerformanceMiddleware(strapi, ctx, next);
+      });
+    })
+  );
 
   const router = new Router();
 

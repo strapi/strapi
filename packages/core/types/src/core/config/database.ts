@@ -63,4 +63,24 @@ export interface Database<TClient extends ClientKind = ClientKind> {
     runMigrations?: boolean;
     useTypescriptMigrations?: boolean;
   };
+  performance?: {
+    enabled?: boolean;
+    slowQueryMs?: number;
+    sampleRate?: number;
+    captureSqlText?: boolean;
+    captureBindings?: boolean;
+    output?: 'none' | 'log' | 'artifact' | 'both';
+    /** Append-only JSON Lines artifact path (used when `output` is `artifact` or `both`) */
+    artifactPath?: string;
+    /** Flush interval for artifact batches (ms). */
+    flushIntervalMs?: number;
+    /** Max buffered perf rows before each flush (rolling window). */
+    maxEvents?: number;
+    /**
+     * When set to a positive byte size, the performance JSON Lines file is renamed to
+     * `{artifactPath}.rotated.{timestamp}.jsonl` before the next append once the file reaches this size.
+     * `0` (default) disables rotation (operators can still rotate logs externally).
+     */
+    artifactMaxFileBytes?: number;
+  };
 }

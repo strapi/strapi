@@ -1,6 +1,7 @@
 import type { Knex } from 'knex';
 
 import path from 'node:path';
+import { performance } from 'node:perf_hooks';
 
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
@@ -15,6 +16,24 @@ import { validateDatabase } from './validations';
 import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
+import {
+  DatabasePerformanceConfig,
+  DatabasePerformanceSubscriber,
+  DatabaseQueryPerfEvent,
+  DatabaseQueryTelemetryInfo,
+  DatabaseResolvedPerformanceConfig,
+  DEFAULT_DATABASE_PERFORMANCE_CONFIG,
+  InflightQueryState,
+  KnexQueryEvent,
+  normalizeSqlFingerprint,
+  toQueryType,
+} from './performance';
+
+/**
+ * Safety cap for the in-flight query map: if a query never emits a terminal
+ * `query-response`/`query-error` event (e.g. pool destroyed mid-flight), its entry would linger.
+ */
+const MAX_INFLIGHT_QUERIES = 10_000;
 
 export { isKnexQuery } from './utils/knex';
 
@@ -36,6 +55,7 @@ export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
   logger?: Logger;
+  performance?: DatabasePerformanceConfig;
 }
 
 const afterCreate =
@@ -71,6 +91,14 @@ class Database {
 
   logger: Logger;
 
+  performance: DatabaseResolvedPerformanceConfig;
+
+  private getRequestId?: () => string | undefined;
+
+  private notifyQueryTelemetry?: (info: DatabaseQueryTelemetryInfo) => void;
+
+  private performanceSubscribers = new Set<DatabasePerformanceSubscriber>();
+
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -82,6 +110,19 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+    const perfFromUser = { ...(config.performance ?? {}) };
+    // Sink-only keys (read by core) must not live on `@strapi/database` runtime perf config.
+    delete (perfFromUser as DatabasePerformanceConfig & { output?: unknown }).output;
+    const getRequestId = perfFromUser.getRequestId;
+    delete perfFromUser.getRequestId;
+    const notifyQueryTelemetry = perfFromUser.notifyQueryTelemetry;
+    delete perfFromUser.notifyQueryTelemetry;
+    this.getRequestId = getRequestId;
+    this.notifyQueryTelemetry = notifyQueryTelemetry;
+    this.performance = {
+      ...DEFAULT_DATABASE_PERFORMANCE_CONFIG,
+      ...perfFromUser,
+    };
 
     this.dialect = getDialect(this);
 
@@ -113,6 +154,7 @@ class Database {
     this.connection = createConnection(knexConfig, {
       pool: { afterCreate: afterCreate(this) },
     });
+    this.registerPerformanceListeners();
 
     this.schema = createSchemaProvider(this);
 
@@ -122,6 +164,194 @@ class Database {
     this.entityManager = createEntityManager(this);
 
     this.repair = createRepairManager(this);
+  }
+
+  private registerPerformanceListeners() {
+    if (!this.performance.enabled) {
+      return;
+    }
+
+    const inflightQueries = new Map<string, InflightQueryState>();
+
+    this.connection.on('query', (queryData: KnexQueryEvent) => {
+      const queryId = queryData?.__knexQueryUid;
+      if (!queryId) {
+        return;
+      }
+
+      inflightQueries.set(queryId, {
+        startedAt: performance.now(),
+        sql: queryData?.sql,
+        bindings: Array.isArray(queryData?.bindings) ? queryData.bindings : undefined,
+        method: queryData?.method,
+        requestId: queryData?.queryContext?.requestId,
+      });
+
+      if (inflightQueries.size > MAX_INFLIGHT_QUERIES) {
+        const oldestQueryId = inflightQueries.keys().next().value;
+        if (oldestQueryId !== undefined) {
+          inflightQueries.delete(oldestQueryId);
+        }
+      }
+    });
+
+    this.connection.on('query-response', (_response: unknown, queryData: KnexQueryEvent) => {
+      this.finalizeQueryTrace({ inflightQueries, queryData, success: true });
+    });
+
+    this.connection.on('query-error', (error: { code?: string }, queryData: KnexQueryEvent) => {
+      this.finalizeQueryTrace({
+        inflightQueries,
+        queryData,
+        success: false,
+        errorCode: error?.code,
+      });
+    });
+  }
+
+  private finalizeQueryTrace({
+    inflightQueries,
+    queryData,
+    success,
+    errorCode,
+  }: {
+    inflightQueries: Map<string, InflightQueryState>;
+    queryData: KnexQueryEvent;
+    success: boolean;
+    errorCode?: string;
+  }) {
+    const queryId = queryData?.__knexQueryUid;
+    if (!queryId) {
+      return;
+    }
+
+    const state = inflightQueries.get(queryId);
+    if (!state) {
+      return;
+    }
+
+    inflightQueries.delete(queryId);
+
+    const durationMs = Math.max(0, performance.now() - state.startedAt);
+    const queryContextRequestId = state.requestId;
+    const contextualRequestId = queryContextRequestId ?? this.getRequestId?.();
+
+    const event = this.buildPerformanceEventPayload({
+      state,
+      durationMs,
+      contextualRequestId,
+      success,
+      errorCode,
+    });
+
+    let slowOrErrorEventEmitted = false;
+
+    if (event) {
+      this.emitPerformance(event);
+      slowOrErrorEventEmitted = true;
+    }
+
+    this.notifyQueryTelemetry?.({
+      durationMs,
+      requestId: contextualRequestId,
+      slowOrErrorEventEmitted,
+    });
+  }
+
+  private buildPerformanceEventPayload({
+    state,
+    durationMs,
+    contextualRequestId,
+    success,
+    errorCode,
+  }: {
+    state: {
+      startedAt: number;
+      sql?: string;
+      bindings?: unknown[];
+      method?: string;
+    };
+    durationMs: number;
+    contextualRequestId?: string;
+    success: boolean;
+    errorCode?: string;
+  }): DatabaseQueryPerfEvent | null {
+    const isSlowOrFailed = !success || durationMs >= this.performance.slowQueryMs;
+
+    if (!isSlowOrFailed) {
+      return null;
+    }
+
+    if (Math.random() > this.performance.sampleRate) {
+      return null;
+    }
+
+    const sql = state.sql;
+    const method = state.method;
+
+    const event: DatabaseQueryPerfEvent = {
+      type: success ? 'query.slow' : 'query.error',
+      timestamp: new Date().toISOString(),
+      durationMs,
+      dbClient: this.dialect.client,
+      queryFingerprint: normalizeSqlFingerprint(sql),
+      queryType: toQueryType(method),
+      requestId: contextualRequestId,
+      success,
+      errorCode,
+    };
+
+    if (this.performance.captureSqlText && sql) {
+      event.sql = sql;
+    }
+
+    if (this.performance.captureBindings && state.bindings) {
+      event.bindings = state.bindings;
+    }
+
+    return event;
+  }
+
+  subscribeToPerformanceEvents(subscriber: DatabasePerformanceSubscriber) {
+    this.performanceSubscribers.add(subscriber);
+
+    return () => {
+      this.performanceSubscribers.delete(subscriber);
+    };
+  }
+
+  /**
+   * Merges `requestId` from {@link DatabasePerformanceConfig.getRequestId} into the Knex
+   * `queryContext` so slow/error perf events correlate without re-reading ALS in the Knex adapter.
+   */
+  mergeKnexQueryContext(qb: Knex.QueryBuilder): void {
+    if (!this.performance.enabled || typeof qb.queryContext !== 'function') {
+      return;
+    }
+
+    const resolveRequestId = this.getRequestId;
+    if (!resolveRequestId) {
+      return;
+    }
+
+    const requestId = resolveRequestId();
+    if (!requestId) {
+      return;
+    }
+
+    qb.queryContext({ requestId });
+  }
+
+  private emitPerformance(event: DatabaseQueryPerfEvent) {
+    for (const subscriber of this.performanceSubscribers) {
+      try {
+        Promise.resolve(subscriber(event)).catch(() => {
+          // Ignore subscriber errors to keep database query path fail-open.
+        });
+      } catch {
+        // Ignore subscriber errors to keep database query path fail-open.
+      }
+    }
   }
 
   async init({ models }: { models: Model[] }) {
@@ -272,3 +502,11 @@ class Database {
 
 export { Database, errors };
 export type { Model, JoinTable, Identifiers, Migration };
+export type {
+  DatabaseQueryPerfEvent,
+  DatabaseQueryTelemetryInfo,
+  DatabasePerformanceConfig,
+  DatabasePerformanceSubscriber,
+  KnexQueryEvent,
+  InflightQueryState,
+};

@@ -310,6 +310,8 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     { column: `${partitionedQueryAlias}.id`, order: 'asc' },
   ] as any);
 
+  db.mergeKnexQueryContext(resultQuery);
+
   return resultQuery;
 };
 
