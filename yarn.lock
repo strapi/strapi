@@ -9594,7 +9594,7 @@ __metadata:
   dependencies:
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.48.0"
-    nodemailer: "npm:8.0.9"
+    nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.48.0"
   languageName: unknown
   linkType: soft
@@ -9616,7 +9616,7 @@ __metadata:
   dependencies:
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.48.0"
-    nodemailer: "npm:8.0.9"
+    nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.48.0"
   languageName: unknown
   linkType: soft
@@ -24608,10 +24608,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:8.0.9":
-  version: 8.0.9
-  resolution: "nodemailer@npm:8.0.9"
-  checksum: 10c0/f5c671ed1c28b27fc997416be70c41aa068ea7540feebc8aca1d0c4f18ac1017d05d74d08218b5aa13206d2639d6a4605f9f3b2acbcb84d20b9cc89d50c5ab5a
+"nodemailer@npm:9.0.1":
+  version: 9.0.1
+  resolution: "nodemailer@npm:9.0.1"
+  checksum: 10c0/4213f01aa211127c1ce33243c5e45e7f831601a933d03fa864cd827b1bd5ea2782cb4b43722bee7028cbc193733d9802dad1120fe67181448eb0b7de52218a37
   languageName: node
   linkType: hard
 
