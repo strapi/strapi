@@ -14,11 +14,15 @@ export const createStrapiFetch = (
 ): Modules.Fetch.Fetch => {
   const { logs = true } = options ?? {};
 
-  function strapiFetch(url: RequestInfo | URL, options?: RequestInit) {
-    const fetchOptions = {
-      ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
+  function strapiFetch(url: string | URL | Request | URL, options?: RequestInit) {
+    const fetchOptions: RequestInit = {
       ...options,
     };
+
+    if (strapiFetch.dispatcher) {
+      // @ts-expect-error - undici/node@24 and undici/node@20 mismatch
+      fetchOptions.dispatcher = strapiFetch.dispatcher;
+    }
 
     if (logs) {
       strapi.log.debug(`Making request for ${url}`);

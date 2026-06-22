@@ -4,7 +4,8 @@
     "rootDir": "../",
     "baseUrl": ".",
     "outDir": "../dist",
-    "noEmit": false
+    "noEmit": false,
+    "types": ["@testing-library/jest-dom", "jest"]
   },
   "include": ["./src", "./custom.d.ts", "../shared"],
   "exclude": ["**/__mocks__", "**/*.test.*"]

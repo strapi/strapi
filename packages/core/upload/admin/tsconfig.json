@@ -5,7 +5,8 @@
     "baseUrl": ".",
     "paths": {
       "@tests/*": ["./tests/*"]
-    }
+    },
+    "types": ["@testing-library/jest-dom", "jest"]
   },
   "include": ["../package.json", "./src", "../shared", "./tests", "./custom.d.ts"]
 }

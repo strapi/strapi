@@ -3,6 +3,7 @@
   "include": ["./src", "../shared"],
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "types": ["node"]
   }
 }

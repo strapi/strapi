@@ -4,7 +4,6 @@
   "compilerOptions": {
     "rootDir": "../",
     "baseUrl": ".",
-    "types": ["jest"],
-    "esModuleInterop": true
+    "types": ["node", "jest"]
   }
 }
