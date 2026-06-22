@@ -1,8 +1,9 @@
-import { AbilityBuilder, Ability } from '@casl/ability';
+import { AbilityBuilder, Ability, subject } from '@casl/ability';
 import { pick } from 'lodash/fp';
 import sift from 'sift';
 import { buildStrapiQuery } from '../permission/permissions-manager/query-builders';
 import createPermissionsManager from '../permission/permissions-manager';
+import { createPermissionFieldsCache } from '../permission/permissions-manager/permission-fields';
 
 const allowedOperations = [
   '$or',
@@ -313,6 +314,22 @@ describe('Permissions Manager', () => {
     // @ts-expect-error
     test.each(tests)(`Test n°%#: %s`, (name, input, expected) => {
       expect(buildStrapiQuery(input)).toStrictEqual(expected);
+    });
+  });
+
+  describe('unrestricted rules combined with restricted rules', () => {
+    test('shouldIncludeAll is true when any rule has no field restriction', () => {
+      const ability = defineAbility((can: any) => {
+        can('read', 'Article', undefined);
+        can('read', 'Article', ['title']);
+      });
+
+      const { getPermissionFields } = createPermissionFieldsCache(ability);
+      const result = getPermissionFields('read', subject('Article', {}));
+
+      expect(result.shouldIncludeAll).toBe(true);
+      expect(result.hasAtLeastOneRegistered).toBe(true);
+      expect(result.permittedFields).toEqual([]);
     });
   });
 });

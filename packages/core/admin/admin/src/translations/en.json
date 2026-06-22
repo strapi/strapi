@@ -146,7 +146,7 @@
   "Settings.application.description": "Administration panel’s global information",
   "Settings.application.edition-title": "current edition",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
-  "Settings.application.ee.admin-seats.add-seats": "Manage seats",
+  "Settings.application.ee.admin-seats.add-seats": "Manage subscription",
   "Settings.application.ee.admin-seats.support": "Contact sales",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "At limit: add seats to invite more users",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
