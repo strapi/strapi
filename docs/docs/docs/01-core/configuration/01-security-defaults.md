@@ -26,8 +26,6 @@ module.exports = {
 };
 ```
 
-See also: [strictParams and registerParam](https://www.notion.so/strapi/strictParams-and-register-Param-2f78f359807480fbaaebfeaf08ba74a3).
-
 ## Content API authentication (refresh tokens)
 
 Use short-lived access tokens with refresh rotation instead of long-lived legacy JWTs. Store refresh tokens in httpOnly cookies when clients support cookie-based auth.
