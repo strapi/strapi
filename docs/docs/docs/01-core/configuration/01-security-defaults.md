@@ -26,6 +26,8 @@ module.exports = {
 };
 ```
 
+See also: [strictParams and custom Content API parameters](https://docs.strapi.io/cms/backend-customization/routes#custom-content-api-parameters).
+
 ## Content API authentication (refresh tokens)
 
 Use short-lived access tokens with refresh rotation instead of long-lived legacy JWTs. Store refresh tokens in httpOnly cookies when clients support cookie-based auth.
