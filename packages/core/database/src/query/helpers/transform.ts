@@ -1,6 +1,7 @@
 import _ from 'lodash/fp';
 
 import * as types from '../../utils/types';
+import { getScalarAttributeDefault } from '../../utils/attribute-default';
 import { createField } from '../../fields';
 
 import type { Meta } from '../../metadata';
@@ -28,7 +29,14 @@ const fromSingleRow = (meta: Meta, row: Row): Rec => {
     if (types.isScalar(attribute.type)) {
       const field = createField(attribute);
 
-      const val = row[column] === null ? null : field.fromDB(row[column]);
+      let val: unknown;
+
+      if (row[column] === null) {
+        const defaultValue = getScalarAttributeDefault(attribute);
+        val = defaultValue !== undefined ? defaultValue : null;
+      } else {
+        val = field.fromDB(row[column]);
+      }
 
       obj[attributeName] = val;
     }
