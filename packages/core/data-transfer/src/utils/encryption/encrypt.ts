@@ -1,29 +1,33 @@
 import { createCipheriv, Cipheriv, scryptSync, CipherKey, BinaryLike } from 'crypto';
 import { EncryptionStrategy, Strategies, Algorithm } from '../../types';
+import { LEGACY_KDF_SALT } from './format';
 
 // different key values depending on algorithm chosen
-const getEncryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {
+const getEncryptionStrategy = (
+  algorithm: Algorithm,
+  kdfSalt: string | Buffer = LEGACY_KDF_SALT
+): EncryptionStrategy => {
   const strategies: Strategies = {
     'aes-128-ecb'(key: string): Cipheriv {
-      const hashedKey = scryptSync(key, '', 16);
+      const hashedKey = scryptSync(key, kdfSalt, 16);
       const initVector: BinaryLike | null = null;
       const securityKey: CipherKey = hashedKey;
       return createCipheriv(algorithm, securityKey, initVector);
     },
     aes128(key: string): Cipheriv {
-      const hashedKey = scryptSync(key, '', 32);
+      const hashedKey = scryptSync(key, kdfSalt, 32);
       const initVector: BinaryLike | null = hashedKey.subarray(16);
       const securityKey: CipherKey = hashedKey.subarray(0, 16);
       return createCipheriv(algorithm, securityKey, initVector);
     },
     aes192(key: string): Cipheriv {
-      const hashedKey = scryptSync(key, '', 40);
+      const hashedKey = scryptSync(key, kdfSalt, 40);
       const initVector: BinaryLike | null = hashedKey.subarray(24);
       const securityKey: CipherKey = hashedKey.subarray(0, 24);
       return createCipheriv(algorithm, securityKey, initVector);
     },
     aes256(key: string): Cipheriv {
-      const hashedKey = scryptSync(key, '', 48);
+      const hashedKey = scryptSync(key, kdfSalt, 48);
       const initVector: BinaryLike | null = hashedKey.subarray(32);
       const securityKey: CipherKey = hashedKey.subarray(0, 32);
       return createCipheriv(algorithm, securityKey, initVector);
@@ -43,7 +47,8 @@ const getEncryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {
  */
 export const createEncryptionCipher = (
   key: string,
-  algorithm: Algorithm = 'aes-128-ecb'
+  algorithm: Algorithm = 'aes-128-ecb',
+  kdfSalt: string | Buffer = LEGACY_KDF_SALT
 ): Cipheriv => {
-  return getEncryptionStrategy(algorithm)(key);
+  return getEncryptionStrategy(algorithm, kdfSalt)(key);
 };

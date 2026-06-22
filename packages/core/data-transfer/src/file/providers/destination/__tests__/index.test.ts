@@ -26,7 +26,7 @@ const filePath = './test-file';
 jest.mock('../../../../utils/encryption', () => {
   return {
     __esModule: true,
-    createEncryptionCipher() {},
+    createEncryptionStream: jest.fn(),
   };
 });
 
@@ -105,7 +105,7 @@ describe('Local File Destination Provider', () => {
     });
 
     it('Adds the encryption step to the stream chain when encryption is enabled', async () => {
-      jest.spyOn(encryption, 'createEncryptionCipher');
+      jest.spyOn(encryption, 'createEncryptionStream');
       const key = 'key';
       const providerOptions: ILocalFileDestinationProviderOptions = {
         encryption: { enabled: true, key },
@@ -116,7 +116,7 @@ describe('Local File Destination Provider', () => {
 
       await provider.bootstrap();
 
-      expect(encryption.createEncryptionCipher).toHaveBeenCalledWith(key);
+      expect(encryption.createEncryptionStream).toHaveBeenCalledWith({ key, format: 'v2' });
     });
   });
 
