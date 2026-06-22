@@ -14,7 +14,7 @@ import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandler
 
 /**
  * Defines a Strapi MCP resource with full type inference, ready to pass to
- * `strapi.ai.mcp.registerResource()`. Exposed publicly as `mcp.defineResource`.
+ * `strapi.ai.mcp.registerResource()`. Exposed publicly as `ai.mcp.defineResource`.
  *
  * The returned value is the definition unchanged — this builder only exists to
  * infer the `name` and narrow the access variant (`devModeOnly` vs `auth`) so the
@@ -26,9 +26,9 @@ import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandler
  *
  * @example
  * ```ts
- * import { mcp } from '@strapi/strapi';
+ * import { ai } from '@strapi/strapi';
  *
- * const appInfo = mcp.defineResource({
+ * const appInfo = ai.mcp.defineResource({
  *   name: 'app-info',
  *   uri: 'strapi://app/info',
  *   metadata: { description: 'Metadata about the app', mimeType: 'application/json' },

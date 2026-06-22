@@ -147,7 +147,7 @@ export type McpToolDefinition<
   McpCapabilityAccess;
 
 /**
- * Builder for Strapi MCP tool definitions, exposed publicly as `mcp.defineTool`.
+ * Builder for Strapi MCP tool definitions, exposed publicly as `ai.mcp.defineTool`.
  * Identity at runtime — its only job is to infer and narrow the access variant
  * (`devModeOnly` vs `auth`) so the result is directly assignable to
  * {@link McpService.registerTool}.
@@ -221,7 +221,7 @@ export type McpPromptDefinition<
 > = McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpCapabilityAccess;
 
 /**
- * Builder for Strapi MCP prompt definitions, exposed publicly as `mcp.definePrompt`.
+ * Builder for Strapi MCP prompt definitions, exposed publicly as `ai.mcp.definePrompt`.
  * Identity at runtime — narrows the access variant for {@link McpService.registerPrompt}.
  */
 export interface McpPromptBuilder {
@@ -271,7 +271,7 @@ export type McpResourceDefinition<Name extends string = string> =
   McpResourceDefinitionFields<Name> & McpCapabilityAccess;
 
 /**
- * Builder for Strapi MCP resource definitions, exposed publicly as `mcp.defineResource`.
+ * Builder for Strapi MCP resource definitions, exposed publicly as `ai.mcp.defineResource`.
  * Identity at runtime — narrows the access variant for {@link McpService.registerResource}.
  */
 export interface McpResourceBuilder {

@@ -12,7 +12,7 @@ import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandler
 
 /**
  * Defines a Strapi MCP prompt with full type inference, ready to pass to
- * `strapi.ai.mcp.registerPrompt()`. Exposed publicly as `mcp.definePrompt`.
+ * `strapi.ai.mcp.registerPrompt()`. Exposed publicly as `ai.mcp.definePrompt`.
  *
  * The returned value is the definition unchanged — this builder only exists to
  * infer the `name`/`argsSchema` and narrow the access variant (`devModeOnly` vs
@@ -24,9 +24,9 @@ import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandler
  *
  * @example
  * ```ts
- * import { mcp } from '@strapi/strapi';
+ * import { ai } from '@strapi/strapi';
  *
- * const context = mcp.definePrompt({
+ * const context = ai.mcp.definePrompt({
  *   name: 'app-context',
  *   title: 'App Context',
  *   description: 'Provides context about the app',

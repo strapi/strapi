@@ -12,7 +12,7 @@ import type { McpAdminTokenAbility } from './authentication';
 
 /**
  * Defines a Strapi MCP tool with full type inference, ready to pass to
- * `strapi.ai.mcp.registerTool()`. Exposed publicly as `mcp.defineTool`.
+ * `strapi.ai.mcp.registerTool()`. Exposed publicly as `ai.mcp.defineTool`.
  *
  * The returned value is the definition unchanged — this builder only exists to
  * infer the `name`, input/output schemas and handler types, and to narrow the
@@ -25,10 +25,10 @@ import type { McpAdminTokenAbility } from './authentication';
  *
  * @example
  * ```ts
- * import { mcp } from '@strapi/strapi';
+ * import { ai } from '@strapi/strapi';
  * import { z } from '@strapi/utils';
  *
- * const greet = mcp.defineTool({
+ * const greet = ai.mcp.defineTool({
  *   name: 'greet',
  *   title: 'Greet',
  *   description: 'Greets a user by name',
