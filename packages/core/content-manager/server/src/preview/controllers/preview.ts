@@ -1,9 +1,20 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
 import type { Core, UID } from '@strapi/types';
 
 import { Preview } from '../../../../shared/contracts';
 
 import { getService } from '../utils';
 import { validatePreviewUrl } from './validation/preview';
+
+let previewScriptContent: string | null = null;
+const getPreviewScriptContent = () => {
+  if (previewScriptContent === null) {
+    previewScriptContent = readFileSync(join(__dirname, 'previewScript.js'), 'utf8');
+  }
+  return previewScriptContent;
+};
 
 const createPreviewController = () => {
   return {
@@ -32,6 +43,15 @@ const createPreviewController = () => {
       return {
         data: { url: url || undefined },
       } satisfies Preview.GetPreviewUrl.Response;
+    },
+
+    /**
+     * Serves the standalone preview script verbatim as JavaScript. The admin fetches
+     * this, injects the config, and posts it to the preview iframe
+     */
+    getPreviewScript(ctx) {
+      ctx.type = 'application/javascript';
+      ctx.body = getPreviewScriptContent();
     },
   } satisfies Core.Controller;
 };

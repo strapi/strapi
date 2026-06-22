@@ -36,9 +36,8 @@ import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
-import { PUBLIC_EVENTS } from '../utils/constants';
+import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
-import { previewScript } from '../utils/previewScript';
 
 import type { Schema, UID } from '@strapi/types';
 
@@ -90,7 +89,36 @@ interface PreviewContextValue {
   setPopoverField: (value: PopoverField | null) => void;
 }
 
+type PreviewHighlightColors = {
+  highlightHoverColor: string;
+  highlightActiveColor: string;
+};
+
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
+
+const getPreviewScript = (() => {
+  let previewScript = '';
+  return async (previewHighlightColors: PreviewHighlightColors) => {
+    if (!previewScript) {
+      const resp = await fetch('/content-manager/preview/script');
+
+      if (!resp.ok) {
+        throw new Error('Could not retrieve preview script from server.');
+      }
+
+      previewScript = await resp.text();
+
+      if (!previewScript) {
+        throw new Error('Could not retrieve preview script from server.');
+      }
+    }
+
+    return `(${previewScript})(${JSON.stringify({
+      colors: previewHighlightColors,
+      events: INTERNAL_EVENTS,
+    })})`;
+  };
+})();
 
 /* -------------------------------------------------------------------------------------------------
  * PreviewPage
@@ -134,14 +162,14 @@ const PreviewPage = () => {
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
-  const previewHighlightColors = {
+  const previewHighlightColors: PreviewHighlightColors = {
     highlightHoverColor: theme.colors.primary500,
     highlightActiveColor: theme.colors.primary600,
   };
 
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = async (event: MessageEvent) => {
       // Only listen to events from the preview iframe
       if (iframeRef.current) {
         const previewOrigin = new URL(iframeRef.current?.src).origin;
@@ -151,10 +179,8 @@ const PreviewPage = () => {
       }
 
       if (event.data?.type === PUBLIC_EVENTS.PREVIEW_READY) {
-        const script = `(${previewScript.toString()})(${JSON.stringify({
-          shouldRun: true,
-          colors: previewHighlightColors,
-        })})`;
+        const script = await getPreviewScript(previewHighlightColors);
+
         const sendMessage = getSendMessage(iframeRef);
         sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
       }
