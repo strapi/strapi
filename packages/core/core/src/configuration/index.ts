@@ -12,6 +12,7 @@ import loadConfigDir from './config-loader';
 import { getDirs } from './get-dirs';
 
 import type { StrapiOptions } from '../Strapi';
+import { isDiskSource } from '../app-definition/brand';
 import { version as strapiVersion } from '../../package.json';
 
 dotenv.config({ path: process.env.ENV_PATH });
@@ -74,12 +75,34 @@ const defaultConfig = {
   } satisfies Partial<Core.Config.Api>,
 };
 
+/**
+ * Guard the `package.json` assumption (ADR-0013). A no-files programmatic app
+ * may not ship a `package.json`; synthesize minimal info instead of throwing.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const loadAppPackageJson = (appDir: string): Record<string, any> => {
+  try {
+    return require(path.resolve(appDir, 'package.json'));
+  } catch (error) {
+    return { name: path.basename(appDir) || 'strapi-app', version: '0.0.0', strapi: {} };
+  }
+};
+
 export const loadConfiguration = (opts: StrapiOptions) => {
-  const { appDir, distDir, autoReload = false, serveAdminPanel = true } = opts;
+  const { appDir, distDir, autoReload = false, serveAdminPanel = true, app } = opts;
 
-  const pkgJSON = require(path.resolve(appDir, 'package.json'));
+  const pkgJSON = loadAppPackageJson(appDir);
 
-  const configDir = path.resolve(distDir || process.cwd(), 'config');
+  // Programmatic `config` (ADR-0008): an in-code object is merged with highest
+  // precedence; a `fromDisk(path)` source redirects the legacy config dir.
+  const appConfig = app?.config;
+  const appConfigObject =
+    appConfig && !isDiskSource(appConfig) ? (appConfig as Record<string, unknown>) : {};
+
+  const configDir =
+    appConfig && isDiskSource(appConfig)
+      ? path.resolve(appConfig.path)
+      : path.resolve(distDir || process.cwd(), 'config');
 
   const rootConfig = {
     launchedAt: Date.now(),
@@ -103,7 +126,7 @@ export const loadConfiguration = (opts: StrapiOptions) => {
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV as string);
   const envConfig = loadConfigDir(envDir);
 
-  const config = _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
+  const config = _.merge(rootConfig, defaultConfig, baseConfig, envConfig, appConfigObject);
 
   const { serverUrl, adminUrl } = getConfigUrls(config);
 

@@ -4,10 +4,12 @@ import { importDefault } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
 
+/**
+ * Path-parametric core: load `.js` policies from `dir` and register them under
+ * the `global::` namespace. Shared by the legacy wrapper and `fromDisk(path)`.
+ */
 // TODO:: allow folders with index.js inside for bigger policies
-export default async function loadPolicies(strapi: Core.Strapi) {
-  const dir = strapi.dirs.dist.policies;
-
+export async function loadPoliciesFromDir(strapi: Core.Strapi, dir: string) {
   if (!(await fse.pathExists(dir))) {
     return;
   }
@@ -26,4 +28,8 @@ export default async function loadPolicies(strapi: Core.Strapi) {
   }
 
   strapi.get('policies').add(`global::`, policies);
+}
+
+export default async function loadPolicies(strapi: Core.Strapi) {
+  return loadPoliciesFromDir(strapi, strapi.dirs.dist.policies);
 }

@@ -1,0 +1,24 @@
+{
+  "name": "example-programmatic-server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Programmatic Strapi — minimal single-file host (defineApp + startStrapi) with a Playwright browser smoke test",
+  "scripts": {
+    "build": "tsc",
+    "build:admin": "tsc && node dist/build-admin.js",
+    "start": "tsc && node dist/index.js",
+    "test:e2e": "tsc && node dist/build-admin.js && playwright test"
+  },
+  "dependencies": {
+    "@strapi/strapi": "workspace:*",
+    "better-sqlite3": "12.8.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "^20",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x"
+  }
+}

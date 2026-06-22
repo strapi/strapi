@@ -1,0 +1,4 @@
+.tmp/
+.next/
+node_modules/
+.strapi-updater.json

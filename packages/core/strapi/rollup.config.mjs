@@ -6,5 +6,7 @@ export default baseConfig({
     cli: './src/cli/index.ts',
     admin: './src/admin.ts',
     'admin-test': './src/admin-test.ts',
+    attributes: './src/attributes.ts',
+    plugins: './src/plugins.ts',
   },
 });

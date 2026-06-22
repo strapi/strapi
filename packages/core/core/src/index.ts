@@ -1,11 +1,57 @@
+import path from 'node:path';
+import fs from 'node:fs';
 import * as qs from 'qs';
 import type { Core } from '@strapi/types';
 
 import Strapi, { type StrapiOptions } from './Strapi';
 import { destroyOnSignal, resolveWorkingDirectories, createUpdateNotifier } from './utils';
+import type { AppDefinition } from './app-definition';
 
 export { default as compileStrapi } from './compile';
 export * as factories from './factories';
+
+export {
+  defineApp,
+  defineComponent,
+  definePlugin,
+  defineConfig,
+  defineDatabaseConfig,
+  defineServerConfig,
+  fromDisk,
+  scaffoldToDefineApp,
+  printDefineAppSource,
+  isAppDefinition,
+  isDiskSource,
+  isDefinedPlugin,
+  getAdminPluginResolutions,
+} from './app-definition';
+export type {
+  AppDefinition,
+  AppInput,
+  AppContentType,
+  AppComponent,
+  AppConfig,
+  BrandedApp,
+  PluginEntry,
+  PluginModule,
+  PluginsInput,
+  DefinedPlugin,
+  DefinePluginInput,
+  RouteBuilder,
+  DiskSource,
+  AdminPluginResolution,
+  RegisterContentTypes,
+  RegisterComponents,
+  ContentTypeUID,
+  ContentTypeUIDs,
+  ComponentUID,
+  ComponentUIDs,
+  InferContentTypeSchema,
+  InferComponentSchema,
+  ScaffoldToDefineAppOptions,
+  ScaffoldToDefineAppResult,
+  PrintDefineAppSourceOptions,
+} from './app-definition';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
   const strapi = new Strapi({
@@ -18,6 +64,72 @@ export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi 
 
   // TODO: deprecate and remove in next major
   global.strapi = strapi;
+
+  return strapi;
+};
+
+/**
+ * Options accepted by {@link startStrapi}. `app` is supplied positionally.
+ */
+export type StartStrapiOptions = Partial<Omit<StrapiOptions, 'app'>>;
+
+/**
+ * Whether a built admin panel exists under the resolved dist dir
+ * (`<distDir>/build/index.html`). Used by {@link startStrapi} to decide whether
+ * to serve the panel by default.
+ */
+const hasAdminBuild = (options: StartStrapiOptions): boolean => {
+  const { distDir } = resolveWorkingDirectories(options);
+  return fs.existsSync(path.join(distDir, 'build', 'index.html'));
+};
+
+/**
+ * Primary entry point for programmatic apps. Builds a Strapi instance from a
+ * `defineApp(...)` result and starts it.
+ *
+ * The admin **panel** is served automatically when a build exists at
+ * `<distDir>/build` (produced by `buildAdmin`), and stays headless otherwise —
+ * the admin server module always loads either way (ADR-0007). Pass an explicit
+ * `serveAdminPanel` to override the auto-detection.
+ */
+export const startStrapi = async (
+  app: AppDefinition,
+  options: StartStrapiOptions = {}
+): Promise<Core.Strapi> => {
+  const strapi = createStrapi({
+    // Serve the panel only when a real build is present; headless otherwise.
+    serveAdminPanel: hasAdminBuild(options),
+    ...options,
+    app,
+  });
+
+  await strapi.start();
+
+  return strapi;
+};
+
+/**
+ * Boot a programmatic Strapi instance **without** binding an HTTP port.
+ *
+ * Runs `register` → `bootstrap` (same as {@link Core.Strapi.load}) and mounts
+ * routes/middleware on `strapi.server.app` so you can embed Strapi in an
+ * existing Koa/Express/Next host via `strapi.server.app.callback()`.
+ *
+ * Pair with your host server's `listen()` — do not call {@link startStrapi} when
+ * embedding (that owns the port).
+ */
+export const loadStrapi = async (
+  app: AppDefinition,
+  options: StartStrapiOptions = {}
+): Promise<Core.Strapi> => {
+  const strapi = createStrapi({
+    serveAdminPanel: hasAdminBuild(options),
+    ...options,
+    app,
+  });
+
+  await strapi.load();
+  strapi.server.mount();
 
   return strapi;
 };
