@@ -77,7 +77,7 @@
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
     "@types/mime-types": "2.1.1",
-    "@types/node": "24.10.0",
+    "@types/node": "20.19.41",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.8",
