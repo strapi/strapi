@@ -24,6 +24,11 @@ describe('Users-Permissions Cookie Security', () => {
     return setCookies.find((c) => c.startsWith(`${name}=`));
   };
 
+  const getSigCookie = (res, name) => {
+    const setCookies = res.headers['set-cookie'] || [];
+    return setCookies.find((c) => c.startsWith(`${name}.sig=`));
+  };
+
   const getCookieHeader = (res, name) => {
     const setCookies = res.headers['set-cookie'] || [];
     return setCookies
@@ -224,6 +229,10 @@ describe('Users-Permissions Cookie Security', () => {
       const cookie = getCookie(res, cookieName);
       expect(cookie).toBeDefined();
       expect(cookie.toLowerCase()).toMatch(/max-age=120/);
+
+      const sigCookie = getSigCookie(res, cookieName);
+      expect(sigCookie).toBeDefined();
+      expect(sigCookie.toLowerCase()).toMatch(/max-age=120/);
     });
 
     test('should not include Max-Age when sessions.cookie.maxAge is not configured', async () => {
@@ -252,6 +261,10 @@ describe('Users-Permissions Cookie Security', () => {
       const cookie = getCookie(res, cookieName);
       expect(cookie).toBeDefined();
       expect(cookie.toLowerCase()).not.toMatch(/max-age=/);
+
+      const sigCookie = getSigCookie(res, cookieName);
+      expect(sigCookie).toBeDefined();
+      expect(sigCookie.toLowerCase()).not.toMatch(/max-age=/);
     });
 
     test('should include Max-Age on refresh rotation when sessions.cookie.maxAge is configured', async () => {
@@ -296,6 +309,10 @@ describe('Users-Permissions Cookie Security', () => {
       const rotatedCookie = getCookie(refreshRes, cookieName);
       expect(rotatedCookie).toBeDefined();
       expect(rotatedCookie.toLowerCase()).toMatch(/max-age=120/);
+
+      const rotatedSigCookie = getSigCookie(refreshRes, cookieName);
+      expect(rotatedSigCookie).toBeDefined();
+      expect(rotatedSigCookie.toLowerCase()).toMatch(/max-age=120/);
     });
   });
 });
