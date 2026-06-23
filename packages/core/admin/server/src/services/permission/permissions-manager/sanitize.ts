@@ -201,9 +201,8 @@ export default ({ action, ability, model }: any) => {
   const wrapSanitize = (createSanitizeFunction: any) => {
     const { getPermissionFields } = createPermissionFieldsCache(ability);
 
-    // TODO
-    // @ts-expect-error define the correct return type
-    const wrappedSanitize = async (data: unknown, options = {} as any) => {
+    // TODO: define the correct return type
+    const wrappedSanitize = async (data: unknown, options = {} as any): Promise<any> => {
       if (isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedSanitize(entity, options)));
       }

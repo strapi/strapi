@@ -20,7 +20,6 @@ export const createStrapiFetch = (
     };
 
     if (strapiFetch.dispatcher) {
-      // @ts-expect-error - undici/node@24 and undici/node@20 mismatch
       fetchOptions.dispatcher = strapiFetch.dispatcher;
     }
 
