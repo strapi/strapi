@@ -34,7 +34,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await login({ page });
 
     await navToHeader(page, ['Releases'], 'Releases');
-    page.getByRole('link', { name: `${releaseName}` }).click();
+    await page.getByRole('link', { name: `${releaseName}` }).click();
     await page.waitForURL('/admin/plugins/content-releases/*');
   });
 
