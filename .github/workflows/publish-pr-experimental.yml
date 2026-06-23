@@ -30,14 +30,16 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Setup npmrc
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+          registry-url: https://registry.npmjs.org
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - run: yarn
+      - run: yarn install --immutable
+        env:
+          YARN_ENABLE_SCRIPTS: 'false'
 
       - name: Publish prerelease
         run: ./scripts/pre-publish.sh --yes
@@ -50,8 +52,7 @@ jobs:
         run: echo "short=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Update experimental build comment
-        if: success()
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@fabd468d3a1a0b97feee5f6b9e499eab0dd903f6 # v2
         with:
           comment_tag: experimental-pr-build
           message: |
@@ -64,7 +65,7 @@ jobs:
             | **Commit** | [`${{ steps.meta.outputs.short }}`](https://github.com/${{ github.repository }}/commit/${{ github.event.pull_request.head.sha }}) |
 
             ```bash
-            npm install @strapi/strapi@0.0.0-experimental.${{ github.event.pull_request.head.sha }}
+            npx create-strapi-app@0.0.0-experimental.${{ github.event.pull_request.head.sha }} my-project --non-interactive --skip-cloud --no-run
             ```
 
-            All `@strapi/*` packages must be installed at the same version.
+            To upgrade an existing app, install all `@strapi/*` packages at the same version.
