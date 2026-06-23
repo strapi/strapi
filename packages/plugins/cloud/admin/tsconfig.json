@@ -2,6 +2,6 @@
   "extends": "tsconfig/client.json",
   "include": ["./src", "*.d.ts"],
   "compilerOptions": {
-    "types": ["jest"]
+    "types": []
   }
 }
