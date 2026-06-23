@@ -1,17 +1,8 @@
 {
   "extends": "tsconfig/base.json",
-  "include": [
-    "src",
-    "custom.d.ts",
-    "../shared"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
+  "include": ["src", "custom.d.ts", "../shared"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
-    "types": [
-      "node",
-      "jest"
-    ]
+    "types": ["node", "jest"]
   }
 }

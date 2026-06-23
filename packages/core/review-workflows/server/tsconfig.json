@@ -1,14 +1,7 @@
 {
   "extends": "tsconfig/base.json",
-  "include": [
-    "src",
-    "custom.d.ts",
-    "../shared"
-  ],
+  "include": ["src", "custom.d.ts", "../shared"],
   "compilerOptions": {
-    "types": [
-      "node",
-      "jest"
-    ]
+    "types": ["node", "jest"]
   }
 }
