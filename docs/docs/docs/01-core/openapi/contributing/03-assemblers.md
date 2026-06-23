@@ -15,7 +15,7 @@ Learn how to add assemblers to the document generation pipeline.
 
 ## Assembler levels
 
-Assemblers build the OpenAPI document in layers. Each level has a matching context type (see [Context factory](./context-factory)).
+Assemblers build the OpenAPI document in layers. Each level has a matching context type (see [Context factory](./04-context-factory.md)).
 
 | Level     | Interface             | Example                        | Factory                     |
 | --------- | --------------------- | ------------------------------ | --------------------------- |
@@ -125,5 +125,5 @@ export class OperationAssembler implements Assembler.PathItem {
 Create or extend a factory (e.g. `PathItemAssemblerFactory`) that instantiates your composite assembler with its sub-assemblers and context factory, then register that factory in the parent level (`PathAssemblerFactory` or `DocumentAssemblerFactory`).
 
 :::tip
-Reuse `timer` and `registries` from the parent context when creating child contexts so timing and shared state stay consistent. Pass them via `PartialContext` (see [Context factory](./context-factory)).
+Reuse `timer` and `registries` from the parent context when creating child contexts so timing and shared state stay consistent. Pass them via `PartialContext` (see [Context factory](./04-context-factory.md)).
 :::

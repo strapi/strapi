@@ -33,7 +33,7 @@ import type {
   ErrorHandlers,
   ErrorCode,
   StageProgress,
-} from '../../types';
+} from '../types';
 import type { Diff } from '../utils/json';
 
 import { compareSchemas, validateProvider } from './validation';

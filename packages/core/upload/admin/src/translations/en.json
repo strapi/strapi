@@ -243,5 +243,14 @@
   "view.grid": "Grid view",
   "ai.modal.uploading.title": "Uploading and processing with AI...",
   "ai.modal.title": "{count, plural, one {# asset uploaded} other {# assets uploaded}}, review AI generated metadata",
-  "ai.modal.error": "Could not generate AI metadata for the uploaded files."
+  "ai.modal.error": "Could not generate AI metadata for the uploaded files.",
+  "sidebar.title": "Media library",
+  "sidebar.home": "Home",
+  "sidebar.folders": "Folders",
+  "sidebar.tree.aria-label": "Media library folders",
+  "sidebar.tree.expand": "Expand {name}",
+  "sidebar.tree.collapse": "Collapse {name}",
+  "sidebar.tree.empty": "No folders yet",
+  "sidebar.tree.loading": "Loading folders...",
+  "sidebar.tree.error": "Could not load folders."
 }

@@ -6,7 +6,7 @@ const { createAuthenticatedUser } = require('../utils');
 
 /**
  * Tests for users-permissions cookie security configuration
- * Focus: Verify that plugin::users-permissions.sessions.cookie.secure config is respected with proper defaults
+ * Focus: Verify that plugin::users-permissions.sessions.cookie options are respected
  */
 describe('Users-Permissions Cookie Security', () => {
   const cookieName = 'strapi_up_refresh';
@@ -22,6 +22,42 @@ describe('Users-Permissions Cookie Security', () => {
   const getCookie = (res, name) => {
     const setCookies = res.headers['set-cookie'] || [];
     return setCookies.find((c) => c.startsWith(`${name}=`));
+  };
+
+  const getSigCookie = (res, name) => {
+    const setCookies = res.headers['set-cookie'] || [];
+    return setCookies.find((c) => c.startsWith(`${name}.sig=`));
+  };
+
+  const getCookieHeader = (res, name) => {
+    const setCookies = res.headers['set-cookie'] || [];
+    return setCookies
+      .map((cookie) => cookie.split(';')[0])
+      .filter((cookie) => cookie.startsWith(`${name}=`) || cookie.startsWith(`${name}.sig=`))
+      .join('; ');
+  };
+
+  const expectCookieLifetimeSeconds = (cookie, expectedSeconds, toleranceSeconds = 5) => {
+    const cookieLower = cookie.toLowerCase();
+    const maxAgeMatch = cookieLower.match(/max-age=(\d+)/);
+
+    if (maxAgeMatch) {
+      expect(Number(maxAgeMatch[1])).toBe(expectedSeconds);
+      return;
+    }
+
+    const expiresMatch = cookieLower.match(/expires=([^;]+)/);
+    expect(expiresMatch).toBeDefined();
+    const expiresAt = new Date(expiresMatch[1].trim());
+    const deltaSeconds = Math.round((expiresAt.getTime() - Date.now()) / 1000);
+    expect(deltaSeconds).toBeGreaterThanOrEqual(expectedSeconds - toleranceSeconds);
+    expect(deltaSeconds).toBeLessThanOrEqual(expectedSeconds + toleranceSeconds);
+  };
+
+  const expectSessionCookie = (cookie) => {
+    const cookieLower = cookie.toLowerCase();
+    expect(cookieLower).not.toMatch(/max-age=/);
+    expect(cookieLower).not.toMatch(/expires=/);
   };
 
   describe('Default behavior based on NODE_ENV', () => {
@@ -171,6 +207,135 @@ describe('Users-Permissions Cookie Security', () => {
       const cookie = getCookie(res, cookieName);
       expect(cookie).toBeDefined();
       expect(cookie.toLowerCase()).not.toMatch(/secure/);
+    });
+  });
+
+  describe('sessions.cookie.maxAge', () => {
+    let strapi;
+    let originalEnv;
+
+    afterEach(async () => {
+      if (strapi) {
+        await strapi.db.query('plugin::users-permissions.user').deleteMany();
+        await strapi.destroy();
+        strapi = null;
+      }
+      if (originalEnv !== undefined) {
+        process.env.NODE_ENV = originalEnv;
+      }
+    });
+
+    test('should set cookie lifetime on Set-Cookie when sessions.cookie.maxAge is configured', async () => {
+      originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      strapi = await createStrapiInstance({
+        bypassAuth: false,
+        async bootstrap({ strapi: s }) {
+          s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
+          s.config.set('plugin::users-permissions.sessions.httpOnly', true);
+          s.config.set('plugin::users-permissions.sessions.cookie.maxAge', 120000);
+        },
+      });
+
+      await createAuthenticatedUser({ strapi, userInfo: testUser });
+      const rq = createRequest({ strapi }).setURLPrefix('/api/auth').asHTTPS();
+
+      const res = await rq({
+        method: 'POST',
+        url: '/local',
+        body: { identifier: testUser.email, password: testUser.password },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const cookie = getCookie(res, cookieName);
+      expect(cookie).toBeDefined();
+      expectCookieLifetimeSeconds(cookie, 120);
+
+      const sigCookie = getSigCookie(res, cookieName);
+      expect(sigCookie).toBeDefined();
+      expectCookieLifetimeSeconds(sigCookie, 120);
+    });
+
+    test('should not set cookie lifetime when sessions.cookie.maxAge is not configured', async () => {
+      originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      strapi = await createStrapiInstance({
+        bypassAuth: false,
+        async bootstrap({ strapi: s }) {
+          s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
+          s.config.set('plugin::users-permissions.sessions.httpOnly', true);
+        },
+      });
+
+      await createAuthenticatedUser({ strapi, userInfo: testUser });
+      const rq = createRequest({ strapi }).setURLPrefix('/api/auth').asHTTPS();
+
+      const res = await rq({
+        method: 'POST',
+        url: '/local',
+        body: { identifier: testUser.email, password: testUser.password },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const cookie = getCookie(res, cookieName);
+      expect(cookie).toBeDefined();
+      expectSessionCookie(cookie);
+
+      const sigCookie = getSigCookie(res, cookieName);
+      expect(sigCookie).toBeDefined();
+      expectSessionCookie(sigCookie);
+    });
+
+    test('should set cookie lifetime on refresh rotation when sessions.cookie.maxAge is configured', async () => {
+      originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      strapi = await createStrapiInstance({
+        bypassAuth: false,
+        async bootstrap({ strapi: s }) {
+          s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
+          s.config.set('plugin::users-permissions.sessions.httpOnly', true);
+          s.config.set('plugin::users-permissions.sessions.cookie.maxAge', 120000);
+        },
+      });
+
+      await createAuthenticatedUser({ strapi, userInfo: testUser });
+      const rq = createRequest({ strapi }).setURLPrefix('/api/auth').asHTTPS();
+
+      const loginRes = await rq({
+        method: 'POST',
+        url: '/local',
+        body: { identifier: testUser.email, password: testUser.password },
+      });
+
+      expect(loginRes.statusCode).toBe(200);
+
+      const refreshCookie = getCookie(loginRes, cookieName);
+      expect(refreshCookie).toBeDefined();
+
+      const cookieHeader = getCookieHeader(loginRes, cookieName);
+      expect(cookieHeader).not.toEqual('');
+
+      const refreshRes = await rq({
+        method: 'POST',
+        url: '/refresh',
+        headers: { Cookie: cookieHeader },
+      });
+
+      expect(refreshRes.statusCode).toBe(200);
+      expect(refreshRes.body.jwt).toEqual(expect.any(String));
+
+      const rotatedCookie = getCookie(refreshRes, cookieName);
+      expect(rotatedCookie).toBeDefined();
+      expectCookieLifetimeSeconds(rotatedCookie, 120);
+
+      const rotatedSigCookie = getSigCookie(refreshRes, cookieName);
+      expect(rotatedSigCookie).toBeDefined();
+      expectCookieLifetimeSeconds(rotatedSigCookie, 120);
     });
   });
 });
