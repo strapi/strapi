@@ -12,6 +12,7 @@ const _ = require('lodash');
 const { concat, compact, isArray } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
+const { buildRefreshCookieOptions } = require('../utils/refresh-cookie-options');
 const {
   validateCallbackBody,
   validateRegisterBody,
@@ -44,21 +45,6 @@ const buildSessionMetadataFromContext = (ctx) =>
     userAgent: ctx.request.headers['user-agent'],
   });
 
-const getUpSessionCookieOptions = (upSessions) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isSecure =
-    typeof upSessions?.cookie?.secure === 'boolean' ? upSessions.cookie.secure : isProduction;
-
-  return {
-    httpOnly: true,
-    secure: isSecure,
-    sameSite: upSessions?.cookie?.sameSite ?? 'lax',
-    path: upSessions?.cookie?.path ?? '/',
-    domain: upSessions?.cookie?.domain,
-    overwrite: true,
-  };
-};
-
 const sendRefreshAuthResponse = async (strapi, ctx, user, { metadata } = {}) => {
   const deviceId = extractDeviceId(ctx.request.body);
   const tokenOptions = { type: 'refresh', ...(metadata ? { metadata } : {}) };
@@ -79,7 +65,8 @@ const sendRefreshAuthResponse = async (strapi, ctx, user, { metadata } = {}) => 
 
   if (upSessions?.httpOnly || requestHttpOnly) {
     const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
-    ctx.cookies.set(cookieName, refresh.token, getUpSessionCookieOptions(upSessions));
+    const isProduction = process.env.NODE_ENV === 'production';
+    ctx.cookies.set(cookieName, refresh.token, buildRefreshCookieOptions(upSessions, isProduction));
     return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
   }
 
@@ -350,7 +337,12 @@ module.exports = ({ strapi }) => ({
 
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
-      ctx.cookies.set(cookieName, rotation.token, getUpSessionCookieOptions(upSessions));
+      const isProduction = process.env.NODE_ENV === 'production';
+      ctx.cookies.set(
+        cookieName,
+        rotation.token,
+        buildRefreshCookieOptions(upSessions, isProduction)
+      );
       return ctx.send({ jwt: result.token });
     }
     return ctx.send({ jwt: result.token, refreshToken: rotation.token });

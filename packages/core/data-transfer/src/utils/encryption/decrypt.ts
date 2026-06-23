@@ -1,5 +1,5 @@
 import { Decipheriv, scryptSync, CipherKey, BinaryLike, createDecipheriv } from 'crypto';
-import { EncryptionStrategy, Strategies, Algorithm } from '../../../types';
+import { EncryptionStrategy, Strategies, Algorithm } from '../../types';
 
 // different key values depending on algorithm chosen
 const getDecryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {

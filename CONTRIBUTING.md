@@ -195,7 +195,7 @@ The types are based on our GitHub label, here are a subset:
 
 - `fix` – When fixing an issue.
 - `chore` – When doing some cleanup, working on tooling, some refactoring. (usually reserved for **internal** work)
-- `doc` – When writing documentation.
+- `docs` – When writing documentation.
 - `feat` – When working on a feature.
 
 You can see the complete list [here](https://github.com/strapi/strapi/blob/develop/.commitlintrc.ts#L11).
@@ -207,14 +207,14 @@ The subject of a commit should be a summary of what the commit is about. It shou
 - `feat: what the feature is`
 - `fix: what the problem is`
 - `chore: what the PR is about`
-- `doc: what is documented`
+- `docs: what is documented`
 
 Examples:
 
 - `feat: introduce document service`
 - `fix: unable to publish documents due to missing permissions`
 - `chore: refactor data-fetching in EditView to use react-query`
-- `doc: document service API reference`
+- `docs: document service API reference`
 
 > ⚠️ For a `fix` commit the message should explain what the commit is fixing. Not what the solution is.
 
