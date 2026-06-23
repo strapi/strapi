@@ -29517,7 +29517,6 @@ __metadata:
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.16"
-    ts-jest: "npm:29.1.0"
     tsx: "npm:4.22.4"
     typescript: "npm:5.4.5"
     vitest: "catalog:"
