@@ -4,5 +4,5 @@
     "types": ["node"]
   },
   "include": ["src"],
-  "exclude": ["node_modules", "src/resources/**/*", "package.json"]
+  "exclude": ["node_modules"]
 }
