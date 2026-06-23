@@ -42,7 +42,8 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "watch": "run -T rollup -c -w"
+    "watch": "run -T rollup -c -w",
+    "test:ts": "run -T tsc -p tsconfig.json"
   },
   "dependencies": {
     "@sendgrid/mail": "8.1.3",

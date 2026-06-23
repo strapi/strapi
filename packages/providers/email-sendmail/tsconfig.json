@@ -1,6 +1,6 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src"],
+  "include": ["src", "__tests__"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "types": ["node", "jest"]

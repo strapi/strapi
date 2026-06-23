@@ -41,6 +41,7 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest --watchman=false",
     "watch": "run -T rollup -c -w"
   },

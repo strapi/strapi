@@ -74,7 +74,7 @@
     "watch:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly -w",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "test:ts": "run -T tsc"
+    "test:ts": "run -T tsc -p tsconfig.json"
   },
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
