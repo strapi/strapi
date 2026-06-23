@@ -32,6 +32,12 @@ import type {
 } from '../../../shared/contracts/authentication';
 import { AdminUser } from '../../../shared/contracts/shared';
 
+const buildSessionMetadataFromContext = (ctx: Context) =>
+  buildSessionMetadata({
+    ip: ctx.request.ip,
+    userAgent: ctx.request.headers['user-agent'],
+  });
+
 const { ApplicationError, ValidationError } = errors;
 
 export default {
@@ -85,10 +91,7 @@ export default {
           'admin'
         ).generateRefreshToken(userId, deviceId, {
           type: rememberMe ? 'refresh' : 'session',
-          metadata: buildSessionMetadata({
-            ip: ctx.request.ip,
-            userAgent: ctx.request.headers['user-agent'],
-          }),
+          metadata: buildSessionMetadataFromContext(ctx),
         });
 
         const cookieOptions = buildCookieOptionsWithExpiry(
@@ -152,10 +155,7 @@ export default {
         'admin'
       ).generateRefreshToken(userId, deviceId, {
         type: rememberMe ? 'refresh' : 'session',
-        metadata: buildSessionMetadata({
-          ip: ctx.request.ip,
-          userAgent: ctx.request.headers['user-agent'],
-        }),
+        metadata: buildSessionMetadataFromContext(ctx),
       });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
@@ -206,10 +206,7 @@ export default {
         'admin'
       ).generateRefreshToken(userId, deviceId, {
         type: rememberMe ? 'refresh' : 'session',
-        metadata: buildSessionMetadata({
-          ip: ctx.request.ip,
-          userAgent: ctx.request.headers['user-agent'],
-        }),
+        metadata: buildSessionMetadataFromContext(ctx),
       });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
@@ -273,10 +270,7 @@ export default {
         'admin'
       ).generateRefreshToken(userId, deviceId, {
         type: 'session',
-        metadata: buildSessionMetadata({
-          ip: ctx.request.ip,
-          userAgent: ctx.request.headers['user-agent'],
-        }),
+        metadata: buildSessionMetadataFromContext(ctx),
       });
 
       // No rememberMe flow here; expire with session by default (session cookie)

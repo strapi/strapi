@@ -5,6 +5,7 @@ import { SessionsPage } from '../SessionsPage';
 
 const mockLogout = jest.fn(() => Promise.resolve());
 const mockNavigate = jest.fn();
+const mockToggleNotification = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -17,6 +18,13 @@ jest.mock('../../features/Auth', () => ({
     selector({ logout: mockLogout }),
 }));
 
+jest.mock('../../features/Notifications', () => ({
+  ...jest.requireActual('../../features/Notifications'),
+  useNotification: () => ({
+    toggleNotification: mockToggleNotification,
+  }),
+}));
+
 describe('SessionsPage', () => {
   beforeAll(() => {
     window.localStorage.setItem('jwtToken', JSON.stringify('token'));
@@ -25,6 +33,7 @@ describe('SessionsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLogout.mockResolvedValue(undefined);
+    mockToggleNotification.mockClear();
   });
 
   it('renders the active sessions returned by the API', async () => {
@@ -98,6 +107,70 @@ describe('SessionsPage', () => {
     await user.click(confirm);
 
     await waitFor(() => expect(revokedId).toBe('session-other'));
+    expect(mockToggleNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'success',
+        message: 'Session ended',
+      })
+    );
+  });
+
+  it('logs out when ending the current session', async () => {
+    let revokedId: string | undefined;
+    server.use(
+      http.delete('/admin/users/me/sessions/:sessionId', ({ params }) => {
+        revokedId = params.sessionId as string;
+        return HttpResponse.json({ data: {} });
+      })
+    );
+
+    const { findByRole, getAllByRole, user } = render(<SessionsPage />);
+
+    await findByRole('heading', { name: 'Active Devices' });
+
+    const endButtons = getAllByRole('button', { name: 'End session' });
+    await user.click(endButtons[0]);
+
+    const confirm = await findByRole('button', { name: /confirm/i });
+    await user.click(confirm);
+
+    await waitFor(() => expect(revokedId).toBe('session-current'));
+    expect(mockLogout).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/auth/login');
+  });
+
+  it('shows an error state when sessions cannot be loaded', async () => {
+    server.use(http.get('/admin/users/me/sessions', () => HttpResponse.error()));
+
+    const { findByText } = render(<SessionsPage />);
+
+    expect(
+      await findByText('Whoops! Something went wrong. Please, try again.')
+    ).toBeInTheDocument();
+  });
+
+  it('notifies when revoking a session fails', async () => {
+    server.use(
+      http.delete('/admin/users/me/sessions/:sessionId', () =>
+        HttpResponse.json({ error: { message: 'Failed' } }, { status: 500 })
+      )
+    );
+
+    const { findByRole, getAllByRole, user } = render(<SessionsPage />);
+
+    await findByRole('heading', { name: 'Active Devices' });
+
+    const endButtons = getAllByRole('button', { name: 'End session' });
+    await user.click(endButtons[1]);
+    await user.click(await findByRole('button', { name: /confirm/i }));
+
+    await waitFor(() =>
+      expect(mockToggleNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'danger',
+        })
+      )
+    );
   });
 
   it('logs out of all devices and redirects to login', async () => {
