@@ -46,7 +46,8 @@ test.describe('Publish with draft relations warning', () => {
 
     await expect(page.getByRole('tab', { name: 'Published' })).toBeEnabled();
     await clickAndWait(page, page.getByRole('tab', { name: 'Published' }));
-    await expect(page.getByRole('button', { name: 'Coach Beard' })).toBeVisible();
+    // Draft relation targets are not listed on the published read-only view.
+    await expect(page.getByRole('button', { name: 'Coach Beard' })).not.toBeVisible();
 
     await clickAndWait(page, page.getByRole('tab', { name: 'Draft' }));
     await expect(page.getByRole('button', { name: 'Coach Beard' })).toBeVisible();

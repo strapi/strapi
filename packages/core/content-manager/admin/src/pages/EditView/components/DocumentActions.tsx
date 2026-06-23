@@ -421,6 +421,7 @@ const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActi
   React.useLayoutEffect(() => {
     if (
       action.dialogRequestId != null &&
+      action.dialogRequestId > 0 &&
       action.dialogRequestId !== lastDialogRequestIdRef.current &&
       action.dialog
     ) {
@@ -554,6 +555,7 @@ const DocumentActionsMenu = ({
     actions.forEach((action) => {
       if (
         action.dialogRequestId != null &&
+        action.dialogRequestId > 0 &&
         action.dialogRequestId !== lastDialogRequestIdRef.current[action.id] &&
         action.dialog
       ) {
@@ -1152,7 +1154,9 @@ const PublishAction: DocumentActionComponent = ({
     loading: isLoading,
     position: ['panel', 'preview', 'relation-modal'],
     disabled: isDisabled,
-    dialogRequestId: hasDraftRelations ? draftRelationsDialogRequestId : undefined,
+    // Only pass a request id after the keyboard shortcut increments it (> 0).
+    // Passing 0 while hasDraftRelations is true would auto-open the dialog via useLayoutEffect.
+    dialogRequestId: draftRelationsDialogRequestId > 0 ? draftRelationsDialogRequestId : undefined,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',

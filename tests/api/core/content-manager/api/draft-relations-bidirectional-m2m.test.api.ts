@@ -9,6 +9,16 @@ const builder = createTestBuilder();
 let strapi: any;
 let rq: any;
 
+const tagModel = {
+  displayName: 'Tag',
+  singularName: 'tag',
+  pluralName: 'tags',
+  draftAndPublish: true,
+  attributes: {
+    name: { type: 'string' },
+  },
+};
+
 const articleModel = {
   displayName: 'Article',
   singularName: 'article',
@@ -20,35 +30,13 @@ const articleModel = {
       type: 'relation',
       relation: 'manyToMany',
       target: TAG_UID,
-      inversedBy: 'articles',
+      targetAttribute: 'articles',
     },
     category: {
       type: 'relation',
       relation: 'manyToOne',
       target: TAG_UID,
-      inversedBy: 'articlesMo',
-    },
-  },
-};
-
-const tagModel = {
-  displayName: 'Tag',
-  singularName: 'tag',
-  pluralName: 'tags',
-  draftAndPublish: true,
-  attributes: {
-    name: { type: 'string' },
-    articles: {
-      type: 'relation',
-      relation: 'manyToMany',
-      target: ARTICLE_UID,
-      mappedBy: 'tags',
-    },
-    articlesMo: {
-      type: 'relation',
-      relation: 'oneToMany',
-      target: ARTICLE_UID,
-      mappedBy: 'category',
+      targetAttribute: 'articlesMo',
     },
   },
 };
