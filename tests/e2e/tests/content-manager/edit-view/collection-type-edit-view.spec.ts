@@ -290,6 +290,12 @@ test.describe('Edit View', () => {
 
       // Press Ctrl + Shift + Enter to publish the document
       await page.keyboard.press('Control+Shift+Enter');
+      const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+      await expect(confirmationDialog).toBeVisible();
+      await clickAndWait(
+        page,
+        confirmationDialog.getByRole('button', { name: 'Publish', exact: true })
+      );
       await findAndClose(page, 'Published Document');
 
       /**

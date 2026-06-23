@@ -181,13 +181,14 @@ const countLocalDraftRelations = (
   }, EMPTY_DRAFT_RELATION_COUNTS);
 };
 
-const maxDraftRelationCounts = (
-  left: DraftRelationCounts,
-  right: DraftRelationCounts
-): DraftRelationCounts => ({
-  unpublishedRelations: Math.max(left.unpublishedRelations, right.unpublishedRelations),
-  draftM2mLinks: Math.max(left.draftM2mLinks, right.draftM2mLinks),
-});
+type PublishConfirmDialogScope = 'panel' | 'preview' | 'relation-modal';
+
+const publishConfirmDialogOpeners = new Map<PublishConfirmDialogScope, () => void>();
+
+const openPublishConfirmDialog = (scope: PublishConfirmDialogScope) => {
+  publishConfirmDialogOpeners.get(scope)?.();
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -214,9 +215,9 @@ interface DocumentActionDescription {
   variant?: ButtonProps['variant'];
   loading?: ButtonProps['loading'];
   /**
-   * Increment to open a configured dialog without a button click (e.g. keyboard shortcut).
+   * When set on a publish action with a dialog, registers an opener for the keyboard shortcut.
    */
-  dialogRequestId?: number;
+  publishConfirmScope?: PublishConfirmDialogScope;
 }
 
 interface DialogOptions {
@@ -415,20 +416,24 @@ interface DocumentActionButtonProps extends Omit<Action, 'type'> {
 
 const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
-  const lastDialogRequestIdRef = React.useRef<number | undefined>();
   const { toggleNotification } = useNotification();
 
-  React.useLayoutEffect(() => {
-    if (
-      action.dialogRequestId != null &&
-      action.dialogRequestId > 0 &&
-      action.dialogRequestId !== lastDialogRequestIdRef.current &&
-      action.dialog
-    ) {
-      lastDialogRequestIdRef.current = action.dialogRequestId;
-      setDialogId(action.id);
+  React.useEffect(() => {
+    const scope = action.publishConfirmScope;
+
+    if (action.type !== 'publish' || !action.dialog || !scope) {
+      return;
     }
-  }, [action.dialog, action.dialogRequestId, action.id]);
+
+    const open = () => setDialogId(action.id);
+    publishConfirmDialogOpeners.set(scope, open);
+
+    return () => {
+      if (publishConfirmDialogOpeners.get(scope) === open) {
+        publishConfirmDialogOpeners.delete(scope);
+      }
+    };
+  }, [action.type, action.dialog, action.id, action.publishConfirmScope]);
 
   const handleClick = (action: DocumentActionButtonProps) => async (e: React.MouseEvent) => {
     const { onClick = () => false, dialog, id } = action;
@@ -511,7 +516,6 @@ const DocumentActionsMenu = ({
 }: DocumentActionsMenuProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [dialogId, setDialogId] = React.useState<string | null>(null);
-  const lastDialogRequestIdRef = React.useRef<Record<string, number | undefined>>({});
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
@@ -550,20 +554,6 @@ const DocumentActionsMenu = ({
       setIsOpen(open);
     }
   };
-
-  React.useLayoutEffect(() => {
-    actions.forEach((action) => {
-      if (
-        action.dialogRequestId != null &&
-        action.dialogRequestId > 0 &&
-        action.dialogRequestId !== lastDialogRequestIdRef.current[action.id] &&
-        action.dialog
-      ) {
-        lastDialogRequestIdRef.current[action.id] = action.dialogRequestId;
-        setDialogId(action.id);
-      }
-    });
-  }, [actions]);
 
   return (
     <Menu.Root open={isOpen} onOpenChange={handleOpenChange}>
@@ -780,7 +770,7 @@ const PublishAction: DocumentActionComponent = ({
     ({ canPublish, canReadFields }) => ({ canPublish, canReadFields })
   );
   const { publish, isLoading } = useDocumentActions();
-  const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
+  const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
   const [
     countDraftRelations,
     { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
@@ -789,7 +779,6 @@ const PublishAction: DocumentActionComponent = ({
     React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
   const [serverDraftRelationCounts, setServerDraftRelationCounts] =
     React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
-  const [draftRelationsDialogRequestId, setDraftRelationsDialogRequestId] = React.useState(0);
 
   const [{ rawQuery }] = useQueryParams();
 
@@ -808,6 +797,16 @@ const PublishAction: DocumentActionComponent = ({
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
   const fromRelationModal = relationContext != undefined;
+  const isRelationModalOpen = useRelationModal(
+    'PublishAction',
+    (state) => state.state.isModalOpen,
+    false
+  );
+  const publishConfirmScope: PublishConfirmDialogScope = fromRelationModal
+    ? 'relation-modal'
+    : onPreview
+      ? 'preview'
+      : 'panel';
 
   const dispatch = useRelationModal('PublishAction', (state) => state.dispatch);
   const fieldToConnect = useRelationModal(
@@ -1084,9 +1083,10 @@ const PublishAction: DocumentActionComponent = ({
     }
   };
 
-  const draftRelationCounts =
-    !documentId || modified
-      ? maxDraftRelationCounts(localDraftRelationCounts, serverDraftRelationCounts)
+  const draftRelationCounts = !documentId
+    ? localDraftRelationCounts
+    : modified
+      ? mergeDraftRelationCounts(localDraftRelationCounts, serverDraftRelationCounts)
       : serverDraftRelationCounts;
   const { unpublishedRelations, draftM2mLinks } = draftRelationCounts;
   const hasUnpublishedRelations = unpublishedRelations > 0;
@@ -1126,12 +1126,16 @@ const PublishAction: DocumentActionComponent = ({
 
       e.preventDefault();
 
+      if (!fromRelationModal && isRelationModalOpen) {
+        return;
+      }
+
       if (isDisabled) {
         return;
       }
 
       if (hasDraftRelations) {
-        setDraftRelationsDialogRequestId((current) => current + 1);
+        openPublishConfirmDialog(publishConfirmScope);
         return;
       }
 
@@ -1143,7 +1147,15 @@ const PublishAction: DocumentActionComponent = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [hasDraftRelations, isDisabled, performPublish, schema?.options?.draftAndPublish]);
+  }, [
+    fromRelationModal,
+    hasDraftRelations,
+    isDisabled,
+    isRelationModalOpen,
+    performPublish,
+    publishConfirmScope,
+    schema?.options?.draftAndPublish,
+  ]);
 
   if (!schema?.options?.draftAndPublish) {
     return null;
@@ -1154,9 +1166,7 @@ const PublishAction: DocumentActionComponent = ({
     loading: isLoading,
     position: ['panel', 'preview', 'relation-modal'],
     disabled: isDisabled,
-    // Only pass a request id after the keyboard shortcut increments it (> 0).
-    // Passing 0 while hasDraftRelations is true would auto-open the dialog via useLayoutEffect.
-    dialogRequestId: draftRelationsDialogRequestId > 0 ? draftRelationsDialogRequestId : undefined,
+    publishConfirmScope: hasDraftRelations ? publishConfirmScope : undefined,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -1772,7 +1782,13 @@ DiscardAction.position = 'panel';
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
-export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
+export {
+  DocumentActions,
+  DocumentActionsMenu,
+  DocumentActionButton,
+  DEFAULT_ACTIONS,
+  openPublishConfirmDialog,
+};
 export type {
   DocumentActionDescription,
   DocumentActionPosition,

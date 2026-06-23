@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { clickAndWait } from '../../../../utils/shared';
+import { clickAndWait, publishAndConfirmDraftRelations } from '../../../../utils/shared';
 
 const AUTHOR_EDIT_URL =
   /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
@@ -37,7 +37,11 @@ test.describe('Relations on the fly - Edit a Relation', () => {
     await expect(page.getByRole('status', { name: 'Draft' }).first()).toBeVisible();
 
     // Publish the related document
-    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    const relationModal = page.getByRole('dialog').filter({ hasText: 'Edit a relation' });
+    await publishAndConfirmDraftRelations(
+      page,
+      relationModal.getByRole('button', { name: 'Publish' })
+    );
     await expect(name).toHaveValue('Mr. Coach Beard');
     await expect(page.getByRole('status', { name: 'Published' }).first()).toBeVisible();
 
@@ -244,7 +248,11 @@ test.describe('Relations on the fly - Edit a Relation', () => {
     // Step 4. Change the name of the author and Publish
     const name = page.getByRole('textbox', { name: 'name' });
     await name.fill('Mr. Led Tasso');
-    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    const relationModal = page.getByRole('dialog').filter({ hasText: 'Edit a relation' });
+    await publishAndConfirmDraftRelations(
+      page,
+      relationModal.getByRole('button', { name: 'Publish' })
+    );
     await expect(name).toHaveValue('Mr. Led Tasso');
     await expect(page.getByRole('status', { name: 'Published' }).first()).toBeVisible();
 

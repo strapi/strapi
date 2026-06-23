@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { DocumentActions, DocumentActionsMenu } from '../DocumentActions';
+import { DocumentActions, DocumentActionsMenu, openPublishConfirmDialog } from '../DocumentActions';
 
 describe('DocumentActions', () => {
   it('it should render a single button when there is only one action', () => {
@@ -160,15 +160,16 @@ describe('DocumentActions', () => {
     expect(onClick2).toHaveBeenCalled();
   });
 
-  it('should not open the dialog when dialogRequestId is 0', async () => {
+  it('should not open the dialog when a publish confirm scope is registered but not requested', async () => {
     render(
       <DocumentActions
         actions={[
           {
             id: '1',
+            type: 'publish',
             label: 'Publish',
             onClick: jest.fn(),
-            dialogRequestId: 0,
+            publishConfirmScope: 'panel',
             dialog: {
               type: 'dialog',
               title: 'Confirmation',
@@ -184,16 +185,18 @@ describe('DocumentActions', () => {
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
-  it('should open the dialog when dialogRequestId is incremented', async () => {
+  it('should open the dialog when the publish confirm opener is called', async () => {
     const onConfirm = jest.fn();
 
-    const { rerender } = render(
+    render(
       <DocumentActions
         actions={[
           {
             id: '1',
+            type: 'publish',
             label: 'Publish',
             onClick: jest.fn(),
+            publishConfirmScope: 'panel',
             dialog: {
               type: 'dialog',
               title: 'Confirmation',
@@ -208,25 +211,7 @@ describe('DocumentActions', () => {
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
 
-    rerender(
-      <DocumentActions
-        actions={[
-          {
-            id: '1',
-            label: 'Publish',
-            onClick: jest.fn(),
-            dialogRequestId: 1,
-            dialog: {
-              type: 'dialog',
-              title: 'Confirmation',
-              content: 'Draft relations will not be included.',
-              confirmLabel: 'Publish without relations',
-              onConfirm,
-            },
-          },
-        ]}
-      />
-    );
+    openPublishConfirmDialog('panel');
 
     expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
     expect(screen.getByText('Draft relations will not be included.')).toBeInTheDocument();
