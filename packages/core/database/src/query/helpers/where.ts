@@ -147,9 +147,18 @@ const isSimpleIdFilter = (value: unknown): boolean => {
 };
 
 /**
- * Optimize relation filter to use FK column directly instead of JOIN
- * Returns { optimized: true, filter } if optimization is possible
- * Returns { optimized: false } if JOIN is needed
+ * Optimize a relation filter to use the FK column on the source table directly,
+ * avoiding a JOIN entirely. Only applies when the relation stores its FK on the
+ * source entity's own table — i.e. when `useJoinTable: false` so that
+ * `attribute.joinColumn` is present on the attribute metadata.
+ *
+ * Default CTB relations use a pivot join table (`attribute.joinTable`) and are
+ * NOT eligible for this optimization. They fall back to the JOIN path, which is
+ * handled correctly by the PK-in-DISTINCT fix in `processSelect()` of
+ * `query-builder.ts` (bug #25395).
+ *
+ * Returns `{ optimized: true, filter }` when the FK column can be used directly.
+ * Returns `{ optimized: false }` when a JOIN is required.
  */
 const optimizeRelationFilter = (
   attribute: Attribute,

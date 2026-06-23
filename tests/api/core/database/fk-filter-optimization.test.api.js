@@ -1,177 +1,107 @@
 'use strict';
 
-// Test for FK Filter Optimization - verifies the fix works for ANY relation field and ANY parameter
+/**
+ * Tests for bug #25395: findMany() with select + relation filter returning wrong row count.
+ *
+ * Two root causes are tested:
+ *
+ * 1. FK optimization path (useJoinTable: false):
+ *    When a relation stores its FK directly on the source table, the optimization
+ *    converts `{ advertiser: { id: X } }` to a WHERE on the FK column, eliminating
+ *    the JOIN and therefore the DISTINCT that collapses duplicate-valued rows.
+ *
+ * 2. JOIN + PK-in-DISTINCT path (default joinTable / complex filters):
+ *    When a JOIN is still required, DISTINCT now always includes the PK so that
+ *    each row is uniquely identified — `SELECT DISTINCT id, price` instead of
+ *    `SELECT DISTINCT price`.
+ */
+
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 
 const builder = createTestBuilder();
 let strapi;
 
-// Setup multiple content types with different relation fields to prove it's not hardcoded
-const categoryCT = {
-  displayName: 'category',
-  singularName: 'category',
-  pluralName: 'categories',
+// --------------------------------------------------------------------------
+// Content type definitions
+// --------------------------------------------------------------------------
+
+const advertiserCT = {
+  displayName: 'advertiser',
+  singularName: 'advertiser',
+  pluralName: 'advertisers',
   kind: 'collectionType',
   attributes: {
     name: { type: 'string' },
+  },
+};
+
+/**
+ * `useJoinTable: false` forces Strapi to store the FK column directly on the
+ * transactions table (advertiser_id) instead of in a pivot join table.
+ * This is required for the FK optimization in `processWhere()` to trigger.
+ */
+const transactionCT = {
+  displayName: 'transaction',
+  singularName: 'transaction',
+  pluralName: 'transactions',
+  kind: 'collectionType',
+  attributes: {
+    price: { type: 'decimal' },
     status: { type: 'string' },
-  },
-};
-
-const authorCT = {
-  displayName: 'author',
-  singularName: 'author',
-  pluralName: 'authors',
-  kind: 'collectionType',
-  attributes: {
-    name: { type: 'string' },
-    country: { type: 'string' },
-  },
-};
-
-const publisherCT = {
-  displayName: 'publisher',
-  singularName: 'publisher',
-  pluralName: 'publishers',
-  kind: 'collectionType',
-  attributes: {
-    name: { type: 'string' },
-  },
-};
-
-const articleCT = {
-  displayName: 'article',
-  singularName: 'article',
-  pluralName: 'articles',
-  kind: 'collectionType',
-  attributes: {
-    title: { type: 'string' },
-    views: { type: 'integer' },
-    rating: { type: 'decimal' },
-    status: { type: 'string' },
-    // Multiple different relation fields - proves it's not hardcoded
-    category: {
+    advertiser: {
       type: 'relation',
       relation: 'manyToOne',
-      target: 'api::category.category',
-    },
-    author: {
-      type: 'relation',
-      relation: 'manyToOne',
-      target: 'api::author.author',
-    },
-    publisher: {
-      type: 'relation',
-      relation: 'manyToOne',
-      target: 'api::publisher.publisher',
+      target: 'api::advertiser.advertiser',
+      useJoinTable: false,
     },
   },
 };
+
+// --------------------------------------------------------------------------
+// Fixtures
+// --------------------------------------------------------------------------
 
 const fixtures = {
-  category: [
-    { name: 'Tech', status: 'active' },
-    { name: 'Science', status: 'active' },
-    { name: 'Sports', status: 'inactive' },
-  ],
-  author: [
-    { name: 'John Doe', country: 'USA' },
-    { name: 'Jane Smith', country: 'UK' },
-    { name: 'Bob Johnson', country: 'Canada' },
-  ],
-  publisher: [{ name: 'Publisher A' }, { name: 'Publisher B' }],
-  article: ({ category, author, publisher }) => {
-    return [
-      // Articles for category 1 (Tech)
-      {
-        title: 'Article 1',
-        views: 100,
-        rating: 4.5,
-        status: 'published',
-        category: category[0].id,
-        author: author[0].id,
-        publisher: publisher[0].id,
-      },
-      {
-        title: 'Article 2',
-        views: 200,
-        rating: 4.5,
-        status: 'published',
-        category: category[0].id,
-        author: author[0].id,
-        publisher: publisher[0].id,
-      },
-      {
-        title: 'Article 3',
-        views: 300,
-        rating: 4.8,
-        status: 'published',
-        category: category[0].id,
-        author: author[1].id,
-        publisher: publisher[0].id,
-      },
-      {
-        title: 'Article 4',
-        views: 400,
-        rating: 4.2,
-        status: 'published',
-        category: category[0].id,
-        author: author[1].id,
-        publisher: publisher[1].id,
-      },
-      {
-        title: 'Article 5',
-        views: 500,
-        rating: 4.5,
-        status: 'draft',
-        category: category[0].id,
-        author: author[2].id,
-        publisher: publisher[0].id,
-      },
+  advertiser: [{ name: 'Alpha Corp' }, { name: 'Beta Inc' }],
 
-      // Articles for category 2 (Science)
-      {
-        title: 'Article 6',
-        views: 600,
-        rating: 4.9,
-        status: 'published',
-        category: category[1].id,
-        author: author[0].id,
-        publisher: publisher[0].id,
-      },
-      {
-        title: 'Article 7',
-        views: 700,
-        rating: 4.7,
-        status: 'published',
-        category: category[1].id,
-        author: author[1].id,
-        publisher: publisher[1].id,
-      },
+  transaction: ({ advertiser }) => {
+    const rows = [];
 
-      // Articles for category 3 (Sports)
-      {
-        title: 'Article 8',
-        views: 800,
-        rating: 4.3,
-        status: 'published',
-        category: category[2].id,
-        author: author[2].id,
-        publisher: publisher[0].id,
-      },
-    ];
+    // 8 rows for advertiser[0], all with the SAME price.
+    // This is the exact scenario from issue #25395:
+    // `SELECT DISTINCT price` would collapse them to 1 row without the fix.
+    for (let i = 0; i < 8; i++) {
+      rows.push({
+        price: 10.0,
+        status: 'SUCCESSFUL',
+        advertiser: advertiser[0].id,
+      });
+    }
+
+    // 3 rows for advertiser[1], different price.
+    for (let i = 0; i < 3; i++) {
+      rows.push({
+        price: 20.0,
+        status: 'PENDING',
+        advertiser: advertiser[1].id,
+      });
+    }
+
+    return rows;
   },
 };
 
-describe('FK Filter Optimization - Works for ANY field and ANY parameter', () => {
+// --------------------------------------------------------------------------
+// Tests
+// --------------------------------------------------------------------------
+
+describe('findMany with select + relation filter (bug #25395)', () => {
   beforeAll(async () => {
     await builder
-      .addContentTypes([categoryCT, authorCT, publisherCT, articleCT])
-      .addFixtures(categoryCT.singularName, fixtures.category)
-      .addFixtures(authorCT.singularName, fixtures.author)
-      .addFixtures(publisherCT.singularName, fixtures.publisher)
-      .addFixtures(articleCT.singularName, fixtures.article)
+      .addContentTypes([advertiserCT, transactionCT])
+      .addFixtures(advertiserCT.singularName, fixtures.advertiser)
+      .addFixtures(transactionCT.singularName, fixtures.transaction)
       .build();
 
     strapi = await createStrapiInstance();
@@ -182,168 +112,113 @@ describe('FK Filter Optimization - Works for ANY field and ANY parameter', () =>
     await builder.cleanup();
   });
 
-  describe('Different relation fields (not hardcoded)', () => {
-    test('Works with category relation field + select', async () => {
-      const categories = await strapi.db.query('api::category.category').findMany();
-      const techCategoryId = categories[0].id;
+  // -------------------------------------------------------------------------
+  // FK optimization path (useJoinTable: false)
+  // -------------------------------------------------------------------------
 
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          category: { id: techCategoryId },
-          status: 'published',
-        },
-        select: ['title', 'views'],
+  describe('FK optimization path (useJoinTable: false)', () => {
+    test('returns all rows when selected field has duplicate values — the core bug', async () => {
+      const [alpha] = await strapi.db
+        .query('api::advertiser.advertiser')
+        .findMany({ where: { name: 'Alpha Corp' } });
+
+      // 8 rows all share price = 10.0. Without the fix, DISTINCT collapses them to 1.
+      const results = await strapi.db.query('api::transaction.transaction').findMany({
+        where: { advertiser: { id: alpha.id } },
+        select: ['price'],
       });
 
-      expect(results.length).toBe(4); // 4 published articles in Tech category
+      expect(results).toHaveLength(8);
     });
 
-    test('Works with author relation field + select', async () => {
-      const authors = await strapi.db.query('api::author.author').findMany();
-      const johnDoeId = authors[0].id;
+    test('select with $in operator returns correct count', async () => {
+      const [alpha] = await strapi.db
+        .query('api::advertiser.advertiser')
+        .findMany({ where: { name: 'Alpha Corp' } });
 
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          author: { id: johnDoeId },
-          status: 'published',
-        },
-        select: ['rating'],
+      const results = await strapi.db.query('api::transaction.transaction').findMany({
+        where: { advertiser: { id: { $in: [alpha.id] } } },
+        select: ['price'],
       });
 
-      expect(results.length).toBe(2); // 2 published articles by John Doe
+      expect(results).toHaveLength(8);
     });
 
-    test('Works with publisher relation field + select', async () => {
-      const publishers = await strapi.db.query('api::publisher.publisher').findMany();
-      const publisherAId = publishers[0].id;
+    test('select with $ne operator excludes the right advertiser', async () => {
+      const [, beta] = await strapi.db
+        .query('api::advertiser.advertiser')
+        .findMany({ orderBy: { name: 'asc' } });
 
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          publisher: { id: publisherAId },
-        },
-        select: ['views'],
+      // Exclude Beta Inc → should return 8 Alpha rows
+      const results = await strapi.db.query('api::transaction.transaction').findMany({
+        where: { advertiser: { id: { $ne: beta.id } } },
+        select: ['price'],
       });
 
-      expect(results.length).toBe(6); // 6 articles from Publisher A
-    });
-  });
-
-  describe('Different operators (not hardcoded)', () => {
-    test('Works with $in operator', async () => {
-      const categories = await strapi.db.query('api::category.category').findMany();
-      const categoryIds = [categories[0].id, categories[1].id];
-
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          category: { id: { $in: categoryIds } },
-          status: 'published',
-        },
-        select: ['title'],
-      });
-
-      expect(results.length).toBe(6); // 4 from Tech + 2 from Science
+      expect(results).toHaveLength(8);
     });
 
-    test('Works with $ne operator', async () => {
-      const categories = await strapi.db.query('api::category.category').findMany();
-      const sportsCategoryId = categories[2].id;
+    test('select with multiple fields still returns all rows', async () => {
+      const [alpha] = await strapi.db
+        .query('api::advertiser.advertiser')
+        .findMany({ where: { name: 'Alpha Corp' } });
 
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          category: { id: { $ne: sportsCategoryId } },
-        },
-        select: ['title'],
+      const results = await strapi.db.query('api::transaction.transaction').findMany({
+        where: { advertiser: { id: alpha.id }, status: 'SUCCESSFUL' },
+        select: ['price', 'status'],
       });
 
-      expect(results.length).toBe(7); // All except Sports category
+      expect(results).toHaveLength(8);
+      expect(results[0]).toHaveProperty('price');
+      expect(results[0]).toHaveProperty('status');
+      expect(results[0]).not.toHaveProperty('id'); // not in select — note: id is added internally for DISTINCT but stripped from output
     });
 
-    test('Works with $notIn operator', async () => {
-      const authors = await strapi.db.query('api::author.author').findMany();
-      const excludeIds = [authors[2].id];
+    test('without select also returns correct count (regression guard)', async () => {
+      const [alpha] = await strapi.db
+        .query('api::advertiser.advertiser')
+        .findMany({ where: { name: 'Alpha Corp' } });
 
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          author: { id: { $notIn: excludeIds } },
-        },
-        select: ['views'],
+      const results = await strapi.db.query('api::transaction.transaction').findMany({
+        where: { advertiser: { id: alpha.id } },
       });
 
-      expect(results.length).toBe(6); // All except Bob Johnson's articles
+      expect(results).toHaveLength(8);
+    });
+
+    test('select without relation filter returns correct count (regression guard)', async () => {
+      const results = await strapi.db.query('api::transaction.transaction').findMany({
+        select: ['price'],
+      });
+
+      expect(results).toHaveLength(11); // 8 + 3
     });
   });
 
-  describe('Different select fields (not hardcoded)', () => {
-    test('Works with single field select', async () => {
-      const categories = await strapi.db.query('api::category.category').findMany();
-      const techCategoryId = categories[0].id;
+  // -------------------------------------------------------------------------
+  // JOIN path (complex filter / PK-in-DISTINCT fix)
+  // -------------------------------------------------------------------------
 
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: { category: { id: techCategoryId } },
-        select: ['title'],
+  describe('JOIN path — complex filter with duplicate selected values', () => {
+    test('complex relation filter with duplicate selected field returns all rows', async () => {
+      // { advertiser: { name: '...' } } cannot be reduced to a FK column filter,
+      // so a JOIN is created and DISTINCT is applied. Without the PK-in-DISTINCT fix,
+      // this would return 1 row instead of 8 (all prices = 10.0).
+      const results = await strapi.db.query('api::transaction.transaction').findMany({
+        where: { advertiser: { name: 'Alpha Corp' } },
+        select: ['price'],
       });
 
-      expect(results.length).toBe(5);
-      expect(results[0]).toHaveProperty('title');
-      expect(results[0]).not.toHaveProperty('views');
+      expect(results).toHaveLength(8);
     });
 
-    test('Works with multiple fields select', async () => {
-      const categories = await strapi.db.query('api::category.category').findMany();
-      const techCategoryId = categories[0].id;
-
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: { category: { id: techCategoryId } },
-        select: ['title', 'views', 'rating'],
+    test('complex filter for the other advertiser returns correct count', async () => {
+      const results = await strapi.db.query('api::transaction.transaction').findMany({
+        where: { advertiser: { name: 'Beta Inc' } },
+        select: ['price'],
       });
 
-      expect(results.length).toBe(5);
-      expect(results[0]).toHaveProperty('title');
-      expect(results[0]).toHaveProperty('views');
-      expect(results[0]).toHaveProperty('rating');
-    });
-  });
-
-  describe('Multiple relation filters (not hardcoded)', () => {
-    test('Works with multiple relation filters in same query', async () => {
-      const categories = await strapi.db.query('api::category.category').findMany();
-      const authors = await strapi.db.query('api::author.author').findMany();
-      const publishers = await strapi.db.query('api::publisher.publisher').findMany();
-
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          category: { id: categories[0].id },
-          author: { id: authors[0].id },
-          publisher: { id: publishers[0].id },
-        },
-        select: ['title'],
-      });
-
-      expect(results.length).toBe(2); // Articles matching all three criteria
-    });
-  });
-
-  describe('Complex filters still use JOIN (fallback)', () => {
-    test('Complex filter with non-id field still works', async () => {
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          category: { name: 'Tech' }, // Complex filter - should use JOIN
-        },
-        select: ['title'],
-      });
-
-      expect(results.length).toBe(5);
-    });
-
-    test('Complex filter with multiple fields still works', async () => {
-      const results = await strapi.db.query('api::article.article').findMany({
-        where: {
-          category: { name: 'Tech', status: 'active' }, // Complex filter - should use JOIN
-        },
-        select: ['title'],
-      });
-
-      expect(results.length).toBe(5);
+      expect(results).toHaveLength(3);
     });
   });
 });
