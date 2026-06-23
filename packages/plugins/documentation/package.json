@@ -56,7 +56,7 @@
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
+    "test:ts:back": "run -T tsc -p server/tsconfig.json",
     "test:unit": "run -T jest --verbose",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"

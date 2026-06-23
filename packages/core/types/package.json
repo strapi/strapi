@@ -40,7 +40,7 @@
     "doc:ts": "typedoc",
     "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
+    "test:ts": "run -T tsc",
     "watch": "run -T tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
