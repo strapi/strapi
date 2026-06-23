@@ -37,6 +37,29 @@ describe('Users-Permissions Cookie Security', () => {
       .join('; ');
   };
 
+  const expectCookieLifetimeSeconds = (cookie, expectedSeconds, toleranceSeconds = 5) => {
+    const cookieLower = cookie.toLowerCase();
+    const maxAgeMatch = cookieLower.match(/max-age=(\d+)/);
+
+    if (maxAgeMatch) {
+      expect(Number(maxAgeMatch[1])).toBe(expectedSeconds);
+      return;
+    }
+
+    const expiresMatch = cookieLower.match(/expires=([^;]+)/);
+    expect(expiresMatch).toBeDefined();
+    const expiresAt = new Date(expiresMatch[1].trim());
+    const deltaSeconds = Math.round((expiresAt.getTime() - Date.now()) / 1000);
+    expect(deltaSeconds).toBeGreaterThanOrEqual(expectedSeconds - toleranceSeconds);
+    expect(deltaSeconds).toBeLessThanOrEqual(expectedSeconds + toleranceSeconds);
+  };
+
+  const expectSessionCookie = (cookie) => {
+    const cookieLower = cookie.toLowerCase();
+    expect(cookieLower).not.toMatch(/max-age=/);
+    expect(cookieLower).not.toMatch(/expires=/);
+  };
+
   describe('Default behavior based on NODE_ENV', () => {
     let strapi;
     let originalEnv;
@@ -202,7 +225,7 @@ describe('Users-Permissions Cookie Security', () => {
       }
     });
 
-    test('should include Max-Age on Set-Cookie when sessions.cookie.maxAge is configured', async () => {
+    test('should set cookie lifetime on Set-Cookie when sessions.cookie.maxAge is configured', async () => {
       originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
 
@@ -228,14 +251,14 @@ describe('Users-Permissions Cookie Security', () => {
 
       const cookie = getCookie(res, cookieName);
       expect(cookie).toBeDefined();
-      expect(cookie.toLowerCase()).toMatch(/max-age=120/);
+      expectCookieLifetimeSeconds(cookie, 120);
 
       const sigCookie = getSigCookie(res, cookieName);
       expect(sigCookie).toBeDefined();
-      expect(sigCookie.toLowerCase()).toMatch(/max-age=120/);
+      expectCookieLifetimeSeconds(sigCookie, 120);
     });
 
-    test('should not include Max-Age when sessions.cookie.maxAge is not configured', async () => {
+    test('should not set cookie lifetime when sessions.cookie.maxAge is not configured', async () => {
       originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
 
@@ -260,14 +283,14 @@ describe('Users-Permissions Cookie Security', () => {
 
       const cookie = getCookie(res, cookieName);
       expect(cookie).toBeDefined();
-      expect(cookie.toLowerCase()).not.toMatch(/max-age=/);
+      expectSessionCookie(cookie);
 
       const sigCookie = getSigCookie(res, cookieName);
       expect(sigCookie).toBeDefined();
-      expect(sigCookie.toLowerCase()).not.toMatch(/max-age=/);
+      expectSessionCookie(sigCookie);
     });
 
-    test('should include Max-Age on refresh rotation when sessions.cookie.maxAge is configured', async () => {
+    test('should set cookie lifetime on refresh rotation when sessions.cookie.maxAge is configured', async () => {
       originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
 
@@ -308,11 +331,11 @@ describe('Users-Permissions Cookie Security', () => {
 
       const rotatedCookie = getCookie(refreshRes, cookieName);
       expect(rotatedCookie).toBeDefined();
-      expect(rotatedCookie.toLowerCase()).toMatch(/max-age=120/);
+      expectCookieLifetimeSeconds(rotatedCookie, 120);
 
       const rotatedSigCookie = getSigCookie(refreshRes, cookieName);
       expect(rotatedSigCookie).toBeDefined();
-      expect(rotatedSigCookie.toLowerCase()).toMatch(/max-age=120/);
+      expectCookieLifetimeSeconds(rotatedSigCookie, 120);
     });
   });
 });
