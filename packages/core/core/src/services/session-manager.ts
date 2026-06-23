@@ -501,7 +501,7 @@ class SessionManager {
     const session = await this.provider.findBySessionId(sessionId);
 
     // Only allow revoking a session that belongs to the requesting user and origin.
-    if (!session || session.userId !== userId || session.origin !== origin) {
+    if (session?.userId !== userId || session?.origin !== origin) {
       return false;
     }
 

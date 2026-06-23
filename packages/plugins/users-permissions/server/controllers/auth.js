@@ -44,6 +44,111 @@ const buildSessionMetadataFromContext = (ctx) =>
     userAgent: ctx.request.headers['user-agent'],
   });
 
+const getUpSessionCookieOptions = (upSessions) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isSecure =
+    typeof upSessions?.cookie?.secure === 'boolean' ? upSessions.cookie.secure : isProduction;
+
+  return {
+    httpOnly: true,
+    secure: isSecure,
+    sameSite: upSessions?.cookie?.sameSite ?? 'lax',
+    path: upSessions?.cookie?.path ?? '/',
+    domain: upSessions?.cookie?.domain,
+    overwrite: true,
+  };
+};
+
+const sendRefreshAuthResponse = async (strapi, ctx, user, { metadata } = {}) => {
+  const deviceId = extractDeviceId(ctx.request.body);
+  const tokenOptions = { type: 'refresh', ...(metadata ? { metadata } : {}) };
+
+  const refresh = await strapi
+    .sessionManager('users-permissions')
+    .generateRefreshToken(String(user.id), deviceId, tokenOptions);
+
+  const access = await strapi
+    .sessionManager('users-permissions')
+    .generateAccessToken(refresh.token);
+  if ('error' in access) {
+    throw new ApplicationError('Invalid credentials');
+  }
+
+  const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+  const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
+
+  if (upSessions?.httpOnly || requestHttpOnly) {
+    const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+    ctx.cookies.set(cookieName, refresh.token, getUpSessionCookieOptions(upSessions));
+    return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
+  }
+
+  return ctx.send({
+    jwt: access.token,
+    refreshToken: refresh.token,
+    user: await sanitizeUser(user, ctx),
+  });
+};
+
+const reissueTokensAfterPasswordChange = async (strapi, ctx, user) => {
+  const deviceId = extractDeviceId(ctx.request.body);
+
+  await strapi.sessionManager('users-permissions').invalidateRefreshToken(String(user.id));
+
+  const newDeviceId = deviceId || crypto.randomUUID();
+  const refresh = await strapi
+    .sessionManager('users-permissions')
+    .generateRefreshToken(String(user.id), newDeviceId, { type: 'refresh' });
+
+  const access = await strapi
+    .sessionManager('users-permissions')
+    .generateAccessToken(refresh.token);
+  if ('error' in access) {
+    throw new ApplicationError('Invalid credentials');
+  }
+
+  return ctx.send({
+    jwt: access.token,
+    refreshToken: refresh.token,
+    user: await sanitizeUser(user, ctx),
+  });
+};
+
+const revokeLogoutSessions = async (strapi, ctx, userId, { scope, deviceId, body }) => {
+  const sessionManager = strapi.sessionManager('users-permissions');
+  const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+
+  if (scope === 'all') {
+    await sessionManager.invalidateRefreshToken(userId);
+    return;
+  }
+
+  if (deviceId) {
+    await sessionManager.invalidateRefreshToken(userId, deviceId);
+    return;
+  }
+
+  let currentSessionId = ctx.state.session?.id;
+  const cookieName = upSessions?.cookie?.name || 'strapi_up_refresh';
+  const refreshToken =
+    ctx.cookies.get(cookieName) ||
+    (typeof body.refreshToken === 'string' ? body.refreshToken : undefined);
+
+  if (refreshToken) {
+    const validation = await sessionManager.validateRefreshToken(refreshToken);
+    if (validation.isValid) {
+      currentSessionId = validation.sessionId;
+    }
+  }
+
+  if (currentSessionId) {
+    await sessionManager.revokeSessionById(userId, currentSessionId);
+    return;
+  }
+
+  await sessionManager.invalidateRefreshToken(userId);
+};
+
 module.exports = ({ strapi }) => ({
   async callback(ctx) {
     const provider = ctx.params.provider || 'local';
@@ -101,49 +206,8 @@ module.exports = ({ strapi }) => ({
 
       const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
       if (mode === 'refresh') {
-        const deviceId = extractDeviceId(ctx.request.body);
-
-        const refresh = await strapi
-          .sessionManager('users-permissions')
-          .generateRefreshToken(String(user.id), deviceId, {
-            type: 'refresh',
-            metadata: buildSessionMetadataFromContext(ctx),
-          });
-
-        const access = await strapi
-          .sessionManager('users-permissions')
-          .generateAccessToken(refresh.token);
-        if ('error' in access) {
-          throw new ApplicationError('Invalid credentials');
-        }
-
-        const upSessions = strapi.config.get('plugin::users-permissions.sessions');
-        const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
-        if (upSessions?.httpOnly || requestHttpOnly) {
-          const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
-          const isProduction = process.env.NODE_ENV === 'production';
-          const isSecure =
-            typeof upSessions.cookie?.secure === 'boolean'
-              ? upSessions.cookie?.secure
-              : isProduction;
-
-          const cookieOptions = {
-            httpOnly: true,
-            secure: isSecure,
-            sameSite: upSessions.cookie?.sameSite ?? 'lax',
-            path: upSessions.cookie?.path ?? '/',
-            domain: upSessions.cookie?.domain,
-            overwrite: true,
-          };
-
-          ctx.cookies.set(cookieName, refresh.token, cookieOptions);
-          return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
-        }
-
-        return ctx.send({
-          jwt: access.token,
-          refreshToken: refresh.token,
-          user: await sanitizeUser(user, ctx),
+        return sendRefreshAuthResponse(strapi, ctx, user, {
+          metadata: buildSessionMetadataFromContext(ctx),
         });
       }
 
@@ -163,47 +227,8 @@ module.exports = ({ strapi }) => ({
 
       const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
       if (mode === 'refresh') {
-        const deviceId = extractDeviceId(ctx.request.body);
-
-        const refresh = await strapi
-          .sessionManager('users-permissions')
-          .generateRefreshToken(String(user.id), deviceId, {
-            type: 'refresh',
-            metadata: buildSessionMetadataFromContext(ctx),
-          });
-
-        const access = await strapi
-          .sessionManager('users-permissions')
-          .generateAccessToken(refresh.token);
-        if ('error' in access) {
-          throw new ApplicationError('Invalid credentials');
-        }
-
-        const upSessions = strapi.config.get('plugin::users-permissions.sessions');
-        const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
-        if (upSessions?.httpOnly || requestHttpOnly) {
-          const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
-          const isProduction = process.env.NODE_ENV === 'production';
-          const isSecure =
-            typeof upSessions.cookie?.secure === 'boolean'
-              ? upSessions.cookie?.secure
-              : isProduction;
-
-          const cookieOptions = {
-            httpOnly: true,
-            secure: isSecure,
-            sameSite: upSessions.cookie?.sameSite ?? 'lax',
-            path: upSessions.cookie?.path ?? '/',
-            domain: upSessions.cookie?.domain,
-            overwrite: true,
-          };
-          ctx.cookies.set(cookieName, refresh.token, cookieOptions);
-          return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
-        }
-        return ctx.send({
-          jwt: access.token,
-          refreshToken: refresh.token,
-          user: await sanitizeUser(user, ctx),
+        return sendRefreshAuthResponse(strapi, ctx, user, {
+          metadata: buildSessionMetadataFromContext(ctx),
         });
       }
 
@@ -246,28 +271,7 @@ module.exports = ({ strapi }) => ({
 
     const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
     if (mode === 'refresh') {
-      const deviceId = extractDeviceId(ctx.request.body);
-
-      // Invalidate all sessions when password changes for security
-      await strapi.sessionManager('users-permissions').invalidateRefreshToken(String(user.id));
-
-      const newDeviceId = deviceId || crypto.randomUUID();
-      const refresh = await strapi
-        .sessionManager('users-permissions')
-        .generateRefreshToken(String(user.id), newDeviceId, { type: 'refresh' });
-
-      const access = await strapi
-        .sessionManager('users-permissions')
-        .generateAccessToken(refresh.token);
-      if ('error' in access) {
-        throw new ApplicationError('Invalid credentials');
-      }
-
-      return ctx.send({
-        jwt: access.token,
-        refreshToken: refresh.token,
-        user: await sanitizeUser(user, ctx),
-      });
+      return reissueTokensAfterPasswordChange(strapi, ctx, user);
     }
 
     return ctx.send({
@@ -303,28 +307,7 @@ module.exports = ({ strapi }) => ({
 
     const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
     if (mode === 'refresh') {
-      const deviceId = extractDeviceId(ctx.request.body);
-
-      // Invalidate all sessions when password is reset for security
-      await strapi.sessionManager('users-permissions').invalidateRefreshToken(String(user.id));
-
-      const newDeviceId = deviceId || crypto.randomUUID();
-      const refresh = await strapi
-        .sessionManager('users-permissions')
-        .generateRefreshToken(String(user.id), newDeviceId, { type: 'refresh' });
-
-      const access = await strapi
-        .sessionManager('users-permissions')
-        .generateAccessToken(refresh.token);
-      if ('error' in access) {
-        throw new ApplicationError('Invalid credentials');
-      }
-
-      return ctx.send({
-        jwt: access.token,
-        refreshToken: refresh.token,
-        user: await sanitizeUser(user, ctx),
-      });
+      return reissueTokensAfterPasswordChange(strapi, ctx, user);
     }
 
     return ctx.send({
@@ -367,19 +350,7 @@ module.exports = ({ strapi }) => ({
 
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
-      const isProduction = process.env.NODE_ENV === 'production';
-      const isSecure =
-        typeof upSessions.cookie?.secure === 'boolean' ? upSessions.cookie?.secure : isProduction;
-
-      const cookieOptions = {
-        httpOnly: true,
-        secure: isSecure,
-        sameSite: upSessions.cookie?.sameSite ?? 'lax',
-        path: upSessions.cookie?.path ?? '/',
-        domain: upSessions.cookie?.domain,
-        overwrite: true,
-      };
-      ctx.cookies.set(cookieName, rotation.token, cookieOptions);
+      ctx.cookies.set(cookieName, rotation.token, getUpSessionCookieOptions(upSessions));
       return ctx.send({ jwt: result.token });
     }
     return ctx.send({ jwt: result.token, refreshToken: rotation.token });
@@ -395,46 +366,13 @@ module.exports = ({ strapi }) => ({
     }
 
     const userId = String(ctx.state.user.id);
-    const sessionManager = strapi.sessionManager('users-permissions');
     const upSessions = strapi.config.get('plugin::users-permissions.sessions');
     const body = ctx.request.body || {};
     const scope = typeof body.scope === 'string' ? body.scope : undefined;
     const deviceId = extractDeviceId(body);
 
     try {
-      if (scope === 'all') {
-        // Explicit global logout: revoke every session for the user. This was the
-        // previous default behavior and is now opt-in to avoid surprising clients.
-        await sessionManager.invalidateRefreshToken(userId);
-      } else if (deviceId) {
-        // Targeted logout of a specific device family (backward compatible).
-        await sessionManager.invalidateRefreshToken(userId, deviceId);
-      } else {
-        // Default: log out only the session backing this request ("this device").
-        let currentSessionId = ctx.state.session?.id;
-
-        // Prefer the refresh token (httpOnly cookie or body) since it always points
-        // at the active session record, even after rotations.
-        const cookieName = upSessions?.cookie?.name || 'strapi_up_refresh';
-        const refreshToken =
-          ctx.cookies.get(cookieName) ||
-          (typeof body.refreshToken === 'string' ? body.refreshToken : undefined);
-
-        if (refreshToken) {
-          const validation = await sessionManager.validateRefreshToken(refreshToken);
-          if (validation.isValid) {
-            currentSessionId = validation.sessionId;
-          }
-        }
-
-        if (currentSessionId) {
-          await sessionManager.revokeSessionById(userId, currentSessionId);
-        } else {
-          // Could not identify the current session; fall back to a full logout so
-          // the request never leaves a session the caller believes is closed.
-          await sessionManager.invalidateRefreshToken(userId);
-        }
-      }
+      await revokeLogoutSessions(strapi, ctx, userId, { scope, deviceId, body });
     } catch (err) {
       strapi.log.error('UP logout failed', err);
     }
