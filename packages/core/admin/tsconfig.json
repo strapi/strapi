@@ -1,9 +1,6 @@
 {
   "extends": "tsconfig/client.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "outDir": "./dist/cli",
     "types": ["@testing-library/jest-dom"]
   },
   "include": ["_internal"]

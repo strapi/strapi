@@ -1,7 +1,6 @@
 {
   "extends": "tsconfig/base.json",
   "compilerOptions": {
-    "outDir": "dist",
     "types": ["node", "jest"]
   },
   "include": ["src"],
