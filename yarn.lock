@@ -9898,7 +9898,6 @@ __metadata:
     "@strapi/permissions": "npm:5.48.1"
     "@strapi/ts-zen": "npm:^0.2.0"
     "@strapi/utils": "npm:5.48.1"
-    "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.13.4"
     "@types/koa__router": "npm:12.0.0"
