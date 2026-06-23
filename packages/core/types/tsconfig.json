@@ -3,7 +3,6 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "node",
-    "noEmit": true,
     "types": ["node"]
   },
   "include": ["src"],

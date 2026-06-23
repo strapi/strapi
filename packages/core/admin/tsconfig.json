@@ -3,7 +3,6 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "noEmit": true,
     "outDir": "./dist/cli",
     "types": ["@testing-library/jest-dom"]
   },
