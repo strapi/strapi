@@ -12,7 +12,12 @@ import { useGetAiUsageQuery } from '@strapi/admin/strapi-admin/ee';
 import { DefaultChatTransport } from 'ai';
 
 import { fetchAI, makeChatFetch, safeParseJson } from '../lib/aiClient';
-import { STRAPI_AI_CHAT_URL, STRAPI_AI_URL } from '../lib/constants';
+import {
+  STRAPI_AI_CHAT_URL,
+  STRAPI_AI_CHAT_URL_V2,
+  STRAPI_AI_URL,
+  isCtbAiOperationsV2Enabled,
+} from '../lib/constants';
 import { Attachment } from '../lib/types/attachments';
 import { Schema } from '../lib/types/schema';
 
@@ -223,7 +228,7 @@ export const useAIChat: typeof useChat = (props) => {
   return useChat({
     ...props,
     transport: new DefaultChatTransport({
-      api: STRAPI_AI_CHAT_URL,
+      api: isCtbAiOperationsV2Enabled() ? STRAPI_AI_CHAT_URL_V2 : STRAPI_AI_CHAT_URL,
       fetch: customFetch,
     }),
   });
