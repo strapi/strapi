@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-amazon-ses",
-  "version": "5.47.0",
+  "version": "5.48.1",
   "description": "Amazon SES provider for strapi email",
   "keywords": [
     "email",
@@ -44,16 +44,16 @@
   },
   "dependencies": {
     "@aws-sdk/client-ses": "3.1023.0",
-    "@strapi/utils": "5.47.0"
+    "@strapi/utils": "5.48.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.47.0",
-    "tsconfig": "5.47.0",
+    "eslint-config-custom": "5.48.1",
+    "tsconfig": "5.48.1",
     "vitest": "catalog:",
-    "vitest-config": "5.47.0"
+    "vitest-config": "5.48.1"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

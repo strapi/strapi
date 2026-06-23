@@ -32,7 +32,7 @@ const convertComponentName = (component: string, isRef = false): string => {
 const cleanSchemaAttributes = (
   attributes: Struct.SchemaAttributes,
   { typeMap = new Map(), isRequest = false, didAddStrapiComponentsToSchemas }: Options
-) => {
+): Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject> => {
   const schemaAttributes: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject> = {};
 
   for (const prop of Object.keys(attributes)) {

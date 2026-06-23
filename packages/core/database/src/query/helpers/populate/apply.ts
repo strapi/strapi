@@ -20,7 +20,7 @@ const getJoinTableOrderBy = (
   populateValue: Record<string, unknown>,
   joinTable: { orderBy?: Record<string, 'asc' | 'desc'> }
 ) => {
-  if (populateValue.orderBy || !joinTable.orderBy) {
+  if (!_.isEmpty(populateValue.orderBy) || !joinTable.orderBy) {
     return undefined;
   }
 
@@ -520,18 +520,20 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
 
   const qb = db.entityManager.createQueryBuilder(joinTable.name);
 
-  const joinRows = await qb
+  const joinRowsRaw = await qb
     .where({
       [joinColumn.name]: referencedValues,
       ...(joinTable.on || {}),
-      // If the populateValue contains an "on" property,
-      // only populate the types defined in it
-      ...('on' in populateValue
-        ? { [morphColumn.typeColumn.name]: Object.keys(populateValue.on ?? {}) }
-        : {}),
     })
     .orderBy([joinColumn.name, 'order'])
     .execute<Row[]>({ mapResults: false });
+
+  const allowedTypes =
+    'on' in populateValue && populateValue.on ? new Set(Object.keys(populateValue.on)) : null;
+
+  const joinRows = allowedTypes
+    ? joinRowsRaw.filter((row) => allowedTypes.has(row[typeColumn.name] as string))
+    : joinRowsRaw;
 
   const joinMap = _.groupBy(joinColumn.name, joinRows);
 

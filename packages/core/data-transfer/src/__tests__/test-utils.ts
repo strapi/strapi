@@ -1,7 +1,7 @@
 import { Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { Core } from '@strapi/types';
-import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../../types';
+import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../types';
 
 /**
  * Create a slow Writable that applies backpressure (low highWaterMark, delayed write).
