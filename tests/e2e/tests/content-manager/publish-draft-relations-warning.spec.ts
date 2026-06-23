@@ -30,7 +30,7 @@ test.describe('Publish with draft relations warning', () => {
     await expect(confirmationDialog).toBeVisible();
     await expect(
       confirmationDialog.getByText(
-        'This entry is related to 1 draft entry. Those relations will not be included in the published version.'
+        'This entry is related to 1 draft entry. They will not appear on the live site until those entries are published.'
       )
     ).toBeVisible();
     await expect(

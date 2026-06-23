@@ -51,10 +51,44 @@ import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
-import type { RelationsFormValue } from './FormInputs/Relations/Relations';
-import type { DocumentActionComponent } from '../../../content-manager';
-import type { ComponentsDictionary, Schema } from '../../../hooks/useDocument';
 import type { Component } from '../../../../../shared/contracts/components';
+import type { DocumentActionComponent } from '../../../content-manager';
+import type { RelationsFormValue } from './FormInputs/Relations/Relations';
+import type { ComponentsDictionary, Schema } from '../../../hooks/useDocument';
+
+interface DraftRelationCounts {
+  unpublishedRelations: number;
+  draftM2mLinks: number;
+}
+
+const EMPTY_DRAFT_RELATION_COUNTS: DraftRelationCounts = {
+  unpublishedRelations: 0,
+  draftM2mLinks: 0,
+};
+
+const isBidirectionalManyToMany = (attribute: Schema['attributes'][string]) => {
+  if (attribute.type !== 'relation' || attribute.relation !== 'manyToMany') {
+    return false;
+  }
+
+  const relationAttribute = attribute as Extract<
+    Schema['attributes'][string],
+    { type: 'relation'; relation: 'manyToMany' }
+  > & {
+    inversedBy?: string;
+    mappedBy?: string;
+  };
+
+  return Boolean(relationAttribute.inversedBy || relationAttribute.mappedBy);
+};
+
+const mergeDraftRelationCounts = (
+  left: DraftRelationCounts,
+  right: DraftRelationCounts
+): DraftRelationCounts => ({
+  unpublishedRelations: left.unpublishedRelations + right.unpublishedRelations,
+  draftM2mLinks: left.draftM2mLinks + right.draftM2mLinks,
+});
 
 /**
  * Counts draft relations in unsaved form values, excluding self-referential relations
@@ -65,74 +99,95 @@ const countLocalDraftRelations = (
   schema: Schema | Component | undefined,
   components: ComponentsDictionary,
   contentTypeUid: string
-): number => {
+): DraftRelationCounts => {
   if (!schema?.attributes) {
-    return 0;
+    return EMPTY_DRAFT_RELATION_COUNTS;
   }
 
-  return Object.keys(schema.attributes).reduce((sum, attributeName) => {
+  return Object.keys(schema.attributes).reduce((counts, attributeName) => {
     const attribute = schema.attributes[attributeName];
     const value = data[attributeName];
 
     if (!value) {
-      return sum;
+      return counts;
     }
 
     switch (attribute.type) {
       case 'relation': {
         if (!('target' in attribute) || attribute.target === contentTypeUid) {
-          return sum;
+          return counts;
         }
 
         if (typeof value === 'object' && value !== null && 'connect' in value) {
-          const relations = (value as RelationsFormValue).connect || [];
-          return sum + relations.filter((relation) => relation.status === 'draft').length;
+          const draftConnectCount =
+            (value as RelationsFormValue).connect?.filter((relation) => relation.status === 'draft')
+              .length ?? 0;
+
+          if (draftConnectCount === 0) {
+            return counts;
+          }
+
+          if (isBidirectionalManyToMany(attribute)) {
+            return {
+              ...counts,
+              draftM2mLinks: counts.draftM2mLinks + draftConnectCount,
+            };
+          }
+
+          return {
+            ...counts,
+            unpublishedRelations: counts.unpublishedRelations + draftConnectCount,
+          };
         }
 
-        return sum;
+        return counts;
       }
       case 'component': {
         const componentItems = Array.isArray(value) ? value : [value];
         const componentSchema = components[attribute.component];
 
-        return (
-          sum +
-          componentItems.reduce(
-            (componentSum, componentValue) =>
-              componentSum +
+        return componentItems.reduce(
+          (componentCounts, componentValue) =>
+            mergeDraftRelationCounts(
+              componentCounts,
               countLocalDraftRelations(
                 componentValue as Record<string, unknown>,
                 componentSchema,
                 components,
                 contentTypeUid
-              ),
-            0
-          )
+              )
+            ),
+          counts
         );
       }
       case 'dynamiczone': {
-        return (
-          sum +
-          (value as Array<Record<string, unknown>>).reduce((zoneSum, componentValue) => {
-            const componentUid = componentValue.__component as string;
+        return (value as Array<Record<string, unknown>>).reduce((zoneCounts, componentValue) => {
+          const componentUid = componentValue.__component as string;
 
-            return (
-              zoneSum +
-              countLocalDraftRelations(
-                componentValue,
-                components[componentUid],
-                components,
-                contentTypeUid
-              )
-            );
-          }, 0)
-        );
+          return mergeDraftRelationCounts(
+            zoneCounts,
+            countLocalDraftRelations(
+              componentValue,
+              components[componentUid],
+              components,
+              contentTypeUid
+            )
+          );
+        }, counts);
       }
       default:
-        return sum;
+        return counts;
     }
-  }, 0);
+  }, EMPTY_DRAFT_RELATION_COUNTS);
 };
+
+const maxDraftRelationCounts = (
+  left: DraftRelationCounts,
+  right: DraftRelationCounts
+): DraftRelationCounts => ({
+  unpublishedRelations: Math.max(left.unpublishedRelations, right.unpublishedRelations),
+  draftM2mLinks: Math.max(left.draftM2mLinks, right.draftM2mLinks),
+});
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -716,8 +771,10 @@ const PublishAction: DocumentActionComponent = ({
     countDraftRelations,
     { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
   ] = useGetDraftRelationCountQuery();
-  const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
-  const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
+  const [localDraftRelationCounts, setLocalDraftRelationCounts] =
+    React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
+  const [serverDraftRelationCounts, setServerDraftRelationCounts] =
+    React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
   const [draftRelationsDialogRequestId, setDraftRelationsDialogRequestId] = React.useState(0);
 
   const [{ rawQuery }] = useQueryParams();
@@ -778,11 +835,9 @@ const PublishAction: DocumentActionComponent = ({
 
   React.useEffect(() => {
     if (!documentId || modified) {
-      setLocalCountOfDraftRelations(
-        countLocalDraftRelations(formValues, schema, components, model)
-      );
+      setLocalDraftRelationCounts(countLocalDraftRelations(formValues, schema, components, model));
     } else {
-      setLocalCountOfDraftRelations(0);
+      setLocalDraftRelationCounts(EMPTY_DRAFT_RELATION_COUNTS);
     }
   }, [components, documentId, formValues, model, modified, schema]);
 
@@ -803,7 +858,7 @@ const PublishAction: DocumentActionComponent = ({
     }
 
     if (data) {
-      setServerCountOfDraftRelations(data.data);
+      setServerDraftRelationCounts(data.data);
     }
   }, [
     collectionType,
@@ -1015,11 +1070,15 @@ const PublishAction: DocumentActionComponent = ({
     }
   };
 
-  const totalDraftRelations =
+  const draftRelationCounts =
     !documentId || modified
-      ? Math.max(localCountOfDraftRelations, serverCountOfDraftRelations)
-      : serverCountOfDraftRelations;
-  const hasDraftRelations = totalDraftRelations > 0;
+      ? maxDraftRelationCounts(localDraftRelationCounts, serverDraftRelationCounts)
+      : serverDraftRelationCounts;
+  const { unpublishedRelations, draftM2mLinks } = draftRelationCounts;
+  const hasUnpublishedRelations = unpublishedRelations > 0;
+  const hasDraftM2mLinks = draftM2mLinks > 0;
+  const hasDraftRelations = hasUnpublishedRelations || hasDraftM2mLinks;
+  const isM2mOnlyDraftRelations = hasDraftM2mLinks && !hasUnpublishedRelations;
 
   /**
    * Disabled when:
@@ -1098,33 +1157,61 @@ const PublishAction: DocumentActionComponent = ({
     dialog: hasDraftRelations
       ? {
           type: 'dialog',
-          variant: 'danger',
+          variant: isM2mOnlyDraftRelations ? 'default' : 'danger',
           title: formatMessage({
             id: getTranslation('popUpWarning.warning.has-draft-relations.title'),
             defaultMessage: 'Confirmation',
           }),
           content: (
             <>
-              {formatMessage(
-                {
-                  id: getTranslation('popUpWarning.warning.has-draft-relations.message'),
-                  defaultMessage:
-                    'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. Those relations will not be included in the published version.',
-                },
-                {
-                  count: totalDraftRelations,
-                }
-              )}{' '}
+              {hasUnpublishedRelations
+                ? formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-relations.message'),
+                      defaultMessage:
+                        'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. They will not appear on the live site until those entries are published.',
+                    },
+                    {
+                      count: unpublishedRelations,
+                    }
+                  )
+                : formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.message'),
+                      defaultMessage:
+                        '{count, plural, one {# linked entry is} other {# linked entries are}} still in draft. They will not appear on the live site until those entries are published.',
+                    },
+                    {
+                      count: draftM2mLinks,
+                    }
+                  )}
+              {hasUnpublishedRelations && hasDraftM2mLinks
+                ? ` ${formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.additional'),
+                      defaultMessage:
+                        '{count, plural, one {# many-to-many link points} other {# many-to-many links point}} to draft entries that will become visible once published.',
+                    },
+                    {
+                      count: draftM2mLinks,
+                    }
+                  )}`
+                : null}{' '}
               {formatMessage({
                 id: getTranslation('popUpWarning.warning.publish-question'),
                 defaultMessage: 'Do you still want to publish?',
               })}
             </>
           ),
-          confirmLabel: formatMessage({
-            id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
-            defaultMessage: 'Publish without relations',
-          }),
+          confirmLabel: isM2mOnlyDraftRelations
+            ? formatMessage({
+                id: 'app.utils.publish',
+                defaultMessage: 'Publish',
+              })
+            : formatMessage({
+                id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
+                defaultMessage: 'Publish without relations',
+              }),
           onConfirm: async () => {
             await performPublish();
           },

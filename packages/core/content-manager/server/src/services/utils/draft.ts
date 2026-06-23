@@ -1,60 +1,88 @@
 import { castArray } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 
+import {
+  type DraftRelationCounts,
+  EMPTY_DRAFT_RELATION_COUNTS,
+  isBidirectionalManyToMany,
+  mergeDraftRelationCounts,
+} from './draft-relations';
+
 const { isVisibleAttribute, hasDraftAndPublish } = strapiUtils.contentTypes;
+
 /**
- * sumDraftCounts works recursively on the attributes of a model counting the
- * number of draft relations
- * These relations can be direct to this content type or contained within components/dynamic zones
- * @param {Object} entity containing the draft relation counts
- * @param {String} uid of the content type
- * @returns {Number} of draft relations
+ * sumDraftCounts works recursively on the attributes of a model counting draft relations
+ * that matter for publish warnings.
+ *
+ * - unpublishedRelations: xToOne / oneToMany style links that will not appear on the live site
+ * - draftM2mLinks: bidirectional manyToMany links to draft-only entries (informational)
  */
-const sumDraftCounts = (entity: any, uid: any): number => {
+const sumDraftCounts = (entity: any, uid: any): DraftRelationCounts => {
   const model = strapi.getModel(uid);
 
-  return Object.keys(model.attributes).reduce((sum, attributeName) => {
+  return Object.keys(model.attributes).reduce((counts, attributeName) => {
     const attribute: any = model.attributes[attributeName];
     const value = entity[attributeName];
+
     if (!value) {
-      return sum;
+      return counts;
     }
 
     switch (attribute.type) {
       case 'relation': {
         if (!('target' in attribute)) {
-          return sum;
+          return counts;
         }
 
         const targetModel = strapi.getModel(attribute.target);
         if (!targetModel || !hasDraftAndPublish(targetModel)) {
-          return sum;
+          return counts;
         }
+
         // Self-referential relations are preserved on publish (see self-referential-relations.ts).
         if (attribute.target === uid) {
-          return sum;
+          return counts;
         }
-        if (isVisibleAttribute(model, attributeName)) {
-          return sum + value.count;
+
+        if (!isVisibleAttribute(model, attributeName)) {
+          return counts;
         }
-        return sum;
+
+        if (isBidirectionalManyToMany(attribute)) {
+          return {
+            ...counts,
+            draftM2mLinks: counts.draftM2mLinks + value.count,
+          };
+        }
+
+        return {
+          ...counts,
+          unpublishedRelations: counts.unpublishedRelations + value.count,
+        };
       }
       case 'component': {
-        const compoSum = castArray(value).reduce((acc, componentValue) => {
-          return acc + sumDraftCounts(componentValue, attribute.component);
-        }, 0);
-        return sum + compoSum;
+        const compoCounts = castArray(value).reduce(
+          (acc, componentValue) =>
+            mergeDraftRelationCounts(acc, sumDraftCounts(componentValue, attribute.component)),
+          EMPTY_DRAFT_RELATION_COUNTS
+        );
+
+        return mergeDraftRelationCounts(counts, compoCounts);
       }
       case 'dynamiczone': {
-        const dzSum = value.reduce((acc: any, componentValue: any) => {
-          return acc + sumDraftCounts(componentValue, componentValue.__component);
-        }, 0);
-        return sum + dzSum;
+        const dzCounts = value.reduce((acc: DraftRelationCounts, componentValue: any) => {
+          return mergeDraftRelationCounts(
+            acc,
+            sumDraftCounts(componentValue, componentValue.__component)
+          );
+        }, EMPTY_DRAFT_RELATION_COUNTS);
+
+        return mergeDraftRelationCounts(counts, dzCounts);
       }
       default:
-        return sum;
+        return counts;
     }
-  }, 0);
+  }, EMPTY_DRAFT_RELATION_COUNTS);
 };
 
 export { sumDraftCounts };

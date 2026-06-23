@@ -394,6 +394,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
       url: `/content-manager/collection-types/api::category.category/${cat.documentId}/actions/countDraftRelations`,
     });
 
-    expect(body.data).toBe(0);
+    expect(body.data.unpublishedRelations).toBe(0);
+    expect(body.data.draftM2mLinks).toBe(0);
   });
 });
