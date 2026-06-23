@@ -2,6 +2,8 @@
 import path from 'node:path';
 import readPkgUp from 'read-pkg-up';
 
+import { ADMIN_PINNED_ALIAS_MODULES, ADMIN_VITE_ALIAS_MODULES } from '../admin-vite-alias-modules';
+
 const actualResolveFrom = jest.requireActual<typeof import('resolve-from')>('resolve-from');
 const adminPkgDir = path.dirname(require.resolve('@strapi/admin/package.json'));
 const adminDeps = require('@strapi/admin/package.json').dependencies as Record<string, string>;
@@ -24,29 +26,24 @@ describe('getModulePath', () => {
     jest.dontMock('read-pkg-up');
   });
 
-  it('resolves admin modules from @strapi/admin dependency context', () => {
+  it.each(ADMIN_VITE_ALIAS_MODULES)('resolves %s from @strapi/admin dependency context', (mod) => {
     const { getModulePath, resolveFromMock } = loadGetModulePath();
 
-    getModulePath('@reduxjs/toolkit');
+    getModulePath(mod);
 
-    expect(resolveFromMock).toHaveBeenCalledWith(adminPkgDir, '@reduxjs/toolkit');
+    expect(resolveFromMock).toHaveBeenCalledWith(adminPkgDir, mod);
   });
 
-  it('resolves react-redux from @strapi/admin dependency context', () => {
-    const { getModulePath, resolveFromMock } = loadGetModulePath();
+  it.each(ADMIN_PINNED_ALIAS_MODULES)(
+    'resolves %s to the version pinned by @strapi/admin',
+    (mod) => {
+      const { getModulePath } = loadGetModulePath();
+      const pkgRoot = getModulePath(mod);
+      const pkg = readPkgUp.sync({ cwd: pkgRoot });
 
-    getModulePath('react-redux');
-
-    expect(resolveFromMock).toHaveBeenCalledWith(adminPkgDir, 'react-redux');
-  });
-
-  it('resolves @reduxjs/toolkit to the version pinned by @strapi/admin', () => {
-    const { getModulePath } = loadGetModulePath();
-    const pkgRoot = getModulePath('@reduxjs/toolkit');
-    const pkg = readPkgUp.sync({ cwd: pkgRoot });
-
-    expect(pkg?.packageJson?.version).toBe(adminDeps['@reduxjs/toolkit']);
-  });
+      expect(pkg?.packageJson?.version).toBe(adminDeps[mod]);
+    }
+  );
 
   it('prefers @strapi/admin closure over a hoisted incompatible major (pnpm monorepo)', () => {
     const adminRtkEntry =
