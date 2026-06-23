@@ -12,6 +12,7 @@ const _ = require('lodash');
 const { concat, compact, isArray } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
+const { buildRefreshCookieOptions } = require('../utils/refresh-cookie-options');
 const {
   validateCallbackBody,
   validateRegisterBody,
@@ -112,20 +113,7 @@ module.exports = ({ strapi }) => ({
         if (upSessions?.httpOnly || requestHttpOnly) {
           const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
           const isProduction = process.env.NODE_ENV === 'production';
-          const isSecure =
-            typeof upSessions.cookie?.secure === 'boolean'
-              ? upSessions.cookie?.secure
-              : isProduction;
-
-          const cookieOptions = {
-            httpOnly: true,
-            secure: isSecure,
-            sameSite: upSessions.cookie?.sameSite ?? 'lax',
-            path: upSessions.cookie?.path ?? '/',
-            domain: upSessions.cookie?.domain,
-            maxAge: upSessions.cookie?.maxAge,
-            overwrite: true,
-          };
+          const cookieOptions = buildRefreshCookieOptions(upSessions, isProduction);
 
           ctx.cookies.set(cookieName, refresh.token, cookieOptions);
           return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
@@ -172,20 +160,7 @@ module.exports = ({ strapi }) => ({
         if (upSessions?.httpOnly || requestHttpOnly) {
           const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
           const isProduction = process.env.NODE_ENV === 'production';
-          const isSecure =
-            typeof upSessions.cookie?.secure === 'boolean'
-              ? upSessions.cookie?.secure
-              : isProduction;
-
-          const cookieOptions = {
-            httpOnly: true,
-            secure: isSecure,
-            sameSite: upSessions.cookie?.sameSite ?? 'lax',
-            path: upSessions.cookie?.path ?? '/',
-            domain: upSessions.cookie?.domain,
-            maxAge: upSessions.cookie?.maxAge,
-            overwrite: true,
-          };
+          const cookieOptions = buildRefreshCookieOptions(upSessions, isProduction);
           ctx.cookies.set(cookieName, refresh.token, cookieOptions);
           return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
         }
@@ -357,18 +332,7 @@ module.exports = ({ strapi }) => ({
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
       const isProduction = process.env.NODE_ENV === 'production';
-      const isSecure =
-        typeof upSessions.cookie?.secure === 'boolean' ? upSessions.cookie?.secure : isProduction;
-
-      const cookieOptions = {
-        httpOnly: true,
-        secure: isSecure,
-        sameSite: upSessions.cookie?.sameSite ?? 'lax',
-        path: upSessions.cookie?.path ?? '/',
-        domain: upSessions.cookie?.domain,
-        maxAge: upSessions.cookie?.maxAge,
-        overwrite: true,
-      };
+      const cookieOptions = buildRefreshCookieOptions(upSessions, isProduction);
       ctx.cookies.set(cookieName, rotation.token, cookieOptions);
       return ctx.send({ jwt: result.token });
     }
