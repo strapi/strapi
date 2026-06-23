@@ -3,7 +3,6 @@
   "include": ["./src"],
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": ".",
     "types": ["@testing-library/jest-dom", "jest"]
   }
 }

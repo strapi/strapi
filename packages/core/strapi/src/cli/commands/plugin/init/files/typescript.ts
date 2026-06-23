@@ -24,7 +24,6 @@ const ADMIN = {
           "include": ["./src", "./custom.d.ts"],
           "compilerOptions": {
             "rootDir": "../",
-            "baseUrl": ".",
           },
         }
       `,
@@ -38,7 +37,6 @@ const ADMIN = {
           "exclude": ["**/*.test.ts", "**/*.test.tsx"],
           "compilerOptions": {
             "rootDir": "../",
-            "baseUrl": ".",
             "outDir": "./dist",
           }
         }
@@ -54,7 +52,6 @@ const SERVER = {
           "include": ["./src"],
           "compilerOptions": {
             "rootDir": "../",
-            "baseUrl": ".",
             "module": "CommonJS",
             "moduleResolution": "Node",
             "lib": ["ES2020"],
@@ -82,7 +79,6 @@ const SERVER = {
           "exclude": ["**/*.test.ts"],
           "compilerOptions": {
             "rootDir": "../",
-            "baseUrl": ".",
             "outDir": "./dist",
           }
         }

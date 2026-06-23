@@ -3,7 +3,6 @@
   "include": ["src", "./custom.d.ts"],
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": ".",
     "types": ["@testing-library/jest-dom", "jest"]
   }
 }
