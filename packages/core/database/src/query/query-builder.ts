@@ -539,12 +539,25 @@ const createQueryBuilder = (
         const joinsOrderByColumns = state.joins.flatMap((join) => {
           return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
         });
-        // Only include column-based orderBy entries (skip raw expressions like status)
+        // Only include column-based orderBy entries here (raw expressions are handled below)
         const orderByColumns = state.orderBy
           .filter((ob: any) => 'column' in ob)
           .map((ob: any) => ob.column);
 
         state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+
+        // PostgreSQL requires every ORDER BY expression to appear in the SELECT list when
+        // SELECT DISTINCT is used. Raw expressions (e.g. the `status` CASE ranking) are not
+        // plain columns, so add them explicitly — using the same builder/alias as the ORDER BY
+        // so the rendered SQL matches and PostgreSQL accepts the query. The deep-sort path
+        // dedupes via row numbering instead of DISTINCT, so it strips these out later.
+        const rawOrderByExpressions = state.orderBy
+          .filter((ob: any) => 'rawExpression' in ob)
+          .map((ob: any) =>
+            helpers.buildStatusSortExpression(db, tableName, this.alias, ob.isI18n)
+          );
+
+        state.select = [...state.select, ...rawOrderByExpressions];
       }
     },
 
