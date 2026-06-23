@@ -5,35 +5,7 @@ import { createStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
-
-const DEFAULT_OUT_DIR = 'dist';
-
-/**
- * Read `compilerOptions.outDir` from tsconfig.json without loading `typescript` or
- * `@strapi/typescript-utils`. Returns null when the file cannot be parsed or when
- * `extends` may define outDir (fall back to resolveOutDir).
- */
-const tryQuickOutDir = (appDir: string, tsconfigPath: string): string | null => {
-  let raw: unknown;
-  try {
-    raw = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
-  } catch {
-    return null;
-  }
-
-  if (!raw || typeof raw !== 'object') {
-    return null;
-  }
-
-  const config = raw as { extends?: string; compilerOptions?: { outDir?: string } };
-  const localOutDir = config.compilerOptions?.outDir;
-
-  if (config.extends && localOutDir === undefined) {
-    return null;
-  }
-
-  return path.resolve(appDir, localOutDir ?? DEFAULT_OUT_DIR);
-};
+import { tryQuickOutDir } from '../utils/try-quick-outdir';
 
 const action = async () => {
   const appDir = process.cwd();
