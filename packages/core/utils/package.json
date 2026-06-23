@@ -44,6 +44,8 @@
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T  rollup -c -w"
   },
   "dependencies": {
@@ -65,7 +67,9 @@
     "eslint-config-custom": "5.48.1",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
-    "tsconfig": "5.48.1"
+    "tsconfig": "5.48.1",
+    "vitest": "catalog:",
+    "vitest-config": "5.48.1"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

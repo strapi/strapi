@@ -8982,6 +8982,8 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.48.1"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   peerDependencies:
@@ -9120,6 +9122,8 @@ __metadata:
     tar: "npm:7.5.16"
     tar-stream: "npm:2.2.0"
     typescript: "npm:5.4.5"
+    vitest: "catalog:"
+    vitest-config: "npm:5.48.1"
     ws: "npm:8.20.1"
   languageName: unknown
   linkType: soft
@@ -9141,6 +9145,8 @@ __metadata:
     semver: "npm:7.7.4"
     tsconfig: "npm:5.48.1"
     umzug: "npm:3.8.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.48.1"
   languageName: unknown
   linkType: soft
 
@@ -9354,6 +9360,8 @@ __metadata:
     qs: "npm:6.15.2"
     sift: "npm:16.0.1"
     tsconfig: "npm:5.48.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.48.1"
   languageName: unknown
   linkType: soft
 
@@ -9399,6 +9407,8 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
     typescript: "npm:5.4.5"
+    vitest: "catalog:"
+    vitest-config: "npm:5.48.1"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9988,6 +9998,8 @@ __metadata:
     p-map: "npm:4.0.0"
     preferred-pm: "npm:3.1.3"
     tsconfig: "npm:5.48.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.48.1"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   languageName: unknown
