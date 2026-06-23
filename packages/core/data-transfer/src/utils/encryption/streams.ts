@@ -5,17 +5,18 @@ import type { Algorithm } from '../../types';
 import { createDecryptionCipher } from './decrypt';
 import { createEncryptionCipher } from './encrypt';
 import {
-  buildEncryptionFormatV2Header,
-  ENCRYPTION_FORMAT_V2_HEADER_LENGTH,
-  ENCRYPTION_FORMAT_V2_MAGIC,
-  ENCRYPTION_FORMAT_V2_SALT_LENGTH,
-  hasEncryptionFormatV2Magic,
+  buildStrapiExEncryptionHeader,
+  ENCRYPTION_HEADER_MAGIC,
+  ENCRYPTION_HEADER_SALT_LENGTH,
+  EncryptionHeaderParseError,
+  hasStrapiExMagic,
   LEGACY_KDF_SALT,
-  tryParseEncryptionFormatV2Header,
-  type EncryptionFormatV2Header,
+  parseStrapiExEncryptionHeader,
+  readStrapiExHeaderLength,
+  type StrapiExEncryptionHeader,
 } from './format';
 
-export type EncryptionFormat = 'legacy' | 'v2';
+export type EncryptionFormat = 'legacy' | 'strapiex';
 
 export interface EncryptionStreamOptions {
   key: string;
@@ -43,10 +44,10 @@ const resolveLegacyDecryption = (
   return { decipher, pending };
 };
 
-const resolveV2Decryption = (
+const resolveStrapiExDecryption = (
   key: string,
   algorithm: Algorithm,
-  header: EncryptionFormatV2Header,
+  header: StrapiExEncryptionHeader,
   remainder: Buffer
 ): { decipher: ReturnType<typeof createDecryptionCipher>; pending: Buffer } => {
   const decipher = createDecryptionCipher(key, algorithm, header.salt);
@@ -58,7 +59,7 @@ const resolveV2Decryption = (
 export const createEncryptionStream = ({
   key,
   algorithm = 'aes-128-ecb',
-  format = 'v2',
+  format = 'strapiex',
 }: EncryptionStreamOptions): Transform => {
   if (format === 'legacy') {
     const cipher = createEncryptionCipher(key, algorithm, LEGACY_KDF_SALT);
@@ -66,8 +67,8 @@ export const createEncryptionStream = ({
     return cipher;
   }
 
-  const salt = randomBytes(ENCRYPTION_FORMAT_V2_SALT_LENGTH);
-  const header = buildEncryptionFormatV2Header(salt);
+  const salt = randomBytes(ENCRYPTION_HEADER_SALT_LENGTH);
+  const header = buildStrapiExEncryptionHeader(salt);
   const cipher = createEncryptionCipher(key, algorithm, salt);
   let headerWritten = false;
 
@@ -118,6 +119,32 @@ export const createDecryptionStream = ({
     }
   };
 
+  const resolveStrapiExHeader = (
+    callback: (error?: Error | null, data?: Buffer) => void
+  ): boolean => {
+    const headerLength = readStrapiExHeaderLength(headerBuffer);
+
+    if (headerLength === null || headerBuffer.length < headerLength) {
+      return false;
+    }
+
+    formatResolved = true;
+
+    try {
+      const parsed = parseStrapiExEncryptionHeader(headerBuffer.subarray(0, headerLength));
+      const remainder = headerBuffer.subarray(headerLength);
+      const resolved = resolveStrapiExDecryption(key, algorithm, parsed, remainder);
+
+      decipher = resolved.decipher;
+      headerBuffer = Buffer.alloc(0);
+      callback(null, resolved.pending);
+    } catch (error) {
+      callback(toCallbackError(error));
+    }
+
+    return true;
+  };
+
   return new Transform({
     transform(chunk, _encoding, callback) {
       try {
@@ -128,8 +155,8 @@ export const createDecryptionStream = ({
 
         headerBuffer = Buffer.concat([headerBuffer, chunk]);
 
-        if (headerBuffer.length >= ENCRYPTION_FORMAT_V2_MAGIC.length) {
-          if (!hasEncryptionFormatV2Magic(headerBuffer)) {
+        if (headerBuffer.length >= ENCRYPTION_HEADER_MAGIC.length) {
+          if (!hasStrapiExMagic(headerBuffer)) {
             formatResolved = true;
             const resolved = resolveLegacyDecryption(key, algorithm, headerBuffer);
             decipher = resolved.decipher;
@@ -138,24 +165,7 @@ export const createDecryptionStream = ({
             return;
           }
 
-          if (headerBuffer.length >= ENCRYPTION_FORMAT_V2_HEADER_LENGTH) {
-            const parsed = tryParseEncryptionFormatV2Header(headerBuffer);
-
-            if (parsed) {
-              formatResolved = true;
-              const remainder = headerBuffer.subarray(ENCRYPTION_FORMAT_V2_HEADER_LENGTH);
-              const resolved = resolveV2Decryption(key, algorithm, parsed, remainder);
-              decipher = resolved.decipher;
-              headerBuffer = Buffer.alloc(0);
-              callback(null, resolved.pending);
-              return;
-            }
-
-            formatResolved = true;
-            const resolved = resolveLegacyDecryption(key, algorithm, headerBuffer);
-            decipher = resolved.decipher;
-            headerBuffer = Buffer.alloc(0);
-            callback(null, resolved.pending);
+          if (resolveStrapiExHeader(callback)) {
             return;
           }
         }
@@ -170,6 +180,14 @@ export const createDecryptionStream = ({
         if (!formatResolved) {
           if (headerBuffer.length === 0) {
             callback();
+            return;
+          }
+
+          if (hasStrapiExMagic(headerBuffer)) {
+            if (!resolveStrapiExHeader(callback)) {
+              callback(new EncryptionHeaderParseError('Truncated STRAPIEX encryption header'));
+            }
+
             return;
           }
 

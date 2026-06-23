@@ -116,7 +116,7 @@ describe('Local File Destination Provider', () => {
 
       await provider.bootstrap();
 
-      expect(encryption.createEncryptionStream).toHaveBeenCalledWith({ key, format: 'v2' });
+      expect(encryption.createEncryptionStream).toHaveBeenCalledWith({ key, format: 'strapiex' });
     });
   });
 

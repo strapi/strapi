@@ -146,6 +146,5 @@ describe('export', () => {
   test.todo('export with --only filter and verify tar contains only those types');
   test.todo('export with --exclude filter and verify excluded types missing from tar');
   test.todo('export with compression (.tar.gz) and verify tar contents');
-  test.todo('export with encryption (.tar.gz.enc) and verify prompt/key and tar not plaintext');
   test.todo('export table counts match actual tar entry counts per stage');
 });

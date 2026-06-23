@@ -2,7 +2,13 @@ import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 
 import { createEncryptionCipher } from '../encrypt';
-import { hasEncryptionFormatV2Magic, LEGACY_KDF_SALT } from '../format';
+import {
+  ENCRYPTION_HEADER_MAGIC,
+  hasStrapiExMagic,
+  LEGACY_KDF_SALT,
+  readStrapiExHeaderLength,
+  EncryptionHeaderParseError,
+} from '../format';
 import { createDecryptionStream, createEncryptionStream } from '../streams';
 
 const collectStream = async (stream: NodeJS.ReadableStream) => {
@@ -18,7 +24,7 @@ const collectStream = async (stream: NodeJS.ReadableStream) => {
 const roundTrip = async (
   plaintext: string,
   key: string,
-  format: 'legacy' | 'v2' = 'v2'
+  format: 'legacy' | 'strapiex' = 'strapiex'
 ): Promise<Buffer> => {
   const encrypted = await collectStream(
     Readable.from([plaintext]).pipe(createEncryptionStream({ key, format }))
@@ -28,9 +34,9 @@ const roundTrip = async (
 };
 
 describe('encryption streams', () => {
-  test('round-trips v2 exports with a per-file salt header', async () => {
+  test('round-trips STRAPIEX exports with a per-file salt header', async () => {
     const plaintext = 'sensitive-export-data';
-    const decrypted = await roundTrip(plaintext, 'export-password', 'v2');
+    const decrypted = await roundTrip(plaintext, 'export-password', 'strapiex');
 
     expect(decrypted.toString()).toBe(plaintext);
   });
@@ -54,28 +60,32 @@ describe('encryption streams', () => {
     expect(decrypted.toString()).toBe(plaintext);
   });
 
-  test('writes a v2 header and uses different ciphertext for the same password', async () => {
+  test('writes a STRAPIEX header and uses different ciphertext for the same password', async () => {
     const key = 'export-password';
     const plaintext = 'same-password-different-salt';
 
     const first = await collectStream(
-      Readable.from([plaintext]).pipe(createEncryptionStream({ key, format: 'v2' }))
+      Readable.from([plaintext]).pipe(createEncryptionStream({ key, format: 'strapiex' }))
     );
     const second = await collectStream(
-      Readable.from([plaintext]).pipe(createEncryptionStream({ key, format: 'v2' }))
+      Readable.from([plaintext]).pipe(createEncryptionStream({ key, format: 'strapiex' }))
     );
 
-    expect(hasEncryptionFormatV2Magic(first)).toBe(true);
-    expect(hasEncryptionFormatV2Magic(second)).toBe(true);
-    expect(first.subarray(0, 26)).not.toEqual(second.subarray(0, 26));
-    expect(first.subarray(26)).not.toEqual(second.subarray(26));
+    expect(hasStrapiExMagic(first)).toBe(true);
+    expect(hasStrapiExMagic(second)).toBe(true);
+
+    const headerLength = readStrapiExHeaderLength(first);
+
+    expect(headerLength).not.toBeNull();
+    expect(first.subarray(0, headerLength!)).not.toEqual(second.subarray(0, headerLength!));
+    expect(first.subarray(headerLength!)).not.toEqual(second.subarray(headerLength!));
   });
 
-  test('decrypts v2 exports when the header arrives in small chunks', async () => {
+  test('decrypts STRAPIEX exports when the header arrives in small chunks', async () => {
     const plaintext = 'chunked-header-export';
     const key = 'export-password';
     const encrypted = await collectStream(
-      Readable.from([plaintext]).pipe(createEncryptionStream({ key, format: 'v2' }))
+      Readable.from([plaintext]).pipe(createEncryptionStream({ key, format: 'strapiex' }))
     );
 
     const chunks = [encrypted.subarray(0, 5), encrypted.subarray(5, 12), encrypted.subarray(12)];
@@ -103,11 +113,51 @@ describe('encryption streams', () => {
     expect(decrypted.toString()).toBe(plaintext);
   });
 
+  test('decrypts exports with extended variable-length headers', async () => {
+    const key = 'export-password';
+    const plaintext = 'extended-header-export';
+    const encrypted = await collectStream(
+      Readable.from([plaintext]).pipe(createEncryptionStream({ key, format: 'strapiex' }))
+    );
+
+    const headerLength = readStrapiExHeaderLength(encrypted);
+
+    expect(headerLength).not.toBeNull();
+
+    const unknownTlv = Buffer.from([0x99, 0x00]);
+    const extendedHeader = Buffer.concat([encrypted.subarray(0, headerLength!), unknownTlv]);
+
+    extendedHeader.writeUInt16BE(
+      headerLength! + unknownTlv.length,
+      ENCRYPTION_HEADER_MAGIC.length + 1
+    );
+
+    const extended = Buffer.concat([extendedHeader, encrypted.subarray(headerLength!)]);
+
+    const decrypted = await collectStream(
+      Readable.from(extended).pipe(createDecryptionStream({ key }))
+    );
+
+    expect(decrypted.toString()).toBe(plaintext);
+  });
+
+  test('rejects truncated STRAPIEX headers instead of falling back to legacy', async () => {
+    const key = 'export-password';
+    const encrypted = await collectStream(
+      Readable.from(['plaintext']).pipe(createEncryptionStream({ key, format: 'strapiex' }))
+    );
+    const truncated = encrypted.subarray(0, 20);
+
+    await expect(
+      collectStream(Readable.from(truncated).pipe(createDecryptionStream({ key })))
+    ).rejects.toThrow(EncryptionHeaderParseError);
+  });
+
   test('supports piping through pipeline', async () => {
     const plaintext = 'pipeline-export';
     const key = 'export-password';
     const encryptedChunks: Buffer[] = [];
-    const encryptedStream = createEncryptionStream({ key, format: 'v2' });
+    const encryptedStream = createEncryptionStream({ key, format: 'strapiex' });
 
     encryptedStream.on('data', (chunk) => {
       encryptedChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));

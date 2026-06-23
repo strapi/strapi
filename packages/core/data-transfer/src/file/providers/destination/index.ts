@@ -23,7 +23,7 @@ export interface ILocalFileDestinationProviderOptions {
   encryption: {
     enabled: boolean; // if the file should be encrypted
     key?: string; // the key to use when encryption.enabled is true
-    format?: 'legacy' | 'v2'; // export format; defaults to v2 with per-file salt header
+    format?: 'legacy' | 'strapiex'; // export format; defaults to strapiex with per-file salt header
   };
 
   compression: {
@@ -138,7 +138,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       archiveTransforms.push(
         createEncryptionStream({
           key: encryption.key,
-          format: encryption.format ?? 'v2',
+          format: encryption.format ?? 'strapiex',
         })
       );
     }
