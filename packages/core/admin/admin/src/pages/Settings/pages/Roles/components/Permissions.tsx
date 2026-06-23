@@ -22,7 +22,13 @@ import {
   createDynamicActionPermissionChecker,
 } from '../utils/createPermissionChecker';
 import { difference } from '../utils/difference';
-import { ConditionForm, Form, createDefaultCTForm, createDefaultForm } from '../utils/forms';
+import {
+  ConditionForm,
+  Form,
+  PropertyChildForm,
+  createDefaultCTForm,
+  createDefaultForm,
+} from '../utils/forms';
 import { GenericLayout, formatLayout } from '../utils/layouts';
 import { hasLocaleValidationErrors } from '../utils/localePermissionValidation';
 import { formatPermissionsForAPI } from '../utils/permissions';
@@ -116,7 +122,52 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
             });
           }
 
-          return { permissionsToSend: formatPermissionsForAPI(modifiedData), didUpdateConditions };
+          const permissionsToSend = formatPermissionsForAPI(modifiedData).map((perm) => {
+            if (!perm.subject) return perm;
+
+            const original = permissions.find(
+              (p) => p.action === perm.action && p.subject === perm.subject
+            );
+
+            // null means "all locales" in legacy DBs — preserve it if the user hasn't changed anything
+            if (original?.properties?.locales !== null) return perm;
+
+            const kind: 'collectionTypes' | 'singleTypes' =
+              perm.subject in modifiedData.collectionTypes ? 'collectionTypes' : 'singleTypes';
+
+            const initialActionForm = initialData[kind]?.[perm.subject]?.[perm.action];
+            const modifiedActionForm = modifiedData[kind]?.[perm.subject]?.[perm.action];
+
+            if (!initialActionForm || !modifiedActionForm) return perm;
+
+            const initialLocaleEntry = (initialActionForm.properties as PropertyChildForm)[
+              'locales'
+            ];
+            const modifiedLocaleEntry = (modifiedActionForm.properties as PropertyChildForm)[
+              'locales'
+            ];
+
+            if (
+              !initialLocaleEntry ||
+              typeof initialLocaleEntry === 'boolean' ||
+              !modifiedLocaleEntry ||
+              typeof modifiedLocaleEntry === 'boolean'
+            ) {
+              return perm;
+            }
+
+            const localesUnchanged =
+              Object.keys(initialLocaleEntry).length === Object.keys(modifiedLocaleEntry).length &&
+              Object.entries(initialLocaleEntry).every(
+                ([locale, val]) => modifiedLocaleEntry[locale] === val
+              );
+
+            if (!localesUnchanged) return perm;
+
+            return { ...perm, properties: { ...perm.properties, locales: null } };
+          });
+
+          return { permissionsToSend, didUpdateConditions };
         },
         hasLocaleValidationErrors() {
           return hasLocaleValidationErrors(modifiedData);

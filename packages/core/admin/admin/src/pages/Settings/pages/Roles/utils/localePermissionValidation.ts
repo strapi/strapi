@@ -46,39 +46,32 @@ const subjectHasLocaleValidationError = (actions: ChildrenForm = {}): boolean =>
 const hasLocaleValidationErrors = (
   modifiedData: PermissionsDataManagerContextValue['modifiedData']
 ): boolean => {
-  return getLocaleValidationErrorSubjects(modifiedData).length > 0;
+  return (['collectionTypes', 'singleTypes'] as const).some((kind) =>
+    Object.values(modifiedData[kind] ?? {}).some(subjectHasLocaleValidationError)
+  );
 };
 
-const getLocaleValidationErrorSubjects = (
-  modifiedData: PermissionsDataManagerContextValue['modifiedData']
-): Array<{ kind: ContentTypeKind; subject: string }> => {
-  const errors: Array<{ kind: ContentTypeKind; subject: string }> = [];
-
-  (['collectionTypes', 'singleTypes'] as const).forEach((kind) => {
-    const contentTypes = modifiedData[kind] ?? {};
-
-    Object.entries(contentTypes).forEach(([subject, actions]) => {
-      if (subjectHasLocaleValidationError(actions)) {
-        errors.push({ kind, subject });
-      }
-    });
-  });
-
-  return errors;
-};
-
-const hasLocaleValidationErrorForSubject = (
+const getLocaleValidationErrorActionKeys = (
   modifiedData: PermissionsDataManagerContextValue['modifiedData'],
   kind: ContentTypeKind,
   subject: string
-): boolean => {
+): string[] => {
   const actions = modifiedData[kind]?.[subject];
 
   if (!actions) {
-    return false;
+    return [];
   }
 
-  return subjectHasLocaleValidationError(actions);
+  return Object.keys(actions).filter((actionKey) => {
+    const actionData = actions[actionKey];
+    const locales = getActionLocales(actionData);
+
+    if (locales === undefined) {
+      return false;
+    }
+
+    return isActionEnabled(actionData) && !hasSelectedLocales(locales);
+  });
 };
 
-export { hasLocaleValidationErrors, hasLocaleValidationErrorForSubject };
+export { hasLocaleValidationErrors, getLocaleValidationErrorActionKeys };

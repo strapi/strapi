@@ -1,43 +1,33 @@
-import {
-  hasLocaleValidationErrors,
-  hasLocaleValidationErrorForSubject,
-} from '../localePermissionValidation';
+import { hasLocaleValidationErrors } from '../localePermissionValidation';
 
-describe('localePermissionValidation', () => {
-  it('does not report errors when Internationalization is not set up for that content type', () => {
+// ---------------------------------------------------------------------------
+// Shared fixtures
+// ---------------------------------------------------------------------------
+
+const action = (fields: Record<string, boolean>, locales?: Record<string, boolean>) => ({
+  properties: {
+    fields,
+    ...(locales !== undefined && { locales }),
+  },
+  conditions: {},
+});
+
+const READ = 'plugin::content-manager.explorer.read';
+const UPDATE = 'plugin::content-manager.explorer.update';
+const DELETE = 'plugin::content-manager.explorer.delete';
+
+// ---------------------------------------------------------------------------
+// hasLocaleValidationErrors
+// Answers: "should the Save button be disabled?"
+// Scans all subjects across both collectionTypes and singleTypes.
+// ---------------------------------------------------------------------------
+
+describe('hasLocaleValidationErrors', () => {
+  it('returns false when no content type has a locales property (non-i18n)', () => {
     const modifiedData = {
       collectionTypes: {
-        'api::article.article': {
-          'plugin::content-manager.explorer.read': {
-            properties: {
-              fields: { title: true },
-            },
-            conditions: {},
-          },
-        },
-      },
-      singleTypes: {},
-      plugins: {},
-      settings: {},
-    };
-
-    expect(hasLocaleValidationErrors(modifiedData)).toBe(false);
-    expect(
-      hasLocaleValidationErrorForSubject(modifiedData, 'collectionTypes', 'api::article.article')
-    ).toBe(false);
-  });
-
-  it('does not report errors when no action is enabled', () => {
-    const modifiedData = {
-      collectionTypes: {
-        'api::article.article': {
-          'plugin::content-manager.explorer.read': {
-            properties: {
-              fields: { title: false },
-              locales: { en: false, fr: false },
-            },
-            conditions: {},
-          },
+        'api::tag.tag': {
+          [READ]: action({ name: true }),
         },
       },
       singleTypes: {},
@@ -48,17 +38,42 @@ describe('localePermissionValidation', () => {
     expect(hasLocaleValidationErrors(modifiedData)).toBe(false);
   });
 
-  it('reports errors when an enabled action has no locales selected', () => {
+  it('returns false when an i18n action is fully disabled (no field or locale selected)', () => {
     const modifiedData = {
       collectionTypes: {
         'api::article.article': {
-          'plugin::content-manager.explorer.read': {
-            properties: {
-              fields: { title: true },
-              locales: { en: false, fr: false },
-            },
-            conditions: {},
-          },
+          [UPDATE]: action({ title: false }, { en: false, fr: false }),
+        },
+      },
+      singleTypes: {},
+      plugins: {},
+      settings: {},
+    };
+
+    expect(hasLocaleValidationErrors(modifiedData)).toBe(false);
+  });
+
+  it('returns false when every enabled i18n action has at least one locale selected', () => {
+    const modifiedData = {
+      collectionTypes: {
+        'api::article.article': {
+          [READ]: action({ title: true }, { en: true, fr: false }),
+          [UPDATE]: action({ title: true }, { en: false, fr: true }),
+        },
+      },
+      singleTypes: {},
+      plugins: {},
+      settings: {},
+    };
+
+    expect(hasLocaleValidationErrors(modifiedData)).toBe(false);
+  });
+
+  it('returns true when an enabled action has no locale selected', () => {
+    const modifiedData = {
+      collectionTypes: {
+        'api::article.article': {
+          [UPDATE]: action({ title: true }, { en: false, fr: false }),
         },
       },
       singleTypes: {},
@@ -67,22 +82,32 @@ describe('localePermissionValidation', () => {
     };
 
     expect(hasLocaleValidationErrors(modifiedData)).toBe(true);
-    expect(
-      hasLocaleValidationErrorForSubject(modifiedData, 'collectionTypes', 'api::article.article')
-    ).toBe(true);
   });
 
-  it('does not report errors when at least one locale is selected', () => {
+  it('returns true when the error is in singleTypes, not collectionTypes', () => {
+    const modifiedData = {
+      collectionTypes: {},
+      singleTypes: {
+        'api::homepage.homepage': {
+          [READ]: action({ title: true }, { en: false }),
+        },
+      },
+      plugins: {},
+      settings: {},
+    };
+
+    expect(hasLocaleValidationErrors(modifiedData)).toBe(true);
+  });
+
+  it('returns true even when only one subject out of many has an error', () => {
     const modifiedData = {
       collectionTypes: {
+        'api::tag.tag': {
+          [READ]: action({ name: true }),
+        },
         'api::article.article': {
-          'plugin::content-manager.explorer.read': {
-            properties: {
-              fields: { title: true },
-              locales: { en: true, fr: false },
-            },
-            conditions: {},
-          },
+          [READ]: action({ title: true }, { en: true }),
+          [DELETE]: action({ title: true }, { en: false, fr: false }),
         },
       },
       singleTypes: {},
@@ -90,6 +115,6 @@ describe('localePermissionValidation', () => {
       settings: {},
     };
 
-    expect(hasLocaleValidationErrors(modifiedData)).toBe(false);
+    expect(hasLocaleValidationErrors(modifiedData)).toBe(true);
   });
 });

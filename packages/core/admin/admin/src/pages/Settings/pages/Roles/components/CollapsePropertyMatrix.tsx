@@ -21,7 +21,7 @@ import {
 } from '../hooks/usePermissionsDataManager';
 import { cellWidth, firstRowWidth, rowHeight } from '../utils/constants';
 import { getCheckboxState } from '../utils/getCheckboxState';
-import { hasLocaleValidationErrorForSubject } from '../utils/localePermissionValidation';
+import { getLocaleValidationErrorActionKeys } from '../utils/localePermissionValidation';
 
 import { CollapseLabel } from './CollapseLabel';
 import { HiddenAction } from './HiddenAction';
@@ -55,7 +55,7 @@ const CollapsePropertyMatrix = ({
   propertyName,
   subject,
 }: CollapsePropertyMatrixProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatList } = useIntl();
   const { modifiedData } = usePermissionsDataManager();
   const propertyActions = React.useMemo(
     () =>
@@ -71,21 +71,34 @@ const CollapsePropertyMatrix = ({
   );
 
   const contentTypeKind = pathToData.split('..')[0] as 'collectionTypes' | 'singleTypes';
-  const showLocaleValidationError =
-    propertyName === 'locales' &&
-    subject !== undefined &&
-    hasLocaleValidationErrorForSubject(modifiedData, contentTypeKind, subject);
+  const localeValidationErrorLabels = React.useMemo(() => {
+    if (propertyName !== 'locales' || subject === undefined) return [];
+    const errorKeys = getLocaleValidationErrorActionKeys(modifiedData, contentTypeKind, subject);
+    return propertyActions
+      .filter(
+        ({ actionId, isActionRelatedToCurrentProperty }) =>
+          isActionRelatedToCurrentProperty && errorKeys.includes(actionId)
+      )
+      .map(({ label }) => label);
+  }, [propertyName, subject, modifiedData, contentTypeKind, propertyActions]);
 
   return (
     <Flex display="inline-flex" direction="column" alignItems="stretch" minWidth={0}>
       <Header label={label} headers={propertyActions} />
-      {showLocaleValidationError && (
+      {localeValidationErrorLabels.length > 0 && (
         <Box paddingLeft={6} paddingTop={2} paddingBottom={2}>
           <Typography variant="pi" textColor="danger600">
-            {formatMessage({
-              id: 'Settings.roles.form.permissions.locales.validation',
-              defaultMessage: 'Permissions must apply to at least one locale.',
-            })}
+            {formatMessage(
+              {
+                id: 'Settings.roles.form.permissions.locales.validation',
+                defaultMessage:
+                  '{count, plural, one {The {actions} action must apply to at least one locale.} other {The {actions} actions must apply to at least one locale.}}',
+              },
+              {
+                count: localeValidationErrorLabels.length,
+                actions: formatList(localeValidationErrorLabels, { type: 'conjunction' }),
+              }
+            )}
           </Typography>
         </Box>
       )}
