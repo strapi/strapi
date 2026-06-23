@@ -3,6 +3,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { toggleRateLimiting } from '../../../utils/rate-limit';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '../../constants';
 import { login } from '../../../utils/login';
+import { clickAndWait } from '../../../utils/shared';
 
 test.describe('Login', () => {
   test.beforeEach(async ({ page, context }) => {
@@ -53,6 +54,26 @@ test.describe('Login', () => {
       await context.clearCookies();
       await page.goto('/admin');
       await expect(page).toHaveTitle(TITLE_LOGIN);
+    });
+
+    test('A logged-in admin can reach the core sections of the app', async ({ page }) => {
+      await login({ page });
+      await expect(page).toHaveTitle(TITLE_HOME);
+
+      // Content Manager loads
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await expect(page).toHaveURL(/\/admin\/content-manager/);
+      await expect(page.getByRole('heading', { name: 'Content Manager' })).toBeVisible();
+
+      // Content-Type Builder loads
+      await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+      await expect(page).toHaveURL(/content-type-builder/);
+      await expect(page.getByRole('heading', { name: 'Content-Type Builder' })).toBeVisible();
+
+      // Settings loads
+      await clickAndWait(page, page.getByRole('link', { name: 'Settings' }));
+      await expect(page).toHaveURL(/\/admin\/settings/);
+      await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
     });
   });
 

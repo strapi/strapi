@@ -1,8 +1,8 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { resetFiles } from '../../../../utils/file-reset';
 import { createCollectionType, type AddAttribute } from '../../../../utils/content-types';
 import { sharedSetup } from '../../../../utils/setup';
-import { clickAndWait } from '../../../../utils/shared';
+import { clickAndWait, navToHeader } from '../../../../utils/shared';
 
 test.describe('Create collection type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -237,6 +237,12 @@ test.describe('Create collection type with all field types', () => {
       };
 
       await createCollectionType(page, options);
+
+      // Verify the collection type is usable in the Content Manager: it appears in the list view and
+      // its create form renders a scalar field. This closes the #2 critical path (CT visible in CM).
+      await navToHeader(page, ['Content Manager', options.name], options.name);
+      await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
+      await expect(page.getByRole('textbox', { name: 'testtext' })).toBeVisible();
     }
   );
 });
