@@ -9,9 +9,7 @@
  *   "refresh token cookies missing Max-Age attribute when sessions.cookie.maxAge is configured"
  *
  * Verifies that `maxAge` from `sessions.cookie.maxAge` is forwarded to
- * `ctx.cookies.set()` in:
- *   - the `callback` action (local login)
- *   - the `refresh` action (token rotation)
+ * `ctx.cookies.set()` in callback (local + OAuth) and refresh actions.
  */
 
 // ---------------------------------------------------------------------------
@@ -47,12 +45,24 @@ jest.mock('@strapi/utils', () => ({
 // Path is relative to the controller file being required (server/controllers/),
 // so from __tests__ perspective, ../utils maps to server/utils.
 jest.mock('../../utils', () => ({
-  getService: (name) => {
+  getService(name) {
     if (name === 'user') {
       return { validatePassword: jest.fn().mockResolvedValue(true) };
     }
     if (name === 'jwt') {
       return { issue: jest.fn().mockReturnValue('legacy-jwt-token') };
+    }
+    if (name === 'providers') {
+      return {
+        connect: jest.fn().mockResolvedValue({
+          id: 2,
+          username: 'oauthuser',
+          email: 'oauth@example.com',
+          provider: 'github',
+          confirmed: true,
+          blocked: false,
+        }),
+      };
     }
     return {};
   },
@@ -76,7 +86,9 @@ jest.mock('crypto', () => ({
   randomBytes: jest.fn().mockReturnValue({ toString: () => 'mock-reset-token' }),
 }));
 
-const { createMockSessionManager } = require('../../../../../../tests/helpers/create-session-manager-mock');
+const {
+  createMockSessionManager,
+} = require('../../../../../../tests/helpers/create-session-manager-mock');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -101,7 +113,17 @@ const makeUpSessions = (maxAge) => ({
  * Builds a minimal mock `strapi` object for the auth controller.
  * Accepts a pre-built sessionManager callable (from createMockSessionManager).
  */
-const buildStrapi = ({ upSessions, sessionManagerCallable }) => ({
+const defaultGrantSettings = {
+  email: { enabled: true },
+  local: { enabled: true },
+  github: { enabled: true },
+};
+
+const buildStrapi = ({
+  upSessions,
+  sessionManagerCallable,
+  grantSettings = defaultGrantSettings,
+}) => ({
   config: {
     get: jest.fn((key, defaultVal) => {
       if (key === 'plugin::users-permissions.jwtManagement') return 'refresh';
@@ -111,10 +133,14 @@ const buildStrapi = ({ upSessions, sessionManagerCallable }) => ({
   },
   sessionManager: sessionManagerCallable,
   store: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({
-      // grant settings: enable local / email provider
-      email: { enabled: true },
-      local: { enabled: true },
+    get: jest.fn(({ key }) => {
+      if (key === 'grant') {
+        return Promise.resolve(grantSettings);
+      }
+      if (key === 'advanced') {
+        return Promise.resolve({});
+      }
+      return Promise.resolve({});
     }),
   }),
   db: {
@@ -143,11 +169,18 @@ const buildStrapi = ({ upSessions, sessionManagerCallable }) => ({
  * Builds a minimal Koa-like context.
  * `cookies.set` is a jest spy so we can assert the options passed to it.
  */
-const buildCtx = ({ body = {}, headers = {}, cookieValue = null } = {}) => {
+const buildCtx = ({
+  body = {},
+  headers = {},
+  cookieValue = null,
+  params = { provider: 'local' },
+  query = {},
+} = {}) => {
   const cookiesSet = jest.fn();
   return {
-    params: { provider: 'local' },
+    params,
     request: { body, header: headers },
+    query,
     state: { auth: {} },
     cookies: {
       set: cookiesSet,
@@ -172,16 +205,14 @@ const getCookieOptions = (ctx) => {
 // ---------------------------------------------------------------------------
 
 describe('auth controller — refresh token cookie options', () => {
-  let mockSessionManager;
   let sessionManagerCallable;
 
   beforeEach(() => {
-    ({ sessionManager: sessionManagerCallable, originApi: mockSessionManager } =
-      createMockSessionManager({
-        generateRefreshToken: jest.fn().mockResolvedValue({ token: 'mock-refresh-token' }),
-        generateAccessToken: jest.fn().mockResolvedValue({ token: 'mock-access-token' }),
-        rotateRefreshToken: jest.fn().mockResolvedValue({ token: 'rotated-refresh-token' }),
-      }));
+    ({ sessionManager: sessionManagerCallable } = createMockSessionManager({
+      generateRefreshToken: jest.fn().mockResolvedValue({ token: 'mock-refresh-token' }),
+      generateAccessToken: jest.fn().mockResolvedValue({ token: 'mock-access-token' }),
+      rotateRefreshToken: jest.fn().mockResolvedValue({ token: 'rotated-refresh-token' }),
+    }));
   });
 
   // ── refresh action ────────────────────────────────────────────────────────
@@ -312,6 +343,40 @@ describe('auth controller — refresh token cookie options', () => {
 
       const options = getCookieOptions(ctx);
       expect(options.maxAge).toBeUndefined();
+    });
+  });
+
+  // ── callback action (OAuth provider) ─────────────────────────────────────
+
+  describe('callback() — OAuth provider', () => {
+    beforeEach(() => {
+      global.strapi = buildStrapi({
+        upSessions: makeUpSessions(120000),
+        sessionManagerCallable,
+      });
+    });
+
+    afterEach(() => {
+      delete global.strapi;
+    });
+
+    it('passes maxAge to ctx.cookies.set when sessions.cookie.maxAge is configured', async () => {
+      const upSessions = makeUpSessions(120000);
+      const strapi = buildStrapi({ upSessions, sessionManagerCallable });
+      global.strapi = strapi;
+
+      const controller = require('../auth')({ strapi });
+
+      const ctx = buildCtx({
+        params: { provider: 'github' },
+        headers: { 'x-strapi-refresh-cookie': 'httpOnly' },
+        query: { access_token: 'oauth-access-token' },
+      });
+
+      await controller.callback(ctx);
+
+      const options = getCookieOptions(ctx);
+      expect(options).toHaveProperty('maxAge', 120000);
     });
   });
 });
