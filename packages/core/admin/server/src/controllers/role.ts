@@ -162,9 +162,11 @@ export default {
 
     await validatedUpdatePermissionsInput(input);
 
-    await roleService.hooks.willValidateUpdatePermissions.call(input.permissions);
+    const normalizedPermissions = (await roleService.hooks.willValidateUpdatePermissions.call(
+      input.permissions
+    )) as typeof input.permissions;
 
-    const permissions = await roleService.assignPermissions(role.id, input.permissions);
+    const permissions = await roleService.assignPermissions(role.id, normalizedPermissions);
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 

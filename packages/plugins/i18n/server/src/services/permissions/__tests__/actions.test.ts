@@ -38,7 +38,7 @@ describe('i18n permissions actions', () => {
     setupCommonMocks();
   });
 
-  describe('validateRolePermissionsLocales', () => {
+  describe('normalizeRolePermissionsLocales', () => {
     beforeEach(() => {
       global.strapi = {
         getModel: jest.fn((uid: string) => {
@@ -60,76 +60,92 @@ describe('i18n permissions actions', () => {
       } as any;
     });
 
-    test('rejects enabled permissions on localized content types with empty locales', async () => {
-      const { validateRolePermissionsLocales } = actionsService;
+    test('fills in default locale for permissions with empty locales', async () => {
+      const { normalizeRolePermissionsLocales } = actionsService;
 
-      await expect(
-        validateRolePermissionsLocales([
-          {
-            action: 'plugin::content-manager.explorer.read',
-            subject: localizedModel.uid,
-            properties: {
-              fields: ['title'],
-              locales: [],
-            },
-          },
-        ])
-      ).rejects.toThrow('Permissions must apply to at least one locale.');
+      const result = await normalizeRolePermissionsLocales([
+        {
+          action: 'plugin::content-manager.explorer.read',
+          subject: localizedModel.uid,
+          properties: { fields: ['title'], locales: [] },
+        },
+      ]);
+
+      expect(result[0].properties.locales).toEqual(['en']);
     });
 
-    test('allows permissions with null locales', async () => {
-      const { validateRolePermissionsLocales } = actionsService;
+    test('fills in default locale for permissions with missing locales', async () => {
+      const { normalizeRolePermissionsLocales } = actionsService;
 
-      await expect(
-        validateRolePermissionsLocales([
-          {
-            action: 'plugin::content-manager.explorer.read',
-            subject: localizedModel.uid,
-            properties: {
-              fields: ['title'],
-              locales: null,
-            },
-          },
-        ])
-      ).resolves.toBeUndefined();
+      const result = await normalizeRolePermissionsLocales([
+        {
+          action: 'plugin::content-manager.explorer.read',
+          subject: localizedModel.uid,
+          properties: { fields: ['title'] },
+        },
+      ]);
+
+      expect(result[0].properties.locales).toEqual(['en']);
     });
 
-    test('allows permissions when locales do not apply to the action', async () => {
+    test('leaves permissions with null locales unchanged', async () => {
+      const { normalizeRolePermissionsLocales } = actionsService;
+
+      const permission = {
+        action: 'plugin::content-manager.explorer.read',
+        subject: localizedModel.uid,
+        properties: { fields: ['title'], locales: null },
+      };
+
+      const result = await normalizeRolePermissionsLocales([permission]);
+
+      expect(result[0].properties.locales).toBeNull();
+    });
+
+    test('leaves permissions unchanged when locales do not apply to the action', async () => {
       global.strapi.admin.services.permission.actionProvider.appliesToProperty = jest.fn(() =>
         Promise.resolve(false)
       );
 
-      const { validateRolePermissionsLocales } = actionsService;
+      const { normalizeRolePermissionsLocales } = actionsService;
 
-      await expect(
-        validateRolePermissionsLocales([
-          {
-            action: 'plugin::content-manager.explorer.create',
-            subject: localizedModel.uid,
-            properties: {
-              fields: ['title'],
-              locales: [],
-            },
-          },
-        ])
-      ).resolves.toBeUndefined();
+      const permission = {
+        action: 'plugin::content-manager.explorer.create',
+        subject: localizedModel.uid,
+        properties: { fields: ['title'], locales: [] },
+      };
+
+      const result = await normalizeRolePermissionsLocales([permission]);
+
+      expect(result[0].properties.locales).toEqual([]);
     });
 
-    test('allows permissions with selected locales', async () => {
-      const { validateRolePermissionsLocales } = actionsService;
+    test('leaves permissions with selected locales unchanged', async () => {
+      const { normalizeRolePermissionsLocales } = actionsService;
 
-      await expect(
-        validateRolePermissionsLocales([
-          {
-            action: 'plugin::content-manager.explorer.read',
-            subject: localizedModel.uid,
-            properties: {
-              fields: ['title'],
-              locales: ['en'],
-            },
-          },
-        ])
-      ).resolves.toBeUndefined();
+      const permission = {
+        action: 'plugin::content-manager.explorer.read',
+        subject: localizedModel.uid,
+        properties: { fields: ['title'], locales: ['en'] },
+      };
+
+      const result = await normalizeRolePermissionsLocales([permission]);
+
+      expect(result[0].properties.locales).toEqual(['en']);
+    });
+
+    test('leaves non-localized content type permissions unchanged', async () => {
+      const { normalizeRolePermissionsLocales } = actionsService;
+
+      const permission = {
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::non-localized.non-localized',
+        properties: { fields: ['title'] },
+      };
+
+      const result = await normalizeRolePermissionsLocales([permission]);
+
+      expect(result[0]).toBe(permission);
     });
   });
 

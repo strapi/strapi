@@ -5,15 +5,12 @@ import validateLocaleCreation from './controllers/validate-locale-creation';
 import graphqlProvider from './graphql';
 import { getService } from './utils';
 import { aiLocalizationJob } from './models/ai-localization-job';
-import { repairLegacyPermissionsWithLocales } from './migrations/database/repair-legacy-permissions-with-locales';
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.get('models').add(aiLocalizationJob);
 
   extendContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
-
-  strapi.db.migrations.providers.internal.register(repairLegacyPermissionsWithLocales);
 
   strapi
     .hook('strapi::content-types.afterSync')

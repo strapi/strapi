@@ -1,8 +1,5 @@
 import { isArray, getOr, prop } from 'lodash/fp';
-import { errors } from '@strapi/utils';
 import { getService } from '../../utils';
-
-const { ApplicationError } = errors;
 
 const actions = [
   {
@@ -119,40 +116,43 @@ const needsLocalesPatch = (properties: Record<string, unknown> = {}) => {
   return Array.isArray(locales) && locales.length === 0;
 };
 
-const validateRolePermissionsLocales = async (permissions: any[]) => {
+const normalizeRolePermissionsLocales = async (permissions: any[]): Promise<any[]> => {
   const { isLocalizedContentType } = getService('content-types');
   const { actionProvider } = strapi.service('admin::permission');
+  const defaultLocale = await getService('locales').getDefaultLocale();
 
-  for (const permission of permissions) {
-    const { subject, action, properties = {} } = permission;
+  return Promise.all(
+    permissions.map(async (permission) => {
+      const { subject, action, properties = {} } = permission;
 
-    if (!subject) {
-      continue;
-    }
+      if (!subject) {
+        return permission;
+      }
 
-    const model = strapi.getModel(subject);
+      const model = strapi.getModel(subject);
 
-    if (!model || !isLocalizedContentType(model)) {
-      continue;
-    }
+      if (!model || !isLocalizedContentType(model)) {
+        return permission;
+      }
 
-    const appliesToLocales = await actionProvider.appliesToProperty('locales', action, subject);
+      const appliesToLocales = await actionProvider.appliesToProperty('locales', action, subject);
 
-    if (!appliesToLocales) {
-      continue;
-    }
+      if (!appliesToLocales) {
+        return permission;
+      }
 
-    const { locales } = properties;
+      // null means access to all locales — same semantics as the permission engine handler
+      if (properties.locales === null) {
+        return permission;
+      }
 
-    // null means access to all locales — same semantics as the permission engine handler
-    if (locales === null) {
-      continue;
-    }
+      if (needsLocalesPatch(properties) && defaultLocale) {
+        return { ...permission, properties: { ...properties, locales: [defaultLocale] } };
+      }
 
-    if (locales === undefined || (Array.isArray(locales) && locales.length === 0)) {
-      throw new ApplicationError('Permissions must apply to at least one locale.');
-    }
-  }
+      return permission;
+    })
+  );
 };
 
 /**
@@ -173,18 +173,12 @@ const repairPermissionsForNewlyLocalizedTypes = async ({
 
   const { isLocalizedContentType } = getService('content-types');
 
-  const newlyLocalizedUids: string[] = [];
-  for (const uid in contentTypes) {
-    if (!oldContentTypes[uid]) {
-      continue;
-    }
-    if (
+  const newlyLocalizedUids = Object.keys(contentTypes).filter(
+    (uid) =>
+      oldContentTypes[uid] &&
       !isLocalizedContentType(oldContentTypes[uid]) &&
       isLocalizedContentType(contentTypes[uid])
-    ) {
-      newlyLocalizedUids.push(uid);
-    }
-  }
+  );
 
   if (newlyLocalizedUids.length === 0) {
     return;
@@ -255,7 +249,7 @@ const registerI18nActionsHooks = () => {
 
   actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyLocalesPropertyToSubject);
   hooks.willResetSuperAdminPermissions.register(addAllLocalesToPermissions);
-  hooks.willValidateUpdatePermissions.register(validateRolePermissionsLocales);
+  hooks.willValidateUpdatePermissions.register(normalizeRolePermissionsLocales);
 };
 
 const updateActionsProperties = () => {
@@ -275,5 +269,5 @@ export default {
   updateActionsProperties,
   syncSuperAdminPermissionsWithLocales,
   repairPermissionsForNewlyLocalizedTypes,
-  validateRolePermissionsLocales,
+  normalizeRolePermissionsLocales,
 };
