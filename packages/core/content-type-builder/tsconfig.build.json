@@ -4,6 +4,7 @@
   "compilerOptions": {
     "declarationDir": "./dist",
     "outDir": "./dist",
+    "rootDir": ".",
     "types": ["@testing-library/jest-dom", "jest"]
   }
 }
