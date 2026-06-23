@@ -123,6 +123,7 @@ module.exports = ({ strapi }) => ({
             sameSite: upSessions.cookie?.sameSite ?? 'lax',
             path: upSessions.cookie?.path ?? '/',
             domain: upSessions.cookie?.domain,
+            maxAge: upSessions.cookie?.maxAge,
             overwrite: true,
           };
 
@@ -182,6 +183,7 @@ module.exports = ({ strapi }) => ({
             sameSite: upSessions.cookie?.sameSite ?? 'lax',
             path: upSessions.cookie?.path ?? '/',
             domain: upSessions.cookie?.domain,
+            maxAge: upSessions.cookie?.maxAge,
             overwrite: true,
           };
           ctx.cookies.set(cookieName, refresh.token, cookieOptions);
@@ -364,6 +366,7 @@ module.exports = ({ strapi }) => ({
         sameSite: upSessions.cookie?.sameSite ?? 'lax',
         path: upSessions.cookie?.path ?? '/',
         domain: upSessions.cookie?.domain,
+        maxAge: upSessions.cookie?.maxAge,
         overwrite: true,
       };
       ctx.cookies.set(cookieName, rotation.token, cookieOptions);
