@@ -13,9 +13,7 @@ test.describe('Publish with draft relations warning', () => {
     await login({ page });
   });
 
-  test('warns on publish, can cancel or publish without relations while draft keeps them', async ({
-    page,
-  }) => {
+  test('warns on publish with bidirectional M2M draft relations', async ({ page }) => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
     await page.waitForURL(CREATE_URL);
@@ -28,13 +26,9 @@ test.describe('Publish with draft relations warning', () => {
 
     const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
     await expect(confirmationDialog).toBeVisible();
+    await expect(confirmationDialog.getByText(/1 linked entry is still in draft/)).toBeVisible();
     await expect(
-      confirmationDialog.getByText(
-        'This entry is related to 1 draft entry. They will not appear on the live site until those entries are published.'
-      )
-    ).toBeVisible();
-    await expect(
-      confirmationDialog.getByRole('button', { name: 'Publish without relations' })
+      confirmationDialog.getByRole('button', { name: 'Publish', exact: true })
     ).toBeVisible();
 
     await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
@@ -46,13 +40,13 @@ test.describe('Publish with draft relations warning', () => {
     await expect(confirmationDialog).toBeVisible();
     await clickAndWait(
       page,
-      confirmationDialog.getByRole('button', { name: 'Publish without relations' })
+      confirmationDialog.getByRole('button', { name: 'Publish', exact: true })
     );
     await findAndClose(page, 'Published Document');
 
     await expect(page.getByRole('tab', { name: 'Published' })).toBeEnabled();
     await clickAndWait(page, page.getByRole('tab', { name: 'Published' }));
-    await expect(page.getByRole('button', { name: 'Coach Beard' })).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Coach Beard' })).toBeVisible();
 
     await clickAndWait(page, page.getByRole('tab', { name: 'Draft' }));
     await expect(page.getByRole('button', { name: 'Coach Beard' })).toBeVisible();

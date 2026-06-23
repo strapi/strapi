@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { clickAndWait, findAndClose } from '../../../../utils/shared';
+import {
+  clickAndWait,
+  findAndClose,
+  publishAndConfirmDraftRelations,
+} from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -31,7 +35,7 @@ test.describe('Edit View', () => {
       await page.getByRole('button', { name: 'Publish' }).click();
 
       // Verify that a warning about a single draft relation is displayed
-      await expect(page.getByText('This entry is related to 1')).toBeVisible();
+      await expect(page.getByText(/1 linked entry is still in draft/)).toBeVisible();
       await page.getByRole('button', { name: 'Cancel' }).click();
 
       // Save the current state of the entry
@@ -45,7 +49,7 @@ test.describe('Edit View', () => {
       await page.getByRole('button', { name: 'Publish' }).click();
 
       // Verify that a warning about two draft relations is displayed
-      await expect(page.getByText('This entry is related to 2')).toBeVisible();
+      await expect(page.getByText(/2 linked entries are still in draft/)).toBeVisible();
       await page.getByRole('button', { name: 'Cancel' }).click();
 
       // Save the current state of the entry
@@ -59,7 +63,7 @@ test.describe('Edit View', () => {
       await page.getByRole('button', { name: 'Publish' }).click();
 
       // Verify that a warning about three draft relations is displayed
-      await expect(page.getByText('This entry is related to 3')).toBeVisible();
+      await expect(page.getByText(/3 linked entries are still in draft/)).toBeVisible();
     });
 
     test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
@@ -303,7 +307,7 @@ test.describe('Edit View', () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
 
-      await page.getByRole('button', { name: 'Publish' }).click();
+      await publishAndConfirmDraftRelations(page);
 
       await findAndClose(page, 'Published Document');
 
@@ -341,7 +345,7 @@ test.describe('Edit View', () => {
       );
       await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
 
-      await page.getByRole('button', { name: 'Publish' }).click();
+      await publishAndConfirmDraftRelations(page);
       await findAndClose(page, 'Published Document');
 
       await expect(page.getByRole('tab', { name: 'Draft' })).toBeVisible();

@@ -20,13 +20,13 @@ const articleModel = {
       type: 'relation',
       relation: 'manyToMany',
       target: TAG_UID,
-      targetAttribute: 'articles',
+      inversedBy: 'articles',
     },
     category: {
       type: 'relation',
       relation: 'manyToOne',
       target: TAG_UID,
-      targetAttribute: 'articlesMo',
+      inversedBy: 'articlesMo',
     },
   },
 };

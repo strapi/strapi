@@ -415,10 +415,16 @@ interface DocumentActionButtonProps extends Omit<Action, 'type'> {
 
 const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
+  const lastDialogRequestIdRef = React.useRef<number | undefined>();
   const { toggleNotification } = useNotification();
 
-  React.useEffect(() => {
-    if (action.dialogRequestId && action.dialog) {
+  React.useLayoutEffect(() => {
+    if (
+      action.dialogRequestId != null &&
+      action.dialogRequestId !== lastDialogRequestIdRef.current &&
+      action.dialog
+    ) {
+      lastDialogRequestIdRef.current = action.dialogRequestId;
       setDialogId(action.id);
     }
   }, [action.dialog, action.dialogRequestId, action.id]);
@@ -504,6 +510,7 @@ const DocumentActionsMenu = ({
 }: DocumentActionsMenuProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [dialogId, setDialogId] = React.useState<string | null>(null);
+  const lastDialogRequestIdRef = React.useRef<Record<string, number | undefined>>({});
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
@@ -543,9 +550,14 @@ const DocumentActionsMenu = ({
     }
   };
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     actions.forEach((action) => {
-      if (action.dialogRequestId && action.dialog) {
+      if (
+        action.dialogRequestId != null &&
+        action.dialogRequestId !== lastDialogRequestIdRef.current[action.id] &&
+        action.dialog
+      ) {
+        lastDialogRequestIdRef.current[action.id] = action.dialogRequestId;
         setDialogId(action.id);
       }
     });

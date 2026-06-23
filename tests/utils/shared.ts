@@ -107,6 +107,37 @@ export const clickAndWait = async (page: Page, locator: Locator) => {
   await page.waitForLoadState('networkidle');
 };
 
+/**
+ * Clicks Publish (or a custom publish button) and confirms the draft-relations
+ * dialog when it appears. Bidirectional M2M warnings use a "Publish" confirm;
+ * xToOne-style warnings use "Publish without relations".
+ */
+export const publishAndConfirmDraftRelations = async (
+  page: Page,
+  publishButton: Locator = page.getByRole('button', { name: 'Publish' })
+) => {
+  await clickAndWait(page, publishButton);
+
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+
+  try {
+    await dialog.waitFor({ state: 'visible', timeout: 3000 });
+  } catch {
+    return;
+  }
+
+  const publishWithoutRelations = dialog.getByRole('button', {
+    name: 'Publish without relations',
+  });
+
+  if (await publishWithoutRelations.isVisible()) {
+    await clickAndWait(page, publishWithoutRelations);
+    return;
+  }
+
+  await clickAndWait(page, dialog.getByRole('button', { name: 'Publish', exact: true }));
+};
+
 // ---------------------------------------------------------------------------
 // E2E timing / sync (toast vs API, SPA navigations, guided tour)
 //

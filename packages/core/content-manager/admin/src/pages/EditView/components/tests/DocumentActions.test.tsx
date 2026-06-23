@@ -182,7 +182,7 @@ describe('DocumentActions', () => {
       />
     );
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
 
     rerender(
       <DocumentActions
@@ -204,7 +204,7 @@ describe('DocumentActions', () => {
       />
     );
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
     expect(screen.getByText('Draft relations will not be included.')).toBeInTheDocument();
   });
 

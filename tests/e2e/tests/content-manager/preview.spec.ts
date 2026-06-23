@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  publishAndConfirmDraftRelations,
+} from '../../../utils/shared';
 import { resetFiles } from '../../../utils/file-reset';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -87,7 +92,7 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Publish the document
-    await page.getByRole('button', { name: /publish/i }).click();
+    await publishAndConfirmDraftRelations(page, page.getByRole('button', { name: /publish/i }));
 
     // Check that preview opens in its own page
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
@@ -123,7 +128,7 @@ test.describe('Preview', () => {
     // Try to publish - should work without conditional field validation errors
     const publishButton = page.getByRole('button', { name: /publish/i });
     await expect(publishButton).toBeEnabled();
-    await clickAndWait(page, publishButton);
+    await publishAndConfirmDraftRelations(page, publishButton);
 
     // Verify publication succeeded and no error notifications appeared
     await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
@@ -179,7 +184,7 @@ describeOnCondition(edition === 'EE')('Advanced Preview', () => {
 
     // Publish
     await expect(publishButton).toBeEnabled();
-    await clickAndWait(page, publishButton);
+    await publishAndConfirmDraftRelations(page, publishButton);
     await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
     await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
     await expect(publishedTab).toBeEnabled();
