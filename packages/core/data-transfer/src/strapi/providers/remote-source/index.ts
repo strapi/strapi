@@ -1,9 +1,8 @@
+import fp from 'lodash/fp.js';
 import { createHash, type Hash } from 'crypto';
 import { PassThrough, Readable, Writable } from 'stream';
 import type { Struct, Utils } from '@strapi/types';
 import { WebSocket } from 'ws';
-import { castArray } from 'lodash/fp';
-
 import type {
   IAsset,
   IMetadata,
@@ -28,6 +27,8 @@ import {
   trimTrailingSlash,
   type RetryMessageOptions,
 } from '../utils';
+
+const { castArray } = fp;
 
 /**
  * Pull server answers `assets` step `start` only after `estimateAssetTotals` (DB stream; remote sizes from DB when complete, else HTTP like `createAssetsStream`).

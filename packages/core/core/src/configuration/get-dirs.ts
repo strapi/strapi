@@ -1,8 +1,9 @@
+import fp from 'lodash/fp.js';
 import { join, resolve } from 'path';
-import { get } from 'lodash/fp';
-
 import type { Core } from '@strapi/types';
 import type { StrapiOptions } from '../Strapi';
+
+const { get } = fp;
 
 export type Options = {
   app: string;

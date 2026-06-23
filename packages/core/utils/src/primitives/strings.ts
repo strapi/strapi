@@ -1,6 +1,10 @@
-import _, { kebabCase } from 'lodash';
-import { trimChars, trimCharsEnd, trimCharsStart } from 'lodash/fp';
+import fp from 'lodash/fp.js';
+import _ from 'lodash';
+
 import slugify from '@sindresorhus/slugify';
+
+const { trimChars, trimCharsEnd, trimCharsStart } = fp;
+const { kebabCase } = _;
 
 const nameToSlug = (name: string, options: slugify.Options = { separator: '-' }) =>
   slugify(name, options);

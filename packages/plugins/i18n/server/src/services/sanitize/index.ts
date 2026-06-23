@@ -1,9 +1,10 @@
+import fp from 'lodash/fp.js';
+import { traverseEntity } from '@strapi/utils';
 import type { Core, Schema, Data } from '@strapi/types';
 
-import { traverseEntity } from '@strapi/utils';
-import { curry } from 'lodash/fp';
-
 import { getService } from '../../utils';
+
+const { curry } = fp;
 
 const LOCALIZATION_FIELDS = ['locale', 'localizations'];
 

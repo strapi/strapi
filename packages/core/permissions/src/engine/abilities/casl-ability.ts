@@ -1,8 +1,11 @@
+import fp from 'lodash/fp.js';
+import { AbilityBuilder, Ability } from '@casl/ability';
 import * as sift from 'sift';
 import qs from 'qs';
-import { AbilityBuilder, Ability } from '@casl/ability';
-import { pick, isNil, isObject } from 'lodash/fp';
+
 import type { ParametrizedAction, PermissionRule } from '../../types';
+
+const { pick, isNil, isObject } = fp;
 
 export interface CustomAbilityBuilder {
   can(permission: PermissionRule): ReturnType<AbilityBuilder<Ability>['can']>;

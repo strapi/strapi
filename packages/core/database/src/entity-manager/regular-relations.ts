@@ -1,5 +1,6 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/no-namespace */
-import { map, isEmpty } from 'lodash/fp';
+
 import type { Knex } from 'knex';
 
 import {
@@ -14,6 +15,8 @@ import { createQueryBuilder } from '../query';
 import { addSchema } from '../utils/knex';
 import type { Database } from '..';
 import type { ID, Relation, Model } from '../types';
+
+const { map, isEmpty } = fp;
 
 declare module 'knex' {
   namespace Knex {

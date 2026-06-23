@@ -1,8 +1,10 @@
-import _, { snakeCase } from 'lodash/fp';
+import _ from 'lodash/fp.js';
 
 import { identifiers } from '../utils/identifiers';
 import type { Meta, Metadata } from './metadata';
 import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
+
+const { snakeCase } = _;
 
 interface JoinColumnOptions {
   attribute: (Relation.OneToOne | Relation.ManyToOne) & Relation.Owner;

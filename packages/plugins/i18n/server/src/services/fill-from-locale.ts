@@ -1,6 +1,8 @@
-import { isArray } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { contentTypes } from '@strapi/utils';
 import type { UID, Schema, Core } from '@strapi/types';
+
+const { isArray } = fp;
 
 const READ_ACTION = 'plugin::content-manager.explorer.read';
 

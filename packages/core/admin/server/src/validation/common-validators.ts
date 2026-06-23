@@ -1,10 +1,12 @@
+import fp from 'lodash/fp.js';
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-import { isEmpty, has, isNil, isArray } from 'lodash/fp';
 import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
 import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from './common-functions';
 import actions from '../domain/action/index';
+
+const { isEmpty, has, isNil, isArray } = fp;
 
 const { actionFields } = actions;
 

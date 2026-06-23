@@ -1,5 +1,6 @@
-import { mergeWith } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
+const { mergeWith } = fp;
 export const CSP_DEFAULTS = {
   'connect-src': ["'self'", 'https:'],
   'img-src': ["'self'", 'data:', 'blob:', 'https://market-assets.strapi.io'],

@@ -1,14 +1,17 @@
+import fp from 'lodash/fp.js';
+import _ from 'lodash';
 /**
  * Entity validator
  * Module that will validate input data for entity creation or edition
  */
 
-import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
-import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import jsonLogic from 'json-logic-js';
 import strapiUtils from '@strapi/utils';
 import type { Modules, UID, Struct, Schema } from '@strapi/types';
 import { Validators, ValidatorMetas } from './validators';
+
+const { uniqBy, castArray, isNil, isArray, mergeWith } = _;
+const { has, prop, isObject, isEmpty } = fp;
 
 type CreateOrUpdate = 'creation' | 'update';
 

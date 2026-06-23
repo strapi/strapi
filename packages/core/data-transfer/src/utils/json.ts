@@ -1,5 +1,6 @@
-import { isArray, isObject, zip, isEqual, uniq } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
+const { isArray, isObject, zip, isEqual, uniq } = fp;
 const createContext = (): Context => ({ path: [] });
 
 /**

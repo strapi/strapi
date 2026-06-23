@@ -1,7 +1,9 @@
-import { snakeCase } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Database } from '../..';
 import type { Relation } from '../../types';
 import { identifiers } from '../../utils/identifiers';
+
+const { snakeCase } = fp;
 
 type Link = {
   relation: Relation.Bidirectional & { inversedBy: string };

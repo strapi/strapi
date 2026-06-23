@@ -1,9 +1,11 @@
-import { isUndefined, get, isNil } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { yup, validateYupSchema } from '@strapi/utils';
 import { getService } from '../../../utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
 import { folderExists } from './utils';
 import { isFolderOrChild } from '../../utils/folders';
+
+const { isUndefined, get, isNil } = fp;
 
 const NO_SLASH_REGEX = /^[^/]+$/;
 const NO_SPACES_AROUND = /^(?! ).+(?<! )$/;

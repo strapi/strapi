@@ -1,6 +1,8 @@
-import { defaultsDeep } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import koaStatic from 'koa-static';
 import type { Core } from '@strapi/types';
+
+const { defaultsDeep } = fp;
 
 type Config = koaStatic.Options;
 

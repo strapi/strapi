@@ -1,8 +1,10 @@
-import { camelCase, upperFirst, lowerFirst, pipe, get } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { singular } from 'pluralize';
 import { errors } from '@strapi/utils';
 import type { Struct, Schema } from '@strapi/types';
 import type { Context } from '../types';
+
+const { camelCase, upperFirst, lowerFirst, pipe, get } = fp;
 
 const { ApplicationError } = errors;
 

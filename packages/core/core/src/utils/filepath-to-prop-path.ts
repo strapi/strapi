@@ -1,5 +1,5 @@
 import path from 'node:path';
-import fp from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
 /**
  * Returns a path (as an array) from a file path

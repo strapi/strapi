@@ -1,6 +1,8 @@
-import { get, difference } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 import type { Context } from '../../types';
+
+const { get, difference } = fp;
 
 const { ApplicationError } = errors;
 

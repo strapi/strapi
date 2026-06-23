@@ -1,7 +1,7 @@
+import fp from 'lodash/fp.js';
+import { strings, errors } from '@strapi/utils';
 import type { Context } from 'koa';
 
-import { strings, errors } from '@strapi/utils';
-import { trim, has } from 'lodash/fp';
 import { getService } from '../utils';
 import {
   validateApiTokenCreationInput,
@@ -9,6 +9,8 @@ import {
 } from '../validation/api-tokens';
 
 import { Create, List, Revoke, Get, Update } from '../../../shared/contracts/api-token';
+
+const { trim, has } = fp;
 
 const { ApplicationError } = errors;
 

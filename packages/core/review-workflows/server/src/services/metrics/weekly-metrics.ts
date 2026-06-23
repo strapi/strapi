@@ -1,7 +1,10 @@
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
-import { flow, map, sum, size, mean, max, defaultTo } from 'lodash/fp';
+
 import { add } from 'date-fns';
 import { getService } from '../../utils';
+
+const { flow, map, sum, size, mean, max, defaultTo } = fp;
 
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 

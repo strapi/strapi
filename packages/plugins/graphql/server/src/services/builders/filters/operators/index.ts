@@ -1,6 +1,6 @@
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
 
-import { mapValues } from 'lodash/fp';
 import andOperator from './and';
 import orOperator from './or';
 import notOperator from './not';
@@ -23,6 +23,8 @@ import notNullOperator from './not-null';
 import inOperator from './in';
 import notInOperator from './not-in';
 import betweenOperator from './between';
+
+const { mapValues } = fp;
 
 const operators = {
   and: andOperator,

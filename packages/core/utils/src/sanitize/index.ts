@@ -1,5 +1,5 @@
-import { CurriedFunction1 } from 'lodash';
-import { isArray, cloneDeep, omit, pick } from 'lodash/fp';
+import fp from 'lodash/fp.js';
+import type { CurriedFunction1 } from 'lodash';
 import type { z } from 'zod/v4';
 
 import { constants, getNonWritableAttributes } from '../content-types';
@@ -18,6 +18,8 @@ import traverseEntity from '../traverse-entity';
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 import type { Model, Data } from '../types';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
+
+const { isArray, cloneDeep, omit, pick } = fp;
 
 export interface Options {
   auth?: unknown;

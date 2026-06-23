@@ -1,10 +1,12 @@
-import { pipe, omit, pick } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core, UID, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
 import { CoreContentTypeRouteValidator } from './core-api/routes/validation';
 import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
+
+const { pipe, omit, pick } = fp;
 
 const symbols = {
   CustomController: Symbol('StrapiCustomCoreController'),

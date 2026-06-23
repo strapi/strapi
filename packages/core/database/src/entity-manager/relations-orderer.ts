@@ -1,8 +1,10 @@
-import { castArray, maxBy } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
 
 import { InvalidRelationError } from '../errors';
 import type { ID } from '../types';
+
+const { castArray, maxBy } = fp;
 
 interface Link {
   id: ID;

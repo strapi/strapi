@@ -1,8 +1,10 @@
-import { omit } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../../types';
 
 import { mergePublicationFilterFromGraphQLArgs } from './merge-publication-args';
+
+const { omit } = fp;
 
 /** Merge sanitized query with resolver args so GraphQL-coerced publication args are not dropped. */
 const mergeDocumentListParams = (

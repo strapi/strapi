@@ -1,10 +1,13 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { uniq, startsWith } from 'lodash/fp';
+
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Modules, Struct } from '@strapi/types';
 import { getService } from '../utils';
 import actionDomain from '../domain/action';
 import permissionDomain from '../domain/permission';
+
+const { uniq, startsWith } = fp;
 
 interface FieldOptions {
   prefix?: string; // prefix to add to the path

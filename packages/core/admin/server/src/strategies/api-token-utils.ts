@@ -1,7 +1,10 @@
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
-import { isNil } from 'lodash/fp';
+
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
+
+const { isNil } = fp;
 
 const { UnauthorizedError } = errors;
 

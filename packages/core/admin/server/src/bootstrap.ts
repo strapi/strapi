@@ -1,4 +1,4 @@
-import { merge, map, difference, uniq } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
@@ -16,6 +16,8 @@ import {
   DEFAULT_MAX_SESSION_LIFESPAN,
   DEFAULT_IDLE_SESSION_LIFESPAN,
 } from '../../shared/utils/session-auth';
+
+const { merge, map, difference, uniq } = fp;
 
 const defaultAdminAuthSettings = {
   providers: {

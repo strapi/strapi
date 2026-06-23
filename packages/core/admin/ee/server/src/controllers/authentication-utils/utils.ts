@@ -1,5 +1,7 @@
-import { mapValues } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { PROVIDER_REDIRECT_ERROR, PROVIDER_REDIRECT_SUCCESS } from './constants';
+
+const { mapValues } = fp;
 
 const PROVIDER_URLS_MAP = {
   success: PROVIDER_REDIRECT_SUCCESS,

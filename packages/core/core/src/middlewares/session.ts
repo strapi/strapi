@@ -1,6 +1,8 @@
-import { isEmpty, isArray } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { type SessionOptions, createSession } from 'koa-session';
 import type { Core } from '@strapi/types';
+
+const { isEmpty, isArray } = fp;
 
 const defaultConfig = {
   key: 'koa.sess',

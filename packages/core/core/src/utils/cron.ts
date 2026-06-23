@@ -1,5 +1,6 @@
-import { isEmpty, negate } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
+const { isEmpty, negate } = fp;
 const DATE_FUNCTIONS = [
   'getSeconds',
   'getMinutes',

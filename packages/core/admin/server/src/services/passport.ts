@@ -1,8 +1,10 @@
+import fp from 'lodash/fp.js';
 import passport from 'koa-passport';
 import type { Strategy } from 'passport-local';
-import { isFunction } from 'lodash/fp';
 
 import createLocalStrategy from './passport/local-strategy';
+
+const { isFunction } = fp;
 
 const authEventsMapper = {
   onConnectionSuccess: 'admin.auth.success',

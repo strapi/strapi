@@ -1,9 +1,11 @@
-import { isUndefined } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { yup } from '@strapi/utils';
 import type { TestContext, TestFunction } from 'yup';
 import type { Schema, UID } from '@strapi/types';
 import { typeKinds, coreUids } from '../../services/constants';
 import { isValidName } from './common';
+
+const { isUndefined } = fp;
 
 const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 

@@ -1,8 +1,10 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { get, has, omit, pipe, assign } from 'lodash/fp';
 
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
 import type { Modules, UID, Data, Utils, Schema, Core } from '@strapi/types';
+
+const { get, has, omit, pipe, assign } = fp;
 
 type LoadedComponents<TUID extends UID.Schema> = Data.Entity<
   TUID,

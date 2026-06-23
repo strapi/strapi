@@ -1,7 +1,7 @@
+import fp from 'lodash/fp.js';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import { get } from 'lodash/fp';
-
+const { get } = fp;
 const validateGetNonLocalizedAttributesSchema = yup
   .object()
   .shape({

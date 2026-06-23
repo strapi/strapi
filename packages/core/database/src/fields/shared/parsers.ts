@@ -1,7 +1,9 @@
-import { padCharsEnd, isString, toString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import * as dateFns from 'date-fns';
 
 import { InvalidDateTimeError, InvalidDateError, InvalidTimeError } from '../../errors';
+
+const { padCharsEnd, isString, toString } = fp;
 
 const isDate = (value: unknown): value is Date => {
   return dateFns.isDate(value);

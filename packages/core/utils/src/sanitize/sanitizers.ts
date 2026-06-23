@@ -1,5 +1,4 @@
-import { curry, isEmpty, isNil, isArray, isPlainObject } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { pipe as pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
 import { isScalarAttribute, constants } from '../content-types';
@@ -22,6 +21,8 @@ import { isOperator } from '../operators';
 
 import type { Model, Data } from '../types';
 import type { Parent } from '../traverse/factory';
+
+const { curry, isEmpty, isNil, isArray, isPlainObject } = fp;
 
 interface Context {
   schema: Model;

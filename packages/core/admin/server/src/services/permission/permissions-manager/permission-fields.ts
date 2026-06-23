@@ -1,8 +1,9 @@
+import fp from 'lodash/fp.js';
 import { detectSubjectType } from '@casl/ability';
 import { permittedFieldsOf } from '@casl/ability/extra';
-import { isEmpty, isNil, flatMap, some, prop } from 'lodash/fp';
-
 import type { Ability } from '@casl/ability';
+
+const { isEmpty, isNil, flatMap, some, prop } = fp;
 
 export interface PermissionFieldsResult {
   permittedFields: string[];

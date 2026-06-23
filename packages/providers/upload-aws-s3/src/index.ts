@@ -1,5 +1,6 @@
+import fp from 'lodash/fp.js';
 import type { ReadStream } from 'node:fs';
-import { getOr } from 'lodash/fp';
+
 import {
   S3Client,
   GetObjectCommand,
@@ -19,6 +20,8 @@ import type { AwsCredentialIdentity } from '@aws-sdk/types';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import { extractCredentials, isUrlFromBucket } from './utils';
+
+const { getOr } = fp;
 
 /**
  * Supported checksum algorithms for data integrity validation.

@@ -1,7 +1,8 @@
-import { assign, isArray, isEmpty, isObject, map, omit, size } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Core, UID, Data, Struct } from '@strapi/types';
 import * as componentsService from '../../utils/components';
+
+const { assign, isArray, isEmpty, isObject, map, omit, size } = fp;
 
 const sanitizeComponentLikeAttributes = <T extends Struct.Schema>(
   model: T,

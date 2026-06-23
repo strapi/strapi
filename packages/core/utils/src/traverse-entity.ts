@@ -1,7 +1,8 @@
-import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
+
+const { clone, isObject, isArray, isNil, curry } = fp;
 
 /**
  * Execute promises in parallel but throw errors in array index order.

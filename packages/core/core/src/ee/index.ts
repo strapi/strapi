@@ -1,4 +1,4 @@
-import { pick, isEqual } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Logger } from '@strapi/logger';
 import type { Core } from '@strapi/types';
 import { createStrapiFetch } from '../utils/fetch';
@@ -10,6 +10,8 @@ import {
   LICENSE_REGISTRY_URI,
 } from './license';
 import { shiftCronExpression } from '../utils/cron';
+
+const { pick, isEqual } = fp;
 
 const ONE_MINUTE = 1000 * 60;
 

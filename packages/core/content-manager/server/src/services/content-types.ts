@@ -1,4 +1,4 @@
-import { isNil, mapValues } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { UID, Struct, Core } from '@strapi/types';
@@ -8,6 +8,8 @@ import type { ConfigurationUpdate } from './configuration';
 import { getService } from '../utils';
 import storeUtils from './utils/store';
 import createConfigurationService from './configuration';
+
+const { isNil, mapValues } = fp;
 
 const configurationService = createConfigurationService({
   storeUtils,

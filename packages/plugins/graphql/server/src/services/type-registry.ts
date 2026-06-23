@@ -1,5 +1,7 @@
-import { isFunction } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
+
+const { isFunction } = fp;
 
 const { ApplicationError } = errors;
 

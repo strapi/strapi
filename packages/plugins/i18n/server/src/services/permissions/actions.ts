@@ -1,5 +1,7 @@
-import { isArray, getOr, prop } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { getService } from '../../utils';
+
+const { isArray, getOr, prop } = fp;
 
 const actions = [
   {

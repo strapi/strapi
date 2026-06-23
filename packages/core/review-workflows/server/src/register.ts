@@ -1,5 +1,4 @@
-import { defaultsDeep, filter, pipe, map } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Core, UID } from '@strapi/types';
 
 import { getService, getAdminService } from './utils';
@@ -21,6 +20,8 @@ import {
   MAX_WORKFLOWS,
   MAX_STAGES_PER_WORKFLOW,
 } from './constants/workflows';
+
+const { defaultsDeep, filter, pipe, map } = fp;
 
 const setRelation = (attributeName: any, target: any, contentType: any) => {
   Object.assign(contentType.attributes, {

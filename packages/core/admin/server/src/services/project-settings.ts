@@ -1,6 +1,9 @@
+import _ from 'lodash';
 import fs from 'fs';
-import { pick } from 'lodash';
+
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
+
+const { pick } = _;
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 

@@ -1,5 +1,5 @@
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
-import { update, map, property } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
@@ -8,6 +8,8 @@ import type { StagePermission } from '../../../shared/contracts/review-workflows
 import { getService } from '../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
+
+const { update, map, property } = fp;
 
 /**
  *

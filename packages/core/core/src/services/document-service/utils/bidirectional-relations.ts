@@ -1,6 +1,8 @@
-import { keyBy, omit } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { UID, Schema } from '@strapi/types';
 import type { JoinTable } from '@strapi/database';
+
+const { keyBy, omit } = fp;
 
 interface LoadContext {
   oldVersions: { id: string; locale: string }[];

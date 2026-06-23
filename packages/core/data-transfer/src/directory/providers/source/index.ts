@@ -1,9 +1,10 @@
-import path from 'path';
-import type { Readable } from 'stream';
+import fp from 'lodash/fp.js';
 import { PassThrough } from 'stream';
 
 import fs from 'fs-extra';
-import { isEmpty, keyBy } from 'lodash/fp';
+import path from 'path';
+import type { Readable } from 'stream';
+
 import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
@@ -15,6 +16,8 @@ import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { unknownPathToPosix } from '../../../file/providers/source/utils';
+
+const { isEmpty, keyBy } = fp;
 
 const METADATA_FILE_PATH = 'metadata.json';
 

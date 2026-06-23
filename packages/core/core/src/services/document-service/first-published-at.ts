@@ -1,6 +1,8 @@
+import fp from 'lodash/fp.js';
 import { contentTypes } from '@strapi/utils';
-import { assoc } from 'lodash/fp';
 import type { Modules, Schema } from '@strapi/types';
+
+const { assoc } = fp;
 
 type EntriesUpdate = (entryToUpdate: any, param?: any) => Promise<any>;
 type ParamsTransform = (params: Modules.Documents.Params.All) => Modules.Documents.Params.All;

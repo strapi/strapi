@@ -1,7 +1,9 @@
-import { isEmpty, pick, pipe, propOr, isEqual } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { traverse } from '@strapi/utils';
 import qs from 'qs';
 import { isSortable, getDefaultMainField, getSortableAttributes } from './attributes';
+
+const { isEmpty, pick, pipe, propOr, isEqual } = fp;
 
 /** General settings */
 const DEFAULT_SETTINGS = {

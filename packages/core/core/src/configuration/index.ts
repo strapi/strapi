@@ -1,8 +1,9 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/no-var-requires */
 import os from 'os';
 import path from 'path';
 import _ from 'lodash';
-import { omit } from 'lodash/fp';
+
 import dotenv from 'dotenv';
 import type { Core } from '@strapi/types';
 import { strings } from '@strapi/utils';
@@ -13,6 +14,8 @@ import { getDirs } from './get-dirs';
 
 import type { StrapiOptions } from '../Strapi';
 import { version as strapiVersion } from '../../package.json';
+
+const { omit } = fp;
 
 dotenv.config({ path: process.env.ENV_PATH });
 

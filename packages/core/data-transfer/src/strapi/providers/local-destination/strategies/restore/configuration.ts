@@ -1,10 +1,12 @@
+import fp from 'lodash/fp.js';
 import { Writable } from 'stream';
-import { omit } from 'lodash/fp';
 import chalk from 'chalk';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { IConfiguration, Transaction } from '../../../../../types';
 import { restoreProjectSettingsRow } from '../../../../utils/project-settings-logos';
+
+const { omit } = fp;
 
 const omitInvalidCreationAttributes = omit(['id']);
 

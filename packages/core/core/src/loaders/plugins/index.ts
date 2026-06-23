@@ -1,6 +1,6 @@
+import fp from 'lodash/fp.js';
 import { join } from 'path';
 import fse from 'fs-extra';
-import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
 import * as resolve from 'resolve.exports';
 
 import { env } from '@strapi/utils';
@@ -10,6 +10,8 @@ import { loadFiles } from '../../utils/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 import { getGlobalId } from '../../domain/content-type';
+
+const { defaultsDeep, defaults, getOr, get } = fp;
 
 interface Plugins {
   [key: string]: Plugin.LoadedPlugin;

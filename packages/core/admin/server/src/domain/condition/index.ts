@@ -1,5 +1,6 @@
-import { pipe, merge, set, pick } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
+const { pipe, merge, set, pick } = fp;
 export type Condition = {
   id: string;
   displayName: string;

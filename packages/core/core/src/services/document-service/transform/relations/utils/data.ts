@@ -1,5 +1,7 @@
-import { isObject } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { ID, LongHand } from './types';
+
+const { isObject } = fp;
 
 export const isShortHand = (relation: any): relation is ID => {
   return typeof relation === 'string' || typeof relation === 'number';

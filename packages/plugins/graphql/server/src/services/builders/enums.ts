@@ -1,6 +1,8 @@
+import fp from 'lodash/fp.js';
 import { enumType } from 'nexus';
-import { set } from 'lodash/fp';
 import { strings } from '@strapi/utils';
+
+const { set } = fp;
 
 interface Definition {
   enum: string[];

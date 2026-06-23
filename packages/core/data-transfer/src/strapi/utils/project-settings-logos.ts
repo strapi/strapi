@@ -1,10 +1,12 @@
+import fp from 'lodash/fp.js';
+import { readFile } from 'node:fs/promises';
 import { join } from 'path';
 import { Readable } from 'stream';
-import { pick } from 'lodash/fp';
-import { readFile } from 'fs-extra';
 import { lookup as lookupMimeType } from 'mime-types';
 import * as webStream from 'stream/web';
 import type { Core } from '@strapi/types';
+
+const { pick } = fp;
 
 export const PROJECT_SETTINGS_CORE_STORE_KEY = 'core_admin_project-settings';
 

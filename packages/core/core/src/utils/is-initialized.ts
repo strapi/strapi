@@ -1,6 +1,7 @@
-import { isEmpty, isNil } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
+
+const { isEmpty, isNil } = fp;
 
 /**
  * Test if the strapi application is considered as initialized (1st user has been created)

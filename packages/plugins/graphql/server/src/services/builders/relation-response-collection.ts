@@ -1,7 +1,9 @@
+import fp from 'lodash/fp.js';
 import { objectType, nonNull } from 'nexus';
-import { defaultTo, prop, pipe } from 'lodash/fp';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../types';
+
+const { defaultTo, prop, pipe } = fp;
 
 export default ({ strapi }: Context) => {
   const { naming } = strapi.plugin('graphql').service('utils');

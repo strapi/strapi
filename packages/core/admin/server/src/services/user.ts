@@ -1,6 +1,7 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import _ from 'lodash';
-import { defaults } from 'lodash/fp';
+
 import { arrays, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
@@ -16,6 +17,8 @@ import type {
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
 import constants from './constants';
+
+const { defaults } = fp;
 
 const { SUPER_ADMIN_CODE } = constants;
 

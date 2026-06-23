@@ -1,3 +1,4 @@
+import fp from 'lodash/fp.js';
 /**
  * @fileoverview This file contains utility functions for shortening identifiers for use in a database schema.
  * The functions in this file are used to generate shorter names for database tables and columns
@@ -15,7 +16,8 @@
  */
 
 import crypto from 'node:crypto';
-import { isInteger } from 'lodash/fp';
+
+const { isInteger } = fp;
 
 /**
  * Creates a hash of the given data with the specified string length as a string of hex characters

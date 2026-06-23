@@ -1,5 +1,7 @@
-import { toString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import Field from './field';
+
+const { toString } = fp;
 
 function isStringOrNumber(value: unknown): value is string | number {
   return typeof value === 'string' || typeof value === 'number';

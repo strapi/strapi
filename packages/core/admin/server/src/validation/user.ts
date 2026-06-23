@@ -1,6 +1,8 @@
-import { isUndefined } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { yup, validateYupSchema } from '@strapi/utils';
 import validators from './common-validators';
+
+const { isUndefined } = fp;
 
 const userCreationSchema = yup
   .object()

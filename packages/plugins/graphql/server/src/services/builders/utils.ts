@@ -1,7 +1,9 @@
-import { entries, mapValues, omit } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { idArg, nonNull } from 'nexus';
 import { pagination } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
+
+const { entries, mapValues, omit } = fp;
 
 const { withDefaultPagination } = pagination;
 

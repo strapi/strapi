@@ -1,6 +1,5 @@
+import fp from 'lodash/fp.js';
 import { subject as asSubject } from '@casl/ability';
-import { defaults, omit, isArray, isEmpty, uniq, intersection, getOr, isObject } from 'lodash/fp';
-
 import {
   contentTypes,
   traverseEntity,
@@ -13,6 +12,8 @@ import {
 import { createPermissionFieldsCache } from './permission-fields';
 
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
+
+const { defaults, omit, isArray, isEmpty, uniq, intersection, getOr, isObject } = fp;
 
 const { ValidationError } = errors;
 const { throwPassword, throwDisallowedFields } = validate.visitors;

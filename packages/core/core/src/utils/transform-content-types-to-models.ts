@@ -2,7 +2,7 @@ import { type Model, type Identifiers } from '@strapi/database';
 import type { Struct, Schema } from '@strapi/types';
 import { createId } from '@paralleldrive/cuid2';
 import assert from 'node:assert';
-import _ from 'lodash/fp';
+import _ from 'lodash/fp.js';
 
 /**
  * Because strapi/database models don't know about things like components or dynamic zones, we use this file to convert them

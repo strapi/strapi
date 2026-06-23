@@ -1,10 +1,11 @@
-import { omit, pipe } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { contentTypes, errors, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
+
+const { omit, pipe } = fp;
 
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];

@@ -1,6 +1,8 @@
+import fp from 'lodash/fp.js';
 import { yup, validateYupSchema } from '@strapi/utils';
-import { isNil } from 'lodash/fp';
 import { getService } from '../../../utils';
+
+const { isNil } = fp;
 
 const focalPointSchema = yup
   .object({

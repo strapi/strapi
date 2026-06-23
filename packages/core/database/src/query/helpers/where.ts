@@ -1,5 +1,6 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { isArray, castArray, isPlainObject } from 'lodash/fp';
+
 import type { Knex } from 'knex';
 
 import { isOperator, isOperatorOfType } from '@strapi/utils';
@@ -11,6 +12,8 @@ import { isKnexQuery } from '../../utils/knex';
 
 import type { Ctx } from '../types';
 import type { Attribute } from '../../types';
+
+const { isArray, castArray, isPlainObject } = fp;
 
 type WhereCtx = Ctx & { alias?: string; isGroupRoot?: boolean };
 

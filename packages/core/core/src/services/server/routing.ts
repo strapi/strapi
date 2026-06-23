@@ -1,9 +1,12 @@
+import fp from 'lodash/fp.js';
 import Router from '@koa/router';
-import { has } from 'lodash/fp';
+
 import { yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import createEndpointComposer from './compose-endpoint';
+
+const { has } = fp;
 
 const policyOrMiddlewareSchema = yup.lazy((value) => {
   if (typeof value === 'string') {

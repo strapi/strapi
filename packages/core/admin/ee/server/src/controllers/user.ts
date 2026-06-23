@@ -1,7 +1,8 @@
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
 
 import _ from 'lodash';
-import { pick, isNil } from 'lodash/fp';
+
 import { errors } from '@strapi/utils';
 import { validateUserCreationInput } from '../validation/user';
 import { validateUserUpdateInput } from '../../../../server/src/validation/user';
@@ -9,6 +10,7 @@ import { normalizeEmail } from '../../../../server/src/utils/normalize-email';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
 
+const { pick, isNil } = fp;
 const { ApplicationError, ForbiddenError } = errors;
 
 const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'roles']);

@@ -1,4 +1,4 @@
-import { prop } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type Koa from 'koa';
 import { contentTypes as contentTypeUtils } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
@@ -7,6 +7,8 @@ import { transformResponse } from './transform';
 import { createSingleTypeController } from './single-type';
 import { createCollectionTypeController } from './collection-type';
 import requestCtx from '../../services/request-context';
+
+const { prop } = fp;
 
 const isSingleType = (
   contentType: Struct.ContentTypeSchema

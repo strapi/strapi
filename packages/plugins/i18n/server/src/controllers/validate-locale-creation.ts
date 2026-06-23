@@ -1,7 +1,9 @@
-import { get } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
+
+const { get } = fp;
 
 const { ApplicationError } = errors;
 

@@ -1,5 +1,7 @@
+import fp from 'lodash/fp.js';
 import type { Struct, Utils } from '@strapi/types';
-import { mapValues, pick } from 'lodash/fp';
+
+const { mapValues, pick } = fp;
 
 /**
  * List of schema properties that should be kept when sanitizing schemas

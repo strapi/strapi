@@ -1,8 +1,10 @@
+import fp from 'lodash/fp.js';
 import { objectType } from 'nexus';
-import { get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 
 import type { Context } from '../../types';
+
+const { get } = fp;
 
 const { ValidationError } = errors;
 

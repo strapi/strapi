@@ -1,4 +1,4 @@
-import { pick, uniq, prop, getOr, flatten, pipe, map } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 import type { FillFromLocale } from '../../../shared/contracts/content-manager';
@@ -7,6 +7,8 @@ import {
   validateGetNonLocalizedAttributesInput,
   validateFillFromLocaleInput,
 } from '../validation/content-types';
+
+const { pick, uniq, prop, getOr, flatten, pipe, map } = fp;
 
 const { ApplicationError } = errors;
 

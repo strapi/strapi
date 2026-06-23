@@ -1,9 +1,10 @@
-import { isNil } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { contentTypes } from '@strapi/utils';
 import type { UID } from '@strapi/types';
 
 import { LongHandDocument } from './types';
+
+const { isNil } = fp;
 
 type Status = 'draft' | 'published';
 

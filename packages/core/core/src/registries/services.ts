@@ -1,6 +1,8 @@
-import { pickBy, has } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
+
+const { pickBy, has } = fp;
 
 export type ServiceFactory = (params: { strapi: Core.Strapi }) => Core.Service | Core.Service;
 export type ServiceFactoryMap = Record<string, ServiceFactory>;

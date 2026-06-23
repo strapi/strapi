@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import CLITable from 'cli-table3';
-import _ from 'lodash/fp';
+import _ from 'lodash/fp.js';
 
 import type { Core } from '@strapi/types';
 

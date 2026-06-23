@@ -1,11 +1,13 @@
+import fp from 'lodash/fp.js';
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-import { snakeCase } from 'lodash/fp';
 import { modelTypes, typeKinds } from '../../services/constants';
 import { getService } from '../../utils';
 import { isValidKey, isValidCollectionName } from './common';
 import { getTypeValidator } from './types';
 import { getRelationValidator } from './relations';
+
+const { snakeCase } = fp;
 
 type ModelTypeInput = (typeof modelTypes)[keyof typeof modelTypes];
 

@@ -1,6 +1,9 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { intersection } from 'lodash/fp';
+
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
+
+const { intersection } = fp;
 
 const { getNonVisibleAttributes, getWritableAttributes } = contentTypesUtils;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } =

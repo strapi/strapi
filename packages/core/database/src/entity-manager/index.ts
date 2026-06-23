@@ -1,26 +1,4 @@
-import {
-  castArray,
-  compact,
-  difference,
-  differenceWith,
-  has,
-  isArray,
-  isEmpty,
-  isEqual,
-  isInteger,
-  isNil,
-  isNull,
-  isNumber,
-  isObject,
-  isPlainObject,
-  isString,
-  isUndefined,
-  map,
-  pick,
-  uniqBy,
-  uniqWith,
-} from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
@@ -48,6 +26,29 @@ import type { Database } from '..';
 import type { Meta } from '../metadata';
 import type { ID } from '../types';
 import { EntityManager, Repository, Entity } from './types';
+
+const {
+  castArray,
+  compact,
+  difference,
+  differenceWith,
+  has,
+  isArray,
+  isEmpty,
+  isEqual,
+  isInteger,
+  isNil,
+  isNull,
+  isNumber,
+  isObject,
+  isPlainObject,
+  isString,
+  isUndefined,
+  map,
+  pick,
+  uniqBy,
+  uniqWith,
+} = fp;
 
 export * from './types';
 

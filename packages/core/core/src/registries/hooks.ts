@@ -1,5 +1,7 @@
-import { pickBy } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { addNamespace, hasNamespace } from './namespace';
+
+const { pickBy } = fp;
 
 type Handler = (context: any) => any;
 

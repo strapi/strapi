@@ -1,7 +1,10 @@
+import fp from 'lodash/fp.js';
 import type { Struct } from '@strapi/types';
-import { isArray, isObject, reject } from 'lodash/fp';
+
 import type { Diff } from '../../../utils/json';
 import * as utils from '../../../utils';
+
+const { isArray, isObject, reject } = fp;
 
 const OPTIONAL_CONTENT_TYPES = ['audit-log'] as const;
 

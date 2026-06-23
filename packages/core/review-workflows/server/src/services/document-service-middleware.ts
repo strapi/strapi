@@ -1,10 +1,12 @@
-import type { Modules } from '@strapi/types';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
+import type { Modules } from '@strapi/types';
 
-import { isNil } from 'lodash/fp';
 import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
 import { WORKFLOW_UPDATE_STAGE } from '../constants/webhook-events';
 import { getService } from '../utils';
+
+const { isNil } = fp;
 
 type Middleware = Modules.Documents.Middleware.Middleware;
 

@@ -1,7 +1,10 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
+
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getService } from '../utils';
+
+const { pick, pipe, has, prop, isNil, cloneDeep, isArray } = fp;
 
 const {
   isRelationalAttribute,

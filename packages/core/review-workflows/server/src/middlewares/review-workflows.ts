@@ -1,7 +1,8 @@
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
-import { set } from 'lodash/fp';
+const { set } = fp;
 
 /**
  * A Strapi middleware function that adds support for review workflows.

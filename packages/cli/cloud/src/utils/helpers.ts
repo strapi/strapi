@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+// [ESM compat] cli/cloud has no exports map today so this named import doesn't affect ESM consumers, but if an exports map is added this will need the same lodash/fp.js fix as server packages
 import { has } from 'lodash/fp';
 
 // TODO: Remove duplicated code by extracting to a shared package

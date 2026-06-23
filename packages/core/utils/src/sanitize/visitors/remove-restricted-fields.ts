@@ -1,5 +1,7 @@
-import { isArray, isString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Visitor } from '../../traverse/factory';
+
+const { isArray, isString } = fp;
 
 export default (restrictedFields: string[] | null = null): Visitor =>
   ({ key, path: { attribute: path } }, { remove }) => {

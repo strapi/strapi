@@ -1,9 +1,11 @@
-import { isNil, camelCase } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import Koa from 'koa';
 import createError from 'http-errors';
 import delegate from 'delegates';
 import statuses from 'statuses';
 import { formatHttpError } from '../errors';
+
+const { isNil, camelCase } = fp;
 
 declare module 'koa' {
   interface BaseResponse {

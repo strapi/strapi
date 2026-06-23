@@ -1,5 +1,7 @@
-import { toString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import Field from './field';
+
+const { toString } = fp;
 
 export default class StringField extends Field {
   toDB(value: unknown) {

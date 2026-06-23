@@ -1,7 +1,9 @@
+import fp from 'lodash/fp.js';
 import { join } from 'path';
 import fse from 'fs-extra';
-import { merge } from 'lodash/fp';
 import { loadConfigFile } from '../../utils/load-config-file';
+
+const { merge } = fp;
 
 /**
  * Return user defined plugins' config

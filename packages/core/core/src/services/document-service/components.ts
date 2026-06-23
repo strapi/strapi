@@ -1,5 +1,6 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { has, omit, pipe, assign, curry } from 'lodash/fp';
+
 import type { Utils, UID, Schema, Data, Modules } from '@strapi/types';
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
 import {
@@ -8,6 +9,8 @@ import {
   getComponentJoinColumnInverseName,
   getComponentTypeColumn,
 } from '../../utils/transform-content-types-to-models';
+
+const { has, omit, pipe, assign, curry } = fp;
 
 // type aliases for readability
 type Input<T extends UID.Schema> = Modules.Documents.Params.Data.Input<T>;

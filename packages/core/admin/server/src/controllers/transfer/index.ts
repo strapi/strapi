@@ -1,6 +1,8 @@
-import { mapKeys } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import runner from './runner';
 import token from './token';
+
+const { mapKeys } = fp;
 
 const prefixActionsName = (prefix: string, dict: any) => mapKeys((key) => `${prefix}-${key}`, dict);
 

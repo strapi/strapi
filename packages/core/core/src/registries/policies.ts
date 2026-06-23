@@ -1,6 +1,8 @@
-import { pickBy, has, castArray } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
+
+const { pickBy, has, castArray } = fp;
 
 const PLUGIN_PREFIX = 'plugin::';
 const API_PREFIX = 'api::';

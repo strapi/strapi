@@ -1,6 +1,8 @@
-import { propEq } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../types';
+
+const { propEq } = fp;
 
 export default ({ strapi }: Context) => {
   /**

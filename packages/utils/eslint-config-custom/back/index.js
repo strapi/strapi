@@ -28,6 +28,17 @@ const config = {
         ],
       },
     ],
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'ignorePackages',
+        mjs: 'never',
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never',
+      },
+    ],
     'prefer-destructuring': ['error', { AssignmentExpression: { array: false } }],
     'no-underscore-dangle': 'off',
     'no-use-before-define': 'off',

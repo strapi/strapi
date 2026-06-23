@@ -2,7 +2,7 @@ import { errors, async } from '@strapi/utils';
 
 import type { Core, Internal, Modules, UID, Data } from '@strapi/types';
 
-import _ from 'lodash/fp';
+import _ from 'lodash/fp.js';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 

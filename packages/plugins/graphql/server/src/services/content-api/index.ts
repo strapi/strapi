@@ -1,6 +1,6 @@
+import fp from 'lodash/fp.js';
 import { pruneSchema } from '@graphql-tools/utils';
 import { makeSchema } from 'nexus';
-import { prop, startsWith } from 'lodash/fp';
 import type * as Nexus from 'nexus';
 import type { Core, Struct } from '@strapi/types';
 
@@ -18,6 +18,8 @@ import {
   registerDynamicZonesDefinition,
 } from './register-functions';
 import { TypeRegistry } from '../type-registry';
+
+const { prop, startsWith } = fp;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires

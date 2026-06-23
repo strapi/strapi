@@ -1,5 +1,7 @@
-import { curry, matchesProperty, pick } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Internal, Struct } from '@strapi/types';
+
+const { curry, matchesProperty, pick } = fp;
 
 const isOfKind = (kind: unknown) => matchesProperty('kind', kind);
 

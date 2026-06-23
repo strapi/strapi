@@ -1,6 +1,7 @@
-import { curry, isArray, isString, eq, trim, constant } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import traverseFactory from './factory';
+
+const { curry, isArray, isString, eq, trim, constant } = fp;
 
 const isStringArray = (value: unknown): value is string[] => {
   return isArray(value) && value.every(isString);

@@ -1,6 +1,7 @@
-import { has, isPlainObject } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Core, Modules } from '@strapi/types';
+
+const { has, isPlainObject } = fp;
 
 const ALLOWED_TYPES = [
   'biginteger',

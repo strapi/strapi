@@ -1,8 +1,10 @@
-import { isFunction } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { file as fileUtils } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { Config, File, UploadableFile } from '../types';
+
+const { isFunction } = fp;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async checkFileSize(file: UploadableFile) {

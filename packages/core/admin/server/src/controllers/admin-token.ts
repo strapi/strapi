@@ -1,7 +1,7 @@
+import fp from 'lodash/fp.js';
+import { strings, errors } from '@strapi/utils';
 import type { Context } from 'koa';
 
-import { strings, errors } from '@strapi/utils';
-import { trim, has } from 'lodash/fp';
 import { getService } from '../utils';
 import constants from '../services/constants';
 import {
@@ -19,6 +19,8 @@ import {
 } from '../../../shared/contracts/admin-token';
 import type { ContentApiApiToken } from '../../../shared/contracts/api-token';
 import type { AdminUser } from '../../../shared/contracts/shared';
+
+const { trim, has } = fp;
 
 const { ApplicationError } = errors;
 

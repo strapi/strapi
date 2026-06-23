@@ -1,4 +1,4 @@
-import { get, getOr, isFunction, first, isNil } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import {
   GraphQLObjectType,
   GraphQLResolveInfo,
@@ -9,6 +9,8 @@ import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { createPoliciesMiddleware } from './policy';
+
+const { get, getOr, isFunction, first, isNil } = fp;
 
 const { ForbiddenError } = errors;
 

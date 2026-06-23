@@ -1,6 +1,8 @@
-import { pickBy, has } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
 import { createModule, RawModule, Module } from '../domain/module';
+
+const { pickBy, has } = fp;
 
 type ModuleMap = { [namespace: string]: Module };
 

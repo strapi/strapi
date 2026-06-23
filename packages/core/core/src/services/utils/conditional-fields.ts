@@ -1,5 +1,7 @@
-import { map, values, sumBy, pipe, flatMap } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Schema, UID } from '@strapi/types';
+
+const { map, values, sumBy, pipe, flatMap } = fp;
 
 const getNumberOfConditionalFields = () => {
   const contentTypes: Record<UID.ContentType, Schema.ContentType> = strapi.contentTypes;

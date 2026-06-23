@@ -1,4 +1,4 @@
-import { difference, omit } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { contentTypes } from '@strapi/utils';
 import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
@@ -6,6 +6,8 @@ import { FIELDS_TO_IGNORE } from '../constants';
 import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import type { RelationResult } from '../../../../shared/contracts/relations';
+
+const { difference, omit } = fp;
 
 const DEFAULT_RETENTION_DAYS = 90;
 

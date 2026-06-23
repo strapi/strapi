@@ -12,6 +12,37 @@ import html from 'rollup-plugin-html';
 
 const isExernal = (id) => !path.isAbsolute(id) && !id.startsWith('.');
 
+// [ESM smoke test] add a tests/ integration that imports built .mjs entry points through Node's native ESM loader to catch runtime failures the pattern check cannot — requires CI build→test ordering
+/** @returns {import('rollup').Plugin} */
+const esmCompatGuard = () => ({
+  name: 'esm-compat-guard',
+  generateBundle(outputOptions, bundle) {
+    if (outputOptions.format !== 'esm') {
+      return;
+    }
+
+    const violations = [];
+
+    for (const [fileName, chunk] of Object.entries(bundle)) {
+      if (chunk.type !== 'chunk') {
+        continue;
+      }
+
+      if (/from ['"]lodash\/fp['"]/.test(chunk.code)) {
+        violations.push(`${fileName}: bare 'lodash/fp' import (ERR_UNSUPPORTED_DIR_IMPORT in Node ESM)`);
+      }
+
+      if (/import \{[^}]+\} from ['"]fs-extra['"]/.test(chunk.code)) {
+        violations.push(`${fileName}: named import from 'fs-extra' (unsafe in native ESM)`);
+      }
+    }
+
+    if (violations.length > 0) {
+      this.error(`ESM compatibility violations in .mjs output:\n${violations.join('\n')}`);
+    }
+  },
+});
+
 /** @returns {import('rollup').RollupOptions['plugins']} */
 const basePlugins = () => [
   image(),
@@ -41,6 +72,7 @@ const basePlugins = () => [
     },
   }),
   dynamicImportVars({}),
+  esmCompatGuard(),
 ];
 
 const isInput = (id, input) => {

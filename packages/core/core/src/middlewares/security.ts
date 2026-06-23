@@ -1,8 +1,10 @@
-import { defaultsDeep, mergeWith } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import helmet, { KoaHelmet } from 'koa-helmet';
 import { CSP_DEFAULTS } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
+
+const { defaultsDeep, mergeWith } = fp;
 
 export type Config = NonNullable<Parameters<KoaHelmet>[0]>;
 

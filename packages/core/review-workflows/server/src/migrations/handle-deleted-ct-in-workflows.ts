@@ -1,7 +1,9 @@
-import { difference, keys } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { async } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID } from '../constants/workflows';
 import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
+
+const { difference, keys } = fp;
 
 /**
  * Remove CT references from workflows if the CT is deleted

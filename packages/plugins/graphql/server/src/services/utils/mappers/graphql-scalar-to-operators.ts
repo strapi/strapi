@@ -1,5 +1,7 @@
-import { get, map, mapValues } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Context } from '../../types';
+
+const { get, map, mapValues } = fp;
 
 export default ({ strapi }: Context) => ({
   graphqlScalarToOperators(graphqlScalar: string) {

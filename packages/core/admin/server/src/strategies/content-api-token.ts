@@ -1,10 +1,13 @@
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
-import { castArray } from 'lodash/fp';
+
 import { errors } from '@strapi/utils';
 import constants from '../services/constants';
 import { getService } from '../utils';
 import { extractToken, checkExpiry, updateLastUsedAt } from './api-token-utils';
 import '@strapi/types';
+
+const { castArray } = fp;
 
 const { UnauthorizedError, ForbiddenError } = errors;
 

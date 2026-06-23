@@ -1,18 +1,6 @@
+import fp from 'lodash/fp.js';
 import crypto from 'crypto';
-import {
-  omit,
-  difference,
-  isNil,
-  isEmpty,
-  map,
-  isArray,
-  uniq,
-  isNumber,
-  differenceWith,
-  isEqual,
-  pick,
-  prop,
-} from 'lodash/fp';
+
 import type { Core, Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import type { Ability } from '@casl/ability';
@@ -28,6 +16,21 @@ import { getService } from '../utils';
 import permissionDomain from '../domain/permission';
 import { validatePermissionsExist } from '../validation/permission';
 import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
+
+const {
+  omit,
+  difference,
+  isNil,
+  isEmpty,
+  map,
+  isArray,
+  uniq,
+  isNumber,
+  differenceWith,
+  isEqual,
+  pick,
+  prop,
+} = fp;
 
 type AnyApiToken = ContentApiApiToken | AdminApiToken;
 

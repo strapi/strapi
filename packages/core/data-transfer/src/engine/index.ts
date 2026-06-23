@@ -1,10 +1,10 @@
+import fp from 'lodash/fp.js';
 import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { extname } from 'path';
 import { EOL } from 'os';
 import type Chain from 'stream-chain';
 import { chain } from 'stream-chain';
-import { isEmpty, uniq, last, isNumber, set, pick } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 
 import type { Struct, Utils } from '@strapi/types';
@@ -47,6 +47,8 @@ import {
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';
 import { ProviderTransferError } from '../errors/providers';
+
+const { isEmpty, uniq, last, isNumber, set, pick } = fp;
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',

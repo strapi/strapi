@@ -1,10 +1,12 @@
-import { cloneDeep, snakeCase } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { identifiers } from '../utils/identifiers';
 import * as types from '../utils/types';
 import { createRelation } from './relations';
 import type { Attribute, Model } from '../types';
 import type { ForeignKey, Index } from '../schema/types';
 import type { Action, SubscriberFn } from '../lifecycles';
+
+const { cloneDeep, snakeCase } = fp;
 
 export interface Meta extends Model {
   columnToAttribute: Record<string, string>;

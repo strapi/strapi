@@ -1,10 +1,12 @@
-import { intersection, map, isEmpty } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { yup, validateYupSchema } from '@strapi/utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
 import { folderExists } from './utils';
 import { isFolderOrChild } from '../../utils/folders';
 
 import type { Folder } from '../../../types';
+
+const { intersection, map, isEmpty } = fp;
 
 const validateDeleteManyFoldersFilesSchema = yup
   .object()

@@ -1,4 +1,8 @@
-import {
+import fp from 'lodash/fp.js';
+import { hasSort } from '../sort-query';
+import traverseFactory, { type Parent } from './factory';
+
+const {
   curry,
   isString,
   isObject,
@@ -11,10 +15,7 @@ import {
   isNil,
   first,
   cloneDeep,
-} from 'lodash/fp';
-
-import { hasSort } from '../sort-query';
-import traverseFactory, { type Parent } from './factory';
+} = fp;
 
 const ORDERS = { asc: 'asc', desc: 'desc' };
 const ORDER_VALUES = Object.values(ORDERS);

@@ -1,5 +1,6 @@
-import { eq } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
+const { eq } = fp;
 interface Options {
   name: string;
   validator?(config: unknown): void;

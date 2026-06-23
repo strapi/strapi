@@ -1,9 +1,11 @@
+import _ from 'lodash';
 import { join } from 'path';
-import { kebabCase, mergeWith } from 'lodash';
 import fse from 'fs-extra';
 
 import { engines } from './engines';
 import type { Scope } from '../types';
+
+const { kebabCase, mergeWith } = _;
 
 type PnpmPackageConfig = {
   onlyBuiltDependencies?: string[];

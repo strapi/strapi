@@ -1,6 +1,6 @@
-import type { UID, Modules } from '@strapi/types';
+import fp from 'lodash/fp.js';
 import { async, errors } from '@strapi/utils';
-import { assoc, omit } from 'lodash/fp';
+import type { UID, Modules } from '@strapi/types';
 
 import * as components from './components';
 
@@ -9,6 +9,8 @@ import { transformParamsToQuery } from './transform/query';
 import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
 import { clearTransformDataRequestCache, transformData } from './transform/data';
+
+const { assoc, omit } = fp;
 
 const createEntriesService = (
   uid: UID.ContentType,

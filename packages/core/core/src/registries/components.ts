@@ -1,5 +1,7 @@
-import { has } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Struct, UID } from '@strapi/types';
+
+const { has } = fp;
 
 const componentsRegistry = () => {
   const components: Record<UID.Component, Struct.ComponentSchema> = {};

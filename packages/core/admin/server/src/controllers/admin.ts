@@ -1,10 +1,10 @@
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
 
 import path from 'path';
 
-import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
-import { exists } from 'fs-extra';
+import fse from 'fs-extra';
 import { env } from '@strapi/utils';
 import {
   validateUpdateProjectSettings,
@@ -22,6 +22,8 @@ import type {
   UpdateProjectSettings,
   GetGuidedTourMeta,
 } from '../../../shared/contracts/admin';
+
+const { map, values, sumBy, pipe, flatMap, propEq } = fp;
 
 // Lazy: only resolved on first GET /admin/project-type request
 type TsUtilsModule = typeof import('@strapi/typescript-utils');
@@ -145,7 +147,7 @@ export default {
     const projectId = strapi.config.get('uuid', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
-    const useYarn: boolean = await exists(path.join(process.cwd(), 'yarn.lock'));
+    const useYarn: boolean = await fse.pathExists(path.join(process.cwd(), 'yarn.lock'));
 
     return {
       data: {

@@ -1,6 +1,8 @@
-import { isObject } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 import type { Struct, Core, Utils, UID } from '@strapi/types';
+
+const { isObject } = fp;
 
 interface Options {
   contentType: Struct.SingleTypeSchema;

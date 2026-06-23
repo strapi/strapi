@@ -1,6 +1,9 @@
+import fp from 'lodash/fp.js';
 import type { Job, Spec } from 'node-schedule';
-import { isFunction } from 'lodash/fp';
+
 import type { Core } from '@strapi/types';
+
+const { isFunction } = fp;
 
 // Lazy: only required when a cron task is actually scheduled
 let lazyNs: typeof import('node-schedule') | undefined;

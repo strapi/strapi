@@ -32,6 +32,17 @@ const config = {
      * we can remove this rule back to the recommended setting.
      */
     'import/no-named-as-default-member': 'off',
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'ignorePackages',
+        mjs: 'never',
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never',
+      },
+    ],
     'import/no-extraneous-dependencies': 'error',
     'no-restricted-imports': [
       'error',

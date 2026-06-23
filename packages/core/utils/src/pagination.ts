@@ -1,5 +1,7 @@
-import { merge, pipe, omit, isNil } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { PaginationError } from './errors';
+
+const { merge, pipe, omit, isNil } = fp;
 
 interface PaginationArgs {
   page: number;

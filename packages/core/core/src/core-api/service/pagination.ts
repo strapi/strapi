@@ -1,6 +1,7 @@
-import { omit, has, toNumber, isNil } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { errors, pagination } from '@strapi/utils';
+
+const { omit, has, toNumber, isNil } = fp;
 
 interface BasePaginationParams {
   withCount?: boolean | 't' | '1' | 'true' | 'f' | '0' | 'false' | 0 | 1;

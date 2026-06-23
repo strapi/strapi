@@ -1,5 +1,7 @@
-import { isNil } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { getService } from '../../../utils';
+
+const { isNil } = fp;
 
 const folderExists = async (folderId: number) => {
   if (isNil(folderId)) {

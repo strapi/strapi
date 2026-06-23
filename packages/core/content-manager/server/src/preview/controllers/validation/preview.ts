@@ -1,10 +1,11 @@
-import { pick } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Core, UID } from '@strapi/types';
 import { z, validateZodSchema, errors } from '@strapi/utils';
 
 import { Preview } from '../../../../../shared/contracts';
 import type { HandlerParams } from '../../services/preview-config';
+
+const { pick } = fp;
 
 const getPreviewUrlSchema = z.object({
   // Will be undefined for single types

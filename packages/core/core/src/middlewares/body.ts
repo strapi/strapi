@@ -1,9 +1,12 @@
+import fp from 'lodash/fp.js';
 import fse from 'fs-extra';
-import { defaultsDeep } from 'lodash/fp';
+
 import { koaBody, KoaBodyMiddlewareOptions } from 'koa-body';
 import mime from 'mime-types';
 import type Koa from 'koa';
 import type { Core } from '@strapi/types';
+
+const { defaultsDeep } = fp;
 
 export type Config = KoaBodyMiddlewareOptions;
 

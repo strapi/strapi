@@ -1,4 +1,4 @@
-import { propEq } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import createSectionBuilder from './builder';
 import {
   subjectsHandlerFor,
@@ -7,6 +7,8 @@ import {
   plugins as pluginsHandler,
   settings as settingsHandler,
 } from './handlers';
+
+const { propEq } = fp;
 
 const sectionPropMatcher = propEq('section');
 

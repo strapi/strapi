@@ -1,5 +1,7 @@
-import { toString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Database, Model } from '@strapi/database';
+
+const { toString } = fp;
 
 const coreStoreModel: Model = {
   uid: 'strapi::core-store',

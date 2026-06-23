@@ -1,7 +1,9 @@
-import { pickBy, has } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { UID, Struct } from '@strapi/types';
 import { createContentType, ContentTypeDefinition } from '../domain/content-type';
 import { addNamespace, hasNamespace } from './namespace';
+
+const { pickBy, has } = fp;
 
 type ContentTypesInput = Record<string, ContentTypeDefinition>;
 type ContentTypeExtendFn = (contentType: Struct.ContentTypeSchema) => Struct.ContentTypeSchema;

@@ -1,6 +1,7 @@
+import fp from 'lodash/fp.js';
 import type { Utils } from '@strapi/types';
 
-import { curry, pipe, merge, set, pick, omit, includes, isArray, prop } from 'lodash/fp';
+const { curry, pipe, merge, set, pick, omit, includes, isArray, prop } = fp;
 
 export interface ActionAlias {
   /**

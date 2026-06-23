@@ -1,5 +1,7 @@
-import { isString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { getService } from '../utils';
+
+const { isString } = fp;
 
 const isValidCondition = (condition: unknown) => {
   const { conditionProvider } = getService('permission');

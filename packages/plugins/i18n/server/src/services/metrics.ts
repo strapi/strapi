@@ -1,5 +1,7 @@
-import { reduce } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { getService } from '../utils';
+
+const { reduce } = fp;
 
 const sendDidInitializeEvent = async () => {
   const { isLocalizedContentType } = getService('content-types');

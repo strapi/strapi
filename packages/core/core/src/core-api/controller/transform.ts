@@ -1,6 +1,8 @@
-import { isNil, isPlainObject } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { UID, Struct, Data } from '@strapi/types';
 import { async } from '@strapi/utils';
+
+const { isNil, isPlainObject } = fp;
 
 type TransformedEntry = {
   id: string;

@@ -1,4 +1,4 @@
-import { isObject } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import ora from 'ora';
 import type { Ora } from 'ora';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
@@ -22,6 +22,8 @@ import {
   formatElapsedAndMaybeRemainingLabel,
   TRANSFER_PROGRESS_FIELD_SEP,
 } from '../../utils/helpers';
+
+const { isObject } = fp;
 
 const { createTransferEngine } = engineDataTransfer;
 const {

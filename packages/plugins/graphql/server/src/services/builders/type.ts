@@ -1,9 +1,11 @@
-import { isArray, isString, isUndefined, constant } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { nonNull, list, objectType } from 'nexus';
 import { contentTypes } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 
 import type { Context } from '../types';
+
+const { isArray, isString, isUndefined, constant } = fp;
 
 export type TypeBuildersOptions = {
   builder: any;

@@ -1,5 +1,7 @@
-import { isArray, isNil, isString, toPath } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Visitor } from '../../traverse/factory';
+
+const { isArray, isNil, isString, toPath } = fp;
 
 export default (allowedFields: string[] | null = null): Visitor =>
   ({ key, path: { attribute: path } }, { remove }) => {

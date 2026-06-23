@@ -50,6 +50,17 @@ const config = {
         alphabetize: { order: 'asc', caseInsensitive: true },
       },
     ],
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'ignorePackages',
+        mjs: 'never',
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never',
+      },
+    ],
     'no-restricted-imports': [
       'error',
       {

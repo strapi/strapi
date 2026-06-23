@@ -1,8 +1,11 @@
-import type { Core } from '@strapi/types';
+import fp from 'lodash/fp.js';
 import { async } from '@strapi/utils';
-import { difference, merge } from 'lodash/fp';
+import type { Core } from '@strapi/types';
+
 import { getService } from '../utils';
 import { WORKFLOW_MODEL_UID } from '../constants/workflows';
+
+const { difference, merge } = fp;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const contentManagerContentTypeService = strapi

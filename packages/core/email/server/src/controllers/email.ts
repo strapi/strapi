@@ -1,9 +1,11 @@
-import { pick } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 
 import type Koa from 'koa';
 import type {} from 'koa-body';
 import type { EmailConfig, SendOptions } from '../types';
+
+const { pick } = fp;
 
 const { ApplicationError } = errors;
 

@@ -1,5 +1,7 @@
+import fp from 'lodash/fp.js';
 import pMap from 'p-map';
-import { curry } from 'lodash/fp';
+
+const { curry } = fp;
 
 type AnyFunc<TA extends any[] = any[], TR = any> = (...args: TA) => TR;
 
