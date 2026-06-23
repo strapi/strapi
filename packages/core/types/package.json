@@ -64,7 +64,6 @@
   },
   "devDependencies": {
     "@strapi/ts-zen": "^0.2.0",
-    "@types/jest": "29.5.2",
     "@types/json-logic-js": "2.0.8",
     "@types/koa": "2.13.4",
     "@types/koa__router": "12.0.0",
