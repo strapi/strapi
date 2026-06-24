@@ -35,7 +35,7 @@ jobs:
     needs: [check-ownership]
     if: ${{ needs.check-ownership.outputs.isTeamMember == 'false' }}
     steps:
-      - uses: thollander/actions-comment-pull-request@v2
+      - uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
             This repo is currently under a community change freeze. Please see any pinned issues for more information.
