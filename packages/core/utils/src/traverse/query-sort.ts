@@ -22,9 +22,9 @@ const ORDER_VALUES = Object.values(ORDERS);
 
 const isSortOrder = (value: string) => ORDER_VALUES.includes(value.toLowerCase());
 const isStringArray = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every((v) => isString(v));
 const isObjectArray = (value: unknown): value is object[] =>
-  Array.isArray(value) && value.every(isObject);
+  Array.isArray(value) && value.every((v) => isObject(v));
 const isNestedSorts = (value: unknown): value is string =>
   isString(value) && value.split(',').length > 1;
 

@@ -12,7 +12,7 @@ export default (allowedFields: string[] | null = null): Visitor =>
     }
 
     // Throw on invalid formats
-    if (!(isArray(allowedFields) && allowedFields.every(isString))) {
+    if (!(isArray(allowedFields) && allowedFields.every((f) => isString(f)))) {
       throw new TypeError(
         `Expected array of strings for allowedFields but got "${typeof allowedFields}"`
       );
