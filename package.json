@@ -49,6 +49,10 @@
     "lint:other": "npm run prettier:other -- --check",
     "version:check": "node scripts/check-package-versions.mjs && syncpack lint",
     "version:fix": "node scripts/check-package-versions.mjs --fix --prompt && syncpack prompt && syncpack fix-mismatches",
+    "ai:sync": "tsx scripts/ai-tooling/index.ts sync",
+    "ai:unlink": "tsx scripts/ai-tooling/index.ts unlink",
+    "ai:status": "tsx scripts/ai-tooling/index.ts status",
+    "ai:test": "tsx --test scripts/ai-tooling/__tests__/*.test.ts",
     "postinstall": "husky",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
@@ -57,7 +61,7 @@
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,mdx,css,scss,yaml,yml}\"",
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
     "release": "node scripts/release.js",
-    "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
+    "setup": "yarn && yarn clean && yarn build --skip-nx-cache && tsx scripts/ai-tooling/post-setup.ts",
     "test:api": "node tests/scripts/run-api-tests.js",
     "test:api:clean": "rimraf ./coverage",
     "test:clean": "run-s -c test:api:clean test:e2e:clean test:cli:clean",
@@ -110,7 +114,8 @@
     "uuid@^9.0.0": "11.1.1",
     "qs@~6.14.0": "6.15.2",
     "tmp@^0.2.3": "0.2.7",
-    "tmp@~0.2.1": "0.2.7"
+    "tmp@~0.2.1": "0.2.7",
+    "@types/node": "20.19.41"
   },
   "devDependencies": {
     "@babel/core": "7.29.6",
@@ -195,6 +200,7 @@
     "syncpack": "13.0.4",
     "tar": "7.5.16",
     "ts-jest": "29.1.0",
+    "tsx": "4.22.4",
     "typescript": "5.4.5",
     "vitest": "catalog:",
     "yalc": "1.0.0-pre.53",
