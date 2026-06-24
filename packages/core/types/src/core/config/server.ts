@@ -54,6 +54,12 @@ export interface Proxy {
 
 export interface Webhooks {
   populateRelations?: boolean;
+  /**
+   * Interval, in milliseconds, at which each instance reloads the in-memory
+   * webhook registry from the database so configuration changes propagate
+   * across a clustered deployment. Disabled when unset or `0`.
+   */
+  reloadInterval?: number;
   [key: string]: unknown;
 }
 

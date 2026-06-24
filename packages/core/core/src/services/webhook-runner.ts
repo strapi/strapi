@@ -52,6 +52,8 @@ class WebhookRunner {
 
   private fetch: Fetch;
 
+  private reloadTimer?: NodeJS.Timeout;
+
   constructor({ eventHub, logger, configuration = {}, fetch }: ConstructorParameters) {
     debug('Initialized webhook runner');
     this.eventHub = eventHub;
@@ -167,6 +169,66 @@ class WebhookRunner {
     debug(`Refreshing webhook '${webhook.id}'`);
     this.remove(webhook);
     this.add(webhook);
+  }
+
+  /**
+   * Replace the whole in-memory registry with a fresh set of webhooks.
+   *
+   * The registry is otherwise only mutated locally (via add/update/remove)
+   * by the instance that handled the admin request. In a clustered or
+   * horizontally-scaled deployment every other instance keeps a stale copy
+   * until it restarts. Reloading from the persisted webhooks lets any
+   * instance converge on the current configuration. See issue #22595.
+   */
+  reload(webhooks: Webhook[]) {
+    debug(`Reloading webhook registry with ${webhooks.length} webhook(s)`);
+
+    // Runs synchronously: listeners are torn down and re-registered within the
+    // same tick, so no event can be missed in between.
+    for (const event of [...this.webhooksMap.keys()]) {
+      this.deleteListener(event);
+    }
+    this.webhooksMap.clear();
+
+    for (const webhook of webhooks) {
+      this.add(webhook);
+    }
+  }
+
+  /**
+   * Periodically reconcile the in-memory registry with the persisted webhooks
+   * by calling `reload()` on an interval. This lets every instance of a
+   * clustered deployment converge on the current configuration (issue #22595).
+   *
+   * `load` is invoked on each tick to fetch the latest webhooks. Any previous
+   * polling is stopped first, and the timer is `unref()`-ed so it never keeps
+   * the process alive on its own.
+   */
+  startReloadPolling(interval: number, load: () => Promise<Webhook[]>) {
+    this.stopReloadPolling();
+
+    this.reloadTimer = setInterval(async () => {
+      try {
+        this.reload(await load());
+      } catch (error) {
+        this.logger.error('Failed to reload the webhook registry from the database');
+        this.logger.error(error);
+      }
+    }, interval);
+
+    // Do not keep the process alive just for this timer.
+    this.reloadTimer.unref?.();
+  }
+
+  stopReloadPolling() {
+    if (this.reloadTimer) {
+      clearInterval(this.reloadTimer);
+      this.reloadTimer = undefined;
+    }
+  }
+
+  destroy() {
+    this.stopReloadPolling();
   }
 
   remove(webhook: Webhook) {
