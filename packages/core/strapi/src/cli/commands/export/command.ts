@@ -22,6 +22,7 @@ const command = () => {
         true
       )
     )
+    .addOption(new Option('--encrypt', `Enables 'aes-128-ecb' encryption of the output file`))
     .addOption(
       new Option('--no-compress', 'Disables gzip compression of output file').default(true)
     )
