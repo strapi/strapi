@@ -90,7 +90,7 @@ Go to the root of the repository and run the setup:
 cd strapi
 yarn install
 yarn setup
-
+yarn ai-tooling:sync  # link AI skills into your local tool directories (.agents/, .claude/, .cursor/)
 ```
 
 ### 4. Start the example application

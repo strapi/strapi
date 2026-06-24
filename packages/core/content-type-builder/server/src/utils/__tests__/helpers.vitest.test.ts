@@ -37,7 +37,7 @@ describe('CTB helpers', () => {
     });
 
     it('leaves non-string primitives unchanged', () => {
-      expect(deepTrimObject(42)).toBe(42);
+      expect(deepTrimObject(42 as unknown as string | object)).toBe(42);
     });
 
     it('throws when given null (typeof null is object)', () => {

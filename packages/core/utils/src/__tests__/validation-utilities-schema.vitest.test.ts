@@ -29,10 +29,10 @@ describe('validation utilities (schema modifiers)', () => {
     });
 
     it('makes schema readonly when writable is false', () => {
-      const schema = maybeReadonly(false)(z.number());
-      expect(() => {
-        (schema.parse(1) as number) = 2;
-      }).toThrow();
+      const schema = maybeReadonly(false)(z.object({ count: z.number() }));
+      const result = schema.parse({ count: 1 });
+
+      expect(Object.isFrozen(result)).toBe(true);
     });
   });
 

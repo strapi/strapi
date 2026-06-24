@@ -1,3 +1,4 @@
+import type { Schema } from '@strapi/types';
 import { describe, it, expect } from 'vitest';
 
 import { hasDefaultAttribute } from '../typeguards';
@@ -13,7 +14,12 @@ describe('typeguards', () => {
     });
 
     it('returns true when default is explicitly null', () => {
-      expect(hasDefaultAttribute({ type: 'string', default: null })).toBe(true);
+      expect(
+        hasDefaultAttribute({
+          type: 'string',
+          default: null,
+        } as unknown as Schema.Attribute.AnyAttribute)
+      ).toBe(true);
     });
   });
 });
