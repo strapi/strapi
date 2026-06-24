@@ -63,7 +63,7 @@ describe('linkTargetFor', () => {
 
 describe('classify', () => {
   const withFixture = (fn: (repoRoot: string) => void): void => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-'));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-'));
     try {
       fn(repoRoot);
     } finally {
@@ -121,7 +121,7 @@ describe('classify', () => {
 
 describe('sync round-trip', () => {
   it('links, unlinks, and preserves foreign symlinks', () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sync-'));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-sync-'));
     try {
       const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
       fs.mkdirSync(sourceDir, { recursive: true });
@@ -156,7 +156,7 @@ describe('sync round-trip', () => {
   });
 
   it('overwrites foreign symlinks and real dirs when force is true', () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sync-force-'));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-sync-force-'));
     try {
       const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
       fs.mkdirSync(sourceDir, { recursive: true });
@@ -189,7 +189,7 @@ describe('sync round-trip', () => {
   });
 
   it('returns warning exit code on collisions without force', () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-sync-warn-'));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-sync-warn-'));
     try {
       const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
       fs.mkdirSync(sourceDir, { recursive: true });
@@ -209,7 +209,7 @@ describe('sync round-trip', () => {
 
 describe('hasMissingLinks', () => {
   it('returns false when there are no source skills', () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-missing-'));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-missing-'));
     try {
       assert.equal(hasMissingLinks(repoRoot), false);
     } finally {
@@ -218,7 +218,7 @@ describe('hasMissingLinks', () => {
   });
 
   it('returns true when a source skill is not linked in a target dir', () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-missing-'));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-missing-'));
     try {
       const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
       fs.mkdirSync(sourceDir, { recursive: true });
@@ -231,7 +231,7 @@ describe('hasMissingLinks', () => {
   });
 
   it('returns false when all source skills are linked in every target dir', () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-missing-'));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-missing-'));
     try {
       const sourceDir = path.join(repoRoot, SOURCE_PATH, 'foo');
       fs.mkdirSync(sourceDir, { recursive: true });
@@ -250,7 +250,7 @@ describe('createSkillLink', () => {
   it('creates a directory symlink on POSIX', () => {
     if (process.platform === 'win32') return;
 
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-link-'));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-tooling-link-'));
     try {
       const sourceDir = path.join(repoRoot, SOURCE_PATH, 'bar');
       fs.mkdirSync(sourceDir, { recursive: true });

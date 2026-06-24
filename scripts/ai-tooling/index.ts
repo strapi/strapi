@@ -15,7 +15,7 @@ const args = process.argv.slice(2);
 const cmd = args[0];
 
 if (cmd === undefined || cmd in COMMANDS === false) {
-  console.error('Usage: tsx scripts/ai/index.ts <sync|unlink|status> [--force]');
+  console.error('Usage: tsx scripts/ai-tooling/index.ts <sync|unlink|status> [--force]');
   process.exit(2);
 }
 
