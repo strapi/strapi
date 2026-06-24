@@ -121,17 +121,45 @@ describe('create-strapi-app', () => {
     }
   });
 
-  it('allows pnpm to build better-sqlite3 for SQLite projects', async () => {
+  it('scaffolds pnpm-workspace.yaml allowBuilds for SQLite projects on pnpm 11', async () => {
     const projectDir = mkProjectDir();
     try {
-      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-pnpm'])
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-pnpm'], {
+        npm_config_user_agent: 'pnpm/11.8.0 npm/? node/v24.12.0 darwin arm64',
+      })
+        .expect('code', 0)
+        .end();
+
+      const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
+      const workspace = fs.readFileSync(path.join(projectDir, 'pnpm-workspace.yaml'), 'utf8');
+
+      expect(pkg.dependencies).toMatchObject({ 'better-sqlite3': expect.any(String) });
+      expect(pkg.pnpm).toBeUndefined();
+      expect(workspace).toContain('allowBuilds:');
+      expect(workspace).toContain('better-sqlite3: true');
+      expect(workspace).toContain('sharp: true');
+      expect(workspace).toContain("'@swc/core': true");
+      expect(workspace).toContain("minimumReleaseAgeExclude:\n  - '@strapi/*'");
+    } finally {
+      fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+  });
+
+  it('writes package.json onlyBuiltDependencies for pnpm 10', async () => {
+    const projectDir = mkProjectDir();
+    try {
+      await spawnCsa([projectDir, ...baseScaffoldArgs, '--use-pnpm'], {
+        npm_config_user_agent: 'pnpm/10.25.0 npm/? node/v24.12.0 darwin arm64',
+      })
         .expect('code', 0)
         .end();
 
       const pkg = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
 
-      expect(pkg.dependencies).toMatchObject({ 'better-sqlite3': expect.any(String) });
-      expect(pkg.pnpm).toMatchObject({ onlyBuiltDependencies: ['better-sqlite3'] });
+      expect(pkg.pnpm.onlyBuiltDependencies).toEqual(
+        expect.arrayContaining(['@swc/core', 'better-sqlite3', 'esbuild', 'sharp'])
+      );
+      expect(fs.existsSync(path.join(projectDir, 'pnpm-workspace.yaml'))).toBe(false);
     } finally {
       fs.rmSync(projectDir, { recursive: true, force: true });
     }
