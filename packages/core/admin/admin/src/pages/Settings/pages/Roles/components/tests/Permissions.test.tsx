@@ -136,6 +136,11 @@ const i18nLayout = {
           label: 'Article',
           properties: [
             {
+              value: 'fields',
+              label: 'Fields',
+              children: [{ value: 'title', label: 'title' }],
+            },
+            {
               value: 'locales',
               label: 'Locales',
               children: [
@@ -150,7 +155,7 @@ const i18nLayout = {
         {
           actionId: READ_ACTION,
           label: 'Read',
-          applyToProperties: ['locales'],
+          applyToProperties: ['fields', 'locales'],
           subjects: [ARTICLE_UID],
         },
       ],
@@ -168,9 +173,13 @@ const makePermission = (locales: string[] | null) => ({
   action: READ_ACTION,
   actionParameters: {},
   subject: ARTICLE_UID,
-  properties: { locales } as any,
+  properties: { fields: ['title'], locales } as any,
   conditions: [],
 });
+
+const findArticleReadPermission = (
+  permissionsToSend: ReturnType<PermissionsAPI['getPermissions']>['permissionsToSend']
+) => permissionsToSend.find((p) => p.action === READ_ACTION && p.subject === ARTICLE_UID);
 
 describe('getPermissions() — null locale restoration', () => {
   it('preserves locales: null when the user has not changed locale selections', async () => {
@@ -179,10 +188,59 @@ describe('getPermissions() — null locale restoration', () => {
     render(<Permissions layout={i18nLayout} permissions={[makePermission(null)]} ref={ref} />);
 
     const { permissionsToSend } = ref.current!.getPermissions();
-    const perm = permissionsToSend.find(
-      (p) => p.action === READ_ACTION && p.subject === ARTICLE_UID
-    );
+    const perm = findArticleReadPermission(permissionsToSend);
 
     expect(perm?.properties?.locales).toBeNull();
+  });
+
+  it('sends an explicit locale list when the user changes locale selections', async () => {
+    const ref = React.createRef<PermissionsAPI>();
+
+    const { user } = render(
+      <Permissions layout={i18nLayout} permissions={[makePermission(null)]} ref={ref} />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Article' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Select fr Read permission' }));
+
+    const { permissionsToSend } = ref.current!.getPermissions();
+    const perm = findArticleReadPermission(permissionsToSend);
+
+    expect(perm?.properties?.locales).toEqual(['en']);
+  });
+
+  it('does not coerce explicit locale selections back to null', async () => {
+    const ref = React.createRef<PermissionsAPI>();
+
+    render(<Permissions layout={i18nLayout} permissions={[makePermission(['fr'])]} ref={ref} />);
+
+    const { permissionsToSend } = ref.current!.getPermissions();
+    const perm = findArticleReadPermission(permissionsToSend);
+
+    expect(perm?.properties?.locales).toEqual(['fr']);
+  });
+});
+
+describe('hasLocaleValidationErrors() — ref API', () => {
+  it('returns false when every enabled action has at least one locale selected', async () => {
+    const ref = React.createRef<PermissionsAPI>();
+
+    render(<Permissions layout={i18nLayout} permissions={[makePermission(['en'])]} ref={ref} />);
+
+    expect(ref.current!.hasLocaleValidationErrors()).toBe(false);
+  });
+
+  it('returns true when an enabled action has no locale selected', async () => {
+    const ref = React.createRef<PermissionsAPI>();
+
+    const { user } = render(
+      <Permissions layout={i18nLayout} permissions={[makePermission(['en', 'fr'])]} ref={ref} />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Article' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Select en Read permission' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Select fr Read permission' }));
+
+    expect(ref.current!.hasLocaleValidationErrors()).toBe(true);
   });
 });

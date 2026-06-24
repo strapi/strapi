@@ -147,6 +147,7 @@ describe('Role controller', () => {
       const roleID = 1;
       const findOneRole = jest.fn(() => Promise.resolve({ id: roleID }));
       const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
+      const willValidateUpdatePermissions = jest.fn((permissions) => Promise.resolve(permissions));
       const inputPermissions = [
         {
           action: 'test',
@@ -172,7 +173,7 @@ describe('Role controller', () => {
               getSuperAdmin: jest.fn(() => undefined),
               hooks: {
                 willValidateUpdatePermissions: {
-                  call: jest.fn((permissions) => Promise.resolve(permissions)),
+                  call: willValidateUpdatePermissions,
                 },
               },
             },
@@ -197,10 +198,83 @@ describe('Role controller', () => {
       await roleController.updatePermissions(ctx);
 
       expect(findOneRole).toHaveBeenCalledWith({ id: roleID });
+      expect(willValidateUpdatePermissions).toHaveBeenCalledWith(inputPermissions);
       expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions);
 
       expect(ctx.body).toEqual({
         data: inputPermissions,
+      });
+    });
+
+    test('Assigns permissions returned by willValidateUpdatePermissions', async () => {
+      const roleID = 1;
+      const findOneRole = jest.fn(() => Promise.resolve({ id: roleID }));
+      const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
+      const inputPermissions = [
+        {
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::article.article',
+          properties: { fields: ['title'], locales: [] },
+          conditions: [],
+        },
+      ];
+      const normalizedPermissions = [
+        {
+          ...inputPermissions[0],
+          properties: { fields: ['title'], locales: ['en'] },
+        },
+      ];
+      const willValidateUpdatePermissions = jest.fn(() => Promise.resolve(normalizedPermissions));
+
+      const ctx = createContext({
+        params: { id: roleID },
+        body: {
+          permissions: inputPermissions,
+        },
+      }) as any;
+
+      global.strapi = {
+        admin: {
+          services: {
+            role: {
+              assignPermissions,
+              findOne: findOneRole,
+              getSuperAdmin: jest.fn(() => undefined),
+              hooks: {
+                willValidateUpdatePermissions: {
+                  call: willValidateUpdatePermissions,
+                },
+              },
+            },
+            permission: {
+              sanitizePermission: jest.fn((permissions) => permissions),
+              conditionProvider: {
+                values: jest.fn(() => []),
+              },
+              actionProvider: {
+                values: jest.fn(() => [
+                  {
+                    actionId: 'plugin::content-manager.explorer.read',
+                    subjects: ['api::article.article'],
+                  },
+                ]),
+                get: jest.fn(() => ({
+                  actionId: 'plugin::content-manager.explorer.read',
+                  subjects: ['api::article.article'],
+                  options: { applyToProperties: ['fields', 'locales'] },
+                })),
+              },
+            },
+          },
+        },
+      } as any;
+
+      await roleController.updatePermissions(ctx);
+
+      expect(willValidateUpdatePermissions).toHaveBeenCalledWith(inputPermissions);
+      expect(assignPermissions).toHaveBeenCalledWith(roleID, normalizedPermissions);
+      expect(ctx.body).toEqual({
+        data: normalizedPermissions,
       });
     });
   });

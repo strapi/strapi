@@ -1,4 +1,7 @@
-import { hasLocaleValidationErrors } from '../localePermissionValidation';
+import {
+  getLocaleValidationErrorActionKeys,
+  hasLocaleValidationErrors,
+} from '../localePermissionValidation';
 
 // ---------------------------------------------------------------------------
 // Shared fixtures
@@ -116,5 +119,61 @@ describe('hasLocaleValidationErrors', () => {
     };
 
     expect(hasLocaleValidationErrors(modifiedData)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getLocaleValidationErrorActionKeys
+// Answers: "which action labels should the inline error mention for this subject?"
+// ---------------------------------------------------------------------------
+
+describe('getLocaleValidationErrorActionKeys', () => {
+  it('returns an empty array when the subject has no locale validation errors', () => {
+    const modifiedData = {
+      collectionTypes: {
+        'api::article.article': {
+          [READ]: action({ title: true }, { en: true, fr: false }),
+        },
+      },
+      singleTypes: {},
+      plugins: {},
+      settings: {},
+    };
+
+    expect(
+      getLocaleValidationErrorActionKeys(modifiedData, 'collectionTypes', 'api::article.article')
+    ).toEqual([]);
+  });
+
+  it('returns only the action keys that are enabled but have no locale selected', () => {
+    const modifiedData = {
+      collectionTypes: {
+        'api::article.article': {
+          [READ]: action({ title: true }, { en: true }),
+          [UPDATE]: action({ title: true }, { en: false, fr: false }),
+          [DELETE]: action({ title: false }, { en: false, fr: false }),
+        },
+      },
+      singleTypes: {},
+      plugins: {},
+      settings: {},
+    };
+
+    expect(
+      getLocaleValidationErrorActionKeys(modifiedData, 'collectionTypes', 'api::article.article')
+    ).toEqual([UPDATE]);
+  });
+
+  it('returns an empty array for an unknown subject', () => {
+    const modifiedData = {
+      collectionTypes: {},
+      singleTypes: {},
+      plugins: {},
+      settings: {},
+    };
+
+    expect(
+      getLocaleValidationErrorActionKeys(modifiedData, 'collectionTypes', 'api::missing.missing')
+    ).toEqual([]);
   });
 });
