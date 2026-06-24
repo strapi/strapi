@@ -1,3 +1,4 @@
+// [lodash: get — skipped, _.get(path, def) uses runtime variable path]
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import authService from '../auth';
@@ -192,6 +193,7 @@ describe('Auth', () => {
         config: {
           ...config,
           get(path: any, def: any) {
+            // eslint-disable-next-line you-dont-need-lodash-underscore/get
             return _.get(path, def);
           },
         },
@@ -236,6 +238,7 @@ describe('Auth', () => {
         config: {
           ...config,
           get(path: any, def: any) {
+            // eslint-disable-next-line you-dont-need-lodash-underscore/get
             return _.get(path, def);
           },
         },

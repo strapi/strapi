@@ -10,6 +10,8 @@ import {
   Modal,
   Typography,
 } from '@strapi/design-system';
+// [lodash: get — skipped, all call sites use dynamic variable paths]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';

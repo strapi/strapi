@@ -1,5 +1,4 @@
 import { Box, BoxComponent, Flex, Typography } from '@strapi/design-system';
-import map from 'lodash/map';
 import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
 import { styled, DefaultTheme } from 'styled-components';
@@ -99,7 +98,7 @@ export const BoundRoute = ({
           </Typography>
         </MethodBox>
         <Box paddingLeft={2} paddingRight={2}>
-          {map(formattedRoute, (value) => (
+          {formattedRoute.map((value) => (
             <Typography key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
               /{value}
             </Typography>

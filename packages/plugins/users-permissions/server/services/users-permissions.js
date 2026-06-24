@@ -1,6 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
+// [lodash: filter/map — kept in lodash/fp pipe pipeline, pipe/prop also kept]
+// eslint-disable-next-line you-dont-need-lodash-underscore/filter, you-dont-need-lodash-underscore/map
 const { filter, map, pipe, prop } = require('lodash/fp');
 const urlJoin = require('url-join');
 const {
@@ -48,10 +50,9 @@ module.exports = ({ strapi }) => ({
       return action[Symbol.for('__type__')].includes('content-api');
     };
 
-    _.forEach(strapi.apis, (api, apiName) => {
-      const controllers = _.reduce(
-        api.controllers,
-        (acc, controller, controllerName) => {
+    Object.entries(strapi.apis).forEach(([apiName, api]) => {
+      const controllers = Object.entries(api.controllers).reduce(
+        (acc, [controllerName, controller]) => {
           const contentApiActions = _.pickBy(controller, isContentApi);
 
           if (_.isEmpty(contentApiActions)) {
@@ -75,10 +76,9 @@ module.exports = ({ strapi }) => ({
       }
     });
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
-      const controllers = _.reduce(
-        plugin.controllers,
-        (acc, controller, controllerName) => {
+    Object.entries(strapi.plugins).forEach(([pluginName, plugin]) => {
+      const controllers = Object.entries(plugin.controllers).reduce(
+        (acc, [controllerName, controller]) => {
           const contentApiActions = _.pickBy(controller, isContentApi);
 
           if (_.isEmpty(contentApiActions)) {
@@ -103,13 +103,15 @@ module.exports = ({ strapi }) => ({
     });
 
     // Return a deeply cloned version to avoid circular references
+    // [lodash: cloneDeep — structuredClone not 1:1, audit value shape first]
+    // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
     return _.cloneDeep(actionMap);
   },
 
   async getRoutes() {
     const routesMap = {};
 
-    _.forEach(strapi.apis, (api, apiName) => {
+    Object.entries(strapi.apis).forEach(([apiName, api]) => {
       const routes = _.flatMap(api.routes, (route) => {
         if (_.has(route, 'routes')) {
           return route.routes;
@@ -129,7 +131,7 @@ module.exports = ({ strapi }) => ({
       }));
     });
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    Object.entries(strapi.plugins).forEach(([pluginName, plugin]) => {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
       const routes = _.flatMap(plugin.routes, (route) => {
@@ -158,11 +160,11 @@ module.exports = ({ strapi }) => ({
     const roles = await strapi.db.query('plugin::users-permissions.role').findMany();
     const dbPermissions = await strapi.db.query('plugin::users-permissions.permission').findMany();
 
-    const permissionsFoundInDB = _.uniq(_.map(dbPermissions, 'action'));
+    const permissionsFoundInDB = [...new Set(dbPermissions.map((permission) => permission.action))];
 
     const appActions = _.flatMap(strapi.apis, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {
-        return _.keys(controller).map((actionName) => {
+        return Object.keys(controller).map((actionName) => {
           return `api::${apiName}.${controllerName}.${actionName}`;
         });
       });
@@ -170,7 +172,7 @@ module.exports = ({ strapi }) => ({
 
     const pluginsActions = _.flatMap(strapi.plugins, (plugin, pluginName) => {
       return _.flatMap(plugin.controllers, (controller, controllerName) => {
-        return _.keys(controller).map((actionName) => {
+        return Object.keys(controller).map((actionName) => {
           return `plugin::${pluginName}.${controllerName}.${actionName}`;
         });
       });

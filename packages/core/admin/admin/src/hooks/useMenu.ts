@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import { Cog, ShoppingCart, House } from '@strapi/icons';
+// [lodash: clone-deep — skipped, structuredClone not 1:1 for class instances/functions]
+// eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
 import cloneDeep from 'lodash/cloneDeep';
 
 import { useTypedSelector } from '../core/store/hooks';

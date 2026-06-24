@@ -116,10 +116,12 @@ const newEngine = (params: EngineParams): Engine => {
       return register({ action, subject, properties });
     }
 
+    // eslint-disable-next-line you-dont-need-lodash-underscore/map
     const resolveConditions = _.map(providers.condition.get);
 
-    const removeInvalidConditions = _.filter((condition: Condition) =>
-      _.isFunction(condition.handler)
+    // eslint-disable-next-line you-dont-need-lodash-underscore/filter
+    const removeInvalidConditions = _.filter(
+      (condition: Condition) => typeof condition.handler === 'function'
     );
 
     const evaluateConditions = (conditions: Condition[]) => {
@@ -127,12 +129,14 @@ const newEngine = (params: EngineParams): Engine => {
         conditions.map(async (condition) => ({
           condition,
           result: await condition.handler(
+            // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
             _.merge(options, { permission: _.cloneDeep(permission) })
           ),
         }))
       );
     };
 
+    // eslint-disable-next-line you-dont-need-lodash-underscore/filter
     const removeInvalidResults = _.filter(
       ({ result }) => _.isBoolean(result) || _.isObject(result)
     );
@@ -144,6 +148,7 @@ const newEngine = (params: EngineParams): Engine => {
       .then(removeInvalidResults);
 
     const resultPropEq = _.propEq('result');
+    // eslint-disable-next-line you-dont-need-lodash-underscore/map
     const pickResults = _.map(_.prop('result'));
 
     if (evaluatedConditions.every(resultPropEq(false))) {

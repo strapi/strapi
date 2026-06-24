@@ -193,7 +193,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
   const getRoutesMap = async () => {
     const routesMap: Record<string, Core.Route[]> = {};
 
-    _.forEach(strapi.apis, (api, apiName) => {
+    Object.entries(strapi.apis ?? {}).forEach(([apiName, api]) => {
       const routes = _.flatMap(api.routes, (route) => {
         if ('routes' in route) {
           return route.routes;
@@ -213,7 +213,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
       }));
     });
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    Object.entries(strapi.plugins ?? {}).forEach(([pluginName, plugin]) => {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
       if (Array.isArray(plugin.routes)) {

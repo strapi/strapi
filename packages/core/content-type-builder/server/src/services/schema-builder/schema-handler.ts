@@ -36,6 +36,7 @@ export default function createSchemaHandler(infos: Infos) {
       } as Struct.ContentTypeSchema),
   };
 
+  // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
   const state = _.cloneDeep(initialState);
 
   // always keep it the same to rollback
@@ -58,7 +59,7 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     get kind() {
-      return _.get(state.schema, 'kind', 'collectionType');
+      return state.schema?.kind ?? 'collectionType';
     },
 
     get uid() {
@@ -66,7 +67,7 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     get writable() {
-      return _.get(state, 'plugin') !== 'admin';
+      return state.plugin !== 'admin';
     },
 
     setUID(val: Internal.UID.ContentType) {
@@ -84,18 +85,21 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     get schema() {
+      // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
       return _.cloneDeep(state.schema);
     },
 
     setSchema(val: Struct.ContentTypeSchema) {
       modified = true;
 
+      // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
       state.schema = _.cloneDeep(val);
       return this;
     },
 
     // get a particular path inside the schema
     get(path: string[]) {
+      // eslint-disable-next-line you-dont-need-lodash-underscore/get
       return _.get(state.schema, path);
     },
 
@@ -105,6 +109,7 @@ export default function createSchemaHandler(infos: Infos) {
 
       modified = true;
 
+      // eslint-disable-next-line you-dont-need-lodash-underscore/get
       const value = _.defaultTo(val, _.get(state.schema, path));
       _.set(state.schema, path, value);
 

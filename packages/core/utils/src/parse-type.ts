@@ -22,7 +22,7 @@ const parseTime = (value: unknown): string => {
   }
 
   const [, hours, minutes, seconds, fraction = '.000'] = result;
-  const fractionPart = _.padEnd(fraction.slice(1), 3, '0');
+  const fractionPart = fraction.slice(1).padEnd(3, '0');
 
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };

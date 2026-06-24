@@ -1,4 +1,7 @@
+// [lodash: cloneDeep — kept; get — skipped, dynamic spread target paths]
+// eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
 import cloneDeep from 'lodash/cloneDeep';
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import * as yup from 'yup';
 

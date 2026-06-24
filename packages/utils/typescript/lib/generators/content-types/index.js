@@ -1,7 +1,8 @@
 'use strict';
 
 const { factory } = require('typescript');
-const { values, pipe, map, sortBy } = require('lodash/fp');
+// eslint-disable-next-line you-dont-need-lodash-underscore/map
+const { pipe, map, sortBy } = require('lodash/fp');
 
 const { models } = require('../common');
 const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
@@ -25,7 +26,7 @@ const generateContentTypesDefinitions = async (options = {}) => {
   const { contentTypes } = strapi;
 
   const contentTypesDefinitions = pipe(
-    values,
+    Object.values,
     sortBy('uid'),
     map((contentType) => ({
       uid: contentType.uid,

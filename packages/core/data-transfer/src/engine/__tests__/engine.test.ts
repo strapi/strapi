@@ -1,6 +1,8 @@
 import path, { posix, win32 } from 'path';
 import os from 'os';
 import fs from 'fs-extra';
+// [lodash: cloneDeep — kept, structuredClone not 1:1; get — kept, dynamic path variable]
+// eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep, you-dont-need-lodash-underscore/get
 import { cloneDeep, get, set } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import { pipeline } from 'stream/promises';

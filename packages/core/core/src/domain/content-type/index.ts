@@ -105,7 +105,7 @@ const addFirstPublishedAt = (schema: Schema.ContentType) => {
 };
 
 const addCreatorFields = (schema: Schema.ContentType) => {
-  const isPrivate = !_.get(schema, 'options.populateCreatorFields', false);
+  const isPrivate = (schema?.options?.populateCreatorFields ?? false) !== true;
 
   schema.attributes[CREATED_BY_ATTRIBUTE] = {
     type: 'relation',
@@ -138,6 +138,8 @@ const getGlobalId = (schema: Schema.ContentType, prefix?: string) => {
 };
 
 const pickSchema = (model: Schema.ContentType) => {
+  // [lodash: cloneDeep — structuredClone not 1:1, audit value shape first]
+  // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
   const schema = _.cloneDeep(
     _.pick(model, [
       'connection',

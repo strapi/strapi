@@ -1,5 +1,3 @@
-import omit from 'lodash/omit';
-
 import { LOCALIZED_FIELDS, doesPluginOptionsHaveI18nLocalized } from './fields';
 
 import type { Schema } from '@strapi/types';
@@ -52,12 +50,12 @@ const mutateCTBContentTypeSchema = (
 
   // Remove the i18n object from the pluginOptions
   if (!isNextSchemaLocalized) {
-    const pluginOptions = omit(nextSchema.pluginOptions, 'i18n');
+    const { i18n: _i18n, ...pluginOptionsWithoutI18n } = nextSchema.pluginOptions ?? {};
     const attributes = disableAttributesLocalisation(nextSchema.attributes);
 
     return {
       ...nextSchema,
-      pluginOptions,
+      pluginOptions: pluginOptionsWithoutI18n,
       attributes,
     };
   }
@@ -91,7 +89,11 @@ const addLocalisationToFields = (attributes: Schema.Attribute.AnyAttribute[]) =>
 
 const disableAttributesLocalisation = (attributes: Schema.Attribute.AnyAttribute[]) => {
   return attributes.map((currentAttribute) => {
-    return omit(currentAttribute, 'pluginOptions.i18n');
+    if (!currentAttribute.pluginOptions) {
+      return currentAttribute;
+    }
+    const { i18n: _i18n, ...restPluginOptions } = currentAttribute.pluginOptions;
+    return { ...currentAttribute, pluginOptions: restPluginOptions };
   });
 };
 

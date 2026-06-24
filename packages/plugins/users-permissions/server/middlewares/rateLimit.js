@@ -2,7 +2,7 @@
 
 const path = require('path');
 const utils = require('@strapi/utils');
-const { isString, has, toLower } = require('lodash/fp');
+const { has } = require('lodash/fp');
 
 const { RateLimitError } = utils.errors;
 
@@ -47,21 +47,21 @@ const routeUsesEmailIdentifier = (requestPath) => {
  */
 const normalizeRequestPathForRateLimit = (requestPath) => {
   const normalized = path.normalize(requestPath);
-  const lower = toLower(normalized);
+  const lower = normalized.toLowerCase();
   return lower.replace(/\/+$/, '') || '/';
 };
 
 const getEmailIdentifierForKey = (body) => {
-  if (!body || !isString(body.email) || body.email === '') {
+  if (body === null || body === undefined || typeof body.email !== 'string' || body.email === '') {
     return 'unknownIdentifier';
   }
 
-  return toLower(body.email);
+  return body.email.toLowerCase();
 };
 
 const buildPrefixKey = (ctx) => {
   let requestPath;
-  if (!isString(ctx.request.path)) {
+  if (typeof ctx.request.path !== 'string') {
     requestPath = 'invalidPath';
   } else {
     requestPath = normalizeRequestPathForRateLimit(ctx.request.path);

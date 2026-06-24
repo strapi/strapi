@@ -118,7 +118,7 @@ const addMinLengthValidator = (
   },
   { isDraft }: ValidatorOptions
 ) => {
-  return attr.minLength && _.isInteger(attr.minLength) && !isDraft
+  return attr.minLength && Number.isInteger(attr.minLength) && !isDraft
     ? validator.min(attr.minLength)
     : validator;
 };
@@ -141,7 +141,9 @@ const addMaxLengthValidator = (
       | Schema.Attribute.UID;
   }
 ) => {
-  return attr.maxLength && _.isInteger(attr.maxLength) ? validator.max(attr.maxLength) : validator;
+  return attr.maxLength && Number.isInteger(attr.maxLength)
+    ? validator.max(attr.maxLength)
+    : validator;
 };
 
 /**
@@ -225,7 +227,7 @@ const addStringRegexValidator = (
   },
   { isDraft }: ValidatorOptions
 ) => {
-  return 'regex' in attr && !_.isUndefined(attr.regex) && !isDraft
+  return 'regex' in attr && attr.regex !== undefined && !isDraft
     ? validator.matches(new RegExp(attr.regex), { excludeEmptyString: !attr.required })
     : validator;
 };
@@ -418,7 +420,7 @@ const addUniqueValidator = <T extends yup.AnySchema>(
      * If the attribute value is `null` or an empty string we want to skip the unique validation.
      * Otherwise it'll only accept a single entry with that value in the database.
      */
-    if (_.isNil(value) || value === '') {
+    if (value === null || value === undefined || value === '') {
       return true;
     }
 

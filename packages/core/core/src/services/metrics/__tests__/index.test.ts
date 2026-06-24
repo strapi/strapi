@@ -1,3 +1,4 @@
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import { get } from 'lodash/fp';
 import metrics from '../index';
 

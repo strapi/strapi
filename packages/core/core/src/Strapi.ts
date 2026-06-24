@@ -322,8 +322,8 @@ class Strapi extends Container implements Core.Strapi {
         groupProperties: {
           database: this.config.get('database.connection.client'),
           plugins: Object.keys(this.plugins),
-          numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
-          numberOfComponents: _.size(this.components),
+          numberOfAllContentTypes: Object.keys(this.contentTypes).length, // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
+          numberOfComponents: Object.keys(this.components).length,
           numberOfDynamicZones: getNumberOfDynamicZones(),
           numberOfConditionalFields: getNumberOfConditionalFields(),
           numberOfCustomControllers: Object.values<Core.Controller>(this.controllers).filter(

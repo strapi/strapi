@@ -9,6 +9,8 @@ import {
   GUIDED_TOUR_REQUIRED_ACTIONS,
 } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@strapi/design-system';
+// [lodash: get — skipped, paths use dynamic array keys including dot-separated UIDs]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';

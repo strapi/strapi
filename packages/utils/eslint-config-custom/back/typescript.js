@@ -5,6 +5,7 @@ const config = {
   root: true,
   extends: [
     '@strapi/eslint-config/back/typescript' /*'plugin:@typescript-eslint/recommended-requiring-type-checking'*/,
+    'plugin:you-dont-need-lodash-underscore/compatible',
   ],
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],

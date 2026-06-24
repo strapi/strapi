@@ -40,10 +40,7 @@ const validateUIDField = (contentTypeUID: any, field: any) => {
     throw new ValidationError('ContentType not found');
   }
 
-  if (
-    !_.has(model, ['attributes', field]) ||
-    _.get(model, ['attributes', field, 'type']) !== 'uid'
-  ) {
+  if (!_.has(model, ['attributes', field]) || model?.attributes?.[field]?.type !== 'uid') {
     throw new ValidationError(`${field} must be a valid \`uid\` attribute`);
   }
 };

@@ -37,7 +37,16 @@ const getSessionManager = () => {
  */
 const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
   return {
-    ..._.omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
+    ...(() => {
+      const {
+        password: _pw,
+        resetPasswordToken: _rpt,
+        registrationToken: _regToken,
+        roles: _roles,
+        ...rest
+      } = user;
+      return rest;
+    })(),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
 };

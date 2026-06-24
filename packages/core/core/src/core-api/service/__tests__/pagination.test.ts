@@ -10,6 +10,7 @@ describe('Pagination service', () => {
       global.strapi = {
         config: {
           get(path, defaultValue) {
+            // eslint-disable-next-line you-dont-need-lodash-underscore/get
             return _.get(this, path, defaultValue);
           },
           api: {
@@ -144,6 +145,7 @@ describe('Pagination service', () => {
       global.strapi = {
         config: {
           get(path, defaultValue) {
+            // eslint-disable-next-line you-dont-need-lodash-underscore/get
             return _.get(this, path, defaultValue);
           },
           api: {

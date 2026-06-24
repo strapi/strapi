@@ -1,7 +1,6 @@
 import fp from 'lodash/fp.js';
 import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
-import _ from 'lodash';
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { strings } from '@strapi/utils';
@@ -138,7 +137,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
   const declaredPlugins: PluginMetas = {};
   const userPluginsConfig = await getUserPluginsConfig();
 
-  _.forEach(userPluginsConfig, (declaration, pluginName) => {
+  Object.entries(userPluginsConfig ?? {}).forEach(([pluginName, declaration]) => {
     validatePluginName(pluginName);
 
     declaredPlugins[pluginName] = {

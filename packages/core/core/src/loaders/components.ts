@@ -49,6 +49,8 @@ export default async function loadComponents(strapi: Core.Strapi) {
       const uid: UID.Component = `${category}.${key}`;
 
       acc[uid] = Object.assign(schema, {
+        // [lodash: cloneDeep — structuredClone not 1:1, audit value shape first]
+        // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
         __schema__: _.cloneDeep(schema),
         uid,
         category,

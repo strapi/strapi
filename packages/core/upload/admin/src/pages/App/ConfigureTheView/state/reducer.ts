@@ -1,5 +1,4 @@
 import { produce } from 'immer'; // current
-import get from 'lodash/get';
 import set from 'lodash/set';
 
 import { ON_CHANGE, SET_LOADED } from './actionTypes';
@@ -40,7 +39,7 @@ export const reducer = (
       }
       case SET_LOADED: {
         // This action re-initialises the state using the current modifiedData.
-        const reInitialise = init(get(draftState, ['modifiedData'], {}));
+        const reInitialise = init(draftState.modifiedData ?? {});
         draftState.initialData = reInitialise.initialData;
         draftState.modifiedData = reInitialise.modifiedData;
         break;

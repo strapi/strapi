@@ -289,8 +289,12 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
     .query(uid)
     .load(entityToUpdate, attributeName)) as ComponentValue;
 
-  const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
-  const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
+  const idsToKeep = (Array.isArray(componentValue) ? componentValue : [componentValue])
+    .filter(has('id'))
+    .map(pickStringifiedId);
+  const allIds = (Array.isArray(previousValue) ? previousValue : [previousValue])
+    .filter(has('id'))
+    .map(pickStringifiedId);
 
   idsToKeep.forEach((id) => {
     if (!allIds.includes(id)) {
@@ -319,14 +323,14 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
     .query(uid)
     .load(entityToUpdate, attributeName)) as Schema.Attribute.Value<Schema.Attribute.DynamicZone>;
 
-  const idsToKeep = _.castArray(dynamiczoneValues)
+  const idsToKeep = (Array.isArray(dynamiczoneValues) ? dynamiczoneValues : [dynamiczoneValues])
     .filter(has('id'))
     .map((v) => ({
       id: pickStringifiedId(v),
       __component: v.__component,
     }));
 
-  const allIds = _.castArray(previousValue)
+  const allIds = (Array.isArray(previousValue) ? previousValue : [previousValue])
     .filter(has('id'))
     .map((v) => ({
       id: pickStringifiedId(v),
@@ -390,7 +394,7 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
         const { component: componentUID } = attribute;
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
         await async.map(
-          _.castArray(value),
+          Array.isArray(value) ? value : [value],
           (subValue: any) => deleteComponent(componentUID, subValue),
           {
             concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity,
@@ -400,7 +404,7 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
         // delete dynamic zone components
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
         await async.map(
-          _.castArray(value),
+          Array.isArray(value) ? value : [value],
           (subValue: any) => deleteComponent(subValue.__component, subValue),
           { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
         );
@@ -535,7 +539,12 @@ const collectComponentIdMappings = ({
       const oldValue = oldData[attributeName];
       const newValue = newData[attributeName];
 
-      if (_.isNil(oldValue) || _.isNil(newValue)) {
+      if (
+        oldValue === null ||
+        oldValue === undefined ||
+        newValue === null ||
+        newValue === undefined
+      ) {
         continue;
       }
 

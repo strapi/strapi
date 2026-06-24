@@ -59,9 +59,10 @@ module.exports = {
 
     // If the targetField property is defined, then reference it,
     // otherwise, put `undefined` keyword type node as placeholder
-    const targetFieldParam = _.isUndefined(targetField)
-      ? factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword)
-      : factory.createStringLiteral(targetField);
+    const targetFieldParam =
+      targetField === undefined
+        ? factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword)
+        : factory.createStringLiteral(targetField);
 
     params.push(targetFieldParam);
 

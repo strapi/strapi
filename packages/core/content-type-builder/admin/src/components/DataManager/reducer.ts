@@ -1,6 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import merge from 'lodash/merge';
-import omit from 'lodash/omit';
 
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
@@ -341,7 +340,8 @@ const slice = createUndoRedoSlice(
 
         const type = getType(state, { forTarget, targetUid });
 
-        const attribute = createAttribute(omit(attributeToSet, 'createComponent'));
+        const { createComponent: _createComponent, ...attributeWithoutCreate } = attributeToSet;
+        const attribute = createAttribute(attributeWithoutCreate);
 
         if (attribute.type === 'relation') {
           const target = attribute.target;

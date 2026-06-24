@@ -56,7 +56,7 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
 const createProvider = (config: Config) => {
   const { providerOptions, actionOptions = {} } = config;
 
-  const providerName = _.toLower(config.provider);
+  const providerName = config.provider.toLowerCase();
   let provider;
 
   let modulePath;

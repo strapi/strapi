@@ -1,4 +1,3 @@
-import { omit } from 'lodash/fp';
 import createActionProvider from '../provider';
 import domain from '..';
 
@@ -47,7 +46,7 @@ describe('Action Provider', () => {
           category: 'category',
           subCategory: 'subcategory',
         };
-        const expected = omit('uid', attributes);
+        const { uid: _uid, ...expected } = attributes;
         const actionId = domain.computeActionId(attributes);
 
         const actionProvider = createActionProvider();

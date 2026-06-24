@@ -164,7 +164,7 @@ const createDefaultImplementation = ({
   },
 
   async load(uid, entity, field, params) {
-    if (!_.isString(field)) {
+    if (typeof field !== 'string') {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
 
@@ -176,7 +176,7 @@ const createDefaultImplementation = ({
   },
 
   async loadPages(uid, entity, field, params, pagination = {}) {
-    if (!_.isString(field)) {
+    if (typeof field !== 'string') {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
 

@@ -23,7 +23,7 @@ import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
 import type { Settings } from '../controllers/validation/admin/settings';
 
-const { has, toNumber, isNil } = fp;
+const { has, toNumber } = fp;
 
 type User = {
   id: string | number;
@@ -294,8 +294,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // Store width and height of the original image
     const { width, height } = await getDimensions(fileData);
 
-    // Make sure this is assigned before calling any upload
-    // That way it can mutate the width and height
+    // [lodash: assign — skipped, target is existing variable not {}]
+    // eslint-disable-next-line you-dont-need-lodash-underscore/assign
     _.assign(fileData, {
       width,
       height,
@@ -351,6 +351,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const { width, height } = await getDimensions(fileData);
 
+    // [lodash: assign — skipped, target is existing variable not {}]
+    // eslint-disable-next-line you-dont-need-lodash-underscore/assign
     _.assign(fileData, {
       width,
       height,
@@ -446,16 +448,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const fileService = getService('file');
 
-    const newName = _.isNil(name) ? dbFile.name : name;
+    const newName = name === null || name === undefined ? dbFile.name : name;
     const newInfos = {
       name: newName,
-      alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
-      caption: _.isNil(caption) ? dbFile.caption : caption,
-      focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
-      folder: _.isUndefined(folder) ? dbFile.folder : folder,
-      folderPath: _.isUndefined(folder)
-        ? dbFile.folderPath
-        : await fileService.getFolderPath(folder),
+      alternativeText:
+        alternativeText === null || alternativeText === undefined
+          ? dbFile.alternativeText
+          : alternativeText,
+      caption: caption === null || caption === undefined ? dbFile.caption : caption,
+      focalPoint: focalPoint === null || focalPoint === undefined ? dbFile.focalPoint : focalPoint,
+      folder: folder === undefined ? dbFile.folder : folder,
+      folderPath:
+        folder === undefined ? dbFile.folderPath : await fileService.getFolderPath(folder),
     };
 
     return update(id, newInfos, { user });
@@ -487,6 +491,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       fileData = await enhanceAndValidateFile(file, fileInfo);
 
       // keep a constant hash and extension so the file url doesn't change when the file is replaced
+      // [lodash: assign — skipped, target is existing variable not {}]
+      // eslint-disable-next-line you-dont-need-lodash-underscore/assign
       _.assign(fileData, {
         hash: dbFile.hash,
         ext: dbFile.ext,
@@ -685,10 +691,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const paginationInfo = transform({ start, limit }, total as number);
 
+    const { total: _total, pageCount: _pageCount, ...paginationWithoutCounts } = paginationInfo;
     return {
       results: signedResults,
       // Omit total & pageCount when counting is disabled (withCount=false).
-      pagination: isNil(total) ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
+      pagination: total === null || total === undefined ? paginationWithoutCounts : paginationInfo,
     };
   }
 

@@ -25,6 +25,8 @@ import {
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
+// [lodash: get — fieldToConnect is a dynamic dot-path string variable; optional chaining cannot traverse it]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import merge from 'lodash/merge';
 import set from 'lodash/set';

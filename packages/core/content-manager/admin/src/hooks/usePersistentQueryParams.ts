@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { usePersistentStateScope, useQueryParams } from '@strapi/admin/strapi-admin';
+// [lodash: get — dynamic PropertyPath (string | string[]) used with lodash set; no safe optional-chaining equivalent]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import set from 'lodash/set';
 

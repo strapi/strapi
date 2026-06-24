@@ -1,7 +1,7 @@
 import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
 
-const { isEmpty, isNil } = fp;
+const { isEmpty } = fp;
 
 /**
  * Test if the strapi application is considered as initialized (1st user has been created)
@@ -15,7 +15,7 @@ export const isInitialized = async (strapi: Core.Strapi): Promise<boolean> => {
     // test if there is at least one admin
     const anyAdministrator = await strapi.db.query('admin::user').findOne({ select: ['id'] });
 
-    return !isNil(anyAdministrator);
+    return anyAdministrator !== null && anyAdministrator !== undefined;
   } catch (err) {
     strapi.stopWithError(err);
   }

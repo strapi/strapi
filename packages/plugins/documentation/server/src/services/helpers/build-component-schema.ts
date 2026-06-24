@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import type { OpenAPIV3 } from 'openapi-types';
 import type { Core, Struct } from '@strapi/types';
 
@@ -63,7 +61,9 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
     'createdBy',
   ];
 
-  const attributesForRequest = _.omit(attributes, attributesToOmit);
+  const attributesForRequest = Object.fromEntries(
+    Object.entries(attributes).filter(([key]) => !attributesToOmit.includes(key))
+  );
   // Get a list of required attribute names
   const requiredRequestAttributes = getRequiredAttributes(attributesForRequest);
   // Build the request schemas when the route has POST or PUT methods

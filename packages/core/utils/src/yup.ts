@@ -2,7 +2,6 @@ import fp from 'lodash/fp.js';
 /* eslint-disable no-template-curly-in-string */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import * as yup from 'yup';
-import _ from 'lodash';
 
 import { strings } from './primitives';
 import { printValue } from './print-value';
@@ -13,9 +12,9 @@ export * from 'yup';
 
 export const strapiID = (): InstanceType<typeof StrapiIDSchema> => new StrapiIDSchema();
 
-const isNotNilTest = (value: unknown) => !_.isNil(value);
+const isNotNilTest = (value: unknown) => value !== null && value !== undefined;
 
-const isNotNullTest = (value: unknown) => !_.isNull(value);
+const isNotNullTest = (value: unknown) => value !== null;
 
 yup.addMethod(yup.mixed, 'notNil', function isNotNill(msg = '${path} must be defined.') {
   return this.test('defined', msg, isNotNilTest);
@@ -29,7 +28,7 @@ yup.addMethod(yup.mixed, 'isFunction', function isFunction(message = '${path} is
   return this.test(
     'is a function',
     message,
-    (value) => _.isUndefined(value) || _.isFunction(value)
+    (value) => value === undefined || typeof value === 'function'
   );
 });
 
@@ -60,7 +59,9 @@ yup.addMethod(
     return this.test(
       'only contains functions',
       message,
-      (value) => _.isUndefined(value) || (value && Object.values(value).every(_.isFunction))
+      (value) =>
+        value === undefined ||
+        (value !== null && Object.values(value).every((v) => typeof v === 'function'))
     );
   }
 );
@@ -74,6 +75,7 @@ yup.addMethod(
 
       list?.forEach((element, index) => {
         const sameElements = list.filter(
+          // [lodash: get — skipped, dynamic path via propertyName variable]
           (e) => get(propertyName, e) === get(propertyName, element)
         );
         if (sameElements.length > 1) {

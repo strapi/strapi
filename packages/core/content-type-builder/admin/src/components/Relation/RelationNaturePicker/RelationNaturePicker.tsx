@@ -7,6 +7,8 @@ import {
   OneToOne,
   OneWay,
 } from '@strapi/icons';
+// [lodash: get — skipped, paths use dynamic array keys with dot-separated UIDs]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import truncate from 'lodash/truncate';
 import pluralize from 'pluralize';

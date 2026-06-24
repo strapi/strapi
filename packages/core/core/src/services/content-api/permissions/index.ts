@@ -74,10 +74,9 @@ export default (strapi: Core.Strapi) => {
       apis: Record<string, Core.Plugin | Core.Module>,
       source: 'api' | 'plugin'
     ) => {
-      _.forEach(apis, (api, apiName) => {
-        const controllers = _.reduce(
-          api.controllers,
-          (acc, controller, controllerName) => {
+      Object.entries(apis ?? {}).forEach(([apiName, api]) => {
+        const controllers = Object.entries(api.controllers ?? {}).reduce(
+          (acc, [controllerName, controller]) => {
             const contentApiActions = _.pickBy(controller, isContentApi);
 
             if (_.isEmpty(contentApiActions)) {

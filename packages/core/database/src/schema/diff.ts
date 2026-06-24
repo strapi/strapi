@@ -94,7 +94,7 @@ export default (db: Database) => {
       changes.push('columns');
     }
 
-    if (oldIndex.type && index.type && _.toLower(oldIndex.type) !== _.toLower(index.type)) {
+    if (oldIndex.type && index.type && oldIndex.type.toLowerCase() !== index.type.toLowerCase()) {
       changes.push('type');
     }
 
@@ -127,25 +127,39 @@ export default (db: Database) => {
       changes.push('referencedTable');
     }
 
-    if (_.isNil(oldForeignKey.onDelete) || _.toUpper(oldForeignKey.onDelete) === 'NO ACTION') {
+    if (
+      oldForeignKey.onDelete === null ||
+      oldForeignKey.onDelete === undefined ||
+      (oldForeignKey.onDelete as string).toUpperCase() === 'NO ACTION'
+    ) {
       if (
-        !_.isNil(foreignKey.onDelete) &&
-        _.toUpper(oldForeignKey.onDelete ?? '') !== 'NO ACTION'
+        foreignKey.onDelete !== null &&
+        foreignKey.onDelete !== undefined &&
+        (oldForeignKey.onDelete ?? '').toUpperCase() !== 'NO ACTION'
       ) {
         changes.push('onDelete');
       }
-    } else if (_.toUpper(oldForeignKey.onDelete) !== _.toUpper(foreignKey.onDelete ?? '')) {
+    } else if (
+      (oldForeignKey.onDelete as string).toUpperCase() !== (foreignKey.onDelete ?? '').toUpperCase()
+    ) {
       changes.push('onDelete');
     }
 
-    if (_.isNil(oldForeignKey.onUpdate) || _.toUpper(oldForeignKey.onUpdate) === 'NO ACTION') {
+    if (
+      oldForeignKey.onUpdate === null ||
+      oldForeignKey.onUpdate === undefined ||
+      (oldForeignKey.onUpdate as string).toUpperCase() === 'NO ACTION'
+    ) {
       if (
-        !_.isNil(foreignKey.onUpdate) &&
-        _.toUpper(oldForeignKey.onUpdate ?? '') !== 'NO ACTION'
+        foreignKey.onUpdate !== null &&
+        foreignKey.onUpdate !== undefined &&
+        (oldForeignKey.onUpdate ?? '').toUpperCase() !== 'NO ACTION'
       ) {
         changes.push('onUpdate');
       }
-    } else if (_.toUpper(oldForeignKey.onUpdate) !== _.toUpper(foreignKey.onUpdate ?? '')) {
+    } else if (
+      (oldForeignKey.onUpdate as string).toUpperCase() !== (foreignKey.onUpdate ?? '').toUpperCase()
+    ) {
       changes.push('onUpdate');
     }
 
@@ -162,13 +176,15 @@ export default (db: Database) => {
     const oldDefaultTo = oldColumn.defaultTo;
     const { defaultTo } = column;
 
-    if (oldDefaultTo === null || _.toLower(oldDefaultTo) === 'null') {
-      return _.isNil(defaultTo) || _.toLower(defaultTo) === 'null';
+    if (oldDefaultTo === null || (oldDefaultTo ?? '').toLowerCase() === 'null') {
+      return (
+        defaultTo === null || defaultTo === undefined || (defaultTo ?? '').toLowerCase() === 'null'
+      );
     }
 
     return (
-      _.toLower(oldDefaultTo) === _.toLower(column.defaultTo) ||
-      _.toLower(oldDefaultTo) === _.toLower(`'${column.defaultTo}'`)
+      (oldDefaultTo ?? '').toLowerCase() === (column.defaultTo ?? '').toLowerCase() ||
+      (oldDefaultTo ?? '').toLowerCase() === `'${column.defaultTo ?? ''}'`.toLowerCase()
     );
   };
 
@@ -451,7 +467,7 @@ export default (db: Database) => {
           .filter((table: PersistedTable) => {
             const dependsOn = table?.dependsOn;
 
-            if (!_.isArray(dependsOn)) {
+            if (!Array.isArray(dependsOn)) {
               return;
             }
 
@@ -463,7 +479,7 @@ export default (db: Database) => {
             );
           })
           // In case the table is not found, filter undefined values
-          .filter((table: PersistedTable) => !_.isNil(table));
+          .filter((table: PersistedTable) => table !== null && table !== undefined);
 
         removedTables.push(databaseTable, ...dependencies);
       }

@@ -10,7 +10,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
-import capitalize from 'lodash/capitalize';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
@@ -73,7 +72,9 @@ export const CollapsableContentType = ({
   return (
     <Accordion.Item value={`${label}-${orderNumber}`}>
       <Accordion.Header variant={orderNumber % 2 ? 'primary' : 'secondary'}>
-        <Accordion.Trigger>{capitalize(label)}</Accordion.Trigger>
+        <Accordion.Trigger>
+          {label.charAt(0).toUpperCase() + label.slice(1).toLowerCase()}
+        </Accordion.Trigger>
       </Accordion.Header>
       <Accordion.Content>
         {controllers?.map((controller) => {

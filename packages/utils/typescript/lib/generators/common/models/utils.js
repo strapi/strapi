@@ -2,20 +2,7 @@
 
 const ts = require('typescript');
 const { factory } = require('typescript');
-const {
-  pipe,
-  replace,
-  camelCase,
-  upperFirst,
-  isUndefined,
-  isNull,
-  isString,
-  isNumber,
-  isDate,
-  isArray,
-  isBoolean,
-  propEq,
-} = require('lodash/fp');
+const { pipe, camelCase, upperFirst, isNumber, isBoolean, propEq } = require('lodash/fp');
 
 const NAMESPACES = {
   Struct: 'Struct',
@@ -28,7 +15,7 @@ const NAMESPACES = {
  * @param {string} uid
  * @returns {string}
  */
-const getSchemaInterfaceName = pipe(replace(/(:.)/, ' '), camelCase, upperFirst);
+const getSchemaInterfaceName = pipe((str) => str.replace(/(:.)/, ' '), camelCase, upperFirst);
 
 const getSchemaModelType = (schema) => {
   const { modelType, kind } = schema;
@@ -79,15 +66,15 @@ const getTypeNode = (typeName, params = []) => {
  * @returns {ts.TypeNode}
  */
 const toTypeLiteral = (data) => {
-  if (isUndefined(data)) {
+  if (data === undefined) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword);
   }
 
-  if (isNull(data)) {
+  if (data === null) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.NullKeyword);
   }
 
-  if (isString(data)) {
+  if (typeof data === 'string') {
     return factory.createStringLiteral(data, true);
   }
 
@@ -104,11 +91,11 @@ const toTypeLiteral = (data) => {
     return data ? factory.createTrue() : factory.createFalse();
   }
 
-  if (isArray(data)) {
+  if (Array.isArray(data)) {
     return factory.createTupleTypeNode(data.map((item) => toTypeLiteral(item)));
   }
 
-  if (isDate(data)) {
+  if (data instanceof Date) {
     return factory.createStringLiteral(data.toISOString());
   }
 

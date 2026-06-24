@@ -9,7 +9,7 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
-const { concat, compact, isArray } = require('lodash/fp');
+const { compact } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const { buildRefreshCookieOptions } = require('../utils/refresh-cookie-options');
@@ -48,6 +48,8 @@ module.exports = ({ strapi }) => ({
 
     const grantProvider = provider === 'local' ? 'email' : provider;
 
+    // [lodash: get — skipped, dynamic grantProvider variable in array path]
+    // eslint-disable-next-line you-dont-need-lodash-underscore/get
     if (!_.get(grantSettings, [grantProvider, 'enabled'])) {
       throw new ApplicationError('This provider is disabled');
     }
@@ -83,7 +85,7 @@ module.exports = ({ strapi }) => ({
       }
 
       const advancedSettings = await store.get({ key: 'advanced' });
-      const requiresConfirmation = _.get(advancedSettings, 'email_confirmation');
+      const requiresConfirmation = advancedSettings?.email_confirmation;
 
       if (requiresConfirmation && user.confirmed !== true) {
         throw new ApplicationError('Your account email is not confirmed');
@@ -384,6 +386,8 @@ module.exports = ({ strapi }) => ({
     const [requestPath] = ctx.request.url.split('?');
     const provider = requestPath.split('/connect/')[1].split('/')[0];
 
+    // [lodash: get — skipped, provider is variable key on grantConfig object]
+    // eslint-disable-next-line you-dont-need-lodash-underscore/get
     if (!_.get(grantConfig[provider], 'enabled')) {
       throw new ApplicationError('This provider is disabled');
     }
@@ -395,8 +399,8 @@ module.exports = ({ strapi }) => ({
     }
 
     // Ability to pass OAuth callback dynamically
-    const queryCustomCallback = _.get(ctx, 'query.callback');
-    const dynamicSessionCallback = _.get(ctx, 'session.grant.dynamic.callback');
+    const queryCustomCallback = ctx?.query?.callback;
+    const dynamicSessionCallback = ctx?.session?.grant?.dynamic?.callback;
 
     const customCallback = queryCustomCallback ?? dynamicSessionCallback;
 
@@ -444,7 +448,7 @@ module.exports = ({ strapi }) => ({
 
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    const resetPasswordSettings = _.get(emailSettings, 'reset_password.options', {});
+    const resetPasswordSettings = emailSettings?.reset_password?.options ?? {};
     const emailBody = await getService('users-permissions').template(
       resetPasswordSettings.message,
       {
@@ -498,7 +502,7 @@ module.exports = ({ strapi }) => ({
 
     // Note that we intentionally do not filter allowedFields to allow a project to explicitly accept private or other Strapi field on registration
     const allowedKeys = compact(
-      concat(alwaysAllowedKeys, isArray(register?.allowedFields) ? register.allowedFields : [])
+      alwaysAllowedKeys.concat(Array.isArray(register?.allowedFields) ? register.allowedFields : [])
     );
 
     // Check if there are any keys in requestBody that are not in allowedKeys

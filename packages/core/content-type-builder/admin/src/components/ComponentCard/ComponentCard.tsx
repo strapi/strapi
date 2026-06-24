@@ -1,5 +1,7 @@
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
+// [lodash: get — skipped, dot-separated UID paths interpreted as nested by lodash]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import { styled } from 'styled-components';
 

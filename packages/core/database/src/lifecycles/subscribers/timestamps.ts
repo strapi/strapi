@@ -10,6 +10,8 @@ export const timestampsLifecyclesSubscriber: Subscriber = {
     const { data } = event.params;
 
     const now = new Date();
+    // _.defaults only fills undefined slots; Object.assign would overwrite
+    // eslint-disable-next-line you-dont-need-lodash-underscore/defaults
     _.defaults(data, { createdAt: now, updatedAt: now });
   },
 
@@ -21,7 +23,9 @@ export const timestampsLifecyclesSubscriber: Subscriber = {
     const { data } = event.params;
 
     const now = new Date();
-    if (_.isArray(data)) {
+    if (Array.isArray(data)) {
+      // _.defaults only fills undefined slots; Object.assign would overwrite
+      // eslint-disable-next-line you-dont-need-lodash-underscore/defaults
       data.forEach((data) => _.defaults(data, { createdAt: now, updatedAt: now }));
     }
   },
@@ -34,7 +38,7 @@ export const timestampsLifecyclesSubscriber: Subscriber = {
     const { data } = event.params;
 
     const now = new Date();
-    _.assign(data, { updatedAt: now });
+    Object.assign(data, { updatedAt: now });
   },
 
   /**
@@ -45,8 +49,8 @@ export const timestampsLifecyclesSubscriber: Subscriber = {
     const { data } = event.params;
 
     const now = new Date();
-    if (_.isArray(data)) {
-      data.forEach((data) => _.assign(data, { updatedAt: now }));
+    if (Array.isArray(data)) {
+      data.forEach((data) => Object.assign(data, { updatedAt: now }));
     }
   },
 };

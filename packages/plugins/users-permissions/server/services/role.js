@@ -4,37 +4,35 @@ const _ = require('lodash');
 const { NotFoundError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
+const toLower = (value) =>
+  value === null || value === undefined ? '' : String(value).toLowerCase();
+
 module.exports = ({ strapi }) => ({
   async createRole(params) {
     if (!params.type) {
-      params.type = _.snakeCase(_.deburr(_.toLower(params.name)));
+      params.type = _.snakeCase(_.deburr(toLower(params.name)));
     }
 
-    const role = await strapi.db
-      .query('plugin::users-permissions.role')
-      .create({ data: _.omit(params, ['users', 'permissions']) });
+    const { users: _users, permissions: _rolePermissions, ...roleData } = params;
+    const role = await strapi.db.query('plugin::users-permissions.role').create({ data: roleData });
 
     const createPromises = _.flatMap(params.permissions, (type, typeName) => {
       return _.flatMap(type.controllers, (controller, controllerName) => {
-        return _.reduce(
-          controller,
-          (acc, action, actionName) => {
-            const { enabled /* policy */ } = action;
+        return Object.entries(controller).reduce((acc, [actionName, action]) => {
+          const { enabled /* policy */ } = action;
 
-            if (enabled) {
-              const actionID = `${typeName}.${controllerName}.${actionName}`;
+          if (enabled) {
+            const actionID = `${typeName}.${controllerName}.${actionName}`;
 
-              acc.push(
-                strapi.db
-                  .query('plugin::users-permissions.permission')
-                  .create({ data: { action: actionID, role: role.id } })
-              );
-            }
+            acc.push(
+              strapi.db
+                .query('plugin::users-permissions.permission')
+                .create({ data: { action: actionID, role: role.id } })
+            );
+          }
 
-            return acc;
-          },
-          []
-        );
+          return acc;
+        }, []);
       });
     });
 
@@ -100,19 +98,15 @@ module.exports = ({ strapi }) => ({
 
     const newActions = _.flatMap(permissions, (type, typeName) => {
       return _.flatMap(type.controllers, (controller, controllerName) => {
-        return _.reduce(
-          controller,
-          (acc, action, actionName) => {
-            const { enabled /* policy */ } = action;
+        return Object.entries(controller).reduce((acc, [actionName, action]) => {
+          const { enabled /* policy */ } = action;
 
-            if (enabled) {
-              acc.push(`${typeName}.${controllerName}.${actionName}`);
-            }
+          if (enabled) {
+            acc.push(`${typeName}.${controllerName}.${actionName}`);
+          }
 
-            return acc;
-          },
-          []
-        );
+          return acc;
+        }, []);
       });
     });
 

@@ -1,4 +1,3 @@
-import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
@@ -177,11 +176,7 @@ export default {
               return [];
             }
 
-            const hasI18nEnabled = get(
-              contentTypeSchema,
-              ['pluginOptions', 'i18n', 'localized'],
-              false
-            );
+            const hasI18nEnabled = contentTypeSchema?.pluginOptions?.i18n?.localized ?? false;
 
             if (!hasI18nEnabled) {
               return [];

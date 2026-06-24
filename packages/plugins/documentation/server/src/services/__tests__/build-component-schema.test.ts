@@ -1,3 +1,4 @@
+// [lodash: cloneDeep — kept, structuredClone not 1:1]
 import _ from 'lodash/fp';
 import buildComponentSchema from '../helpers/build-component-schema';
 
@@ -42,6 +43,7 @@ const strapi = {
 describe('Documentation plugin | Build component schema', () => {
   beforeEach(() => {
     // Reset the mocked strapi instance
+    // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
     global.strapi = _.cloneDeep(strapi);
   });
 

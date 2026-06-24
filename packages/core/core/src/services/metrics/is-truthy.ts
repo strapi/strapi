@@ -1,7 +1,5 @@
-import _ from 'lodash';
-
-const isTruthy = (val: any) => {
-  return [1, true].includes(val) || ['true', '1'].includes(_.toLower(val));
+const isTruthy = (val: unknown) => {
+  return [1, true].includes(val as never) || ['true', '1'].includes(String(val).toLowerCase());
 };
 
 export default isTruthy;

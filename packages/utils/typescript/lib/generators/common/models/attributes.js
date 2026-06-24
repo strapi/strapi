@@ -102,7 +102,10 @@ const getAttributeModifiers = (attribute) => {
   }
 
   // Min / Max
-  if (!_.isNil(attribute.min) || !_.isNil(attribute.max)) {
+  if (
+    (attribute.min !== null && attribute.min !== undefined) ||
+    (attribute.max !== null && attribute.max !== undefined)
+  ) {
     const minMaxProperties = _.pick(['min', 'max'], attribute);
     const { min, max } = minMaxProperties;
 
@@ -140,7 +143,10 @@ const getAttributeModifiers = (attribute) => {
   }
 
   // Min length / Max length
-  if (!_.isNil(attribute.minLength) || !_.isNil(attribute.maxLength)) {
+  if (
+    (attribute.minLength !== null && attribute.minLength !== undefined) ||
+    (attribute.maxLength !== null && attribute.maxLength !== undefined)
+  ) {
     const minMaxProperties = _.pick(['minLength', 'maxLength'], attribute);
 
     modifiers.push(
@@ -152,7 +158,11 @@ const getAttributeModifiers = (attribute) => {
   }
 
   // Default (ignore if default is a function)
-  if (!_.isNil(attribute.default) && !_.isFunction(attribute.default)) {
+  if (
+    attribute.default !== null &&
+    attribute.default !== undefined &&
+    typeof attribute.default !== 'function'
+  ) {
     const defaultLiteral = toTypeLiteral(attribute.default);
 
     modifiers.push(

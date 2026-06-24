@@ -40,6 +40,8 @@ const defaultQueryOpts = {
 const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi: Core.Strapi) => {
   const { packageJsonStrapi = {} } = strapi.config;
 
+  // [lodash: defaults — fills undefined only, Object.assign overwrites]
+  // eslint-disable-next-line you-dont-need-lodash-underscore/defaults
   _.defaults(metadata, packageJsonStrapi);
 };
 

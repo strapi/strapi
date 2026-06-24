@@ -11,12 +11,15 @@ import type { InternalRelationAttribute, InternalAttribute } from './types';
 
 const { ApplicationError } = errors;
 
+// [lodash: defaults — skipped, fills only undefined keys (differs from Object.assign); omit — skipped, used inside defaults call]
 const reuseUnsetPreviousProperties = (
   newAttribute: Schema.Attribute.AnyAttribute,
   oldAttribute: Schema.Attribute.AnyAttribute
 ) => {
+  // eslint-disable-next-line you-dont-need-lodash-underscore/defaults
   _.defaults(
     newAttribute,
+    // eslint-disable-next-line you-dont-need-lodash-underscore/omit
     _.omit(oldAttribute, [
       'configurable',
       'required',

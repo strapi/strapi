@@ -1,4 +1,6 @@
 import { Box, Grid, Typography, Button, Tooltip } from '@strapi/design-system';
+// [lodash: get — skipped, paths use dynamic input.name variable]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 

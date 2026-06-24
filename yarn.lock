@@ -17461,6 +17461,8 @@ __metadata:
 "eslint-config-custom@npm:5.48.1, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
+  dependencies:
+    eslint-plugin-you-dont-need-lodash-underscore: "npm:6.14.0"
   languageName: unknown
   linkType: soft
 
@@ -17857,6 +17859,15 @@ __metadata:
   peerDependencies:
     eslint: ^7.5.0 || ^8.0.0
   checksum: 10c0/55c7792345710a2b951acb0552ebe4e491d988f7d37fd308749e75fdbc36142b9a151ecec03b39992f672afea1a99dd3c3d2fb9f737ef18f56d7168e294fd9eb
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-you-dont-need-lodash-underscore@npm:6.14.0":
+  version: 6.14.0
+  resolution: "eslint-plugin-you-dont-need-lodash-underscore@npm:6.14.0"
+  dependencies:
+    kebab-case: "npm:^1.0.0"
+  checksum: 10c0/23dadc91b754b9afdd5c9d87509f21e1c627888dc8a5e34c3d3181521ce9c5e87b4d1f5c693413d857e7fbb6e54b6d471adb1ee1e912fc8824a982f1762a11e0
   languageName: node
   linkType: hard
 
@@ -22407,6 +22418,13 @@ __metadata:
     jwa: "npm:^2.0.1"
     safe-buffer: "npm:^5.0.1"
   checksum: 10c0/6be1ed93023aef570ccc5ea8d162b065840f3ef12f0d1bb3114cade844de7a357d5dc558201d9a65101e70885a6fa56b17462f520e6b0d426195510618a154d0
+  languageName: node
+  linkType: hard
+
+"kebab-case@npm:^1.0.0":
+  version: 1.0.2
+  resolution: "kebab-case@npm:1.0.2"
+  checksum: 10c0/94080c483c4bb88d7a37efe21431271e91a2297d2fb4e9c12167c5a9144a813ffbdd92f7ba7778f553250c83ba8413f4b061e949b0d6c9bada771efe10c220a4
   languageName: node
   linkType: hard
 

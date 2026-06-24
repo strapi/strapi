@@ -10,6 +10,10 @@ import * as helpers from './helpers';
 import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
 
+const isNil = (value: unknown): value is null | undefined => value === null || value === undefined;
+const toArray = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
+const unique = <T>(values: T[]): T[] => [...new Set(values)];
+
 interface State {
   type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
   select: Array<string | Knex.Raw>;
@@ -133,6 +137,8 @@ const createQueryBuilder = (
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
 
+  // _.defaults only fills undefined slots; spread `{ ...defaults, ...initialState }` would overwrite with undefined for Partial<State> keys
+  // eslint-disable-next-line you-dont-need-lodash-underscore/defaults
   const state: State = _.defaults(
     {
       type: 'select',
@@ -182,13 +188,13 @@ const createQueryBuilder = (
 
     select(args) {
       state.type = 'select';
-      state.select = _.uniq(_.castArray(args));
+      state.select = unique(toArray(args));
 
       return this;
     },
 
     addSelect(args) {
-      state.select = _.uniq([...state.select, ..._.castArray(args)]);
+      state.select = unique([...state.select, ...toArray(args)]);
 
       return this;
     },
@@ -316,41 +322,41 @@ const createQueryBuilder = (
     init(params = {}) {
       const { _q, filters, where, select, limit, offset, orderBy, groupBy, populate } = params;
 
-      if (!_.isNil(where)) {
+      if (!isNil(where)) {
         this.where(where);
       }
 
-      if (!_.isNil(_q)) {
+      if (!isNil(_q)) {
         this.search(_q);
       }
 
-      if (!_.isNil(select)) {
+      if (!isNil(select)) {
         this.select(select);
       } else {
         this.select('*');
       }
 
-      if (!_.isNil(limit)) {
+      if (!isNil(limit)) {
         this.limit(limit);
       }
 
-      if (!_.isNil(offset)) {
+      if (!isNil(offset)) {
         this.offset(offset);
       }
 
-      if (!_.isNil(orderBy)) {
+      if (!isNil(orderBy)) {
         this.orderBy(orderBy);
       }
 
-      if (!_.isNil(groupBy)) {
+      if (!isNil(groupBy)) {
         this.groupBy(groupBy);
       }
 
-      if (!_.isNil(populate)) {
+      if (!isNil(populate)) {
         this.populate(populate);
       }
 
-      if (!_.isNil(filters)) {
+      if (!isNil(filters)) {
         this.filters(filters);
       }
 
@@ -401,7 +407,7 @@ const createQueryBuilder = (
         return key;
       }
 
-      if (!_.isNil(alias)) {
+      if (!isNil(alias)) {
         return `${alias}.${key}`;
       }
 
@@ -433,11 +439,11 @@ const createQueryBuilder = (
 
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
 
-      if (!_.isNil(state.filters)) {
-        if (_.isFunction(state.filters)) {
+      if (!isNil(state.filters)) {
+        if (typeof state.filters === 'function') {
           const filters = state.filters({ qb: this, uid, meta, db });
 
-          if (!_.isNil(filters)) {
+          if (!isNil(filters)) {
             state.where.push(filters);
           }
         } else {
@@ -537,14 +543,14 @@ const createQueryBuilder = (
 
       if (this.shouldUseDistinct()) {
         const joinsOrderByColumns = state.joins.flatMap((join) => {
-          return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
+          return Object.keys(join.orderBy ?? {}).map((key) => this.aliasColumn(key, join.alias));
         });
         // Only include column-based orderBy entries (skip raw expressions like status)
         const orderByColumns = state.orderBy
           .filter((ob: any) => 'column' in ob)
           .map((ob: any) => ob.column);
 
-        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+        state.select = unique([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
       }
     },
 
@@ -708,8 +714,8 @@ const createQueryBuilder = (
 
         const rows = await qb;
 
-        if (state.populate && !_.isNil(rows)) {
-          await helpers.applyPopulate(_.castArray(rows), state.populate, {
+        if (state.populate && !isNil(rows)) {
+          await helpers.applyPopulate(toArray(rows), state.populate, {
             qb: this,
             uid,
             db,

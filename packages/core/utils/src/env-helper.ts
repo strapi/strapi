@@ -75,7 +75,7 @@ function array(key: string, defaultValue?: string[]): string[] | undefined {
   }
 
   return value.split(',').map((v) => {
-    return _.trim(_.trim(v, ' '), '"');
+    return v.trim().replace(/^"+|"+$/g, '');
   });
 }
 

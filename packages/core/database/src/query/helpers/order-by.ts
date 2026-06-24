@@ -177,6 +177,8 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
   const { tableName } = db.metadata.get(uid);
 
   // The orderBy is cloned to avoid unwanted mutations of the original object
+  // lodash/fp cloneDeep is used because structuredClone doesn't handle Knex instances or functions
+  // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
   const orderBy = _.cloneDeep<OrderByValue[]>(qb.state.orderBy);
 
   // Separate column-based entries from raw-expression entries (e.g. status)

@@ -3,7 +3,10 @@
 /** @type {import('eslint').Linter.Config} */
 const config = {
   root: true,
-  extends: ['@strapi/eslint-config/front/typescript'],
+  extends: [
+    '@strapi/eslint-config/front/typescript',
+    'plugin:you-dont-need-lodash-underscore/compatible',
+  ],
   overrides: [
     {
       files: ['**/*.test.[j|t]s', '**/*.test.[j|t]sx', '**/__mocks__/**/*'],

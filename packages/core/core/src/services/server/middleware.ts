@@ -1,10 +1,7 @@
-import fp from 'lodash/fp.js';
 import path from 'path';
 
 import { importDefault } from '@strapi/utils';
 import type { Core } from '@strapi/types';
-
-const { isArray } = fp;
 
 const instantiateMiddleware = (
   middlewareFactory: Core.MiddlewareFactory,
@@ -24,7 +21,7 @@ const instantiateMiddleware = (
 const resolveRouteMiddlewares = (route: Core.Route, strapi: Core.Strapi) => {
   const middlewaresConfig = route?.config?.middlewares ?? [];
 
-  if (!isArray(middlewaresConfig)) {
+  if (!Array.isArray(middlewaresConfig)) {
     throw new Error('Route middlewares config must be an array');
   }
 

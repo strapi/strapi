@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { queryParams } from '@strapi/utils';
 import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
@@ -75,7 +74,9 @@ describe('Role', () => {
         name: 'super_admin',
         description: "Have all permissions. Can't be delete",
       };
-      const dbFindOne = jest.fn(({ where: { id } }) => Promise.resolve(_.find([role], { id })));
+      const dbFindOne = jest.fn(({ where: { id } }) =>
+        Promise.resolve([role].find((r) => r.id === id))
+      );
 
       global.strapi = {
         ...strapiMock,
@@ -95,9 +96,10 @@ describe('Role', () => {
         description: "Have all permissions. Can't be delete",
         usersCount: 0,
       };
-      const dbFindOne = jest.fn(({ where: { id } }) =>
-        Promise.resolve(_.find([_.omit(role, ['usersCount'])], { id }))
-      );
+      const dbFindOne = jest.fn(({ where: { id } }) => {
+        const { usersCount: _usersCount, ...roleWithoutCount } = role;
+        return Promise.resolve([roleWithoutCount].find((r) => r.id === id));
+      });
       const dbCount = jest.fn(() => Promise.resolve(0));
       global.strapi = {
         ...strapiMock,

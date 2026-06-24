@@ -135,7 +135,7 @@ const findAllWithUsersCount = async (params: any): Promise<AdminRoleWithUsersCou
  * @param attributes A partial role object
  */
 const update = async (params: any, attributes: Partial<AdminRole>): Promise<AdminRole> => {
-  const sanitizedAttributes = _.omit(attributes, ['code']);
+  const { code: _code, ...sanitizedAttributes } = attributes;
 
   if (_.has(params, 'id') && _.has(sanitizedAttributes, 'name')) {
     const alreadyExists = await exists({
@@ -450,7 +450,7 @@ const resetSuperAdminPermissions = async () => {
  * Check if a user object includes the super admin role
  */
 const hasSuperAdminRole = (user: AdminUser): boolean => {
-  const roles = _.get(user, 'roles', []) as AdminRole[];
+  const roles = (user.roles ?? []) as AdminRole[];
 
   return roles.map(prop('code')).includes(SUPER_ADMIN_CODE);
 };

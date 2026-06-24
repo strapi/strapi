@@ -1,6 +1,5 @@
 import type { UID, Core, Struct } from '@strapi/types';
 import type { Context, Next } from 'koa';
-import isNil from 'lodash/isNil.js';
 
 interface ContentType extends Struct.ContentTypeSchema {
   plugin?: string;
@@ -37,7 +36,7 @@ export default async (ctx: Context, next: Next) => {
     actionConfig = strapi.plugin(ct.plugin).config(`layout.${ct.modelName}.actions.${action}`);
   }
 
-  if (!isNil(actionConfig)) {
+  if (actionConfig !== null && actionConfig !== undefined) {
     const [controller, action] = actionConfig.split('.');
 
     if (controller && action) {

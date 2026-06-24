@@ -1,7 +1,5 @@
-import _ from 'lodash';
-
 const checkFieldsAreCorrectlyNested = (fields: unknown) => {
-  if (_.isNil(fields)) {
+  if (fields === null || fields === undefined) {
     // Only check if the fields exist
     return true;
   }

@@ -10,6 +10,8 @@ import {
   TypographyComponent,
 } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
+// [lodash: get — skipped, all call sites use dynamic array/variable paths]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { styled, DefaultTheme, css } from 'styled-components';

@@ -1,4 +1,5 @@
 import fp from 'lodash/fp.js';
+// [lodash: reduce — skipped, _.reduce iterates over plain object keys; not a drop-in for Array.prototype.reduce]
 import _ from 'lodash';
 
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
@@ -40,6 +41,7 @@ const getNestedFields = (
 
   const nonAuthorizableFields = contentTypesUtils.getNonVisibleAttributes(model);
 
+  // eslint-disable-next-line you-dont-need-lodash-underscore/reduce
   return _.reduce(
     model.attributes,
     (fields: any, attr: any, key: any) => {
@@ -91,6 +93,7 @@ const getNestedFieldsWithIntermediate = (
 
   const nonAuthorizableFields = contentTypesUtils.getNonVisibleAttributes(model);
 
+  // eslint-disable-next-line you-dont-need-lodash-underscore/reduce
   return _.reduce(
     model.attributes,
     (fields: any, attr: any, key: any) => {

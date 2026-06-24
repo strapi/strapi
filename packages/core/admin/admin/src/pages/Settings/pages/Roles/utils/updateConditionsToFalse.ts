@@ -1,5 +1,4 @@
 import has from 'lodash/has';
-import omit from 'lodash/omit';
 
 import { isObject } from '../../../../../utils/objects';
 
@@ -17,9 +16,8 @@ const updateConditionsToFalse = (obj: object): object => {
     }
 
     if (isObject(currentValue) && has(currentValue, 'conditions')) {
-      const isActionEnabled = createArrayOfValues(omit(currentValue, 'conditions')).some(
-        (val) => val
-      );
+      const { conditions: _conditions, ...currentValueWithoutConditions } = currentValue;
+      const isActionEnabled = createArrayOfValues(currentValueWithoutConditions).some((val) => val);
 
       if (!isActionEnabled) {
         // @ts-expect-error – TODO: type better

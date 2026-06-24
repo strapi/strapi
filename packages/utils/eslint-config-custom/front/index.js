@@ -3,7 +3,10 @@
 /** @type {import('eslint').Linter.Config} */
 const config = {
   parser: '@babel/eslint-parser',
-  extends: ['@strapi/eslint-config/front/javascript'],
+  extends: [
+    '@strapi/eslint-config/front/javascript',
+    'plugin:you-dont-need-lodash-underscore/compatible',
+  ],
   env: {
     browser: true,
     commonjs: true,

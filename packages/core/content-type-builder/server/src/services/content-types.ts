@@ -47,7 +47,7 @@ export const formatContentType = (contentType: any) => {
       displayName: info.displayName,
       singularName: info.singularName,
       pluralName: info.pluralName,
-      description: _.get(info, 'description', ''),
+      description: info.description ?? '',
       pluginOptions: contentType.pluginOptions,
       kind: kind || 'collectionType',
       collectionName,

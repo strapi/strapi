@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 
+// [lodash: throttle — skipped, native throttle requires non-trivial implementation with RAF/timer cleanup]
+// eslint-disable-next-line you-dont-need-lodash-underscore/throttle
 import throttle from 'lodash/throttle';
 
 type ThrottleSettings = Parameters<typeof throttle>[2];

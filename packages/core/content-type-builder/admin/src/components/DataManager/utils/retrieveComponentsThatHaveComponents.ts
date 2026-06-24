@@ -1,5 +1,3 @@
-import get from 'lodash/get';
-
 import type { AnyAttribute, Component, Components } from '../../../types';
 import type { UID } from '@strapi/types';
 
@@ -15,7 +13,7 @@ export type ComponentWithChildren = {
 const retrieveComponentsThatHaveComponents = (allComponents: Components) => {
   const componentsThatHaveNestedComponents = Object.keys(allComponents).reduce(
     (acc: ComponentWithChildren[], current) => {
-      const currentComponent = get(allComponents, [current]);
+      const currentComponent = allComponents[current];
 
       const compoWithChildren = getComponentWithChildComponents(currentComponent);
       if (compoWithChildren.childComponents.length > 0) {

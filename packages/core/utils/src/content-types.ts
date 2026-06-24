@@ -13,6 +13,8 @@ import type {
 
 const { has, getOr, union } = fp;
 
+const unique = <T>(values: T[]): T[] => [...new Set(values)];
+
 const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
 
@@ -80,13 +82,12 @@ const getCreatorFields = (model: Model) => {
 const getNonWritableAttributes = (model: Model) => {
   if (!model) return [];
 
-  const nonWritableAttributes = _.reduce(
-    model.attributes,
-    (acc, attr, attrName) => (attr.writable === false ? acc.concat(attrName) : acc),
+  const nonWritableAttributes = Object.entries(model.attributes).reduce(
+    (acc: string[], [attrName, attr]) => (attr.writable === false ? acc.concat(attrName) : acc),
     [] as string[]
   );
 
-  return _.uniq([
+  return unique([
     ID_ATTRIBUTE,
     DOC_ID_ATTRIBUTE,
     ...getTimestamps(model),
@@ -105,13 +106,12 @@ const isWritableAttribute = (model: Model, attributeName: string) => {
 };
 
 const getNonVisibleAttributes = (model: Model) => {
-  const nonVisibleAttributes = _.reduce(
-    model.attributes,
-    (acc, attr, attrName) => (attr.visible === false ? acc.concat(attrName) : acc),
+  const nonVisibleAttributes = Object.entries(model.attributes).reduce(
+    (acc: string[], [attrName, attr]) => (attr.visible === false ? acc.concat(attrName) : acc),
     [] as string[]
   );
 
-  return _.uniq([
+  return unique([
     ID_ATTRIBUTE,
     DOC_ID_ATTRIBUTE,
     PUBLISHED_AT_ATTRIBUTE,
@@ -121,25 +121,23 @@ const getNonVisibleAttributes = (model: Model) => {
 };
 
 const getVisibleAttributes = (model: Model) => {
-  return _.difference(_.keys(model.attributes), getNonVisibleAttributes(model));
+  return _.difference(Object.keys(model.attributes), getNonVisibleAttributes(model));
 };
 
 const isVisibleAttribute = (model: Model, attributeName: string) => {
   return getVisibleAttributes(model).includes(attributeName);
 };
 
-const getOptions = (model: Model) =>
-  _.assign({ draftAndPublish: false }, _.get(model, 'options', {}));
+const getOptions = (model: Model) => ({ draftAndPublish: false, ...(model?.options ?? {}) });
 
-const hasDraftAndPublish = (model: Model) =>
-  _.get(model, 'options.draftAndPublish', false) === true;
+const hasDraftAndPublish = (model: Model) => (model?.options?.draftAndPublish ?? false) === true;
 
 const hasFirstPublishedAtField = (model: Model) =>
   strapi.config.get('features.future.experimental_firstPublishedAt', false) &&
   hasDraftAndPublish(model);
 
 const isDraft = <T extends object>(data: T, model: Model) =>
-  hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
+  hasDraftAndPublish(model) && (data as Record<string, unknown>)[PUBLISHED_AT_ATTRIBUTE] === null;
 
 const isSchema = (data: unknown): data is Model => {
   return (
@@ -172,7 +170,7 @@ const getStoredPrivateAttributes = (model: Model) =>
 const getPrivateAttributes = (model: Model) => {
   return _.union(
     getStoredPrivateAttributes(model),
-    _.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
+    Object.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
   );
 };
 
@@ -219,47 +217,31 @@ const isMorphToRelationalAttribute = (attribute?: Attribute) => {
 };
 
 const getComponentAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isComponentAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc: string[], [attrName, attr]) => {
+    if (isComponentAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getMediaAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isMediaAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc: string[], [attrName, attr]) => {
+    if (isMediaAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getScalarAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isScalarAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc: string[], [attrName, attr]) => {
+    if (isScalarAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 const getRelationalAttributes = (schema: Model) => {
-  return _.reduce(
-    schema.attributes,
-    (acc, attr, attrName) => {
-      if (isRelationalAttribute(attr)) acc.push(attrName);
-      return acc;
-    },
-    [] as string[]
-  );
+  return Object.entries(schema.attributes).reduce((acc: string[], [attrName, attr]) => {
+    if (isRelationalAttribute(attr)) acc.push(attrName);
+    return acc;
+  }, [] as string[]);
 };
 
 /**

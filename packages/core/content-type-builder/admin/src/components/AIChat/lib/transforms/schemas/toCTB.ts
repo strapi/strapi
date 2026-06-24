@@ -1,6 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import isEqual from 'lodash/isEqual';
-import omit from 'lodash/omit';
 import pluralize from 'pluralize';
 
 import { Schema } from '../../types/schema';
@@ -62,8 +60,8 @@ const determineAttributeStatus = (
   }
 
   // Compare attributes without the status field to determine if they've changed
-  const newAttrWithoutStatus = omit(newAttr, ['status']);
-  const oldAttrWithoutStatus = omit(oldAttr, ['status']);
+  const { status: _ns, ...newAttrWithoutStatus } = newAttr;
+  const { status: _os, ...oldAttrWithoutStatus } = oldAttr;
 
   if (!isEqual(newAttrWithoutStatus, oldAttrWithoutStatus)) {
     return 'CHANGED';

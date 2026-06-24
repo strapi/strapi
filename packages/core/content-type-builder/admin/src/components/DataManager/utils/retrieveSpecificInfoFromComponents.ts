@@ -1,3 +1,5 @@
+// [lodash: get — skipped, dynamic path with spread keysToRetrieve variable]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 
 import { makeUnique } from '../../../utils/makeUnique';
