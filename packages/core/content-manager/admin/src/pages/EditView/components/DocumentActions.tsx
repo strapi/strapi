@@ -50,8 +50,9 @@ import { AnyData, handleInvisibleAttributes } from '../utils/data';
 import {
   countLocalDraftRelations,
   EMPTY_DRAFT_RELATION_COUNTS,
-  mergeDraftRelationCounts,
+  getDraftRelationsPublishState,
   normalizeDraftRelationCounts,
+  resolveDraftRelationCounts,
   type DraftRelationCounts,
 } from '../utils/draftRelationCounts';
 import { getEditViewShortcut } from '../utils/keyboardShortcuts';
@@ -988,16 +989,20 @@ const PublishAction: DocumentActionComponent = ({
     }
   };
 
-  const draftRelationCounts = !documentId
-    ? localDraftRelationCounts
-    : modified
-      ? mergeDraftRelationCounts(localDraftRelationCounts, serverDraftRelationCounts)
-      : serverDraftRelationCounts;
-  const { unpublishedRelations, draftM2mLinks } = draftRelationCounts;
-  const hasUnpublishedRelations = unpublishedRelations > 0;
-  const hasDraftM2mLinks = draftM2mLinks > 0;
-  const hasDraftRelations = hasUnpublishedRelations || hasDraftM2mLinks;
-  const isM2mOnlyDraftRelations = hasDraftM2mLinks && !hasUnpublishedRelations;
+  const draftRelationCounts = resolveDraftRelationCounts(
+    documentId,
+    modified,
+    localDraftRelationCounts,
+    serverDraftRelationCounts
+  );
+  const {
+    hasUnpublishedRelations,
+    hasDraftM2mLinks,
+    hasDraftRelations,
+    dialogVariant,
+    bodyIcon,
+    confirmLabel,
+  } = getDraftRelationsPublishState(draftRelationCounts);
 
   /**
    * Disabled when:
@@ -1088,8 +1093,8 @@ const PublishAction: DocumentActionComponent = ({
     dialog: hasDraftRelations
       ? {
           type: 'dialog',
-          variant: isM2mOnlyDraftRelations ? 'default' : 'danger',
-          bodyIcon: isM2mOnlyDraftRelations ? 'default' : 'danger',
+          variant: dialogVariant,
+          bodyIcon,
           title: formatMessage({
             id: getTranslation('popUpWarning.warning.has-draft-relations.title'),
             defaultMessage: 'Confirmation',
@@ -1104,7 +1109,7 @@ const PublishAction: DocumentActionComponent = ({
                         'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. {count, plural, one {That relation will not be included in the published version.} other {Those relations will not be included in the published version.}}',
                     },
                     {
-                      count: unpublishedRelations,
+                      count: draftRelationCounts.unpublishedRelations,
                     }
                   )
                 : formatMessage(
@@ -1114,7 +1119,7 @@ const PublishAction: DocumentActionComponent = ({
                         '{count, plural, one {# linked entry is still in draft. It will appear on the live site once that entry is published.} other {# linked entries are still in draft. They will appear on the live site once those entries are published.}}',
                     },
                     {
-                      count: draftM2mLinks,
+                      count: draftRelationCounts.draftM2mLinks,
                     }
                   )}
               {hasUnpublishedRelations && hasDraftM2mLinks
@@ -1125,7 +1130,7 @@ const PublishAction: DocumentActionComponent = ({
                         '{count, plural, one {# many-to-many link points} other {# many-to-many links point}} to draft entries that will become visible once published.',
                     },
                     {
-                      count: draftM2mLinks,
+                      count: draftRelationCounts.draftM2mLinks,
                     }
                   )}`
                 : null}{' '}
@@ -1135,15 +1140,16 @@ const PublishAction: DocumentActionComponent = ({
               })}
             </>
           ),
-          confirmLabel: isM2mOnlyDraftRelations
-            ? formatMessage({
-                id: 'app.utils.publish',
-                defaultMessage: 'Publish',
-              })
-            : formatMessage({
-                id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
-                defaultMessage: 'Publish without relations',
-              }),
+          confirmLabel:
+            confirmLabel === 'publish'
+              ? formatMessage({
+                  id: 'app.utils.publish',
+                  defaultMessage: 'Publish',
+                })
+              : formatMessage({
+                  id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
+                  defaultMessage: 'Publish without relations',
+                }),
           onConfirm: async () => {
             await performPublish();
           },

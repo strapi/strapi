@@ -53,6 +53,52 @@ export const normalizeDraftRelationCounts = (payload: unknown): DraftRelationCou
   return EMPTY_DRAFT_RELATION_COUNTS;
 };
 
+export const resolveDraftRelationCounts = (
+  documentId: string | undefined,
+  modified: boolean,
+  localCounts: DraftRelationCounts,
+  serverCounts: DraftRelationCounts
+): DraftRelationCounts => {
+  if (!documentId) {
+    return localCounts;
+  }
+
+  if (modified) {
+    return mergeDraftRelationCounts(localCounts, serverCounts);
+  }
+
+  return serverCounts;
+};
+
+export interface DraftRelationsPublishState {
+  hasUnpublishedRelations: boolean;
+  hasDraftM2mLinks: boolean;
+  hasDraftRelations: boolean;
+  isM2mOnlyDraftRelations: boolean;
+  dialogVariant: 'default' | 'danger';
+  bodyIcon: 'default' | 'danger';
+  confirmLabel: 'publish' | 'publish-without-relations';
+}
+
+export const getDraftRelationsPublishState = (
+  counts: DraftRelationCounts
+): DraftRelationsPublishState => {
+  const hasUnpublishedRelations = counts.unpublishedRelations > 0;
+  const hasDraftM2mLinks = counts.draftM2mLinks > 0;
+  const hasDraftRelations = hasUnpublishedRelations || hasDraftM2mLinks;
+  const isM2mOnlyDraftRelations = hasDraftM2mLinks && !hasUnpublishedRelations;
+
+  return {
+    hasUnpublishedRelations,
+    hasDraftM2mLinks,
+    hasDraftRelations,
+    isM2mOnlyDraftRelations,
+    dialogVariant: isM2mOnlyDraftRelations ? 'default' : 'danger',
+    bodyIcon: isM2mOnlyDraftRelations ? 'default' : 'danger',
+    confirmLabel: isM2mOnlyDraftRelations ? 'publish' : 'publish-without-relations',
+  };
+};
+
 /**
  * Counts draft relations in unsaved form values, excluding self-referential relations
  * (preserved on publish via document-service self-referential-relations).
