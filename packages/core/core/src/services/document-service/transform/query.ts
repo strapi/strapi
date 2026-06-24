@@ -1,6 +1,6 @@
+import fp from 'lodash/fp.js';
 import type { UID } from '@strapi/types';
 
-import { curry, assoc, omit } from 'lodash/fp';
 import {
   parseHasPublishedVersionQueryParam,
   hasPublishedVersionBooleanToPublicationFilterMode,
@@ -10,6 +10,8 @@ import {
 import { parsePublicationFilter, getPublicationFilterCondition } from '../publication-filter';
 
 import { pickAllowedQueryParams } from '../params';
+
+const { curry, assoc, omit } = fp;
 
 const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
   const rawParams = (params ?? {}) as Record<string, unknown>;

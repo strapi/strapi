@@ -1,10 +1,13 @@
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
-import { getOr, keys, pickBy, pipe, has, clamp } from 'lodash/fp';
+
 import {
   ENTITY_STAGE_ATTRIBUTE,
   MAX_WORKFLOWS,
   MAX_STAGES_PER_WORKFLOW,
 } from '../constants/workflows';
+
+const { getOr, keys, pickBy, pipe, has, clamp } = fp;
 
 export const getVisibleContentTypesUID = pipe([
   // Pick only content-types visible in the content-manager and option is not false

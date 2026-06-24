@@ -12,6 +12,64 @@ import html from 'rollup-plugin-html';
 
 const isExernal = (id) => !path.isAbsolute(id) && !id.startsWith('.');
 
+/**
+ * Fail ESM bundle generation when output contains import shapes that break under Node's native ESM loader.
+ *
+ * Checked:
+ * - bare `lodash/fp` directory imports (`ERR_UNSUPPORTED_DIR_IMPORT`)
+ * - named imports from `lodash/fp` / `lodash/fp.js` (CJS module — named exports are not statically detectable)
+ * - named imports from `fs-extra` (CJS module — same limitation)
+ *
+ * Not checked (safe today):
+ * - deep lodash file imports (`lodash/isEqual` → `lodash/isEqual.js`, a file not a directory)
+ * - namespace imports from CJS modules (`import * as fse from 'fs-extra'`)
+ *
+ * Runtime failures this regex guard cannot catch are tracked in CMS-1280.
+ *
+ * @returns {import('rollup').Plugin}
+ */
+const esmCompatGuard = () => ({
+  name: 'esm-compat-guard',
+  generateBundle(outputOptions, bundle) {
+    if (outputOptions.format !== 'esm') {
+      return;
+    }
+
+    const violations = [];
+
+    for (const [fileName, chunk] of Object.entries(bundle)) {
+      if (chunk.type !== 'chunk') {
+        continue;
+      }
+
+      if (
+        /from ['"]lodash\/fp['"]/.test(chunk.code) &&
+        !/import \{[^}]+\} from ['"]lodash\/fp['"]/.test(chunk.code)
+      ) {
+        violations.push(
+          `${fileName}: bare 'lodash/fp' import (ERR_UNSUPPORTED_DIR_IMPORT in Node ESM) — use: import fp from 'lodash/fp.js'; const { foo } = fp;`
+        );
+      }
+
+      if (/import \{[^}]+\} from ['"]lodash\/fp(\.js)?['"]/.test(chunk.code)) {
+        violations.push(
+          `${fileName}: named import from 'lodash/fp(.js)' (unsafe in native ESM) — use: import fp from 'lodash/fp.js'; const { foo } = fp;`
+        );
+      }
+
+      if (/import \{[^}]+\} from ['"]fs-extra['"]/.test(chunk.code)) {
+        violations.push(
+          `${fileName}: named import from 'fs-extra' (unsafe in native ESM) — use: import fse from 'fs-extra'; const { ensureDir } = fse;`
+        );
+      }
+    }
+
+    if (violations.length > 0) {
+      this.error(`ESM compatibility violations in .mjs output:\n${violations.join('\n')}`);
+    }
+  },
+});
+
 /** @returns {import('rollup').RollupOptions['plugins']} */
 const basePlugins = () => [
   image(),
@@ -41,6 +99,7 @@ const basePlugins = () => [
     },
   }),
   dynamicImportVars({}),
+  esmCompatGuard(),
 ];
 
 const isInput = (id, input) => {

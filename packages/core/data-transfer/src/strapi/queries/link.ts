@@ -1,8 +1,11 @@
+import fp from 'lodash/fp.js';
 import type { Knex } from 'knex';
-import { clone, isNil } from 'lodash/fp';
+
 import type { Core } from '@strapi/types';
 
 import { ILink } from '../../types';
+
+const { clone, isNil } = fp;
 
 // TODO: Remove any types when we'll have types for DB metadata
 

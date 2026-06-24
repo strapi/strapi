@@ -1,11 +1,12 @@
+import fp from 'lodash/fp.js';
 import type { Context, Next } from 'koa';
 
-import { pick } from 'lodash/fp';
 import compose from 'koa-compose';
 import { errors } from '@strapi/utils';
 import { validateProviderOptionsUpdate } from '../validation/authentication';
 import { middlewares, utils } from './authentication-utils';
 
+const { pick } = fp;
 const toProviderDTO = pick(['uid', 'displayName', 'icon']);
 const toProviderLoginOptionsDTO = pick(['autoRegister', 'defaultRole', 'ssoLockedRoles']);
 

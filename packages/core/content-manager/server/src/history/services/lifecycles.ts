@@ -1,13 +1,14 @@
-import type { Core, Modules, UID } from '@strapi/types';
+import fp from 'lodash/fp.js';
 import { contentTypes } from '@strapi/utils';
-
-import { omit, castArray } from 'lodash/fp';
+import type { Core, Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
 import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { createServiceUtils } from './utils';
+
+const { omit, castArray } = fp;
 
 /**
  * Filters out actions that should not create a history version.

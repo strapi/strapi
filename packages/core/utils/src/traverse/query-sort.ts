@@ -1,4 +1,8 @@
-import {
+import fp from 'lodash/fp.js';
+import { hasSort } from '../sort-query';
+import traverseFactory, { type Parent } from './factory';
+
+const {
   curry,
   isString,
   isObject,
@@ -11,19 +15,16 @@ import {
   isNil,
   first,
   cloneDeep,
-} from 'lodash/fp';
-
-import { hasSort } from '../sort-query';
-import traverseFactory, { type Parent } from './factory';
+} = fp;
 
 const ORDERS = { asc: 'asc', desc: 'desc' };
 const ORDER_VALUES = Object.values(ORDERS);
 
 const isSortOrder = (value: string) => ORDER_VALUES.includes(value.toLowerCase());
 const isStringArray = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every((v) => isString(v));
 const isObjectArray = (value: unknown): value is object[] =>
-  Array.isArray(value) && value.every(isObject);
+  Array.isArray(value) && value.every((v) => isObject(v));
 const isNestedSorts = (value: unknown): value is string =>
   isString(value) && value.split(',').length > 1;
 

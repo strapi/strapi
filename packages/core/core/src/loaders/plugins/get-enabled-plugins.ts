@@ -1,11 +1,14 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+import fp from 'lodash/fp.js';
 import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
 import _ from 'lodash';
-import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 import { strings } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { getUserPluginsConfig } from './get-user-plugins-config';
+
+const { get, pickBy, defaultsDeep, map, prop, pipe } = fp;
 
 interface PluginMeta {
   enabled: boolean;

@@ -1,10 +1,13 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { cloneDeep, isPlainObject } from 'lodash/fp';
+
 import { subject as asSubject } from '@casl/ability';
 import createSanitizeHelpers from './sanitize';
 import createValidateHelpers from './validate';
 
 import { buildStrapiQuery, buildCaslQuery } from './query-builders';
+
+const { cloneDeep, isPlainObject } = fp;
 
 export default ({ ability, action, model }: any) => ({
   ability,

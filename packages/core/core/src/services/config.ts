@@ -1,5 +1,8 @@
+import _ from 'lodash';
 import type { Core } from '@strapi/types';
-import { get, set, has, isString, isNumber, isArray, type PropertyPath } from 'lodash';
+import type { PropertyPath } from 'lodash';
+
+const { get, set, has, isString, isNumber, isArray } = _;
 
 type State = {
   config: Config;

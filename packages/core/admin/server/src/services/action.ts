@@ -1,8 +1,10 @@
-import { isNil } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import constants from './constants';
 import type { AdminRole } from '../../../shared/contracts/shared';
+
+const { isNil } = fp;
 
 const { AUTHOR_CODE, PUBLISH_ACTION } = constants;
 

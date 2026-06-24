@@ -1,7 +1,7 @@
+import fp from 'lodash/fp.js';
 import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
-import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
@@ -37,6 +37,8 @@ import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+
+const { isFunction } = fp;
 
 // Lazy: only resolved when `useTypescriptMigrations` is true (default false)
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;

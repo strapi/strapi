@@ -1,5 +1,6 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { has, getOr, union } from 'lodash/fp';
+
 import type {
   Model,
   Kind,
@@ -9,6 +10,8 @@ import type {
   DynamicZoneAttribute,
   WithRequired,
 } from './types';
+
+const { has, getOr, union } = fp;
 
 const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';

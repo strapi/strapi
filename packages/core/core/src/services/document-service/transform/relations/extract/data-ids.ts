@@ -1,5 +1,4 @@
-import { curry } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { UID } from '@strapi/types';
 import { relations } from '@strapi/utils';
 import { IdMap } from '../../id-map';
@@ -8,6 +7,8 @@ import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { normalizeXToOneRelationValue } from '../utils/xto-one';
 import { LongHandDocument } from '../utils/types';
+
+const { curry } = fp;
 
 const { isPolymorphic } = relations;
 

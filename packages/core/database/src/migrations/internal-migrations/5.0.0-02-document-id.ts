@@ -1,3 +1,5 @@
+import fp from 'lodash/fp.js';
+import { createId } from '@paralleldrive/cuid2';
 /**
  * NOTE: This migration avoids using the `identifiers` utility.
  * As the `5.0.0-01-convert-identifiers-long-than-max-length`
@@ -11,13 +13,14 @@
  * Actual `identifiers` returned join table name: `categories_localizations_lnk`
  *
  */
-import { createId } from '@paralleldrive/cuid2';
-import { snakeCase } from 'lodash/fp';
+
 import type { Knex } from 'knex';
 
 import type { Migration } from '../common';
 import type { Database } from '../..';
 import type { Meta } from '../../metadata';
+
+const { snakeCase } = fp;
 
 function getBatchSize(trx: Knex, defaultSize: number = 1000): number {
   const client = trx.client.config.client;

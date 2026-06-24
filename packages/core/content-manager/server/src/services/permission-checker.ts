@@ -1,7 +1,10 @@
-import type { Ability } from '@casl/ability';
+import fp from 'lodash/fp.js';
 import { async } from '@strapi/utils';
-import { isEmpty } from 'lodash/fp';
+import type { Ability } from '@casl/ability';
+
 import type { Core, UID, Modules } from '@strapi/types';
+
+const { isEmpty } = fp;
 
 export const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',

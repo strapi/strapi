@@ -1,5 +1,7 @@
-import { toNumber } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import Field from './field';
+
+const { toNumber } = fp;
 
 export default class NumberField extends Field {
   toDB(value: unknown) {

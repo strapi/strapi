@@ -1,5 +1,6 @@
-import { isEmpty } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
+const { isEmpty } = fp;
 export const isSsoLocked = async (user: any) => {
   if (!strapi.ee.features.isEnabled('sso')) {
     return false;

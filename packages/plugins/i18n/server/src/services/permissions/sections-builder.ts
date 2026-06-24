@@ -1,6 +1,7 @@
-import { isEmpty } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { getService } from '../../utils';
+
+const { isEmpty } = fp;
 
 /**
  * Handler for the permissions layout (sections builder)

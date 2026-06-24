@@ -1,10 +1,11 @@
-import { defaultsDeep } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
 
 import { getService } from '../utils';
 import { FOLDER_MODEL_UID } from '../constants';
 import { validateCreateFolder, validateUpdateFolder } from './validation/admin/folder';
+
+const { defaultsDeep } = fp;
 
 export default {
   async findOne(ctx: Context) {

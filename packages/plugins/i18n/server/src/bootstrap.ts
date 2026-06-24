@@ -1,6 +1,9 @@
+import fp from 'lodash/fp.js';
 import type { Schema } from '@strapi/types';
-import { isEqual } from 'lodash/fp';
+
 import { getService } from './utils';
+
+const { isEqual } = fp;
 
 const registerModelsHooks = () => {
   strapi.db.lifecycles.subscribe({

@@ -1,7 +1,10 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable no-continue */
-import { keyBy, omit } from 'lodash/fp';
+
 import type { Data, UID } from '@strapi/types';
 import type { JoinTable } from '@strapi/database';
+
+const { keyBy, omit } = fp;
 
 interface VersionEntry {
   id: Data.ID;

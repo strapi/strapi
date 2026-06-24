@@ -1,8 +1,7 @@
+import fp from 'lodash/fp.js';
 import { z } from 'zod';
 import { strings, validateZodSchema } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
-import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
-
 import { isReservedAttributeName, isReservedModelName } from '../../services/builder';
 import { coreUids, typeKinds, VALID_UID_TARGETS } from '../../services/constants';
 
@@ -13,6 +12,8 @@ import {
   KEBAB_BASE_REGEX,
   NAME_REGEX,
 } from './common';
+
+const { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } = fp;
 
 type SchemaMeta =
   | {

@@ -1,6 +1,6 @@
 import { join } from 'path';
 import _ from 'lodash';
-import { pathExists } from 'fs-extra';
+import fse from 'fs-extra';
 import type { Core, Struct, UID } from '@strapi/types';
 import { loadFiles } from '../utils/load-files';
 
@@ -27,7 +27,7 @@ type ComponentMap = {
 };
 
 export default async function loadComponents(strapi: Core.Strapi) {
-  if (!(await pathExists(strapi.dirs.dist.components))) {
+  if (!(await fse.pathExists(strapi.dirs.dist.components))) {
     return {};
   }
 

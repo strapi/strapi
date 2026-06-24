@@ -1,9 +1,11 @@
+import _ from 'lodash';
 import type { Internal, Struct } from '@strapi/types';
-import { get, has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import type { SchemaHandler } from './schema-builder/schema-handler';
+
+const { get, has } = _;
 
 /**
  * Formats a component attributes

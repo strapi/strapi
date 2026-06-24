@@ -1,6 +1,7 @@
+import fp from 'lodash/fp.js';
 import crypto from 'crypto';
 import assert from 'assert';
-import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
+
 import { errors } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
@@ -13,6 +14,8 @@ import {
   TransferToken,
   TransferTokenPermission,
 } from '../../../../shared/contracts/transfer';
+
+const { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } = fp;
 
 const { ValidationError, NotFoundError } = errors;
 

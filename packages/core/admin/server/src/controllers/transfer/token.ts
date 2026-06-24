@@ -1,5 +1,5 @@
+import fp from 'lodash/fp.js';
 import { Context } from 'koa';
-import { trim, has } from 'lodash/fp';
 import { errors, strings } from '@strapi/utils';
 import { getService } from '../../utils';
 import { token } from '../../validation/transfer';
@@ -12,6 +12,8 @@ import type {
   TokenRevoke,
   TokenUpdate,
 } from '../../../../shared/contracts/transfer';
+
+const { trim, has } = fp;
 
 const { ApplicationError } = errors;
 

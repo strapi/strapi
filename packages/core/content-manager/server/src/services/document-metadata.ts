@@ -1,9 +1,10 @@
-import { groupBy, pick, uniq } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
+
+const { groupBy, pick, uniq } = fp;
 
 const { getScalarAttributes, getMediaAttributes } = contentTypes;
 

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+import fp from 'lodash/fp.js';
 import assert from 'node:assert';
-import { isEqual } from 'lodash/fp';
+
 import { register } from 'esbuild-register/dist/node';
 
 import { createJSONTransformAPI, readJSON, saveJSON } from '../../json';
@@ -9,6 +10,8 @@ import { createJSONTransformAPI, readJSON, saveJSON } from '../../json';
 import type { Report } from '../../report';
 
 import type { JSONRunnerConfiguration, JSONSourceFile, JSONTransformParams } from './types';
+
+const { isEqual } = fp;
 
 export const transformJSON = async (
   codemodPath: string,

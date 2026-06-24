@@ -1,4 +1,4 @@
-import { merge } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { async } from '@strapi/utils';
 
 import type { Context } from 'koa';
@@ -6,6 +6,8 @@ import type { Context } from 'koa';
 import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
+
+const { merge } = fp;
 
 export default {
   async find(ctx: Context) {

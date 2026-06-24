@@ -1,5 +1,7 @@
-import { isFunction } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
+
+const { isFunction } = fp;
 
 export interface Config {
   handlers?: Record<number, Core.MiddlewareHandler>;

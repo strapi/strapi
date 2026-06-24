@@ -1,8 +1,10 @@
-import { cloneDeep } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
 import { yup, contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import { validateContentTypeDefinition } from './validator';
+
+const { cloneDeep } = fp;
 
 export type ContentTypeDefinition = {
   schema: Schema.ContentType;

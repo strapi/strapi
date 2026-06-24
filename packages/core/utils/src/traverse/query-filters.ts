@@ -1,9 +1,10 @@
-import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { isScalarAttribute } from '../content-types';
 import { isOperator } from '../operators';
 import traverseFactory, { type Parent } from './factory';
 import type { Model } from '../types';
+
+const { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } = fp;
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 

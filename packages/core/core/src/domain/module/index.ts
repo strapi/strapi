@@ -1,9 +1,12 @@
-import _, { type PropertyPath, flatten } from 'lodash';
+import _ from 'lodash';
+import type { PropertyPath } from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Core, UID, Struct } from '@strapi/types';
 
 import { removeNamespace } from '../../registries/namespace';
 import { validateModule } from './validation';
+
+const { flatten } = _;
 
 interface LifecyclesState {
   bootstrap?: boolean;

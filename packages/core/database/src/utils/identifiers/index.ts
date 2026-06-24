@@ -8,7 +8,7 @@
  * have access to the full length names, in particular for migration purposes, but also so that (in theory) the feature
  * could be disabled and stay compatible with v4 database structure.
  */
-import _, { isInteger, partition, snakeCase, sumBy } from 'lodash/fp';
+import _ from 'lodash/fp.js';
 import { createHash } from './hash';
 import {
   IdentifiersOptions,
@@ -17,6 +17,8 @@ import {
   NameToken,
   NameTokenWithAllocation,
 } from './types';
+
+const { isInteger, partition, snakeCase, sumBy } = _;
 
 const IDENTIFIER_MAX_LENGTH = 55 as const;
 

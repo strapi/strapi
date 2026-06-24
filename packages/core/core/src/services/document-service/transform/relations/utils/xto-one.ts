@@ -1,8 +1,9 @@
-import { isNil, isObject } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { relations } from '@strapi/utils';
 
 import { Relation } from './types';
+
+const { isNil, isObject } = fp;
 
 const { isAnyToOne } = relations;
 

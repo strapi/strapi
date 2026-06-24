@@ -1,4 +1,4 @@
-import { defaultTo } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { add } from 'date-fns';
 
 import type { Core } from '@strapi/types';
@@ -6,6 +6,8 @@ import type { Core } from '@strapi/types';
 import { getWeeklyCronScheduleAt } from '../utils/cron';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
+
+const { defaultTo } = fp;
 
 type MetricStoreValue = {
   lastWeeklyUpdate?: number;

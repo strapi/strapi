@@ -1,9 +1,12 @@
+import fp from 'lodash/fp.js';
 import * as nexus from 'nexus';
-import { merge } from 'lodash/fp';
+
 import type { Core } from '@strapi/types';
 import type * as Nexus from 'nexus';
 
 import createShadowCRUDManager from './shadow-crud-manager';
+
+const { merge } = fp;
 
 export type Configuration = {
   types?: NexusGen[];

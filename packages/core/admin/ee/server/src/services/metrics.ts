@@ -1,6 +1,8 @@
-import { assign } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
+
+const { assign } = fp;
 
 const getSSOProvidersList = async () => {
   const { providerRegistry } = strapi.service('admin::passport');

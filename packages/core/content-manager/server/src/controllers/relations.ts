@@ -1,5 +1,4 @@
-import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
 
@@ -7,6 +6,8 @@ import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
 import { indexByDocumentId } from './utils/document-status';
+
+const { prop, uniq, uniqBy, concat, flow, isEmpty } = fp;
 
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 

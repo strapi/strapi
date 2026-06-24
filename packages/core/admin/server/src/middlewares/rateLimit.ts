@@ -1,8 +1,11 @@
+import fp from 'lodash/fp.js';
 import type { Context, Next } from 'koa';
 import path from 'path';
 import utils from '@strapi/utils';
-import { isString, has, toLower, get } from 'lodash/fp';
+
 import type { Core } from '@strapi/types';
+
+const { isString, has, toLower, get } = fp;
 
 const { RateLimitError } = utils.errors;
 

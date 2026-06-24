@@ -1,5 +1,5 @@
-import { CurriedFunction1 } from 'lodash';
-import { isArray, isObject } from 'lodash/fp';
+import fp from 'lodash/fp.js';
+import type { CurriedFunction1 } from 'lodash';
 import type { z } from 'zod/v4';
 
 import { getNonWritableAttributes, constants } from '../content-types';
@@ -21,6 +21,8 @@ import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '
 import { Model, Data } from '../types';
 import { ValidationError } from '../errors';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
+
+const { isArray, isObject } = fp;
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 

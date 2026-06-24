@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash/fp.js';
 
 import { fromRow } from '../transform';
 import type { QueryBuilder } from '../../query-builder';

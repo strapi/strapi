@@ -1,4 +1,4 @@
-import { get, merge } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import {
   async,
   contentTypes,
@@ -9,6 +9,8 @@ import {
 import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
+
+const { get, merge } = fp;
 
 const { ApplicationError } = errors;
 

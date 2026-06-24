@@ -1,7 +1,9 @@
-import { isBoolean } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Attribute, Model } from './types';
 
 import { isRelationalAttribute } from './content-types';
+
+const { isBoolean } = fp;
 
 const MANY_RELATIONS = ['oneToMany', 'manyToMany'];
 

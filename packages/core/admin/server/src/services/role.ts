@@ -1,7 +1,7 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 import _ from 'lodash';
-import { set, omit, pick, prop, isArray, differenceWith, differenceBy, isEqual } from 'lodash/fp';
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
@@ -13,6 +13,8 @@ import type { Action } from '../domain/action';
 import { validatePermissionsExist } from '../validation/permission';
 import roleConstants from './constants';
 import { getService } from '../utils';
+
+const { set, omit, pick, prop, isArray, differenceWith, differenceBy, isEqual } = fp;
 
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION } = roleConstants;
 

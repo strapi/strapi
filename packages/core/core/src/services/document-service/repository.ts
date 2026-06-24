@@ -1,5 +1,4 @@
-import { omit, assoc, merge, curry, isEmpty, pick } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import {
   async,
   contentTypes as contentTypesUtils,
@@ -28,6 +27,8 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
+
+const { omit, assoc, merge, curry, isEmpty, pick } = fp;
 
 const { validators } = validate;
 

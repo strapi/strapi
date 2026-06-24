@@ -1,10 +1,13 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/naming-convention */ // allow __type
-import { curry, groupBy, pipe, mapValues, map, isEmpty } from 'lodash/fp';
+
 import type { Knex } from 'knex';
 
 import { createQueryBuilder } from '../query';
 import type { Database } from '..';
 import type { MorphJoinTable, Relation } from '../types';
+
+const { curry, groupBy, pipe, mapValues, map, isEmpty } = fp;
 
 type Rows = Record<string, unknown>[];
 

@@ -1,7 +1,10 @@
+import fp from 'lodash/fp.js';
 import semver from 'semver';
-import { getOr } from 'lodash/fp';
+
 import { async } from '@strapi/utils';
 import { STAGE_MODEL_UID } from '../constants/workflows';
+
+const { getOr } = fp;
 
 function checkVersionThreshold(
   startVersion: string,

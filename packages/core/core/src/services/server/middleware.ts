@@ -1,7 +1,10 @@
+import fp from 'lodash/fp.js';
 import path from 'path';
-import { isArray } from 'lodash/fp';
+
 import { importDefault } from '@strapi/utils';
 import type { Core } from '@strapi/types';
+
+const { isArray } = fp;
 
 const instantiateMiddleware = (
   middlewareFactory: Core.MiddlewareFactory,

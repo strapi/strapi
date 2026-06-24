@@ -1,4 +1,10 @@
-import {
+import fp from 'lodash/fp.js';
+import traverseFactory, { type Parent } from './factory';
+import { Attribute } from '../types';
+import { isMorphToRelationalAttribute } from '../content-types';
+import { ValidationError } from '../errors';
+
+const {
   curry,
   isString,
   isArray,
@@ -12,12 +18,7 @@ import {
   cloneDeep,
   join,
   first,
-} from 'lodash/fp';
-
-import traverseFactory, { type Parent } from './factory';
-import { Attribute } from '../types';
-import { isMorphToRelationalAttribute } from '../content-types';
-import { ValidationError } from '../errors';
+} = fp;
 
 const DEFAULT_QS_ARRAY_LIMIT = 100;
 

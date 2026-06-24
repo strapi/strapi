@@ -1,6 +1,8 @@
-import { first } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Context } from '../../types';
 import type { Constants } from '../../constants';
+
+const { first } = fp;
 
 export default ({ strapi }: Context) =>
   () => {

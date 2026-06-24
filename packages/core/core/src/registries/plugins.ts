@@ -1,6 +1,7 @@
-import { has } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
+
+const { has } = fp;
 
 type PluginMap = Record<string, Core.Plugin>;
 

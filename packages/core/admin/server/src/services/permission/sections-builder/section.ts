@@ -1,6 +1,8 @@
-import { eq } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { hooks } from '@strapi/utils';
 import type { Action } from '../../../domain/action';
+
+const { eq } = fp;
 
 export type SectionOptions = {
   initialStateFactory?: (...args: any) => unknown; // A factory function that returns the default shape of the section

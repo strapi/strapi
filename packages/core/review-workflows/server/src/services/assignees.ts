@@ -1,9 +1,11 @@
-import type { Core, UID, Modules } from '@strapi/types';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
-import { isNil } from 'lodash/fp';
+import type { Core, UID, Modules } from '@strapi/types';
+
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';
 import { getService, getAdminService } from '../utils';
 
+const { isNil } = fp;
 const { ApplicationError } = errors;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {

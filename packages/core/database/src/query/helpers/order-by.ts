@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash/fp.js';
 import knex from 'knex';
 
 import * as types from '../../utils/types';

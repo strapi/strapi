@@ -1,5 +1,5 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/no-loop-func */
-import { isNil, pick } from 'lodash/fp';
 
 import {
   AnyAttribute,
@@ -9,6 +9,8 @@ import {
   Model,
   RelationalAttribute,
 } from '../types';
+
+const { isNil, pick } = fp;
 
 export interface Path {
   raw: string | null;

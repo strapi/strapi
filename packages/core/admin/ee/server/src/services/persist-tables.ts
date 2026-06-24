@@ -1,5 +1,7 @@
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
-import { differenceWith, isEqual } from 'lodash/fp';
+
+const { differenceWith, isEqual } = fp;
 
 export interface PersistedTable {
   name: string;

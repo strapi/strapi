@@ -1,9 +1,11 @@
-import { isNil, prop, omit, castArray } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import createDebug from 'debug';
 
 import type { Knex } from 'knex';
 import type { Database } from '..';
 import type { Schema, Table, SchemaDiff, TableDiff, ForeignKey, Index, Column } from './types';
+
+const { isNil, prop, omit, castArray } = fp;
 
 const debug = createDebug('strapi::database');
 

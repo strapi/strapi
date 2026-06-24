@@ -1,7 +1,7 @@
+import fp from 'lodash/fp.js';
 import { createHash, randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import { WebSocket } from 'ws';
-import { once } from 'lodash/fp';
 import type { Struct, Utils } from '@strapi/types';
 
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
@@ -24,6 +24,8 @@ import {
   createTransferAssetStreamChunkLegacy,
   transferAssetStreamChunkByteLength,
 } from '../../../utils/transfer-asset-chunk';
+
+const { once } = fp;
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy' | 'onTransferPhase'> {

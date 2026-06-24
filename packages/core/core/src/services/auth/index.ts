@@ -1,9 +1,11 @@
+import fp from 'lodash/fp.js';
 import assert from 'assert/strict';
-import { has } from 'lodash/fp';
 
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import type { ParameterizedContext } from 'koa';
+
+const { has } = fp;
 
 interface AuthenticationResponse {
   authenticated?: boolean;

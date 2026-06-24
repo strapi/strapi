@@ -1,7 +1,9 @@
-import { prop } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { yup, validateYupSchema } from '@strapi/utils';
 
 import { isoLocales } from '../constants';
+
+const { prop } = fp;
 
 const allowedLocaleCodes = isoLocales.map(prop('code'));
 

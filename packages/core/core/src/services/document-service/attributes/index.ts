@@ -1,8 +1,9 @@
-import { curry } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { UID, Modules, Schema } from '@strapi/types';
 
 import transforms from './transforms';
+
+const { curry } = fp;
 
 // aliasing the type to make it easier to read
 type Data = Modules.Documents.Params.Data.Input<UID.Schema>;

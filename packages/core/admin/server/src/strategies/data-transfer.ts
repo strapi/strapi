@@ -1,9 +1,11 @@
-import type { Context } from 'koa';
+import fp from 'lodash/fp.js';
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
-import { castArray, isNil } from 'lodash/fp';
+import type { Context } from 'koa';
 
 import { getService } from '../utils';
+
+const { castArray, isNil } = fp;
 
 const { UnauthorizedError, ForbiddenError } = errors;
 

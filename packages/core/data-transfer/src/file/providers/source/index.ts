@@ -1,13 +1,14 @@
+import fp from 'lodash/fp.js';
+import { pipeline, PassThrough } from 'stream';
+import fs from 'fs-extra';
 import type { Stats } from 'node:fs';
 import type { Readable } from 'stream';
 
 import zip from 'zlib';
 import path from 'path';
-import { pipeline, PassThrough } from 'stream';
-import fs from 'fs-extra';
-import { Parser, type ReadEntry } from 'tar';
-import { isEmpty, keyBy } from 'lodash/fp';
+
 import { chain } from 'stream-chain';
+import { Parser, type ReadEntry } from 'tar';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
@@ -18,6 +19,8 @@ import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
+
+const { isEmpty, keyBy } = fp;
 
 type StreamItemArray = Parameters<typeof chain>[0];
 

@@ -1,8 +1,11 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-template-curly-in-string */
 import * as yup from 'yup';
-import { defaults } from 'lodash/fp';
+
 import { YupValidationError } from './errors';
+
+const { defaults } = fp;
 
 const handleYupError = (error: yup.ValidationError, errorMessage?: string) => {
   throw new YupValidationError(error, errorMessage);

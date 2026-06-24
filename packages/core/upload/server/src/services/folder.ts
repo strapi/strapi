@@ -1,9 +1,11 @@
-import { sortBy, map, isUndefined } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
 
 import type { File, Folder } from '../types';
+
+const { sortBy, map, isUndefined } = fp;
 
 type FolderMap = {
   [key: string]: Partial<Folder> & {

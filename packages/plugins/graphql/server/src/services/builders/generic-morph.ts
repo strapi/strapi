@@ -1,7 +1,8 @@
+import fp from 'lodash/fp.js';
 import { unionType } from 'nexus';
-import { prop } from 'lodash/fp';
-
 import type { Context } from '../types';
+
+const { prop } = fp;
 
 export default ({ strapi, registry }: Context) => {
   const { naming } = strapi.plugin('graphql').service('utils');

@@ -1,11 +1,12 @@
+import fp from 'lodash/fp.js';
+import { Command, Option } from 'commander';
+import { configs, createLogger, formats, type Logger } from '@strapi/logger';
+import { createStrapi, compileStrapi } from '@strapi/core';
+import ora from 'ora';
 import chalk from 'chalk';
 import path from 'node:path';
 import Table from 'cli-table3';
-import { Command, Option } from 'commander';
-import { configs, createLogger, type winston, formats } from '@strapi/logger';
-import { createStrapi, compileStrapi } from '@strapi/core';
-import ora from 'ora';
-import { merge } from 'lodash/fp';
+
 import type { Core } from '@strapi/types';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
@@ -16,6 +17,8 @@ import {
   exitWith,
 } from './helpers';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
+
+const { merge } = fp;
 
 const {
   errors: { TransferEngineInitializationError },
@@ -217,11 +220,11 @@ const formatDiagnostic = (
   operation: string,
   verbose?: boolean
 ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] => {
-  let logger: undefined | winston.Logger;
+  let logger: Logger | undefined;
   let logFileBasename: string | undefined;
 
   const getLogger = () => {
-    if (!logger) {
+    if (logger === undefined) {
       logFileBasename = `${operation}_${Date.now()}.log`;
       const absoluteLogPath = path.resolve(process.cwd(), logFileBasename);
 

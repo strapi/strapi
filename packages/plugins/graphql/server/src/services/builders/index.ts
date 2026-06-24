@@ -1,4 +1,4 @@
-import { merge, map, pipe, reduce } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
 
 // Builders Factories
@@ -22,6 +22,8 @@ import resolvers from './resolvers';
 import operators from './filters/operators';
 import utils from './utils';
 import type { TypeRegistry } from '../type-registry';
+
+const { merge, map, pipe, reduce } = fp;
 
 const buildersFactories = [
   enums,

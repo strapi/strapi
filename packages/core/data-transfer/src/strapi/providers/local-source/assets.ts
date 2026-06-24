@@ -1,6 +1,7 @@
 import { join } from 'path';
 import { Duplex, PassThrough, Readable } from 'stream';
-import { stat, createReadStream, ReadStream } from 'fs-extra';
+import { createReadStream, type ReadStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
 import * as webStream from 'stream/web';
 import type { Core } from '@strapi/types';
 

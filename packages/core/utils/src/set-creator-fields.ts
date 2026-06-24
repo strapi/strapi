@@ -1,5 +1,7 @@
-import { assign, assoc } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import * as contentTypes from './content-types';
+
+const { assign, assoc } = fp;
 
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypes.constants;
 

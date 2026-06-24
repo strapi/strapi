@@ -1,5 +1,6 @@
-import { snakeCase } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
+const { snakeCase } = fp;
 // use snake_case
 export const reservedAttributes = [
   // TODO: these need to come from a centralized place so we don't break things accidentally in the future and can share them outside the CTB, for example on Strapi bootstrap prior to schema db sync

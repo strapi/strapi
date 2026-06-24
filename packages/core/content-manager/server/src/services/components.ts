@@ -1,5 +1,4 @@
-import { isNil, mapValues } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { UID, Struct, Core } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
 import type { ConfigurationUpdate } from './configuration';
@@ -7,6 +6,8 @@ import type { ConfigurationUpdate } from './configuration';
 import { getService } from '../utils';
 import storeUtils from './utils/store';
 import createConfigurationService from './configuration';
+
+const { isNil, mapValues } = fp;
 
 const STORE_KEY_PREFIX = 'components';
 

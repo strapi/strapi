@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash/fp.js';
 import qs from 'qs';
 import { Ability } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';

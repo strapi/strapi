@@ -1,7 +1,8 @@
-import { assoc, curry } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Modules, Struct } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
+
+const { assoc, curry } = fp;
 
 type ParamsTransform = (params: Modules.Documents.Params.All) => Modules.Documents.Params.All;
 

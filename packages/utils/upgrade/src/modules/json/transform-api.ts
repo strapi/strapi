@@ -1,8 +1,9 @@
-import { cloneDeep, get, has, set, merge, omit } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Utils } from '@strapi/types';
 
 import type { JSONTransformAPI as JSONTransformAPIInterface } from './types';
+
+const { cloneDeep, get, has, set, merge, omit } = fp;
 
 export class JSONTransformAPI implements JSONTransformAPIInterface {
   private json: Utils.JSONObject;

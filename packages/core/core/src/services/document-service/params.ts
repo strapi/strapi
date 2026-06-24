@@ -1,6 +1,8 @@
-import { pick } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { UID, Modules } from '@strapi/types';
 import { SHARED_QUERY_PARAM_KEYS } from '@strapi/utils';
+
+const { pick } = fp;
 
 /**
  * Division of allowlists:

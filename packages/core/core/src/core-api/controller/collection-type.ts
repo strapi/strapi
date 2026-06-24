@@ -1,7 +1,9 @@
-import { isObject } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 import type { Core, Struct, Utils, UID } from '@strapi/types';
 import type Koa from 'koa';
+
+const { isObject } = fp;
 
 interface Options {
   contentType: Struct.CollectionTypeSchema;

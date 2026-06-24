@@ -1,6 +1,8 @@
-import { isArray, isNil, isString, toPath } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Visitor } from '../../traverse/factory';
 import { throwInvalidKey } from '../utils';
+
+const { isArray, isNil, isString, toPath } = fp;
 
 export default (allowedFields: string[] | null = null): Visitor =>
   ({ key, path: { attribute: path } }) => {
@@ -10,7 +12,7 @@ export default (allowedFields: string[] | null = null): Visitor =>
     }
 
     // Throw on invalid formats
-    if (!(isArray(allowedFields) && allowedFields.every(isString))) {
+    if (!(isArray(allowedFields) && allowedFields.every((f) => isString(f)))) {
       throw new TypeError(
         `Expected array of strings for allowedFields but got "${typeof allowedFields}"`
       );

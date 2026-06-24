@@ -1,3 +1,4 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable max-classes-per-file */
 
 /**
@@ -6,17 +7,7 @@
  */
 
 import _ from 'lodash';
-import {
-  cloneDeep,
-  get,
-  isArray,
-  isEmpty,
-  isInteger,
-  isNil,
-  isObject,
-  isString,
-  toNumber,
-} from 'lodash/fp';
+
 import {
   constants,
   hasDraftAndPublish,
@@ -35,6 +26,8 @@ import {
   type SortParamsObject,
 } from './sort-query';
 import { Model } from './types';
+
+const { cloneDeep, get, isArray, isEmpty, isInteger, isNil, isObject, isString, toNumber } = fp;
 
 export type { SortParams, SortParamsObject } from './sort-query';
 

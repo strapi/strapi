@@ -1,12 +1,14 @@
+import fp from 'lodash/fp.js';
+import { Command, InvalidOptionArgumentError, Option } from 'commander';
+import chalk from 'chalk';
 /**
  * This file includes hooks to use for commander.hook and argParsers for commander.argParser
  */
 
-import { Command, InvalidOptionArgumentError, Option } from 'commander';
-import chalk from 'chalk';
-import { isNaN } from 'lodash/fp';
 import { exitWith } from './helpers';
 import { getInquirer } from './get-inquirer';
+
+const { isNaN } = fp;
 
 /**
  * argParser: Parse a comma-delimited string as an array

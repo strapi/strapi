@@ -1,5 +1,7 @@
-import { isArray, isString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Visitor } from '../../traverse/factory';
+
+const { isArray, isString } = fp;
 
 export default (restrictedFields: string[] | null = null): Visitor =>
   ({ key, path: { attribute: path } }, { remove }) => {
@@ -10,7 +12,7 @@ export default (restrictedFields: string[] | null = null): Visitor =>
     }
 
     // Throw on invalid formats
-    if (!(isArray(restrictedFields) && restrictedFields.every(isString))) {
+    if (!(isArray(restrictedFields) && restrictedFields.every((f) => isString(f)))) {
       throw new TypeError(
         `Expected array of strings for restrictedFields but got "${typeof restrictedFields}"`
       );

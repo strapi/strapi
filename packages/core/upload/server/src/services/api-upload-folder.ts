@@ -1,6 +1,8 @@
-import { isNil, get } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { getService } from '../utils';
 import { FOLDER_MODEL_UID, API_UPLOAD_FOLDER_BASE_NAME } from '../constants';
+
+const { isNil, get } = fp;
 
 const getStore = () => strapi.store({ type: 'plugin', name: 'upload', key: 'api-folder' });
 

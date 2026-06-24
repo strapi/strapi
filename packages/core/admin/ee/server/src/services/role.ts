@@ -1,6 +1,7 @@
-import { toString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 
+const { toString } = fp;
 const { ApplicationError } = errors;
 
 const ssoCheckRolesIdForDeletion = async (ids: any) => {

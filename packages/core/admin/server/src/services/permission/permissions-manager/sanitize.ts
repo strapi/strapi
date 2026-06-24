@@ -1,17 +1,5 @@
+import fp from 'lodash/fp.js';
 import { subject as asSubject } from '@casl/ability';
-import {
-  defaults,
-  omit,
-  isArray,
-  isEmpty,
-  uniq,
-  intersection,
-  pick,
-  getOr,
-  isObject,
-  cloneDeep,
-} from 'lodash/fp';
-
 import type { UID } from '@strapi/types';
 
 import {
@@ -24,6 +12,9 @@ import {
 } from '@strapi/utils';
 import { createPermissionFieldsCache } from './permission-fields';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
+
+const { defaults, omit, isArray, isEmpty, uniq, intersection, pick, getOr, isObject, cloneDeep } =
+  fp;
 
 const {
   visitors: { removePassword, expandWildcardPopulate },

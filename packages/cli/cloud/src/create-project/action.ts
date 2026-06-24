@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import { defaults } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import {
   CLIContext,
   CloudApiService,
@@ -23,6 +23,8 @@ import {
   environmentCreationErrorFactory,
   environmentErrorMessageFactory,
 } from '../utils/error-message-factories';
+
+const { defaults } = fp;
 
 async function handleError(ctx: CLIContext, error: Error) {
   const { logger } = ctx;

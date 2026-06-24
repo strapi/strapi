@@ -1,5 +1,7 @@
 import chalk from 'chalk';
-import { has } from 'lodash/fp';
+import fp from 'lodash/fp.js';
+
+const { has } = fp;
 
 // TODO: Remove duplicated code by extracting to a shared package
 

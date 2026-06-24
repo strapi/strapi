@@ -1,4 +1,4 @@
-import { toLower, castArray, trim, prop, isNil } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
@@ -6,6 +6,8 @@ import Router from '@koa/router';
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
+
+const { toLower, castArray, trim, prop, isNil } = fp;
 
 const getMethod = (route: Core.Route) => {
   return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;

@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash/fp.js';
 
 import * as types from '../../utils/types';
 import { createField } from '../../fields';

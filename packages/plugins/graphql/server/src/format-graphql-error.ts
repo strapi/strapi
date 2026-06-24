@@ -1,7 +1,9 @@
-import { toUpper, snakeCase, pick, isEmpty } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 import { unwrapResolverError } from '@apollo/server/errors';
 import { GraphQLError, type GraphQLFormattedError } from 'graphql';
+
+const { toUpper, snakeCase, pick, isEmpty } = fp;
 
 const { HttpError, ForbiddenError, UnauthorizedError, ApplicationError, ValidationError } = errors;
 

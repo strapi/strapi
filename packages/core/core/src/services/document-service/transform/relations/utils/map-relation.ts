@@ -1,9 +1,11 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable node/no-callback-literal */
-import { isObject, curry, isNil } from 'lodash/fp';
 
 import { traverseEntity, async } from '@strapi/utils';
 
 import { Relation } from './types';
+
+const { isObject, curry, isNil } = fp;
 
 const isNumeric = (value: any): value is number => {
   if (Array.isArray(value)) return false; // Handle [1, 'docId'] case

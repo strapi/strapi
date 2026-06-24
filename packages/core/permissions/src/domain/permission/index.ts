@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash/fp.js';
 
 const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'] as const;
 

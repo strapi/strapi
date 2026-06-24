@@ -1,6 +1,8 @@
-import type { Struct, Modules, Schema } from '@strapi/types';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
-import { curry, assoc } from 'lodash/fp';
+import type { Struct, Modules, Schema } from '@strapi/types';
+
+const { curry, assoc } = fp;
 
 type Transform = (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,

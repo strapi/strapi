@@ -1,6 +1,8 @@
-import { isNil } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
+
+const { isNil } = fp;
 
 const find = (params: any = {}) =>
   strapi.db.query('plugin::i18n.locale').findMany({ where: params });

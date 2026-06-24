@@ -1,8 +1,10 @@
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
-import { isEmpty } from 'lodash/fp';
 
 import { getService } from '../utils';
 import { validateUpdateSchema } from './validation/schema';
+
+const { isEmpty } = fp;
 
 export default () => {
   const internals = {

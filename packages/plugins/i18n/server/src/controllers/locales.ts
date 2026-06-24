@@ -1,9 +1,12 @@
+import fp from 'lodash/fp.js';
 import * as utils from '@strapi/utils';
-import { pick } from 'lodash/fp';
+
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';
+
+const { pick } = fp;
 
 const { setCreatorFields } = utils;
 const { ApplicationError } = utils.errors;

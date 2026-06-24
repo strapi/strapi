@@ -1,10 +1,13 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { getOr } from 'lodash/fp';
+
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
+
+const { getOr } = fp;
 
 const { ApplicationError } = errors;
 

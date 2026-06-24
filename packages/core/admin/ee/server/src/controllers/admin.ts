@@ -1,10 +1,13 @@
+import fp from 'lodash/fp.js';
 import type { Context } from 'koa';
-import { isNil } from 'lodash/fp';
+
 import { env } from '@strapi/utils';
 import { getService } from '../utils';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+
+const { isNil } = fp;
 
 export default {
   // NOTE: Overrides CE admin controller

@@ -1,8 +1,9 @@
-import { intersection, difference } from 'lodash';
-
+import _ from 'lodash';
 import type { Settings, Metadatas, Layouts } from '../../../shared/contracts/content-types';
 
 import { createDefaultConfiguration, syncConfiguration } from './utils/configuration';
+
+const { intersection, difference } = _;
 
 export type ConfigurationUpdate = {
   settings: Settings;

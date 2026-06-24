@@ -1,6 +1,8 @@
-import { getOr, toNumber, isString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Schema } from '@strapi/types';
 import bcrypt from 'bcryptjs';
+
+const { getOr, toNumber, isString } = fp;
 
 type Transforms = {
   [TKind in Schema.Attribute.Kind]?: (

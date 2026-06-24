@@ -1,10 +1,12 @@
+import fp from 'lodash/fp.js';
 import _ from 'lodash';
-import { pipe, map, castArray, toNumber } from 'lodash/fp';
+
 import { arrays, errors } from '@strapi/utils';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
 import constants from '../../../../server/src/services/constants';
 import { getService } from '../utils';
 
+const { pipe, map, castArray, toNumber } = fp;
 const { ValidationError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
 

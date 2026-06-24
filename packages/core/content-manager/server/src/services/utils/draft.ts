@@ -1,5 +1,7 @@
-import { castArray } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import strapiUtils from '@strapi/utils';
+
+const { castArray } = fp;
 
 const { isVisibleAttribute, hasDraftAndPublish } = strapiUtils.contentTypes;
 /**

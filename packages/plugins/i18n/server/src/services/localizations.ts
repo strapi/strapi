@@ -1,8 +1,9 @@
-import { cloneDeep, isEmpty } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { Schema } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from '../utils';
+
+const { cloneDeep, isEmpty } = fp;
 
 /**
  * Mutates the provided data object in place and returns the same reference

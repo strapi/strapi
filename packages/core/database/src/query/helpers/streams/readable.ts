@@ -1,5 +1,5 @@
+import fp from 'lodash/fp.js';
 import { Readable } from 'stream';
-import { isFinite } from 'lodash/fp';
 import type { Knex } from 'knex';
 import type { QueryBuilder } from '../../query-builder';
 import type { Database } from '../../..';
@@ -7,6 +7,8 @@ import type { Database } from '../../..';
 import { applyPopulate } from '../populate';
 import { fromRow } from '../transform';
 import { Meta } from '../../../metadata';
+
+const { isFinite } = fp;
 
 const knexQueryDone = Symbol('knexQueryDone');
 const knexPerformingQuery = Symbol('knexPerformingQuery');

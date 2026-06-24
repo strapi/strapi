@@ -1,10 +1,11 @@
-import { curry } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { UID, Modules } from '@strapi/types';
 
 import { transformData } from './data';
 import { transformFields } from './fields';
 import { transformPopulate } from './populate';
+
+const { curry } = fp;
 
 /**
  * Transform input of a query to map document ids to entity ids.

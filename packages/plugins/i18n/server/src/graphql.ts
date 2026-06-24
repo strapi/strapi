@@ -1,6 +1,8 @@
-import { propEq, identity } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
+
+const { propEq, identity } = fp;
 
 const { ValidationError } = errors;
 

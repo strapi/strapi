@@ -1,5 +1,6 @@
+import fp from 'lodash/fp.js';
 import path from 'path';
-import { isObject, isString, isFinite, toNumber } from 'lodash/fp';
+
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import type { Core } from '@strapi/types';
@@ -25,6 +26,8 @@ import {
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 import { normalizeExportDirFormatOpts } from './validate-dir-format';
+
+const { isObject, isString, isFinite, toNumber } = fp;
 
 const {
   providers: { createLocalFileDestinationProvider },

@@ -1,5 +1,6 @@
-import { eq, remove, cloneDeep } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 
+const { eq, remove, cloneDeep } = fp;
 export type Handler = (...args: any[]) => any;
 
 export interface Hook<T extends Handler = Handler> {

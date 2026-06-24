@@ -1,7 +1,8 @@
-import { take, drop, map, prop, pick, reverse, isNil } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { getService } from '../utils';
 import constants from '../../../../server/src/services/constants';
 
+const { take, drop, map, prop, pick, reverse, isNil } = fp;
 const { SUPER_ADMIN_CODE } = constants;
 
 /**

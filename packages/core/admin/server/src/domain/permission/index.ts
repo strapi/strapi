@@ -1,22 +1,11 @@
+import fp from 'lodash/fp.js';
+import { providerFactory } from '@strapi/utils';
 import type { Utils } from '@strapi/types';
 
-import { providerFactory } from '@strapi/utils';
-import {
-  pipe,
-  set,
-  pick,
-  eq,
-  omit,
-  remove,
-  get,
-  uniq,
-  isArray,
-  map,
-  curry,
-  merge,
-} from 'lodash/fp';
 import { Permission } from '../../../../shared/contracts/shared';
 import { SanitizedPermission } from '../../../../shared/contracts/roles';
+
+const { pipe, set, pick, eq, omit, remove, get, uniq, isArray, map, curry, merge } = fp;
 
 export type CreatePermissionPayload = Utils.Object.PartialBy<
   Permission,

@@ -1,5 +1,4 @@
-import { isEmpty, isNil, isObject } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import { pipe as pipeAsync } from '../async';
 import { isScalarAttribute, constants } from '../content-types';
 import {
@@ -14,6 +13,8 @@ import { asyncCurry, throwInvalidKey } from './utils';
 import type { Model } from '../types';
 import parseType from '../parse-type';
 import type { Parent, Path } from '../traverse/factory';
+
+const { isEmpty, isNil, isObject } = fp;
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 

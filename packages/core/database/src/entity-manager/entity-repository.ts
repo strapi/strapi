@@ -1,6 +1,8 @@
-import { isString } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { Database } from '..';
 import type { Repository, Params } from './types';
+
+const { isString } = fp;
 
 const withDefaultPagination = (params: Params) => {
   const { page = 1, pageSize = 10, ...rest } = params;

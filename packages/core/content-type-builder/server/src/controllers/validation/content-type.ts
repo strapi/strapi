@@ -1,6 +1,6 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable no-template-curly-in-string */ // yup templates need to be in this format
 
-import { flatMap, getOr, has, snakeCase } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
 import type { Struct, Internal, UID } from '@strapi/types';
@@ -10,6 +10,8 @@ import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
 import { removeEmptyDefaults, removeDeletedUIDTargetFields } from './data-transform';
 import { nestedComponentSchema } from './component';
+
+const { flatMap, getOr, has, snakeCase } = fp;
 
 // Input flattens some fields of the "info" into the root type
 export type CreateContentTypeInput = {

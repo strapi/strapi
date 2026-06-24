@@ -1,9 +1,12 @@
+import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from 'chalk';
-import { has, isString, isArray } from 'lodash/fp';
+
 import boxen from 'boxen';
 import type { Command } from 'commander';
 import { getInquirer } from './get-inquirer';
+
+const { has, isString, isArray } = fp;
 
 /**
  * Helper functions for the Strapi CLI

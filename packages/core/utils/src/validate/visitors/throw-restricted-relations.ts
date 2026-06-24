@@ -1,8 +1,10 @@
-import { isArray, isObject } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import * as contentTypeUtils from '../../content-types';
 import { throwInvalidKey } from '../utils';
 import type { Visitor } from '../../traverse/factory';
 import { VALID_RELATION_ORDERING_KEYS } from '../../relations';
+
+const { isArray, isObject } = fp;
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;

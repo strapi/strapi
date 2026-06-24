@@ -1,7 +1,8 @@
-import { capitalize } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import type { IDestinationProvider, ISourceProvider, ProviderType } from '../../types';
 import { TransferEngineValidationError } from '../errors';
+
+const { capitalize } = fp;
 
 const reject = (reason: string): never => {
   throw new TransferEngineValidationError(`Invalid provider supplied. ${reason}`);

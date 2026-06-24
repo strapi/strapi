@@ -1,6 +1,8 @@
-import { isNil, merge } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import type { UID } from '@strapi/types';
 import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
+
+const { isNil, merge } = fp;
 
 /**
  * Builder to create a Strapi populate object.

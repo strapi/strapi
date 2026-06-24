@@ -1,5 +1,6 @@
+import fp from 'lodash/fp.js';
 import type { Core } from '@strapi/types';
-import { isObject } from 'lodash/fp';
+
 import chalk from 'chalk';
 
 import fs from 'fs-extra';
@@ -25,6 +26,8 @@ import {
   parseRestoreFromOptions,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
+
+const { isObject } = fp;
 
 const {
   providers: { createLocalFileSourceProvider },

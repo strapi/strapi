@@ -1,7 +1,9 @@
 import fse from 'fs-extra';
 import path from 'path';
-import { merge } from 'lodash';
+import _ from 'lodash';
 import type { ProjectInfo } from './cli-api';
+
+const { merge } = _;
 
 export const LOCAL_SAVE_FILENAME = '.strapi-cloud.json';
 

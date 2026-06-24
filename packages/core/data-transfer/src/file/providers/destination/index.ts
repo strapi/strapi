@@ -1,7 +1,8 @@
 import path from 'path';
 import zlib from 'zlib';
 import { Readable, Writable } from 'stream';
-import { rm, createWriteStream } from 'fs-extra';
+import { createWriteStream } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import tar from 'tar-stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';

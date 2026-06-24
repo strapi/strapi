@@ -1,5 +1,4 @@
-import { isNil, omit } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import {
   setCreatorFields,
   async,
@@ -17,6 +16,8 @@ import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
 import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
+
+const { isNil, omit } = fp;
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,

@@ -1,5 +1,7 @@
-import { get, keys, pickBy, pipe } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { WORKFLOW_MODEL_UID } from '../constants/workflows';
+
+const { get, keys, pickBy, pipe } = fp;
 
 async function migrateWorkflowsContentTypes({ oldContentTypes, contentTypes }: any) {
   // Look for RW contentTypes attribute

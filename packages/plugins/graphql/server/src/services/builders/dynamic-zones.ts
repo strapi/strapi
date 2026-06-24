@@ -1,10 +1,12 @@
+import fp from 'lodash/fp.js';
 import { Kind, valueFromASTUntyped } from 'graphql';
-import { omit } from 'lodash/fp';
 import { unionType, scalarType } from 'nexus';
 import { errors } from '@strapi/utils';
 import type { Internal, Schema } from '@strapi/types';
 
 import type { Context } from '../types';
+
+const { omit } = fp;
 
 const { ApplicationError } = errors;
 

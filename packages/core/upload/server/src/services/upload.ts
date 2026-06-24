@@ -1,8 +1,4 @@
-import os from 'os';
-import path from 'path';
-import fs from 'fs';
-import fse from 'fs-extra';
-import _ from 'lodash';
+import fp from 'lodash/fp.js';
 import { extension } from 'mime-types';
 import {
   async,
@@ -12,7 +8,11 @@ import {
   file as fileUtils,
   pagination as paginationUtils,
 } from '@strapi/utils';
-import { has, toNumber, isNil } from 'lodash/fp';
+import os from 'os';
+import path from 'path';
+import fs from 'fs';
+import fse from 'fs-extra';
+import _ from 'lodash';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -22,6 +22,8 @@ import { getService } from '../utils';
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
 import type { Settings } from '../controllers/validation/admin/settings';
+
+const { has, toNumber, isNil } = fp;
 
 type User = {
   id: string | number;

@@ -1,9 +1,11 @@
-import { cloneDeep, has, isArray } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import { hooks } from '@strapi/utils';
 
 import * as domain from '../domain';
 import type { Permission } from '../domain/permission';
 import type { PermissionRule } from '../types';
+
+const { cloneDeep, has, isArray } = fp;
 
 export interface PermissionEngineHooks {
   'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;

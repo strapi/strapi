@@ -1,5 +1,5 @@
+import fp from 'lodash/fp.js';
 import utils from '@strapi/utils';
-import { mapValues } from 'lodash/fp';
 
 import type { Schema } from '@strapi/types';
 
@@ -7,6 +7,8 @@ import createBuilder from './schema-builder';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
+
+const { mapValues } = fp;
 
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
   schema.components.forEach((component) => {

@@ -1,5 +1,4 @@
-import { groupBy, size } from 'lodash/fp';
-
+import fp from 'lodash/fp.js';
 import {
   codemodRepositoryFactory,
   constants as codemodRepositoryConstants,
@@ -14,6 +13,8 @@ import type { Project } from '../project';
 import type { UpgradeReport } from '../upgrader';
 import type { CodemodRunnerInterface, CodemodRunnerReport, SelectCodemodsCallback } from './types';
 import type { Version } from '../version';
+
+const { groupBy, size } = fp;
 
 export class CodemodRunner implements CodemodRunnerInterface {
   private readonly project: Project;
