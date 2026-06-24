@@ -90,6 +90,23 @@ const mergeDraftRelationCounts = (
   draftM2mLinks: left.draftM2mLinks + right.draftM2mLinks,
 });
 
+const normalizeDraftRelationCounts = (payload: unknown): DraftRelationCounts => {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'unpublishedRelations' in payload &&
+    'draftM2mLinks' in payload
+  ) {
+    return payload as DraftRelationCounts;
+  }
+
+  if (payload && typeof payload === 'object' && 'data' in payload) {
+    return normalizeDraftRelationCounts((payload as { data: unknown }).data);
+  }
+
+  return EMPTY_DRAFT_RELATION_COUNTS;
+};
+
 /**
  * Counts draft relations in unsaved form values, excluding self-referential relations
  * (preserved on publish via document-service self-referential-relations).
@@ -771,14 +788,12 @@ const PublishAction: DocumentActionComponent = ({
   );
   const { publish, isLoading } = useDocumentActions();
   const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
-  const [
-    countDraftRelations,
-    { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
-  ] = useGetDraftRelationCountQuery();
+  const [countDraftRelations, { isError: isErrorDraftRelations }] = useGetDraftRelationCountQuery();
   const [localDraftRelationCounts, setLocalDraftRelationCounts] =
     React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
   const [serverDraftRelationCounts, setServerDraftRelationCounts] =
     React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
+  const [isFetchingDraftRelations, setIsFetchingDraftRelations] = React.useState(false);
 
   const [{ rawQuery }] = useQueryParams();
 
@@ -859,19 +874,25 @@ const PublishAction: DocumentActionComponent = ({
       return;
     }
 
-    const { data, error } = await countDraftRelations({
-      collectionType,
-      model,
-      documentId,
-      params: currentDocumentMeta.params,
-    });
+    setIsFetchingDraftRelations(true);
 
-    if (error) {
-      throw error;
-    }
+    try {
+      const { data, error } = await countDraftRelations({
+        collectionType,
+        model,
+        documentId,
+        params: currentDocumentMeta.params,
+      });
 
-    if (data) {
-      setServerDraftRelationCounts(data.data);
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setServerDraftRelationCounts(normalizeDraftRelationCounts(data));
+      }
+    } finally {
+      setIsFetchingDraftRelations(false);
     }
   }, [
     collectionType,
@@ -1106,7 +1127,7 @@ const PublishAction: DocumentActionComponent = ({
   const isDisabled =
     isCloning ||
     isSubmitting ||
-    isLoadingDraftRelations ||
+    isFetchingDraftRelations ||
     activeTab === 'published' ||
     (!modified && isDocumentPublished) ||
     (!modified && !document?.documentId) ||

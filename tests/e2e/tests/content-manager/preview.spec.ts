@@ -27,13 +27,15 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Check that preview opens in its own page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await page.getByRole('link', { name: /open preview/i }).click();
     // Draft status is visible (second Draft text is the draft tab)
     await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
     await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
 
     // Copies the link of the page
-    await page.getByRole('button', { name: /copy preview link/i }).click();
+    const copyPreviewLink = page.getByRole('button', { name: /copy preview link/i });
+    await expect(copyPreviewLink).toBeVisible();
+    await copyPreviewLink.click();
     await findAndClose(page, 'Copied preview link');
 
     // Should go back to the edit view on close

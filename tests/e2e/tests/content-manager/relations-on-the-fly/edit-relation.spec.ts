@@ -218,7 +218,7 @@ test.describe('Relations on the fly - Edit a Relation', () => {
     await page.getByRole('button', { name: 'Product carousel', exact: true }).click();
     // Step 3. Select a product
     await page.getByRole('combobox', { name: 'products' }).click();
-    await page.getByRole('option', { name: 'Nike Mens 23/24 Away Stadium Jersey' }).click();
+    await page.getByLabel('Nike Mens 23/24 Away Stadium').click();
     // Step 4. Open the relation modal
     await page.getByRole('button', { name: 'Nike Mens 23/24 Away Stadium Jersey' }).click();
     await expect(page.getByText('Edit a relation')).toBeVisible();

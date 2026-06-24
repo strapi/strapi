@@ -107,37 +107,6 @@ export const clickAndWait = async (page: Page, locator: Locator) => {
   await page.waitForLoadState('networkidle');
 };
 
-/**
- * Clicks Publish (or a custom publish button) and confirms the draft-relations
- * dialog when it appears. Bidirectional M2M warnings use a "Publish" confirm;
- * xToOne-style warnings use "Publish without relations".
- */
-export const publishAndConfirmDraftRelations = async (
-  page: Page,
-  publishButton: Locator = page.getByRole('button', { name: 'Publish' })
-) => {
-  await clickAndWait(page, publishButton);
-
-  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
-
-  try {
-    await dialog.waitFor({ state: 'visible', timeout: 3000 });
-  } catch {
-    return;
-  }
-
-  const publishWithoutRelations = dialog.getByRole('button', {
-    name: 'Publish without relations',
-  });
-
-  if (await publishWithoutRelations.isVisible()) {
-    await clickAndWait(page, publishWithoutRelations);
-    return;
-  }
-
-  await clickAndWait(page, dialog.getByRole('button', { name: 'Publish', exact: true }));
-};
-
 // ---------------------------------------------------------------------------
 // E2E timing / sync (toast vs API, SPA navigations, guided tour)
 //
@@ -211,6 +180,41 @@ export const withContentManagerPublish = async (
   const done = waitForContentManagerMutation(page, 'publish');
   await act();
   await done;
+};
+
+/**
+ * Clicks Publish (or a custom publish button) and confirms the draft-relations
+ * dialog when it appears. Bidirectional M2M warnings use a "Publish" confirm;
+ * xToOne-style warnings use "Publish without relations".
+ */
+export const publishAndConfirmDraftRelations = async (
+  page: Page,
+  publishButton: Locator = page.getByRole('button', { name: 'Publish' })
+) => {
+  await publishButton.click();
+
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+
+  try {
+    await dialog.waitFor({ state: 'visible', timeout: 3000 });
+  } catch {
+    // No draft-relations dialog — publish may have proceeded on the first click.
+    await waitForContentManagerMutation(page, 'publish').catch(() => {});
+    return;
+  }
+
+  const publishWithoutRelations = dialog.getByRole('button', {
+    name: 'Publish without relations',
+  });
+
+  if (await publishWithoutRelations.isVisible()) {
+    await withContentManagerPublish(page, () => publishWithoutRelations.click());
+    return;
+  }
+
+  await withContentManagerPublish(page, () =>
+    dialog.getByRole('button', { name: 'Publish', exact: true }).click()
+  );
 };
 
 /** Map a segment under `/admin` (or legacy `/admin/…`) to a pathname. */

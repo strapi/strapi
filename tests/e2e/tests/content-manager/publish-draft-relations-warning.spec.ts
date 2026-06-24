@@ -21,6 +21,7 @@ test.describe('Publish with draft relations warning', () => {
     await page.getByRole('textbox', { name: 'title' }).fill('Article with draft author');
     await page.getByRole('combobox', { name: 'authors' }).click();
     await page.getByLabel('Coach BeardDraft').click();
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
 
     await page.getByRole('button', { name: 'Publish' }).click();
 
@@ -51,5 +52,43 @@ test.describe('Publish with draft relations warning', () => {
 
     await clickAndWait(page, page.getByRole('tab', { name: 'Draft' }));
     await expect(page.getByRole('button', { name: 'Coach Beard' })).toBeVisible();
+  });
+
+  test('warns on publish with oneToMany draft relations in a dynamic zone', async ({ page }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
+    await page.waitForResponse(
+      (response) =>
+        response.request().method() === 'GET' &&
+        response.url().includes('/actions/countDraftRelations') &&
+        response.ok()
+    );
+
+    await clickAndWait(page, page.getByRole('button', { name: 'Product carousel - 23/24 kits' }));
+    await page.getByRole('combobox', { name: 'products' }).click();
+    await page.getByLabel('Nike Mens 23/24 Away Stadium').click();
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
+
+    const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+
+    await page.getByRole('button', { name: 'Publish' }).click();
+    await expect(confirmationDialog).toBeVisible();
+    await expect(
+      confirmationDialog.getByText(/This entry is related to 1 draft entry/)
+    ).toBeVisible();
+    await expect(
+      confirmationDialog.getByRole('button', { name: 'Publish without relations' })
+    ).toBeVisible();
+
+    await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(confirmationDialog).not.toBeVisible();
+
+    await page.getByRole('button', { name: 'Publish' }).click();
+    await expect(confirmationDialog).toBeVisible();
+    await clickAndWait(
+      page,
+      confirmationDialog.getByRole('button', { name: 'Publish without relations' })
+    );
+    await findAndClose(page, 'Published Document');
   });
 });

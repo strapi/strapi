@@ -29,14 +29,20 @@ test.describe('Edit View', () => {
       await page.waitForURL(CREATE_URL);
 
       // Add a new relation to the entry
+      await page.getByRole('textbox', { name: 'title' }).fill('Draft relations warning test');
       await page.getByRole('combobox', { name: 'authors' }).click();
       await page.getByLabel('Coach BeardDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
+
+      const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+
       // Attempt to publish the entry
       await page.getByRole('button', { name: 'Publish' }).click();
 
       // Verify that a warning about a single draft relation is displayed
-      await expect(page.getByText(/1 linked entry is still in draft/)).toBeVisible();
-      await page.getByRole('button', { name: 'Cancel' }).click();
+      await expect(confirmationDialog).toBeVisible();
+      await expect(confirmationDialog.getByText(/1 linked entry is still in draft/)).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
 
       // Save the current state of the entry
       await page.getByRole('button', { name: 'Save' }).click();
@@ -45,12 +51,16 @@ test.describe('Edit View', () => {
       // Add another relation to the entry
       await page.getByRole('combobox', { name: 'authors' }).click();
       await page.getByLabel('Led TassoDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
       // Attempt to publish the entry again
       await page.getByRole('button', { name: 'Publish' }).click();
 
       // Verify that a warning about two draft relations is displayed
-      await expect(page.getByText(/2 linked entries are still in draft/)).toBeVisible();
-      await page.getByRole('button', { name: 'Cancel' }).click();
+      await expect(confirmationDialog).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/2 linked entries are still in draft/)
+      ).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
 
       // Save the current state of the entry
       await page.getByRole('button', { name: 'Save' }).click();
@@ -59,11 +69,15 @@ test.describe('Edit View', () => {
       // Add another relation to the entry
       await page.getByRole('combobox', { name: 'authors' }).click();
       await page.getByLabel('Ted LassoDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
       // Attempt to publish the entry again
       await page.getByRole('button', { name: 'Publish' }).click();
 
       // Verify that a warning about three draft relations is displayed
-      await expect(page.getByText(/3 linked entries are still in draft/)).toBeVisible();
+      await expect(confirmationDialog).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/3 linked entries are still in draft/)
+      ).toBeVisible();
     });
 
     test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
