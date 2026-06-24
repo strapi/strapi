@@ -1,4 +1,5 @@
 import path from 'path';
+// [lodash: cloneDeep — kept, structuredClone not 1:1]
 import _ from 'lodash/fp';
 import fse from 'fs-extra';
 // eslint-disable-next-line node/no-unpublished-import
@@ -76,6 +77,7 @@ describe('Documentation plugin | Documentation service', () => {
     const mockFinalDoc = lastMockCall[1];
 
     // The final documenation is read only, clone deep for this test
+    // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
     const validatePromise = SwaggerParser.validate(_.cloneDeep(mockFinalDoc));
 
     await expect(validatePromise).resolves.not.toThrow();

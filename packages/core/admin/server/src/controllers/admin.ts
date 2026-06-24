@@ -3,7 +3,6 @@ import type { Context } from 'koa';
 
 import path from 'path';
 
-import _ from 'lodash';
 import fse from 'fs-extra';
 import { env } from '@strapi/utils';
 import {
@@ -115,8 +114,8 @@ export default {
     );
     const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
 
-    const numberOfAllContentTypes = _.size(strapi.contentTypes);
-    const numberOfComponents = _.size(strapi.components);
+    const numberOfAllContentTypes = Object.keys(strapi.contentTypes).length;
+    const numberOfComponents = Object.keys(strapi.components).length;
 
     const getNumberOfDynamicZones = () => {
       return pipe(

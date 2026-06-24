@@ -24,7 +24,7 @@ const { ApplicationError } = errors;
 export default {
   async create(ctx: Context) {
     const { body } = ctx.request as Create.Request;
-    const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
+    const cleanData = { ...body, email: (body.email ?? '').toLowerCase() };
 
     await validateUserCreationInput(cleanData);
 

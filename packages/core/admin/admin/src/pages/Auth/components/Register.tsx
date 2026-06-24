@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography, Link } from '@strapi/design-system';
-import omit from 'lodash/omit';
 import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -404,24 +403,28 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               }
 
               if (normalizedData.registrationToken) {
+                const {
+                  registrationToken: _rt,
+                  confirmPassword: _cp,
+                  email: _email,
+                  news: _news,
+                  ...userInfoData
+                } = normalizedData;
                 handleRegisterUser(
                   {
-                    userInfo: omit(normalizedData, [
-                      'registrationToken',
-                      'confirmPassword',
-                      'email',
-                      'news',
-                    ]),
+                    userInfo: userInfoData,
                     registrationToken: normalizedData.registrationToken,
                     news: normalizedData.news,
                   },
                   helpers.setErrors
                 );
               } else {
-                await handleRegisterAdmin(
-                  omit(normalizedData, ['registrationToken', 'confirmPassword']),
-                  helpers.setErrors
-                );
+                const {
+                  registrationToken: _rt,
+                  confirmPassword: _cp,
+                  ...adminData
+                } = normalizedData;
+                await handleRegisterAdmin(adminData, helpers.setErrors);
               }
             } catch (err) {
               if (err instanceof ValidationError) {

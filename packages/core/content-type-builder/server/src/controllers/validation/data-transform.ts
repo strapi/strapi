@@ -21,7 +21,7 @@ export const removeDeletedUIDTargetFields = (data: Struct.ContentTypeSchema) => 
     Object.values(data.attributes).forEach((attribute) => {
       if (
         attribute.type === 'uid' &&
-        !_.isUndefined(attribute.targetField) &&
+        attribute.targetField !== undefined &&
         !_.has(data.attributes, attribute.targetField)
       ) {
         attribute.targetField = undefined;

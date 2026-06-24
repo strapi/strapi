@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { subject } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
 import * as permissions from '../index';
@@ -134,10 +133,10 @@ describe('Permissions Engine', () => {
    */
   const expectedAbilityRules = (permissions) => {
     return permissions.map((permission) => {
-      const rules = _.omit(permission, ['properties', 'conditions']);
+      const { properties, conditions, ...rules } = permission;
 
-      if (permission.properties && permission.properties.fields) {
-        rules.fields = permission.properties.fields;
+      if (properties && properties.fields) {
+        rules.fields = properties.fields;
       }
       if (!permission.subject) {
         rules.subject = 'all';
@@ -213,8 +212,9 @@ describe('Permissions Engine', () => {
     expect(ability.can('read', subject('article', { id: 125 }))).toBeTruthy();
     expect(ability.can('read', subject('user', { id: 125 }))).toBeFalsy();
 
+    const { conditions: _c0, ...perm0NoConditions } = permissions[0];
     expect(registerFunctions[0]).toBeCalledWith({
-      ..._.omit(permissions[0], ['conditions']),
+      ...perm0NoConditions,
       condition: {
         $and: [
           {
@@ -327,7 +327,8 @@ describe('Permissions Engine', () => {
     expect(ability.can('read', 'article', 'title')).toBeTruthy();
 
     expect(createRegisterFunction).toBeCalledTimes(1);
-    expect(registerFunctions[0]).toBeCalledWith(_.omit(permissions[0], ['conditions']));
+    const { conditions: _c0a, ...perm0aNoConditions } = permissions[0];
+    expect(registerFunctions[0]).toBeCalledWith(perm0aNoConditions);
   });
 
   describe('hooks', () => {
@@ -495,12 +496,14 @@ describe('Permissions Engine', () => {
       expect(ability.can('read', subject('article', { id: 200 }))).toBe(true);
       expect(ability.can('read', subject('article', { id: 999 }))).toBe(false);
 
+      const { conditions: _c0b, ...perm0b } = permissions[0];
+      const { conditions: _c1b, ...perm1b } = permissions[1];
       expect(registerFunctions[0]).toBeCalledWith({
-        ..._.omit(permissions[0], ['conditions']),
+        ...perm0b,
         condition: { $and: [{ $or: [{ id: 125 }] }] },
       });
       expect(registerFunctions[1]).toBeCalledWith({
-        ..._.omit(permissions[1], ['conditions']),
+        ...perm1b,
         condition: { $and: [{ $or: [{ id: 200 }] }] },
       });
     });
@@ -525,11 +528,13 @@ describe('Permissions Engine', () => {
       expect(ability.can('read', 'article')).toBe(true);
       expect(ability.can('read', subject('article', { id: 999 }))).toBe(true);
 
+      const { conditions: _c0c, ...perm0c } = permissions[0];
+      const { conditions: _c1c, ...perm1c } = permissions[1];
       expect(registerFunctions[0]).toBeCalledWith({
-        ..._.omit(permissions[0], ['conditions']),
+        ...perm0c,
         condition: { $and: [{ $or: [{ id: 125 }] }] },
       });
-      expect(registerFunctions[1]).toBeCalledWith(_.omit(permissions[1], ['conditions']));
+      expect(registerFunctions[1]).toBeCalledWith(perm1c);
     });
   });
 

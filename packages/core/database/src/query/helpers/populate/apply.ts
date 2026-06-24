@@ -53,6 +53,10 @@ type MorphIdMap = Record<string, Record<ID, Row[]>>;
 
 type Row = Record<string, unknown>;
 
+const getUniqueNonNilValues = (values: unknown[]) => {
+  return [...new Set(values.filter((value) => value !== null && value !== undefined))];
+};
+
 /**
  * Populate oneToOne and manyToOne relation
  * @param {*} input
@@ -71,9 +75,7 @@ const XtoOne = async (
   if ('joinColumn' in attribute && attribute.joinColumn) {
     const { name: joinColumnName, referencedColumn: referencedColumnName } = attribute.joinColumn;
 
-    const referencedValues = _.uniq(
-      results.map((r) => r[joinColumnName]).filter((value) => !_.isNil(value))
-    );
+    const referencedValues = getUniqueNonNilValues(results.map((r) => r[joinColumnName]));
 
     if (_.isEmpty(referencedValues)) {
       results.forEach((result) => {
@@ -93,7 +95,7 @@ const XtoOne = async (
     const map = _.groupBy<Row[]>(referencedColumnName)(rows);
 
     results.forEach((result) => {
-      result[attributeName] = fromTargetRow(_.first(map[result[joinColumnName] as string]));
+      result[attributeName] = fromTargetRow(map[result[joinColumnName] as string]?.[0]);
     });
 
     return;
@@ -111,9 +113,7 @@ const XtoOne = async (
     const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
     const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
-    const referencedValues = _.uniq(
-      results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
-    );
+    const referencedValues = getUniqueNonNilValues(results.map((r) => r[referencedColumnName]));
 
     if (isCount) {
       if (_.isEmpty(referencedValues)) {
@@ -179,7 +179,7 @@ const XtoOne = async (
     const map = _.groupBy<Row>(joinColRenameAs)(rows);
 
     results.forEach((result) => {
-      result[attributeName] = fromTargetRow(_.first(map[result[referencedColumnName] as string]));
+      result[attributeName] = fromTargetRow(map[result[referencedColumnName] as string]?.[0]);
     });
   }
 };
@@ -197,9 +197,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
       on,
     } = attribute.joinColumn;
 
-    const referencedValues = _.uniq(
-      results.map((r) => r[joinColumnName]).filter((value) => !_.isNil(value))
-    );
+    const referencedValues = getUniqueNonNilValues(results.map((r) => r[joinColumnName]));
 
     if (_.isEmpty(referencedValues)) {
       results.forEach((result) => {
@@ -239,9 +237,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
     const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
     const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
-    const referencedValues = _.uniq(
-      results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
-    );
+    const referencedValues = getUniqueNonNilValues(results.map((r) => r[referencedColumnName]));
 
     if (isCount) {
       if (_.isEmpty(referencedValues)) {
@@ -328,9 +324,7 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
   const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
   const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
-  const referencedValues = _.uniq(
-    results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
-  );
+  const referencedValues = getUniqueNonNilValues(results.map((r) => r[referencedColumnName]));
 
   if (isCount) {
     if (_.isEmpty(referencedValues)) {
@@ -415,8 +409,8 @@ const morphX = async (
   if (targetAttribute.type === 'relation' && targetAttribute.relation === 'morphToOne') {
     const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
-    const referencedValues = _.uniq(
-      results.map((r) => r[idColumn.referencedColumn]).filter((value) => !_.isNil(value))
+    const referencedValues = getUniqueNonNilValues(
+      results.map((r) => r[idColumn.referencedColumn])
     );
 
     if (_.isEmpty(referencedValues)) {
@@ -439,8 +433,7 @@ const morphX = async (
     results.forEach((result) => {
       const matchingRows = map[result[idColumn.referencedColumn] as string];
 
-      const matchingValue =
-        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+      const matchingValue = attribute.relation === 'morphOne' ? matchingRows?.[0] : matchingRows;
 
       result[attributeName] = fromTargetRow(matchingValue);
     });
@@ -451,8 +444,8 @@ const morphX = async (
 
     const { idColumn, typeColumn } = morphColumn;
 
-    const referencedValues = _.uniq(
-      results.map((r) => r[idColumn.referencedColumn]).filter((value) => !_.isNil(value))
+    const referencedValues = getUniqueNonNilValues(
+      results.map((r) => r[idColumn.referencedColumn])
     );
 
     if (_.isEmpty(referencedValues)) {
@@ -494,8 +487,7 @@ const morphX = async (
     results.forEach((result) => {
       const matchingRows = map[result[idColumn.referencedColumn] as string];
 
-      const matchingValue =
-        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+      const matchingValue = attribute.relation === 'morphOne' ? matchingRows?.[0] : matchingRows;
 
       result[attributeName] = fromTargetRow(matchingValue);
     });
@@ -514,8 +506,8 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
 
   // fetch join table to create the ids map then do the same as morphToOne without the first
 
-  const referencedValues = _.uniq(
-    results.map((r) => r[joinColumn.referencedColumn]).filter((value) => !_.isNil(value))
+  const referencedValues = getUniqueNonNilValues(
+    results.map((r) => r[joinColumn.referencedColumn])
   );
 
   const qb = db.entityManager.createQueryBuilder(joinTable.name);
@@ -665,7 +657,7 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
     const fromTargetRow = (rowOrRows: Row | Row[] | undefined) =>
       fromRow(db.metadata.get(type), rowOrRows);
 
-    const row = fromTargetRow(_.first(matchingRows));
+    const row = fromTargetRow(matchingRows?.[0]);
     // Spread target first so a same-named user attribute cannot override the morph type UID
     result[attributeName] = row ? { ...row, [typeField]: type } : row;
   });

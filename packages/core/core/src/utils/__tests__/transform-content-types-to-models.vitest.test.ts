@@ -1,4 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
+// [lodash: cloneDeep — structuredClone not 1:1, audit value shape first]
+// eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
 import { cloneDeep, merge } from 'lodash';
 import { Database } from '@strapi/database';
 import {

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { strings } from '@strapi/utils';
 import { isIP } from 'node:net';
 
@@ -13,15 +12,15 @@ export const getConfigUrls = (config: Record<string, unknown>, forAdminBuild = f
   const adminConfig = config.admin;
 
   // Defines serverUrl value
-  let serverUrl = _.get(serverConfig, 'url', '');
-  serverUrl = _.trim(serverUrl, '/ ');
+  let serverUrl = serverConfig?.url ?? '';
+  serverUrl = serverUrl.replace(/^[/ ]+|[/ ]+$/g, '');
   if (typeof serverUrl !== 'string') {
     throw new Error('Invalid server url config. Make sure the url is a string.');
   }
 
   if (serverUrl.startsWith('http')) {
     try {
-      serverUrl = _.trim(new URL(serverConfig.url).toString(), '/');
+      serverUrl = new URL(serverConfig.url).toString().replace(/^\/+|\/+$/g, '');
     } catch (e) {
       throw new Error(
         'Invalid server url config. Make sure the url defined in server.js is valid.'
@@ -32,14 +31,14 @@ export const getConfigUrls = (config: Record<string, unknown>, forAdminBuild = f
   }
 
   // Defines adminUrl value
-  let adminUrl = _.get(adminConfig, 'url', '/admin');
-  adminUrl = _.trim(adminUrl, '/ ');
+  let adminUrl = (adminConfig as { url?: string })?.url ?? '/admin';
+  adminUrl = adminUrl.replace(/^[/ ]+|[/ ]+$/g, '');
   if (typeof adminUrl !== 'string') {
     throw new Error('Invalid admin url config. Make sure the url is a non-empty string.');
   }
   if (adminUrl.startsWith('http')) {
     try {
-      adminUrl = _.trim(new URL(adminUrl).toString(), '/');
+      adminUrl = new URL(adminUrl).toString().replace(/^\/+|\/+$/g, '');
     } catch (e) {
       throw new Error('Invalid admin url config. Make sure the url defined in server.js is valid.');
     }
@@ -56,7 +55,7 @@ export const getConfigUrls = (config: Record<string, unknown>, forAdminBuild = f
     !forAdminBuild
   ) {
     adminPath = adminUrl.replace(strings.getCommonPath(serverUrl, adminUrl), '');
-    adminPath = `/${_.trim(adminPath, '/')}`;
+    adminPath = `/${adminPath.replace(/^\/+|\/+$/g, '')}`;
   } else if (adminUrl.startsWith('http')) {
     adminPath = new URL(adminUrl).pathname;
   }

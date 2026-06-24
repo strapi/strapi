@@ -1,5 +1,4 @@
 import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
-import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 
 import { getRelationType } from '../../../utils/getRelationType';
@@ -169,11 +168,13 @@ export const attributeTypes = {
             if (!values) {
               return false;
             }
-            const duplicates = uniq(
-              values
-                .map(toRegressedEnumValue)
-                .filter((value, index, values) => values.indexOf(value) !== index)
-            );
+            const duplicates = [
+              ...new Set(
+                values
+                  .map(toRegressedEnumValue)
+                  .filter((value, index, values) => values.indexOf(value) !== index)
+              ),
+            ];
 
             return !duplicates.length;
           },

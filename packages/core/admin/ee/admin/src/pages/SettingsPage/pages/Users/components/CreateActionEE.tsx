@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Button, Flex, Tooltip } from '@strapi/design-system';
 import { Mail, WarningCircle } from '@strapi/icons';
-import isNil from 'lodash/isNil';
 import { useIntl } from 'react-intl';
 
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
@@ -22,7 +21,7 @@ export const CreateActionEE = React.forwardRef<HTMLButtonElement, CreateActionCE
 
     return (
       <Flex width="100%" gap={2}>
-        {!isNil(permittedSeats) && shouldStopCreate && (
+        {permittedSeats !== null && permittedSeats !== undefined && shouldStopCreate && (
           <Tooltip
             label={formatMessage({
               id: 'Settings.application.admin-seats.at-limit-tooltip',

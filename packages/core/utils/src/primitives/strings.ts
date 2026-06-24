@@ -19,9 +19,8 @@ const toRegressedEnumValue = (value: string) =>
   });
 
 const getCommonPath = (...paths: string[]) => {
-  const [segments, ...otherSegments] = paths.map((it) => _.split(it, '/'));
-  return _.join(
-    _.takeWhile(segments, (str, index) => otherSegments.every((it) => it[index] === str)),
+  const [segments, ...otherSegments] = paths.map((it) => it.split('/'));
+  return _.takeWhile(segments, (str, index) => otherSegments.every((it) => it[index] === str)).join(
     '/'
   );
 };

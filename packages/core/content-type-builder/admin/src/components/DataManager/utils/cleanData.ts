@@ -1,5 +1,4 @@
 import camelCase from 'lodash/camelCase';
-import omit from 'lodash/omit';
 import sortBy from 'lodash/sortBy';
 
 import { pluginId } from '../../../pluginId';
@@ -153,11 +152,19 @@ const formatTypeForRequest = (type: ContentType | Component) => {
       throw new Error('Invalid status');
   }
 
+  const {
+    info: _info,
+    options: _options,
+    visible: _visible,
+    uid: _uid,
+    restrictRelationsTo: _restrict,
+    ...typeRest
+  } = type;
   return {
     action,
     uid: type.uid,
     category: 'category' in type ? type.category : undefined,
-    ...omit(type, ['info', 'options', 'visible', 'uid', 'restrictRelationsTo']),
+    ...typeRest,
     ...type.options,
     ...type.info,
     attributes: type.attributes.map((attr) => {
@@ -177,10 +184,11 @@ const formatTypeForRequest = (type: ContentType | Component) => {
           action = 'update';
       }
 
+      const { status: _s, name: _n, ...formattedAttr } = formatAttribute(attr);
       return {
         action,
         name: attr.name,
-        properties: removeNullKeys(omit(formatAttribute(attr), ['status', 'name'])),
+        properties: removeNullKeys(formattedAttr),
       };
     }),
   };

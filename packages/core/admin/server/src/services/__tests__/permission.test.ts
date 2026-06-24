@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { merge } from 'lodash/fp';
 import {
   cleanPermissionsInDatabase,
@@ -79,8 +78,9 @@ describe('Permission Service', () => {
       const sanitizedPermission: any = sanitizePermission(permission);
 
       expect(sanitizedPermission.foo).toBeUndefined();
+      const { foo: _foo, ...permissionWithoutFoo } = permission;
       expect(sanitizedPermission).toMatchObject({
-        ..._.omit(permission, 'foo'),
+        ...permissionWithoutFoo,
       });
     });
   });

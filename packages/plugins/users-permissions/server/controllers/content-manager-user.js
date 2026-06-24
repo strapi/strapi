@@ -15,12 +15,15 @@ const ACTIONS = {
   delete: 'plugin::content-manager.explorer.delete',
 };
 
+const toLower = (value) =>
+  value === null || value === undefined ? '' : String(value).toLowerCase();
+
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const doc = await strapi.service('plugin::content-manager.document-manager').findOne(id, model, {
     populate: [`${CREATED_BY_ATTRIBUTE}.roles`],
   });
 
-  if (_.isNil(doc)) {
+  if (doc === null || doc === undefined) {
     throw new NotFoundError();
   }
 
@@ -32,7 +35,12 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
     throw new ForbiddenError();
   }
 
-  const docWithoutCreatorRoles = _.omit(doc, `${CREATED_BY_ATTRIBUTE}.roles`);
+  const { [CREATED_BY_ATTRIBUTE]: createdByField, ...docWithoutCreatedBy } = doc;
+  const { roles: _roles, ...createdByWithoutRoles } = createdByField ?? {};
+  const docWithoutCreatorRoles = {
+    ...docWithoutCreatedBy,
+    [CREATED_BY_ATTRIBUTE]: createdByWithoutRoles,
+  };
 
   return { pm, doc: docWithoutCreatorRoles };
 };
@@ -91,7 +99,7 @@ module.exports = {
       [UPDATED_BY_ATTRIBUTE]: admin.id,
     };
 
-    user.email = _.toLower(user.email);
+    user.email = toLower(user.email);
 
     try {
       const data = await strapi
@@ -149,17 +157,17 @@ module.exports = {
     if (_.has(body, 'email') && advancedConfigs.unique_email) {
       const userWithSameEmail = await strapi.db
         .query('plugin::users-permissions.user')
-        .findOne({ where: { email: _.toLower(email) } });
+        .findOne({ where: { email: toLower(email) } });
 
       if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(user.id)) {
         throw new ApplicationError('Email already taken');
       }
 
-      body.email = _.toLower(body.email);
+      body.email = toLower(body.email);
     }
 
     const sanitizedData = await pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
-    const updateData = _.omit({ ...sanitizedData, updatedBy: admin.id }, 'createdBy');
+    const { createdBy: _createdBy, ...updateData } = { ...sanitizedData, updatedBy: admin.id };
 
     const data = await strapi
       .service('plugin::content-manager.document-manager')

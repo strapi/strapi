@@ -8,6 +8,7 @@ const validatorsRegistry = () => {
 
   return {
     get(path: PropertyName): Validator[] {
+      // eslint-disable-next-line you-dont-need-lodash-underscore/get
       return _.get(validators, path, []);
     },
 

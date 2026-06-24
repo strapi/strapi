@@ -37,7 +37,7 @@ const registerAdminRoutes = (strapi: Core.Strapi) => {
   // Mutate admin.routes in-place and make sure router factories are instantiated correctly
   strapi.admin.routes = instantiateRouterInputs(strapi.admin.routes, strapi);
 
-  _.forEach(strapi.admin.routes, (router) => {
+  Object.values(strapi.admin.routes ?? {}).forEach((router) => {
     router.type = router.type || 'admin';
     router.prefix = router.prefix || `/admin`;
     router.routes.forEach((route) => {
@@ -75,7 +75,7 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
       // Mutate plugin.routes in-place and make sure router factories are instantiated correctly
       plugin.routes = instantiateRouterInputs(plugin.routes, strapi);
 
-      _.forEach(plugin.routes, (router) => {
+      Object.values(plugin.routes ?? {}).forEach((router) => {
         router.type = router.type ?? 'admin';
         router.prefix = router.prefix ?? `/${pluginName}`;
         router.routes.forEach((route) => {
@@ -102,7 +102,7 @@ const registerAPIRoutes = (strapi: Core.Strapi) => {
     // Mutate api.routes in-place and make sure router factories are instantiated correctly
     api.routes = instantiateRouterInputs(api.routes, strapi);
 
-    _.forEach(api.routes, (router) => {
+    Object.values(api.routes ?? {}).forEach((router) => {
       // TODO: remove once auth setup
       // pass meta down to compose endpoint
       router.type = 'content-api';

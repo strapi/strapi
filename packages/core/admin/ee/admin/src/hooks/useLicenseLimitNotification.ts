@@ -5,7 +5,6 @@
  */
 import * as React from 'react';
 
-import isNil from 'lodash/isNil';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
@@ -32,7 +31,8 @@ export const useLicenseLimitNotification = () => {
     }
 
     const shouldDisplayNotification =
-      !isNil(permittedSeats) &&
+      permittedSeats !== null &&
+      permittedSeats !== undefined &&
       !window.sessionStorage.getItem(`${STORAGE_KEY_PREFIX}-${pathname}`) &&
       licenseLimitStatus === 'OVER_LIMIT';
 

@@ -5,7 +5,7 @@ import delegate from 'delegates';
 import statuses from 'statuses';
 import { formatHttpError } from '../errors';
 
-const { isNil, camelCase } = fp;
+const { camelCase } = fp;
 
 declare module 'koa' {
   interface BaseResponse {
@@ -48,7 +48,7 @@ const addCustomMethods = (app: Koa) => {
   };
 
   app.response.deleted = function deleted(data) {
-    if (isNil(data)) {
+    if (data === null || data === undefined) {
       this.status = 204;
     } else {
       this.status = 200;

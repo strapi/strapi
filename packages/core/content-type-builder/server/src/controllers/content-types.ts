@@ -48,8 +48,7 @@ export default {
       .filter(
         (uid) =>
           !kind ||
-          _.get(strapi.contentTypes[uid as Internal.UID.ContentType], 'kind', 'collectionType') ===
-            kind
+          (strapi.contentTypes[uid as Internal.UID.ContentType]?.kind ?? 'collectionType') === kind
       )
       .map((uid) =>
         contentTypeService.formatContentType(strapi.contentTypes[uid as Internal.UID.ContentType])

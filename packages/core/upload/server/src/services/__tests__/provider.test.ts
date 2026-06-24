@@ -12,6 +12,7 @@ const defaultConfig: Record<string, any> = {
 function setupStrapi(providerImpl: Record<string, any>) {
   global.strapi = {
     config: {
+      // eslint-disable-next-line you-dont-need-lodash-underscore/get
       get: (path: any, defaultValue: any) => _.get(defaultConfig, path, defaultValue),
     },
     plugins: {

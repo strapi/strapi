@@ -11,7 +11,7 @@ export type Rec = Record<string, unknown> | null;
 const fromSingleRow = (meta: Meta, row: Row): Rec => {
   const { attributes } = meta;
 
-  if (_.isNil(row)) {
+  if (row === null || row === undefined) {
     return null;
   }
 
@@ -42,7 +42,7 @@ const fromSingleRow = (meta: Meta, row: Row): Rec => {
 };
 
 const fromRow = (meta: Meta, row: Row | Row[] | undefined) => {
-  if (_.isNil(row)) {
+  if (row === null || row === undefined) {
     return null;
   }
 
@@ -54,7 +54,7 @@ const fromRow = (meta: Meta, row: Row | Row[] | undefined) => {
 };
 
 const toSingleRow = (meta: Meta, data: Rec = {}): Row => {
-  if (_.isNil(data)) {
+  if (data === null || data === undefined) {
     return data;
   }
 
@@ -84,11 +84,11 @@ function toRow<TData extends Rec | Rec[] | null>(
   data: TData
 ): TData extends null ? null : TData extends Rec[] ? Row[] : Rec;
 function toRow(meta: Meta, data: Rec | Rec[] | null): Row | Row[] | null {
-  if (_.isNil(data)) {
+  if (data === null || data === undefined) {
     return data;
   }
 
-  if (_.isArray(data)) {
+  if (Array.isArray(data)) {
     return data.map((datum) => toSingleRow(meta, datum));
   }
 

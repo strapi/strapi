@@ -25,6 +25,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     } = attributes[field] as Schema.Attribute.UID;
 
     // @ts-expect-error targetField can be undefined
+    // [lodash: get — targetField can be undefined; _.get(obj, undefined) returns undefined but obj[undefined] coerces to 'undefined' key]
+    // eslint-disable-next-line you-dont-need-lodash-underscore/get
     const targetValue = _.get(data, targetField);
 
     if (!_.isEmpty(targetValue)) {
@@ -40,7 +42,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       contentTypeUID,
       field,
       value: slugify(
-        _.isFunction(defaultValue) ? defaultValue() : defaultValue || contentType.modelName,
+        typeof defaultValue === 'function' ? defaultValue() : defaultValue || contentType.modelName,
         options
       ),
       locale,

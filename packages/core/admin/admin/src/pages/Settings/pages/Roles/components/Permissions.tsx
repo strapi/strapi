@@ -2,7 +2,11 @@ import * as React from 'react';
 
 import { Tabs } from '@strapi/design-system';
 import { produce } from 'immer';
+// [lodash: clone-deep — skipped, structuredClone not 1:1 for class instances/functions]
+// eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
 import cloneDeep from 'lodash/cloneDeep';
+// [lodash: get — skipped, all call sites use dynamic variable paths]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';

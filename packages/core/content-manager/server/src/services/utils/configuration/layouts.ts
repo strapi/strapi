@@ -32,7 +32,7 @@ async function createDefaultLayouts(schema: any) {
     list: createDefaultListLayout(schema),
     // @ts-expect-error necessary to provide this default layout
     edit: createDefaultEditLayout(schema),
-    ..._.pick(_.get(schema, ['config', 'layouts'], {}), ['list', 'edit']),
+    ..._.pick(schema?.config?.layouts ?? {}, ['list', 'edit']),
   };
 }
 
@@ -109,11 +109,13 @@ function syncLayouts(configuration: any, schema: any) {
   if (cleanList.length < DEFAULT_LIST_LENGTH) {
     // add newAttributes
     // only add valid listable attributes
-    cleanList = _.uniq(
-      cleanList
-        .concat(newAttributes.filter((key) => isListable(schema, key)))
-        .slice(0, DEFAULT_LIST_LENGTH)
-    );
+    cleanList = [
+      ...new Set(
+        cleanList
+          .concat(newAttributes.filter((key) => isListable(schema, key)))
+          .slice(0, DEFAULT_LIST_LENGTH)
+      ),
+    ];
   }
 
   // add new attributes to edit view

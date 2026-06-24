@@ -3,6 +3,8 @@ import { forwardRef, memo, useState } from 'react';
 import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Box, Flex, IconButton, Typography, Link, Badge, Dialog } from '@strapi/design-system';
 import { ChevronDown, Drag, Lock, Pencil, Trash } from '@strapi/icons';
+// [lodash: get — skipped, paths use dot-separated UID keys and dynamic variables]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';

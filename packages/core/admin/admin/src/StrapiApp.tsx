@@ -3,10 +3,8 @@ import * as React from 'react';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { Cloud, Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
-import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
-import uniq from 'lodash/uniq';
 import { RouterProvider } from 'react-router-dom';
 
 import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/admin/src/constants';
@@ -254,7 +252,7 @@ class StrapiApp {
       }
     });
 
-    if (isFunction(customBootstrap)) {
+    if (typeof customBootstrap === 'function') {
       customBootstrap({
         addComponents: this.addComponents,
         addFields: this.addFields,
@@ -275,7 +273,7 @@ class StrapiApp {
           ?.filter((loc) => loc !== 'en')
           .map((loc) => normalizeAdminLocale(loc)) || [];
 
-      this.configurations.locales = uniq(['en', ...extraLocales]);
+      this.configurations.locales = [...new Set(['en', ...extraLocales])];
     }
 
     if (customConfig.auth?.logo) {
@@ -392,7 +390,7 @@ class StrapiApp {
       this.appPlugins[plugin].register(this);
     });
 
-    if (isFunction(customRegister)) {
+    if (typeof customRegister === 'function') {
       customRegister(this);
     }
 
@@ -496,13 +494,15 @@ class StrapiApp {
     }, {});
 
     const adminTranslations = await this.loadAdminTrads();
-    const localesForPlugins = uniq(
-      this.configurations.locales.flatMap((locale) => {
-        const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
+    const localesForPlugins = [
+      ...new Set(
+        this.configurations.locales.flatMap((locale) => {
+          const legacyLocale = ADMIN_LOCALE_LEGACY_ALIASES[locale];
 
-        return legacyLocale ? [locale, legacyLocale] : [locale];
-      })
-    );
+          return legacyLocale ? [locale, legacyLocale] : [locale];
+        })
+      ),
+    ];
 
     const arrayOfPromises = Object.keys(this.appPlugins)
       .map((plugin) => {

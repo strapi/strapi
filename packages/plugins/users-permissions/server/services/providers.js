@@ -10,6 +10,9 @@ const urlJoin = require('url-join');
 
 const { getService, findValidUsername } = require('../utils');
 
+const toLower = (value) =>
+  value === null || value === undefined ? '' : String(value).toLowerCase();
+
 module.exports = ({ strapi }) => {
   /**
    * Helper to get profiles
@@ -52,7 +55,7 @@ module.exports = ({ strapi }) => {
     // Get the profile.
     const profile = await getProfile(provider, query);
 
-    const email = _.toLower(profile.email);
+    const email = toLower(profile.email);
 
     // We need at least the mail.
     if (!email) {
@@ -67,7 +70,7 @@ module.exports = ({ strapi }) => {
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
-    const user = _.find(users, { provider });
+    const user = users.find((u) => u.provider === provider);
 
     if (_.isEmpty(user) && !advancedSettings.allow_register) {
       throw new Error('Register action is actually not available.');

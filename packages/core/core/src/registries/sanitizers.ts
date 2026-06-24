@@ -8,6 +8,7 @@ const sanitizersRegistry = () => {
 
   return {
     get(path: PropertyName): Sanitizer[] {
+      // eslint-disable-next-line you-dont-need-lodash-underscore/get
       return _.get(sanitizers, path, []);
     },
 

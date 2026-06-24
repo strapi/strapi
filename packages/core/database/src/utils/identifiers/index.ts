@@ -81,7 +81,7 @@ export class Identifiers {
    * final string my_model which generally works but is not entirely safe
    * */
   getName = (names: NameInput, options?: NameOptions) => {
-    const tokens: NameToken[] = _.castArray(names).map((name) => {
+    const tokens: NameToken[] = (Array.isArray(names) ? names : [names]).map((name) => {
       return {
         name,
         compressible: true,

@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import { Checkbox, Box, Flex, Typography } from '@strapi/design-system';
+// [lodash: get — skipped, all call sites use dynamic array paths]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 

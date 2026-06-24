@@ -49,13 +49,16 @@ export const arrayOfConditionNames = yup
   .of(yup.string())
   .test('is-an-array-of-conditions', 'is not a plugin name', function (value) {
     const ids = strapi.service('admin::permission').conditionProvider.keys();
-    return _.isUndefined(value) || _.difference(value, ids).length === 0
+    return value === undefined || _.difference(value, ids).length === 0
       ? true
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
   });
 
 export const permissionsAreEquals = (a: any, b: any) =>
-  a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
+  a.action === b.action &&
+  (a.subject === b.subject ||
+    ((a.subject === null || a.subject === undefined) &&
+      (b.subject === null || b.subject === undefined)));
 
 const checkNoDuplicatedPermissions = (permissions: unknown) =>
   !Array.isArray(permissions) ||

@@ -1,3 +1,5 @@
+// [lodash: cloneDeep — structuredClone not 1:1, audit value shape first]
+// eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
 import { cloneDeep } from 'lodash/fp';
 
 import type { Utils } from '@strapi/types';

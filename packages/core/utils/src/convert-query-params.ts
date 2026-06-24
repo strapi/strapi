@@ -27,11 +27,12 @@ import {
 } from './sort-query';
 import { Model } from './types';
 
-const { cloneDeep, get, isArray, isEmpty, isInteger, isNil, isObject, isString, toNumber } = fp;
+const { cloneDeep, get, isEmpty, isInteger, isNil, isObject, toNumber } = fp;
 
 export type { SortParams, SortParamsObject } from './sort-query';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE } = constants;
+const unique = <T>(values: T[]): T[] => [...new Set(values)];
 
 type SortOrder = 'asc' | 'desc';
 
@@ -167,7 +168,7 @@ class InvalidSortError extends Error {
 }
 
 function validateOrder(order: string): asserts order is SortOrder {
-  if (!isString(order) || !['asc', 'desc'].includes(order.toLocaleLowerCase())) {
+  if (typeof order !== 'string' || !['asc', 'desc'].includes(order.toLocaleLowerCase())) {
     throw new InvalidOrderError();
   }
 }
@@ -181,7 +182,7 @@ const convertOrderingQueryParams = (ordering: unknown) => {
 };
 
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every((v) => typeof v === 'string');
 
 interface TransformerOptions {
   getModel: (uid: string) => Model | undefined;
@@ -224,7 +225,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       return {};
     }
 
-    if (!isString(trimmed)) {
+    if (typeof trimmed !== 'string') {
       throw new Error('Invalid sort query');
     }
 
@@ -288,7 +289,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertStartQueryParams = (startQuery: unknown): number => {
     const startAsANumber = toNumber(startQuery);
 
-    if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
+    if (!Number.isInteger(startAsANumber) || startAsANumber < 0) {
       throw new ValidationError(
         `convertStartQueryParams expected a positive integer got ${startAsANumber}`
       );
@@ -303,7 +304,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertLimitQueryParams = (limitQuery: unknown): number | undefined => {
     const limitAsANumber = toNumber(limitQuery);
 
-    if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
+    if (!Number.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
       throw new ValidationError(
         `convertLimitQueryParams expected a positive integer got ${limitAsANumber}`
       );
@@ -376,18 +377,18 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (typeof populate === 'string') {
-      return populate.split(',').map((value) => _.trim(value));
+      return populate.split(',').map((value) => value.trim());
     }
 
     if (Array.isArray(populate)) {
       // map convert
-      return _.uniq(
+      return unique(
         populate.flatMap((value) => {
           if (typeof value !== 'string') {
             throw new InvalidPopulateError();
           }
 
-          return value.split(',').map((value) => _.trim(value));
+          return value.split(',').map((value) => value.trim());
         })
       );
     }
@@ -421,7 +422,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const { attributes } = schema;
     return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
       // Try converting strings to regular booleans if possible
-      if (_.isString(subPopulate)) {
+      if (typeof subPopulate === 'string') {
         try {
           const subPopulateAsBoolean = parseType({ type: 'boolean', value: subPopulate });
           // Only true is accepted as a boolean populate value
@@ -544,7 +545,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   };
 
   const convertNestedPopulate = (subPopulate: boolean | PopulateObjectParams, schema?: Model) => {
-    if (_.isString(subPopulate)) {
+    if (typeof subPopulate === 'string') {
       return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
     }
 
@@ -615,13 +616,13 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (typeof fields === 'string') {
-      const fieldsValues = fields.split(',').map((value) => _.trim(value));
+      const fieldsValues = fields.split(',').map((value) => value.trim());
 
       // NOTE: Only include the doc id if it's a content type
       if (schema?.modelType === 'contentType') {
-        return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
+        return unique([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
       }
-      return _.uniq([ID_ATTRIBUTE, ...fieldsValues]);
+      return unique([ID_ATTRIBUTE, ...fieldsValues]);
     }
 
     if (isStringArray(fields)) {
@@ -632,9 +633,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // NOTE: Only include the doc id if it's a content type
       if (schema?.modelType === 'contentType') {
-        return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
+        return unique([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
       }
-      return _.uniq([ID_ATTRIBUTE, ...fieldsValues]);
+      return unique([ID_ATTRIBUTE, ...fieldsValues]);
     }
 
     throw new ValidationError('Invalid fields parameter. Expected a string or an array of strings');

@@ -1,3 +1,5 @@
+// [lodash: get — partially kept, dynamic uid in array path prevents full removal]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 
 import type { Middleware } from '@reduxjs/toolkit';
@@ -27,7 +29,8 @@ const extendCTBAttributeInitialDataMiddleware: () => Middleware<
             return next(action);
           }
 
-          const hasi18nEnabled = get(type, ['pluginOptions', 'i18n', 'localized'], false);
+          // [lodash: get (line 19) — skipped, dynamic uid in array path]
+          const hasi18nEnabled = (type as any)?.pluginOptions?.i18n?.localized ?? false;
 
           if (hasi18nEnabled) {
             return next({

@@ -10,7 +10,7 @@ import strapiUtils from '@strapi/utils';
 import type { Modules, UID, Struct, Schema } from '@strapi/types';
 import { Validators, ValidatorMetas } from './validators';
 
-const { uniqBy, castArray, isNil, isArray, mergeWith } = _;
+const { uniqBy, castArray, mergeWith } = _;
 const { has, prop, isObject, isEmpty } = fp;
 
 type CreateOrUpdate = 'creation' | 'update';
@@ -470,7 +470,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
       const attribute = currentModel.attributes[attributeName];
       const value = data[attributeName];
 
-      if (isNil(value)) {
+      if (value === null || value === undefined) {
         return result;
       }
 
@@ -494,9 +494,9 @@ const buildRelationsStore = <TUID extends UID.Schema>({
           if (Array.isArray(value)) {
             source = value;
           } else if (isObject(value)) {
-            if ('connect' in value && !isNil(value.connect)) {
+            if ('connect' in value && value.connect !== null && value.connect !== undefined) {
               source = value.connect as RelationSource[];
-            } else if ('set' in value && !isNil(value.set)) {
+            } else if ('set' in value && value.set !== null && value.set !== undefined) {
               source = value.set as RelationSource[];
             } else {
               source = [];
@@ -529,7 +529,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
                 data: componentValue as Record<string, unknown>,
               }),
               (objValue, srcValue) => {
-                if (isArray(objValue)) {
+                if (Array.isArray(objValue)) {
                   return objValue.concat(srcValue);
                 }
               }
@@ -552,7 +552,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
                 data: value,
               }),
               (objValue, srcValue) => {
-                if (isArray(objValue)) {
+                if (Array.isArray(objValue)) {
                   return objValue.concat(srcValue);
                 }
               }

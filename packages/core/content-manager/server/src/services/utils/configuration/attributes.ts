@@ -21,7 +21,7 @@ const isHidden = (schema: any, name: any) => {
     return false;
   }
 
-  const isHidden = _.get(schema, ['config', 'attributes', name, 'hidden'], false);
+  const isHidden = schema?.config?.attributes?.[name]?.hidden ?? false;
   if (isHidden === true) {
     return true;
   }

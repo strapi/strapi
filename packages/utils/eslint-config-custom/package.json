@@ -2,5 +2,8 @@
   "name": "eslint-config-custom",
   "version": "5.48.1",
   "private": true,
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "eslint-plugin-you-dont-need-lodash-underscore": "6.14.0"
+  }
 }

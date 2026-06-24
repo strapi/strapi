@@ -35,7 +35,7 @@ const addCondition = _.curry((condition: string, permission: Permission): Permis
   const { conditions } = permission;
 
   const newConditions = Array.isArray(conditions)
-    ? _.uniq(conditions.concat(condition))
+    ? [...new Set(conditions.concat(condition))]
     : [condition];
 
   return _.set('conditions', newConditions, permission);
@@ -48,7 +48,10 @@ const getProperty = _.curry(
   <T extends keyof Permission['properties']>(
     property: T,
     permission: Permission
-  ): Permission['properties'][T] => _.get(`properties.${property}`, permission)
+  ): Permission['properties'][T] =>
+    // [lodash: get — skipped, dynamic template path `properties.${property}`]
+    // eslint-disable-next-line you-dont-need-lodash-underscore/get
+    _.get(`properties.${property}`, permission)
 );
 
 export { create, sanitizePermissionFields, addCondition, getProperty };

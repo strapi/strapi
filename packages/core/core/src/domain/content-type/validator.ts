@@ -73,11 +73,14 @@ const contentTypeSchemaValidator = yup.object().shape({
             }
 
             // should not collide
-            const duplicates = _.uniq(
-              regressedValues.filter(
-                (value: string, index: number, values: string[]) => values.indexOf(value) !== index
-              )
-            );
+            const duplicates = [
+              ...new Set(
+                regressedValues.filter(
+                  (value: string, index: number, values: string[]) =>
+                    values.indexOf(value) !== index
+                )
+              ),
+            ];
 
             if (duplicates.length) {
               const message = `Some enumeration values of the field '${attrName}' collide when normalized: ${duplicates.join(

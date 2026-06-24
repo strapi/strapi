@@ -257,8 +257,12 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   const previousValue = (await strapi.db
     .query(uid)
     .load(entityToUpdate, attributeName)) as ComponentValue;
-  const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
-  const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
+  const idsToKeep = (Array.isArray(componentValue) ? componentValue : [componentValue])
+    .filter(has('id'))
+    .map(pickStringifiedId);
+  const allIds = (Array.isArray(previousValue) ? previousValue : [previousValue])
+    .filter(has('id'))
+    .map(pickStringifiedId);
 
   idsToKeep.forEach((id) => {
     if (!allIds.includes(id)) {
@@ -287,14 +291,14 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
     .query(uid)
     .load(entityToUpdate, attributeName)) as DynamicZoneValue;
 
-  const idsToKeep = _.castArray(dynamiczoneValues)
+  const idsToKeep = (Array.isArray(dynamiczoneValues) ? dynamiczoneValues : [dynamiczoneValues])
     .filter(has('id'))
     .map((v) => ({
       id: pickStringifiedId(v),
       __component: v.__component,
     }));
 
-  const allIds = _.castArray(previousValue)
+  const allIds = (Array.isArray(previousValue) ? previousValue : [previousValue])
     .filter(has('id'))
     .map((v) => ({
       id: pickStringifiedId(v),
@@ -357,11 +361,11 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
-        await async.map(_.castArray(value), (subValue: any) =>
+        await async.map(Array.isArray(value) ? value : [value], (subValue: any) =>
           deleteComponent(componentUID, subValue)
         );
       } else {
-        await async.map(_.castArray(value), (subValue: any) =>
+        await async.map(Array.isArray(value) ? value : [value], (subValue: any) =>
           deleteComponent(subValue.__component, subValue)
         );
       }

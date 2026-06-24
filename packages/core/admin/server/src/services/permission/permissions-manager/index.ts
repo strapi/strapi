@@ -1,5 +1,4 @@
 import fp from 'lodash/fp.js';
-import _ from 'lodash';
 
 import { subject as asSubject } from '@casl/ability';
 import createSanitizeHelpers from './sanitize';
@@ -27,7 +26,7 @@ export default ({ ability, action, model }: any) => ({
   },
 
   getQuery(queryAction = action) {
-    if (_.isUndefined(queryAction)) {
+    if (queryAction === undefined) {
       throw new Error('Action must be defined to build a permission query');
     }
 

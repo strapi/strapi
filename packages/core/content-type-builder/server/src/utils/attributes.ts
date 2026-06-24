@@ -5,7 +5,7 @@ import type { Schema } from '@strapi/types';
 const { ApplicationError } = errors;
 
 export const isConfigurable = (attribute: Schema.Attribute.AnyAttribute) =>
-  _.get(attribute, 'configurable', true);
+  (attribute as { configurable?: boolean }).configurable ?? true;
 
 export const isRelation = (attribute: Schema.Attribute.AnyAttribute) =>
   attribute.type === 'relation';

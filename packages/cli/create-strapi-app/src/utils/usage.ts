@@ -9,6 +9,8 @@ type TrackError = Error | string | StderrError;
 function addPackageJsonStrapiMetadata(metadata: Record<string, unknown>, scope: Scope) {
   const { packageJsonStrapi = {} } = scope;
 
+  // [lodash: defaults — fills undefined only; Object.assign overwrites existing keys]
+  // eslint-disable-next-line you-dont-need-lodash-underscore/defaults
   return _.defaults(metadata, packageJsonStrapi);
 }
 

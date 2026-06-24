@@ -1,5 +1,4 @@
 import { join } from 'path';
-import _ from 'lodash';
 
 import { errors } from '@strapi/utils';
 import createSchemaHandler from './schema-handler';
@@ -119,7 +118,7 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
         //   throw new errors.ApplicationError(`target: ${target} does not exist`);
         // }
 
-        if (_.isNil(targetAttribute)) {
+        if (targetAttribute === null || targetAttribute === undefined) {
           return attr;
         }
 

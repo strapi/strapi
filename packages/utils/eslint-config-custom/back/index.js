@@ -2,7 +2,10 @@
 
 /** @type {import('eslint').Linter.Config} */
 const config = {
-  extends: '@strapi/eslint-config/back/javascript',
+  extends: [
+    '@strapi/eslint-config/back/javascript',
+    'plugin:you-dont-need-lodash-underscore/compatible',
+  ],
   parserOptions: {
     ecmaVersion: 2021,
   },

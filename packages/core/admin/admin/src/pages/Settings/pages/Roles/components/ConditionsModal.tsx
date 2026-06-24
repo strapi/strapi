@@ -12,6 +12,8 @@ import {
   Crumb,
 } from '@strapi/design-system';
 import { produce } from 'immer';
+// [lodash: get — skipped, all call sites use dynamic variable paths]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import upperFirst from 'lodash/upperFirst';

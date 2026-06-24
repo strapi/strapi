@@ -59,6 +59,7 @@ const uploadSettings = { responsiveDimensions: true };
 const resetStrapi = () => {
   global.strapi = {
     config: {
+      // eslint-disable-next-line you-dont-need-lodash-underscore/get
       get: (key: string, defaultValue: unknown) => _.get(defaultConfig, key, defaultValue),
     },
     plugins: {

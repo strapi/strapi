@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { yup } from '@strapi/utils';
 
 import type { TestContext } from 'yup';
@@ -26,7 +25,7 @@ const maxLengthIsGreaterThanOrEqualToMinLength = {
   message: 'maxLength must be greater or equal to minLength',
   test(this: TestContext, value: unknown) {
     const { minLength } = this.parent;
-    return !(!_.isUndefined(minLength) && !_.isUndefined(value) && (value as number) < minLength);
+    return !(minLength !== undefined && value !== undefined && (value as number) < minLength);
   },
 };
 
@@ -70,7 +69,7 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
           .string()
           .oneOf(
             Object.keys(attributes!).filter((key) =>
-              VALID_UID_TARGETS.includes(_.get(attributes![key] as any, 'type'))
+              VALID_UID_TARGETS.includes((attributes![key] as any)?.type)
             )
           )
           .nullable(),
@@ -81,7 +80,12 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
             'cannot define a default UID if the targetField is set',
             function (value) {
               const { targetField } = this.parent;
-              return !!(_.isNil(targetField) || _.isNil(value));
+              return !!(
+                targetField === null ||
+                targetField === undefined ||
+                value === null ||
+                value === undefined
+              );
             }
           )
           .test(
@@ -91,7 +95,10 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
               const { regex } = this.parent;
 
               if (regex) {
-                return !_.isNil(value) && (value === '' || new RegExp(regex).test(value));
+                return (
+                  !(value === null || value === undefined) &&
+                  (value === '' || new RegExp(regex).test(value))
+                );
               }
 
               return value === '' || UID_REGEX.test(value as string);

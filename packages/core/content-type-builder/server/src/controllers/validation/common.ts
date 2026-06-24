@@ -85,7 +85,7 @@ export const isValidDefaultJSON: CommonTestConfig = {
       return true;
     }
 
-    if (_.isNumber(val) || _.isNull(val) || _.isObject(val) || _.isArray(val)) {
+    if (_.isNumber(val) || val === null || _.isObject(val) || Array.isArray(val)) {
       return true;
     }
 

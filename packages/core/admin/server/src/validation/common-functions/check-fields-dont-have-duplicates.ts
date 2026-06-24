@@ -1,7 +1,5 @@
-import _ from 'lodash';
-
 const checkFieldsDontHaveDuplicates = (fields: unknown) => {
-  if (_.isNil(fields)) {
+  if (fields === null || fields === undefined) {
     // Only check if the fields exist
     return true;
   }
@@ -9,7 +7,7 @@ const checkFieldsDontHaveDuplicates = (fields: unknown) => {
     return false;
   }
 
-  return _.uniq(fields).length === fields.length;
+  return new Set(fields).size === fields.length;
 };
 
 export default checkFieldsDontHaveDuplicates;

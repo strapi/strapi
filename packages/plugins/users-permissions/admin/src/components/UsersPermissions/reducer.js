@@ -1,5 +1,7 @@
 /* eslint-disable consistent-return */
 import { produce } from 'immer';
+// [lodash: get — skipped, dynamic spread path from action.keys]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';

@@ -13,7 +13,7 @@ const findEntityAndCheckPermissions = async (
     'folder',
   ]);
 
-  if (_.isNil(file)) {
+  if (file === null || file === undefined) {
     throw new errors.NotFoundError();
   }
 
@@ -21,11 +21,14 @@ const findEntityAndCheckPermissions = async (
     .service('admin::permission')
     .createPermissionsManager({ ability, action, model });
 
+  // [lodash: get — skipped, path is a dynamic array; cloneDeep — skipped, structuredClone not 1:1]
+  // eslint-disable-next-line you-dont-need-lodash-underscore/get
   const creatorId = _.get(file, [contentTypesUtils.constants.CREATED_BY_ATTRIBUTE, 'id']);
   const author = creatorId
     ? await strapi.service('admin::user').findOne(creatorId, ['roles'])
     : null;
 
+  // eslint-disable-next-line you-dont-need-lodash-underscore/clone-deep
   const fileWithRoles = _.set(_.cloneDeep(file), 'createdBy', author);
 
   if (pm.ability.cannot(pm.action, pm.toSubject(fileWithRoles))) {

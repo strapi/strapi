@@ -66,6 +66,8 @@ export const createModule = (
   rawModule: RawModule,
   strapi: Core.Strapi
 ): Module => {
+  // [lodash: defaults — fills undefined only, Object.assign overwrites]
+  // eslint-disable-next-line you-dont-need-lodash-underscore/defaults
   _.defaults(rawModule, defaultModule);
 
   try {

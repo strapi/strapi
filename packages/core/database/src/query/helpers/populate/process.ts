@@ -47,7 +47,7 @@ const processPopulate = (populate: unknown, ctx: Context) => {
 
   let populateMap: PopulateMap = {};
 
-  if (populate === false || _.isNil(populate)) {
+  if (populate === false || populate === null || populate === undefined) {
     return null;
   }
 

@@ -54,9 +54,9 @@ function createDefaultMetadata(schema: any, name: any) {
     }
   }
 
-  _.assign(
+  Object.assign(
     edit,
-    _.pick(_.get(schema, ['config', 'metadatas', name, 'edit'], {}), [
+    _.pick(schema?.config?.metadatas?.[name]?.edit ?? {}, [
       'label',
       'description',
       'placeholder',
@@ -73,11 +73,7 @@ function createDefaultMetadata(schema: any, name: any) {
     searchable: isSearchable(schema, name),
     // @ts-expect-error we need to specify these properties
     sortable: isSortable(schema, name),
-    ..._.pick(_.get(schema, ['config', 'metadatas', name, 'list'], {}), [
-      'label',
-      'searchable',
-      'sortable',
-    ]),
+    ..._.pick(schema?.config?.metadatas?.[name]?.list ?? {}, ['label', 'searchable', 'sortable']),
   };
 
   return { edit, list };
@@ -119,7 +115,10 @@ async function syncMetadatas(configuration: any, schema: any) {
 
     // remove mainField if the attribute is not a relation anymore
     if (!isRelation(attr)) {
-      _.set(updatedMeta, 'edit', _.omit(edit, ['mainField']));
+      const editWithoutMainField = Object.fromEntries(
+        Object.entries(edit).filter(([k]) => k !== 'mainField')
+      );
+      _.set(updatedMeta, 'edit', editWithoutMainField);
       _.set(acc, [key], updatedMeta);
       return acc;
     }
@@ -141,7 +140,7 @@ async function syncMetadatas(configuration: any, schema: any) {
     return acc;
   }, {});
 
-  return _.assign(metasWithDefaults, updatedMetas);
+  return Object.assign(metasWithDefaults, updatedMetas);
 }
 
 const getTargetSchema = (targetModel: any) => {

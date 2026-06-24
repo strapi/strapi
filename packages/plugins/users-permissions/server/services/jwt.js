@@ -55,6 +55,8 @@ module.exports = ({ strapi }) => ({
       return issueRefreshToken();
     }
 
+    // [lodash: defaults — fills undefined only, Object.assign overwrites existing keys]
+    // eslint-disable-next-line you-dont-need-lodash-underscore/defaults
     _.defaults(jwtOptions, strapi.config.get('plugin::users-permissions.jwt'));
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),

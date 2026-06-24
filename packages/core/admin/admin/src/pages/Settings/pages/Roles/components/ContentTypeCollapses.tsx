@@ -2,9 +2,10 @@ import * as React from 'react';
 
 import { Checkbox, Box, BoxComponent, Flex, FlexComponent, Modal } from '@strapi/design-system';
 import { ChevronDown, ChevronUp } from '@strapi/icons';
+// [lodash: get — skipped, all call sites use dynamic variable paths]
+// eslint-disable-next-line you-dont-need-lodash-underscore/get
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
-import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import { styled, DefaultTheme } from 'styled-components';
 
@@ -146,7 +147,8 @@ const Collapse = ({
   // to return the state of checkbox. Since the conditions are not related to the property we need to remove the key from the object.
   const dataWithoutCondition = React.useMemo(() => {
     return Object.keys(mainData).reduce<Record<string, ConditionForm>>((acc, current) => {
-      acc[current] = omit(mainData[current], 'conditions');
+      const { conditions: _conditions, ...rest } = mainData[current];
+      acc[current] = rest;
 
       return acc;
     }, {});

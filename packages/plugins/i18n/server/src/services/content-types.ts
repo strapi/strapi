@@ -1,5 +1,4 @@
 import fp from 'lodash/fp.js';
-import _ from 'lodash';
 
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getService } from '../utils';
@@ -82,7 +81,7 @@ const removeIdsMut = (model: any, entry: any): Record<string, any> => {
 
   removeId(entry);
 
-  _.forEach(model.attributes, (attr, attrName) => {
+  Object.entries(model.attributes).forEach(([attrName, attr]) => {
     const value = entry[attrName];
     if (attr.type === 'dynamiczone' && isArray(value)) {
       value.forEach((compo) => {
@@ -142,7 +141,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
   const modelDef = strapi.getModel(model);
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
-  _.forEach(relatedEntryCopy, (value, field) => {
+  Object.entries(relatedEntryCopy).forEach(([field, value]) => {
     if (isNil(entry[field])) {
       entry[field] = value;
     }
