@@ -1,6 +1,5 @@
 import { AxiosError } from 'axios';
-// [ESM compat] cli/cloud has no exports map today so this named import doesn't affect ESM consumers, but if an exports map is added this will need the same lodash/fp.js fix as server packages
-import { defaults } from 'lodash/fp';
+import fp from 'lodash/fp.js';
 import {
   CLIContext,
   CloudApiService,
@@ -24,6 +23,8 @@ import {
   environmentCreationErrorFactory,
   environmentErrorMessageFactory,
 } from '../utils/error-message-factories';
+
+const { defaults } = fp;
 
 async function handleError(ctx: CLIContext, error: Error) {
   const { logger } = ctx;

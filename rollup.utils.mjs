@@ -12,8 +12,22 @@ import html from 'rollup-plugin-html';
 
 const isExernal = (id) => !path.isAbsolute(id) && !id.startsWith('.');
 
-// [ESM smoke test] add a tests/ integration that imports built .mjs entry points through Node's native ESM loader to catch runtime failures the pattern check cannot — requires CI build→test ordering
-/** @returns {import('rollup').Plugin} */
+/**
+ * Fail ESM bundle generation when output contains import shapes that break under Node's native ESM loader.
+ *
+ * Checked:
+ * - bare `lodash/fp` directory imports (`ERR_UNSUPPORTED_DIR_IMPORT`)
+ * - named imports from `lodash/fp` / `lodash/fp.js` (CJS module — named exports are not statically detectable)
+ * - named imports from `fs-extra` (CJS module — same limitation)
+ *
+ * Not checked (safe today):
+ * - deep lodash file imports (`lodash/isEqual` → `lodash/isEqual.js`, a file not a directory)
+ * - namespace imports from CJS modules (`import * as fse from 'fs-extra'`)
+ *
+ * Runtime failures this regex guard cannot catch are tracked in CMS-1280.
+ *
+ * @returns {import('rollup').Plugin}
+ */
 const esmCompatGuard = () => ({
   name: 'esm-compat-guard',
   generateBundle(outputOptions, bundle) {
@@ -28,12 +42,25 @@ const esmCompatGuard = () => ({
         continue;
       }
 
-      if (/from ['"]lodash\/fp['"]/.test(chunk.code)) {
-        violations.push(`${fileName}: bare 'lodash/fp' import (ERR_UNSUPPORTED_DIR_IMPORT in Node ESM)`);
+      if (
+        /from ['"]lodash\/fp['"]/.test(chunk.code) &&
+        !/import \{[^}]+\} from ['"]lodash\/fp['"]/.test(chunk.code)
+      ) {
+        violations.push(
+          `${fileName}: bare 'lodash/fp' import (ERR_UNSUPPORTED_DIR_IMPORT in Node ESM) — use: import fp from 'lodash/fp.js'; const { foo } = fp;`
+        );
+      }
+
+      if (/import \{[^}]+\} from ['"]lodash\/fp(\.js)?['"]/.test(chunk.code)) {
+        violations.push(
+          `${fileName}: named import from 'lodash/fp(.js)' (unsafe in native ESM) — use: import fp from 'lodash/fp.js'; const { foo } = fp;`
+        );
       }
 
       if (/import \{[^}]+\} from ['"]fs-extra['"]/.test(chunk.code)) {
-        violations.push(`${fileName}: named import from 'fs-extra' (unsafe in native ESM)`);
+        violations.push(
+          `${fileName}: named import from 'fs-extra' (unsafe in native ESM) — use: import fse from 'fs-extra'; const { ensureDir } = fse;`
+        );
       }
     }
 

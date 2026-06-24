@@ -1,6 +1,6 @@
-import fp from 'lodash/fp.js';
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+import fp from 'lodash/fp.js';
 import assert from 'node:assert';
 
 import { register } from 'esbuild-register/dist/node';

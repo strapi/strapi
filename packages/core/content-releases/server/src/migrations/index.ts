@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
-import isEqual from 'lodash/isEqual';
+import isEqual from 'lodash/isEqual.js';
 import type { Schema, UID } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';

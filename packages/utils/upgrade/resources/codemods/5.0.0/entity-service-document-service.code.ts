@@ -17,6 +17,7 @@ strapi.entityService.findOne(uid, entityId, {
   publicationState: "preview",
 });
 
+
 Case: using a variable declared somewhere else
 
 const objectParam_2 = {
@@ -38,6 +39,7 @@ const objectParam_3 = {
 strapi.entityService.findOne(uid, entityId, {
   ...objectParam_3,
 });
+
 
 Case: using a variable declared somewhere else with a spread element and overwritten properties
 
@@ -113,6 +115,7 @@ const objectParam_8 = [
 ];
 
 strapi.entityService.findOne(uid, ...objectParam_8);
+
 
 Case: some sort of mix of all the above
 

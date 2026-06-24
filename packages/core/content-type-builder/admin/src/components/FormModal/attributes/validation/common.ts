@@ -1,5 +1,4 @@
 import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
-// [ESM compat] admin frontend is bundled by Vite so this doesn't leak into Node ESM output; fix when migrating to es-toolkit
 import { snakeCase } from 'lodash/fp';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';

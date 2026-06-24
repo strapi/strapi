@@ -1,7 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
-import camelCase from 'lodash/camelCase';
+import camelCase from 'lodash/camelCase.js';
 import { env } from '@strapi/utils';
 import { getModule, PackageJson } from './dependencies';
 import { convertModulePathToSystemPath, convertSystemPathToModulePath, loadFile } from './files';

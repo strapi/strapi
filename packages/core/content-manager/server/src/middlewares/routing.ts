@@ -1,6 +1,6 @@
 import type { UID, Core, Struct } from '@strapi/types';
 import type { Context, Next } from 'koa';
-import isNil from 'lodash/isNil';
+import isNil from 'lodash/isNil.js';
 
 interface ContentType extends Struct.ContentTypeSchema {
   plugin?: string;
