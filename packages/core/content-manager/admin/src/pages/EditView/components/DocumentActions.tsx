@@ -241,6 +241,10 @@ interface DialogOptions {
   type: 'dialog';
   title: string;
   content?: React.ReactNode;
+  /**
+   * When set, centers a warning icon above the dialog body (bulk publish / delete pattern).
+   */
+  bodyIcon?: 'danger' | 'default';
   variant?: ButtonProps['variant'];
   confirmLabel?: string;
   onConfirm?: () => void | Promise<void>;
@@ -651,6 +655,7 @@ const DocumentActionConfirmDialog = ({
   onConfirm,
   title,
   content,
+  bodyIcon,
   confirmLabel,
   isOpen,
   variant = 'secondary',
@@ -674,11 +679,28 @@ const DocumentActionConfirmDialog = ({
     onClose();
   };
 
+  const dialogBody = bodyIcon ? (
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <Flex justifyContent="center">
+        <WarningCircle
+          width="24px"
+          height="24px"
+          fill={bodyIcon === 'danger' ? 'danger600' : 'primary600'}
+        />
+      </Flex>
+      <Typography id="confirm-description" tag="p" variant="omega" textAlign="center">
+        {content}
+      </Typography>
+    </Flex>
+  ) : (
+    content
+  );
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={handleClose}>
       <Dialog.Content>
         <Dialog.Header>{title}</Dialog.Header>
-        <Dialog.Body>{content}</Dialog.Body>
+        <Dialog.Body>{dialogBody}</Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>
             <Button variant="tertiary" fullWidth>
@@ -1205,6 +1227,7 @@ const PublishAction: DocumentActionComponent = ({
       ? {
           type: 'dialog',
           variant: isM2mOnlyDraftRelations ? 'default' : 'danger',
+          bodyIcon: isM2mOnlyDraftRelations ? 'default' : 'danger',
           title: formatMessage({
             id: getTranslation('popUpWarning.warning.has-draft-relations.title'),
             defaultMessage: 'Confirmation',
