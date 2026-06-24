@@ -49,8 +49,10 @@ import { getTranslation } from '../../../utils/translations';
 import { AnyData, handleInvisibleAttributes } from '../utils/data';
 import {
   countLocalDraftRelations,
+  EMPTY_DRAFT_RELATION_COUNTS,
   mergeDraftRelationCounts,
   normalizeDraftRelationCounts,
+  type DraftRelationCounts,
 } from '../utils/draftRelationCounts';
 import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
