@@ -327,7 +327,7 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
   }
 
   return (
-    <Grid.Root gap={4} role="list">
+    <Grid.Root gap={4} role="list" data-testid="assets-grid">
       {folders.length > 0 && (
         <FoldersRow>
           <Grid.Root gap={4}>

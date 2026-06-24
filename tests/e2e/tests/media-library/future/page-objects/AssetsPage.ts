@@ -127,8 +127,24 @@ export class AssetsPage {
     // Wait for the success notification inside the Notifications region
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
-      .getByRole('status');
+      .getByRole('status')
+      .first();
     await notification.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Wait for the bulk-move success toast after drag-and-drop.
+   * Scoped to the Notifications region so it does not match the a11y live region.
+   */
+  async waitForMoveSuccess() {
+    await this.getMoveSuccessNotification().waitFor({ state: 'visible' });
+  }
+
+  getMoveSuccessNotification() {
+    return this.page
+      .getByRole('region', { name: 'Notifications' })
+      .getByRole('status')
+      .filter({ hasText: 'Elements have been moved successfully' });
   }
 
   async getSuccessMessage() {
@@ -172,11 +188,20 @@ export class AssetsPage {
   }
 
   /**
+   * The grid container. Scoped via test id so card/folder locators don't
+   * collide with the sidebar FolderTree, which also renders folder names as
+   * list items inside the `main` landmark.
+   */
+  get assetsGrid() {
+    return this.page.getByTestId('assets-grid');
+  }
+
+  /**
    * Get an asset card in grid view by (partial) filename.
    * Asset cards use role="listitem" in the list.
    */
   getAssetCard(name: string) {
-    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+    return this.assetsGrid.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**
@@ -332,7 +357,7 @@ export class AssetsPage {
    * Get a folder card in grid view
    */
   getFolderCard(name: string) {
-    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+    return this.assetsGrid.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**

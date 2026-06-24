@@ -30,7 +30,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await assetsPage.switchToTableView();
       await assetsPage.dragItemToFolder('test-image.jpg', 'Destination', 'table');
 
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForMoveSuccess();
       await expect(assetsPage.getAssetRow('test-image.jpg')).not.toBeVisible();
       await expect(assetsPage.getFolderRow('Destination')).toBeVisible();
     });
@@ -47,7 +47,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await assetsPage.switchToGridView();
       await assetsPage.dragItemToFolder('test-image.jpg', 'Grid Destination', 'grid');
 
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForMoveSuccess();
       await expect(assetsPage.getAssetCard('test-image.jpg')).not.toBeVisible();
     });
 
@@ -63,7 +63,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await assetsPage.switchToTableView();
       await assetsPage.dragItemToFolder('Movable Folder', 'Target Folder', 'table', 'folder');
 
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForMoveSuccess();
       await expect(assetsPage.getFolderRow('Movable Folder')).not.toBeVisible();
     });
 
@@ -79,7 +79,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await assetsPage.switchToGridView();
       await assetsPage.dragItemToFolder('Grid Movable', 'Grid Target', 'grid', 'folder');
 
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForMoveSuccess();
       await expect(assetsPage.getFolderCard('Grid Movable')).not.toBeVisible();
     });
 
@@ -94,7 +94,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await assetsPage.dragFolderToSelf('Self Folder', 'table');
 
       await expect(assetsPage.getFolderRow('Self Folder')).toBeVisible();
-      await expect(page.getByText('Elements have been moved successfully')).not.toBeVisible();
+      await expect(assetsPage.getMoveSuccessNotification()).not.toBeVisible();
     });
 
     test('shows success toast and removes item from current view after drop', async ({ page }) => {
@@ -109,7 +109,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await assetsPage.switchToGridView();
       await assetsPage.dragItemToFolder('test-image.jpg', 'Toast Target', 'grid');
 
-      await expect(page.getByText('Elements have been moved successfully')).toBeVisible();
+      await expect(assetsPage.getMoveSuccessNotification()).toBeVisible();
       await expect(assetsPage.getAssetCard('test-image.jpg')).not.toBeVisible();
     });
   }
