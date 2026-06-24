@@ -191,15 +191,17 @@ export const publishAndConfirmDraftRelations = async (
   page: Page,
   publishButton: Locator = page.getByRole('button', { name: 'Publish' })
 ) => {
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+  const publishDone = waitForContentManagerMutation(page, 'publish');
+
   await publishButton.click();
 
-  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+  const dialogAppeared = await Promise.race([
+    dialog.waitFor({ state: 'visible', timeout: 5000 }).then(() => true as const),
+    publishDone.then(() => false as const),
+  ]);
 
-  try {
-    await dialog.waitFor({ state: 'visible', timeout: 3000 });
-  } catch {
-    // No draft-relations dialog — publish may have proceeded on the first click.
-    await waitForContentManagerMutation(page, 'publish').catch(() => {});
+  if (!dialogAppeared) {
     return;
   }
 
