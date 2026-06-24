@@ -234,5 +234,55 @@ describe('Admin Sessions Management (Active Devices)', () => {
       expect(list.body.data[0].id).toBe(sessionId);
       expect(list.body.data[0].current).toBe(true);
     });
+
+    it('does not revoke sessions belonging to another user', async () => {
+      const { accessToken, userId } = await loginAndExchange(deviceA);
+      await createRequest({ strapi }).post('/admin/login', {
+        body: { ...superAdmin.loginInfo, deviceId: deviceB },
+      });
+
+      const password = 'Password123';
+      const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const other = await utils.createUser({
+        firstname: 'Other',
+        lastname: 'Admin',
+        email: `other-admin-${suffix}@strapi.io`,
+        password,
+        isActive: true,
+      });
+
+      const otherLogin = await createRequest({ strapi }).post('/admin/login', {
+        body: { email: other.email, password, deviceId: deviceC },
+      });
+      expect(otherLogin.statusCode).toBe(200);
+
+      const cookiePair = getCookie(otherLogin, cookieName)!.split(';')[0];
+      const otherTokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+        headers: { Cookie: cookiePair },
+      });
+      expect(otherTokenRes.statusCode).toBe(200);
+      const otherAccessToken = otherTokenRes.body?.data?.token as string;
+
+      const res = await createRequest({ strapi })
+        .setToken(accessToken)
+        .delete('/admin/users/me/sessions');
+      expect(res.statusCode).toBe(200);
+
+      const actorSessions = await strapi.db.query(SESSION_UID).findMany({ where: { userId } });
+      expect(actorSessions).toHaveLength(0);
+
+      const otherSessions = await strapi.db
+        .query(SESSION_UID)
+        .findMany({ where: { userId: String(other.id), status: 'active' } });
+      expect(otherSessions).toHaveLength(1);
+
+      const list = await createRequest({ strapi })
+        .setToken(otherAccessToken)
+        .get('/admin/users/me/sessions');
+      expect(list.statusCode).toBe(200);
+      expect(list.body.data).toHaveLength(1);
+
+      await utils.deleteUserById(other.id);
+    });
   });
 });

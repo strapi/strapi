@@ -253,6 +253,43 @@ describe('UP Content API - Active Sessions', () => {
         .deleteMany({ where: { origin: 'users-permissions' } });
     });
 
+    it('logout with scope "all" does not revoke another user\'s sessions', async () => {
+      const login1 = await loginUser();
+      const login2 = await loginUser();
+      const otherLogin = await loginUser(internals.otherUser);
+
+      const res = await createAuthRequest().setToken(login1.body.jwt)({
+        method: 'POST',
+        url: '/logout',
+        body: { scope: 'all' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const refresh1 = await createAuthRequest()({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: login1.body.refreshToken },
+      });
+      const refresh2 = await createAuthRequest()({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: login2.body.refreshToken },
+      });
+      expect(refresh1.statusCode).toBe(401);
+      expect(refresh2.statusCode).toBe(401);
+
+      const refreshOther = await createAuthRequest()({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: otherLogin.body.refreshToken },
+      });
+      expect(refreshOther.statusCode).toBe(200);
+
+      await strapi.db
+        .query('admin::session')
+        .deleteMany({ where: { origin: 'users-permissions' } });
+    });
+
     it('cannot revoke a session that belongs to another user', async () => {
       const login1 = await loginUser();
       const otherLogin = await loginUser(internals.otherUser);
