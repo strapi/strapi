@@ -15,6 +15,7 @@ const config = {
     'jest.config.js',
     'rollup.config.mjs',
     'coverage/',
+    'lint-staged.config.mjs',
   ],
 };
 
