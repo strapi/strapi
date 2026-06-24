@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Location, MemoryRouter, Navigation, Route, Routes, useNavigation } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useNavigation } from 'react-router-dom';
 
 import { LazyOutlet } from '../LazyOutlet';
 
@@ -10,7 +10,7 @@ jest.mock('react-router-dom', () => ({
 
 const mockUseNavigation = jest.mocked(useNavigation);
 
-const idleNavigation: Navigation = {
+const idleNavigation = {
   state: 'idle' as const,
   location: undefined,
   formMethod: undefined,
@@ -21,10 +21,16 @@ const idleNavigation: Navigation = {
   text: undefined,
 };
 
-const loadingNavigation: Navigation = {
+const loadingNavigation = {
   ...idleNavigation,
   state: 'loading' as const,
-  location: undefined as unknown as Location,
+  location: {
+    pathname: '/',
+    search: '',
+    hash: '',
+    state: null,
+    key: 'default',
+  },
 };
 
 describe('LazyOutlet', () => {

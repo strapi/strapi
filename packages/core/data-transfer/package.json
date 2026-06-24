@@ -49,6 +49,8 @@
     "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -88,7 +90,9 @@
     "knex": "3.0.1",
     "koa": "2.16.4",
     "rimraf": "6.1.3",
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "vitest": "catalog:",
+    "vitest-config": "5.49.0"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

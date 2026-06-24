@@ -61,6 +61,8 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -111,7 +113,9 @@
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "vitest": "catalog:",
+    "vitest-config": "5.49.0"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
