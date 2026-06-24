@@ -248,6 +248,36 @@ describe('DocumentActions', () => {
     expect(onConfirm).toHaveBeenCalled();
   });
 
+  it('should center dialog content with a warning icon when bodyIcon is set', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          {
+            id: '1',
+            label: 'Publish',
+            onClick: jest.fn(),
+            dialog: {
+              type: 'dialog',
+              title: 'Confirmation',
+              bodyIcon: 'danger',
+              content: 'Draft relations will not be included.',
+              confirmLabel: 'Publish without relations',
+              onConfirm: jest.fn(),
+            },
+          },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    expect(screen.getByText('Draft relations will not be included.')).toHaveAttribute(
+      'id',
+      'confirm-description'
+    );
+  });
+
   it('should render a dialog if either of the button actions has been pressed and the dialog props are provided', async () => {
     const onClick = jest.fn();
     const onConfirm = jest.fn();
