@@ -40,7 +40,7 @@ const articleSchema = {
       components: ['default.relation-block'],
     },
   },
-} as Schema;
+} as unknown as Schema;
 
 const components: ComponentsDictionary = {
   'default.meta': {
@@ -51,7 +51,7 @@ const components: ComponentsDictionary = {
         target: 'api::author.author',
       },
     },
-  } as ComponentsDictionary[string],
+  } as unknown as ComponentsDictionary[string],
   'default.relation-block': {
     attributes: {
       tag: {
@@ -60,7 +60,7 @@ const components: ComponentsDictionary = {
         target: 'api::tag.tag',
       },
     },
-  } as ComponentsDictionary[string],
+  } as unknown as ComponentsDictionary[string],
 };
 
 describe('draftRelationCounts', () => {
