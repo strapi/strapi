@@ -6,5 +6,5 @@
     "noEmit": false
   },
   "include": ["./src", "./custom.d.ts", "../shared"],
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "exclude": ["**/*.test.ts"]
 }

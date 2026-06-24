@@ -83,7 +83,7 @@
     "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
     "test:generate-app": "yarn build:ts && node tests/scripts/generate-test-app.js",
     "test:generate-app:no-build": "node tests/scripts/generate-test-app.js",
-    "test:ts": "yarn test:ts:packages && yarn test:ts:front && yarn test:ts:back",
+    "test:ts": "nx run-many --targets=test:ts,test:ts:front,test:ts:back --nx-ignore-cycles",
     "test:ts:back": "nx run-many --target=test:ts:back --nx-ignore-cycles",
     "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
     "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",

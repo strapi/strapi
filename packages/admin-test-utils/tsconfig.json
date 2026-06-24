@@ -1,7 +1,6 @@
 {
   "extends": "tsconfig/client.json",
   "include": ["src", "./custom.d.ts"],
-  "exclude": ["node_modules"],
   "compilerOptions": {
     "types": ["@testing-library/jest-dom"]
   }

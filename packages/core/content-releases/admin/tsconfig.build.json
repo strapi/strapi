@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "include": ["./src", "./custom.d.ts", "../shared", "./module.d.ts"],
-  "exclude": ["node_modules", "tests", "**/*.test.*"],
+  "exclude": ["tests", "**/*.test.*"],
   "compilerOptions": {
     "rootDir": "../",
     "outDir": "../dist",
