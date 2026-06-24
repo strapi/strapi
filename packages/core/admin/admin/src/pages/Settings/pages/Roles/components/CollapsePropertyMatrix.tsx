@@ -87,7 +87,7 @@ const CollapsePropertyMatrix = ({
       <Header label={label} headers={propertyActions} />
       {localeValidationErrorLabels.length > 0 && (
         <Box paddingLeft={6} paddingTop={2} paddingBottom={2}>
-          <Typography variant="pi" textColor="danger600">
+          <Typography role="alert" variant="pi" textColor="danger600">
             {formatMessage(
               {
                 id: 'Settings.roles.form.permissions.locales.validation',

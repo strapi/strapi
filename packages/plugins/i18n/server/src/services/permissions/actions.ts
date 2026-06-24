@@ -191,15 +191,13 @@ const repairPermissionsForNewlyLocalizedTypes = async ({
     }
 
     const permissionService = strapi.service('admin::permission');
-    const allPermissions = await permissionService.findMany({});
+    const allPermissions = await permissionService.findMany({
+      where: { subject: { $in: newlyLocalizedUids } },
+    });
 
-    await Promise.all(
+    const results = await Promise.allSettled(
       allPermissions
-        .filter(
-          (permission: any) =>
-            newlyLocalizedUids.includes(permission.subject) &&
-            needsLocalesPatch(permission.properties)
-        )
+        .filter((permission: any) => needsLocalesPatch(permission.properties))
         .map((permission: any) =>
           strapi.db.query('admin::permission').update({
             where: { id: permission.id },
@@ -209,6 +207,15 @@ const repairPermissionsForNewlyLocalizedTypes = async ({
           })
         )
     );
+
+    results
+      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+      .forEach((r) =>
+        strapi.log.error(
+          'Failed to patch i18n permission during newly-localized type repair.',
+          r.reason
+        )
+      );
   } catch (error) {
     strapi.log.error('Failed to repair i18n permissions for newly localized content types.', error);
   }

@@ -107,7 +107,9 @@ const resolvePermissionPropertyValues = (
 
   const defaultLocaleCode = property.children?.find((child) => child.isDefault)?.value;
 
-  return defaultLocaleCode ? [defaultLocaleCode] : storedValues;
+  return defaultLocaleCode
+    ? [defaultLocaleCode]
+    : (property.children ?? []).map((child) => child.value);
 };
 
 /**

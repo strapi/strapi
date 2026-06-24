@@ -733,8 +733,13 @@ const restoreNullLocalesIfUnchanged = (
   // null means "all locales" in legacy DBs — preserve it if the user hasn't changed anything
   if (original?.properties?.locales !== null) return perm;
 
-  const kind: 'collectionTypes' | 'singleTypes' =
-    perm.subject in modifiedData.collectionTypes ? 'collectionTypes' : 'singleTypes';
+  const kind =
+    perm.subject in modifiedData.collectionTypes
+      ? ('collectionTypes' as const)
+      : perm.subject in modifiedData.singleTypes
+        ? ('singleTypes' as const)
+        : null;
+  if (!kind) return perm;
 
   const initialActionForm = initialData[kind]?.[perm.subject]?.[perm.action];
   const modifiedActionForm = modifiedData[kind]?.[perm.subject]?.[perm.action];
