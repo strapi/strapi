@@ -1,0 +1,49 @@
+name: Admin bundle-size comment
+
+on:
+  workflow_run:
+    workflows: ['Admin bundle-size']
+    types: [completed]
+
+jobs:
+  comment:
+    name: Comment
+    # Only handle successful PR runs from forks.
+    # Same-repository PRs can be commented on by the original pull_request workflow if it has permission.
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name != github.repository
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      pull-requests: write
+
+    steps:
+      - name: Download comment body
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          name: admin-bundle-size-comment
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp
+
+      - name: Download PR number
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          name: admin-bundle-size-pr-number
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp
+
+      - name: Get PR number
+        id: pr
+        run: echo "pr=$(</tmp/admin-bundle-size-pr-number)" >> "$GITHUB_OUTPUT"
+
+      - uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: /tmp/admin-bundle-size-comment.md
+          pr_number: ${{ steps.pr.outputs.pr }}
+          comment_tag: admin-bundle-size
