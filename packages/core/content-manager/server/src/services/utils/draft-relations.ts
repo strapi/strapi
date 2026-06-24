@@ -17,8 +17,8 @@ export const EMPTY_DRAFT_RELATION_COUNTS: DraftRelationCounts = {
 };
 
 /**
- * Bidirectional manyToMany links are document-scoped: they may not appear on the live site
- * until the related entry publishes, but they are not stripped the same way as xToOne links.
+ * Bidirectional manyToMany links share a join-table row and are kept on publish; they become
+ * visible on the live site once the related entry is published. xToOne-style links are stripped.
  */
 export const isBidirectionalManyToMany = (attribute: RelationAttribute) =>
   attribute.relation === 'manyToMany' && Boolean(attribute.inversedBy || attribute.mappedBy);

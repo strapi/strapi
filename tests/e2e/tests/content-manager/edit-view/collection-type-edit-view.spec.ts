@@ -42,6 +42,9 @@ test.describe('Edit View', () => {
       // Verify that a warning about a single draft relation is displayed
       await expect(confirmationDialog).toBeVisible();
       await expect(confirmationDialog.getByText(/1 linked entry is still in draft/)).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/will appear on the live site once that entry is published/)
+      ).toBeVisible();
       await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
 
       // Save the current state of the entry
@@ -60,6 +63,11 @@ test.describe('Edit View', () => {
       await expect(
         confirmationDialog.getByText(/2 linked entries are still in draft/)
       ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(
+          /will appear on the live site once those entries are published/
+        )
+      ).toBeVisible();
       await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
 
       // Save the current state of the entry
@@ -77,6 +85,11 @@ test.describe('Edit View', () => {
       await expect(confirmationDialog).toBeVisible();
       await expect(
         confirmationDialog.getByText(/3 linked entries are still in draft/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(
+          /will appear on the live site once those entries are published/
+        )
       ).toBeVisible();
     });
 

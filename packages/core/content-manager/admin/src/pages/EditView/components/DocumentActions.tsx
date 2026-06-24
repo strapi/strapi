@@ -1216,7 +1216,7 @@ const PublishAction: DocumentActionComponent = ({
                     {
                       id: getTranslation('popUpWarning.warning.has-draft-relations.message'),
                       defaultMessage:
-                        'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. They will not appear on the live site until those entries are published.',
+                        'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. {count, plural, one {That relation will not be included in the published version.} other {Those relations will not be included in the published version.}}',
                     },
                     {
                       count: unpublishedRelations,
@@ -1226,7 +1226,7 @@ const PublishAction: DocumentActionComponent = ({
                     {
                       id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.message'),
                       defaultMessage:
-                        '{count, plural, one {# linked entry is} other {# linked entries are}} still in draft. They will not appear on the live site until those entries are published.',
+                        '{count, plural, one {# linked entry is still in draft. It will appear on the live site once that entry is published.} other {# linked entries are still in draft. They will appear on the live site once those entries are published.}}',
                     },
                     {
                       count: draftM2mLinks,

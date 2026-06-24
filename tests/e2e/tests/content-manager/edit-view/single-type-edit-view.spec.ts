@@ -39,6 +39,9 @@ test.describe('Edit View', () => {
         confirmationDialog.getByText(/This entry is related to 1 draft entry/)
       ).toBeVisible();
       await expect(
+        confirmationDialog.getByText(/not be included in the published version/)
+      ).toBeVisible();
+      await expect(
         confirmationDialog.getByRole('button', { name: 'Publish without relations' })
       ).toBeVisible();
       await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
@@ -48,6 +51,9 @@ test.describe('Edit View', () => {
       await expect(confirmationDialog).toBeVisible();
       await expect(
         confirmationDialog.getByText(/This entry is related to 1 draft entry/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/not be included in the published version/)
       ).toBeVisible();
     });
 

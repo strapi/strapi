@@ -29,6 +29,9 @@ test.describe('Publish with draft relations warning', () => {
     await expect(confirmationDialog).toBeVisible();
     await expect(confirmationDialog.getByText(/1 linked entry is still in draft/)).toBeVisible();
     await expect(
+      confirmationDialog.getByText(/will appear on the live site once that entry is published/)
+    ).toBeVisible();
+    await expect(
       confirmationDialog.getByRole('button', { name: 'Publish', exact: true })
     ).toBeVisible();
 
@@ -75,6 +78,9 @@ test.describe('Publish with draft relations warning', () => {
     await expect(confirmationDialog).toBeVisible();
     await expect(
       confirmationDialog.getByText(/This entry is related to 1 draft entry/)
+    ).toBeVisible();
+    await expect(
+      confirmationDialog.getByText(/not be included in the published version/)
     ).toBeVisible();
     await expect(
       confirmationDialog.getByRole('button', { name: 'Publish without relations' })

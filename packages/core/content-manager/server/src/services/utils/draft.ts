@@ -14,8 +14,8 @@ const { isVisibleAttribute, hasDraftAndPublish } = strapiUtils.contentTypes;
  * sumDraftCounts works recursively on the attributes of a model counting draft relations
  * that matter for publish warnings.
  *
- * - unpublishedRelations: xToOne / oneToMany style links that will not appear on the live site
- * - draftM2mLinks: bidirectional manyToMany links to draft-only entries (informational)
+ * - unpublishedRelations: xToOne / oneToMany style links stripped from the published version
+ * - draftM2mLinks: bidirectional manyToMany links kept on publish (informational)
  */
 const sumDraftCounts = (entity: any, uid: any): DraftRelationCounts => {
   const model = strapi.getModel(uid);
