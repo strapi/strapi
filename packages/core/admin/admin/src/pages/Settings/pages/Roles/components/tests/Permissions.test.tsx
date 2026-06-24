@@ -1,7 +1,9 @@
+import React from 'react';
+
 import { render, screen } from '@tests/utils';
 
 import { capitalise } from '../../../../../../utils/strings';
-import { Permissions } from '../Permissions';
+import { Permissions, type PermissionsAPI } from '../Permissions';
 
 import layout from './test-data.json';
 
@@ -114,5 +116,73 @@ describe('Permissions', () => {
     expect(
       screen.getByRole('checkbox', { name: 'Access the Email Settings page' })
     ).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Minimal i18n layout fixture for getPermissions() tests
+// ---------------------------------------------------------------------------
+
+const READ_ACTION = 'plugin::content-manager.explorer.read';
+const ARTICLE_UID = 'api::article.article';
+
+const i18nLayout = {
+  conditions: [],
+  sections: {
+    collectionTypes: {
+      subjects: [
+        {
+          uid: ARTICLE_UID,
+          label: 'Article',
+          properties: [
+            {
+              value: 'locales',
+              label: 'Locales',
+              children: [
+                { value: 'en', label: 'English', isDefault: true },
+                { value: 'fr', label: 'French' },
+              ],
+            },
+          ],
+        },
+      ],
+      actions: [
+        {
+          actionId: READ_ACTION,
+          label: 'Read',
+          applyToProperties: ['locales'],
+          subjects: [ARTICLE_UID],
+        },
+      ],
+    },
+    singleTypes: { subjects: [], actions: [] },
+    plugins: { subjects: [] },
+    settings: { subjects: [] },
+  },
+} as any;
+
+const makePermission = (locales: string[] | null) => ({
+  id: 1,
+  createdAt: '',
+  updatedAt: '',
+  action: READ_ACTION,
+  actionParameters: {},
+  subject: ARTICLE_UID,
+  properties: { locales } as any,
+  conditions: [],
+});
+
+describe('getPermissions() — null locale restoration', () => {
+  it('preserves locales: null when the user has not changed locale selections', async () => {
+    const ref = React.createRef<PermissionsAPI>();
+
+    render(<Permissions layout={i18nLayout} permissions={[makePermission(null)]} ref={ref} />);
+
+    const { permissionsToSend } = ref.current!.getPermissions();
+    const perm = permissionsToSend.find(
+      (p) => p.action === READ_ACTION && p.subject === ARTICLE_UID
+    );
+
+    expect(perm?.properties?.locales).toBeNull();
   });
 });

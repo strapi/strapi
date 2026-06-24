@@ -24,11 +24,11 @@ const getActionLocales = (actionData: ChildrenForm[string]): unknown => {
 };
 
 const isActionEnabled = (actionData: ChildrenForm[string]) => {
-  return createArrayOfValues(omit(actionData, 'conditions')).some((value) => value);
+  return createArrayOfValues(omit(actionData, 'conditions')).some(Boolean);
 };
 
 const hasSelectedLocales = (locales: unknown) => {
-  return createArrayOfValues(locales).some((value) => value);
+  return createArrayOfValues(locales).some(Boolean);
 };
 
 const subjectHasLocaleValidationError = (actions: ChildrenForm = {}): boolean => {

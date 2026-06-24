@@ -122,50 +122,9 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
             });
           }
 
-          const permissionsToSend = formatPermissionsForAPI(modifiedData).map((perm) => {
-            if (!perm.subject) return perm;
-
-            const original = permissions.find(
-              (p) => p.action === perm.action && p.subject === perm.subject
-            );
-
-            // null means "all locales" in legacy DBs — preserve it if the user hasn't changed anything
-            if (original?.properties?.locales !== null) return perm;
-
-            const kind: 'collectionTypes' | 'singleTypes' =
-              perm.subject in modifiedData.collectionTypes ? 'collectionTypes' : 'singleTypes';
-
-            const initialActionForm = initialData[kind]?.[perm.subject]?.[perm.action];
-            const modifiedActionForm = modifiedData[kind]?.[perm.subject]?.[perm.action];
-
-            if (!initialActionForm || !modifiedActionForm) return perm;
-
-            const initialLocaleEntry = (initialActionForm.properties as PropertyChildForm)[
-              'locales'
-            ];
-            const modifiedLocaleEntry = (modifiedActionForm.properties as PropertyChildForm)[
-              'locales'
-            ];
-
-            if (
-              !initialLocaleEntry ||
-              typeof initialLocaleEntry === 'boolean' ||
-              !modifiedLocaleEntry ||
-              typeof modifiedLocaleEntry === 'boolean'
-            ) {
-              return perm;
-            }
-
-            const localesUnchanged =
-              Object.keys(initialLocaleEntry).length === Object.keys(modifiedLocaleEntry).length &&
-              Object.entries(initialLocaleEntry).every(
-                ([locale, val]) => modifiedLocaleEntry[locale] === val
-              );
-
-            if (!localesUnchanged) return perm;
-
-            return { ...perm, properties: { ...perm.properties, locales: null } };
-          });
+          const permissionsToSend = formatPermissionsForAPI(modifiedData).map((perm) =>
+            restoreNullLocalesIfUnchanged(perm, permissions, initialData, modifiedData)
+          );
 
           return { permissionsToSend, didUpdateConditions };
         },
@@ -750,6 +709,60 @@ const reducer = (state: State, action: Action) =>
         return draftState;
     }
   });
+
+/* -------------------------------------------------------------------------------------------------
+ * restoreNullLocalesIfUnchanged
+ * Extracted at module level to avoid nesting arrow functions more than 4 levels deep inside
+ * the useImperativeHandle → getPermissions → map chain.
+ * -----------------------------------------------------------------------------------------------*/
+
+type SentPermission = Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>;
+
+const restoreNullLocalesIfUnchanged = (
+  perm: SentPermission,
+  originalPermissions: Permission[],
+  initialData: PermissionForms,
+  modifiedData: PermissionForms
+): SentPermission => {
+  if (!perm.subject) return perm;
+
+  const original = originalPermissions.find(
+    (p) => p.action === perm.action && p.subject === perm.subject
+  );
+
+  // null means "all locales" in legacy DBs — preserve it if the user hasn't changed anything
+  if (original?.properties?.locales !== null) return perm;
+
+  const kind: 'collectionTypes' | 'singleTypes' =
+    perm.subject in modifiedData.collectionTypes ? 'collectionTypes' : 'singleTypes';
+
+  const initialActionForm = initialData[kind]?.[perm.subject]?.[perm.action];
+  const modifiedActionForm = modifiedData[kind]?.[perm.subject]?.[perm.action];
+
+  if (!initialActionForm || !modifiedActionForm) return perm;
+
+  const initialLocaleEntry = (initialActionForm.properties as PropertyChildForm)['locales'];
+  const modifiedLocaleEntry = (modifiedActionForm.properties as PropertyChildForm)['locales'];
+
+  if (
+    !initialLocaleEntry ||
+    typeof initialLocaleEntry === 'boolean' ||
+    !modifiedLocaleEntry ||
+    typeof modifiedLocaleEntry === 'boolean'
+  ) {
+    return perm;
+  }
+
+  const localesUnchanged =
+    Object.keys(initialLocaleEntry).length === Object.keys(modifiedLocaleEntry).length &&
+    Object.entries(initialLocaleEntry).every(
+      ([locale, val]) => modifiedLocaleEntry[locale] === val
+    );
+
+  if (!localesUnchanged) return perm;
+
+  return { ...perm, properties: { ...perm.properties, locales: null } };
+};
 
 /* -------------------------------------------------------------------------------------------------
  * init (reducer)

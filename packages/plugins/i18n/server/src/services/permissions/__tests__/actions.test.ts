@@ -315,5 +315,72 @@ describe('i18n permissions actions', () => {
       expect(update).not.toHaveBeenCalled();
       expect(findMany).not.toHaveBeenCalled();
     });
+
+    test('does nothing when getDefaultLocale returns null', async () => {
+      mockGetService.mockImplementation((serviceName: string) => {
+        if (serviceName === 'locales') {
+          return { getDefaultLocale: jest.fn(() => Promise.resolve(null)) };
+        }
+        if (serviceName === 'content-types') {
+          return {
+            isLocalizedContentType: jest.fn(
+              (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+                model?.pluginOptions?.i18n?.localized === true
+            ),
+          };
+        }
+        return undefined;
+      });
+
+      const findMany = jest.fn(() => Promise.resolve([]));
+      const { update } = setupRepairMocks({ findMany });
+
+      await actionsService.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes: oldTypes,
+        contentTypes: newTypes,
+      });
+
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    test('patches permissions whose properties object is undefined', async () => {
+      const findMany = jest.fn(() =>
+        Promise.resolve([
+          {
+            id: 10,
+            action: explorerReadAction,
+            subject: localizedModel.uid,
+            properties: undefined,
+          },
+        ])
+      );
+
+      const { update } = setupRepairMocks({ findMany });
+
+      await actionsService.repairPermissionsForNewlyLocalizedTypes({
+        oldContentTypes: oldTypes,
+        contentTypes: newTypes,
+      });
+
+      expect(update).toHaveBeenCalledWith({
+        where: { id: 10 },
+        data: { properties: { locales: ['en'] } },
+      });
+    });
+
+    test('logs an error and does not throw when an internal operation fails', async () => {
+      const findMany = jest.fn(() => Promise.reject(new Error('DB failure')));
+      const { update } = setupRepairMocks({ findMany });
+
+      await expect(
+        actionsService.repairPermissionsForNewlyLocalizedTypes({
+          oldContentTypes: oldTypes,
+          contentTypes: newTypes,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(update).not.toHaveBeenCalled();
+      expect((global.strapi as any).log.error).toHaveBeenCalled();
+    });
   });
 });

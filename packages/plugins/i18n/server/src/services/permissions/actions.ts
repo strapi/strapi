@@ -204,7 +204,7 @@ const repairPermissionsForNewlyLocalizedTypes = async ({
           strapi.db.query('admin::permission').update({
             where: { id: permission.id },
             data: {
-              properties: { ...(permission.properties ?? {}), locales: [defaultLocaleCode] },
+              properties: { ...permission.properties, locales: [defaultLocaleCode] },
             },
           })
         )

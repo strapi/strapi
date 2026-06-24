@@ -22,7 +22,7 @@ const localesPropertyHandler = async ({ action, section }: any) => {
 
   for (const subject of section.subjects) {
     const applies = await actionProvider.appliesToProperty('locales', action.actionId, subject.uid);
-    const hasLocalesProperty = subject.properties.find(
+    const hasLocalesProperty = subject.properties.some(
       (property: any) => property.value === 'locales'
     );
 
