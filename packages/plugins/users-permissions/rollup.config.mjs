@@ -11,9 +11,9 @@ export default defineConfig([
   }),
   baseConfig({
     input: {
-      index: './server/index.js'
+      index: './server/src/index.js'
     },
-    rootDir: './server',
+    rootDir: './server/src',
     outDir: './dist/server',
   })
 ]);

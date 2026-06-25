@@ -11,7 +11,7 @@ const {
   ROUTES_WITHOUT_IDENTIFIER,
   normalizeRequestPathForRateLimit,
   buildRateLimitLoadConfig,
-} = require('../rateLimit');
+} = require('../../src/middlewares/rateLimit');
 
 const makeCtx = ({ path: requestPath, ip = '203.0.113.1', body = {} } = {}) => ({
   request: {
