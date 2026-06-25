@@ -26,8 +26,9 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
   const isDisabled =
     !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED) || isTruthy(telemetryDisabled);
 
-  const sender = createSender(strapi);
-  const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
+  // Skip the sender (and its tsUtils consumer) entirely when telemetry is off
+  const sender = isDisabled ? null : createSender(strapi);
+  const sendEvent = sender ? wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS }) : null;
 
   return {
     get isDisabled() {
@@ -35,7 +36,7 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
     },
 
     register() {
-      if (!isDisabled) {
+      if (!isDisabled && sendEvent) {
         strapi.cron.add({
           sendPingEvent: {
             task: () => sendEvent('ping'),
@@ -50,7 +51,7 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
     bootstrap() {},
 
     async send(event: string, payload: Record<string, unknown> = {}) {
-      if (isDisabled) return true;
+      if (isDisabled || !sendEvent) return true;
       return sendEvent(event, payload);
     },
 

@@ -4,7 +4,7 @@ import { stat, createReadStream, ReadStream } from 'fs-extra';
 import * as webStream from 'stream/web';
 import type { Core } from '@strapi/types';
 
-import type { IAsset, IFile } from '../../../../types';
+import type { IAsset, IFile } from '../../../types';
 
 function getFileStream(
   filepath: string,
