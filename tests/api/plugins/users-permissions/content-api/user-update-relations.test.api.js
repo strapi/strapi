@@ -498,5 +498,30 @@ describe('U&P users REST relation handling (issue 26606)', () => {
 
       expect(res.statusCode).toBe(400);
     });
+
+    describe('invalid role relation input', () => {
+      test('POST /users rejects an empty role object', async () => {
+        const res = await postUser({ ...uniqueUser(), role: {} });
+
+        expect(res.statusCode).toBe(400);
+      });
+
+      test('POST /users rejects a connect entry with neither id nor documentId', async () => {
+        const res = await postUser({
+          ...uniqueUser(),
+          role: { connect: [{}] },
+        });
+
+        expect(res.statusCode).toBe(400);
+      });
+
+      test('PUT rejects a connect entry with neither id nor documentId', async () => {
+        const user = await createUser();
+
+        const res = await putUser(user.id, { role: { connect: [{}] } });
+
+        expect(res.statusCode).toBe(400);
+      });
+    });
   });
 });
