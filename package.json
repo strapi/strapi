@@ -95,7 +95,9 @@
     "test:front:coverage": "cross-env IS_EE=true jest --config jest.config.front.js --runInBand --coverage",
     "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
     "test:unit:vitest": "vitest run",
-    "test:unit:vitest:watch": "vitest --watch"
+    "test:unit:vitest:watch": "vitest --watch",
+    "translations:check": "node scripts/front/translations/check.js",
+    "translations:sync-en": "node scripts/front/translations/sync-en.js"
   },
   "resolutions": {
     "ajv@^8.0.0": "8.20.0",
@@ -120,7 +122,10 @@
   "devDependencies": {
     "@babel/core": "7.29.6",
     "@babel/eslint-parser": "7.28.6",
+    "@babel/parser": "7.29.7",
     "@babel/preset-react": "7.28.5",
+    "@babel/traverse": "7.29.7",
+    "@babel/types": "7.29.7",
     "@commitlint/cli": "19.2.0",
     "@commitlint/config-conventional": "19.1.0",
     "@commitlint/prompt-cli": "19.2.0",
