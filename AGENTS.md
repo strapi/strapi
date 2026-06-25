@@ -164,6 +164,14 @@ yarn test:e2e --domains content-manager admin    # run specific domains only
 yarn test:e2e --concurrency=3                    # run 3 domains in parallel
 ```
 
+A subset is being piloted on **Vitest** (runner) + the **`playwright` library** (browser), as `tests/e2e/tests/**/*.vitest.spec.ts`:
+
+```bash
+yarn test:e2e:vitest                             # run the Vitest e2e pilot (boots a test app)
+```
+
+`strapi user-stories:sync-e2e` scaffolds/reconciles these `*.vitest.spec.ts` files from the Gherkin acceptance criteria in `docs/user-stories/`. A Playwright MCP (`.mcp.json`) is available for selector discovery. See `tests/e2e/README.md` and `docs/docs/guides/e2e/00-setup.md`.
+
 ### EE toggles
 
 - `IS_EE=true` — enables Enterprise features in frontend tests (`yarn test:front`)
