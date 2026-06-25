@@ -169,10 +169,10 @@ module.exports = ({ env }) => {
     };
   }
 
-  // mysql + mariadb — both use mysql2 driver.
+  // mysql + mariadb — Strapi client alias "mysql" (Knex uses mysql2 driver via @strapi/database).
   return {
     connection: {
-      client: 'mysql2',
+      client: 'mysql',
       connection: {
         host: env('DATABASE_HOST', 'localhost'),
         port: env.int('DATABASE_PORT', 3306),
