@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { spawnSync } = require('child_process');
+const path = require('path');
 const { runCompose, runContainer } = require('./compose');
 
 const COMPOSE_PROJECT_NAME = process.env.COMPOSE_PROJECT_NAME || 'strapi_complex';
@@ -221,7 +222,14 @@ function getDatabaseEnv(dbType) {
 
   if (dbType === 'sqlite') {
     env.DATABASE_CLIENT = 'sqlite';
-    env.DATABASE_FILENAME = env.DATABASE_FILENAME || '.tmp/data.db';
+    if (!env.DATABASE_FILENAME) {
+      const complexDir = path.resolve(__dirname, '..');
+      const monorepoRoot = path.resolve(complexDir, '../..');
+      const v4ProjectDir = process.env.V4_OUTSIDE_DIR
+        ? path.resolve(process.cwd(), process.env.V4_OUTSIDE_DIR)
+        : path.resolve(monorepoRoot, '..', 'complex-v4');
+      env.DATABASE_FILENAME = path.join(v4ProjectDir, '.tmp', 'data.db');
+    }
     return env;
   }
 

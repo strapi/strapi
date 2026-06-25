@@ -163,6 +163,13 @@ class Database {
     return !!transactionCtx.get();
   }
 
+  /**
+   * Run work inside a DB transaction. On a fulfilled callback, the transaction
+   * is committed; on rejection, it is rolled back. The callback receives Knex
+   * `commit` and `rollback` helpers: if you call `rollback` and return without
+   * throwing, the implementation avoids attempting a second `commit` on an
+   * already-finalised transactor.
+   */
   transaction(): Promise<TransactionObject>;
   transaction<TCallback extends Callback>(c: TCallback): Promise<ReturnType<TCallback>>;
   async transaction<TCallback extends Callback>(

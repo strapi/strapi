@@ -57,6 +57,7 @@ const renderAdmin = async (
     flags: {
       nps: false,
       promoteEE: true,
+      docLinks: true,
     },
     // eslint-disable-next-line
     // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.

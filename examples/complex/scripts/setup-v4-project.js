@@ -91,6 +91,7 @@ const packageJson = {
     // Pin to v9 — better-sqlite3 v12 requires newer Node than Strapi v4 supports (Node ≤20).
     'better-sqlite3': '9.6.0',
     entities: '2.2.0',
+    sqlite3: '5.1.7',
     mysql2: '3.20.0',
     pg: '8.20.0',
     react: '^18.0.0',

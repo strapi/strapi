@@ -1018,7 +1018,60 @@ class ContentSeeder {
     await this.seedRelationDp();
     await this.seedRelationDpI18n();
     await this.seedHcM2m();
+    await assignCreatorFieldsOnPublishedEntries(this.strapi);
     return this.results;
+  }
+}
+
+async function ensureAdminUser(strapi) {
+  const existing = await strapi.query('admin::user').findOne();
+  if (existing) {
+    return existing;
+  }
+
+  const superAdminRole = await strapi.query('admin::role').findOne({
+    where: { code: 'strapi-super-admin' },
+  });
+
+  return strapi.query('admin::user').create({
+    data: {
+      firstname: 'Seed',
+      lastname: 'Admin',
+      email: 'seed-admin@strapi.io',
+      password: 'SeedAdmin123!',
+      isActive: true,
+      roles: superAdminRole ? [superAdminRole.id] : [],
+    },
+  });
+}
+
+async function assignCreatorFieldsOnPublishedEntries(strapi) {
+  console.log('Assigning creator fields on published entries...');
+  const adminUser = await ensureAdminUser(strapi);
+  const knex = strapi.db.connection;
+
+  for (const [uid, contentType] of Object.entries(strapi.contentTypes)) {
+    if (!uid.startsWith('api::')) {
+      continue;
+    }
+    if (!contentType.options?.draftAndPublish) {
+      continue;
+    }
+
+    const table = contentType.collectionName;
+    const hasCreatedBy = await knex.schema.hasColumn(table, 'created_by_id');
+    if (!hasCreatedBy) {
+      continue;
+    }
+
+    const updated = await knex(table).whereNotNull('published_at').update({
+      created_by_id: adminUser.id,
+      updated_by_id: adminUser.id,
+    });
+
+    if (updated > 0) {
+      console.log(`  ${table}: ${updated} published row(s)`);
+    }
   }
 }
 
