@@ -1,30 +1,23 @@
-import { isNil, camelCase } from 'lodash/fp';
+import { isNil } from 'lodash/fp';
 import Koa from 'koa';
 import createError from 'http-errors';
 import delegate from 'delegates';
-import { STATUS_CODES } from 'node:http';
 import { formatHttpError } from '../errors';
-import type { ContextDelegatedResponseErrorMethods } from './koa-methods';
+import { errorMethodEntries } from './koa-methods';
 
 const addCustomMethods = (app: Koa) => {
   const delegator = delegate(app.context, 'response');
 
   /* errors */
-  for (const [codeStr, name] of Object.entries(STATUS_CODES)) {
-    const code = Number(codeStr);
+  for (const { code, statusName, methodName } of errorMethodEntries()) {
+    app.response[methodName] = function responseCode(response = statusName, details = {}) {
+      const httpError = createError(code, response, { details });
+      const { status, body } = formatHttpError(httpError);
+      this.status = status;
+      this.body = body;
+    };
 
-    if (name && code >= 400 && code < 600) {
-      const camelCasedName = camelCase(name) as keyof ContextDelegatedResponseErrorMethods;
-
-      app.response[camelCasedName] = function responseCode(message = name, details = {}) {
-        const httpError = createError(code, message, { details });
-        const { status, body } = formatHttpError(httpError);
-        this.status = status;
-        this.body = body;
-      };
-
-      delegator.method(camelCasedName);
-    }
+    delegator.method(methodName);
   }
 
   /* send, created, deleted */

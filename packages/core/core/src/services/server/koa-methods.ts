@@ -1,3 +1,34 @@
+import { camelCase } from 'lodash/fp';
+import { STATUS_CODES } from 'node:http';
+
+export interface ErrorMethodEntry {
+  /** HTTP status code (400–599). */
+  code: number;
+  /** Reason phrase from `node:http` `STATUS_CODES`, e.g. "Not Found". */
+  statusName: string;
+  /** camelCased helper name registered on the context, e.g. "notFound". */
+  methodName: keyof ContextDelegatedResponseErrorMethods;
+}
+
+/**
+ * Single source of truth for the generated error helpers: yields one entry per
+ * 4xx/5xx `node:http` status. Both the runtime registration (`koa.ts`) and the
+ * type/runtime sync test iterate this, so they cannot drift.
+ */
+export function* errorMethodEntries(): Generator<ErrorMethodEntry> {
+  for (const [codeStr, statusName] of Object.entries(STATUS_CODES)) {
+    const code = Number(codeStr);
+
+    if (statusName && code >= 400 && code < 600) {
+      yield {
+        code,
+        statusName,
+        methodName: camelCase(statusName) as keyof ContextDelegatedResponseErrorMethods,
+      };
+    }
+  }
+}
+
 export interface ContextDelegatedResponseErrorMethods {
   /** 400 Bad Request */
   badRequest(response?: string | object, details?: object): void;

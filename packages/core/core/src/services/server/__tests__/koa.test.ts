@@ -1,9 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { STATUS_CODES } from 'node:http';
-import { camelCase } from 'lodash/fp';
 import ts from 'typescript';
 import createKoaApp from '../koa';
+import { errorMethodEntries } from '../koa-methods';
 import type {
   ContextDelegatedResponseErrorMethods,
   ContextDelegatedResponseSuccessMethods,
@@ -67,10 +66,8 @@ const successMethodNames = getInterfaceMemberNames<ContextDelegatedResponseSucce
 );
 const allMethodNames = [...errorMethodNames, ...successMethodNames];
 
-// Mirror of koa.ts: the camelCased names the runtime loop actually generates.
-const runtimeErrorMethodNames = Object.entries(STATUS_CODES)
-  .filter(([codeStr, name]) => Boolean(name) && Number(codeStr) >= 400 && Number(codeStr) < 600)
-  .map(([, name]) => camelCase(name as string));
+// The camelCased names the runtime actually registers, from the shared iterator.
+const runtimeErrorMethodNames = [...errorMethodEntries()].map((entry) => entry.methodName);
 
 describe('koa custom response methods', () => {
   describe('type/runtime sync', () => {
