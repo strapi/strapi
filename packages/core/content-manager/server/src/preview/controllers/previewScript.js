@@ -30,6 +30,7 @@
  * @typedef {Object} PreviewScriptConfig
  * @property {PreviewScriptColors} colors
  * @property {InternalEvents} events Internal event names, owned by the admin (INTERNAL_EVENTS).
+ * @property {string} parentOrigin Admin panel origin used to validate and target postMessage traffic.
  */
 
 /**
@@ -44,7 +45,7 @@
  * @param {PreviewScriptConfig} config
  */
 function previewScript(config) {
-  const { colors, events: INTERNAL_EVENTS } = config;
+  const { colors, events: INTERNAL_EVENTS, parentOrigin } = config;
 
   /** @type {typeof window & WindowExtensions} */
   const win = window;
@@ -71,7 +72,7 @@ function previewScript(config) {
    * @param {unknown} payload
    */
   const sendMessage = (type, payload) => {
-    window.parent.postMessage({ type, payload }, '*');
+    window.parent.postMessage({ type, payload }, parentOrigin);
   };
 
   /**
@@ -273,12 +274,19 @@ function previewScript(config) {
       return;
     }
 
-    // The specifier is a plain external URL. This file is never bundled, so the
-    // import is left exactly as written and evaluated natively inside the iframe.
-    const { vercelStegaDecode: stegaDecode, vercelStegaClean: stegaClean } = await import(
-      // @ts-ignore it's not a local dependency
-      'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
-    );
+    let stegaDecode;
+    let stegaClean;
+
+    try {
+      // The specifier is a plain external URL. This file is never bundled, so the
+      // import is left exactly as written and evaluated natively inside the iframe.
+      ({ vercelStegaDecode: stegaDecode, vercelStegaClean: stegaClean } = await import(
+        // @ts-ignore it's not a local dependency
+        'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
+      ));
+    } catch {
+      return;
+    }
 
     /**
      * @param {Element} element
@@ -959,6 +967,7 @@ function previewScript(config) {
         if (mutation.type === 'attributes' && mutation.attributeName === SOURCE_ATTRIBUTE) {
           const target = /** @type {HTMLElement} */ (mutation.target);
           if (target.hasAttribute(SOURCE_ATTRIBUTE)) {
+            highlightManager.removeHighlightForElement(target);
             highlightManager.createHighlightForElement(target);
             observeElementForResize(target);
           } else {
@@ -990,6 +999,9 @@ function previewScript(config) {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = /** @type {Element} */ (node);
               highlightManager.removeHighlightForElement(element);
+              element.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`).forEach((childElement) => {
+                highlightManager.removeHighlightForElement(childElement);
+              });
 
               // If a tracked media original (or its ancestor) was removed —
               // typically when the host framework re-renders after save and
@@ -1174,6 +1186,7 @@ function previewScript(config) {
      */
     const handleMessage = (event) => {
       if (!event.data?.type) return;
+      if (event.source !== window.parent || event.origin !== parentOrigin) return;
 
       // The user typed in an input, reflect the change in the preview
       if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
@@ -1264,7 +1277,7 @@ function previewScript(config) {
               const mime = typeof value === 'object' && value !== null ? value.mime : undefined;
               setMediaElement(element, url || null, mime);
             } else {
-              element.textContent = value || '';
+              element.textContent = value == null ? '' : String(value);
             }
           });
         }
@@ -1292,7 +1305,7 @@ function previewScript(config) {
               const propertyName = elementPath.slice(field.length + 1);
               const propertyValue = value[propertyName];
               if (element instanceof HTMLElement && propertyValue !== undefined) {
-                element.textContent = propertyValue || '';
+                element.textContent = propertyValue == null ? '' : String(propertyValue);
               }
             }
           });
@@ -1397,13 +1410,15 @@ function previewScript(config) {
    * Orchestration
    * ---------------------------------------------------------------------------------------------*/
 
-  setupStegaDOMObserver().then((stegaObserver) => {
-    createHighlightStyles();
-    const overlay = createOverlaySystem();
-    const highlightManager = createHighlightManager(overlay);
-    const observers = setupObservers(highlightManager, stegaObserver);
-    const scrollManager = setupScrollManagement(highlightManager);
-    const eventHandlers = setupEventHandlers(highlightManager);
-    createCleanupSystem(overlay, observers, scrollManager, eventHandlers, highlightManager);
-  });
+  setupStegaDOMObserver()
+    .catch(() => undefined)
+    .then((stegaObserver) => {
+      createHighlightStyles();
+      const overlay = createOverlaySystem();
+      const highlightManager = createHighlightManager(overlay);
+      const observers = setupObservers(highlightManager, stegaObserver);
+      const scrollManager = setupScrollManagement(highlightManager);
+      const eventHandlers = setupEventHandlers(highlightManager);
+      createCleanupSystem(overlay, observers, scrollManager, eventHandlers, highlightManager);
+    });
 }

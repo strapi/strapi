@@ -22,12 +22,13 @@ Instead, the preview script is defined inside Strapi and sent to the frontend vi
 The preview script (`packages/core/content-manager/server/src/preview/controllers/previewScript.js`) is served verbatim from a server endpoint (`GET /content-manager/preview/script`). The admin fetches it, wraps it with its runtime config, and posts the result to the iframe:
 
 ```ts
-const previewScriptSource = await fetch('/content-manager/preview/script').then((res) =>
-  res.text()
-);
+const previewScriptSource = await fetch(
+  `${window.strapi.backendURL}/content-manager/preview/script`
+).then((res) => res.text());
 const config = {
   colors: previewHighlightColors,
   events: INTERNAL_EVENTS,
+  parentOrigin: window.location.origin,
 };
 const script = `(${previewScriptSource})(${JSON.stringify(config)})`;
 ```

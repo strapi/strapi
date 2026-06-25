@@ -100,7 +100,7 @@ const getPreviewScript = (() => {
   let previewScript = '';
   return async (previewHighlightColors: PreviewHighlightColors) => {
     if (!previewScript) {
-      const resp = await fetch('/content-manager/preview/script');
+      const resp = await fetch(`${window.strapi.backendURL}/content-manager/preview/script`);
 
       if (!resp.ok) {
         throw new Error('Could not retrieve preview script from server.');
@@ -116,6 +116,7 @@ const getPreviewScript = (() => {
     return `(${previewScript})(${JSON.stringify({
       colors: previewHighlightColors,
       events: INTERNAL_EVENTS,
+      parentOrigin: window.location.origin,
     })})`;
   };
 })();
