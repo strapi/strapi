@@ -9188,6 +9188,7 @@ __metadata:
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/admin": "npm:5.49.0"
     "@strapi/database": "npm:5.49.0"
+    "@strapi/definitions": "npm:5.49.0"
     "@strapi/generators": "npm:5.49.0"
     "@strapi/logger": "npm:5.49.0"
     "@strapi/openapi": "npm:5.49.0"
@@ -9315,6 +9316,7 @@ __metadata:
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
     "@paralleldrive/cuid2": "npm:2.2.2"
+    "@strapi/definitions": "npm:5.49.0"
     "@strapi/utils": "npm:5.49.0"
     "@types/fs-extra": "npm:11.0.4"
     ajv: "npm:8.20.0"
@@ -9332,15 +9334,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/definitions@workspace:packages/definitions":
+"@strapi/definitions@npm:5.49.0, @strapi/definitions@workspace:packages/definitions":
   version: 0.0.0-use.local
   resolution: "@strapi/definitions@workspace:packages/definitions"
   dependencies:
     "@types/node": "npm:20.19.41"
-    eslint-config-custom: "npm:5.48.1"
-    tsconfig: "npm:5.48.1"
+    eslint-config-custom: "npm:5.49.0"
+    tsconfig: "npm:5.49.0"
     vitest: "catalog:"
-    vitest-config: "npm:5.48.1"
+    vitest-config: "npm:5.49.0"
     zod: "npm:3.25.67"
   languageName: unknown
   linkType: soft

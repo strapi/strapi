@@ -63,6 +63,7 @@
     "@paralleldrive/cuid2": "2.2.2",
     "@strapi/admin": "5.49.0",
     "@strapi/database": "5.49.0",
+    "@strapi/definitions": "5.49.0",
     "@strapi/generators": "5.49.0",
     "@strapi/logger": "5.49.0",
     "@strapi/openapi": "5.49.0",

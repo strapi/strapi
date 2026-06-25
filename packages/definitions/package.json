@@ -1,6 +1,6 @@
 {
   "name": "@strapi/definitions",
-  "version": "5.48.1",
+  "version": "5.49.0",
   "description": "Shared definitions, identity helpers, and schemas for Strapi packages",
   "keywords": [
     "strapi",
@@ -61,10 +61,10 @@
   },
   "devDependencies": {
     "@types/node": "20.19.41",
-    "eslint-config-custom": "5.48.1",
-    "tsconfig": "5.48.1",
+    "eslint-config-custom": "5.49.0",
+    "tsconfig": "5.49.0",
     "vitest": "catalog:",
-    "vitest-config": "5.48.1"
+    "vitest-config": "5.49.0"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
