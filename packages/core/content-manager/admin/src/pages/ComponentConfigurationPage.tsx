@@ -41,6 +41,7 @@ const ComponentConfigurationPage = () => {
     components,
     fieldSizes,
     schema,
+    schemas,
     error: errorSchema,
     isLoading: isLoadingSchema,
     isFetching: isFetchingSchema,
@@ -73,6 +74,7 @@ const ComponentConfigurationPage = () => {
         error: res.error,
         components,
         schema,
+        schemas: res.data?.contentTypes ?? [],
         fieldSizes,
       };
     },
@@ -112,7 +114,7 @@ const ComponentConfigurationPage = () => {
   const editLayout = React.useMemo(
     () =>
       data && !isLoading
-        ? formatComponentConfigurationEditLayout(data, { schema, components })
+        ? formatComponentConfigurationEditLayout(data, { schema, components, schemas })
         : ({
             layout: [],
             components: {},
@@ -120,7 +122,7 @@ const ComponentConfigurationPage = () => {
             options: {},
             settings: DEFAULT_SETTINGS,
           } as EditLayout),
-    [data, isLoading, schema, components]
+    [data, isLoading, schema, components, schemas]
   );
 
   const [updateConfiguration] = useUpdateComponentConfigurationMutation();

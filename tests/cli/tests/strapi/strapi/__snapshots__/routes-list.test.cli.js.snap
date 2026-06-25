@@ -83,6 +83,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /api/email                                                                      │
 │ POST               │ /api/upload                                                                     │
 │ HEAD|GET           │ /api/upload/files                                                               │
+│ HEAD|GET           │ /api/upload/files/page                                                          │
 │ HEAD|GET           │ /api/upload/files/:id                                                           │
 │ DELETE             │ /api/upload/files/:id                                                           │
 │ HEAD|GET           │ /api/i18n/locales                                                               │
@@ -97,6 +98,8 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /api/auth/change-password                                                       │
 │ POST               │ /api/auth/refresh                                                               │
 │ POST               │ /api/auth/logout                                                                │
+│ HEAD|GET           │ /api/auth/sessions                                                              │
+│ DELETE             │ /api/auth/sessions/:sessionId                                                   │
 │ HEAD|GET           │ /api/users/count                                                                │
 │ HEAD|GET           │ /api/users                                                                      │
 │ HEAD|GET           │ /api/users/me                                                                   │
@@ -132,6 +135,9 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/users/me                                                                 │
 │ PUT                │ /admin/users/me                                                                 │
 │ HEAD|GET           │ /admin/users/me/permissions                                                     │
+│ HEAD|GET           │ /admin/users/me/sessions                                                        │
+│ DELETE             │ /admin/users/me/sessions                                                        │
+│ DELETE             │ /admin/users/me/sessions/:sessionId                                             │
 │ POST               │ /admin/users                                                                    │
 │ HEAD|GET           │ /admin/users                                                                    │
 │ HEAD|GET           │ /admin/users/:id                                                                │
@@ -244,7 +250,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /upload/settings                                                                │
 │ PUT                │ /upload/settings                                                                │
 │ POST               │ /upload                                                                         │
-│ POST               │ /upload/unstable/stream                                                         │
+│ POST               │ /upload/unstable/upload-file                                                    │
 │ POST               │ /upload/unstable/stream-from-urls                                               │
 │ HEAD|GET           │ /upload/files                                                                   │
 │ HEAD|GET           │ /upload/files/:id                                                               │
