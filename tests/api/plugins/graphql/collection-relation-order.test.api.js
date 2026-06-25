@@ -2,6 +2,9 @@
 
 /**
  * GraphQL collection-type manyToMany relation order with pagination (issue #26577).
+ *
+ * GraphQL SortArg defaults to `[]`; meaningless sort must not override join-table connect order.
+ * Explicit meaningful sort must still win (no breaking change).
  */
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -24,7 +27,7 @@ const categoryModel = {
       type: 'relation',
       relation: 'manyToMany',
       target: 'api::article.article',
-      mappedBy: 'categories',
+      targetAttribute: 'categories',
     },
   },
 };
@@ -35,24 +38,21 @@ const articleModel = {
   singularName: 'article',
   pluralName: 'articles',
   displayName: 'Article',
-  draftAndPublish: true,
   attributes: {
     title: { type: 'string' },
-    categories: {
-      type: 'relation',
-      relation: 'manyToMany',
-      target: 'api::category.category',
-      inversedBy: 'articles',
-    },
   },
 };
+
+const CONNECT_ORDER = ['Gamma', 'Alpha', 'Beta'];
+
+const categoryNamesFromList = (items) => items.map((item) => item.name ?? item.attributes?.name);
 
 describe('GraphQL collection relation order (issue #26577)', () => {
   let articleDocumentId;
   const categoryIds = [];
 
   beforeAll(async () => {
-    await builder.addContentTypes([categoryModel, articleModel]).build();
+    await builder.addContentTypes([articleModel, categoryModel]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -87,6 +87,32 @@ describe('GraphQL collection relation order (issue #26577)', () => {
     await builder.cleanup();
   });
 
+  test('returns manyToMany relations in connect order without pagination', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        query ($documentId: ID!) {
+          article(documentId: $documentId) {
+            data {
+              attributes {
+                categories {
+                  name
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: { documentId: articleDocumentId },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+
+    const categories = res.body.data.article.data.attributes.categories;
+
+    expect(categoryNamesFromList(categories)).toEqual(CONNECT_ORDER);
+  });
+
   test('returns manyToMany relations in connect order with pagination', async () => {
     const res = await graphqlQuery({
       query: /* GraphQL */ `
@@ -109,9 +135,34 @@ describe('GraphQL collection relation order (issue #26577)', () => {
     expect(res.body.errors).toBeUndefined();
 
     const categories = res.body.data.article.data.attributes.categories;
-    const names = categories.map((item) => item.name ?? item.attributes?.name);
 
-    expect(names).toEqual(['Gamma', 'Alpha', 'Beta']);
+    expect(categoryNamesFromList(categories)).toEqual(CONNECT_ORDER);
+  });
+
+  test('returns manyToMany relations in connect order when sort is explicitly empty with pagination', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        query ($documentId: ID!) {
+          article(documentId: $documentId) {
+            data {
+              attributes {
+                categories(sort: [], pagination: { page: 1, pageSize: 10 }) {
+                  name
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: { documentId: articleDocumentId },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+
+    const categories = res.body.data.article.data.attributes.categories;
+
+    expect(categoryNamesFromList(categories)).toEqual(CONNECT_ORDER);
   });
 
   test('returns manyToMany relations in connect order via _connection with pagination', async () => {
@@ -138,8 +189,107 @@ describe('GraphQL collection relation order (issue #26577)', () => {
     expect(res.body.errors).toBeUndefined();
 
     const nodes = res.body.data.article.data.attributes.categories_connection.nodes;
-    const names = nodes.map((item) => item.name ?? item.attributes?.name);
 
-    expect(names).toEqual(['Gamma', 'Alpha', 'Beta']);
+    expect(categoryNamesFromList(nodes)).toEqual(CONNECT_ORDER);
+  });
+
+  test('paginates manyToMany relations in connect order across pages', async () => {
+    const page1 = await graphqlQuery({
+      query: /* GraphQL */ `
+        query ($documentId: ID!) {
+          article(documentId: $documentId) {
+            data {
+              attributes {
+                categories(pagination: { page: 1, pageSize: 2 }) {
+                  name
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: { documentId: articleDocumentId },
+    });
+
+    const page2 = await graphqlQuery({
+      query: /* GraphQL */ `
+        query ($documentId: ID!) {
+          article(documentId: $documentId) {
+            data {
+              attributes {
+                categories(pagination: { page: 2, pageSize: 2 }) {
+                  name
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: { documentId: articleDocumentId },
+    });
+
+    expect(page1.statusCode).toBe(200);
+    expect(page1.body.errors).toBeUndefined();
+    expect(page2.statusCode).toBe(200);
+    expect(page2.body.errors).toBeUndefined();
+
+    const page1Names = categoryNamesFromList(page1.body.data.article.data.attributes.categories);
+    const page2Names = categoryNamesFromList(page2.body.data.article.data.attributes.categories);
+
+    expect(page1Names).toEqual(['Gamma', 'Alpha']);
+    expect(page2Names).toEqual(['Beta']);
+    expect([...page1Names, ...page2Names]).toEqual(CONNECT_ORDER);
+  });
+
+  test('applies explicit sort on manyToMany relations with pagination', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        query ($documentId: ID!) {
+          article(documentId: $documentId) {
+            data {
+              attributes {
+                categories(sort: ["name:asc"], pagination: { page: 1, pageSize: 10 }) {
+                  name
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: { documentId: articleDocumentId },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+
+    const categories = res.body.data.article.data.attributes.categories;
+
+    expect(categoryNamesFromList(categories)).toEqual(['Alpha', 'Beta', 'Gamma']);
+  });
+
+  test('applies explicit descending sort on manyToMany relations with pagination', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        query ($documentId: ID!) {
+          article(documentId: $documentId) {
+            data {
+              attributes {
+                categories(sort: ["name:desc"], pagination: { page: 1, pageSize: 10 }) {
+                  name
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: { documentId: articleDocumentId },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+
+    const categories = res.body.data.article.data.attributes.categories;
+
+    expect(categoryNamesFromList(categories)).toEqual(['Gamma', 'Beta', 'Alpha']);
   });
 });
