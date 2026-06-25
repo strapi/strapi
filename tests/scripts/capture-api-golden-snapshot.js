@@ -28,13 +28,8 @@ const main = async () => {
   }
 
   const strapi = await createStrapiInstance({ logLevel: 'error' });
-
-  try {
-    const { goldenDir, client } = await captureGoldenSnapshot({ strapi });
-    console.log(`[api-tests] golden snapshot captured at ${goldenDir} (${client})`);
-  } finally {
-    await strapi.destroy();
-  }
+  const { goldenDir, client } = await captureGoldenSnapshot({ strapi });
+  console.log(`[api-tests] golden snapshot captured at ${goldenDir} (${client})`);
 };
 
 main().catch((error) => {
