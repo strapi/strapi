@@ -94,7 +94,8 @@
     "test:unit:vitest:watch": "vitest --watch",
     "test:migrations": "node tests/migration/scripts/run-migration-scenario.js",
     "test:migrations:plan": "node tests/migration/scripts/run-migration-scenario.js --print-plan",
-    "test:migrations:smoke": "node tests/migration/scripts/run-migration-scenario.js --initial legacy --database sqlite --skip-build"
+    "test:migrations:smoke": "node tests/migration/scripts/run-migration-scenario.js --initial legacy --database sqlite --skip-build",
+    "test:migrations:unit": "jest --config tests/migration/fixture/jest.config.js"
   },
   "resolutions": {
     "webpack": "5.106.2",

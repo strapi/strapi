@@ -31,6 +31,13 @@ yarn test:migrations --initial legacy --database sqlite --skip-build
 yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
 ```
 
+Fixture unit tests (fast guards for spec/validators and v4 scaffold templates):
+
+```bash
+yarn test:migrations:unit
+# also included in yarn test:unit via tests/migration/fixture/jest.config.js
+```
+
 Optional checkpoints: [`CHECKPOINTS.md`](CHECKPOINTS.md).
 
 ## CI (GitHub Actions)
