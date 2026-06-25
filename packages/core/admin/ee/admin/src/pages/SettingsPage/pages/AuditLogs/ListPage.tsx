@@ -1,5 +1,5 @@
-import { Flex, IconButton, Typography } from '@strapi/design-system';
-import { Eye } from '@strapi/icons';
+import { Button, Flex, IconButton, Typography } from '@strapi/design-system';
+import { Download, Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Filters } from '../../../../../../../admin/src/components/Filters';
@@ -17,6 +17,13 @@ import { useAuditLogsData } from './hooks/useAuditLogsData';
 import { useFormatTimeStamp } from './hooks/useFormatTimeStamp';
 import { getDefaultMessage } from './utils/getActionTypesDefaultMessages';
 import { getDisplayedFilters } from './utils/getDisplayedFilters';
+
+const escapeCsvCell = (value: string) => {
+  if (/[",\n\r]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+};
 
 const ListPage = () => {
   const { formatMessage } = useIntl();
@@ -82,6 +89,47 @@ const ListPage = () => {
 
   const { results = [] } = auditLogs ?? {};
 
+  const handleExport = () => {
+    const actionHeader = formatMessage({
+      id: 'Settings.permissions.auditLogs.action',
+      defaultMessage: 'Action',
+    });
+    const dateHeader = formatMessage({
+      id: 'Settings.permissions.auditLogs.date',
+      defaultMessage: 'Date',
+    });
+    const userHeader = formatMessage({
+      id: 'Settings.permissions.auditLogs.user',
+      defaultMessage: 'User',
+    });
+
+    const headerRow = [actionHeader, dateHeader, userHeader].map(escapeCsvCell).join(',');
+
+    const dataRows = results.map((log) => {
+      const actionLabel = formatMessage(
+        {
+          id: `Settings.permissions.auditLogs.${log.action}`,
+          // @ts-expect-error – same pattern as table cells
+          defaultMessage: getDefaultMessage(log.action),
+        },
+        { model: (log.payload?.model as string) ?? '' }
+      );
+      const dateLabel = formatTimeStamp(log.date);
+      const userLabel = log.user?.displayName ?? '';
+
+      return [actionLabel, dateLabel, userLabel].map(escapeCsvCell).join(',');
+    });
+
+    const csv = `\uFEFF${[headerRow, ...dataRows].join('\n')}`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `audit-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Page.Main aria-busy={isLoading}>
       <Page.Title>
@@ -112,6 +160,22 @@ const ListPage = () => {
             <Filters.Popover zIndex={499} />
             <Filters.List />
           </Filters.Root>
+        }
+        endActions={
+          canReadAuditLogs ? (
+            <Button
+              variant="secondary"
+              size="S"
+              startIcon={<Download />}
+              onClick={handleExport}
+              disabled={isLoading || results.length === 0}
+            >
+              {formatMessage({
+                id: 'Settings.permissions.auditLogs.export',
+                defaultMessage: 'Export',
+              })}
+            </Button>
+          ) : null
         }
       />
       <Layouts.Content>
