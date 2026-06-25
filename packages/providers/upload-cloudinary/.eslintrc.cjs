@@ -13,6 +13,7 @@ const config = {
     '.eslintrc.cjs',
     'jest.config.js',
     'rollup.config.mjs',
+    'lint-staged.config.mjs',
   ],
 };
 
