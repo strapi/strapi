@@ -107,7 +107,6 @@
   "form.attribute.item.text.regex.description": "Der Text der Regular Expression",
   "form.attribute.item.uniqueField": "Einzigartiges Feld",
   "form.attribute.item.uniqueField.description": "Du wirst keinen Eintrag anlegen können, wenn es bereits einen Eintrag mit identischem Inhalt gibt",
-  "form.attribute.item.uniqueField.v5.willBeDisabled": "Derzeit funktionieren eindeutige Felder in Komponenten nicht korrekt. Wenn du diese Funktion aktivierst, wird das Feld deaktiviert, bis dies behoben ist.",
   "form.attribute.item.uniqueField.v5.disabled": "Derzeit funktionieren eindeutige Felder in Komponenten nicht korrekt. Dieses Feld wurde deaktiviert, bis es behoben ist.",
   "form.attribute.media.allowed-types": "Wähle erlaubte Arten von Medien",
   "form.attribute.media.allowed-types.option-files": "Dateien",
