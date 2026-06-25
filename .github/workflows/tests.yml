@@ -397,7 +397,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ce-postgres
-          path: test-apps/.golden/api
+          path: test-apps/.golden
           retention-days: 1
 
   api_golden_ce_mysql:
@@ -435,7 +435,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ce-mysql
-          path: test-apps/.golden/api
+          path: test-apps/.golden
           retention-days: 1
 
   api_golden_ce_sqlite:
@@ -458,7 +458,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ce-sqlite
-          path: test-apps/.golden/api
+          path: test-apps/.golden
           retention-days: 1
 
   api_golden_ee_pg:
@@ -499,7 +499,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ee-postgres
-          path: test-apps/.golden/api
+          path: test-apps/.golden
           retention-days: 1
 
   api_golden_ee_mysql:
@@ -540,7 +540,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ee-mysql
-          path: test-apps/.golden/api
+          path: test-apps/.golden
           retention-days: 1
 
   api_golden_ee_sqlite:
@@ -566,7 +566,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ee-sqlite
-          path: test-apps/.golden/api
+          path: test-apps/.golden
           retention-days: 1
 
   api_ce_pg:

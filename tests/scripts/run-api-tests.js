@@ -100,6 +100,11 @@ const main = async ({ database, generateApp }, args) => {
     const goldenProvided = Boolean(process.env.GOLDEN_SNAPSHOT_PROVIDED);
 
     if (goldenProvided) {
+      if (!goldenSnapshotExists()) {
+        throw new Error(
+          'golden-snapshot: CI artifact was downloaded but the snapshot is incomplete at test-apps/.golden/api'
+        );
+      }
       console.log('[api-tests] using pre-captured golden snapshot from CI artifact');
     } else if (generateApp || !goldenSnapshotExists()) {
       // Migrations run on first boot; capture after bootstrap for every database client.
