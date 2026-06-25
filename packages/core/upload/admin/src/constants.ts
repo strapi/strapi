@@ -1,9 +1,11 @@
 import { getTrad } from './utils';
 
-export enum AssetSource {
-  Url = 'url',
-  Computer = 'computer',
-}
+export const AssetSource = {
+  Url: 'url',
+  Computer: 'computer',
+} as const satisfies Record<Capitalize<AssetSource>, AssetSource>;
+
+export type AssetSource = 'url' | 'computer';
 
 export const PERMISSIONS = {
   // This permission regards the main component (App) and is used to tell
