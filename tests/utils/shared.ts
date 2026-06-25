@@ -182,6 +182,43 @@ export const withContentManagerPublish = async (
   await done;
 };
 
+/**
+ * Clicks Publish (or a custom publish button) and confirms the draft-relations
+ * dialog when it appears. Bidirectional M2M warnings use a "Publish" confirm;
+ * xToOne-style warnings use "Publish without relations".
+ */
+export const publishAndConfirmDraftRelations = async (
+  page: Page,
+  publishButton: Locator = page.getByRole('button', { name: 'Publish' })
+) => {
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+  const publishDone = waitForContentManagerMutation(page, 'publish');
+
+  await publishButton.click();
+
+  const dialogAppeared = await Promise.race([
+    dialog.waitFor({ state: 'visible', timeout: 5000 }).then(() => true as const),
+    publishDone.then(() => false as const),
+  ]);
+
+  if (!dialogAppeared) {
+    return;
+  }
+
+  const publishWithoutRelations = dialog.getByRole('button', {
+    name: 'Publish without relations',
+  });
+
+  if (await publishWithoutRelations.isVisible()) {
+    await withContentManagerPublish(page, () => publishWithoutRelations.click());
+    return;
+  }
+
+  await withContentManagerPublish(page, () =>
+    dialog.getByRole('button', { name: 'Publish', exact: true }).click()
+  );
+};
+
 /** Map a segment under `/admin` (or legacy `/admin/…`) to a pathname. */
 function resolveAdminUrl(adminPath: string): string {
   let s = adminPath.trim();

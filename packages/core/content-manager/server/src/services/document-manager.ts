@@ -244,7 +244,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
-        return 0;
+        return { unpublishedRelations: 0, draftM2mLinks: 0 };
       }
 
       const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
@@ -282,7 +282,10 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       const totalNumberDraftRelations: number = entities!.reduce(
-        (count: number, entity: Document) => sumDraftCounts(entity, uid) + count,
+        (count: number, entity: Document) => {
+          const { unpublishedRelations } = sumDraftCounts(entity, uid);
+          return count + unpublishedRelations;
+        },
         0
       );
 
