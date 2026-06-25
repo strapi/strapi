@@ -18,12 +18,14 @@ import { FeedbackProvider } from '../FeedbackModal';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
+import { isCtbAiOperationsV2Enabled } from '../lib/constants';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
 import { Schema } from '../lib/types/schema';
 import { UploadProjectToChatProvider } from '../UploadCodeModal';
 import { UploadFigmaToChatProvider } from '../UploadFigmaModal';
 
+import { OperationsChatProvider } from './OperationsProvider';
 import { SchemaChatProvider } from './SchemaProvider';
 
 interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
@@ -116,6 +118,7 @@ export const BaseChatProvider = ({
       body: {
         ...options?.body,
         schemas,
+        ...(isCtbAiOperationsV2Enabled() ? { ctbApiVersion: 2 as const } : {}),
         metadata: {
           lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
         },
@@ -232,11 +235,13 @@ export const ChatProvider = ({
   return (
     <BaseChatProvider defaultOpen={defaultOpen}>
       <SchemaChatProvider>
-        <UploadProjectToChatProvider>
-          <UploadFigmaToChatProvider>
-            <FeedbackProvider>{children}</FeedbackProvider>
-          </UploadFigmaToChatProvider>
-        </UploadProjectToChatProvider>
+        <OperationsChatProvider>
+          <UploadProjectToChatProvider>
+            <UploadFigmaToChatProvider>
+              <FeedbackProvider>{children}</FeedbackProvider>
+            </UploadFigmaToChatProvider>
+          </UploadProjectToChatProvider>
+        </OperationsChatProvider>
       </SchemaChatProvider>
     </BaseChatProvider>
   );

@@ -16,6 +16,8 @@ import { AttachmentPreview } from '../Attachments/AttachmentPreview';
 
 import { Marker } from './Marker';
 
+import type { CTBOperation } from '../../lib/types/ctbOperations';
+
 const MarkdownStyles = styled(Typography)`
   max-width: 65ch;
   margin: 0 auto;
@@ -155,6 +157,126 @@ const toMarkerFromSchemaTool = (part: SchemaToolPart): MarkerContentType => {
   };
 };
 
+// ---------------------------
+// Tool: schemaOperationsTool helpers
+// ---------------------------
+
+type OperationsToolPart = {
+  type: 'tool-schemaOperationsTool';
+  input?: { operations?: CTBOperation[] };
+  output?: { operations?: CTBOperation[]; error?: unknown };
+  toolCallId?: string;
+};
+
+const isOperationsToolPart = (part: any): part is OperationsToolPart =>
+  part && typeof part === 'object' && part.type === 'tool-schemaOperationsTool';
+
+const operationMarkerStatus = (op: CTBOperation): MarkerContentType['steps'][number]['status'] => {
+  switch (op.op) {
+    case 'createSchema':
+    case 'createComponentSchema':
+    case 'addAttribute':
+    case 'addCustomFieldAttribute':
+    case 'addCreatedComponentToDynamicZone':
+      return 'create';
+    case 'removeAttribute':
+    case 'deleteContentType':
+    case 'deleteComponent':
+    case 'removeComponentFromDynamicZone':
+      return 'remove';
+    default:
+      return 'update';
+  }
+};
+
+const getOperationTargetUid = (op: CTBOperation): string | undefined => {
+  if ('targetUid' in op) return op.targetUid;
+  if ('uid' in op) return op.uid;
+  return undefined;
+};
+
+const getOperationLink = (op: CTBOperation): string | undefined => {
+  const uid = getOperationTargetUid(op);
+  if (!uid) return undefined;
+
+  if (op.op === 'createComponentSchema' || op.op === 'deleteComponent' || uid.includes('.')) {
+    const category =
+      op.op === 'createComponentSchema'
+        ? op.componentCategory
+        : op.op === 'updateComponentSchema'
+          ? op.data.category
+          : '';
+    return `/plugins/content-type-builder/component-categories/${category}/${uid}`;
+  }
+
+  return `/plugins/content-type-builder/content-types/${uid}`;
+};
+
+const formatOperationDescription = (op: CTBOperation): string => {
+  switch (op.op) {
+    case 'editAttribute': {
+      const nextName =
+        typeof op.attributeToSet.name === 'string' ? op.attributeToSet.name : undefined;
+      if (nextName && nextName !== op.name) {
+        return `Rename ${op.name} → ${nextName}`;
+      }
+      return `Edit ${op.name}`;
+    }
+    case 'addAttribute':
+      return `Add ${String(op.attributeToSet.name ?? 'field')}`;
+    case 'removeAttribute':
+      return `Remove ${op.attributeToRemoveName}`;
+    case 'createSchema':
+      return `Create ${op.data.displayName}`;
+    case 'createComponentSchema':
+      return `Create ${op.data.displayName}`;
+    case 'updateSchema':
+      return `Update ${op.data.displayName}`;
+    case 'updateComponentSchema':
+      return `Update ${op.data.displayName}`;
+    case 'deleteContentType':
+    case 'deleteComponent':
+      return `Delete ${op.uid}`;
+    default:
+      return op.op;
+  }
+};
+
+const toMarkerFromOperationsTool = (part: OperationsToolPart): MarkerContentType => {
+  const outOperations = part.output?.operations ?? [];
+  const inOperations = part.input?.operations ?? [];
+
+  const operations = (outOperations.length ? outOperations : inOperations) as CTBOperation[];
+  const numOperations = operations.length;
+
+  const state: 'loading' | 'success' | 'error' = part.output
+    ? part.output.error
+      ? 'error'
+      : 'success'
+    : 'loading';
+
+  const steps = operations.map((operation, index) => ({
+    id: `${part.toolCallId ?? 'schemaOperationsTool'}-${index}`,
+    description: formatOperationDescription(operation),
+    status: operationMarkerStatus(operation),
+    link: getOperationLink(operation),
+  }));
+
+  const title =
+    state === 'success'
+      ? `Applied ${numOperations} operation${numOperations === 1 ? '' : 's'}`
+      : state === 'error'
+        ? `Failed to apply operation${numOperations === 1 ? '' : 's'}`
+        : 'Applying operations';
+
+  return {
+    type: 'marker',
+    title,
+    state,
+    steps,
+  };
+};
+
 const MessageContent = ({
   part,
 }: {
@@ -177,6 +299,11 @@ const MessageContent = ({
 
   if (isSchemaToolPart(part)) {
     const marker = toMarkerFromSchemaTool(part);
+    return <Marker {...marker} />;
+  }
+
+  if (isOperationsToolPart(part)) {
+    const marker = toMarkerFromOperationsTool(part);
     return <Marker {...marker} />;
   }
 

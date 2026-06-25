@@ -25,6 +25,12 @@ import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavig
 
 import { DataManagerContext, type DataManagerContextValue } from './DataManagerContext';
 import { actions, initialState, type State } from './reducer';
+import {
+  RenameMigrationModal,
+  applyRenameDecisions,
+  collectPendingRenames,
+  type PendingRename,
+} from './RenameMigrationModal';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
@@ -91,6 +97,17 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const [isSaving, setIsSaving] = React.useState(false);
   const previousLocationRef = React.useRef<string | null>(null);
 
+  // Rename-migration mode from server config ('prompt' | 'always' | 'never'),
+  // read from the schema response on load.
+  const renameMigrationModeRef = React.useRef<'prompt' | 'always' | 'never'>('prompt');
+
+  // When `modal` mode prompts the user, we hold the pending renames plus the
+  // promise resolver here so `saveSchema` can await the decision.
+  const [renameModal, setRenameModal] = React.useState<{
+    renames: PendingRename[];
+    resolve: (_acceptedKeys: Set<string> | null) => void;
+  } | null>(null);
+
   const isModified = React.useMemo(() => {
     return !(isEqual(components, initialComponents) && isEqual(contentTypes, initialContentTypes));
   }, [components, contentTypes, initialComponents, initialContentTypes]);
@@ -108,7 +125,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         fetchClient.get(`/content-type-builder/reserved-names`),
       ]);
 
-      const { components, contentTypes } = schemaResponse.data.data;
+      const { components, contentTypes, settings } = schemaResponse.data.data;
+
+      if (settings?.renameMigrations) {
+        renameMigrationModeRef.current = settings.renameMigrations;
+      }
 
       dispatch(
         actions.init({
@@ -210,6 +231,30 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       components: state.current.components,
       contentTypes: mutatedCTs,
     });
+
+    // In `prompt` mode, prompt the user per rename before saving: accepting keeps
+    // the rename in the payload (the server generates a data-preserving
+    // migration for it), refusing strips it (the field is dropped and recreated
+    // empty). `always` skips the prompt; the server ignores renames entirely
+    // in `never`.
+    if (renameMigrationModeRef.current === 'prompt') {
+      const pendingRenames = collectPendingRenames(requestData);
+
+      if (pendingRenames.length > 0) {
+        const acceptedKeys = await new Promise<Set<string> | null>((resolve) => {
+          setRenameModal({ renames: pendingRenames, resolve });
+        });
+        setRenameModal(null);
+
+        // The user cancelled the whole save — return to editing untouched.
+        if (acceptedKeys === null) {
+          setIsSaving(false);
+          return;
+        }
+
+        applyRenameDecisions(requestData, acceptedKeys);
+      }
+    }
 
     // Track that the save button was clicked (includes session ID via useCTBTracking)
     trackUsage('willUpdateCTBSchema', {
@@ -423,7 +468,18 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
   };
 
-  return <DataManagerContext.Provider value={context}>{children}</DataManagerContext.Provider>;
+  return (
+    <DataManagerContext.Provider value={context}>
+      {children}
+      {renameModal && (
+        <RenameMigrationModal
+          renames={renameModal.renames}
+          onConfirm={(acceptedKeys) => renameModal.resolve(acceptedKeys)}
+          onCancel={() => renameModal.resolve(null)}
+        />
+      )}
+    </DataManagerContext.Provider>
+  );
 };
 
 // eslint-disable-next-line import/no-default-export

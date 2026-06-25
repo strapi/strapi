@@ -25,6 +25,19 @@ export type Base = {
   };
 };
 
+/**
+ * A single attribute rename hop, recorded in the exact order the user performed
+ * it so the server can replay it as a data-preserving migration. Because the CTB
+ * forbids duplicate field names at any instant, the recorded sequence is always
+ * collision-free (a swap is expressed through the user's own intermediate name).
+ * Only renames of fields that already exist in the database are tracked — never
+ * brand-new fields. Transient (admin only).
+ */
+export type RenameHop = {
+  oldName: string;
+  newName: string;
+};
+
 export type Relation = Base & {
   type: 'relation';
   relation: Schema.Attribute.RelationKind.Any;
@@ -75,6 +88,7 @@ export type AnyAttribute = Base &
 export type Component = Omit<Struct.ComponentSchema, 'attributes'> & {
   status: Status;
   attributes: Array<AnyAttribute>;
+  renames?: RenameHop[];
 };
 
 export type ContentType = Omit<Struct.ContentTypeSchema, 'attributes'> & {
@@ -83,6 +97,7 @@ export type ContentType = Omit<Struct.ContentTypeSchema, 'attributes'> & {
   status: Status;
   restrictRelationsTo: Schema.Attribute.RelationKind.Any[] | null;
   attributes: Array<AnyAttribute>;
+  renames?: RenameHop[];
 };
 
 export type Components = Record<string, Component>;
