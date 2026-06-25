@@ -5,7 +5,6 @@ import { PlusCircle as PicturePlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetSource } from '../../../constants';
 import { getTrad, rawFileToAsset } from '../../../utils';
 
 import type { File } from '../../../../../shared/contracts/files';
@@ -55,7 +54,7 @@ export const EmptyStateAsset = ({
       for (let i = 0; i < files.length; i++) {
         const file = files.item(i);
         if (file) {
-          const asset = rawFileToAsset(file, AssetSource.Computer);
+          const asset = rawFileToAsset(file, 'computer');
 
           assets.push(asset);
         }

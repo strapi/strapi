@@ -1,10 +1,5 @@
 import { getTrad } from './utils';
 
-export const AssetSource = {
-  Url: 'url',
-  Computer: 'computer',
-} as const satisfies Record<Capitalize<AssetSource>, AssetSource>;
-
 export type AssetSource = 'url' | 'computer';
 
 export const PERMISSIONS = {

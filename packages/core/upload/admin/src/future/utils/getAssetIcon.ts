@@ -12,7 +12,7 @@ import {
 } from '@strapi/icons';
 import { DefaultTheme } from 'styled-components';
 
-import { AssetType } from '../enums';
+import { AssetType } from '../../enums';
 
 import { getFileExtension } from './files';
 

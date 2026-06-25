@@ -38,8 +38,8 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { AssetType } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
-import { AssetType } from '../../../../enums';
 import {
   useDeleteAssetMutation,
   useGetAssetQuery,
