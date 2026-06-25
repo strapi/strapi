@@ -5,7 +5,7 @@
   "dataOrigin": "v4",
   "baseline": {
     "type": "v4-scaffold",
-    "initialVersion": "4.26.0"
+    "initialVersion": "legacy"
   },
   "stages": [
     {

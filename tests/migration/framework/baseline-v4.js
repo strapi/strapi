@@ -11,7 +11,7 @@ const execa = require('execa');
  * @param {{ database: string, multiplier: number, dbEnv: Record<string, string>, initialVersion?: string }} opts
  */
 async function runV4Baseline(ctx, opts) {
-  const { database, multiplier, dbEnv, initialVersion = '4.26.0' } = opts;
+  const { database, multiplier, dbEnv, initialVersion = 'legacy' } = opts;
 
   console.log('\n📁 Scaffolding Strapi v4 app...');
   await execa('node', [path.join(ctx.COMPLEX_DIR, 'scripts', 'setup-v4-project.js')], {

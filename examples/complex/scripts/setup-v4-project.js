@@ -30,8 +30,8 @@ function findDockerComposeFile(v4ProjectDir) {
   return complexDockerCompose;
 }
 
-/** Pinned Strapi v4 app versions (npm), e.g. 4.26.0 — set by migration tests via STRAPI_V4_VERSION */
-const STRAPI_V4_VERSION = process.env.STRAPI_V4_VERSION || '4.26.0';
+/** Strapi v4 app versions (npm semver or dist-tag `legacy`), set by migration tests via STRAPI_V4_VERSION */
+const STRAPI_V4_VERSION = process.env.STRAPI_V4_VERSION || 'legacy';
 
 const CONTENT_TYPES = [
   'basic',

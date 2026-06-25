@@ -10,7 +10,7 @@ The fixture path is historical; we may relocate it under `tests/migration/` late
 
 ## Requirements
 
-- **`--initial <4.x semver>`** — explicit starting v4 npm version (**required** unless you pass **`--scenario`**). Final app is **always workspace** (this monorepo).
+- **`--initial <version>`** — starting Strapi npm version (**required** unless you pass **`--scenario`**). Use **`legacy`** for the latest v4 line (`@strapi/strapi@legacy`), or an explicit semver (e.g. `4.26.2`). Final app is **always workspace** (this monorepo).
 - Optional **`--scenario`** — load [`scenarios/v4-to-head.json`](scenarios/v4-to-head.json) instead of CLI flags.
 
 Hands-on commands: [examples/complex/README.md — Automated migration test](../../examples/complex/README.md). CI triggers and path filters are documented **below**.
@@ -21,11 +21,11 @@ Hands-on commands: [examples/complex/README.md — Automated migration test](../
 # Fast local smoke (~1–2 min when dist is warm)
 yarn test:migrations:smoke
 
-# Plan only (seconds; no installs)
-yarn test:migrations:plan --initial 4.26.0
+# Plan only (seconds; no installs; `legacy` needs npm)
+yarn test:migrations:plan --initial legacy
 
 # Full local run (sqlite default; add --skip-build when already built)
-yarn test:migrations --initial 4.26.0 --database sqlite --skip-build
+yarn test:migrations --initial legacy --database sqlite --skip-build
 
 # Same as CI path (named scenario)
 yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
@@ -38,10 +38,10 @@ Optional checkpoints: [`CHECKPOINTS.md`](CHECKPOINTS.md).
 Job **`migration_v5`** in [`.github/workflows/tests.yml`](../../.github/workflows/tests.yml) runs:
 
 ```bash
-yarn test:migrations --initial "$VERSION" --initial-node 20 --database <matrix> --skip-build
+yarn test:migrations --initial legacy --initial-node 20 --database <matrix> --skip-build
 ```
 
-on **sqlite**, **postgres**, **mysql**, and **mariadb** (Node **20**). **`$VERSION`** is the latest Strapi v4 from npm: `npm view @strapi/strapi@legacy version`. The step uses **`timeout 25m`**.
+on **sqlite**, **postgres**, **mysql**, and **mariadb** (Node **20**). **`legacy`** resolves to the latest Strapi v4 from npm (`@strapi/strapi@legacy`). The step uses **`timeout 25m`**.
 
 ### CI parity (local vs GitHub)
 
@@ -57,5 +57,6 @@ Job **`migration_v5`** runs when the **`migrations`** path filter matches the PR
 ## Implementation
 
 - Runner: [`scripts/run-migration-scenario.js`](scripts/run-migration-scenario.js)
+- Version aliases: [`framework/resolve-strapi-version.js`](framework/resolve-strapi-version.js)
 - Fixture spec + validators: [`fixture/`](fixture/)
 - Canonical scenario: [`scenarios/v4-to-head.json`](scenarios/v4-to-head.json)

@@ -176,12 +176,12 @@ yarn test:migrations:smoke
 Full flow after `yarn build` (or `--skip-build` when dist is current):
 
 ```bash
-yarn test:migrations --initial 4.26.0 --database sqlite --skip-build
+yarn test:migrations --initial legacy --database sqlite --skip-build
 ```
 
 You must pass **`--initial <4.x semver>`** (or use **`--scenario tests/migration/scenarios/v4-to-head.json`**): v4 baseline npm version. The **last step is always workspace** (this monorepo). There is **no** final Strapi version flag.
 
-The orchestrator (`tests/migration/scripts/run-migration-scenario.js`) wipes `examples/complex/.migration-v5/`, scaffolds a disposable v4 app via `scripts/setup-v4-project.js`, seeds it, then validates on the same database against workspace Strapi. **Postgres / MySQL / MariaDB** legs start DB containers via `examples/complex/docker-compose.dev.yml`; **sqlite** uses a local file and needs no Docker. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial 4.26.0`.
+The orchestrator (`tests/migration/scripts/run-migration-scenario.js`) wipes `examples/complex/.migration-v5/`, scaffolds a disposable v4 app via `scripts/setup-v4-project.js`, seeds it, then validates on the same database against workspace Strapi. **Postgres / MySQL / MariaDB** legs start DB containers via `examples/complex/docker-compose.dev.yml`; **sqlite** uses a local file and needs no Docker. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial legacy`.
 
 **CI:** [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job, Node 20, latest v4 from `@strapi/strapi@legacy`).
 
@@ -199,7 +199,7 @@ Pass flags after the script name (avoid an extra `--` before `--database` or Yar
 
 Examples:
 
-- `yarn test:migrations --initial 4.26.0 --database sqlite --skip-build`
+- `yarn test:migrations --initial legacy --database sqlite --skip-build`
 - `yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json`
 - `yarn test:migrations --initial-node 20` — fail fast if Node major ≠ 20
 

@@ -365,16 +365,9 @@ jobs:
       # only used to start postgres/mysql/mariadb services when the matrix leg needs them.
       - name: Monorepo build
         uses: ./.github/actions/run-build
-      # Latest Strapi v4 line: npm dist-tag `legacy` on @strapi/strapi (see tests/migration/README.md).
-      - name: Resolve latest Strapi v4 from npm
-        id: strapi_v4
-        run: |
-          VERSION="$(npm view @strapi/strapi@legacy version)"
-          echo "Resolved @strapi/strapi@legacy → ${VERSION}"
-          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
-      # `timeout` avoids a hung install/boot blocking the runner until the job's 30m cap (ubuntu images ship coreutils `timeout`).
+      # Latest Strapi v4 line: npm dist-tag `legacy` on @strapi/strapi (resolved by the orchestrator).
       - name: Run migration integration test
-        run: timeout 25m yarn test:migrations --initial "${{ steps.strapi_v4.outputs.version }}" --initial-node 20 --database ${{ matrix.database }} --skip-build
+        run: timeout 25m yarn test:migrations --initial legacy --initial-node 20 --database ${{ matrix.database }} --skip-build
 
   cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'

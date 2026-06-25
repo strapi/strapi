@@ -10,16 +10,16 @@
  *   yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
  *
  * Examples:
- *   yarn test:migrations --initial 4.26.0 --database sqlite --skip-build
+ *   yarn test:migrations --initial legacy --database sqlite --skip-build
  *   yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
- *   yarn test:migrations --initial 4.26.0 --initial-node 20 --workspace-node 24
+ *   yarn test:migrations --initial legacy --initial-node 20 --workspace-node 24
  *
  * When --scenario is omitted, you must pass **--initial** (no default). When --scenario is set,
  * `--initial` / `--via` are ignored.
  *
  * Duration: full runs are usually on the order of 1–4 minutes with `--database sqlite --skip-build` on
  * a warm machine; cold nested `yarn install` can be longer. CI uses `timeout 25m` as a safety cap.
- * Use `--print-plan` to resolve the scenario and exit in under a second (no installs, no network).
+ * Use `--print-plan` to resolve the scenario and exit without installs (resolving `legacy` needs npm).
  */
 
 const fs = require('fs');
@@ -42,6 +42,7 @@ const { runPinnedStrapiStage } = require('../framework/stage-pinned-v5');
 const { runValidators } = require('../framework/validators');
 const { buildScenarioFromFlags } = require('../framework/build-scenario');
 const { assertNodeMajor } = require('../framework/node-check');
+const { materializeScenarioVersions } = require('../framework/resolve-strapi-version');
 
 const REPO_ROOT = path.resolve(__dirname, '../../..');
 
@@ -53,7 +54,7 @@ const argv = yargs(hideBin(process.argv))
   .option('initial', {
     type: 'string',
     describe:
-      'Required unless --scenario is set: explicit npm Strapi version to start from (4.x = v4 scaffold+seed, 5.x = pinned v5+seed-v5). The last step is always workspace (monorepo), e.g. 4.26.0 or 5.7.0',
+      'Required unless --scenario is set: npm Strapi version to start from (4.x = v4 scaffold+seed, 5.x = pinned v5+seed-v5, `legacy` = latest v4). The last step is always workspace (monorepo), e.g. legacy, 4.26.2, or 5.7.0',
   })
   .option('via', {
     alias: 'v',
@@ -179,7 +180,7 @@ function assertCliInitialOrScenario() {
   const init = argv.initial;
   if (init == null || String(init).trim() === '') {
     console.error(
-      'Missing --initial: pass an explicit starting Strapi npm version (e.g. --initial 4.26.0 or --initial 5.7.0).\n' +
+      'Missing --initial: pass a starting Strapi npm version (e.g. --initial legacy, --initial 4.26.2, or --initial 5.7.0).\n' +
         'The last step is always **workspace** (this monorepo); there is no separate final Strapi version.\n' +
         'Or use --scenario <path> to load a JSON plan.'
     );
@@ -188,21 +189,26 @@ function assertCliInitialOrScenario() {
 }
 
 function resolveScenario() {
+  let scenario;
+  let sourceLabel;
+
   if (argv.scenario) {
     const scenarioPath = path.resolve(argv.scenario);
-    const scenario = loadScenarioFromFile(scenarioPath);
-    assertScenarioShape(scenario);
-    return { scenario, sourceLabel: path.basename(scenarioPath) };
+    scenario = loadScenarioFromFile(scenarioPath);
+    sourceLabel = path.basename(scenarioPath);
+  } else {
+    const via = normalizeVia(argv.via);
+    scenario = buildScenarioFromFlags({
+      initial: argv.initial,
+      via,
+      validators: argv.validators,
+    });
+    sourceLabel = 'CLI flags';
   }
 
-  const via = normalizeVia(argv.via);
-  const scenario = buildScenarioFromFlags({
-    initial: argv.initial,
-    via,
-    validators: argv.validators,
-  });
+  materializeScenarioVersions(scenario);
   assertScenarioShape(scenario);
-  return { scenario, sourceLabel: 'CLI flags' };
+  return { scenario, sourceLabel };
 }
 
 function shouldPrintPlanOnly() {
@@ -264,7 +270,10 @@ async function run() {
   }
 
   const composeProject = process.env.STRAPI_MIGRATION_COMPOSE_PROJECT || 'strapi_migration_v5';
-  const initialVersion = scenario.baseline.initialVersion || '4.26.0';
+  const initialVersion = scenario.baseline.initialVersion;
+  if (!initialVersion) {
+    throw new Error(`Scenario "${scenario.id}" is missing baseline.initialVersion`);
+  }
   const viaList = scenario.stages.filter((s) => s.type === 'strapi-pinned').map((s) => s.version);
   console.log(
     `\n📌 Migration test "${scenario.id}" (${sourceLabel})\n` +

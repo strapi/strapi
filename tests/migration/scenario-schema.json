@@ -14,7 +14,10 @@
           "required": ["type", "initialVersion"],
           "properties": {
             "type": { "const": "v4-scaffold" },
-            "initialVersion": { "type": "string", "description": "e.g. 4.26.0" }
+            "initialVersion": {
+              "type": "string",
+              "description": "e.g. legacy (latest v4) or 4.26.2"
+            }
           }
         },
         {

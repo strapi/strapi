@@ -1,5 +1,7 @@
 'use strict';
 
+const { isLatestV4Alias } = require('./resolve-strapi-version');
+
 /**
  * Build an in-memory scenario from CLI flags (same shape as JSON scenarios).
  */
@@ -9,6 +11,9 @@ function slugVersion(v) {
 }
 
 function initialMajor(version) {
+  if (isLatestV4Alias(version)) {
+    return 4;
+  }
   const m = Number(String(version).split('.')[0]);
   return Number.isFinite(m) ? m : NaN;
 }
@@ -24,7 +29,7 @@ function buildScenarioFromFlags(argv) {
   const major = initialMajor(initial);
   if (major !== 4 && major !== 5) {
     throw new Error(
-      `--initial must be Strapi 4.x (v4 scaffold) or 5.x (pinned app + seed-v5). Got "${initial}".`
+      `--initial must be Strapi 4.x (v4 scaffold), 5.x (pinned app + seed-v5), or \`legacy\` (latest v4 from npm). Got "${initial}".`
     );
   }
 
