@@ -172,7 +172,6 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/ts-zen": "^0.2.0",
     "@types/fs-extra": "11.0.4",
     "@types/inquirer": "9.0.9",
     "@types/jest": "29.5.2",
