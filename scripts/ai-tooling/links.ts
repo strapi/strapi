@@ -58,7 +58,7 @@ export const createSkillLink = (repoRoot: string, targetPath: string, name: stri
   } catch (err) {
     if (isWin && err instanceof Error && 'code' in err && err.code === 'EPERM') {
       throw new Error(
-        'ai-tooling: cannot create skill link on Windows (permission denied). ' +
+        'ai: cannot create skill link on Windows (permission denied). ' +
           'Enable Developer Mode (Settings → System → For developers) or run the shell as Administrator.',
         { cause: err }
       );
@@ -144,7 +144,7 @@ export const hasMissingLinks = (repoRoot: string): boolean => {
 export const SETUP_HINT_LINES = [
   '',
   '────────────────────────────────────────────────────────',
-  '  AI tooling missing initialization: run  yarn ai-tooling:sync',
+  '  AI tooling missing initialization: run  yarn ai:sync',
   '  Links repo skills (.ai/skills/) into .agents/, .claude/, .cursor/',
   '────────────────────────────────────────────────────────',
   '',

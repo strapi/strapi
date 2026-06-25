@@ -39,6 +39,8 @@
     "lint": "run -T tsc --noEmit && run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -56,7 +58,9 @@
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
     "eslint-config-custom": "5.49.0",
-    "tsconfig": "5.49.0"
+    "tsconfig": "5.49.0",
+    "vitest": "catalog:",
+    "vitest-config": "5.49.0"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
