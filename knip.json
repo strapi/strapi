@@ -1,0 +1,54 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreWorkspaces": ["examples/**", "docs/**", "tests/**", ".github/**", "scripts/**"],
+  "ignoreBinaries": ["run"],
+  "ignoreUnresolved": ["eslint-config-custom/.+"],
+  "workspaces": {
+    "packages/core/*": {
+      "entry": [
+        "admin/src/index.ts!",
+        "server/src/index.ts!",
+        "shared/index.ts!",
+        "src/index.ts!",
+        "src/admin.ts!",
+        "src/admin-test.ts!",
+        "bin/*.js!"
+      ],
+      "project": ["admin/**/*.{ts,tsx}!", "server/**/*.ts!", "shared/**/*.ts!", "src/**/*.ts!"]
+    },
+    "packages/core/strapi": {
+      "entry": [
+        "src/index.ts!",
+        "src/admin.ts!",
+        "src/admin-test.ts!",
+        "bin/strapi.js!",
+        "src/cli/index.ts!"
+      ],
+      "project": ["src/**/*.ts!"]
+    },
+    "packages/plugins/*": {
+      "entry": ["admin/src/index.ts!", "server/src/index.ts!"],
+      "project": ["admin/**/*.{ts,tsx}!", "server/**/*.ts!"]
+    },
+    "packages/cli/*": {
+      "entry": ["src/index.ts!", "bin/*.js!"],
+      "project": ["src/**/*.ts!"]
+    },
+    "packages/providers/*": {
+      "entry": ["src/index.ts!"],
+      "project": ["src/**/*.ts!"]
+    },
+    "packages/utils/*": {
+      "entry": ["src/index.ts!"],
+      "project": ["src/**/*.ts!"]
+    },
+    "packages/generators/*": {
+      "entry": ["src/index.ts!"],
+      "project": ["src/**/*.ts!"]
+    },
+    "packages/admin-test-utils": {
+      "entry": ["src/index.ts!"],
+      "project": ["src/**/*.{ts,tsx}!"]
+    }
+  }
+}
