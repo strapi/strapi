@@ -5,7 +5,7 @@ import Strapi, { type StrapiOptions } from './Strapi';
 import { destroyOnSignal, resolveWorkingDirectories, createUpdateNotifier } from './utils';
 import type {
   ContextDelegatedResponseErrorMethods,
-  ContextDelegatedResponeSuccessMethods,
+  ContextDelegatedResponseSuccessMethods,
 } from './services/server/koa-methods';
 
 export { default as compileStrapi } from './compile';
@@ -48,5 +48,5 @@ declare module 'koa' {
 
   interface DefaultContextDelegatedResponse
     extends ContextDelegatedResponseErrorMethods,
-      ContextDelegatedResponeSuccessMethods {}
+      ContextDelegatedResponseSuccessMethods {}
 }

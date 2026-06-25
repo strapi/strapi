@@ -83,7 +83,7 @@ export interface ContextDelegatedResponseErrorMethods {
   networkAuthenticationRequired(response?: string | object, details?: object): void;
 }
 
-export interface ContextDelegatedResponeSuccessMethods {
+export interface ContextDelegatedResponseSuccessMethods {
   /** 200 */
   send(response: unknown, status?: number): void;
   /** 201 */
