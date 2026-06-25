@@ -54,13 +54,22 @@ const purgeGeneratedPaths = async (appDir) => {
   }
 };
 
-const PLACEHOLDER_FILE = '.golden-empty';
+// Non-hidden marker so GitHub artifact upload/download preserves otherwise-empty dirs
+// (dotfiles like .gitkeep alone are not enough — empty directories are dropped).
+const PLACEHOLDER_FILE = 'golden-empty';
+const LEGACY_PLACEHOLDER_FILE = '.golden-empty';
 
-const ensureDirWithPlaceholder = async (dir) => {
+const writeCapturePlaceholder = async (dir) => {
   await fs.promises.mkdir(dir, { recursive: true });
-  const entries = await fs.promises.readdir(dir);
-  if (entries.length === 0) {
-    await fs.promises.writeFile(path.join(dir, PLACEHOLDER_FILE), '', 'utf8');
+  await fs.promises.writeFile(path.join(dir, PLACEHOLDER_FILE), '', 'utf8');
+};
+
+const removeCapturePlaceholders = async (dir) => {
+  for (const name of [PLACEHOLDER_FILE, LEGACY_PLACEHOLDER_FILE]) {
+    const marker = path.join(dir, name);
+    if (fs.existsSync(marker)) {
+      await fs.promises.unlink(marker);
+    }
   }
 };
 
@@ -74,7 +83,7 @@ const captureFilesystem = async (appDir, goldenDir) => {
     } else {
       await fs.promises.mkdir(dest, { recursive: true });
     }
-    await ensureDirWithPlaceholder(dest);
+    await writeCapturePlaceholder(dest);
   }
 };
 
@@ -88,6 +97,7 @@ const restoreFilesystem = async (appDir, goldenDir) => {
     } else {
       await fs.promises.mkdir(target, { recursive: true });
     }
+    await removeCapturePlaceholders(target);
   }
 };
 
