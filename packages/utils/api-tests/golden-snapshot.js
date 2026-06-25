@@ -54,6 +54,16 @@ const purgeGeneratedPaths = async (appDir) => {
   }
 };
 
+const PLACEHOLDER_FILE = '.golden-empty';
+
+const ensureDirWithPlaceholder = async (dir) => {
+  await fs.promises.mkdir(dir, { recursive: true });
+  const entries = await fs.promises.readdir(dir);
+  if (entries.length === 0) {
+    await fs.promises.writeFile(path.join(dir, PLACEHOLDER_FILE), '', 'utf8');
+  }
+};
+
 const captureFilesystem = async (appDir, goldenDir) => {
   for (const rel of SNAPSHOT_DIRS) {
     const src = path.join(appDir, rel);
@@ -64,6 +74,7 @@ const captureFilesystem = async (appDir, goldenDir) => {
     } else {
       await fs.promises.mkdir(dest, { recursive: true });
     }
+    await ensureDirWithPlaceholder(dest);
   }
 };
 
