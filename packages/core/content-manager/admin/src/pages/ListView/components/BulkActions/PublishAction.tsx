@@ -71,7 +71,7 @@ export const formatErrorMessages = (
   errors: FormErrors,
   parentKey: string,
   formatMessage: IntlShape['formatMessage']
-) => {
+): string[] => {
   if (!errors) return [];
 
   const messages: string[] = [];
