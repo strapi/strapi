@@ -51,7 +51,7 @@
     "into-stream": "^5.1.0"
   },
   "devDependencies": {
-    "@types/node": "20.19.41",
+    "@types/node": "22.20.0",
     "eslint-config-custom": "5.59.0",
     "tsconfig": "5.59.0"
   },

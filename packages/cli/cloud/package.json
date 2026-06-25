@@ -75,7 +75,7 @@
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
     "@types/lodash": "^4.14.191",
-    "@types/node": "20.19.41",
+    "@types/node": "22.20.0",
     "eslint-config-custom": "5.59.0",
     "tsconfig": "5.59.0",
     "vitest": "catalog:",

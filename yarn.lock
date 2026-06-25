@@ -9442,7 +9442,7 @@ __metadata:
     "@types/markdown-it-container": "npm:2.0.9"
     "@types/markdown-it-emoji": "npm:2.0.4"
     "@types/markdown-it-footnote": "npm:3.0.3"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/react-window": "npm:1.8.8"
@@ -9530,7 +9530,7 @@ __metadata:
     "@types/cli-progress": "npm:3.11.5"
     "@types/eventsource": "npm:1.1.15"
     "@types/lodash": "npm:^4.14.191"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     axios: "npm:1.20.0"
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
@@ -9581,7 +9581,7 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/prismjs": "npm:1.26.5"
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
@@ -9650,7 +9650,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
     formik: "npm:2.4.9"
@@ -9702,7 +9702,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/micromatch": "npm:^4.0.9"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/pluralize": "npm:0.0.32"
     "@types/react": "npm:18.3.2"
     ai: "npm:6.0.277"
@@ -9776,7 +9776,7 @@ __metadata:
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@vercel/stega": "npm:0.1.2"
     ajv: "npm:8.20.0"
     ajv-formats: "npm:3.0.1"
@@ -9845,7 +9845,7 @@ __metadata:
     "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/semver": "npm:7.5.0"
     "@types/stream-chain": "npm:2.0.1"
     "@types/stream-json": "npm:1.7.8"
@@ -9885,7 +9885,7 @@ __metadata:
     "@strapi/utils": "npm:5.59.0"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     ajv: "npm:8.20.0"
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
@@ -9966,7 +9966,7 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
@@ -10032,7 +10032,7 @@ __metadata:
     "@strapi/utils": "npm:5.59.0"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jscodeshift": "npm:17.3.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     chalk: "npm:4.1.2"
     copyfiles: "npm:2.4.1"
     eslint-config-custom: "npm:5.59.0"
@@ -10067,7 +10067,7 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
@@ -10107,7 +10107,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
   dependencies:
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     lodash: "npm:4.18.1"
     tsconfig: "npm:5.59.0"
@@ -10122,7 +10122,7 @@ __metadata:
     "@strapi/types": "npm:5.59.0"
     "@types/debug": "npm:^4"
     "@types/jest": "npm:29.5.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     debug: "npm:4.3.4"
     jest: "npm:29.6.0"
     openapi-types: "npm:12.1.3"
@@ -10136,7 +10136,7 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@strapi/utils": "npm:5.59.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     lodash: "npm:4.18.1"
     qs: "npm:6.16.1"
@@ -10185,7 +10185,7 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-colorful: "npm:5.6.1"
@@ -10225,7 +10225,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/swagger-ui-dist": "npm:3.30.4"
     bcryptjs: "npm:2.4.3"
     cheerio: "npm:^1.2.0"
@@ -10276,7 +10276,7 @@ __metadata:
     "@types/graphql-depth-limit": "npm:1.1.5"
     "@types/koa-bodyparser": "npm:4.3.12"
     "@types/koa__cors": "npm:5.0.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     cross-env: "npm:^7.0.3"
     eslint-config-custom: "npm:5.59.0"
     graphql: "npm:^16.8.1"
@@ -10316,7 +10316,7 @@ __metadata:
     "@strapi/design-system": "npm:2.2.4"
     "@strapi/icons": "npm:2.2.4"
     "@strapi/strapi": "npm:5.59.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.6"
@@ -10383,7 +10383,7 @@ __metadata:
   dependencies:
     "@aws-sdk/client-ses": "npm:3.1023.0"
     "@strapi/utils": "npm:5.59.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     tsconfig: "npm:5.59.0"
     vitest: "catalog:"
@@ -10396,7 +10396,7 @@ __metadata:
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
     "@strapi/utils": "npm:5.59.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     form-data: "npm:4.0.6"
     mailgun.js: "npm:10.2.1"
@@ -10410,7 +10410,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     nodemailer: "npm:10.0.9"
     tsconfig: "npm:5.59.0"
@@ -10425,7 +10425,7 @@ __metadata:
   dependencies:
     "@sendgrid/mail": "npm:8.1.3"
     "@strapi/utils": "npm:5.59.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     tsconfig: "npm:5.59.0"
   languageName: unknown
@@ -10435,7 +10435,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     nodemailer: "npm:10.0.9"
     tsconfig: "npm:5.59.0"
@@ -10452,7 +10452,7 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:3.1023.0"
     "@aws-sdk/s3-request-presigner": "npm:3.1023.0"
     "@aws-sdk/types": "npm:3.973.6"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     lodash: "npm:4.18.1"
     tsconfig: "npm:5.59.0"
@@ -10466,7 +10466,7 @@ __metadata:
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
     "@strapi/utils": "npm:5.59.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     cloudinary: "npm:^2.7.0"
     eslint-config-custom: "npm:5.59.0"
     into-stream: "npm:^5.1.0"
@@ -10481,7 +10481,7 @@ __metadata:
     "@strapi/types": "npm:5.59.0"
     "@strapi/utils": "npm:5.59.0"
     "@types/fs-extra": "npm:11.0.4"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     eslint-config-custom: "npm:5.59.0"
     fs-extra: "npm:11.3.4"
     tsconfig: "npm:5.59.0"
@@ -10505,7 +10505,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@types/jest": "npm:29.5.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     date-fns: "npm:2.30.0"
     fractional-indexing: "npm:3.2.0"
     jest: "npm:29.6.0"
@@ -10566,7 +10566,7 @@ __metadata:
     "@types/inquirer": "npm:9.0.9"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/webpack-bundle-analyzer": "npm:4.7.0"
     "@types/webpack-hot-middleware": "npm:2.25.12"
     "@vitejs/plugin-react-swc": "npm:3.11.0"
@@ -10639,7 +10639,7 @@ __metadata:
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
     "@types/koa__router": "npm:12.0.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     commander: "npm:8.3.0"
     croner: "npm:10.0.1"
     eslint-config-custom: "npm:5.59.0"
@@ -10664,7 +10664,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     eslint-config-custom: "npm:5.59.0"
@@ -10717,7 +10717,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/jscodeshift": "npm:17.3.0"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     commander: "npm:8.3.0"
@@ -10770,7 +10770,7 @@ __metadata:
     "@types/koa": "npm:2.15.2"
     "@types/koa-range": "npm:0.3.5"
     "@types/koa-static": "npm:4.0.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     byte-size: "npm:8.1.1"
     cropperjs: "npm:1.6.2"
     date-fns: "npm:2.30.0"
@@ -10818,7 +10818,7 @@ __metadata:
     "@types/http-errors": "npm:2.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.59.0"
     execa: "npm:5.1.1"
@@ -12266,12 +12266,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.19.41":
-  version: 20.19.41
-  resolution: "@types/node@npm:20.19.41"
+"@types/node@npm:22.20.0":
+  version: 22.20.0
+  resolution: "@types/node@npm:22.20.0"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10c0/aa2a07317bbd700bea68d5784b403a738dbcebadbe2d8ef05649f7953065120d5d37f7edfdd7881df3a3bd15328c8a4dc46fdd69732ab540d552c505378c585b
+  checksum: 10c0/55d78223205bd5f81f043d71b7a5c8d8854b9ef44ef81291680943adb27fa5ba1f092658c87183d5bc8cf6baf6a57b81dad966eb3afa452cc301a615b6d9b20e
   languageName: node
   linkType: hard
 
@@ -15640,7 +15640,7 @@ __metadata:
     "@actions/github": "npm:^6.0.0"
     "@linear/sdk": "npm:^37.0.0"
     "@notionhq/client": "npm:^2.2.15"
-    "@types/node": "npm:^22.0.0"
+    "@types/node": "npm:22.20.0"
     tsup: "npm:^8.0.0"
     typescript: "npm:^5.4.0"
   languageName: unknown
@@ -15669,7 +15669,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:^22"
+    "@types/node": "npm:22.20.0"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
     better-sqlite3: "npm:12.11.1"
@@ -15998,7 +15998,7 @@ __metadata:
     "@types/async-retry": "npm:^1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/inquirer": "npm:9.0.9"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     async-retry: "npm:1.3.3"
     chalk: "npm:4.1.2"
     commander: "npm:8.3.0"
@@ -16898,7 +16898,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "draft-release@workspace:.github/actions/draft-release"
   dependencies:
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     typescript: "npm:5.9.3"
   languageName: unknown
   linkType: soft
@@ -17006,7 +17006,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:^22"
+    "@types/node": "npm:22.20.0"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
     better-sqlite3: "npm:12.11.1"
@@ -19361,7 +19361,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": "workspace:*"
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     better-sqlite3: "npm:12.11.1"
     lodash: "npm:4.18.1"
     mysql2: "npm:3.23.1"
@@ -22066,7 +22066,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": "workspace:*"
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     better-sqlite3: "npm:12.11.1"
     lodash: "npm:4.18.1"
     mysql2: "npm:3.23.1"
@@ -30913,7 +30913,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "vitest-config@workspace:packages/utils/vitest-config"
   dependencies:
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     vitest: "catalog:"
   peerDependencies:
     vitest: ^4.0.0

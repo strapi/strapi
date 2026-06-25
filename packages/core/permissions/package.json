@@ -50,7 +50,7 @@
     "sift": "16.0.1"
   },
   "devDependencies": {
-    "@types/node": "20.19.41",
+    "@types/node": "22.20.0",
     "eslint-config-custom": "5.59.0",
     "tsconfig": "5.59.0",
     "vitest": "catalog:",

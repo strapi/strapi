@@ -14,7 +14,7 @@
     "@notionhq/client": "^2.2.15"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "22.20.0",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0"
   }

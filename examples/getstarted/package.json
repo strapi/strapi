@@ -44,6 +44,6 @@
     "uuid": "getstarted"
   },
   "devDependencies": {
-    "@types/node": "20.19.41"
+    "@types/node": "22.20.0"
   }
 }
