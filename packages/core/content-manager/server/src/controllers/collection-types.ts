@@ -1028,10 +1028,10 @@ export default {
       }
     }
 
-    const number = await documentManager.countDraftRelations(id, model, locale);
+    const counts = await documentManager.countDraftRelations(id, model, locale);
 
     return {
-      data: number,
+      data: counts,
     };
   },
 
