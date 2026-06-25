@@ -179,10 +179,21 @@ const PreviewPage = () => {
       }
 
       if (event.data?.type === PUBLIC_EVENTS.PREVIEW_READY) {
-        const script = await getPreviewScript(previewHighlightColors);
+        try {
+          const script = await getPreviewScript(previewHighlightColors);
 
-        const sendMessage = getSendMessage(iframeRef);
-        sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
+          const sendMessage = getSendMessage(iframeRef);
+          sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
+        } catch {
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: 'content-manager.preview.error.script-failed',
+              defaultMessage:
+                'Could not load the live preview script. Visual editing may not be available.',
+            }),
+          });
+        }
       }
     };
 
@@ -191,7 +202,7 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [documentId, toggleNotification, theme]);
+  }, [documentId, toggleNotification, theme, formatMessage]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
