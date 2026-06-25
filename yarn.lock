@@ -9332,6 +9332,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/definitions@workspace:packages/definitions":
+  version: 0.0.0-use.local
+  resolution: "@strapi/definitions@workspace:packages/definitions"
+  dependencies:
+    "@types/node": "npm:20.19.41"
+    eslint-config-custom: "npm:5.48.1"
+    tsconfig: "npm:5.48.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.48.1"
+    zod: "npm:3.25.67"
+  languageName: unknown
+  linkType: soft
+
 "@strapi/design-system@npm:2.2.0":
   version: 2.2.0
   resolution: "@strapi/design-system@npm:2.2.0"
