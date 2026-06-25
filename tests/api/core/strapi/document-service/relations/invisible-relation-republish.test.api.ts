@@ -4,6 +4,7 @@
  */
 import type { Core, UID } from '@strapi/types';
 import { testInTransaction } from '../../../../utils';
+import { destroyTestSetup, type BuilderHelperReturn } from '../../../../utils/builder-helper';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -65,8 +66,7 @@ describe('Document Service invisible inverse oneToOne', () => {
   });
 
   afterAll(async () => {
-    await strapi.destroy();
-    await builder.cleanup();
+    await destroyTestSetup({ strapi, builder } as BuilderHelperReturn);
   });
 
   testInTransaction(

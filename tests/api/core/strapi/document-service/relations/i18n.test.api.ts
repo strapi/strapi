@@ -6,6 +6,7 @@
  */
 import type { Core } from '@strapi/types';
 import { testInTransaction } from '../../../../utils';
+import { destroyTestSetup, type BuilderHelperReturn } from '../../../../utils/builder-helper';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -137,10 +138,9 @@ describe('Document Service relations', () => {
 
   afterAll(async () => {
     // Delete all locales that have been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
 
-    await strapi.destroy();
-    await builder.cleanup();
+    await destroyTestSetup({ strapi, builder } as BuilderHelperReturn);
   });
 
   describe('Non i18n Content Type (Shop) -> i18n Content Type (Product)', () => {

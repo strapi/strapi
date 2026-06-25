@@ -8,9 +8,17 @@ inputs:
     description: 'Should run EE or CE tests'
   jestOptions:
     description: 'Jest options'
+  goldenArtifact:
+    description: 'Pre-captured golden snapshot artifact name (optional)'
+    required: false
 runs:
   using: 'composite'
   steps:
+    - if: ${{ inputs.goldenArtifact != '' }}
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        name: ${{ inputs.goldenArtifact }}
+        path: test-apps/.golden/api
     - run: $GITHUB_ACTION_PATH/script.sh
       env:
         DB_OPTIONS: ${{ inputs.dbOptions }}

@@ -103,6 +103,8 @@ const main = async ({ database, generateApp }, args) => {
       const strapi = await createStrapiInstance({ logLevel: 'error' });
       const { goldenDir, client } = await captureGoldenSnapshot({ strapi });
       console.log(`[api-tests] golden snapshot captured at ${goldenDir} (${client})`);
+    } else {
+      console.log('[api-tests] using existing golden snapshot (skipping capture)');
     }
 
     await runAllTests(args).catch(() => {
