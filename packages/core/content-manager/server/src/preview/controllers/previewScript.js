@@ -210,6 +210,28 @@ function previewScript(config) {
     }
   };
 
+  const SAFE_MEDIA_URL_PROTOCOLS = new Set(['http:', 'https:', 'data:']);
+
+  /**
+   * Reject dangerous URL schemes before assigning media `src` attributes.
+   *
+   * @param {string | null | undefined} url
+   * @returns {string | null}
+   */
+  const sanitizeMediaUrl = (url) => {
+    if (!url) return null;
+
+    try {
+      const parsed = new URL(url, window.location.href);
+      if (!SAFE_MEDIA_URL_PROTOCOLS.has(parsed.protocol)) {
+        return null;
+      }
+      return parsed.href;
+    } catch {
+      return url.startsWith('/') ? url : null;
+    }
+  };
+
   /**
    * Extract a recognizable media filename from a URL string. Works for
    * direct backend URLs, relative paths, and proxy URLs that embed the
@@ -1118,11 +1140,15 @@ function previewScript(config) {
       // Resolve relative form-value URLs against the existing src's origin
       // so the swap targets the Strapi backend, not the iframe origin.
       const resolvedUrl = resolveMediaUrl(original, url);
+      const safeUrl = sanitizeMediaUrl(resolvedUrl);
+      if (!safeUrl) {
+        return;
+      }
 
       // No mime info — fall back to updating whatever's active
       if (!desiredTag) {
-        if (active.getAttribute('src') !== resolvedUrl) {
-          active.setAttribute('src', resolvedUrl);
+        if (active.getAttribute('src') !== safeUrl) {
+          active.setAttribute('src', safeUrl);
         }
         active.style.display = '';
         return;
@@ -1131,8 +1157,8 @@ function previewScript(config) {
       // Original's tag matches: restore it (removing any previous injection)
       if (original.tagName === desiredTag) {
         removeInjection();
-        if (original.getAttribute('src') !== resolvedUrl) {
-          original.setAttribute('src', resolvedUrl);
+        if (original.getAttribute('src') !== safeUrl) {
+          original.setAttribute('src', safeUrl);
         }
         original.style.display = '';
         return;
@@ -1140,8 +1166,8 @@ function previewScript(config) {
 
       // Existing injection of the right tag: just update its src
       if (injection && injection.tagName === desiredTag) {
-        if (injection.getAttribute('src') !== resolvedUrl) {
-          injection.setAttribute('src', resolvedUrl);
+        if (injection.getAttribute('src') !== safeUrl) {
+          injection.setAttribute('src', safeUrl);
         }
         return;
       }
@@ -1165,7 +1191,7 @@ function previewScript(config) {
         if (isAudio && skipForAudio.has(attr.name)) return;
         newInjection.setAttribute(attr.name, attr.value);
       });
-      newInjection.setAttribute('src', resolvedUrl);
+      newInjection.setAttribute('src', safeUrl);
       if (desiredTag === 'VIDEO' || desiredTag === 'AUDIO') {
         newInjection.setAttribute('controls', '');
       }
