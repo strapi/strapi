@@ -13,19 +13,6 @@ import {
 } from '../derive-content-type-mcp-tools';
 import { ACTIONS } from '../../services/permission-checker';
 
-/**
- * Phased per: .agents/local-state/2026-05-25-fine-tune-content-management-tools/003-merged-analysis-and-implementation-plan.md
- *
- * | Phase | Scope in this file |
- * |-------|-------------------|
- * | 1 ✅  | Handler contract tests (list/get/create/delete + update/publish/unpublish/discard + single write/publish/unpublish/discard + publish schema contract) |
- * | 2     | `buildDataSchema`, `buildSortSchema`, `buildFiltersSchema`, `getComponentLeafPaths` — update imports when extracted to `mcp/schemas/*` |
- * | 3     | Component permission narrowing — tighten Zod to permitted leaf paths only (F4 partial, F7) |
- * | 4 ✅  | F1 global.strapi DI, F2 single unpublish transaction result, F3 shared permission checker |
- * | 5     | Populate depth presets per operation (F5, F14) — assert `populateDeep` depth in handler tests |
- * | 6     | Optional follow-ups (F6, F8, F12–F20) — not covered here yet |
- */
-
 // ---------------------------------------------------------------------------
 // Type helpers derived from the source module's exported signatures
 // ---------------------------------------------------------------------------
@@ -240,6 +227,12 @@ jest.mock('../../services/utils/populate', () => ({
   getPopulateForLocalizations: jest.fn(() => ({})),
 }));
 
+// shapeRelationsForMcp is a passthrough in handler tests.
+// Pure shaping logic is covered by mcp/sanitizers/__tests__/shape-relations.test.ts.
+jest.mock('../sanitizers/shape-relations', () => ({
+  shapeRelationsForMcp: jest.fn((_uid: unknown, data: unknown) => Promise.resolve(data)),
+}));
+
 const mockSetCreatorFields = jest.fn(() => (data: unknown) => Promise.resolve(data));
 
 jest.mock('@strapi/utils', () => {
@@ -303,12 +296,57 @@ jest.mock('@strapi/utils', () => {
 });
 
 // ---------------------------------------------------------------------------
+// slugifyUidForMcpToolName
+// ---------------------------------------------------------------------------
+
+describe('slugifyUidForMcpToolName', () => {
+  it('maps api UIDs to the first model-name segment only', () => {
+    expect(slugifyUidForMcpToolName('api::article.article')).toBe('article');
+  });
+
+  it('maps plugin UIDs to namespace-model_content-type per documented format', () => {
+    expect(slugifyUidForMcpToolName('plugin::i18n.locale')).toBe('plugin-i18n_locale');
+  });
+
+  it('includes the content-type suffix so plugin models with the same prefix stay unique', () => {
+    expect(slugifyUidForMcpToolName('plugin::cms-basics.page')).toBe('plugin-cms-basics_page');
+    expect(slugifyUidForMcpToolName('plugin::cms-basics.settings')).toBe(
+      'plugin-cms-basics_settings'
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Tool structure tests (unchanged from original)
 // ---------------------------------------------------------------------------
 
 describe('deriveDisplayedContentTypeMcpToolDefinitions', () => {
-  it('maps uid segments into a stable tool name slug', () => {
-    expect(slugifyUidForMcpToolName('api::article.article')).toBe('article');
+  it('derives unique tool names for plugin content types that share a model-name prefix', () => {
+    const models = [
+      baseModel({
+        uid: 'plugin::cms-basics.page',
+        apiID: 'page',
+        kind: 'collectionType',
+      }),
+      baseModel({
+        uid: 'plugin::cms-basics.settings',
+        apiID: 'settings',
+        kind: 'singleType',
+      }),
+    ];
+
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, models);
+    const names = tools.map((tool) => tool.name);
+    const uniqueNames = new Set(names);
+
+    expect(uniqueNames.size).toBe(names.length);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'list_plugin-cms-basics_page',
+        'get_plugin-cms-basics_settings',
+        'write_plugin-cms-basics_settings',
+      ])
+    );
   });
 
   it('emits list/get with explorer.read for a collection type', () => {
@@ -533,6 +571,25 @@ describe('tool input schemas', () => {
       getJsonSchema as { properties?: { data?: { additionalProperties?: unknown } } }
     ).properties?.data;
     expect(dataProperty).not.toHaveProperty('additionalProperties', false);
+  });
+
+  it('delete output schema accepts empty data for relation content types', () => {
+    const model = baseModel({
+      attributes: {
+        title: { type: 'string' },
+        category: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'api::category.category',
+        },
+      } as TestAttrs,
+    });
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const deleteTool = tools.find((t) => t.name === 'delete_article')!;
+    const schema = deleteTool.resolveOutputSchema(mockContext);
+
+    expect(schema.safeParse({ data: {} }).success).toBe(true);
+    expect(JSON.stringify(z.toJSONSchema(schema))).not.toContain('category');
   });
 
   it('falls back to generic locale string when localeCodes are null', () => {
@@ -2641,12 +2698,6 @@ describe('schema: publish tool behavior contract', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Phase 5 — Populate depth presets (F5, F14)
-// TODO @Nico Phase 5: add describe('handler populate presets') asserting populateDeep depth
-//   per operation — list=1, get=bounded, single read/write/delete=bounded, lifecycle=shallow
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
 // Phase 1 — Handler contract tests (locale edge cases, pre-existing)
 // ---------------------------------------------------------------------------
 
@@ -2698,5 +2749,118 @@ describe('single-type handler: delete on non-localized CT', () => {
       uid,
       expect.objectContaining({ locale: 'fr' })
     );
+  });
+});
+
+describe('relation populate: read handlers call populateDeep and withPopulateOverride', () => {
+  const uid = 'api::article.article';
+  const model = baseModel({ uid, attributes: { title: { type: 'string' } } as TestAttrs });
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+  // Needs getModel for hasDraftAndPublish in list handler
+  const strapiForTest = makeMinimalGlobalStrapi();
+
+  const getBuilderFromMock = () => {
+    const { getService } = jest.requireMock('../../utils') as { getService: jest.Mock };
+    return getService('populate-builder')();
+  };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('list_* calls populateDeep and withPopulateOverride, not countRelations', async () => {
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const listTool = tools.find((t) => t.name === 'list_article')!;
+    const handler = listTool.createHandler(strapiForTest, context);
+    await handler({ args: {}, extra: mockExtra });
+
+    const builder = getBuilderFromMock();
+    expect(builder.populateDeep).toHaveBeenCalled();
+    expect(builder.withPopulateOverride).toHaveBeenCalled();
+    expect(builder.countRelations).not.toHaveBeenCalled();
+  });
+
+  it('get_* calls populateDeep and withPopulateOverride, not countRelations', async () => {
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const getTool = tools.find((t) => t.name === 'get_article')!;
+
+    mockDocumentManager.findOne.mockResolvedValueOnce({ documentId: 'doc-1' });
+    const handler = getTool.createHandler(strapiForTest, context);
+    await handler({ args: { documentId: 'doc-1' }, extra: mockExtra });
+
+    const builder = getBuilderFromMock();
+    expect(builder.populateDeep).toHaveBeenCalled();
+    expect(builder.withPopulateOverride).toHaveBeenCalled();
+    expect(builder.countRelations).not.toHaveBeenCalled();
+  });
+});
+
+describe('relation identity: shapeRelationsForMcp called on every op', () => {
+  const { shapeRelationsForMcp: mockShapeRelations } = jest.requireMock(
+    '../sanitizers/shape-relations'
+  ) as { shapeRelationsForMcp: jest.Mock };
+
+  const uid = 'api::article.article';
+  const model = baseModel({
+    uid,
+    attributes: { title: { type: 'string' } } as TestAttrs,
+    options: { draftAndPublish: true },
+  });
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+  const strapiForTest = makeMinimalGlobalStrapi();
+
+  const runHandler = async (toolName: string, args: Record<string, unknown> = {}) => {
+    jest.clearAllMocks();
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
+    const tool = tools.find((t) => t.name === toolName)!;
+    const handler = tool.createHandler(strapiForTest, context);
+    await handler({ args, extra: mockExtra });
+    return mockShapeRelations;
+  };
+
+  beforeEach(() => {
+    mockDocumentManager.findOne.mockResolvedValue({ documentId: 'doc-1' });
+    mockDocumentManager.findMany.mockResolvedValue([{ documentId: 'doc-1' }]);
+    mockDocumentManager.exists.mockResolvedValue(true);
+    mockDocumentManager.publish.mockResolvedValue([{ documentId: 'doc-1' }]);
+    mockDocumentManager.unpublish.mockResolvedValue({ documentId: 'doc-1' });
+    mockDocumentManager.discardDraft.mockResolvedValue({ documentId: 'doc-1' });
+  });
+
+  it('list_article routes output through shapeRelationsForMcp', async () => {
+    mockDocumentManager.findPage.mockResolvedValueOnce({
+      results: [{ documentId: 'doc-1', category: { documentId: 'c1', name: 'LEAKED' } }],
+      pagination: { page: 1, pageSize: 25, pageCount: 1, total: 1 },
+    });
+    const spy = await runHandler('list_article');
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('get_article routes output through shapeRelationsForMcp', async () => {
+    const spy = await runHandler('get_article', { documentId: 'doc-1' });
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('create_article routes output through shapeRelationsForMcp', async () => {
+    const spy = await runHandler('create_article', { data: { title: 'New' } });
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('update_article routes output through shapeRelationsForMcp', async () => {
+    const spy = await runHandler('update_article', { documentId: 'doc-1', data: { title: 'Up' } });
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('publish_article routes output through shapeRelationsForMcp', async () => {
+    const spy = await runHandler('publish_article', { documentId: 'doc-1' });
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('unpublish_article routes output through shapeRelationsForMcp', async () => {
+    const spy = await runHandler('unpublish_article', { documentId: 'doc-1' });
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('discard_article_draft routes output through shapeRelationsForMcp', async () => {
+    const spy = await runHandler('discard_article_draft', { documentId: 'doc-1' });
+    expect(spy).toHaveBeenCalled();
   });
 });

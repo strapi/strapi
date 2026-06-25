@@ -47,6 +47,7 @@ import {
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 import { AnyData, handleInvisibleAttributes } from '../utils/data';
+import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
@@ -183,22 +184,25 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   }
 
   const addHintTooltip = (action: Action, children: React.ReactNode) => {
-    return !action.disabled ? (
-      <Tooltip
-        label={formatMessage(
-          {
+    if (action.disabled) {
+      return children;
+    }
+
+    const hint =
+      action.type === 'publish'
+        ? formatMessage({
+            id: 'content-manager.containers.EditView.publishHint',
+            defaultMessage: 'Ctrl / Cmd + Shift + Enter to publish',
+          })
+        : formatMessage({
             id: 'content-manager.containers.EditView.saveHint',
-            defaultMessage: 'Ctrl / Cmd + Enter to {action}',
-          },
-          {
-            action: action.label,
-          }
-        )}
-      >
+            defaultMessage: 'Ctrl / Cmd + Enter to save',
+          });
+
+    return (
+      <Tooltip label={hint}>
         <Flex width="100%">{children}</Flex>
       </Tooltip>
-    ) : (
-      children
     );
   };
 
@@ -236,17 +240,23 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
         <Flex flex={1} order={{ initial: -1, large: 0 }} alignItems="stretch" direction="column">
           {secondaryAction.type === 'publish' ? (
             <tours.contentManager.Publish>
+              {addHintTooltip(
+                secondaryAction,
+                <DocumentActionButton
+                  {...secondaryAction}
+                  variant={secondaryAction.variant || 'secondary'}
+                />
+              )}
+            </tours.contentManager.Publish>
+          ) : (
+            addHintTooltip(
+              secondaryAction,
               <DocumentActionButton
                 {...secondaryAction}
                 variant={secondaryAction.variant || 'secondary'}
+                buttonType="submit"
               />
-            </tours.contentManager.Publish>
-          ) : (
-            <DocumentActionButton
-              {...secondaryAction}
-              variant={secondaryAction.variant || 'secondary'}
-              buttonType="submit"
-            />
+            )
           )}
         </Flex>
       ) : null}
@@ -925,18 +935,40 @@ const PublishAction: DocumentActionComponent = ({
   const enableDraftRelationsCount = false;
   const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
 
-  // Auto-publish on CMD+Enter on macOS, and CTRL+Enter on Windows/Linux
+  /**
+   * Disabled when:
+   *  - currently if you're cloning a document we don't support publish & clone at the same time.
+   *  - the form is submitting
+   *  - the active tab is the published tab
+   *  - the document is already published & not modified
+   *  - the document is being created & not modified
+   *  - the user doesn't have the permission to publish
+   */
+  const isDisabled =
+    isCloning ||
+    isSubmitting ||
+    isLoadingDraftRelations ||
+    activeTab === 'published' ||
+    (!modified && isDocumentPublished) ||
+    (!modified && !document?.documentId) ||
+    !canPublish;
+
+  // Publish on CMD+Shift+Enter (macOS) / CTRL+Shift+Enter (Windows/Linux).
+  // Saving a draft (CMD/CTRL+Enter) is handled by the UpdateAction.
   React.useEffect(() => {
     if (!schema?.options?.draftAndPublish) {
       return;
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        if (!hasDraftRelations) {
-          performPublish();
-        }
+      if (getEditViewShortcut(e) !== 'publish') {
+        return;
+      }
+
+      e.preventDefault();
+
+      if (!isDisabled && !hasDraftRelations) {
+        performPublish();
       }
     };
 
@@ -945,7 +977,7 @@ const PublishAction: DocumentActionComponent = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [hasDraftRelations, performPublish, schema?.options?.draftAndPublish]);
+  }, [hasDraftRelations, isDisabled, performPublish, schema?.options?.draftAndPublish]);
 
   if (!schema?.options?.draftAndPublish) {
     return null;
@@ -955,23 +987,7 @@ const PublishAction: DocumentActionComponent = ({
     type: 'publish',
     loading: isLoading,
     position: ['panel', 'preview', 'relation-modal'],
-    /**
-     * Disabled when:
-     *  - currently if you're cloning a document we don't support publish & clone at the same time.
-     *  - the form is submitting
-     *  - the active tab is the published tab
-     *  - the document is already published & not modified
-     *  - the document is being created & not modified
-     *  - the user doesn't have the permission to publish
-     */
-    disabled:
-      isCloning ||
-      isSubmitting ||
-      isLoadingDraftRelations ||
-      activeTab === 'published' ||
-      (!modified && isDocumentPublished) ||
-      (!modified && !document?.documentId) ||
-      !canPublish,
+    disabled: isDisabled,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -1087,6 +1103,17 @@ const UpdateAction: DocumentActionComponent = ({
   );
   const { schema } = useDoc();
 
+  const suitableSchema = fromRelationModal ? relationalModalSchema : schema;
+  const hasDraftAndPublished = suitableSchema?.options?.draftAndPublish ?? false;
+
+  /**
+   * Disabled when:
+   * - the form is submitting
+   * - the document is not modified & we're not cloning (you can save a clone entity straight away)
+   * - the active tab is the published tab
+   */
+  const isDisabled = isSubmitting || (!modified && !isCloning) || activeTab === 'published';
+
   const handleUpdate = async () => {
     setSubmitting(true);
 
@@ -1107,7 +1134,8 @@ const UpdateAction: DocumentActionComponent = ({
       await Promise.resolve();
 
       const { errors } = await validate(true, {
-        status: 'draft',
+        // enforce "published" validation if not using "draft and published"
+        status: !hasDraftAndPublished ? 'published' : 'draft',
       });
 
       if (errors) {
@@ -1152,7 +1180,7 @@ const UpdateAction: DocumentActionComponent = ({
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
         const { data } = handleInvisibleAttributes(transformData(latestValues), {
-          schema: fromRelationModal ? relationalModalSchema : schema,
+          schema: suitableSchema,
           initialValues,
           components,
         });
@@ -1173,7 +1201,7 @@ const UpdateAction: DocumentActionComponent = ({
         }
       } else {
         const { data } = handleInvisibleAttributes(transformData(latestValues), {
-          schema: fromRelationModal ? relationalModalSchema : schema,
+          schema: suitableSchema,
           initialValues,
           components,
         });
@@ -1279,15 +1307,38 @@ const UpdateAction: DocumentActionComponent = ({
     }
   };
 
+  // Save a draft on CMD+Enter (macOS) / CTRL+Enter (Windows/Linux), with CMD/CTRL+S as an alias.
+  // Publishing (CMD/CTRL+Shift+Enter) is handled by the PublishAction.
+  // `handleUpdate` is recreated on every render, so we read the latest version (and the latest
+  // disabled state) through refs and register the listener only once.
+  const handleUpdateRef = React.useRef(handleUpdate);
+  handleUpdateRef.current = handleUpdate;
+  const isDisabledRef = React.useRef(isDisabled);
+  isDisabledRef.current = isDisabled;
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (getEditViewShortcut(e) !== 'save') {
+        return;
+      }
+
+      e.preventDefault();
+
+      if (!isDisabledRef.current) {
+        handleUpdateRef.current();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return {
     loading: isLoading,
-    /**
-     * Disabled when:
-     * - the form is submitting
-     * - the document is not modified & we're not cloning (you can save a clone entity straight away)
-     * - the active tab is the published tab
-     */
-    disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
+    disabled: isDisabled,
     label: formatMessage({
       id: 'global.save',
       defaultMessage: 'Save',

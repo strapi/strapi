@@ -46,6 +46,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = await sanitizeOutput(signedFiles, ctx);
     },
 
+    async findPage(ctx: Context) {
+      await validateQuery(ctx.query, ctx);
+      const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+
+      const { results, pagination } = await getService('upload').findAndCountPage(sanitizedQuery);
+
+      const data = await sanitizeOutput(results, ctx);
+
+      ctx.body = { data, meta: { pagination } };
+    },
+
     async findOne(ctx: Context) {
       const {
         params: { id },
