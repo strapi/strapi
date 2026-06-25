@@ -1,5 +1,5 @@
 import { defineConfig } from 'rollup';
-import {  baseConfig } from '../../../rollup.utils.mjs';
+import { baseConfig } from '../../../rollup.utils.mjs';
 
 export default defineConfig([
   baseConfig({
@@ -11,9 +11,9 @@ export default defineConfig([
   }),
   baseConfig({
     input: {
-      index: './server/index.js'
+      index: './server/index.js',
     },
     rootDir: './server',
     outDir: './dist/server',
-  })
+  }),
 ]);
