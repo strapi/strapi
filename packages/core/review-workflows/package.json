@@ -66,6 +66,8 @@
     "@strapi/icons": "2.2.1",
     "@strapi/utils": "5.49.0",
     "fractional-indexing": "3.2.0",
+    "koa": "2.16.4",
+    "lodash": "4.18.1",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
     "react-helmet": "^6.1.0",
