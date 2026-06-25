@@ -8,6 +8,7 @@
  * The system also takes locales into account when validating data.
  * E.g, unique fields must be unique within the same locale.
  */
+import { constants } from '@strapi/definitions';
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Schema, Struct, Modules } from '@strapi/types';
@@ -43,8 +44,6 @@ const toNumberSafe = (value: unknown): number | undefined => {
   return Number.isFinite(num) ? num : undefined;
 };
 
-const BIG_INTEGER_REGEX = /^[+-]?\d+$/;
-
 const toBigIntegerString = (value: unknown): string | undefined => {
   if (value == null) {
     return undefined;
@@ -65,7 +64,7 @@ const toBigIntegerString = (value: unknown): string | undefined => {
   if (typeof value === 'string') {
     const trimmedValue = value.trim();
 
-    if (!BIG_INTEGER_REGEX.test(trimmedValue)) {
+    if (!constants.regex.BIG_INTEGER.test(trimmedValue)) {
       return undefined;
     }
 

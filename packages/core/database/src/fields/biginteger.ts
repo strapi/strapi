@@ -1,7 +1,6 @@
+import { constants } from '@strapi/definitions';
 import { toString } from 'lodash/fp';
 import Field from './field';
-
-const BIG_INTEGER_REGEX = /^[+-]?\d+$/;
 
 const toBigIntegerString = (value: unknown): string => {
   if (typeof value === 'bigint') {
@@ -19,7 +18,7 @@ const toBigIntegerString = (value: unknown): string => {
   if (typeof value === 'string') {
     const trimmedValue = value.trim();
 
-    if (!BIG_INTEGER_REGEX.test(trimmedValue)) {
+    if (!constants.regex.BIG_INTEGER.test(trimmedValue)) {
       throw new Error(`Expected a valid BigInteger, got ${value}`);
     }
 
