@@ -2,19 +2,17 @@
 'use strict';
 
 /**
- * Migration tests: **explicit starting Strapi version** (`--initial`) → optional `--via` pinned npm
- * releases → **always workspace** (this monorepo). There is no `--final` Strapi version: validation
- * always runs against `examples/complex` + workspace packages.
+ * Migration tests: v4 baseline (`--initial <4.x>`) → **always workspace** (this monorepo).
+ * Validation always runs against `examples/complex` + workspace packages.
  *
  * Usage (repo root):
- *   yarn test:migrations --initial <semver> [options]
- *   yarn test:migrations --scenario <path.json>
+ *   yarn test:migrations --initial <4.x semver> [options]
+ *   yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
  *
  * Examples:
  *   yarn test:migrations --initial 4.26.0 --database sqlite --skip-build
- *   yarn test:migrations --initial 4.26.0 --via 5.30.0 --database sqlite
- *   yarn test:migrations --initial 4.26.0 -v 5.30.0 --initial-node 20 --workspace-node 24
  *   yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
+ *   yarn test:migrations --initial 4.26.0 --initial-node 20 --workspace-node 24
  *
  * When --scenario is omitted, you must pass **--initial** (no default). When --scenario is set,
  * `--initial` / `--via` are ignored.

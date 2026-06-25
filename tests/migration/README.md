@@ -1,19 +1,19 @@
 # Migration integration tests
 
-End-to-end checks for **v4 (or pinned v5) seed → optional published Strapi `via` steps → always workspace** on the monorepo’s migration test fixture at [`examples/complex`](../../examples/complex/README.md).
+End-to-end **v4 seed → workspace** checks on the monorepo migration test fixture at [`examples/complex`](../../examples/complex/README.md).
 
 ## Test fixture
 
-The **Strapi app, schemas, seeds, validators, and DB tooling** live in [`examples/complex/`](../../examples/complex/README.md) (workspace name `complex`). This directory (`tests/migration/`) owns the **runner, scenarios, and CI wiring** only.
+The **Strapi app, schemas, seeds, validators, and DB tooling** live in [`examples/complex/`](../../examples/complex/README.md) (workspace name `complex`). This directory (`tests/migration/`) owns the **runner and CI wiring** only.
 
-The fixture path is historical; we may relocate it under `tests/migration/` later (e.g. `tests/migration/fixture/`). Until then, CI watches both trees — see [When `migration_v5` runs](#when-migration_v5-runs) and [`.github/filters.yaml`](../../.github/filters.yaml).
+The fixture path is historical; we may relocate it under `tests/migration/` later. Until then, CI watches both trees — see [When `migration_v5` runs](#when-migration_v5-runs) and [`.github/filters.yaml`](../../.github/filters.yaml).
 
 ## Requirements
 
-- **`--initial <semver>`** — explicit starting npm version (**required** unless you pass **`--scenario`**). Final app is **always workspace**; there is no `--final` Strapi version.
-- **`--via` / `-v`** — optional repeatable pinned Strapi versions between seed and workspace.
+- **`--initial <4.x semver>`** — explicit starting v4 npm version (**required** unless you pass **`--scenario`**). Final app is **always workspace** (this monorepo).
+- Optional **`--scenario`** — load [`scenarios/v4-to-head.json`](scenarios/v4-to-head.json) instead of CLI flags.
 
-Hands-on commands and `yarn test:migrations` flags: [examples/complex/README.md — Automated migration test](../../examples/complex/README.md). CI triggers and path filters are documented **below** (not repeated in the fixture README).
+Hands-on commands: [examples/complex/README.md — Automated migration test](../../examples/complex/README.md). CI triggers and path filters are documented **below**.
 
 ## Quick reference
 
@@ -26,9 +26,12 @@ yarn test:migrations:plan --initial 4.26.0
 
 # Full local run (sqlite default; add --skip-build when already built)
 yarn test:migrations --initial 4.26.0 --database sqlite --skip-build
+
+# Same as CI path (named scenario)
+yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json
 ```
 
-JSON scenarios live in [`scenarios/`](scenarios/). Optional checkpoints: [`CHECKPOINTS.md`](CHECKPOINTS.md).
+Optional checkpoints: [`CHECKPOINTS.md`](CHECKPOINTS.md).
 
 ## CI (GitHub Actions)
 
@@ -51,9 +54,8 @@ on **sqlite**, **postgres**, **mysql**, and **mariadb** (Node **20**). **`$VERSI
 
 Job **`migration_v5`** runs when the **`migrations`** path filter matches the PR/push diff. Exact globs are defined only in [`.github/filters.yaml`](../../.github/filters.yaml) (that file’s other groups, e.g. **`global:`**, are independent).
 
-Optional follow-up: **v5-only baseline** or extra **`--via`** matrix legs are not in CI yet.
-
 ## Implementation
 
 - Runner: [`scripts/run-migration-scenario.js`](scripts/run-migration-scenario.js)
-- Validators: [`framework/validators.js`](framework/validators.js)
+- Fixture spec + validators: [`fixture/`](fixture/)
+- Canonical scenario: [`scenarios/v4-to-head.json`](scenarios/v4-to-head.json)
