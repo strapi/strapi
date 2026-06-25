@@ -10684,6 +10684,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tsconfig/node22@npm:22.0.5":
+  version: 22.0.5
+  resolution: "@tsconfig/node22@npm:22.0.5"
+  checksum: 10c0/c64b1d51e1556da9212463799f5096289d2cc8561eaed10cd0a0a36c25790b4c6bed30c0f846afccf8da75b5750326fa281216a908c2b67ead7b55adaf3eda22
+  languageName: node
+  linkType: hard
+
 "@tybys/wasm-util@npm:^0.10.1":
   version: 0.10.1
   resolution: "@tybys/wasm-util@npm:0.10.1"
@@ -30628,6 +30635,8 @@ __metadata:
 "tsconfig@npm:5.49.0, tsconfig@workspace:packages/utils/tsconfig":
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
+  dependencies:
+    "@tsconfig/node22": "npm:22.0.5"
   languageName: unknown
   linkType: soft
 
