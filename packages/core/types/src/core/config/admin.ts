@@ -131,13 +131,21 @@ export interface Admin {
   apiToken: ApiToken;
   auth: Auth;
 
-  // optional - server configuration
+  // optional - admin panel URL and legacy dev-server settings
   /**
-   * @deprecated Not read by Strapi. Reserved for backward compatibility in config files.
+   * Legacy option from when the admin panel ran on a separate webpack dev server
+   * (pre–v5 admin build pipeline). Not read by Strapi v5.
+   *
+   * For split deployment, use `admin.url` with `server.url` and `serveAdminPanel: false`.
+   * For the API listen address, use `server.host` / `server.port` in `config/server.ts`.
    */
   host?: string;
   /**
-   * @deprecated Not read by Strapi. Reserved for backward compatibility in config files.
+   * Legacy option from when the admin panel ran on a separate webpack dev server
+   * (pre–v5 admin build pipeline). Not read by Strapi v5.
+   *
+   * For split deployment, use `admin.url` with `server.url` and `serveAdminPanel: false`.
+   * For the API listen address, use `server.host` / `server.port` in `config/server.ts`.
    */
   port?: number;
   serveAdminPanel?: boolean;
