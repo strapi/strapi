@@ -394,11 +394,16 @@ jobs:
       - uses: ./.github/actions/capture-api-golden-snapshot
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+      - name: Stage golden snapshot for artifact upload
+        run: |
+          rm -rf /tmp/api-golden-staging
+          cp -a test-apps/.golden /tmp/api-golden-staging
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ce-postgres
-          path: test-apps/.golden
+          path: /tmp/api-golden-staging
           retention-days: 1
+          if-no-files-found: error
 
   api_golden_ce_mysql:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
@@ -432,11 +437,16 @@ jobs:
       - uses: ./.github/actions/capture-api-golden-snapshot
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+      - name: Stage golden snapshot for artifact upload
+        run: |
+          rm -rf /tmp/api-golden-staging
+          cp -a test-apps/.golden /tmp/api-golden-staging
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ce-mysql
-          path: test-apps/.golden
+          path: /tmp/api-golden-staging
           retention-days: 1
+          if-no-files-found: error
 
   api_golden_ce_sqlite:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
@@ -455,11 +465,16 @@ jobs:
       - uses: ./.github/actions/capture-api-golden-snapshot
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
+      - name: Stage golden snapshot for artifact upload
+        run: |
+          rm -rf /tmp/api-golden-staging
+          cp -a test-apps/.golden /tmp/api-golden-staging
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ce-sqlite
-          path: test-apps/.golden
+          path: /tmp/api-golden-staging
           retention-days: 1
+          if-no-files-found: error
 
   api_golden_ee_pg:
     runs-on: ubuntu-latest
@@ -496,11 +511,16 @@ jobs:
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
+      - name: Stage golden snapshot for artifact upload
+        run: |
+          rm -rf /tmp/api-golden-staging
+          cp -a test-apps/.golden /tmp/api-golden-staging
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ee-postgres
-          path: test-apps/.golden
+          path: /tmp/api-golden-staging
           retention-days: 1
+          if-no-files-found: error
 
   api_golden_ee_mysql:
     runs-on: ubuntu-latest
@@ -537,11 +557,16 @@ jobs:
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
+      - name: Stage golden snapshot for artifact upload
+        run: |
+          rm -rf /tmp/api-golden-staging
+          cp -a test-apps/.golden /tmp/api-golden-staging
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ee-mysql
-          path: test-apps/.golden
+          path: /tmp/api-golden-staging
           retention-days: 1
+          if-no-files-found: error
 
   api_golden_ee_sqlite:
     runs-on: ubuntu-latest
@@ -563,11 +588,16 @@ jobs:
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
+      - name: Stage golden snapshot for artifact upload
+        run: |
+          rm -rf /tmp/api-golden-staging
+          cp -a test-apps/.golden /tmp/api-golden-staging
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-golden-ee-sqlite
-          path: test-apps/.golden
+          path: /tmp/api-golden-staging
           retention-days: 1
+          if-no-files-found: error
 
   api_ce_pg:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
