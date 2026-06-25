@@ -15,7 +15,7 @@ import type {
 } from '../types';
 import type { Codemod } from '../../modules/codemod';
 
-const DEFAULT_TARGET = Version.ReleaseType.Major;
+const DEFAULT_TARGET = Version.ReleaseTypes.Major;
 
 export const runCodemods: RunCodemodsCommand = async (options) => {
   const { silent, debug } = options;

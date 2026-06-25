@@ -157,7 +157,7 @@ describe('Upgrader', () => {
         findVersionsInRange: jest.fn(() => [{ version: '6.0.0' }, { version: '6.0.1' }]),
       });
 
-      const upgrader = upgraderFactory(project, Version.ReleaseType.Major, npmPackageStub);
+      const upgrader = upgraderFactory(project, Version.ReleaseTypes.Major, npmPackageStub);
 
       expect(upgrader.getTarget().raw).toBe('6.0.1');
     });
@@ -168,7 +168,7 @@ describe('Upgrader', () => {
         findVersionsInRange: jest.fn(() => [{ version: '5.8.2' }, { version: '5.9.0' }]),
       });
 
-      const upgrader = upgraderFactory(project, Version.ReleaseType.Minor, npmPackageStub);
+      const upgrader = upgraderFactory(project, Version.ReleaseTypes.Minor, npmPackageStub);
 
       expect(upgrader.getTarget().raw).toBe('5.9.0');
     });
@@ -190,7 +190,7 @@ describe('Upgrader', () => {
         findVersionsInRange: jest.fn(() => []),
       });
 
-      expect(() => upgraderFactory(project, Version.ReleaseType.Patch, npmPackageStub)).toThrow(
+      expect(() => upgraderFactory(project, Version.ReleaseTypes.Patch, npmPackageStub)).toThrow(
         'The project is already up-to-date (patch)'
       );
     });

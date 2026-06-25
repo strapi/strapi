@@ -3,7 +3,7 @@ import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { AssetType } from '../../../../enums';
+import { AssetTypes } from '../../../../enums';
 import { PendingAssetStep } from '../PendingAssetStep';
 
 jest.mock('../../../../utils', () => ({
@@ -31,7 +31,7 @@ describe('PendingAssetStep', () => {
     const assets = [
       {
         source: 'url',
-        type: AssetType.Image,
+        type: AssetTypes.Image,
         url: 'http://localhost:5000/CPAM.jpg',
         ext: 'jpg',
         mime: 'image/jpeg',
@@ -42,7 +42,7 @@ describe('PendingAssetStep', () => {
       },
       {
         source: 'url',
-        type: AssetType.Document,
+        type: AssetTypes.Document,
         url: 'http://localhost:5000/MARIAGE%20FRACHET%204.pdf',
         ext: 'pdf',
         mime: 'application/pdf',
@@ -52,7 +52,7 @@ describe('PendingAssetStep', () => {
       },
       {
         source: 'url',
-        type: AssetType.Video,
+        type: AssetTypes.Video,
         url: 'http://localhost:5000/mov_bbb.mp4',
         ext: 'mp4',
         mime: 'video/mp4',

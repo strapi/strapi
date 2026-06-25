@@ -74,25 +74,25 @@ export const register = (program: Command) => {
 
   // upgrade latest
   addReleaseUpgradeCommand(
-    Version.ReleaseType.Latest,
+    Version.ReleaseTypes.Latest,
     'Upgrade to the latest available version of Strapi'
   );
 
   // upgrade major
   addReleaseUpgradeCommand(
-    Version.ReleaseType.Major,
+    Version.ReleaseTypes.Major,
     'Upgrade to the next available major version of Strapi'
   );
 
   // upgrade minor
   addReleaseUpgradeCommand(
-    Version.ReleaseType.Minor,
+    Version.ReleaseTypes.Minor,
     'Upgrade to the latest minor and patch version of Strapi for the current major'
   );
 
   // upgrade patch
   addReleaseUpgradeCommand(
-    Version.ReleaseType.Patch,
+    Version.ReleaseTypes.Patch,
     'Upgrade to latest patch version of Strapi for the current major and minor'
   );
 

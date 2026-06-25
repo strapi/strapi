@@ -15,7 +15,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../enums';
+import { AssetType, AssetTypes } from '../../enums';
 import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
 import { UploadProgress } from '../UploadProgress/UploadProgress';
@@ -61,17 +61,17 @@ export const UploadingAssetCard = ({
     defaultMessage: 'Doc',
   });
 
-  if (asset.type === AssetType.Image) {
+  if (asset.type === AssetTypes.Image) {
     badgeContent = formatMessage({
       id: getTrad('settings.section.image.label'),
       defaultMessage: 'Image',
     });
-  } else if (asset.type === AssetType.Video) {
+  } else if (asset.type === AssetTypes.Video) {
     badgeContent = formatMessage({
       id: getTrad('settings.section.video.label'),
       defaultMessage: 'Video',
     });
-  } else if (asset.type === AssetType.Audio) {
+  } else if (asset.type === AssetTypes.Audio) {
     badgeContent = formatMessage({
       id: getTrad('settings.section.audio.label'),
       defaultMessage: 'Audio',

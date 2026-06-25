@@ -9,11 +9,11 @@ export const rangeFactory = (range: string): Version.Range => {
 
 export const rangeFromReleaseType = (current: Version.SemVer, identifier: Version.ReleaseType) => {
   switch (identifier) {
-    case Version.ReleaseType.Latest: {
+    case Version.ReleaseTypes.Latest: {
       // Match anything greater than the current version
       return rangeFactory(`>${current.raw}`);
     }
-    case Version.ReleaseType.Major: {
+    case Version.ReleaseTypes.Major: {
       // For example, 4.15.4 returns 5.0.0
       const nextMajor = semVerFactory(current.raw).inc('major');
 
@@ -26,7 +26,7 @@ export const rangeFromReleaseType = (current: Version.SemVer, identifier: Versio
       // greater than "4.15.4" but less than "6.0.0-0".
       return rangeFactory(`>${current.raw} <=${nextMajor.major}`);
     }
-    case Version.ReleaseType.Minor: {
+    case Version.ReleaseTypes.Minor: {
       // For example, 4.15.4 returns 5.0.0
       const nextMajor = semVerFactory(current.raw).inc('major');
 
@@ -39,7 +39,7 @@ export const rangeFromReleaseType = (current: Version.SemVer, identifier: Versio
       // greater than "4.15.4" but less than "5.0.0".
       return rangeFactory(`>${current.raw} <${nextMajor.raw}`);
     }
-    case Version.ReleaseType.Patch: {
+    case Version.ReleaseTypes.Patch: {
       // For example, 4.15.4 returns 4.16.0
       const nextMinor = semVerFactory(current.raw).inc('minor');
 

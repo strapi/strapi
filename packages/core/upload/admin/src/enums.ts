@@ -1,17 +1,17 @@
-export const DocType = {
+export const DocTypes = {
   Pdf: 'pdf',
   Csv: 'csv',
   Xls: 'xls',
   Zip: 'zip',
-} as const satisfies Record<Capitalize<DocType>, DocType>;
+} as const;
 
-export type DocType = 'pdf' | 'csv' | 'xls' | 'zip';
+export type DocType = (typeof DocTypes)[keyof typeof DocTypes];
 
-export const AssetType = {
+export const AssetTypes = {
   Video: 'video',
   Image: 'image',
   Document: 'doc',
   Audio: 'audio',
-} as const satisfies Record<string, AssetType>;
+} as const;
 
-export type AssetType = 'video' | 'image' | 'doc' | 'audio';
+export type AssetType = (typeof AssetTypes)[keyof typeof AssetTypes];

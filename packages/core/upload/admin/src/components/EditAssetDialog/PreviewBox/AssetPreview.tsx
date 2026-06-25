@@ -6,7 +6,7 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
-import { AssetType } from '../../../enums';
+import { AssetTypes } from '../../../enums';
 import { typeFromMime } from '../../../utils';
 import { getFileIconComponent } from '../../../utils/icons';
 
@@ -36,7 +36,7 @@ export const AssetPreview = React.forwardRef<
 
   const { formatMessage } = useIntl();
 
-  if (assetType === AssetType.Image) {
+  if (assetType === AssetTypes.Image) {
     return (
       <img
         ref={ref as React.ForwardedRef<HTMLImageElement>}
@@ -48,11 +48,11 @@ export const AssetPreview = React.forwardRef<
     );
   }
 
-  if (assetType === AssetType.Video) {
+  if (assetType === AssetTypes.Video) {
     return <MuxPlayer src={url} accentColor={theme.colors.primary500} />;
   }
 
-  if (assetType === AssetType.Audio) {
+  if (assetType === AssetTypes.Audio) {
     return (
       <Box margin="5">
         <audio controls src={url} ref={ref as React.ForwardedRef<HTMLAudioElement>} {...props}>

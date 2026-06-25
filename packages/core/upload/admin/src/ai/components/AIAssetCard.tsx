@@ -29,7 +29,7 @@ import { styled } from 'styled-components';
 import { AudioPreview } from '../../components/AssetCard/AudioPreview';
 import { VideoPreview } from '../../components/AssetCard/VideoPreview';
 import { type Asset, EditAssetContent } from '../../components/EditAssetDialog/EditAssetContent';
-import { AssetType, DocType } from '../../enums';
+import { AssetType, AssetTypes, DocType, DocTypes } from '../../enums';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useRemoveAsset } from '../../hooks/useRemoveAsset';
 import {
@@ -222,9 +222,9 @@ const Asset = ({ assetType, thumbnailUrl, assetUrl, asset }: AssetProps) => {
   const formattedDuration = duration ? formatDuration(duration) : undefined;
 
   switch (assetType) {
-    case AssetType.Image:
+    case AssetTypes.Image:
       return <CardAsset src={thumbnailUrl} size="S" alt={asset.alternativeText || asset.name} />;
-    case AssetType.Video:
+    case AssetTypes.Video:
       return (
         <CardAsset size="S">
           <VideoPreviewWrapper>
@@ -238,7 +238,7 @@ const Asset = ({ assetType, thumbnailUrl, assetUrl, asset }: AssetProps) => {
           </VideoPreviewWrapper>
         </CardAsset>
       );
-    case AssetType.Audio:
+    case AssetTypes.Audio:
       return (
         <CardAsset size="S">
           <AudioPreviewWrapper>
@@ -271,19 +271,19 @@ const StyledCard = styled(Card)`
 
 const getAssetBadgeLabel = (assetType: AssetType | DocType) => {
   switch (assetType) {
-    case AssetType.Image:
+    case AssetTypes.Image:
       return { id: getTrad('settings.section.image.label'), defaultMessage: 'IMAGE' };
-    case AssetType.Video:
+    case AssetTypes.Video:
       return { id: getTrad('settings.section.video.label'), defaultMessage: 'VIDEO' };
-    case AssetType.Audio:
+    case AssetTypes.Audio:
       return { id: getTrad('settings.section.audio.label'), defaultMessage: 'AUDIO' };
-    case DocType.Pdf:
+    case DocTypes.Pdf:
       return { id: getTrad('settings.section.pdf.label'), defaultMessage: 'PDF' };
-    case DocType.Csv:
+    case DocTypes.Csv:
       return { id: getTrad('settings.section.csv.label'), defaultMessage: 'CSV' };
-    case DocType.Xls:
+    case DocTypes.Xls:
       return { id: getTrad('settings.section.xls.label'), defaultMessage: 'XLS' };
-    case DocType.Zip:
+    case DocTypes.Zip:
       return { id: getTrad('settings.section.zip.label'), defaultMessage: 'ZIP' };
     default:
       return { id: getTrad('settings.section.doc.label'), defaultMessage: 'DOC' };
