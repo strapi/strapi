@@ -1,6 +1,8 @@
-# Complex Example Project
+# Migration test fixture (`examples/complex`)
 
-This project contains complex Strapi schemas for testing migrations between Strapi v4 and v5, plus a benchmark harness for measuring the performance of those migrations.
+**Canonical Strapi app for v4→v5 migration integration tests and benchmarks.** It ships rich schemas (relations, dynamic zones, i18n, draft/publish, stress cases), seed scripts, `validate-migration.js`, and database tooling used by CI and local workflows.
+
+> **Location:** this directory stays at `examples/complex` (Yarn workspace name `complex`) for historical reasons. It is **test infrastructure**, not a casual demo like `getstarted`. Test orchestration lives in [`tests/migration/`](../../tests/migration/README.md). **Future:** we may relocate the app under `tests/migration/` (e.g. `tests/migration/fixture/`) so ownership and CI path filters are clearer; until then, treat changes here as changes to the migration-test contract.
 
 ## Content Types
 
@@ -32,7 +34,7 @@ Container runtime is auto-detected in this order: `podman compose` → `podman-c
 
 ## Migration Testing Workflow
 
-This project includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots. The complex example ships its own `docker-compose.dev.yml` so the database containers are independent of the monorepo root.
+This fixture includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots. It ships its own `docker-compose.dev.yml` so database containers are independent of the monorepo root.
 
 ### Setup
 
@@ -161,7 +163,50 @@ yarn db:check:mariadb
 
 11. **Repeat from step 7** to test fixes
 
-**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. The complex example uses its own Compose project name (`strapi_complex`) so it does not collide with other containers.
+**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. Manual workflows use Compose project name `strapi_complex` so they do not collide with other containers (automated `yarn test:migrations` uses `strapi_migration_v5` by default).
+
+## Automated migration test (monorepo)
+
+From the **repository root** (quick smoke, ~1–2 min on a warm tree):
+
+```bash
+yarn test:migrations:smoke
+```
+
+Full flow after `yarn build` (or `--skip-build` when dist is current):
+
+```bash
+yarn test:migrations --initial 4.26.0 --database sqlite --skip-build
+```
+
+You must pass **`--initial <semver>`** (unless you use **`--scenario`**): baseline npm version (v4 or v5). Optional **`--via`** adds intermediate published Strapi boots. The **last step is always workspace** (this monorepo). There is **no** final Strapi version flag.
+
+This wipes `examples/complex/.migration-v5/`, scaffolds the baseline, seeds, optionally runs `--via` pinned releases, then validates on the same database. **`--initial` 4.x** = v4 scaffold + `seed.js`; **`--initial` 5.x** = pinned v5 + `seed-v5.js`. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial 4.26.0`.
+
+**CI:** [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job, Node 20, latest v4 from `@strapi/strapi@legacy`).
+
+Options:
+
+- `--initial <semver>` — required without `--scenario` (4.x = v4 scaffold; 5.x = pinned v5 + v5 seed)
+- `--via <semver>` / `-v` — repeatable pinned boots before workspace (`full-ladder` when any `--via`; `full-v5-origin` for 5.x baseline without `--via`; `full-v4-origin` for 4.x)
+- `--scenario <path>` — JSON scenario (overrides CLI flags)
+- `--validators` — e.g. `full-v4-origin`, `full-v5-origin`, `full-ladder` ([`validators.js`](../../tests/migration/framework/validators.js))
+- `--initial-node` / `--workspace-node` — optional Node major checks per phase
+- `--database sqlite` (default locally) | `postgres` | `mysql` | `mariadb` | `sqlite`
+- `--multiplier N`, `--build`, `--skip-build`
+
+Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20**.
+
+Pass flags after the script name (avoid an extra `--` before `--database` or Yarn may not forward options).
+
+Examples:
+
+- `yarn test:migrations --initial 4.26.0 --via 5.30.0 --database sqlite` — see `tests/migration/scenarios/v4-via-5-30-0-to-head.json`
+- `yarn test:migrations --initial 5.7.0 --database sqlite` — see `tests/migration/scenarios/v5-5-7-to-workspace.json`
+- `yarn test:migrations --initial-node 20` — fail fast if Node major ≠ 20
+- `yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json`
+
+Checkpoints: [`tests/migration/CHECKPOINTS.md`](../../tests/migration/CHECKPOINTS.md).
 
 ### Automated migration test (monorepo)
 

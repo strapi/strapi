@@ -27,7 +27,8 @@ cli:
   - 'tests/scripts/run-cli-tests.js'
   - 'tests/scripts/run-tests.js'
   - 'tests/cli/**'
-# DB / schema migration sources (Umzug, internal migrations) + monorepo v4→v5 integration harness (examples/complex)
+# Umzug migration sources + v4→v5 integration harness (fixture app at examples/complex; runner at tests/migration/)
+# Fixture paths may move under tests/migration/ later; keep both globs in sync until then (see tests/migration/README.md).
 migrations:
   - 'packages/**/migrations/**'
   - 'tests/migration/**'

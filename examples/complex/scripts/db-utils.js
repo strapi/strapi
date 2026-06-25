@@ -6,16 +6,30 @@ const { runCompose, runContainer } = require('./compose');
 
 const COMPOSE_PROJECT_NAME = process.env.COMPOSE_PROJECT_NAME || 'strapi_complex';
 
+const SAFE_SNAPSHOT_NAME = /^[a-zA-Z0-9._-]+$/;
+
+function assertSafeSnapshotName(name) {
+  if (!name || !SAFE_SNAPSHOT_NAME.test(name)) {
+    console.error(
+      'Error: Snapshot name must contain only letters, numbers, dots, underscores, and hyphens'
+    );
+    process.exit(1);
+  }
+}
+
 function getComposeEnv() {
   return { ...process.env, COMPOSE_PROJECT_NAME };
 }
 
-function getContainerId(composeFile, cwd, serviceName) {
+function getContainerId(composeFile, cwd, serviceName, env) {
+  const composeEnv = env || getComposeEnv();
+  const projectName = composeEnv.COMPOSE_PROJECT_NAME || COMPOSE_PROJECT_NAME;
+
   // Try compose ps -q first (works with docker-compose and docker compose v2).
   try {
     const output = runCompose(['-f', composeFile, 'ps', '-q', serviceName], {
       cwd,
-      env: getComposeEnv(),
+      env: composeEnv,
     }).trim();
     if (output) return output.split('\n')[0];
   } catch (error) {
@@ -30,7 +44,7 @@ function getContainerId(composeFile, cwd, serviceName) {
       'ps',
       '-a',
       '--filter',
-      `name=${COMPOSE_PROJECT_NAME}_${serviceName}`,
+      `name=${projectName}_${serviceName}`,
       '--format',
       '{{.ID}}',
     ]).trim();
@@ -40,7 +54,7 @@ function getContainerId(composeFile, cwd, serviceName) {
       'ps',
       '-a',
       '--filter',
-      `name=${COMPOSE_PROJECT_NAME}-${serviceName}`,
+      `name=${projectName}-${serviceName}`,
       '--format',
       '{{.ID}}',
     ]).trim();
@@ -52,8 +66,8 @@ function getContainerId(composeFile, cwd, serviceName) {
   return null;
 }
 
-function getContainerName(composeFile, cwd, serviceName) {
-  const containerId = getContainerId(composeFile, cwd, serviceName);
+function getContainerName(composeFile, cwd, serviceName, env) {
+  const containerId = getContainerId(composeFile, cwd, serviceName, env);
   if (!containerId) return null;
   try {
     const nameOutput = runContainer(['inspect', '--format={{.Name}}', containerId]).trim();
@@ -73,11 +87,11 @@ function isContainerRunning(containerId) {
   }
 }
 
-function startContainer(composeFile, cwd, serviceName) {
+function startContainer(composeFile, cwd, serviceName, env) {
   runCompose(['-f', composeFile, 'up', '-d', serviceName], {
     cwd,
     stdio: 'inherit',
-    env: getComposeEnv(),
+    env: env || getComposeEnv(),
   });
 }
 
@@ -258,6 +272,7 @@ function getDatabaseEnv(dbType) {
 
 module.exports = {
   COMPOSE_PROJECT_NAME,
+  assertSafeSnapshotName,
   getComposeEnv,
   getContainerId,
   getContainerName,

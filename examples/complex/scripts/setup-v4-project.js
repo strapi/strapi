@@ -94,6 +94,7 @@ const packageJson = {
     sqlite3: '5.1.7',
     mysql2: '3.20.0',
     pg: '8.20.0',
+    'better-sqlite3': '12.8.0',
     react: '^18.0.0',
     'react-dom': '^18.0.0',
     'react-is': '^18.0.0',
@@ -572,6 +573,10 @@ console.log('✅ Created database development scripts');
 const seedScriptSource = path.join(SCRIPT_DIR, 'seed-v4.js');
 const seedScriptDest = path.join(v4ScriptsDir, 'seed.js');
 fs.copyFileSync(seedScriptSource, seedScriptDest);
+fs.copyFileSync(
+  path.join(SCRIPT_DIR, 'require-fixture.js'),
+  path.join(v4ScriptsDir, 'require-fixture.js')
+);
 try {
   fs.chmodSync(seedScriptDest, 0o755);
 } catch (error) {

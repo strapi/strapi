@@ -343,6 +343,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditions, build]
     timeout-minutes: 30
+    env:
+      YARN_ENABLE_IMMUTABLE_INSTALLS: false
+      # Non-sqlite legs use examples/complex/docker-compose.dev.yml (see examples/complex/scripts/compose.js).
+      # Pin the container runtime here so CI matches the Docker daemon on ubuntu-latest runners.
+      # compose.js also prefers Docker when GITHUB_ACTIONS=true; this env is the explicit job default.
+      STRAPI_BENCH_RUNTIME: docker
     strategy:
       fail-fast: false
       matrix:
@@ -370,7 +376,7 @@ jobs:
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
       # `timeout` avoids a hung install/boot blocking the runner until the job's 30m cap (ubuntu images ship coreutils `timeout`).
       - name: Run migration integration test
-        run: timeout 25m yarn test:migrations --initial "${{ steps.strapi_v4.outputs.version }}" --database ${{ matrix.database }}
+        run: timeout 25m yarn test:migrations --initial "${{ steps.strapi_v4.outputs.version }}" --initial-node 20 --database ${{ matrix.database }} --skip-build
 
   cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'

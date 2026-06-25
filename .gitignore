@@ -98,6 +98,7 @@ package-lock.json
 ############################
 # Ignore real env files anywhere; tracked templates use other names (e.g. `.env.example`).
 **/.env
+!tests/cli/data/*.tar.gz
 
 ############################
 # Tests
