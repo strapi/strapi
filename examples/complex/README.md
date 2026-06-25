@@ -181,19 +181,19 @@ yarn test:migrations --initial 4.26.0 --database sqlite --skip-build
 
 You must pass **`--initial <4.x semver>`** (or use **`--scenario tests/migration/scenarios/v4-to-head.json`**): v4 baseline npm version. The **last step is always workspace** (this monorepo). There is **no** final Strapi version flag.
 
-This wipes `examples/complex/.migration-v5/`, scaffolds the v4 baseline, seeds, then validates on the same database against workspace Strapi. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial 4.26.0`.
+The orchestrator (`tests/migration/scripts/run-migration-scenario.js`) wipes `examples/complex/.migration-v5/`, scaffolds a disposable v4 app via `scripts/setup-v4-project.js`, seeds it, then validates on the same database against workspace Strapi. **Postgres / MySQL / MariaDB** legs start DB containers via `examples/complex/docker-compose.dev.yml`; **sqlite** uses a local file and needs no Docker. Compose project `strapi_migration_v5` by default. **Instant dry-run:** `yarn test:migrations:plan --initial 4.26.0`.
 
 **CI:** [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job, Node 20, latest v4 from `@strapi/strapi@legacy`).
 
 Options:
 
 - `--initial <4.x semver>` — required without `--scenario`
-- `--scenario <path>` — JSON scenario (default example: `tests/migration/scenarios/v4-to-head.json`)
+- `--scenario <path>` — JSON scenario (default: `tests/migration/scenarios/v4-to-head.json`)
 - `--initial-node` / `--workspace-node` — optional Node major checks per phase
 - `--database sqlite` (default locally) | `postgres` | `mysql` | `mariadb`
 - `--multiplier N`, `--build`, `--skip-build`
 
-Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20**.
+Optional env: [`tests/migration/v5/.env.example`](../../tests/migration/v5/.env.example). Strapi v4 scaffold targets **Node ≤ 20** (CI passes `--initial-node 20`).
 
 Pass flags after the script name (avoid an extra `--` before `--database` or Yarn may not forward options).
 
@@ -204,42 +204,6 @@ Examples:
 - `yarn test:migrations --initial-node 20` — fail fast if Node major ≠ 20
 
 Checkpoints: [`tests/migration/CHECKPOINTS.md`](../../tests/migration/CHECKPOINTS.md).
-
-### Automated migration test (monorepo)
-
-The migration test framework is **Docker-native**: the v4 baseline runs inside a Node-20 runner container, so any host Node version 20–24 works (the workspace validation step still runs on the host against the locally-built workspace `@strapi/strapi`).
-
-**Requirements:** Docker Engine 20+ with Compose v2 (`docker compose ...`) and a built workspace (`yarn build`).
-
-From the **repository root**:
-
-```bash
-yarn test:migrations --initial 4.26.0
-```
-
-You must pass **`--initial <4.x semver>`** (or **`--scenario`**): the explicit Strapi v4 npm version for the baseline. The **last step is always workspace** — the current monorepo (`examples/complex` + workspace packages).
-
-This wipes the disposable apps under `examples/complex/.migration-v5/` (yarn cache + runner home dirs survive for fast warm runs), brings up the requested DB via compose, hydrates the v4 baseline app from the checked-in skeleton + the live schemas in `src/api/`, seeds it, then validates against **workspace** on the same database. **Instant dry-run:** `yarn test:migrations:plan --initial 4.26.0` (or `--print-plan`).
-
-**CI, path filters, matrix:** see [`tests/migration/README.md`](../../tests/migration/README.md) (`migration_v5` job).
-
-Options:
-
-- `--initial <4.x semver>` — **Required** when not using `--scenario`.
-- `--scenario <path>` — JSON scenario file (overrides `--initial`). See `tests/migration/scenarios/v4-to-head.json`.
-- `--database postgres` (default) | `mysql` | `mariadb` (MySQL protocol; `DATABASE_CLIENT=mysql` against the MariaDB service) | `sqlite`
-- `--multiplier N` — scale seed and validation expectations.
-- `--keep-state` — skip teardown (compose stays up, disposable apps remain on disk for inspection).
-- `--rebuild-image` — force rebuild of the runner image (one-shot, ~1 min).
-
-Optional env vars consumed by the orchestrator: `STRAPI_MIGRATION_COMPOSE_PROJECT` (default `strapi_migration_v5`), `POSTGRES_HOST_PORT` / `MYSQL_HOST_PORT` / `MARIADB_HOST_PORT` (host-side published ports; defaults `15432` / `13306` / `13307`).
-
-CLI examples:
-
-- `yarn test:migrations --initial 4.26.0 --database sqlite --skip-build`
-- `yarn test:migrations --scenario tests/migration/scenarios/v4-to-head.json`
-
-Optional: local DB checkpoint tips in [`tests/migration/CHECKPOINTS.md`](../../tests/migration/CHECKPOINTS.md).
 
 ## Migration performance benchmark
 
