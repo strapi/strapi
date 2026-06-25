@@ -1,5 +1,6 @@
 {
   "EditRelations.title": "Dati relazionali",
+  "HeaderLayout.button.label-add-entry": "Crea nuovo elemento",
   "api.id": "API ID",
   "components.AddFilterCTA.add": "Filtri",
   "components.AddFilterCTA.hide": "Filtri",
@@ -128,5 +129,10 @@
   "success.record.delete": "Eliminato",
   "success.record.publish": "Pubblicato",
   "success.record.save": "Salvato",
-  "success.record.unpublish": "Non pubblicato"
+  "success.record.unpublish": "Non pubblicato",
+  "widget.last-edited.title": "Gli ultimi elementi modificati",
+  "widget.last-edited.single-type": "Tipo singolo",
+  "widget.last-edited.no-data": "Nessun elemento modificato",
+  "widget.last-published.title": "Ultimi elementi pubblicati",
+  "widget.last-published.no-data": "Nessun elemento pubblicato"
 }
