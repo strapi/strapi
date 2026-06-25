@@ -57,9 +57,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@sentry/node": "7.112.2",
-    "@strapi/design-system": "2.2.1",
-    "@strapi/icons": "2.2.1"
+    "@sentry/node": "7.112.2"
   },
   "devDependencies": {
     "@strapi/strapi": "5.49.0",

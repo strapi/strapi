@@ -46,13 +46,11 @@
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
     "@strapi/utils": "5.49.0",
-    "ajv": "8.20.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "11.3.4",
     "knex": "3.0.1",
     "lodash": "4.18.1",
-    "semver": "7.7.4",
     "umzug": "3.8.1"
   },
   "devDependencies": {

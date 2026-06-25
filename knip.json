@@ -1,20 +1,33 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreWorkspaces": ["examples/**", "docs/**", "tests/**", ".github/**", "scripts/**"],
+  "ignoreWorkspaces": [
+    "examples/**",
+    "docs/**",
+    "tests/**",
+    ".github/**",
+    "scripts/**",
+    "packages/utils/api-tests"
+  ],
   "ignoreBinaries": ["run"],
   "ignoreUnresolved": ["eslint-config-custom/.+"],
+  "ignoreDependencies": ["@strapi/provider-email-.*", "@strapi/provider-upload-.*"],
   "workspaces": {
     "packages/core/*": {
       "entry": [
-        "admin/src/index.ts!",
-        "server/src/index.ts!",
-        "shared/index.ts!",
+        "admin/src/index.{js,jsx,ts,tsx}!",
+        "server/src/index.{js,ts}!",
+        "shared/index.{js,ts}!",
         "src/index.ts!",
         "src/admin.ts!",
         "src/admin-test.ts!",
         "bin/*.js!"
       ],
-      "project": ["admin/**/*.{ts,tsx}!", "server/**/*.ts!", "shared/**/*.ts!", "src/**/*.ts!"]
+      "project": [
+        "admin/**/*.{js,jsx,ts,tsx}!",
+        "server/**/*.{js,ts}!",
+        "shared/**/*.{js,ts}!",
+        "src/**/*.{js,ts}!"
+      ]
     },
     "packages/core/strapi": {
       "entry": [
@@ -24,31 +37,41 @@
         "bin/strapi.js!",
         "src/cli/index.ts!"
       ],
-      "project": ["src/**/*.ts!"]
+      "project": ["src/**/*.{js,ts}!"]
     },
     "packages/plugins/*": {
-      "entry": ["admin/src/index.ts!", "server/src/index.ts!"],
-      "project": ["admin/**/*.{ts,tsx}!", "server/**/*.ts!"]
+      "entry": [
+        "admin/src/index.{js,jsx,ts,tsx}!",
+        "server/src/index.{js,ts}!",
+        "strapi-admin.js!",
+        "strapi-server.js!"
+      ],
+      "project": [
+        "admin/**/*.{js,jsx,ts,tsx}!",
+        "server/**/*.{js,ts}!",
+        "strapi-admin.js!",
+        "strapi-server.js!"
+      ]
     },
     "packages/cli/*": {
-      "entry": ["src/index.ts!", "bin/*.js!"],
-      "project": ["src/**/*.ts!"]
+      "entry": ["src/index.{js,ts}!", "bin/*.js!"],
+      "project": ["src/**/*.{js,ts}!"]
     },
     "packages/providers/*": {
-      "entry": ["src/index.ts!"],
-      "project": ["src/**/*.ts!"]
+      "entry": ["src/index.{js,ts}!"],
+      "project": ["src/**/*.{js,ts}!"]
     },
     "packages/utils/*": {
-      "entry": ["src/index.ts!"],
-      "project": ["src/**/*.ts!"]
+      "entry": ["src/index.{js,ts}!", "lib/index.js!"],
+      "project": ["src/**/*.{js,ts}!", "lib/**/*.js!"]
     },
     "packages/generators/*": {
-      "entry": ["src/index.ts!"],
-      "project": ["src/**/*.ts!"]
+      "entry": ["src/index.{js,ts}!"],
+      "project": ["src/**/*.{js,ts}!"]
     },
     "packages/admin-test-utils": {
-      "entry": ["src/index.ts!"],
-      "project": ["src/**/*.{ts,tsx}!"]
+      "entry": ["src/index.{js,ts}!"],
+      "project": ["src/**/*.{js,jsx,ts,tsx}!"]
     }
   }
 }

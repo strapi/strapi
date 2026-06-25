@@ -99,16 +99,13 @@
     "qs": "6.15.2",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
-    "react-helmet": "^6.1.0",
     "react-intl": "6.6.2",
-    "react-query": "3.39.3",
     "react-redux": "8.1.3",
     "react-window": "1.8.10",
     "slate": "0.94.1",
     "slate-history": "0.93.0",
     "slate-react": "0.98.3",
-    "yup": "0.32.9",
-    "zod": "3.25.67"
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@strapi/admin": "5.49.0",

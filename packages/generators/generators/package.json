@@ -52,7 +52,6 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/typescript-utils": "5.49.0",
     "@strapi/utils": "5.49.0",
-    "chalk": "4.1.2",
     "fs-extra": "11.3.4",
     "handlebars": "4.7.9",
     "jscodeshift": "17.3.0",
