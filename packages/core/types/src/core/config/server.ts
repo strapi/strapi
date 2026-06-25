@@ -52,7 +52,7 @@ export interface ServerTransfer {
 
 export interface ServerAdmin {
   /**
-   * @deprecated Use `admin.autoOpen` in `config/admin.ts` instead.
+   * @deprecated Use `admin.autoOpen` in `config/admin.ts` instead. Ignored at runtime; a startup warning is logged if set.
    */
   autoOpen?: boolean;
 }
@@ -104,7 +104,7 @@ export interface Server {
   absoluteUrl?: string;
   proxy?: boolean | Proxy;
   /**
-   * @deprecated Use `server.proxy.global` instead.
+   * @deprecated Use `server.proxy.global` instead. Ignored at runtime; a startup warning is logged if set.
    */
   globalProxy?: string;
   cron?: Cron;

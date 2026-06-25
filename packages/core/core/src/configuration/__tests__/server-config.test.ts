@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { getServerGlobalProxy, shouldOpenAdminOnDevelop } from '../server-config';
+import { warnDeprecatedServerConfig } from '../server-config';
 
 const createConfigProvider = (values: Record<string, unknown>): Core.ConfigProvider => ({
   get(path, defaultValue) {
@@ -16,54 +16,53 @@ const createConfigProvider = (values: Record<string, unknown>): Core.ConfigProvi
   },
 });
 
-describe('server-config helpers', () => {
-  describe('getServerGlobalProxy', () => {
-    it('prefers server.proxy.global over deprecated server.globalProxy', () => {
-      const config = createConfigProvider({
-        'server.proxy.global': 'http://proxy.example',
-        'server.globalProxy': 'http://legacy.example',
-      });
+describe('warnDeprecatedServerConfig', () => {
+  it('warns when server.globalProxy is set', () => {
+    const warnings: string[] = [];
 
-      expect(getServerGlobalProxy(config)).toBe('http://proxy.example');
-    });
+    warnDeprecatedServerConfig(
+      createConfigProvider({ 'server.globalProxy': 'http://legacy.example' }),
+      { warn: (message) => warnings.push(message) }
+    );
 
-    it('falls back to deprecated server.globalProxy', () => {
-      const config = createConfigProvider({
-        'server.globalProxy': 'http://legacy.example',
-      });
-
-      expect(getServerGlobalProxy(config)).toBe('http://legacy.example');
-    });
+    expect(warnings).toEqual([
+      'server.globalProxy is deprecated and ignored. Use server.proxy.global in config/server instead.',
+    ]);
   });
 
-  describe('shouldOpenAdminOnDevelop', () => {
-    it('prefers admin.autoOpen over deprecated server.admin.autoOpen', () => {
-      const config = createConfigProvider({
-        'admin.autoOpen': true,
-        'server.admin.autoOpen': false,
-      });
+  it('warns when server.admin.autoOpen is set', () => {
+    const warnings: string[] = [];
 
-      expect(shouldOpenAdminOnDevelop(config)).toBe(true);
+    warnDeprecatedServerConfig(createConfigProvider({ 'server.admin.autoOpen': false }), {
+      warn: (message) => warnings.push(message),
     });
 
-    it('uses deprecated server.admin.autoOpen when admin.autoOpen is unset', () => {
-      const config = createConfigProvider({
-        'server.admin.autoOpen': false,
-      });
+    expect(warnings).toEqual([
+      'server.admin.autoOpen is deprecated and ignored. Use admin.autoOpen in config/admin instead.',
+    ]);
+  });
 
-      expect(shouldOpenAdminOnDevelop(config)).toBe(false);
+  it('emits both warnings when both deprecated keys are set', () => {
+    const warnings: string[] = [];
+
+    warnDeprecatedServerConfig(
+      createConfigProvider({
+        'server.globalProxy': 'http://legacy.example',
+        'server.admin.autoOpen': true,
+      }),
+      { warn: (message) => warnings.push(message) }
+    );
+
+    expect(warnings).toHaveLength(2);
+  });
+
+  it('does not warn when deprecated keys are absent', () => {
+    const warnings: string[] = [];
+
+    warnDeprecatedServerConfig(createConfigProvider({}), {
+      warn: (message) => warnings.push(message),
     });
 
-    it('defaults to true when neither key is set', () => {
-      expect(shouldOpenAdminOnDevelop(createConfigProvider({}))).toBe(true);
-    });
-
-    it('treats explicit false on admin.autoOpen as disabled', () => {
-      const config = createConfigProvider({
-        'admin.autoOpen': false,
-      });
-
-      expect(shouldOpenAdminOnDevelop(config)).toBe(false);
-    });
+    expect(warnings).toEqual([]);
   });
 });
