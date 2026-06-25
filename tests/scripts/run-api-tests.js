@@ -97,7 +97,15 @@ const main = async ({ database, generateApp }, args) => {
       );
     }
 
-    if (generateApp || !goldenSnapshotExists()) {
+    const goldenProvided = Boolean(process.env.GOLDEN_SNAPSHOT_PROVIDED);
+
+    if (goldenProvided && !goldenSnapshotExists()) {
+      throw new Error(
+        'golden-snapshot: CI expected a pre-captured snapshot (artifact) but none was found under test-apps/.golden/api'
+      );
+    }
+
+    if (!goldenProvided && (generateApp || !goldenSnapshotExists())) {
       // Migrations run on first boot; capture after bootstrap for every database client.
       process.env.JWT_SECRET = process.env.JWT_SECRET || 'aSecret';
       const strapi = await createStrapiInstance({ logLevel: 'error' });

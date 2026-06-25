@@ -24,4 +24,5 @@ runs:
         DB_OPTIONS: ${{ inputs.dbOptions }}
         RUN_EE: ${{ inputs.runEE }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
+        GOLDEN_SNAPSHOT_PROVIDED: ${{ inputs.goldenArtifact }}
       shell: bash

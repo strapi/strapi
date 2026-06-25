@@ -7,6 +7,9 @@ fi
 
 export ENV_PATH="$(pwd)/test-apps/api/.env"
 export JWT_SECRET="aSecret"
+if [[ -n "${GOLDEN_SNAPSHOT_PROVIDED:-}" ]]; then
+  export GOLDEN_SNAPSHOT_PROVIDED
+fi
 
 opts=($DB_OPTIONS)
 jestOptions=($JEST_OPTIONS)
