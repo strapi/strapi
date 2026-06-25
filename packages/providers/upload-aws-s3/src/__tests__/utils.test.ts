@@ -136,5 +136,20 @@ describe('Utils', () => {
 
       expect(credentials).toEqual(null);
     });
+
+    test('Passes a credential provider function through unchanged', () => {
+      const provider = async () => ({ accessKeyId, secretAccessKey });
+      const options: InitOptions = {
+        s3Options: {
+          credentials: provider,
+          ...defaultOptions,
+        },
+      };
+      const credentials = extractCredentials(options);
+
+      // The provider function must be returned as-is so the AWS SDK can
+      // resolve and refresh credentials at runtime.
+      expect(credentials).toBe(provider);
+    });
   });
 });
