@@ -187,6 +187,7 @@ const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
               defaultMessage: 'More actions',
             })}
             variant="ghost"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             <More />
           </IconButton>

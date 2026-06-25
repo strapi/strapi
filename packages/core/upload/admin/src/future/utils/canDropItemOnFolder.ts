@@ -86,6 +86,10 @@ export const canDropItemOnFolder = ({
     if (item.kind === 'file' && item.folderId === targetFolderId) {
       return false;
     }
+
+    if (item.kind === 'folder' && item.parentId === targetFolderId) {
+      return false;
+    }
   }
 
   return true;

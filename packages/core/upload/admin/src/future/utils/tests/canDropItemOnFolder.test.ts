@@ -84,6 +84,16 @@ describe('canDropItemOnFolder', () => {
     ).toBe(false);
   });
 
+  it('blocks moving a folder that is already in the target folder', () => {
+    expect(
+      canDropItemOnFolder({
+        items: [{ kind: 'folder', id: 2, name: '2023', parentId: 1 }],
+        targetFolderId: 1,
+        folderStructure,
+      })
+    ).toBe(false);
+  });
+
   it('blocks when the target folder is part of the drag payload', () => {
     expect(
       canDropItemOnFolder({

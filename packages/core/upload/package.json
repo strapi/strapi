@@ -70,7 +70,6 @@
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",
-    "@dnd-kit/utilities": "3.2.2",
     "@mux/mux-player-react": "3.1.0",
     "@radix-ui/react-dialog": "1.0.5",
     "@radix-ui/react-toggle-group": "1.1.11",
