@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check issue uses template
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const issueBody = context.payload.issue.body || '';
