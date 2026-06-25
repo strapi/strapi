@@ -148,7 +148,7 @@ export const FreeTrialEndedModal = () => {
                 </ul>
               </Box>
               <Flex marginTop={4} gap={2}>
-                <LinkButton href="https://strapi.chargebeeportal.com/" target="_blank">
+                <LinkButton href="https://billing.strapi.io/" target="_blank">
                   {formatMessage({
                     id: 'app.components.FreeTrialEndedModal.button.upgrade',
                     defaultMessage: 'Stay on the Growth plan',

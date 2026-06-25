@@ -100,7 +100,10 @@ const createDeleteApiFunction = (baseName: string) => {
  * Deletes a folder recursively using a delete function
  * @param {string} folder folder to delete
  */
-const recursiveRemoveFiles = async (folder: string, deleteFn: (file: string) => unknown) => {
+const recursiveRemoveFiles = async (
+  folder: string,
+  deleteFn: (file: string) => unknown
+): Promise<void> => {
   const filesName = await fse.readdir(folder);
 
   for (const fileName of filesName) {

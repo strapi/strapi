@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "5.48.0",
+  "version": "5.49.0",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -86,10 +86,10 @@
   "devDependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@testing-library/jest-dom": "6.9.1",
-    "eslint-config-custom": "5.48.0",
+    "eslint-config-custom": "5.49.0",
     "jest-environment-jsdom": "29.6.1",
     "styled-components": "6.4.1",
-    "tsconfig": "5.48.0"
+    "tsconfig": "5.49.0"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.9.7",
