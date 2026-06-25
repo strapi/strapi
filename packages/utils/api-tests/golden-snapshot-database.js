@@ -19,20 +19,21 @@ const normalizeClient = (client) => {
 };
 
 const readDatabaseMeta = (appDir) => {
-  dotenv.config({ path: path.join(appDir, '.env') });
+  const envPath = path.join(appDir, '.env');
+  const env = fs.existsSync(envPath) ? dotenv.parse(fs.readFileSync(envPath, 'utf8')) : {};
 
-  const client = normalizeClient(process.env.DATABASE_CLIENT || 'sqlite');
+  const client = normalizeClient(env.DATABASE_CLIENT || 'sqlite');
 
   return {
     client,
     connection: {
-      host: process.env.DATABASE_HOST,
-      port: process.env.DATABASE_PORT,
-      database: process.env.DATABASE_NAME,
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      filename: process.env.DATABASE_FILENAME,
-      schema: process.env.DATABASE_SCHEMA,
+      host: env.DATABASE_HOST,
+      port: env.DATABASE_PORT,
+      database: env.DATABASE_NAME,
+      username: env.DATABASE_USERNAME,
+      password: env.DATABASE_PASSWORD,
+      filename: env.DATABASE_FILENAME,
+      schema: env.DATABASE_SCHEMA,
     },
   };
 };
@@ -246,6 +247,7 @@ module.exports = {
   captureDatabase,
   restoreDatabase,
   databaseSnapshotExists,
+  normalizeClient,
   readDatabaseMeta,
   removeSqliteSidecars,
   resolveSqlitePath,

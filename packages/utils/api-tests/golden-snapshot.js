@@ -6,6 +6,7 @@ const path = require('path');
 const {
   captureDatabase,
   databaseSnapshotExists,
+  normalizeClient,
   readDatabaseMeta,
   restoreDatabase,
 } = require('./golden-snapshot-database');
@@ -82,7 +83,8 @@ const restoreFilesystem = async (appDir, goldenDir) => {
  */
 const captureGoldenSnapshot = async ({ strapi }) => {
   const appDir = getAppDir();
-  const { client } = readDatabaseMeta(appDir);
+  const envMeta = readDatabaseMeta(appDir);
+  const client = normalizeClient(strapi.db.config.connection.client || envMeta.client);
 
   if (!SUPPORTED_CLIENTS.has(client)) {
     throw new Error(
@@ -106,7 +108,7 @@ const captureGoldenSnapshot = async ({ strapi }) => {
     await strapi.destroy();
   }
 
-  return { goldenDir, client, dbMeta };
+  return { goldenDir, client: dbMeta.client, dbMeta };
 };
 
 const goldenSnapshotExists = () => {
