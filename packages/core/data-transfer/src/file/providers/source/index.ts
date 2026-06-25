@@ -253,7 +253,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     }
 
     if (encryption.enabled && encryption.key) {
-      streams.push(utils.encryption.createDecryptionCipher(encryption.key));
+      streams.push(utils.encryption.createDecryptionStream({ key: encryption.key }));
     }
 
     if (compression.enabled) {
