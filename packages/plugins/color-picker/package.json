@@ -76,7 +76,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
-    "typescript": "5.4.5",
+    "typescript": "5.9.3",
     "vitest": "catalog:",
     "vitest-config": "5.49.0"
   },
