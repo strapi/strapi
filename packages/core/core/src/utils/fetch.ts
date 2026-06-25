@@ -1,6 +1,8 @@
 import type { Core, Modules } from '@strapi/types';
 import { ProxyAgent } from 'undici';
 
+import { getServerGlobalProxy } from '../configuration/server-config';
+
 // TODO: once core Node exposes a stable way to create a ProxyAgent we will use that instead of undici
 
 interface StrapiFetchOptions {
@@ -29,7 +31,7 @@ export const createStrapiFetch = (
 
   const proxy =
     strapi.config.get<ConstructorParameters<typeof ProxyAgent>[0]>('server.proxy.fetch') ||
-    strapi.config.get<string>('server.proxy.global');
+    getServerGlobalProxy(strapi.config);
 
   if (proxy) {
     if (logs) {

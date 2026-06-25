@@ -72,7 +72,7 @@ export interface RateLimit {
   max?: number;
   delayAfter?: number;
   timeWait?: number;
-  prefixKey?: number;
+  prefixKey?: string;
   whitelist?: string;
   store?: string;
 }
@@ -82,7 +82,18 @@ export interface Transfer {
 }
 
 export interface FirstPublisedAtField {
+  /**
+   * @deprecated Use `features.future.experimental_firstPublishedAt` in `config/features.ts` instead.
+   */
   enabled: boolean;
+}
+
+export interface AdminLayoutModel {
+  actions?: Record<string, string>;
+}
+
+export interface AdminLayout {
+  [modelName: string]: AdminLayoutModel | undefined;
 }
 
 export interface Flags {
@@ -121,7 +132,13 @@ export interface Admin {
   auth: Auth;
 
   // optional - server configuration
+  /**
+   * @deprecated Not read by Strapi. Reserved for backward compatibility in config files.
+   */
   host?: string;
+  /**
+   * @deprecated Not read by Strapi. Reserved for backward compatibility in config files.
+   */
   port?: number;
   serveAdminPanel?: boolean;
   autoOpen?: boolean;
@@ -138,7 +155,16 @@ export interface Admin {
   ai?: Ai;
   forgotPassword?: ForgotPassword;
   rateLimit?: RateLimit;
+  /**
+   * @deprecated Use `features.future.experimental_firstPublishedAt` in `config/features.ts` instead.
+   */
   firstPublishedAtField?: FirstPublisedAtField;
   flags?: Flags;
   transfer?: Transfer;
+  /**
+   * Override content-manager edit-view actions per model.
+   *
+   * Keys are content-type model names. Values map action names to `controller.action` handlers.
+   */
+  layout?: AdminLayout;
 }

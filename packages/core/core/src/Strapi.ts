@@ -8,6 +8,7 @@ import { Database } from '@strapi/database';
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
 import { loadConfiguration } from './configuration';
+import { getServerGlobalProxy, shouldOpenAdminOnDevelop } from './configuration/server-config';
 
 import * as factories from './factories';
 
@@ -338,8 +339,7 @@ class Strapi extends Container implements Core.Strapi {
 
   async openAdmin({ isInitialized }: { isInitialized: boolean }) {
     const shouldOpenAdmin =
-      this.config.get('environment') === 'development' &&
-      this.config.get('admin.autoOpen', true) !== false;
+      this.config.get('environment') === 'development' && shouldOpenAdminOnDevelop(this.config);
 
     if (shouldOpenAdmin && !isInitialized) {
       try {
@@ -520,7 +520,7 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   configureGlobalProxy() {
-    const globalProxy = this.config.get('server.proxy.global');
+    const globalProxy = getServerGlobalProxy(this.config);
     const httpProxy = this.config.get('server.proxy.http') || globalProxy;
     const httpsProxy = this.config.get('server.proxy.https') || globalProxy;
 
