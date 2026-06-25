@@ -69,7 +69,6 @@
   "plugin.description.long": "Цей плаґін дозволяє створювати, читати та оновлювати вміст різними мовами як з панелі адміністрування, так і через API.",
   "plugin.description.short": "Цей плаґін дозволяє створювати, читати та оновлювати вміст різними мовами як з панелі адміністрування, так і через API.",
   "plugin.name": "Інтернаціоналізація",
-  "plugin.schema.i18n.ensure-unique-localization": "Унікальні поля повинні бути локалізовані",
   "plugin.schema.i18n.localized.description-content-type": "Дозволяє перекладати запис різними мовами",
   "plugin.schema.i18n.localized.description-field": "Поле може мати різні значення для кожної мови",
   "plugin.schema.i18n.localized.label-content-type": "Інтернаціоналізація",

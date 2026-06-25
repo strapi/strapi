@@ -95,7 +95,8 @@
     "test:front:coverage": "cross-env IS_EE=true jest --config jest.config.front.js --runInBand --coverage",
     "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
     "test:unit:vitest": "vitest run",
-    "test:unit:vitest:watch": "vitest --watch"
+    "test:unit:vitest:watch": "vitest --watch",
+    "translations:prune": "node scripts/front/prune-obsolete-translation-keys.js"
   },
   "resolutions": {
     "ajv@^8.0.0": "8.20.0",

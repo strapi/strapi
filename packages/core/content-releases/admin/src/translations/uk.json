@@ -84,7 +84,6 @@
   "pages.ReleaseDetails.groupBy.option.actions": "Дії",
   "pages.ReleaseDetails.header-subtitle.scheduled": "Заплановано на {date} о {time} ({offset})",
   "pages.ReleaseDetails.entry-validation.fields": "Поля",
-  "pages.Settings.releases.title": "Релізи",
   "pages.Settings.releases.description": "Створюйте та керуйте оновленнями вмісту",
   "pages.Settings.releases.timezone.label": "Часовий пояс за замовчуванням",
   "pages.Settings.releases.setting.default-timezone-notification-success": "Часовий пояс за замовчуванням оновлено.",
