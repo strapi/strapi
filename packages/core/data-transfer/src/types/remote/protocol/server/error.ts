@@ -1,18 +1,26 @@
-export enum ErrorKind {
+export const ErrorKind = {
   // Generic
-  Unknown = 0,
+  Unknown: 0,
   // Chunk transfer
-  DiscardChunk = 1,
-  InvalidChunkFormat = 2,
-}
+  DiscardChunk: 1,
+  InvalidChunkFormat: 2,
+} as const satisfies Record<string, ErrorKind>;
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type ErrorKind = 0 | 1 | 2;
 
 export class ServerError extends Error {
-  constructor(
-    public code: ErrorKind,
-    public message: string,
-    public details?: Record<string, unknown> | null
-  ) {
+  public code: ErrorKind;
+
+  public message: string;
+
+  public details?: Record<string, unknown> | null;
+
+  constructor(code: ErrorKind, message: string, details?: Record<string, unknown> | null) {
     super(message);
+    this.code = code;
+    this.message = message;
+    this.details = details;
   }
 }
 
