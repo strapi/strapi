@@ -57,8 +57,12 @@ const purgeGeneratedPaths = async (appDir) => {
 const captureFilesystem = async (appDir, goldenDir) => {
   for (const rel of SNAPSHOT_DIRS) {
     const src = path.join(appDir, rel);
+    const dest = path.join(goldenDir, rel);
+    await rm(dest);
     if (fs.existsSync(src)) {
-      await copyPath(src, path.join(goldenDir, rel));
+      await copyPath(src, dest);
+    } else {
+      await fs.promises.mkdir(dest, { recursive: true });
     }
   }
 };
@@ -117,7 +121,7 @@ const goldenSnapshotExists = () => {
     return false;
   }
 
-  const hasFilesystem = SNAPSHOT_DIRS.some((rel) => fs.existsSync(path.join(goldenDir, rel)));
+  const hasFilesystem = SNAPSHOT_DIRS.every((rel) => fs.existsSync(path.join(goldenDir, rel)));
   return hasFilesystem && databaseSnapshotExists(goldenDir);
 };
 

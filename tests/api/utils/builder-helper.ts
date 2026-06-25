@@ -88,5 +88,5 @@ export const destroyTestSetup = async (
 
   const { strapi, builder } = testSetup;
   await strapi.destroy();
-  await builder.cleanup({ useGoldenRestore: options.useGoldenRestore });
+  await builder.cleanup({ useGoldenRestore: options.useGoldenRestore ?? true });
 };

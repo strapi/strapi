@@ -79,10 +79,10 @@ const createTestBuilder = (options = {}) => {
 
     /**
      * @param {{ enableTestDataAutoCleanup?: boolean, useGoldenRestore?: boolean }} [options]
-     * @param {boolean} [options.useGoldenRestore=true] Pass false for legacy CTB teardown when this suite cannot use golden restore.
+     * @param {boolean} [options.useGoldenRestore=false] Pass true for golden snapshot restore (see destroyTestSetup).
      */
     async cleanup(options = {}) {
-      const { enableTestDataAutoCleanup = true, useGoldenRestore = true } = options;
+      const { enableTestDataAutoCleanup = true, useGoldenRestore = false } = options;
 
       if (useGoldenRestore && isGoldenRestoreSupported()) {
         await restoreGoldenSnapshot();
