@@ -142,7 +142,7 @@
     "semver": "7.7.4",
     "sift": "16.0.1",
     "sonner": "2.0.7",
-    "typescript": "5.4.5",
+    "typescript": "5.9.3",
     "use-context-selector": "1.4.1",
     "yup": "0.32.9",
     "zod": "3.25.67"

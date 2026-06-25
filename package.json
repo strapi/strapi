@@ -199,7 +199,7 @@
     "syncpack": "13.0.4",
     "tar": "7.5.16",
     "tsx": "4.22.4",
-    "typescript": "5.4.5",
+    "typescript": "5.9.3",
     "vitest": "catalog:",
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"

@@ -8958,7 +8958,7 @@ __metadata:
     sift: "npm:16.0.1"
     sonner: "npm:2.0.7"
     styled-components: "npm:6.4.1"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
     use-context-selector: "npm:1.4.1"
     vite: "npm:5.4.21"
     vite-plugin-dts: "npm:^4.3.0"
@@ -9127,7 +9127,7 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -9282,7 +9282,7 @@ __metadata:
     statuses: "npm:2.0.1"
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.49.0"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
     undici: "npm:6.27.0"
     vitest: "catalog:"
     vitest-config: "npm:5.49.0"
@@ -9328,7 +9328,7 @@ __metadata:
     stream-json: "npm:1.9.1"
     tar: "npm:7.5.16"
     tar-stream: "npm:2.2.0"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
     vitest: "catalog:"
     vitest-config: "npm:5.49.0"
     ws: "npm:8.20.1"
@@ -9610,7 +9610,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.49.0"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
@@ -9641,7 +9641,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
     vitest: "catalog:"
     vitest-config: "npm:5.49.0"
   peerDependencies:
@@ -9743,7 +9743,7 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.49.0"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -10049,7 +10049,7 @@ __metadata:
     semver: "npm:7.7.4"
     style-loader: "npm:3.3.4"
     tsconfig: "npm:5.49.0"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
     vite: "npm:5.4.21"
     webpack: "npm:5.106.2"
     webpack-bundle-analyzer: "npm:5.3.0"
@@ -10106,7 +10106,7 @@ __metadata:
     typedoc: "npm:0.28.19"
     typedoc-github-wiki-theme: "npm:2.1.0"
     typedoc-plugin-markdown: "npm:4.11.0"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
     undici: "npm:6.27.0"
     zod: "npm:3.25.67"
   languageName: unknown
@@ -10124,7 +10124,7 @@ __metadata:
     jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
     prettier: "npm:3.3.3"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
   languageName: unknown
   linkType: soft
 
@@ -29520,7 +29520,7 @@ __metadata:
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.16"
     tsx: "npm:4.22.4"
-    typescript: "npm:5.4.5"
+    typescript: "npm:5.9.3"
     vitest: "catalog:"
     yalc: "npm:1.0.0-pre.53"
     yargs: "npm:17.7.2"
@@ -31033,16 +31033,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.4.5":
-  version: 5.4.5
-  resolution: "typescript@npm:5.4.5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10c0/2954022ada340fd3d6a9e2b8e534f65d57c92d5f3989a263754a78aba549f7e6529acc1921913560a4b816c46dce7df4a4d29f9f11a3dc0d4213bb76d043251e
-  languageName: node
-  linkType: hard
-
 "typescript@npm:5.8.2":
   version: 5.8.2
   resolution: "typescript@npm:5.8.2"
@@ -31053,23 +31043,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5, typescript@npm:^5.4.0":
+"typescript@npm:5.9.3, typescript@npm:^5, typescript@npm:^5.4.0":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/6bd7552ce39f97e711db5aa048f6f9995b53f1c52f7d8667c1abdc1700c68a76a308f579cd309ce6b53646deb4e9a1be7c813a93baaf0a28ccd536a30270e1c5
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>":
-  version: 5.4.5
-  resolution: "typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10c0/db2ad2a16ca829f50427eeb1da155e7a45e598eec7b086d8b4e8ba44e5a235f758e606d681c66992230d3fc3b8995865e5fd0b22a2c95486d0b3200f83072ec9
   languageName: node
   linkType: hard
 
@@ -31083,7 +31063,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.4.0#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.4.0#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:
