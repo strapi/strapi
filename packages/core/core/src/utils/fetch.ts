@@ -15,17 +15,14 @@ export const createStrapiFetch = (
   const { logs = true } = options ?? {};
 
   const strapiFetch: Modules.Fetch.Fetch = (url: string | URL | Request, options?: RequestInit) => {
-    const fetchOptions: RequestInit = {
-      ...options,
-    };
-
-    if (strapiFetch.dispatcher) {
-      fetchOptions.dispatcher = strapiFetch.dispatcher;
-    }
-
     if (logs) {
       strapi.log.debug(`Making request for ${url}`);
     }
+
+    const fetchOptions: RequestInit = {
+      ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
+      ...options,
+    };
 
     return fetch(url, fetchOptions);
   };
