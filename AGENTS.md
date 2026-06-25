@@ -243,7 +243,7 @@ yarn prettier:check # check only
 
 ## Notes for Agents
 
-- **`examples/`** apps are sandboxes only — use them to reproduce and test fixes, never commit changes to them unless specifically asked to do so.
+- **`examples/`** apps are sandboxes only — use them to reproduce and test fixes, never commit changes to them unless specifically asked to do so. **Exception:** `examples/complex` is the **migration test fixture** (schemas, seeds, `validate-migration.js`, DB tooling); CI runs `migration_v5` against it via `tests/migration/`. It may relocate under `tests/migration/` in the future.
 - **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps and some root devDeps.
 - **Entity Service is deprecated** — always use the Document Service (`strapi.documents`) for content operations.
 - **Lifecycle phases** — `strapi.isLoaded` must be `true` before accessing services. Plugins and DB are not available until after the `load()` phase.

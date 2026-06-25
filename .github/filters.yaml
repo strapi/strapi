@@ -27,6 +27,16 @@ cli:
   - 'tests/scripts/run-cli-tests.js'
   - 'tests/scripts/run-tests.js'
   - 'tests/cli/**'
+# Umzug migration sources + v4→v5 integration harness (fixture app at examples/complex; runner at tests/migration/)
+# Fixture paths may move under tests/migration/ later; keep both globs in sync until then (see tests/migration/README.md).
+migrations:
+  - 'packages/**/migrations/**'
+  - 'tests/migration/**'
+  - 'examples/complex/docker-compose.dev.yml'
+  - 'examples/complex/scripts/**'
+  - 'examples/complex/config/**'
+  - 'examples/complex/src/**'
+  - 'examples/complex/package.json'
 docs:
   - 'docs/**'
   - '**.mdx?'

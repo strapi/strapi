@@ -9,6 +9,7 @@ const config = {
     '<rootDir>/packages/core/*/jest.config.js',
     '<rootDir>/packages/providers/*/jest.config.js',
     '<rootDir>/.github/actions/*/jest.config.js',
+    '<rootDir>/tests/migration/fixture/jest.config.js',
   ],
   // Coverage configuration for monorepo
   collectCoverage: false, // Will be enabled via CLI flag
