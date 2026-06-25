@@ -11,7 +11,7 @@
  * Because it runs in the user's page, it CANNOT use any imports or refer to any
  * variable outside of its own scope. Everything it needs is either defined within
  * `previewScript` or passed in through the `config` argument that the admin injects
- * at invocation time. Writting in JS and keeping it out of any bundler is deliberate:
+ * at invocation time. Writing in JS and keeping it out of any bundler is deliberate:
  * it guarantees the served text is exactly what's written here (no helper hoisting, no wrapping),
  * which is what makes it safe to evaluate as-is in the iframe.
  */

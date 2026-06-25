@@ -25,6 +25,10 @@ The preview script (`packages/core/content-manager/server/src/preview/controller
 const previewScriptSource = await fetch('/content-manager/preview/script').then((res) =>
   res.text()
 );
+const config = {
+  colors: previewHighlightColors,
+  events: INTERNAL_EVENTS,
+};
 const script = `(${previewScriptSource})(${JSON.stringify(config)})`;
 ```
 
