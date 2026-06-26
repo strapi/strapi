@@ -281,7 +281,6 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     canReadAdminUsers,
     model,
     attributes,
-    layout.metadatas,
     schemas,
     layout,
     users,
