@@ -210,7 +210,8 @@ const optionsValidationReducer = (
   } else {
     acc.push({
       isValidOptionPath:
-        option.name.startsWith('options') || ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name),
+        option.name.startsWith('options') ||
+        (ALLOWED_ROOT_LEVEL_OPTIONS as readonly string[]).includes(option.name),
       errorMessage: `'${option.name}' must be prefixed with 'options.'`,
     });
   }
