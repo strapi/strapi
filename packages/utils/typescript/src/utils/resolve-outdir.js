@@ -1,8 +1,8 @@
 'use strict';
 
 const path = require('path');
-const resolveConfigOptions = require('./resolve-config-options');
-const isUsingTypescript = require('./is-using-typescript');
+const { resolveConfigOptions } = require('./resolve-config-options');
+const { isUsingTypeScript } = require('./is-using-typescript');
 
 const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
 /**
@@ -11,8 +11,10 @@ const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
  * @param {string | undefined} configFilename
  * @returns {Promise<string | undefined>}
  */
-module.exports = async (dir, configFilename = DEFAULT_TS_CONFIG_FILENAME) => {
-  return (await isUsingTypescript(dir))
+const resolveOutDir = async (dir, configFilename = DEFAULT_TS_CONFIG_FILENAME) => {
+  return (await isUsingTypeScript(dir))
     ? resolveConfigOptions(path.join(dir, configFilename)).options.outDir
     : undefined;
 };
+
+module.exports = { resolveOutDir };

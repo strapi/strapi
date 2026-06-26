@@ -193,6 +193,9 @@ const attributeToPropertySignature = (schema, attributeName, attribute) => {
   );
 };
 
-module.exports = attributeToPropertySignature;
-
-Object.assign(module.exports, { mappers, getAttributeModifiers, getAttributeType });
+module.exports = {
+  attributeToPropertySignature,
+  mappers,
+  getAttributeModifiers,
+  getAttributeType,
+};

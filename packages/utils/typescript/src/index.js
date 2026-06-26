@@ -1,6 +1,6 @@
 'use strict';
 
-const compile = require('./compile');
+const { compile } = require('./compile');
 const compilers = require('./compilers');
 const utils = require('./utils');
 const generators = require('./generators');

@@ -4,31 +4,31 @@ const { factory } = require('typescript');
 
 const imports = [];
 
-module.exports = {
-  getImports() {
-    return imports;
-  },
+function getImports() {
+  return imports;
+}
 
-  addImport(type) {
-    const hasType = imports.includes(type);
+function addImport(type) {
+  const hasType = imports.includes(type);
 
-    if (!hasType) {
-      imports.push(type);
-    }
-  },
+  if (!hasType) {
+    imports.push(type);
+  }
+}
 
-  generateImportDefinition() {
-    const formattedImports = imports
-      .sort()
-      .map((key) => factory.createImportSpecifier(false, undefined, factory.createIdentifier(key)));
+function generateImportDefinition() {
+  const formattedImports = imports
+    .sort()
+    .map((key) => factory.createImportSpecifier(false, undefined, factory.createIdentifier(key)));
 
-    return [
-      factory.createImportDeclaration(
-        undefined,
-        factory.createImportClause(true, undefined, factory.createNamedImports(formattedImports)),
-        factory.createStringLiteral('@strapi/strapi'),
-        undefined
-      ),
-    ];
-  },
-};
+  return [
+    factory.createImportDeclaration(
+      undefined,
+      factory.createImportClause(true, undefined, factory.createNamedImports(formattedImports)),
+      factory.createStringLiteral('@strapi/strapi'),
+      undefined
+    ),
+  ];
+}
+
+module.exports = { getImports, addImport, generateImportDefinition };

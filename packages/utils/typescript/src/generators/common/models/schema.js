@@ -10,7 +10,7 @@ const {
   toTypeLiteral,
   NAMESPACES,
 } = require('./utils');
-const attributeToPropertySignature = require('./attributes');
+const { attributeToPropertySignature } = require('./attributes');
 const { addImport } = require('../imports');
 
 /**

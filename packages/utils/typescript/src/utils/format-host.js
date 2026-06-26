@@ -12,4 +12,4 @@ const formatHost = {
   getNewLine: () => ts.sys.newLine,
 };
 
-module.exports = formatHost;
+module.exports = { formatHost };

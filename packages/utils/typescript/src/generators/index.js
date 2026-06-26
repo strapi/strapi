@@ -5,8 +5,8 @@ const chalk = require('chalk');
 
 const { TYPES_ROOT_DIR, GENERATED_OUT_DIR } = require('./constants');
 const { saveDefinitionToFileSystem, createLogger, timer } = require('./utils');
-const generateContentTypesDefinitions = require('./content-types');
-const generateComponentsDefinitions = require('./components');
+const { generateContentTypesDefinitions } = require('./content-types');
+const { generateComponentsDefinitions } = require('./components');
 
 const GENERATORS = {
   contentTypes: generateContentTypesDefinitions,

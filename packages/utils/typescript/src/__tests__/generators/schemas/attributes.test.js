@@ -6,8 +6,8 @@ const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation();
 
 const ts = require('typescript');
 
-const attributeToPropertySignature = require('../../../generators/common/models/attributes');
 const {
+  attributeToPropertySignature,
   getAttributeType,
   getAttributeModifiers,
 } = require('../../../generators/common/models/attributes');
