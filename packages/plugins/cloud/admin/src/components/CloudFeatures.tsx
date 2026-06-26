@@ -4,15 +4,13 @@ import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils/getTrad';
 
-const CloudFree = () => {
+const CloudFeatures = () => {
   const { formatMessage } = useIntl();
 
   const features = [
-    { id: 'api', message: '2.5K API requests' },
-    { id: 'storage', message: '10 GB storage' },
-    { id: 'bandwidth', message: '10 GB asset bandwidth' },
     { id: 'cdn', message: 'Global CDN' },
     { id: 'pushToDeploy', message: 'Push to deploy' },
+    { id: 'customDomain', message: 'Custom domains' },
   ];
 
   return (
@@ -25,7 +23,7 @@ const CloudFree = () => {
                 <Check fill="primary500" />
                 <Typography variant="omega" paddingLeft={1}>
                   {formatMessage({
-                    id: getTrad(`Homepage.freePlan.${id}`),
+                    id: getTrad(`Homepage.features.${id}`),
                     defaultMessage: message,
                   })}
                 </Typography>
@@ -38,4 +36,4 @@ const CloudFree = () => {
   );
 };
 
-export { CloudFree };
+export { CloudFeatures };
