@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Accordion, Box, Flex, FlexComponent, Typography } from '@strapi/design-system';
+import { Accordion, Box, Flex, FlexComponent, Tooltip, Typography } from '@strapi/design-system';
+import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -31,7 +32,7 @@ const ComponentCategory = ({
     <Accordion.Item value={category}>
       <Accordion.Header variant={variant}>
         <Accordion.Trigger>
-          {formatMessage({ id: category, defaultMessage: category })}
+          {formatMessage({ id: category, defaultMessage: upperFirst(category) })}
         </Accordion.Trigger>
       </Accordion.Header>
       <ResponsiveAccordionContent>
@@ -49,12 +50,22 @@ const ComponentCategory = ({
               shrink={0}
               borderColor="neutral200"
             >
-              <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
+              <Flex
+                direction="column"
+                gap={1}
+                alignItems="center"
+                justifyContent="center"
+                width="100%"
+                paddingLeft={2}
+                paddingRight={2}
+              >
                 <ComponentIcon color="currentColor" background="primary200" icon={icon} />
 
-                <Typography variant="pi" fontWeight="bold">
-                  {displayName}
-                </Typography>
+                <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
+                  <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
+                    {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
+                  </Typography>
+                </Tooltip>
               </Flex>
             </ComponentBox>
           ))}

@@ -8,7 +8,7 @@ import { transformParamsDocumentId } from './transform/id-transform';
 import { transformParamsToQuery } from './transform/query';
 import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
-import { transformData } from './transform/data';
+import { clearTransformDataRequestCache, transformData } from './transform/data';
 
 const createEntriesService = (
   uid: UID.ContentType,
@@ -87,10 +87,10 @@ const createEntriesService = (
     return doc;
   }
 
-  async function deleteEntry(id: number) {
+  async function deleteEntry(id: number, query = {} as any) {
     const componentsToDelete = await components.getComponents(uid, { id });
 
-    const deletedEntry = await strapi.db.query(uid).delete({ where: { id } });
+    const deletedEntry = await strapi.db.query(uid).delete({ ...query, where: { id } });
 
     await components.deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
 
@@ -126,11 +126,19 @@ const createEntriesService = (
   }
 
   async function publishEntry(entry: any, params = {} as any) {
+    clearTransformDataRequestCache();
+
     return async.pipe(
       omit('id'),
       assoc('publishedAt', new Date()),
       (draft) => {
-        const opts = { uid, locale: draft.locale, status: 'published', allowMissingId: true };
+        const opts = {
+          uid,
+          locale: draft.locale,
+          status: 'published',
+          allowMissingId: true,
+          useRequestCache: false,
+        };
         return transformData(draft, opts);
       },
       // Create the published entry
@@ -139,11 +147,19 @@ const createEntriesService = (
   }
 
   async function discardDraftEntry(entry: any, params = {} as any) {
+    clearTransformDataRequestCache();
+
     return async.pipe(
       omit('id'),
       assoc('publishedAt', null),
       (entry) => {
-        const opts = { uid, locale: entry.locale, status: 'draft', allowMissingId: true };
+        const opts = {
+          uid,
+          locale: entry.locale,
+          status: 'draft',
+          allowMissingId: true,
+          useRequestCache: false,
+        };
         return transformData(entry, opts);
       },
       // Create the draft entry

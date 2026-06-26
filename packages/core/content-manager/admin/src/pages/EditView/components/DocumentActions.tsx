@@ -47,11 +47,28 @@ import {
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 import { AnyData, handleInvisibleAttributes } from '../utils/data';
+import {
+  countLocalDraftRelations,
+  EMPTY_DRAFT_RELATION_COUNTS,
+  getDraftRelationsPublishState,
+  normalizeDraftRelationCounts,
+  resolveDraftRelationCounts,
+  type DraftRelationCounts,
+} from '../utils/draftRelationCounts';
+import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
-import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
+
+type PublishConfirmDialogScope = 'panel' | 'preview' | 'relation-modal';
+
+const publishConfirmDialogOpeners = new Map<PublishConfirmDialogScope, () => void>();
+
+const openPublishConfirmDialog = (scope: PublishConfirmDialogScope) => {
+  publishConfirmDialogOpeners.get(scope)?.();
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -59,6 +76,7 @@ type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview' | 're
 
 interface DocumentActionDescription {
   label: string;
+  type?: 'publish' | 'update' | 'unpublish' | 'discard';
   onClick?: (event: React.SyntheticEvent) => Promise<boolean | void> | boolean | void;
   icon?: React.ReactNode;
   /**
@@ -76,13 +94,22 @@ interface DocumentActionDescription {
    */
   variant?: ButtonProps['variant'];
   loading?: ButtonProps['loading'];
+  /**
+   * When set on a publish action with a dialog, registers an opener for the keyboard shortcut.
+   */
+  publishConfirmScope?: PublishConfirmDialogScope;
 }
 
 interface DialogOptions {
   type: 'dialog';
   title: string;
   content?: React.ReactNode;
+  /**
+   * When set, centers a warning icon above the dialog body (bulk publish / delete pattern).
+   */
+  bodyIcon?: 'danger' | 'default';
   variant?: ButtonProps['variant'];
+  confirmLabel?: string;
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
 }
@@ -182,44 +209,39 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   }
 
   const addHintTooltip = (action: Action, children: React.ReactNode) => {
-    return !action.disabled ? (
-      <Tooltip
-        label={formatMessage(
-          {
+    if (action.disabled) {
+      return children;
+    }
+
+    const hint =
+      action.type === 'publish'
+        ? formatMessage({
+            id: 'content-manager.containers.EditView.publishHint',
+            defaultMessage: 'Ctrl / Cmd + Shift + Enter to publish',
+          })
+        : formatMessage({
             id: 'content-manager.containers.EditView.saveHint',
-            defaultMessage: 'Ctrl / Cmd + Enter to {action}',
-          },
-          {
-            action: action.label,
-          }
-        )}
-      >
+            defaultMessage: 'Ctrl / Cmd + Enter to save',
+          });
+
+    return (
+      <Tooltip label={hint}>
         <Flex width="100%">{children}</Flex>
       </Tooltip>
-    ) : (
-      children
     );
   };
 
   const primaryActionContent = (
     <>
       <Flex flex={1} alignItems="stretch" direction="column">
-        {primaryAction.label === 'Publish'
-          ? addHintTooltip(
-              primaryAction,
-              <DocumentActionButton
-                {...primaryAction}
-                variant={primaryAction.variant || 'default'}
-              />
-            )
-          : addHintTooltip(
-              primaryAction,
-              <DocumentActionButton
-                {...primaryAction}
-                variant={primaryAction.variant || 'default'}
-                buttonType="submit"
-              />
-            )}
+        {addHintTooltip(
+          primaryAction,
+          <DocumentActionButton
+            {...primaryAction}
+            variant={primaryAction.variant || 'default'}
+            buttonType={primaryAction.type === 'publish' ? undefined : 'submit'}
+          />
+        )}
       </Flex>
 
       {restActions.length > 0 ? (
@@ -241,19 +263,25 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
       </tours.contentManager.Publish>
       {secondaryAction ? (
         <Flex flex={1} order={{ initial: -1, large: 0 }} alignItems="stretch" direction="column">
-          {secondaryAction.label === 'Publish' ? (
+          {secondaryAction.type === 'publish' ? (
             <tours.contentManager.Publish>
+              {addHintTooltip(
+                secondaryAction,
+                <DocumentActionButton
+                  {...secondaryAction}
+                  variant={secondaryAction.variant || 'secondary'}
+                />
+              )}
+            </tours.contentManager.Publish>
+          ) : (
+            addHintTooltip(
+              secondaryAction,
               <DocumentActionButton
                 {...secondaryAction}
                 variant={secondaryAction.variant || 'secondary'}
+                buttonType="submit"
               />
-            </tours.contentManager.Publish>
-          ) : (
-            <DocumentActionButton
-              {...secondaryAction}
-              variant={secondaryAction.variant || 'secondary'}
-              buttonType="submit"
-            />
+            )
           )}
         </Flex>
       ) : null}
@@ -265,15 +293,33 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
  * DocumentActionButton
  * -----------------------------------------------------------------------------------------------*/
 
-interface DocumentActionButtonProps extends Action {
+interface DocumentActionButtonProps extends Omit<Action, 'type'> {
   buttonType?: 'button' | 'submit' | 'reset';
+  type?: DocumentActionDescription['type'];
 }
 
 const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { toggleNotification } = useNotification();
 
-  const handleClick = (action: Action) => async (e: React.MouseEvent) => {
+  React.useEffect(() => {
+    const scope = action.publishConfirmScope;
+
+    if (action.type !== 'publish' || !action.dialog || !scope) {
+      return;
+    }
+
+    const open = () => setDialogId(action.id);
+    publishConfirmDialogOpeners.set(scope, open);
+
+    return () => {
+      if (publishConfirmDialogOpeners.get(scope) === open) {
+        publishConfirmDialogOpeners.delete(scope);
+      }
+    };
+  }, [action.type, action.dialog, action.id, action.publishConfirmScope]);
+
+  const handleClick = (action: DocumentActionButtonProps) => async (e: React.MouseEvent) => {
     const { onClick = () => false, dialog, id } = action;
 
     const muteDialog = await onClick(e);
@@ -409,7 +455,7 @@ const DocumentActionsMenu = ({
         icon={<More />}
         variant={variant}
       />
-      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
+      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end" maxWidth="25rem">
         {actions.map((action) => {
           return (
             <Menu.Item
@@ -472,6 +518,8 @@ const DocumentActionConfirmDialog = ({
   onConfirm,
   title,
   content,
+  bodyIcon,
+  confirmLabel,
   isOpen,
   variant = 'secondary',
   loading,
@@ -494,11 +542,28 @@ const DocumentActionConfirmDialog = ({
     onClose();
   };
 
+  const dialogBody = bodyIcon ? (
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <Flex justifyContent="center">
+        <WarningCircle
+          width="24px"
+          height="24px"
+          fill={bodyIcon === 'danger' ? 'danger600' : 'primary600'}
+        />
+      </Flex>
+      <Typography id="confirm-description" tag="p" variant="omega" textAlign="center">
+        {content}
+      </Typography>
+    </Flex>
+  ) : (
+    content
+  );
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={handleClose}>
       <Dialog.Content>
         <Dialog.Header>{title}</Dialog.Header>
-        <Dialog.Body>{content}</Dialog.Body>
+        <Dialog.Body>{dialogBody}</Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>
             <Button variant="tertiary" fullWidth>
@@ -509,10 +574,11 @@ const DocumentActionConfirmDialog = ({
             </Button>
           </Dialog.Cancel>
           <Button onClick={handleConfirm} variant={variant} fullWidth loading={loading}>
-            {formatMessage({
-              id: 'app.components.Button.confirm',
-              defaultMessage: 'Confirm',
-            })}
+            {confirmLabel ??
+              formatMessage({
+                id: 'app.components.Button.confirm',
+                defaultMessage: 'Confirm',
+              })}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>
@@ -606,13 +672,13 @@ const PublishAction: DocumentActionComponent = ({
     ({ canPublish, canReadFields }) => ({ canPublish, canReadFields })
   );
   const { publish, isLoading } = useDocumentActions();
-  const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
-  const [
-    countDraftRelations,
-    { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
-  ] = useGetDraftRelationCountQuery();
-  const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
-  const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
+  const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
+  const [countDraftRelations, { isError: isErrorDraftRelations }] = useGetDraftRelationCountQuery();
+  const [localDraftRelationCounts, setLocalDraftRelationCounts] =
+    React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
+  const [serverDraftRelationCounts, setServerDraftRelationCounts] =
+    React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
+  const [isFetchingDraftRelations, setIsFetchingDraftRelations] = React.useState(false);
 
   const [{ rawQuery }] = useQueryParams();
 
@@ -621,8 +687,8 @@ const PublishAction: DocumentActionComponent = ({
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
+  const getValues = useForm('PublishAction', (state) => state.getValues);
   const formValues = useForm('PublishAction', ({ values }) => values);
-  const initialValues = useForm('PublishAction', ({ initialValues }) => initialValues);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
   const {
     currentDocument: { components },
@@ -631,6 +697,16 @@ const PublishAction: DocumentActionComponent = ({
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
   const fromRelationModal = relationContext != undefined;
+  const isRelationModalOpen = useRelationModal(
+    'PublishAction',
+    (state) => state.state.isModalOpen,
+    false
+  );
+  const publishConfirmScope: PublishConfirmDialogScope = fromRelationModal
+    ? 'relation-modal'
+    : onPreview
+      ? 'preview'
+      : 'panel';
 
   const dispatch = useRelationModal('PublishAction', (state) => state.dispatch);
   const fieldToConnect = useRelationModal(
@@ -671,49 +747,21 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    const localDraftRelations = new Set();
-
-    /**
-     * Extracts draft relations from the provided data object.
-     * It checks for a connect array of relations.
-     * If a relation has a status of 'draft', its id is added to the localDraftRelations set.
-     */
-    const extractDraftRelations = (data: Omit<RelationsFormValue, 'disconnect'>) => {
-      const relations = data.connect || [];
-      relations.forEach((relation) => {
-        if (relation.status === 'draft') {
-          localDraftRelations.add(relation.id);
-        }
-      });
-    };
-
-    /**
-     * Recursively traverses the provided data object to extract draft relations from arrays within 'connect' keys.
-     * If the data is an object, it looks for 'connect' keys to pass their array values to extractDraftRelations.
-     * It recursively calls itself for any non-null objects it contains.
-     */
-    const traverseAndExtract = (data: { [field: string]: any }) => {
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'connect' && Array.isArray(value)) {
-          extractDraftRelations({ connect: value });
-        } else if (typeof value === 'object' && value !== null) {
-          traverseAndExtract(value);
-        }
-      });
-    };
-
     if (!documentId || modified) {
-      traverseAndExtract(formValues);
-      setLocalCountOfDraftRelations(localDraftRelations.size);
+      setLocalDraftRelationCounts(countLocalDraftRelations(formValues, schema, components, model));
+    } else {
+      setLocalDraftRelationCounts(EMPTY_DRAFT_RELATION_COUNTS);
     }
-  }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
+  }, [components, documentId, formValues, model, modified, schema]);
 
-  React.useEffect(() => {
-    if (!document || !document.documentId || isListView) {
+  const fetchDraftRelationsCount = React.useCallback(async () => {
+    if (!document?.documentId || isListView) {
       return;
     }
 
-    const fetchDraftRelationsCount = async () => {
+    setIsFetchingDraftRelations(true);
+
+    try {
       const { data, error } = await countDraftRelations({
         collectionType,
         model,
@@ -726,20 +774,36 @@ const PublishAction: DocumentActionComponent = ({
       }
 
       if (data) {
-        setServerCountOfDraftRelations(data.data);
+        setServerDraftRelationCounts(normalizeDraftRelationCounts(data));
       }
+    } finally {
+      setIsFetchingDraftRelations(false);
+    }
+  }, [
+    collectionType,
+    countDraftRelations,
+    currentDocumentMeta.params,
+    document?.documentId,
+    documentId,
+    isListView,
+    model,
+  ]);
+
+  React.useEffect(() => {
+    fetchDraftRelationsCount();
+  }, [fetchDraftRelationsCount, document?.updatedAt]);
+
+  React.useEffect(() => {
+    const handleWindowFocus = () => {
+      fetchDraftRelationsCount();
     };
 
-    fetchDraftRelationsCount();
-  }, [
-    isListView,
-    document,
-    documentId,
-    countDraftRelations,
-    collectionType,
-    model,
-    currentDocumentMeta.params,
-  ]);
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [fetchDraftRelationsCount]);
   const parentDocumentMetaToUpdate = documentHistory?.at(-2) ?? rootDocumentMeta;
   const parentDocumentData = useDocument(
     {
@@ -762,12 +826,14 @@ const PublishAction: DocumentActionComponent = ({
     setSubmitting(true);
 
     try {
-      const { data: filteredData } = handleInvisibleAttributes(transformData(formValues), {
-        schema,
-        components,
-      });
+      /**
+       * Yield one microtask so React can flush any pending field updates from the same task
+       * (common with fast local runners / Playwright) before we read values and validate.
+       * TODO: replace with an explicit form flush contract when we can (same concern as Save flow).
+       */
+      await Promise.resolve();
+
       const { errors } = await validate(true, {
-        ...filteredData,
         status: 'published',
       });
       if (errors) {
@@ -809,8 +875,11 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
-      // filteredData is already used for validation, so use it for publishing as well
-      const data = filteredData;
+
+      const { data } = handleInvisibleAttributes(transformData(getValues()), {
+        schema,
+        components,
+      });
       const res = await publish(
         {
           collectionType,
@@ -823,7 +892,7 @@ const PublishAction: DocumentActionComponent = ({
 
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
-        resetForm(formValues);
+        resetForm(getValues());
         dispatchGuidedTour({
           type: 'set_completed_actions',
           payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
@@ -920,25 +989,67 @@ const PublishAction: DocumentActionComponent = ({
     }
   };
 
-  const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
-  // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
-  // see RFC "Count draft relations" in Notion
-  const enableDraftRelationsCount = false;
-  const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
+  const draftRelationCounts = resolveDraftRelationCounts(
+    documentId,
+    modified,
+    localDraftRelationCounts,
+    serverDraftRelationCounts
+  );
+  const {
+    hasUnpublishedRelations,
+    hasDraftM2mLinks,
+    hasDraftRelations,
+    dialogVariant,
+    bodyIcon,
+    confirmLabel,
+  } = getDraftRelationsPublishState(draftRelationCounts);
 
-  // Auto-publish on CMD+Enter on macOS, and CTRL+Enter on Windows/Linux
+  /**
+   * Disabled when:
+   *  - currently if you're cloning a document we don't support publish & clone at the same time.
+   *  - the form is submitting
+   *  - the active tab is the published tab
+   *  - the document is already published & not modified
+   *  - the document is being created & not modified
+   *  - the user doesn't have the permission to publish
+   */
+  const isDisabled =
+    isCloning ||
+    isSubmitting ||
+    isFetchingDraftRelations ||
+    activeTab === 'published' ||
+    (!modified && isDocumentPublished) ||
+    (!modified && !document?.documentId) ||
+    !canPublish;
+
+  // Publish on CMD+Shift+Enter (macOS) / CTRL+Shift+Enter (Windows/Linux).
+  // Saving a draft (CMD/CTRL+Enter) is handled by the UpdateAction.
   React.useEffect(() => {
     if (!schema?.options?.draftAndPublish) {
       return;
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        if (!hasDraftRelations) {
-          performPublish();
-        }
+      if (getEditViewShortcut(e) !== 'publish') {
+        return;
       }
+
+      e.preventDefault();
+
+      if (!fromRelationModal && isRelationModalOpen) {
+        return;
+      }
+
+      if (isDisabled) {
+        return;
+      }
+
+      if (hasDraftRelations) {
+        openPublishConfirmDialog(publishConfirmScope);
+        return;
+      }
+
+      performPublish();
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -946,32 +1057,26 @@ const PublishAction: DocumentActionComponent = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [hasDraftRelations, performPublish, schema?.options?.draftAndPublish]);
+  }, [
+    fromRelationModal,
+    hasDraftRelations,
+    isDisabled,
+    isRelationModalOpen,
+    performPublish,
+    publishConfirmScope,
+    schema?.options?.draftAndPublish,
+  ]);
 
   if (!schema?.options?.draftAndPublish) {
     return null;
   }
 
   return {
+    type: 'publish',
     loading: isLoading,
     position: ['panel', 'preview', 'relation-modal'],
-    /**
-     * Disabled when:
-     *  - currently if you're cloning a document we don't support publish & clone at the same time.
-     *  - the form is submitting
-     *  - the active tab is the published tab
-     *  - the document is already published & not modified
-     *  - the document is being created & not modified
-     *  - the user doesn't have the permission to publish
-     */
-    disabled:
-      isCloning ||
-      isSubmitting ||
-      isLoadingDraftRelations ||
-      activeTab === 'published' ||
-      (!modified && isDocumentPublished) ||
-      (!modified && !document?.documentId) ||
-      !canPublish,
+    disabled: isDisabled,
+    publishConfirmScope: hasDraftRelations ? publishConfirmScope : undefined,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -988,22 +1093,63 @@ const PublishAction: DocumentActionComponent = ({
     dialog: hasDraftRelations
       ? {
           type: 'dialog',
-          variant: 'danger',
-          footer: null,
+          variant: dialogVariant,
+          bodyIcon,
           title: formatMessage({
-            id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.title`),
+            id: getTranslation('popUpWarning.warning.has-draft-relations.title'),
             defaultMessage: 'Confirmation',
           }),
-          content: formatMessage(
-            {
-              id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.message`),
-              defaultMessage:
-                'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. Publishing it could leave broken links in your app.',
-            },
-            {
-              count: totalDraftRelations,
-            }
+          content: (
+            <>
+              {hasUnpublishedRelations
+                ? formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-relations.message'),
+                      defaultMessage:
+                        'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. {count, plural, one {That relation will not be included in the published version.} other {Those relations will not be included in the published version.}}',
+                    },
+                    {
+                      count: draftRelationCounts.unpublishedRelations,
+                    }
+                  )
+                : formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.message'),
+                      defaultMessage:
+                        '{count, plural, one {# linked entry is still in draft. It will appear on the live site once that entry is published.} other {# linked entries are still in draft. They will appear on the live site once those entries are published.}}',
+                    },
+                    {
+                      count: draftRelationCounts.draftM2mLinks,
+                    }
+                  )}
+              {hasUnpublishedRelations && hasDraftM2mLinks
+                ? ` ${formatMessage(
+                    {
+                      id: getTranslation('popUpWarning.warning.has-draft-m2m-relations.additional'),
+                      defaultMessage:
+                        '{count, plural, one {# many-to-many link points} other {# many-to-many links point}} to draft entries that will become visible once published.',
+                    },
+                    {
+                      count: draftRelationCounts.draftM2mLinks,
+                    }
+                  )}`
+                : null}{' '}
+              {formatMessage({
+                id: getTranslation('popUpWarning.warning.publish-question'),
+                defaultMessage: 'Do you still want to publish?',
+              })}
+            </>
           ),
+          confirmLabel:
+            confirmLabel === 'publish'
+              ? formatMessage({
+                  id: 'app.utils.publish',
+                  defaultMessage: 'Publish',
+                })
+              : formatMessage({
+                  id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
+                  defaultMessage: 'Publish without relations',
+                }),
           onConfirm: async () => {
             await performPublish();
           },
@@ -1040,7 +1186,7 @@ const UpdateAction: DocumentActionComponent = ({
   const modified = useForm('UpdateAction', ({ modified }) => modified);
   const setSubmitting = useForm('UpdateAction', ({ setSubmitting }) => setSubmitting);
   const initialValues = useForm('UpdateAction', ({ initialValues }) => initialValues);
-  const document = useForm('UpdateAction', ({ values }) => values);
+  const getValues = useForm('UpdateAction', (state) => state.getValues);
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('UpdateAction', ({ resetForm }) => resetForm);
@@ -1087,6 +1233,17 @@ const UpdateAction: DocumentActionComponent = ({
   );
   const { schema } = useDoc();
 
+  const suitableSchema = fromRelationModal ? relationalModalSchema : schema;
+  const hasDraftAndPublished = suitableSchema?.options?.draftAndPublish ?? false;
+
+  /**
+   * Disabled when:
+   * - the form is submitting
+   * - the document is not modified & we're not cloning (you can save a clone entity straight away)
+   * - the active tab is the published tab
+   */
+  const isDisabled = isSubmitting || (!modified && !isCloning) || activeTab === 'published';
+
   const handleUpdate = async () => {
     setSubmitting(true);
 
@@ -1095,8 +1252,20 @@ const UpdateAction: DocumentActionComponent = ({
         return;
       }
 
+      // Blur the active element so inputs that debounce into the form (e.g. blocks editor) flush
+      // before validate/getValues — on fast clients Save can otherwise read stale field state.
+      // Use the global DOM document — form values are not in scope here (avoid shadowing `document`).
+      (globalThis.document?.activeElement as HTMLElement | undefined)?.blur();
+
+      // Yield microtasks so batched React updates after blur/onChange can settle before validate
+      // (same idea as performPublish; two ticks vs one gives a bit more room after focus/blur).
+      // TODO: replace with an explicit field/form flush contract when available.
+      await Promise.resolve();
+      await Promise.resolve();
+
       const { errors } = await validate(true, {
-        status: 'draft',
+        // enforce "published" validation if not using "draft and published"
+        status: !hasDraftAndPublished ? 'published' : 'draft',
       });
 
       if (errors) {
@@ -1111,6 +1280,9 @@ const UpdateAction: DocumentActionComponent = ({
 
         return;
       }
+
+      const latestValues = getValues();
+
       if (isCloning) {
         const res = await clone(
           {
@@ -1118,7 +1290,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId: cloneMatch.params.origin!,
             params: currentDocumentMeta.params,
           },
-          transformData(document)
+          transformData(latestValues)
         );
 
         if ('data' in res) {
@@ -1137,8 +1309,8 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const { data } = handleInvisibleAttributes(transformData(document), {
-          schema: fromRelationModal ? relationalModalSchema : schema,
+        const { data } = handleInvisibleAttributes(transformData(latestValues), {
+          schema: suitableSchema,
           initialValues,
           components,
         });
@@ -1155,11 +1327,11 @@ const UpdateAction: DocumentActionComponent = ({
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           setErrors(formatValidationErrors(res.error));
         } else {
-          resetForm(document);
+          resetForm(latestValues);
         }
       } else {
-        const { data } = handleInvisibleAttributes(transformData(document), {
-          schema: fromRelationModal ? relationalModalSchema : schema,
+        const { data } = handleInvisibleAttributes(transformData(latestValues), {
+          schema: suitableSchema,
           initialValues,
           components,
         });
@@ -1265,15 +1437,38 @@ const UpdateAction: DocumentActionComponent = ({
     }
   };
 
+  // Save a draft on CMD+Enter (macOS) / CTRL+Enter (Windows/Linux), with CMD/CTRL+S as an alias.
+  // Publishing (CMD/CTRL+Shift+Enter) is handled by the PublishAction.
+  // `handleUpdate` is recreated on every render, so we read the latest version (and the latest
+  // disabled state) through refs and register the listener only once.
+  const handleUpdateRef = React.useRef(handleUpdate);
+  handleUpdateRef.current = handleUpdate;
+  const isDisabledRef = React.useRef(isDisabled);
+  isDisabledRef.current = isDisabled;
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (getEditViewShortcut(e) !== 'save') {
+        return;
+      }
+
+      e.preventDefault();
+
+      if (!isDisabledRef.current) {
+        handleUpdateRef.current();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return {
     loading: isLoading,
-    /**
-     * Disabled when:
-     * - the form is submitting
-     * - the document is not modified & we're not cloning (you can save a clone entity straight away)
-     * - the active tab is the published tab
-     */
-    disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
+    disabled: isDisabled,
     label: formatMessage({
       id: 'global.save',
       defaultMessage: 'Save',
@@ -1499,7 +1694,13 @@ DiscardAction.position = 'panel';
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
-export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
+export {
+  DocumentActions,
+  DocumentActionsMenu,
+  DocumentActionButton,
+  DEFAULT_ACTIONS,
+  openPublishConfirmDialog,
+};
 export type {
   DocumentActionDescription,
   DocumentActionPosition,

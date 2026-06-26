@@ -4,7 +4,6 @@ import { Page } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
-import { AIGenerationPage } from './pages/AIGenerationPage';
 import { AssetsPage } from './pages/Assets/AssetsPage';
 import { getTranslationKey } from './utils/translations';
 
@@ -21,7 +20,6 @@ export const UnstableMediaLibrary = () => {
 
       <Routes>
         <Route index element={<AssetsPage />} />
-        <Route path="ai-generation" element={<AIGenerationPage />} />
       </Routes>
     </Page.Main>
   );

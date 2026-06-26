@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { createStrapi, compileStrapi } = require('@strapi/strapi');
-const path = require('path');
+const { getDatabaseEnv } = require('./db-utils');
 
 // Expected counts per run (kept small for example seeding in this repo)
 const EXPECTED_COUNTS_PER_RUN = {
@@ -522,6 +522,493 @@ function areRelationSummariesEqual(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
+/**
+ * Collect all media (file) ids from an entry recursively (direct media + component/dz media).
+ */
+function collectMediaIds(value, path = '') {
+  const ids = [];
+  if (!value) return ids;
+  if (Array.isArray(value)) {
+    value.forEach((item, idx) => {
+      if (item && (item.id != null || item.documentId != null)) {
+        ids.push(item.id ?? item.documentId);
+      }
+      if (item && typeof item === 'object' && !item.id && !item.documentId) {
+        ids.push(...collectMediaIds(item, `${path}[${idx}]`));
+      }
+    });
+    return ids;
+  }
+  if (value.id != null || value.documentId != null) {
+    ids.push(value.id ?? value.documentId);
+    return ids;
+  }
+  if (typeof value === 'object') {
+    for (const v of Object.values(value)) {
+      ids.push(...collectMediaIds(v, path));
+    }
+  }
+  return ids;
+}
+
+/**
+ * Bug 1: Ensure draft has same media as published (catches missing files_related_morphs for drafts).
+ */
+async function validateMediaParityForDp(strapi) {
+  const errors = [];
+  const dpUids = [
+    'api::basic-dp.basic-dp',
+    'api::relation-dp.relation-dp',
+    'api::basic-dp-i18n.basic-dp-i18n',
+    'api::relation-dp-i18n.relation-dp-i18n',
+  ];
+  for (const uid of dpUids) {
+    const contentType = strapi.contentTypes[uid];
+    if (!contentType) continue;
+    const populate = buildPopulateFromAttributes(contentType.attributes);
+    const locale = isI18nContentType(contentType) ? 'all' : undefined;
+    const entries = await strapi
+      .documents(uid)
+      .findMany({ populate, ...(locale ? { locale } : {}) });
+    const byDoc = new Map();
+    for (const entry of entries) {
+      const key = locale ? `${entry.documentId}::${entry.locale || ''}` : entry.documentId;
+      if (!key) continue;
+      const bucket = byDoc.get(key) || { draft: null, published: null };
+      if (entry.publishedAt) bucket.published = entry;
+      else bucket.draft = entry;
+      byDoc.set(key, bucket);
+    }
+    for (const [key, pair] of byDoc.entries()) {
+      if (!pair.published || !pair.draft) continue;
+      const pubIds = collectMediaIds(pair.published).sort();
+      const draftIds = collectMediaIds(pair.draft).sort();
+      if (JSON.stringify(pubIds) !== JSON.stringify(draftIds)) {
+        errors.push(
+          `${uid} ${key}: media parity failed (published: ${pubIds.length} media, draft: ${draftIds.length} media)`
+        );
+      }
+    }
+  }
+  return { errors };
+}
+
+/**
+ * Bug 2: Ensure nested component relations (e.g. reference-list.references[].article) resolve on both draft and published.
+ */
+async function validateNestedComponentRelationParity(strapi) {
+  const errors = [];
+  // Dynamic zones (sections) only allow populate: '*' — no nested field targeting
+  const populate = { sections: { populate: '*' }, header: { populate: '*' } };
+  const entries = await strapi.documents('api::relation-dp.relation-dp').findMany({ populate });
+  const byDoc = new Map();
+  for (const entry of entries) {
+    if (!entry.documentId) continue;
+    const bucket = byDoc.get(entry.documentId) || { draft: null, published: null };
+    if (entry.publishedAt) bucket.published = entry;
+    else bucket.draft = entry;
+    byDoc.set(entry.documentId, bucket);
+  }
+  for (const [docId, pair] of byDoc.entries()) {
+    if (!pair.published || !pair.draft) continue;
+    const sectionsPub = pair.published.sections || [];
+    const sectionsDraft = pair.draft.sections || [];
+    for (let i = 0; i < Math.max(sectionsPub.length, sectionsDraft.length); i++) {
+      const sp = sectionsPub[i];
+      const sd = sectionsDraft[i];
+      if (
+        sp?.__component === 'shared.reference-list' ||
+        sd?.__component === 'shared.reference-list'
+      ) {
+        const refsPub = sp?.references || [];
+        const refsDraft = sd?.references || [];
+        for (let j = 0; j < Math.max(refsPub.length, refsDraft.length); j++) {
+          const rp = refsPub[j];
+          const rd = refsDraft[j];
+          const pubArticle = rp?.article?.id ?? rp?.article?.documentId;
+          const draftArticle = rd?.article?.id ?? rd?.article?.documentId;
+          if (pubArticle != null && draftArticle == null) {
+            errors.push(
+              `relation-dp documentId ${docId}: nested reference-list.references[${j}].article present on published, missing on draft`
+            );
+          }
+          if (draftArticle != null && pubArticle == null) {
+            errors.push(
+              `relation-dp documentId ${docId}: nested reference-list.references[${j}].article present on draft, missing on published`
+            );
+          }
+        }
+      }
+    }
+  }
+  return { errors };
+}
+
+const DRAFT_PUBLISH_UIDS = [
+  'api::basic-dp.basic-dp',
+  'api::basic-dp-i18n.basic-dp-i18n',
+  'api::relation-dp.relation-dp',
+  'api::relation-dp-i18n.relation-dp-i18n',
+  'api::hc-m2m-source.hc-m2m-source',
+  'api::hc-m2m-target.hc-m2m-target',
+];
+
+async function validateCreatorFieldsOnClonedDrafts(strapi) {
+  const errors = [];
+  const conn = strapi.db.connection;
+
+  for (const uid of DRAFT_PUBLISH_UIDS) {
+    const meta = strapi.db.metadata.get(uid);
+    const contentType = strapi.contentTypes[uid];
+    if (!meta || !contentType) {
+      continue;
+    }
+
+    const createdCol = meta.attributes?.createdBy?.joinColumn?.name ?? 'created_by_id';
+    const updatedCol = meta.attributes?.updatedBy?.joinColumn?.name ?? 'updated_by_id';
+    const localized = isI18nContentType(contentType);
+
+    const rows = await conn(meta.tableName).select(
+      'document_id',
+      'locale',
+      'published_at',
+      createdCol,
+      updatedCol
+    );
+
+    const byKey = new Map();
+    for (const row of rows) {
+      if (!row.document_id) {
+        continue;
+      }
+      const key = localized ? `${row.document_id}::${row.locale || ''}` : row.document_id;
+      const bucket = byKey.get(key) || { published: null, draft: null };
+      if (row.published_at != null) {
+        bucket.published = row;
+      } else {
+        bucket.draft = row;
+      }
+      byKey.set(key, bucket);
+    }
+
+    for (const [key, pair] of byKey.entries()) {
+      if (!pair.published || !pair.draft) {
+        continue;
+      }
+
+      const pubCreated = pair.published[createdCol];
+      const draftCreated = pair.draft[createdCol];
+      if (pubCreated != null && draftCreated == null) {
+        errors.push(
+          `${uid} ${key}: cloned draft is missing ${createdCol} (published=${pubCreated})`
+        );
+      } else if (pubCreated != null && Number(draftCreated) !== Number(pubCreated)) {
+        errors.push(
+          `${uid} ${key}: draft ${createdCol}=${draftCreated} does not match published ${pubCreated}`
+        );
+      }
+
+      const pubUpdated = pair.published[updatedCol];
+      const draftUpdated = pair.draft[updatedCol];
+      if (pubUpdated != null && draftUpdated == null) {
+        errors.push(
+          `${uid} ${key}: cloned draft is missing ${updatedCol} (published=${pubUpdated})`
+        );
+      } else if (pubUpdated != null && Number(draftUpdated) !== Number(pubUpdated)) {
+        errors.push(
+          `${uid} ${key}: draft ${updatedCol}=${draftUpdated} does not match published ${pubUpdated}`
+        );
+      }
+    }
+  }
+
+  return { errors };
+}
+
+/**
+ * Optional DB-level verification for migration-specific regressions.
+ * Prints supplementary evidence when primary validations pass.
+ */
+async function verifyMigrationFixAtDbLevel(strapi) {
+  const out = [];
+  const errors = [];
+  try {
+    const conn = strapi.db.connection;
+    const meta = strapi.db.metadata;
+
+    // --- Morph table (Bug 1) ---
+    const fileMeta = meta.get('plugin::upload.file');
+    const relatedAttr = fileMeta?.attributes?.related;
+    const morphJoin = relatedAttr?.joinTable;
+    if (morphJoin?.morphColumn) {
+      const morphTable = morphJoin.name;
+      const relatedIdCol = morphJoin.morphColumn.idColumn.name;
+      const relatedTypeCol = morphJoin.morphColumn.typeColumn.name;
+      const relationDpMeta = meta.get('api::relation-dp.relation-dp');
+      const relTable = relationDpMeta.tableName;
+      const rows = await conn(relTable).select('id', 'document_id', 'published_at');
+      const publishedIds = rows.filter((r) => r.published_at != null).map((r) => r.id);
+      const draftIds = rows.filter((r) => r.published_at == null).map((r) => r.id);
+
+      const relType = 'api::relation-dp.relation-dp';
+      const countPub =
+        publishedIds.length === 0
+          ? 0
+          : Number(
+              (
+                await conn(morphTable)
+                  .where(relatedTypeCol, relType)
+                  .whereIn(relatedIdCol, publishedIds)
+                  .count('* as c')
+                  .first()
+              )?.c ?? 0
+            );
+      const countDraft =
+        draftIds.length === 0
+          ? 0
+          : Number(
+              (
+                await conn(morphTable)
+                  .where(relatedTypeCol, relType)
+                  .whereIn(relatedIdCol, draftIds)
+                  .count('* as c')
+                  .first()
+              )?.c ?? 0
+            );
+
+      const morphNote =
+        countPub === 0 && countDraft === 0
+          ? ' (relation-dp has no direct media field in this schema)'
+          : countPub > 0 && countDraft > 0
+            ? ' (draft has media morph rows; fix verified)'
+            : ' (without fix draft would be 0 when published have media)';
+      out.push(
+        `  Morph (relation-dp direct): ${countPub} published, ${countDraft} draft${morphNote}.`
+      );
+    }
+
+    // --- Morph for component media (Bug 1): shared.logo under relation-dp (header.logo). This actually exercises the migration's component morph copy.
+    if (morphJoin?.morphColumn) {
+      const morphTable = morphJoin.name;
+      const relatedIdCol = morphJoin.morphColumn.idColumn.name;
+      const relatedTypeCol = morphJoin.morphColumn.typeColumn.name;
+      const relationDpMeta = meta.get('api::relation-dp.relation-dp');
+      const relTable = relationDpMeta.tableName;
+      const rows = await conn(relTable).select('id', 'published_at');
+      const publishedIds = rows.filter((r) => r.published_at != null).map((r) => r.id);
+      const draftIds = rows.filter((r) => r.published_at == null).map((r) => r.id);
+
+      const rdCmps = meta.get('api::relation-dp.relation-dp').attributes?.sections?.joinTable;
+      const rdCmpsTable = rdCmps?.name;
+      const entityIdCol = rdCmps?.joinColumn?.name;
+      const cmpIdCol = rdCmps?.morphColumn?.idColumn?.name;
+      const cmpTypeCol = rdCmps?.morphColumn?.typeColumn?.name;
+      if (!rdCmpsTable || !entityIdCol || !cmpIdCol || !cmpTypeCol) return out;
+
+      // Header component IDs under relation_dp (first-level sections include header)
+      const headerType = 'shared.header';
+      const headerRows = await conn(rdCmpsTable)
+        .where(cmpTypeCol, headerType)
+        .whereIn(entityIdCol, [...publishedIds, ...draftIds])
+        .select(entityIdCol, cmpIdCol);
+      const headerIdsByRelDp = new Map();
+      for (const r of headerRows) {
+        const eid = r[entityIdCol];
+        if (!headerIdsByRelDp.has(eid)) headerIdsByRelDp.set(eid, []);
+        headerIdsByRelDp.get(eid).push(r[cmpIdCol]);
+      }
+
+      // Logo component IDs: from header join table (shared.header has headerlogo -> shared.logo).
+      // Component->component uses joinColumn (parent entity_id) and inverseJoinColumn (child cmp_id), not morphColumn.
+      let headerLogoJoinTable;
+      let headerEntityCol;
+      let logoCmpCol;
+      for (const uid of ['shared.header', 'component::shared.header']) {
+        try {
+          const headerMeta = meta.get(uid);
+          const headerLogoAttr = headerMeta?.attributes?.headerlogo;
+          const jt = headerLogoAttr?.joinTable;
+          if (jt?.joinColumn?.name && jt?.inverseJoinColumn?.name) {
+            headerLogoJoinTable = jt.name;
+            headerEntityCol = jt.joinColumn.name;
+            logoCmpCol = jt.inverseJoinColumn.name;
+            break;
+          }
+        } catch (_) {}
+      }
+      if (!headerLogoJoinTable) {
+        out.push('  Morph (shared.logo under relation-dp): skipped (no header logo join table).');
+      } else {
+        const allHeaderIds = [...new Set(headerRows.map((r) => r[cmpIdCol]))];
+        const logoRows = await conn(headerLogoJoinTable)
+          .whereIn(headerEntityCol, allHeaderIds)
+          .select(headerEntityCol, logoCmpCol);
+        const logoIdByHeaderId = new Map();
+        for (const r of logoRows) {
+          logoIdByHeaderId.set(r[headerEntityCol], r[logoCmpCol]);
+        }
+        const publishedLogoIds = [];
+        const draftLogoIds = [];
+        for (const id of publishedIds) {
+          for (const hid of headerIdsByRelDp.get(id) || []) {
+            const lid = logoIdByHeaderId.get(hid);
+            if (lid != null) publishedLogoIds.push(lid);
+          }
+        }
+        for (const id of draftIds) {
+          for (const hid of headerIdsByRelDp.get(id) || []) {
+            const lid = logoIdByHeaderId.get(hid);
+            if (lid != null) draftLogoIds.push(lid);
+          }
+        }
+        const logoType = 'shared.logo';
+        const countPubLogo =
+          publishedLogoIds.length === 0
+            ? 0
+            : Number(
+                (
+                  await conn(morphTable)
+                    .where(relatedTypeCol, logoType)
+                    .whereIn(relatedIdCol, publishedLogoIds)
+                    .count('* as c')
+                    .first()
+                )?.c ?? 0
+              );
+        const countDraftLogo =
+          draftLogoIds.length === 0
+            ? 0
+            : Number(
+                (
+                  await conn(morphTable)
+                    .where(relatedTypeCol, logoType)
+                    .whereIn(relatedIdCol, draftLogoIds)
+                    .count('* as c')
+                    .first()
+                )?.c ?? 0
+              );
+        const logoNote =
+          countPubLogo > 0 && countDraftLogo === 0
+            ? ' (BUG: draft would have 0 without migration fix)'
+            : countPubLogo > 0 && countDraftLogo > 0
+              ? ' (draft clones have media morph rows; fix verified)'
+              : ' (no logo media on relation-dp in this seed)';
+        out.push(
+          `  Morph (shared.logo under relation-dp): ${countPubLogo} published, ${countDraftLogo} draft${logoNote}.`
+        );
+      }
+    }
+
+    // --- Source-side morph (universal fix): relation-dp.morphTargets (morphMany) ---
+    const relationDpMeta = meta.get('api::relation-dp.relation-dp');
+    const morphTargetsAttr = relationDpMeta?.attributes?.morphTargets;
+    const morphTargetsJoin = morphTargetsAttr?.joinTable;
+    if (morphTargetsJoin?.morphColumn?.idColumn && morphTargetsJoin?.joinColumn?.name) {
+      const morphTable = morphTargetsJoin.name;
+      const sourceCol = morphTargetsJoin.joinColumn.name;
+      const relTable = relationDpMeta.tableName;
+      const relRows = await conn(relTable).select('id', 'published_at');
+      const pubIds = relRows.filter((r) => r.published_at != null).map((r) => r.id);
+      const draftIds = relRows.filter((r) => r.published_at == null).map((r) => r.id);
+      const countPub =
+        pubIds.length === 0
+          ? 0
+          : Number(
+              (await conn(morphTable).whereIn(sourceCol, pubIds).count('* as c').first())?.c ?? 0
+            );
+      const countDraft =
+        draftIds.length === 0
+          ? 0
+          : Number(
+              (await conn(morphTable).whereIn(sourceCol, draftIds).count('* as c').first())?.c ?? 0
+            );
+      const note =
+        countPub > 0 && countDraft > 0
+          ? ' (source-side morph copied to drafts; universal fix verified)'
+          : countPub > 0 && countDraft === 0
+            ? ' (BUG: draft would have 0 without fix)'
+            : '';
+      out.push(
+        `  Morph (relation-dp morphTargets, source-side): ${countPub} published, ${countDraft} draft${note}.`
+      );
+    }
+
+    // --- Nested component IDs (Bug 2) ---
+    const sectionsAttr = relationDpMeta?.attributes?.sections;
+    const dzJoin = sectionsAttr?.joinTable;
+    if (
+      dzJoin?.joinColumn?.name &&
+      dzJoin?.morphColumn?.idColumn?.name &&
+      dzJoin?.morphColumn?.typeColumn?.name
+    ) {
+      const joinTableName = dzJoin.name;
+      const entityIdCol = dzJoin.joinColumn.name;
+      const componentIdCol = dzJoin.morphColumn.idColumn.name;
+      const componentTypeCol = dzJoin.morphColumn.typeColumn.name;
+
+      const relTable = relationDpMeta.tableName;
+      const relRows = await conn(relTable).select('id', 'document_id', 'published_at');
+      const byDoc = new Map();
+      for (const r of relRows) {
+        const docId = r.document_id;
+        if (!docId) continue;
+        const bucket = byDoc.get(docId) || { published: null, draft: null };
+        if (r.published_at != null) bucket.published = r.id;
+        else bucket.draft = r.id;
+        byDoc.set(docId, bucket);
+      }
+
+      let docsWithRefList = 0;
+      let docsWithDistinctCmpIds = 0;
+      let docsWithDz = 0;
+      let docsWithOverlap = 0;
+      const refListType = 'shared.reference-list';
+      for (const [docId, pair] of byDoc.entries()) {
+        if (!pair.published || !pair.draft) continue;
+        const dzRows = await conn(joinTableName)
+          .whereIn(entityIdCol, [pair.published, pair.draft])
+          .select(entityIdCol, componentIdCol, componentTypeCol);
+        const pubRows = dzRows.filter((row) => row[entityIdCol] === pair.published);
+        const draftRows = dzRows.filter((row) => row[entityIdCol] === pair.draft);
+        if (pubRows.length === 0 && draftRows.length === 0) continue;
+        docsWithDz += 1;
+        const componentKey = (row) => `${row[componentTypeCol]}::${row[componentIdCol]}`;
+        const pubDzKeys = new Set(pubRows.map(componentKey));
+        const draftDzKeys = new Set(draftRows.map(componentKey));
+        const overlaps = [...pubDzKeys].filter((key) => draftDzKeys.has(key));
+        if (overlaps.length > 0) {
+          docsWithOverlap += 1;
+          errors.push(
+            `relation-dp documentId ${docId}: ${overlaps.length} dynamic-zone component(s) shared between published and draft (${overlaps.join(', ')})`
+          );
+        }
+
+        const refRows = dzRows.filter((row) => row[componentTypeCol] === refListType);
+        const pubCmps = new Set(
+          refRows
+            .filter((row) => row[entityIdCol] === pair.published)
+            .map((row) => row[componentIdCol])
+        );
+        const draftCmps = new Set(
+          refRows.filter((row) => row[entityIdCol] === pair.draft).map((row) => row[componentIdCol])
+        );
+        if (pubCmps.size === 0 && draftCmps.size === 0) continue;
+        docsWithRefList += 1;
+        const disjoint = [...pubCmps].every((id) => !draftCmps.has(id));
+        if (disjoint && pubCmps.size > 0) docsWithDistinctCmpIds += 1;
+      }
+      out.push(
+        `  Nested components: ${docsWithRefList} document(s) with reference-list; ${docsWithDistinctCmpIds} have distinct draft vs published component IDs.`
+      );
+      out.push(
+        `  Dynamic zone components: ${docsWithDz} document(s); ${docsWithOverlap} have overlapping component IDs.`
+      );
+    }
+  } catch (e) {
+    out.push(`  Verification skipped (${e.message}).`);
+  }
+  return { lines: out, errors };
+}
+
 async function validateRelationParityForDp(strapi, uid) {
   const errors = [];
   const contentType = strapi.contentTypes[uid];
@@ -562,6 +1049,10 @@ async function run() {
   const argv = process.argv.slice(2);
   const opts = parseCliArgs(argv);
   const expected = getExpectedCounts(opts.multiplier);
+  const dbType = process.env.DATABASE_CLIENT || 'postgres';
+  if (['postgres', 'mysql', 'mariadb', 'sqlite'].includes(dbType)) {
+    Object.assign(process.env, getDatabaseEnv(dbType));
+  }
 
   console.log('🔍 Starting document-service validator (this will boot Strapi programmatically)...');
   console.log(`  multiplier: ${opts.multiplier}`);
@@ -569,6 +1060,15 @@ async function run() {
   const appContext = await compileStrapi();
   const strapi = await createStrapi(appContext).load();
   strapi.log.level = 'error';
+
+  // Log which DB we use (same config as config/database.ts + .env when run from examples/complex)
+  const dbConfig = strapi.config.get('database');
+  const conn = dbConfig?.connection?.connection || {};
+  const client = dbConfig?.connection?.client || '?';
+  const dbDesc = conn.connectionString
+    ? `${client} (from DATABASE_URL)`
+    : `${client} ${conn.host || 'localhost'}:${conn.port ?? (client === 'postgres' ? 5432 : 3306)}/${conn.database || 'strapi'}`;
+  console.log(`  database: ${dbDesc}`);
 
   try {
     const results = { errors: [], checks: [], sections: [] };
@@ -581,6 +1081,13 @@ async function run() {
     const docStruct = await validateDocumentStructure(strapi, expected);
     results.errors.push(...docStruct.errors);
     results.sections.push({ name: 'Draft/publish pairing', errors: docStruct.errors });
+
+    const creatorFields = await validateCreatorFieldsOnClonedDrafts(strapi);
+    results.errors.push(...creatorFields.errors);
+    results.sections.push({
+      name: 'Creator fields on cloned drafts',
+      errors: creatorFields.errors,
+    });
 
     const relPresence = await validateRelationsPresence(strapi);
     results.errors.push(...relPresence.errors);
@@ -605,6 +1112,29 @@ async function run() {
     results.errors.push(...entityGraph.errors);
     results.sections.push({ name: 'Components/dynamic zones/media', errors: entityGraph.errors });
 
+    const mediaParity = await validateMediaParityForDp(strapi);
+    results.errors.push(...mediaParity.errors);
+    results.sections.push({
+      name: 'Media parity (draft vs published)',
+      errors: mediaParity.errors,
+    });
+
+    const nestedComponentParity = await validateNestedComponentRelationParity(strapi);
+    results.errors.push(...nestedComponentParity.errors);
+    results.sections.push({
+      name: 'Nested component relation parity',
+      errors: nestedComponentParity.errors,
+    });
+
+    // Optional DB-level verification (evidence that migration fixes are in effect)
+    const verification = await verifyMigrationFixAtDbLevel(strapi);
+    if (verification.errors.length > 0) {
+      results.errors.push(...verification.errors);
+      results.sections.push({ name: 'DB-level verification', errors: verification.errors });
+    } else {
+      results.sections.push({ name: 'DB-level verification', errors: [] });
+    }
+
     // Summarize
     console.log('\n✅ Validation summary:');
     if (results.errors.length === 0) {
@@ -626,6 +1156,11 @@ async function run() {
     for (const section of results.sections) {
       const status = section.errors.length === 0 ? 'ok' : `errors=${section.errors.length}`;
       console.log(`  - ${section.name}: ${status}`);
+    }
+
+    if (verification.lines.length > 0) {
+      console.log('\n🔬 DB-level verification (migration fix evidence):');
+      for (const line of verification.lines) console.log(line);
     }
 
     process.exit(results.errors.length === 0 ? 0 : 2);

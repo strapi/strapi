@@ -234,7 +234,25 @@ export declare namespace CreateFile {
 }
 
 /**
- * POST /upload/unstable/stream - Stream upload files with partial success support
+ * POST /upload/unstable/upload-file - Upload a single file
+ *
+ * Accepts one file per request (multipart `files` + `fileInfo`) and returns the
+ * single created `File`. Does not run inline AI metadata generation.
+ */
+export declare namespace UnstableCreateFile {
+  export interface Request {
+    body: FormData;
+  }
+  export interface Response {
+    data: File;
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
+/**
+ * POST /upload/unstable/stream-from-urls - Stream upload files with partial success support
+ *
+ * Still used by the URL upload flow (`uploadFromUrls`).
  */
 export declare namespace CreateFilesStream {
   export interface FileUploadError {
@@ -251,7 +269,7 @@ export declare namespace CreateFilesStream {
 }
 
 /**
- * POST /upload/unstable/stream - SSE streaming event types
+ * POST /upload/unstable/stream-from-urls - SSE streaming event types
  *
  * The endpoint streams Server-Sent Events as each file is processed.
  * The final `stream:complete` event carries the same shape as CreateFilesStream.Response.
@@ -366,3 +384,16 @@ export declare namespace GenerateAIMetadata {
     error?: errors.ApplicationError;
   }
 }
+
+/** User object returned when createdBy is populated (GET /upload/files/:id) */
+export interface PopulatedCreatedBy {
+  id: number;
+  firstname?: string;
+  lastname?: string;
+  username?: string | null;
+  email?: string;
+}
+
+export type AssetWithPopulatedCreatedBy = Omit<File, 'createdBy'> & {
+  createdBy?: PopulatedCreatedBy | null;
+};

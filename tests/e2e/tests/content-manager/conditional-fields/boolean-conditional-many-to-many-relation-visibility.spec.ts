@@ -6,7 +6,7 @@ import { navToHeader } from '../../../../utils/shared';
 
 test.describe('Conditional Fields - Boolean-controlled conditional many-to-many relation fields', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
 

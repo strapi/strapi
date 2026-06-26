@@ -7,4 +7,7 @@ module.exports = {
   },
   testMatch: ['<rootDir>/**/*.test.ts'],
   displayName: 'Strapi',
+  moduleNameMapper: {
+    '^inquirer$': '<rootDir>/src/test/mocks/inquirer.ts',
+  },
 };

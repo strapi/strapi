@@ -145,7 +145,7 @@ const createComponentValidator =
       componentContext,
     }: ValidatorMeta<Schema.Attribute.Component<UID.Component, boolean>>,
     { isDraft }: ValidatorContext
-  ) => {
+  ): strapiUtils.yup.AnySchema => {
     const model = strapi.getModel(attr.component);
     if (!model) {
       throw new Error('Validation failed: Model not found');
@@ -196,7 +196,10 @@ const createComponentValidator =
 
 const createDzValidator =
   (createOrUpdate: CreateOrUpdate) =>
-  ({ attr, updatedAttribute, componentContext }: ValidatorMeta, { isDraft }: ValidatorContext) => {
+  (
+    { attr, updatedAttribute, componentContext }: ValidatorMeta,
+    { isDraft }: ValidatorContext
+  ): strapiUtils.yup.AnySchema => {
     let validator;
 
     validator = yup.array().of(
@@ -266,7 +269,8 @@ const createScalarAttributeValidator =
   };
 
 const createAttributeValidator =
-  (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMetas, options: ValidatorContext) => {
+  (createOrUpdate: CreateOrUpdate) =>
+  (metas: ValidatorMetas, options: ValidatorContext): strapiUtils.yup.AnySchema => {
     let validator = yup.mixed();
 
     // If field is conditionally invisible, skip all validation for it
@@ -344,7 +348,10 @@ const createAttributeValidator =
 
 const createModelValidator =
   (createOrUpdate: CreateOrUpdate) =>
-  ({ componentContext, model, data, entity }: ModelValidatorMetas, options: ValidatorContext) => {
+  (
+    { componentContext, model, data, entity }: ModelValidatorMetas,
+    options: ValidatorContext
+  ): strapiUtils.yup.AnyObjectSchema => {
     const writableAttributes = model ? getWritableAttributes(model as any) : [];
 
     const schema = writableAttributes.reduce(

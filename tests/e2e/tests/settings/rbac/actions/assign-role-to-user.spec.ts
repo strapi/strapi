@@ -14,7 +14,7 @@ test.describe('RBAC - Assign Role to Users', () => {
     await sharedSetup('rbac-assign-roles-to-user', page, {
       login: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Navigate to the Users management page

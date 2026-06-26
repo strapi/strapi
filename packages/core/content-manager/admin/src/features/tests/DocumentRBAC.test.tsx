@@ -152,6 +152,95 @@ describe('DocumentRBAC', () => {
     });
   });
 
+  describe('multi-role field union with restricted roles', () => {
+    const role1Read = {
+      id: 900,
+      action: 'plugin::content-manager.explorer.read',
+      actionParameters: {},
+      subject: 'api::article.article',
+      properties: { fields: ['title', 'content'] },
+      conditions: [],
+    } satisfies Permission;
+
+    const role2Read = {
+      id: 901,
+      action: 'plugin::content-manager.explorer.read',
+      actionParameters: {},
+      subject: 'api::article.article',
+      properties: { fields: ['status', 'network'] },
+      conditions: [],
+    } satisfies Permission;
+
+    const permissions = [role1Read, role2Read];
+
+    it('unions canReadFields from all roles instead of keeping only the last one', async () => {
+      const { result } = renderRTLHook(() => useDocumentRBAC('TEST', (state) => state), {
+        wrapper({ children }) {
+          return (
+            <Routes>
+              <Route
+                path="/content-manager/:collectionType/:slug"
+                element={<DocumentRBAC permissions={permissions}>{children}</DocumentRBAC>}
+              />
+            </Routes>
+          );
+        },
+        initialEntries: ['/content-manager/collection-type/api::article.article'],
+        providerOptions: { permissions },
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.canReadFields).toEqual(
+        expect.arrayContaining(['title', 'content', 'status', 'network'])
+      );
+      expect(result.current.canReadFields).toHaveLength(4);
+    });
+  });
+
+  describe('unrestricted field access combined with restricted roles', () => {
+    const permUnrestricted = {
+      id: 902,
+      action: 'plugin::content-manager.explorer.read',
+      actionParameters: {},
+      subject: 'api::article.article',
+      properties: {},
+      conditions: [],
+    } satisfies Permission;
+
+    const permRestricted = {
+      id: 903,
+      action: 'plugin::content-manager.explorer.read',
+      actionParameters: {},
+      subject: 'api::article.article',
+      properties: { fields: ['title'] },
+      conditions: [],
+    } satisfies Permission;
+
+    const permissions = [permUnrestricted, permRestricted];
+
+    it('returns an empty field list when any role has unrestricted access', async () => {
+      const { result } = renderRTLHook(() => useDocumentRBAC('TEST', (state) => state), {
+        wrapper({ children }) {
+          return (
+            <Routes>
+              <Route
+                path="/content-manager/:collectionType/:slug"
+                element={<DocumentRBAC permissions={permissions}>{children}</DocumentRBAC>}
+              />
+            </Routes>
+          );
+        },
+        initialEntries: ['/content-manager/collection-type/api::article.article'],
+        providerOptions: { permissions },
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.canReadFields).toHaveLength(0);
+    });
+  });
+
   describe('can not do anything', () => {
     const renderHook = makeRenderHook([]);
 

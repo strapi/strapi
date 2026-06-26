@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import * as Dialog from '@radix-ui/react-dialog';
-import { Box, Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
+import { Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
   Check,
@@ -13,12 +12,19 @@ import {
   Upload,
 } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled, keyframes } from 'styled-components';
+import { styled } from 'styled-components';
 
-import { abortUpload, useRetryCancelledFilesStreamMutation } from '../services/api';
+import { abortUpload, useRetryCancelledFilesMutation } from '../services/api';
 import { useTypedDispatch, useTypedSelector } from '../store/hooks';
-import { closeUploadProgress, toggleMinimize, cancelUpload } from '../store/uploadProgress';
+import {
+  closeUploadProgress,
+  toggleMinimize,
+  cancelUpload,
+  selectAggregateProgress,
+} from '../store/uploadProgress';
 import { getTranslationKey } from '../utils/translations';
+
+import { Drawer } from './Drawer';
 
 import type { FileProgress, FileProgressStatus } from '../store/uploadProgress';
 
@@ -29,14 +35,14 @@ import type { FileProgress, FileProgressStatus } from '../store/uploadProgress';
 const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
     <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
-      <Dialog.Title>
+      <Drawer.Title>
         <Typography variant="omega">{title}</Typography>
-      </Dialog.Title>
-      <Dialog.Description>
+      </Drawer.Title>
+      <Drawer.Description>
         <Typography variant="pi" textColor="neutral600">
           {subtitle}
         </Typography>
-      </Dialog.Description>
+      </Drawer.Description>
     </Flex>
   );
 };
@@ -51,8 +57,7 @@ const HeaderStatusIcon = styled(Flex)`
   }
 `;
 
-const HeaderStatusWrapper = styled(Dialog.Title)`
-  display: flex;
+const HeaderStatusWrapper = styled(Flex)`
   align-items: center;
 `;
 
@@ -60,9 +65,17 @@ type HeaderStatusProps = {
   status: 'uploading' | 'success' | 'error' | 'canceled';
   progress?: number;
   totalFiles: number;
+  successfulCount: number;
+  errorCount: number;
 };
 
-const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
+const HeaderStatus = ({
+  status,
+  progress,
+  totalFiles,
+  successfulCount,
+  errorCount,
+}: HeaderStatusProps) => {
   const { formatMessage } = useIntl();
 
   if (status === 'error') {
@@ -86,6 +99,23 @@ const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
   }
 
   if (status === 'success') {
+    const subtitle =
+      errorCount > 0
+        ? formatMessage(
+            {
+              id: getTranslationKey('upload.progress.success.subtitle.withErrors'),
+              defaultMessage: '{successCount} uploaded, {errorCount} failed',
+            },
+            { successCount: successfulCount, errorCount }
+          )
+        : formatMessage(
+            {
+              id: getTranslationKey('upload.progress.success.subtitle'),
+              defaultMessage: '{count} files uploaded successfully',
+            },
+            { count: successfulCount }
+          );
+
     return (
       <HeaderStatusWrapper>
         <HeaderStatusIcon background="success200">
@@ -96,13 +126,7 @@ const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
             id: getTranslationKey('upload.progress.success'),
             defaultMessage: 'Upload successful!',
           })}
-          subtitle={formatMessage(
-            {
-              id: getTranslationKey('upload.progress.success.subtitle'),
-              defaultMessage: '{count} files uploaded successfully',
-            },
-            { count: totalFiles }
-          )}
+          subtitle={subtitle}
         />
       </HeaderStatusWrapper>
     );
@@ -177,17 +201,25 @@ const HEADER_COLOR_MAP = {
 const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const { formatMessage } = useIntl();
 
-  const { isMinimized, progress, files, uploadId, totalFiles } = useTypedSelector(
+  const { isMinimized, files, uploadId, totalFiles } = useTypedSelector(
     (state) => state.uploadProgress
   );
+  const progress = useTypedSelector(selectAggregateProgress);
   const dispatch = useTypedDispatch();
-  const [retryCancelledFiles] = useRetryCancelledFilesStreamMutation();
+  const [retryCancelledFiles] = useRetryCancelledFilesMutation();
 
-  const isComplete = progress === 100;
-  const isAllUploaded = isComplete && files.every((f) => f.status !== 'uploading');
-  const isAllErrored = isComplete && files.length > 0 && files.every((f) => f.status === 'error');
+  // The batch is complete once every file has reached a terminal state. Byte-weighted
+  // progress can't be used here because errored/cancelled rows never reach 100%.
+  const isComplete =
+    files.length > 0 &&
+    files.every((f) => f.status === 'complete' || f.status === 'error' || f.status === 'cancelled');
+  const isAllUploaded = isComplete;
+  const isAllErrored = isComplete && files.every((f) => f.status === 'error');
   const hasCancelledFiles = files.some((f) => f.status === 'cancelled');
-  const isSuccess = isComplete && isAllUploaded && !isAllErrored && !hasCancelledFiles;
+  const successfulCount = files.filter((f) => f.status === 'complete').length;
+  const errorCount = files.filter((f) => f.status === 'error').length;
+  // Success includes partial success (some files succeeded, even if some failed)
+  const isSuccess = isComplete && successfulCount > 0 && !hasCancelledFiles;
   const status = ((): HeaderStatusProps['status'] => {
     if (isAllErrored) return 'error';
     if (isSuccess) return 'success';
@@ -220,7 +252,13 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
       margin={1}
       hasRadius
     >
-      <HeaderStatus status={status} progress={progress} totalFiles={totalFiles} />
+      <HeaderStatus
+        status={status}
+        progress={progress}
+        totalFiles={totalFiles}
+        successfulCount={successfulCount}
+        errorCount={errorCount}
+      />
       <Flex gap={1}>
         {!isAllUploaded && (
           <TextButton onClick={handleCancel} fontWeight="bold">
@@ -253,16 +291,13 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
           </ChevronWrapper>
         </HeaderIconButton>
         {isComplete && (
-          <HeaderIconButton
-            onClick={handleClose}
+          <Drawer.CloseButton
+            onClose={handleClose}
             label={formatMessage({
               id: getTranslationKey('upload.progress.close'),
               defaultMessage: 'Close',
             })}
-            variant="ghost"
-          >
-            <Cross />
-          </HeaderIconButton>
+          />
         )}
       </Flex>
     </Flex>
@@ -273,35 +308,30 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
  * UploadProgressDialog
  * -----------------------------------------------------------------------------------------------*/
 
-const indeterminate = keyframes`
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(400%);
-  }
-`;
-
-const IndeterminateBar = styled.div`
+const ProgressTrack = styled.div`
   width: 100%;
   height: ${({ theme }) => theme.spaces[1]};
   background-color: ${({ theme }) => theme.colors.neutral200};
   border-radius: 4px;
   overflow: hidden;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 25%;
-    background-color: ${({ theme }) => theme.colors.primary700};
-    border-radius: 4px;
-    animation: ${indeterminate} 1.5s ease-in-out infinite;
-  }
 `;
+
+const ProgressIndicator = styled.div<{ $percent: number }>`
+  height: 100%;
+  width: ${({ $percent }) => $percent}%;
+  background-color: ${({ theme }) => theme.colors.primary700};
+  border-radius: 4px;
+  transition: width 0.15s linear;
+`;
+
+const DeterminateBar = ({ percent }: { percent: number }) => {
+  const clamped = Math.min(100, Math.max(0, Math.round(percent)));
+  return (
+    <ProgressTrack role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={clamped}>
+      <ProgressIndicator $percent={clamped} />
+    </ProgressTrack>
+  );
+};
 
 const FileRow = ({
   icon,
@@ -333,6 +363,7 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   const isCancelled = file.status === 'cancelled';
 
   if (isCurrentFile) {
+    const percent = file.size > 0 ? (file.uploadedBytes / file.size) * 100 : 0;
     return (
       <FileRow icon={<ArrowsCounterClockwise fill="secondary600" />} fileName={file.name}>
         <Typography variant="pi" textColor="neutral600">
@@ -341,7 +372,7 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
             defaultMessage: 'Uploading...',
           })}
         </Typography>
-        <IndeterminateBar />
+        <DeterminateBar percent={percent} />
       </FileRow>
     );
   }
@@ -385,39 +416,10 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   return null;
 };
 
-const DialogContent = styled(Dialog.Content)`
-  position: fixed;
-  bottom: ${({ theme }) => theme.spaces[4]};
-  right: ${({ theme }) => theme.spaces[4]};
-  width: 400px;
-  background-color: ${({ theme }) => theme.colors.neutral0};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  box-shadow: ${({ theme }) => theme.shadows.popupShadow};
-  z-index: 1000;
-  overflow: hidden;
-  border: 1px solid ${({ theme }) => theme.colors.neutral150};
-
-  &:focus {
-    outline: none;
-  }
-`;
-
 const CompletedFilesList = styled(Flex)`
-  max-height: 200px;
-  overflow-y: auto;
   flex-direction: column;
   gap: ${({ theme }) => theme.spaces[2]};
   width: 100%;
-`;
-
-const AnimatedContent = styled.div<{ $isVisible: boolean }>`
-  display: grid;
-  grid-template-rows: ${({ $isVisible }) => ($isVisible ? '1fr' : '0fr')};
-  transition: grid-template-rows 0.3s ease-in-out;
-
-  > div {
-    overflow: hidden;
-  }
 `;
 
 export const UploadProgressDialog = () => {
@@ -444,40 +446,31 @@ export const UploadProgressDialog = () => {
   };
 
   return (
-    <Dialog.Root open={isVisible} modal={false}>
-      <Dialog.Portal>
-        <DialogContent
-          // The accessible name is set by Dialog.Title and is dynamic,
-          // use a data-testid to ensure a stable target for e2e tests
-          data-testid="upload-progress-dialog"
-        >
-          <DialogHeader handleClose={handleClose} />
+    <Drawer.Root isVisible={isVisible} onClose={handleClose}>
+      <Drawer.Body animationDirection="up" width="41.6rem" maxHeight="34.2rem">
+        <DialogHeader handleClose={handleClose} />
+        <Drawer.ScrollableContent isContentExpanded={!isMinimized}>
+          <Flex
+            direction="column"
+            alignItems="stretch"
+            gap={4}
+            paddingTop={4}
+            paddingBottom={4}
+            paddingLeft={4}
+            paddingRight={4}
+          >
+            {currentFile && <FileRowRenderer file={currentFile} />}
 
-          <AnimatedContent $isVisible={!isMinimized}>
-            <Box>
-              <Flex
-                direction="column"
-                alignItems="stretch"
-                gap={4}
-                paddingTop={4}
-                paddingBottom={4}
-                paddingLeft={4}
-                paddingRight={4}
-              >
-                {currentFile && <FileRowRenderer file={currentFile} />}
-
-                {completedFiles.length > 0 && (
-                  <CompletedFilesList>
-                    {completedFiles.map((file) => (
-                      <FileRowRenderer key={file.index} file={file} />
-                    ))}
-                  </CompletedFilesList>
-                )}
-              </Flex>
-            </Box>
-          </AnimatedContent>
-        </DialogContent>
-      </Dialog.Portal>
-    </Dialog.Root>
+            {completedFiles.length > 0 && (
+              <CompletedFilesList>
+                {completedFiles.map((file) => (
+                  <FileRowRenderer key={file.index} file={file} />
+                ))}
+              </CompletedFilesList>
+            )}
+          </Flex>
+        </Drawer.ScrollableContent>
+      </Drawer.Body>
+    </Drawer.Root>
   );
 };

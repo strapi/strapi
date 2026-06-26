@@ -5,10 +5,10 @@ import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
 
+import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
@@ -122,7 +122,9 @@ const AdminLayout = () => {
                 topMobileNavigation={topMobileNavigation}
                 burgerMobileNavigation={burgerMobileNavigation}
               />
-              <Box
+              <Flex
+                direction="column"
+                alignItems="stretch"
                 flex={1}
                 overflow="auto"
                 width="100%"
@@ -132,8 +134,13 @@ const AdminLayout = () => {
                 }}
               >
                 <UpsellBanner />
-                <Outlet />
-              </Box>
+                {/*
+                 * Top-level Suspense only — nested layouts (Settings, Content Manager) use
+                 * LazyOutlet with useNavigation so in-app navigations show loading in the content
+                 * column without hiding section side navs.
+                 */}
+                <LazyOutlet suspenseOnly />
+              </Flex>
             </Flex>
           </Box>
         </DndProvider>

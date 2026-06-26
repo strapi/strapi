@@ -20,7 +20,6 @@ export interface Options {
   install?: boolean;
   example?: boolean;
   gitInit?: boolean;
-  enableAbTests?: boolean;
   nonInteractive?: boolean;
   templateBranch?: string;
   templatePath?: string;
@@ -66,7 +65,8 @@ export interface Scope {
   useExample?: boolean;
   gitInit?: boolean;
   shouldCreateGrowthSsoTrial: boolean;
-  isABTestEnabled: boolean;
+  /** Resolved at scaffold time when packageManager is pnpm (npm_config_user_agent or pnpm --version). */
+  pnpmVersion?: string | null;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';
