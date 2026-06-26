@@ -1,5 +1,13 @@
 [
   {
+    "code": "abk",
+    "name": "Abkhazian (Abkhazia)"
+  },
+  {
+    "code": "ady",
+    "name": "Adyghe (West Circassian)"
+  },
+  {
     "code": "af",
     "name": "Afrikaans (af)"
   },
@@ -174,6 +182,10 @@
   {
     "code": "az-Latn-AZ",
     "name": "Azerbaijani (Latin, Azerbaijan) (az-Latn-AZ)"
+  },
+  {
+    "code": "kbd",
+    "name": "Kabardian (East Circassian)"
   },
   {
     "code": "ksf",
