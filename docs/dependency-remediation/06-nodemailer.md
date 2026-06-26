@@ -3,7 +3,7 @@
 **Date:** 2026-06-27  
 **Packages:** `@strapi/provider-email-nodemailer`, `@strapi/provider-email-sendmail`, `@strapi/email`  
 **Verdict:** **Ship** — version bump only; non-breaking for typical Strapi usage  
-**Draft PR:** https://github.com/strapi/strapi/pull/TBD  
+**Draft PR:** https://github.com/strapi/strapi/pull/26821  
 **Branch:** `chore/deps-nodemailer-9`
 
 ---
