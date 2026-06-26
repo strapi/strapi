@@ -1,4 +1,4 @@
-import type { AnyAttribute } from '../types';
+import type { AnyAttribute, AttributeConditions, ContentTypes } from '../types';
 
 interface DependentRow {
   contentTypeUid: string;
@@ -7,27 +7,27 @@ interface DependentRow {
 }
 
 export const checkDependentRows = (
-  contentTypes: Record<string, any>,
+  contentTypes: ContentTypes,
   fieldName: string
 ): DependentRow[] => {
   const dependentRows: DependentRow[] = [];
 
-  Object.entries(contentTypes).forEach(([contentTypeUid, contentType]: [string, any]) => {
-    if (contentType.attributes) {
+  Object.entries(contentTypes).forEach(([contentTypeUid, contentType]) => {
+    if (contentType.attributes !== undefined) {
       // Handle both array and object formats of attributes
       const attributes = Array.isArray(contentType.attributes)
-        ? contentType.attributes.reduce((acc: Record<string, any>, attr: any, index: number) => {
+        ? contentType.attributes.reduce<Record<string, AnyAttribute>>((acc, attr, index) => {
             acc[index.toString()] = attr;
             return acc;
           }, {})
         : contentType.attributes;
 
-      Object.entries(attributes).forEach(([attrName, attr]: [string, any]) => {
-        if (attr.conditions?.visible) {
+      Object.entries(attributes).forEach(([attrName, attr]) => {
+        if (attr.conditions?.visible !== undefined) {
           Object.entries(attr.conditions.visible).forEach(([, conditions]) => {
-            const [fieldVar] = conditions as [{ var: string }, any];
+            const [fieldVar] = conditions;
             // Check if this condition references our field
-            if (fieldVar && fieldVar.var === fieldName) {
+            if (fieldVar.var === fieldName) {
               dependentRows.push({
                 contentTypeUid,
                 contentType: contentType.info.displayName,
@@ -43,16 +43,22 @@ export const checkDependentRows = (
 };
 
 export const formatCondition = (
-  condition: any,
+  condition: AttributeConditions,
   availableFields: Array<{ name: string; type: string }>,
   attributeName: string
 ): string => {
-  if (!condition?.visible) {
+  if (condition.visible === undefined) {
     return '';
   }
 
-  const [[operator, conditions]] = Object.entries(condition.visible);
-  const [fieldVar, value] = conditions as [{ var: string }, any];
+  const conditionEntry = Object.entries(condition.visible)[0];
+
+  if (conditionEntry === undefined) {
+    return '';
+  }
+
+  const [operator, conditions] = conditionEntry;
+  const [fieldVar, value] = conditions;
 
   const dependsOnField = availableFields.find((field) => field.name === fieldVar.var);
   const dependsOnFieldName = dependsOnField ? dependsOnField.name : fieldVar.var;
