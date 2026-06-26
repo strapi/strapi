@@ -47,7 +47,7 @@ describe('aiClient', () => {
         }),
     });
 
-    const responses: any[] = [
+    const responses: Response[] = [
       new Response(JSON.stringify({ error: 'expired token' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
@@ -58,8 +58,8 @@ describe('aiClient', () => {
       }),
     ];
 
-    const fetchSpy = jest.spyOn(global, 'fetch' as any).mockImplementation(() => {
-      return Promise.resolve(responses.shift());
+    const fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(() => {
+      return Promise.resolve(responses.shift()!);
     });
 
     const res = await fetchAI('https://strapi.io', { method: 'POST' });
