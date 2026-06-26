@@ -50,30 +50,6 @@ const main = async (database, appPath, opts) => {
   }
 };
 
-const databaseFromArgv = (argv) => {
-  if (!argv.dbclient) {
-    return databases[argv.databaseName];
-  }
-
-  const database = {
-    client: argv.dbclient,
-    connection: {
-      host: argv.dbhost,
-      port: argv.dbport,
-      database: argv.dbname,
-      username: argv.dbusername,
-      password: argv.dbpassword,
-      filename: argv.dbfile,
-    },
-  };
-
-  if (argv.dbclient === 'sqlite') {
-    database.useNullAsDefault = true;
-  }
-
-  return database;
-};
-
 // eslint-disable-next-line no-unused-expressions
 yargs
   .command(
@@ -96,19 +72,30 @@ yargs
         type: 'string',
         default: undefined,
       });
-
-      yarg.option('dbclient', { type: 'string' });
-      yarg.option('dbhost', { type: 'string' });
-      yarg.option('dbport', { type: 'number' });
-      yarg.option('dbname', { type: 'string' });
-      yarg.option('dbusername', { type: 'string' });
-      yarg.option('dbpassword', { type: 'string' });
-      yarg.option('dbfile', { type: 'string' });
     },
     (argv) => {
-      const { run, appPath, template } = argv;
+      const { databaseName, run, appPath, template } = argv;
 
-      return main(databaseFromArgv(argv), appPath, { run, template });
+      // databaseName defaults to sqlite; CI --dbclient flags are ignored (same as develop).
+      if (databaseName) {
+        return main(databases[databaseName], appPath, { run, template });
+      }
+
+      return main(
+        {
+          client: argv.dbclient,
+          connection: {
+            host: argv.dbhost,
+            port: argv.dbport,
+            database: argv.dbname,
+            username: argv.dbusername,
+            password: argv.dbpassword,
+            filename: argv.dbfile,
+          },
+        },
+        appPath,
+        { run, template }
+      );
     }
   )
   .help().argv;
