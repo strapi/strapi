@@ -94,6 +94,18 @@ export type {
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
+export type {
+  BuiltInCustomFieldOptionInput,
+  BuiltInCustomFieldOptionName,
+  CustomField,
+  CustomFieldOption,
+  CustomFieldOptionInput,
+  CustomFieldOptionInputRegistry,
+  CustomFieldOptionName,
+  CustomFieldOptionNameRegistry,
+  CustomFieldOptionSection,
+  CustomFieldOptions,
+} from './core/apis/CustomFields';
 
 /**
  * Utils
