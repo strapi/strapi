@@ -88,9 +88,9 @@ const resolveAdminTokenOwnerId = (token: AdminApiToken): Data.ID | null => {
 
 const toAdminTokenOwner = (
   owner: AdminApiToken['adminUserOwner'] | null | undefined
-): Data.ID | AdminTokenOwner => {
+): Data.ID | AdminTokenOwner | null => {
   if (owner === null || owner === undefined) {
-    throw new Error('adminUserOwner is required');
+    return null;
   }
 
   // Bare id
