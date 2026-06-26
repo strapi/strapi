@@ -28,7 +28,6 @@ function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: unknown
 export default {
   /**
    * List all stages
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx: Context) {
     const { workflow_id: workflowId } = ctx.params;
@@ -47,7 +46,6 @@ export default {
   },
   /**
    * Get one stage
-   * @param {import('koa').BaseContext} ctx - koa context
    */
   async findById(ctx: Context) {
     const { id, workflow_id: workflowId } = ctx.params;

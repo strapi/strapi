@@ -84,7 +84,7 @@ function getPopulateForDZ(
   attribute: Schema.Attribute.DynamicZone,
   options: PopulateOptions,
   level: number
-) {
+): { on: { [key: string]: { populate: { [key: string]: boolean | object } } } } {
   // Use fragments to populate the dynamic zone components
   const populatedComponents = (attribute.components || []).reduce(
     (acc: any, componentUID: UID.Component) => ({
@@ -162,7 +162,7 @@ const getDeepPopulate = (
     maxLevel = Infinity,
   }: PopulateOptions = {},
   level = 1
-) => {
+): { [key: string]: boolean | object } => {
   if (level > maxLevel) {
     return {};
   }
@@ -302,7 +302,7 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
  */
 const draftCountPopulateCache = new Map<string, { populate: any; hasRelations: boolean }>();
 
-const getDeepPopulateDraftCount = (uid: UID.Schema) => {
+const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelations: boolean } => {
   const cached = draftCountPopulateCache.get(uid);
   if (cached) {
     return cached;
@@ -333,6 +333,11 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
 
         const targetModel = strapi.getModel(attribute.target);
         if (!targetModel || !hasDraftAndPublish(targetModel)) {
+          break;
+        }
+
+        // Self-referential relations are preserved on publish (see self-referential-relations.ts).
+        if (attribute.target === uid) {
           break;
         }
 

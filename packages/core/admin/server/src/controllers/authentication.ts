@@ -2,7 +2,7 @@ import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
-import { errors } from '@strapi/utils';
+import { errors, buildSessionMetadata } from '@strapi/utils';
 import { getService } from '../utils';
 import {
   REFRESH_COOKIE_NAME,
@@ -31,6 +31,12 @@ import type {
   ResetPassword,
 } from '../../../shared/contracts/authentication';
 import { AdminUser } from '../../../shared/contracts/shared';
+
+const buildSessionMetadataFromContext = (ctx: Context) =>
+  buildSessionMetadata({
+    ip: ctx.request.ip,
+    userAgent: ctx.request.headers['user-agent'],
+  });
 
 const { ApplicationError, ValidationError } = errors;
 
@@ -85,6 +91,7 @@ export default {
           'admin'
         ).generateRefreshToken(userId, deviceId, {
           type: rememberMe ? 'refresh' : 'session',
+          metadata: buildSessionMetadataFromContext(ctx),
         });
 
         const cookieOptions = buildCookieOptionsWithExpiry(
@@ -146,7 +153,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: rememberMe ? 'refresh' : 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -194,7 +204,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: rememberMe ? 'refresh' : 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -255,7 +268,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       // No rememberMe flow here; expire with session by default (session cookie)
       const cookieOptions = buildCookieOptionsWithExpiry(

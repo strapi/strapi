@@ -116,6 +116,31 @@ export const server: SetupServer = setupServer(
       });
     }),
     http.get('/admin/users/me/permissions', () => HttpResponse.json({ data: [] })),
+    http.get('/admin/users/me/sessions', () =>
+      HttpResponse.json({
+        data: [
+          {
+            id: 'session-current',
+            deviceId: 'device-aaaaaaaa',
+            deviceName: 'Chrome on macOS',
+            current: true,
+            loginAt: '2026-06-12T08:00:00.000Z',
+            lastActiveAt: '2026-06-12T10:00:00.000Z',
+            ip: '127.0.0.1',
+          },
+          {
+            id: 'session-other',
+            deviceId: 'device-bbbbbbbb',
+            current: false,
+            loginAt: '2026-06-10T08:00:00.000Z',
+            lastActiveAt: '2026-06-11T09:00:00.000Z',
+            ip: '10.0.0.2',
+          },
+        ],
+      })
+    ),
+    http.delete('/admin/users/me/sessions/:sessionId', () => HttpResponse.json({ data: {} })),
+    http.delete('/admin/users/me/sessions', () => HttpResponse.json({ data: {} })),
     /**
      *
      * ADMIN PROVIDERS
