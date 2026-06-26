@@ -748,7 +748,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const [selectedRows, setSelectedRows] = React.useState<any[]>([]);
+  const [selectedRows, setSelectedRows] = React.useState<Array<LocaleStatus & { id: string }>>([]);
   const [isDraftRelationConfirmationOpen, setIsDraftRelationConfirmationOpen] =
     React.useState<boolean>(false);
 
