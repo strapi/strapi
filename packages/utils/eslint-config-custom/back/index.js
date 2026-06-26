@@ -31,7 +31,7 @@ const config = {
     'prefer-destructuring': ['error', { AssignmentExpression: { array: false } }],
     'no-underscore-dangle': 'off',
     'no-use-before-define': 'off',
-    'no-continue': 'warn',
+    'no-continue': 'off',
     'no-process-exit': 'off',
     'no-loop-func': 'off',
     'max-classes-per-file': 'off',
