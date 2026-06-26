@@ -16,7 +16,6 @@ import {
   Layouts,
   useTable,
   useIsMobile,
-  useIsDesktop,
   useClipboard,
   tours,
 } from '@strapi/admin/strapi-admin';
