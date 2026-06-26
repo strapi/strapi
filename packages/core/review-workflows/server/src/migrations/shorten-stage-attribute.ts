@@ -1,6 +1,5 @@
 import semver from 'semver';
 import { getOr } from 'lodash/fp';
-import { async } from '@strapi/utils';
 import { STAGE_MODEL_UID } from '../constants/workflows';
 
 function checkVersionThreshold(
@@ -19,6 +18,7 @@ async function migrateStageAttribute({ oldContentTypes, contentTypes }: any) {
   const oldRWVersion = getRWVersion(oldContentTypes);
   const currentRWVersion = getRWVersion(contentTypes);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const migrationNeeded = checkVersionThreshold(oldRWVersion, currentRWVersion, '1.1.0');
 
   // TODO: Find tables with something else than `findTables` function
