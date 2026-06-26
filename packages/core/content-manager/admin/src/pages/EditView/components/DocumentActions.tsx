@@ -628,9 +628,9 @@ const DocumentActionModal = ({
   );
 };
 
-const transformData = (data: Record<string, any>): any => {
+const transformData = (data: unknown): unknown => {
   if (Array.isArray(data)) {
-    return data.map(transformData);
+    return data.map((value) => transformData(value));
   }
 
   if (typeof data === 'object' && data !== null) {
@@ -638,7 +638,7 @@ const transformData = (data: Record<string, any>): any => {
       return data.apiData;
     }
 
-    return mapValues(transformData)(data);
+    return mapValues((value) => transformData(value))(data);
   }
 
   return data;

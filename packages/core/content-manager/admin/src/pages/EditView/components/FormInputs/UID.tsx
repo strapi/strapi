@@ -46,7 +46,7 @@ interface UIDInputProps extends Omit<InputProps, 'type'> {
   type: Schema.Attribute.TypeOf<Schema.Attribute.UID>;
 }
 
-const UIDInput = React.forwardRef<any, UIDInputProps>(
+const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
   ({ hint, label, labelAction, name, required, attribute = {}, ...props }, ref) => {
     const { currentDocumentMeta } = useDocumentContext('UIDInput');
     const allFormValues = useForm('InputUID', (form) => form.values);
