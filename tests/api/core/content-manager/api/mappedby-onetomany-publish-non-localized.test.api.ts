@@ -1,8 +1,6 @@
 /**
- * GitHub issue #26804: Publishing a non-localized content type with a mappedBy
- * oneToMany relation fails with `Document with id "...", locale "null" not found`.
- *
- * @see https://github.com/strapi/strapi/issues/26804
+ * Publishing non-localized content types with a mappedBy oneToMany relation,
+ * including when related rows still carry a stale locale column in the database.
  */
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
@@ -45,7 +43,7 @@ const featureCategoryModel = {
   collectionName: '',
 };
 
-describe('CM API - GH#26804 mappedBy oneToMany publish', () => {
+describe('CM API - mappedBy oneToMany publish (non-localized)', () => {
   const builder = createTestBuilder();
   let strapi: any;
   let rq: any;
