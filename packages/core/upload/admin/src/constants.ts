@@ -78,7 +78,7 @@ export const tableHeaders = [
     key: 'size',
     metadatas: {
       label: { id: getTrad('list.table.header.size'), defaultMessage: 'size' },
-      isSortable: false,
+      isSortable: true,
     },
     type: 'size',
   },
@@ -107,6 +107,8 @@ export const sortOptions = [
   { key: 'sort.created_at_asc', value: 'createdAt:ASC' },
   { key: 'sort.name_asc', value: 'name:ASC' },
   { key: 'sort.name_desc', value: 'name:DESC' },
+  { key: 'sort.size_desc', value: 'size:DESC' },
+  { key: 'sort.size_asc', value: 'size:ASC' },
   { key: 'sort.updated_at_desc', value: 'updatedAt:DESC' },
   { key: 'sort.updated_at_asc', value: 'updatedAt:ASC' },
 ];
