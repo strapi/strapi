@@ -10056,11 +10056,15 @@ __metadata:
   resolution: "@strapi/typescript-utils@workspace:packages/utils/typescript"
   dependencies:
     "@types/fs-extra": "npm:11.0.4"
+    "@types/lodash": "npm:^4.14.191"
+    "@types/node": "npm:20.19.41"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
+    eslint-config-custom: "npm:5.50.0"
     fs-extra: "npm:11.3.4"
     lodash: "npm:4.18.1"
     prettier: "npm:3.3.3"
+    tsconfig: "npm:5.50.0"
     typescript: "npm:5.9.3"
   languageName: unknown
   linkType: soft
