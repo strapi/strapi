@@ -1,7 +1,7 @@
 # Strapi Monorepo — Agent Guide
 
 Strapi is an open-source headless CMS.
-Yarn workspaces + Nx monorepo. Node ≥20 ≤26, Yarn 4.
+Yarn workspaces + Nx monorepo. Node ≥22 ≤26, Yarn 4.
 Target branch: `develop` (not `main`). All PRs go to `develop`.
 
 ---
@@ -34,9 +34,19 @@ The following are the most important packages (not exhaustive — run `yarn work
 
 ### Skills directories
 
-Shared skills live under `.agents/skills/<name>/`. Tool-specific skill directories (e.g. `.claude/skills/`) should be symlinks to `.agents/skills/` — each AI tool has its own well-known location.
+**`.ai/skills/`** is the canonical source for committed repo skills. Each subdirectory containing a `SKILL.md` is a skill.
 
-Personal/in-progress skills go under `.agents/local-skills/` (gitignored). See [.agents/skills/writing-skills/SKILL.md](.agents/skills/writing-skills/SKILL.md) for authoring guidance.
+The AI-tooling well-known locations are **symlink targets** maintained by `yarn ai:sync`: `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`.
+
+Run `yarn ai:sync` after adding or removing a skill in `.ai/skills/` to keep all three target dirs up to date. Links are local-only (gitignored target dirs) — only `.ai/skills/` content is committed.
+
+On **Windows**, the CLI creates directory **junctions** (no extra setup). Directory symlinks require Developer Mode or an elevated shell.
+
+```bash
+yarn ai:sync    # idempotent — create/prune .ai links in all 3 tool dirs
+yarn ai:unlink  # remove only .ai-sourced links (leaves brain links intact)
+yarn ai:status  # read-only report: linked / missing / conflict / stale
+```
 
 ---
 
@@ -58,7 +68,8 @@ Personal/in-progress skills go under `.agents/local-skills/` (gitignored). See [
 ```bash
 # Initial setup (run once after cloning)
 yarn install
-yarn setup                    # clean + build all packages
+yarn setup                    # clean + build all packages; hints to run ai:sync if links are missing
+yarn ai:sync          # link .ai/skills into .agents/ .claude/ .cursor/
 ```
 
 ---
@@ -226,7 +237,7 @@ yarn prettier:check # check only
 - Branch from `develop`, target `develop` — never `main`.
 - Link the issue you're fixing in the description.
 - All tests must pass before merging.
-- PR description must follow [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).
+- PR description must follow [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) — do not invent your own sections.
 
 ---
 

@@ -1,7 +1,7 @@
 import { PassThrough, Readable } from 'stream';
 import type { Core } from '@strapi/types';
 
-import type { IAsset } from '../../../../../types';
+import type { IAsset } from '../../../../types';
 import { createTransaction } from '../../../../utils/transaction';
 import { createAssetsDestinationWritable } from '../assets-destination-writable';
 

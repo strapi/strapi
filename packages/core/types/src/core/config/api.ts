@@ -4,6 +4,9 @@ export interface ResponsesProp {
 
 export interface RestProp {
   prefix?: string;
+  /**
+   * @deprecated Not read by Strapi. Reserved for backward compatibility in config files.
+   */
   port?: number;
   defaultLimit?: number;
   maxLimit?: number;
