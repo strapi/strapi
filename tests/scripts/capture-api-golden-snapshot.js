@@ -17,9 +17,7 @@ const main = async () => {
   const appDir = path.dirname(process.env.ENV_PATH);
 
   if (!isGoldenRestoreSupported(appDir)) {
-    throw new Error(
-      'golden-snapshot: DATABASE_CLIENT must be sqlite, postgres, or mysql in the test app .env'
-    );
+    throw new Error('golden-snapshot: DATABASE_CLIENT must be sqlite for golden capture');
   }
 
   if (goldenSnapshotExists()) {

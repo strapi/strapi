@@ -35,9 +35,10 @@ const getGoldenDir = (appDir = getAppDir()) => {
   return path.join(parent, '.golden', name);
 };
 
+/** Golden snapshot restore is sqlite-only; relational row restore corrupts postgres/mysql schema (indexes). */
 const isGoldenRestoreSupported = (appDir = getAppDir()) => {
   const { client } = readDatabaseMeta(appDir);
-  return SUPPORTED_CLIENTS.has(client);
+  return client === 'sqlite';
 };
 
 const rm = async (target) => {
@@ -162,7 +163,9 @@ const restoreGoldenSnapshot = async () => {
 
   if (!isGoldenRestoreSupported(appDir)) {
     const { client } = readDatabaseMeta(appDir);
-    throw new Error(`golden-snapshot: unsupported DATABASE_CLIENT "${client}"`);
+    throw new Error(
+      `golden-snapshot: DATABASE_CLIENT "${client}" does not support golden restore (sqlite only)`
+    );
   }
 
   await restoreFilesystem(appDir, goldenDir);

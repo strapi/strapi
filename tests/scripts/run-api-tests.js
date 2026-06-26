@@ -90,30 +90,27 @@ const main = async ({ database, generateApp }, args) => {
     }
 
     const appDir = path.resolve(__dirname, '../..', appPath);
+    const goldenRestoreSupported = isGoldenRestoreSupported(appDir);
 
-    if (!isGoldenRestoreSupported(appDir)) {
-      throw new Error(
-        'API test golden snapshot requires DATABASE_CLIENT sqlite, postgres, or mysql in the test app .env'
-      );
-    }
+    if (goldenRestoreSupported) {
+      const goldenProvided = Boolean(process.env.GOLDEN_SNAPSHOT_PROVIDED);
 
-    const goldenProvided = Boolean(process.env.GOLDEN_SNAPSHOT_PROVIDED);
-
-    if (goldenProvided) {
-      if (!goldenSnapshotExists()) {
-        throw new Error(
-          'golden-snapshot: CI artifact was downloaded but the snapshot is incomplete at test-apps/.golden/api'
-        );
+      if (goldenProvided) {
+        if (!goldenSnapshotExists()) {
+          throw new Error(
+            'golden-snapshot: CI artifact was downloaded but the snapshot is incomplete at test-apps/.golden/api'
+          );
+        }
+        console.log('[api-tests] using pre-captured golden snapshot from CI artifact');
+      } else if (generateApp || !goldenSnapshotExists()) {
+        // Migrations run on first boot; capture after bootstrap.
+        process.env.JWT_SECRET = process.env.JWT_SECRET || 'aSecret';
+        const strapi = await createStrapiInstance({ logLevel: 'error' });
+        const { goldenDir, client } = await captureGoldenSnapshot({ strapi });
+        console.log(`[api-tests] golden snapshot captured at ${goldenDir} (${client})`);
+      } else {
+        console.log('[api-tests] using existing golden snapshot (skipping capture)');
       }
-      console.log('[api-tests] using pre-captured golden snapshot from CI artifact');
-    } else if (generateApp || !goldenSnapshotExists()) {
-      // Migrations run on first boot; capture after bootstrap for every database client.
-      process.env.JWT_SECRET = process.env.JWT_SECRET || 'aSecret';
-      const strapi = await createStrapiInstance({ logLevel: 'error' });
-      const { goldenDir, client } = await captureGoldenSnapshot({ strapi });
-      console.log(`[api-tests] golden snapshot captured at ${goldenDir} (${client})`);
-    } else {
-      console.log('[api-tests] using existing golden snapshot (skipping capture)');
     }
 
     await runAllTests(args).catch(() => {
