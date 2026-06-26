@@ -110,11 +110,22 @@ const sqlClientModule = {
   sqlite: { 'better-sqlite3': '12.8.0' },
 };
 
+const sqliteDevelopmentModule = sqlClientModule.sqlite;
+
 export function addDatabaseDependencies(scope: Scope) {
+  const { client } = scope.database;
+
   scope.dependencies = {
     ...scope.dependencies,
-    ...sqlClientModule[scope.database.client],
+    ...sqlClientModule[client],
   };
+
+  if (client !== 'sqlite') {
+    scope.devDependencies = {
+      ...scope.devDependencies,
+      ...sqliteDevelopmentModule,
+    };
+  }
 }
 
 interface QuestionFactory {
