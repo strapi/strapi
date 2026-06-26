@@ -1195,9 +1195,26 @@ export const createEntityManager = (db: Database): EntityManager => {
                 // cleanRelationData.connect = cleanRelationData.connect?.slice(-1);
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
+
+              // When a connect item's position.before/after references an id that is
+              // also being disconnected, the referenced row will be deleted before the
+              // adjacentRelations query runs, causing sortConnectArray to throw.
+              // Rewrite such positions to {end: true} so the ordering gracefully
+              // falls back to appending instead of crashing.
+              const disconnectIds = new Set(toIds(cleanRelationData.disconnect));
+              const resolvedConnect = (cleanRelationData.connect ?? []).map((item) => {
+                const adjacentId = item.position?.before ?? item.position?.after;
+                return adjacentId != null && disconnectIds.has(adjacentId)
+                  ? { ...item, position: { end: true } }
+                  : item;
+              });
+
+              // Use id-only comparison so a disconnect item whose id also appears in
+              // the connect array is correctly excluded from deletion (deep-equality
+              // fails because connect items carry extra fields like `position`).
               const relIdsToDelete = toIds(
                 differenceWith(
-                  isEqual,
+                  (a: { id: ID }, b: { id: ID }) => a.id === b.id,
                   cleanRelationData.disconnect,
                   cleanRelationData.connect ?? []
                 )
@@ -1243,7 +1260,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                         [joinColumn.name]: id,
                         [inverseJoinColumn.name]: {
                           $in: compact(
-                            cleanRelationData.connect?.map(
+                            resolvedConnect.map(
                               (r) => r.position?.after || r.position?.before
                             )
                           ),
@@ -1270,7 +1287,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                   joinTable.orderColumnName,
                   cleanRelationData.options?.strict
                 )
-                  .connect(cleanRelationData.connect ?? [])
+                  .connect(resolvedConnect)
                   .getOrderMap();
 
                 insert.forEach((row) => {
