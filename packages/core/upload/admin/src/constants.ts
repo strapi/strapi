@@ -1,6 +1,11 @@
 import { getTrad } from './utils';
 
-export type AssetSource = 'url' | 'computer';
+export const ASSET_SOURCES = {
+  Url: 'url',
+  Computer: 'computer',
+} as const;
+
+export type AssetSource = (typeof ASSET_SOURCES)[keyof typeof ASSET_SOURCES];
 
 export const PERMISSIONS = {
   // This permission regards the main component (App) and is used to tell

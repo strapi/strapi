@@ -11,7 +11,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetTypes } from '../../enums';
+import { ASSET_TYPES } from '../../enums';
 import {
   createAssetUrl,
   getFileExtension,
@@ -70,7 +70,7 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
 
   const fileExtension = getFileExtension(ext);
 
-  if (mime?.includes(AssetTypes.Image)) {
+  if (mime?.includes(ASSET_TYPES.Image)) {
     const mediaURL =
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
 
@@ -84,7 +84,7 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
     );
   }
 
-  if (mime?.includes(AssetTypes.Video)) {
+  if (mime?.includes(ASSET_TYPES.Video)) {
     return (
       <VideoPreviewWrapper>
         <VideoPreview
@@ -96,7 +96,7 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
     );
   }
 
-  if (mime?.includes(AssetTypes.Audio)) {
+  if (mime?.includes(ASSET_TYPES.Audio)) {
     return (
       <Flex
         background="neutral100"

@@ -40,10 +40,10 @@ describe('Version Utilities', () => {
 
   describe('isSemVerReleaseType', () => {
     it('should return true for valid release types', () => {
-      expect(isSemVerReleaseType(Version.ReleaseTypes.Major)).toBe(true);
-      expect(isSemVerReleaseType(Version.ReleaseTypes.Minor)).toBe(true);
-      expect(isSemVerReleaseType(Version.ReleaseTypes.Patch)).toBe(true);
-      expect(isSemVerReleaseType(Version.ReleaseTypes.Latest)).toBe(true);
+      expect(isSemVerReleaseType(Version.RELEASE_TYPES.Major)).toBe(true);
+      expect(isSemVerReleaseType(Version.RELEASE_TYPES.Minor)).toBe(true);
+      expect(isSemVerReleaseType(Version.RELEASE_TYPES.Patch)).toBe(true);
+      expect(isSemVerReleaseType(Version.RELEASE_TYPES.Latest)).toBe(true);
     });
 
     it('should return false for invalid release types', () => {

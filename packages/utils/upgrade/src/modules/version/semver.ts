@@ -22,5 +22,5 @@ export const isSemverInstance = (value: unknown): value is semver.SemVer => {
 };
 
 export const isSemVerReleaseType = (str: string): str is Version.ReleaseType => {
-  return Object.values(Version.ReleaseTypes).includes(str as Version.ReleaseType);
+  return Object.values(Version.RELEASE_TYPES).includes(str as Version.ReleaseType);
 };

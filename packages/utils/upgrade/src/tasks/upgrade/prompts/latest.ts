@@ -13,7 +13,7 @@ import type { UpgradeOptions } from '../types';
  */
 export const latest = async (upgrader: Upgrader, options: UpgradeOptions) => {
   // Exit if the upgrade target isn't the latest tag
-  if (options.target !== Version.ReleaseTypes.Latest) {
+  if (options.target !== Version.RELEASE_TYPES.Latest) {
     return;
   }
 
@@ -37,7 +37,7 @@ export const latest = async (upgrader: Upgrader, options: UpgradeOptions) => {
   // Handle potential major upgrade, warns, and asks for confirmation to proceed
   if (isMajorUpgrade) {
     options.logger.warn(
-      `Detected a major upgrade for the "${f.highlight(Version.ReleaseTypes.Latest)}" tag: ${fCurrent} > ${fTarget}`
+      `Detected a major upgrade for the "${f.highlight(Version.RELEASE_TYPES.Latest)}" tag: ${fCurrent} > ${fTarget}`
     );
 
     // Find the latest release in between the current one and the next major

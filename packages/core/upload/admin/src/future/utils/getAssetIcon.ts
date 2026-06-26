@@ -12,7 +12,7 @@ import {
 } from '@strapi/icons';
 import { DefaultTheme } from 'styled-components';
 
-import { AssetTypes } from '../../enums';
+import { ASSET_TYPES } from '../../enums';
 
 import { getFileExtension } from './files';
 
@@ -37,15 +37,15 @@ const DOC_ICON_MAP: Record<string, IconComponent> = {
 export const getAssetIcon = (mime: string | undefined, ext: string | undefined): IconComponent => {
   const fileExtension = getFileExtension(ext);
 
-  if (mime?.includes(AssetTypes.Image)) {
+  if (mime?.includes(ASSET_TYPES.Image)) {
     return Image;
   }
 
-  if (mime?.includes(AssetTypes.Video)) {
+  if (mime?.includes(ASSET_TYPES.Video)) {
     return Play;
   }
 
-  if (mime?.includes(AssetTypes.Audio)) {
+  if (mime?.includes(ASSET_TYPES.Audio)) {
     return Headphones;
   }
 

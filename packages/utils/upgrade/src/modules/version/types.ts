@@ -9,7 +9,7 @@ export type LiteralSemVer = `${Version}.${Version}.${Version}`;
 
 export type { SemVer, Range } from 'semver';
 
-export const ReleaseTypes = {
+export const RELEASE_TYPES = {
   // Classic
   Major: 'major',
   Minor: 'minor',
@@ -18,4 +18,4 @@ export const ReleaseTypes = {
   Latest: 'latest',
 } as const;
 
-export type ReleaseType = (typeof ReleaseTypes)[keyof typeof ReleaseTypes];
+export type ReleaseType = (typeof RELEASE_TYPES)[keyof typeof RELEASE_TYPES];

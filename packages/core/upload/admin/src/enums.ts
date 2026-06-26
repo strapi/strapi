@@ -1,17 +1,17 @@
-export const DocTypes = {
+export const DOC_TYPES = {
   Pdf: 'pdf',
   Csv: 'csv',
   Xls: 'xls',
   Zip: 'zip',
 } as const;
 
-export type DocType = (typeof DocTypes)[keyof typeof DocTypes];
+export type DocType = (typeof DOC_TYPES)[keyof typeof DOC_TYPES];
 
-export const AssetTypes = {
+export const ASSET_TYPES = {
   Video: 'video',
   Image: 'image',
   Document: 'doc',
   Audio: 'audio',
 } as const;
 
-export type AssetType = (typeof AssetTypes)[keyof typeof AssetTypes];
+export type AssetType = (typeof ASSET_TYPES)[keyof typeof ASSET_TYPES];

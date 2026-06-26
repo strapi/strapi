@@ -27,7 +27,7 @@ jest.mock('../../modules/logger', () => ({
 describe('codemods task', () => {
   const logger = loggerFactory();
   const options = {
-    target: Version.ReleaseTypes.Major,
+    target: Version.RELEASE_TYPES.Major,
     logger,
     dry: false,
     selectCodemods: <T>(options: T) => Promise.resolve(options),
@@ -48,7 +48,7 @@ describe('codemods task', () => {
     onSelectCodemods: jest.fn().mockReturnThis(),
     setLogger: jest.fn().mockReturnThis(),
     run: jest.fn().mockResolvedValue({ success: true }),
-    target: Version.ReleaseTypes.Major,
+    target: Version.RELEASE_TYPES.Major,
     strapiVersion: semVerFactory('3.6.0'),
     isDry: false,
   });
