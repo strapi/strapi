@@ -54,7 +54,7 @@ interface StagesProps {
   isCreating?: boolean;
 }
 
-const Stages = ({ canDelete = true, canUpdate = true, isCreating }: StagesProps) => {
+const Stages = ({ canDelete = true, canUpdate = true }: StagesProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const addFieldRow = useForm('Stages', (state) => state.addFieldRow);
