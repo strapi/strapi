@@ -51,12 +51,12 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
   defaultMessage: 'An error occurred, please try again',
 } satisfies MessageDescriptor;
 
-type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
+type OperationResponse<TResponse extends { data: unknown; meta?: unknown; error?: unknown }> =
   | Pick<TResponse, 'data'>
   | Pick<TResponse, 'data' | 'meta'>
   | { error: BaseQueryError | SerializedError };
 
-type BulkOperationResponse<TResponse extends { data: any; error?: any }> =
+type BulkOperationResponse<TResponse extends { data: unknown; error?: unknown }> =
   | Pick<TResponse, 'data'>
   | { error: BaseQueryError | SerializedError };
 
@@ -202,6 +202,7 @@ const useDocumentActions: UseDocumentActions = () => {
   const navigate = useNavigate();
   const { data: aiFeatureConfig } = useGetAiFeatureConfigQuery();
   const isAiAvailable = useAIAvailability();
+  const isAiI18nConfigured = Boolean(aiFeatureConfig?.isAiI18nConfigured);
 
   // Get metadata from context providers for tracking purposes
   const previewContext = usePreviewContext('useDocumentActions', () => true, false);
@@ -369,9 +370,7 @@ const useDocumentActions: UseDocumentActions = () => {
           documentId,
           fromPreview,
           fromRelationModal,
-          ...(isAiAvailable
-            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
-            : {}),
+          ...(isAiAvailable ? { isAiI18nConfigured } : {}),
         });
 
         toggleNotification({
@@ -400,6 +399,8 @@ const useDocumentActions: UseDocumentActions = () => {
       toggleNotification,
       formatMessage,
       formatAPIError,
+      isAiAvailable,
+      isAiI18nConfigured,
     ]
   );
 
@@ -472,9 +473,7 @@ const useDocumentActions: UseDocumentActions = () => {
           documentId: res.data.data.documentId,
           fromPreview,
           fromRelationModal,
-          ...(isAiAvailable
-            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
-            : {}),
+          ...(isAiAvailable ? { isAiI18nConfigured } : {}),
         });
         toggleNotification({
           type: 'success',
@@ -504,6 +503,8 @@ const useDocumentActions: UseDocumentActions = () => {
       toggleNotification,
       formatMessage,
       formatAPIError,
+      isAiAvailable,
+      isAiI18nConfigured,
     ]
   );
 
@@ -619,9 +620,7 @@ const useDocumentActions: UseDocumentActions = () => {
           documentId: res.data.data.documentId,
           fromPreview,
           fromRelationModal,
-          ...(isAiAvailable
-            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
-            : {}),
+          ...(isAiAvailable ? { isAiI18nConfigured } : {}),
         });
 
         toggleNotification({
@@ -653,7 +652,7 @@ const useDocumentActions: UseDocumentActions = () => {
       toggleNotification,
       trackUsage,
       isAiAvailable,
-      aiFeatureConfig,
+      isAiI18nConfigured,
     ]
   );
 
@@ -721,9 +720,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
         trackUsage('didCreateEntry', {
           ...trackerProperty,
-          ...(isAiAvailable
-            ? { isAiI18nConfigured: Boolean(aiFeatureConfig?.isAiI18nConfigured) }
-            : {}),
+          ...(isAiAvailable ? { isAiI18nConfigured } : {}),
         });
         toggleNotification({
           type: 'success',
@@ -748,7 +745,16 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [cloneDocument, trackUsage, toggleNotification, formatMessage, formatAPIError, navigate]
+    [
+      cloneDocument,
+      trackUsage,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+      navigate,
+      isAiAvailable,
+      isAiI18nConfigured,
+    ]
   );
 
   const [getDoc] = useLazyGetDocumentQuery();
