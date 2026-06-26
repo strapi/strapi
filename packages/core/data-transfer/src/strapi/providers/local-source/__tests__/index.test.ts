@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import type { IEntity } from '../../../../../types';
+import type { IEntity } from '../../../../types';
 
 import {
   assertReadStreamBackpressure,

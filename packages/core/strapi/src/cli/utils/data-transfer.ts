@@ -547,9 +547,20 @@ const parseRestoreFromOptions = (
     include: undefined,
   };
 
-  // if content is not included, send an empty array for include
-  if ((opts.only && !opts.only.includes('content')) || opts.exclude?.includes('content')) {
+  const contentInScope = !(
+    (opts.only && !opts.only.includes('content')) ||
+    opts.exclude?.includes('content')
+  );
+
+  if (!contentInScope) {
+    // Nothing from the entities stage is transferred; do not delete any records beforehand.
     entitiesOptions.include = [];
+  } else if (shouldSkipStage(opts, 'config')) {
+    // When config is excluded, scope pre-transfer deletion to user content types only.
+    // Internal models (e.g. strapi::core-store) must not be wiped via the entities path.
+    entitiesOptions.include = Object.keys(strapi.contentTypes).filter(
+      (uid) => !isIgnoredContentType(uid)
+    );
   }
 
   const restoreConfig: strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore'] =

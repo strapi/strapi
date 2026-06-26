@@ -59,7 +59,11 @@ export interface Parent {
   schema: Model;
 }
 
-const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
+const traverseEntity = async (
+  visitor: Visitor,
+  options: TraverseOptions,
+  entity: Data
+): Promise<Data> => {
   const {
     path = { raw: null, attribute: null, rawWithIndices: null },
     schema,

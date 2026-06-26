@@ -284,6 +284,14 @@ interface WillNavigateEvent {
   };
 }
 
+interface DidClickOnDocLink {
+  name: 'didClickOnDocLink';
+  properties: {
+    from: string;
+    to: string;
+  };
+}
+
 interface DidAccessTokenListEvent {
   name: 'didAccessTokenList';
   properties: {
@@ -318,7 +326,8 @@ interface WillModifyTokenEvent {
   name: 'didCreateToken' | 'didEditToken';
   properties: {
     tokenType: TokenEvents['properties']['tokenType'];
-    type: 'custom' | 'full-access' | 'read-only' | Array<'push' | 'pull' | 'push-pull'>;
+    kind?: 'admin' | 'content-api';
+    type?: 'custom' | 'full-access' | 'read-only' | Array<'push' | 'pull' | 'push-pull'>;
   };
 }
 
@@ -483,6 +492,7 @@ type EventsWithProperties =
   | UpdateEntryEvents
   | WillModifyTokenEvent
   | WillNavigateEvent
+  | DidClickOnDocLink
   | DidPublishRelease
   | MediaEvents
   | DidUpdateCTBSchema

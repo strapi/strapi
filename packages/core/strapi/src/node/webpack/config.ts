@@ -1,17 +1,11 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
 import { EsbuildPlugin } from 'esbuild-loader';
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import crypto from 'node:crypto';
 import path from 'node:path';
-import {
-  Configuration,
-  DefinePlugin,
-  HotModuleReplacementPlugin,
-  WebpackPluginInstance,
-} from 'webpack';
+import { Configuration, DefinePlugin, HotModuleReplacementPlugin } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import { loadStrapiMonorepo } from '../core/monorepo';
@@ -22,6 +16,7 @@ import { getMonorepoAliases } from '../core/aliases';
 import { getModulePath } from '../core/resolve-module';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
   return {
@@ -181,6 +176,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuratio
 };
 
 const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration> => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
   const baseConfig = await resolveBaseConfig(ctx);
@@ -217,7 +213,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
         chunkFilename: '[name].[chunkhash].chunkhash.css',
         ignoreOrder: true,
       }),
-      ctx.options.stats && (new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance), // TODO: find out if this is an actual issue or just a ts bug
+      ctx.options.stats && new BundleAnalyzerPlugin(),
     ].filter(Boolean),
   };
 };
