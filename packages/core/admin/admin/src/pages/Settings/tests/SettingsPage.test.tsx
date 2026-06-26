@@ -43,7 +43,7 @@ const render = (settings: StrapiAppContextValue['settings']) =>
                 widgets: [],
                 register: jest.fn(),
                 getAll: jest.fn(),
-              } as any
+              } satisfies StrapiAppContextValue['widgets']
             }
             customFields={{
               customFields: {},
