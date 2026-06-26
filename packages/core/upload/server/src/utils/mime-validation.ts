@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { open } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { lookup } from 'mime-types';
 import type { Core } from '@strapi/types';
@@ -27,8 +27,16 @@ type ErrorDetail = {
 };
 
 async function readFileChunk(filePath: string, chunkSize: number = 4100): Promise<Buffer> {
-  const buffer = await readFile(filePath);
-  return buffer.length > chunkSize ? buffer.subarray(0, chunkSize) : buffer;
+  const file = await open(filePath, 'r');
+
+  try {
+    const buffer = Buffer.alloc(chunkSize);
+    const { bytesRead } = await file.read(buffer, 0, chunkSize, 0);
+
+    return buffer.subarray(0, bytesRead);
+  } finally {
+    await file.close();
+  }
 }
 
 export async function detectMimeType(file: any): Promise<string | undefined> {
