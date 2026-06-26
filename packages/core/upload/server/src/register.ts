@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import sharp from 'sharp';
 
 import { errors, file } from '@strapi/utils';
 import type { Core } from '@strapi/types';
@@ -6,6 +7,7 @@ import type { Core } from '@strapi/types';
 import registerUploadMiddleware from './middlewares/upload';
 import spec from '../../documentation/content-api.json';
 import type { Config, File, InputFile } from './types';
+import { aiMetadataJob } from './models/ai-metadata-job';
 
 const { PayloadTooLargeError } = errors;
 const { bytesToHumanReadable, kbytesToBytes } = file;
@@ -14,7 +16,24 @@ const { bytesToHumanReadable, kbytesToBytes } = file;
  * Register upload plugin
  */
 export async function register({ strapi }: { strapi: Core.Strapi }) {
-  strapi.plugin('upload').provider = createProvider(strapi.config.get<Config>('plugin::upload'));
+  // Register AI metadata job model
+  strapi.get('models').add(aiMetadataJob);
+
+  const raw = strapi.config.get<Partial<Config> | null | undefined>('plugin::upload') ?? {};
+  // createProvider needs a provider; empty get() (e.g. in tests) still has defaults.
+  const uploadConfig = {
+    provider: 'local' as const,
+    providerOptions: {} as Config['providerOptions'],
+    actionOptions: {} as Config['actionOptions'],
+    ...raw,
+  } as Config;
+
+  // Configure sharp memory management
+  const { cache = false, concurrency = 1 } = uploadConfig.sharp ?? {};
+  sharp.cache(cache);
+  sharp.concurrency(concurrency);
+
+  strapi.plugin('upload').provider = createProvider(uploadConfig);
 
   await registerUploadMiddleware({ strapi });
 

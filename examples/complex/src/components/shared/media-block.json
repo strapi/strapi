@@ -1,0 +1,10 @@
+{
+  "collectionName": "components_shared_media_blocks",
+  "info": { "displayName": "media-block", "description": "Media content block" },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "mediaUrl": { "type": "string" },
+    "mediaType": { "type": "enumeration", "enum": ["image", "video", "audio"], "default": "image" },
+    "description": { "type": "text" }
+  }
+}

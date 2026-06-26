@@ -74,8 +74,8 @@ describe('Configure the List View', () => {
     await user.click(getByRole('button', { name: 'Add a field' }));
     await user.click(getByRole('menuitem', { name: 'slug' }));
 
-    expect(getByRole('button', { name: `Edit slug` })).toBeInTheDocument();
-    expect(getByRole('button', { name: `Delete slug` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Edit slug` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Delete slug` })).toBeInTheDocument();
   });
 
   it('should let me re-add a field I just removed from the original list', async () => {
@@ -83,12 +83,12 @@ describe('Configure the List View', () => {
 
     await findByRole('heading', { name: 'Configure the view - Address' });
 
-    await user.click(getByRole('button', { name: 'Delete id' }));
+    await user.click(getByRole('button', { name: 'Delete documentId' }));
     await user.click(getByRole('button', { name: 'Add a field' }));
-    await user.click(getByRole('menuitem', { name: 'id' }));
+    await user.click(getByRole('menuitem', { name: 'documentId' }));
 
-    expect(getByRole('button', { name: `Edit id` })).toBeInTheDocument();
-    expect(getByRole('button', { name: `Delete id` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Edit documentId` })).toBeInTheDocument();
+    expect(await findByRole('button', { name: `Delete documentId` })).toBeInTheDocument();
   });
 
   describe('Edit modal', () => {
@@ -97,22 +97,25 @@ describe('Configure the List View', () => {
 
       await findByRole('heading', { name: 'Configure the view - Address' });
 
-      await user.click(getByRole('button', { name: 'Edit id' }));
+      await user.click(getByRole('button', { name: 'Edit documentId' }));
 
-      expect(getByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
-      expect(getByRole('heading', { name: 'Edit Id' })).toBeInTheDocument();
-      expect(getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
-      expect(getByRole('checkbox', { name: 'Enable sort on this field' })).toBeInTheDocument();
+      expect(await findByRole('dialog', { name: 'Edit DocumentId' })).toBeInTheDocument();
+      expect(await findByRole('heading', { name: 'Edit DocumentId' })).toBeInTheDocument();
+      const labelInput = await findByRole('textbox', { name: 'Label' });
+      expect(labelInput).toBeInTheDocument();
+      expect(
+        await findByRole('checkbox', { name: 'Enable sort on this field' })
+      ).toBeInTheDocument();
 
-      await user.type(getByRole('textbox', { name: 'Label' }), 'testname');
+      await user.type(labelInput, 'testname');
 
-      expect(getByRole('button', { name: 'Finish' })).toBeInTheDocument();
-      expect(getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+      expect(await findByRole('button', { name: 'Finish' })).toBeInTheDocument();
+      expect(await findByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
       fireEvent.click(getByRole('button', { name: 'Finish' }));
 
       await waitFor(() =>
-        expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument()
+        expect(queryByRole('dialog', { name: 'Edit DocumentId' })).not.toBeInTheDocument()
       );
     });
 
@@ -121,14 +124,14 @@ describe('Configure the List View', () => {
 
       await findByRole('heading', { name: 'Configure the view - Address' });
 
-      await user.click(getByRole('button', { name: 'Edit id' }));
+      await user.click(getByRole('button', { name: 'Edit documentId' }));
 
-      expect(getByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
+      expect(await findByRole('dialog', { name: 'Edit DocumentId' })).toBeInTheDocument();
 
-      await user.click(getByRole('button', { name: 'Cancel' }));
+      await user.click(await findByRole('button', { name: 'Cancel' }));
 
       await waitFor(() =>
-        expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument()
+        expect(queryByRole('dialog', { name: 'Edit DocumentId' })).not.toBeInTheDocument()
       );
     });
   });

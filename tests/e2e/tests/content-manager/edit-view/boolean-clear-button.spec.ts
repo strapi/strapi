@@ -6,7 +6,7 @@ import { navToHeader } from '../../../../utils/shared';
 
 test.describe('Boolean Component - Clear Button Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
     await navToHeader(page, ['Content Manager'], 'Content Manager');

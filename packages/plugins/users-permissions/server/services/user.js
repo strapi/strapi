@@ -59,8 +59,12 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async add(values) {
-    return strapi.db.query(USER_MODEL_UID).create({
-      data: await this.ensureHashedPasswords(values),
+    // Use the Document Service so relation inputs accept both the internal
+    // numeric id (legacy) and the documentId (v5 default) syntax, consistent
+    // with every other content-type endpoint. The Document Service hashes
+    // `password` attributes itself, so we must not pre-hash here.
+    return strapi.documents(USER_MODEL_UID).create({
+      data: values,
       populate: ['role'],
     });
   },
@@ -72,9 +76,22 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async edit(userId, params = {}) {
-    return strapi.db.query(USER_MODEL_UID).update({
-      where: { id: userId },
-      data: await this.ensureHashedPasswords(params),
+    // The user is addressed by its numeric id (e.g. the `/users/:id` route),
+    // but the Document Service updates by documentId. Resolve it first so the
+    // relation inputs are processed by the Document Service, which accepts both
+    // numeric ids (legacy) and documentIds (v5 default). The Document Service
+    // hashes `password` attributes itself, so we must not pre-hash here.
+    const entry = await strapi.db
+      .query(USER_MODEL_UID)
+      .findOne({ where: { id: userId }, select: ['documentId'] });
+
+    if (!entry) {
+      return null;
+    }
+
+    return strapi.documents(USER_MODEL_UID).update({
+      documentId: entry.documentId,
+      data: params,
       populate: ['role'],
     });
   },

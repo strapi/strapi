@@ -5,7 +5,7 @@ import { clickAndWait } from '../../../utils/shared';
 
 test.describe('Homepage Widget Customization', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
