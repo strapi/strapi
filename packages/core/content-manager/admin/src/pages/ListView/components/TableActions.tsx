@@ -181,7 +181,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
   const { toggleNotification } = useNotification();
   const { autoClone } = useDocumentActions();
   const [prohibitedFields, setProhibitedFields] = React.useState<ProhibitedCloningField[]>([]);
-  const [{ query }] = useQueryParams<{ plugins?: Record<string, any> }>();
+  const [{ query }] = useQueryParams<{ plugins?: Record<string, Record<string, unknown>> }>();
 
   return {
     disabled: !canCreate,
