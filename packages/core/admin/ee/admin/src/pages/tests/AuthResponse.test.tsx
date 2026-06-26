@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { render } from '@testing-library/react';
-import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 import { login } from '../../../../../admin/src/reducer';
