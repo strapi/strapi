@@ -1137,10 +1137,10 @@ function previewScript(config) {
    * @param {HighlightManager} highlightManager
    */
   const setupEventHandlers = (highlightManager) => {
-    /** @type {string | null} */
-    let blocksEditActiveField = null;
     /** @type {(() => void) | null} */
     let blocksEditClickOutsideHandler = null;
+    /** @type {(() => void) | null} */
+    let blocksEditScrollHandler = null;
 
     /**
      * @param {HTMLElement} el
@@ -1305,12 +1305,13 @@ function previewScript(config) {
         // to the host frontend — we re-dispatch as a CustomEvent so integrators
         // (e.g. BlocksRenderer in dummy-preview) can re-render without DOM patching.
         if (isBlocksValue(value)) {
-          // Suppress live DOM updates while this field is being edited inline — the iframe content
-          // is hidden by CSS, and re-rendering it would create un-stega'd elements that bypass the
-          // hide rule and produce duplicate visible text alongside the editor overlay.
-          if (field !== blocksEditActiveField) {
-            forwardBlocksFieldChange(field, value);
-          }
+          // Always forward — even when this field is being edited inline.
+          // The parent container has visibility:hidden which inherits to all children
+          // including newly-rendered un-stega'd elements, so there is no risk of
+          // duplicate visible text. Forwarding during editing lets the hidden
+          // container reflow to the correct height as content grows, preventing the
+          // overlay from covering content below the field.
+          forwardBlocksFieldChange(field, value);
           return;
         }
 
@@ -1476,7 +1477,6 @@ function previewScript(config) {
 
       if (event.data.type === INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_START) {
         const { fieldPath } = event.data.payload;
-        blocksEditActiveField = fieldPath;
         // Inject CSS to hide host-rendered blocks content (hides existing + future elements)
         const styleId = `strapi-blocks-hide-${fieldPath}`;
         document.getElementById(styleId)?.remove();
@@ -1495,15 +1495,47 @@ function previewScript(config) {
           sendMessage(INTERNAL_EVENTS.STRAPI_CLICK_OUTSIDE_BLOCKS, null);
         };
         document.addEventListener('click', blocksEditClickOutsideHandler);
+
+        // Send position updates to the admin as the iframe scrolls
+        blocksEditScrollHandler = () => {
+          const elements = getElementsByPath(fieldPath);
+          let minLeft = Infinity;
+          let minTop = Infinity;
+          let maxRight = -Infinity;
+          let maxBottom = -Infinity;
+          let any = false;
+          elements.forEach((el) => {
+            const r = el.getBoundingClientRect();
+            if (r.width === 0 && r.height === 0) return;
+            any = true;
+            if (r.left < minLeft) minLeft = r.left;
+            if (r.top < minTop) minTop = r.top;
+            if (r.right > maxRight) maxRight = r.right;
+            if (r.bottom > maxBottom) maxBottom = r.bottom;
+          });
+          if (!any) return;
+          sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_POSITION_SYNC, {
+            top: minTop,
+            left: minLeft,
+            right: maxRight,
+            bottom: maxBottom,
+            width: maxRight - minLeft,
+            height: maxBottom - minTop,
+          });
+        };
+        window.addEventListener('scroll', blocksEditScrollHandler);
         return;
       }
 
       if (event.data.type === INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_END) {
         const { fieldPath } = event.data.payload;
-        blocksEditActiveField = null;
         if (blocksEditClickOutsideHandler) {
           document.removeEventListener('click', blocksEditClickOutsideHandler);
           blocksEditClickOutsideHandler = null;
+        }
+        if (blocksEditScrollHandler) {
+          window.removeEventListener('scroll', blocksEditScrollHandler);
+          blocksEditScrollHandler = null;
         }
         // Remove the CSS rule to restore host content visibility
         document.getElementById(`strapi-blocks-hide-${fieldPath}`)?.remove();
@@ -1531,6 +1563,10 @@ function previewScript(config) {
         if (blocksEditClickOutsideHandler) {
           document.removeEventListener('click', blocksEditClickOutsideHandler);
           blocksEditClickOutsideHandler = null;
+        }
+        if (blocksEditScrollHandler) {
+          window.removeEventListener('scroll', blocksEditScrollHandler);
+          blocksEditScrollHandler = null;
         }
       },
     };

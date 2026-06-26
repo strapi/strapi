@@ -49,6 +49,12 @@ const LivePreviewBlocksEditor = ({
 
   const field = useField(blocksEditSession.fieldPath);
 
+  // Track latest value via ref so the cleanup closure can read it without going stale
+  const latestValueRef = React.useRef(field.value);
+  React.useEffect(() => {
+    latestValueRef.current = field.value;
+  }, [field.value]);
+
   const endSession = React.useCallback(() => {
     setBlocksEditSession(null);
   }, [setBlocksEditSession]);
@@ -58,7 +64,15 @@ const LivePreviewBlocksEditor = ({
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const isInsideEditor = containerRef.current?.contains(target);
-      const isInsidePortaledUI = target.closest?.('[data-preview-blocks-ui]');
+      const isInsidePortaledUI =
+        // Floating toolbar wrapper and any element that opts in
+        target.closest?.('[data-preview-blocks-ui]') ||
+        // Radix Select dropdown portal (block type selector options, etc.)
+        // These are portaled to document.body outside data-preview-blocks-ui,
+        // but the mousedown fires before Radix can register the selection.
+        target.closest?.('[role="listbox"]') ||
+        // Radix Dialog portals (e.g. image block modal, link modal)
+        target.closest?.('[role="dialog"]');
       if (!isInsideEditor && !isInsidePortaledUI) {
         endSession();
       }
@@ -76,7 +90,11 @@ const LivePreviewBlocksEditor = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [endSession]);
 
+  // Track the field's position as the iframe scrolls
+  const [position, setPosition] = React.useState(blocksEditSession.position);
+
   // Close when the user clicks anywhere in the iframe (notified via postMessage from previewScript)
+  // Also update position when the iframe scrolls
   React.useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
       if (iframeRef.current) {
@@ -88,10 +106,25 @@ const LivePreviewBlocksEditor = ({
       if (e.data?.type === INTERNAL_EVENTS.STRAPI_CLICK_OUTSIDE_BLOCKS) {
         endSession();
       }
+      if (e.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_POSITION_SYNC) {
+        setPosition(e.data.payload);
+      }
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [endSession, iframeRef]);
+
+  // Send the updated content to the iframe on every edit so the iframe's hidden blocks
+  // container reflows to the correct height as the user adds text or changes block types.
+  // visibility:hidden preserves layout participation — when the hidden BlocksRenderer
+  // re-renders with new content, the container naturally grows, and content below reflows.
+  React.useEffect(() => {
+    const sendMessage = getSendMessage(iframeRef);
+    sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
+      field: blocksEditSession.fieldPath,
+      value: field.value,
+    });
+  }, [field.value, blocksEditSession.fieldPath, iframeRef]);
 
   // Send edit start/end messages to the iframe
   React.useEffect(() => {
@@ -103,55 +136,83 @@ const LivePreviewBlocksEditor = ({
       sendMessage(INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_END, {
         fieldPath: blocksEditSession.fieldPath,
       });
+      // Forward the final value after END so the host app can re-render
+      // the blocks content without requiring a save.
+      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
+        field: blocksEditSession.fieldPath,
+        value: latestValueRef.current,
+      });
     };
   }, [blocksEditSession.fieldPath, iframeRef]);
 
   // Compute position (translate iframe-local rect to admin viewport coords)
   const iframeRect = iframeRef.current?.getBoundingClientRect();
-  if (!iframeRect) return null;
 
-  const { position } = blocksEditSession;
+  const rawTop = iframeRect ? iframeRect.top + position.top : 0;
+  const rawBottom = rawTop + position.height;
 
-  const editorTop = iframeRect.top + position.top;
-  const editorLeft = iframeRect.left + position.left;
-  const editorWidth = position.width;
-  // Clip to the visible iframe area so content doesn't bleed into the admin chrome
-  const maxHeight = iframeRect.bottom - editorTop;
+  // Close automatically when the field has scrolled entirely out of the iframe viewport
+  const isOutOfView = !iframeRect || rawBottom <= iframeRect.top || rawTop >= iframeRect.bottom;
 
-  // Don't render if the field is scrolled out of view
-  if (editorTop >= iframeRect.bottom || editorTop <= iframeRect.top - position.height) {
-    return null;
-  }
+  // Must be before any conditional return to satisfy rules-of-hooks
+  React.useEffect(() => {
+    if (isOutOfView) endSession();
+  }, [isOutOfView, endSession]);
+
+  if (!iframeRect || isOutOfView) return null;
 
   return (
+    // Clipping wrapper covers exactly the visible iframe area; the editor moves freely inside it
     <div
-      ref={containerRef}
       style={{
         position: 'fixed',
-        top: editorTop,
-        left: editorLeft,
-        width: editorWidth,
-        maxHeight,
+        top: iframeRect.top,
+        left: iframeRect.left,
+        width: iframeRect.width,
+        height: iframeRect.height,
         overflow: 'hidden',
+        pointerEvents: 'none',
         zIndex: 5,
       }}
-      onWheel={(e) => {
-        const sendMessage = getSendMessage(iframeRef);
-        sendMessage(INTERNAL_EVENTS.STRAPI_SCROLL, { deltaX: e.deltaX, deltaY: e.deltaY });
-      }}
     >
-      <BlocksEditor
-        name={blocksEditSession.fieldPath}
-        value={field.value as Schema.Attribute.BlocksValue}
-        onChange={field.onChange}
-        error={field.error}
-        ariaLabelId={`preview-blocks-${blocksEditSession.fieldPath}`}
-        isLivePreviewInline
-        livePreviewSync
-        autoFocus
-        onEscape={endSession}
-        floatingToolbar={<PreviewBlocksToolbar />}
-      />
+      <div
+        ref={containerRef}
+        style={{
+          position: 'absolute',
+          top: position.top,
+          left: position.left,
+          width: position.width,
+          pointerEvents: 'auto',
+        }}
+        onWheel={(e) => {
+          // React portals (toolbar, dropdowns, dialogs) bubble synthetic events through the
+          // React tree even when their DOM nodes live in document.body. Guard against forwarding
+          // a scroll that originated inside portaled UI rather than the editor content itself.
+          const target = e.target as HTMLElement;
+          if (
+            target.closest('[data-preview-blocks-ui]') ||
+            target.closest('[role="listbox"]') ||
+            target.closest('[role="dialog"]')
+          ) {
+            return;
+          }
+          const sendMessage = getSendMessage(iframeRef);
+          sendMessage(INTERNAL_EVENTS.STRAPI_SCROLL, { deltaX: e.deltaX, deltaY: e.deltaY });
+        }}
+      >
+        <BlocksEditor
+          name={blocksEditSession.fieldPath}
+          value={field.value as Schema.Attribute.BlocksValue}
+          onChange={field.onChange}
+          error={field.error}
+          ariaLabelId={`preview-blocks-${blocksEditSession.fieldPath}`}
+          isLivePreviewInline
+          livePreviewSync
+          autoFocus
+          onEscape={endSession}
+          floatingToolbar={<PreviewBlocksToolbar />}
+        />
+      </div>
     </div>
   );
 };
