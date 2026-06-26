@@ -1,5 +1,4 @@
 import type { InlineConfig, UserConfig } from 'vite';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
@@ -11,6 +10,7 @@ import type { BuildContext } from '../create-build-context';
 import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
   const designSystemLinked = isDesignSystemLinked();
@@ -43,6 +43,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom/client',
         'styled-components',
         'react-router-dom',
+        // Admin + RTK Query share react-redux context; pre-bundle so dev chunks cannot load a
+        // second copy (avoids "could not find react-redux context value" after upgrades / hoisting).
+        'react-redux',
+        '@reduxjs/toolkit',
         // Pre-bundle design-system so plugin custom field chunks (dynamic imports) resolve
         // to the same instance as the main app. Otherwise TooltipProvider/DesignSystemProvider
         // context from the root is not seen by components in plugin chunks.
@@ -106,7 +110,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'react-colorful',
               'react-dnd-html5-backend',
               'react-window',
-              'sanitize-html',
               'semver',
               'semver/functions/lt',
               'semver/functions/valid',
@@ -126,6 +129,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom',
         'react-router-dom',
         'styled-components',
+        'react-redux',
+        '@reduxjs/toolkit',
         '@strapi/design-system',
         '@radix-ui/react-tooltip',
         'lodash',
@@ -137,6 +142,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom': getModulePath('react-dom'),
         'react-router-dom': getModulePath('react-router-dom'),
         'styled-components': getModulePath('styled-components'),
+        'react-redux': getModulePath('react-redux'),
+        '@reduxjs/toolkit': getModulePath('@reduxjs/toolkit'),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),
@@ -187,12 +194,21 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
     },
     server: {
       cors: false,
+      /**
+       * In middleware mode Strapi forwards the browser Host from reverse proxies (nginx, Traefik).
+       * Vite 5+ blocks unknown hosts unless explicitly allowed (#23491).
+       */
+      allowedHosts: true,
       middlewareMode: true,
       open: ctx.options.open,
       hmr: {
         overlay: false,
-        server: ctx.options.hmrServer,
-        clientPort: ctx.options.hmrClientPort,
+        /**
+         * Use Strapi's http.Server so HMR websockets reuse the app's listen port. A separate listener
+         * plus clientPort pushes browsers toward host:5173-style URLs that fail behind proxies that
+         * only expose the Strapi server port (#23491, #23008).
+         */
+        server: ctx.strapi.server.httpServer,
       },
     },
     appType: 'custom',

@@ -77,8 +77,8 @@ const runUpgradePrompts = async (upgrader: Upgrader, options: UpgradeOptions) =>
 };
 
 const addUpgradeRequirements = (upgrader: Upgrader, options: UpgradeOptions): void => {
-  // Don't add the same requirements when manually targeting a major upgrade
-  // using a semver as it's implied that the users know what they're doing
+  // Major release upgrades enforce stepping through the latest patch for the current major.
+  // Semver targets (via the "to" command) skip these checks intentionally.
   if (options.target === Version.ReleaseType.Major) {
     upgrader
       .addRequirement(requirements.major.REQUIRE_AVAILABLE_NEXT_MAJOR)

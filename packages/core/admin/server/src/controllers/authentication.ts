@@ -2,7 +2,7 @@ import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
-import { errors } from '@strapi/utils';
+import { errors, buildSessionMetadata } from '@strapi/utils';
 import { getService } from '../utils';
 import {
   REFRESH_COOKIE_NAME,
@@ -26,10 +26,17 @@ import type {
   ForgotPassword,
   Login,
   Register,
+  RegisterAdmin,
   RegistrationInfo,
   ResetPassword,
 } from '../../../shared/contracts/authentication';
 import { AdminUser } from '../../../shared/contracts/shared';
+
+const buildSessionMetadataFromContext = (ctx: Context) =>
+  buildSessionMetadata({
+    ip: ctx.request.ip,
+    userAgent: ctx.request.headers['user-agent'],
+  });
 
 const { ApplicationError, ValidationError } = errors;
 
@@ -84,6 +91,7 @@ export default {
           'admin'
         ).generateRefreshToken(userId, deviceId, {
           type: rememberMe ? 'refresh' : 'session',
+          metadata: buildSessionMetadataFromContext(ctx),
         });
 
         const cookieOptions = buildCookieOptionsWithExpiry(
@@ -145,7 +153,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: rememberMe ? 'refresh' : 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -175,30 +186,11 @@ export default {
   },
 
   async registerAdmin(ctx: Context) {
-    const input = ctx.request.body as Register.Request['body'];
+    const input = ctx.request.body as RegisterAdmin.Request['body'];
 
     await validateAdminRegistrationInput(input);
 
-    const hasAdmin = await getService('user').exists();
-
-    if (hasAdmin) {
-      throw new ApplicationError('You cannot register a new super admin');
-    }
-
-    const superAdminRole = await getService('role').getSuperAdmin();
-
-    if (!superAdminRole) {
-      throw new ApplicationError(
-        "Cannot register the first admin because the super admin role doesn't exist."
-      );
-    }
-
-    const user = await getService('user').create({
-      ...input,
-      registrationToken: null,
-      isActive: true,
-      roles: superAdminRole ? [superAdminRole.id] : [],
-    });
+    const user = await getService('user').createFirstAdmin(input);
 
     strapi.telemetry.send('didCreateFirstAdmin');
 
@@ -212,7 +204,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: rememberMe ? 'refresh' : 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -234,7 +229,7 @@ export default {
           accessToken,
           user: getService('user').sanitizeUser(user),
         },
-      };
+      } satisfies RegisterAdmin.Response;
     } catch (error) {
       strapi.log.error('Failed to create admin refresh session during register-admin', error);
       return ctx.internalServerError();
@@ -273,7 +268,10 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: 'session' });
+      ).generateRefreshToken(userId, deviceId, {
+        type: 'session',
+        metadata: buildSessionMetadataFromContext(ctx),
+      });
 
       // No rememberMe flow here; expire with session by default (session cookie)
       const cookieOptions = buildCookieOptionsWithExpiry(

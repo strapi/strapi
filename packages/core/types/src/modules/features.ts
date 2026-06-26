@@ -1,9 +1,6 @@
-export interface FeaturesConfig {
-  future?: {
-    adminTokens?: boolean;
-    unstableMediaLibrary?: boolean;
-  };
-}
+import type { Features } from '../core/config/features';
+
+export type FeaturesConfig = Features;
 
 export interface FeaturesService {
   /**

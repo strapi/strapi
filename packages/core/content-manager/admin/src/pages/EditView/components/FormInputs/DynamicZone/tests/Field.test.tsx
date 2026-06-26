@@ -155,6 +155,28 @@ describe('DynamicZone', () => {
 
       expect(screen.getByText('test comp - test')).toBeInTheDocument();
     });
+
+    it('should ignore dynamic-zone component UIDs whose schema is unavailable', async () => {
+      const { user } = render({
+        attribute: {
+          ...defaultProps.attribute,
+          components: ['blog.test-como', 'shared.deleted-component'],
+        },
+      });
+
+      await waitForQueryToFinish();
+
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+
+      expect(screen.getByRole('button', { name: 'test comp' })).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'shared.deleted-component' })
+      ).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
+
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
+    });
   });
 
   describe('callbacks', () => {

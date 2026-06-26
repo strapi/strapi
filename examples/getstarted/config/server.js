@@ -19,7 +19,9 @@ module.exports = ({ env }) => ({
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', true),
   },
   // ℹ️ http_proxy is the env var used by system to set proxy globally
-  globalProxy: env('http_proxy'),
+  proxy: {
+    global: env('http_proxy'),
+  },
   http: {
     serverOptions: {
       requestTimeout: 1000 * 60 * 10, // set request timeout to 600000ms (10 minutes)
@@ -40,5 +42,8 @@ module.exports = ({ env }) => ({
     startup: {
       // enabled: false,
     },
+  },
+  mcp: {
+    enabled: true,
   },
 });
