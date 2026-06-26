@@ -60,15 +60,14 @@ export const AdminSeatInfoEE = () => {
               {
                 permittedSeats,
                 enforcementUserCount,
-                text: (chunks) =>
-                  (
-                    <Typography
-                      fontWeight="semiBold"
-                      textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
-                    >
-                      {chunks}
-                    </Typography>
-                  ) as any,
+                text: (chunks) => (
+                  <Typography
+                    fontWeight="semiBold"
+                    textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
+                  >
+                    {chunks}
+                  </Typography>
+                ),
               }
             )}
           </Typography>
