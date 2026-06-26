@@ -336,6 +336,11 @@ const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelatio
           break;
         }
 
+        // Self-referential relations are preserved on publish (see self-referential-relations.ts).
+        if (attribute.target === uid) {
+          break;
+        }
+
         if (isVisibleAttribute(model, attributeName)) {
           populateAcc[attributeName] = {
             count: true,

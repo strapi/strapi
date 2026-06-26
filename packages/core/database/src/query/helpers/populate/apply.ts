@@ -1,4 +1,5 @@
 import _ from 'lodash/fp';
+import { hasSort } from '@strapi/utils';
 
 import { fromRow } from '../transform';
 import type { QueryBuilder } from '../../query-builder';
@@ -20,7 +21,9 @@ const getJoinTableOrderBy = (
   populateValue: Record<string, unknown>,
   joinTable: { orderBy?: Record<string, 'asc' | 'desc'> }
 ) => {
-  if (!_.isEmpty(populateValue.orderBy) || !joinTable.orderBy) {
+  const explicitSort = populateValue.orderBy ?? populateValue.sort;
+
+  if (hasSort(explicitSort) || !joinTable.orderBy) {
     return undefined;
   }
 
