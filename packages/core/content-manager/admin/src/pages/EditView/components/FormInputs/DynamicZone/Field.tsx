@@ -76,7 +76,11 @@ const DynamicZone = ({
       __temp_key__: string;
     };
 
-  const { value = [], error } = useField<Array<DzWithTempKey>>(name);
+  const { value: rawValue, error } = useField<Array<DzWithTempKey>>(name);
+  // `value` can be `null` (for example after closing a relation modal), and a
+  // default parameter only applies to `undefined`, so coerce `null` to an empty
+  // array to avoid crashing on `value.length` / `value.map`. (#26815)
+  const value = rawValue ?? [];
 
   /**
    * Track the previous value array to detect when a new component is added.

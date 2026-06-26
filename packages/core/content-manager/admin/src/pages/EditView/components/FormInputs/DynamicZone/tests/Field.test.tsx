@@ -156,6 +156,24 @@ describe('DynamicZone', () => {
       expect(screen.getByText('test comp - test')).toBeInTheDocument();
     });
 
+    // Regression test for https://github.com/strapi/strapi/issues/26815
+    it('should not crash when the dynamic zone value is null', async () => {
+      render({
+        initialFormValues: {
+          DynamicZoneComponent: null,
+        },
+      });
+
+      // Before the fix, a `null` value bypassed the `value = []` default and
+      // crashed on `value.length` / `value.map` with
+      // "Cannot read properties of null (reading 'length')".
+      await waitForQueryToFinish();
+
+      expect(
+        screen.getByRole('button', { name: /Add a component to/i }),
+      ).toBeInTheDocument();
+    });
+
     it('should ignore dynamic-zone component UIDs whose schema is unavailable', async () => {
       const { user } = render({
         attribute: {
