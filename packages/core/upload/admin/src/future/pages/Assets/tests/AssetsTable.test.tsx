@@ -15,6 +15,26 @@ jest.mock('../hooks/useFolderNavigation', () => ({
   }),
 }));
 
+jest.mock('../components/Dnd/useAssetDnd', () => ({
+  useFileDraggable: () => ({
+    attributes: {},
+    listeners: {},
+    setNodeRef: jest.fn(),
+    isDragging: false,
+  }),
+  useFolderDraggableDroppable: () => ({
+    draggable: {
+      attributes: {},
+      listeners: {},
+      setNodeRef: jest.fn(),
+      isDragging: false,
+    },
+    droppable: { setNodeRef: jest.fn() },
+    showValidDropHighlight: false,
+    showInvalidDropCursor: false,
+  }),
+}));
+
 const createMockAsset = (id: number, name: string, mime = 'image/png', ext = '.png'): File => ({
   id,
   name,

@@ -127,8 +127,24 @@ export class AssetsPage {
     // Wait for the success notification inside the Notifications region
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
-      .getByRole('status');
+      .getByRole('status')
+      .first();
     await notification.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Wait for the bulk-move success toast after drag-and-drop.
+   * Scoped to the Notifications region so it does not match the a11y live region.
+   */
+  async waitForMoveSuccess() {
+    await this.getMoveSuccessNotification().waitFor({ state: 'visible' });
+  }
+
+  getMoveSuccessNotification() {
+    return this.page
+      .getByRole('region', { name: 'Notifications' })
+      .getByRole('status')
+      .filter({ hasText: 'Elements have been moved successfully' });
   }
 
   async getSuccessMessage() {
@@ -172,11 +188,20 @@ export class AssetsPage {
   }
 
   /**
+   * The grid container. Scoped via test id so card/folder locators don't
+   * collide with the sidebar FolderTree, which also renders folder names as
+   * list items inside the `main` landmark.
+   */
+  get assetsGrid() {
+    return this.page.getByTestId('assets-grid');
+  }
+
+  /**
    * Get an asset card in grid view by (partial) filename.
    * Asset cards use role="listitem" in the list.
    */
   getAssetCard(name: string) {
-    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+    return this.assetsGrid.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**
@@ -332,7 +357,7 @@ export class AssetsPage {
    * Get a folder card in grid view
    */
   getFolderCard(name: string) {
-    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
+    return this.assetsGrid.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**
@@ -361,10 +386,65 @@ export class AssetsPage {
   /**
    * Upload files from URLs using the import from URL dialog
    */
-  async uploadFilesFromUrl(urls: string | string[]) {
-    await this.openImportFromUrlDialog();
-    const urlsArray = Array.isArray(urls) ? urls : [urls];
-    await this.urlTextarea.fill(urlsArray.join('\n'));
-    await this.importFromUrlDialog.getByRole('button', { name: 'Upload' }).click();
+  /**
+   * Drag a file or folder onto a folder target using pointer events (dnd-kit).
+   * Moves the pointer more than 8px before dropping to satisfy activation distance.
+   */
+  async dragItemToFolder(
+    itemName: string,
+    folderName: string,
+    view: 'grid' | 'table' = 'grid',
+    itemType: 'file' | 'folder' = 'file'
+  ) {
+    const item =
+      view === 'grid'
+        ? itemType === 'folder'
+          ? this.getFolderCard(itemName)
+          : this.getAssetCard(itemName)
+        : itemType === 'folder'
+          ? this.getFolderRow(itemName)
+          : this.getAssetRow(itemName);
+    const target = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
+
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (!itemBox || !targetBox) {
+      throw new Error(
+        `Could not resolve drag source "${itemName}" or target folder "${folderName}"`
+      );
+    }
+
+    const startX = itemBox.x + itemBox.width / 2;
+    const startY = itemBox.y + itemBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(endX, endY, { steps: 12 });
+    await this.page.mouse.up();
+  }
+
+  /**
+   * Drag a folder row/card onto itself (invalid shallow drop).
+   */
+  async dragFolderToSelf(folderName: string, view: 'grid' | 'table' = 'table') {
+    const folder = view === 'grid' ? this.getFolderCard(folderName) : this.getFolderRow(folderName);
+
+    const box = await folder.boundingBox();
+    if (!box) {
+      throw new Error(`Could not resolve folder "${folderName}"`);
+    }
+
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 12, startY);
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.up();
   }
 }
