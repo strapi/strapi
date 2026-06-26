@@ -3,6 +3,7 @@
   "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
     "lib": ["es2023"],
+    "target": "es2023",
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
