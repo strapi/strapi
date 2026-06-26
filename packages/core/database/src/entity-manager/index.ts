@@ -180,6 +180,7 @@ const toAssocs = (data: Assocs) => {
 };
 
 const processData = (
+  db: Database,
   metadata: Meta,
   data: Record<string, unknown> = {},
   { withDefaults = false } = {}
@@ -239,7 +240,7 @@ const processData = (
         ) {
           const setIds = attrValue.set;
           if (setIds.length > 1) {
-            strapi?.log?.warn?.(
+            db.logger.warn(
               `Multiple ids provided for xToOne relation "${attributeName}" stored in a single FK column; keeping only the last id. Consider using a join table (useJoinTable: true) to support multiple versions of a Draft-and-Publish target.`
             );
           }
@@ -339,7 +340,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         throw new Error('Create expects a data object');
       }
 
-      const dataToInsert = processData(metadata, data, { withDefaults: true });
+      const dataToInsert = processData(db, metadata, data, { withDefaults: true });
 
       const res = await this.createQueryBuilder(uid)
         .insert(dataToInsert)
@@ -347,7 +348,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
       const id = isRecord(res[0]) ? res[0].id : res[0];
 
-      const trx = await strapi.db.transaction();
+      const trx = await db.transaction();
       try {
         await this.attachRelations(uid, id, data, { transaction: trx.get() });
 
@@ -384,7 +385,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
 
       const dataToInsert = data.map((datum) =>
-        processData(metadata, datum, { withDefaults: true })
+        processData(db, metadata, datum, { withDefaults: true })
       );
 
       if (isEmpty(dataToInsert)) {
@@ -447,13 +448,13 @@ export const createEntityManager = (db: Database): EntityManager => {
 
       const { id } = entity;
 
-      const dataToUpdate = processData(metadata, data);
+      const dataToUpdate = processData(db, metadata, data);
 
       if (!isEmpty(dataToUpdate)) {
         await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
       }
 
-      const trx = await strapi.db.transaction();
+      const trx = await db.transaction();
       try {
         await this.updateRelations(uid, id, data, { transaction: trx.get() });
         await trx.commit();
@@ -483,7 +484,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const metadata = db.metadata.get(uid);
       const { where, data } = params;
 
-      const dataToUpdate = processData(metadata, data);
+      const dataToUpdate = processData(db, metadata, data);
 
       if (isEmpty(dataToUpdate)) {
         throw new Error('Update requires data');
@@ -525,7 +526,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
       await this.createQueryBuilder(uid).where({ id }).delete().execute();
 
-      const trx = await strapi.db.transaction();
+      const trx = await db.transaction();
       try {
         await this.deleteRelations(uid, id, { transaction: trx.get() });
 

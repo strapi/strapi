@@ -12,7 +12,7 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { Model, JoinTable } from './types';
+import type { Model, JoinTable, StrapiHost } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
 
@@ -36,6 +36,14 @@ export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
   logger?: Logger;
+  /**
+   * Strapi host used by the database layer (e.g. for model lookups and store
+   * access). Optional for backwards compatibility: when omitted, the
+   * constructor falls back to `globalThis.strapi`, which is deprecated and
+   * will be removed in the next major. At that point this field will become
+   * required — always pass the Strapi instance explicitly.
+   */
+  strapi?: StrapiHost;
 }
 
 const afterCreate =
@@ -71,6 +79,8 @@ class Database {
 
   logger: Logger;
 
+  strapi: StrapiHost;
+
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -82,6 +92,22 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+
+    let strapi = config.strapi;
+    if (!strapi) {
+      strapi = (globalThis as { strapi?: StrapiHost }).strapi;
+      if (strapi) {
+        this.logger.warn(
+          'Database resolved its Strapi host from `globalThis.strapi`. This fallback is deprecated and will be removed in the next major; pass `config.strapi` to the Database constructor explicitly.'
+        );
+      }
+    }
+
+    if (!strapi) {
+      throw new Error('Database requires a Strapi host. Pass `config.strapi` to the constructor.');
+    }
+
+    this.strapi = strapi;
 
     this.dialect = getDialect(this);
 
@@ -271,4 +297,4 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration };
+export type { Model, JoinTable, Identifiers, Migration, StrapiHost };

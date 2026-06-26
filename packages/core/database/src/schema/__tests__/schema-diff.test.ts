@@ -4,8 +4,15 @@ import type { Index, Schema, Table } from '..';
 
 describe('diffSchemas', () => {
   let diffSchemas: ReturnType<typeof createSchemaDiff>['diff'];
+  let mockStrapi: { store: { get: (...args: any[]) => any } };
 
   beforeEach(() => {
+    mockStrapi = {
+      store: {
+        get: () => [],
+      },
+    };
+
     const schemaDiff = createSchemaDiff({
       dialect: {
         usesForeignKeys() {
@@ -14,15 +21,10 @@ describe('diffSchemas', () => {
         getSqlType: (type: string) => type, // Mock the getSqlType function to return the type as-is
         supportsUnsigned: () => false,
       },
+      strapi: mockStrapi,
     } as any);
 
     diffSchemas = schemaDiff.diff.bind(schemaDiff);
-
-    global.strapi = {
-      store: {
-        get: () => [],
-      },
-    };
   });
 
   test('New Table', async () => {
@@ -1181,11 +1183,7 @@ describe('diffSchemas', () => {
       foreignKeys: [],
     };
 
-    global.strapi = {
-      store: {
-        get: async () => [testTables[0].name, 'table2'],
-      },
-    } as any;
+    mockStrapi.store.get = async () => [testTables[0].name, 'table2'];
 
     const databaseSchema: Schema = {
       tables: [...testTables, coreStoreTable],

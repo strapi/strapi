@@ -46,6 +46,10 @@ describe('Database Repair Manager', () => {
         warn: jest.fn(),
         error: jest.fn(),
       },
+      strapi: {
+        getModel: jest.fn(),
+        store: { get: jest.fn() },
+      },
     };
   });
 

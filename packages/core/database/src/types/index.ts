@@ -1,6 +1,8 @@
 import type { Action, SubscriberFn } from '../lifecycles';
 import type { ForeignKey, Index } from '../schema/types';
 
+export type { StrapiHost } from './host';
+
 export type ID = string | number;
 
 export interface ColumnInfo {

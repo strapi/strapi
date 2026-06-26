@@ -60,6 +60,11 @@ const models = [
   },
 ];
 
+const strapiStub = {
+  getModel: jest.fn(),
+  store: { get: jest.fn() },
+};
+
 const configConnectionObject: DatabaseConfig = {
   connection: {
     client: 'postgres',
@@ -76,6 +81,7 @@ const configConnectionObject: DatabaseConfig = {
       dir: 'migrations',
     },
   },
+  strapi: strapiStub,
 };
 const configConnectionFunction: DatabaseConfig = {
   connection: {
@@ -95,6 +101,7 @@ const configConnectionFunction: DatabaseConfig = {
       dir: 'migrations',
     },
   },
+  strapi: strapiStub,
 };
 
 describe('Database', () => {
