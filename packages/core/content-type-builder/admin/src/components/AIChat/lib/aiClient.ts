@@ -118,7 +118,7 @@ export const prefetchAIToken = async (): Promise<void> => {
   }
 };
 
-export const safeParseJson = async (response: Response): Promise<any> => {
+export const safeParseJson = async (response: Response): Promise<unknown> => {
   try {
     return await response.json();
   } catch {
@@ -152,12 +152,24 @@ const buildHeaders = (
   };
 };
 
-const shouldRetryForToken = (status: number, body: any): boolean => {
+type ErrorResponseBody = {
+  error?: unknown;
+};
+
+const getErrorMessage = (body: unknown): string => {
+  if (typeof body !== 'object' || body === null || !('error' in body)) {
+    return '';
+  }
+
+  return String((body as ErrorResponseBody).error ?? '').toLowerCase();
+};
+
+const shouldRetryForToken = (status: number, body: unknown): boolean => {
   if (status === 401 || status === 403) {
     return true;
   }
 
-  const msg = (body?.error || '').toString().toLowerCase();
+  const msg = getErrorMessage(body);
   return msg.includes('expired') || msg.includes('invalid token');
 };
 
