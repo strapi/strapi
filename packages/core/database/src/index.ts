@@ -8,6 +8,7 @@ import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
 import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
+import type { Event } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
@@ -15,8 +16,6 @@ import { validateDatabase } from './validations';
 import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
-
-export type { Event } from './lifecycles';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -266,4 +265,4 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration };
+export type { Model, JoinTable, Identifiers, Migration, Event };
