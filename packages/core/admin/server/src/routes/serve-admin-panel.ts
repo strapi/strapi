@@ -22,6 +22,9 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
       return;
     }
 
+    // Always revalidate the SPA shell so clients never keep an index that references
+    // hashed chunks removed after a new admin build (avoids dynamic import fetch failures).
+    ctx.set('Cache-Control', 'no-cache');
     ctx.type = 'html';
     ctx.body = fse.createReadStream(join(buildDir, 'index.html'));
   };
@@ -38,8 +41,11 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
           index: 'index.html',
           setHeaders(res: any, path: any) {
             const ext = extname(path);
-            // publicly cache static files to avoid unnecessary network & disk access
-            if (ext !== '.html') {
+            if (ext === '.html') {
+              // Do not cache the document: it must track the current hashed chunk names.
+              res.setHeader('cache-control', 'no-cache');
+            } else {
+              // Hashed assets are safe to cache for a long time.
               res.setHeader('cache-control', 'public, max-age=31536000, immutable');
             }
           },
