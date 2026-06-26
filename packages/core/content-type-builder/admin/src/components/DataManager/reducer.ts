@@ -27,7 +27,7 @@ export interface DataManagerStateType {
     attributes: string[];
   };
   isLoading: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const initialState: DataManagerStateType = {
@@ -56,7 +56,7 @@ const getOppositeRelation = (originalRelation?: Schema.Attribute.RelationKind.An
   return originalRelation;
 };
 
-const findAttributeIndex = (type: any, attributeToFind?: string) => {
+const findAttributeIndex = (type: ContentType | Component, attributeToFind?: string) => {
   return type.attributes.findIndex(({ name }: { name: string }) => name === attributeToFind);
 };
 
@@ -204,11 +204,11 @@ const getNewStatus = (oldStatus: Status | undefined, newStatus: Status) => {
   return newStatus;
 };
 
-const setAttributeStatus = (attribute: Record<string, any>, status: Status) => {
+const setAttributeStatus = (attribute: { status?: Status }, status: Status) => {
   attribute.status = getNewStatus(attribute.status, status);
 };
 
-const createAttribute = (properties: Record<string, any>): AnyAttribute => {
+const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {
   return {
     ...properties,
     status: 'NEW',
@@ -268,7 +268,7 @@ const removeAttributeByName = (type: ContentType | Component, name: string) => {
   }
 };
 
-const updateType = (type: ContentType | Component, data: Record<string, any>) => {
+const updateType = (type: ContentType | Component, data: Record<string, unknown>) => {
   merge(type, data);
   setStatus(type, 'CHANGED');
 };
