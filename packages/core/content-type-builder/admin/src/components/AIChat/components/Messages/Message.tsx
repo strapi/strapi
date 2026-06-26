@@ -104,8 +104,13 @@ type SchemaToolPart = {
   toolCallId?: string;
 };
 
-const isSchemaToolPart = (part: any): part is SchemaToolPart =>
-  part && typeof part === 'object' && part.type === 'tool-schemaGenerationTool';
+const isSchemaToolPart = (part: unknown): part is SchemaToolPart => {
+  if (typeof part !== 'object' || part === null || !('type' in part)) {
+    return false;
+  }
+
+  return part.type === 'tool-schemaGenerationTool';
+};
 
 const capitalize = (s?: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
