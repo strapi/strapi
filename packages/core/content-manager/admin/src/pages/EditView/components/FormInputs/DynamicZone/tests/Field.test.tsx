@@ -164,14 +164,11 @@ describe('DynamicZone', () => {
         },
       });
 
-      // Before the fix, a `null` value bypassed the `value = []` default and
-      // crashed on `value.length` / `value.map` with
-      // "Cannot read properties of null (reading 'length')".
+      // Before the fix, a `null` value bypassed the `value = []` default and crashed
+      // on `value.length` / `value.map`.
       await waitForQueryToFinish();
 
-      expect(
-        screen.getByRole('button', { name: /Add a component to/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeInTheDocument();
     });
 
     it('should ignore dynamic-zone component UIDs whose schema is unavailable', async () => {
