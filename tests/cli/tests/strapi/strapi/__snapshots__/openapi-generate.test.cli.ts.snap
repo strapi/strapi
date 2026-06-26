@@ -4317,6 +4317,58 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
+    "/auth/sessions": {
+      "get": {
+        "operationId": "users-permissions/get/auth_sessions",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "users-permissions",
+        ],
+      },
+    },
+    "/auth/sessions/{sessionId}": {
+      "delete": {
+        "operationId": "users-permissions/delete/auth_sessions_by_sessionId",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "users-permissions",
+        ],
+      },
+    },
     "/auth/{provider}/callback": {
       "get": {
         "operationId": "users-permissions/get/auth_by_provider_callback",
@@ -25145,6 +25197,441 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
+    "/upload/files/page": {
+      "get": {
+        "operationId": "upload/get/upload_files_page",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "string",
+                },
+                {
+                  "items": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+              "description": "Select specific fields to return in the response",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "populate",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "const": "*",
+                  "type": "string",
+                },
+                {
+                  "type": "string",
+                },
+                {
+                  "items": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                {
+                  "additionalProperties": {},
+                  "propertyNames": {
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
+              ],
+              "description": "Specify which relations to populate in the response",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "anyOf": [
+                {
+                  "type": "string",
+                },
+                {
+                  "items": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                {
+                  "additionalProperties": {
+                    "enum": [
+                      "asc",
+                      "desc",
+                    ],
+                    "type": "string",
+                  },
+                  "propertyNames": {
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
+                {
+                  "items": {
+                    "additionalProperties": {
+                      "enum": [
+                        "asc",
+                        "desc",
+                      ],
+                      "type": "string",
+                    },
+                    "propertyNames": {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              ],
+              "description": "Sort the results by specified fields",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "pagination",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "allOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "withCount": {
+                      "description": "Include total count in response",
+                      "type": "boolean",
+                    },
+                  },
+                  "type": "object",
+                },
+                {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "description": "Page-based pagination",
+                      "properties": {
+                        "page": {
+                          "description": "Page number (1-based)",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991,
+                          "type": "integer",
+                        },
+                        "pageSize": {
+                          "description": "Number of entries per page",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991,
+                          "type": "integer",
+                        },
+                      },
+                      "required": [
+                        "page",
+                        "pageSize",
+                      ],
+                      "type": "object",
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Offset-based pagination",
+                      "properties": {
+                        "limit": {
+                          "description": "Maximum number of entries to return",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991,
+                          "type": "integer",
+                        },
+                        "start": {
+                          "description": "Number of entries to skip",
+                          "maximum": 9007199254740991,
+                          "minimum": 0,
+                          "type": "integer",
+                        },
+                      },
+                      "required": [
+                        "start",
+                        "limit",
+                      ],
+                      "type": "object",
+                    },
+                  ],
+                },
+              ],
+              "description": "Pagination parameters",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+          {
+            "in": "query",
+            "name": "filters",
+            "required": false,
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "additionalProperties": {},
+              "description": "Apply filters to the query",
+              "propertyNames": {
+                "type": "string",
+              },
+              "type": "object",
+            },
+            "x-strapi-serialize": "querystring",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "alternativeText": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                          },
+                          "caption": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                          },
+                          "createdAt": {
+                            "type": "string",
+                          },
+                          "createdBy": {
+                            "type": "number",
+                          },
+                          "documentId": {
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$",
+                            "type": "string",
+                          },
+                          "ext": {
+                            "type": "string",
+                          },
+                          "folder": {
+                            "type": "number",
+                          },
+                          "folderPath": {
+                            "type": "string",
+                          },
+                          "formats": {
+                            "additionalProperties": {},
+                            "propertyNames": {
+                              "type": "string",
+                            },
+                            "type": "object",
+                          },
+                          "hash": {
+                            "type": "string",
+                          },
+                          "height": {
+                            "maximum": 9007199254740991,
+                            "minimum": -9007199254740991,
+                            "type": "integer",
+                          },
+                          "id": {
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991,
+                            "type": "integer",
+                          },
+                          "mime": {
+                            "type": "string",
+                          },
+                          "name": {
+                            "type": "string",
+                          },
+                          "previewUrl": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                          },
+                          "provider": {
+                            "type": "string",
+                          },
+                          "provider_metadata": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": {},
+                                "propertyNames": {
+                                  "type": "string",
+                                },
+                                "type": "object",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                          },
+                          "size": {
+                            "type": "number",
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                          },
+                          "updatedBy": {
+                            "type": "number",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                          "width": {
+                            "maximum": 9007199254740991,
+                            "minimum": -9007199254740991,
+                            "type": "integer",
+                          },
+                        },
+                        "required": [
+                          "id",
+                          "documentId",
+                          "name",
+                          "hash",
+                          "mime",
+                          "size",
+                          "url",
+                          "folderPath",
+                          "provider",
+                          "createdAt",
+                          "updatedAt",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "meta": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "pagination": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "page": {
+                                  "maximum": 9007199254740991,
+                                  "minimum": -9007199254740991,
+                                  "type": "integer",
+                                },
+                                "pageCount": {
+                                  "maximum": 9007199254740991,
+                                  "minimum": -9007199254740991,
+                                  "type": "integer",
+                                },
+                                "pageSize": {
+                                  "maximum": 9007199254740991,
+                                  "minimum": -9007199254740991,
+                                  "type": "integer",
+                                },
+                                "total": {
+                                  "maximum": 9007199254740991,
+                                  "minimum": -9007199254740991,
+                                  "type": "integer",
+                                },
+                              },
+                              "required": [
+                                "page",
+                                "pageSize",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "limit": {
+                                  "maximum": 9007199254740991,
+                                  "minimum": -9007199254740991,
+                                  "type": "integer",
+                                },
+                                "start": {
+                                  "maximum": 9007199254740991,
+                                  "minimum": -9007199254740991,
+                                  "type": "integer",
+                                },
+                                "total": {
+                                  "maximum": 9007199254740991,
+                                  "minimum": -9007199254740991,
+                                  "type": "integer",
+                                },
+                              },
+                              "required": [
+                                "start",
+                                "limit",
+                              ],
+                              "type": "object",
+                            },
+                          ],
+                        },
+                      },
+                      "required": [
+                        "pagination",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                  "required": [
+                    "data",
+                    "meta",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "upload",
+        ],
+      },
+    },
     "/upload/files/{id}": {
       "delete": {
         "operationId": "upload/delete/upload_files_by_id",
@@ -25886,7 +26373,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "type": "string",
                   },
                   "role": {
-                    "type": "number",
+                    "anyOf": [
+                      {
+                        "type": "number",
+                      },
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "connect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "disconnect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    ],
                   },
                   "username": {
                     "type": "string",
@@ -27211,7 +27755,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "type": "string",
                   },
                   "role": {
-                    "type": "number",
+                    "anyOf": [
+                      {
+                        "type": "number",
+                      },
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "connect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "disconnect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    ],
                   },
                   "username": {
                     "type": "string",
