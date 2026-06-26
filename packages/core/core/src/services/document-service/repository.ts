@@ -43,6 +43,48 @@ const MAX_LOCALE_LENGTH = 35;
 /** Treat as "param not provided": null, undefined, or empty string (e.g. from query/JSON). */
 const isParamEmpty = (v: unknown): boolean => v === undefined || v === null || v === '';
 
+/**
+ * Detects the relation-operation shape (`{ connect, disconnect, set }`) used
+ * by the admin form when editing a relation. We replace these wholesale rather
+ * than deep-merging them on top of the cloned entry's raw DB representation
+ * (e.g. `{ id: 3 }`), otherwise the stale `id` key survives and causes the
+ * relation to be transferred to the clone. See issue #25749.
+ */
+const isRelationOp = (value: unknown): boolean =>
+  value !== null &&
+  typeof value === 'object' &&
+  !Array.isArray(value) &&
+  ('connect' in (value as Record<string, unknown>) ||
+    'disconnect' in (value as Record<string, unknown>) ||
+    'set' in (value as Record<string, unknown>));
+
+/**
+ * Merge of user-provided form data over the raw DB representation of the
+ * entry being cloned. Deep-merges by default to preserve historical behavior
+ * (e.g. partial component / JSON payloads), but replaces relation-operation
+ * fields wholesale to avoid leaking stale `id` keys into the new entry.
+ * See issue #25749.
+ */
+export const mergeCloneData = (
+  data: Record<string, any>,
+  userData: Record<string, any> | undefined
+): Record<string, any> => {
+  if (!userData) return { ...data };
+
+  const relationOverrides: Record<string, any> = {};
+  const deepMergeable: Record<string, any> = {};
+
+  for (const key of Object.keys(userData)) {
+    if (isRelationOp(userData[key])) {
+      relationOverrides[key] = userData[key];
+    } else {
+      deepMergeable[key] = userData[key];
+    }
+  }
+
+  return { ...merge(data, deepMergeable), ...relationOverrides };
+};
+
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
   validator = entityValidator
@@ -453,8 +495,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         omit(['id', 'createdAt', 'updatedAt']),
         // assign new documentId
         assoc('documentId', createDocumentId()),
-        // Merge new data into it
-        (data) => merge(data, queryParams.data),
+        // Merge user-submitted data over the cloned entry. Relation-op fields
+        // (connect/disconnect/set) replace wholesale; everything else is
+        // deep-merged as before. See issue #25749.
+        (data) => mergeCloneData(data, queryParams.data),
         (data) => entries.create({ ...queryParams, data, status: 'draft' })
       )
     );
