@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useFolderStructure } from '../../../hooks/useFolderStructure';
 import { CrumbSimpleMenuAsync } from '../CrumbSimpleMenuAsync';
 
+type FolderStructureData = NonNullable<ReturnType<typeof useFolderStructure>['data']>;
+
 // Mock dependencies
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -37,7 +39,7 @@ const mockFolderData = [
       },
     ],
   },
-];
+] satisfies FolderStructureData;
 
 describe('CrumbSimpleMenuAsync', () => {
   beforeEach(() => {
@@ -78,7 +80,7 @@ describe('CrumbSimpleMenuAsync', () => {
 
   it('should display parent folders when data is loaded', async () => {
     mockUseFolderStructure.mockReturnValue({
-      data: mockFolderData as any,
+      data: mockFolderData,
       isLoading: false,
       error: null,
     });
@@ -96,7 +98,7 @@ describe('CrumbSimpleMenuAsync', () => {
 
   it('should filter out omitted parents', async () => {
     mockUseFolderStructure.mockReturnValue({
-      data: mockFolderData as any,
+      data: mockFolderData,
       isLoading: false,
       error: null,
     });
@@ -112,7 +114,7 @@ describe('CrumbSimpleMenuAsync', () => {
 
   it('should have the correct url in the menu links', async () => {
     mockUseFolderStructure.mockReturnValue({
-      data: mockFolderData as any,
+      data: mockFolderData,
       isLoading: false,
       error: null,
     });
@@ -132,7 +134,7 @@ describe('CrumbSimpleMenuAsync', () => {
 
   it('should call onChangeFolder callback when provided', async () => {
     mockUseFolderStructure.mockReturnValue({
-      data: mockFolderData as any,
+      data: mockFolderData,
       isLoading: false,
       error: null,
     });

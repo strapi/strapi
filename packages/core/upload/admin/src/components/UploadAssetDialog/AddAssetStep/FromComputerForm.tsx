@@ -59,11 +59,6 @@ export const FromComputerForm = ({
 
   const handleDragLeave = () => setDragOver(false);
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    // inputRef.current?.click();
-  };
-
   const handleChange = () => {
     const files = inputRef.current?.files;
     const assets: FileWithRawFile[] = [];
@@ -158,15 +153,6 @@ export const FromComputerForm = ({
                   zIndex={1}
                   onChange={handleChange}
                 />
-
-                {/* <Box position="relative">
-                  <Button type="button" onClick={handleClick}>
-                    {formatMessage({
-                      id: getTrad('input.button.label'),
-                      defaultMessage: 'Browse files',
-                    })}
-                  </Button>
-                </Box> */}
               </Wrapper>
             </Flex>
           </MediaBox>
