@@ -42,7 +42,7 @@ jobs:
         id: pr
         run: echo "pr=$(</tmp/admin-bundle-size-pr-number)" >> "$GITHUB_OUTPUT"
 
-      - uses: thollander/actions-comment-pull-request@v2
+      - uses: thollander/actions-comment-pull-request@v3
         with:
           filePath: /tmp/admin-bundle-size-comment.md
           pr_number: ${{ steps.pr.outputs.pr }}
