@@ -1,9 +1,23 @@
-export const customFieldDefaultOptionsReducer = (acc: any, option: any) => {
-  if (option.items) {
+type CustomFieldDefaultOption = {
+  name: string;
+  defaultValue: unknown;
+};
+
+type CustomFieldOption = {
+  items?: CustomFieldOption[];
+  name?: string;
+  defaultValue?: unknown;
+};
+
+export const customFieldDefaultOptionsReducer = (
+  acc: CustomFieldDefaultOption[],
+  option: CustomFieldOption
+) => {
+  if (option.items !== undefined) {
     return option.items.reduce(customFieldDefaultOptionsReducer, acc);
   }
 
-  if ('defaultValue' in option) {
+  if ('defaultValue' in option && option.name !== undefined) {
     const { name, defaultValue } = option;
     acc.push({ name, defaultValue });
   }
