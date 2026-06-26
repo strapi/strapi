@@ -296,7 +296,7 @@ export default {
       },
     } = await this.extractAndValidateRequestInfo(ctx, id);
 
-    const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
+    const { idsToOmit, idsToInclude, _q: search, ...query } = ctx.request.query;
 
     const permissionChecker = getService('permission-checker').create({
       userAbility: ctx.state.userAbility,
@@ -389,9 +389,9 @@ export default {
      * Apply a filter to the mainField based on the search query and filter operator
      * searching should be allowed only on mainField for permission reasons
      */
-    if (_q) {
-      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
-      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
+    if (Boolean(search) === true) {
+      const filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      addFiltersClause(queryParams, { [mainField]: { [filter]: search } });
     }
 
     if (idsToOmit?.length > 0) {
