@@ -44,6 +44,12 @@ const initialState: DataManagerStateType = {
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
+type AttributeMutation = AnyAttribute & {
+  createComponent?: unknown;
+};
+
+type PluginOptions = Record<string, unknown>;
+
 const getOppositeRelation = (originalRelation?: Schema.Attribute.RelationKind.Any) => {
   if (originalRelation === 'manyToOne') {
     return 'oneToMany';
@@ -67,7 +73,7 @@ type InitPayload = {
 };
 
 type AddAttributePayload = {
-  attributeToSet: Record<string, any>;
+  attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
 };
@@ -80,7 +86,7 @@ type AddCreateComponentToDynamicZonePayload = {
 };
 
 type AddCustomFieldAttributePayload = {
-  attributeToSet: Record<string, any>;
+  attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
 };
@@ -109,19 +115,19 @@ type CreateSchemaPayload = {
     pluralName: string;
     kind: Struct.ContentTypeKind;
     draftAndPublish: boolean;
-    pluginOptions: Record<string, any>;
+    pluginOptions: PluginOptions;
   };
 };
 
 type EditAttributePayload = {
-  attributeToSet: Record<string, any>;
+  attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
 };
 
 type EditCustomFieldAttributePayload = {
-  attributeToSet: Record<string, any>;
+  attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
@@ -158,7 +164,7 @@ type UpdateSchemaPayload = {
     displayName: string;
     kind: Struct.ContentTypeKind;
     draftAndPublish: boolean;
-    pluginOptions: Record<string, any>;
+    pluginOptions: PluginOptions;
   };
   uid: string;
 };
