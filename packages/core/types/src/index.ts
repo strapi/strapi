@@ -1,7 +1,5 @@
 import { Strapi } from './core';
 
-export type { Event } from '@strapi/database';
-
 export type * as Core from './core';
 export type * as Data from './data';
 export type * as Internal from './internal';

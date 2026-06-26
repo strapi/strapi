@@ -9,7 +9,7 @@ tags:
 
 Content-type lifecycle hooks (`src/api/<api>/content-types/<content-type>/lifecycles.ts`) receive a database lifecycle `Event` object.
 
-For TypeScript projects, import the type from `@strapi/database` or `@strapi/strapi`:
+For TypeScript projects, import the type from `@strapi/database`:
 
 ```ts
 import type { Event } from '@strapi/database';
@@ -20,12 +20,6 @@ export default {
     // ...
   },
 };
-```
-
-`@strapi/strapi` re-exports the same type for apps that only depend on the main package:
-
-```ts
-import type { Event } from '@strapi/strapi';
 ```
 
 The `Event` type includes `action`, `model`, `params`, `state`, and optional `result`. It is defined in `@strapi/database` alongside the lifecycle subscriber implementation.
