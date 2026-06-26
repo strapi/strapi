@@ -42,13 +42,15 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "watch": "run -T rollup -c -w"
+    "watch": "run -T rollup -c -w",
+    "test:ts": "run -T tsc -p tsconfig.json"
   },
   "dependencies": {
     "@sendgrid/mail": "8.1.3",
     "@strapi/utils": "5.49.0"
   },
   "devDependencies": {
+    "@types/node": "20.19.41",
     "eslint-config-custom": "5.49.0",
     "tsconfig": "5.49.0"
   },

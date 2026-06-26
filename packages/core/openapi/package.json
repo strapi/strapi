@@ -49,6 +49,7 @@
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch"
   },
@@ -63,6 +64,9 @@
   },
   "devDependencies": {
     "@strapi/types": "5.49.0",
-    "@types/debug": "^4"
+    "@types/debug": "^4",
+    "@types/jest": "29.5.2",
+    "@types/node": "20.19.41",
+    "jest": "29.6.0"
   }
 }

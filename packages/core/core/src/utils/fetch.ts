@@ -14,18 +14,18 @@ export const createStrapiFetch = (
 ): Modules.Fetch.Fetch => {
   const { logs = true } = options ?? {};
 
-  function strapiFetch(url: RequestInfo | URL, options?: RequestInit) {
-    const fetchOptions = {
-      ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
-      ...options,
-    };
-
+  const strapiFetch: Modules.Fetch.Fetch = (url: string | URL | Request, options?: RequestInit) => {
     if (logs) {
       strapi.log.debug(`Making request for ${url}`);
     }
 
+    const fetchOptions: RequestInit = {
+      ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
+      ...options,
+    };
+
     return fetch(url, fetchOptions);
-  }
+  };
 
   const proxy =
     strapi.config.get<ConstructorParameters<typeof ProxyAgent>[0]>('server.proxy.fetch') ||

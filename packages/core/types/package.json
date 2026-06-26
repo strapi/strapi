@@ -40,7 +40,7 @@
     "doc:ts": "typedoc",
     "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "watch": "run -T tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
@@ -67,6 +67,7 @@
     "@types/json-logic-js": "2.0.8",
     "@types/koa": "2.15.2",
     "@types/koa__router": "12.0.0",
+    "@types/node": "20.19.41",
     "@types/node-schedule": "2.1.7",
     "eslint-config-custom": "5.49.0",
     "lodash": "4.18.1",

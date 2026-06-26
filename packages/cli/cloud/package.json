@@ -44,6 +44,7 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest",
     "watch": "run -T rollup -c -w"
   },
@@ -72,8 +73,11 @@
   "devDependencies": {
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
+    "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
+    "@types/node": "20.19.41",
     "eslint-config-custom": "5.49.0",
+    "jest": "29.6.0",
     "tsconfig": "5.49.0"
   },
   "engines": {

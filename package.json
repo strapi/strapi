@@ -83,7 +83,7 @@
     "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
     "test:generate-app": "yarn build:ts && node tests/scripts/generate-test-app.js",
     "test:generate-app:no-build": "node tests/scripts/generate-test-app.js",
-    "test:ts": "yarn test:ts:packages && yarn test:ts:front && yarn test:ts:back",
+    "test:ts": "nx run-many --targets=test:ts,test:ts:front,test:ts:back --nx-ignore-cycles",
     "test:ts:back": "nx run-many --target=test:ts:back --nx-ignore-cycles",
     "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
     "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",
@@ -115,7 +115,8 @@
     "qs@~6.14.0": "6.15.2",
     "tmp@^0.2.3": "0.2.7",
     "tmp@~0.2.1": "0.2.7",
-    "@types/node": "20.19.41"
+    "@types/node": "20.19.41",
+    "@types/react": "18.3.2"
   },
   "devDependencies": {
     "@babel/core": "7.29.6",
@@ -177,9 +178,7 @@
     "husky": "9.1.7",
     "inquirer": "9.3.8",
     "jest": "29.6.0",
-    "jest-circus": "29.6.0",
     "jest-cli": "29.6.0",
-    "jest-environment-jsdom": "29.6.1",
     "jest-watch-typeahead": "2.2.2",
     "lint-staged": "16.4.0",
     "lodash": "4.18.1",
@@ -199,7 +198,6 @@
     "supertest": "7.2.2",
     "syncpack": "13.0.4",
     "tar": "7.5.16",
-    "ts-jest": "29.1.0",
     "tsx": "4.22.4",
     "typescript": "5.9.3",
     "vitest": "catalog:",

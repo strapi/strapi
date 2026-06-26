@@ -1,4 +1,4 @@
-import { defaultsDeep, filter, pipe, map } from 'lodash/fp';
+import { defaultsDeep, filter, pipe } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 

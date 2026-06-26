@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import type { Core } from '@strapi/types';
 
 import { generateInstallId } from '@strapi/utils';
+import { z } from 'zod/v4';
 
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';
@@ -92,6 +93,11 @@ const throwError = () => {
   throw new LicenseCheckError('Could not proceed to the online validation of your license.', true);
 };
 
+const licensePayloadSchema = z.union([
+  z.object({ data: z.object({ license: z.string() }) }),
+  z.object({ error: z.object({ message: z.string() }) }),
+]);
+
 const fetchLicense = async (
   { strapi }: { strapi: Core.Strapi },
   key: string,
@@ -114,13 +120,28 @@ const fetchLicense = async (
   const contentType = response.headers.get('Content-Type');
 
   if (contentType?.includes('application/json')) {
-    const { data, error } = await response.json();
+    const json = await response.json();
+    const result = licensePayloadSchema.safeParse(json);
+
+    if (!result.success) {
+      throw new LicenseCheckError('Invalid license payload.');
+    }
+
+    const payload = result.data;
 
     switch (response.status) {
-      case 200:
-        return data.license;
-      case 400:
-        throw new LicenseCheckError(error.message);
+      case 200: {
+        if ('data' in payload) {
+          return payload.data.license;
+        }
+        throw new LicenseCheckError('Invalid license payload.');
+      }
+      case 400: {
+        if ('error' in payload) {
+          throw new LicenseCheckError(payload.error.message);
+        }
+        throw new LicenseCheckError('Invalid license payload.');
+      }
       case 404:
         throw new LicenseCheckError('The license used does not exists.');
       default:
