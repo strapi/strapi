@@ -4,7 +4,7 @@
 
 const fse = require('fs-extra');
 
-const getConfigPath = require('./get-config-path');
+const { getConfigPath } = require('./get-config-path');
 
 /**
  * Checks if `dir` is a using TypeScript (whether there is a tsconfig file or not)
@@ -12,8 +12,10 @@ const getConfigPath = require('./get-config-path');
  * @param {string | undefined} filename
  * @returns {boolean}
  */
-module.exports = (dir, filename = undefined) => {
+const isUsingTypeScriptSync = (dir, filename = undefined) => {
   const filePath = getConfigPath(dir, { filename });
 
   return filePath ? fse.pathExistsSync(filePath) : false;
 };
+
+module.exports = { isUsingTypeScriptSync };

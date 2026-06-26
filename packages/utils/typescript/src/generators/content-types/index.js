@@ -71,4 +71,4 @@ const generateContentTypesDefinitions = async (options = {}) => {
   return { output: formattedOutput, stats: {} };
 };
 
-module.exports = generateContentTypesDefinitions;
+module.exports = { generateContentTypesDefinitions };

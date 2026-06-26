@@ -71,4 +71,4 @@ const generateComponentsDefinitions = async (options = {}) => {
   return { output: formattedOutput, stats: {} };
 };
 
-module.exports = generateComponentsDefinitions;
+module.exports = { generateComponentsDefinitions };
