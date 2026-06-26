@@ -24,15 +24,20 @@ module.exports = {
   rootDir: __dirname,
   moduleNameMapper,
   /* Tells jest to ignore duplicated manual mock files, such as index.js */
-  modulePathIgnorePatterns: ['.*__mocks__.*'],
-  testPathIgnorePatterns: ['node_modules/', 'dist/'],
+  modulePathIgnorePatterns: ['[/\\\\]__mocks__[/\\\\]'],
+  testPathIgnorePatterns: [
+    '[/\\\\]node_modules[/\\\\]',
+    '[/\\\\]dist[/\\\\]',
+    // Prevent Jest from running Vitest test files
+    '.vitest.test.ts',
+  ],
   globalSetup: '@strapi/admin-test-utils/global-setup',
   setupFiles: ['@strapi/admin-test-utils/setup'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: '@strapi/admin-test-utils/environment',
   prettierPath: require.resolve('prettier-2'),
   transform: {
-    '^.+\\.js(x)?$': [
+    '^.+\\.m?js(x)?$': [
       '@swc/jest',
       {
         jsc: {
@@ -75,11 +80,16 @@ module.exports = {
       path.join(__dirname, 'fileTransformer.js'),
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing)/)',
+    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing|msw|@mswjs|until-async|outvariant|strict-event-emitter|headers-polyfill|rettime|@open-draft|is-node-process)/)',
   ],
   testMatch: ['**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {
     url: 'http://localhost:1337/admin',
+    // MSW v2 ships `msw/node` behind the `node` export condition, but jsdom defaults
+    // to `browser`. Empty-string condition is the recipe from the MSW migration guide
+    // (https://mswjs.io/docs/migrations/1.x-to-2.x#frequent-issues) — it falls back to
+    // the package's `default` export so `msw/node` resolves correctly under Jest+jsdom.
+    customExportConditions: [''],
   },
   // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
   // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0

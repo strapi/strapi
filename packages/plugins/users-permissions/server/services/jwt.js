@@ -80,7 +80,8 @@ module.exports = ({ strapi }) => ({
         throw new Error('Invalid token.');
       }
 
-      return { id: user.id };
+      // Surface the sessionId so the strategy can flag the "current" session.
+      return { id: user.id, sessionId: result.payload.sessionId };
     }
 
     return new Promise((resolve, reject) => {
