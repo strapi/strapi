@@ -9953,6 +9953,8 @@ __metadata:
     "@types/node": "npm:20.19.41"
     fractional-indexing: "npm:3.2.0"
     jest: "npm:29.6.0"
+    koa: "npm:2.16.4"
+    lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"

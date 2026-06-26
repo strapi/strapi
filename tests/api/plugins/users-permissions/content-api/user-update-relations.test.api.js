@@ -423,4 +423,105 @@ describe('U&P users REST relation handling (issue 26606)', () => {
       });
     });
   });
+
+  // Follow-up to https://github.com/strapi/strapi/issues/24343 — the `role`
+  // relation carried its own numeric-only validation gate, so unlike every other
+  // relation it could not be referenced by `documentId` (nor via the longhand
+  // connect/disconnect object) at the REST boundary. These lock in full parity.
+  describe('role relation by documentId + longhand', () => {
+    const postUser = (body) => rq({ method: 'POST', url: '/users', body });
+    let roleSeq = 0;
+    const uniqueUser = () => {
+      roleSeq += 1;
+      return {
+        username: `roleuser${roleSeq}`,
+        email: `roleuser${roleSeq}@strapi.io`,
+        password: 'password123',
+      };
+    };
+
+    test('POST /users sets the role by documentId shorthand', async () => {
+      const res = await postUser({ ...uniqueUser(), role: authenticatedRole.documentId });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.role.id).toBe(authenticatedRole.id);
+    });
+
+    test('POST /users sets the role via longhand connect by documentId', async () => {
+      const res = await postUser({
+        ...uniqueUser(),
+        role: { connect: [{ documentId: publicRole.documentId }] },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.role.id).toBe(publicRole.id);
+    });
+
+    test('PUT changes the role by documentId shorthand', async () => {
+      const user = await createUser();
+
+      const res = await putUser(user.id, { role: publicRole.documentId });
+
+      expect(res.statusCode).toBe(200);
+      const after = await readUser(user.id);
+      expect(after.role.id).toBe(publicRole.id);
+    });
+
+    test('PUT changes the role via longhand connect by documentId', async () => {
+      const user = await createUser();
+
+      const res = await putUser(user.id, {
+        role: { connect: [{ documentId: publicRole.documentId }] },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const after = await readUser(user.id);
+      expect(after.role.id).toBe(publicRole.id);
+    });
+
+    test('PUT changes the role via longhand connect by numeric id', async () => {
+      const user = await createUser();
+
+      const res = await putUser(user.id, { role: { connect: [{ id: publicRole.id }] } });
+
+      expect(res.statusCode).toBe(200);
+      const after = await readUser(user.id);
+      expect(after.role.id).toBe(publicRole.id);
+    });
+
+    test('PUT rejects disconnecting the last role (must keep a role)', async () => {
+      const user = await createUser();
+
+      const res = await putUser(user.id, {
+        role: { connect: [], disconnect: [{ documentId: authenticatedRole.documentId }] },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    describe('invalid role relation input', () => {
+      test('POST /users rejects an empty role object', async () => {
+        const res = await postUser({ ...uniqueUser(), role: {} });
+
+        expect(res.statusCode).toBe(400);
+      });
+
+      test('POST /users rejects a connect entry with neither id nor documentId', async () => {
+        const res = await postUser({
+          ...uniqueUser(),
+          role: { connect: [{}] },
+        });
+
+        expect(res.statusCode).toBe(400);
+      });
+
+      test('PUT rejects a connect entry with neither id nor documentId', async () => {
+        const user = await createUser();
+
+        const res = await putUser(user.id, { role: { connect: [{}] } });
+
+        expect(res.statusCode).toBe(400);
+      });
+    });
+  });
 });

@@ -59,7 +59,7 @@
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:ts:back": "run -T tsc -p server/tsconfig.json",
+    "test:ts:back": "run -T tsc -p server/tsconfig.json && run -T tsc -p server/tsconfig.preview-script.json",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
