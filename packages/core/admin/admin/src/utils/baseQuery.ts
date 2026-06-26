@@ -32,7 +32,7 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
   query,
   api
 ) => {
-  const { signal, dispatch } = api as { signal?: AbortSignal; dispatch: (a: any) => void };
+  const { signal, dispatch } = api;
 
   const executeQuery = async (queryToExecute: string | QueryArguments) => {
     const { get, post, del, put } = getFetchClient();
@@ -91,7 +91,7 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
         /**
          * This will most likely be ApiError
          */
-        return { data: undefined, error: err.response?.data.error as any };
+        return { data: undefined, error: err.response.data.error as BaseQueryError };
       } else {
         return {
           data: undefined,

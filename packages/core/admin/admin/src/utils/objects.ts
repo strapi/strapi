@@ -1,29 +1,40 @@
 import clone from 'lodash/clone';
 import toPath from 'lodash/toPath';
 
+type PathContainer = Record<string, unknown> | unknown[];
+
+const isPathContainer = (obj: unknown): obj is PathContainer => isObject(obj) || Array.isArray(obj);
+
 /**
  * Deeply get a value from an object via its path.
  */
-export function getIn(obj: any, key: string | string[], def?: any, pathStartIndex: number = 0) {
+export function getIn<T = unknown>(
+  obj: unknown,
+  key: string | string[],
+  def?: T,
+  pathStartIndex: number = 0
+) {
   const path = toPath(key);
-  while (obj && pathStartIndex < path.length) {
-    obj = obj[path[pathStartIndex++]];
+  let currentValue = obj;
+
+  while (isPathContainer(currentValue) && pathStartIndex < path.length) {
+    currentValue = currentValue[path[pathStartIndex++]];
   }
 
   // check if path is not in the end
-  if (pathStartIndex !== path.length && !obj) {
+  if (pathStartIndex !== path.length && isPathContainer(currentValue) === false) {
     return def;
   }
 
-  return obj === undefined ? def : obj;
+  return currentValue === undefined ? def : currentValue;
 }
 
 /** @internal is the given object an Object? */
-export const isObject = (obj: any): obj is object =>
+export const isObject = (obj: unknown): obj is PathContainer =>
   obj !== null && typeof obj === 'object' && !Array.isArray(obj);
 
 /** @internal is the given object an integer? */
-export const isInteger = (obj: any): boolean => String(Math.floor(Number(obj))) === obj;
+export const isInteger = (obj: unknown): boolean => String(Math.floor(Number(obj))) === obj;
 
 /**
  * Deeply set a value from in object via its path. If the value at `path`
@@ -49,21 +60,25 @@ export const isInteger = (obj: any): boolean => String(Math.floor(Number(obj))) 
  * @see https://github.com/developit/linkstate
  * @see https://github.com/jaredpalmer/formik/pull/123
  */
-export function setIn(obj: any, path: string, value: any): any {
-  const res: any = clone(obj); // this keeps inheritance when obj is a class
-  let resVal: any = res;
+export function setIn<T>(obj: T, path: string, value: unknown): T {
+  const res = clone(obj); // this keeps inheritance when obj is a class
+  let resVal = res as PathContainer;
   let i = 0;
   const pathArray = toPath(path);
 
   for (; i < pathArray.length - 1; i++) {
     const currentPath: string = pathArray[i];
-    const currentObj: any = getIn(obj, pathArray.slice(0, i + 1));
+    const currentObj = getIn(obj, pathArray.slice(0, i + 1));
 
-    if (currentObj && (isObject(currentObj) || Array.isArray(currentObj))) {
-      resVal = resVal[currentPath] = clone(currentObj);
+    if (isObject(currentObj) || Array.isArray(currentObj)) {
+      const clonedValue = clone(currentObj) as PathContainer;
+      resVal[currentPath] = clonedValue;
+      resVal = clonedValue;
     } else {
       const nextPath: string = pathArray[i + 1];
-      resVal = resVal[currentPath] = isInteger(nextPath) && Number(nextPath) >= 0 ? [] : {};
+      const nextValue: PathContainer = isInteger(nextPath) && Number(nextPath) >= 0 ? [] : {};
+      resVal[currentPath] = nextValue;
+      resVal = nextValue;
     }
   }
 
