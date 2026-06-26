@@ -5,6 +5,7 @@ import type { PreviewContextValue } from '../pages/Preview';
 import type { Modules, Schema, Struct, UID } from '@strapi/types';
 
 type PreviewErrorMessage = keyof typeof PREVIEW_ERROR_MESSAGES;
+type FieldData = Record<string, unknown>;
 
 // Generic error class for preview field operations
 export class PreviewFieldError extends Error {
@@ -18,6 +19,10 @@ export class PreviewFieldError extends Error {
 }
 
 type PathPart = { name: string; index?: number };
+
+const isFieldData = (value: unknown): value is FieldData => {
+  return typeof value === 'object' && value !== null && Array.isArray(value) === false;
+};
 
 // Helper function to parse path with array indices and return clean attribute names
 export const parsePathWithIndices = (path: string): PathPart[] => {
@@ -67,7 +72,7 @@ export function getAttributeSchemaFromPath({
   const visitor = (
     currentPathParts: PathPart[],
     currentAttributes: Schema.Attributes,
-    currentData: any
+    currentData: FieldData
   ): Schema.Attribute.AnyAttribute => {
     const [currentPart, ...remainingParts] = currentPathParts;
 
@@ -89,15 +94,27 @@ export function getAttributeSchemaFromPath({
         if (currentPart.index === undefined) {
           throw new PreviewFieldError('INVALID_FIELD_PATH');
         }
-        return visitor(
-          remainingParts,
-          componentAttributes,
-          currentData[currentPart.name][currentPart.index]
-        );
+
+        const componentListData = currentData[currentPart.name];
+        const componentData = Array.isArray(componentListData)
+          ? componentListData[currentPart.index]
+          : undefined;
+
+        if (isFieldData(componentData) === false) {
+          throw new PreviewFieldError('INVALID_FIELD_PATH');
+        }
+
+        return visitor(remainingParts, componentAttributes, componentData);
       }
 
       // Non repeatable component
-      return visitor(remainingParts, componentAttributes, currentData[currentPart.name]);
+      const componentData = currentData[currentPart.name];
+
+      if (isFieldData(componentData) === false) {
+        throw new PreviewFieldError('INVALID_FIELD_PATH');
+      }
+
+      return visitor(remainingParts, componentAttributes, componentData);
     }
 
     if (currentAttribute.type === 'dynamiczone') {
@@ -106,7 +123,19 @@ export function getAttributeSchemaFromPath({
         throw new PreviewFieldError('INVALID_FIELD_PATH');
       }
 
-      const componentData = currentData[currentPart.name][currentPart.index];
+      const dynamicZoneData = currentData[currentPart.name];
+      const componentData = Array.isArray(dynamicZoneData)
+        ? dynamicZoneData[currentPart.index]
+        : undefined;
+
+      if (
+        isFieldData(componentData) === false ||
+        typeof componentData.__component !== 'string' ||
+        components[componentData.__component] === undefined
+      ) {
+        throw new PreviewFieldError('INVALID_FIELD_PATH');
+      }
+
       const componentAttributes = components[componentData.__component].attributes;
       return visitor(remainingParts, componentAttributes, componentData);
     }
@@ -115,7 +144,7 @@ export function getAttributeSchemaFromPath({
     return currentAttributes[currentPart.name];
   };
 
-  return visitor(parsePathWithIndices(path), schema.attributes, document);
+  return visitor(parsePathWithIndices(path), schema.attributes, document as FieldData);
 }
 
 export function parseFieldMetaData(strapiSource: string): FieldContentSourceMap | null {
