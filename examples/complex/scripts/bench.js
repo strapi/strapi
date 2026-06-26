@@ -349,7 +349,7 @@ function cmdRun(args) {
     migrations: hookData.migrations,
     totalDurationMs,
     wallDurationMs: wallMs,
-    umzugInstanceCount: hookData.instanceCount,
+    runnerInstanceCount: hookData.instanceCount,
   };
 
   const outFile = path.join(RESULTS_DIR, `${db}-${label}-${timestamp.replace(/[:.]/g, '-')}.json`);
