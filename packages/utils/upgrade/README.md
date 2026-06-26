@@ -6,18 +6,32 @@ The Strapi Upgrade Tool is the CLI for facilitating upgrades between Strapi vers
 
 It handles updating a project's package.json with the correct version of Strapi, running the package installer, and running suggested code transforms for breaking changes (in major versions).
 
-Once released, it will be the recommended way to update to any major, minor, and patch versions of Strapi instead of manually modifying package.json files.
+It is the recommended way to update to any major, minor, and patch versions of Strapi instead of manually modifying package.json files.
 
 The tool offers the following commands:
 
 ```
-  major [options]     Upgrade to the next available major version of Strapi
-  minor [options]     Upgrade to the latest minor and patch version of Strapi for the
-                      current major
-  patch [options]     Upgrade to latest patch version of Strapi for the current major
-                      and minor
+  latest [options]  Upgrade to the latest available version of Strapi
+  major [options]   Upgrade to the next available major version of Strapi
+  minor [options]   Upgrade to the latest minor and patch version of Strapi for the
+                    current major
+  patch [options]   Upgrade to latest patch version of Strapi for the current major
+                    and minor
+  to <version>      Upgrade to a specific version of Strapi
   codemods [options]  Run a set of available codemods for the selected target version
                       without updating the Strapi dependencies
+```
+
+When `latest` resolves to a version blocked by registry policies such as `min-release-age`, use `to` to target a specific published version instead:
+
+```bash
+npx @strapi/upgrade to 5.42.0
+```
+
+For pre-releases, pass `--codemods-target` to select which codemod set to run (defaults to the `major.minor.patch` portion of the target version):
+
+```bash
+npx @strapi/upgrade to 5.0.0-beta.951 --codemods-target 5.0.0
 ```
 
 ### What's a codemod / code transform?
@@ -43,13 +57,16 @@ For Strapi v5, automated data migrations can be added in the `packages/core/data
 
 ## Usage
 
-This package is not yet released, so currently it can be run on a project in the monorepo /examples directory with the following command:
+Run from a Strapi project directory:
 
-`../../packages/utils/upgrade/bin/upgrade`
+```bash
+npx @strapi/upgrade --help
+npx @strapi/upgrade to 5.42.0
+```
 
-Run the command with the `--help` option to see all the available options.
+Within a project that has Strapi installed, you can also use `strapi upgrade`.
 
-[Coming Soon] The Strapi Upgrade tool will be available using `npx @strapi/upgrade` and an alias for that within a project using `strapi upgrade`
+For monorepo development against `/examples`, run `../../packages/utils/upgrade/bin/upgrade` from the example app directory.
 
 ## Writing a code transforms
 

@@ -7,7 +7,7 @@ import {
   useRBAC,
   isFetchError,
 } from '@strapi/admin/strapi-admin';
-import { Menu, AccessibleIcon } from '@strapi/design-system';
+import { Menu, AccessibleIcon, IconButton } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -207,16 +207,21 @@ const Root = ({ children }: RootProps) => {
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
     allowedActions.canDeleteAction || allowedActions.canUpdate ? (
       <Menu.Root>
-        <StyledMoreButton variant="tertiary" endIcon={null} paddingLeft="7px" paddingRight="7px">
-          <AccessibleIcon
-            label={formatMessage({
-              id: 'content-releases.content-manager-edit-view.release-action-menu',
-              defaultMessage: 'Release action options',
-            })}
-          >
-            <More />
-          </AccessibleIcon>
-        </StyledMoreButton>
+        <StyledMoreButton
+          variant="tertiary"
+          endIcon={null}
+          tag={IconButton}
+          icon={
+            <AccessibleIcon
+              label={formatMessage({
+                id: 'content-releases.content-manager-edit-view.release-action-menu',
+                defaultMessage: 'Release action options',
+              })}
+            >
+              <More />
+            </AccessibleIcon>
+          }
+        />
         <Menu.Content top={1} popoverPlacement="bottom-end">
           {children}
         </Menu.Content>

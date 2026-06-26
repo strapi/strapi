@@ -10,7 +10,6 @@ permissions:
   actions: read
   checks: read
   contents: read
-  repository-projects: read
   statuses: read
 
 jobs:
@@ -167,8 +166,8 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'not_planned'
 
-      # Redirect questions to community sources
-      - name: 'Comment: redirect question to community'
+      # Redirect questions to GitHub Discussions
+      - name: 'Comment: redirect question to discussions'
         if: "${{ github.event.label.name == 'flag: question' }}"
         uses: actions-cool/issues-helper@v3
         with:
@@ -180,34 +179,26 @@ jobs:
 
             Hello @${{ github.event.issue.user.login }},
 
-            I see you are wanting to ask a question that is not really a bug report,
+            Thank you for your interest in Strapi! However, this issue appears to be a question rather than a bug report. GitHub Issues are reserved for reproducible bug reports.
 
-            - questions should be directed to [our forum](https://forum.strapi.io) or our [Discord](https://discord.strapi.io)
-            - feature requests should be directed to our [feedback and feature request database](https://feedback.strapi.io)
+            Please ask your question in our [GitHub Discussions](https://github.com/strapi/strapi/discussions) where the community and team can help you out.
 
-            Please see the following contributing guidelines for asking a question [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
+            You can also check out our [Discord](https://discord.strapi.io) for real-time help.
 
-            Thank you.
-      - name: 'Close: redirect question to community'
+            Thank you!
+      - name: 'Close: redirect question to discussions'
         if: "${{ github.event.label.name == 'flag: question' }}"
         uses: actions-cool/issues-helper@v3
         with:
           actions: 'close-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
-          close-reason: 'complete'
-
-      - name: assign issues to DevExp squad project
-        uses: actions/add-to-project@v0.4.1
+          close-reason: 'not_planned'
+      - name: 'Lock: redirect question to discussions'
+        if: "${{ github.event.label.name == 'flag: question' }}"
+        uses: actions-cool/issues-helper@v3
         with:
-          project-url: https://github.com/orgs/strapi/projects/13
-          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:upgrade, source: core:permissions, source: rbac, source: providers, source: core:openapi, source: strapi-ai'
-          label-operator: OR
-      - name: assign issues to Content squad project
-        uses: actions/add-to-project@v0.4.1
-        with:
-          project-url: https://github.com/orgs/strapi/projects/48
-          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:review-workflows, source: core:upload, source: plugin:color-picker, source: plugin:documentation, source: plugin:i18n, source: core:preview'
-          label-operator: OR
+          actions: 'lock-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          lock-reason: 'off-topic'

@@ -1,0 +1,258 @@
+import type { Core } from '@strapi/types';
+import { createMcpService } from '../index';
+
+describe('MCP Service Integration', () => {
+  let mockStrapi: Partial<Core.Strapi>;
+  let mockServerRoutes: jest.Mock;
+  let mockServerUse: jest.Mock;
+  let logDebugSpy: jest.Mock;
+  let logInfoSpy: jest.Mock;
+  let logErrorSpy: jest.Mock;
+
+  let mockTelemetrySend: jest.Mock;
+
+  beforeEach(() => {
+    mockTelemetrySend = jest.fn().mockResolvedValue(true);
+    logDebugSpy = jest.fn();
+    logInfoSpy = jest.fn();
+    logErrorSpy = jest.fn();
+    mockServerRoutes = jest.fn();
+    mockServerUse = jest.fn();
+
+    mockStrapi = {
+      log: {
+        debug: logDebugSpy,
+        info: logInfoSpy,
+        error: logErrorSpy,
+      } as any,
+      config: {
+        get: jest.fn((key, defaultValue) => {
+          if (key === 'server.mcp.enabled') {
+            return true;
+          }
+          if (key === 'server.url') {
+            return 'http://localhost:1337';
+          }
+          return defaultValue;
+        }),
+      } as any,
+      server: {
+        routes: mockServerRoutes,
+        use: mockServerUse,
+      } as any,
+      telemetry: {
+        send: mockTelemetrySend,
+      } as any,
+    };
+  });
+
+  describe('route registration on start', () => {
+    test('should register all routes when service starts', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      expect(mockServerRoutes).toHaveBeenCalledTimes(1);
+      const registeredRoutes = mockServerRoutes.mock.calls[0][0];
+
+      expect(registeredRoutes).toHaveLength(5);
+    });
+
+    test('should register OAuth discovery fallback middleware via server.use', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      expect(mockServerUse).toHaveBeenCalledTimes(1);
+      expect(typeof mockServerUse.mock.calls[0][0]).toBe('function');
+    });
+
+    test('should register middleware before routes', async () => {
+      const callOrder: string[] = [];
+      mockServerUse.mockImplementation(() => callOrder.push('use'));
+      mockServerRoutes.mockImplementation(() => callOrder.push('routes'));
+
+      const service = createMcpService(mockStrapi as Core.Strapi);
+      await service.start();
+
+      expect(callOrder).toEqual(['use', 'routes']);
+    });
+
+    test('should register POST route with correct configuration', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      const registeredRoutes = mockServerRoutes.mock.calls[0][0];
+      const postRoute = registeredRoutes.find((r: any) => r.method === 'POST');
+
+      expect(postRoute).toBeDefined();
+      expect(postRoute.path).toBe('/mcp');
+      expect(postRoute.config.auth).toBe(false);
+      expect(typeof postRoute.handler).toBe('function');
+    });
+
+    test('should use hardcoded /mcp path', async () => {
+      // Path is currently hardcoded in McpConfiguration
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      const registeredRoutes = mockServerRoutes.mock.calls[0][0];
+
+      const expectedMCPRoutesCount = registeredRoutes.filter((r: any) =>
+        r.path.includes('/mcp')
+      ).length;
+      expect(expectedMCPRoutesCount).toBe(5);
+    });
+
+    test('should not register routes when service is disabled', async () => {
+      const disabledStrapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'server.mcp.enabled') {
+              return false;
+            }
+            return defaultValue;
+          }),
+        } as any,
+      };
+
+      const service = createMcpService(disabledStrapi as Core.Strapi);
+
+      await service.start();
+
+      expect(mockServerRoutes).not.toHaveBeenCalled();
+      expect(mockServerUse).not.toHaveBeenCalled();
+      expect(logDebugSpy).toHaveBeenCalledWith('[MCP] Server is disabled');
+    });
+
+    test('should log correct endpoint URL after starting', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      expect(logInfoSpy).toHaveBeenCalledWith(
+        '[MCP] Server available at http://localhost:1337/mcp'
+      );
+      expect(mockTelemetrySend).toHaveBeenCalledWith('didStartMcpServer', {
+        eventProperties: { path: '/mcp' },
+        groupProperties: {
+          numberOfTools: 1,
+          numberOfPrompts: 0,
+          numberOfResources: 0,
+        },
+      });
+    });
+
+    test('should not send start telemetry when service is disabled', async () => {
+      const disabledStrapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'server.mcp.enabled') {
+              return false;
+            }
+            return defaultValue;
+          }),
+        } as any,
+      };
+
+      const service = createMcpService(disabledStrapi as Core.Strapi);
+
+      await service.start();
+
+      expect(mockTelemetrySend).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('route authentication', () => {
+    test('should disable authentication for all routes', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      const registeredRoutes = mockServerRoutes.mock.calls[0][0];
+
+      registeredRoutes.forEach((route: any) => {
+        expect(route.config).toBeDefined();
+        expect(route.config.auth).toBe(false);
+      });
+    });
+  });
+
+  describe('service state management', () => {
+    test('should update status to running after registering routes', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      expect(service.isRunning()).toBe(false);
+
+      await service.start();
+
+      expect(service.isRunning()).toBe(true);
+    });
+
+    test('should prevent registration before routes are registered', () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      // Tools can be registered before start
+      expect(() => {
+        service.registerTool({
+          name: 'test-tool',
+          title: 'Test Tool',
+          description: 'Test tool',
+          resolveOutputSchema: () => ({}) as any,
+          auth: { policies: [{ action: 'test.action' }] },
+          createHandler: jest.fn(),
+        });
+      }).not.toThrow();
+    });
+
+    test('should throw error when registering tools after start', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      expect(() => {
+        service.registerTool({
+          name: 'test-tool',
+          title: 'Test Tool',
+          description: 'Test tool',
+          resolveOutputSchema: () => ({}) as any,
+          auth: { policies: [{ action: 'test.action' }] },
+          createHandler: jest.fn(),
+        });
+      }).toThrow('[MCP] Cannot register tools after the MCP server has started.');
+    });
+  });
+
+  describe('error state handling', () => {
+    test('should handle start/stop lifecycle correctly', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      // Start service
+      await service.start();
+      expect(mockServerRoutes).toHaveBeenCalledTimes(1);
+      expect(service.isRunning()).toBe(true);
+
+      // Stop service successfully
+      await service.stop();
+      expect(service.isRunning()).toBe(false);
+
+      // Should be able to start again after clean stop
+      await service.start();
+      expect(mockServerRoutes).toHaveBeenCalledTimes(2);
+      expect(service.isRunning()).toBe(true);
+    });
+
+    test('should prevent starting twice in a row', async () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      await service.start();
+
+      // Try to start again without stopping
+      await expect(service.start()).rejects.toThrow('[MCP] Server already started or starting');
+    });
+  });
+});

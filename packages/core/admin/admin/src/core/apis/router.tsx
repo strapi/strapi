@@ -13,7 +13,12 @@ import { Theme } from '../../components/Theme';
 import { Permission } from '../../features/Auth';
 import { NotFoundPage } from '../../pages/NotFoundPage';
 import { getImmutableRoutes } from '../../router';
-import { StrapiApp } from '../../StrapiApp';
+import {
+  wrapRouteObjectLazyWithRetry,
+  wrapRouteObjectsLazyWithRetry,
+} from '../../utils/retryDynamicImport';
+
+import type { StrapiApp } from '../../StrapiApp';
 
 type IRouter = ReturnType<typeof createBrowserRouter> | ReturnType<typeof createMemoryRouter>;
 
@@ -89,6 +94,24 @@ class Router {
    * It should not be used by plugins, doing so will likely break the application.
    */
   createRouter(strapi: StrapiApp, { memory, ...opts }: RouterOptions = {}) {
+    const authenticatedLayoutRoute: RouteObject = {
+      path: '/*',
+      lazy: async () => {
+        const { PrivateAdminLayout } = await import('../../layouts/AuthenticatedLayout');
+
+        return {
+          Component: PrivateAdminLayout,
+        };
+      },
+      children: [
+        ...this.routes,
+        {
+          path: '*',
+          element: <NotFoundPage />,
+        },
+      ],
+    };
+
     const routes = [
       {
         path: '/*',
@@ -103,24 +126,8 @@ class Router {
         ),
         element: <App strapi={strapi} store={strapi.store!} />,
         children: [
-          ...getImmutableRoutes(),
-          {
-            path: '/*',
-            lazy: async () => {
-              const { PrivateAdminLayout } = await import('../../layouts/AuthenticatedLayout');
-
-              return {
-                Component: PrivateAdminLayout,
-              };
-            },
-            children: [
-              ...this.routes,
-              {
-                path: '*',
-                element: <NotFoundPage />,
-              },
-            ],
-          },
+          ...wrapRouteObjectsLazyWithRetry(getImmutableRoutes()),
+          wrapRouteObjectLazyWithRetry(authenticatedLayoutRoute),
         ],
       },
     ];
@@ -136,7 +143,7 @@ class Router {
 
   public addMenuLink = (
     link: Omit<MenuItem, 'Component'> & {
-      Component: () => Promise<{ default: React.ComponentType }>;
+      Component?: () => Promise<{ default: React.ComponentType }>;
     }
   ) => {
     invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
@@ -156,15 +163,14 @@ class Router {
     );
 
     if (
-      !link.Component ||
-      (link.Component &&
-        typeof link.Component === 'function' &&
-        // @ts-expect-error – shh
-        link.Component[Symbol.toStringTag] === 'AsyncFunction')
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
       console.warn(
         `
-      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". Component loaders should return a dynamic import with a default export shape, e.g. \`Component: () => import(path).then((mod) => ({ default: mod.Component }))\`. Async wrapper functions will stop being supported in a future version.
       `.trim()
       );
     }
@@ -202,12 +208,8 @@ class Router {
     links?: never
   ): void;
   public addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink
-  ): void;
-  public addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink[]
+    section: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
+    link: UnloadedSettingsLink | UnloadedSettingsLink[]
   ): void;
   public addSettingsLink(
     section:
@@ -279,15 +281,14 @@ class Router {
     );
 
     if (
-      !link.Component ||
-      (link.Component &&
-        typeof link.Component === 'function' &&
-        // @ts-expect-error – shh
-        link.Component[Symbol.toStringTag] === 'AsyncFunction')
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
       console.warn(
         `
-      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". Component loaders should return a dynamic import with a default export shape, e.g. \`Component: () => import(path).then((mod) => ({ default: mod.Component }))\`. Async wrapper functions will stop being supported in a future version.
       `.trim()
       );
     }

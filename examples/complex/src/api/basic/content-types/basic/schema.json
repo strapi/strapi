@@ -61,6 +61,18 @@
       "type": "enumeration",
       "enum": ["one", "two", "three"]
     },
+    "morph_one": {
+      "type": "relation",
+      "relation": "morphOne",
+      "target": "api::relation.relation",
+      "morphBy": "morph_to_one"
+    },
+    "morph_many": {
+      "type": "relation",
+      "relation": "morphMany",
+      "target": "api::relation.relation",
+      "morphBy": "morph_to_many"
+    },
     "textBlocks": {
       "type": "component",
       "repeatable": true,

@@ -62,7 +62,7 @@ const getDirectParent = (data: unknown, path: string): unknown => {
  * It is possible to break the ContentManager by using this function incorrectly, for example,
  * if you transform a number into a string but the attribute type is a number, the ContentManager
  * will not be able to save the data and the Form will likely crash because the component it's
- * passing the data too won't succesfully be able to handle the value.
+ * passing the data too won't successfully be able to handle the value.
  */
 const traverseData =
   (predicate: Predicate, transform: Transform) =>
@@ -77,6 +77,15 @@ const traverseData =
          * We also don't want to transform null or undefined values.
          */
         if (BLOCK_LIST_ATTRIBUTE_KEYS.includes(key) || value === null || value === undefined) {
+          acc[key] = value;
+          return acc;
+        }
+
+        // The schema may not contain the attribute when historical data references a
+        // component or field that no longer exists (e.g. a component detached from a
+        // dynamic zone via the content-type-builder). Pass the value through so the
+        // History view can still render the rest of the document.
+        if (!attribute) {
           acc[key] = value;
           return acc;
         }

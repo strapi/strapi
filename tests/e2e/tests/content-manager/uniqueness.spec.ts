@@ -15,7 +15,7 @@ type Field = {
 test.describe('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
 
     await page.goto('/admin');
     await login({ page });
@@ -100,8 +100,8 @@ test.describe('Uniqueness', () => {
   const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
   const clickSave = async (page: Page) => {
-    await page.getByRole('button', { name: 'Save' }).isEnabled();
     await clickAndWait(page, page.getByRole('tab', { name: 'Draft' }));
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await expect(page.getByText('Saved document')).toBeVisible();
   };

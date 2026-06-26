@@ -1,0 +1,71 @@
+name: 'Publish PR Experimental'
+
+# Publishes an experimental prerelease when the `publish-experimental` label is present.
+# Uses the same version scheme and dist tag as the manual Publish Prerelease workflow.
+# npm only — pre-publish.sh disables git tags and changelog; this workflow must NEVER create
+# GitHub Releases or git tags on the repository.
+on:
+  pull_request:
+    types: [labeled, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: experimental-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: 'Publish experimental'
+    runs-on: ubuntu-latest
+    if: |
+      github.repository == 'strapi/strapi' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'publish-experimental') &&
+      (github.event.action == 'synchronize' || github.event.label.name == 'publish-experimental')
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - run: yarn install --immutable
+        env:
+          YARN_ENABLE_SCRIPTS: 'false'
+
+      - name: Publish prerelease
+        run: ./scripts/pre-publish.sh --yes
+        env:
+          VERSION: '0.0.0-experimental.${{ github.event.pull_request.head.sha }}'
+          DIST_TAG: experimental
+
+      - name: Resolve commit metadata
+        id: meta
+        run: echo "short=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Update experimental build comment
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          comment_tag: experimental-pr-build
+          message: |
+            ## Experimental build
+
+            | | |
+            |---|---|
+            | **Version** | `0.0.0-experimental.${{ github.event.pull_request.head.sha }}` |
+            | **Dist tag** | `experimental` |
+            | **Commit** | [`${{ steps.meta.outputs.short }}`](https://github.com/${{ github.repository }}/commit/${{ github.event.pull_request.head.sha }}) |
+
+            ```bash
+            npx create-strapi-app@0.0.0-experimental.${{ github.event.pull_request.head.sha }} my-project --non-interactive --skip-cloud --no-run
+            ```
+
+            To upgrade an existing app, install all `@strapi/*` packages at the same version.
