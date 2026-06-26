@@ -44,6 +44,12 @@ interface InputOption {
   value: string;
 }
 
+type ConditionField = {
+  name: string;
+  type: string;
+  enum?: string[];
+};
+
 interface CustomInputProps<
   TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute,
 > {
@@ -75,7 +81,7 @@ interface CustomInputProps<
   value?: Schema.Attribute.Value<TAttribute>;
   autoFocus?: boolean;
   attributeName?: string;
-  conditionFields?: Record<string, boolean>;
+  conditionFields?: ConditionField[];
 }
 
 interface GenericInputProps<
@@ -111,7 +117,7 @@ interface GenericInputProps<
   isNullable?: boolean;
   autoFocus?: boolean;
   attributeName?: string;
-  conditionFields?: Record<string, boolean>;
+  conditionFields?: ConditionField[];
 }
 
 const GenericInput = ({
