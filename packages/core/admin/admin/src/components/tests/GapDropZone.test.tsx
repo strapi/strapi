@@ -5,7 +5,7 @@ import type { WidgetRow } from '../../utils/widgetLayout';
 
 // Mock data
 const createMockWidget = (uid: string, title: string): WidgetWithUID => ({
-  uid: uid as any,
+  uid,
   title: { defaultMessage: title, id: `test.${uid}` },
   icon: undefined,
   component: () => Promise.resolve(() => null),
