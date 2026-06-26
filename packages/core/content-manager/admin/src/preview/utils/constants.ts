@@ -14,6 +14,7 @@ export const INTERNAL_EVENTS = {
   STRAPI_BLOCKS_EDIT_END: 'strapiBlocksEditEnd',
   STRAPI_SCROLL: 'strapiScroll',
   STRAPI_CLICK_OUTSIDE_BLOCKS: 'strapiClickOutsideBlocks',
+  STRAPI_FIELD_POSITION_SYNC: 'strapiFieldPositionSync',
 } as const;
 
 /**
