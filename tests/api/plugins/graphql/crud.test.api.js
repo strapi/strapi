@@ -23,6 +23,10 @@ const postModel = {
     nullable: {
       type: 'string',
     },
+    privateNote: {
+      type: 'string',
+      private: true,
+    },
     category: {
       type: 'enumeration',
       enum: ['BLOG', 'PRODUCT', 'TUTORIALS'],
@@ -66,6 +70,8 @@ describe('Test Graphql API End to End', () => {
     };
 
     test.each(postsPayload)('Create Post %o', async (post) => {
+      const input = post.name === 'post 1' ? { ...post, privateNote: 'stored but hidden' } : post;
+
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           mutation createPost($data: PostInput!) {
@@ -84,7 +90,7 @@ describe('Test Graphql API End to End', () => {
           }
         `,
         variables: {
-          data: post,
+          data: input,
         },
       });
 
@@ -104,6 +110,14 @@ describe('Test Graphql API End to End', () => {
           },
         },
       });
+
+      if (input.privateNote) {
+        const createdPost = await strapi.db.query('api::post.post').findOne({
+          where: { documentId: body.data.createPost.data.documentId },
+        });
+
+        expect(createdPost.privateNote).toBe(input.privateNote);
+      }
     });
 
     test('List posts', async () => {
