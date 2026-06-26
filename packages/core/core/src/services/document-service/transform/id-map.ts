@@ -1,14 +1,11 @@
 import type { Core, Data, UID } from '@strapi/types';
 import { async, contentTypes } from '@strapi/utils';
 
+import { isLocalizedContentType } from './relations/utils/i18n';
+
 const hasDraftAndPublish = (uid: UID.CollectionType) => {
   const model = strapi.getModel(uid);
   return contentTypes.hasDraftAndPublish(model);
-};
-
-const isLocalizedContentType = (uid: UID.Schema) => {
-  const model = strapi.getModel(uid);
-  return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
 };
 
 /**
