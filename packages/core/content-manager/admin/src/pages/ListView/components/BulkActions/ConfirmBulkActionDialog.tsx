@@ -14,8 +14,6 @@ import { useDoc } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 
-import { Emphasis } from './Actions';
-
 interface ConfirmBulkActionDialogProps {
   endAction: React.ReactNode;
   onToggleDialog: () => void;

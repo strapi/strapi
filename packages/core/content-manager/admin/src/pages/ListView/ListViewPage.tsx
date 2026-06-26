@@ -16,7 +16,6 @@ import {
   Layouts,
   useTable,
   useIsMobile,
-  useIsDesktop,
   useClipboard,
   tours,
 } from '@strapi/admin/strapi-admin';
@@ -82,7 +81,6 @@ const ListViewPage = () => {
   const { copy } = useClipboard();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
-  const isDesktop = useIsDesktop();
 
   const handleCopyDocumentId = React.useCallback(
     async (e: React.MouseEvent, documentId: string | undefined) => {
