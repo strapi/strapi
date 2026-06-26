@@ -1,10 +1,20 @@
 import * as React from 'react';
 
-import { Accordion, Box, Flex, FlexComponent, Tooltip, Typography } from '@strapi/design-system';
+import {
+  Accordion,
+  Box,
+  Flex,
+  FlexComponent,
+  TextButton,
+  Tooltip,
+  Typography,
+} from '@strapi/design-system';
+import { Duplicate } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
+import { getTranslation } from '../../../../../utils/translations';
 
 interface ComponentCategoryProps {
   category: string;
@@ -16,6 +26,7 @@ interface ComponentCategoryProps {
   onAddComponent: (
     componentUid: string
   ) => React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
+  onCopyComponent?: (componentUid: string) => React.MouseEventHandler<HTMLButtonElement>;
   variant?: Accordion.Variant;
 }
 
@@ -24,6 +35,7 @@ const ComponentCategory = ({
   components = [],
   variant = 'primary',
   onAddComponent,
+  onCopyComponent,
 }: ComponentCategoryProps) => {
   const { formatMessage } = useIntl();
 
@@ -39,33 +51,43 @@ const ComponentCategory = ({
           {components.map(({ uid, displayName, icon }) => (
             <ComponentBox
               key={uid}
-              tag="button"
-              type="button"
               background="neutral100"
               justifyContent="center"
-              onClick={onAddComponent(uid)}
               hasRadius
-              height="8.4rem"
               shrink={0}
               borderColor="neutral200"
+              direction="column"
+              alignItems="stretch"
             >
-              <Flex
-                direction="column"
-                gap={1}
-                alignItems="center"
-                justifyContent="center"
-                width="100%"
-                paddingLeft={2}
-                paddingRight={2}
-              >
-                <ComponentIcon color="currentColor" background="primary200" icon={icon} />
+              <ComponentAddButton type="button" onClick={onAddComponent(uid)}>
+                <Flex
+                  direction="column"
+                  gap={1}
+                  alignItems="center"
+                  justifyContent="center"
+                  width="100%"
+                  paddingLeft={2}
+                  paddingRight={2}
+                >
+                  <ComponentIcon color="currentColor" background="primary200" icon={icon} />
 
-                <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
-                  <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
-                    {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
-                  </Typography>
-                </Tooltip>
-              </Flex>
+                  <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
+                    <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
+                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
+                    </Typography>
+                  </Tooltip>
+                </Flex>
+              </ComponentAddButton>
+              {onCopyComponent && (
+                <Flex justifyContent="center" paddingBottom={2}>
+                  <TextButton startIcon={<Duplicate />} onClick={onCopyComponent(uid)}>
+                    {formatMessage({
+                      id: getTranslation('components.copy-from-existing.short'),
+                      defaultMessage: 'Copy',
+                    })}
+                  </TextButton>
+                </Flex>
+              )}
             </ComponentBox>
           ))}
         </Grid>
@@ -106,20 +128,29 @@ const Grid =
         }
       `;
 
-const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
+const ComponentBox = styled<FlexComponent>(Flex)`
   color: ${({ theme }) => theme.colors.neutral600};
-  cursor: pointer;
+  min-height: 10.8rem;
 
   @media (prefers-reduced-motion: no-preference) {
     transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
   }
 
-  &:focus,
+  &:focus-within,
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
     color: ${({ theme }) => theme.colors.primary600};
   }
+`;
+
+const ComponentAddButton = styled.button`
+  width: 100%;
+  min-height: 8.4rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 `;
 
 export { ComponentCategory };

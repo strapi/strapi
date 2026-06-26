@@ -1,10 +1,9 @@
 import * as React from 'react';
 
 import { useField } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Typography } from '@strapi/design-system';
-import { PlusCircle } from '@strapi/icons';
+import { Box, Flex, TextButton, Typography } from '@strapi/design-system';
+import { Duplicate, PlusCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { getTranslation } from '../../../../../utils/translations';
 
@@ -12,9 +11,10 @@ interface InitializerProps {
   disabled?: boolean;
   name: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
+  onCopyClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
+const Initializer = ({ disabled, name, onClick, onCopyClick }: InitializerProps) => {
   const { formatMessage } = useIntl();
 
   const field = useField(name);
@@ -51,6 +51,16 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
           </Flex>
         </Flex>
       </Box>
+      {onCopyClick && (
+        <Flex justifyContent="center" paddingTop={3}>
+          <TextButton disabled={disabled} startIcon={<Duplicate />} onClick={onCopyClick}>
+            {formatMessage({
+              id: getTranslation('components.copy-from-existing'),
+              defaultMessage: 'Copy from existing',
+            })}
+          </TextButton>
+        </Flex>
+      )}
     </>
   );
 };
