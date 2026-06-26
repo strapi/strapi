@@ -1,16 +1,14 @@
-'use strict';
+import * as ts from 'typescript';
 
-const ts = require('typescript');
+import { reportDiagnostics } from './report-diagnostics';
 
-const { reportDiagnostics } = require('./report-diagnostics');
-
-const resolveConfigOptions = (configPath) => {
+export const resolveConfigOptions = (configPath: string) => {
   // Parse the tsconfig.json file and resolve every file name & compiler options
   const { errors, ...configOptions } = ts.getParsedCommandLineOfConfigFile(
     configPath,
     undefined,
-    ts.sys
-  );
+    ts.sys as unknown as ts.ParseConfigFileHost
+  )!;
 
   // If there are errors in the tsconfig.json
   // file, report them and exit early
@@ -21,5 +19,3 @@ const resolveConfigOptions = (configPath) => {
 
   return configOptions;
 };
-
-module.exports = { resolveConfigOptions };

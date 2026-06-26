@@ -1,10 +1,8 @@
-'use strict';
-
-const path = require('path');
-const assert = require('assert');
-const ts = require('typescript');
-const fse = require('fs-extra');
-const chalk = require('chalk');
+import path from 'node:path';
+import assert from 'node:assert';
+import * as ts from 'typescript';
+import fse from 'fs-extra';
+import chalk from 'chalk';
 
 const { factory } = ts;
 
@@ -13,11 +11,8 @@ const PUBLIC_NAMESPACE = 'Public';
 
 /**
  * Aggregate the given TypeScript nodes into a single string
- *
- * @param {ts.Node[]} definitions
- * @return {string}
  */
-const emitDefinitions = (definitions) => {
+export const emitDefinitions = (definitions: ts.Node[]): string => {
   const nodeArray = factory.createNodeArray(definitions);
 
   const sourceFile = ts.createSourceFile(
@@ -37,13 +32,13 @@ const emitDefinitions = (definitions) => {
  * Save the given string representation of TS nodes in a file
  * If the given directory doesn't exist, it'll be created automatically
  *
- * @param {string} dir
- * @param {string} file
- * @param {string} content
- *
- * @return {Promise<string>} The path of the created file
+ * @return The path of the created file
  */
-const saveDefinitionToFileSystem = async (dir, file, content) => {
+export const saveDefinitionToFileSystem = async (
+  dir: string,
+  file: string,
+  content: string
+): Promise<string> => {
   const filepath = path.join(dir, file);
 
   fse.ensureDirSync(dir);
@@ -55,16 +50,13 @@ const saveDefinitionToFileSystem = async (dir, file, content) => {
 /**
  * Format the given definitions.
  * Uses the existing config if one is defined in the project.
- *
- * @param {string} content
- * @returns {Promise<string>}
  */
-const format = async (content) => {
+export const format = async (content: string): Promise<string> => {
   // eslint-disable-next-line node/no-unsupported-features/es-syntax
   const prettier = await import('prettier'); // ESM-only
 
   const configFile = await prettier.resolveConfigFile();
-  const config = configFile
+  const config: any = configFile
     ? await prettier.resolveConfig(configFile)
     : // Default config
       {
@@ -80,18 +72,19 @@ const format = async (content) => {
 
 /**
  * Generate the extension block for a shared component from strapi/strapi
- *
- * @param {string} registry The registry to extend
- * @param {Array<{ uid: string; definition: ts.TypeNode }>} definitions
- * @returns {ts.ModuleDeclaration}
  */
-const generateSharedExtensionDefinition = (registry, definitions) => {
+export const generateSharedExtensionDefinition = (
+  registry: string,
+  definitions: Array<{ uid: string; definition: ts.InterfaceDeclaration }>
+): ts.ModuleDeclaration => {
   const properties = definitions.map(({ uid, definition }) =>
     factory.createPropertySignature(
       undefined,
       factory.createStringLiteral(uid, true),
       undefined,
-      factory.createTypeReferenceNode(factory.createIdentifier(definition.name.escapedText))
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(definition.name.escapedText as string)
+      )
     )
   );
 
@@ -121,7 +114,12 @@ const generateSharedExtensionDefinition = (registry, definitions) => {
   );
 };
 
-const createLogger = (options = {}) => {
+interface CreateLoggerOptions {
+  silent?: boolean;
+  debug?: boolean;
+}
+
+export const createLogger = (options: CreateLoggerOptions = {}) => {
   const { silent = false, debug = false } = options;
 
   const state = { errors: 0, warning: 0 };
@@ -135,7 +133,7 @@ const createLogger = (options = {}) => {
       return state.errors;
     },
 
-    debug(...args) {
+    debug(...args: any[]) {
       if (silent || !debug) {
         return;
       }
@@ -143,7 +141,7 @@ const createLogger = (options = {}) => {
       console.log(chalk.cyan(`[DEBUG]\t[${new Date().toISOString()}] (Typegen)`), ...args);
     },
 
-    info(...args) {
+    info(...args: any[]) {
       if (silent) {
         return;
       }
@@ -151,7 +149,7 @@ const createLogger = (options = {}) => {
       console.info(chalk.blue(`[INFO]\t[${new Date().toISOString()}] (Typegen)`), ...args);
     },
 
-    warn(...args) {
+    warn(...args: any[]) {
       state.warning += 1;
 
       if (silent) {
@@ -161,7 +159,7 @@ const createLogger = (options = {}) => {
       console.warn(chalk.yellow(`[WARN]\t[${new Date().toISOString()}] (Typegen)`), ...args);
     },
 
-    error(...args) {
+    error(...args: any[]) {
       state.errors += 1;
 
       if (silent) {
@@ -173,8 +171,8 @@ const createLogger = (options = {}) => {
   };
 };
 
-const timer = () => {
-  const state = {
+export const timer = () => {
+  const state: { start: number | null; end: number | null } = {
     start: null,
     end: null,
   };
@@ -201,16 +199,18 @@ const timer = () => {
     get duration() {
       assert(state.start !== null, 'The timer has not been started');
 
-      return ((state.end ?? Date.now) - state.start) / 1000;
+      return (((state.end ?? Date.now) as any) - (state.start as number)) / 1000;
     },
   };
 };
 
-module.exports = {
-  emitDefinitions,
-  saveDefinitionToFileSystem,
-  format,
-  generateSharedExtensionDefinition,
-  createLogger,
-  timer,
-};
+export type Logger = ReturnType<typeof createLogger>;
+
+/**
+ * Options passed to each artifact generator (content-types, components).
+ */
+export interface GeneratorOptions {
+  strapi: any;
+  logger: Logger;
+  pwd?: string;
+}

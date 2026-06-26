@@ -1,24 +1,20 @@
-'use strict';
-
-const path = require('path');
-const ts = require('typescript');
+import path from 'node:path';
+import * as ts from 'typescript';
 
 const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
 
+interface GetConfigPathOptions {
+  filename?: string;
+  ancestorsLookup?: boolean;
+}
+
 /**
  * Get the path of the typescript config file for a given directory
- *
- * @param {string} dir
- * @param {object} [options]
- * @param {string} [options.filename]
- * @param {boolean} [options.ancestorsLookup]
- *
- * @return {string | undefined}
  */
-const getConfigPath = (
-  dir,
-  { filename = DEFAULT_TS_CONFIG_FILENAME, ancestorsLookup = false } = {}
-) => {
+export const getConfigPath = (
+  dir: string,
+  { filename = DEFAULT_TS_CONFIG_FILENAME, ancestorsLookup = false }: GetConfigPathOptions = {}
+): string | undefined => {
   const dirAbsolutePath = path.resolve(dir);
   let configFilePath = ts.findConfigFile(dirAbsolutePath, ts.sys.fileExists, filename);
 
@@ -30,5 +26,3 @@ const getConfigPath = (
 
   return configFilePath.startsWith(dirAbsolutePath) ? configFilePath : undefined;
 };
-
-module.exports = { getConfigPath };

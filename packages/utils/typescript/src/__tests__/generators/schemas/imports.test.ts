@@ -1,12 +1,10 @@
-'use strict';
+import * as ts from 'typescript';
 
-const ts = require('typescript');
-
-const {
+import {
   addImport,
   generateImportDefinition,
   getImports,
-} = require('../../../generators/common/imports');
+} from '../../../generators/common/imports';
 
 describe('Imports', () => {
   test('When first loaded, the list of imports should be empty', () => {

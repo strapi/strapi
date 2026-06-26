@@ -1,20 +1,19 @@
-'use strict';
+import * as ts from 'typescript';
+import { merge } from 'lodash';
 
-const ts = require('typescript');
-const { merge } = require('lodash');
+import { reportDiagnostics } from '../utils/report-diagnostics';
+import { resolveConfigOptions } from '../utils/resolve-config-options';
 
-const { reportDiagnostics } = require('../utils/report-diagnostics');
-const { resolveConfigOptions } = require('../utils/resolve-config-options');
+export interface ConfigOptions {
+  fileNames?: string[];
+  options?: ts.CompilerOptions;
+  ignoreDiagnostics?: boolean;
+}
 
 /**
  * Default TS -> JS Compilation for Strapi
- * @param {string} tsConfigPath
- * @param {Object} configOptions
- * @param {Array.<string>} configOptions.fileNames
- * @param {Object} configOptions.options
- * @param {boolean} configOptions.ignoreDiagnostics
  */
-function run(tsConfigPath, configOptions = {}) {
+export function run(tsConfigPath: string, configOptions: ConfigOptions = {}) {
   const { ignoreDiagnostics = false } = configOptions;
   // Parse the tsconfig.json file & resolve the configuration options
   const { fileNames, options, projectReferences } = resolveConfigOptions(tsConfigPath);
@@ -46,5 +45,3 @@ function run(tsConfigPath, configOptions = {}) {
     throw new Error('TypeScript compilation failed');
   }
 }
-
-module.exports = { run };

@@ -1,17 +1,15 @@
-'use strict';
+import * as ts from 'typescript';
+
+import {
+  attributeToPropertySignature,
+  getAttributeType,
+  getAttributeModifiers,
+} from '../../../generators/common/models/attributes';
+import { addImport } from '../../../generators/common/imports';
 
 jest.mock('../../../generators/common/imports', () => ({ addImport: jest.fn() }));
 
 const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation();
-
-const ts = require('typescript');
-
-const {
-  attributeToPropertySignature,
-  getAttributeType,
-  getAttributeModifiers,
-} = require('../../../generators/common/models/attributes');
-const { addImport } = require('../../../generators/common/imports');
 
 // TODO: emit definition (to a string) & also check snapshots based on that. It would allow checking both the structure & the output.
 describe('Attributes', () => {

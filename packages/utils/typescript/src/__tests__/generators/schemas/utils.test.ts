@@ -1,16 +1,14 @@
-'use strict';
+import * as ts from 'typescript';
+import { factory } from 'typescript';
 
-const ts = require('typescript');
-const { factory } = require('typescript');
-
-const {
+import {
   getDefinitionAttributesCount,
   getSchemaExtendsTypeName,
   getSchemaInterfaceName,
   getSchemaModelType,
   getTypeNode,
   toTypeLiteral,
-} = require('../../../generators/common/models/utils');
+} from '../../../generators/common/models/utils';
 
 describe('Utils', () => {
   describe('Get Definition Attributes Count', () => {

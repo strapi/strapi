@@ -1,8 +1,5 @@
-'use strict';
-
-const ts = require('typescript');
-const { factory } = require('typescript');
-const {
+import * as ts from 'typescript';
+import {
   pipe,
   replace,
   camelCase,
@@ -15,22 +12,44 @@ const {
   isArray,
   isBoolean,
   propEq,
-} = require('lodash/fp');
+} from 'lodash/fp';
 
-const NAMESPACES = {
+const { factory } = ts;
+
+export const NAMESPACES = {
   Struct: 'Struct',
   Schema: 'Schema',
 };
 
 /**
- * Extract a valid interface name from a schema uid
- *
- * @param {string} uid
- * @returns {string}
+ * Shallow representation of a content-type/component attribute definition.
+ * Only the fields read by the generators are typed; the rest is left open.
  */
-const getSchemaInterfaceName = pipe(replace(/(:.)/, ' '), camelCase, upperFirst);
+export interface Attribute {
+  type: string;
+  [key: string]: any;
+}
 
-const getSchemaModelType = (schema) => {
+/**
+ * Shallow representation of a content-type/component schema definition.
+ * Only the fields read by the generators are typed; the rest is left open.
+ */
+export interface Schema {
+  uid: string;
+  modelType?: string;
+  kind?: string;
+  attributes: Record<string, Attribute>;
+  [key: string]: any;
+}
+
+/**
+ * Extract a valid interface name from a schema uid
+ */
+export const getSchemaInterfaceName = pipe(replace(/(:.)/, ' '), camelCase, upperFirst) as (
+  uid: string
+) => string;
+
+export const getSchemaModelType = (schema: Schema): string | null | undefined => {
   const { modelType, kind } = schema;
 
   // Components
@@ -48,43 +67,34 @@ const getSchemaModelType = (schema) => {
 
 /**
  * Get the parent type name to extend based on the schema's nature
- *
- * @param {object} schema
- * @returns {string|null}
  */
-const getSchemaExtendsTypeName = (schema) => {
+export const getSchemaExtendsTypeName = (schema: Schema): string | null => {
   const base = getSchemaModelType(schema);
 
   if (base === null) {
     return null;
   }
 
-  return `${NAMESPACES.Struct}.${upperFirst(base)}Schema`;
+  return `${NAMESPACES.Struct}.${upperFirst(base as string)}Schema`;
 };
 
 /**
  * Get a type node based on a type and its params
- *
- * @param {string} typeName
- * @param {ts.TypeNode[]} [params]
- * @returns
  */
-const getTypeNode = (typeName, params = []) => {
+export const getTypeNode = (typeName: string, params: ts.TypeNode[] = []): ts.TypeReferenceNode => {
   return factory.createTypeReferenceNode(factory.createIdentifier(typeName), params);
 };
 
 /**
  * Transform a regular JavaScript object or scalar value into a literal expression
- * @param data
- * @returns {ts.TypeNode}
  */
-const toTypeLiteral = (data) => {
+export const toTypeLiteral = (data: any): any => {
   if (isUndefined(data)) {
-    return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword);
+    return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword as any);
   }
 
   if (isNull(data)) {
-    return factory.createLiteralTypeNode(ts.SyntaxKind.NullKeyword);
+    return factory.createLiteralTypeNode(ts.SyntaxKind.NullKeyword as any);
   }
 
   if (isString(data)) {
@@ -118,7 +128,7 @@ const toTypeLiteral = (data) => {
 
   const entries = Object.entries(data).sort((a, b) => a[0].localeCompare(b[0]));
 
-  const props = entries.reduce((acc, [key, value]) => {
+  const props = entries.reduce<any[]>((acc, [key, value]) => {
     // Handle keys such as content-type-builder & co.
     const identifier = key.includes('-')
       ? factory.createStringLiteral(key, true)
@@ -126,7 +136,13 @@ const toTypeLiteral = (data) => {
 
     return [
       ...acc,
-      factory.createPropertyDeclaration(undefined, identifier, undefined, toTypeLiteral(value)),
+      factory.createPropertyDeclaration(
+        undefined,
+        identifier,
+        undefined,
+        toTypeLiteral(value),
+        undefined
+      ),
     ];
   }, []);
 
@@ -135,12 +151,13 @@ const toTypeLiteral = (data) => {
 
 /**
  * Get the number of attributes generated for a given schema definition
- *
- * @param {ts.TypeNode} definition
- * @returns {number | null}
  */
-const getDefinitionAttributesCount = (definition) => {
-  const attributesNode = definition.members.find(propEq('name.escapedText', 'attributes'));
+export const getDefinitionAttributesCount = (
+  definition: ts.InterfaceDeclaration
+): number | null => {
+  const attributesNode = definition.members.find(
+    (propEq as any)('name.escapedText', 'attributes')
+  ) as any;
 
   if (!attributesNode) {
     return null;
@@ -151,28 +168,12 @@ const getDefinitionAttributesCount = (definition) => {
 
 /**
  * Add the Schema.Attribute namespace before the typename
- *
- * @param {string} typeName
- * @returns {string}
  */
-const withAttributeNamespace = (typeName) => `${NAMESPACES.Schema}.Attribute.${typeName}`;
+export const withAttributeNamespace = (typeName: string): string =>
+  `${NAMESPACES.Schema}.Attribute.${typeName}`;
 
 /**
  * Add the schema namespace before the typename
- *
- * @param {string} typeName
- * @returns {string}
  */
-const withSchemaNamespace = (typeName) => `${NAMESPACES.schema}.${typeName}`;
-
-module.exports = {
-  NAMESPACES,
-  withAttributeNamespace,
-  withSchemaNamespace,
-  getSchemaInterfaceName,
-  getSchemaExtendsTypeName,
-  getSchemaModelType,
-  getDefinitionAttributesCount,
-  getTypeNode,
-  toTypeLiteral,
-};
+export const withSchemaNamespace = (typeName: string): string =>
+  `${(NAMESPACES as any).schema}.${typeName}`;

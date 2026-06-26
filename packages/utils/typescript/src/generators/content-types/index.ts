@@ -1,10 +1,11 @@
-'use strict';
+import * as ts from 'typescript';
+import { values, pipe, map, sortBy } from 'lodash/fp';
 
-const { factory } = require('typescript');
-const { values, pipe, map, sortBy } = require('lodash/fp');
+import { models } from '../common';
+import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
+import type { GeneratorOptions } from '../utils';
 
-const { models } = require('../common');
-const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
+const { factory } = ts;
 
 const NO_CONTENT_TYPE_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any content-types yet.
@@ -13,13 +14,10 @@ const NO_CONTENT_TYPE_PLACEHOLDER_COMMENT = `/*
 
 /**
  * Generate type definitions for Strapi Content-Types
- *
- * @param {object} [options]
- * @param {object} options.strapi
- * @param {object} options.logger
- * @param {string} options.pwd
  */
-const generateContentTypesDefinitions = async (options = {}) => {
+export const generateContentTypesDefinitions = async (
+  options: GeneratorOptions = {} as GeneratorOptions
+) => {
   const { strapi } = options;
 
   const { contentTypes } = strapi;
@@ -27,7 +25,7 @@ const generateContentTypesDefinitions = async (options = {}) => {
   const contentTypesDefinitions = pipe(
     values,
     sortBy('uid'),
-    map((contentType) => ({
+    map((contentType: any) => ({
       uid: contentType.uid,
       definition: models.schema.generateSchemaDefinition(contentType),
     }))
@@ -39,7 +37,7 @@ const generateContentTypesDefinitions = async (options = {}) => {
     return { output: NO_CONTENT_TYPE_PLACEHOLDER_COMMENT, stats: {} };
   }
 
-  const formattedSchemasDefinitions = contentTypesDefinitions.reduce((acc, def) => {
+  const formattedSchemasDefinitions = contentTypesDefinitions.reduce<any[]>((acc, def) => {
     acc.push(
       // Definition
       def.definition,
@@ -70,5 +68,3 @@ const generateContentTypesDefinitions = async (options = {}) => {
 
   return { output: formattedOutput, stats: {} };
 };
-
-module.exports = { generateContentTypesDefinitions };

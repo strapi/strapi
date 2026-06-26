@@ -1,10 +1,11 @@
-'use strict';
+import * as ts from 'typescript';
+import { pipe, values, sortBy, map } from 'lodash/fp';
 
-const { factory } = require('typescript');
-const { pipe, values, sortBy, map } = require('lodash/fp');
+import { models } from '../common';
+import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
+import type { GeneratorOptions } from '../utils';
 
-const { models } = require('../common');
-const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
+const { factory } = ts;
 
 const NO_COMPONENT_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any components yet.
@@ -13,13 +14,10 @@ const NO_COMPONENT_PLACEHOLDER_COMMENT = `/*
 
 /**
  * Generate type definitions for Strapi Components
- *
- * @param {object} [options]
- * @param {object} options.strapi
- * @param {object} options.logger
- * @param {string} options.pwd
  */
-const generateComponentsDefinitions = async (options = {}) => {
+export const generateComponentsDefinitions = async (
+  options: GeneratorOptions = {} as GeneratorOptions
+) => {
   const { strapi } = options;
 
   const { components } = strapi;
@@ -27,7 +25,7 @@ const generateComponentsDefinitions = async (options = {}) => {
   const componentsDefinitions = pipe(
     values,
     sortBy('uid'),
-    map((component) => ({
+    map((component: any) => ({
       uid: component.uid,
       definition: models.schema.generateSchemaDefinition(component),
     }))
@@ -39,7 +37,7 @@ const generateComponentsDefinitions = async (options = {}) => {
     return { output: NO_COMPONENT_PLACEHOLDER_COMMENT, stats: {} };
   }
 
-  const formattedSchemasDefinitions = componentsDefinitions.reduce((acc, def) => {
+  const formattedSchemasDefinitions = componentsDefinitions.reduce<any[]>((acc, def) => {
     acc.push(
       // Definition
       def.definition,
@@ -70,5 +68,3 @@ const generateComponentsDefinitions = async (options = {}) => {
 
   return { output: formattedOutput, stats: {} };
 };
-
-module.exports = { generateComponentsDefinitions };

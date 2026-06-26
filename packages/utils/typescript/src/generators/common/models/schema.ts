@@ -1,25 +1,22 @@
-'use strict';
+import * as ts from 'typescript';
+import { isEmpty } from 'lodash/fp';
 
-const ts = require('typescript');
-const { factory } = require('typescript');
-const { isEmpty } = require('lodash/fp');
-
-const {
+import {
   getSchemaExtendsTypeName,
   getSchemaInterfaceName,
   toTypeLiteral,
   NAMESPACES,
-} = require('./utils');
-const { attributeToPropertySignature } = require('./attributes');
-const { addImport } = require('../imports');
+} from './utils';
+import type { Schema } from './utils';
+import { attributeToPropertySignature } from './attributes';
+import { addImport } from '../imports';
+
+const { factory } = ts;
 
 /**
  * Generate a property signature for the schema's `attributes` field
- *
- * @param {object} schema
- * @returns {ts.PropertySignature}
  */
-const generateAttributePropertySignature = (schema) => {
+const generateAttributePropertySignature = (schema: Schema): ts.PropertySignature => {
   const { attributes } = schema;
 
   const properties = Object.entries(attributes)
@@ -32,11 +29,11 @@ const generateAttributePropertySignature = (schema) => {
     undefined,
     factory.createIdentifier('attributes'),
     undefined,
-    factory.createTypeLiteralNode(properties)
+    factory.createTypeLiteralNode(properties as any)
   );
 };
 
-const generatePropertyLiteralDefinitionFactory = (schema) => (key) => {
+const generatePropertyLiteralDefinitionFactory = (schema: Schema) => (key: string) => {
   return factory.createPropertySignature(
     undefined,
     factory.createIdentifier(key),
@@ -47,11 +44,8 @@ const generatePropertyLiteralDefinitionFactory = (schema) => (key) => {
 
 /**
  * Generate an interface declaration for a given schema
- *
- * @param {object} schema
- * @returns {ts.InterfaceDeclaration}
  */
-const generateSchemaDefinition = (schema) => {
+export const generateSchemaDefinition = (schema: Schema): ts.InterfaceDeclaration => {
   const { uid } = schema;
 
   // Resolve the different interface names needed to declare the schema's interface
@@ -81,7 +75,7 @@ const generateSchemaDefinition = (schema) => {
     undefined,
     [
       factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
-        factory.createIdentifier(parentType),
+        factory.createIdentifier(parentType as string) as any,
       ]),
     ],
     schemaProperties
@@ -89,5 +83,3 @@ const generateSchemaDefinition = (schema) => {
 
   return schemaType;
 };
-
-module.exports = { generateSchemaDefinition };

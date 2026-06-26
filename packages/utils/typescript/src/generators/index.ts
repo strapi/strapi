@@ -1,44 +1,41 @@
-'use strict';
+import path from 'node:path';
+import chalk from 'chalk';
 
-const path = require('path');
-const chalk = require('chalk');
-
-const { TYPES_ROOT_DIR, GENERATED_OUT_DIR } = require('./constants');
-const { saveDefinitionToFileSystem, createLogger, timer } = require('./utils');
-const { generateContentTypesDefinitions } = require('./content-types');
-const { generateComponentsDefinitions } = require('./components');
+import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
+import { saveDefinitionToFileSystem, createLogger, timer } from './utils';
+import { generateContentTypesDefinitions } from './content-types';
+import { generateComponentsDefinitions } from './components';
 
 const GENERATORS = {
   contentTypes: generateContentTypesDefinitions,
   components: generateComponentsDefinitions,
 };
 
-/**
- * @typedef GenerateConfig
- *
- * @property {object} strapi
- * @property {boolean} pwd
- * @property {object} [artifacts]
- * @property {boolean} [artifacts.contentTypes]
- * @property {boolean} [artifacts.components]
- * @property {boolean} [artifacts.services]
- * @property {boolean} [artifacts.controllers]
- * @property {boolean} [artifacts.policies]
- * @property {boolean} [artifacts.middlewares]
- * @property {object} [logger]
- * @property {boolean} [logger.silent]
- * @property {boolean} [logger.debug]
- * @property {boolean} [logger.verbose]
- */
+export interface GenerateConfig {
+  strapi: any;
+  pwd: string;
+  rootDir?: string;
+  artifacts?: {
+    contentTypes?: boolean;
+    components?: boolean;
+    services?: boolean;
+    controllers?: boolean;
+    policies?: boolean;
+    middlewares?: boolean;
+  };
+  logger?: {
+    silent?: boolean;
+    debug?: boolean;
+    verbose?: boolean;
+  };
+}
 
 /**
  * Generate types definitions based on the given configuration
- *
- * @param {GenerateConfig} [config]
  */
-const generate = async (config = {}) => {
+export const generate = async (config: GenerateConfig = {} as GenerateConfig) => {
   const { pwd, rootDir = TYPES_ROOT_DIR, strapi, artifacts = {}, logger: loggerConfig } = config;
-  const reports = {};
+  const reports: Record<string, any> = {};
   const logger = createLogger(loggerConfig);
   const psTimer = timer().start();
 
@@ -58,7 +55,9 @@ const generate = async (config = {}) => {
     return reports;
   };
 
-  const enabledArtifacts = Object.keys(artifacts).filter((p) => artifacts[p] === true);
+  const enabledArtifacts = Object.keys(artifacts).filter(
+    (p) => (artifacts as Record<string, boolean>)[p] === true
+  );
 
   logger.info('Starting the type generation process');
   logger.debug(`Enabled artifacts: ${enabledArtifacts.join(', ')}`);
@@ -69,7 +68,7 @@ const generate = async (config = {}) => {
     logger.info(`Generating types for ${boldArtifact}`);
 
     if (artifact in GENERATORS) {
-      const generator = GENERATORS[artifact];
+      const generator = (GENERATORS as any)[artifact];
 
       try {
         const artifactGenTimer = timer().start();
@@ -81,7 +80,7 @@ const generate = async (config = {}) => {
         logger.debug(`Generated ${boldArtifact} in ${artifactGenTimer.duration}s`);
       } catch (e) {
         logger.error(
-          `Failed to generate types for ${boldArtifact}: ${e.message ?? e.toString()}. Exiting`
+          `Failed to generate types for ${boldArtifact}: ${(e as any).message ?? (e as any).toString()}. Exiting`
         );
         return returnWithMessage();
       }
@@ -109,7 +108,7 @@ const generate = async (config = {}) => {
     } catch (e) {
       logger.error(
         `An error occurred while saving ${boldArtifact} types to the filesystem: ${
-          e.message ?? e.toString()
+          (e as any).message ?? (e as any).toString()
         }. Exiting`
       );
       return returnWithMessage();
@@ -118,5 +117,3 @@ const generate = async (config = {}) => {
 
   return returnWithMessage();
 };
-
-module.exports = { generate };

@@ -1,65 +1,72 @@
-'use strict';
+import * as ts from 'typescript';
+import _ from 'lodash/fp';
 
-const ts = require('typescript');
-const _ = require('lodash/fp');
-
-const { toTypeLiteral, withAttributeNamespace } = require('./utils');
+import { toTypeLiteral, withAttributeNamespace } from './utils';
+import type { Attribute } from './utils';
 
 const { factory } = ts;
 
-function string() {
+export interface MapperContext {
+  uid?: string;
+  attribute: Attribute;
+  attributeName?: string;
+}
+
+export type Mapper = (context: MapperContext) => [string] | [string, any[]];
+
+function string(): [string] {
   return [withAttributeNamespace('String')];
 }
 
-function text() {
+function text(): [string] {
   return [withAttributeNamespace('Text')];
 }
 
-function richtext() {
+function richtext(): [string] {
   return [withAttributeNamespace('RichText')];
 }
 
-function password() {
+function password(): [string] {
   return [withAttributeNamespace('Password')];
 }
 
-function email() {
+function email(): [string] {
   return [withAttributeNamespace('Email')];
 }
 
-function date() {
+function date(): [string] {
   return [withAttributeNamespace('Date')];
 }
 
-function time() {
+function time(): [string] {
   return [withAttributeNamespace('Time')];
 }
 
-function datetime() {
+function datetime(): [string] {
   return [withAttributeNamespace('DateTime')];
 }
 
-function timestamp() {
+function timestamp(): [string] {
   return [withAttributeNamespace('Timestamp')];
 }
 
-function integer() {
+function integer(): [string] {
   return [withAttributeNamespace('Integer')];
 }
 
-function biginteger() {
+function biginteger(): [string] {
   return [withAttributeNamespace('BigInteger')];
 }
 
-function float() {
+function float(): [string] {
   return [withAttributeNamespace('Float')];
 }
 
-function decimal() {
+function decimal(): [string] {
   return [withAttributeNamespace('Decimal')];
 }
 
-function uid({ attribute }) {
+function uid({ attribute }: MapperContext): [string] | [string, any[]] {
   const { targetField, options } = attribute;
 
   // If there are no params to compute, then return the attribute type alone
@@ -67,7 +74,7 @@ function uid({ attribute }) {
     return [withAttributeNamespace('UID')];
   }
 
-  const params = [];
+  const params: any[] = [];
 
   // If the targetField property is defined, then reference it,
   // otherwise, put `undefined` keyword type node as placeholder
@@ -86,32 +93,32 @@ function uid({ attribute }) {
   return [withAttributeNamespace('UID'), params];
 }
 
-function enumeration({ attribute }) {
+function enumeration({ attribute }: MapperContext): [string, any[]] {
   const { enum: enumValues } = attribute;
 
   return [withAttributeNamespace('Enumeration'), [toTypeLiteral(enumValues)]];
 }
 
-function boolean() {
+function boolean(): [string] {
   return [withAttributeNamespace('Boolean')];
 }
 
-function json() {
+function json(): [string] {
   return [withAttributeNamespace('JSON')];
 }
 
-function blocks() {
+function blocks(): [string] {
   return [withAttributeNamespace('Blocks')];
 }
 
-function media({ attribute }) {
+function media({ attribute }: MapperContext): [string, any[]] {
   const { allowedTypes, multiple } = attribute;
 
-  const params = [];
+  const params: any[] = [];
 
   const typesParam = allowedTypes
     ? factory.createUnionTypeNode(
-        allowedTypes.map((allowedType) => factory.createStringLiteral(allowedType))
+        allowedTypes.map((allowedType: string) => factory.createStringLiteral(allowedType))
       )
     : factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
 
@@ -126,7 +133,7 @@ function media({ attribute }) {
   return [withAttributeNamespace('Media'), params];
 }
 
-function relation({ attribute }) {
+function relation({ attribute }: MapperContext): [string, any[]] {
   const { relation: relationType, target } = attribute;
 
   const isMorphRelation = relationType.toLowerCase().includes('morph');
@@ -141,28 +148,28 @@ function relation({ attribute }) {
   ];
 }
 
-function component({ attribute }) {
+function component({ attribute }: MapperContext): [string, any[]] {
   const target = attribute.component;
   const params = [factory.createStringLiteral(target, true)];
 
   if (attribute.repeatable) {
-    params.push(factory.createTrue());
+    params.push(factory.createTrue() as any);
   } else {
-    params.push(factory.createFalse());
+    params.push(factory.createFalse() as any);
   }
 
   return [withAttributeNamespace('Component'), params];
 }
 
-function dynamiczone({ attribute }) {
+function dynamiczone({ attribute }: MapperContext): [string, any[]] {
   const componentsParam = factory.createTupleTypeNode(
-    attribute.components.map((c) => factory.createStringLiteral(c))
+    attribute.components.map((c: string) => factory.createStringLiteral(c))
   );
 
   return [withAttributeNamespace('DynamicZone'), [componentsParam]];
 }
 
-module.exports = {
+export const mappers: Record<string, Mapper> = {
   string,
   text,
   richtext,

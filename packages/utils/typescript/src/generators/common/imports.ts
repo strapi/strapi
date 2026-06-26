@@ -1,14 +1,14 @@
-'use strict';
+import * as ts from 'typescript';
 
-const { factory } = require('typescript');
+const { factory } = ts;
 
-const imports = [];
+const imports: string[] = [];
 
-function getImports() {
+export function getImports(): string[] {
   return imports;
 }
 
-function addImport(type) {
+export function addImport(type: string): void {
   const hasType = imports.includes(type);
 
   if (!hasType) {
@@ -16,7 +16,7 @@ function addImport(type) {
   }
 }
 
-function generateImportDefinition() {
+export function generateImportDefinition(): ts.ImportDeclaration[] {
   const formattedImports = imports
     .sort()
     .map((key) => factory.createImportSpecifier(false, undefined, factory.createIdentifier(key)));
@@ -30,5 +30,3 @@ function generateImportDefinition() {
     ),
   ];
 }
-
-module.exports = { getImports, addImport, generateImportDefinition };

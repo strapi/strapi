@@ -1,23 +1,21 @@
-'use strict';
+import * as ts from 'typescript';
+import _ from 'lodash/fp';
 
-const ts = require('typescript');
-const _ = require('lodash/fp');
-
-const { addImport } = require('../imports');
-const { getTypeNode, toTypeLiteral, withAttributeNamespace, NAMESPACES } = require('./utils');
-const mappers = require('./mappers');
+import { addImport } from '../imports';
+import { getTypeNode, toTypeLiteral, withAttributeNamespace, NAMESPACES } from './utils';
+import type { Attribute, Schema } from './utils';
+import { mappers } from './mappers';
 
 const { factory } = ts;
 
 /**
  * Create the base type node for a given attribute
- *
- * @param {string} attributeName
- * @param {object} attribute
- * @param {string} uid
- * @returns {object}
  */
-const getAttributeType = (attributeName, attribute, uid) => {
+export const getAttributeType = (
+  attributeName: string,
+  attribute: Attribute,
+  uid?: string
+): ts.TypeReferenceNode | null => {
   if (!Object.keys(mappers).includes(attribute.type)) {
     console.warn(
       `"${attributeName}" attribute from "${uid}" has an invalid type: "${attribute.type}"`
@@ -36,12 +34,9 @@ const getAttributeType = (attributeName, attribute, uid) => {
 
 /**
  * Collect every modifier node from an attribute
- *
- * @param {object} attribute
- * @returns {object[]}
  */
-const getAttributeModifiers = (attribute) => {
-  const modifiers = [];
+export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
+  const modifiers: ts.TypeNode[] = [];
 
   // Required
   if (attribute.required) {
@@ -76,7 +71,7 @@ const getAttributeModifiers = (attribute) => {
   // Custom field
   if (attribute.customField) {
     const customFieldUid = factory.createStringLiteral(attribute.customField);
-    const typeArguments = [customFieldUid];
+    const typeArguments: any[] = [customFieldUid];
 
     if (attribute.options) {
       typeArguments.push(toTypeLiteral(attribute.options));
@@ -114,7 +109,7 @@ const getAttributeModifiers = (attribute) => {
       throw new Error('typeof min/max values mismatch');
     }
 
-    let typeKeyword;
+    let typeKeyword: any;
 
     // use 'string'
     if (typeofMin === 'string' || typeofMax === 'string') {
@@ -168,13 +163,12 @@ const getAttributeModifiers = (attribute) => {
 
 /**
  * Generate a property signature node for a given attribute
- *
- * @param {object} schema
- * @param {string} attributeName
- * @param {object} attribute
- * @returns {object}
  */
-const attributeToPropertySignature = (schema, attributeName, attribute) => {
+export const attributeToPropertySignature = (
+  schema: Schema,
+  attributeName: string,
+  attribute: Attribute
+): ts.PropertySignature | null => {
   const baseType = getAttributeType(attributeName, attribute, schema.uid);
 
   if (baseType === null) {
@@ -193,9 +187,4 @@ const attributeToPropertySignature = (schema, attributeName, attribute) => {
   );
 };
 
-module.exports = {
-  attributeToPropertySignature,
-  mappers,
-  getAttributeModifiers,
-  getAttributeType,
-};
+export { mappers };
