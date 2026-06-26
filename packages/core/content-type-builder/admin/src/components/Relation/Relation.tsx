@@ -5,11 +5,18 @@ import { getRelationType } from '../../utils/getRelationType';
 import { RelationFormBox } from './RelationField/RelationField';
 import { RelationNaturePicker } from './RelationNaturePicker/RelationNaturePicker';
 
+import type { FormChangeHandler } from '../../types';
+
 interface RelationProps {
-  formErrors: Record<string, any>;
+  formErrors: Record<string, { id?: string } | undefined>;
   mainBoxHeader: string;
-  modifiedData: Record<string, any>;
-  onChange: (value: any) => void;
+  modifiedData: {
+    name?: string;
+    relation?: string;
+    target?: string;
+    targetAttribute?: string | null;
+  };
+  onChange: FormChangeHandler<string>;
   naturePickerType: string;
   targetUid: string;
 }

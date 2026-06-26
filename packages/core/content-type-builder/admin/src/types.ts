@@ -6,6 +6,18 @@ export type IntlLabel = {
   values?: Record<string, any>;
 };
 
+export type FormChange<TValue = unknown, TType extends string = string> = {
+  target: {
+    name: string;
+    value: TValue;
+    type?: TType;
+  };
+};
+
+export type FormChangeHandler<TValue = unknown, TType extends string = string> = (
+  value: FormChange<TValue, TType>
+) => void;
+
 export type DifferentAttributesKind = 'Populatable' | 'NonPopulatable' | 'Any';
 
 export type Status = 'UNCHANGED' | 'CHANGED' | 'REMOVED' | 'NEW';
