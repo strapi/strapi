@@ -840,7 +840,7 @@ export default {
       }
     }
 
-    const entitiesIds = entities.map((document) => document.documentId);
+    const entitiesIds = entities.map((document: any) => document.documentId);
 
     const { count } = await documentManager.unpublishMany(entitiesIds, model, { locale });
 

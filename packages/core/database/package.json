@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
+    "@types/jest": "29.5.2",
     "eslint-config-custom": "5.49.0",
     "tsconfig": "5.49.0",
     "vitest": "catalog:",

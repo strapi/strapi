@@ -3,6 +3,7 @@
   "include": ["./shared", "./server", "./admin"],
   "compilerOptions": {
     "declarationDir": "./dist",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "rootDir": "."
   }
 }
