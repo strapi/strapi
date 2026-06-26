@@ -11,7 +11,7 @@ import {
   Portal,
   Typography,
 } from '@strapi/design-system';
-import { Crop, Link } from '@strapi/icons';
+import { ArrowsHorizontal, ArrowsVertical, Crop, Link } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
@@ -179,7 +179,6 @@ const FieldNumberInput = styled(NumberInput)`
   width: 8.4rem;
 `;
 
-// TODO: replace with icons from design system when available
 const LabelIcon = styled(Field.Label)`
   display: flex;
   align-items: center;
@@ -495,7 +494,9 @@ export const AssetCropEditor = ({
                 <Flex alignItems="center" gap={2}>
                   <Flex direction="column" gap={2}>
                     <FieldRow name="crop-width" gap={2}>
-                      <LabelIcon textColor={infoTextColor}>↔</LabelIcon>
+                      <LabelIcon textColor={infoTextColor}>
+                        <ArrowsHorizontal />
+                      </LabelIcon>
                       <FieldNumberInput
                         aria-label={formatMessage({
                           id: getTranslationKey('asset-details.crop.width'),
@@ -510,7 +511,9 @@ export const AssetCropEditor = ({
                       />
                     </FieldRow>
                     <FieldRow name="crop-height" gap={2}>
-                      <LabelIcon textColor={infoTextColor}>↕</LabelIcon>
+                      <LabelIcon textColor={infoTextColor}>
+                        <ArrowsVertical />
+                      </LabelIcon>
                       <FieldNumberInput
                         aria-label={formatMessage({
                           id: getTranslationKey('asset-details.crop.height'),
