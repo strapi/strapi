@@ -26,6 +26,8 @@ type CustomFieldOptionInput =
   | 'text-area-enum'
   | 'select-number'
   | 'radio-group'
+  // Preserve autocomplete for built-in input types while allowing plugin-registered CTB components.
+  // eslint-disable-next-line @typescript-eslint/ban-types -- intentional autocomplete-preserving widen
   | (string & {});
 
 type CustomFieldOptionName =
