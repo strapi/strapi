@@ -1023,6 +1023,15 @@ export const createEntityManager = (db: Database): EntityManager => {
                   {
                     [joinColumn.name]: id,
                     order: this.createQueryBuilder(joinTable.name)
+                      .min('order')
+                      .where({ [joinColumn.name]: id })
+                      .where(joinTable.on || {})
+                      .transacting(trx)
+                      .getKnexQuery(),
+                  },
+                  {
+                    [joinColumn.name]: id,
+                    order: this.createQueryBuilder(joinTable.name)
                       .max('order')
                       .where({ [joinColumn.name]: id })
                       .where(joinTable.on || {})
@@ -1032,9 +1041,9 @@ export const createEntityManager = (db: Database): EntityManager => {
                 ],
               })
               .where(joinTable.on || {})
+              .orderBy('order')
               .transacting(trx)
               .execute<Array<Record<string, any>>>();
-
             if (!isEmpty(idsToDelete)) {
               const where = {
                 $or: idsToDelete.map((item: any) => {
@@ -1252,6 +1261,15 @@ export const createEntityManager = (db: Database): EntityManager => {
                       {
                         [joinColumn.name]: id,
                         [orderColumnName]: this.createQueryBuilder(joinTable.name)
+                          .min(orderColumnName)
+                          .where({ [joinColumn.name]: id })
+                          .where(joinTable.on || {})
+                          .transacting(trx)
+                          .getKnexQuery(),
+                      },
+                      {
+                        [joinColumn.name]: id,
+                        [orderColumnName]: this.createQueryBuilder(joinTable.name)
                           .max(orderColumnName)
                           .where({ [joinColumn.name]: id })
                           .where(joinTable.on || {})
@@ -1261,6 +1279,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                     ],
                   })
                   .where(joinTable.on || {})
+                  .orderBy(orderColumnName)
                   .transacting(trx)
                   .execute<Array<Record<string, any>>>();
 
