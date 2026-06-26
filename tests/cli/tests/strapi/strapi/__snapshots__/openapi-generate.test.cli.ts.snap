@@ -26373,7 +26373,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "type": "string",
                   },
                   "role": {
-                    "type": "number",
+                    "anyOf": [
+                      {
+                        "type": "number",
+                      },
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "connect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "disconnect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    ],
                   },
                   "username": {
                     "type": "string",
@@ -27698,7 +27755,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "type": "string",
                   },
                   "role": {
-                    "type": "number",
+                    "anyOf": [
+                      {
+                        "type": "number",
+                      },
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "connect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "disconnect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    ],
                   },
                   "username": {
                     "type": "string",

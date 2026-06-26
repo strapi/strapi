@@ -278,6 +278,7 @@
   "preview.error.relations-not-handled": "Inline editing for relations is not currently supported.",
   "preview.error.incomplete-strapi-source": "This field is missing some required preview information",
   "preview.error.different-document": "This field comes from a different document",
+  "preview.error.script-failed": "Could not load the live preview script. Visual editing may not be available.",
   "relation.create": "Create a relation",
   "relation.add": "Add or create a relation",
   "relation.disconnect": "Remove",
