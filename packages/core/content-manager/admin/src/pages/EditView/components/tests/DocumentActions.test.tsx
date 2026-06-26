@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { DocumentActions, DocumentActionsMenu } from '../DocumentActions';
+import { DocumentActions, DocumentActionsMenu, openPublishConfirmDialog } from '../DocumentActions';
 
 describe('DocumentActions', () => {
   it('it should render a single button when there is only one action', () => {
@@ -54,7 +54,76 @@ describe('DocumentActions', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
+  it('should show the save keyboard shortcut hint on the primary action by default', async () => {
+    const { user } = render(
+      <DocumentActions actions={[{ id: '1', label: 'Save', onClick: jest.fn() }]} />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Save' }));
+
+    expect((await screen.findAllByText('Ctrl / Cmd + Enter to save')).length).toBeGreaterThan(0);
+  });
+
+  it('should show the publish keyboard shortcut hint when the primary action is a publish action', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[{ id: '1', label: 'Publish', type: 'publish', onClick: jest.fn() }]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(
+      (await screen.findAllByText('Ctrl / Cmd + Shift + Enter to publish')).length
+    ).toBeGreaterThan(0);
+  });
+
+  it('should show the save keyboard shortcut hint on the secondary action', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          { id: '1', label: 'Publish', type: 'publish', onClick: jest.fn() },
+          { id: '2', label: 'Save', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Save' }));
+
+    expect((await screen.findAllByText('Ctrl / Cmd + Enter to save')).length).toBeGreaterThan(0);
+  });
+
+  it('should show the publish keyboard shortcut hint on the secondary action', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          { id: '1', label: 'Save', onClick: jest.fn() },
+          { id: '2', label: 'Publish', type: 'publish', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(
+      (await screen.findAllByText('Ctrl / Cmd + Shift + Enter to publish')).length
+    ).toBeGreaterThan(0);
+  });
+
+  it('should not show a keyboard shortcut hint when the action is disabled', async () => {
+    const { user } = render(
+      <DocumentActions actions={[{ id: '1', label: 'Save', onClick: jest.fn(), disabled: true }]} />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Save' }));
+
+    expect(screen.queryByText('Ctrl / Cmd + Enter to save')).not.toBeInTheDocument();
   });
 
   it('should render a notification if either of the button actions has been pressed and the notification dialog props are provided', async () => {
@@ -89,6 +158,124 @@ describe('DocumentActions', () => {
 
     expect(screen.getByText('Action 2 pressed!')).toBeInTheDocument();
     expect(onClick2).toHaveBeenCalled();
+  });
+
+  it('should not open the dialog when a publish confirm scope is registered but not requested', async () => {
+    render(
+      <DocumentActions
+        actions={[
+          {
+            id: '1',
+            type: 'publish',
+            label: 'Publish',
+            onClick: jest.fn(),
+            publishConfirmScope: 'panel',
+            dialog: {
+              type: 'dialog',
+              title: 'Confirmation',
+              content: 'Draft relations will not be included.',
+              confirmLabel: 'Publish without relations',
+              onConfirm: jest.fn(),
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('should open the dialog when the publish confirm opener is called', async () => {
+    const onConfirm = jest.fn();
+
+    render(
+      <DocumentActions
+        actions={[
+          {
+            id: '1',
+            type: 'publish',
+            label: 'Publish',
+            onClick: jest.fn(),
+            publishConfirmScope: 'panel',
+            dialog: {
+              type: 'dialog',
+              title: 'Confirmation',
+              content: 'Draft relations will not be included.',
+              confirmLabel: 'Publish without relations',
+              onConfirm,
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+
+    openPublishConfirmDialog('panel');
+
+    expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+    expect(screen.getByText('Draft relations will not be included.')).toBeInTheDocument();
+  });
+
+  it('should render a custom confirm label when provided', async () => {
+    const onConfirm = jest.fn();
+
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          {
+            id: '1',
+            label: 'Publish',
+            onClick: jest.fn(),
+            dialog: {
+              type: 'dialog',
+              title: 'Confirmation',
+              content: 'Draft relations will not be included.',
+              confirmLabel: 'Publish without relations',
+              onConfirm,
+            },
+          },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(screen.getByRole('button', { name: 'Publish without relations' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Publish without relations' }));
+
+    expect(onConfirm).toHaveBeenCalled();
+  });
+
+  it('should center dialog content with a warning icon when bodyIcon is set', async () => {
+    const { user } = render(
+      <DocumentActions
+        actions={[
+          {
+            id: '1',
+            label: 'Publish',
+            onClick: jest.fn(),
+            dialog: {
+              type: 'dialog',
+              title: 'Confirmation',
+              bodyIcon: 'danger',
+              content: 'Draft relations will not be included.',
+              confirmLabel: 'Publish without relations',
+              onConfirm: jest.fn(),
+            },
+          },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    expect(screen.getByText('Draft relations will not be included.')).toHaveAttribute(
+      'id',
+      'confirm-description'
+    );
   });
 
   it('should render a dialog if either of the button actions has been pressed and the dialog props are provided', async () => {
@@ -200,7 +387,10 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it("should render an actions's icon if provided", async () => {

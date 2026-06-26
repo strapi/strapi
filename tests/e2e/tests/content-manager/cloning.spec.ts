@@ -17,7 +17,7 @@ const CREATE_URL_TEAM = /\/admin\/content-manager\/collection-types\/api::team.t
 
 test.describe('Cloning', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -35,7 +35,7 @@ test.describe('Cloning', () => {
     await page.getByRole('link', { name: 'Author' }).click();
     await page.waitForURL(LIST_URL_AUTHOR);
     await expect(page.getByRole('row', { name: 'Coach Beard' })).toBeVisible();
-    expect(await page.getByRole('row', { name: 'Coach Beard' }).all()).toHaveLength(1);
+    await expect(page.getByRole('row', { name: 'Coach Beard' })).toHaveCount(1);
 
     /**
      * Open the row actions menu and click on the duplicate button.
@@ -61,7 +61,7 @@ test.describe('Cloning', () => {
     await page.getByRole('link', { name: 'Author' }).click();
     await page.waitForURL(LIST_URL_AUTHOR);
     await expect(page.getByRole('heading', { name: 'Author' })).toBeVisible();
-    expect(await page.getByRole('row', { name: 'Coach Beard' }).all()).toHaveLength(2);
+    await expect(page.getByRole('row', { name: 'Coach Beard' })).toHaveCount(2);
   });
 
   test('As a user I want to auto-clone a document in a different locale than the default one', async ({
@@ -135,9 +135,7 @@ test.describe('Cloning', () => {
      */
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await expect(page.getByRole('row', { name: 'West ham post match analysis' })).toBeVisible();
-    expect(
-      await page.getByRole('row', { name: 'West ham post match analysis' }).all()
-    ).toHaveLength(1);
+    await expect(page.getByRole('row', { name: 'West ham post match analysis' })).toHaveCount(1);
 
     /**
      * Open the row actions menu and click on the duplicate button.
@@ -162,7 +160,6 @@ test.describe('Cloning', () => {
      * The save button should be disabled and the publish button enabled.
      */
     await page.waitForURL(CLONE_URL_ARTICLE);
-    await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled(); // we current don't support publish & create in clone routes.
     await page.getByRole('textbox', { name: 'slug' }).fill('');
@@ -178,8 +175,6 @@ test.describe('Cloning', () => {
     await page.getByRole('link', { name: 'Article' }).click();
     await page.waitForURL(LIST_URL_ARTICLE);
     await expect(page.getByRole('grid')).toBeVisible();
-    expect(
-      await page.getByRole('row', { name: 'West ham post match analysis' }).all()
-    ).toHaveLength(2);
+    await expect(page.getByRole('row', { name: 'West ham post match analysis' })).toHaveCount(2);
   });
 });

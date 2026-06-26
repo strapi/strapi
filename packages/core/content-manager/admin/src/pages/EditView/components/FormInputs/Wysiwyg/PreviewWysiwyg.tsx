@@ -1,26 +1,17 @@
 import * as React from 'react';
 
-import sanitizeHtml from 'sanitize-html';
 import { styled } from 'styled-components';
 
 import { md } from './utils/mdRenderer';
+import { sanitize } from './utils/sanitizer';
 
 interface PreviewWysiwygProps {
   data?: string;
 }
 
-const PreviewWysiwyg = ({ data = '' }: PreviewWysiwygProps) => {
+const PreviewWysiwyg = ({ data }: PreviewWysiwygProps) => {
   const html = React.useMemo(
-    () =>
-      sanitizeHtml(md.render(data.replaceAll('\\n', '\n') || ''), {
-        ...sanitizeHtml.defaults,
-        allowedTags: false,
-        allowedAttributes: {
-          '*': ['href', 'align', 'alt', 'center', 'width', 'height', 'type', 'controls', 'target'],
-          img: ['src', 'alt'],
-          source: ['src', 'type'],
-        },
-      }),
+    () => sanitize(md.render((data ?? '').replaceAll('\\n', '\n'))),
     [data]
   );
 
@@ -58,23 +49,35 @@ const Wrapper = styled.div`
   }
 
   h1 {
-    font-size: 3.6rem;
+    font-size: 2.8rem;
+    ${({ theme }) => theme.breakpoints.medium} {
+      font-size: 3.6rem;
+    }
     font-weight: 600;
   }
 
   h2 {
-    font-size: 3rem;
-    font-weight: 500;
+    font-size: 2.2rem;
+    ${({ theme }) => theme.breakpoints.medium} {
+      font-size: 3rem;
+    }
+    font-weight: 600;
   }
 
   h3 {
-    font-size: 2.4rem;
-    font-weight: 500;
+    font-size: 2rem;
+    ${({ theme }) => theme.breakpoints.medium} {
+      font-size: 2.4rem;
+    }
+    font-weight: 600;
   }
 
   h4 {
-    font-size: 2rem;
-    font-weight: 500;
+    font-size: 1.8rem;
+    ${({ theme }) => theme.breakpoints.medium} {
+      font-size: 2.4rem;
+    }
+    font-weight: 600;
   }
 
   strong {

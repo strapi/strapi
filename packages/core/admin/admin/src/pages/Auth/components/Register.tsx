@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
-import { useIntl } from 'react-intl';
+import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
@@ -55,24 +55,45 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
         return byteSize <= 72;
       }
     )
-    .matches(/[a-z]/, {
-      message: {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least 1 lowercase letter',
+    .test(
+      'lowercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.lowercase',
+          defaultMessage: 'Password must contain at least 1 lowercase letter',
+        },
       },
-    })
-    .matches(/[A-Z]/, {
-      message: {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      (value) => {
+        if (!value) return true;
+        return /[a-z]/.test(value);
+      }
+    )
+    .test(
+      'uppercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.uppercase',
+          defaultMessage: 'Password must contain at least 1 uppercase letter',
+        },
       },
-    })
-    .matches(/\d/, {
-      message: {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least 1 number',
+      (value) => {
+        if (!value) return true;
+        return /[A-Z]/.test(value);
+      }
+    )
+    .test(
+      'number',
+      {
+        message: {
+          id: 'components.Input.error.contain.number',
+          defaultMessage: 'Password must contain at least 1 number',
+        },
       },
-    })
+      (value) => {
+        if (!value) return true;
+        return /\d/.test(value);
+      }
+    )
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
@@ -123,24 +144,45 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
         return new TextEncoder().encode(value).length <= 72;
       }
     )
-    .matches(/[a-z]/, {
-      message: {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least 1 lowercase letter',
+    .test(
+      'lowercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.lowercase',
+          defaultMessage: 'Password must contain at least 1 lowercase letter',
+        },
       },
-    })
-    .matches(/[A-Z]/, {
-      message: {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      (value) => {
+        if (!value) return true;
+        return /[a-z]/.test(value);
+      }
+    )
+    .test(
+      'uppercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.uppercase',
+          defaultMessage: 'Password must contain at least 1 uppercase letter',
+        },
       },
-    })
-    .matches(/\d/, {
-      message: {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least 1 number',
+      (value) => {
+        if (!value) return true;
+        return /[A-Z]/.test(value);
+      }
+    )
+    .test(
+      'number',
+      {
+        message: {
+          id: 'components.Input.error.contain.number',
+          defaultMessage: 'Password must contain at least 1 number',
+        },
       },
-    })
+      (value) => {
+        if (!value) return true;
+        return /\d/.test(value);
+      }
+    )
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
@@ -187,6 +229,10 @@ interface RegisterFormValues {
   confirmPassword: string;
   registrationToken: string | undefined;
   news: boolean;
+}
+
+interface IntlFormattedMessage extends MessageDescriptor {
+  values?: Record<string, PrimitiveType>;
 }
 
 const Register = ({ hasAdmin }: RegisterProps) => {
@@ -379,15 +425,43 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               }
             } catch (err) {
               if (err instanceof ValidationError) {
-                helpers.setErrors(
-                  err.inner.reduce<Record<string, string>>((acc, { message, path }) => {
-                    if (path && typeof message === 'object') {
-                      acc[path] = formatMessage(message);
+                const formatDescriptor = (msg: any) => {
+                  try {
+                    if (!msg) return '';
+                    if (typeof msg === 'string') return msg;
+                    // Direct descriptor
+                    if ('id' in msg && 'defaultMessage' in msg) return formatMessage(msg as any);
+                    // Wrapped descriptor: { message: { id, defaultMessage } }
+                    if (msg.message && typeof msg.message === 'object' && 'id' in msg.message) {
+                      return formatMessage(msg.message as any);
                     }
+                    // errors array: [{ id, defaultMessage }]
+                    if (Array.isArray(msg.errors) && msg.errors.length > 0) {
+                      const first = msg.errors[0];
+                      if (typeof first === 'string') return first;
+                      if (first && typeof first === 'object' && 'id' in first)
+                        return formatMessage(first as any);
+                    }
+                    // fallback to defaultMessage if present
+                    if ('defaultMessage' in msg) return msg.defaultMessage;
+                    return String(msg);
+                  } catch (e) {
+                    return String(msg);
+                  }
+                };
+
+                const computed = err.inner.reduce<Record<string, string>>(
+                  (acc, { message, path }) => {
+                    if (!path) return acc;
+                    acc[path] = formatDescriptor(message);
                     return acc;
-                  }, {})
+                  },
+                  {}
                 );
+
+                helpers.setErrors(computed);
               }
+
               setSubmitCount(submitCount + 1);
             }
           }}
@@ -516,16 +590,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     </UnauthenticatedLayout>
   );
 };
-
-interface RegisterFormValues {
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  registrationToken: string | undefined;
-  news: boolean;
-}
 
 type StringKeys<T> = {
   [K in keyof T]: T[K] extends string | undefined ? K : never;

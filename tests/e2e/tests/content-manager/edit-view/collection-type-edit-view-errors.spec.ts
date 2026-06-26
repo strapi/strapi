@@ -6,7 +6,7 @@ import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -39,7 +39,7 @@ test.describe('Edit View', () => {
       await page.getByRole('link', { name: 'Create new entry' }).click();
 
       const slug = 'product-for-required-test';
-      await page.getByLabel('slug*This value is unique for').fill(slug);
+      await page.getByLabel('slug*').fill(slug);
 
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');

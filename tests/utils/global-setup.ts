@@ -32,20 +32,26 @@ export const setGuidedTourLocalStorage = async (
   page: Page,
   guidedTourState: typeof STRAPI_GUIDED_TOUR_CONFIG
 ) => {
-  // Navigate to the admin page to set localStorage
-  const port = process.env.PORT || 1337;
-  await page.goto(`http://127.0.0.1:${port}/admin`);
+  // Use a path so Playwright resolves `baseURL` from project config (e2e apps use 8000+, not 1337).
 
-  // Set a default local storage so the guided tour is disabled by default
+  await page.goto('/admin');
+
   await page.evaluate((config) => {
     localStorage.setItem('STRAPI_GUIDED_TOUR', JSON.stringify(config));
   }, guidedTourState);
 };
 
 async function globalSetup() {
-  // Create a browser context and set up localStorage
+  const port = process.env.PORT?.trim();
+  if (!port) {
+    throw new Error(
+      'globalSetup: PORT is not set. Run e2e via `yarn test:e2e` so the browser runner sets PORT (same port as the Playwright webServer).'
+    );
+  }
   const browser = await chromium.launch();
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    baseURL: `http://127.0.0.1:${port}`,
+  });
   const page = await context.newPage();
 
   await setGuidedTourLocalStorage(page, STRAPI_GUIDED_TOUR_CONFIG);

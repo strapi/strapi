@@ -1,6 +1,6 @@
-export interface FeaturesConfig {
-  future?: object;
-}
+import type { Features } from '../core/config/features';
+
+export type FeaturesConfig = Features;
 
 export interface FeaturesService {
   /**

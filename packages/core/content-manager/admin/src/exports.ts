@@ -20,6 +20,7 @@ export type {
   ListFieldLayout,
   ListLayout,
 } from './hooks/useDocumentLayout';
+export type { InjectableListViewFilter } from './constants/hooks';
 export * from './features/DocumentRBAC';
 export type {
   EditViewContext,
@@ -27,6 +28,7 @@ export type {
   BulkActionComponent,
   BulkActionComponentProps,
   BulkActionDescription,
+  ContentManagerPlugin,
   DescriptionComponent,
   DescriptionReducer,
   PanelComponentProps,
@@ -39,3 +41,8 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './content-manager';
+export type {
+  RichTextBlocksStore,
+  SelectorBlock,
+  NonSelectorBlock,
+} from './pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';

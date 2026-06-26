@@ -46,6 +46,11 @@ export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
 export type SanitizedAdminUser = Omit<AdminUser, 'password' | 'resetPasswordToken' | 'roles'> & {
   roles: SanitizedAdminRole[];
 };
+
+export type AdminTokenOwner = Pick<
+  AdminUser,
+  'id' | 'firstname' | 'lastname' | 'username' | 'email'
+>;
 export interface AdminRole extends Entity {
   name: string;
   code: string;

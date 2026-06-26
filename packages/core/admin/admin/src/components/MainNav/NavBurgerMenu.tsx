@@ -1,4 +1,4 @@
-import { Box, FocusTrap, Portal, ScrollArea } from '@strapi/design-system';
+import { Box, FocusTrap, Portal, ScrollArea, Flex, Divider } from '@strapi/design-system';
 import { motion, AnimatePresence } from 'motion/react';
 import { styled } from 'styled-components';
 
@@ -57,21 +57,28 @@ export const NavBurgerMenu = ({
             >
               <Surface>
                 <ScrollArea>
-                  <Box
+                  <Flex
                     tag="ul"
+                    direction="column"
+                    alignItems="stretch"
+                    width="100%"
                     paddingLeft={{ initial: 4, medium: 6 }}
                     paddingRight={{ initial: 4, medium: 6 }}
-                    paddingTop={{ initial: 1, medium: 3 }}
+                    paddingTop={{ initial: 4, medium: 3 }}
                     paddingBottom={{ initial: 4, medium: 6 }}
+                    gap={3}
                   >
                     <MainNavBurgerMenuLinks
                       listLinks={listLinks}
                       handleClickOnLink={handleClickOnLink}
                     />
-                    <Box paddingTop={4} tag="li">
+                    <Box tag="li">
+                      <Divider />
+                    </Box>
+                    <Box paddingLeft={2} paddingRight={2} paddingTop={1} paddingBottom={1} tag="li">
                       <NavUser showDisplayName />
                     </Box>
-                  </Box>
+                  </Flex>
                 </ScrollArea>
               </Surface>
             </MotionLayer>

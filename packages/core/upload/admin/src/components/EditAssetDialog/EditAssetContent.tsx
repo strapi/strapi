@@ -32,17 +32,30 @@ import { DialogHeader } from './DialogHeader';
 import { PreviewBox } from './PreviewBox/PreviewBox';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
 
-import type { File as FileDefinition, RawFile } from '../../../../shared/contracts/files';
+import type {
+  File as FileDefinition,
+  RawFile,
+  FocalPoint,
+} from '../../../../shared/contracts/files';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
   min-height: ${() => `calc(60dvh + 8rem)`};
 `;
 
+const focalPointSchema = yup
+  .object({
+    x: yup.number().min(0).max(100).required(),
+    y: yup.number().min(0).max(100).required(),
+  })
+  .nullable()
+  .default(null);
+
 const fileInfoSchema = yup.object({
   name: yup.string().required(),
   alternativeText: yup.string(),
   caption: yup.string(),
+  focalPoint: focalPointSchema,
   folder: yup.number(),
 });
 
@@ -54,6 +67,7 @@ export interface Asset extends Omit<FileDefinition, 'folder'> {
 
 interface EditAssetContentProps {
   asset?: Asset;
+  initialFolderId?: string | number | null;
   canUpdate?: boolean;
   canCopyLink?: boolean;
   canDownload?: boolean;
@@ -67,15 +81,30 @@ interface FormInitialData {
   name?: string;
   alternativeText?: string;
   caption?: string;
+  focalPoint?: FocalPoint | null;
   parent?: {
     value?: number;
     label: string;
   };
 }
 
+const toFolderId = (value: string | number | null | undefined): number | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export const EditAssetContent = ({
   onClose,
   asset,
+  initialFolderId = null,
   canUpdate = false,
   canCopyLink = false,
   canDownload = false,
@@ -87,6 +116,7 @@ export const EditAssetContent = ({
   const { trackUsage } = useTracking();
   const submitButtonRef = React.useRef<HTMLButtonElement>(null);
   const [isCropping, setIsCropping] = React.useState(false);
+  const [isFocalPointMode, setIsFocalPointMode] = React.useState(false);
   const [replacementFile, setReplacementFile] = React.useState<File | undefined>();
   const { editAsset, isLoading } = useEditAsset();
 
@@ -132,7 +162,15 @@ export const EditAssetContent = ({
     onClose();
   };
 
-  const formDisabled = !canUpdate || isCropping;
+  const handleFocalPointStart = () => {
+    setIsFocalPointMode(true);
+  };
+
+  const handleFocalPointCancel = () => {
+    setIsFocalPointMode(false);
+  };
+
+  const formDisabled = !canUpdate || isCropping || isFocalPointMode;
 
   const handleConfirmClose = () => {
     // eslint-disable-next-line no-alert
@@ -148,11 +186,12 @@ export const EditAssetContent = ({
     }
   };
 
-  const activeFolderId = asset?.folder?.id;
+  const activeFolderId = asset?.folder?.id ?? toFolderId(initialFolderId);
   const initialFormData = !folderStructureIsLoading && {
     name: asset?.name,
     alternativeText: asset?.alternativeText ?? undefined,
     caption: asset?.caption ?? undefined,
+    focalPoint: asset?.focalPoint ?? null,
     parent: {
       value: activeFolderId ?? undefined,
       label:
@@ -214,6 +253,13 @@ export const EditAssetContent = ({
                   onCropCancel={handleCancelCropping}
                   replacementFile={replacementFile}
                   trackedLocation={trackedLocation}
+                  formFocalPoint={values.focalPoint}
+                  onFocalPointStart={handleFocalPointStart}
+                  onFocalPointFinish={(focalPoint) => {
+                    setIsFocalPointMode(false);
+                    setFieldValue('focalPoint', focalPoint);
+                  }}
+                  onFocalPointCancel={handleFocalPointCancel}
                 />
               </Grid.Item>
               <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
@@ -261,6 +307,18 @@ export const EditAssetContent = ({
                           }),
                           value: asset?.id ? asset.id : null,
                         },
+
+                        ...(values.focalPoint
+                          ? [
+                              {
+                                label: formatMessage({
+                                  id: getTrad('modal.file-details.focal-point'),
+                                  defaultMessage: 'Focal point',
+                                }),
+                                value: `x: ${values.focalPoint.x}% - y: ${values.focalPoint.y}%`,
+                              },
+                            ]
+                          : []),
                       ]}
                     />
                     <Field.Root name="name" error={errors.name}>
