@@ -14,19 +14,19 @@ const createRegisterSchema = (config) =>
     password: yup
       .string()
       .required()
-      .test(function (value) {
-        if (!value) return true;
+      .test(function validateRegisterPasswordMaxLength(value) {
+        if (Boolean(value) === false) return true;
         const isValid = new TextEncoder().encode(value).length <= 72;
-        if (!isValid) {
+        if (Boolean(isValid) === false) {
           return this.createError({ message: 'Password must be less than 73 bytes' });
         }
         return true;
       })
-      .test(async function (value) {
+      .test(async function validateRegisterPassword(value) {
         if (typeof config?.validatePassword === 'function') {
           try {
             const isValid = await config.validatePassword(value);
-            if (!isValid) {
+            if (Boolean(isValid) === false) {
               return this.createError({ message: 'Password validation failed.' });
             }
           } catch (error) {
@@ -57,19 +57,19 @@ const createResetPasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .test(function (value) {
-          if (!value) return true;
+        .test(function validateResetPasswordMaxLength(value) {
+          if (Boolean(value) === false) return true;
           const isValid = new TextEncoder().encode(value).length <= 72;
-          if (!isValid) {
+          if (Boolean(isValid) === false) {
             return this.createError({ message: 'Password must be less than 73 bytes' });
           }
           return true;
         })
-        .test(async function (value) {
+        .test(async function validateResetPassword(value) {
           if (typeof config?.validatePassword === 'function') {
             try {
               const isValid = await config.validatePassword(value);
-              if (!isValid) {
+              if (Boolean(isValid) === false) {
                 return this.createError({ message: 'Password validation failed.' });
               }
             } catch (error) {
@@ -93,19 +93,19 @@ const createChangePasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .test(function (value) {
-          if (!value) return true;
+        .test(function validateChangePasswordMaxLength(value) {
+          if (Boolean(value) === false) return true;
           const isValid = new TextEncoder().encode(value).length <= 72;
-          if (!isValid) {
+          if (Boolean(isValid) === false) {
             return this.createError({ message: 'Password must be less than 73 bytes' });
           }
           return true;
         })
-        .test(async function (value) {
+        .test(async function validateChangePassword(value) {
           if (typeof config?.validatePassword === 'function') {
             try {
               const isValid = await config.validatePassword(value);
-              if (!isValid) {
+              if (Boolean(isValid) === false) {
                 return this.createError({ message: 'Password validation failed.' });
               }
             } catch (error) {
