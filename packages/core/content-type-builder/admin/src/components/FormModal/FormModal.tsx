@@ -456,11 +456,7 @@ export const FormModal = () => {
   };
 
   const handleChange = React.useCallback(
-    ({
-      target: { name, value, type, ...rest },
-    }: {
-      target: { name: string; value: string | string[]; type: string };
-    }) => {
+    ({ target: { name, value } }: { target: { name: string; value: string | string[] } }) => {
       const namesThatCanResetToNullValue = [
         'enumName',
         'max',
@@ -841,7 +837,7 @@ export const FormModal = () => {
         // The modal is addComponentToDynamicZone
         if (isInFirstComponentStep) {
           if (isCreatingComponentFromAView) {
-            const { category, type, ...rest } = modifiedData.componentToCreate;
+            const { category, type: _type, ...rest } = modifiedData.componentToCreate;
             const componentUid = createComponentUid(
               modifiedData.componentToCreate.displayName,
               category

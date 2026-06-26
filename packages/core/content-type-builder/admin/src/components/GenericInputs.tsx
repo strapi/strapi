@@ -131,7 +131,7 @@ const GenericInput = ({
   step,
   type,
   value: defaultValue,
-  isNullable,
+  isNullable: _isNullable,
   autoFocus,
   attribute,
   attributeName,

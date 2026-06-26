@@ -166,7 +166,9 @@ const MessageContent = ({
       <MarkdownStyles>
         <Markdown
           components={{
-            a: ({ node, ...props }) => <a target="_blank" rel="noopener noreferrer" {...props} />,
+            a: ({ node: _node, ...props }) => (
+              <a target="_blank" rel="noopener noreferrer" {...props} />
+            ),
           }}
         >
           {part.text}
@@ -275,5 +277,5 @@ export const ChatMessage = ({
   if (message.role === 'user') {
     return <UserMessage message={message as UserMessageType} />;
   }
-  return <AssistantMessage message={message as AssistantMessageType} />;
+  return <AssistantMessage message={message as AssistantMessageType} isLoading={isLoading} />;
 };
