@@ -25,7 +25,10 @@ type CustomFieldOptionInput =
   | 'select-date'
   | 'text-area-enum'
   | 'select-number'
-  | 'radio-group';
+  | 'radio-group'
+  // Preserve autocomplete for built-in input types while allowing plugin-registered CTB components.
+  // eslint-disable-next-line @typescript-eslint/ban-types -- intentional autocomplete-preserving widen
+  | (string & {});
 
 type CustomFieldOptionName =
   | 'min'
@@ -37,7 +40,8 @@ type CustomFieldOptionName =
   | 'enum'
   | 'unique'
   | 'private'
-  | 'default';
+  | 'default'
+  | `options.${string}`;
 
 interface CustomFieldOption {
   intlLabel: MessageDescriptor & {
@@ -206,7 +210,8 @@ const optionsValidationReducer = (
   } else {
     acc.push({
       isValidOptionPath:
-        option.name.startsWith('options') || ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name),
+        option.name.startsWith('options') ||
+        (ALLOWED_ROOT_LEVEL_OPTIONS as readonly string[]).includes(option.name),
       errorMessage: `'${option.name}' must be prefixed with 'options.'`,
     });
   }
