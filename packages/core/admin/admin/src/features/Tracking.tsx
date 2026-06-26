@@ -584,7 +584,7 @@ const useTracking = (): UseTrackingReturn => {
 
       return null;
     },
-    [telemetryProperties, userId, uuid]
+    [deviceType, telemetryProperties, userId, uuid]
   );
 
   return { trackUsage };
