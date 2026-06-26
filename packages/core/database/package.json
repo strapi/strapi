@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "5.33.2",
+  "version": "5.49.0",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/database"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -38,27 +39,31 @@
     "lint": "run -T tsc --noEmit && run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/utils": "5.33.2",
-    "ajv": "8.16.0",
+    "@strapi/utils": "5.49.0",
+    "ajv": "8.20.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
-    "fs-extra": "11.2.0",
+    "fs-extra": "11.3.4",
     "knex": "3.0.1",
-    "lodash": "4.17.21",
-    "semver": "7.5.4",
+    "lodash": "4.18.1",
+    "semver": "7.7.4",
     "umzug": "3.8.1"
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.33.2",
-    "tsconfig": "5.33.2"
+    "eslint-config-custom": "5.49.0",
+    "tsconfig": "5.49.0",
+    "vitest": "catalog:",
+    "vitest-config": "5.49.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

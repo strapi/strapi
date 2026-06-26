@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi
+      POSTGRES_DB: strapi
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+
+  mysql:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_DATABASE: strapi
+      MYSQL_USER: strapi
+      MYSQL_PASSWORD: strapi
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: strapi
+    volumes:
+      - mysqldata:/var/lib/mysql
+    ports:
+      - '${MYSQL_PORT:-3306}:3306'
+
+  mariadb:
+    image: mariadb:11
+    restart: always
+    environment:
+      MARIADB_DATABASE: strapi
+      MARIADB_USER: strapi
+      MARIADB_PASSWORD: strapi
+      MARIADB_ROOT_PASSWORD: strapi
+    volumes:
+      - mariadbdata:/var/lib/mysql
+    ports:
+      - '${MARIADB_PORT:-3307}:3306'
+
+volumes:
+  pgdata:
+  mysqldata:
+  mariadbdata:

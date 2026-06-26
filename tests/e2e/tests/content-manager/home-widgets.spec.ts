@@ -1,11 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import {
+  clickAndWait,
+  findAndClose,
+  navToHeader,
+  publishAndConfirmDraftRelations,
+} from '../../../utils/shared';
 
 test.describe('Homepage - Content Manager Widgets', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -40,7 +45,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
     // Make content update in the CM
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await page.getByRole('button', { name: /publish/i }).click();
+    await publishAndConfirmDraftRelations(page, page.getByRole('button', { name: /publish/i }));
     await findAndClose(page, 'Published document');
 
     // Go back to the home page, the published entry should be the first in the table with published status
@@ -139,7 +144,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
     // Publish an entry
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-    await page.getByRole('button', { name: /publish/i }).click();
+    await publishAndConfirmDraftRelations(page, page.getByRole('button', { name: /publish/i }));
     await findAndClose(page, 'Published document');
 
     // Modify an entry

@@ -1,5 +1,8 @@
-import { Decipheriv, scryptSync, CipherKey, BinaryLike, createDecipheriv } from 'crypto';
-import { EncryptionStrategy, Strategies, Algorithm } from '../../../types';
+import { scryptSync, CipherKey, BinaryLike, createDecipheriv } from 'crypto';
+import { EncryptionStrategy, Strategies, Algorithm } from '../../types';
+
+// @types/node 20.x names this class Decipher; 24.x renames it to Decipheriv. Derive via ReturnType so signatures hold across both.
+type Decipheriv = ReturnType<typeof createDecipheriv>;
 
 // different key values depending on algorithm chosen
 const getDecryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {

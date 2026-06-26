@@ -68,3 +68,54 @@ export const UploadProgressWrapper = styled.div`
   height: 100%;
   width: 100%;
 `;
+
+export const FocalPointActionRow = styled(Flex)`
+  z-index: 1;
+  height: 5.2rem;
+  position: absolute;
+  background-color: rgba(33, 33, 52, 0.4);
+  width: 100%;
+`;
+
+export const FocalPointImageWrapper = styled.div`
+  display: inline-block;
+  position: relative;
+`;
+
+interface FocalPointAimProps {
+  $focalPoint: { x: number; y: number };
+}
+
+export const FocalPointAim = styled.div<FocalPointAimProps>`
+  position: absolute;
+  pointer-events: none;
+  left: ${({ $focalPoint }) => $focalPoint.x}%;
+  top: ${({ $focalPoint }) => $focalPoint.y}%;
+
+  &:before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 2px solid ${({ theme }) => theme.colors.primary700};
+    border-radius: 50%;
+    background-color: ${({ theme }) => theme.colors.primary500};
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+`;
+
+export const FocalPointHalo = styled.div`
+  &:before {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border: 1px solid ${({ theme }) => theme.colors.neutral500};
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+`;

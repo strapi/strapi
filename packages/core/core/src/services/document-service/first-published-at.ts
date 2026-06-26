@@ -18,11 +18,18 @@ const addFirstPublishedAtToDraft = async (
     return draft;
   }
 
-  return update(draft, {
-    data: {
-      firstPublishedAt: Date.now(),
-    },
+  const now = new Date();
+
+  // Persist to the draft DB row, but discard the return value: entries.update
+  // returns an unpopulated findOne (no populate is passed through), which would
+  // strip media, components, dynamic zones and relations from the draft that
+  // downstream publishEntry relies on. Instead we carry forward the already
+  // populated draft from repository.publish's findMany with the field merged in.
+  await update(draft, {
+    data: { firstPublishedAt: now },
   });
+
+  return { ...draft, firstPublishedAt: now };
 };
 
 const filterDataFirstPublishedAt: ParamsTransform = (params) => {

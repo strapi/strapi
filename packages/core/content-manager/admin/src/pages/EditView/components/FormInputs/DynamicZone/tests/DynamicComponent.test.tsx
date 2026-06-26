@@ -40,6 +40,7 @@ describe('DynamicComponent', () => {
         },
       ],
     },
+    totalLength: 1,
   } satisfies DynamicComponentProps;
 
   interface TestComponentProps extends Partial<DynamicComponentProps> {
@@ -88,6 +89,12 @@ describe('DynamicComponent', () => {
     await screen.findByRole('button', { name: 'component - test' });
   });
 
+  it('should not crash when the component uid is missing from a malformed dynamic-zone entry', async () => {
+    render({ componentUid: undefined });
+
+    await screen.findByRole('button', { name: 'Unknown component' });
+  });
+
   it('should allow removal of the component & call the onRemoveComponentClick callback when the field isAllowed', async () => {
     const onRemoveComponentClick = jest.fn();
     const { user } = render({ disabled: false, onRemoveComponentClick });
@@ -112,11 +119,11 @@ describe('DynamicComponent', () => {
 
     await screen.findByRole('button', { name: 'component - test' });
 
-    expect(screen.queryByText('INPUTS')).not.toBeInTheDocument();
+    expect(await screen.findByText('INPUTS')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'component - test' }));
 
-    expect(await screen.findByText('INPUTS')).toBeInTheDocument();
+    expect(screen.queryByText('INPUTS')).not.toBeInTheDocument();
   });
 
   describe('Keyboard drag and drop', () => {

@@ -1,11 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../../../utils/shared';
+import {
+  clickAndWait,
+  findAndClose,
+  insertDynamicZoneComponent,
+  navToHeader,
+} from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
@@ -14,38 +19,43 @@ test.describe('Edit View', () => {
     const EDIT_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
     const SHOP_URL = /\/admin\/content-manager\/single-types\/api::shop.shop(\?.*)?/;
 
-    // TODO: Skip this test for now since there is a known bug with the draft relations check
-    test.fixme(
-      'as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone',
-      async ({ page }) => {
-        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-        await page.getByRole('link', { name: 'Shop' }).click();
+    test('as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone', async ({
+      page,
+    }) => {
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
+      await page.waitForURL(SHOP_URL);
 
-        await page.waitForURL(SHOP_URL);
+      await clickAndWait(page, page.getByRole('button', { name: 'Product carousel - 23/24 kits' }));
+      await page.getByRole('combobox', { name: 'products' }).click();
+      await page.getByLabel('Nike Mens 23/24 Away Stadium').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
 
-        // Navigate to the product carousel component
-        await page.getByRole('button', { name: 'Product carousel - 23/24 kits' }).click();
+      const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
 
-        // Select a product from the combobox
-        await page.getByRole('combobox', { name: 'products' }).click();
-        await page.getByLabel('Nike Mens 23/24 Away Stadium').click();
+      await page.getByRole('button', { name: 'Publish' }).click();
+      await expect(confirmationDialog).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/This entry is related to 1 draft entry/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/not be included in the published version/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByRole('button', { name: 'Publish without relations' })
+      ).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
+      await expect(confirmationDialog).not.toBeVisible();
 
-        // Attempt to publish the entry
-        await page.getByRole('button', { name: 'Publish' }).click();
-
-        // Verify that a warning about a single draft relation is displayed
-        await expect(page.getByText('This entry is related to 1')).toBeVisible();
-        await page.getByRole('button', { name: 'Cancel' }).click();
-
-        // Save the current state of the entry
-        await page.getByRole('button', { name: 'Save' }).click();
-        await findAndClose(page, 'Saved Document');
-
-        // Attempt to publish the entry once more
-        await page.getByRole('button', { name: 'Publish' }).click();
-        await expect(page.getByText('This entry is related to 1')).toBeVisible();
-      }
-    );
+      await page.getByRole('button', { name: 'Publish' }).click();
+      await expect(confirmationDialog).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/This entry is related to 1 draft entry/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/not be included in the published version/)
+      ).toBeVisible();
+    });
 
     test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
       page,
@@ -234,10 +244,7 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
 
-      await page
-        .getByRole('textbox', { name: 'title This value is unique for the selected locale' })
-        .first()
-        .fill('International Shop');
+      await page.getByRole('textbox', { name: 'title' }).first().fill('International Shop');
       await page.getByRole('button', { name: 'Save' }).click();
 
       await findAndClose(page, 'Saved Document');
@@ -321,33 +328,27 @@ test.describe('Edit View', () => {
       await expect(componentsLocator.nth(1)).toHaveText(/content and image/i);
       await expect(componentsLocator.nth(2)).toHaveText(/product carousel/i);
 
-      // Add components at specific locations:
-      // - very last position
-      const moreActionsBtn1 = componentsLocator
-        .nth(1)
-        .getByRole('button', { name: /more actions/i });
-      await moreActionsBtn1.waitFor({ state: 'visible' });
-      await moreActionsBtn1.click({ force: true });
-      await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
-      await page.getByRole('menuitem', { name: /product carousel/i }).dispatchEvent('click');
+      // Add components at specific locations (stable accordion labels, not nth indices):
+      await insertDynamicZoneComponent(page, {
+        relativeToComponent: /content and image/i,
+        position: 'below',
+        componentToAdd: /product carousel/i,
+        expectedComponentCount: 4,
+      });
 
-      // - very first position
-      const moreActionsBtn2 = componentsLocator
-        .nth(0)
-        .getByRole('button', { name: /more actions/i });
-      await moreActionsBtn2.waitFor({ state: 'visible' });
-      await moreActionsBtn2.click({ force: true });
-      await page.getByRole('menuitem', { name: /add component above/i }).dispatchEvent('click');
-      await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
+      await insertDynamicZoneComponent(page, {
+        relativeToComponent: /product carousel - 23\/24 kits/i,
+        position: 'above',
+        componentToAdd: /hero image/i,
+        expectedComponentCount: 5,
+      });
 
-      // - middle position
-      const moreActionsBtn3 = componentsLocator
-        .nth(1)
-        .getByRole('button', { name: /more actions/i });
-      await moreActionsBtn3.waitFor({ state: 'visible' });
-      await moreActionsBtn3.click({ force: true });
-      await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
-      await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
+      await insertDynamicZoneComponent(page, {
+        relativeToComponent: /product carousel - 23\/24 kits/i,
+        position: 'below',
+        componentToAdd: /hero image/i,
+        expectedComponentCount: 6,
+      });
 
       // Make sure we get the desired components order
       const componentTexts = await page

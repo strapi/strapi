@@ -20,11 +20,10 @@ const CardAsset = styled(Flex)`
   );
 `;
 
-interface AssetPreviewProps {
+interface AssetPreviewProps extends React.HTMLAttributes<HTMLElement> {
   mime: string;
   name: string;
   url: string;
-  onLoad?: () => void;
 }
 
 export const AssetPreview = React.forwardRef<
@@ -39,7 +38,13 @@ export const AssetPreview = React.forwardRef<
 
   if (assetType === AssetType.Image) {
     return (
-      <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} />
+      <img
+        ref={ref as React.ForwardedRef<HTMLImageElement>}
+        src={url}
+        alt={name}
+        crossOrigin="anonymous"
+        {...props}
+      />
     );
   }
 

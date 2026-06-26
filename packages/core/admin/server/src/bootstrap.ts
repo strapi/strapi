@@ -2,7 +2,11 @@ import { merge, map, difference, uniq } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
-import { getTokenOptions, expiresInToSeconds } from './services/token';
+import {
+  getTokenOptions,
+  expiresInToSeconds,
+  hasUserConfiguredAuthOptionsExpiresIn,
+} from './services/token';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';
@@ -36,9 +40,34 @@ const registerModelHooks = () => {
     models: ['admin::user'],
     afterCreate: sendDidChangeInterfaceLanguage,
     afterDelete: sendDidChangeInterfaceLanguage,
-    afterUpdate({ params }) {
-      if (params.data.preferedLanguage) {
+    async beforeDelete(event) {
+      // Delete all admin API tokens owned by this user before the user row is removed
+      await getService('api-token-admin').deleteTokensForUser(event.params.where.id);
+    },
+    async afterUpdate(event) {
+      if (event.params.data?.preferedLanguage) {
         sendDidChangeInterfaceLanguage();
+      }
+      if (event.params.data?.roles !== undefined) {
+        // We re-sync token permissions for all owner users with their role when the user is updated
+        await getService('api-token-admin').syncPermissionsForUser(event.result.id);
+      }
+    },
+  });
+
+  strapi.db.lifecycles.subscribe({
+    models: ['admin::role'],
+    // We re-sync token permissions for all owner users with this role when the role is deleted
+    async beforeDelete(event) {
+      const users = await strapi.db.query('admin::user').findMany({
+        where: { roles: { id: event.params.where.id } },
+        select: ['id'],
+      });
+      event.state.affectedUserIds = users.map((u: { id: unknown }) => u.id);
+    },
+    async afterDelete(event) {
+      for (const userId of (event.state.affectedUserIds as unknown[]) ?? []) {
+        await getService('api-token-admin').syncPermissionsForUser(userId as string | number);
       }
     },
   });
@@ -90,10 +119,10 @@ const syncAPITokensPermissions = async () => {
 
 const createDefaultAPITokensIfNeeded = async () => {
   const userService = getService('user');
-  const apiTokenService = getService('api-token');
+  const apiTokenService = getService('api-token-content-api');
 
   const usersCount = await userService.count();
-  const apiTokenCount = await apiTokenService.count();
+  const apiTokenCount = await apiTokenService.countAll();
 
   if (usersCount === 0 && apiTokenCount === 0) {
     for (const token of constants.DEFAULT_API_TOKENS) {
@@ -110,8 +139,11 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const legacyMaxSessionFallback =
     expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_SESSION_LIFESPAN;
 
-  // Warn if using deprecated legacy expiresIn for new session settings
-  const hasLegacyExpires = options?.expiresIn != null;
+  // Warn only when the user set legacy admin.auth.options.expiresIn. Merged JWT options always
+  // include the default expiresIn ('30d'), so reading merged options alone is a false positive.
+  const hasLegacyExpires = hasUserConfiguredAuthOptionsExpiresIn(
+    strapi.config.get('admin.auth.options')
+  );
   const hasNewMaxRefresh = strapi.config.get('admin.auth.sessions.maxRefreshTokenLifespan') != null;
   const hasNewMaxSession = strapi.config.get('admin.auth.sessions.maxSessionLifespan') != null;
 
@@ -160,7 +192,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const permissionService = getService('permission');
   const userService = getService('user');
   const roleService = getService('role');
-  const apiTokenService = getService('api-token');
+  const apiTokenService = getService('api-token-content-api');
   const transferService = getService('transfer');
   const tokenService = getService('token');
 

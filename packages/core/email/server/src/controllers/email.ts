@@ -65,13 +65,45 @@ const emailController = {
 
   async getSettings(ctx: Koa.Context) {
     const config: EmailConfig = strapi.plugin('email').service('email').getProviderSettings();
+    const provider = strapi.plugin('email').provider;
+
+    // Check if provider supports verify method
+    const supportsVerify = typeof provider?.verify === 'function';
+
+    // Get capabilities from provider (e.g. SMTP host, auth type, features)
+    const capabilities =
+      typeof provider?.getCapabilities === 'function' ? provider.getCapabilities() : undefined;
+
+    // Get pool idle status if provider supports it
+    const isIdle = typeof provider?.isIdle === 'function' ? provider.isIdle() : undefined;
 
     ctx.send({
       config: pick(
         ['provider', 'settings.defaultFrom', 'settings.defaultReplyTo', 'settings.testAddress'],
         config
       ),
+      supportsVerify,
+      ...(capabilities ? { capabilities } : {}),
+      ...(isIdle !== undefined ? { isIdle } : {}),
     });
+  },
+
+  async verify(ctx: Koa.Context) {
+    const provider = strapi.plugin('email').provider;
+
+    if (!provider?.verify || typeof provider.verify !== 'function') {
+      throw new ApplicationError('This email provider does not support connection verification');
+    }
+
+    try {
+      await provider.verify();
+      ctx.send({ success: true, message: 'SMTP connection verified successfully' });
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ApplicationError(`Connection verification failed: ${error.message}`);
+      }
+      throw new ApplicationError('Connection verification failed');
+    }
   },
 };
 

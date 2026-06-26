@@ -1,6 +1,6 @@
 {
   "name": "@strapi/types",
-  "version": "5.33.2",
+  "version": "5.49.0",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
@@ -11,7 +11,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/types"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -43,38 +44,38 @@
     "watch": "run -T tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@casl/ability": "6.5.0",
+    "@casl/ability": "6.7.5",
     "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
-    "@strapi/database": "5.33.2",
-    "@strapi/logger": "5.33.2",
-    "@strapi/permissions": "5.33.2",
-    "@strapi/utils": "5.33.2",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@strapi/database": "5.49.0",
+    "@strapi/logger": "5.49.0",
+    "@strapi/permissions": "5.49.0",
+    "@strapi/utils": "5.49.0",
     "commander": "8.3.0",
     "json-logic-js": "2.0.5",
-    "koa": "2.16.3",
+    "koa": "2.16.4",
     "koa-body": "6.0.1",
     "node-schedule": "2.1.1",
-    "typedoc": "0.25.10",
-    "typedoc-github-wiki-theme": "1.1.0",
-    "typedoc-plugin-markdown": "3.17.1",
+    "typedoc": "0.28.19",
+    "typedoc-github-wiki-theme": "2.1.0",
+    "typedoc-plugin-markdown": "4.11.0",
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
     "@types/json-logic-js": "2.0.8",
-    "@types/koa": "2.13.4",
+    "@types/koa": "2.15.2",
     "@types/koa__router": "12.0.0",
     "@types/node-schedule": "2.1.7",
-    "eslint-config-custom": "5.33.2",
-    "lodash": "4.17.21",
-    "tsconfig": "5.33.2",
-    "typescript": "5.4.4",
-    "undici": "6.21.2"
+    "eslint-config-custom": "5.49.0",
+    "lodash": "4.18.1",
+    "tsconfig": "5.49.0",
+    "typescript": "5.9.3",
+    "undici": "6.27.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

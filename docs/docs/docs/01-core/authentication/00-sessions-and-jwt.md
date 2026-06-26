@@ -54,7 +54,10 @@ Endpoints (admin server):
 - `POST /admin/register` and `POST /admin/register-admin`
 - `POST /admin/reset-password`
 - `POST /admin/access-token` — rotates the refresh cookie and returns `{ data: { token } }`
-- `POST /admin/logout` — clears cookie and revokes refresh tokens; body may include `{ deviceId }` to revoke a single device
+- `POST /admin/logout` — clears cookie and revokes refresh tokens; body may include `{ deviceId }` to revoke a single device family
+- `GET /admin/users/me/sessions` — lists the current admin user's active sessions (device label, IP, signed-in time, last used)
+- `DELETE /admin/users/me/sessions/:sessionId` — revokes a single session owned by the current user
+- `DELETE /admin/users/me/sessions` — revokes all sessions; query `?keepCurrent=true` preserves the session backing the current request ("log out of other devices")
 
 Optional request fields on login/register:
 
@@ -85,8 +88,8 @@ Configuration:
 Key files:
 
 - Bootstrap/config: `packages/core/admin/server/src/bootstrap.ts`
-- Routes: `packages/core/admin/server/src/routes/authentication.ts`
-- Controller: `packages/core/admin/server/src/controllers/authentication.ts`
+- Routes: `packages/core/admin/server/src/routes/authentication.ts`, `packages/core/admin/server/src/routes/users.ts`
+- Controllers: `packages/core/admin/server/src/controllers/authentication.ts`, `packages/core/admin/server/src/controllers/authenticated-session.ts`
 - Strategy (Bearer access token validation): `packages/core/admin/server/src/strategies/admin.ts`
 
 ## Content API (users-permissions)
@@ -101,7 +104,11 @@ When `jwtManagement` is `refresh`:
 - Login/Register/Provider callback responses include `{ jwt, refreshToken }`.
 - New endpoints:
   - `POST /api/auth/refresh` — body `{ refreshToken }`, returns `{ jwt }` and rotates the refresh token
-  - `POST /api/auth/logout` — revokes sessions for the authenticated user; optional `{ deviceId }` in body to revoke only one device
+  - `POST /api/auth/logout` — logs out the session backing the current request by default; optional body fields:
+    - `{ scope: 'all' }` — revokes every session for the user (previous default behavior before session management)
+    - `{ deviceId }` — revokes all sessions for a specific device family
+  - `GET /api/auth/sessions` — lists the authenticated user's active sessions
+  - `DELETE /api/auth/sessions/:sessionId` — revokes a single session owned by the authenticated user
 
 Configuration keys:
 
@@ -119,8 +126,19 @@ Key files:
 - Routes: `packages/plugins/users-permissions/server/routes/content-api/auth.js`
 - JWT service: `packages/plugins/users-permissions/server/services/jwt.js`
 
+## Session Revocation on Credential Changes
+
+For security, **password changes and resets automatically invalidate all active refresh/session tokens** across all devices:
+
+- **Admin**: When an admin user changes their password via `PUT /admin/users/me` (with `currentPassword` and `password`), all admin sessions are revoked, including the current session. The user must re-authenticate.
+- **Admin**: When an admin resets their password via `POST /admin/reset-password`, all existing admin sessions are revoked before issuing a new session.
+- **Content API (refresh mode)**: When a user changes their password via `POST /api/auth/change-password` or resets it via `POST /api/auth/reset-password`, all users-permissions sessions are revoked. A new refresh token is issued for the current request.
+
+This behavior ensures that compromised refresh tokens cannot be used after a password change, mitigating persistent session hijacking attacks.
+
 ## Notes
 
 - Access tokens are always used in the `Authorization` header as `Bearer <token>`.
 - Admin refresh tokens are stored in an httpOnly cookie and are not exposed to JavaScript.
 - Device-bound sessions allow targeted logout by `deviceId`.
+- Session list responses expose `lastActiveAt` as the timestamp of the last refresh-token rotation for that session (not per-request activity tracking).
