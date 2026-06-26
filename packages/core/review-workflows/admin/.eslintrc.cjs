@@ -8,6 +8,15 @@ const config = {
     {
       files: ['**/*.ts', '**/*.tsx'],
       extends: ['eslint-config-custom/front/typescript'],
+      // parserOptions: {
+      //   tsconfigRootDir: __dirname,
+      // },
+      // settings: {
+      //   'import/resolver': {
+      //     typescript: true,
+      //     node: true,
+      //   },
+      // },
       rules: {
         'check-file/filename-naming-convention': 'off',
       },
