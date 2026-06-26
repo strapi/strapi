@@ -15,7 +15,6 @@ import {
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
-import * as yup from 'yup';
 
 import { AttributeIcon } from '../../../components/AttributeIcon';
 import { getTrad } from '../../../utils/getTrad';

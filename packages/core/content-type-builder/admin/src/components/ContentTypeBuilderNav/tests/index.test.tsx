@@ -1,7 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { useState } from 'react';
 
-import { Layouts } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@strapi/admin/strapi-admin/test';
 import { userEvent } from '@testing-library/user-event';
 
