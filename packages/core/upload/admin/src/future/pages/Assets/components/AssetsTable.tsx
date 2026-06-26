@@ -21,6 +21,7 @@ import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
+import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 
 import type { File } from '../../../../../../shared/contracts/files';
@@ -56,13 +57,21 @@ const StyledTd = styled(RawTd)`
 
 const StyledTr = styled.tr<{
   $isDragging?: boolean;
+  $isMovePending?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
 }>`
   height: 48px;
   background: ${({ theme }) => theme.colors.neutral0};
-  cursor: ${({ $isInvalidDropTarget }) => ($isInvalidDropTarget ? 'not-allowed' : 'pointer')};
+  cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
+    if ($isMovePending) {
+      return 'wait';
+    }
+
+    return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
+  }};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
 
   ${({ $isValidDropTarget, theme }) =>
     $isValidDropTarget &&
@@ -125,6 +134,7 @@ interface AssetRowProps {
 const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -140,8 +150,10 @@ const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
       {...attributes}
       {...listeners}
       $isDragging={isDragging}
+      $isMovePending={isMovePending}
       tabIndex={0}
       role="row"
+      onDragStart={(e) => e.preventDefault()}
       onClick={() => onAssetItemClick(asset.id)}
       onKeyDown={handleKeyDown}
     >
@@ -211,6 +223,7 @@ const FolderRow = ({ folder }: FolderRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
@@ -234,10 +247,12 @@ const FolderRow = ({ folder }: FolderRowProps) => {
       {...attributes}
       {...listeners}
       $isDragging={isDragging}
+      $isMovePending={isMovePending}
       $isValidDropTarget={showValidDropHighlight}
       $isInvalidDropTarget={showInvalidDropCursor}
       tabIndex={0}
       role="row"
+      onDragStart={(e) => e.preventDefault()}
       onClick={() => navigateToFolder(folder)}
       onKeyDown={handleKeyDown}
     >

@@ -18,6 +18,7 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
+import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 
 import type { File } from '../../../../../../shared/contracts/files';
@@ -27,12 +28,13 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
 
-const StyledCard = styled(Card)<{ $isDragging?: boolean }>`
+const StyledCard = styled(Card)<{ $isDragging?: boolean; $isMovePending?: boolean }>`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: 8px;
   overflow: hidden;
-  cursor: pointer;
+  cursor: ${({ $isMovePending }) => ($isMovePending ? 'wait' : 'pointer')};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
 
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
@@ -54,6 +56,7 @@ const FoldersRow = styled(Box)`
 
 const StyledFolderCard = styled(Flex)<{
   $isDragging?: boolean;
+  $isMovePending?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
 }>`
@@ -64,8 +67,15 @@ const StyledFolderCard = styled(Flex)<{
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
-  cursor: ${({ $isInvalidDropTarget }) => ($isInvalidDropTarget ? 'not-allowed' : 'pointer')};
+  cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
+    if ($isMovePending) {
+      return 'wait';
+    }
+
+    return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
+  }};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
   transition: background 0.2s;
 
   ${({ $isValidDropTarget, theme }) =>
@@ -102,6 +112,7 @@ interface FolderCardProps {
 const FolderCard = ({ folder }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
@@ -127,6 +138,7 @@ const FolderCard = ({ folder }: FolderCardProps) => {
       {...attributes}
       {...listeners}
       $isDragging={isDragging}
+      $isMovePending={isMovePending}
       $isValidDropTarget={showValidDropHighlight}
       $isInvalidDropTarget={showInvalidDropCursor}
       onClick={() => navigateToFolder(folder)}
@@ -204,7 +216,12 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
     if (mediaURL) {
       return (
         <PreviewContainer>
-          <StyledImage src={mediaURL} alt={alternativeText || ''} />
+          <StyledImage
+            src={mediaURL}
+            alt={alternativeText || ''}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+          />
         </PreviewContainer>
       );
     }
@@ -252,6 +269,7 @@ interface AssetCardProps {
 const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -267,8 +285,10 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
       {...attributes}
       {...listeners}
       $isDragging={isDragging}
+      $isMovePending={isMovePending}
       tabIndex={0}
       role="listitem"
+      onDragStart={(e) => e.preventDefault()}
       onClick={() => onAssetItemClick(asset.id)}
       onKeyDown={handleKeyDown}
     >

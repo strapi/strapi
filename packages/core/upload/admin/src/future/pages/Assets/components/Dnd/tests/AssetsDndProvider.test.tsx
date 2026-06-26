@@ -142,4 +142,79 @@ describe('AssetsDndProvider', () => {
       });
     });
   });
+
+  describe('Invalid drop guard', () => {
+    it('does not call bulkMove when dropping a folder onto a descendant', async () => {
+      setup();
+
+      await act(async () => {
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          active: {
+            ...validDragEndEvent.active,
+            id: 'folder:1',
+            data: {
+              current: {
+                kind: 'folder',
+                id: 1,
+                name: 'Marketing',
+                parentId: null,
+              },
+            },
+          },
+          over: {
+            id: 'folder-target:2',
+            data: {
+              current: {
+                kind: 'folder-target',
+                id: 2,
+                name: '2023',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      expect(mockBulkMove).not.toHaveBeenCalled();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+
+    it('does not call bulkMove when dropping a file onto its current folder', async () => {
+      setup();
+
+      await act(async () => {
+        triggerDragEnd?.({
+          ...validDragEndEvent,
+          active: {
+            ...validDragEndEvent.active,
+            data: {
+              current: {
+                kind: 'file',
+                id: 10,
+                name: 'hero.png',
+                folderId: 2,
+              },
+            },
+          },
+          over: {
+            id: 'folder-target:2',
+            data: {
+              current: {
+                kind: 'folder-target',
+                id: 2,
+                name: '2023',
+              },
+            },
+            rect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
+            disabled: false,
+          },
+        });
+      });
+
+      expect(mockBulkMove).not.toHaveBeenCalled();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+  });
 });
