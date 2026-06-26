@@ -1,6 +1,6 @@
-import { forwardRef, memo } from 'react';
+import { forwardRef, memo, type ForwardedRef } from 'react';
 
-import { TextInput, useComposedRefs, Field } from '@strapi/design-system';
+import { TextInput, useComposedRefs, Field, type JSONInputRef } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -30,46 +30,52 @@ import type { InputProps } from '../Form';
  * @description A generic form renderer for Strapi forms. Similar to GenericInputs but with a different API.
  * The entire component is memoized to avoid re-renders in large forms.
  */
+type InputRendererRef = HTMLInputElement | HTMLTextAreaElement | HTMLDivElement | JSONInputRef;
+
+const getTypedRef = <TElement,>(ref: ForwardedRef<InputRendererRef>) => {
+  return ref as ForwardedRef<TElement>;
+};
+
 const InputRenderer = memo(
-  forwardRef<any, InputProps>((props, forwardRef) => {
+  forwardRef<InputRendererRef, InputProps>((props, forwardedRef) => {
     switch (props.type) {
       case 'biginteger':
       case 'timestamp':
       case 'string':
       case 'uid':
-        return <StringInput ref={forwardRef} {...props} />;
+        return <StringInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'boolean':
-        return <BooleanInput ref={forwardRef} {...props} />;
+        return <BooleanInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'checkbox':
-        return <CheckboxInput ref={forwardRef} {...props} />;
+        return <CheckboxInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'datetime':
-        return <DateTimeInput ref={forwardRef} {...props} />;
+        return <DateTimeInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'date':
-        return <DateInput ref={forwardRef} {...props} />;
+        return <DateInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'decimal':
       case 'float':
       case 'integer':
-        return <NumberInput ref={forwardRef} {...props} />;
+        return <NumberInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'json':
-        return <JsonInput ref={forwardRef} {...props} />;
+        return <JsonInput ref={getTypedRef<JSONInputRef>(forwardedRef)} {...props} />;
       case 'email':
-        return <EmailInput ref={forwardRef} {...props} />;
+        return <EmailInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'enumeration':
-        return <EnumerationInput ref={forwardRef} {...props} />;
+        return <EnumerationInput ref={getTypedRef<HTMLDivElement>(forwardedRef)} {...props} />;
       case 'password':
-        return <PasswordInput ref={forwardRef} {...props} />;
+        return <PasswordInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'text':
-        return <TextareaInput ref={forwardRef} {...props} />;
+        return <TextareaInput ref={getTypedRef<HTMLTextAreaElement>(forwardedRef)} {...props} />;
       case 'time':
-        return <TimeInput ref={forwardRef} {...props} />;
+        return <TimeInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       default:
         // This is cast because this renderer tackles all the possibilities of the InputProps, but this is for runtime catches.
-        return <NotSupportedField ref={forwardRef} {...(props as InputProps)} />;
+        return <NotSupportedField ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
     }
   })
 );
 
-const NotSupportedField = forwardRef<any, InputProps>(
+const NotSupportedField = forwardRef<HTMLInputElement, InputProps>(
   ({ label, hint, name, required, type, labelAction }, ref) => {
     const { error } = useField(name);
     const fieldRef = useFocusInputField(name);
