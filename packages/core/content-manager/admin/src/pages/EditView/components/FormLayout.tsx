@@ -10,9 +10,7 @@ import { InputRenderer } from './InputRenderer';
 
 import type { UseDocument } from '../../../hooks/useDocument';
 
-export const ResponsiveGridRoot = styled(Grid.Root)`
-  container-type: inline-size;
-`;
+export const ResponsiveGridRoot = styled(Grid.Root)``;
 
 export const ResponsiveGridItem =
   /**
