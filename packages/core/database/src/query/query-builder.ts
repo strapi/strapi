@@ -544,7 +544,20 @@ const createQueryBuilder = (
           .filter((ob: any) => 'column' in ob)
           .map((ob: any) => ob.column);
 
-        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+        // Always prepend the PK so DISTINCT operates per-row, not per-value-set.
+        // Without this, `SELECT DISTINCT price` collapses rows that share the same
+        // selected value(s): e.g. 8 transactions at price=10.0 → returns only 1 row.
+        // Fix for bug #25395: ensures DISTINCT id, price uniquely identifies each row.
+        const pkColumnName = helpers.toColumnName(meta, 'id');
+        const aliasedPk = this.aliasColumn(pkColumnName);
+        const pkColumns = meta.attributes.id ? [aliasedPk] : [];
+
+        state.select = _.uniq([
+          ...pkColumns,
+          ...joinsOrderByColumns,
+          ...orderByColumns,
+          ...state.select,
+        ]);
       }
     },
 
