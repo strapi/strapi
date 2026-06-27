@@ -1,3 +1,5 @@
+import { type IntlShape } from 'react-intl';
+
 import { formatErrorMessages } from '../PublishAction';
 
 /**
@@ -5,7 +7,7 @@ import { formatErrorMessages } from '../PublishAction';
  * For cases where we want to assert the field is forwarded we inspect the
  * second argument via a spy instead.
  */
-const fmt = (msg: { defaultMessage: string }) => msg.defaultMessage;
+const fmt = ((msg) => msg.defaultMessage) as IntlShape['formatMessage'];
 
 describe('formatErrorMessages', () => {
   // -------------------------------------------------------------------------

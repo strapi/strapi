@@ -51,7 +51,7 @@
   "dependencies": {
     "@strapi/design-system": "2.2.1",
     "@strapi/icons": "2.2.1",
-    "react-intl": "6.6.2"
+    "react-intl": "7.1.14"
   },
   "devDependencies": {
     "@strapi/admin": "5.49.0",

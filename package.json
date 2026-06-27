@@ -115,7 +115,8 @@
     "qs@~6.14.0": "6.15.2",
     "tmp@^0.2.3": "0.2.7",
     "tmp@~0.2.1": "0.2.7",
-    "@types/node": "20.19.41"
+    "@types/node": "20.19.41",
+    "react-intl/@types/react": "18.3.2"
   },
   "devDependencies": {
     "@babel/core": "7.29.6",
