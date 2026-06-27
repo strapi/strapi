@@ -3,6 +3,11 @@ import getFilePath from '../get-file-path';
 describe('Get-File-Path util', () => {
   test('with destination set as api', () => {
     const filePath = getFilePath('api');
+    expect(filePath).toBe(`api/{{ api }}`);
+  });
+
+  test('with destination set as new', () => {
+    const filePath = getFilePath('new');
     expect(filePath).toBe(`api/{{ id }}`);
   });
 
