@@ -211,7 +211,7 @@ export const SettingsPage = () => {
           message: formatMessage({ id: 'notification.form.success.fields' }),
         });
       },
-      onError(err: any) {
+      onError(err) {
         toggleNotification({
           type: 'danger',
           message: err.message || formatMessage({ id: 'notification.error' }),

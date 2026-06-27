@@ -476,7 +476,7 @@ interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
   isRelatedToCurrentDocument: boolean;
   onChange: (
     relation: Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> & {
-      [key: string]: any;
+      [key: string]: unknown;
     }
   ) => void;
 }

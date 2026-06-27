@@ -2649,10 +2649,6 @@ describe('schema: component permission narrowing — current behavior', () => {
 
   it('excludes component when zero nested leaves are permitted', () => {
     const permitted = new Set(['title']);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _actual = jest.requireActual(
-      '../derive-content-type-mcp-tools'
-    ) as typeof import('../derive-content-type-mcp-tools');
     const schema = buildDataSchema(mockStrapi, model, attrs, permitted);
     // SEO is excluded — no SEO.* paths in permitted set
     expect(schema.safeParse({ title: 'hello' }).success).toBe(true);

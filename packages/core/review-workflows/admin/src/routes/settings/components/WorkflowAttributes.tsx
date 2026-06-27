@@ -248,7 +248,7 @@ const StageSelector = ({ disabled }: StageSelectorProps) => {
             defaultMessage: 'Any stage',
           })}
         </SingleSelectOption>
-        {validStages.map((stage, i) => (
+        {validStages.map((stage) => (
           <SingleSelectOption
             key={`requiredToPublishStage-${stage.id || stage.__temp_key__}`}
             value={stage.id?.toString() || stage.__temp_key__}

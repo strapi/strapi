@@ -66,7 +66,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
         },
         cellFormatter: (
           props: Modules.Documents.AnyDocument,
-          _: any,
+          _: unknown,
           { model }: { model: UID.ContentType }
         ) => <ReleaseListCell {...props} model={model} />,
       },

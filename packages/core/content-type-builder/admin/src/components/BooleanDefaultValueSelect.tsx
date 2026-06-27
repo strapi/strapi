@@ -1,7 +1,7 @@
 import { Field, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { IntlLabel } from '../types';
+import type { FormChangeHandler, IntlLabel } from '../types';
 
 interface Metadata {
   intlLabel: IntlLabel;
@@ -18,9 +18,9 @@ interface Option {
 interface BooleanDefaultValueSelectProps {
   intlLabel: IntlLabel;
   name: string;
-  onChange: (value: any) => void;
+  onChange: FormChangeHandler<boolean | string, 'select-default-boolean'>;
   options: Option[];
-  value?: any;
+  value?: boolean | string | null;
 }
 
 export const BooleanDefaultValueSelect = ({
@@ -38,7 +38,7 @@ export const BooleanDefaultValueSelect = ({
       )
     : name;
 
-  const handleChange = (value: any) => {
+  const handleChange = (value: string) => {
     let nextValue: boolean | string = '';
 
     if (value === 'true') {

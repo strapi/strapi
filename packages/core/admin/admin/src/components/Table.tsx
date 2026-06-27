@@ -15,7 +15,6 @@ import {
   Tbody,
   Td,
   Tooltip,
-  IconButton,
   Thead,
   Tr,
   RawTrProps,
@@ -43,7 +42,7 @@ import { createContext } from './Context';
 
 interface BaseRow {
   id: string | number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface TableHeader<TData = object, THeader = object> {
@@ -70,7 +69,10 @@ interface TableContextValue<TRow extends BaseRow, THeader extends TableHeader<TR
   selectRow: (row: TRow | TRow[]) => void;
 }
 
-const [TableProvider, useTable] = createContext<TableContextValue<any, any>>('Table');
+type DefaultTableHeader = TableHeader<BaseRow, object>;
+type DefaultTableContextValue = TableContextValue<BaseRow, DefaultTableHeader>;
+
+const [TableProvider, useTable] = createContext<DefaultTableContextValue>('Table');
 
 interface RootProps<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
   extends Partial<
@@ -412,7 +414,11 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
   const { formatMessage } = useIntl();
 
   const handleSelectRow = () => {
-    selectRow(rows.find((row) => row.id === id));
+    const row = rows.find((row) => row.id === id);
+
+    if (row !== undefined) {
+      selectRow(row);
+    }
   };
 
   const isChecked = selectedRows.findIndex((row) => row.id === id) > -1;

@@ -60,7 +60,8 @@ import { createComponentUid, createUid } from './utils/createUid';
 import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
 
-import type { ContentType } from '../../types';
+import type { AnyAttribute, ContentType } from '../../types';
+import type { FormAPI } from '../../utils/formAPI';
 import type { Internal } from '@strapi/types';
 
 const FormComponent = styled.form`
@@ -69,6 +70,11 @@ const FormComponent = styled.form`
 
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_formModal'] || initialState) as FormModalState;
+
+type PendingSubmit = {
+  e: React.SyntheticEvent;
+  shouldContinue: boolean;
+};
 
 export const FormModal = () => {
   const {
@@ -104,7 +110,7 @@ export const FormModal = () => {
   const { trackUsage } = useCTBTracking();
   const { formatMessage } = useIntl();
   const ctbPlugin = getPlugin(pluginId);
-  const ctbFormsAPI: any = ctbPlugin?.apis.forms;
+  const ctbFormsAPI = ctbPlugin?.apis.forms as FormAPI;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
 
   const dispatchGuidedTour = useGuidedTour('FormModal', (s) => s.dispatch);
@@ -141,9 +147,9 @@ export const FormModal = () => {
   const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
 
   const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [pendingSubmit, setPendingSubmit] = useState<any>(null);
+  const [pendingSubmit, setPendingSubmit] = useState<PendingSubmit | null>(null);
 
-  const checkFieldNameChanges = () => {
+  const checkFieldNameChanges = (): AnyAttribute[] | false => {
     // Only check when editing an attribute
     if (actionType !== 'edit' || modalType !== 'attribute') {
       return false;
@@ -154,27 +160,38 @@ export const FormModal = () => {
     const newEnum = modifiedData.enum;
 
     // Get all attributes from the content type schema
-    const contentTypeAttributes = type?.attributes || [];
+    const contentTypeAttributes = type?.attributes ?? [];
 
     // Find all fields that reference this field in their conditions
-    const referencedFields = contentTypeAttributes.filter((attr: any) => {
-      if (!attr.conditions) return false;
+    const referencedFields = contentTypeAttributes.filter((attr) => {
+      if (attr.conditions === undefined) {
+        return false;
+      }
 
       const condition = attr.conditions.visible;
-      if (!condition) return false;
+      if (condition === undefined) {
+        return false;
+      }
 
-      const [[, conditions]] = Object.entries(condition);
-      const [fieldVar, value] = conditions as [{ var: string }, any];
+      const conditionEntry = Object.entries(condition)[0];
+      if (conditionEntry === undefined) {
+        return false;
+      }
+
+      const [, conditions] = conditionEntry;
+      const [fieldVar, value] = conditions;
 
       // Check if this condition references our field
-      if (fieldVar.var !== oldName) return false;
+      if (fieldVar.var !== oldName) {
+        return false;
+      }
 
       // If it's an enum field, also check if the value is being deleted/changed
-      if (oldEnum && newEnum) {
+      if (oldEnum !== undefined && newEnum !== undefined) {
         const deletedOrChangedValues = oldEnum.filter(
           (oldValue: string) => !newEnum.includes(oldValue)
         );
-        return deletedOrChangedValues.includes(value);
+        return typeof value === 'string' && deletedOrChangedValues.includes(value);
       }
 
       return true;
@@ -398,7 +415,7 @@ export const FormModal = () => {
     } else if (isCreatingAttribute && !isInFirstComponentStep) {
       const computedAttrbiuteType = attributeType === 'relation' ? 'relation' : modifiedData.type;
 
-      let alreadyTakenTargetContentTypeAttributes: any[] = [];
+      let alreadyTakenTargetContentTypeAttributes: Array<{ name: string }> = [];
 
       if (computedAttrbiuteType === 'relation') {
         const targetContentTypeUID = get(modifiedData, ['target'], null);
@@ -456,11 +473,7 @@ export const FormModal = () => {
   };
 
   const handleChange = React.useCallback(
-    ({
-      target: { name, value, type, ...rest },
-    }: {
-      target: { name: string; value: string | string[]; type: string };
-    }) => {
+    ({ target: { name, value } }: { target: { name: string; value: string | string[] } }) => {
       const namesThatCanResetToNullValue = [
         'enumName',
         'max',
@@ -841,7 +854,7 @@ export const FormModal = () => {
         // The modal is addComponentToDynamicZone
         if (isInFirstComponentStep) {
           if (isCreatingComponentFromAView) {
-            const { category, type, ...rest } = modifiedData.componentToCreate;
+            const { category, type: _type, ...rest } = modifiedData.componentToCreate;
             const componentUid = createComponentUid(
               modifiedData.componentToCreate.displayName,
               category
@@ -1090,7 +1103,7 @@ export const FormModal = () => {
           <Dialog.Trigger />
           <ConfirmDialog
             onConfirm={() => {
-              if (pendingSubmit) {
+              if (pendingSubmit !== null) {
                 const { e, shouldContinue } = pendingSubmit;
                 setShowWarningDialog(false);
                 setPendingSubmit(null);
@@ -1104,9 +1117,9 @@ export const FormModal = () => {
           >
             {(() => {
               const referencedFields = checkFieldNameChanges();
-              if (!referencedFields) return null;
+              if (referencedFields === false) return null;
 
-              const fieldNames = referencedFields.map((field: any) => field.name).join(', ');
+              const fieldNames = referencedFields.map((field) => field.name).join(', ');
               const isEnum = initialData.enum && modifiedData.enum;
 
               if (isEnum) {

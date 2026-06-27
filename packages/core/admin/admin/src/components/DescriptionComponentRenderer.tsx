@@ -21,7 +21,7 @@ interface DescriptionComponent<Props, Description> {
  * DescriptionComponentRenderer
  * -----------------------------------------------------------------------------------------------*/
 
-interface DescriptionComponentRendererProps<Props = any, Description = any> {
+interface DescriptionComponentRendererProps<Props = unknown, Description = unknown> {
   children: (descriptions: Array<Description & { id: string }>) => React.ReactNode;
   descriptions: DescriptionComponent<Props, Description>[];
   props: Props;
@@ -128,7 +128,12 @@ interface DescriptionProps<Props, Description> {
  * to the react tree, instead we push it back out to the parent.
  */
 const Description = React.memo(
-  ({ description, id, props, update }: DescriptionProps<any, any>) => {
+  <Props, Description>({
+    description,
+    id,
+    props,
+    update,
+  }: DescriptionProps<Props, Description>) => {
     const comp = description(props);
 
     useShallowCompareEffect(() => {
@@ -148,18 +153,29 @@ const Description = React.memo(
  * Helpers
  * -----------------------------------------------------------------------------------------------*/
 
-const ids = new WeakMap<DescriptionComponent<any, any>, string>();
+type DescriptionComponentWithDisplayName<Props, Description> = DescriptionComponent<
+  Props,
+  Description
+> & {
+  displayName?: string;
+};
+
+type CachedDescriptionComponent = DescriptionComponent<unknown, unknown>;
+
+const ids = new WeakMap<CachedDescriptionComponent, string>();
 
 let counter = 0;
 
 function getCompId<T, K>(comp: DescriptionComponent<T, K>): string {
-  const cachedId = ids.get(comp);
+  const cachedComponent = comp as CachedDescriptionComponent;
+  const cachedId = ids.get(cachedComponent);
 
   if (cachedId) return cachedId;
 
-  const id = `${comp.name || (comp as any).displayName || '<anonymous>'}-${counter++}`;
+  const { displayName } = comp as DescriptionComponentWithDisplayName<T, K>;
+  const id = `${comp.name || displayName || '<anonymous>'}-${counter++}`;
 
-  ids.set(comp, id);
+  ids.set(cachedComponent, id);
 
   return id;
 }

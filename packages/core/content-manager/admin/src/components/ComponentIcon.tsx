@@ -34,7 +34,7 @@ const ComponentIcon = ({
   );
 };
 
-const COMPONENT_ICONS: Record<string, React.ComponentType<any>> = {
+const COMPONENT_ICONS: Record<string, React.ComponentType<{ height?: string; width?: string }>> = {
   alien: Icons.Alien,
   apps: Icons.GridNine,
   archive: Icons.Archive,

@@ -9,6 +9,8 @@ import { AIMessage } from '../lib/types/messages';
 
 import { useStrapiChat } from './ChatProvider';
 
+import type { Schema } from '../lib/types/schema';
+
 interface SchemaContextType {
   lastRevisedId: string | null;
   setLastRevisedId: (id: string | null) => void;
@@ -22,6 +24,11 @@ const TYPE_TO_ACTION: Record<string, 'add' | 'update' | 'delete'> = {
   remove: 'delete',
 };
 
+type SchemaGenerationOutput = {
+  schemas?: Schema[];
+  error?: unknown;
+};
+
 function extractSchemaChangesFromMessage(message: AIMessage): SchemaChange[] {
   if (message.role !== 'assistant') return [];
 
@@ -31,7 +38,7 @@ function extractSchemaChangesFromMessage(message: AIMessage): SchemaChange[] {
     // We only care about the schema generation tool
     if (part && typeof part === 'object' && part.type === 'tool-schemaGenerationTool') {
       // Prefer validated schemas from output; ignore if there's an error or no output yet
-      const output = part.output as { schemas?: any[]; error?: unknown } | undefined;
+      const output = part.output as SchemaGenerationOutput | undefined;
       if (!output || output.error || !Array.isArray(output.schemas)) return;
 
       const baseId = part.toolCallId ?? `${message.id}-${partIndex}`;
@@ -70,8 +77,7 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
     );
 
     schemaChanges.forEach((change: SchemaChange) => {
-      const oldSchema =
-        contentTypes[change.schema.uid as any] || components[change.schema.uid as any];
+      const oldSchema = contentTypes[change.schema.uid] || components[change.schema.uid];
       const newSchema = transformChatToCTB(change.schema, oldSchema);
 
       // Check if any attributes/fields are being added to any schema (existing or new)

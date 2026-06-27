@@ -35,7 +35,7 @@ import { More, Pencil, Trash } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
-import { useIntl } from 'react-intl';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
@@ -344,6 +344,11 @@ const SimpleMenuButton = styled(SimpleMenu)`
  * -----------------------------------------------------------------------------------------------*/
 const GROUP_BY_OPTIONS = ['contentType', 'locale', 'action'] as const;
 const GROUP_BY_OPTIONS_NO_LOCALE = ['contentType', 'action'] as const;
+type ReleaseDetailsHeader = {
+  label: MessageDescriptor;
+  name: string;
+};
+
 const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   if (value === 'locale') {
     return {
@@ -385,8 +390,12 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
 
   // TODO: Migrated displayedHeader to v5
-  const { displayedHeaders, hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } =
-    runHookWaterfall('ContentReleases/pages/ReleaseDetails/add-locale-in-releases', {
+  const {
+    displayedHeaders,
+    hasI18nEnabled,
+  }: { displayedHeaders: ReleaseDetailsHeader[]; hasI18nEnabled: boolean } = runHookWaterfall(
+    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+    {
       displayedHeaders: [
         {
           label: {
@@ -397,7 +406,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         },
       ],
       hasI18nEnabled: false,
-    });
+    }
+  );
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -456,7 +466,6 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const releaseActions = data?.data;
   const releaseMeta = data?.meta;
   const contentTypes = releaseMeta?.contentTypes || {};
-  const components = releaseMeta?.components || {};
 
   if (isBaseQueryError(releaseError) || !release) {
     const errorsArray = [];

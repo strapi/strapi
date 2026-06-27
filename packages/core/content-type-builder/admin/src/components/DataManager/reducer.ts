@@ -27,7 +27,7 @@ export interface DataManagerStateType {
     attributes: string[];
   };
   isLoading: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const initialState: DataManagerStateType = {
@@ -44,6 +44,12 @@ const initialState: DataManagerStateType = {
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
+type AttributeMutation = AnyAttribute & {
+  createComponent?: unknown;
+};
+
+type PluginOptions = Record<string, unknown>;
+
 const getOppositeRelation = (originalRelation?: Schema.Attribute.RelationKind.Any) => {
   if (originalRelation === 'manyToOne') {
     return 'oneToMany';
@@ -56,7 +62,7 @@ const getOppositeRelation = (originalRelation?: Schema.Attribute.RelationKind.An
   return originalRelation;
 };
 
-const findAttributeIndex = (type: any, attributeToFind?: string) => {
+const findAttributeIndex = (type: ContentType | Component, attributeToFind?: string) => {
   return type.attributes.findIndex(({ name }: { name: string }) => name === attributeToFind);
 };
 
@@ -67,7 +73,7 @@ type InitPayload = {
 };
 
 type AddAttributePayload = {
-  attributeToSet: Record<string, any>;
+  attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
 };
@@ -80,7 +86,7 @@ type AddCreateComponentToDynamicZonePayload = {
 };
 
 type AddCustomFieldAttributePayload = {
-  attributeToSet: Record<string, any>;
+  attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
 };
@@ -109,19 +115,19 @@ type CreateSchemaPayload = {
     pluralName: string;
     kind: Struct.ContentTypeKind;
     draftAndPublish: boolean;
-    pluginOptions: Record<string, any>;
+    pluginOptions: PluginOptions;
   };
 };
 
 type EditAttributePayload = {
-  attributeToSet: Record<string, any>;
+  attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
 };
 
 type EditCustomFieldAttributePayload = {
-  attributeToSet: Record<string, any>;
+  attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
@@ -158,7 +164,7 @@ type UpdateSchemaPayload = {
     displayName: string;
     kind: Struct.ContentTypeKind;
     draftAndPublish: boolean;
-    pluginOptions: Record<string, any>;
+    pluginOptions: PluginOptions;
   };
   uid: string;
 };
@@ -204,11 +210,11 @@ const getNewStatus = (oldStatus: Status | undefined, newStatus: Status) => {
   return newStatus;
 };
 
-const setAttributeStatus = (attribute: Record<string, any>, status: Status) => {
+const setAttributeStatus = (attribute: { status?: Status }, status: Status) => {
   attribute.status = getNewStatus(attribute.status, status);
 };
 
-const createAttribute = (properties: Record<string, any>): AnyAttribute => {
+const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {
   return {
     ...properties,
     status: 'NEW',
@@ -268,7 +274,7 @@ const removeAttributeByName = (type: ContentType | Component, name: string) => {
   }
 };
 
-const updateType = (type: ContentType | Component, data: Record<string, any>) => {
+const updateType = (type: ContentType | Component, data: Record<string, unknown>) => {
   merge(type, data);
   setStatus(type, 'CHANGED');
 };

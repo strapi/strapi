@@ -36,9 +36,11 @@ interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
 }
 
-interface FormValues {
-  [field: string]: any;
-}
+type FormFieldValue = unknown;
+type FormValues = object;
+type FormFieldEvent = React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+type FormFieldRowValue = Record<string, unknown>;
+type FormFieldRowValueWithKey = FormFieldRowValue & { __temp_key__?: string };
 
 interface FormContextValue<TFormValues extends FormValues = FormValues>
   extends FormState<TFormValues> {
@@ -50,9 +52,9 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    * The default behaviour is to add the row to the end of the array, if you want to add it to a
    * specific index you can pass the index.
    */
-  addFieldRow: (field: string, value: any, addAtIndex?: number) => void;
+  addFieldRow: (field: string, value: FormFieldRowValue, addAtIndex?: number) => void;
   moveFieldRow: (field: string, fromIndex: number, toIndex: number) => void;
-  onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: any) => void;
+  onChange: (eventOrPath: FormFieldEvent | string, value?: FormFieldValue) => void;
   /*
    * The default behaviour is to remove the last row, if you want to remove a specific index you can
    * pass the index.
@@ -148,8 +150,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
   initialErrors?: FormErrors<TFormValues>;
-  // NOTE: we don't know what return type it can be here
-  validate?: (values: TFormValues, options: Record<string, string>) => Promise<any>;
+  validate?: (values: TFormValues, options: Record<string, string>) => Promise<TFormValues>;
 }
 
 /**
@@ -344,13 +345,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         return;
       }
 
-      const target = eventOrPath.target || eventOrPath.currentTarget;
+      const target = eventOrPath.target;
 
-      const { type, name, id, value, options, multiple } = target;
+      const { type, name, id, value } = target;
 
       const field = name || id;
 
-      if (!field && process.env.NODE_ENV !== 'production') {
+      if (field === '' && process.env.NODE_ENV !== 'production') {
         console.warn(
           `\`onChange\` was called with an event, but you forgot to pass a \`name\` or \`id'\` attribute to your input. The field to update cannot be determined`
         );
@@ -369,9 +370,9 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       } else if (/checkbox/.test(type)) {
         // Get & invert the current value of the checkbox.
         val = !getIn(state.values, field);
-      } else if (options && multiple) {
+      } else if (target instanceof HTMLSelectElement && target.multiple) {
         // This will handle native select elements incl. ones with mulitple options.
-        val = Array.from<HTMLOptionElement>(options)
+        val = Array.from<HTMLOptionElement>(target.options)
           .filter((el) => el.selected)
           .map((el) => el.value);
       } else {
@@ -384,7 +385,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         }
       }
 
-      if (field) {
+      if (field !== '') {
         dispatch({
           type: 'SET_FIELD_VALUE',
           payload: {
@@ -504,7 +505,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
  * @internal
  * @description Checks if the error is a Yup validation error.
  */
-const isErrorYupValidationError = (err: any): err is Yup.ValidationError =>
+const isErrorYupValidationError = (err: unknown): err is Yup.ValidationError =>
   typeof err === 'object' &&
   err !== null &&
   'name' in err &&
@@ -542,7 +543,7 @@ const getYupValidationErrors = (err: Yup.ValidationError): FormErrors => {
 
 type FormErrors<TFormValues extends FormValues = FormValues> = {
   // is it a repeatable component or dynamic zone?
-  [Key in keyof TFormValues]?: TFormValues[Key] extends any[]
+  [Key in keyof TFormValues]?: TFormValues[Key] extends unknown[]
     ? TFormValues[Key][number] extends object
       ? FormErrors<TFormValues[Key][number]>[] | string | string[]
       : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
@@ -565,8 +566,11 @@ type FormActions<TFormValues extends FormValues = FormValues> =
   | { type: 'SUBMIT_ATTEMPT' }
   | { type: 'SUBMIT_FAILURE' }
   | { type: 'SUBMIT_SUCCESS' }
-  | { type: 'SET_FIELD_VALUE'; payload: { field: string; value: any } }
-  | { type: 'ADD_FIELD_ROW'; payload: { field: string; value: any; addAtIndex?: number } }
+  | { type: 'SET_FIELD_VALUE'; payload: { field: string; value: FormFieldValue } }
+  | {
+      type: 'ADD_FIELD_ROW';
+      payload: { field: string; value: FormFieldRowValue; addAtIndex?: number };
+    }
   | { type: 'REMOVE_FIELD_ROW'; payload: { field: string; removeAtIndex?: number } }
   | { type: 'MOVE_FIELD_ROW'; payload: { field: string; fromIndex: number; toIndex: number } }
   | { type: 'SET_ERRORS'; payload: FormErrors<TFormValues> }
@@ -605,7 +609,11 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         /**
          * TODO: add check for if the field is an array?
          */
-        const currentField = getIn(state.values, action.payload.field, []) as Array<any>;
+        const currentField = getIn(
+          state.values,
+          action.payload.field,
+          []
+        ) as FormFieldRowValueWithKey[];
 
         let position = action.payload.addAtIndex;
 
@@ -618,7 +626,11 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         // Collect all existing keys to ensure uniqueness.
         // Keys may be out of order after drag-and-drop moves, so we can't rely
         // on fractional indexing alone to avoid collisions.
-        const existingKeys = new Set(currentField.map((item) => item.__temp_key__).filter(Boolean));
+        const existingKeys = new Set(
+          currentField
+            .map((item) => item.__temp_key__)
+            .filter((key): key is string => key !== undefined && key !== '')
+        );
 
         // Generate a unique key, retrying if there's a collision
         let key: string;
@@ -648,7 +660,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         /**
          * TODO: add check for if the field is an array?
          */
-        const currentField = [...(getIn(state.values, field, []) as Array<any>)];
+        const currentField = [...(getIn(state.values, field, []) as FormFieldRowValueWithKey[])];
         const currentRow = currentField[fromIndex];
 
         // Preserve the original __temp_key__ to maintain stable identity during drag-and-drop.
@@ -664,7 +676,11 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         /**
          * TODO: add check for if the field is an array?
          */
-        const currentField = getIn(state.values, action.payload.field, []) as Array<any>;
+        const currentField = getIn(
+          state.values,
+          action.payload.field,
+          []
+        ) as FormFieldRowValueWithKey[];
 
         let position = action.payload.removeAtIndex;
 
@@ -714,15 +730,15 @@ const reducer = <TFormValues extends FormValues = FormValues>(
 /* -------------------------------------------------------------------------------------------------
  * useField
  * -----------------------------------------------------------------------------------------------*/
-interface FieldValue<TValue = any> {
+interface FieldValue<TValue = unknown> {
   error?: string;
   initialValue: TValue;
-  onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: TValue) => void;
+  onChange: (eventOrPath: FormFieldEvent | string, value?: TValue) => void;
   value: TValue;
-  rawError?: any;
+  rawError?: unknown;
 }
 
-function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
+function useField<TValue = unknown>(path: string): FieldValue<TValue | undefined> {
   const { formatMessage } = useIntl();
 
   const initialValue = useForm(
@@ -773,7 +789,7 @@ function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
   };
 }
 
-const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
+const isErrorMessageDescriptor = (object: unknown): object is TranslationMessage => {
   return (
     typeof object === 'object' &&
     object !== null &&

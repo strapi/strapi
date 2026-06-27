@@ -24,7 +24,23 @@ export type ModalType =
   | 'contentType'
   | 'component';
 
-export type State = Record<string, any>;
+export type ActionType = 'create' | 'edit' | null;
+
+export type State = {
+  actionType: ActionType;
+  attributeName: string | null;
+  attributeType: string | null;
+  dynamicZoneTarget: string | null;
+  forTarget: Struct.ModelType | null;
+  modalType: ModalType | null;
+  isOpen: boolean;
+  showBackLink: boolean;
+  kind: string | null;
+  step: string | null;
+  targetUid: Internal.UID.Schema | null;
+  customFieldUid: string | null;
+  activeTab: Tab;
+};
 
 export const INITIAL_STATE_DATA: State = {
   actionType: null,
@@ -93,6 +109,11 @@ export type NavigateToChooseAttributeModalPayload = {
 export type NavigateToAddCompoToDZModalPayload = {
   dynamicZoneTarget: string;
 };
+
+export type OpenModalCreateSchemaPayload = Pick<
+  State,
+  'actionType' | 'forTarget' | 'kind' | 'modalType'
+>;
 
 export const FormModalNavigationProvider = ({ children }: FormModalNavigationProviderProps) => {
   const [state, setFormModalNavigationState] = useState(INITIAL_STATE_DATA);
@@ -173,7 +194,7 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
     }));
   }, []);
 
-  const onOpenModalCreateSchema = useCallback((nextState: State) => {
+  const onOpenModalCreateSchema = useCallback((nextState: OpenModalCreateSchemaPayload) => {
     setFormModalNavigationState((prevState) => ({
       ...prevState,
       ...nextState,

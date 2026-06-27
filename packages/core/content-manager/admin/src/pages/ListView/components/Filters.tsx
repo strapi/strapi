@@ -88,7 +88,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     return acc;
   }, []);
 
-  const { data: userData, isLoading: isLoadingAdminUsers } = useAdminUsers(
+  const { data: userData } = useAdminUsers(
     { filters: { id: { $in: selectedUserIds } } },
     {
       // fetch the list of admin users only if the filter contains users and the
@@ -281,7 +281,6 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     canReadAdminUsers,
     model,
     attributes,
-    layout.metadatas,
     schemas,
     layout,
     users,

@@ -1,11 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import pluralize from 'pluralize';
 
-import { Schema } from '../../types/schema';
-
 import type { ContentType, Component, AnyAttribute } from '../../../../../types';
+import type { Schema, SchemaAttribute } from '../../types/schema';
+import type { UID } from '@strapi/types';
 
 const isPluginContentTypeUid = (uid: string) => uid.startsWith('plugin::');
 
@@ -35,7 +34,7 @@ const ACTION_TO_STATUS: Record<Schema['action'], ContentType['status']> = {
  */
 const createAttributeWithStatus = (
   name: string,
-  attributeData: Record<string, any>,
+  attributeData: SchemaAttribute | AnyAttribute,
   status: AnyAttribute['status']
 ): AnyAttribute =>
   ({
@@ -48,7 +47,7 @@ const createAttributeWithStatus = (
  * Determines the status of an attribute by comparing new and old versions
  */
 const determineAttributeStatus = (
-  newAttr: Record<string, any>,
+  newAttr: Record<string, unknown>,
   oldAttr?: AnyAttribute,
   oldSchema?: ContentType | Component
 ): AnyAttribute['status'] => {
@@ -165,7 +164,7 @@ export const transformChatToCTB = (
         // icon: schema.icon,
       },
       modelType: schema.modelType,
-      uid: schema.uid as any,
+      uid: schema.uid as UID.Component,
       collectionName: pluralName,
       status: transformStatusFromChatToCTB(schema, oldSchema),
       globalId: singularName,
@@ -173,7 +172,7 @@ export const transformChatToCTB = (
   }
 
   const contentTypeBase = {
-    uid: schema.uid as any,
+    uid: schema.uid as UID.ContentType,
     modelType: schema.modelType,
     modelName: singularName,
     kind: schema.kind!,

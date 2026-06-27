@@ -1,3 +1,5 @@
+import type { ChangeEventHandler } from 'react';
+
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -8,13 +10,13 @@ import type { IntlLabel } from '../../types';
 interface Radio {
   title: IntlLabel;
   description: IntlLabel;
-  value: any;
+  value: string | boolean;
 }
 
 interface CustomRadioGroupProps {
   intlLabel: IntlLabel;
   name: string;
-  onChange: (value: any) => void;
+  onChange: ChangeEventHandler<HTMLInputElement>;
   radios?: Radio[];
   value?: string | boolean;
 }

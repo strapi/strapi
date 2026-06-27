@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
-import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
@@ -231,9 +231,15 @@ interface RegisterFormValues {
   news: boolean;
 }
 
-interface IntlFormattedMessage extends MessageDescriptor {
-  values?: Record<string, PrimitiveType>;
-}
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null;
+};
+
+const isMessageDescriptor = (value: unknown): value is MessageDescriptor => {
+  return (
+    isRecord(value) && typeof value.id === 'string' && typeof value.defaultMessage === 'string'
+  );
+};
 
 const Register = ({ hasAdmin }: RegisterProps) => {
   const { toggleNotification } = useNotification();
@@ -425,27 +431,28 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               }
             } catch (err) {
               if (err instanceof ValidationError) {
-                const formatDescriptor = (msg: any) => {
+                const formatDescriptor = (msg: unknown) => {
                   try {
-                    if (!msg) return '';
+                    if (msg === undefined || msg === null) return '';
                     if (typeof msg === 'string') return msg;
                     // Direct descriptor
-                    if ('id' in msg && 'defaultMessage' in msg) return formatMessage(msg as any);
+                    if (isMessageDescriptor(msg)) return formatMessage(msg);
                     // Wrapped descriptor: { message: { id, defaultMessage } }
-                    if (msg.message && typeof msg.message === 'object' && 'id' in msg.message) {
-                      return formatMessage(msg.message as any);
+                    if (isRecord(msg) && isMessageDescriptor(msg.message)) {
+                      return formatMessage(msg.message);
                     }
                     // errors array: [{ id, defaultMessage }]
-                    if (Array.isArray(msg.errors) && msg.errors.length > 0) {
+                    if (isRecord(msg) && Array.isArray(msg.errors) && msg.errors.length > 0) {
                       const first = msg.errors[0];
                       if (typeof first === 'string') return first;
-                      if (first && typeof first === 'object' && 'id' in first)
-                        return formatMessage(first as any);
+                      if (isMessageDescriptor(first)) return formatMessage(first);
                     }
                     // fallback to defaultMessage if present
-                    if ('defaultMessage' in msg) return msg.defaultMessage;
+                    if (isRecord(msg) && typeof msg.defaultMessage === 'string') {
+                      return msg.defaultMessage;
+                    }
                     return String(msg);
-                  } catch (e) {
+                  } catch {
                     return String(msg);
                   }
                 };

@@ -13,28 +13,52 @@ import { addItemsToFormSection, FormTypeOptions } from './utils/addItemsToFormSe
 import { createComponentCollectionName } from './utils/createCollectionName';
 import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAttributeNames';
 
-import type { ContentType } from '../../../types';
+import type { Component, ContentType } from '../../../types';
+import type { FormAPI } from '../../../utils/formAPI';
+import type { FormModalData } from '../reducer';
 import type { Internal } from '@strapi/types';
 
+type AttributeType = keyof typeof attributeTypes;
+type CustomFieldFormOptions = Parameters<typeof addItemsToFormSection>[0];
+type CustomFieldValidator = Parameters<FormAPI['makeCustomFieldValidator']>[1];
+type FormSection = FormTypeOptions[number];
+type FormItem = FormSection['items'][number];
+
+type CustomField = {
+  type: AttributeType;
+  options?: {
+    base?: CustomFieldFormOptions;
+    advanced?: CustomFieldFormOptions;
+    validator?: CustomFieldValidator;
+  };
+};
+
 export type SchemaParams = {
-  schemaAttributes: any;
-  attributeType: keyof typeof attributeTypes;
-  customFieldValidator: any;
+  schemaAttributes: Attribute[];
+  attributeType: AttributeType;
+  customFieldValidator: CustomFieldValidator;
   reservedNames: {
     attributes: Array<string>;
   };
-  schemaData: any;
-  ctbFormsAPI: any;
+  schemaData: SchemaData;
+  ctbFormsAPI: FormAPI;
 };
 
 type Base<TAttributesFormType extends 'base' | 'advanced'> = {
-  data: any;
+  data: FormModalData;
   type: keyof (typeof attributesForm)[TAttributesFormType];
-  step: string;
-  attributes: any;
-  extensions: any;
+  step: string | null;
+  attributes: Attribute[];
+  extensions: FormAPI;
   forTarget: string;
 };
+
+type CustomFieldFormParams = {
+  customField: CustomField;
+  data?: FormModalData;
+  step?: string | null;
+  extensions: FormAPI;
+} & Record<string, unknown>;
 
 export const forms = {
   customField: {
@@ -72,7 +96,7 @@ export const forms = {
       );
     },
     form: {
-      base({ customField }: any) {
+      base({ customField }: Pick<CustomFieldFormParams, 'customField'>) {
         // Default section with required name field
         const sections: FormTypeOptions = [{ sectionTitle: null, items: [nameField] }];
 
@@ -82,7 +106,7 @@ export const forms = {
 
         return { sections };
       },
-      advanced({ customField, data, step, extensions, ...rest }: any) {
+      advanced({ customField, data, step, extensions, ...rest }: CustomFieldFormParams) {
         // Default section with no fields
         const sections: FormTypeOptions = [
           { sectionTitle: null, items: [] },
@@ -110,13 +134,13 @@ export const forms = {
           step,
           customField,
           ...rest,
-        });
+        }) as FormItem[] | undefined;
 
         if (customField.options?.advanced) {
           addItemsToFormSection(customField.options.advanced, sections);
         }
 
-        if (injectedInputs) {
+        if (injectedInputs !== undefined) {
           const extendedSettings = {
             sectionTitle: {
               id: getTrad('modalForm.custom-fields.advanced.settings.extended'),
@@ -134,15 +158,15 @@ export const forms = {
   },
   attribute: {
     schema(
-      currentSchema: any,
-      attributeType: keyof typeof attributeTypes,
+      currentSchema: { attributes?: Attribute[] } | null | undefined,
+      attributeType: AttributeType,
       reservedNames: {
         attributes: Array<string>;
       },
       alreadyTakenTargetContentTypeAttributes: Array<Attribute>,
       options: SchemaData,
       extensions: {
-        makeValidator: any;
+        makeValidator: FormAPI['makeValidator'];
       }
     ) {
       // Get the attributes object on the schema
@@ -181,11 +205,11 @@ export const forms = {
             step,
             customField: null,
             ...rest,
-          });
+          }) as FormItem[];
 
           let injected = false;
 
-          const sections = baseForm.reduce((acc: Array<any>, current: any) => {
+          const sections = baseForm.reduce<FormTypeOptions>((acc, current) => {
             if (current.sectionTitle === null || injected) {
               acc.push(current);
             } else {
@@ -226,16 +250,16 @@ export const forms = {
       isEditing: boolean,
       ctUid: Internal.UID.ContentType,
       reservedNames: {
-        models: any;
+        models: string[];
       },
-      extensions: any,
+      extensions: FormAPI,
       contentTypes: Record<Internal.UID.ContentType, ContentType>
     ) {
       const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.info.singularName;
       });
 
-      const pluralNames = Object.values(contentTypes).map((contentType: any) => {
+      const pluralNames = Object.values(contentTypes).map((contentType) => {
         return contentType?.info?.pluralName ?? '';
       });
 
@@ -291,14 +315,14 @@ export const forms = {
       );
     },
     form: {
-      base({ actionType }: any) {
+      base({ actionType }: { actionType?: string }) {
         if (actionType === 'create') {
           return contentTypeForm.base.create();
         }
 
         return contentTypeForm.base.edit();
       },
-      advanced({ extensions }: any) {
+      advanced({ extensions }: { extensions: FormAPI }) {
         const baseForm = contentTypeForm.advanced
           .default()
           .sections.map((section) => section.items)
@@ -320,17 +344,17 @@ export const forms = {
       alreadyTakenAttributes: Array<Internal.UID.Component>,
       componentCategory: string,
       reservedNames: {
-        models: any;
+        models: string[];
       },
       isEditing = false,
-      components: Record<string, any>,
+      components: Record<Internal.UID.Component, Component>,
       componentDisplayName: string,
       compoUid: Internal.UID.Component | null = null
     ) {
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter((uid: Internal.UID.Component) => uid !== compoUid)
         : alreadyTakenAttributes;
-      const collectionNames = Object.values(components).map((component: any) => {
+      const collectionNames = Object.values(components).map((component) => {
         return component?.collectionName;
       });
 
@@ -369,7 +393,7 @@ export const forms = {
       advanced() {
         return dynamiczoneForm.advanced.default();
       },
-      base({ data }: any) {
+      base({ data }: { data: FormModalData }) {
         const isCreatingComponent = data?.createComponent ?? false;
 
         if (isCreatingComponent) {
