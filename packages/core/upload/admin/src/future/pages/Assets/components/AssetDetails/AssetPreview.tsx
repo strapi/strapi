@@ -4,7 +4,7 @@ import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../../enums';
+import { ASSET_TYPES } from '../../../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -132,7 +132,7 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
     setIsMediaLoaded(false);
   }, [mediaUrl]);
 
-  if (mime?.includes(AssetType.Image)) {
+  if (mime?.includes(ASSET_TYPES.Image)) {
     const imageUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
     if (imageUrl) {
@@ -153,7 +153,7 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
     }
   }
 
-  if (mime?.includes(AssetType.Video) && mediaUrl) {
+  if (mime?.includes(ASSET_TYPES.Video) && mediaUrl) {
     return (
       <PreviewContainer>
         {!isMediaLoaded && <AssetLoader />}
@@ -175,7 +175,7 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
     );
   }
 
-  if (mime?.includes(AssetType.Audio) && mediaUrl) {
+  if (mime?.includes(ASSET_TYPES.Audio) && mediaUrl) {
     return (
       <PreviewContainer>
         {!isMediaLoaded && <AssetLoader />}
