@@ -52,8 +52,7 @@
     "fs-extra": "11.3.4",
     "knex": "3.0.1",
     "lodash": "4.18.1",
-    "semver": "7.7.4",
-    "umzug": "3.8.1"
+    "semver": "7.7.4"
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
