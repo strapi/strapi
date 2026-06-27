@@ -85,6 +85,7 @@
   },
   "devDependencies": {
     "@reduxjs/toolkit": "1.9.7",
+    "@strapi/types": "5.49.0",
     "@testing-library/jest-dom": "6.9.1",
     "eslint-config-custom": "5.49.0",
     "jest-environment-jsdom": "29.6.1",
@@ -93,6 +94,7 @@
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.9.7",
+    "@strapi/types": "5.49.0",
     "@testing-library/jest-dom": "^5.16.5",
     "jest-environment-jsdom": "^29.0.0",
     "styled-components": "^6.0.0"

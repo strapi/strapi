@@ -1,5 +1,5 @@
 {
   "extends": "tsconfig/client.json",
-  "include": ["src", "./custom.d.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

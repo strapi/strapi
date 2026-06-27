@@ -21,7 +21,7 @@ const ADMIN = {
             noEmit: true,
             jsx: 'react-jsx',
           },
-          "include": ["./src", "./custom.d.ts"],
+          "include": ["./src"],
           "compilerOptions": {
             "rootDir": "../",
             "baseUrl": ".",
@@ -34,7 +34,7 @@ const ADMIN = {
     contents: outdent`
         {
           "extends": "./tsconfig",
-          "include": ["./src", "./custom.d.ts"],
+          "include": ["./src"],
           "exclude": ["**/*.test.ts", "**/*.test.tsx"],
           "compilerOptions": {
             "rootDir": "../",

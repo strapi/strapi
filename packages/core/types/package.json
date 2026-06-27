@@ -30,6 +30,22 @@
   "main": "./dist/index.js",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./globals-admin": {
+      "types": "./dist/globals-admin.d.ts",
+      "source": "./src/globals-admin.ts",
+      "require": "./dist/globals-admin.js",
+      "default": "./dist/globals-admin.js"
+    },
+    "./package.json": "./package.json",
+    "./*": "./*"
+  },
   "files": [
     "dist/"
   ],

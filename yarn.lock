@@ -8849,6 +8849,7 @@ __metadata:
   dependencies:
     "@juggle/resize-observer": "npm:3.4.0"
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/types": "npm:5.49.0"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     eslint-config-custom: "npm:5.49.0"
@@ -8860,6 +8861,7 @@ __metadata:
     whatwg-fetch: "npm:3.6.2"
   peerDependencies:
     "@reduxjs/toolkit": ^1.9.7
+    "@strapi/types": 5.49.0
     "@testing-library/jest-dom": ^5.16.5
     jest-environment-jsdom: ^29.0.0
     styled-components: ^6.0.0
