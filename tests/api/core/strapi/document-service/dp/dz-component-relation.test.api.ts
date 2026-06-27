@@ -4,6 +4,7 @@ import { Core } from '@strapi/types';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createContentAPIRequest } from 'api-tests/request';
+import { destroyTestSetup, type BuilderHelperReturn } from '../../../../utils/builder-helper';
 
 const article = {
   kind: 'collectionType',
@@ -84,8 +85,7 @@ describe('Dynamic zone with component containing relation', () => {
   });
 
   afterAll(async () => {
-    await strapi.destroy();
-    await builder.cleanup();
+    await destroyTestSetup({ strapi, builder } as BuilderHelperReturn);
   });
 
   it('returns only published documents', async () => {

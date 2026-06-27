@@ -63,19 +63,20 @@ yargs
 
       yarg.boolean('run');
 
-      yarg.positional('appPath', {
+      yarg.option('appPath', {
         type: 'string',
         default: 'test-apps/base',
       });
 
-      yarg.positional('template', {
+      yarg.option('template', {
         type: 'string',
         default: undefined,
       });
     },
     (argv) => {
-      const { databaseName, run, appPath = 'test-apps/base', template } = argv;
+      const { databaseName, run, appPath, template } = argv;
 
+      // databaseName defaults to sqlite; CI --dbclient flags are ignored (same as develop).
       if (databaseName) {
         return main(databases[databaseName], appPath, { run, template });
       }
