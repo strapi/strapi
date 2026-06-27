@@ -4,25 +4,22 @@ import { fs } from 'memfs';
 jest.mock('fs', () => fs);
 
 import fse from 'fs-extra';
+import type { Core } from '@strapi/types';
 
 import localProvider from '../index';
 
 describe('Local provider', () => {
+  const strapiHost: Core.Strapi = {
+    dirs: { static: { public: '' } },
+  } as Core.Strapi;
+
   beforeAll(() => {
-    global.strapi = {
-      dirs: { static: { public: '' } },
-    } as any;
-
     fse.ensureDirSync('uploads');
-  });
-
-  afterAll(() => {
-    global.strapi.dirs = undefined as any;
   });
 
   describe('upload', () => {
     test('Should have relative url to file object', async () => {
-      const providerInstance = localProvider.init({});
+      const providerInstance = localProvider({ strapi: strapiHost }).init({});
 
       const file = {
         name: 'test',
@@ -44,7 +41,7 @@ describe('Local provider', () => {
 
   describe('replace', () => {
     test('Should overwrite file at same hash and set url', async () => {
-      const providerInstance = localProvider.init({});
+      const providerInstance = localProvider({ strapi: strapiHost }).init({});
 
       const oldFile = {
         name: 'replace-me',
@@ -78,7 +75,7 @@ describe('Local provider', () => {
     });
 
     test('Should delete the old file when hash changes', async () => {
-      const providerInstance = localProvider.init({});
+      const providerInstance = localProvider({ strapi: strapiHost }).init({});
 
       const oldFile = {
         name: 'old',

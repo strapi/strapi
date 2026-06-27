@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Utils } from '@strapi/types';
 import type { ProviderCapabilities } from '../../shared/types';
 import type { EmailConfig, SendOptions } from './types';
 
@@ -19,9 +19,15 @@ interface EmailProviderModule {
   provider?: string;
 }
 
-const createProvider = (emailConfig: EmailConfig) => {
+const createProvider = async ({
+  strapi,
+  emailConfig,
+}: {
+  strapi: Core.Strapi;
+  emailConfig: EmailConfig;
+}) => {
   const providerName = emailConfig.provider.toLowerCase();
-  let provider: EmailProviderModule;
+  let providerModule: Utils.MaybeStrapiFactoryAsync<EmailProviderModule>;
 
   let modulePath: string;
   try {
@@ -40,7 +46,7 @@ const createProvider = (emailConfig: EmailConfig) => {
   }
 
   try {
-    provider = require(modulePath);
+    providerModule = require(modulePath);
   } catch (err) {
     const newError = new Error(`Could not load email provider "${providerName}".`);
     if (err instanceof Error) {
@@ -48,6 +54,9 @@ const createProvider = (emailConfig: EmailConfig) => {
     }
     throw newError;
   }
+
+  const provider =
+    typeof providerModule === 'function' ? await providerModule({ strapi }) : providerModule;
 
   return provider.init(emailConfig.providerOptions, emailConfig.settings);
 };
@@ -63,7 +72,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     );
   }
 
-  strapi.plugin('email').provider = createProvider(emailConfig);
+  strapi.plugin('email').provider = await createProvider({ strapi, emailConfig });
 
   // Add permissions
   const actions = [
