@@ -23,9 +23,13 @@ const Layout = () => {
   const isMobile = useIsMobile();
 
   const { isLoading, collectionTypeLinks, models, singleTypeLinks } = useContentManagerInitData();
-  const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks].sort((a, b) =>
+  const authorisedCollectionModels = [...collectionTypeLinks].sort((a, b) =>
     a.title.localeCompare(b.title)
   );
+  const authorisedSingleModels = [...singleTypeLinks].sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
+  const authorisedModels = [...authorisedCollectionModels, ...authorisedSingleModels];
 
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
@@ -63,13 +67,15 @@ const Layout = () => {
 
   // On /content-manager base route
   if (!contentTypeMatch && authorisedModels.length > 0) {
-    // On desktop: redirect to first collection type
+    // On desktop: redirect to first collection type when available, otherwise first model
     if (!isMobile) {
+      const targetModel = authorisedCollectionModels[0] ?? authorisedModels[0];
+
       return (
         <Navigate
           to={{
-            pathname: authorisedModels[0].to,
-            search: authorisedModels[0].search ?? '',
+            pathname: targetModel.to,
+            search: targetModel.search ?? '',
           }}
           replace
         />
