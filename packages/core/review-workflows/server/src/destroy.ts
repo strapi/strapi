@@ -1,3 +1,4 @@
 import type { Core } from '@strapi/types';
 
-export default async ({ strapi }: { strapi: Core.Strapi }) => {};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default async (_args: { strapi: Core.Strapi }) => {};
