@@ -38,8 +38,8 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
-import { AssetType } from '../../../../enums';
 import {
   useDeleteAssetMutation,
   useGetAssetQuery,
@@ -639,7 +639,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   // own handlers (replace, update) read like the consumers do.
   const notify = React.useCallback<DrawerNotify>((toast) => setDrawerToast(toast), []);
 
-  const isImage = asset.mime?.includes(AssetType.Image);
+  const isImage = asset.mime?.includes(ASSET_TYPES.Image);
 
   const initialValues: AssetFormState = {
     name: asset.name ?? '',
