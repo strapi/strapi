@@ -25,6 +25,43 @@ const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
 const filterContentAPI = (route: Core.Route) => route.info.type === 'content-api';
 
 /**
+ * Marker recording which extra-param names THIS extra-params mechanism has
+ * already merged onto a given route, keyed per param kind.
+ *
+ * Route definitions from `@strapi/*` plugins and the admin are MODULE-LEVEL
+ * singletons loaded once via native `require`. If route registration runs more
+ * than once in a single process (repeated test setup today, or an in-process
+ * reload / HMR path in the future), `applyExtraParamsToRoutes` runs a SECOND
+ * time over a route that already carries the first pass's merged params. Without
+ * this marker the duplicate-param guard would throw `param "…" already exists on
+ * route` on the second pass.
+ *
+ * The marker is non-enumerable (it never leaks into `{...route}` serialization)
+ * and is keyed by *this* mechanism. A param that is present but NOT in the marker
+ * (e.g. genuinely declared twice, or hand-written into the route) still throws —
+ * the duplicate guard is preserved for real mistakes; only OUR own re-application
+ * is treated as an idempotent no-op.
+ */
+const APPLIED_EXTRA_PARAMS = Symbol.for('strapi.contentAPI.appliedExtraParams');
+
+type AppliedExtraParams = { query: Set<string>; input: Set<string> };
+
+const getAppliedExtraParams = (route: Core.Route): AppliedExtraParams => {
+  const holder = route as unknown as { [APPLIED_EXTRA_PARAMS]?: AppliedExtraParams };
+  let applied = holder[APPLIED_EXTRA_PARAMS];
+  if (!applied) {
+    applied = { query: new Set<string>(), input: new Set<string>() };
+    Object.defineProperty(route, APPLIED_EXTRA_PARAMS, {
+      value: applied,
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    });
+  }
+  return applied;
+};
+
+/**
  * Runtime check for addQueryParams: we only allow scalar or array-of-scalar schemas (no nested objects).
  * We keep this in addition to the ZodQueryParamSchema type because: (1) TypeScript can be bypassed (JS,
  * any, or schema from another Zod instance); (2) it gives a clear, immediate error at registration
@@ -76,6 +113,10 @@ const mergeOneQueryParamIntoRoute = (
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
   if (matchRoute && !matchRoute(route)) return;
+  const applied = getAppliedExtraParams(route);
+  // Idempotent re-application (experimental in-process reload re-registers the
+  // same persistent route singleton): we already merged this param ourselves.
+  if (applied.query.has(param)) return;
   const query = { ...(route.request?.query ?? {}) };
   if (param in query) {
     throw new Error(
@@ -83,6 +124,7 @@ const mergeOneQueryParamIntoRoute = (
     );
   }
   route.request = { ...route.request, query: { ...query, [param]: schema } };
+  applied.query.add(param);
 };
 
 const mergeOneInputParamIntoRoute = (
@@ -92,6 +134,9 @@ const mergeOneInputParamIntoRoute = (
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
   if (matchRoute && !matchRoute(route)) return;
+  const applied = getAppliedExtraParams(route);
+  // Idempotent re-application (see mergeOneQueryParamIntoRoute).
+  if (applied.input.has(param)) return;
   const jsonKey = 'application/json';
   type RouteBody = NonNullable<NonNullable<Core.Route['request']>['body']>;
   const body: RouteBody = route.request?.body ? { ...route.request.body } : ({} as RouteBody);
@@ -107,6 +152,7 @@ const mergeOneInputParamIntoRoute = (
   }
   body[jsonKey] = z.object({ ...base, [param]: schema }) as RouteBody[keyof RouteBody];
   route.request = { ...route.request, body };
+  applied.input.add(param);
 };
 
 /** Stored options with schema always resolved (never a function). */
