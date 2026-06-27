@@ -42,6 +42,7 @@ import { ComponentProvider } from '../ComponentContext';
 
 import type { RelationOpenMode } from '../../../../../../../shared/contracts/content-types';
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
+import type { AnyData } from '../../../utils/data';
 
 export function getCollectionType(url: string) {
   const regex = new RegExp(`(${COLLECTION_TYPES}|${SINGLE_TYPES})`);
@@ -81,6 +82,7 @@ interface State {
   hasUnsavedChanges: boolean;
   fieldToConnect?: string;
   fieldToConnectUID?: string;
+  parentFormValues?: AnyData;
 }
 
 type Action =
@@ -91,6 +93,7 @@ type Action =
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
         fieldToConnectUID?: string;
+        parentFormValues?: AnyData;
       };
     }
   | {
@@ -107,6 +110,7 @@ type Action =
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
         fieldToConnectUID?: string;
+        parentFormValues?: AnyData;
       };
     }
   | {
@@ -130,6 +134,7 @@ function reducer(state: State, action: Action): State {
           confirmDialogIntent: action.payload.document,
           fieldToConnect: action.payload.fieldToConnect,
           fieldToConnectUID: action.payload.fieldToConnectUID,
+          parentFormValues: action.payload.parentFormValues,
         };
       }
 
@@ -146,6 +151,7 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
         fieldToConnect: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnect,
         fieldToConnectUID: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnectUID,
+        parentFormValues: hasToResetDocumentHistory ? undefined : action.payload.parentFormValues,
       };
     case 'GO_BACK':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
@@ -180,6 +186,7 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
         fieldToConnect: undefined,
         fieldToConnectUID: undefined,
+        parentFormValues: undefined,
       };
     case 'CANCEL_CONFIRM_DIALOG':
       return {
@@ -197,6 +204,9 @@ function reducer(state: State, action: Action): State {
         confirmDialogIntent: null,
         hasUnsavedChanges: false,
         isModalOpen: false,
+        fieldToConnect: undefined,
+        fieldToConnectUID: undefined,
+        parentFormValues: undefined,
       };
     case 'SET_HAS_UNSAVED_CHANGES':
       return {
@@ -524,7 +534,13 @@ const RelationModalBody = () => {
     } else if ('documentId' in state.confirmDialogIntent) {
       dispatch({
         type: 'GO_TO_RELATION',
-        payload: { document: state.confirmDialogIntent, shouldBypassConfirmation: true },
+        payload: {
+          document: state.confirmDialogIntent,
+          shouldBypassConfirmation: true,
+          fieldToConnect: state.fieldToConnect,
+          fieldToConnectUID: state.fieldToConnectUID,
+          parentFormValues: state.parentFormValues,
+        },
       });
     }
   };
