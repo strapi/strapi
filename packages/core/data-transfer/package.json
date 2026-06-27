@@ -79,7 +79,7 @@
     "@types/koa": "2.15.2",
     "@types/lodash": "^4.14.191",
     "@types/mime-types": "2.1.1",
-    "@types/node": "20.19.41",
+    "@types/node": "22.20.0",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.8",
@@ -93,7 +93,7 @@
     "vitest-config": "5.49.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }
