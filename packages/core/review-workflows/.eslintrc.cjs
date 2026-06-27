@@ -9,6 +9,8 @@ const config = {
     'rollup.config.mjs',
     'coverage/',
     'lint-staged.config.mjs',
+    'admin/**/*',
+    'server/**/*',
   ],
   overrides: [
     {

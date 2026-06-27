@@ -4,7 +4,14 @@
     "noEmit": true,
     "rootDir": "./src",
     "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "paths": {
+      // TEMPORARY: redirect plugin-react-swc types to a local stub because the
+      // pinned TypeScript cannot parse the plugin's string-named export. Remove
+      // this entry and ./types/plugin-react-swc.d.ts once TypeScript is bumped.
+      // See ./types/plugin-react-swc.d.ts for details.
+      "@vitejs/plugin-react-swc": ["./types/plugin-react-swc.d.ts"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules"]
