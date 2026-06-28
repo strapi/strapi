@@ -10,7 +10,7 @@ import { ActionsDrawer, useActionsDrawer } from '../../components/ActionsDrawer'
 import { RelativeTime } from '../../components/RelativeTime';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDisplayName } from '../../utils/users';
-import { useHistoryContext } from '../pages/History';
+import { useHistoryContext } from '../HistoryContext';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
 

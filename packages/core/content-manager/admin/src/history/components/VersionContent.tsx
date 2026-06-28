@@ -15,92 +15,14 @@ import {
   getConditionDependencyPaths,
   getConditionDependencySubscriptionValue,
 } from '../../utils/conditionalFields';
-import { HistoryContextValue, useHistoryContext } from '../pages/History';
+import { useHistoryContext } from '../HistoryContext';
+import { getRemaingFieldsLayout } from '../utils/versionLayoutUtils';
 
 import { VersionInputRenderer } from './VersionInputRenderer';
 
-import type { Metadatas } from '../../../../shared/contracts/content-types';
-import type { GetInitData } from '../../../../shared/contracts/init';
 import type { ComponentsDictionary, Document } from '../../hooks/useDocument';
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
-
-const createLayoutFromFields = <T extends EditFieldLayout | UnknownField>(fields: T[]) => {
-  return (
-    fields
-      .reduce<Array<T[]>>((rows, field) => {
-        if (field.type === 'dynamiczone') {
-          // Dynamic zones take up all the columns in a row
-          rows.push([field]);
-
-          return rows;
-        }
-
-        if (!rows[rows.length - 1]) {
-          // Create a new row if there isn't one available
-          rows.push([]);
-        }
-
-        // Push fields to the current row, they wrap and handle their own column size
-        rows[rows.length - 1].push(field);
-
-        return rows;
-      }, [])
-      // Map the rows to panels
-      .map((row) => [row])
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * getRemainingFieldsLayout
- * -----------------------------------------------------------------------------------------------*/
-
-interface GetRemainingFieldsLayoutOptions
-  extends Pick<HistoryContextValue, 'layout'>,
-    Pick<GetInitData.Response['data'], 'fieldSizes'> {
-  schemaAttributes: HistoryContextValue['schema']['attributes'];
-  metadatas: Metadatas;
-}
-
-/**
- * Build a layout for the fields that are were deleted from the edit view layout
- * via the configure the view page. This layout will be merged with the main one.
- * Those fields would be restored if the user restores the history version, which is why it's
- * important to show them, even if they're not in the normal layout.
- */
-function getRemaingFieldsLayout({
-  layout,
-  metadatas,
-  schemaAttributes,
-  fieldSizes,
-}: GetRemainingFieldsLayoutOptions) {
-  const fieldsInLayout = layout.flatMap((panel) =>
-    panel.flatMap((row) => row.flatMap((field) => field.name))
-  );
-  const remainingFields = Object.entries(metadatas).reduce<EditFieldLayout[]>(
-    (currentRemainingFields, [name, field]) => {
-      // Make sure we do not fields that are not visible, e.g. "id"
-      if (!fieldsInLayout.includes(name) && field.edit.visible === true) {
-        const attribute = schemaAttributes[name];
-        // @ts-expect-error not sure why attribute causes type error
-        currentRemainingFields.push({
-          attribute,
-          type: attribute.type,
-          visible: true,
-          disabled: true,
-          label: field.edit.label || name,
-          name: name,
-          size: fieldSizes[attribute.type].default ?? 12,
-        });
-      }
-
-      return currentRemainingFields;
-    },
-    []
-  );
-
-  return createLayoutFromFields(remainingFields);
-}
 
 /* -------------------------------------------------------------------------------------------------
  * FormPanel
@@ -351,4 +273,4 @@ const VersionContent = () => {
   );
 };
 
-export { VersionContent, getRemaingFieldsLayout };
+export { VersionContent };

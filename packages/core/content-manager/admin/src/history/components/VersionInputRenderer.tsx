@@ -30,9 +30,8 @@ import { UIDInput } from '../../pages/EditView/components/FormInputs/UID';
 import { Wysiwyg } from '../../pages/EditView/components/FormInputs/Wysiwyg/Field';
 import { useFieldHint } from '../../pages/EditView/components/InputRenderer';
 import { getRelationLabel } from '../../utils/relations';
-import { useHistoryContext } from '../pages/History';
-
-import { getRemaingFieldsLayout } from './VersionContent';
+import { useHistoryContext } from '../HistoryContext';
+import { getRemaingFieldsLayout } from '../utils/versionLayoutUtils';
 
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations/Relations';

@@ -1,12 +1,6 @@
 import * as React from 'react';
 
-import {
-  useQueryParams,
-  Page,
-  createContext,
-  useRBAC,
-  HEIGHT_TOP_NAVIGATION,
-} from '@strapi/admin/strapi-admin';
+import { useQueryParams, Page, useRBAC, HEIGHT_TOP_NAVIGATION } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, Main, Portal, Link } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -16,42 +10,16 @@ import { COLLECTION_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';
-import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
 import { buildValidParams } from '../../utils/api';
 import { VersionContent } from '../components/VersionContent';
 import { VersionHeader } from '../components/VersionHeader';
 import { VersionsList } from '../components/VersionsList';
+import { HistoryProvider, useHistoryContext } from '../HistoryContext';
 import { useGetHistoryVersionsQuery } from '../services/historyVersion';
 
-import type {
-  ContentType,
-  FindContentTypeConfiguration,
-} from '../../../../shared/contracts/content-types';
-import type {
-  HistoryVersionDataResponse,
-  GetHistoryVersions,
-} from '../../../../shared/contracts/history-versions';
 import type { UID } from '@strapi/types';
-
-/* -------------------------------------------------------------------------------------------------
- * HistoryProvider
- * -----------------------------------------------------------------------------------------------*/
-
-interface HistoryContextValue {
-  contentType: UID.ContentType;
-  id?: string; // null for single types
-  layout: EditLayout['layout'];
-  configuration: FindContentTypeConfiguration.Response['data'];
-  selectedVersion: HistoryVersionDataResponse;
-  // Errors are handled outside of the provider, so we exclude errors from the response type
-  versions: Extract<GetHistoryVersions.Response, { data: Array<HistoryVersionDataResponse> }>;
-  page: number;
-  mainField: string;
-  schema: ContentType;
-}
-
-const [HistoryProvider, useHistoryContext] = createContext<HistoryContextValue>('HistoryPage');
 
 /* -------------------------------------------------------------------------------------------------
  * HistoryPage
@@ -298,4 +266,4 @@ const ProtectedHistoryPage = () => {
 };
 
 export { ProtectedHistoryPage, HistoryProvider, useHistoryContext };
-export type { HistoryContextValue };
+export type { HistoryContextValue } from '../HistoryContext';

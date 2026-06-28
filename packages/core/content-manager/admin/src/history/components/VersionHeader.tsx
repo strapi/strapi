@@ -16,7 +16,7 @@ import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, useParams, type To } from 'react-router-dom';
 
 import { PERMISSIONS } from '../../constants/plugin';
-import { useHistoryContext } from '../pages/History';
+import { useHistoryContext } from '../HistoryContext';
 import { useRestoreVersionMutation } from '../services/historyVersion';
 
 import type { UID } from '@strapi/types';
