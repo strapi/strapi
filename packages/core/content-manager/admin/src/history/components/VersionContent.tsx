@@ -16,7 +16,7 @@ import {
   getConditionDependencySubscriptionValue,
 } from '../../utils/conditionalFields';
 import { useHistoryContext } from '../HistoryContext';
-import { getRemaingFieldsLayout } from '../utils/versionLayoutUtils';
+import { getRemaingFieldsLayout, createLayoutFromFields } from '../utils/versionLayoutUtils';
 
 import { VersionInputRenderer } from './VersionInputRenderer';
 

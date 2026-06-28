@@ -19,6 +19,7 @@ import { TEMP_FIELD_NAME } from './constants';
 
 import type { EditFieldFormProps } from './fieldFormTypes';
 import type { ConfigurationFormData } from './Form';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Constants

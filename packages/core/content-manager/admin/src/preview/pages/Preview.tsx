@@ -33,7 +33,7 @@ import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
-import { PreviewProvider, usePreviewContext } from '../PreviewContext';
+import { PreviewProvider, usePreviewContext, type PopoverField } from '../PreviewContext';
 import { useGetPreviewUrlQuery } from '../services/preview';
 import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';

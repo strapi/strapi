@@ -65,4 +65,3 @@ function getRemaingFieldsLayout({
 }
 
 export { createLayoutFromFields, getRemaingFieldsLayout };
-export type { GetRemainingFieldsLayoutOptions };

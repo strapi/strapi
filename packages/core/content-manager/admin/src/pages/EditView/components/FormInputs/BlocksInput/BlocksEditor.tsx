@@ -270,6 +270,8 @@ export {
   type BlocksStore,
   type RichTextBlocksStore,
   type SelectorBlockKey,
+  type SelectorBlock,
+  type NonSelectorBlock,
   BlocksEditorProvider,
   useBlocksEditorContext,
   isSelectorBlockKey,

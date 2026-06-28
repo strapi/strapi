@@ -8,7 +8,7 @@ import type {
   GetHistoryVersions,
   HistoryVersionDataResponse,
 } from '../../../shared/contracts/history-versions';
-import type { EditLayout } from '../../hooks/useDocumentLayout';
+import type { EditLayout } from '../hooks/useDocumentLayout';
 import type { UID } from '@strapi/types';
 
 type HistoryContextValue = {

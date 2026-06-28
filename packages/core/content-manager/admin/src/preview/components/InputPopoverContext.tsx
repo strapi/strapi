@@ -1,6 +1,10 @@
+import * as React from 'react';
+
 import { createContext } from '@strapi/admin/strapi-admin';
 
-type InputPopoverContextValue = Record<string, never>;
+type InputPopoverContextValue = {
+  children?: React.ReactNode;
+};
 
 const [InputPopoverProvider, useInputPopoverContext] =
   createContext<InputPopoverContextValue>('InputPopover');
