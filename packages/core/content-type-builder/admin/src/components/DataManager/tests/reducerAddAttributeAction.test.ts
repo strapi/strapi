@@ -7,6 +7,7 @@ import type { Struct } from '@strapi/types';
 const baseContentType = initCT('test', {});
 const relatedContentType = initCT('relationship', {});
 const baseComponent = initCompo('test', {});
+type AddAttributePayload = Parameters<typeof actions.addAttribute>[0];
 
 const init = () => {
   return initUtils({
@@ -63,13 +64,13 @@ describe.each<{ forTarget: Struct.ModelType; targetUid: string }>([
       ['json', {}],
       // should not be able to highjack the status
       ['string', { status: 'REMOVED' }],
-    ])('Should add a %s field to a type correctly', (type, opts) => {
+    ] as const)('Should add a %s field to a type correctly', (type, opts) => {
       const initializedState = init();
 
       const state = reducer(
         initializedState,
         actions.addAttribute({
-          attributeToSet: { type, name: 'name', ...opts },
+          attributeToSet: { type, name: 'name', ...opts } as AddAttributePayload['attributeToSet'],
           forTarget,
           targetUid,
         })
@@ -94,7 +95,7 @@ describe.each<{ forTarget: Struct.ModelType; targetUid: string }>([
       reducer(
         initializedState,
         actions.addAttribute({
-          attributeToSet: { type: 'unknown', name: 'name' },
+          attributeToSet: { type: 'string', name: 'name' },
           forTarget,
           targetUid: 'api::unknown.unknown',
         })

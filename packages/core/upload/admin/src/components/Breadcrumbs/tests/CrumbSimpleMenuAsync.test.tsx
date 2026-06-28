@@ -20,20 +20,26 @@ const mockNavigate = jest.fn();
 
 const mockFolderData = [
   {
-    value: 1,
-    label: 'Folder 1',
-    path: '/1',
+    value: null,
+    label: 'Media Library',
     children: [
       {
-        value: 2,
-        label: 'Folder 2',
-        path: '/1/2',
+        value: 1,
+        label: 'Folder 1',
+        path: '/1',
         children: [
           {
-            value: 3,
-            label: 'Folder 3',
-            path: '/1/2/3',
-            children: [],
+            value: 2,
+            label: 'Folder 2',
+            path: '/1/2',
+            children: [
+              {
+                value: 3,
+                label: 'Folder 3',
+                path: '/1/2/3',
+                children: [],
+              },
+            ],
           },
         ],
       },

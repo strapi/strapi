@@ -2,6 +2,7 @@ import { render as baseRender, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { RBAC } from '../../../core/apis/rbac';
+import { Widgets } from '../../../core/apis/Widgets';
 import { StrapiAppContextValue, StrapiAppProvider } from '../../../features/StrapiApp';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 import { Layout } from '../Layout';
@@ -38,13 +39,7 @@ const render = (settings: StrapiAppContextValue['settings']) =>
           <StrapiAppProvider
             components={{}}
             fields={{}}
-            widgets={
-              {
-                widgets: [],
-                register: jest.fn(),
-                getAll: jest.fn(),
-              } satisfies StrapiAppContextValue['widgets']
-            }
+            widgets={new Widgets()}
             customFields={{
               customFields: {},
               get: jest.fn(),
