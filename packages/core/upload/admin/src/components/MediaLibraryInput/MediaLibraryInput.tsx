@@ -48,7 +48,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();
-    const { onChange, value, error } = useField(name);
+    const { onChange, value, error } = useField<File | File[] | null>(name);
     const [uploadedFiles, setUploadedFiles] = React.useState<Asset[] | File[]>([]);
     const [step, setStep] = React.useState<string | undefined>(undefined);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -67,7 +67,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
 
     if (Array.isArray(value)) {
       selectedAssets = value;
-    } else if (value) {
+    } else if (value !== null && value !== undefined) {
       selectedAssets = [value];
     }
 
