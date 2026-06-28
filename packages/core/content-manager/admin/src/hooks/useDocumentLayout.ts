@@ -7,6 +7,7 @@ import {
   useAPIErrorHandler,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
+import { useParams } from 'react-router-dom';
 
 import { HOOKS } from '../constants/hooks';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
@@ -14,23 +15,21 @@ import { BaseQueryError } from '../utils/api';
 import { getMainField } from '../utils/attributes';
 import { normalizeContentManagerLayout } from '../utils/layouts/normalizeContentManagerLayout';
 
-import { useContentTypeSchema } from './useContentTypeSchema';
-import {
-  type ComponentsDictionary,
-  type Document,
-  type Schema,
-  useDoc,
-  useDocument,
-} from './useDocument';
+import { useContentTypeSchema, type ComponentsDictionary } from './useContentTypeSchema';
 
+import type { FindOne } from '../../../shared/contracts/collection-types';
 import type { ComponentConfiguration } from '../../../shared/contracts/components';
 import type {
+  ContentType,
   Metadatas,
   FindContentTypeConfiguration,
   Settings,
 } from '../../../shared/contracts/content-types';
 import type { Filters, InputProps, Table } from '@strapi/admin/strapi-admin';
 import type { Schema as SchemaUtils } from '@strapi/types';
+
+type Document = FindOne.Response['data'];
+type Schema = ContentType;
 
 type LayoutOptions = Schema['options'] & Schema['pluginOptions'] & object;
 
@@ -198,12 +197,11 @@ const DEFAULT_SETTINGS = {
  *
  */
 const useDocumentLayout: UseDocumentLayout = (model) => {
-  const { schema, components } = useDocument({ model, collectionType: '' }, { skip: true });
+  const { schema, components, schemas, isLoading: isLoadingSchemas } = useContentTypeSchema(model);
   const [{ query }] = useQueryParams();
   const runHookWaterfall = useStrapiApp('useDocumentLayout', (state) => state.runHookWaterfall);
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const { isLoading: isLoadingSchemas, schemas } = useContentTypeSchema();
 
   const {
     currentData: data,
@@ -322,8 +320,13 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
  * content-manager because it won't work as intended.
  */
 const useDocLayout = () => {
-  const { model } = useDoc();
-  return useDocumentLayout(model);
+  const { slug } = useParams<{ slug: string }>();
+
+  if (slug === undefined) {
+    throw new Error('Could not find model in url params');
+  }
+
+  return useDocumentLayout(slug);
 };
 
 /* -------------------------------------------------------------------------------------------------
