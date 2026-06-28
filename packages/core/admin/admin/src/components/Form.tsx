@@ -38,7 +38,12 @@ interface TranslationMessage extends MessageDescriptor {
 
 type FormFieldValue = unknown;
 type FormValues = object;
-type FormFieldEvent = React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+type FormFieldTarget = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+type FormFieldEvent = React.ChangeEvent<FormFieldTarget>;
+type FormFieldEventWithFallbackTarget = Omit<FormFieldEvent, 'target' | 'currentTarget'> & {
+  target?: (FormFieldTarget & { id?: string; name?: string }) | undefined;
+  currentTarget?: (FormFieldTarget & { id?: string; name?: string }) | undefined;
+};
 type FormFieldRowValue = Record<string, unknown>;
 type FormFieldRowValueWithKey = FormFieldRowValue & { __temp_key__?: string };
 
@@ -345,16 +350,29 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         return;
       }
 
-      const target = eventOrPath.target;
+      const { target: eventTarget, currentTarget } =
+        eventOrPath as FormFieldEventWithFallbackTarget;
+      const target = eventTarget ?? currentTarget;
+
+      if (target === undefined) {
+        return;
+      }
 
       const { type, name, id, value } = target;
+      let field = name;
 
-      const field = name || id;
+      if (field === undefined || field === '') {
+        field = id;
+      }
 
-      if (field === '' && process.env.NODE_ENV !== 'production') {
+      if ((field === undefined || field === '') && process.env.NODE_ENV !== 'production') {
         console.warn(
           `\`onChange\` was called with an event, but you forgot to pass a \`name\` or \`id'\` attribute to your input. The field to update cannot be determined`
         );
+      }
+
+      if (field === undefined || field === '') {
+        return;
       }
 
       /**
@@ -385,15 +403,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         }
       }
 
-      if (field !== '') {
-        dispatch({
-          type: 'SET_FIELD_VALUE',
-          payload: {
-            field,
-            value: val,
-          },
-        });
-      }
+      dispatch({
+        type: 'SET_FIELD_VALUE',
+        payload: {
+          field,
+          value: val,
+        },
+      });
     });
 
     const addFieldRow: FormContextValue['addFieldRow'] = React.useCallback(

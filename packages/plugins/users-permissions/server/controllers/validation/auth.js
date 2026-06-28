@@ -15,9 +15,9 @@ const createRegisterSchema = (config) =>
       .string()
       .required()
       .test(function validateRegisterPasswordMaxLength(value) {
-        if (Boolean(value) === false) return true;
+        if (!value) return true;
         const isValid = new TextEncoder().encode(value).length <= 72;
-        if (Boolean(isValid) === false) {
+        if (!isValid) {
           return this.createError({ message: 'Password must be less than 73 bytes' });
         }
         return true;
@@ -26,7 +26,7 @@ const createRegisterSchema = (config) =>
         if (typeof config?.validatePassword === 'function') {
           try {
             const isValid = await config.validatePassword(value);
-            if (Boolean(isValid) === false) {
+            if (!isValid) {
               return this.createError({ message: 'Password validation failed.' });
             }
           } catch (error) {
@@ -58,9 +58,9 @@ const createResetPasswordSchema = (config) =>
         .string()
         .required()
         .test(function validateResetPasswordMaxLength(value) {
-          if (Boolean(value) === false) return true;
+          if (!value) return true;
           const isValid = new TextEncoder().encode(value).length <= 72;
-          if (Boolean(isValid) === false) {
+          if (!isValid) {
             return this.createError({ message: 'Password must be less than 73 bytes' });
           }
           return true;
@@ -69,7 +69,7 @@ const createResetPasswordSchema = (config) =>
           if (typeof config?.validatePassword === 'function') {
             try {
               const isValid = await config.validatePassword(value);
-              if (Boolean(isValid) === false) {
+              if (!isValid) {
                 return this.createError({ message: 'Password validation failed.' });
               }
             } catch (error) {
@@ -94,9 +94,9 @@ const createChangePasswordSchema = (config) =>
         .string()
         .required()
         .test(function validateChangePasswordMaxLength(value) {
-          if (Boolean(value) === false) return true;
+          if (!value) return true;
           const isValid = new TextEncoder().encode(value).length <= 72;
-          if (Boolean(isValid) === false) {
+          if (!isValid) {
             return this.createError({ message: 'Password must be less than 73 bytes' });
           }
           return true;
@@ -105,7 +105,7 @@ const createChangePasswordSchema = (config) =>
           if (typeof config?.validatePassword === 'function') {
             try {
               const isValid = await config.validatePassword(value);
-              if (Boolean(isValid) === false) {
+              if (!isValid) {
                 return this.createError({ message: 'Password validation failed.' });
               }
             } catch (error) {

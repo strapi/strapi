@@ -31,6 +31,7 @@ const config = {
     'prefer-destructuring': ['error', { AssignmentExpression: { array: false } }],
     'no-underscore-dangle': 'off',
     'no-use-before-define': 'off',
+    // Allowed in this codebase: continue is clearer in traversal/query/migration loops.
     'no-continue': 'off',
     'no-process-exit': 'off',
     'no-loop-func': 'off',
