@@ -18,7 +18,6 @@ import {
 import { useNotification } from './Notifications';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
-import type { FetchError } from '../utils/getFetchClient';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 
 export interface WidgetInfo {
@@ -45,11 +44,9 @@ interface MoveWidgetOptions extends BaseWidgetContext {
 interface SaveLayoutOptions {
   widgets: WidgetWithUID[];
   widths: Record<string, number>;
-  updateHomepageLayout: (data: {
-    widgets: Array<{ uid: string; width: (typeof WIDGET_SIZING.DISCRETE_SIZES)[number] }>;
-  }) => Promise<{ error?: FetchError }>;
+  updateHomepageLayout: ReturnType<typeof useUpdateHomepageLayoutMutation>[0];
   toggleNotification: (config: { type: 'danger'; message: string }) => void;
-  formatAPIError: (error: FetchError) => string;
+  formatAPIError: ReturnType<typeof useAPIErrorHandler>['_unstableFormatAPIError'];
   formatMessage: (descriptor: { id: string; defaultMessage: string }) => string;
 }
 

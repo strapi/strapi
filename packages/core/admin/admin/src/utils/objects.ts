@@ -1,9 +1,18 @@
 import clone from 'lodash/clone';
 import toPath from 'lodash/toPath';
 
-type PathContainer = Record<string, unknown> | unknown[];
+type PathObject = Record<string, unknown>;
+type PathContainer = PathObject | unknown[];
 
 const isPathContainer = (obj: unknown): obj is PathContainer => isObject(obj) || Array.isArray(obj);
+const getPathValue = (container: PathContainer, key: string): unknown =>
+  (container as PathObject)[key];
+const setPathValue = (container: PathContainer, key: string, value: unknown) => {
+  (container as PathObject)[key] = value;
+};
+const deletePathValue = (container: PathContainer, key: string) => {
+  delete (container as PathObject)[key];
+};
 
 /**
  * Deeply get a value from an object via its path.
@@ -18,7 +27,7 @@ export function getIn<T = unknown>(
   let currentValue = obj;
 
   while (isPathContainer(currentValue) && pathStartIndex < path.length) {
-    currentValue = currentValue[path[pathStartIndex++]];
+    currentValue = getPathValue(currentValue, path[pathStartIndex++]);
   }
 
   // check if path is not in the end
@@ -30,7 +39,7 @@ export function getIn<T = unknown>(
 }
 
 /** @internal is the given object an Object? */
-export const isObject = (obj: unknown): obj is PathContainer =>
+export const isObject = (obj: unknown): obj is PathObject =>
   obj !== null && typeof obj === 'object' && !Array.isArray(obj);
 
 /** @internal is the given object an integer? */
@@ -72,31 +81,35 @@ export function setIn<T>(obj: T, path: string, value: unknown): T {
 
     if (isObject(currentObj) || Array.isArray(currentObj)) {
       const clonedValue = clone(currentObj) as PathContainer;
-      resVal[currentPath] = clonedValue;
+      setPathValue(resVal, currentPath, clonedValue);
       resVal = clonedValue;
     } else {
       const nextPath: string = pathArray[i + 1];
       const nextValue: PathContainer = isInteger(nextPath) && Number(nextPath) >= 0 ? [] : {};
-      resVal[currentPath] = nextValue;
+      setPathValue(resVal, currentPath, nextValue);
       resVal = nextValue;
     }
   }
 
   // Return original object if new value is the same as current
-  if ((i === 0 ? obj : resVal)[pathArray[i]] === value) {
+  const currentValue =
+    isPathContainer(obj) && i === 0
+      ? getPathValue(obj, pathArray[i])
+      : getPathValue(resVal, pathArray[i]);
+  if (currentValue === value) {
     return obj;
   }
 
   if (value === undefined) {
-    delete resVal[pathArray[i]];
+    deletePathValue(resVal, pathArray[i]);
   } else {
-    resVal[pathArray[i]] = value;
+    setPathValue(resVal, pathArray[i], value);
   }
 
   // If the path array has a single element, the loop did not run.
   // Deleting on `resVal` had no effect in this scenario, so we delete on the result instead.
   if (i === 0 && value === undefined) {
-    delete res[pathArray[i]];
+    deletePathValue(res as PathContainer, pathArray[i]);
   }
 
   return res;

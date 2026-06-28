@@ -30,7 +30,12 @@ import type { InputProps } from '../Form';
  * @description A generic form renderer for Strapi forms. Similar to GenericInputs but with a different API.
  * The entire component is memoized to avoid re-renders in large forms.
  */
-type InputRendererRef = HTMLInputElement | HTMLTextAreaElement | HTMLDivElement | JSONInputRef;
+type InputRendererRef =
+  | HTMLButtonElement
+  | HTMLInputElement
+  | HTMLTextAreaElement
+  | HTMLDivElement
+  | JSONInputRef;
 
 const getTypedRef = <TElement,>(ref: ForwardedRef<InputRendererRef>) => {
   return ref as ForwardedRef<TElement>;
@@ -47,7 +52,7 @@ const InputRenderer = memo(
       case 'boolean':
         return <BooleanInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'checkbox':
-        return <CheckboxInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
+        return <CheckboxInput ref={getTypedRef<HTMLButtonElement>(forwardedRef)} {...props} />;
       case 'datetime':
         return <DateTimeInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
       case 'date':
@@ -68,17 +73,35 @@ const InputRenderer = memo(
         return <TextareaInput ref={getTypedRef<HTMLTextAreaElement>(forwardedRef)} {...props} />;
       case 'time':
         return <TimeInput ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
-      default:
-        // This is cast because this renderer tackles all the possibilities of the InputProps, but this is for runtime catches.
-        return <NotSupportedField ref={getTypedRef<HTMLInputElement>(forwardedRef)} {...props} />;
+      default: {
+        const notSupportedProps = props as InputProps;
+        return (
+          <NotSupportedField
+            ref={getTypedRef<HTMLInputElement>(forwardedRef)}
+            label={notSupportedProps.label}
+            hint={notSupportedProps.hint}
+            name={notSupportedProps.name}
+            required={notSupportedProps.required}
+            type={notSupportedProps.type}
+            labelAction={notSupportedProps.labelAction}
+          />
+        );
+      }
     }
   })
 );
 
-const NotSupportedField = forwardRef<HTMLInputElement, InputProps>(
+type NotSupportedFieldProps = Pick<
+  InputProps,
+  'hint' | 'label' | 'labelAction' | 'name' | 'required'
+> & {
+  type: string;
+};
+
+const NotSupportedField = forwardRef<HTMLInputElement, NotSupportedFieldProps>(
   ({ label, hint, name, required, type, labelAction }, ref) => {
     const { error } = useField(name);
-    const fieldRef = useFocusInputField(name);
+    const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
