@@ -2,7 +2,7 @@ import get from 'lodash/get';
 
 import { ComponentRow } from './ComponentRow';
 import { useDataManager } from './DataManager/useDataManager';
-import { List } from './List';
+import { useListRenderer } from './ListRendererContext';
 
 import type { UID } from '@strapi/types';
 
@@ -18,6 +18,7 @@ export const ComponentList = ({
   firstLoopComponentUid,
 }: ComponentListProps) => {
   const { components } = useDataManager();
+  const List = useListRenderer();
   const type = get(components, component);
 
   if (!type) return;

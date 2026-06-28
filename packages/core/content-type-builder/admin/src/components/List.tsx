@@ -35,25 +35,15 @@ import { useCTBTracking } from './CTBSession/ctbSession';
 import { useDataManager } from './DataManager/useDataManager';
 import { NestedTFooter, TFooter } from './Footers';
 import { useFormModalNavigation } from './FormModalNavigation/useFormModalNavigation';
+import { ListRendererProvider } from './ListRendererContext';
 
-import type { Component, ContentType } from '../types';
-import type { UID } from '@strapi/types';
+import type { ListProps } from './listTypes';
 
 export const ListGrid = styled(Box)`
   white-space: nowrap;
   list-style: none;
   list-style-type: none;
 `;
-
-type ListProps = {
-  addComponentToDZ?: () => void;
-  firstLoopComponentUid?: UID.Component | null;
-  isFromDynamicZone?: boolean;
-  isMain?: boolean;
-  secondLoopComponentUid?: UID.Component | null;
-  isSub?: boolean;
-  type: ContentType | Component;
-};
 
 const SortableRow = (props: AttributeRowProps) => {
   const { isInDevelopmentMode } = useDataManager();
@@ -96,7 +86,7 @@ const SortableRow = (props: AttributeRowProps) => {
   );
 };
 
-export const List = ({
+const ListInner = ({
   addComponentToDZ,
   firstLoopComponentUid,
   isFromDynamicZone = false,
@@ -268,5 +258,13 @@ export const List = ({
         </NestedTFooter>
       )}
     </DndContext>
+  );
+};
+
+export const List = (props: ListProps) => {
+  return (
+    <ListRendererProvider renderer={ListInner}>
+      <ListInner {...props} />
+    </ListRendererProvider>
   );
 };
