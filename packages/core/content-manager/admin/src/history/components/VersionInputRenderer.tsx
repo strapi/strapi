@@ -218,7 +218,7 @@ const createInitialValuesForPath = (keyPath: string, value: unknown) => {
 };
 
 const CustomMediaInput = (props: VersionInputRendererProps) => {
-  const { value } = useField(props.name);
+  const { value } = useField<{ results: unknown[]; meta: { missingCount: number } }>(props.name);
   const results = value?.results ?? [];
   const meta = value?.meta ?? { missingCount: 0 };
 

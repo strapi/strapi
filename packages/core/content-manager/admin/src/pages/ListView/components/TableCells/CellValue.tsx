@@ -28,9 +28,9 @@ const CellValue = ({ isIdColumn = false, type, value }: CellValueProps) => {
   if (type === 'time' && typeof value === 'string') {
     const [hour, minute, second] = value.split(':');
     const date = new Date();
-    date.setHours(hour);
-    date.setMinutes(minute);
-    date.setSeconds(second);
+    date.setHours(Number(hour));
+    date.setMinutes(Number(minute));
+    date.setSeconds(Number(second));
 
     formattedValue = formatTime(date, {
       timeStyle: 'short',

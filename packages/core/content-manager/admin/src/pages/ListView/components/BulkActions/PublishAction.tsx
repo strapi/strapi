@@ -479,7 +479,7 @@ const SelectedEntriesModalContent = ({
   const { publishMany: bulkPublishAction, isLoading: isPublishing } = useDocumentActions();
   const [, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
 
-  const selectedRows = useTable('publishAction', (state) => state.selectedRows);
+  const selectedRows = useTable('publishAction', (state) => state.selectedRows) as Document[];
 
   // Filter selected entries from the updated modal table rows
   const selectedEntries = rows.filter((entry) =>

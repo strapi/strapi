@@ -638,11 +638,13 @@ const transformData = (data: unknown): unknown => {
       return data.apiData;
     }
 
-    return mapValues((value) => transformData(value))(data);
+    return mapValues((value) => transformData(value))(data as Record<string, unknown>);
   }
 
   return data;
 };
+
+const transformDocumentData = (data: object): AnyData => transformData(data) as AnyData;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
@@ -748,7 +750,9 @@ const PublishAction: DocumentActionComponent = ({
 
   React.useEffect(() => {
     if (!documentId || modified) {
-      setLocalDraftRelationCounts(countLocalDraftRelations(formValues, schema, components, model));
+      setLocalDraftRelationCounts(
+        countLocalDraftRelations(formValues as AnyData, schema, components, model)
+      );
     } else {
       setLocalDraftRelationCounts(EMPTY_DRAFT_RELATION_COUNTS);
     }
@@ -876,7 +880,7 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
-      const { data } = handleInvisibleAttributes(transformData(getValues()), {
+      const { data } = handleInvisibleAttributes(transformDocumentData(getValues()), {
         schema,
         components,
       });
@@ -1290,7 +1294,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId: cloneMatch.params.origin!,
             params: currentDocumentMeta.params,
           },
-          transformData(latestValues)
+          transformDocumentData(latestValues)
         );
 
         if ('data' in res) {
@@ -1309,7 +1313,7 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const { data } = handleInvisibleAttributes(transformData(latestValues), {
+        const { data } = handleInvisibleAttributes(transformDocumentData(latestValues), {
           schema: suitableSchema,
           initialValues,
           components,
@@ -1330,7 +1334,7 @@ const UpdateAction: DocumentActionComponent = ({
           resetForm(latestValues);
         }
       } else {
-        const { data } = handleInvisibleAttributes(transformData(latestValues), {
+        const { data } = handleInvisibleAttributes(transformDocumentData(latestValues), {
           schema: suitableSchema,
           initialValues,
           components,
