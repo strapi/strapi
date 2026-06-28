@@ -19,7 +19,7 @@ import { InjectionZone } from '../../components/InjectionZone';
 import { DocumentActionButton } from '../../pages/EditView/components/DocumentActions';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
-import { usePreviewContext } from '../pages/Preview';
+import { usePreviewContext } from '../PreviewContext';
 
 import type { ContentManagerPlugin, DocumentActionProps } from '../../content-manager';
 

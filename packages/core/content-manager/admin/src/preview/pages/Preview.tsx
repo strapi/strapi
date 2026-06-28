@@ -4,9 +4,7 @@ import {
   Page,
   useQueryParams,
   useRBAC,
-  createContext,
   Form as FormContext,
-  type FieldContentSourceMap,
   useNotification,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -35,6 +33,7 @@ import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
+import { PreviewProvider, usePreviewContext } from '../PreviewContext';
 import { useGetPreviewUrlQuery } from '../services/preview';
 import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
@@ -66,35 +65,10 @@ const DEVICES = [
   },
 ];
 
-/* -------------------------------------------------------------------------------------------------
- * PreviewProvider
- * -----------------------------------------------------------------------------------------------*/
-
-interface PopoverField extends FieldContentSourceMap {
-  position: DOMRect;
-  attribute: Schema.Attribute.AnyAttribute;
-}
-
-interface PreviewContextValue {
-  url: string;
-  title: string;
-  document: NonNullable<ReturnType<UseDocument>['document']>;
-  meta: NonNullable<ReturnType<UseDocument>['meta']>;
-  schema: NonNullable<ReturnType<UseDocument>['schema']>;
-  components: NonNullable<ReturnType<UseDocument>['components']>;
-  layout: EditLayout;
-  onPreview: () => void;
-  iframeRef: React.RefObject<HTMLIFrameElement>;
-  popoverField: PopoverField | null;
-  setPopoverField: (value: PopoverField | null) => void;
-}
-
 type PreviewHighlightColors = {
   highlightHoverColor: string;
   highlightActiveColor: string;
 };
-
-const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
 
 const getPreviewScript = (() => {
   let previewScript = '';
@@ -528,4 +502,4 @@ const ProtectedPreviewPage = () => {
 };
 
 export { ProtectedPreviewPage, usePreviewContext };
-export type { PreviewContextValue };
+export type { PreviewContextValue } from '../PreviewContext';

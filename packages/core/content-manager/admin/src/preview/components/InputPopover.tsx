@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { createContext, useNotification } from '@strapi/admin/strapi-admin';
+import { useNotification } from '@strapi/admin/strapi-admin';
 import { Box, Popover } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { type UseDocument } from '../../hooks/useDocument';
 import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
-import { usePreviewContext } from '../pages/Preview';
+import { usePreviewContext } from '../PreviewContext';
 import { INTERNAL_EVENTS, PREVIEW_ERROR_MESSAGES } from '../utils/constants';
 import {
   parseFieldMetaData,
@@ -14,29 +14,7 @@ import {
   PreviewFieldError,
 } from '../utils/fieldUtils';
 
-/* -------------------------------------------------------------------------------------------------
- * Context utils
- * -----------------------------------------------------------------------------------------------*/
-
-/**
- * No need for actual data in the context. It's just to let children check if they're rendered
- * inside of a preview InputPopover without relying on prop drilling.
- */
-interface InputPopoverContextValue {}
-
-const [InputPopoverProvider, useInputPopoverContext] =
-  createContext<InputPopoverContextValue>('InputPopover');
-
-function useHasInputPopoverParent() {
-  const context = useInputPopoverContext('useHasInputPopoverParent', () => true, false);
-
-  // useContext will return undefined if the called is not wrapped in the provider
-  return context !== undefined;
-}
-
-/* -------------------------------------------------------------------------------------------------
- * InputPopover
- * -----------------------------------------------------------------------------------------------*/
+import { InputPopoverProvider } from './InputPopoverContext';
 
 const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDocument> }) => {
   const iframeRef = usePreviewContext('InputPopover', (state) => state.iframeRef);
@@ -174,4 +152,5 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
   );
 };
 
-export { InputPopover, useHasInputPopoverParent };
+export { InputPopover };
+export { useHasInputPopoverParent } from './InputPopoverContext';

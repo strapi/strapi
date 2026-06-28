@@ -3,8 +3,8 @@ import * as React from 'react';
 import { useField } from '@strapi/admin/strapi-admin';
 import { Schema } from '@strapi/types';
 
-import { useHasInputPopoverParent } from '../components/InputPopover';
-import { usePreviewContext } from '../pages/Preview';
+import { useHasInputPopoverParent } from '../components/InputPopoverContext';
+import { usePreviewContext } from '../PreviewContext';
 import { INTERNAL_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
 
