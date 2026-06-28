@@ -37,6 +37,7 @@ import { hideDeployNowWidgetInProduction } from '../../utils/widgetVisibility';
 import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
+import { WidgetComponent } from './components/WidgetComponent';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 
@@ -65,40 +66,6 @@ const DragPreviewWrapper = styled.div<{ $maxWidth: string }>`
   border-radius: ${({ theme }) => theme.borderRadius};
   pointer-events: none;
 `;
-
-/* -------------------------------------------------------------------------------------------------
- * UnstableHomePageCe
- * -----------------------------------------------------------------------------------------------*/
-
-export const WidgetComponent = ({
-  component,
-  columnWidth,
-}: {
-  component: () => Promise<React.ComponentType>;
-  columnWidth: number;
-}) => {
-  const [loadedComponent, setLoadedComponent] = React.useState<React.ComponentType<{
-    columnWidth?: number;
-  }> | null>(null);
-
-  React.useEffect(() => {
-    const loadComponent = async () => {
-      const resolvedComponent = await component();
-
-      setLoadedComponent(() => resolvedComponent);
-    };
-
-    loadComponent();
-  }, [component]);
-
-  const Component = loadedComponent;
-
-  if (!Component) {
-    return <Widget.Loading />;
-  }
-
-  return <Component {...({ columnWidth } as Record<string, unknown>)} />;
-};
 
 /* -------------------------------------------------------------------------------------------------
  * HomePageCE

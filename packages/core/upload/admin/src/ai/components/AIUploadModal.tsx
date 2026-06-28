@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { createContext, useNotification } from '@strapi/admin/strapi-admin';
+import { useNotification } from '@strapi/admin/strapi-admin';
 import { Alert, Button, Flex, Modal } from '@strapi/design-system';
-import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -16,6 +15,12 @@ import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
 
 import { AIAssetCard, AIAssetCardSkeletons } from './AIAssetCard';
+import {
+  AIUploadModalContext,
+  aiUploadModalInitialState,
+  aiUploadModalReducer,
+  useAIUploadModalContext,
+} from './AIUploadModalContext';
 
 import type { File } from '../../../../shared/contracts/files';
 
@@ -41,6 +46,12 @@ const StyledAlert = styled(Alert)`
     display: none;
   }
 `;
+
+interface AIUploadModalProps {
+  open: boolean;
+  onClose: () => void;
+  folderId?: number | null;
+}
 
 const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const { formatMessage } = useIntl();
@@ -257,120 +268,8 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
  * UploadModal
  * -----------------------------------------------------------------------------------------------*/
 
-interface AIUploadModalProps {
-  open: boolean;
-  onClose: () => void;
-  folderId?: number | null;
-}
-
-type State = {
-  uploadedAssets: Array<{ file: File; wasCaptionChanged: boolean; wasAltTextChanged: boolean }>;
-  assetsToUploadLength: number;
-  hasUnsavedChanges: boolean;
-};
-
-type Action =
-  | {
-      type: 'set_uploaded_assets';
-      payload: File[];
-    }
-  | {
-      type: 'set_assets_to_upload_length';
-      payload: number;
-    }
-  | {
-      type: 'set_uploaded_asset_caption';
-      payload: { id: number; caption: string };
-    }
-  | {
-      type: 'set_uploaded_asset_alt_text';
-      payload: { id: number; altText: string };
-    }
-  | {
-      type: 'remove_uploaded_asset';
-      payload: { id: number };
-    }
-  | {
-      type: 'edit_uploaded_asset';
-      payload: { editedAsset: File };
-    }
-  | {
-      type: 'clear_unsaved_changes';
-    };
-
-const [AIUploadModalContext, useAIUploadModalContext] = createContext<{
-  state: State;
-  dispatch: React.Dispatch<Action>;
-  folderId: number | null;
-  onClose: () => void;
-}>('AIUploadModalContext');
-
-const reducer = (state: State, action: Action): State => {
-  return produce(state, (draft: State) => {
-    if (action.type === 'set_uploaded_assets') {
-      draft.uploadedAssets = action.payload.map((file) => ({
-        file,
-        wasCaptionChanged: false,
-        wasAltTextChanged: false,
-      }));
-      draft.hasUnsavedChanges = false;
-    }
-
-    if (action.type === 'set_assets_to_upload_length') {
-      draft.assetsToUploadLength = action.payload;
-    }
-
-    if (action.type === 'set_uploaded_asset_caption') {
-      const asset = draft.uploadedAssets.find((a) => a.file.id === action.payload.id);
-      if (asset && asset.file.caption !== action.payload.caption) {
-        asset.file.caption = action.payload.caption;
-        asset.wasCaptionChanged = true;
-        draft.hasUnsavedChanges = true;
-      }
-    }
-
-    if (action.type === 'set_uploaded_asset_alt_text') {
-      const asset = draft.uploadedAssets.find((a) => a.file.id === action.payload.id);
-      if (asset && asset.file.alternativeText !== action.payload.altText) {
-        asset.file.alternativeText = action.payload.altText;
-        asset.wasAltTextChanged = true;
-        draft.hasUnsavedChanges = true;
-      }
-    }
-
-    if (action.type === 'remove_uploaded_asset') {
-      draft.uploadedAssets = draft.uploadedAssets.filter((a) => a.file.id !== action.payload.id);
-    }
-
-    if (action.type === 'edit_uploaded_asset') {
-      const assetIndex = draft.uploadedAssets.findIndex(
-        (a) => a.file.id === action.payload.editedAsset.id
-      );
-      if (assetIndex !== -1) {
-        draft.uploadedAssets[assetIndex] = {
-          file: action.payload.editedAsset,
-          wasCaptionChanged: draft.uploadedAssets[assetIndex].wasCaptionChanged,
-          wasAltTextChanged: draft.uploadedAssets[assetIndex].wasAltTextChanged,
-        };
-      }
-    }
-
-    if (action.type === 'clear_unsaved_changes') {
-      draft.hasUnsavedChanges = false;
-      draft.uploadedAssets.forEach((asset) => {
-        asset.wasCaptionChanged = false;
-        asset.wasAltTextChanged = false;
-      });
-    }
-  });
-};
-
 export const AIUploadModal = ({ open, onClose, folderId = null }: AIUploadModalProps) => {
-  const [state, dispatch] = React.useReducer(reducer, {
-    uploadedAssets: [],
-    assetsToUploadLength: 0,
-    hasUnsavedChanges: false,
-  });
+  const [state, dispatch] = React.useReducer(aiUploadModalReducer, aiUploadModalInitialState);
 
   const handleClose = React.useCallback(() => {
     // Reset state when modal closes
@@ -392,4 +291,4 @@ export const AIUploadModal = ({ open, onClose, folderId = null }: AIUploadModalP
   );
 };
 
-export { useAIUploadModalContext };
+export { useAIUploadModalContext } from './AIUploadModalContext';

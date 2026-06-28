@@ -41,7 +41,7 @@ import {
 } from '../../utils';
 import { typeFromMime } from '../../utils/typeFromMime';
 
-import { useAIUploadModalContext } from './AIUploadModal';
+import { useAIUploadModalContext } from './AIUploadModalContext';
 
 import type { File } from '../../../../shared/contracts/files';
 

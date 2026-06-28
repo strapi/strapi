@@ -5,7 +5,7 @@ import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { WidgetComponent } from '../HomePage';
+import { WidgetComponent } from './WidgetComponent';
 
 import type { WidgetWithUID } from '../../../core/apis/Widgets';
 
