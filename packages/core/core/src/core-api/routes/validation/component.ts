@@ -1,8 +1,8 @@
 import type { UID } from '@strapi/types';
 
-// eslint-disable-next-line import/no-cycle
-import { createAttributesSchema } from './mappers';
 import { AbstractCoreRouteValidator } from './common';
+import { createAttributesSchema } from './schema-factory';
+import { registerComponentEntrySchemaResolver } from './validators-bridge';
 
 /**
  * A component validator for core content-type routes.
@@ -41,3 +41,7 @@ export class CoreComponentRouteValidator extends AbstractCoreRouteValidator<UID.
     return createAttributesSchema(this._strapi, entries);
   }
 }
+
+registerComponentEntrySchemaResolver(
+  (strapi, uid) => new CoreComponentRouteValidator(strapi, uid).entry
+);

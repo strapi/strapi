@@ -19,11 +19,8 @@ import { z } from 'zod/v4';
 
 import { BOOLEAN_LITERAL_VALUES } from './constants';
 
-// eslint-disable-next-line import/no-cycle
-import { CoreComponentRouteValidator } from './component';
-import { CoreContentTypeRouteValidator } from './content-type';
-
 import { safeSchemaCreation } from './utils';
+import { resolveComponentEntrySchema, resolveContentTypeDocumentSchema } from './validators-bridge';
 
 /**
  * Converts a BigInteger attribute to a Zod schema.
@@ -80,10 +77,8 @@ export const componentToSchema = (
 ): z.Schema => {
   const { writable, required, min, max, component, repeatable } = attribute;
 
-  const componentSchema = safeSchemaCreation(
-    strapi,
-    component,
-    () => new CoreComponentRouteValidator(strapi, component).entry
+  const componentSchema = safeSchemaCreation(strapi, component, () =>
+    resolveComponentEntrySchema(strapi, component)
   ) as z.ZodType;
 
   const baseSchema = repeatable ? z.array(componentSchema) : componentSchema;
@@ -279,10 +274,8 @@ export const mediaToSchema = (
   // @ts-expect-error there is a mismatch between a raw module and a loader module
   const fileSchema = uploadPlugin.contentTypes.file as Struct.ContentTypeSchema;
 
-  const mediaSchema = safeSchemaCreation(
-    strapi,
-    fileSchema.uid,
-    () => new CoreContentTypeRouteValidator(strapi, fileSchema.uid).document
+  const mediaSchema = safeSchemaCreation(strapi, fileSchema.uid, () =>
+    resolveContentTypeDocumentSchema(strapi, fileSchema.uid)
   ) as z.ZodType;
 
   const baseSchema = multiple ? z.array(mediaSchema) : mediaSchema;
@@ -307,10 +300,8 @@ export const relationToSchema = (
 
   const { writable, required, target } = attribute as Schema.Attribute.RelationWithTarget;
 
-  const targetSchema = safeSchemaCreation(
-    strapi,
-    target,
-    () => new CoreContentTypeRouteValidator(strapi, target).document
+  const targetSchema = safeSchemaCreation(strapi, target, () =>
+    resolveContentTypeDocumentSchema(strapi, target)
   ) as z.ZodType;
 
   const baseSchema = relations.isAnyToMany(attribute) ? z.array(targetSchema) : targetSchema;

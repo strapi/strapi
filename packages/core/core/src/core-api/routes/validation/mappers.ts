@@ -6,7 +6,6 @@
 import type { Core, Schema } from '@strapi/types';
 import * as z from 'zod/v4';
 
-// eslint-disable-next-line import/no-cycle
 import * as attributes from './attributes';
 
 const isCustomFieldAttribute = (
@@ -18,67 +17,6 @@ const isCustomFieldAttribute = (
     (attribute as any).type === 'customField' &&
     typeof (attribute as any).customField === 'string'
   );
-};
-
-/**
- * Creates a Zod schema for a collection of Strapi attributes.
- *
- * @param attributes - An array of tuples, where each tuple contains the attribute name and its schema definition.
- * @returns A Zod object schema representing the combined attributes.
- *
- * @example
- * ```typescript
- * const myAttributes = [
- *   ['title', { type: 'string', required: true }],
- *   ['description', { type: 'text' }],
- * ];
- * const schema = createAttributesSchema(myAttributes);
- * // schema will be a Zod object with 'title' and 'description' fields,
- * // each mapped to their respective Zod schemas based on their Strapi attribute types.
- * ```
- */
-export const createAttributesSchema = (
-  strapi: Core.Strapi,
-  attributes: [name: string, attribute: Schema.Attribute.AnyAttribute][]
-) => {
-  return attributes.reduce((acc, [name, attribute]) => {
-    return acc.extend({
-      get [name]() {
-        return mapAttributeToSchema(strapi, attribute);
-      },
-    });
-  }, z.object({}));
-};
-
-/**
- * Creates a Zod input schema for a collection of Strapi attributes.
- * This is typically used for validating incoming data (e.g., from API requests).
- *
- * @param attributes - An array of tuples, where each tuple contains the attribute name and its schema definition.
- * @returns A Zod object schema representing the combined input attributes.
- *
- * @example
- * ```typescript
- * const myInputAttributes = [
- *   ['email', { type: 'email', required: true }],
- *   ['description', { type: 'text', minLength: 8 }],
- * ];
- * const inputSchema = createAttributesInputSchema(myInputAttributes);
- * // inputSchema will be a Zod object with 'email' and 'description' fields,
- * // mapped to Zod schemas suitable for input validation.
- * ```
- */
-export const createAttributesInputSchema = (
-  strapi: Core.Strapi,
-  attributes: [name: string, attribute: Schema.Attribute.AnyAttribute][]
-) => {
-  return attributes.reduce((acc, [name, attribute]) => {
-    return acc.extend({
-      get [name]() {
-        return mapAttributeToInputSchema(strapi, attribute);
-      },
-    });
-  }, z.object({}));
 };
 
 /**

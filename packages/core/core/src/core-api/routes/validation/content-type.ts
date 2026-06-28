@@ -3,9 +3,9 @@ import type { Schema, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import * as z from 'zod/v4';
 
-// eslint-disable-next-line import/no-cycle
-import { createAttributesInputSchema, createAttributesSchema } from './mappers';
 import { AbstractCoreRouteValidator } from './common';
+import { createAttributesInputSchema, createAttributesSchema } from './schema-factory';
+import { registerContentTypeDocumentSchemaResolver } from './validators-bridge';
 
 /** REST query param names. `hasPublishedVersion` is deprecated in favor of `publicationFilter`. */
 export type QueryParam =
@@ -252,3 +252,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
     );
   }
 }
+
+registerContentTypeDocumentSchemaResolver(
+  (strapi, uid) => new CoreContentTypeRouteValidator(strapi, uid).document
+);
