@@ -24,10 +24,11 @@ import { type EditFieldLayout, useDocumentLayout } from '../../../../../hooks/us
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
-import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
-import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayoutGrid';
+import { useInputRenderer } from '../../InputRendererContext';
 
 import type { ComponentPickerProps } from './ComponentPicker';
+import type { InputRendererProps } from '../../InputRenderer';
 
 interface DynamicComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
@@ -406,6 +407,7 @@ interface DynamicComponentFieldsProps extends Pick<DynamicComponentProps, 'child
 const DynamicComponentFields = React.memo(
   ({ children, componentUid, index, layout, name }: DynamicComponentFieldsProps) => {
     const { formatMessage } = useIntl();
+    const InputRenderer = useInputRenderer();
 
     return (
       <Box padding={{ initial: 4, medium: 6 }}>

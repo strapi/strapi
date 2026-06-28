@@ -38,7 +38,7 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc, useDocument } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
-import { usePreviewContext } from '../../../preview/pages/Preview';
+import { usePreviewContext } from '../../../preview/PreviewContext';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import {
   useGetDraftRelationCountQuery,
@@ -57,7 +57,7 @@ import {
 } from '../utils/draftRelationCounts';
 import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
-import { useRelationModal } from './FormInputs/Relations/RelationModal';
+import { useRelationModal } from './FormInputs/Relations/RelationModalContext';
 
 import type { DocumentActionComponent } from '../../../content-manager';
 

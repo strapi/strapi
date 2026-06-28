@@ -25,7 +25,7 @@ import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
-import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayoutGrid';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';

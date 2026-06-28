@@ -5,7 +5,7 @@ import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getIn } from '../../../../../utils/objects';
-import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayoutGrid';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import type { ComponentInputProps } from './Input';

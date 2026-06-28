@@ -16,7 +16,7 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
-import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
+import { useHasInputPopoverParent } from '../../../preview/components/InputPopoverContext';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 import {
   getConditionDependencyPaths,
@@ -31,6 +31,7 @@ import { NotAllowedInput } from './FormInputs/NotAllowed';
 import { RelationsInput } from './FormInputs/Relations/Relations';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
+import { InputRendererProvider } from './InputRendererContext';
 
 import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
@@ -412,5 +413,13 @@ const MemoizedInputRenderer = React.memo((props: InputRendererProps) => {
   return <BaseInputRenderer {...props} />;
 });
 
+const InputRenderer = (props: InputRendererProps) => {
+  return (
+    <InputRendererProvider renderer={MemoizedInputRenderer}>
+      <MemoizedInputRenderer {...props} />
+    </InputRendererProvider>
+  );
+};
+
 export type { InputRendererProps };
-export { MemoizedInputRenderer as InputRenderer, useFieldHint };
+export { InputRenderer, useFieldHint };

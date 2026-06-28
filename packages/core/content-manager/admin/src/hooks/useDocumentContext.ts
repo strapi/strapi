@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 
 import { useDoc, useDocument, type UseDocument } from '../hooks/useDocument';
-import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModal';
+import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModalContext';
 import { buildValidParams } from '../utils/api';
 
 interface DocumentMeta {
