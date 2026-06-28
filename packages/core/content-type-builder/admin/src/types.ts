@@ -10,7 +10,7 @@ export type IntlLabel = {
 export type FormChange<TValue = unknown, TType extends string = string> = {
   target: {
     name: string;
-    value: TValue;
+    value?: TValue;
     type?: TType;
   };
 };
@@ -23,7 +23,7 @@ export type DifferentAttributesKind = 'Populatable' | 'NonPopulatable' | 'Any';
 
 export type Status = 'UNCHANGED' | 'CHANGED' | 'REMOVED' | 'NEW';
 
-export type AttributeConditionValue = string | number | boolean | null;
+export type AttributeConditionValue = string | number | boolean;
 
 export type AttributeConditionRule = [{ var: string }, AttributeConditionValue];
 

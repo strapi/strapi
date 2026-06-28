@@ -13,8 +13,8 @@ type ContentTypeSchemaMutation = (
 ) => Record<string, unknown>;
 
 type ExtensionForm = {
-  advanced: FormExtensionHandler;
-  base: FormExtensionHandler;
+  advanced: FormExtensionHandler[];
+  base: FormExtensionHandler[];
 };
 
 type ExtensionDefinition = {
@@ -24,7 +24,10 @@ type ExtensionDefinition = {
 
 type ExtensionInput = {
   validator?: FormValidator;
-  form: ExtensionForm;
+  form: {
+    advanced: FormExtensionHandler;
+    base: FormExtensionHandler;
+  };
 };
 
 export type FormAPI = {

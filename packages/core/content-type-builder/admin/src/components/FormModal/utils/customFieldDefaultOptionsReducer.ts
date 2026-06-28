@@ -12,7 +12,7 @@ type CustomFieldOption = {
 export const customFieldDefaultOptionsReducer = (
   acc: CustomFieldDefaultOption[],
   option: CustomFieldOption
-) => {
+): CustomFieldDefaultOption[] => {
   if (option.items !== undefined) {
     return option.items.reduce(customFieldDefaultOptionsReducer, acc);
   }

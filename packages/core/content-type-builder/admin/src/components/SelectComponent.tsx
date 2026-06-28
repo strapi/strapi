@@ -9,7 +9,7 @@ import { useDataManager } from './DataManager/useDataManager';
 import type { FormChangeHandler, IntlLabel } from '../types';
 import type { Internal } from '@strapi/types';
 interface Option {
-  uid: string;
+  uid: Internal.UID.Component;
   label?: string;
   categoryName?: string;
 }
@@ -92,7 +92,7 @@ export const SelectComponent = ({
   if (isCreatingComponentWhileAddingAField) {
     options = [
       {
-        uid: value,
+        uid: value as Internal.UID.Component,
         label: componentToCreate?.displayName,
         categoryName: componentToCreate?.category,
       },
@@ -104,8 +104,8 @@ export const SelectComponent = ({
       <Field.Label>{label}</Field.Label>
       <SingleSelect
         disabled={isCreatingComponentWhileAddingAField || !isCreating}
-        onChange={(value: string) => {
-          onChange({ target: { name, value, type: 'select-category' } });
+        onChange={(value: string | number) => {
+          onChange({ target: { name, value: value.toString(), type: 'select-category' } });
         }}
         value={value || ''}
       >

@@ -10,6 +10,7 @@ import { AIMessage } from '../lib/types/messages';
 import { useStrapiChat } from './ChatProvider';
 
 import type { Schema } from '../lib/types/schema';
+import type { Internal } from '@strapi/types';
 
 interface SchemaContextType {
   lastRevisedId: string | null;
@@ -77,7 +78,10 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
     );
 
     schemaChanges.forEach((change: SchemaChange) => {
-      const oldSchema = contentTypes[change.schema.uid] || components[change.schema.uid];
+      const oldSchema =
+        change.schema.modelType === 'contentType'
+          ? contentTypes[change.schema.uid as Internal.UID.ContentType]
+          : components[change.schema.uid as Internal.UID.Component];
       const newSchema = transformChatToCTB(change.schema, oldSchema);
 
       // Check if any attributes/fields are being added to any schema (existing or new)

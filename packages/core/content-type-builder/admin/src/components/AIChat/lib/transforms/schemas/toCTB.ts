@@ -4,9 +4,13 @@ import pluralize from 'pluralize';
 
 import type { ContentType, Component, AnyAttribute } from '../../../../../types';
 import type { Schema, SchemaAttribute } from '../../types/schema';
-import type { UID } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
 
 const isPluginContentTypeUid = (uid: string) => uid.startsWith('plugin::');
+
+const isContentTypeKind = (kind: Schema['kind']): kind is Struct.ContentTypeKind => {
+  return kind === 'collectionType' || kind === 'singleType';
+};
 
 /**
  * Plugin / extension content-types use server-derived identity (globalId, collectionName, …).
@@ -171,19 +175,20 @@ export const transformChatToCTB = (
     } satisfies Component;
   }
 
+  const previousContentType = oldSchema?.modelType === 'contentType' ? oldSchema : undefined;
+  const kind = isContentTypeKind(schema.kind) ? schema.kind : 'collectionType';
+
   const contentTypeBase = {
     uid: schema.uid as UID.ContentType,
-    modelType: schema.modelType,
+    modelType: 'contentType',
     modelName: singularName,
-    kind: schema.kind!,
+    kind,
     info: {
       displayName: schema.name.charAt(0).toUpperCase() + schema.name.slice(1),
       // Always keep the old by default
-      // @ts-expect-error - not in types
-      singularName: oldSchema?.info?.singularName || singularName,
+      singularName: previousContentType?.info.singularName ?? singularName,
       // Always keep the old by default
-      // @ts-expect-error - not in types
-      pluralName: oldSchema?.info?.pluralName || pluralName,
+      pluralName: previousContentType?.info.pluralName ?? pluralName,
     },
     collectionName: pluralName,
     attributes: transformAttributesFromChatToCTB(schema, oldSchema),

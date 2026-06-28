@@ -20,7 +20,11 @@ import { AttributeIcon } from '../../../components/AttributeIcon';
 import { getTrad } from '../../../utils/getTrad';
 import { ApplyConditionButton } from '../../ApplyConditionButton';
 
-import type { AttributeConditions, AttributeConditionValue } from '../../../types';
+import type {
+  AttributeConditions,
+  AttributeConditionRule,
+  AttributeConditionValue,
+} from '../../../types';
 
 const SmallAttributeIcon = styled(AttributeIcon)`
   width: 16px !important;
@@ -108,9 +112,10 @@ const convertToJsonLogic = (value: LocalValue): AttributeConditions | null => {
       (value.operator === 'isNot' && value.action === 'hide')
         ? '=='
         : '!=';
+    const conditionRule: AttributeConditionRule = [{ var: value.dependsOn }, value.value];
     return {
       visible: {
-        [operator]: [{ var: value.dependsOn }, value.value],
+        [operator]: conditionRule,
       },
     };
   } catch (error) {
@@ -155,10 +160,14 @@ export const ConditionForm = ({
         (updatedValue.operator === 'isNot' && updatedValue.action === 'hide')
           ? '=='
           : '!=';
-      const jsonLogic = updatedValue.dependsOn
+      const conditionRule: AttributeConditionRule = [
+        { var: updatedValue.dependsOn },
+        updatedValue.value,
+      ];
+      const jsonLogic: AttributeConditions | null = updatedValue.dependsOn
         ? {
             visible: {
-              [operator]: [{ var: updatedValue.dependsOn }, updatedValue.value],
+              [operator]: conditionRule,
             },
           }
         : null;
