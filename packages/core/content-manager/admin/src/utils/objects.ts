@@ -24,7 +24,7 @@ export function getIn<TValue = unknown>(
   }
 
   // check if path is not in the end
-  if (pathStartIndex !== path.length && currentValue === undefined) {
+  if (pathStartIndex !== path.length) {
     return def;
   }
 

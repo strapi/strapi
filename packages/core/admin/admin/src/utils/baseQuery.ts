@@ -91,7 +91,7 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
         /**
          * This will most likely be ApiError
          */
-        return { data: undefined, error: err.response.data.error as BaseQueryError };
+        return { data: undefined, error: err.response?.data.error as BaseQueryError };
       } else {
         return {
           data: undefined,
