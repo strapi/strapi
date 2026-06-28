@@ -1,4 +1,4 @@
-import { reducer, initialState, actions } from '../reducer';
+import { reducer, initialState, actions, type State } from '../reducer';
 
 describe('CTB | components | FormModal | reducer | actions', () => {
   describe('onChange', () => {
@@ -8,7 +8,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         value: 'test',
       });
 
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           type: 'string',
@@ -27,7 +27,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('should remove the default value if the type of date input type has been changed', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'short_movie_time',
@@ -53,7 +53,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('should not remove the default value if the type of another input type has been changed', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'number_of_movies',
@@ -82,7 +82,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('ON_CHANGE_RELATION_TARGET', () => {
     it('Should handle the target change correctly for a one side relation (oneWay, manyWay)', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'category test',
@@ -116,7 +116,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the target change correctly for the manyToMany relation', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'categories',
@@ -151,7 +151,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the target change correctly if the target has restricted relations and the relation type is not correct', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'categories',
@@ -186,7 +186,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the target change correctly if the target has restricted relations and the relation type is correct', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'categories',
@@ -222,7 +222,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('ON_CHANGE_RELATION_TYPE', () => {
     it('Should handle the relation type change correctly from oneWay to manyToMany', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'category test',
@@ -254,7 +254,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the relation type change correctly from manyToMany to oneWay', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'category_tests',
@@ -287,7 +287,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     });
 
     it('Should handle the relation type change correctly from oneToOne to oneToMany', () => {
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           name: 'category_test',
@@ -322,7 +322,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('RESET_PROPS', () => {
     it('Should return the initialState', () => {
-      const state = { ...initialState, modifiedData: { foo: 'bar' } };
+      const state: State = { ...initialState, modifiedData: { foo: 'bar' } };
       const action = actions.resetProps();
 
       expect(reducer(state, action)).toEqual(initialState);
@@ -335,7 +335,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         uid: 'api::address.address',
       });
 
-      const state = { ...initialState, modifiedData: { foo: 'bar' } };
+      const state: State = { ...initialState, modifiedData: { foo: 'bar' } };
       const expected = {
         ...initialState,
         modifiedData: {
@@ -354,7 +354,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         uid: 'api::address.address',
       });
 
-      const state = {
+      const state: State = {
         ...initialState,
         modifiedData: {
           type: 'component',
@@ -393,7 +393,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     it('Should reset the state and prepare the form for adding or creating a component to a dynamic zone', () => {
       const action = actions.resetPropsAndSetTheFormForAddingACompoToADz();
 
-      const state = {
+      const state: State = {
         ...initialState,
         initialData: {
           foo: 'bar',
@@ -462,7 +462,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: '1',
         uid: 'api::address.address',
       });
@@ -484,7 +484,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: '2',
         uid: 'api::address.address',
       });
@@ -506,7 +506,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: '2',
         uid: 'api::address.address',
       });
@@ -528,7 +528,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -549,7 +549,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -564,7 +564,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -579,7 +579,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -601,7 +601,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -616,7 +616,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address test',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -640,7 +640,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address',
         targetUid: 'api::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null },
+        modifiedDataToSetForEditing: {},
         step: null,
         uid: 'api::address.address',
       });
@@ -676,7 +676,10 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     it('Should set the formErrors object correctly', () => {
       const action = actions.setErrors({
         errors: {
-          test: 'this is required',
+          test: {
+            id: 'test.error',
+            defaultMessage: 'this is required',
+          },
         },
       });
       const expected = { ...initialState, formErrors: action.payload.errors };

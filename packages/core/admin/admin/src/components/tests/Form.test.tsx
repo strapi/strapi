@@ -2,7 +2,7 @@ import { renderHook } from '@tests/utils';
 
 import { Form, useField } from '../Form';
 
-const createFormWrapper = (initialErrors: Record<string, unknown>) =>
+const createFormWrapper = (initialErrors: React.ComponentProps<typeof Form>['initialErrors']) =>
   function ({ children }: { children: React.ReactNode }) {
     return (
       <Form method="POST" initialErrors={initialErrors}>
