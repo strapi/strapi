@@ -15,10 +15,10 @@ import { capitalise } from '../../utils/strings';
 import { getTranslation } from '../../utils/translations';
 import { FieldTypeIcon } from '../FieldTypeIcon';
 
-import { TEMP_FIELD_NAME } from './Fields';
+import { TEMP_FIELD_NAME } from './constants';
 
+import type { EditFieldFormProps } from './fieldFormTypes';
 import type { ConfigurationFormData } from './Form';
-import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Constants
@@ -35,12 +35,6 @@ const FIELD_SCHEMA = yup.object().shape({
 /* -------------------------------------------------------------------------------------------------
  * EditFieldForm
  * -----------------------------------------------------------------------------------------------*/
-
-interface EditFieldFormProps {
-  attribute?: Schema.Attribute.AnyAttribute;
-  name: string;
-  onClose: () => void;
-}
 
 const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   const { formatMessage } = useIntl();
@@ -256,4 +250,4 @@ const filterFieldsBasedOnAttributeType = (type: Schema.Attribute.Kind) => (field
 };
 
 export { EditFieldForm };
-export type { EditFieldFormProps };
+export type { EditFieldFormProps } from './fieldFormTypes';

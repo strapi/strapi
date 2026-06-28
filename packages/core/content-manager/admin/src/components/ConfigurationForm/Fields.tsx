@@ -25,8 +25,10 @@ import { styled } from 'styled-components';
 import { getTranslation } from '../../utils/translations';
 import { ComponentIcon } from '../ComponentIcon';
 
-import { EditFieldForm, EditFieldFormProps } from './EditFieldForm';
+import { TEMP_FIELD_NAME } from './constants';
+import { EditFieldForm } from './EditFieldForm';
 
+import type { EditFieldFormProps } from './fieldFormTypes';
 import type { ConfigurationFormData, EditFieldSpacerLayout } from './Form';
 import type { EditLayout } from '../../hooks/useDocumentLayout';
 
@@ -572,8 +574,6 @@ interface FieldProps extends Pick<EditFieldFormProps, 'name' | 'attribute'> {
   onRemoveField?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-const TEMP_FIELD_NAME = '_TEMP_';
-
 /**
  * Displays a field in the layout with drag options, also
  * opens a modal  to edit the details of said field.
@@ -824,5 +824,6 @@ const ComponentLink = styled(NavLink)`
   }
 `;
 
-export { Fields, TEMP_FIELD_NAME };
+export { Fields };
+export { TEMP_FIELD_NAME } from './constants';
 export type { FieldsProps };
