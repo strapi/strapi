@@ -152,11 +152,12 @@ const PreviewPage = () => {
     collectionType: string;
   }>();
   const [{ query }] = useQueryParams<{
-    plugins?: Record<string, unknown>;
+    plugins?: { i18n?: { locale?: string } };
     status?: string;
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+  const locale = typeof params.locale === 'string' ? params.locale : undefined;
 
   const [deviceName, setDeviceName] = React.useState<(typeof DEVICES)[number]['name']>(
     DEVICES[0].name
@@ -227,7 +228,7 @@ const PreviewPage = () => {
     },
     query: {
       documentId,
-      locale: params.locale,
+      locale,
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });

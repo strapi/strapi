@@ -53,7 +53,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
     const [availability, setAvailability] = React.useState<CheckUIDAvailability.Response>();
     const [showRegenerate, setShowRegenerate] = React.useState(false);
     const isCloning = useMatch(CLONE_PATH) !== null;
-    const field = useField(name);
+    const field = useField<string>(name);
     const debouncedValue = useDebounce(field.value, 300);
     const hasChanged = debouncedValue !== field.initialValue;
     const { toggleNotification } = useNotification();
@@ -80,7 +80,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
         params,
       },
       {
-        skip: field.value || !required,
+        skip: (field.value !== undefined && field.value !== '') || !required,
       }
     );
 
@@ -148,7 +148,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
         // Don't check availability if the value is empty or wasn't changed
         skip: !Boolean(
           (hasChanged || isCloning) &&
-            debouncedValue &&
+            debouncedValue !== undefined &&
             validationRegExp.test(debouncedValue.trim())
         ),
       }
@@ -187,7 +187,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
 
     const isLoading = isGeneratingDefaultUID || isGeneratingUID || isCheckingAvailability;
 
-    const fieldRef = useFocusInputField(name);
+    const fieldRef = useFocusInputField<HTMLInputElement>(name);
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     const shouldShowAvailability =

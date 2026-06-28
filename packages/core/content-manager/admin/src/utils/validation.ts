@@ -13,8 +13,8 @@ type AnySchema =
   | yup.NumberSchema
   | yup.BooleanSchema
   | yup.DateSchema
-  | yup.ArraySchema<unknown>
-  | yup.ObjectSchema<Record<string, unknown>>;
+  | yup.ArraySchema<yup.AnySchema>
+  | yup.ObjectSchema<ObjectShape>;
 
 /* -------------------------------------------------------------------------------------------------
  * createYupSchema
@@ -55,11 +55,11 @@ const createYupSchema = (
   attributes: Schema['attributes'] = {},
   components: ComponentsDictionary = {},
   options: ValidationOptions = { status: null }
-): yup.ObjectSchema<Record<string, unknown>> => {
+): yup.ObjectSchema<ObjectShape> => {
   const createModelSchema = (
     attributes: Schema['attributes'],
     removedAttributes: string[] = []
-  ): yup.ObjectSchema<Record<string, unknown>> =>
+  ): yup.ObjectSchema<ObjectShape> =>
     yup
       .object()
       .shape(
@@ -145,7 +145,7 @@ const createYupSchema = (
 
                         return validation.concat(createModelSchema(attributes, nestedRemoved));
                       }
-                    ) as unknown as yup.ObjectSchema<Record<string, unknown>>
+                    ) as unknown as yup.ObjectSchema<ObjectShape>
                   )
                 ).test(arrayValidator(attribute, options)),
               };

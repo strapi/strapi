@@ -10,7 +10,7 @@ import { Button, Flex, Dialog, Typography } from '@strapi/design-system';
 import { Check, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../../../hooks/useDocument';
+import { useDoc, type Document } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 
@@ -85,7 +85,10 @@ const ConfirmDialogPublishAll = ({
   onConfirm,
 }: ConfirmDialogPublishAllProps) => {
   const { formatMessage } = useIntl();
-  const selectedEntries = useTable('ConfirmDialogPublishAll', (state) => state.selectedRows);
+  const selectedEntries = useTable(
+    'ConfirmDialogPublishAll',
+    (state) => state.selectedRows
+  ) as Document[];
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const { model } = useDoc();

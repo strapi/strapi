@@ -60,6 +60,8 @@ type BulkOperationResponse<TResponse extends { data: unknown; error?: unknown }>
   | Pick<TResponse, 'data'>
   | { error: BaseQueryError | SerializedError };
 
+type QueryParams = Record<string, unknown>;
+
 type UseDocumentActions = (
   fromPreview?: boolean,
   fromRelationModal?: boolean
@@ -79,7 +81,7 @@ type UseDocumentActions = (
     args: {
       model: string;
       documentId: string;
-      params?: object;
+      params?: QueryParams;
     },
     document: Omit<Document, 'id'>,
     trackerProperty?: Extract<
@@ -90,7 +92,7 @@ type UseDocumentActions = (
   create: (
     args: {
       model: string;
-      params?: object;
+      params?: QueryParams;
     },
     document: Omit<Document, 'id'>,
     trackerProperty?: Extract<
@@ -103,7 +105,7 @@ type UseDocumentActions = (
       collectionType: string;
       model: string;
       documentId?: string;
-      params?: object;
+      params?: QueryParams;
     },
     trackerProperty?: Extract<
       TrackingEvent,
@@ -113,40 +115,40 @@ type UseDocumentActions = (
   deleteMany: (args: {
     model: string;
     documentIds: string[];
-    params?: object;
+    params?: QueryParams;
   }) => Promise<BulkOperationResponse<BulkDelete.Response>>;
   discard: (args: {
     collectionType: string;
     model: string;
     documentId?: string;
-    params?: object;
+    params?: QueryParams;
   }) => Promise<OperationResponse<Discard.Response>>;
   getDocument: (args: {
     collectionType: string;
     model: string;
     documentId?: string;
-    params?: object;
+    params?: QueryParams;
   }) => Promise<FindOne.Response | undefined>;
   publish: (
     args: {
       collectionType: string;
       model: string;
       documentId?: string;
-      params?: object;
+      params?: QueryParams;
     },
     document: Partial<Document>
   ) => Promise<OperationResponse<Publish.Response>>;
   publishMany: (args: {
     model: string;
     documentIds: string[];
-    params?: object;
+    params?: QueryParams;
   }) => Promise<BulkOperationResponse<BulkPublish.Response>>;
   update: (
     args: {
       collectionType: string;
       model: string;
       documentId?: string;
-      params?: object;
+      params?: QueryParams;
     },
     document: Partial<Document>,
     trackerProperty?: Extract<
@@ -159,14 +161,14 @@ type UseDocumentActions = (
       collectionType: string;
       model: string;
       documentId?: string;
-      params?: object;
+      params?: QueryParams;
     },
     discardDraft?: boolean
   ) => Promise<OperationResponse<Unpublish.Response>>;
   unpublishMany: (args: {
     model: string;
     documentIds: string[];
-    params?: object;
+    params?: QueryParams;
   }) => Promise<BulkOperationResponse<BulkUnpublish.Response>>;
 };
 

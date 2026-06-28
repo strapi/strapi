@@ -333,7 +333,7 @@ const AdminUsersFilter = ({ name }: Filters.ValueInputProps) => {
     pageSize,
     _q: debouncedSearch,
   });
-  const field = useField(name);
+  const field = useField<string>(name);
 
   const handleOpenChange = (isOpen?: boolean) => {
     if (!isOpen) {
