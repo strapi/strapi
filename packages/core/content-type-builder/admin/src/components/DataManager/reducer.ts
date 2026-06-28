@@ -355,7 +355,8 @@ const slice = createUndoRedoSlice(
           const relation = attribute.relation;
           const relationType = getRelationType(relation, targetAttribute);
 
-          const isBidirectionalRelation = !['oneWay', 'manyWay'].includes(relationType);
+          const isBidirectionalRelation =
+            relationType !== undefined && !['oneWay', 'manyWay'].includes(relationType);
 
           if (isBidirectionalRelation) {
             const oppositeAttribute = createAttribute({
@@ -407,7 +408,7 @@ const slice = createUndoRedoSlice(
           attr.components.push(componentUid);
         });
 
-        setAttributeStatus(attr, 'CHANGED');
+        setAttributeStatus(attr as AnyAttribute, 'CHANGED');
         setStatus(type, 'CHANGED');
       },
       changeDynamicZoneComponents: (
@@ -425,7 +426,7 @@ const slice = createUndoRedoSlice(
         const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
 
         setStatus(type, 'CHANGED');
-        setAttributeStatus(attr, 'CHANGED');
+        setAttributeStatus(attr as AnyAttribute, 'CHANGED');
         attr.components = updatedComponents;
       },
       editAttribute: (state, action: PayloadAction<EditAttributePayload>) => {
@@ -474,7 +475,8 @@ const slice = createUndoRedoSlice(
           attributeToSet.relation,
           attributeToSet.targetAttribute
         );
-        const isBidirectionnal = !ONE_SIDE_RELATIONS.includes(newRelationType);
+        const isBidirectionnal =
+          newRelationType !== undefined && !ONE_SIDE_RELATIONS.includes(newRelationType);
 
         if (isBidirectionnal) {
           const newTargetAttribute = {
@@ -530,7 +532,7 @@ const slice = createUndoRedoSlice(
         const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
 
         setStatus(type, 'CHANGED');
-        setAttributeStatus(attr, 'CHANGED');
+        setAttributeStatus(attr as AnyAttribute, 'CHANGED');
         attr.components.splice(componentToRemoveIndex, 1);
       },
       removeField: (state, action: PayloadAction<RemoveFieldPayload>) => {

@@ -14,7 +14,7 @@ interface RelationFormBoxProps {
   header?: string;
   isMain?: boolean;
   name: string;
-  onChange: FormChangeHandler<string>;
+  onChange: FormChangeHandler;
   oneThatIsCreatingARelationWithAnother?: string;
   target?: Internal.UID.ContentType;
   value?: string;
@@ -49,7 +49,7 @@ export const RelationFormBox = ({
       <Box padding={4}>
         <GenericInput
           disabled={disabled}
-          error={error}
+          error={error ?? undefined}
           intlLabel={{
             id: getTrad('form.attribute.item.defineRelation.fieldName'),
             defaultMessage: 'Field name',

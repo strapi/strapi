@@ -178,7 +178,7 @@ export const forms = {
           usedAttributeNames,
           reservedNames.attributes,
           alreadyTakenTargetContentTypeAttributes,
-          options
+          options as never
         );
 
         return extensions.makeValidator(
@@ -198,7 +198,8 @@ export const forms = {
     form: {
       advanced({ data, type, step, extensions, ...rest }: Base<'advanced'>) {
         try {
-          const baseForm = attributesForm.advanced[type](data, step).sections;
+          const baseForm = attributesForm.advanced[type](data as never, step ?? '')
+            .sections as FormTypeOptions;
           const itemsToAdd = extensions.getAdvancedForm(['attribute', type], {
             data,
             type,
@@ -237,7 +238,7 @@ export const forms = {
       },
       base({ data, type, step, attributes }: Base<'base'>) {
         try {
-          return attributesForm.base[type](data, step, attributes);
+          return attributesForm.base[type](data as never, step ?? '', attributes as never);
         } catch (err) {
           return commonBaseForm;
         }
@@ -354,9 +355,9 @@ export const forms = {
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter((uid: Internal.UID.Component) => uid !== compoUid)
         : alreadyTakenAttributes;
-      const collectionNames = Object.values(components).map((component) => {
-        return component?.collectionName;
-      });
+      const collectionNames = Object.values(components)
+        .map((component) => component?.collectionName)
+        .filter((collectionName): collectionName is string => collectionName !== undefined);
 
       const currentCollectionName = createComponentCollectionName(
         componentDisplayName,

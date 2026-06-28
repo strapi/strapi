@@ -26,7 +26,7 @@ export type ComponentToCreateData = Record<string, unknown> & {
 
 export type FormModalData = Record<string, unknown> & {
   allowedTypes?: string[];
-  category?: string | false;
+  category?: string;
   component?: UID.Component;
   components?: UID.Component[];
   componentToCreate?: ComponentToCreateData;
@@ -37,16 +37,16 @@ export type FormModalData = Record<string, unknown> & {
   draftAndPublish?: boolean;
   enum?: string[];
   icon?: string;
-  kind?: Struct.ContentTypeKind | false;
+  kind?: Struct.ContentTypeKind;
   multiple?: boolean;
   name?: string;
-  options?: Record<string, unknown>;
-  pluralName?: string | false;
-  pluginOptions?: Record<string, unknown>;
+  options?: object;
+  pluralName?: string;
+  pluginOptions?: object;
   relation?: Schema.Attribute.RelationKind.Any;
   repeatable?: boolean;
   required?: boolean;
-  singularName?: string | false;
+  singularName?: string;
   target?: string | null;
   targetAttribute?: string | null;
   type?: string;
@@ -163,7 +163,7 @@ const slice = createSlice({
     onChange: (state, action: PayloadAction<OnChangePayload>) => {
       const { keys, value } = action.payload;
       const obj = state.modifiedData;
-      const hasDefaultValue = Boolean(obj.default);
+      const hasDefaultValue = obj.default !== undefined;
 
       // There is no need to remove the default key if the default value isn't defined
       if (hasDefaultValue && keys.length === 1 && keys.includes('type')) {
@@ -267,7 +267,7 @@ const slice = createSlice({
         target: { oneThatIsCreatingARelationWithAnother, value },
       } = action.payload;
 
-      const currentName = state.modifiedData.name;
+      const currentName = state.modifiedData.name ?? '';
 
       // Switching from oneWay
       if (!['oneWay', 'manyWay'].includes(value)) {
@@ -330,6 +330,14 @@ const slice = createSlice({
       const { options = {} } = action.payload;
       // This is run when the user has created a new component
       const componentToCreate = state.modifiedData.componentToCreate;
+
+      if (
+        componentToCreate?.displayName === undefined ||
+        componentToCreate.category === undefined
+      ) {
+        return initialState;
+      }
+
       const modifiedData = {
         displayName: componentToCreate.displayName,
         type: 'component',
@@ -342,7 +350,7 @@ const slice = createSlice({
         ...initialState,
         componentToCreate,
         modifiedData,
-        isCreatingComponentWhileAddingAField: state.modifiedData.createComponent,
+        isCreatingComponentWhileAddingAField: state.modifiedData.createComponent === true,
       };
     },
     resetPropsAndSetTheFormForAddingACompoToADz: (state) => {
@@ -350,7 +358,7 @@ const slice = createSlice({
       const dataToSet = {
         ...createdDZ,
         createComponent: true,
-        componentToCreate: { type: 'component' },
+        componentToCreate: { type: 'component' as const },
       };
 
       return { ...initialState, modifiedData: dataToSet };

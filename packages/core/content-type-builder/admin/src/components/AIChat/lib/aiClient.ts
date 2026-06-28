@@ -13,6 +13,10 @@ export interface AITokenData {
   expiresAt: string;
 }
 
+type AITokenResponse = Partial<AITokenData> & {
+  data?: Partial<AITokenData>;
+};
+
 let aiTokenCache: AITokenData | null = null;
 const SESSION_STORAGE_KEY = 'strapi-ai-token';
 const EXPIRY_BUFFER_MS = 60 * 1000;
@@ -86,12 +90,12 @@ export const getAIJwt = async (): Promise<AITokenData | null> => {
   // Fetch from admin endpoint
   try {
     const { get } = getFetchClient();
-    const { data } = await get('/admin/ai-token');
+    const { data } = await get<AITokenResponse>('/admin/ai-token');
 
-    const token = data?.token || data?.data?.token;
-    const expiresAt = data?.expiresAt || data?.data?.expiresAt;
+    const token = data.token ?? data.data?.token;
+    const expiresAt = data.expiresAt ?? data.data?.expiresAt;
 
-    if (token && expiresAt) {
+    if (typeof token === 'string' && typeof expiresAt === 'string') {
       aiTokenCache = { token, expiresAt };
       writeToSession(aiTokenCache);
 

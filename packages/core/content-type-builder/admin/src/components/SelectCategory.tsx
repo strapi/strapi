@@ -33,11 +33,19 @@ export const SelectCategory = ({
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = formatMessage(intlLabel);
 
-  const handleChange = (value: string) => {
+  const handleChange = (value?: string) => {
+    if (value === undefined) {
+      return;
+    }
+
     onChange({ target: { name, value, type: 'select-category' } });
   };
 
-  const handleCreateOption = (value: string) => {
+  const handleCreateOption = (value?: string) => {
+    if (value === undefined) {
+      return;
+    }
+
     setCategories((prev) => [...prev, value]);
     handleChange(value);
   };

@@ -38,14 +38,15 @@ export const BooleanDefaultValueSelect = ({
       )
     : name;
 
-  const handleChange = (value: string) => {
+  const handleChange = (value: string | number) => {
+    const stringValue = value.toString();
     let nextValue: boolean | string = '';
 
-    if (value === 'true') {
+    if (stringValue === 'true') {
       nextValue = true;
     }
 
-    if (value === 'false') {
+    if (stringValue === 'false') {
       nextValue = false;
     }
 

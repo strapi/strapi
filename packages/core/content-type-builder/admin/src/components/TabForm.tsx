@@ -24,7 +24,7 @@ type FormError = {
   id?: string;
 };
 
-type GenericInputProps = Partial<React.ComponentProps<typeof GenericInput>> & {
+type GenericInputProps = Record<string, unknown> & {
   attributeName?: string;
   contentTypeSchema?: {
     attributes?: AnyAttribute[];
@@ -60,6 +60,8 @@ export const TabForm = ({
   onChange,
 }: TabFormProps) => {
   const { formatMessage } = useIntl();
+  const sharedInputProps = genericInputProps as Partial<React.ComponentProps<typeof GenericInput>> &
+    GenericInputProps;
 
   return (
     <>
@@ -86,6 +88,10 @@ export const TabForm = ({
             <Grid.Root gap={4}>
               {section.items.map((input, i) => {
                 const key = `${sectionIndex}.${i}`;
+                const intlLabel = input.intlLabel ?? {
+                  id: input.name,
+                  defaultMessage: input.name,
+                };
 
                 /**
                  * Use undefined as the default value because not every input wants a string e.g. Date pickers
@@ -142,9 +148,9 @@ export const TabForm = ({
 
                   // Get all attributes from the content type schema
                   const contentTypeAttributes =
-                    genericInputProps.contentTypeSchema?.attributes ?? [];
+                    sharedInputProps.contentTypeSchema?.attributes ?? [];
 
-                  if (!genericInputProps.contentTypeSchema) {
+                  if (!sharedInputProps.contentTypeSchema) {
                     console.warn('contentTypeSchema is undefined, skipping condition form');
                     return null;
                   }
@@ -178,7 +184,7 @@ export const TabForm = ({
                                 {formatCondition(
                                   currentCondition,
                                   availableFields,
-                                  genericInputProps.attributeName ?? modifiedData.name ?? ''
+                                  sharedInputProps.attributeName ?? modifiedData.name ?? ''
                                 )}
                               </Typography>
                             )}
@@ -213,8 +219,9 @@ export const TabForm = ({
                       ) : (
                         <GenericInput
                           {...input}
-                          {...genericInputProps}
+                          {...sharedInputProps}
                           error={errorId}
+                          intlLabel={intlLabel}
                           onChange={onChange}
                           value={value}
                           autoFocus={i === 0}
@@ -244,8 +251,9 @@ export const TabForm = ({
                   >
                     <GenericInput
                       {...input}
-                      {...genericInputProps}
+                      {...sharedInputProps}
                       error={errorId}
+                      intlLabel={intlLabel}
                       onChange={onChange}
                       value={value}
                       autoFocus={i === 0}
