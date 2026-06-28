@@ -10,7 +10,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Chat } from '../../components/AIChat/Chat';
 import { prefetchAIToken } from '../../components/AIChat/lib/aiClient';
-import { ChatProvider } from '../../components/AIChat/providers/ChatProvider';
+import { ChatProviders } from '../../components/AIChat/providers/ChatProviders';
 import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import { CTBSessionProvider } from '../../components/CTBSession/CTBSessionProvider';
@@ -62,7 +62,7 @@ const App = () => {
           <FormModalNavigationProvider>
             <DataManagerProvider>
               <ExitPrompt />
-              <ChatProvider>
+              <ChatProviders>
                 <>
                   {autoReload && <FormModal />}
                   <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
@@ -80,7 +80,7 @@ const App = () => {
                   </Layouts.Root>
                   <Chat />
                 </>
-              </ChatProvider>
+              </ChatProviders>
             </DataManagerProvider>
           </FormModalNavigationProvider>
         </CTBSessionProvider>

@@ -14,17 +14,12 @@ import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 
 import { useCTBTracking } from '../../CTBSession/ctbSession';
 import { useDataManager } from '../../DataManager/useDataManager';
-import { FeedbackProvider } from '../FeedbackModal';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
 import { Schema } from '../lib/types/schema';
-import { UploadProjectToChatProvider } from '../UploadCodeModal';
-import { UploadFigmaToChatProvider } from '../UploadFigmaModal';
-
-import { SchemaChatProvider } from './SchemaProvider';
 
 interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   isChatEnabled: boolean;
@@ -51,7 +46,7 @@ const generateRandomId = () => {
   return Math.random().toString(36).substring(2, 15);
 };
 
-export const BaseChatProvider = ({
+export const ChatProvider = ({
   children,
   defaultOpen = false,
 }: {
@@ -219,26 +214,6 @@ export const BaseChatProvider = ({
     >
       {children}
     </ChatContext.Provider>
-  );
-};
-
-export const ChatProvider = ({
-  children,
-  defaultOpen = false,
-}: {
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}) => {
-  return (
-    <BaseChatProvider defaultOpen={defaultOpen}>
-      <SchemaChatProvider>
-        <UploadProjectToChatProvider>
-          <UploadFigmaToChatProvider>
-            <FeedbackProvider>{children}</FeedbackProvider>
-          </UploadFigmaToChatProvider>
-        </UploadProjectToChatProvider>
-      </SchemaChatProvider>
-    </BaseChatProvider>
   );
 };
 
