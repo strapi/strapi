@@ -170,7 +170,9 @@ export const SettingsPage = () => {
   >(
     ['ai-metadata-count'],
     async () => {
-      const { data } = await get('/upload/actions/generate-ai-metadata/count');
+      const { data } = await get<GetAIMetadataCount.Response['data']>(
+        '/upload/actions/generate-ai-metadata/count'
+      );
       return data;
     },
     {
@@ -198,7 +200,10 @@ export const SettingsPage = () => {
     UpdateSettings.Request['body']
   >(
     async (body) => {
-      const { data } = await put('/upload/settings', body);
+      const { data } = await put<UpdateSettings.Response['data'], UpdateSettings.Request['body']>(
+        '/upload/settings',
+        body
+      );
 
       return data;
     },
@@ -214,7 +219,7 @@ export const SettingsPage = () => {
       onError(err) {
         toggleNotification({
           type: 'danger',
-          message: err.message || formatMessage({ id: 'notification.error' }),
+          message: err?.message ?? formatMessage({ id: 'notification.error' }),
         });
       },
     }
@@ -231,7 +236,10 @@ export const SettingsPage = () => {
     void
   >(
     async () => {
-      const { data } = await post('/upload/actions/generate-ai-metadata', {});
+      const { data } = await post<
+        GenerateAIMetadata.Response['data'],
+        GenerateAIMetadata.Request['body']
+      >('/upload/actions/generate-ai-metadata', {});
       return data;
     },
     {
