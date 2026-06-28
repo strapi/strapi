@@ -1,128 +1,31 @@
 import * as React from 'react';
 
-import {
-  createContext,
-  useStrapiApp,
-  type FieldValue,
-  useIsMobile,
-} from '@strapi/admin/strapi-admin';
+import { useStrapiApp, type FieldValue, useIsMobile } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { flushSync } from 'react-dom';
-import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
+import { useIntl } from 'react-intl';
+import { Editor, type Descendant, createEditor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
-import { styled, type CSSProperties } from 'styled-components';
+import { Slate, withReact, ReactEditor } from 'slate-react';
+import { styled } from 'styled-components';
 
 import { ContentManagerPlugin } from '../../../../../content-manager';
 import { getTranslation } from '../../../../../utils/translations';
 
 import { BlocksContent, type BlocksContentProps } from './BlocksContent';
+import {
+  BlocksEditorProvider,
+  normalizeBlocksState,
+  type RichTextBlocksStore,
+} from './BlocksEditorContext';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
-import { type ModifiersStore, modifiers } from './Modifiers';
+import { modifiers } from './Modifiers';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 import { isNonNullable } from './utils/types';
 
 import type { Schema } from '@strapi/types';
-
-/* -------------------------------------------------------------------------------------------------
- * BlocksEditorProvider
- * -----------------------------------------------------------------------------------------------*/
-
-interface CustomNode extends Omit<Schema.Attribute.BlocksNode, 'type'> {
-  type: Schema.Attribute.BlocksNode['type'] | string;
-  level?: number;
-  format?: string;
-}
-
-interface BaseBlock {
-  renderElement: (props: RenderElementProps) => React.JSX.Element;
-  /** Function to check if a given node is of this type of block */
-  matchNode: (node: Schema.Attribute.BlocksNode | CustomNode) => boolean;
-  handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
-  handleEnterKey?: (editor: Editor) => void;
-  handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
-  handleTab?: (editor: Editor) => void;
-  handleShiftTab?: (editor: Editor) => void;
-  snippets?: string[];
-  /** Adjust the vertical positioning of the drag-to-reorder grip icon */
-  dragHandleTopMargin?: CSSProperties['marginTop'];
-  /** A Slate plugin: function that will wrap the editor creation */
-  plugin?: (editor: Editor) => Editor;
-  /**
-   * Function that checks if an element should be draggable
-   * @default () => true */
-  isDraggable?: (element: Element) => boolean;
-}
-
-export interface NonSelectorBlock extends BaseBlock {
-  isInBlocksSelector?: false;
-}
-
-export interface SelectorBlock extends BaseBlock {
-  isInBlocksSelector: true;
-  icon?: React.ComponentType;
-  label: MessageDescriptor;
-}
-
-type NonSelectorBlockKey = 'list-item' | 'link';
-
-const selectorBlockKeys = [
-  'paragraph',
-  'heading-one',
-  'heading-two',
-  'heading-three',
-  'heading-four',
-  'heading-five',
-  'heading-six',
-  'list-ordered',
-  'list-unordered',
-  'image',
-  'quote',
-  'code',
-] as const;
-
-type SelectorBlockKey = (typeof selectorBlockKeys)[number];
-
-const isSelectorBlockKey = (key: unknown): key is SelectorBlockKey => {
-  return typeof key === 'string' && selectorBlockKeys.includes(key as SelectorBlockKey);
-};
-
-type BlocksStore = {
-  [K in SelectorBlockKey]: SelectorBlock;
-} & {
-  [K in NonSelectorBlockKey]: NonSelectorBlock;
-};
-
-type RichTextBlocksStore = Partial<BlocksStore> & Record<string, SelectorBlock | NonSelectorBlock>;
-
-interface BlocksEditorContextValue {
-  blocks: RichTextBlocksStore;
-  modifiers: ModifiersStore;
-  disabled: boolean;
-  name: string;
-  setLiveText: (text: string) => void;
-  isExpandedMode: boolean;
-  /** Push debounced Slate → form sync immediately (e.g. on Editable blur before Save). */
-  flushPendingFormSync: () => void;
-}
-
-const [BlocksEditorProvider, usePartialBlocksEditorContext] =
-  createContext<BlocksEditorContextValue>('BlocksEditor');
-
-function useBlocksEditorContext(consumerName: string): BlocksEditorContextValue & {
-  editor: Editor;
-} {
-  const context = usePartialBlocksEditorContext(consumerName, (state) => state);
-  const editor = useSlate();
-
-  return {
-    ...context,
-    editor,
-  };
-}
 
 /* -------------------------------------------------------------------------------------------------
  * BlocksEditor
@@ -176,20 +79,6 @@ const pipe =
   (...fns: ((baseEditor: Editor) => Editor)[]) =>
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
-
-/**
- * Normalize the blocks state to null if the editor state is considered empty,
- * otherwise return the state
- */
-const normalizeBlocksState = (
-  editor: Editor,
-  value: Schema.Attribute.BlocksValue | Descendant[]
-): Schema.Attribute.BlocksValue | Descendant[] | null => {
-  const isEmpty =
-    value.length === 1 && Editor.isEmpty(editor, value[0] as Schema.Attribute.BlocksNode);
-
-  return isEmpty ? null : value;
-};
 
 interface BlocksEditorProps
   extends Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
@@ -376,13 +265,13 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   }
 );
 
+export { BlocksEditor };
 export {
   type BlocksStore,
   type RichTextBlocksStore,
   type SelectorBlockKey,
-  BlocksEditor,
   BlocksEditorProvider,
   useBlocksEditorContext,
   isSelectorBlockKey,
   normalizeBlocksState,
-};
+} from './BlocksEditorContext';

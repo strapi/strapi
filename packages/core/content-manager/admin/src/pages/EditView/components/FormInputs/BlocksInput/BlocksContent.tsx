@@ -21,7 +21,7 @@ import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop'
 import { getTranslation } from '../../../../../utils/translations';
 
 import { decorateCode } from './Blocks/Code';
-import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
+import { type BlocksStore, useBlocksEditorContext } from './BlocksEditorContext';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries } from './utils/types';

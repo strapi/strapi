@@ -7,7 +7,7 @@ import { type Text, Editor, Node, Transforms, Path, Element } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled, type CSSProperties, css } from 'styled-components';
 
-import { type BlocksStore } from '../BlocksEditor';
+import { type BlocksStore } from '../BlocksEditorContext';
 import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 

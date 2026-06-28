@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import { Paragraph } from '@strapi/icons';
 import { type Text, Editor, Transforms } from 'slate';
 
-import { type BlocksStore } from '../BlocksEditor';
+import { type BlocksStore } from '../BlocksEditorContext';
 import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 

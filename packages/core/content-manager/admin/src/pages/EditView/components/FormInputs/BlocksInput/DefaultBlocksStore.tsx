@@ -5,7 +5,7 @@ import { linkBlocks } from './Blocks/Link';
 import { listBlocks } from './Blocks/List';
 import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
-import { BlocksStore } from './BlocksEditor';
+import { BlocksStore } from './BlocksEditorContext';
 
 const defaultBlocksStore: BlocksStore = {
   ...paragraphBlocks,

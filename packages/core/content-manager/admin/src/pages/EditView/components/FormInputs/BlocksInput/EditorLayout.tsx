@@ -7,7 +7,7 @@ import { css, styled } from 'styled-components';
 
 import { getTranslation } from '../../../../../utils/translations';
 
-import { useBlocksEditorContext } from './BlocksEditor';
+import { useBlocksEditorContext } from './BlocksEditorContext';
 
 interface EditorLayoutProps {
   children: React.ReactNode;

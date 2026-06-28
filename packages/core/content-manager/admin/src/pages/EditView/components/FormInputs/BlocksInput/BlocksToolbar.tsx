@@ -25,10 +25,8 @@ import { insertLink } from './Blocks/Link';
 import {
   type BlocksStore,
   type SelectorBlock,
-  type SelectorBlockKey,
-  isSelectorBlockKey,
   useBlocksEditorContext,
-} from './BlocksEditor';
+} from './BlocksEditorContext';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`

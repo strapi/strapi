@@ -12,7 +12,7 @@ import {
 import { Editor } from 'slate';
 import { styled } from 'styled-components';
 
-import { type BlocksStore } from '../BlocksEditor';
+import { type BlocksStore } from '../BlocksEditorContext';
 import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 

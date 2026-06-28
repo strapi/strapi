@@ -8,7 +8,7 @@ import { BaseRange, Element, Editor, Node, NodeEntry, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
-import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
+import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditorContext';
 import { codeLanguages } from '../utils/constants';
 import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';

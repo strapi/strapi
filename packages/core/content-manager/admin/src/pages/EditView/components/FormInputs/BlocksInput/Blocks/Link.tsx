@@ -16,7 +16,7 @@ import {
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
-import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
+import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditorContext';
 import { type Block } from '../utils/types';
 
 import type { Schema } from '@strapi/types';

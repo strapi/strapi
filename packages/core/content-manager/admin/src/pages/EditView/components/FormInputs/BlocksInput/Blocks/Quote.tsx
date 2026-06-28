@@ -1,7 +1,7 @@
 import { Quotes } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-import { type BlocksStore } from '../BlocksEditor';
+import { type BlocksStore } from '../BlocksEditorContext';
 import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';

@@ -8,7 +8,7 @@ import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import { styled, css } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../../utils/urls';
-import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
+import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditorContext';
 import { type Block } from '../utils/types';
 
 import type { Schema } from '@strapi/types';
