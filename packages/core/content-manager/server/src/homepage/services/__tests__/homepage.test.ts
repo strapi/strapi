@@ -65,6 +65,7 @@ describe('homepage service', () => {
                 { subject: 'api::article.article' },
                 { subject: 'api::article.article' },
                 { subject: 'api::page.page' },
+                { subject: 'api::missing.missing' },
               ]),
             },
           },
@@ -96,9 +97,18 @@ describe('homepage service', () => {
           })),
         })),
         contentType: jest.fn((uid: keyof typeof contentTypes) => contentTypes[uid]),
-        documents: jest.fn((uid: keyof typeof contentTypes) => ({
-          findMany: uid === 'api::article.article' ? findArticleDocuments : findPageDocuments,
-        })),
+        contentTypes,
+        documents: jest.fn((uid: keyof typeof contentTypes) => {
+          if (uid === 'api::article.article') {
+            return { findMany: findArticleDocuments };
+          }
+
+          if (uid === 'api::page.page') {
+            return { findMany: findPageDocuments };
+          }
+
+          throw new Error(`Unexpected content type lookup: ${uid}`);
+        }),
       };
 
       const service = createHomepageService({ strapi } as any);
@@ -111,6 +121,7 @@ describe('homepage service', () => {
             $in: [
               'plugin_content_manager_configuration_content_types::api::article.article',
               'plugin_content_manager_configuration_content_types::api::page.page',
+              'plugin_content_manager_configuration_content_types::api::missing.missing',
             ],
           },
         },
