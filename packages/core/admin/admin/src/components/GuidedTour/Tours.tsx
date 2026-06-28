@@ -5,11 +5,12 @@ import { styled } from 'styled-components';
 
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
-import { type State, type Action, useGuidedTour, ValidTourName, CompletedActions } from './Context';
+import { useGuidedTour } from './Context';
 import { apiTokensSteps } from './Steps/ApiTokensSteps';
 import { contentManagerSteps } from './Steps/ContentManagerSteps';
 import { contentTypeBuilderSteps } from './Steps/ContentTypeBuilderSteps';
-import { type Step, createStepComponents } from './Steps/Step';
+import { createStepComponents, type Content } from './Steps/Step';
+import { type CompletedActions, type State, type Action, type ValidTourName } from './types';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
@@ -28,13 +29,6 @@ type Tours = typeof tours;
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourTooltip
  * -----------------------------------------------------------------------------------------------*/
-
-export type StepContentProps = {
-  Step: Step;
-  state: State;
-  dispatch: React.Dispatch<Action>;
-};
-type Content = (props: StepContentProps) => React.ReactNode;
 
 type GuidedTourTooltipProps = {
   children: React.ReactNode;

@@ -14,8 +14,10 @@ import { To, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useTracking } from '../../../features/Tracking';
-import { useGuidedTour, type ValidTourName } from '../Context';
-import { tours } from '../Tours';
+import { useGuidedTour } from '../Context';
+import { guidedTours } from '../tourDefinitions';
+
+import type { Action, State, ValidTourName } from '../types';
 
 /* -------------------------------------------------------------------------------------------------
  * Common Step Components
@@ -32,7 +34,7 @@ const StepCount = ({
 }) => {
   const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
   const currentStep = displayedCurrentStep ?? state.tours[tourName].currentStep + 1;
-  const displayedStepCount = displayedTourLength ?? tours[tourName]._meta.displayedStepCount;
+  const displayedStepCount = displayedTourLength ?? guidedTours[tourName]._meta.displayedStepCount;
 
   return (
     <Typography variant="omega" fontSize="12px">
@@ -79,7 +81,7 @@ const DefaultActions = ({
   }
 
   const currentStep = state.tours[tourName].currentStep + 1;
-  const actualTourLength = tours[tourName]._meta.totalStepCount;
+  const actualTourLength = guidedTours[tourName]._meta.totalStepCount;
 
   const handleSkip = () => {
     trackUsage('didSkipGuidedTour', { name: tourName });
@@ -177,6 +179,14 @@ type Step = {
   ) => React.ReactNode;
   Actions: (props: ActionsProps & { to?: string } & FlexProps) => React.ReactNode;
 };
+
+export type StepContentProps = {
+  Step: Step;
+  state: State;
+  dispatch: React.Dispatch<Action>;
+};
+
+export type Content = (props: StepContentProps) => React.ReactNode;
 
 const ActionsContainer = styled(Flex)`
   border-top: ${({ theme }) => `1px solid ${theme.colors.neutral150}`};

@@ -1,10 +1,18 @@
 import { useParams } from 'react-router-dom';
 
-import { CompletedActions, useGuidedTour } from '../Context';
-import { tours, type StepContentProps } from '../Tours';
+import { useGuidedTour } from '../Context';
+import { guidedTours } from '../tourDefinitions';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 
-import { DefaultActions, DefaultActionsProps, GotItAction, StepCount } from './Step';
+import {
+  DefaultActions,
+  DefaultActionsProps,
+  GotItAction,
+  StepCount,
+  type StepContentProps,
+} from './Step';
+
+import type { CompletedActions } from '../types';
 
 const ContentManagerActions = ({
   isActionRequired = false,
@@ -30,8 +38,8 @@ const ContentManagerActions = ({
 
   // For single types we subtract all contentTypeSpecificSteps
   const displayedTourLength = isSingleType
-    ? tours.contentManager._meta.displayedStepCount - collectionTypeSpecificSteps.length
-    : tours.contentManager._meta.displayedStepCount;
+    ? guidedTours.contentManager._meta.displayedStepCount - collectionTypeSpecificSteps.length
+    : guidedTours.contentManager._meta.displayedStepCount;
 
   const handleNextStep = () => {
     if (isSingleType && state.tours.contentManager.currentStep === 0) {

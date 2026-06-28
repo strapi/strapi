@@ -7,7 +7,8 @@ import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
-import { type Tours, tours as guidedTours } from './Tours';
+import { guidedTours } from './tourDefinitions';
+import { type Action, type CompletedActions, type State, type ValidTourName } from './types';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 import { migrateTours } from './utils/migrations';
 
@@ -15,97 +16,40 @@ import { migrateTours } from './utils/migrations';
  * GuidedTourProvider
  * -----------------------------------------------------------------------------------------------*/
 
-type ValidTourName = keyof Tours;
-
 /**
  * Derive the union of all string literal values from GUIDED_TOUR_REQUIRED_ACTIONS
  * (ie didCreateContentTypeSchema | didCreateContent etc...)
  */
 type ValueOf<T> = T[keyof T];
-type NonEmptyValueOf<T> = T extends Record<string, never> ? never : ValueOf<T>;
-export type CompletedActions = NonEmptyValueOf<ValueOf<typeof GUIDED_TOUR_REQUIRED_ACTIONS>>[];
-
-type Action =
-  | {
-      type: 'next_step';
-      payload: ValidTourName;
-    }
-  | {
-      type: 'previous_step';
-      payload: ValidTourName;
-    }
-  | {
-      type: 'go_to_step';
-      payload: {
-        tourName: ValidTourName;
-        step: number;
-      };
-    }
-  | {
-      type: 'skip_tour';
-      payload: ValidTourName;
-    }
-  | {
-      type: 'skip_all_tours';
-    }
-  | {
-      type: 'reset_all_tours';
-    }
-  | {
-      type: 'set_completed_actions';
-      payload: CompletedActions;
-    }
-  | {
-      type: 'remove_completed_action';
-      payload: ValueOf<CompletedActions>;
-    }
-  | {
-      type: 'set_tour_type';
-      payload: {
-        tourName: ValidTourName;
-        tourType: 'ContentTypeBuilderAI' | 'ContentTypeBuilderNoAI';
-      };
-    }
-  | {
-      type: 'set_hidden';
-      payload: boolean;
-    };
-
-type TourState = Record<
-  ValidTourName,
-  { currentStep: number; isCompleted: boolean; tourType?: string }
->;
-type State = {
-  tours: TourState;
-  enabled: boolean;
-  hidden?: boolean;
-  completedActions: CompletedActions;
-};
 
 const [GuidedTourProviderImpl, useGuidedTour] = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
 }>('GuidedTour');
 
-const getInitialTourState = (tours: Tours) => {
-  return Object.keys(tours).reduce((acc, tourName) => {
-    acc[tourName as ValidTourName] = {
-      currentStep: 0,
-      isCompleted: false,
-      tourType: undefined,
-    };
+const getInitialTourState = () => {
+  return Object.keys(guidedTours).reduce(
+    (acc, tourName) => {
+      acc[tourName as ValidTourName] = {
+        currentStep: 0,
+        isCompleted: false,
+        tourType: undefined,
+      };
 
-    return acc;
-  }, {} as TourState);
+      return acc;
+    },
+    {} as State['tours']
+  );
 };
 
-const getCompletedTours = (tours: TourState): ValidTourName[] => {
+const getCompletedTours = (tours: State['tours']): ValidTourName[] => {
   return Object.keys(tours).filter(
     (tourName) => tours[tourName as ValidTourName].isCompleted
   ) as ValidTourName[];
 };
 
-const areAllToursCompleted = (tours: TourState) => Object.values(tours).every((t) => t.isCompleted);
+const areAllToursCompleted = (tours: State['tours']) =>
+  Object.values(tours).every((t) => t.isCompleted);
 
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
@@ -151,7 +95,7 @@ function reducer(state: State, action: Action): State {
 
     if (action.type === 'reset_all_tours') {
       draft.enabled = true;
-      draft.tours = getInitialTourState(guidedTours);
+      draft.tours = getInitialTourState();
       draft.completedActions = [];
     }
 
@@ -184,7 +128,7 @@ const GuidedTourContext = ({
   const isDesktop = useIsDesktop();
   const { trackUsage } = useTracking();
   const [storedTours, setStoredTours] = usePersistentState<State>(STORAGE_KEY, {
-    tours: getInitialTourState(guidedTours),
+    tours: getInitialTourState(),
     enabled,
     hidden: !isDesktop,
     completedActions: [],
@@ -226,5 +170,5 @@ const GuidedTourContext = ({
   );
 };
 
-export type { Action, State, ValidTourName };
+export type { Action, CompletedActions, State, ValidTourName, ValueOf };
 export { GuidedTourContext, useGuidedTour, reducer, getCompletedTours };

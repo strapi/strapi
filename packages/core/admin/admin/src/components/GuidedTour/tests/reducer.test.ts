@@ -1,5 +1,5 @@
 import { type Action, reducer } from '../Context';
-import { tours } from '../Tours';
+import { guidedTours } from '../tourDefinitions';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 
 describe('GuidedTour | reducer', () => {
@@ -119,7 +119,7 @@ describe('GuidedTour | reducer', () => {
     });
 
     it('should mark tour as completed when reaching the last step', () => {
-      const totalStepCount = tours.contentTypeBuilder._meta.totalStepCount;
+      const totalStepCount = guidedTours.contentTypeBuilder._meta.totalStepCount;
       const initialState = {
         tours: {
           contentTypeBuilder: {

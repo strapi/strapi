@@ -2,11 +2,11 @@ import * as React from 'react';
 
 import { Box, Link } from '@strapi/design-system';
 
-import { type CompletedActions } from '../Context';
-import { type StepContentProps } from '../Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 
-import { GotItAction, StepCount } from './Step';
+import { GotItAction, StepCount, type StepContentProps } from './Step';
+
+import type { CompletedActions } from '../types';
 
 /* -------------------------------------------------------------------------------------------------
  * Step Components

@@ -5,11 +5,19 @@ import { UID } from '@strapi/types';
 import { useParams } from 'react-router-dom';
 
 import { useGetGuidedTourMetaQuery } from '../../../services/admin';
-import { CompletedActions, useGuidedTour } from '../Context';
-import { tours, type StepContentProps } from '../Tours';
+import { useGuidedTour } from '../Context';
+import { guidedTours } from '../tourDefinitions';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 
-import { GotItAction, StepCount, DefaultActions, DefaultActionsProps } from './Step';
+import {
+  GotItAction,
+  StepCount,
+  DefaultActions,
+  DefaultActionsProps,
+  type StepContentProps,
+} from './Step';
+
+import type { CompletedActions } from '../types';
 
 const ContentTypeBuilderActions = ({
   ...props
@@ -34,8 +42,8 @@ const ContentTypeBuilderActions = ({
 
   // When AI is enabled, we subtract the no AI steps and vice versa
   const displayedTourLength = isAIEnabled
-    ? tours.contentTypeBuilder._meta.displayedStepCount - contentTypeBuilderStepsNoAI.length
-    : tours.contentTypeBuilder._meta.displayedStepCount - contentTypeBuilderStepsAI.length;
+    ? guidedTours.contentTypeBuilder._meta.displayedStepCount - contentTypeBuilderStepsNoAI.length
+    : guidedTours.contentTypeBuilder._meta.displayedStepCount - contentTypeBuilderStepsAI.length;
 
   const handleNextStep = () => {
     const currentStep = state.tours.contentTypeBuilder.currentStep;

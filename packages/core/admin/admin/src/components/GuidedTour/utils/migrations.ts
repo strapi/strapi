@@ -1,14 +1,14 @@
 import { produce } from 'immer';
 
-import { tours } from '../Tours';
+import { guidedTours } from '../tourDefinitions';
 
-import type { State, ValidTourName } from '../Context';
+import type { State, ValidTourName } from '../types';
 
 /**
  * Build default tour state (used when stored state is missing tours)
  */
 const getDefaultTours = () =>
-  (Object.keys(tours) as ValidTourName[]).reduce(
+  (Object.keys(guidedTours) as ValidTourName[]).reduce(
     (acc, tourName) => {
       acc[tourName] = { currentStep: 0, isCompleted: false, tourType: undefined };
       return acc;
@@ -34,7 +34,7 @@ const migrateTours = (storedTourState: State) => {
   }
 
   const storedTourNames = Object.keys(storedTourState.tours) as ValidTourName[];
-  const currentTourNames = Object.keys(tours) as ValidTourName[];
+  const currentTourNames = Object.keys(guidedTours) as ValidTourName[];
 
   return produce(storedTourState, (draft) => {
     // Add new tours that don't exist in stored state
