@@ -349,6 +349,11 @@ type ReleaseDetailsHeader = {
   name: string;
 };
 
+type ReleaseDetailsTableHeader = {
+  label: string;
+  name: string;
+};
+
 const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   if (value === 'locale') {
     return {
@@ -527,7 +532,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     id: 'content-releases.pages.ReleaseDetails.groupBy.aria-label',
     defaultMessage: 'Group by',
   });
-  const headers = [
+  const headers: ReleaseDetailsTableHeader[] = [
     ...displayedHeaders,
     {
       label: {
@@ -554,7 +559,10 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           },
         ]
       : []),
-  ];
+  ].map(({ label, name }) => ({
+    label: formatMessage(label),
+    name,
+  }));
 
   const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
@@ -602,7 +610,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               <Table.Content>
                 <Table.Head>
                   {headers.map(({ label, name }) => (
-                    <Table.HeaderCell key={name} label={formatMessage(label)} name={name} />
+                    <Table.HeaderCell key={name} label={label} name={name} />
                   ))}
                 </Table.Head>
                 <Table.Loading />
