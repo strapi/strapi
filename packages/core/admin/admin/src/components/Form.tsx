@@ -10,7 +10,7 @@ import {
 } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
-import { produce } from 'immer';
+import { produce, type Draft } from 'immer';
 import isEqual from 'lodash/isEqual';
 import { useIntl, type MessageDescriptor, type PrimitiveType } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
@@ -578,6 +578,13 @@ interface FormState<TFormValues extends FormValues = FormValues> {
   values: TFormValues;
 }
 
+const setDraftValues = <TFormValues extends FormValues>(
+  draft: Draft<FormState<TFormValues>>,
+  values: TFormValues
+) => {
+  draft.values = values as Draft<TFormValues>;
+};
+
 type FormActions<TFormValues extends FormValues = FormValues> =
   | { type: 'SUBMIT_ATTEMPT' }
   | { type: 'SUBMIT_FAILURE' }
@@ -602,12 +609,10 @@ const reducer = <TFormValues extends FormValues = FormValues>(
   produce(state, (draft) => {
     switch (action.type) {
       case 'SET_INITIAL_VALUES':
-        // @ts-expect-error – TODO: figure out why this fails ts.
-        draft.values = action.payload;
+        setDraftValues(draft, action.payload);
         break;
       case 'SET_VALUES':
-        // @ts-expect-error – TODO: figure out why this fails ts.
-        draft.values = action.payload;
+        setDraftValues(draft, action.payload);
         break;
       case 'SUBMIT_ATTEMPT':
         draft.isSubmitting = true;
@@ -619,7 +624,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.isSubmitting = false;
         break;
       case 'SET_FIELD_VALUE':
-        draft.values = setIn(state.values, action.payload.field, action.payload.value);
+        setDraftValues(draft, setIn(state.values, action.payload.field, action.payload.value));
         break;
       case 'ADD_FIELD_ROW': {
         /**
@@ -660,13 +665,16 @@ const reducer = <TFormValues extends FormValues = FormValues>(
           }
         } while (existingKeys.has(key));
 
-        draft.values = setIn(
-          state.values,
-          action.payload.field,
-          currentField.toSpliced(position, 0, {
-            ...action.payload.value,
-            __temp_key__: key,
-          })
+        setDraftValues(
+          draft,
+          setIn(
+            state.values,
+            action.payload.field,
+            currentField.toSpliced(position, 0, {
+              ...action.payload.value,
+              __temp_key__: key,
+            })
+          )
         );
 
         break;
@@ -684,7 +692,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         currentField.splice(fromIndex, 1);
         currentField.splice(toIndex, 0, currentRow);
 
-        draft.values = setIn(state.values, field, currentField);
+        setDraftValues(draft, setIn(state.values, field, currentField));
 
         break;
       }
@@ -714,10 +722,9 @@ const reducer = <TFormValues extends FormValues = FormValues>(
           (val: unknown) => val
         );
 
-        draft.values = setIn(
-          state.values,
-          action.payload.field,
-          newValue.length > 0 ? newValue : []
+        setDraftValues(
+          draft,
+          setIn(state.values, action.payload.field, newValue.length > 0 ? newValue : [])
         );
 
         break;
@@ -732,8 +739,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.isSubmitting = action.payload;
         break;
       case 'RESET_FORM':
-        // @ts-expect-error – TODO: figure out why this fails ts.
-        draft.values = action.payload.values;
+        setDraftValues(draft, action.payload.values);
         // @ts-expect-error – TODO: figure out why this fails ts.
         draft.errors = action.payload.errors;
         draft.isSubmitting = action.payload.isSubmitting;

@@ -6,13 +6,13 @@ const createArrayOfValues = <TData>(obj: unknown): Array<Flat<TData>> => {
     return [];
   }
 
-  return flattenDeep(
-    Object.values(obj).map((value) => {
+  return flattenDeep<Flat<TData>>(
+    Object.values(obj).map((value): Flat<TData> | Array<Flat<TData>> => {
       if (isObject(value)) {
-        return createArrayOfValues(value);
+        return createArrayOfValues<TData>(value);
       }
 
-      return value;
+      return value as Flat<TData>;
     })
   );
 };

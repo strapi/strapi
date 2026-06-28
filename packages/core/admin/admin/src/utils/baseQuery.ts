@@ -105,14 +105,14 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
       }
     }
 
-    const error = err as Error;
+    const error = err instanceof Error ? err : new Error('Unknown error');
     return {
       data: undefined,
       error: {
-        name: error.name,
+        name: 'UnknownError',
         message: error.message,
-        stack: error.stack,
-      } satisfies SerializedError,
+        details: error,
+      } satisfies UnknownApiError,
     };
   }
 };

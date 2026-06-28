@@ -102,7 +102,13 @@ const DescriptionComponentRenderer = <Props, Description>({
       {descriptions.map((description) => {
         const key = getCompId(description);
         return (
-          <Description key={key} id={key} description={description} props={props} update={update} />
+          <MemoizedDescription
+            key={key}
+            id={key}
+            description={description}
+            props={props}
+            update={update}
+          />
         );
       })}
       {children(states)}
@@ -127,27 +133,28 @@ interface DescriptionProps<Props, Description> {
  * within a component, however because they return an object of data we can't add that
  * to the react tree, instead we push it back out to the parent.
  */
-const Description = React.memo(
-  <Props, Description>({
-    description,
-    id,
-    props,
-    update,
-  }: DescriptionProps<Props, Description>) => {
-    const comp = description(props);
+const Description = <Props, Description>({
+  description,
+  id,
+  props,
+  update,
+}: DescriptionProps<Props, Description>) => {
+  const comp = description(props);
 
-    useShallowCompareEffect(() => {
-      update(id, comp);
+  useShallowCompareEffect(() => {
+    update(id, comp);
 
-      return () => {
-        update(id, null);
-      };
-    }, comp);
+    return () => {
+      update(id, null);
+    };
+  }, comp);
 
-    return null;
-  },
-  (prev, next) => isEqual(prev.props, next.props)
-);
+  return null;
+};
+
+const MemoizedDescription = React.memo(Description, (prev, next) =>
+  isEqual(prev.props, next.props)
+) as typeof Description;
 
 /* -------------------------------------------------------------------------------------------------
  * Helpers

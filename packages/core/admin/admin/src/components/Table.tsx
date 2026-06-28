@@ -42,7 +42,6 @@ import { createContext } from './Context';
 
 interface BaseRow {
   id: string | number;
-  [key: string]: unknown;
 }
 
 interface TableHeader<TData = object, THeader = object> {
@@ -73,6 +72,13 @@ type DefaultTableHeader = TableHeader<BaseRow, object>;
 type DefaultTableContextValue = TableContextValue<BaseRow, DefaultTableHeader>;
 
 const [TableProvider, useTable] = createContext<DefaultTableContextValue>('Table');
+
+const GenericTableProvider = TableProvider as <
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+>(
+  props: TableContextValue<TRow, THeader> & { children?: React.ReactNode }
+) => React.ReactElement;
 
 interface RootProps<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
   extends Partial<
@@ -122,7 +128,7 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
   };
 
   return (
-    <TableProvider
+    <GenericTableProvider
       colCount={colCount}
       hasHeaderCheckbox={hasHeaderCheckbox}
       setHasHeaderCheckbox={setHasHeaderCheckbox}
@@ -135,7 +141,7 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
       selectRow={selectRow}
     >
       {children}
-    </TableProvider>
+    </GenericTableProvider>
   );
 };
 
