@@ -1,6 +1,5 @@
-import { IntlProvider } from 'react-intl';
-
 import { render, screen } from '@tests/utils';
+import { IntlProvider } from 'react-intl';
 
 import { Form } from '../../Form';
 import { InputRenderer } from '../Renderer';
