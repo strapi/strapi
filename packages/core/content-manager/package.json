@@ -106,7 +106,7 @@
     "react-window": "1.8.10",
     "slate": "0.94.1",
     "slate-history": "0.93.0",
-    "slate-react": "0.98.3",
+    "slate-react": "0.98.4",
     "yup": "0.32.9",
     "zod": "3.25.67"
   },
