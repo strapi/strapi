@@ -131,7 +131,7 @@
     "qs": "6.15.2",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
-    "react-intl": "6.6.2",
+    "react-intl": "7.1.14",
     "react-is": "^18.2.0",
     "react-query": "3.39.3",
     "react-redux": "8.1.3",

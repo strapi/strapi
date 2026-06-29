@@ -66,7 +66,7 @@
     "@strapi/design-system": "2.2.1",
     "@strapi/icons": "2.2.1",
     "react-colorful": "5.6.1",
-    "react-intl": "6.6.2"
+    "react-intl": "7.1.14"
   },
   "devDependencies": {
     "@strapi/strapi": "5.49.0",
