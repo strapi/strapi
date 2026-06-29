@@ -156,6 +156,7 @@
     "nodemon": "3.0.2",
     "ora": "5.4.1",
     "outdent": "0.8.0",
+    "path-browserify": "1.0.1",
     "pkg-up": "3.1.0",
     "prettier": "3.3.3",
     "react-refresh": "0.14.0",

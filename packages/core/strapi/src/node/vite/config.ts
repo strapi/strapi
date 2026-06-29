@@ -198,6 +198,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),
+        // Vite 8 externalizes Node `path`; CTB and other admin chunks import path.sep (#26541).
+        path: getModulePath('path-browserify'),
+        'node:path': getModulePath('path-browserify'),
       },
     },
     plugins: [react(), objectInspectShimPlugin(), buildFilesPlugin(ctx)],
