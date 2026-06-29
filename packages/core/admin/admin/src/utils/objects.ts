@@ -5,8 +5,31 @@ type PathObject = Record<string, unknown>;
 type PathContainer = PathObject | unknown[];
 
 const isPathContainer = (obj: unknown): obj is PathContainer => isObject(obj) || Array.isArray(obj);
-const getPathValue = (container: PathContainer, key: string): unknown =>
-  (container as PathObject)[key];
+const isPathTraversable = (obj: unknown): boolean => {
+  if (obj === null || obj === undefined) {
+    return false;
+  }
+
+  if (typeof obj === 'boolean') {
+    return obj === true;
+  }
+
+  if (typeof obj === 'number') {
+    return obj !== 0 && Number.isNaN(obj) === false;
+  }
+
+  if (typeof obj === 'bigint') {
+    return obj !== 0n;
+  }
+
+  if (typeof obj === 'string') {
+    return obj !== '';
+  }
+
+  return true;
+};
+const getPathValue = (container: unknown, key: string): unknown =>
+  (Object(container) as PathObject)[key];
 const setPathValue = (container: PathContainer, key: string, value: unknown) => {
   (container as PathObject)[key] = value;
 };
@@ -26,12 +49,12 @@ export function getIn<T = unknown>(
   const path = toPath(key);
   let currentValue = obj;
 
-  while (isPathContainer(currentValue) && pathStartIndex < path.length) {
+  while (isPathTraversable(currentValue) && pathStartIndex < path.length) {
     currentValue = getPathValue(currentValue, path[pathStartIndex++]);
   }
 
   // check if path is not in the end
-  if (pathStartIndex !== path.length && isPathContainer(currentValue) === false) {
+  if (pathStartIndex !== path.length && isPathTraversable(currentValue) === false) {
     return def;
   }
 
