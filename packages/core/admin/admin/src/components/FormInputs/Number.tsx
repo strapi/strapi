@@ -3,6 +3,7 @@ import { forwardRef, memo } from 'react';
 import { NumberInput, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
+import { useSelectOnFocus } from '../../hooks/useSelectOnFocus';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
@@ -11,6 +12,7 @@ const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, type, ...props }, ref) => {
     const field = useField<number | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
+    const { onFocus } = useSelectOnFocus();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
@@ -24,6 +26,7 @@ const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
             // See https://github.com/strapi/strapi/issues/22533
             field.onChange(name, value ?? null);
           }}
+          onFocus={onFocus}
           step={type === 'float' || type === 'decimal' ? 0.01 : 1}
           value={field.value ?? undefined}
           {...props}

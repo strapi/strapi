@@ -3,6 +3,7 @@ import { forwardRef, memo } from 'react';
 import { Textarea, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
+import { useSelectOnFocus } from '../../hooks/useSelectOnFocus';
 import { useField } from '../Form';
 
 import type { StringProps } from './types';
@@ -11,6 +12,7 @@ const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLTextAreaElement>(name);
+    const { onFocus } = useSelectOnFocus();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
@@ -20,6 +22,7 @@ const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
         <Textarea
           ref={composedRefs}
           onChange={field.onChange}
+          onFocus={onFocus}
           value={field.value ?? ''}
           {...props}
         />

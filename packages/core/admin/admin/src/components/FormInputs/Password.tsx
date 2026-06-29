@@ -5,6 +5,7 @@ import { Eye, EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
+import { useSelectOnFocus } from '../../hooks/useSelectOnFocus';
 import { useField } from '../Form';
 
 import type { StringProps } from './types';
@@ -15,6 +16,7 @@ const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
     const { formatMessage } = useIntl();
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
+    const { onFocus } = useSelectOnFocus();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
@@ -38,6 +40,7 @@ const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
             </Field.Action>
           }
           onChange={field.onChange}
+          onFocus={onFocus}
           value={field.value}
           {...props}
           type={showPassword ? 'text' : 'password'}
