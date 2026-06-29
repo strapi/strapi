@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "5.48.0",
+  "version": "5.49.0",
   "description": "Strapi plugin for organizing and releasing content",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -64,11 +64,11 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/database": "5.48.0",
-    "@strapi/design-system": "2.2.0",
-    "@strapi/icons": "2.2.0",
-    "@strapi/types": "5.48.0",
-    "@strapi/utils": "5.48.0",
+    "@strapi/database": "5.49.0",
+    "@strapi/design-system": "2.2.1",
+    "@strapi/icons": "2.2.1",
+    "@strapi/types": "5.49.0",
+    "@strapi/utils": "5.49.0",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
     "formik": "2.4.5",
@@ -79,13 +79,13 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.48.0",
-    "@strapi/admin-test-utils": "5.48.0",
-    "@strapi/content-manager": "5.48.0",
+    "@strapi/admin": "5.49.0",
+    "@strapi/admin-test-utils": "5.49.0",
+    "@strapi/content-manager": "5.49.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
-    "@types/koa": "2.13.4",
+    "@types/koa": "2.15.2",
     "koa": "2.16.4",
     "msw": "2.13.4",
     "react": "18.3.1",
@@ -93,7 +93,7 @@
     "react-query": "3.39.3",
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
-    "typescript": "5.4.5"
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

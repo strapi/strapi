@@ -851,4 +851,150 @@ describe('DatabaseSessionProvider', () => {
       });
     });
   });
+
+  describe('findByUser', () => {
+    it('should query active sessions scoped to user and origin', async () => {
+      mockQuery.findMany.mockResolvedValue([]);
+
+      await provider.findByUser({ userId: 'user123', origin: 'admin', status: 'active' });
+
+      expect(mockQuery.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user123', origin: 'admin', status: 'active' },
+        orderBy: { createdAt: 'DESC' },
+      });
+    });
+
+    it('should omit status from the query when not provided', async () => {
+      mockQuery.findMany.mockResolvedValue([]);
+
+      await provider.findByUser({ userId: 'user123', origin: 'admin' });
+
+      expect(mockQuery.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user123', origin: 'admin' },
+        orderBy: { createdAt: 'DESC' },
+      });
+    });
+  });
+});
+
+describe('SessionManager sessions management', () => {
+  let mockDb: any;
+  let mockQuery: any;
+  let config: SessionManagerConfig;
+  let sessionManager: any;
+
+  beforeEach(() => {
+    mockQuery = {
+      create: jest.fn((data: SessionData) => ({ ...data, createdAt: new Date() })),
+      findOne: jest.fn(),
+      findMany: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn(),
+    };
+
+    mockDb = { query: jest.fn().mockReturnValue(mockQuery) };
+
+    config = {
+      jwtSecret: 'test-secret',
+      accessTokenLifespan: 60 * 60,
+      maxRefreshTokenLifespan: 30 * 24 * 60 * 60,
+      idleRefreshTokenLifespan: 7 * 24 * 60 * 60,
+      maxSessionLifespan: 7 * 24 * 60 * 60,
+      idleSessionLifespan: 60 * 60,
+    } as SessionManagerConfig;
+
+    sessionManager = createSessionManager({ db: mockDb });
+    sessionManager.defineOrigin('admin', config);
+
+    mockCrypto.randomBytes.mockReturnValue(Buffer.from('abcdef1234567890', 'hex') as any);
+    mockJwt.sign.mockReturnValue('test-jwt-token' as any);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('generateRefreshToken metadata', () => {
+    it('should persist provided metadata on the created session record', async () => {
+      const metadata = { loginAt: '2026-06-12T00:00:00.000Z', ip: '127.0.0.1' };
+
+      await sessionManager('admin').generateRefreshToken('user123', 'device456', { metadata });
+
+      expect(mockQuery.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ metadata }),
+      });
+    });
+
+    it('should not include metadata when none is provided', async () => {
+      await sessionManager('admin').generateRefreshToken('user123', 'device456');
+
+      const createArg = mockQuery.create.mock.calls[0][0];
+      expect(createArg.data).not.toHaveProperty('metadata');
+    });
+  });
+
+  describe('listSessions', () => {
+    it('should return active sessions for the user and origin', async () => {
+      const sessions = [{ sessionId: 's1', userId: 'user123', origin: 'admin', status: 'active' }];
+      mockQuery.findMany.mockResolvedValue(sessions);
+
+      const result = await sessionManager('admin').listSessions('user123');
+
+      expect(mockQuery.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user123', origin: 'admin', status: 'active' },
+        orderBy: { createdAt: 'DESC' },
+      });
+      expect(result).toEqual(sessions);
+    });
+  });
+
+  describe('revokeSessionById', () => {
+    it('should delete a session that belongs to the user and origin', async () => {
+      mockQuery.findOne.mockResolvedValue({
+        sessionId: 's1',
+        userId: 'user123',
+        origin: 'admin',
+      });
+
+      const result = await sessionManager('admin').revokeSessionById('user123', 's1');
+
+      expect(result).toBe(true);
+      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { sessionId: 's1' } });
+    });
+
+    it('should not delete a session that belongs to another user', async () => {
+      mockQuery.findOne.mockResolvedValue({
+        sessionId: 's1',
+        userId: 'otherUser',
+        origin: 'admin',
+      });
+
+      const result = await sessionManager('admin').revokeSessionById('user123', 's1');
+
+      expect(result).toBe(false);
+      expect(mockQuery.delete).not.toHaveBeenCalled();
+    });
+
+    it('should not delete a session from a different origin', async () => {
+      mockQuery.findOne.mockResolvedValue({
+        sessionId: 's1',
+        userId: 'user123',
+        origin: 'users-permissions',
+      });
+
+      const result = await sessionManager('admin').revokeSessionById('user123', 's1');
+
+      expect(result).toBe(false);
+      expect(mockQuery.delete).not.toHaveBeenCalled();
+    });
+
+    it('should return false when the session does not exist', async () => {
+      mockQuery.findOne.mockResolvedValue(null);
+
+      const result = await sessionManager('admin').revokeSessionById('user123', 'missing');
+
+      expect(result).toBe(false);
+      expect(mockQuery.delete).not.toHaveBeenCalled();
+    });
+  });
 });

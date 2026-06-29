@@ -1,4 +1,4 @@
-import { AssetType } from '../../enums';
+import { ASSET_TYPES } from '../../enums';
 import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
 
 import { AudioAssetCard } from './AudioAssetCard';
@@ -52,11 +52,11 @@ export const AssetCard = ({
     className,
   };
 
-  if (asset.mime?.includes(AssetType.Video)) {
+  if (asset.mime?.includes(ASSET_TYPES.Video)) {
     return <VideoAssetCard {...commonAssetCardProps} />;
   }
 
-  if (asset.mime?.includes(AssetType.Image)) {
+  if (asset.mime?.includes(ASSET_TYPES.Image)) {
     return (
       <ImageAssetCard
         alt={asset.alternativeText || asset.name}
@@ -70,7 +70,7 @@ export const AssetCard = ({
     );
   }
 
-  if (asset.mime?.includes(AssetType.Audio)) {
+  if (asset.mime?.includes(ASSET_TYPES.Audio)) {
     return <AudioAssetCard {...commonAssetCardProps} />;
   }
 

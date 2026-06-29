@@ -65,6 +65,8 @@ export interface Scope {
   useExample?: boolean;
   gitInit?: boolean;
   shouldCreateGrowthSsoTrial: boolean;
+  /** Resolved at scaffold time when packageManager is pnpm (npm_config_user_agent or pnpm --version). */
+  pnpmVersion?: string | null;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';

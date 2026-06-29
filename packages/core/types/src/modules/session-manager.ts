@@ -2,11 +2,27 @@ export type ValidateRefreshTokenResult =
   | { isValid: true; userId: string; sessionId: string }
   | { isValid: false };
 
+export interface SessionEntry {
+  id?: string;
+  userId: string;
+  sessionId: string;
+  deviceId?: string;
+  origin: string;
+  childId?: string | null;
+  type?: 'refresh' | 'session';
+  status?: 'active' | 'rotated' | 'revoked';
+  metadata?: Record<string, unknown> | null;
+  expiresAt: Date;
+  absoluteExpiresAt?: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface OriginSessionManagerService {
   generateRefreshToken(
     userId: string,
     deviceId: string | undefined,
-    options?: { type?: 'refresh' | 'session' }
+    options?: { type?: 'refresh' | 'session'; metadata?: Record<string, unknown> }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }>;
   generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }>;
   rotateRefreshToken(refreshToken: string): Promise<
@@ -29,6 +45,8 @@ export interface OriginSessionManagerService {
       };
   validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
   invalidateRefreshToken(userId: string, deviceId?: string): Promise<void>;
+  listSessions(userId: string): Promise<SessionEntry[]>;
+  revokeSessionById(userId: string, sessionId: string): Promise<boolean>;
   isSessionActive(sessionId: string): Promise<boolean>;
 }
 

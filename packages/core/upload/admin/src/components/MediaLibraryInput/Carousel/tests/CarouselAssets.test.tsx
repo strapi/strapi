@@ -111,4 +111,17 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
 
     expect(queryByRole('button', { name: 'edit' })).not.toBeInTheDocument();
   });
+
+  it('should not open edit view on double click when disabled', async () => {
+    const onDoubleClickAssetSpy = jest.fn();
+    const { getByRole, queryByText, user } = setup({
+      disabled: true,
+      onDoubleClickAsset: onDoubleClickAssetSpy,
+    });
+
+    await user.dblClick(getByRole('img', { name: 'alternative text' }));
+
+    expect(queryByText('Details')).not.toBeInTheDocument();
+    expect(onDoubleClickAssetSpy).not.toHaveBeenCalled();
+  });
 });

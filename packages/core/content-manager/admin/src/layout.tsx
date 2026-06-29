@@ -1,9 +1,9 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { Page, Layouts, SubNav, useIsMobile } from '@strapi/admin/strapi-admin';
+import { Page, Layouts, SubNav, useIsMobile, LazyOutlet } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
+import { Navigate, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from './components/DragLayer';
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
@@ -102,7 +102,7 @@ const Layout = () => {
       </Page.Title>
       <Layouts.Root sideNav={<LeftMenu />}>
         <DragLayer renderItem={renderDraglayerItem} />
-        <Outlet />
+        <LazyOutlet nested />
       </Layouts.Root>
     </>
   );
