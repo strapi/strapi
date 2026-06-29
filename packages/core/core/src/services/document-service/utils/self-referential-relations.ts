@@ -11,6 +11,10 @@ interface VersionEntry {
 interface RelationData {
   joinTable: JoinTable;
   relations: Record<string, unknown>[];
+  remap: {
+    source: boolean;
+    target: boolean;
+  };
 }
 
 /**
@@ -35,7 +39,8 @@ interface RelationData {
  */
 const load = async (
   uid: UID.ContentType,
-  sourceEntries: VersionEntry[]
+  sourceEntries: VersionEntry[],
+  replacedEntries: VersionEntry[] = []
 ): Promise<RelationData[]> => {
   const updates: RelationData[] = [];
   const dbModel = strapi.db.metadata.get(uid);
@@ -61,6 +66,7 @@ const load = async (
       const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
       const sourceIds = sourceEntries.map((entry) => String(entry.id));
+      const replacedIds = replacedEntries.map((entry) => String(entry.id));
 
       // Load relations where both source and target are among the entries being processed.
       // These are the self-referential relations that would be lost during the
@@ -74,7 +80,50 @@ const load = async (
         .transacting(trx);
 
       if (selfRelations.length > 0) {
-        updates.push({ joinTable, relations: selfRelations });
+        updates.push({
+          joinTable,
+          relations: selfRelations,
+          remap: { source: true, target: true },
+        });
+      }
+
+      if (replacedIds.length === 0) {
+        continue;
+      }
+
+      // When only one side of a self-relation is republished/discarded, the normal relation
+      // write recreates the row but assigns fresh order values. Capture those rows so sync()
+      // can restore the join-table payload after the replacement row exists.
+      const sourceOnlyRelations = await strapi.db
+        .getConnection()
+        .select('*')
+        .from(joinTable.name)
+        .whereIn(sourceColumnName, replacedIds)
+        .whereNotIn(targetColumnName, replacedIds)
+        .transacting(trx);
+
+      if (sourceOnlyRelations.length > 0) {
+        updates.push({
+          joinTable,
+          relations: sourceOnlyRelations,
+          remap: { source: true, target: false },
+        });
+      }
+
+      const targetOnlyRelations = await strapi.db
+        .getConnection()
+        .select('*')
+        .from(joinTable.name)
+        .whereIn(targetColumnName, replacedIds)
+        .whereNotIn(sourceColumnName, replacedIds)
+        .transacting(trx);
+
+      if (targetOnlyRelations.length > 0) {
+        updates.push({
+          joinTable,
+          relations: targetOnlyRelations,
+          remap: { source: false, target: true },
+        });
       }
     }
   });
@@ -109,7 +158,7 @@ const sync = async (
   const batchSize = strapi.db.dialect.getBatchInsertSize();
 
   await strapi.db.transaction(async ({ trx }) => {
-    for (const { joinTable, relations } of relationData) {
+    for (const { joinTable, relations, remap = { source: true, target: true } } of relationData) {
       const sourceColumn = joinTable.joinColumn.name;
       const targetColumn = joinTable.inverseJoinColumn.name;
 
@@ -117,10 +166,10 @@ const sync = async (
         .map((relation) => {
           const oldSourceId = String(relation[sourceColumn]);
           const oldTargetId = String(relation[targetColumn]);
-          const newSourceId = idMapping[oldSourceId];
-          const newTargetId = idMapping[oldTargetId];
+          const newSourceId = remap.source ? idMapping[oldSourceId] : relation[sourceColumn];
+          const newTargetId = remap.target ? idMapping[oldTargetId] : relation[targetColumn];
 
-          // Both sides must map to new entries
+          // Any side being remapped must resolve to a new entry.
           if (!newSourceId || !newTargetId) return null;
 
           return {
@@ -143,13 +192,28 @@ const sync = async (
 
       if (deduped.length === 0) continue;
 
+      // Relation writes may have already recreated the remapped pair. In that case restore
+      // the saved join-row metadata (notably order columns) instead of inserting a duplicate.
       const newSourceIds = [...new Set(deduped.map((r) => String(r[sourceColumn])))];
       const existingRows = await trx(joinTable.name)
         .whereIn(sourceColumn, newSourceIds)
         .select(sourceColumn, targetColumn);
 
       const existingSet = new Set(existingRows.map((r: Record<string, unknown>) => pairKey(r)));
+      const toUpdate = deduped.filter((r) => existingSet.has(pairKey(r)));
       const toInsert = deduped.filter((r) => !existingSet.has(pairKey(r)));
+
+      for (const relation of toUpdate) {
+        const { [sourceColumn]: sourceId, [targetColumn]: targetId, ...dataToRestore } = relation;
+
+        if (Object.keys(dataToRestore).length === 0) {
+          continue;
+        }
+
+        await trx(joinTable.name)
+          .where({ [sourceColumn]: sourceId, [targetColumn]: targetId })
+          .update(dataToRestore);
+      }
 
       if (toInsert.length > 0) {
         await trx.batchInsert(joinTable.name, toInsert as any[], batchSize);
