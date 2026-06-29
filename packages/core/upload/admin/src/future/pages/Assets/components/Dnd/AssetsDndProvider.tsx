@@ -139,12 +139,7 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
       try {
         await bulkMove({ ...payload, destinationFolderId: targetFolderId }).unwrap();
 
-        announceToLiveRegion(
-          formatMessage({
-            id: getTranslationKey('dnd.announce.move-success'),
-            defaultMessage: 'Elements have been moved successfully.',
-          })
-        );
+        announceToLiveRegion(successMessage);
 
         toggleNotification({
           type: 'success',

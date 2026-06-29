@@ -7,6 +7,19 @@ describe('getBulkMoveErrorMessage', () => {
     );
   });
 
+  it('unwraps RTK Query error shapes', () => {
+    expect(
+      getBulkMoveErrorMessage(
+        { status: 403, data: { error: { message: 'Forbidden' } } },
+        'Fallback'
+      )
+    ).toBe('Forbidden');
+
+    expect(
+      getBulkMoveErrorMessage({ status: 500, data: { message: 'Server error' } }, 'Fallback')
+    ).toBe('Server error');
+  });
+
   it('returns the fallback for unknown error shapes', () => {
     expect(getBulkMoveErrorMessage(undefined, 'Fallback')).toBe('Fallback');
     expect(getBulkMoveErrorMessage({ status: 500 }, 'Fallback')).toBe('Fallback');

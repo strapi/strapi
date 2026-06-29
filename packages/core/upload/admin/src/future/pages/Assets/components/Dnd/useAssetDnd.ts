@@ -28,7 +28,11 @@ export const useFileDraggable = (asset: {
       id: asset.id,
       name: asset.name,
       folderId:
-        asset.folder == null || typeof asset.folder === 'number' ? (asset.folder ?? null) : null,
+        asset.folder == null
+          ? null
+          : typeof asset.folder === 'number'
+            ? asset.folder
+            : Number(asset.folder) || null,
     }),
     [asset.folder, asset.id, asset.name]
   );
