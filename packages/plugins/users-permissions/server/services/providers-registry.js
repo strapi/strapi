@@ -1,52 +1,12 @@
 'use strict';
 
 const { strict: assert } = require('assert');
-const jwt = require('jsonwebtoken');
 const urljoin = require('url-join');
-const jwkToPem = require('jwk-to-pem');
 
-const getCognitoPayload = async ({ idToken, jwksUrl, purest }) => {
-  const {
-    header: { kid },
-    payload,
-  } = jwt.decode(idToken, { complete: true });
+const { verifyJwtWithJwks } = require('../utils/verify-jwt-with-jwks');
+const { bearerGet, fetchJson } = require('../utils/provider-http');
 
-  if (!payload || !kid) {
-    throw new Error('The provided token is not valid');
-  }
-
-  const config = {
-    cognito: {
-      discovery: {
-        origin: jwksUrl.origin,
-        path: jwksUrl.pathname,
-      },
-    },
-  };
-  try {
-    const cognito = purest({ provider: 'cognito', config });
-    // get the JSON Web Key (JWK) for the user pool
-    const { body: jwk } = await cognito('discovery').request();
-    // Get the key with the same Key ID as the provided token
-    const key = jwk.keys.find(({ kid: jwkKid }) => jwkKid === kid);
-    const pem = jwkToPem(key);
-
-    // https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-verifying-a-jwt.html
-    const decodedToken = await new Promise((resolve, reject) => {
-      jwt.verify(idToken, pem, { algorithms: ['RS256'] }, (err, decodedToken) => {
-        if (err) {
-          reject();
-        }
-        resolve(decodedToken);
-      });
-    });
-    return decodedToken;
-  } catch (err) {
-    throw new Error('There was an error verifying the token');
-  }
-};
-
-const initProviders = ({ baseURL, purest }) => ({
+const initProviders = ({ baseURL }) => ({
   email: {
     enabled: true,
     icon: 'envelope',
@@ -62,23 +22,15 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['identify', 'email'],
     },
     async authCallback({ accessToken }) {
-      const discord = purest({ provider: 'discord' });
-
-      return discord
-        .get('users/@me')
-        .auth(accessToken)
-        .request()
-        .then(({ body }) => {
-          // Combine username and discriminator (if discriminator exists and not equal to 0)
-          const username =
-            body.discriminator && body.discriminator !== '0'
-              ? `${body.username}#${body.discriminator}`
-              : body.username;
-          return {
-            username,
-            email: body.email,
-          };
-        });
+      const { body } = await bearerGet('https://discord.com/api/users/@me', accessToken);
+      const username =
+        body.discriminator && body.discriminator !== '0'
+          ? `${body.username}#${body.discriminator}`
+          : body.username;
+      return {
+        username,
+        email: body.email,
+      };
     },
   },
   facebook: {
@@ -91,17 +43,13 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['email'],
     },
     async authCallback({ accessToken }) {
-      const facebook = purest({ provider: 'facebook' });
-
-      return facebook
-        .get('me')
-        .auth(accessToken)
-        .qs({ fields: 'name,email' })
-        .request()
-        .then(({ body }) => ({
-          username: body.name,
-          email: body.email,
-        }));
+      const { body } = await bearerGet('https://graph.facebook.com/me', accessToken, {
+        qs: { fields: 'name,email' },
+      });
+      return {
+        username: body.name,
+        email: body.email,
+      };
     },
   },
   google: {
@@ -114,17 +62,13 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['email'],
     },
     async authCallback({ accessToken }) {
-      const google = purest({ provider: 'google' });
-
-      return google
-        .query('oauth')
-        .get('tokeninfo')
-        .qs({ accessToken })
-        .request()
-        .then(({ body }) => ({
-          username: body.email.split('@')[0],
-          email: body.email,
-        }));
+      const { body } = await fetchJson(
+        `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`
+      );
+      return {
+        username: body.email.split('@')[0],
+        email: body.email,
+      };
     },
   },
   github: {
@@ -137,26 +81,24 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['user', 'user:email'],
     },
     async authCallback({ accessToken }) {
-      const github = purest({
-        provider: 'github',
-        defaults: {
-          headers: {
-            'user-agent': 'strapi',
-          },
-        },
+      const { body: userBody } = await bearerGet('https://api.github.com/user', accessToken, {
+        headers: { 'user-agent': 'strapi' },
       });
 
-      const { body: userBody } = await github.get('user').auth(accessToken).request();
-
-      // This is the public email on the github profile
       if (userBody.email) {
         return {
           username: userBody.login,
           email: userBody.email,
         };
       }
-      // Get the email with Github's user/emails API
-      const { body: emailBody } = await github.get('user/emails').auth(accessToken).request();
+
+      const { body: emailBody } = await bearerGet(
+        'https://api.github.com/user/emails',
+        accessToken,
+        {
+          headers: { 'user-agent': 'strapi' },
+        }
+      );
 
       return {
         username: userBody.login,
@@ -176,16 +118,11 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['user.read'],
     },
     async authCallback({ accessToken }) {
-      const microsoft = purest({ provider: 'microsoft' });
-
-      return microsoft
-        .get('me')
-        .auth(accessToken)
-        .request()
-        .then(({ body }) => ({
-          username: body.userPrincipalName,
-          email: body.userPrincipalName,
-        }));
+      const { body } = await bearerGet('https://graph.microsoft.com/v1.0/me', accessToken);
+      return {
+        username: body.userPrincipalName,
+        email: body.userPrincipalName,
+      };
     },
   },
 
@@ -198,25 +135,20 @@ const initProviders = ({ baseURL, purest }) => ({
       callbackUrl: `${baseURL}/twitter/callback`,
     },
     async authCallback({ accessToken, query, providers }) {
-      const twitter = purest({
-        provider: 'twitter',
-        defaults: {
-          oauth: {
-            consumer_key: providers.twitter.key,
-            consumer_secret: providers.twitter.secret,
-          },
-        },
+      const { twitterGet } = require('../utils/oauth-connect/oauth1');
+      const { body } = await twitterGet({
+        url: 'https://api.twitter.com/1.1/account/verify_credentials.json',
+        accessToken,
+        accessSecret: query.access_secret,
+        consumerKey: providers.twitter.key,
+        consumerSecret: providers.twitter.secret,
+        qs: { include_email: 'true', screen_name: query['raw[screen_name]'] },
       });
 
-      return twitter
-        .get('account/verify_credentials')
-        .auth(accessToken, query.access_secret)
-        .qs({ screen_name: query['raw[screen_name]'], include_email: 'true' })
-        .request()
-        .then(({ body }) => ({
-          username: body.screen_name,
-          email: body.email,
-        }));
+      return {
+        username: body.screen_name,
+        email: body.email,
+      };
     },
   },
   instagram: {
@@ -229,17 +161,13 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['user_profile'],
     },
     async authCallback({ accessToken }) {
-      const instagram = purest({ provider: 'instagram' });
-
-      return instagram
-        .get('me')
-        .auth(accessToken)
-        .qs({ fields: 'id,username' })
-        .request()
-        .then(({ body }) => ({
-          username: body.username,
-          email: `${body.username}@strapi.io`, // dummy email as Instagram does not provide user email
-        }));
+      const { body } = await bearerGet('https://graph.instagram.com/me', accessToken, {
+        qs: { fields: 'id,username' },
+      });
+      return {
+        username: body.username,
+        email: `${body.username}@strapi.io`,
+      };
     },
   },
   vk: {
@@ -252,17 +180,13 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['email'],
     },
     async authCallback({ accessToken, query }) {
-      const vk = purest({ provider: 'vk' });
-
-      return vk
-        .get('users')
-        .auth(accessToken)
-        .qs({ id: query.raw.user_id, v: '5.122' })
-        .request()
-        .then(({ body }) => ({
-          username: `${body.response[0].last_name} ${body.response[0].first_name}`,
-          email: query.raw.email,
-        }));
+      const { body } = await bearerGet('https://api.vk.com/method/users.get', accessToken, {
+        qs: { user_ids: query.raw.user_id, v: '5.122' },
+      });
+      return {
+        username: `${body.response[0].last_name} ${body.response[0].first_name}`,
+        email: query.raw.email,
+      };
     },
   },
 
@@ -276,30 +200,15 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['user:read:email'],
     },
     async authCallback({ accessToken, providers }) {
-      const twitch = purest({
-        provider: 'twitch',
-        config: {
-          twitch: {
-            default: {
-              origin: 'https://api.twitch.tv',
-              path: 'helix/{path}',
-              headers: {
-                Authorization: 'Bearer {auth}',
-                'Client-Id': '{auth}',
-              },
-            },
-          },
+      const { body } = await bearerGet('https://api.twitch.tv/helix/users', accessToken, {
+        headers: {
+          'Client-Id': providers.twitch.key,
         },
       });
-
-      return twitch
-        .get('users')
-        .auth(accessToken, providers.twitch.key)
-        .request()
-        .then(({ body }) => ({
-          username: body.data[0].login,
-          email: body.data[0].email,
-        }));
+      return {
+        username: body.data[0].login,
+        email: body.data[0].email,
+      };
     },
   },
 
@@ -313,21 +222,16 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['r_liteprofile', 'r_emailaddress'],
     },
     async authCallback({ accessToken }) {
-      const linkedIn = purest({ provider: 'linkedin' });
-      const {
-        body: { localizedFirstName },
-      } = await linkedIn.get('me').auth(accessToken).request();
-      const {
-        body: { elements },
-      } = await linkedIn
-        .get('emailAddress?q=members&projection=(elements*(handle~))')
-        .auth(accessToken)
-        .request();
+      const { body: profileBody } = await bearerGet('https://api.linkedin.com/v2/me', accessToken);
+      const { body: emailBody } = await bearerGet(
+        'https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))',
+        accessToken
+      );
 
-      const email = elements[0]['handle~'];
+      const email = emailBody.elements[0]['handle~'];
 
       return {
-        username: localizedFirstName,
+        username: profileBody.localizedFirstName,
         email: email.emailAddress,
       };
     },
@@ -346,7 +250,7 @@ const initProviders = ({ baseURL, purest }) => ({
     async authCallback({ query, providers }) {
       const jwksUrl = new URL(providers.cognito.jwksurl);
       const idToken = query.id_token;
-      const tokenPayload = await getCognitoPayload({ idToken, jwksUrl, purest });
+      const tokenPayload = await verifyJwtWithJwks({ idToken, jwksUrl });
       return {
         username: tokenPayload['cognito:username'],
         email: tokenPayload.email,
@@ -364,31 +268,13 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['identity'],
     },
     async authCallback({ accessToken }) {
-      const reddit = purest({
-        provider: 'reddit',
-        config: {
-          reddit: {
-            default: {
-              origin: 'https://oauth.reddit.com',
-              path: 'api/{version}/{path}',
-              version: 'v1',
-              headers: {
-                Authorization: 'Bearer {auth}',
-                'user-agent': 'strapi',
-              },
-            },
-          },
-        },
+      const { body } = await bearerGet('https://oauth.reddit.com/api/v1/me', accessToken, {
+        headers: { 'user-agent': 'strapi' },
       });
-
-      return reddit
-        .get('me')
-        .auth(accessToken)
-        .request()
-        .then(({ body }) => ({
-          username: body.name,
-          email: `${body.name}@strapi.io`, // dummy email as Reddit does not provide user email
-        }));
+      return {
+        username: body.name,
+        email: `${body.name}@strapi.io`,
+      };
     },
   },
 
@@ -403,22 +289,17 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['openid', 'email', 'profile'],
     },
     async authCallback({ accessToken, providers }) {
-      const auth0 = purest({ provider: 'auth0' });
+      const { body } = await bearerGet(
+        `https://${providers.auth0.subdomain}.auth0.com/userinfo`,
+        accessToken
+      );
+      const username = body.username || body.nickname || body.name || body.email.split('@')[0];
+      const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
 
-      return auth0
-        .get('userinfo')
-        .subdomain(providers.auth0.subdomain)
-        .auth(accessToken)
-        .request()
-        .then(({ body }) => {
-          const username = body.username || body.nickname || body.name || body.email.split('@')[0];
-          const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
-
-          return {
-            username,
-            email,
-          };
-        });
+      return {
+        username,
+        email,
+      };
     },
   },
 
@@ -429,35 +310,29 @@ const initProviders = ({ baseURL, purest }) => ({
       key: '',
       secret: '',
       callback: `${baseURL}/cas/callback`,
-      scope: ['openid email'], // scopes should be space delimited
+      scope: ['openid email'],
       subdomain: 'my.subdomain.com/cas',
     },
     async authCallback({ accessToken, providers }) {
-      const cas = purest({ provider: 'cas' });
-
-      return cas
-        .get('oidc/profile')
-        .subdomain(providers.cas.subdomain)
-        .auth(accessToken)
-        .request()
-        .then(({ body }) => {
-          // CAS attribute may be in body.attributes or "FLAT", depending on CAS config
-          const username = body.attributes
-            ? body.attributes.strapiusername || body.id || body.sub
-            : body.strapiusername || body.id || body.sub;
-          const email = body.attributes
-            ? body.attributes.strapiemail || body.attributes.email
-            : body.strapiemail || body.email;
-          if (!username || !email) {
-            strapi.log.warn(
-              `CAS Response Body did not contain required attributes: ${JSON.stringify(body)}`
-            );
-          }
-          return {
-            username,
-            email,
-          };
-        });
+      const { body } = await bearerGet(
+        `https://${providers.cas.subdomain}/oidc/profile`,
+        accessToken
+      );
+      const username = body.attributes
+        ? body.attributes.strapiusername || body.id || body.sub
+        : body.strapiusername || body.id || body.sub;
+      const email = body.attributes
+        ? body.attributes.strapiemail || body.attributes.email
+        : body.strapiemail || body.email;
+      if (!username || !email) {
+        strapi.log.warn(
+          `CAS Response Body did not contain required attributes: ${JSON.stringify(body)}`
+        );
+      }
+      return {
+        username,
+        email,
+      };
     },
   },
 
@@ -471,33 +346,15 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['identity', 'identity[email]'],
     },
     async authCallback({ accessToken }) {
-      const patreon = purest({
-        provider: 'patreon',
-        config: {
-          patreon: {
-            default: {
-              origin: 'https://www.patreon.com',
-              path: 'api/oauth2/{path}',
-              headers: {
-                authorization: 'Bearer {auth}',
-              },
-            },
-          },
-        },
-      });
-
-      return patreon
-        .get('v2/identity')
-        .auth(accessToken)
-        .qs(new URLSearchParams({ 'fields[user]': 'full_name,email' }).toString())
-        .request()
-        .then(({ body }) => {
-          const patreonData = body.data.attributes;
-          return {
-            username: patreonData.full_name,
-            email: patreonData.email,
-          };
-        });
+      const { body } = await bearerGet(
+        'https://www.patreon.com/api/oauth2/v2/identity?fields[user]=full_name,email',
+        accessToken
+      );
+      const patreonData = body.data.attributes;
+      return {
+        username: patreonData.full_name,
+        email: patreonData.email,
+      };
     },
   },
   keycloak: {
@@ -511,34 +368,24 @@ const initProviders = ({ baseURL, purest }) => ({
       scope: ['openid', 'email', 'profile'],
     },
     async authCallback({ accessToken, providers }) {
-      const keycloak = purest({ provider: 'keycloak' });
-
-      return keycloak
-        .subdomain(providers.keycloak.subdomain)
-        .get('protocol/openid-connect/userinfo')
-        .auth(accessToken)
-        .request()
-        .then(({ body }) => {
-          return {
-            username: body.preferred_username,
-            email: body.email,
-          };
-        });
+      const { body } = await bearerGet(
+        `https://${providers.keycloak.subdomain}/protocol/openid-connect/userinfo`,
+        accessToken
+      );
+      return {
+        username: body.preferred_username,
+        email: body.email,
+      };
     },
   },
 });
 
 module.exports = () => {
-  const purest = require('purest');
-
   const apiPrefix = strapi.config.get('api.rest.prefix');
   const baseURL = urljoin(strapi.config.server.url, apiPrefix, 'auth');
 
-  const authProviders = initProviders({ baseURL, purest });
+  const authProviders = initProviders({ baseURL });
 
-  /**
-   * @public
-   */
   return {
     getAll() {
       return authProviders;
@@ -553,15 +400,12 @@ module.exports = () => {
       delete authProviders[name];
     },
 
-    /**
-     * @internal
-     */
     async run({ provider, accessToken, query, providers }) {
       const authProvider = authProviders[provider];
 
       assert(authProvider, 'Unknown auth provider');
 
-      return authProvider.authCallback({ accessToken, query, providers, purest });
+      return authProvider.authCallback({ accessToken, query, providers });
     },
   };
 };
