@@ -310,6 +310,13 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
       childC.documentId,
       childD.documentId,
     ];
+    const expectChildrenToPointToParent = async () => {
+      for (const child of [childA, childB, childC, childD]) {
+        expect(await getRelationTargets(child.documentId, 'parent', 'published')).toEqual([
+          parent.documentId,
+        ]);
+      }
+    };
 
     for (const child of [childA, childB, childC, childD]) {
       await updateCategory(child.documentId, {
@@ -336,6 +343,7 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
       expectedOrder
     );
+    await expectChildrenToPointToParent();
 
     for (const child of [childA, childB, childC, childD]) {
       await updateCategory(child.documentId, {
@@ -350,7 +358,24 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
         republishedChild: child.name,
         publishedOrder: expectedOrder,
       });
+      await expectChildrenToPointToParent();
     }
+
+    await updateCategory(parent.documentId, { name: 'Page 1 - edited' });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+    await expectChildrenToPointToParent();
+
+    await updateCategory(childC.documentId, { name: 'Page 1.3 - draft edit' });
+    await discardCategory(childC.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+    await expectChildrenToPointToParent();
   });
 
   // A single entry whose unidirectional relation points at itself must keep that relation in
