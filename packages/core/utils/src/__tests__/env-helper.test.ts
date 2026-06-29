@@ -144,6 +144,12 @@ describe('Env helper', () => {
   });
 
   describe('env with required cast', () => {
+    afterEach(() => {
+      delete process.env.REQUIRED_VAR;
+      delete process.env.EMPTY_REQUIRED_VAR;
+      delete process.env.WHITESPACE_REQUIRED_VAR;
+    });
+
     test('Returns env var when defined', () => {
       process.env.REQUIRED_VAR = 'secret';
       expect(envHelper.required('REQUIRED_VAR')).toEqual('secret');
@@ -171,6 +177,13 @@ describe('Env helper', () => {
   });
 
   describe('env with required array cast', () => {
+    afterEach(() => {
+      delete process.env.REQUIRED_ARRAY_VAR;
+      delete process.env.EMPTY_REQUIRED_ARRAY_VAR;
+      delete process.env.MANY_EMPTY_REQUIRED_ARRAY_VAR;
+      delete process.env.WHITESPACE_REQUIRED_ARRAY_VAR;
+    });
+
     test('Returns env var as array when defined', () => {
       process.env.REQUIRED_ARRAY_VAR = 'first,second';
       expect(envHelper.array.required('REQUIRED_ARRAY_VAR')).toEqual(['first', 'second']);
