@@ -56,6 +56,7 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ admin::api-token                                     │
 │ admin::admin-token                                   │
 │ admin::authenticated-user                            │
+│ admin::authenticated-session                         │
 │ admin::authentication                                │
 │ admin::permission                                    │
 │ admin::role                                          │

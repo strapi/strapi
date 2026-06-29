@@ -43,11 +43,13 @@ const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
       // see https://github.com/date-fns/date-fns/issues/2891 – No idea why it's all partial it returns it every time.
     }) as Required<Duration>;
 
-    const unit = intervals.find((intervalUnit) => {
-      return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
-    })!;
+    const unit =
+      intervals.find((intervalUnit) => {
+        return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
+      }) ?? 'seconds';
 
-    const relativeTime = isPast(timestamp) ? -interval[unit] : interval[unit];
+    const value = interval[unit] ?? 0;
+    const relativeTime = isPast(timestamp) ? -value : value;
 
     // Display custom text if interval is less than the threshold
     const customInterval = customIntervals.find(
