@@ -22,8 +22,15 @@ import {
   createDynamicActionPermissionChecker,
 } from '../utils/createPermissionChecker';
 import { difference } from '../utils/difference';
-import { ConditionForm, Form, createDefaultCTForm, createDefaultForm } from '../utils/forms';
+import {
+  ConditionForm,
+  Form,
+  PropertyChildForm,
+  createDefaultCTForm,
+  createDefaultForm,
+} from '../utils/forms';
 import { GenericLayout, formatLayout } from '../utils/layouts';
+import { hasLocaleValidationErrors } from '../utils/localePermissionValidation';
 import { formatPermissionsForAPI } from '../utils/permissions';
 import { updateConditionsToFalse } from '../utils/updateConditionsToFalse';
 import { updateValues, updateValuesWithPermissions } from '../utils/updateValues';
@@ -63,25 +70,34 @@ export interface PermissionsAPI {
     didUpdateConditions: boolean;
     permissionsToSend: Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>[];
   };
+  hasLocaleValidationErrors: () => boolean;
   resetForm: () => void;
   setFormAfterSubmit: () => void;
 }
 
 interface PermissionsProps {
   isFormDisabled?: boolean;
+  onLocaleValidationChange?: (hasErrors: boolean) => void;
   permissions?: Permission[];
   layout: PermissonContracts.GetAll.Response['data'];
   userPermissions?: AuthPermission[];
 }
 
 const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
-  ({ layout, isFormDisabled, permissions = [], userPermissions }, api) => {
+  (
+    { layout, isFormDisabled, onLocaleValidationChange, permissions = [], userPermissions },
+    api
+  ) => {
     const [{ initialData, layouts, modifiedData }, dispatch] = React.useReducer(
       reducer,
       initialState,
       () => init(layout, permissions)
     );
     const { formatMessage } = useIntl();
+
+    React.useEffect(() => {
+      onLocaleValidationChange?.(hasLocaleValidationErrors(modifiedData));
+    }, [modifiedData, onLocaleValidationChange]);
 
     React.useImperativeHandle(api, () => {
       return {
@@ -106,7 +122,14 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
             });
           }
 
-          return { permissionsToSend: formatPermissionsForAPI(modifiedData), didUpdateConditions };
+          const permissionsToSend = formatPermissionsForAPI(modifiedData).map((perm) =>
+            restoreNullLocalesIfUnchanged(perm, permissions, initialData, modifiedData)
+          );
+
+          return { permissionsToSend, didUpdateConditions };
+        },
+        hasLocaleValidationErrors() {
+          return hasLocaleValidationErrors(modifiedData);
         },
         resetForm() {
           dispatch({ type: 'RESET_FORM' });
@@ -686,6 +709,65 @@ const reducer = (state: State, action: Action) =>
         return draftState;
     }
   });
+
+/* -------------------------------------------------------------------------------------------------
+ * restoreNullLocalesIfUnchanged
+ * Extracted at module level to avoid nesting arrow functions more than 4 levels deep inside
+ * the useImperativeHandle → getPermissions → map chain.
+ * -----------------------------------------------------------------------------------------------*/
+
+type SentPermission = Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>;
+
+const restoreNullLocalesIfUnchanged = (
+  perm: SentPermission,
+  originalPermissions: Permission[],
+  initialData: PermissionForms,
+  modifiedData: PermissionForms
+): SentPermission => {
+  if (!perm.subject) return perm;
+
+  const original = originalPermissions.find(
+    (p) => p.action === perm.action && p.subject === perm.subject
+  );
+
+  // null means "all locales" in legacy DBs — preserve it if the user hasn't changed anything
+  if (original?.properties?.locales !== null) return perm;
+
+  const kind =
+    perm.subject in modifiedData.collectionTypes
+      ? ('collectionTypes' as const)
+      : perm.subject in modifiedData.singleTypes
+        ? ('singleTypes' as const)
+        : null;
+  if (!kind) return perm;
+
+  const initialActionForm = initialData[kind]?.[perm.subject]?.[perm.action];
+  const modifiedActionForm = modifiedData[kind]?.[perm.subject]?.[perm.action];
+
+  if (!initialActionForm || !modifiedActionForm) return perm;
+
+  const initialLocaleEntry = (initialActionForm.properties as PropertyChildForm)['locales'];
+  const modifiedLocaleEntry = (modifiedActionForm.properties as PropertyChildForm)['locales'];
+
+  if (
+    !initialLocaleEntry ||
+    typeof initialLocaleEntry === 'boolean' ||
+    !modifiedLocaleEntry ||
+    typeof modifiedLocaleEntry === 'boolean'
+  ) {
+    return perm;
+  }
+
+  const localesUnchanged =
+    Object.keys(initialLocaleEntry).length === Object.keys(modifiedLocaleEntry).length &&
+    Object.entries(initialLocaleEntry).every(
+      ([locale, val]) => modifiedLocaleEntry[locale] === val
+    );
+
+  if (!localesUnchanged) return perm;
+
+  return { ...perm, properties: { ...perm.properties, locales: null } };
+};
 
 /* -------------------------------------------------------------------------------------------------
  * init (reducer)
