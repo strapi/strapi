@@ -102,18 +102,14 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
 };
 
 /**
- * Clicks a control and waits for SPA navigation to settle.
+ * Clicks a control and waits for the DOM to settle.
  *
  * Avoid `networkidle` — the admin app polls continuously (widgets, guided tour, HMR),
- * so idle is rarely reached under Vite 8 dev. Wait for route change when it happens,
- * then for DOM content (still helps webkit vs firing the next action too early).
+ * so idle is rarely reached under Vite 8 dev. Do not wait for URL changes here: most
+ * clicks (Save, Publish, form controls) stay on the same route and would stall 30s.
  */
 export const clickAndWait = async (page: Page, locator: Locator) => {
-  const urlBefore = page.url();
   await locator.click();
-  await page
-    .waitForURL((url) => url.toString() !== urlBefore, { timeout: 30_000 })
-    .catch(() => undefined);
   await page.waitForLoadState('domcontentloaded');
 };
 
