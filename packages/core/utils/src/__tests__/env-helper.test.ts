@@ -143,6 +143,46 @@ describe('Env helper', () => {
     });
   });
 
+  describe('env with required cast', () => {
+    test('Returns env var when defined', () => {
+      process.env.REQUIRED_VAR = 'secret';
+      expect(envHelper.required('REQUIRED_VAR')).toEqual('secret');
+    });
+
+    test('Throws if env var is not defined', () => {
+      expect(() => envHelper.required('MISSING_REQUIRED_VAR')).toThrow(
+        'Missing required environment variable MISSING_REQUIRED_VAR'
+      );
+    });
+
+    test('Throws if env var is empty', () => {
+      process.env.EMPTY_REQUIRED_VAR = '';
+      expect(() => envHelper.required('EMPTY_REQUIRED_VAR')).toThrow(
+        'Missing required environment variable EMPTY_REQUIRED_VAR'
+      );
+    });
+  });
+
+  describe('env with required array cast', () => {
+    test('Returns env var as array when defined', () => {
+      process.env.REQUIRED_ARRAY_VAR = 'first,second';
+      expect(envHelper.array.required('REQUIRED_ARRAY_VAR')).toEqual(['first', 'second']);
+    });
+
+    test('Throws if env var is not defined', () => {
+      expect(() => envHelper.array.required('MISSING_REQUIRED_ARRAY_VAR')).toThrow(
+        'Missing required environment variable MISSING_REQUIRED_ARRAY_VAR'
+      );
+    });
+
+    test('Throws if env var is empty', () => {
+      process.env.EMPTY_REQUIRED_ARRAY_VAR = '';
+      expect(() => envHelper.array.required('EMPTY_REQUIRED_ARRAY_VAR')).toThrow(
+        'Missing required environment variable EMPTY_REQUIRED_ARRAY_VAR'
+      );
+    });
+  });
+
   describe('env with union cast', () => {
     test('Throws if expectedValues is not provided', () => {
       // @ts-expect-error missing 2nd parameter (that's the point of the test)
