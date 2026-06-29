@@ -87,7 +87,12 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
     }
 
     await expect(item).toBeVisible();
-    await clickAndWait(page, item);
+    const urlBefore = page.url();
+    await item.click();
+    // Client-side navigation does not fire load events; wait for route change when it happens.
+    await page
+      .waitForURL((url) => url.toString() !== urlBefore, { timeout: 30_000 })
+      .catch(() => undefined);
   }
 
   // Verify header is correct (Vite 8 admin chunks can load slower on first SPA navigation)
