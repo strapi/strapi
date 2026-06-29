@@ -79,6 +79,28 @@ function array(key: string, defaultValue?: string[]): string[] | undefined {
   });
 }
 
+function required(key: string): string {
+  const value = envFn(key);
+
+  if (value === undefined || value === '') {
+    throw new Error(`Missing required environment variable ${key}`);
+  }
+
+  return value;
+}
+
+function requiredArray(key: string): string[] {
+  const value = array(key);
+
+  if (!value?.length || value.every((v) => v === '')) {
+    throw new Error(`Missing required environment variable ${key}`);
+  }
+
+  return value;
+}
+
+const arrayWithRequired = Object.assign(array, { required: requiredArray });
+
 function date(key: string, defaultValue: Date): Date;
 function date(key: string, defaultValue?: Date | undefined): Date | undefined;
 function date(key: string, defaultValue?: Date): Date | undefined {
@@ -128,9 +150,10 @@ const utils = {
   float,
   bool,
   json,
-  array,
+  array: arrayWithRequired,
   date,
   oneOf,
+  required,
 };
 
 const env: Env = Object.assign(envFn, utils);
