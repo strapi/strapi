@@ -4317,6 +4317,58 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
+    "/auth/sessions": {
+      "get": {
+        "operationId": "users-permissions/get/auth_sessions",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "users-permissions",
+        ],
+      },
+    },
+    "/auth/sessions/{sessionId}": {
+      "delete": {
+        "operationId": "users-permissions/delete/auth_sessions_by_sessionId",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "users-permissions",
+        ],
+      },
+    },
     "/auth/{provider}/callback": {
       "get": {
         "operationId": "users-permissions/get/auth_by_provider_callback",
@@ -26321,7 +26373,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "type": "string",
                   },
                   "role": {
-                    "type": "number",
+                    "anyOf": [
+                      {
+                        "type": "number",
+                      },
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "connect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "disconnect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    ],
                   },
                   "username": {
                     "type": "string",
@@ -27646,7 +27755,64 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "type": "string",
                   },
                   "role": {
-                    "type": "number",
+                    "anyOf": [
+                      {
+                        "type": "number",
+                      },
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "connect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "disconnect": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "documentId": {
+                                  "type": "string",
+                                },
+                                "id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                    },
+                                    {
+                                      "type": "string",
+                                    },
+                                  ],
+                                },
+                              },
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    ],
                   },
                   "username": {
                     "type": "string",

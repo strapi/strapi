@@ -183,7 +183,7 @@ jobs:
           name: unit-coverage-reports
           path: |
             coverage/
-            packages/*/coverage/
+            packages/**/coverage/
           retention-days: 1
 
   unit_back_vitest:

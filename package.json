@@ -99,13 +99,13 @@
   },
   "resolutions": {
     "webpack": "5.106.2",
-    "@types/koa": "2.13.4",
-    "@babel/core": "7.29.0",
+    "@types/koa": "2.15.2",
+    "@babel/core": "7.29.6",
     "@babel/runtime": "7.29.2",
     "@babel/runtime-corejs3": "7.29.2"
   },
   "devDependencies": {
-    "@babel/core": "7.29.0",
+    "@babel/core": "7.29.6",
     "@babel/eslint-parser": "7.28.6",
     "@babel/preset-react": "7.28.5",
     "@commitlint/cli": "19.2.0",
@@ -168,7 +168,7 @@
     "jest-cli": "29.6.0",
     "jest-environment-jsdom": "29.6.1",
     "jest-watch-typeahead": "2.2.2",
-    "lint-staged": "15.2.10",
+    "lint-staged": "16.4.0",
     "lodash": "4.18.1",
     "minimatch": "10.2.5",
     "npm-run-all": "4.1.5",

@@ -6,3 +6,5 @@ export type { OpenAPI } from './openapi';
 export type { Plugin } from './plugin';
 export type { Database } from './database';
 export type { Middlewares } from './middlewares';
+export type { Features } from './features';
+export type { TypeScript } from './typescript';

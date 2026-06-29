@@ -22,6 +22,8 @@ const DEFAULT_PERMISSIONS = [
   { action: 'plugin::users-permissions.auth.sendEmailConfirmation', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.refresh', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.logout', roleType: 'authenticated' },
+  { action: 'plugin::users-permissions.auth.getSessions', roleType: 'authenticated' },
+  { action: 'plugin::users-permissions.auth.revokeSession', roleType: 'authenticated' },
   { action: 'plugin::users-permissions.user.me', roleType: 'authenticated' },
   { action: 'plugin::users-permissions.auth.changePassword', roleType: 'authenticated' },
 ];
