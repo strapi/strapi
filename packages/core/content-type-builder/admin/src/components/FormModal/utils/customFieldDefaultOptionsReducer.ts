@@ -14,7 +14,10 @@ export const customFieldDefaultOptionsReducer = (
   option: CustomFieldOption
 ): CustomFieldDefaultOption[] => {
   if (option.items !== undefined) {
-    return option.items.reduce(customFieldDefaultOptionsReducer, acc);
+    return option.items.reduce(
+      (currentAcc, item) => customFieldDefaultOptionsReducer(currentAcc, item),
+      acc
+    );
   }
 
   if ('defaultValue' in option && option.name !== undefined) {

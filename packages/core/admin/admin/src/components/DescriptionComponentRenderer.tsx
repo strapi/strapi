@@ -15,6 +15,7 @@ import { cancelIdleCallback, requestIdleCallback } from '../utils/shims';
 
 interface DescriptionComponent<Props, Description> {
   (props: Props): Description | null;
+  displayName?: string;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -160,13 +161,6 @@ const MemoizedDescription = React.memo(Description, (prev, next) =>
  * Helpers
  * -----------------------------------------------------------------------------------------------*/
 
-type DescriptionComponentWithDisplayName<Props, Description> = DescriptionComponent<
-  Props,
-  Description
-> & {
-  displayName?: string;
-};
-
 type CachedDescriptionComponent = DescriptionComponent<unknown, unknown>;
 
 const ids = new WeakMap<CachedDescriptionComponent, string>();
@@ -179,8 +173,7 @@ function getCompId<T, K>(comp: DescriptionComponent<T, K>): string {
 
   if (cachedId) return cachedId;
 
-  const { displayName } = comp as DescriptionComponentWithDisplayName<T, K>;
-  const id = `${comp.name || displayName || '<anonymous>'}-${counter++}`;
+  const id = `${comp.name || comp.displayName || '<anonymous>'}-${counter++}`;
 
   ids.set(cachedComponent, id);
 
