@@ -397,7 +397,6 @@
   "app.components.FreeTrialEndedModal.notice.item4": "If you downgrade ensure to set a root admin password to keep access to the admin panel.",
   "app.components.FreeTrialEndedModal.notice.title": "Important to know:",
   "app.components.FreeTrialEndedModal.title": "Your trial has ended",
-  "app.components.FreeTrialWelcomeModal.badge": "30-DAY FREE TRIAL",
   "app.components.FreeTrialWelcomeModal.button": "Start exploring",
   "app.components.FreeTrialWelcomeModal.description1": "For the next 30 days, you will have full access to advanced features like Content History, Releases and Single Sign-On (SSO) – everything you need to explore the power of Strapi CMS.",
   "app.components.FreeTrialWelcomeModal.description2": "Use this time to build, customize, and test your content workflows with complete flexibility!",
