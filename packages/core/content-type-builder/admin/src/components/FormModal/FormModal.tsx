@@ -84,6 +84,14 @@ type PendingSubmit = {
 
 const toStringValue = (value: unknown): string => (typeof value === 'string' ? value : '');
 
+const toOptionalStringValue = (value: unknown): string | undefined => {
+  if (typeof value !== 'string' || value === '') {
+    return undefined;
+  }
+
+  return value;
+};
+
 const toBooleanValue = (value: unknown): boolean => (typeof value === 'boolean' ? value : false);
 
 const toContentTypeKind = (value: unknown): Struct.ContentTypeKind =>
@@ -95,7 +103,7 @@ const toRecordValue = (value: unknown): Record<string, unknown> =>
 const toComponentDraft = (value?: ComponentToCreateData) => ({
   category: toStringValue(value?.category),
   displayName: toStringValue(value?.displayName),
-  icon: toStringValue(value?.icon),
+  icon: toOptionalStringValue(value?.icon),
 });
 
 export const FormModal = () => {
@@ -623,7 +631,7 @@ export const FormModal = () => {
           createComponentSchema({
             data: {
               displayName: componentDisplayName,
-              icon: toStringValue(modifiedData.icon),
+              icon: toOptionalStringValue(modifiedData.icon),
             },
             uid: componentUid,
             componentCategory,
@@ -640,7 +648,7 @@ export const FormModal = () => {
         } else {
           updateComponentSchema({
             data: {
-              icon: toStringValue(modifiedData.icon),
+              icon: toOptionalStringValue(modifiedData.icon),
               displayName: toStringValue(modifiedData.displayName),
             },
             componentUID: targetUid as Internal.UID.Component,
