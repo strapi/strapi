@@ -12,7 +12,7 @@ export interface Permission extends Entity {
   subject?: string | null;
   properties: {
     fields?: string[];
-    locales?: string[];
+    locales?: string[] | null;
     [key: string]: any;
   };
   conditions: string[];

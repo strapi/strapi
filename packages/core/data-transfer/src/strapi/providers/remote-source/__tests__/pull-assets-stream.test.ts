@@ -5,7 +5,7 @@ import { Writable } from 'stream';
 import type { Core } from '@strapi/types';
 import type { WebSocket } from 'ws';
 
-import type { IAsset } from '../../../../../types';
+import type { IAsset } from '../../../../types';
 
 import { createRemoteStrapiSourceProvider } from '..';
 import { ProviderTransferError } from '../../../../errors/providers';

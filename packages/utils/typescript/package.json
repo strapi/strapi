@@ -1,6 +1,6 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "5.46.1",
+  "version": "5.49.0",
   "description": "Typescript support for Strapi",
   "keywords": [
     "strapi",
@@ -44,13 +44,13 @@
     "fs-extra": "11.3.4",
     "lodash": "4.18.1",
     "prettier": "3.3.3",
-    "typescript": "5.4.5"
+    "typescript": "5.9.3"
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

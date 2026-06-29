@@ -265,6 +265,53 @@ export class AssetsPage {
   }
 
   /**
+   * Click the trash icon in the drawer footer and confirm the dialog.
+   * Returns once the confirm dialog has been dismissed.
+   */
+  async deleteAssetFromDrawer() {
+    await this.assetDetailsDrawer.getByRole('button', { name: /Delete this/i }).click();
+
+    // Confirm dialog renders in a Radix portal at body root — query off `page`,
+    // not the drawer locator.
+    const confirmDialog = this.page
+      .getByRole('alertdialog')
+      .filter({ hasText: /Delete this media file\?/i });
+    await expect(confirmDialog).toBeVisible();
+    await confirmDialog.getByRole('button', { name: 'Confirm' }).click();
+  }
+
+  /**
+   * Click the replace icon in the drawer footer, confirm the dialog, and set
+   * the file picked by the native file chooser. Returns once the upload
+   * request has been initiated (the chooser was satisfied).
+   *
+   * Use `getDrawerToast(...)` to assert the in-drawer success toast.
+   */
+  async replaceAssetFromDrawer(filePath: string) {
+    await this.assetDetailsDrawer.getByRole('button', { name: /Replace this/i }).click();
+
+    const confirmDialog = this.page
+      .getByRole('alertdialog')
+      .filter({ hasText: /Replace this media file\?/i });
+    await expect(confirmDialog).toBeVisible();
+
+    // Continue triggers `fileInputRef.current?.click()` which opens the native
+    // chooser. Wait for the chooser event BEFORE clicking so we don't miss it.
+    const fileChooserPromise = this.page.waitForEvent('filechooser');
+    await confirmDialog.getByRole('button', { name: 'Continue' }).click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles(filePath);
+  }
+
+  /**
+   * Get the in-drawer alert toast (above the preview). Matches the substring
+   * shown in the success/error message.
+   */
+  getDrawerToast(message: string | RegExp) {
+    return this.assetDetailsDrawer.getByText(message);
+  }
+
+  /**
    * Open the New menu and click "New folder"
    */
   async openCreateFolderDialog() {

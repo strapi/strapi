@@ -172,4 +172,4 @@ The Review Workflow feature is currently included as a core feature within the S
 - https://docs.strapi.io/user-docs/settings/review-workflows
 - https://docs.strapi.io/user-docs/content-type-builder/creating-new-content-type#creating-a-new-content-type
 - https://docs.strapi.io/user-docs/users-roles-permissions/configuring-administrator-roles#plugins-and-settings
-- [Content Manager Review Workflows](../../content-manager/features/review-workflows)
+- [Content Manager Review Workflows](../../content-manager/features/review-workflows.mdx)

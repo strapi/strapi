@@ -5,7 +5,7 @@ import cluster from 'node:cluster';
 import type chokidarType from 'chokidar';
 import type { createStrapi as CreateStrapi } from '@strapi/core';
 import type { CLIContext } from '../cli/types';
-import { checkRequiredDependencies } from './core/dependencies';
+import { handleAdminDependencies } from './core/ensure-admin-dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
@@ -40,6 +40,12 @@ interface DevelopOptions extends CLIContext {
   open?: boolean;
   watchAdmin?: boolean;
   buildAdmin?: boolean;
+  /**
+   * Auto-install missing admin dependencies
+   *
+   * @default true
+   */
+  installDeps?: boolean;
 }
 
 // This method removes all non-admin build files from the dist directory
@@ -91,17 +97,19 @@ const develop = async ({
   tsconfig,
   watchAdmin,
   buildAdmin,
+  installDeps = true,
   ...options
 }: DevelopOptions) => {
   const timer = getTimer();
 
   if (cluster.isPrimary) {
-    const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
-      logger.error(err.message);
-      process.exit(1);
+    const shouldContinue = await handleAdminDependencies({
+      cwd,
+      logger,
+      installIfMissing: installDeps,
     });
 
-    if (didInstall) {
+    if (!shouldContinue) {
       return;
     }
 
