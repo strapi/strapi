@@ -442,6 +442,7 @@ const Component = ({
   const displayValue = useForm<string | undefined>('RepeatableComponent', (state) => {
     return getIn<string>(state.values, [...name.split('.'), mainField.name]);
   });
+  const displayedValue = typeof displayValue === 'string' ? displayValue : '';
 
   const accordionRef = React.useRef<HTMLButtonElement>(null!);
 
@@ -460,7 +461,7 @@ const Component = ({
       item: {
         index,
         id: __temp_key__,
-        displayedValue: displayValue,
+        displayedValue,
       },
       onStart() {
         // Close all collapses
