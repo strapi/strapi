@@ -23,6 +23,11 @@ const DEFAULT_FILTERS = [
     label: 'Created At',
     type: 'date',
   },
+  {
+    name: 'updatedAt',
+    label: 'Updated At',
+    type: 'datetime',
+  },
 ] satisfies Filters.Filter[];
 
 describe('Filters', () => {
@@ -118,6 +123,26 @@ describe('Filters', () => {
     expect(await screen.findByRole('option', { name: 'Draft' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'Modified' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'Published' })).toBeInTheDocument();
+  });
+
+  it('should not show exact equality operators for datetime filters', async () => {
+    const { user } = render();
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('option', { name: 'Updated At' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select filter' }));
+
+    expect(screen.queryByRole('option', { name: 'is' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'is not' })).not.toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is null' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is greater than' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('option', { name: 'is null' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    await screen.findByText('Updated At $null');
+    expect(screen.queryByText(/Updated At \$eq/)).not.toBeInTheDocument();
   });
 
   it('should replace existing filter when editing instead of adding a duplicate', async () => {
