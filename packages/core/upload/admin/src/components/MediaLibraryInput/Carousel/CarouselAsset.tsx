@@ -1,7 +1,7 @@
 import { Box, Flex } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../enums';
+import { ASSET_TYPES } from '../../../enums';
 import { createAssetUrl } from '../../../utils';
 import { getFileIconComponent } from '../../../utils/icons';
 import { AudioPreview } from '../../AssetCard/AudioPreview';
@@ -29,7 +29,7 @@ const AudioPreviewWrapper = styled(Box)`
 `;
 
 export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
-  if (asset.mime?.includes(AssetType.Video)) {
+  if (asset.mime?.includes(ASSET_TYPES.Video)) {
     return (
       <VideoPreviewWrapper height="100%">
         <VideoPreview
@@ -41,7 +41,7 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
     );
   }
 
-  if (asset.mime?.includes(AssetType.Audio)) {
+  if (asset.mime?.includes(ASSET_TYPES.Audio)) {
     return (
       <AudioPreviewWrapper>
         <AudioPreview
@@ -52,7 +52,7 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
     );
   }
 
-  if (asset.mime?.includes(AssetType.Image)) {
+  if (asset.mime?.includes(ASSET_TYPES.Image)) {
     const assetUrl = createAssetUrl(asset, true);
     if (!assetUrl) return null;
 

@@ -10,6 +10,7 @@ export interface Action {
 
 export interface SubjectProperty {
   children?: SubjectProperty[];
+  isDefault?: boolean;
   label: string;
   required?: boolean;
   value: string;
