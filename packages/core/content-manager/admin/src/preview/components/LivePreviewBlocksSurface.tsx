@@ -46,6 +46,15 @@ const LivePreviewBlocksEditor = ({
     (s) => s.setBlocksEditSession
   );
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const previewOriginRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    try {
+      previewOriginRef.current = iframeRef.current ? new URL(iframeRef.current.src).origin : null;
+    } catch {
+      previewOriginRef.current = null;
+    }
+  }, [iframeRef]);
 
   const field = useField(blocksEditSession.fieldPath);
 
@@ -54,6 +63,8 @@ const LivePreviewBlocksEditor = ({
   React.useEffect(() => {
     latestValueRef.current = field.value;
   }, [field.value]);
+
+  const sendMessage = React.useMemo(() => getSendMessage(iframeRef), [iframeRef]);
 
   const endSession = React.useCallback(() => {
     setBlocksEditSession(null);
@@ -93,16 +104,24 @@ const LivePreviewBlocksEditor = ({
   // Track the field's position as the iframe scrolls
   const [position, setPosition] = React.useState(blocksEditSession.position);
 
+  // Cache the iframe's bounding rect so getBoundingClientRect is not called on every render.
+  // The rect only changes when the admin layout shifts (window resize), not on keystrokes.
+  const [iframeRect, setIframeRect] = React.useState<DOMRect | undefined>(
+    () => iframeRef.current?.getBoundingClientRect()
+  );
+
+  React.useEffect(() => {
+    const updateRect = () => setIframeRect(iframeRef.current?.getBoundingClientRect());
+    updateRect();
+    window.addEventListener('resize', updateRect);
+    return () => window.removeEventListener('resize', updateRect);
+  }, [iframeRef]);
+
   // Close when the user clicks anywhere in the iframe (notified via postMessage from previewScript)
   // Also update position when the iframe scrolls
   React.useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      if (iframeRef.current) {
-        try {
-          const previewOrigin = new URL(iframeRef.current.src).origin;
-          if (e.origin !== previewOrigin) return;
-        } catch {}
-      }
+      if (previewOriginRef.current && e.origin !== previewOriginRef.current) return;
       if (e.data?.type === INTERNAL_EVENTS.STRAPI_CLICK_OUTSIDE_BLOCKS) {
         endSession();
       }
@@ -114,17 +133,19 @@ const LivePreviewBlocksEditor = ({
     return () => window.removeEventListener('message', handleMessage);
   }, [endSession, iframeRef]);
 
-  // Send the updated content to the iframe on every edit so the iframe's hidden blocks
-  // container reflows to the correct height as the user adds text or changes block types.
-  // visibility:hidden preserves layout participation — when the hidden BlocksRenderer
-  // re-renders with new content, the container naturally grows, and content below reflows.
+  // Send the updated content to the iframe so its hidden BlocksRenderer reflows to the
+  // correct height as the user edits. Batched to one message per animation frame so rapid
+  // keystrokes don't trigger a separate iframe re-render each — latestValueRef ensures the
+  // callback always sends the most recent value even if several renders were batched.
   React.useEffect(() => {
-    const sendMessage = getSendMessage(iframeRef);
-    sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
-      field: blocksEditSession.fieldPath,
-      value: field.value,
+    const rafId = requestAnimationFrame(() => {
+      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
+        field: blocksEditSession.fieldPath,
+        value: latestValueRef.current,
+      });
     });
-  }, [field.value, blocksEditSession.fieldPath, iframeRef]);
+    return () => cancelAnimationFrame(rafId);
+  }, [field.value, blocksEditSession.fieldPath, sendMessage]);
 
   // Send edit start/end messages to the iframe
   React.useEffect(() => {
@@ -144,9 +165,6 @@ const LivePreviewBlocksEditor = ({
       });
     };
   }, [blocksEditSession.fieldPath, iframeRef]);
-
-  // Compute position (translate iframe-local rect to admin viewport coords)
-  const iframeRect = iframeRef.current?.getBoundingClientRect();
 
   const rawTop = iframeRect ? iframeRect.top + position.top : 0;
   const rawBottom = rawTop + position.height;
@@ -196,7 +214,6 @@ const LivePreviewBlocksEditor = ({
           ) {
             return;
           }
-          const sendMessage = getSendMessage(iframeRef);
           sendMessage(INTERNAL_EVENTS.STRAPI_SCROLL, { deltaX: e.deltaX, deltaY: e.deltaY });
         }}
       >
