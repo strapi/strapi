@@ -210,7 +210,9 @@ const createAPISanitizers = (opts: APIOptions) => {
     }
 
     if (populate) {
-      Object.assign(sanitizedQuery, { populate: await sanitizePopulate(populate, schema) });
+      Object.assign(sanitizedQuery, {
+        populate: await sanitizePopulate(populate, schema, { auth }),
+      });
     }
 
     const extraQueryKeys = getExtraQueryKeysFromRoute(route);
