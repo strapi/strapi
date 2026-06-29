@@ -146,10 +146,14 @@ export interface SessionManagerConfig {
 }
 
 class OriginSessionManager {
-  constructor(
-    private sessionManager: SessionManager,
-    private origin: string
-  ) {}
+  private sessionManager: SessionManager;
+
+  private origin: string;
+
+  constructor(sessionManager: SessionManager, origin: string) {
+    this.sessionManager = sessionManager;
+    this.origin = origin;
+  }
 
   async generateRefreshToken(
     userId: string,

@@ -21,6 +21,7 @@ import {
 } from '../hooks/usePermissionsDataManager';
 import { cellWidth, firstRowWidth, rowHeight } from '../utils/constants';
 import { getCheckboxState } from '../utils/getCheckboxState';
+import { getLocaleValidationErrorActionKeys } from '../utils/localePermissionValidation';
 
 import { CollapseLabel } from './CollapseLabel';
 import { HiddenAction } from './HiddenAction';
@@ -54,6 +55,8 @@ const CollapsePropertyMatrix = ({
   propertyName,
   subject,
 }: CollapsePropertyMatrixProps) => {
+  const { formatMessage, formatList } = useIntl();
+  const { modifiedData } = usePermissionsDataManager();
   const propertyActions = React.useMemo(
     () =>
       availableActions.map((action) => {
@@ -67,9 +70,38 @@ const CollapsePropertyMatrix = ({
     [availableActions, propertyName]
   );
 
+  const contentTypeKind = pathToData.split('..')[0] as 'collectionTypes' | 'singleTypes';
+  const localeValidationErrorLabels = React.useMemo(() => {
+    if (propertyName !== 'locales' || subject === undefined) return [];
+    const errorKeys = getLocaleValidationErrorActionKeys(modifiedData, contentTypeKind, subject);
+    return propertyActions
+      .filter(
+        ({ actionId, isActionRelatedToCurrentProperty }) =>
+          isActionRelatedToCurrentProperty && errorKeys.includes(actionId)
+      )
+      .map(({ label }) => label);
+  }, [propertyName, subject, modifiedData, contentTypeKind, propertyActions]);
+
   return (
     <Flex display="inline-flex" direction="column" alignItems="stretch" minWidth={0}>
       <Header label={label} headers={propertyActions} />
+      {localeValidationErrorLabels.length > 0 && (
+        <Box paddingLeft={6} paddingTop={2} paddingBottom={2}>
+          <Typography role="alert" variant="pi" textColor="danger600">
+            {formatMessage(
+              {
+                id: 'Settings.roles.form.permissions.locales.validation',
+                defaultMessage:
+                  '{count, plural, one {The {actions} action must apply to at least one locale.} other {The {actions} actions must apply to at least one locale.}}',
+              },
+              {
+                count: localeValidationErrorLabels.length,
+                actions: formatList(localeValidationErrorLabels, { type: 'conjunction' }),
+              }
+            )}
+          </Typography>
+        </Box>
+      )}
       <Box>
         {childrenForm.map(({ children: childrenForm, label, value, required }, i) => (
           <ActionRow
