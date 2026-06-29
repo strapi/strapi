@@ -75,7 +75,7 @@ const getDocumentIdsByDraftPublishRelation = async (
 
 /** Map from __status filter value to top-level query fields (mirrors client STATUS_PARAMS). */
 const STATUS_QUERY_FROM_FILTER: Record<string, Record<string, string>> = {
-  draft: { status: 'draft', publicationFilter: 'never-published-document' },
+  draft: { status: 'draft', publicationFilter: 'never-published' },
   published: { status: 'published' },
   'published-modified': { publicationStatusFilter: 'published-modified' },
   'published-unmodified': { publicationStatusFilter: 'published-unmodified' },
