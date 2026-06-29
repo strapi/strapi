@@ -8,6 +8,11 @@ jest.mock('browserslist-to-esbuild', () => ({
   default: jest.fn(() => ['chrome100']),
 }));
 
+jest.mock('@vitejs/plugin-react-swc', () => ({
+  __esModule: true,
+  default: jest.fn(() => []),
+}));
+
 describe('resolveDevelopmentConfig (Vite admin dev)', () => {
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {
     const mockHttpServer = http.createServer();
