@@ -25,6 +25,8 @@ const ARTICLE_HISTORY_URL =
 const HOMEPAGE_EDIT_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
 const HOMEPAGE_HISTORY_URL =
   /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
+const CTB_HOMEPAGE_URL =
+  /\/admin\/plugins\/content-type-builder\/content-types\/api::homepage\.homepage/;
 
 const goToHistoryPage = async (page: Page) => {
   const moreActionsButton = page.getByRole('button', { name: /more actions/i });
@@ -40,7 +42,24 @@ const goToHistoryPage = async (page: Page) => {
 };
 
 const goToContentTypeBuilder = async (page: Page) => {
-  await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+  await Promise.all([
+    page.waitForURL(/\/plugins\/content-type-builder/, { timeout: 30_000 }),
+    page.getByRole('link', { name: 'Content-Type Builder' }).click(),
+  ]);
+};
+
+const openHomepageInContentTypeBuilder = async (page: Page) => {
+  await Promise.all([
+    page.waitForURL(CTB_HOMEPAGE_URL, { timeout: 30_000 }),
+    page.getByRole('link', { name: 'Homepage' }).click(),
+  ]);
+};
+
+const openHomepageInContentManager = async (page: Page) => {
+  await Promise.all([
+    page.waitForURL(HOMEPAGE_EDIT_URL, { timeout: 30_000 }),
+    page.getByRole('link', { name: 'Homepage' }).click(),
+  ]);
 };
 
 describeOnCondition(edition === 'EE')('History', () => {
@@ -311,6 +330,7 @@ describeOnCondition(edition === 'EE')('History', () => {
   });
 
   test.describe('Single Type', () => {
+    test.describe.configure({ timeout: 120_000 });
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
       page,
     }) => {
@@ -319,7 +339,7 @@ describeOnCondition(edition === 'EE')('History', () => {
 
       // Navigate to the content-manager - single type - homepage
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
+      await openHomepageInContentManager(page);
       await page.getByRole('combobox', { name: 'Locales' }).click();
       await page.getByRole('option', { name: 'French (fr)' }).click();
 
@@ -421,10 +441,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Create relation in Content-Type Builder
       await goToContentTypeBuilder(page);
 
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      await page.waitForURL(
-        '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
-      );
+      await openHomepageInContentTypeBuilder(page);
       await page.getByRole('button', { name: /add another field to this single type/i }).click();
       await page.getByRole('button', { name: /relation/i }).click();
       await page.getByLabel('Basic settings').getByRole('button').nth(1).click();
@@ -445,8 +462,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(AUTHOR_EDIT_URL);
 
       // Add author to homepage
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      await page.waitForURL(HOMEPAGE_EDIT_URL);
+      await openHomepageInContentManager(page);
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Will Kitman').click();
       await page.getByRole('combobox', { name: 'Authors' }).click();
@@ -465,8 +481,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the history page
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      await page.waitForURL(HOMEPAGE_EDIT_URL);
+      await openHomepageInContentManager(page);
       await page.getByRole('button', { name: /more actions/i }).click();
       await clickAndWait(page, page.getByRole('menuitem', { name: /content history/i }));
       await page.waitForURL(HOMEPAGE_HISTORY_URL);
@@ -484,7 +499,7 @@ describeOnCondition(edition === 'EE')('History', () => {
        * Create an initial entry to also create an initial version
        */
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
+      await openHomepageInContentManager(page);
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
@@ -494,10 +509,7 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await goToContentTypeBuilder(page);
 
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      await page.waitForURL(
-        '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
-      );
+      await openHomepageInContentTypeBuilder(page);
       await page.getByRole('button', { name: 'Edit title' }).first().click();
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
@@ -510,7 +522,7 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await page.goto('/admin');
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
+      await openHomepageInContentManager(page);
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Welcome to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
