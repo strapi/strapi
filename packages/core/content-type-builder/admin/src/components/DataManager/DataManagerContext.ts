@@ -44,7 +44,7 @@ export interface DataManagerContextValue {
   }) => void;
   createComponentSchema: (opts: {
     data: {
-      icon: string;
+      icon?: string;
       displayName: string;
     };
     componentCategory: string;
@@ -93,7 +93,7 @@ export interface DataManagerContextValue {
   }[];
   updateComponentSchema: (opts: {
     data: {
-      icon: string;
+      icon?: string;
       displayName: string;
     };
     componentUID: Internal.UID.Component;

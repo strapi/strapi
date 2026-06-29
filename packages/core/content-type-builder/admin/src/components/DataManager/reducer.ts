@@ -101,7 +101,7 @@ type ChangeDynamicZoneComponentsPayload = {
 type CreateComponentSchemaPayload = {
   uid: string;
   data: {
-    icon: string;
+    icon?: string;
     displayName: string;
   };
   componentCategory: string;
@@ -148,7 +148,7 @@ type RemoveFieldPayload = {
 
 type UpdateComponentSchemaPayload = {
   data: {
-    icon: string;
+    icon?: string;
     displayName: string;
   };
   uid: Internal.UID.Component;
