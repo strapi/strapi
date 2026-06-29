@@ -2,9 +2,8 @@ import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
-import { errors } from '@strapi/utils';
+import { errors, buildSessionMetadata } from '@strapi/utils';
 import { getService } from '../utils';
-import { buildSessionMetadata } from './session-utils';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,

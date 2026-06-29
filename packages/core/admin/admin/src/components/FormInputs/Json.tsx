@@ -26,7 +26,7 @@ const JsonInput = React.forwardRef<JSONInputRef, InputProps>(
           ref={composedRefs}
           value={
             field.value !== undefined &&
-            (typeof field.value === 'object' ||
+            (typeof field.value === 'object' || // accounts for objects, arrays, null
               typeof field.value === 'boolean' ||
               typeof field.value === 'number')
               ? JSON.stringify(field.value, null, 2)

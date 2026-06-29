@@ -28,10 +28,11 @@ type BaseQueryError = ApiError | UnknownApiError;
 
 const isAuthPath = (url: string) => /^\/admin\/(login|logout|access-token)\b/.test(url);
 
-const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> = async (
-  query,
-  api
-) => {
+const simpleQuery: BaseQueryFn<
+  string | QueryArguments,
+  unknown,
+  BaseQueryError | SerializedError
+> = async (query, api) => {
   const { signal, dispatch } = api;
 
   const executeQuery = async (queryToExecute: string | QueryArguments) => {
@@ -109,10 +110,10 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
     return {
       data: undefined,
       error: {
-        name: 'UnknownError',
+        name: error.name,
         message: error.message,
-        details: error,
-      } satisfies UnknownApiError,
+        stack: error.stack,
+      } satisfies SerializedError,
     };
   }
 };

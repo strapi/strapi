@@ -25,9 +25,7 @@ export const password = yup
   .min(8)
   // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
   .test('required-byte-size', '${path} must be less than 73 bytes', function checkByteSize(value) {
-    if (value === undefined || value === null || value === '') {
-      return true;
-    }
+    if (!value) return true;
 
     const byteSize = new TextEncoder().encode(value).length;
     return byteSize <= 72;

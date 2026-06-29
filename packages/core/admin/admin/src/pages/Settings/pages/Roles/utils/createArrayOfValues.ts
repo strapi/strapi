@@ -1,4 +1,4 @@
-import { Flat, flattenDeep } from '../../../../../utils/arrays';
+import { type Flat, flattenDeep } from '../../../../../utils/arrays';
 import { isObject } from '../../../../../utils/objects';
 
 const createArrayOfValues = <TData>(obj: unknown): Array<Flat<TData>> => {
