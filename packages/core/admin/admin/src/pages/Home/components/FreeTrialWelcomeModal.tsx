@@ -1,14 +1,7 @@
 import * as React from 'react';
 
 import { Button, Flex, Modal, Typography } from '@strapi/design-system';
-import {
-  Calendar,
-  Eye,
-  Key,
-  Layer,
-  Picture,
-  Translate,
-} from '@strapi/icons';
+import { Calendar, Eye, Key, ListPlus, Image, Book } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -35,7 +28,12 @@ interface Feature {
 // ---------------------------------------------------------------------------
 
 const ModalHeader = styled(Flex)`
-  background: linear-gradient(135deg, #4945ff 0%, #7b61ff 60%, #ac73e5 100%);
+  background: linear-gradient(
+    135deg,
+    ${({ theme }) => theme.colors.primary600} 0%,
+    ${({ theme }) => theme.colors.primary500} 60%,
+    ${({ theme }) => theme.colors.alternative500} 100%
+  );
   border-radius: 4px 4px 0 0;
   padding: 2.8rem 2.8rem 2.4rem;
 `;
@@ -46,7 +44,7 @@ const TrialBadge = styled.span`
   padding: 0.4rem 1rem;
   font-size: 1.2rem;
   font-weight: 500;
-  color: #fff;
+  color: theme.colors.neutral0;
   letter-spacing: 0.05em;
   display: inline-block;
   margin-bottom: 0.8rem;
@@ -60,10 +58,11 @@ const FeatureGrid = styled.div`
 
 const FeatureCard = styled.div<{ $isAI?: boolean; $fullWidth?: boolean }>`
   border: 0.5px solid
-    ${({ $isAI }) => ($isAI ? '#ac73e5' : 'rgba(220, 220, 228, 0.6)')};
+    ${({ theme, $isAI }) => ($isAI ? theme.colors.alternative500 : theme.colors.neutral150)};
   border-radius: 10px;
   padding: 1.2rem 1.4rem;
-  background: ${({ $isAI }) => ($isAI ? '#f8f5ff' : '#f6f6f9')};
+  background: ${({ theme, $isAI }) =>
+    $isAI ? theme.colors.alternative100 : theme.colors.neutral100};
   grid-column: ${({ $fullWidth }) => ($fullWidth ? '1 / -1' : 'auto')};
 `;
 
@@ -75,7 +74,7 @@ const IconWrapper = styled.span<{ $isAI?: boolean }>`
   svg {
     width: 18px;
     height: 18px;
-    color: ${({ $isAI }) => ($isAI ? '#534ab7' : '#666687')};
+    color: ${({ theme, $isAI }) => ($isAI ? theme.colors.alternative700 : theme.colors.neutral600)};
   }
 `;
 
@@ -85,7 +84,7 @@ const IconWrapper = styled.span<{ $isAI?: boolean }>`
 
 const FEATURES: Feature[] = [
   {
-    icon: <Translate />,
+    icon: <Book />,
     titleId: 'app.components.FreeTrialWelcomeModal.feature.aiTranslations.title',
     titleDefault: 'AI Translations',
     descId: 'app.components.FreeTrialWelcomeModal.feature.aiTranslations.desc',
@@ -93,7 +92,7 @@ const FEATURES: Feature[] = [
     isAI: true,
   },
   {
-    icon: <Picture />,
+    icon: <Image />,
     titleId: 'app.components.FreeTrialWelcomeModal.feature.aiMediaLibrary.title',
     titleDefault: 'AI Media Library',
     descId: 'app.components.FreeTrialWelcomeModal.feature.aiMediaLibrary.desc',
@@ -101,7 +100,7 @@ const FEATURES: Feature[] = [
     isAI: true,
   },
   {
-    icon: <Layer />,
+    icon: <ListPlus />,
     titleId: 'app.components.FreeTrialWelcomeModal.feature.aiContentTypeBuilder.title',
     titleDefault: 'AI Content-Type Builder',
     descId: 'app.components.FreeTrialWelcomeModal.feature.aiContentTypeBuilder.desc',
@@ -158,10 +157,7 @@ const FreeTrialWelcomeModal = ({ onClose }: FreeTrialWelcomeModalProps) => {
             })}
           </TrialBadge>
 
-          <Typography
-            variant="alpha"
-            style={{ color: '#fff', marginBottom: '0.4rem' }}
-          >
+          <Typography variant="alpha" style={{ color: '#fff', marginBottom: '0.4rem' }}>
             {formatMessage({
               id: 'app.components.FreeTrialWelcomeModal.title',
               defaultMessage: 'Your Growth trial has started! 🎉',
@@ -208,11 +204,11 @@ const FreeTrialWelcomeModal = ({ onClose }: FreeTrialWelcomeModalProps) => {
                           variant="pi"
                           fontWeight="bold"
                           style={{
-                            color: feature.isAI ? '#3c3489' : undefined,
+                            color: feature.isAI ? 'theme.colors.primary700' : undefined,
                             display: 'block',
                             marginBottom: '0.2rem',
                           }}
-                          textColor={feature.isAI ? undefined : 'neutral800'}
+                          textColor={feature.isAI ? undefined : 'theme.colors.neutral800'}
                         >
                           {formatMessage({
                             id: feature.titleId,
@@ -221,8 +217,8 @@ const FreeTrialWelcomeModal = ({ onClose }: FreeTrialWelcomeModalProps) => {
                         </Typography>
                         <Typography
                           variant="pi"
-                          style={{ color: feature.isAI ? '#534ab7' : undefined }}
-                          textColor={feature.isAI ? undefined : 'neutral600'}
+                          style={{ color: feature.isAI ? 'theme.colors.primary700' : undefined }}
+                          textColor={feature.isAI ? undefined : 'theme.colors.neutral600'}
                         >
                           {formatMessage({
                             id: feature.descId,
@@ -239,11 +235,11 @@ const FreeTrialWelcomeModal = ({ onClose }: FreeTrialWelcomeModalProps) => {
                         variant="pi"
                         fontWeight="bold"
                         style={{
-                          color: feature.isAI ? '#3c3489' : undefined,
+                          color: feature.isAI ? 'theme.colors.primary700' : undefined,
                           display: 'block',
                           marginBottom: '0.2rem',
                         }}
-                        textColor={feature.isAI ? undefined : 'neutral800'}
+                        textColor={feature.isAI ? undefined : 'theme.colors.neutral800'}
                       >
                         {formatMessage({
                           id: feature.titleId,
@@ -252,8 +248,7 @@ const FreeTrialWelcomeModal = ({ onClose }: FreeTrialWelcomeModalProps) => {
                       </Typography>
                       <Typography
                         variant="pi"
-                        style={{ color: feature.isAI ? '#534ab7' : undefined }}
-                        textColor={feature.isAI ? undefined : 'neutral600'}
+                        textColor={feature.isAI ? 'alternative700' : 'neutral600'}
                       >
                         {formatMessage({
                           id: feature.descId,
@@ -270,7 +265,7 @@ const FreeTrialWelcomeModal = ({ onClose }: FreeTrialWelcomeModalProps) => {
 
         <Modal.Footer>
           <Flex justifyContent="space-between" alignItems="center" width="100%">
-            <Typography variant="pi" textColor="neutral500">
+            <Typography variant="pi" textColor="theme.colors.neutral500">
               {formatMessage({
                 id: 'app.components.FreeTrialWelcomeModal.footer',
                 defaultMessage: '30 days free · No credit card required',
