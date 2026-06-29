@@ -87,12 +87,12 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
     }
 
     await expect(item).toBeVisible();
-    await item.click();
+    await clickAndWait(page, item);
   }
 
-  // Verify header is correct
+  // Verify header is correct (Vite 8 admin chunks can load slower on first SPA navigation)
   const header = page.getByRole('heading', { name: headerText, exact: true });
-  await expect(header).toBeVisible();
+  await expect(header).toBeVisible({ timeout: 30_000 });
   return header;
 };
 
