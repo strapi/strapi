@@ -158,7 +158,14 @@ describe('Env helper', () => {
     test('Throws if env var is empty', () => {
       process.env.EMPTY_REQUIRED_VAR = '';
       expect(() => envHelper.required('EMPTY_REQUIRED_VAR')).toThrow(
-        'Missing required environment variable EMPTY_REQUIRED_VAR'
+        'Required environment variable EMPTY_REQUIRED_VAR must not be empty'
+      );
+    });
+
+    test('Throws if env var is whitespace only', () => {
+      process.env.WHITESPACE_REQUIRED_VAR = '   ';
+      expect(() => envHelper.required('WHITESPACE_REQUIRED_VAR')).toThrow(
+        'Required environment variable WHITESPACE_REQUIRED_VAR must not be empty'
       );
     });
   });
@@ -178,7 +185,21 @@ describe('Env helper', () => {
     test('Throws if env var is empty', () => {
       process.env.EMPTY_REQUIRED_ARRAY_VAR = '';
       expect(() => envHelper.array.required('EMPTY_REQUIRED_ARRAY_VAR')).toThrow(
-        'Missing required environment variable EMPTY_REQUIRED_ARRAY_VAR'
+        'Required environment variable EMPTY_REQUIRED_ARRAY_VAR must not be empty'
+      );
+    });
+
+    test('Throws if env var is only empty comma-separated values', () => {
+      process.env.MANY_EMPTY_REQUIRED_ARRAY_VAR = ',,,';
+      expect(() => envHelper.array.required('MANY_EMPTY_REQUIRED_ARRAY_VAR')).toThrow(
+        'Required environment variable MANY_EMPTY_REQUIRED_ARRAY_VAR must not be empty'
+      );
+    });
+
+    test('Throws if env var is whitespace only', () => {
+      process.env.WHITESPACE_REQUIRED_ARRAY_VAR = '   ';
+      expect(() => envHelper.array.required('WHITESPACE_REQUIRED_ARRAY_VAR')).toThrow(
+        'Required environment variable WHITESPACE_REQUIRED_ARRAY_VAR must not be empty'
       );
     });
   });

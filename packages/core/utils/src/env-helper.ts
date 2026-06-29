@@ -82,8 +82,12 @@ function array(key: string, defaultValue?: string[]): string[] | undefined {
 function required(key: string): string {
   const value = envFn(key);
 
-  if (value === undefined || value === '') {
+  if (value === undefined) {
     throw new Error(`Missing required environment variable ${key}`);
+  }
+
+  if (value.trim() === '') {
+    throw new Error(`Required environment variable ${key} must not be empty`);
   }
 
   return value;
@@ -92,8 +96,12 @@ function required(key: string): string {
 function requiredArray(key: string): string[] {
   const value = array(key);
 
-  if (!value?.length || value.every((v) => v === '')) {
+  if (value === undefined) {
     throw new Error(`Missing required environment variable ${key}`);
+  }
+
+  if (!value.length || value.every((v) => v.trim() === '')) {
+    throw new Error(`Required environment variable ${key} must not be empty`);
   }
 
   return value;
