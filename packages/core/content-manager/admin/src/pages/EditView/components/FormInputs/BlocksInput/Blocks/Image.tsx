@@ -108,6 +108,7 @@ const ImageDialog = () => {
 
     // Save the path of the node that is being replaced by an image to insert the images there later
     // It's the closest full block node above the selection
+    // Use anchor Point not the full Range: Editor.above with a cross-block Range resolves [] (root) and finds no block.
     const nodeEntryBeingReplaced = Editor.above(editor, {
       match(node) {
         if (Editor.isEditor(node)) return false;
@@ -116,13 +117,14 @@ const ImageDialog = () => {
 
         return !isInlineNode;
       },
+      at: editor.selection?.anchor,
     });
 
     if (!nodeEntryBeingReplaced) return;
     const [, pathToInsert] = nodeEntryBeingReplaced;
 
     // Remove the previous node that is being replaced by an image
-    Transforms.removeNodes(editor);
+    Transforms.removeNodes(editor, { at: pathToInsert });
 
     // Convert images to nodes and insert them
     const nodesToInsert = images.map((image) => {
