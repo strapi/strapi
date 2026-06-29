@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
+import { sanitizeSessionEntry, sortSessionsForDisplay } from '@strapi/utils';
 
 import { getSessionManager } from '../../../shared/utils/session-auth';
-import { sanitizeSessionEntry, sortSessionsForDisplay } from './session-utils';
 import type {
   GetSessions,
   DeleteSession,
