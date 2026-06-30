@@ -57,10 +57,15 @@ describe('link queries realtion fitlers', () => {
 });
 
 describe('createLinkQuery', () => {
-  test('does not export join-table links when either referenced entity is missing', async () => {
-    const joinTableRows = [{ chapter_id: 1, node_id: 99, chapter_ord: 1 }];
-    const existingEntityIds = new Set([1]);
-
+  const buildJoinTableStrapi = ({
+    joinTableRows,
+    existingLeftIds = new Set<number>(),
+    existingRightIds = new Set<number>(),
+  }: {
+    joinTableRows: Record<string, unknown>[];
+    existingLeftIds?: Set<number>;
+    existingRightIds?: Set<number>;
+  }) => {
     const connection = {
       client: { connectionSettings: {} },
       queryBuilder() {
@@ -75,7 +80,7 @@ describe('createLinkQuery', () => {
       },
     };
 
-    const strapi = {
+    return {
       db: {
         connection,
         metadata: {
@@ -99,8 +104,110 @@ describe('createLinkQuery', () => {
         },
         query: jest.fn((uid: string) => ({
           findOne: jest.fn(async ({ where }: { where: { id: number } }) => {
-            if (uid === 'api::chapter.chapter' && existingEntityIds.has(where.id)) {
+            if (uid === 'api::chapter.chapter' && existingLeftIds.has(where.id)) {
               return { id: where.id };
+            }
+
+            if (uid === 'api::node.node' && existingRightIds.has(where.id)) {
+              return { id: where.id };
+            }
+
+            return null;
+          }),
+        })),
+      },
+    } as unknown as import('@strapi/types').Core.Strapi;
+  };
+
+  test('exports join-table links when both referenced entities exist', async () => {
+    const strapi = buildJoinTableStrapi({
+      joinTableRows: [{ chapter_id: 1, node_id: 2, chapter_ord: 1 }],
+      existingLeftIds: new Set([1]),
+      existingRightIds: new Set([2]),
+    });
+
+    const links = [];
+
+    for await (const link of createLinkQuery(strapi)().generateAll('api::chapter.chapter')) {
+      links.push(link);
+    }
+
+    expect(links).toEqual([
+      {
+        kind: 'relation.basic',
+        relation: 'oneToMany',
+        left: { type: 'api::chapter.chapter', ref: 1, field: 'nodes', pos: 1 },
+        right: { type: 'api::node.node', ref: 2, field: undefined },
+      },
+    ]);
+  });
+
+  test('does not export join-table links when the right referenced entity is missing', async () => {
+    const strapi = buildJoinTableStrapi({
+      joinTableRows: [{ chapter_id: 1, node_id: 99, chapter_ord: 1 }],
+      existingLeftIds: new Set([1]),
+    });
+
+    const links = [];
+
+    for await (const link of createLinkQuery(strapi)().generateAll('api::chapter.chapter')) {
+      links.push(link);
+    }
+
+    expect(links).toEqual([]);
+  });
+
+  test('does not export join-table links when the left referenced entity is missing', async () => {
+    const strapi = buildJoinTableStrapi({
+      joinTableRows: [{ chapter_id: 1, node_id: 2, chapter_ord: 1 }],
+      existingRightIds: new Set([2]),
+    });
+
+    const links = [];
+
+    for await (const link of createLinkQuery(strapi)().generateAll('api::chapter.chapter')) {
+      links.push(link);
+    }
+
+    expect(links).toEqual([]);
+  });
+
+  test('does not export joinColumn links when the relation target is missing', async () => {
+    const connection = {
+      client: { connectionSettings: {} },
+      queryBuilder() {
+        const qb: Record<string, unknown> = {
+          select: jest.fn().mockReturnThis(),
+          from: jest.fn().mockReturnThis(),
+          transacting: jest.fn().mockReturnThis(),
+          then: (resolve: (value: unknown) => void) => resolve([{ id: 1, author_id: 42 }]),
+        };
+
+        return qb;
+      },
+    };
+
+    const strapi = {
+      db: {
+        connection,
+        metadata: {
+          get: jest.fn(() => ({
+            tableName: 'articles',
+            attributes: {
+              author: {
+                type: 'relation',
+                relation: 'manyToOne',
+                target: 'api::author.author',
+                owner: true,
+                joinColumn: { name: 'author_id' },
+              },
+            },
+          })),
+        },
+        query: jest.fn((uid: string) => ({
+          findOne: jest.fn(async ({ where }: { where: { id: number } }) => {
+            if (uid === 'api::article.article' && where.id === 1) {
+              return { id: 1 };
             }
 
             return null;
@@ -111,7 +218,7 @@ describe('createLinkQuery', () => {
 
     const links = [];
 
-    for await (const link of createLinkQuery(strapi)().generateAll('api::chapter.chapter')) {
+    for await (const link of createLinkQuery(strapi)().generateAll('api::article.article')) {
       links.push(link);
     }
 
