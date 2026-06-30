@@ -10,13 +10,16 @@ import {
 } from '@strapi/design-system';
 import { Folder as FolderIcon, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+
+import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
+import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
@@ -25,11 +28,13 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
 
-const StyledCard = styled(Card)`
+const StyledCard = styled(Card)<{ $isDragging?: boolean; $isMovePending?: boolean }>`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: 8px;
   overflow: hidden;
-  cursor: pointer;
+  cursor: ${({ $isMovePending }) => ($isMovePending ? 'wait' : 'pointer')};
+  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
 
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
@@ -49,7 +54,12 @@ const FoldersRow = styled(Box)`
   grid-column: 1 / -1;
 `;
 
-const StyledFolderCard = styled(Flex)`
+const StyledFolderCard = styled(Flex)<{
+  $isDragging?: boolean;
+  $isMovePending?: boolean;
+  $isValidDropTarget?: boolean;
+  $isInvalidDropTarget?: boolean;
+}>`
   width: 100%;
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`}; // 8px 12px
   align-items: center;
@@ -57,8 +67,23 @@ const StyledFolderCard = styled(Flex)`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
-  cursor: pointer;
+  cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
+    if ($isMovePending) {
+      return 'wait';
+    }
+
+    return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
+  }};
+  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
+  pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
   transition: background 0.2s;
+
+  ${({ $isValidDropTarget, theme }) =>
+    $isValidDropTarget &&
+    css`
+      background: ${theme.colors.primary100};
+      border: 1px dashed ${theme.colors.primary600};
+    `}
 
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
@@ -87,6 +112,18 @@ interface FolderCardProps {
 const FolderCard = ({ folder }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+  const {
+    draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
+    droppable: { setNodeRef: setDropRef },
+    showValidDropHighlight,
+    showInvalidDropCursor,
+  } = useFolderDraggableDroppable(folder);
+
+  const setNodeRef = (node: HTMLElement | null) => {
+    setDragRef(node);
+    setDropRef(node);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -97,6 +134,13 @@ const FolderCard = ({ folder }: FolderCardProps) => {
 
   return (
     <StyledFolderCard
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      $isDragging={isDragging}
+      $isMovePending={isMovePending}
+      $isValidDropTarget={showValidDropHighlight}
+      $isInvalidDropTarget={showInvalidDropCursor}
       onClick={() => navigateToFolder(folder)}
       onKeyDown={handleKeyDown}
       role="listitem"
@@ -172,7 +216,12 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
     if (mediaURL) {
       return (
         <PreviewContainer>
-          <StyledImage src={mediaURL} alt={alternativeText || ''} />
+          <StyledImage
+            src={mediaURL}
+            alt={alternativeText || ''}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+          />
         </PreviewContainer>
       );
     }
@@ -220,6 +269,8 @@ interface AssetCardProps {
 const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
+  const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+  const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -230,8 +281,14 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
 
   return (
     <StyledCard
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      $isDragging={isDragging}
+      $isMovePending={isMovePending}
       tabIndex={0}
       role="listitem"
+      onDragStart={(e) => e.preventDefault()}
       onClick={() => onAssetItemClick(asset.id)}
       onKeyDown={handleKeyDown}
     >
@@ -252,6 +309,7 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
               defaultMessage: 'More actions',
             })}
             variant="ghost"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             <More />
           </IconButton>
@@ -290,7 +348,7 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
   }
 
   return (
-    <Grid.Root gap={4} role="list">
+    <Grid.Root gap={4} role="list" data-testid="assets-grid">
       {folders.length > 0 && (
         <FoldersRow>
           <Grid.Root gap={4}>

@@ -86,12 +86,12 @@ module.exports = ({ strapi }) => ({
 
     return new Promise((resolve, reject) => {
       const jwtConfig = strapi.config.get('plugin::users-permissions.jwt', {});
-      const algorithms = jwtConfig && jwtConfig.algorithm ? [jwtConfig.algorithm] : undefined;
+      const algorithms = [jwtConfig?.algorithm || 'HS256'];
 
       jwt.verify(
         token,
         strapi.config.get('plugin::users-permissions.jwtSecret'),
-        algorithms ? { algorithms } : {},
+        { algorithms },
         (err, tokenPayload = {}) => {
           if (err) {
             return reject(new Error('Invalid token.'));
