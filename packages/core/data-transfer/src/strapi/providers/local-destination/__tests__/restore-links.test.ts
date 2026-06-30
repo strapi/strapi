@@ -1,7 +1,10 @@
 import { Writable } from 'stream';
 import type { Core } from '@strapi/types';
 
-import { createLinksWriteStream } from '../strategies/restore/links';
+import {
+  createLinksWriteStream,
+  formatSkippedLinksRestoreSummary,
+} from '../strategies/restore/links';
 import type { ILink, Transaction } from '../../../../../types';
 
 const insert = jest.fn();
@@ -41,6 +44,24 @@ const writeLink = (stream: Writable, link: ILink) =>
     stream.once('error', reject);
     stream.write(link, (error) => (error ? reject(error) : resolve()));
   });
+
+const finishStream = (stream: Writable) =>
+  new Promise<void>((resolve, reject) => {
+    stream.once('error', reject);
+    stream.end((error) => (error ? reject(error) : resolve()));
+  });
+
+describe('formatSkippedLinksRestoreSummary', () => {
+  test('returns null when no links were skipped', () => {
+    expect(formatSkippedLinksRestoreSummary(0, 0)).toBeNull();
+  });
+
+  test('summarizes unmapped and foreign key skips', () => {
+    expect(formatSkippedLinksRestoreSummary(2, 1)).toBe(
+      'Links restore skipped 3 relation(s) (2 unmapped, 1 foreign key). Verify relations in the admin after transfer.'
+    );
+  });
+});
 
 describe('createLinksWriteStream', () => {
   test('Should insert the link with both refs mapped', async () => {
@@ -227,5 +248,21 @@ describe('createLinksWriteStream', () => {
 
     await expect(writeLink(stream, createLink())).rejects.toThrow('connection reset by peer');
     expect(onWarning).not.toHaveBeenCalled();
+  });
+
+  test('Should emit a summary warning when the stream ends after skipped links', async () => {
+    const mappings: Record<string, Record<number, number>> = {
+      'test.component': { 2: 22 },
+      'api::foo.foo': { 100: 200 },
+    };
+    const mapID = (uid: string, id: number) => mappings[uid]?.[id];
+    const onWarning = jest.fn();
+
+    const stream = createLinksWriteStream(mapID, strapi, transaction, onWarning);
+    await writeLink(stream, createLink());
+    await finishStream(stream);
+
+    expect(onWarning).toHaveBeenCalledTimes(2);
+    expect(onWarning).toHaveBeenLastCalledWith(formatSkippedLinksRestoreSummary(1, 0));
   });
 });

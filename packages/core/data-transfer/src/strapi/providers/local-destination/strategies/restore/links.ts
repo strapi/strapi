@@ -45,12 +45,35 @@ const withSavepoint = async <T>(trx: Knex.Transaction, fn: () => Promise<T>) => 
   }
 };
 
+export const formatSkippedLinksRestoreSummary = (unmapped: number, foreignKey: number) => {
+  const total = unmapped + foreignKey;
+
+  if (total === 0) {
+    return null;
+  }
+
+  const parts = [];
+
+  if (unmapped > 0) {
+    parts.push(`${unmapped} unmapped`);
+  }
+
+  if (foreignKey > 0) {
+    parts.push(`${foreignKey} foreign key`);
+  }
+
+  return `Links restore skipped ${total} relation(s) (${parts.join(', ')}). Verify relations in the admin after transfer.`;
+};
+
 export const createLinksWriteStream = (
   mapID: (uid: string, id: number) => number | undefined,
   strapi: Core.Strapi,
   transaction?: Transaction,
   onWarning?: (message: string) => void
 ) => {
+  let skippedUnmapped = 0;
+  let skippedForeignKey = 0;
+
   return new Writable({
     objectMode: true,
     async write(link: ILink, _encoding, callback) {
@@ -80,6 +103,7 @@ export const createLinksWriteStream = (
             `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} because ${missingRefs} was not transferred during the entities stage.`
           );
 
+          skippedUnmapped += 1;
           return callback(null);
         }
 
@@ -98,6 +122,7 @@ export const createLinksWriteStream = (
               onWarning?.(
                 `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} due to a foreign key constraint.`
               );
+              skippedForeignKey += 1;
               return callback(null);
             }
             return callback(e);
@@ -112,6 +137,15 @@ export const createLinksWriteStream = (
 
         callback(null);
       });
+    },
+    final(callback) {
+      const summary = formatSkippedLinksRestoreSummary(skippedUnmapped, skippedForeignKey);
+
+      if (summary) {
+        onWarning?.(summary);
+      }
+
+      callback();
     },
   });
 };

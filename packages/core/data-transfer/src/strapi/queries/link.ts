@@ -23,7 +23,30 @@ const linkReferencesExistingEntities = async (strapi: Core.Strapi, link: ILink) 
   return leftExists && rightExists;
 };
 
-export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => {
+export interface LinkQueryOptions {
+  onOrphanedLink?: (link: ILink) => void;
+}
+
+const yieldLinkIfEntitiesExist = async (
+  strapi: Core.Strapi,
+  link: ILink,
+  onOrphanedLink?: (link: ILink) => void
+) => {
+  if (await linkReferencesExistingEntities(strapi, link)) {
+    return link;
+  }
+
+  onOrphanedLink?.(link);
+  return null;
+};
+
+export const createLinkQuery = (
+  strapi: Core.Strapi,
+  trx?: Knex.Transaction,
+  options?: LinkQueryOptions
+) => {
+  const { onOrphanedLink } = options ?? {};
+
   const query = () => {
     const { connection } = strapi.db;
 
@@ -79,8 +102,10 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
               right: { type: target, ref },
             };
 
-            if (await linkReferencesExistingEntities(strapi, link)) {
-              yield link;
+            const validLink = await yieldLinkIfEntitiesExist(strapi, link, onOrphanedLink);
+
+            if (validLink) {
+              yield validLink;
             }
           }
         }
@@ -189,8 +214,10 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
             right: clone(right as ILink['right']),
           };
 
-          if (await linkReferencesExistingEntities(strapi, link)) {
-            yield link;
+          const validLink = await yieldLinkIfEntitiesExist(strapi, link, onOrphanedLink);
+
+          if (validLink) {
+            yield validLink;
           }
         }
       }
@@ -221,8 +248,10 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
             right: { type: entry[typeColumn.name], ref },
           };
 
-          if (await linkReferencesExistingEntities(strapi, link)) {
-            yield link;
+          const validLink = await yieldLinkIfEntitiesExist(strapi, link, onOrphanedLink);
+
+          if (validLink) {
+            yield validLink;
           }
         }
       }

@@ -224,4 +224,26 @@ describe('createLinkQuery', () => {
 
     expect(links).toEqual([]);
   });
+
+  test('invokes onOrphanedLink when a join-table link references a missing entity', async () => {
+    const onOrphanedLink = jest.fn();
+    const strapi = buildJoinTableStrapi({
+      joinTableRows: [{ chapter_id: 1, node_id: 99, chapter_ord: 1 }],
+      existingLeftIds: new Set([1]),
+    });
+
+    for await (const link of createLinkQuery(strapi, undefined, { onOrphanedLink })().generateAll(
+      'api::chapter.chapter'
+    )) {
+      expect(link).toBeDefined();
+    }
+
+    expect(onOrphanedLink).toHaveBeenCalledTimes(1);
+    expect(onOrphanedLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        left: expect.objectContaining({ type: 'api::chapter.chapter', ref: 1 }),
+        right: expect.objectContaining({ type: 'api::node.node', ref: 99 }),
+      })
+    );
+  });
 });
