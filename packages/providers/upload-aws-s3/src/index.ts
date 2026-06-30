@@ -15,7 +15,7 @@ import {
   StorageClass,
   ServerSideEncryption,
 } from '@aws-sdk/client-s3';
-import type { AwsCredentialIdentity } from '@aws-sdk/types';
+import type { AwsCredentialIdentity, AwsCredentialIdentityProvider } from '@aws-sdk/types';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import { extractCredentials, isUrlFromBucket } from './utils';
@@ -140,8 +140,9 @@ export interface DefaultOptions extends S3ClientConfig {
   // TODO Remove this in V5
   accessKeyId?: AwsCredentialIdentity['accessKeyId'];
   secretAccessKey?: AwsCredentialIdentity['secretAccessKey'];
-  // Keep this for V5
-  credentials?: AwsCredentialIdentity;
+  // Keep this for V5. Accepts either static credentials or an AWS credential
+  // provider function, which the SDK resolves (and refreshes) at runtime.
+  credentials?: AwsCredentialIdentity | AwsCredentialIdentityProvider;
   params?: AWSParams;
   [k: string]: unknown;
 }

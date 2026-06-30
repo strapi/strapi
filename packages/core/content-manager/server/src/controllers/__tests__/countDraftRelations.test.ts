@@ -9,7 +9,10 @@ const createMocks = (overrides: Record<string, any> = {}) => {
   const buildPopulate = jest.fn().mockResolvedValue({ createdBy: true });
 
   const findOne = jest.fn().mockResolvedValue({ id: 1, createdBy: { id: 1 } });
-  const countDraftRelations = jest.fn().mockResolvedValue(3);
+  const countDraftRelations = jest.fn().mockResolvedValue({
+    unpublishedRelations: 3,
+    draftM2mLinks: 0,
+  });
   const sanitizedQueryRead = jest.fn().mockResolvedValue({});
 
   const cannotRead = jest.fn().mockReturnValue(false);
@@ -101,7 +104,7 @@ describe('countDraftRelations', () => {
 
     const res = await controller.countDraftRelations(createCtx());
 
-    expect(res.data).toBe(3);
+    expect(res.data).toEqual({ unpublishedRelations: 3, draftM2mLinks: 0 });
   });
 
   it('returns 403 when the user lacks read permission entirely', async () => {
@@ -153,7 +156,7 @@ describe('countDraftRelations', () => {
 
     const res = await controller.countDraftRelations(createCtx());
 
-    expect(res.data).toBe(3);
+    expect(res.data).toEqual({ unpublishedRelations: 3, draftM2mLinks: 0 });
     expect(mocks.findOne).not.toHaveBeenCalled();
     expect(mocks.populateFromQuery).not.toHaveBeenCalled();
   });

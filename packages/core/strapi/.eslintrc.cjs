@@ -18,6 +18,7 @@ const config = {
     'bin/',
     'scripts/',
     'rollup.config.mjs',
+    'lint-staged.config.mjs',
   ],
   overrides: [
     {
