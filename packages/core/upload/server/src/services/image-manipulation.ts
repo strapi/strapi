@@ -54,9 +54,15 @@ const getMetadata = (file: UploadableFile): Promise<sharp.Metadata> => {
 };
 
 const getDimensions = async (file: UploadableFile): Promise<Dimensions> => {
-  const { width = null, height = null } = await getMetadata(file);
-
-  return { width, height };
+  try {
+    const { width = null, height = null } = await getMetadata(file);
+    return { width, height };
+  } catch {
+    return {
+      width: file.width ?? null,
+      height: file.height ?? null,
+    };
+  }
 };
 
 const THUMBNAIL_RESIZE_OPTIONS = {
@@ -134,65 +140,70 @@ const generateThumbnail = async (file: UploadableFile) => {
  *
  */
 const optimize = async (file: UploadableFile) => {
-  const { sizeOptimization = false, autoOrientation = false } =
-    (await getService('upload').getSettings()) ?? {};
+  try {
+    const { sizeOptimization = false, autoOrientation = false } =
+      (await getService('upload').getSettings()) ?? {};
 
-  const { format, size } = await getMetadata(file);
+    const { format, size } = await getMetadata(file);
 
-  if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
-    let transformer;
-    if (!file.filepath) {
-      transformer = sharp({ animated: true });
-    } else {
-      transformer = sharp(file.filepath, { animated: true });
-    }
-    // reduce image quality
-    transformer[format]({ quality: sizeOptimization ? 80 : 100 });
-    // rotate image based on EXIF data
-    if (autoOrientation) {
-      transformer.rotate();
-    }
-    const filePath = file.tmpWorkingDirectory
-      ? join(file.tmpWorkingDirectory, `optimized-${file.hash}`)
-      : `optimized-${file.hash}`;
+    if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
+      let transformer;
+      if (!file.filepath) {
+        transformer = sharp({ animated: true });
+      } else {
+        transformer = sharp(file.filepath, { animated: true });
+      }
+      // reduce image quality
+      transformer[format]({ quality: sizeOptimization ? 80 : 100 });
+      // rotate image based on EXIF data
+      if (autoOrientation) {
+        transformer.rotate();
+      }
+      const filePath = file.tmpWorkingDirectory
+        ? join(file.tmpWorkingDirectory, `optimized-${file.hash}`)
+        : `optimized-${file.hash}`;
 
-    let newInfo;
-    if (!file.filepath) {
-      transformer.on('info', (info) => {
-        newInfo = info;
+      let newInfo;
+      if (!file.filepath) {
+        transformer.on('info', (info) => {
+          newInfo = info;
+        });
+
+        await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+      } else {
+        newInfo = await transformer.toFile(filePath);
+      }
+
+      const {
+        width: newWidth,
+        height: newHeight,
+        size: newSize,
+        pageHeight: newPageHeight,
+      } = newInfo ?? {};
+
+      const newFile = { ...file };
+
+      newFile.getStream = () => fs.createReadStream(filePath);
+      newFile.filepath = filePath;
+
+      if (newSize && size && newSize > size) {
+        // Ignore optimization if output is bigger than original
+        return file;
+      }
+
+      return Object.assign(newFile, {
+        width: newWidth,
+        height: newPageHeight ?? newHeight,
+        size: newSize ? bytesToKbytes(newSize) : 0,
+        sizeInBytes: newSize,
       });
-
-      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
-    } else {
-      newInfo = await transformer.toFile(filePath);
     }
 
-    const {
-      width: newWidth,
-      height: newHeight,
-      size: newSize,
-      pageHeight: newPageHeight,
-    } = newInfo ?? {};
-
-    const newFile = { ...file };
-
-    newFile.getStream = () => fs.createReadStream(filePath);
-    newFile.filepath = filePath;
-
-    if (newSize && size && newSize > size) {
-      // Ignore optimization if output is bigger than original
-      return file;
-    }
-
-    return Object.assign(newFile, {
-      width: newWidth,
-      height: newPageHeight ?? newHeight,
-      size: newSize ? bytesToKbytes(newSize) : 0,
-      sizeInBytes: newSize,
-    });
+    return file;
+  } catch {
+    // Preserve original bytes when EXIF/metadata reads or transforms fail (e.g. corrupt orientation tags).
+    return file;
   }
-
-  return file;
 };
 
 const DEFAULT_BREAKPOINTS = {
@@ -209,20 +220,24 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
 
   if (!responsiveDimensions) return [];
 
-  const originalDimensions = await getDimensions(file);
+  try {
+    const originalDimensions = await getDimensions(file);
 
-  const breakpoints = getBreakpoints();
-  const results = [];
+    const breakpoints = getBreakpoints();
+    const results = [];
 
-  for (const key of Object.keys(breakpoints)) {
-    const breakpoint = breakpoints[key];
+    for (const key of Object.keys(breakpoints)) {
+      const breakpoint = breakpoints[key];
 
-    if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-      results.push(await generateBreakpoint(key, { file, breakpoint }));
+      if (breakpointSmallerThan(breakpoint, originalDimensions)) {
+        results.push(await generateBreakpoint(key, { file, breakpoint }));
+      }
     }
-  }
 
-  return results;
+    return results;
+  } catch {
+    return [];
+  }
 };
 
 const generateBreakpoint = async (
@@ -256,9 +271,12 @@ const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions
  */
 const isFaultyImage = async (file: UploadableFile) => {
   if (!file.filepath) {
-    return new Promise((resolve, reject) => {
+    return new Promise<boolean>((resolve) => {
       const pipeline = sharp();
-      pipeline.stats().then(resolve).catch(reject);
+      pipeline
+        .stats()
+        .then(() => resolve(false))
+        .catch(() => resolve(true));
       file.getStream().pipe(pipeline);
     });
   }
