@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -232,6 +233,7 @@ export const AssetCropEditor = ({
   onSaveAsCopy,
 }: AssetCropEditorProps) => {
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
   // The InfoBox is a fixed dark surface in both themes, so its text can't use a
   // single neutral token (those invert with the scheme). Pick the scheme's white
   // and a muted grey explicitly.
@@ -258,7 +260,15 @@ export const AssetCropEditor = ({
   // Focal point as a percentage of the crop area (matches the {x,y} contract).
   const [focal, setFocal] = React.useState<FocalPoint>(asset.focalPoint ?? { x: 50, y: 50 });
 
-  const imageUrl = prefixFileUrlWithBackendUrl(asset.url) as string;
+  // Append `updatedAt` as a cache-buster: a replaced asset is served at the same
+  // URL, so without this, reopening the editor shows the browser-cached old image
+  // (mirrors AssetPreview).
+  const rawImageUrl = prefixFileUrlWithBackendUrl(asset.url) as string;
+  const cacheKey = asset.updatedAt ? new Date(asset.updatedAt).getTime() : undefined;
+  const imageUrl =
+    cacheKey !== undefined
+      ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}v=${cacheKey}`
+      : rawImageUrl;
 
   const handleImageLoad = () => {
     if (imgRef.current) {
@@ -369,16 +379,6 @@ export const AssetCropEditor = ({
     setFocal((prev) => ({ ...prev, [axis]: Math.round(pct) }));
   };
 
-  const handleAction = async (action: 'apply' | 'copy') => {
-    const file = await produceFile(asset.name, asset.mime ?? 'image/png', asset.updatedAt);
-    const roundedFocal = { x: Math.round(focal.x), y: Math.round(focal.y) };
-    if (action === 'apply') {
-      onApply(file, roundedFocal);
-    } else {
-      onSaveAsCopy(file, roundedFocal);
-    }
-  };
-
   const cropPercents =
     naturalSize.width && naturalSize.height
       ? {
@@ -388,6 +388,35 @@ export const AssetCropEditor = ({
           height: (crop.height / naturalSize.height) * 100,
         }
       : null;
+
+  // The crop is only usable once the image has loaded and `init()` has seeded
+  // the natural size. Until then the produce/export path would reject.
+  const isReady = cropPercents !== null;
+
+  const handleAction = async (action: 'apply' | 'copy') => {
+    if (!isReady) return;
+
+    let file: globalThis.File;
+    try {
+      file = await produceFile(asset.name, asset.mime ?? 'image/png', asset.updatedAt);
+    } catch {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslationKey('asset-details.crop.export-error'),
+          defaultMessage: 'Could not process the cropped image.',
+        }),
+      });
+      return;
+    }
+
+    const roundedFocal = { x: Math.round(focal.x), y: Math.round(focal.y) };
+    if (action === 'apply') {
+      onApply(file, roundedFocal);
+    } else {
+      onSaveAsCopy(file, roundedFocal);
+    }
+  };
 
   return (
     <Portal>
@@ -433,28 +462,40 @@ export const AssetCropEditor = ({
                 >
                   <ResizeHandle
                     type="button"
-                    aria-label="Resize top-left"
+                    aria-label={formatMessage({
+                      id: getTranslationKey('asset-details.crop.resize.top-left'),
+                      defaultMessage: 'Resize top-left',
+                    })}
                     $cursor="nwse-resize"
                     style={{ left: 0, top: 0 }}
                     onPointerDown={handleResizePointerDown('tl')}
                   />
                   <ResizeHandle
                     type="button"
-                    aria-label="Resize top-right"
+                    aria-label={formatMessage({
+                      id: getTranslationKey('asset-details.crop.resize.top-right'),
+                      defaultMessage: 'Resize top-right',
+                    })}
                     $cursor="nesw-resize"
                     style={{ right: 0, top: 0 }}
                     onPointerDown={handleResizePointerDown('tr')}
                   />
                   <ResizeHandle
                     type="button"
-                    aria-label="Resize bottom-left"
+                    aria-label={formatMessage({
+                      id: getTranslationKey('asset-details.crop.resize.bottom-left'),
+                      defaultMessage: 'Resize bottom-left',
+                    })}
                     $cursor="nesw-resize"
                     style={{ left: 0, bottom: 0 }}
                     onPointerDown={handleResizePointerDown('bl')}
                   />
                   <ResizeHandle
                     type="button"
-                    aria-label="Resize bottom-right"
+                    aria-label={formatMessage({
+                      id: getTranslationKey('asset-details.crop.resize.bottom-right'),
+                      defaultMessage: 'Resize bottom-right',
+                    })}
                     $cursor="nwse-resize"
                     style={{ right: 0, bottom: 0 }}
                     onPointerDown={handleResizePointerDown('br')}
@@ -546,7 +587,12 @@ export const AssetCropEditor = ({
 
                 <Flex direction="column" gap={2} marginLeft={'auto'}>
                   <FieldRow name="focal-x" gap={2}>
-                    <Field.Label textColor={infoTextColor}>fa-x</Field.Label>
+                    <Field.Label textColor={infoTextColor}>
+                      {formatMessage({
+                        id: getTranslationKey('asset-details.crop.focal-x-axis'),
+                        defaultMessage: 'X',
+                      })}
+                    </Field.Label>
                     <FieldNumberInput
                       aria-label={formatMessage({
                         id: getTranslationKey('asset-details.crop.focal-x'),
@@ -559,7 +605,12 @@ export const AssetCropEditor = ({
                     />
                   </FieldRow>
                   <FieldRow name="focal-y" gap={2}>
-                    <Field.Label textColor={infoTextColor}>fa-y</Field.Label>
+                    <Field.Label textColor={infoTextColor}>
+                      {formatMessage({
+                        id: getTranslationKey('asset-details.crop.focal-y-axis'),
+                        defaultMessage: 'Y',
+                      })}
+                    </Field.Label>
                     <FieldNumberInput
                       aria-label={formatMessage({
                         id: getTranslationKey('asset-details.crop.focal-y'),
@@ -581,13 +632,23 @@ export const AssetCropEditor = ({
               {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
             </Button>
             <Flex gap={2}>
-              <Button variant="secondary" onClick={() => handleAction('copy')} loading={isBusy}>
+              <Button
+                variant="secondary"
+                onClick={() => handleAction('copy')}
+                loading={isBusy}
+                disabled={!isReady}
+              >
                 {formatMessage({
                   id: getTranslationKey('asset-details.crop.save-as-copy'),
                   defaultMessage: 'Save as copy',
                 })}
               </Button>
-              <Button variant="default" onClick={() => handleAction('apply')} loading={isBusy}>
+              <Button
+                variant="default"
+                onClick={() => handleAction('apply')}
+                loading={isBusy}
+                disabled={!isReady}
+              >
                 {formatMessage({
                   id: getTranslationKey('asset-details.crop.apply'),
                   defaultMessage: 'Apply',
