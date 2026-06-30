@@ -21,6 +21,7 @@ const { ApplicationError } = errors;
 
 const hooks = {
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
+  willValidateUpdatePermissions: createAsyncSeriesWaterfallHook(),
 };
 
 const ACTIONS = {
@@ -373,6 +374,10 @@ const assignPermissions = async (
 
   if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
     await getService('metrics').sendDidUpdateRolePermissions();
+  }
+
+  if (permissionsToAdd.length > 0 || permissionsToDelete.length > 0) {
+    await getService('api-token-admin').syncPermissionsForRole(roleId);
   }
 
   return permissionsToReturn;

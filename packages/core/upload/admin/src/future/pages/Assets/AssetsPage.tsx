@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, type ChangeEvent } from 'react';
+import { useRef, useCallback, useState, useEffect, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Layouts, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
@@ -15,8 +15,8 @@ import { ChevronDown, Files, Folder, GridFour as GridIcon, Link, List } from '@s
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useUploadFilesStreamMutation, useUploadFromUrlsMutation } from '../../services/api';
-import { useGetFoldersQuery } from '../../services/folders';
+import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
+import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
 
 import {
@@ -28,6 +28,7 @@ import { AssetsTable } from './components/AssetsTable';
 import { CreateFolderDialog } from './components/CreateFolderDialog';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
+import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { localStorageKeys, viewOptions } from './constants';
 import { useFolderInfo } from './hooks/useFolderInfo';
@@ -183,7 +184,19 @@ export const AssetsPage = () => {
   const { formatMessage } = useIntl();
   const { openDetails } = useAssetDetailsParam();
 
-  const { currentFolderId } = useFolderNavigation();
+  const { currentFolderId, navigateToFolderId, navigateToRoot } = useFolderNavigation();
+  // Deleted or missing folders (404) need a fetch — handled here, not in
+  // `useFolderNavigation` (which only strips malformed ?folder= values).
+  const { error: currentFolderError } = useGetFolderQuery(
+    { id: currentFolderId! },
+    { skip: currentFolderId === null }
+  );
+
+  useEffect(() => {
+    if (currentFolderError?.name === 'NotFoundError') {
+      navigateToRoot();
+    }
+  }, [currentFolderError, navigateToRoot]);
   const { title, itemCount } = useFolderInfo(currentFolderId);
   const itemCountLabel = formatMessage(
     {
@@ -192,6 +205,9 @@ export const AssetsPage = () => {
     },
     { count: itemCount }
   );
+  const pageHeaderTitle = title
+    ? `${title} (${itemCountLabel})`
+    : formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' });
 
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
 
@@ -207,7 +223,7 @@ export const AssetsPage = () => {
   const uploadDropZoneRef = useRef<HTMLDivElement>(null);
 
   // Upload handlers
-  const [uploadFilesStream] = useUploadFilesStreamMutation();
+  const [uploadFiles] = useUploadFilesMutation();
   const [uploadFromUrls] = useUploadFromUrlsMutation();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
@@ -228,7 +244,7 @@ export const AssetsPage = () => {
 
     formData.append('fileInfo', JSON.stringify(fileInfoArray));
     try {
-      await uploadFilesStream({ formData, totalFiles: files.length }).unwrap();
+      await uploadFiles({ formData, totalFiles: files.length }).unwrap();
     } catch (error) {
       // Error is already dispatched to store from the API queryFn
     }
@@ -262,14 +278,20 @@ export const AssetsPage = () => {
     <>
       <UploadDropZoneProvider onDrop={handleDrop}>
         <Box ref={uploadDropZoneRef}>
-          <Layouts.Root minHeight="100vh" background="neutral0">
+          <Layouts.Root
+            minHeight="100vh"
+            background="neutral0"
+            sideNav={
+              <FolderTree currentFolderId={currentFolderId} onSelectFolder={navigateToFolderId} />
+            }
+          >
             <VisuallyHidden>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
             </VisuallyHidden>
 
             <HeaderWrapper>
               <Layouts.Header
-                title={`${title} (${itemCountLabel})`}
+                title={pageHeaderTitle}
                 primaryAction={
                   <SimpleMenu
                     popoverPlacement="bottom-end"

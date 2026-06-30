@@ -323,6 +323,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c2 {
+  position: relative;
   overflow-x: hidden;
 }
 

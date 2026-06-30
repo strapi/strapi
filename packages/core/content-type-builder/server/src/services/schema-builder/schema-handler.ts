@@ -15,6 +15,8 @@ export type Infos = {
   schema?: Struct.ContentTypeSchema;
 };
 
+export type SchemaHandler = ReturnType<typeof createSchemaHandler>;
+
 export default function createSchemaHandler(infos: Infos) {
   const { category, modelName, plugin, uid, dir, filename, schema } = infos;
 

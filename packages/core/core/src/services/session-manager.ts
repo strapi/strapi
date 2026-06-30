@@ -7,6 +7,11 @@ import { DEFAULT_ALGORITHM } from '../constants';
 export interface SessionProvider {
   create(session: SessionData): Promise<SessionData>;
   findBySessionId(sessionId: string): Promise<SessionData | null>;
+  findByUser(criteria: {
+    userId: string;
+    origin: string;
+    status?: SessionData['status'];
+  }): Promise<SessionData[]>;
   updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void>;
   deleteBySessionId(sessionId: string): Promise<void>;
   deleteExpired(): Promise<void>;
@@ -23,6 +28,9 @@ export interface SessionData {
 
   type?: 'refresh' | 'session';
   status?: 'active' | 'rotated' | 'revoked';
+  // Free-form, origin-defined metadata (e.g. ip, loginAt). The session manager only
+  // persists and returns this verbatim; it never interprets its contents.
+  metadata?: Record<string, unknown> | null;
   expiresAt: Date;
   absoluteExpiresAt?: Date | null;
   createdAt?: Date;
@@ -83,6 +91,22 @@ class DatabaseSessionProvider implements SessionProvider {
     return result as SessionData | null;
   }
 
+  async findByUser(criteria: {
+    userId: string;
+    origin: string;
+    status?: SessionData['status'];
+  }): Promise<SessionData[]> {
+    const results = await this.db.query(this.contentType).findMany({
+      where: {
+        userId: criteria.userId,
+        origin: criteria.origin,
+        ...(criteria.status ? { status: criteria.status } : {}),
+      },
+      orderBy: { createdAt: 'DESC' },
+    });
+    return results as SessionData[];
+  }
+
   async updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void> {
     await this.db.query(this.contentType).update({ where: { sessionId }, data });
   }
@@ -122,15 +146,19 @@ export interface SessionManagerConfig {
 }
 
 class OriginSessionManager {
-  constructor(
-    private sessionManager: SessionManager,
-    private origin: string
-  ) {}
+  private sessionManager: SessionManager;
+
+  private origin: string;
+
+  constructor(sessionManager: SessionManager, origin: string) {
+    this.sessionManager = sessionManager;
+    this.origin = origin;
+  }
 
   async generateRefreshToken(
     userId: string,
     deviceId: string | undefined,
-    options?: { type?: 'refresh' | 'session' }
+    options?: { type?: 'refresh' | 'session'; metadata?: Record<string, unknown> }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
     return this.sessionManager.generateRefreshToken(userId, deviceId, this.origin, options);
   }
@@ -163,6 +191,22 @@ class OriginSessionManager {
 
   async invalidateRefreshToken(userId: string, deviceId?: string): Promise<void> {
     return this.sessionManager.invalidateRefreshToken(this.origin, userId, deviceId);
+  }
+
+  /**
+   * Lists the active sessions of a user for this origin. Rotated/expired records
+   * are excluded so each live login family yields a single entry.
+   */
+  async listSessions(userId: string): Promise<SessionData[]> {
+    return this.sessionManager.listSessions(this.origin, userId);
+  }
+
+  /**
+   * Revokes a single session by id, but only if it belongs to the given user and origin.
+   * Returns true when a matching session was found and deleted.
+   */
+  async revokeSessionById(userId: string, sessionId: string): Promise<boolean> {
+    return this.sessionManager.revokeSessionById(this.origin, userId, sessionId);
   }
 
   /**
@@ -280,7 +324,7 @@ class SessionManager {
     userId: string,
     deviceId: string | undefined,
     origin: string,
-    options?: { type?: 'refresh' | 'session' }
+    options?: { type?: 'refresh' | 'session'; metadata?: Record<string, unknown> }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
     if (!origin || typeof origin !== 'string') {
       throw new Error(
@@ -314,6 +358,7 @@ class SessionManager {
       childId: null,
       type: tokenType,
       status: 'active',
+      ...(options?.metadata ? { metadata: options.metadata } : {}),
       expiresAt,
       absoluteExpiresAt,
     });
@@ -438,6 +483,34 @@ class SessionManager {
 
   async invalidateRefreshToken(origin: string, userId: string, deviceId?: string): Promise<void> {
     await this.provider.deleteBy({ userId, origin, deviceId });
+  }
+
+  async listSessions(origin: string, userId: string): Promise<SessionData[]> {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+
+    return this.provider.findByUser({ userId, origin, status: 'active' });
+  }
+
+  async revokeSessionById(origin: string, userId: string, sessionId: string): Promise<boolean> {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+
+    const session = await this.provider.findBySessionId(sessionId);
+
+    // Only allow revoking a session that belongs to the requesting user and origin.
+    if (session?.userId !== userId || session?.origin !== origin) {
+      return false;
+    }
+
+    await this.provider.deleteBySessionId(sessionId);
+    return true;
   }
 
   async generateAccessToken(
@@ -588,6 +661,9 @@ class SessionManager {
         childId: null,
         type: tokenType,
         status: 'active',
+        // Preserve origin-defined metadata (e.g. ip, loginAt) across rotation so the
+        // active record always reflects the original session details.
+        ...(current.metadata ? { metadata: current.metadata } : {}),
         expiresAt: childExpiresAt,
         absoluteExpiresAt: current.absoluteExpiresAt ?? new Date(absolute),
       });

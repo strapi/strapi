@@ -5,7 +5,7 @@ import { PlusCircle as PicturePlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetSource } from '../../../constants';
+import { ASSET_SOURCES } from '../../../constants';
 import { useTracking } from '../../../hooks/useTracking';
 import { getTrad, rawFileToAsset } from '../../../utils';
 
@@ -59,11 +59,6 @@ export const FromComputerForm = ({
 
   const handleDragLeave = () => setDragOver(false);
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    // inputRef.current?.click();
-  };
-
   const handleChange = () => {
     const files = inputRef.current?.files;
     const assets: FileWithRawFile[] = [];
@@ -72,7 +67,7 @@ export const FromComputerForm = ({
       for (let i = 0; i < files.length; i++) {
         const file = files.item(i);
         if (file) {
-          const asset = rawFileToAsset(file, AssetSource.Computer);
+          const asset = rawFileToAsset(file, ASSET_SOURCES.Computer);
           assets.push(asset);
         }
       }
@@ -95,7 +90,7 @@ export const FromComputerForm = ({
       for (let i = 0; i < files.length; i++) {
         const file = files.item(i);
         if (file) {
-          const asset = rawFileToAsset(file, AssetSource.Computer);
+          const asset = rawFileToAsset(file, ASSET_SOURCES.Computer);
           assets.push(asset);
         }
       }

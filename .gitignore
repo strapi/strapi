@@ -123,7 +123,6 @@ dist
 ############################
 
 .vscode/
-!.vscode/settings.json
 front-workspace.code-workspace
 .yarnrc
 
@@ -155,8 +154,19 @@ tests/cli/.env
 ############################
 # AI tools
 ############################
+.brain
+.brain.*
+
+# Claude
 CLAUDE.local.md
-.claude
+.claude/
+
+# Cursor
+.cursor/
+!.cursor/worktrees.json
+
+# Codex
+.agents/
 
 ############################
 # Strapi

@@ -15,7 +15,7 @@ import {
   StorageClass,
   ServerSideEncryption,
 } from '@aws-sdk/client-s3';
-import type { AwsCredentialIdentity } from '@aws-sdk/types';
+import type { AwsCredentialIdentity, AwsCredentialIdentityProvider } from '@aws-sdk/types';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import { extractCredentials, isUrlFromBucket } from './utils';
@@ -87,7 +87,7 @@ export type UploadCommandOutput = (
   | CompleteMultipartUploadCommandOutput
   | AbortMultipartUploadCommandOutput
 ) & {
-  Location: string;
+  Location?: string;
   ETag?: string;
 };
 
@@ -140,8 +140,9 @@ export interface DefaultOptions extends S3ClientConfig {
   // TODO Remove this in V5
   accessKeyId?: AwsCredentialIdentity['accessKeyId'];
   secretAccessKey?: AwsCredentialIdentity['secretAccessKey'];
-  // Keep this for V5
-  credentials?: AwsCredentialIdentity;
+  // Keep this for V5. Accepts either static credentials or an AWS credential
+  // provider function, which the SDK resolves (and refreshes) at runtime.
+  credentials?: AwsCredentialIdentity | AwsCredentialIdentityProvider;
   params?: AWSParams;
   [k: string]: unknown;
 }
@@ -485,10 +486,8 @@ export default {
       const uploadObj = new Upload(uploadOptions);
       const result = (await uploadObj.done()) as UploadCommandOutput;
 
-      // Construct the correct URL (handles S3-compatible provider quirks)
-      file.url = constructFileUrl(fileKey, result.Location);
+      file.url = constructFileUrl(fileKey, result.Location ?? '');
 
-      // Store ETag for potential future conditional updates
       if (result.ETag) {
         file.etag = result.ETag.replace(/"/g, '');
       }
@@ -516,8 +515,7 @@ export default {
 
       const result = (await uploadObj.done()) as UploadCommandOutput;
 
-      // Construct the correct URL (handles S3-compatible provider quirks)
-      file.url = constructFileUrl(fileKey, result.Location);
+      file.url = constructFileUrl(fileKey, result.Location ?? '');
 
       if (result.ETag) {
         file.etag = result.ETag.replace(/"/g, '');
@@ -613,6 +611,48 @@ export default {
        */
       upload(file: File, customParams = {}) {
         return upload(file, customParams);
+      },
+
+      /**
+       * Replaces an existing object in S3. Since `PutObject` with the same key
+       * overwrites the existing object, this is just an upload of the new file
+       * — and if the key changed, we delete the old object afterwards so we
+       * never leave the bucket in a state where the asset is missing.
+       */
+      async replaceStream(newFile: File, oldFile: File, customParams = {}) {
+        const newKey = getFileKey(newFile);
+        const oldKey = getFileKey(oldFile);
+
+        await upload(newFile, customParams);
+
+        if (newKey !== oldKey) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { Bucket, Key, ...safeParams } = customParams as any;
+          const command = new DeleteObjectCommand({
+            ...safeParams,
+            Bucket: config.params.Bucket,
+            Key: oldKey,
+          });
+          await s3Client.send(command);
+        }
+      },
+
+      async replace(newFile: File, oldFile: File, customParams = {}) {
+        const newKey = getFileKey(newFile);
+        const oldKey = getFileKey(oldFile);
+
+        await upload(newFile, customParams);
+
+        if (newKey !== oldKey) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { Bucket, Key, ...safeParams } = customParams as any;
+          const command = new DeleteObjectCommand({
+            ...safeParams,
+            Bucket: config.params.Bucket,
+            Key: oldKey,
+          });
+          await s3Client.send(command);
+        }
       },
 
       /**

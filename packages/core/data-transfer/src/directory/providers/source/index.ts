@@ -8,10 +8,11 @@ import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
-import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../../types';
+import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
+import { write } from '../../../utils/writable-async-write';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { unknownPathToPosix } from '../../../file/providers/source/utils';
 
@@ -196,7 +197,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
           stats: { size: stat.size },
           stream: fs.createReadStream(absUpload),
         };
-        outStream.write(asset);
+        await write(outStream, asset);
       }
     }
     outStream.end();
@@ -246,7 +247,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
 
       try {
         for await (const chunk of stream) {
-          outStream.write(chunk);
+          await write(outStream, chunk);
         }
       } catch (e: unknown) {
         outStream.destroy(

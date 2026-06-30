@@ -19,12 +19,57 @@ const readableBytes = (bytes: number, decimals = 1, padStart = 0) => {
     return '0';
   }
   const i = Math.floor(Math.log(bytes) / Math.log(bytesPerKb));
-  const result = `${parseFloat((bytes / bytesPerKb ** i).toFixed(decimals))} ${sizes[i].padStart(
-    2
-  )}`;
+  const result = `${(bytes / bytesPerKb ** i).toFixed(decimals)} ${sizes[i].padStart(2)}`;
 
   return result.padStart(padStart);
 };
+
+// Helper to floor a number to a given number of decimal places
+function floorToDecimal(value: number, decimals: number) {
+  const factor = 10 ** decimals;
+  return Math.floor(value * factor) / factor;
+}
+
+/**
+ * Convert elapsed time to a human readable formatted string, for example "1024" becomes "1s"
+ */
+const readableTime = (elapsedTime: number, decimals = 1, padStart = 0): string => {
+  let value: number;
+  let unit: string;
+
+  if (elapsedTime >= 60000) {
+    value = elapsedTime / 60000;
+    unit = 'm';
+  } else if (elapsedTime >= 1000) {
+    value = elapsedTime / 1000;
+    unit = 's';
+  } else {
+    value = elapsedTime;
+    unit = 'ms';
+  }
+
+  const floored = floorToDecimal(value, decimals);
+  const result = `${floored.toFixed(decimals)}${unit}`;
+  return result.padStart(padStart);
+};
+
+/**
+ * Separates transfer progress segments (count, size, elapsed, rate, ETA) instead of nested
+ * parentheses — easier to scan in a single terminal line.
+ */
+const TRANSFER_PROGRESS_FIELD_SEP = ' · ';
+
+/**
+ * Stage / prep timing: plain `readableTime` (e.g. `1.2s`) when no ETA; with ETA, append
+ * `, ~4.0s remaining` (`~` = approximate). Same base format for every stage; remaining is additive.
+ */
+const formatElapsedAndMaybeRemainingLabel = (
+  elapsedMs: number,
+  remainingMs: number | null
+): string =>
+  remainingMs != null
+    ? `${readableTime(elapsedMs)}, ~${readableTime(remainingMs)} remaining`
+    : readableTime(elapsedMs);
 
 interface ExitWithOptions {
   logger?: Console;
@@ -196,6 +241,9 @@ export {
   assertUrlHasProtocol,
   ifOptions,
   readableBytes,
+  readableTime,
+  formatElapsedAndMaybeRemainingLabel,
+  TRANSFER_PROGRESS_FIELD_SEP,
   runAction,
   assertCwdContainsStrapiProject,
   notifyExperimentalCommand,

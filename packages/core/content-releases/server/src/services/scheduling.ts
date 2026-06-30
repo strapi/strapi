@@ -23,12 +23,7 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.cron.add({
         [taskName]: {
           async task() {
-            try {
-              await getService('release', { strapi }).publish(releaseId);
-              // @TODO: Trigger webhook with success message
-            } catch (error) {
-              // @TODO: Trigger webhook with error message
-            }
+            await getService('release', { strapi }).publish(releaseId);
           },
           options: scheduleDate,
         },

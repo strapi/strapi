@@ -46,6 +46,7 @@ const EditPage = () => {
   const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
   const permissionsRef = React.useRef<PermissionsAPI>(null);
+  const [hasLocaleValidationErrors, setHasLocaleValidationErrors] = React.useState(false);
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -95,6 +96,11 @@ const EditPage = () => {
     data: EditRoleFormValues,
     formik: FormikHelpers<EditRoleFormValues>
   ) => {
+    // Re-check via ref on submit: state may lag behind the latest matrix edits when save is clicked quickly
+    if (permissionsRef.current?.hasLocaleValidationErrors()) {
+      return;
+    }
+
     try {
       const { permissionsToSend, didUpdateConditions } =
         permissionsRef.current?.getPermissions() ?? {};
@@ -192,7 +198,7 @@ const EditPage = () => {
                 <Button
                   type="submit"
                   startIcon={<Check />}
-                  disabled={role.code === 'strapi-super-admin'}
+                  disabled={role.code === 'strapi-super-admin' || hasLocaleValidationErrors}
                   loading={isSubmitting}
                   fullWidth
                 >
@@ -230,6 +236,7 @@ const EditPage = () => {
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}
+                    onLocaleValidationChange={setHasLocaleValidationErrors}
                     permissions={permissions}
                     ref={permissionsRef}
                     layout={permissionsLayout}

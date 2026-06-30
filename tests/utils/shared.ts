@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Locator } from '@playwright/test';
+import { test, expect, type Page, type Locator, type Response } from '@playwright/test';
 
 type NavItem = string | [string, string] | Locator | { text: string; exact?: boolean };
 
@@ -107,6 +107,206 @@ export const clickAndWait = async (page: Page, locator: Locator) => {
   await page.waitForLoadState('networkidle');
 };
 
+// ---------------------------------------------------------------------------
+// E2E timing / sync (toast vs API, SPA navigations, guided tour)
+//
+// Playwright already waits on locators; these helpers cover **ordering** (toast before API, etc.).
+// See `tests/e2e/LOCAL_E2E.md` (“race synchronization”). Prefer `withContentManagerSave` /
+// `withContentManagerPublish` when you click Save/Publish so the listener is always registered first.
+// ---------------------------------------------------------------------------
+
+/** What to wait for after a Content Manager write (see `waitForContentManagerMutation`). */
+export type ContentManagerWritePhase = 'save' | 'publish';
+
+/**
+ * Wait until the matching Content Manager HTTP response succeeds.
+ *
+ * - **`save`**: draft document PUT to `/content-manager/…/collection-types|single-types/…`
+ * - **`publish`**: POST to `…/actions/publish`
+ *
+ * On fast machines the success toast can appear before the API finishes; list/home queries may stay
+ * stale until this resolves.
+ */
+export const waitForContentManagerMutation = (
+  page: Page,
+  phase: ContentManagerWritePhase
+): Promise<Response> => {
+  if (phase === 'save') {
+    return page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PUT' &&
+        response.url().includes('/content-manager/') &&
+        (response.url().includes('/collection-types/') ||
+          response.url().includes('/single-types/')) &&
+        response.ok()
+    );
+  }
+  return page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/actions/publish') &&
+      response.ok()
+  );
+};
+
+/** Same as `waitForContentManagerMutation(page, 'save')`. */
+export const waitForContentManagerDocumentPut = (page: Page) =>
+  waitForContentManagerMutation(page, 'save');
+
+/** Same as `waitForContentManagerMutation(page, 'publish')`. */
+export const waitForContentManagerPublish = (page: Page) =>
+  waitForContentManagerMutation(page, 'publish');
+
+/**
+ * Registers the save-PUT listener, runs `act` (e.g. click Save), then awaits the PUT. Use this so
+ * you never forget to `await` the listener after the click.
+ */
+export const withContentManagerSave = async (
+  page: Page,
+  act: () => Promise<void>
+): Promise<void> => {
+  const done = waitForContentManagerMutation(page, 'save');
+  await act();
+  await done;
+};
+
+/**
+ * Same as `withContentManagerSave` for the publish POST (pair with `findAndClose(…, 'Published document')`).
+ */
+export const withContentManagerPublish = async (
+  page: Page,
+  act: () => Promise<void>
+): Promise<void> => {
+  const done = waitForContentManagerMutation(page, 'publish');
+  await act();
+  await done;
+};
+
+/**
+ * Clicks Publish (or a custom publish button) and confirms the draft-relations
+ * dialog when it appears. Bidirectional M2M warnings use a "Publish" confirm;
+ * xToOne-style warnings use "Publish without relations".
+ */
+export const publishAndConfirmDraftRelations = async (
+  page: Page,
+  publishButton: Locator = page.getByRole('button', { name: 'Publish' })
+) => {
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+  const publishDone = waitForContentManagerMutation(page, 'publish');
+
+  await publishButton.click();
+
+  const dialogAppeared = await Promise.race([
+    dialog.waitFor({ state: 'visible', timeout: 5000 }).then(() => true as const),
+    publishDone.then(() => false as const),
+  ]);
+
+  if (!dialogAppeared) {
+    return;
+  }
+
+  const publishWithoutRelations = dialog.getByRole('button', {
+    name: 'Publish without relations',
+  });
+
+  if (await publishWithoutRelations.isVisible()) {
+    await withContentManagerPublish(page, () => publishWithoutRelations.click());
+    return;
+  }
+
+  await withContentManagerPublish(page, () =>
+    dialog.getByRole('button', { name: 'Publish', exact: true }).click()
+  );
+};
+
+/** Map a segment under `/admin` (or legacy `/admin/…`) to a pathname. */
+function resolveAdminUrl(adminPath: string): string {
+  let s = adminPath.trim();
+  if (s === '' || s === '/') {
+    return '/admin';
+  }
+  s = s.replace(/^\/+/, '');
+  if (s === 'admin' || s.startsWith('admin/')) {
+    s = s.replace(/^admin\/?/, '');
+  }
+  return s === '' ? '/admin' : `/admin/${s}`;
+}
+
+/**
+ * Navigate within the admin SPA when auth/session may have changed (cookies, localStorage, tokens).
+ *
+ * **`adminPath`** — path after `/admin`: omit or `''` for `/admin`; `'settings'` → `/admin/settings`.
+ * You do not repeat the `/admin` prefix (legacy strings starting with `/admin` are still accepted).
+ *
+ * **`options`** — forwarded to `page.goto` (default `waitUntil: 'domcontentloaded'` unless overridden).
+ * We default to `domcontentloaded` instead of Playwright’s `load`: a client-side redirect to login can
+ * overlap a full navigation; waiting for `load` then races (Firefox: `NS_BINDING_ABORTED`).
+ */
+export const gotoAdminPath = async (
+  page: Page,
+  adminPath: string = '',
+  options?: Parameters<Page['goto']>[1]
+): Promise<void> => {
+  const href = resolveAdminUrl(adminPath);
+  await page.goto(href, {
+    ...options,
+    waitUntil: options?.waitUntil ?? 'domcontentloaded',
+  });
+};
+
+/**
+ * Waits until the homepage guided tour card is rendered (depends on guided-tour-meta and dev mode).
+ * Call before interacting with tour links to avoid racing login / RTK hydration.
+ */
+export const waitForGuidedTourOverviewReady = async (page: Page): Promise<void> => {
+  await expect(page.getByRole('heading', { name: 'Discover your application!' })).toBeVisible();
+};
+
+/**
+ * Clicks "Next" in a guided-tour step (`role="dialog"`).
+ * Tour popovers are often fixed to the viewport edge; Playwright may report the button as visible but
+ * still refuse to click with "outside of the viewport" after scroll (differs from headless CI vs local
+ * window chrome, DPI, or panel height). `force` skips the viewport intersection check while still hitting
+ * the real element.
+ */
+export const clickGuidedTourDialogNext = async (page: Page, dialogAccessibleName: string) => {
+  await page
+    .getByRole('dialog', { name: dialogAccessibleName })
+    .getByRole('button', { name: 'Next' })
+    .click({ force: true });
+};
+
+const STRAPI_GUIDED_TOUR_KEY = 'STRAPI_GUIDED_TOUR';
+
+/**
+ * Wait until the guided tour state in localStorage marks a tour completed.
+ * Use before `page.goto('/admin')` (or any full reload): the UI can show "Done" from React
+ * while `usePersistentState` is still flushing; reloading rehydrates from storage and can
+ * briefly (or persistently) show stale progress if this wait is skipped.
+ */
+export const waitForGuidedTourCompletedInStorage = async (
+  page: Page,
+  tourName: 'strapiCloud' | 'contentTypeBuilder' | 'contentManager' | 'apiTokens'
+): Promise<void> => {
+  await page.waitForFunction(
+    ({ key, name }) => {
+      const raw = localStorage.getItem(key);
+      if (!raw) return false;
+      try {
+        const parsed = JSON.parse(raw) as { tours?: Record<string, { isCompleted?: boolean }> };
+        return parsed.tours?.[name]?.isCompleted === true;
+      } catch {
+        return false;
+      }
+    },
+    { key: STRAPI_GUIDED_TOUR_KEY, name: tourName },
+    { timeout: 15_000 }
+  );
+};
+
+/** @deprecated Renamed to `waitForGuidedTourCompletedInStorage`. */
+export const waitForGuidedTourTourCompletedInStorage = waitForGuidedTourCompletedInStorage;
+
 /**
  * Look for an element containing text, and then click a sibling close button
  */
@@ -124,7 +324,7 @@ export const findAndClose = async (page: Page, text: string, options: FindAndClo
   const elements = page.locator(`:has-text("${text}")[role="${role}"]`);
 
   if (required) {
-    await expect(elements.first()).toBeVisible(); // expect at least one element
+    await expect(elements.first()).toBeVisible();
   }
 
   // Find all 'Close' buttons that are siblings of the elements containing the specified text.
@@ -362,11 +562,187 @@ const waitForLayoutFrames = async (page: Page, frames = 3) => {
   }
 };
 
+type DragElementAboveOptions = {
+  source: Locator;
+  target: Locator;
+  steps?: number;
+  delay?: number;
+};
+
+type InnerDropSurfaceDragParams = DragElementAboveOptions & {
+  /** Prefix for thrown errors (e.g. `WebKit`, `Firefox`). */
+  browserLabel: string;
+  /** Run after `mouseup` — e.g. Firefox teardown so later clicks are not swallowed. */
+  afterMouseUp?: () => Promise<void>;
+};
+
+/**
+ * WebKit + Firefox: drop targets use the inner row card (`:scope > *` index 1), same rect as react-dnd’s `objectRef`.
+ * Chromium keeps its own `<li>`-based path.
+ */
+const dragElementAboveInnerDropSurface = async (
+  page: Page,
+  { source, target, steps = 5, delay = 20, browserLabel, afterMouseUp }: InnerDropSurfaceDragParams
+) => {
+  const hitTarget = target.locator(':scope > *').nth(1);
+
+  const v = page.viewportSize();
+  if (v) {
+    const minHeight = 960;
+    if (v.height < minHeight) {
+      await page.setViewportSize({ width: v.width, height: minHeight });
+    }
+  }
+
+  await ensureElementsInViewport(page, source, target);
+
+  const draggable = source.locator('[draggable="true"]');
+
+  const sourceBox = await draggable.boundingBox();
+  let targetBox = await hitTarget.boundingBox();
+
+  if (!sourceBox || !targetBox) {
+    throw new Error('Bounding boxes for source or target could not be determined.');
+  }
+
+  const startX = sourceBox.x + sourceBox.width / 2;
+  const startY = sourceBox.y + sourceBox.height / 2;
+
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+
+  await page.waitForTimeout(100);
+  await waitForLayoutFrames(page, 6);
+  await hitTarget.scrollIntoViewIfNeeded();
+  await waitForLayoutFrames(page, 4);
+  const freshTargetBox = await hitTarget.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+  if (!freshTargetBox || freshTargetBox.width === 0) {
+    await page.mouse.up();
+    throw new Error(
+      `${browserLabel}: drop surface bounding box could not be resolved after drag start (layout may still be settling).`
+    );
+  }
+  targetBox = freshTargetBox;
+
+  let endX = targetBox.x + targetBox.width / 2;
+  let endY = targetBox.y + targetBox.height * 0.35;
+
+  const stepDelay = Math.max(delay, 20);
+  for (let i = 1; i <= steps; i++) {
+    const drop = await hitTarget.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height * 0.35 };
+    });
+    const t = i / steps;
+    const x = startX + (drop.x - startX) * t;
+    const y = startY + (drop.y - startY) * t;
+    await page.mouse.move(x, y);
+    await page.waitForTimeout(stepDelay);
+  }
+  const finalBox = await hitTarget.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+  if (finalBox && finalBox.width > 0) {
+    endX = finalBox.x + finalBox.width / 2;
+    endY = finalBox.y + finalBox.height * 0.35;
+    await page.mouse.move(endX, endY);
+  }
+
+  await page.waitForTimeout(140);
+  await page.mouse.up();
+  await afterMouseUp?.();
+};
+
+/**
+ * Chromium-only path for {@link dragElementAbove}. Do not change when fixing other browsers.
+ */
+const dragElementAboveChromium = async (page: Page, options: DragElementAboveOptions) => {
+  const { source, target, steps = 5, delay = 20 } = options;
+
+  await ensureElementsInViewport(page, source, target);
+
+  const draggable = source.locator('[draggable="true"]');
+
+  const sourceBox = await draggable.boundingBox();
+  let targetBox = await target.boundingBox();
+
+  if (sourceBox && targetBox) {
+    const startX = sourceBox.x + sourceBox.width / 2;
+    const startY = sourceBox.y + sourceBox.height / 2;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+
+    await page.waitForTimeout(100);
+    await waitForLayoutFrames(page, 6);
+    const freshTargetBox = await target.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height };
+    });
+    if (!freshTargetBox || freshTargetBox.width === 0) {
+      await page.mouse.up();
+      throw new Error(
+        'Chromium: target bounding box could not be resolved after drag start (layout may still be settling).'
+      );
+    }
+    targetBox = freshTargetBox;
+
+    let endX = targetBox.x + targetBox.width / 2;
+    let endY = targetBox.y + targetBox.height * 0.35;
+
+    const stepDelay = Math.max(delay, 15);
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const x = startX + (endX - startX) * t;
+      const y = startY + (endY - startY) * t;
+      await page.mouse.move(x, y);
+      await page.waitForTimeout(stepDelay);
+    }
+    const finalBox = await target.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height };
+    });
+    if (finalBox && finalBox.width > 0) {
+      endX = finalBox.x + finalBox.width / 2;
+      endY = finalBox.y + finalBox.height * 0.35;
+      await page.mouse.move(endX, endY);
+    }
+
+    await page.waitForTimeout(100);
+    await page.mouse.up();
+  } else {
+    throw new Error('Bounding boxes for source or target could not be determined.');
+  }
+};
+
+/** WebKit: same inner-card drag as Firefox; no post-`mouseup` hook. */
+const dragElementAboveWebKit = async (page: Page, options: DragElementAboveOptions) =>
+  dragElementAboveInnerDropSurface(page, { ...options, browserLabel: 'WebKit' });
+
+/** Firefox: inner-card drag + teardown so later UI clicks are not swallowed after HTML5 DnD. */
+const dragElementAboveFirefox = async (page: Page, options: DragElementAboveOptions) =>
+  dragElementAboveInnerDropSurface(page, {
+    ...options,
+    browserLabel: 'Firefox',
+    afterMouseUp: async () => {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(100);
+      const vp = page.viewportSize();
+      if (vp) {
+        await page.mouse.move(Math.floor(vp.width / 2), Math.floor(vp.height / 2));
+      }
+    },
+  });
+
 /**
  * Smoothly drags a draggable element within a source <li> to just above a target <li>.
- * Automatically detects WebKit and uses a WebKit-specific implementation if needed.
- * In Chromium, re-resolves the target position after mousedown so the drop uses the
- * target's position after the source row collapses (avoids dragging to a stale offset).
+ *
+ * Dispatches to {@link dragElementAboveChromium} or {@link dragElementAboveInnerDropSurface}
+ * (WebKit / Firefox — shared logic; Firefox passes an `afterMouseUp` hook).
  *
  * @param {object} page - The Playwright page instance.
  * @param {object} options - Options for the drag operation.
@@ -375,88 +751,18 @@ const waitForLayoutFrames = async (page: Page, frames = 3) => {
  * @param {number} [options.steps=5] - Number of steps for smooth movement.
  * @param {number} [options.delay=20] - Delay in milliseconds between steps.
  */
-export const dragElementAbove = async (page, options) => {
-  // Extract options
-  const { source, target, steps = 5, delay = 20 } = options;
-
-  // Ensure both elements are fully visible in the viewport
-  await ensureElementsInViewport(page, source, target);
-
-  // Locate the draggable button within the source <li>
-  const draggable = source.locator('[draggable="true"]');
-
-  // Get bounding boxes of the draggable button and target <li>
-  const sourceBox = await draggable.boundingBox();
-  let targetBox = await target.boundingBox();
-
-  if (sourceBox && targetBox) {
-    // Calculate start position
-    const startX = sourceBox.x + sourceBox.width / 2;
-    const startY = sourceBox.y + sourceBox.height / 2;
-
-    // Move to the starting position and press the mouse
-    await page.mouse.move(startX, startY);
-    await page.mouse.down();
-
-    const browserType = page.context().browser()?.browserType().name() ?? '';
-
-    // In Chromium the source collapses into a floating drag preview; the target's position
-    // can change. Never use the pre-mousedown target position for the move — wait for layout
-    // to settle, then resolve the target's current position (via getBoundingClientRect in page)
-    // so we use the real post-collapse coordinates.
-    if (browserType === 'chromium') {
-      await page.waitForTimeout(100);
-      await waitForLayoutFrames(page, 6);
-      const freshTargetBox = await target.evaluate((el) => {
-        const r = el.getBoundingClientRect();
-        return { x: r.x, y: r.y, width: r.width, height: r.height };
-      });
-      if (!freshTargetBox || freshTargetBox.width === 0) {
-        await page.mouse.up();
-        throw new Error(
-          'Chromium: target bounding box could not be resolved after drag start (layout may still be settling).'
-        );
-      }
-      targetBox = freshTargetBox;
-    }
-
-    // Resolve drop coordinates from the current target box (post-collapse in Chromium)
-    let endX = targetBox.x + targetBox.width / 2;
-    let endY = targetBox.y + targetBox.height * 0.35;
-
-    if (browserType === 'chromium') {
-      // Move in steps so dragover events fire; re-query target position right before final move
-      // so we end at the actual current drop zone (layout can shift during the move).
-      const stepDelay = Math.max(delay, 15);
-      for (let i = 1; i <= steps; i++) {
-        const t = i / steps;
-        const x = startX + (endX - startX) * t;
-        const y = startY + (endY - startY) * t;
-        await page.mouse.move(x, y);
-        await page.waitForTimeout(stepDelay);
-      }
-      // Final position: re-resolve target so we release over the current drop area
-      const finalBox = await target.evaluate((el) => {
-        const r = el.getBoundingClientRect();
-        return { x: r.x, y: r.y, width: r.width, height: r.height };
-      });
-      if (finalBox && finalBox.width > 0) {
-        endX = finalBox.x + finalBox.width / 2;
-        endY = finalBox.y + finalBox.height * 0.35;
-        await page.mouse.move(endX, endY);
-      }
-    } else {
-      await page.mouse.move(endX, endY, { steps: steps });
-    }
-
-    // Brief pause at drop position so react-dnd can set isOver before release
-    await page.waitForTimeout(100);
-
-    // Release the mouse to drop the element
-    await page.mouse.up();
-  } else {
-    throw new Error('Bounding boxes for source or target could not be determined.');
+export const dragElementAbove = async (page: Page, options: DragElementAboveOptions) => {
+  const browserType = page.context().browser()?.browserType().name() ?? '';
+  if (browserType === 'webkit') {
+    return dragElementAboveWebKit(page, options);
   }
+  if (browserType === 'firefox') {
+    return dragElementAboveFirefox(page, options);
+  }
+  if (browserType === 'chromium') {
+    return dragElementAboveChromium(page, options);
+  }
+  throw new Error(`Unsupported browser: ${browserType}`);
 };
 
 /**
@@ -478,6 +784,53 @@ export const isElementBefore = async (firstLocator, secondLocator) => {
   return await firstHandle.evaluate((first, second) => {
     return !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
   }, secondHandle);
+};
+
+type DynamicZoneInsertPosition = 'above' | 'below';
+
+/**
+ * Insert a component in a dynamic zone relative to an existing component.
+ *
+ * Radix nested menus need a real click on the sub-trigger to open the picker; only the leaf
+ * component item uses `dispatchEvent('click')` (see DynamicComponent unit tests).
+ */
+export const insertDynamicZoneComponent = async (
+  page: Page,
+  options: {
+    relativeToComponent: RegExp | string;
+    position: DynamicZoneInsertPosition;
+    componentToAdd: RegExp | string;
+    expectedComponentCount?: number;
+  }
+) => {
+  const { relativeToComponent, position, componentToAdd, expectedComponentCount } = options;
+
+  const componentItem = page.getByRole('listitem').filter({
+    has: page.getByRole('button', { name: relativeToComponent }),
+  });
+
+  await expect(componentItem).toHaveCount(1);
+
+  const moreActionsBtn = componentItem.getByRole('button', { name: /more actions/i });
+  await moreActionsBtn.scrollIntoViewIfNeeded();
+  await moreActionsBtn.click();
+
+  const insertLabel = position === 'above' ? /add component above/i : /add component below/i;
+  const insertMenuItem = page.getByRole('menuitem', { name: insertLabel });
+  await expect(insertMenuItem).toBeVisible();
+  await insertMenuItem.click();
+
+  const componentMenuItem = page.getByRole('menuitem', { name: componentToAdd }).last();
+  await expect(componentMenuItem).toBeVisible();
+  await componentMenuItem.dispatchEvent('click');
+
+  const components = page.getByRole('listitem').filter({ has: page.getByRole('heading') });
+
+  if (expectedComponentCount !== undefined) {
+    await expect(components).toHaveCount(expectedComponentCount);
+  } else {
+    await expect(insertMenuItem).toBeHidden();
+  }
 };
 
 /**
