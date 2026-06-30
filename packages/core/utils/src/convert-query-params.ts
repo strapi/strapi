@@ -469,7 +469,11 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          *
          * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
          */
-        if ('populate' in subPopulate && subPopulate.populate !== '*') {
+        if (
+          'populate' in subPopulate &&
+          !isNil(subPopulate.populate) &&
+          subPopulate.populate !== '*'
+        ) {
           throw new ValidationError(
             `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
               `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
@@ -481,7 +485,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         const newSubPopulate = {};
 
         // case: { populate: '*' }
-        if ('populate' in subPopulate) {
+        if ('populate' in subPopulate && subPopulate.populate === '*') {
           Object.assign(newSubPopulate, { populate: true });
         }
 
