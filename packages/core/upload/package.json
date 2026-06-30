@@ -69,6 +69,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.3.1",
     "@mux/mux-player-react": "3.1.0",
     "@radix-ui/react-dialog": "1.0.5",
     "@radix-ui/react-toggle-group": "1.1.11",
@@ -90,7 +91,7 @@
     "lodash": "4.18.1",
     "mime-types": "2.1.35",
     "prop-types": "^15.8.1",
-    "qs": "6.15.2",
+    "qs": "6.15.3",
     "react-dnd": "16.0.1",
     "react-intl": "6.6.2",
     "react-query": "3.39.3",

@@ -383,7 +383,7 @@
   "components.Wysiwyg.selectOptions.title": "タイトルを追加する",
   "components.Wysiwyg.ToggleMode.markdown-mode": "Markdownモード",
   "components.Wysiwyg.ToggleMode.preview-mode": "プレビューモード",
-  "components.WysiwygBottomControls.charactersIndicators": "キャラクター",
+  "components.WysiwygBottomControls.charactersIndicators": "文字",
   "components.WysiwygBottomControls.fullscreen": "広げる",
   "components.WysiwygBottomControls.uploadFiles": "ファイルをドラッグ＆ドロップ, クリップボードからペースト もしくは {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "選ぶ",
