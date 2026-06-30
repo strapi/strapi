@@ -64,7 +64,6 @@ const LivePreviewBlocksEditor = ({
 
   const field = useField(blocksEditSession.fieldPath);
 
-  // Track latest value via ref so the cleanup closure can read it without going stale
   const latestValueRef = React.useRef(field.value);
   React.useEffect(() => {
     latestValueRef.current = field.value;
@@ -111,19 +110,6 @@ const LivePreviewBlocksEditor = ({
   const [position, setPosition] = React.useState(blocksEditSession.position);
   const [typography, setTypography] = React.useState<FieldTypography>({});
 
-  // Cache the iframe's bounding rect so getBoundingClientRect is not called on every render.
-  // The rect only changes when the admin layout shifts (window resize), not on keystrokes.
-  const [iframeRect, setIframeRect] = React.useState<DOMRect | undefined>(() =>
-    iframeRef.current?.getBoundingClientRect()
-  );
-
-  React.useEffect(() => {
-    const updateRect = () => setIframeRect(iframeRef.current?.getBoundingClientRect());
-    updateRect();
-    window.addEventListener('resize', updateRect);
-    return () => window.removeEventListener('resize', updateRect);
-  }, [iframeRef]);
-
   // Close when the user clicks anywhere in the iframe (notified via postMessage from previewScript)
   // Also update position when the iframe scrolls
   React.useEffect(() => {
@@ -142,18 +128,13 @@ const LivePreviewBlocksEditor = ({
     return () => window.removeEventListener('message', handleMessage);
   }, [endSession, iframeRef]);
 
-  // Send the updated content to the iframe so its hidden BlocksRenderer reflows to the
-  // correct height as the user edits. Batched to one message per animation frame so rapid
-  // keystrokes don't trigger a separate iframe re-render each — latestValueRef ensures the
-  // callback always sends the most recent value even if several renders were batched.
+  // Send the updated content to the iframe on every edit so the iframe's hidden blocks
+  // container reflows to the correct height as the user adds text or changes block types.
   React.useEffect(() => {
-    const rafId = requestAnimationFrame(() => {
-      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
-        field: blocksEditSession.fieldPath,
-        value: latestValueRef.current,
-      });
+    sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
+      field: blocksEditSession.fieldPath,
+      value: field.value,
     });
-    return () => cancelAnimationFrame(rafId);
   }, [field.value, blocksEditSession.fieldPath, sendMessage]);
 
   // Send edit start/end messages to the iframe
@@ -174,6 +155,8 @@ const LivePreviewBlocksEditor = ({
       });
     };
   }, [blocksEditSession.fieldPath, iframeRef]);
+
+  const iframeRect = iframeRef.current?.getBoundingClientRect();
 
   const rawTop = iframeRect ? iframeRect.top + position.top : 0;
   const rawBottom = rawTop + position.height;
