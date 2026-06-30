@@ -675,6 +675,70 @@ const applyJoinTableOrdering = (qb: any, joinTable: any, sourceColumnName: strin
 };
 
 /**
+ * v4 join rows often only persisted owner-side order. When cloning relations for draft targets,
+ * derive missing inverse order values from owner order so inverse populate does not fall back to id.
+ */
+const assignMissingInverseOrderColumns = (
+  relations: Array<Record<string, any>>,
+  joinTable: { orderColumnName?: string; inverseOrderColumnName?: string },
+  targetColumnName: string
+) => {
+  const ownerOrderColumn = joinTable.orderColumnName;
+  const inverseOrderColumn = joinTable.inverseOrderColumnName;
+
+  if (!ownerOrderColumn || !inverseOrderColumn || relations.length === 0) {
+    return relations;
+  }
+
+  const byTarget = new Map<string | number, Array<Record<string, any>>>();
+
+  for (const relation of relations) {
+    const targetId = relation[targetColumnName];
+    const key = targetId ?? 'null';
+    const group = byTarget.get(key);
+
+    if (group) {
+      group.push(relation);
+    } else {
+      byTarget.set(key, [relation]);
+    }
+  }
+
+  for (const group of byTarget.values()) {
+    if (!group.some((relation) => relation[inverseOrderColumn] == null)) {
+      continue;
+    }
+
+    const sorted = [...group].sort((left, right) => {
+      const leftOrder = left[ownerOrderColumn];
+      const rightOrder = right[ownerOrderColumn];
+
+      if (leftOrder != null && rightOrder != null) {
+        return leftOrder - rightOrder;
+      }
+
+      if (leftOrder != null) {
+        return -1;
+      }
+
+      if (rightOrder != null) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    sorted.forEach((relation, index) => {
+      if (relation[inverseOrderColumn] == null) {
+        relation[inverseOrderColumn] = index + 1;
+      }
+    });
+  }
+
+  return relations;
+};
+
+/**
  * Builds a stable key for join-table relations to detect duplicates.
  * Key format: sourceId::targetId::field::componentType
  */
@@ -2247,6 +2311,8 @@ async function copyRelationsFromOtherContentTypes({
         if (newRelations.length === 0) {
           continue;
         }
+
+        assignMissingInverseOrderColumns(newRelations, joinTable, targetColumnName);
 
         await insertRelationsWithDuplicateHandling({
           trx,
