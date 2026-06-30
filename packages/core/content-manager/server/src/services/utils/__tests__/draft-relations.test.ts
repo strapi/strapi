@@ -36,6 +36,7 @@ describe('draft-relations utils', () => {
           if (uid === 'api::article.article') {
             return {
               uid,
+              pluginOptions: { i18n: { localized: true } },
               attributes: {
                 category: {
                   type: 'relation',
@@ -48,12 +49,29 @@ describe('draft-relations utils', () => {
                   target: 'api::tag.tag',
                   inversedBy: 'articles',
                 },
+                authors: {
+                  type: 'relation',
+                  relation: 'manyToMany',
+                  target: 'api::author.author',
+                  inversedBy: 'articles',
+                },
               },
+            };
+          }
+
+          if (uid === 'api::author.author') {
+            return {
+              uid,
+              attributes: {
+                name: { type: 'string' },
+              },
+              options: { draftAndPublish: true },
             };
           }
 
           return {
             uid,
+            pluginOptions: { i18n: { localized: true } },
             attributes: {
               name: { type: 'string' },
             },
@@ -127,6 +145,22 @@ describe('draft-relations utils', () => {
       expect(counts).toEqual({
         unpublishedRelations: 0,
         draftM2mLinks: 1,
+      });
+    });
+
+    it('ignores locale when the M2M target content type is not localized', async () => {
+      findMany.mockResolvedValue([{ documentId: 'published-author', locale: null }]);
+
+      const counts = await sumDraftCounts(
+        {
+          authors: [{ documentId: 'published-author', locale: 'en' }],
+        },
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: 0,
       });
     });
   });

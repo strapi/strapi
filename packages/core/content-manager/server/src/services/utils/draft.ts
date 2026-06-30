@@ -11,6 +11,9 @@ import {
 
 const { isVisibleAttribute, hasDraftAndPublish } = strapiUtils.contentTypes;
 
+const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
+  (model.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized === true;
+
 type M2mLinkRef = {
   targetUid: UID.Schema;
   documentId: string;
@@ -53,12 +56,14 @@ const collectBidirectionalM2mLinks = (
 
         if (isBidirectionalManyToMany(attribute)) {
           const relatedEntries = castArray(value);
+          const targetIsLocalized = isLocalizedContentType(targetModel);
+
           return [
             ...links,
             ...relatedEntries.map((entry) => ({
               targetUid: attribute.target,
               documentId: entry.documentId,
-              locale: entry.locale ?? locale,
+              locale: targetIsLocalized ? (entry.locale ?? locale) : null,
             })),
           ];
         }
@@ -102,6 +107,8 @@ const countLinksToUnpublishedDocuments = async (links: M2mLinkRef[]) => {
 
   const counts = await Promise.all(
     Array.from(linksByTarget.entries()).map(async ([targetUid, targetLinks]) => {
+      const targetModel = strapi.getModel(targetUid);
+      const targetIsLocalized = isLocalizedContentType(targetModel);
       const documentIds = [...new Set(targetLinks.map((link) => link.documentId))];
 
       const publishedRows = await strapi.db.query(targetUid).findMany({
@@ -111,6 +118,12 @@ const countLinksToUnpublishedDocuments = async (links: M2mLinkRef[]) => {
           publishedAt: { $notNull: true },
         },
       });
+
+      if (!targetIsLocalized) {
+        const publishedDocumentIds = new Set(publishedRows.map((row) => row.documentId));
+
+        return targetLinks.filter((link) => !publishedDocumentIds.has(link.documentId)).length;
+      }
 
       const publishedDocumentKeys = new Set(
         publishedRows.map((row) => toPublishedDocumentKey(row.documentId, row.locale))
