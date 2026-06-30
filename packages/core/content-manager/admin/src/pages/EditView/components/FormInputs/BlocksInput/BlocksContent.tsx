@@ -31,7 +31,7 @@ const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   outline: none;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spaces[3]};
+  gap: var(--preview-block-gap, ${({ theme }) => theme.spaces[3]});
   height: 100%;
   // For fullscreen align input in the center with fixed width
   width: ${(props) => (props.$isExpandedMode ? '512px' : '100%')};
@@ -43,6 +43,13 @@ const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   }
   > *:last-child {
     padding-bottom: ${({ theme }) => theme.spaces[3]};
+  }
+  // When --preview-line-height is set (inline live-preview mode), override DS Typography omega's
+  // own line-height on paragraph elements. Targeting > p avoids compressing heading elements
+  // (h1-h6) which have larger font sizes and need their own line-height values.
+  // && doubles the class specificity to (0,2,0)+(0,0,1)=(0,2,1), beating Typography's (0,1,0).
+  && > p {
+    line-height: var(--preview-line-height, inherit);
   }
 `;
 
@@ -359,7 +366,17 @@ const baseRenderElement = ({
   const isDraggable = block.isDraggable?.(element) ?? true;
 
   if (!isDraggable || isMobile || hideDragHandles) {
-    return block.renderElement(props);
+    const el = block.renderElement(props);
+    // In inline live-preview mode, guarantee paragraph line-height matches the preview via
+    // inline style (highest CSS specificity — overrides DS Typography's class regardless of
+    // cascade). The CSS &&>p rule in StyledEditable is a secondary attempt; this inline style
+    // ensures it always works even if the CSS rule loses a specificity battle.
+    if (hideDragHandles && element.type === 'paragraph') {
+      return React.cloneElement(el, {
+        style: { lineHeight: 'var(--preview-line-height, inherit)', ...(el.props?.style ?? {}) },
+      });
+    }
+    return el;
   }
 
   return (
@@ -645,7 +662,8 @@ const BlocksContent = ({
       fontSize={2}
       background={hideDragHandles ? undefined : 'neutral0'}
       color="neutral800"
-      lineHeight={6}
+      lineHeight={hideDragHandles ? undefined : 6}
+      style={hideDragHandles ? { lineHeight: 'var(--preview-line-height, 1.5)' } : undefined}
       paddingLeft={hideDragHandles ? 0 : { initial: 4, medium: 0 }}
       paddingRight={hideDragHandles ? 0 : 7}
       paddingTop={hideDragHandles ? 0 : 6}

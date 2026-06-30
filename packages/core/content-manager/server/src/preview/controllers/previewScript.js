@@ -1141,6 +1141,8 @@ function previewScript(config) {
     let blocksEditClickOutsideHandler = null;
     /** @type {(() => void) | null} */
     let blocksEditScrollHandler = null;
+    /** @type {ResizeObserver | null} */
+    let blocksEditResizeObserver = null;
 
     /**
      * @param {HTMLElement} el
@@ -1496,7 +1498,22 @@ function previewScript(config) {
         };
         document.addEventListener('click', blocksEditClickOutsideHandler);
 
-        // Send position updates to the admin as the iframe scrolls
+        // Measure the preview's computed typography once so the admin overlay can match it
+        const fieldEls = /** @type {HTMLElement[]} */ (Array.from(getElementsByPath(fieldPath)));
+        const sampleEl = fieldEls[0];
+        /** @type {{ lineHeight?: string; fontSize?: string; paragraphGap?: string }} */
+        const typographySync = {};
+        if (sampleEl) {
+          const cs = window.getComputedStyle(sampleEl);
+          typographySync.lineHeight = cs.lineHeight;
+          typographySync.fontSize = cs.fontSize;
+          const pEl = sampleEl.closest('p') ?? sampleEl.querySelector('p');
+          if (pEl) {
+            typographySync.paragraphGap = window.getComputedStyle(pEl).marginBottom;
+          }
+        }
+
+        // Send position + typography to the admin on scroll
         blocksEditScrollHandler = () => {
           const elements = getElementsByPath(fieldPath);
           let minLeft = Infinity;
@@ -1521,9 +1538,23 @@ function previewScript(config) {
             bottom: maxBottom,
             width: maxRight - minLeft,
             height: maxBottom - minTop,
+            typography: typographySync,
           });
         };
         window.addEventListener('scroll', blocksEditScrollHandler);
+        // Fire once immediately to send initial position + typography to the admin
+        blocksEditScrollHandler();
+        // Also sync when the preview content reflows as the user types new blocks
+        const containerEl =
+          fieldEls.find(
+            (el) =>
+              new URLSearchParams(el.getAttribute(SOURCE_ATTRIBUTE) ?? '').get('type') === 'blocks'
+          ) ?? fieldEls[0];
+        if (containerEl) {
+          const resizeObs = new ResizeObserver(blocksEditScrollHandler);
+          blocksEditResizeObserver = resizeObs;
+          resizeObs.observe(containerEl);
+        }
         return;
       }
 
@@ -1536,6 +1567,10 @@ function previewScript(config) {
         if (blocksEditScrollHandler) {
           window.removeEventListener('scroll', blocksEditScrollHandler);
           blocksEditScrollHandler = null;
+        }
+        if (blocksEditResizeObserver) {
+          blocksEditResizeObserver.disconnect();
+          blocksEditResizeObserver = null;
         }
         // Remove the CSS rule to restore host content visibility
         document.getElementById(`strapi-blocks-hide-${fieldPath}`)?.remove();
@@ -1567,6 +1602,10 @@ function previewScript(config) {
         if (blocksEditScrollHandler) {
           window.removeEventListener('scroll', blocksEditScrollHandler);
           blocksEditScrollHandler = null;
+        }
+        if (blocksEditResizeObserver) {
+          blocksEditResizeObserver.disconnect();
+          blocksEditResizeObserver = null;
         }
       },
     };

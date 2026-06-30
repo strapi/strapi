@@ -24,8 +24,10 @@ const ImageWrapper = styled<FlexComponent>(Flex)<{ $isFocused?: boolean }>`
 
   & > img {
     height: auto;
-    // The max-height is decided with the design team, the 56px is the height of the toolbar
-    max-height: calc(512px - 56px);
+    // The max-height is decided with the design team, the 56px is the height of the toolbar.
+    // In inline live-preview mode, --preview-image-max-height is set to "none" on the overlay
+    // container so images render at their natural proportional size (matching the preview).
+    max-height: var(--preview-image-max-height, calc(512px - 56px));
     max-width: 100%;
     object-fit: contain;
   }
