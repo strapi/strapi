@@ -204,6 +204,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
+    const reportWarning = this.#reportWarning.bind(this);
     this.#reportInfo('creating assets read stream');
 
     let activeAsyncEntries = 0;
@@ -236,7 +237,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               try {
                 metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
               } catch {
-                this.#reportWarning(missingAssetMetadataSidecarMessage(file));
+                reportWarning(missingAssetMetadataSidecarMessage(file));
                 metadata = buildFallbackAssetMetadataFromFilename(file, { size });
               }
               const asset: IAsset = {
