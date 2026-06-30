@@ -63,7 +63,18 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       ...new Set(
         readPermissions
           .map((permission) => permission.subject)
-          .filter(Boolean) as RecentDocument['contentTypeUid'][]
+          .filter((subject): subject is RecentDocument['contentTypeUid'] => {
+            if (!subject) {
+              return false;
+            }
+
+            const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
+            const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
+              | { visible?: boolean }
+              | undefined;
+
+            return contentTypeOptions?.visible !== false;
+          })
       ),
     ];
   };

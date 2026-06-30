@@ -265,10 +265,16 @@ const createRolesIfNoneExist = async () => {
   });
 
   // create content-type permissions for each role
+  // Exclude non-displayed content types (e.g. plugin::users-permissions.role) from Editor/Author
+  // since those types are in explorer.read subjects only for super admin relation reads.
+  const nonDisplayedUids = Object.values(strapi.contentTypes as Record<string, any>)
+    .filter((ct) => ct?.pluginOptions?.['content-manager']?.visible === false)
+    .map((ct) => ct.uid as string);
+
   const editorPermissions = getService('content-type').getPermissionsWithNestedFields(
     contentTypesActions,
     {
-      restrictedSubjects: ['plugin::users-permissions.user'],
+      restrictedSubjects: ['plugin::users-permissions.user', ...nonDisplayedUids],
     }
   );
 
