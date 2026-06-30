@@ -19,7 +19,7 @@ import { styled, useTheme } from 'styled-components';
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/files';
 import { getTranslationKey } from '../../../../utils/translations';
 
-import { useCropImg } from './useCropImg';
+import { resolveCornerResize, useCropImg } from './useCropImg';
 
 import type {
   AssetWithPopulatedCreatedBy,
@@ -248,6 +248,7 @@ export const AssetCropEditor = ({
     init,
     crop,
     naturalSize,
+    aspectRatio,
     setCropSize,
     setCropPosition,
     setAspectRatio,
@@ -323,10 +324,17 @@ export const AssetCropEditor = ({
     const move = (e: PointerEvent) => {
       const point = pointerToNatural(e);
       if (!point) return;
-      const x = Math.min(anchorX, point.x);
-      const y = Math.min(anchorY, point.y);
-      const w = Math.abs(point.x - anchorX);
-      const h = Math.abs(point.y - anchorY);
+      const {
+        x,
+        y,
+        width: w,
+        height: h,
+      } = resolveCornerResize({
+        anchorX,
+        anchorY,
+        point,
+        aspectRatio: aspectLocked ? aspectRatio : null,
+      });
       setCropPosition({ x, y });
       setCropSize({ width: w, height: h });
     };
