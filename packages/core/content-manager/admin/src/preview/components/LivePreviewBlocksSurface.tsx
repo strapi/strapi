@@ -204,6 +204,7 @@ const LivePreviewBlocksEditor = ({
     >
       <div
         ref={containerRef}
+        data-testid="blocks-editor-container"
         style={
           {
             position: 'absolute',
