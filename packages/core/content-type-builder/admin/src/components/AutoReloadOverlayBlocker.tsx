@@ -58,7 +58,6 @@ const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlocker
   const unlockAppWithAutoreload = React.useCallback(() => {
     setIsOpen(false);
     setConfig({});
-    setFailed(false);
   }, []);
 
   // eslint-disable-next-line consistent-return

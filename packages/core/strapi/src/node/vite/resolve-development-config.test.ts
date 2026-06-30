@@ -71,20 +71,4 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
       mockHttpServer.close(() => resolve());
     });
   });
-
-  it('aliases path and node:path for browser bundles (#26541)', async () => {
-    const mockHttpServer = http.createServer();
-    const ctx = createCtx(mockHttpServer);
-
-    const config = await resolveDevelopmentConfig(ctx);
-
-    expect(config.resolve?.alias).toMatchObject({
-      path: '/mock/path-browserify',
-      'node:path': '/mock/path-browserify',
-    });
-
-    await new Promise<void>((resolve) => {
-      mockHttpServer.close(() => resolve());
-    });
-  });
 });

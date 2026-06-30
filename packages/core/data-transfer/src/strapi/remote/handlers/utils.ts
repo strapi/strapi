@@ -352,8 +352,8 @@ export const handlerControllerFactory =
             cannotRespondHandler(err);
           } finally {
             resetTimeouts();
-            strapi?.db?.lifecycles?.enable();
-            strapi?.log?.info('[Data transfer] Restoring lifecycle hooks');
+            strapi.db.lifecycles.enable();
+            strapi.log.info('[Data transfer] Restoring lifecycle hooks');
           }
         });
         ws.on('error', async (...args) => {

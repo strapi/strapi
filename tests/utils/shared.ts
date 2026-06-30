@@ -87,17 +87,12 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
     }
 
     await expect(item).toBeVisible();
-    const urlBefore = page.url();
     await item.click();
-    // Client-side navigation does not fire load events; wait for route change when it happens.
-    await page
-      .waitForURL((url) => url.toString() !== urlBefore, { timeout: 30_000 })
-      .catch(() => undefined);
   }
 
-  // Verify header is correct (Vite 8 admin chunks can load slower on first SPA navigation)
+  // Verify header is correct
   const header = page.getByRole('heading', { name: headerText, exact: true });
-  await expect(header).toBeVisible({ timeout: 30_000 });
+  await expect(header).toBeVisible();
   return header;
 };
 
@@ -105,8 +100,7 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
  * Clicks a control and waits for the DOM to settle.
  *
  * Avoid `networkidle` — the admin app polls continuously (widgets, guided tour, HMR),
- * so idle is rarely reached under Vite 8 dev. Do not wait for URL changes here: most
- * clicks (Save, Publish, form controls) stay on the same route and would stall 30s.
+ * so idle is rarely reached under Vite 8 dev.
  */
 export const clickAndWait = async (page: Page, locator: Locator) => {
   await locator.click();
