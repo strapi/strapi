@@ -43,6 +43,13 @@ const { ApplicationError, ValidationError } = errors;
 export default {
   login: compose([
     async (ctx: Context, next: Next) => {
+      const disableLocal = strapi.config.get('admin.auth.disableLocalLoginForSSO', false);
+      if (disableLocal && (strapi.ee?.features?.isEnabled('sso') ?? false)) {
+        return ctx.forbidden('Local login is disabled. Please authenticate via SSO.');
+      }
+      return next();
+    },
+    async (ctx: Context, next: Next) => {
       await validateLoginSessionInput(ctx.request.body ?? {});
       return next();
     },

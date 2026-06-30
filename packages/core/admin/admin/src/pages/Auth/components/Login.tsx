@@ -21,6 +21,7 @@ import type { Login } from '../../../../../shared/contracts/authentication';
 
 interface LoginProps {
   children?: React.ReactNode;
+  hideForm?: boolean;
 }
 
 const LOGIN_SCHEMA = yup.object().shape({
@@ -36,7 +37,7 @@ const LOGIN_SCHEMA = yup.object().shape({
   rememberMe: yup.bool().nullable(),
 });
 
-const Login = ({ children }: LoginProps) => {
+const Login = ({ children, hideForm }: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
@@ -94,13 +95,13 @@ const Login = ({ children }: LoginProps) => {
                 })}
               </Typography>
             </Box>
-            {apiError ? (
+            {!hideForm && apiError ? (
               <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
                 {apiError}
               </Typography>
             ) : null}
           </Column>
-          <Form
+          {!hideForm && <Form
             method="PUT"
             initialValues={{
               email: '',
@@ -148,19 +149,21 @@ const Login = ({ children }: LoginProps) => {
                 {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
               </Button>
             </Flex>
-          </Form>
+          </Form>}
           {children}
         </LayoutContent>
-        <Flex justifyContent="center">
-          <Box paddingTop={4}>
-            <Link isExternal={false} tag={NavLink} to="/auth/forgot-password">
-              {formatMessage({
-                id: 'Auth.link.forgot-password',
-                defaultMessage: 'Forgot your password?',
-              })}
-            </Link>
-          </Box>
-        </Flex>
+        {!hideForm && (
+          <Flex justifyContent="center">
+            <Box paddingTop={4}>
+              <Link isExternal={false} tag={NavLink} to="/auth/forgot-password">
+                {formatMessage({
+                  id: 'Auth.link.forgot-password',
+                  defaultMessage: 'Forgot your password?',
+                })}
+              </Link>
+            </Box>
+          </Flex>
+        )}
       </Main>
     </UnauthenticatedLayout>
   );

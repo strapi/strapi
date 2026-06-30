@@ -25,6 +25,7 @@ interface BrowserStrapi {
     promoteEE?: boolean;
     nps?: boolean;
     docLinks?: boolean;
+    disableLocalLoginForSSO?: boolean;
   };
   projectType: 'Community' | 'Enterprise';
   telemetryDisabled: boolean;
