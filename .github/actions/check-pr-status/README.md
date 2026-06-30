@@ -14,7 +14,7 @@ This action checks a PR labels, milestone and status to validate it is ready for
 2. The PR should have one and only one `source: *` label.
 3. The PR should have one and only one `pr: *` label.
 4. PRs targeting `develop` must have a milestone defined.
-5. Community PRs (authors who are not Strapi org members) must not target `main`. Strapi engineers (`MEMBER` / `OWNER` author association) may still open PRs against `main` for backports and release work.
+5. Community PRs must not target `main`.
 
 ## Contributing
 
