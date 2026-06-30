@@ -16,6 +16,12 @@ interface LivePreviewBlocksSurfaceProps {
   documentResponse: ReturnType<UseDocument>;
 }
 
+type FieldTypography = {
+  lineHeight?: string;
+  fontSize?: string;
+  paragraphGap?: string;
+};
+
 /**
  * Outer wrapper: only renders when a blocks inline edit session is active.
  */
@@ -103,11 +109,12 @@ const LivePreviewBlocksEditor = ({
 
   // Track the field's position as the iframe scrolls
   const [position, setPosition] = React.useState(blocksEditSession.position);
+  const [typography, setTypography] = React.useState<FieldTypography>({});
 
   // Cache the iframe's bounding rect so getBoundingClientRect is not called on every render.
   // The rect only changes when the admin layout shifts (window resize), not on keystrokes.
-  const [iframeRect, setIframeRect] = React.useState<DOMRect | undefined>(
-    () => iframeRef.current?.getBoundingClientRect()
+  const [iframeRect, setIframeRect] = React.useState<DOMRect | undefined>(() =>
+    iframeRef.current?.getBoundingClientRect()
   );
 
   React.useEffect(() => {
@@ -126,7 +133,9 @@ const LivePreviewBlocksEditor = ({
         endSession();
       }
       if (e.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_POSITION_SYNC) {
-        setPosition(e.data.payload);
+        const { typography: typo, ...pos } = e.data.payload;
+        setPosition(pos);
+        if (typo) setTypography(typo as FieldTypography);
       }
     };
     window.addEventListener('message', handleMessage);
@@ -195,13 +204,21 @@ const LivePreviewBlocksEditor = ({
     >
       <div
         ref={containerRef}
-        style={{
-          position: 'absolute',
-          top: position.top,
-          left: position.left,
-          width: position.width,
-          pointerEvents: 'auto',
-        }}
+        style={
+          {
+            position: 'absolute',
+            top: position.top,
+            left: position.left,
+            width: position.width,
+            height: position.height,
+            overflow: 'visible',
+            pointerEvents: 'auto',
+            '--preview-image-max-height': 'none',
+            ...(typography.lineHeight && { '--preview-line-height': typography.lineHeight }),
+            ...(typography.fontSize && { '--preview-font-size': typography.fontSize }),
+            ...(typography.paragraphGap && { '--preview-block-gap': typography.paragraphGap }),
+          } as React.CSSProperties
+        }
         onWheel={(e) => {
           // React portals (toolbar, dropdowns, dialogs) bubble synthetic events through the
           // React tree even when their DOM nodes live in document.body. Guard against forwarding
