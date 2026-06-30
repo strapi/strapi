@@ -16,10 +16,13 @@ afterEach(() => {
 
 const strapi = {} as unknown as Core.Strapi;
 
+const createTrx = () => ({
+  raw: jest.fn().mockResolvedValue({ rows: [] }),
+});
+
 const transaction = {
   attach: jest.fn(async (callback: (trx?: unknown) => unknown) => {
-    const trx = {};
-    return callback(trx);
+    return callback(createTrx());
   }),
   end: jest.fn(),
   rollback: jest.fn(),
@@ -119,6 +122,97 @@ describe('createLinksWriteStream', () => {
     expect(onWarning).toHaveBeenCalledWith(expect.stringContaining('foreign key constraint'));
   });
 
+  test('Should continue inserting links after a foreign key failure in the same transaction', async () => {
+    let aborted = false;
+    const trx = {
+      raw: jest.fn(async (sql: string) => {
+        if (aborted && !sql.startsWith('ROLLBACK TO SAVEPOINT')) {
+          const error = Object.assign(
+            new Error(
+              'current transaction is aborted, commands ignored until end of transaction block'
+            ),
+            { code: '25P02' }
+          );
+          throw error;
+        }
+
+        if (sql.startsWith('ROLLBACK TO SAVEPOINT')) {
+          aborted = false;
+        }
+
+        return { rows: [] };
+      }),
+    };
+
+    transaction.attach.mockImplementationOnce(async (callback: (t?: unknown) => unknown) =>
+      callback(trx)
+    );
+
+    const mappings: Record<string, Record<number, number>> = {
+      'api::chapter.chapter': { 226: 1226, 227: 1227 },
+      'api::node.node': { 269: 1269, 270: 1270 },
+    };
+    const mapID = (uid: string, id: number) => mappings[uid]?.[id];
+    const onWarning = jest.fn();
+
+    const fkError = Object.assign(new Error('insert violates foreign key constraint'), {
+      code: '23503',
+    });
+
+    insert
+      .mockImplementationOnce(async () => {
+        aborted = true;
+        throw fkError;
+      })
+      .mockResolvedValueOnce(undefined);
+
+    const stream = createLinksWriteStream(mapID, strapi, transaction, onWarning);
+
+    const firstLink: ILink = {
+      kind: 'relation.basic',
+      relation: 'oneToMany',
+      left: { type: 'api::chapter.chapter', ref: 226, field: 'nodes' },
+      right: { type: 'api::node.node', ref: 269, field: 'chapters' },
+    };
+    const secondLink: ILink = {
+      kind: 'relation.basic',
+      relation: 'oneToMany',
+      left: { type: 'api::chapter.chapter', ref: 227, field: 'nodes' },
+      right: { type: 'api::node.node', ref: 270, field: 'chapters' },
+    };
+
+    await writeLink(stream, firstLink);
+    await writeLink(stream, secondLink);
+
+    expect(insert).toHaveBeenCalledTimes(2);
+    expect(onWarning).toHaveBeenCalledTimes(1);
+    expect(onWarning).toHaveBeenCalledWith(expect.stringContaining('foreign key constraint'));
+    expect(trx.raw).toHaveBeenCalledWith(expect.stringMatching(/^SAVEPOINT /));
+    expect(trx.raw).toHaveBeenCalledWith(expect.stringMatching(/^ROLLBACK TO SAVEPOINT /));
+  });
+
+  test('Should skip with a warning when the insert hits an aborted transaction error', async () => {
+    const mappings: Record<string, Record<number, number>> = {
+      'test.component': { 1: 11 },
+      'api::foo.foo': { 100: 200 },
+    };
+    const mapID = (uid: string, id: number) => mappings[uid]?.[id];
+    const onWarning = jest.fn();
+
+    const abortedError = Object.assign(
+      new Error('current transaction is aborted, commands ignored until end of transaction block'),
+      { code: '25P02' }
+    );
+    insert.mockRejectedValueOnce(abortedError);
+
+    const stream = createLinksWriteStream(mapID, strapi, transaction, onWarning);
+    await writeLink(stream, createLink());
+
+    expect(insert).toHaveBeenCalledTimes(1);
+    expect(onWarning).toHaveBeenCalledTimes(1);
+    expect(onWarning).toHaveBeenCalledWith(expect.stringContaining('foreign key constraint'));
+  });
+
   test('Should propagate non foreign key errors', async () => {
     const mappings: Record<string, Record<number, number>> = {
       'test.component': { 1: 11 },
@@ -127,11 +221,11 @@ describe('createLinksWriteStream', () => {
     const mapID = (uid: string, id: number) => mappings[uid]?.[id];
     const onWarning = jest.fn();
 
-    insert.mockRejectedValueOnce(new Error('current transaction is aborted'));
+    insert.mockRejectedValueOnce(new Error('connection reset by peer'));
 
     const stream = createLinksWriteStream(mapID, strapi, transaction, onWarning);
 
-    await expect(writeLink(stream, createLink())).rejects.toThrow('current transaction is aborted');
+    await expect(writeLink(stream, createLink())).rejects.toThrow('connection reset by peer');
     expect(onWarning).not.toHaveBeenCalled();
   });
 });
