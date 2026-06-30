@@ -348,7 +348,7 @@ const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelatio
           // documents that still have a draft row (those links are kept on publish).
           if (isBidirectionalManyToMany(attribute)) {
             populateAcc[attributeName] = {
-              fields: ['documentId', 'locale'],
+              fields: ['documentId'],
               filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
             };
           } else {

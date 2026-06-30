@@ -20,8 +20,13 @@ type M2mLinkRef = {
 const toPublishedDocumentKey = (documentId: string, locale?: string | null) =>
   `${documentId}:${locale ?? ''}`;
 
-const collectBidirectionalM2mLinks = (entity: any, uid: UID.Schema): M2mLinkRef[] => {
+const collectBidirectionalM2mLinks = (
+  entity: any,
+  uid: UID.Schema,
+  documentLocale?: string | null
+): M2mLinkRef[] => {
   const model = strapi.getModel(uid);
+  const locale = entity.locale ?? documentLocale;
 
   return Object.keys(model.attributes).reduce((links, attributeName) => {
     const attribute: any = model.attributes[attributeName];
@@ -53,7 +58,7 @@ const collectBidirectionalM2mLinks = (entity: any, uid: UID.Schema): M2mLinkRef[
             ...relatedEntries.map((entry) => ({
               targetUid: attribute.target,
               documentId: entry.documentId,
-              locale: entry.locale,
+              locale: entry.locale ?? locale,
             })),
           ];
         }
@@ -64,7 +69,7 @@ const collectBidirectionalM2mLinks = (entity: any, uid: UID.Schema): M2mLinkRef[
         return castArray(value).reduce(
           (componentLinks, componentValue) => [
             ...componentLinks,
-            ...collectBidirectionalM2mLinks(componentValue, attribute.component),
+            ...collectBidirectionalM2mLinks(componentValue, attribute.component, locale),
           ],
           links
         );
@@ -73,7 +78,7 @@ const collectBidirectionalM2mLinks = (entity: any, uid: UID.Schema): M2mLinkRef[
         return value.reduce((zoneLinks: M2mLinkRef[], componentValue: any) => {
           return [
             ...zoneLinks,
-            ...collectBidirectionalM2mLinks(componentValue, componentValue.__component),
+            ...collectBidirectionalM2mLinks(componentValue, componentValue.__component, locale),
           ];
         }, links);
       }
