@@ -1,38 +1,24 @@
-import { isNil, camelCase } from 'lodash/fp';
+import { isNil } from 'lodash/fp';
 import Koa from 'koa';
 import createError from 'http-errors';
 import delegate from 'delegates';
-import statuses from 'statuses';
 import { formatHttpError } from '../errors';
-
-declare module 'koa' {
-  interface BaseResponse {
-    send: (data: any, status?: number) => void;
-    created: (data: any) => void;
-    deleted: (data: any) => void;
-    _explicitStatus: boolean;
-    [key: string]: (message: string, details?: unknown) => void;
-  }
-}
+import { errorMethodEntries } from './koa-methods';
 
 const addCustomMethods = (app: Koa) => {
   const delegator = delegate(app.context, 'response');
 
   /* errors */
-  statuses.codes
-    .filter((code) => code >= 400 && code < 600)
-    .forEach((code) => {
-      const name = statuses(code);
+  for (const { code, statusName, methodName } of errorMethodEntries()) {
+    app.response[methodName] = function responseCode(response = statusName, details = {}) {
+      const httpError = createError(code, response, { details });
+      const { status, body } = formatHttpError(httpError);
+      this.status = status;
+      this.body = body;
+    };
 
-      const camelCasedName = camelCase(name);
-      app.response[camelCasedName] = function responseCode(message = name, details = {}) {
-        const httpError = createError(code, message, { details });
-        const { status, body } = formatHttpError(httpError);
-        this.status = status;
-        this.body = body;
-      };
-      delegator.method(camelCasedName);
-    });
+    delegator.method(methodName);
+  }
 
   /* send, created, deleted */
   app.response.send = function send(data, status = 200) {

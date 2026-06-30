@@ -12,7 +12,8 @@ import { getService } from '../../utils';
 const localesPropertyHandler = async ({ action, section }: any) => {
   const { actionProvider } = strapi.service('admin::permission');
 
-  const locales = await getService('locales').find();
+  const localesService = getService('locales');
+  const locales = await localesService.setIsDefault(await localesService.find());
 
   // Do not add the locales property if there is none registered
   if (isEmpty(locales)) {
@@ -21,7 +22,7 @@ const localesPropertyHandler = async ({ action, section }: any) => {
 
   for (const subject of section.subjects) {
     const applies = await actionProvider.appliesToProperty('locales', action.actionId, subject.uid);
-    const hasLocalesProperty = subject.properties.find(
+    const hasLocalesProperty = subject.properties.some(
       (property: any) => property.value === 'locales'
     );
 
@@ -29,7 +30,11 @@ const localesPropertyHandler = async ({ action, section }: any) => {
       subject.properties.push({
         label: 'Locales',
         value: 'locales',
-        children: locales.map(({ name, code }: any) => ({ label: name || code, value: code })),
+        children: locales.map(({ name, code, isDefault }: any) => ({
+          label: name || code,
+          value: code,
+          isDefault,
+        })),
       });
     }
   }

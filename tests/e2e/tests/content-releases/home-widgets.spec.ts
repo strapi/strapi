@@ -36,16 +36,12 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     await page.getByRole('button', { name: /new release/i }).click();
     await page.getByRole('textbox', { name: /name/i }).fill(nextReleaseName);
 
-    const date = new Date();
-    const hours = date.getHours();
-    const hoursFuture = (hours + 2) % 24;
-    const hoursFutureFormatted = hoursFuture < 10 ? `0${hoursFuture}` : `${hoursFuture}`;
-
     await page
       .getByRole('combobox', {
         name: /date/i,
       })
       .click();
+    const date = new Date();
     date.setDate(date.getDate() + 1);
     const formattedDate = date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -55,11 +51,13 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     });
     await page.getByLabel(formattedDate).click();
 
-    await page.getByRole('combobox', { name: 'Time', exact: true }).click();
-    await page.getByRole('option', { name: `${hoursFutureFormatted}:00`, exact: true }).click();
+    await page.getByRole('combobox', { name: /^time$/i }).click();
+    await page.getByRole('option', { name: '08:00' }).click();
 
-    await page.getByRole('button', { name: /continue/i }).click();
-    await findAndClose(page, 'Release created');
+    await clickAndWait(page, page.getByRole('button', { name: /continue/i }));
+    // Success navigates to the release details page; the toast is too brief to assert reliably in CI.
+    await page.waitForURL('/admin/plugins/content-releases/*');
+    await expect(page.getByRole('heading', { name: nextReleaseName })).toBeVisible();
 
     // Go back to the homepage
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));

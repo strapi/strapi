@@ -178,6 +178,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
     }
 
     const handleDoubleClickAsset = (asset: File) => {
+      if (disabled) return;
       handleAssetEdit(asset);
     };
 

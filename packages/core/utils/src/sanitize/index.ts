@@ -18,6 +18,7 @@ import traverseEntity from '../traverse-entity';
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 import type { Model, Data } from '../types';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
+import { hasSort } from '../sort-query';
 
 export interface Options {
   auth?: unknown;
@@ -198,8 +199,10 @@ const createAPISanitizers = (opts: APIOptions) => {
       Object.assign(sanitizedQuery, { filters: await sanitizeFilters(filters, schema, { auth }) });
     }
 
-    if (sort) {
+    if (hasSort(sort)) {
       Object.assign(sanitizedQuery, { sort: await sanitizeSort(sort, schema, { auth }) });
+    } else if ('sort' in sanitizedQuery) {
+      delete sanitizedQuery.sort;
     }
 
     if (fields) {
