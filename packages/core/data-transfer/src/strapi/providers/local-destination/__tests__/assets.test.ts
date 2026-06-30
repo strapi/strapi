@@ -1,4 +1,4 @@
-import { Writable, Readable } from 'stream';
+import { Writable, PassThrough } from 'stream';
 import fse from 'fs-extra';
 import type { IAsset } from '../../../../types';
 
@@ -105,14 +105,15 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     );
   });
 
-  test('uploading file to strapi fails incase file ID is not found', async () => {
+  test('still uploads asset bytes when file ID mapping is missing', async () => {
     (fse.createWriteStream as jest.Mock).mockImplementationOnce(createWriteStreamMock);
     const assetsDirectory = 'static/public/assets';
+    const passThrough = new PassThrough();
     const file: IAsset = {
       filename: 'test-photo.jpg',
       filepath: 'strapi-import-folder/assets',
       stats: { size: 200 },
-      stream: Readable.from(['test', 'test-2']),
+      stream: passThrough,
       metadata: {
         hash: 'hash',
         name: 'test-photo',
@@ -122,7 +123,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
         mime: 'test-photo.jpg',
       },
     };
-    const mockFindOne = jest.fn().mockResolvedValue({ ...file.metadata });
+    const mockFindOne = jest.fn().mockResolvedValue(null);
     const mockUpdate = jest.fn().mockResolvedValue(null);
     const mockQuery = jest.fn(() => ({ findOne: mockFindOne, update: mockUpdate }));
     const provider = createLocalStrapiDestinationProvider({
@@ -159,9 +160,17 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
           resolve();
         }
       });
-    }).catch((error) => {
-      expect(error).toBeInstanceOf(Error);
-      expect(error.message).toBe('File ID not found for ID: 1'); // Customize as needed
+    });
+    passThrough.write(Buffer.from('test'));
+    passThrough.end();
+    await new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
+
+    expect(uploadStream).toHaveBeenCalled();
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
     });
   });
 });

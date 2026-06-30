@@ -13,6 +13,10 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import {
+  buildFallbackAssetMetadataFromFilename,
+  missingAssetMetadataSidecarMessage,
+} from '../../../utils/asset-metadata-fallback';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { unknownPathToPosix } from '../../../file/providers/source/utils';
 
@@ -62,6 +66,17 @@ class LocalDirectorySourceProvider implements ISourceProvider {
         origin: 'directory-source-provider',
       },
       kind: 'info',
+    });
+  }
+
+  #reportWarning(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'directory-source-provider',
+      },
+      kind: 'warning',
     });
   }
 
@@ -180,13 +195,9 @@ class LocalDirectorySourceProvider implements ISourceProvider {
         let metadata: IAsset['metadata'];
         try {
           metadata = await this.#readAssetMetadata(name);
-        } catch (error) {
-          outStream.destroy(
-            new ProviderTransferError(`Failed to read metadata for ${name}`, {
-              details: { error },
-            })
-          );
-          return;
+        } catch {
+          this.#reportWarning(missingAssetMetadataSidecarMessage(name));
+          metadata = buildFallbackAssetMetadataFromFilename(name, { size: stat.size });
         }
 
         const normalizedPath = unknownPathToPosix(path.posix.join('assets', 'uploads', name));
