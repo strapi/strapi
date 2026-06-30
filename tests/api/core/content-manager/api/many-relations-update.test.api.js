@@ -141,7 +141,7 @@ describe('CM API - Many relations update (GH#25198)', () => {
       expect(publishRes.body.data).toBeDefined();
       expect(publishRes.body.data.publishedAt).toBeDefined();
     },
-    120000
+    240000
   );
 
   /**

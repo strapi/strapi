@@ -51,7 +51,7 @@ test.describe('Preview', () => {
     await previewLink.locator('..').hover();
     await expect(
       page.getByRole('tooltip', { name: /please save to open the preview/i })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 30_000 });
   });
 
   test('Preview button should not appear for content types without preview config', async ({

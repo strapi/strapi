@@ -49,10 +49,14 @@ describe('AutoReloadOverlayBlocker', () => {
       result.current.lockAppWithAutoreload?.();
     });
     expect(await screen.findByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
-    await waitFor(() => {
+    act(() => {
       result.current.unlockAppWithAutoreload?.();
     });
-    expect(screen.queryByRole('heading', { name: /Waiting for restart/ })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('heading', { name: /Waiting for restart/ })
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('should show failed message after 30s', async () => {
