@@ -26,11 +26,11 @@ describe('Empty populate sort', () => {
     testUtils = await createTestSetup(resources);
     strapi = testUtils.strapi;
     rqContent = await createContentAPIRequest({ strapi });
-  }, 120000);
+  });
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  }, 120000);
+  });
 
   describe('Document Service', () => {
     testInTransaction(
