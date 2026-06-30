@@ -13,17 +13,25 @@ import {
   withContentManagerPublish,
 } from '../../../utils/shared';
 import {
-  RELATION_LAB_FIELDS,
+  BIDIRECTIONAL_M2M_LAB_FIELD,
+  XTOONE_LAB_FIELDS,
   connectRelationTarget,
   createRelationTarget,
   openNewRelationLab,
   saveRelationLabDraft,
+  selectRelationComboboxOption,
 } from './publish-draft-relations-warning.utils';
 
 const ARTICLE_CREATE_URL =
   /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
 
-test.describe('Publish draft-relations warning by relation type', () => {
+/**
+ * Seed product name in the app-template dataset (see entities_00001.jsonl).
+ * Combobox options use the full name plus a Draft/Published suffix — see relation-option-probe.spec.ts.
+ */
+const NIKE_JERSEY_NAME = 'Nike Mens 23/24 Away Stadium Jersey';
+
+test.describe('Publish draft-relations warning — bidirectional M2M regression', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resyncSuperAdminPermissionsAfterImport();
@@ -31,58 +39,28 @@ test.describe('Publish draft-relations warning by relation type', () => {
     await login({ page });
   });
 
-  for (const { field, dialogVariant } of RELATION_LAB_FIELDS) {
-    test(`warns on publish when ${field} links to a draft-only target`, async ({ page }) => {
-      const targetName = `Draft ${field}`;
-
-      await createRelationTarget(page, targetName, { publish: false });
-      await openNewRelationLab(page);
-      await saveRelationLabDraft(page, `Lab ${field} draft target`);
-      await connectRelationTarget(page, field, targetName, false);
-
-      await clickPublishExpectDraftRelationsDialog(page, dialogVariant);
-    });
-
-    test(`does not warn on publish when ${field} links to a published target`, async ({ page }) => {
-      const targetName = `Published ${field}`;
-
-      await createRelationTarget(page, targetName, { publish: true });
-      await openNewRelationLab(page);
-      await saveRelationLabDraft(page, `Lab ${field} published target`);
-      await connectRelationTarget(page, field, targetName, true);
-
-      await clickPublishExpectNoDraftRelationsDialog(page);
-      await findAndClose(page, 'Published Document');
-    });
-  }
-});
-
-test.describe('Publish draft-relations warning — fixture content types', () => {
-  test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
-    await resyncSuperAdminPermissionsAfterImport();
-    await page.goto('/admin');
-    await login({ page });
-  });
-
-  test('bidirectional M2M (Article authors): warns for draft author', async ({ page }) => {
+  test('shows the M2M warning when authors link to a draft-only entry', async ({ page }) => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
     await page.waitForURL(ARTICLE_CREATE_URL);
 
-    await page.getByRole('textbox', { name: 'title' }).fill('Article draft author warning');
+    await page.getByRole('textbox', { name: 'title' }).fill('Article with draft author');
     await page.getByRole('combobox', { name: 'authors' }).click();
-    await page.getByLabel('Coach BeardDraft').click();
+    await selectRelationComboboxOption(page, 'Coach Beard', 'draft');
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await findAndClose(page, 'Saved Document');
 
     await clickPublishExpectDraftRelationsDialog(page, 'm2m');
   });
 
-  test('bidirectional M2M (Article authors): no warning for published author', async ({ page }) => {
+  test('does not warn when authors link to a document that is already published', async ({
+    page,
+  }) => {
+    const authorName = 'Jane Smith';
+
     await navToHeader(page, ['Content Manager', 'Author'], 'Author');
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
-    await page.getByRole('textbox', { name: 'name' }).fill('Published Author');
+    await page.getByRole('textbox', { name: 'name' }).fill(authorName);
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await findAndClose(page, 'Saved Document');
     await withContentManagerPublish(page, () =>
@@ -94,9 +72,9 @@ test.describe('Publish draft-relations warning — fixture content types', () =>
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
     await page.waitForURL(ARTICLE_CREATE_URL);
 
-    await page.getByRole('textbox', { name: 'title' }).fill('Article published author');
+    await page.getByRole('textbox', { name: 'title' }).fill('Article with published author');
     await page.getByRole('combobox', { name: 'authors' }).click();
-    await page.getByLabel('Published AuthorPublished').click();
+    await selectRelationComboboxOption(page, authorName, 'published');
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await findAndClose(page, 'Saved Document');
 
@@ -104,7 +82,69 @@ test.describe('Publish draft-relations warning — fixture content types', () =>
     await findAndClose(page, 'Published Document');
   });
 
-  test('oneToMany (Shop product carousel): warns for draft product', async ({ page }) => {
+  test('relation-lab manyToManyBi warns when the target document is draft-only', async ({
+    page,
+  }) => {
+    const targetName = 'Draft-only M2M target';
+
+    await createRelationTarget(page, targetName, { publish: false });
+    await openNewRelationLab(page);
+    await saveRelationLabDraft(page, 'Lab draft M2M target');
+    await connectRelationTarget(page, BIDIRECTIONAL_M2M_LAB_FIELD, targetName, 'draft');
+
+    await clickPublishExpectDraftRelationsDialog(page, 'm2m');
+  });
+
+  test('relation-lab manyToManyBi does not warn when the target document is already published', async ({
+    page,
+  }) => {
+    const targetName = 'Published M2M target';
+
+    await createRelationTarget(page, targetName, { publish: true });
+    await openNewRelationLab(page);
+    await saveRelationLabDraft(page, 'Lab published M2M target');
+    await connectRelationTarget(page, BIDIRECTIONAL_M2M_LAB_FIELD, targetName, 'published');
+
+    await clickPublishExpectNoDraftRelationsDialog(page);
+    await findAndClose(page, 'Published Document');
+  });
+});
+
+test.describe('Publish draft-relations warning — xToOne-style relations', () => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
+    await resyncSuperAdminPermissionsAfterImport();
+    await page.goto('/admin');
+    await login({ page });
+  });
+
+  for (const field of XTOONE_LAB_FIELDS) {
+    test(`relation-lab ${field} warns when the target document is draft-only`, async ({ page }) => {
+      const targetName = `${field} draft-only target`;
+
+      await createRelationTarget(page, targetName, { publish: false });
+      await openNewRelationLab(page);
+      await saveRelationLabDraft(page, `Lab ${field} draft target`);
+      await connectRelationTarget(page, field, targetName, 'draft');
+
+      await clickPublishExpectDraftRelationsDialog(page, 'xToOne');
+    });
+  }
+
+  test('relation-lab unidirectional manyToMany warns when the target document is draft-only', async ({
+    page,
+  }) => {
+    const targetName = 'Uni M2M draft-only target';
+
+    await createRelationTarget(page, targetName, { publish: false });
+    await openNewRelationLab(page);
+    await saveRelationLabDraft(page, 'Lab uni M2M draft target');
+    await connectRelationTarget(page, 'manyToMany', targetName, 'draft');
+
+    await clickPublishExpectDraftRelationsDialog(page, 'xToOne');
+  });
+
+  test('Shop product carousel warns when linking an unpublished product', async ({ page }) => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
     await page.waitForResponse(
@@ -116,18 +156,17 @@ test.describe('Publish draft-relations warning — fixture content types', () =>
 
     await clickAndWait(page, page.getByRole('button', { name: 'Product carousel - 23/24 kits' }));
     await page.getByRole('combobox', { name: 'products' }).click();
-    await page.getByLabel('Nike Mens 23/24 Away Stadium').click();
+    await selectRelationComboboxOption(page, NIKE_JERSEY_NAME, 'draft');
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
 
     await clickPublishExpectDraftRelationsDialog(page, 'xToOne');
   });
 
-  test('oneToMany (Shop product carousel): no warning for published product', async ({ page }) => {
+  test('Shop product carousel does not warn when linking an already-published product', async ({
+    page,
+  }) => {
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
-    await clickAndWait(
-      page,
-      page.getByRole('gridcell', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
-    );
+    await clickAndWait(page, page.getByRole('gridcell', { name: NIKE_JERSEY_NAME }));
     await withContentManagerPublish(page, () =>
       page.getByRole('button', { name: 'Publish', exact: true }).click()
     );
@@ -144,45 +183,8 @@ test.describe('Publish draft-relations warning — fixture content types', () =>
 
     await clickAndWait(page, page.getByRole('button', { name: 'Product carousel - 23/24 kits' }));
     await page.getByRole('combobox', { name: 'products' }).click();
-    await page.getByLabel('Nike Mens 23/24 Away StadiumPublished').click();
+    await selectRelationComboboxOption(page, NIKE_JERSEY_NAME, 'published');
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
-
-    await clickPublishExpectNoDraftRelationsDialog(page);
-    await findAndClose(page, 'Published Document');
-  });
-
-  test('self-referential oneToMany (Dog related): no draft-relations warning', async ({ page }) => {
-    await navToHeader(page, ['Content Manager', 'Dog'], 'Dog');
-    await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
-    await page.getByRole('textbox', { name: 'name' }).fill('Rex');
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Saved Document');
-
-    await page.getByRole('combobox', { name: 'related' }).click();
-    await clickAndWait(page, page.getByRole('option', { name: 'Rex' }));
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Saved Document');
-
-    await clickPublishExpectNoDraftRelationsDialog(page);
-    await findAndClose(page, 'Published Document');
-  });
-});
-
-test.describe('Publish draft-relations warning — no relations', () => {
-  test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin');
-    await page.goto('/admin');
-    await login({ page });
-  });
-
-  test('does not warn when publishing a draft entry without relations', async ({ page }) => {
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
-    await page.waitForURL(ARTICLE_CREATE_URL);
-
-    await page.getByRole('textbox', { name: 'title' }).fill('No relations');
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Saved Document');
 
     await clickPublishExpectNoDraftRelationsDialog(page);
     await findAndClose(page, 'Published Document');

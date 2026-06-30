@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   clickAndWait,
@@ -7,28 +8,36 @@ import {
   withContentManagerPublish,
 } from '../../../utils/shared';
 
-export type RelationLabField =
-  | 'manyToOne'
-  | 'oneToOne'
-  | 'oneToMany'
-  | 'manyToMany'
-  | 'manyToManyBi';
+export type RelationLabField = 'manyToOne' | 'oneToOne' | 'oneToMany' | 'manyToManyBi';
 
 export type RelationDialogVariant = 'm2m' | 'xToOne';
 
-export const RELATION_LAB_FIELDS: Array<{
-  field: RelationLabField;
-  dialogVariant: RelationDialogVariant;
-}> = [
-  { field: 'manyToOne', dialogVariant: 'xToOne' },
-  { field: 'oneToOne', dialogVariant: 'xToOne' },
-  { field: 'oneToMany', dialogVariant: 'xToOne' },
-  { field: 'manyToMany', dialogVariant: 'xToOne' },
-  { field: 'manyToManyBi', dialogVariant: 'm2m' },
-];
+/** xToOne-style fields in relation-lab (unidirectional — stripped on publish). */
+export const XTOONE_LAB_FIELDS: RelationLabField[] = ['manyToOne', 'oneToOne', 'oneToMany'];
 
-export const relationTargetOptionLabel = (name: string, published: boolean) =>
-  `${name}${published ? 'Published' : 'Draft'}`;
+/** Bidirectional M2M in relation-lab — the relation type this PR fixes. */
+export const BIDIRECTIONAL_M2M_LAB_FIELD: RelationLabField = 'manyToManyBi';
+
+/**
+ * Select a relation in an open CM combobox.
+ *
+ * Each option is a label span plus a DocumentStatus badge (`role="status"`,
+ * `aria-label="draft"|"published"`). Do not use `getByRole('option', { name })` — the
+ * accessible name does not match a simple `${label}Draft` string even when textContent does.
+ */
+export const selectRelationComboboxOption = async (
+  page: Page,
+  label: string,
+  status: 'draft' | 'published'
+) => {
+  const option = page
+    .getByRole('option')
+    .filter({ has: page.getByText(label, { exact: true }) })
+    .filter({ has: page.getByRole('status', { name: status }) });
+
+  await expect(option).toHaveCount(1);
+  await clickAndWait(page, option);
+};
 
 export const createRelationTarget = async (
   page: Page,
@@ -56,12 +65,12 @@ export const openNewRelationLab = async (page: Page) => {
 
 export const connectRelationTarget = async (
   page: Page,
-  field: RelationLabField,
+  field: RelationLabField | 'manyToMany',
   targetName: string,
-  published: boolean
+  status: 'draft' | 'published'
 ) => {
   await page.getByRole('combobox', { name: field, exact: true }).click();
-  await clickAndWait(page, page.getByLabel(relationTargetOptionLabel(targetName, published)));
+  await selectRelationComboboxOption(page, targetName, status);
 };
 
 export const saveRelationLabDraft = async (page: Page, title: string) => {
