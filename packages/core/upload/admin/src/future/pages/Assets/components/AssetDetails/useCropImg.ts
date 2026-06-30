@@ -17,6 +17,41 @@ export interface CropRect {
 }
 
 /**
+ * Resolve a corner-resize drag into a crop rect, keeping the opposite corner
+ * (`anchor`) fixed. When `aspectRatio` is set, one dimension is snapped to the
+ * ratio first (driven by whichever axis the pointer pushed furthest), then the
+ * position is derived from the anchor — so a locked resize never drifts the
+ * anchored corner. Pure (no clamping to image bounds; the caller clamps).
+ */
+export const resolveCornerResize = ({
+  anchorX,
+  anchorY,
+  point,
+  aspectRatio,
+}: {
+  anchorX: number;
+  anchorY: number;
+  point: { x: number; y: number };
+  aspectRatio: number | null;
+}): CropRect => {
+  let width = Math.abs(point.x - anchorX);
+  let height = Math.abs(point.y - anchorY);
+
+  if (aspectRatio) {
+    if (width / aspectRatio >= height) {
+      height = width / aspectRatio;
+    } else {
+      width = height * aspectRatio;
+    }
+  }
+
+  const x = point.x < anchorX ? anchorX - width : anchorX;
+  const y = point.y < anchorY ? anchorY - height : anchorY;
+
+  return { x, y, width, height };
+};
+
+/**
  * Custom crop state + file producer. Replaces a cropperjs-based version: the
  * crop rectangle is stored in natural-image pixels (so it stays locked across
  * window resizes), and `AssetCropEditor` overlays a div sized by
