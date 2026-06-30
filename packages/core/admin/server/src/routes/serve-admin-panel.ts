@@ -61,7 +61,7 @@ export const serveStatic = (filesDir: any, koaStaticOptions = {}) => {
     }
 
     const prev = ctx.path;
-    const newPath = basename(ctx.path);
+    const newPath = `/${basename(ctx.path)}`;
 
     ctx.path = newPath;
     await serve(ctx, async () => {
