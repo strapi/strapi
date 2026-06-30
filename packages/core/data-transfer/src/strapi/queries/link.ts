@@ -1,10 +1,27 @@
 import type { Knex } from 'knex';
 import { clone, isNil } from 'lodash/fp';
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import { ILink } from '../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
+
+const entityExists = async (strapi: Core.Strapi, uid: string, id: number | null | undefined) => {
+  if (id == null) {
+    return false;
+  }
+
+  const entry = await strapi.db.query(uid as UID.Schema).findOne({ select: ['id'], where: { id } });
+
+  return entry != null;
+};
+
+const linkReferencesExistingEntities = async (strapi: Core.Strapi, link: ILink) => {
+  const leftExists = await entityExists(strapi, link.left.type, link.left.ref);
+  const rightExists = await entityExists(strapi, link.right.type, link.right.ref);
+
+  return leftExists && rightExists;
+};
 
 export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => {
   const query = () => {
@@ -55,12 +72,16 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
           const ref = entry[joinColumnName];
 
           if (ref !== null) {
-            yield {
+            const link = {
               kind,
               relation,
               left: { type: uid, ref: entry.id, field: fieldName },
               right: { type: target, ref },
             };
+
+            if (await linkReferencesExistingEntities(strapi, link)) {
+              yield link;
+            }
           }
         }
       }
@@ -168,7 +189,9 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
             right: clone(right as ILink['right']),
           };
 
-          yield link;
+          if (await linkReferencesExistingEntities(strapi, link)) {
+            yield link;
+          }
         }
       }
 
@@ -191,12 +214,16 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
         for (const entry of entries) {
           const ref = entry[idColumn.name];
 
-          yield {
+          const link = {
             kind,
             relation,
             left: { type: uid, ref: entry.id, field: fieldName },
             right: { type: entry[typeColumn.name], ref },
           };
+
+          if (await linkReferencesExistingEntities(strapi, link)) {
+            yield link;
+          }
         }
       }
     }

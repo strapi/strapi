@@ -1,4 +1,6 @@
+import { randomUUID } from 'crypto';
 import { Writable } from 'stream';
+import type { Knex } from 'knex';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { ILink, Transaction } from '../../../../../types';
@@ -22,6 +24,25 @@ const isForeignKeyConstraintError = (e: Error) => {
   }
 
   return e.message.toLowerCase().includes('foreign key constraint');
+};
+
+const isAbortedTransactionError = (e: Error) => {
+  return isErrorWithCode(e) && e.code === '25P02';
+};
+
+const withSavepoint = async <T>(trx: Knex.Transaction, fn: () => Promise<T>) => {
+  const savepoint = `sp_${randomUUID().replace(/-/g, '')}`;
+
+  await trx.raw(`SAVEPOINT ${savepoint}`);
+
+  try {
+    const result = await fn();
+    await trx.raw(`RELEASE SAVEPOINT ${savepoint}`);
+    return result;
+  } catch (error) {
+    await trx.raw(`ROLLBACK TO SAVEPOINT ${savepoint}`);
+    throw error;
+  }
 };
 
 export const createLinksWriteStream = (
@@ -66,10 +87,14 @@ export const createLinksWriteStream = (
         right.ref = mappedRightRef;
 
         try {
-          await query().insert(link);
+          if (trx) {
+            await withSavepoint(trx, () => query().insert(link));
+          } else {
+            await query().insert(link);
+          }
         } catch (e) {
           if (e instanceof Error) {
-            if (isForeignKeyConstraintError(e)) {
+            if (isForeignKeyConstraintError(e) || isAbortedTransactionError(e)) {
               onWarning?.(
                 `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} due to a foreign key constraint.`
               );
