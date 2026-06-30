@@ -7,6 +7,7 @@ import type {
   GetFolder,
   GetFolders,
   GetFolderStructure,
+  BulkMoveFolders,
 } from '../../../../shared/contracts/folders';
 
 export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
@@ -18,13 +19,22 @@ interface GetFoldersParams {
   parentId?: number | null;
 }
 
+interface BulkMoveParams {
+  fileIds?: number[];
+  folderIds?: number[];
+  destinationFolderId: number;
+}
+
 const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
         const { parentId } = params as GetFoldersParams;
 
-        const queryParams: Record<string, unknown> = {};
+        const queryParams: Record<string, unknown> = {
+          // Match sidebar FolderTree order (server getStructure uses sortBy('name')).
+          sort: 'name:ASC',
+        };
 
         if (parentId != null) {
           queryParams['filters'] = {
@@ -132,6 +142,19 @@ const foldersApi = uploadApi.injectEndpoints({
         response.data as unknown as FolderWithCounts,
       providesTags: (_result, _error, { id }) => [{ type: 'Folder', id }],
     }),
+    bulkMove: builder.mutation<BulkMoveFolders.Response['data'], BulkMoveParams>({
+      query: ({ fileIds = [], folderIds = [], destinationFolderId }) => ({
+        url: '/upload/actions/bulk-move',
+        method: 'POST',
+        data: { fileIds, folderIds, destinationFolderId },
+      }),
+      transformResponse: (response: BulkMoveFolders.Response) => response.data,
+      invalidatesTags: [
+        { type: 'Asset', id: 'LIST' },
+        { type: 'Folder', id: 'LIST' },
+        { type: 'Folder', id: 'STRUCTURE' },
+      ],
+    }),
   }),
 });
 
@@ -141,4 +164,5 @@ export const {
   useGetFolderQuery,
   useGetAllFoldersQuery,
   useGetFolderStructureQuery,
+  useBulkMoveMutation,
 } = foldersApi;
