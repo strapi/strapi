@@ -191,6 +191,27 @@ describe('draftRelationCounts', () => {
       });
     });
 
+    it('ignores published bidirectional M2M connects', () => {
+      const counts = countLocalDraftRelations(
+        {
+          tags: {
+            connect: [
+              { id: 1, status: 'published' },
+              { id: 2, status: 'published' },
+            ],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: 0,
+      });
+    });
+
     it('counts draft relations inside components and dynamic zones', () => {
       const counts = countLocalDraftRelations(
         {
@@ -297,6 +318,17 @@ describe('draftRelationCounts', () => {
           { unpublishedRelations: 0, draftM2mLinks: 2 }
         )
       ).toEqual({ unpublishedRelations: 0, draftM2mLinks: 2 });
+    });
+
+    it('does not warn when server reports no draft relations for published M2M targets', () => {
+      const counts = resolveDraftRelationCounts(
+        'doc-1',
+        false,
+        { unpublishedRelations: 0, draftM2mLinks: 0 },
+        { unpublishedRelations: 0, draftM2mLinks: 0 }
+      );
+
+      expect(getDraftRelationsPublishState(counts).hasDraftRelations).toBe(false);
     });
   });
 

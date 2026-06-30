@@ -26,7 +26,11 @@ describe('draft-relations utils', () => {
   });
 
   describe('sumDraftCounts', () => {
+    const findMany = jest.fn();
+
     beforeEach(() => {
+      findMany.mockReset();
+
       global.strapi = {
         getModel: jest.fn((uid: string) => {
           if (uid === 'api::article.article') {
@@ -56,14 +60,24 @@ describe('draft-relations utils', () => {
             options: { draftAndPublish: true },
           };
         }),
+        db: {
+          query: jest.fn(() => ({
+            findMany,
+          })),
+        },
       } as any;
     });
 
-    it('splits bidirectional M2M counts from xToOne counts', () => {
-      const counts = sumDraftCounts(
+    it('splits bidirectional M2M counts from xToOne counts', async () => {
+      findMany.mockResolvedValue([]);
+
+      const counts = await sumDraftCounts(
         {
           category: { count: 1 },
-          tags: { count: 2 },
+          tags: [
+            { documentId: 'draft-tag', locale: 'en' },
+            { documentId: 'another-draft-tag', locale: 'en' },
+          ],
         },
         'api::article.article'
       );
@@ -71,6 +85,48 @@ describe('draft-relations utils', () => {
       expect(counts).toEqual({
         unpublishedRelations: 1,
         draftM2mLinks: 2,
+      });
+    });
+
+    it('ignores bidirectional M2M links to documents that already have a published version', async () => {
+      findMany.mockResolvedValue([
+        { documentId: 'published-tag', locale: 'en' },
+        { documentId: 'another-published-tag', locale: 'en' },
+      ]);
+
+      const counts = await sumDraftCounts(
+        {
+          tags: [
+            { documentId: 'published-tag', locale: 'en' },
+            { documentId: 'another-published-tag', locale: 'en' },
+            { documentId: 'draft-only-tag', locale: 'en' },
+          ],
+        },
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: 1,
+      });
+    });
+
+    it('scopes published-version checks by locale for bidirectional M2M links', async () => {
+      findMany.mockResolvedValue([{ documentId: 'tag-fr', locale: 'fr' }]);
+
+      const counts = await sumDraftCounts(
+        {
+          tags: [
+            { documentId: 'tag-fr', locale: 'fr' },
+            { documentId: 'tag-fr', locale: 'en' },
+          ],
+        },
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: 1,
       });
     });
   });

@@ -1,5 +1,6 @@
 import { castArray } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
+import type { UID } from '@strapi/types';
 
 import {
   type DraftRelationCounts,
@@ -10,14 +11,123 @@ import {
 
 const { isVisibleAttribute, hasDraftAndPublish } = strapiUtils.contentTypes;
 
+type M2mLinkRef = {
+  targetUid: UID.Schema;
+  documentId: string;
+  locale?: string | null;
+};
+
+const toPublishedDocumentKey = (documentId: string, locale?: string | null) =>
+  `${documentId}:${locale ?? ''}`;
+
+const collectBidirectionalM2mLinks = (entity: any, uid: UID.Schema): M2mLinkRef[] => {
+  const model = strapi.getModel(uid);
+
+  return Object.keys(model.attributes).reduce((links, attributeName) => {
+    const attribute: any = model.attributes[attributeName];
+    const value = entity[attributeName];
+
+    if (!value) {
+      return links;
+    }
+
+    switch (attribute.type) {
+      case 'relation': {
+        if (!('target' in attribute)) {
+          return links;
+        }
+
+        const targetModel = strapi.getModel(attribute.target);
+        if (!targetModel || !hasDraftAndPublish(targetModel)) {
+          return links;
+        }
+
+        if (attribute.target === uid || !isVisibleAttribute(model, attributeName)) {
+          return links;
+        }
+
+        if (isBidirectionalManyToMany(attribute)) {
+          const relatedEntries = castArray(value);
+          return [
+            ...links,
+            ...relatedEntries.map((entry) => ({
+              targetUid: attribute.target,
+              documentId: entry.documentId,
+              locale: entry.locale,
+            })),
+          ];
+        }
+
+        return links;
+      }
+      case 'component': {
+        return castArray(value).reduce(
+          (componentLinks, componentValue) => [
+            ...componentLinks,
+            ...collectBidirectionalM2mLinks(componentValue, attribute.component),
+          ],
+          links
+        );
+      }
+      case 'dynamiczone': {
+        return value.reduce((zoneLinks: M2mLinkRef[], componentValue: any) => {
+          return [
+            ...zoneLinks,
+            ...collectBidirectionalM2mLinks(componentValue, componentValue.__component),
+          ];
+        }, links);
+      }
+      default:
+        return links;
+    }
+  }, [] as M2mLinkRef[]);
+};
+
+const countLinksToUnpublishedDocuments = async (links: M2mLinkRef[]) => {
+  if (links.length === 0) {
+    return 0;
+  }
+
+  const linksByTarget = links.reduce<Map<UID.Schema, M2mLinkRef[]>>((acc, link) => {
+    const targetLinks = acc.get(link.targetUid) ?? [];
+    targetLinks.push(link);
+    acc.set(link.targetUid, targetLinks);
+    return acc;
+  }, new Map());
+
+  const counts = await Promise.all(
+    Array.from(linksByTarget.entries()).map(async ([targetUid, targetLinks]) => {
+      const documentIds = [...new Set(targetLinks.map((link) => link.documentId))];
+
+      const publishedRows = await strapi.db.query(targetUid).findMany({
+        select: ['documentId', 'locale'],
+        where: {
+          documentId: { $in: documentIds },
+          publishedAt: { $notNull: true },
+        },
+      });
+
+      const publishedDocumentKeys = new Set(
+        publishedRows.map((row) => toPublishedDocumentKey(row.documentId, row.locale))
+      );
+
+      return targetLinks.filter(
+        (link) => !publishedDocumentKeys.has(toPublishedDocumentKey(link.documentId, link.locale))
+      ).length;
+    })
+  );
+
+  return counts.reduce((total, count) => total + count, 0);
+};
+
 /**
  * sumDraftCounts works recursively on the attributes of a model counting draft relations
  * that matter for publish warnings.
  *
  * - unpublishedRelations: xToOne / oneToMany style links stripped from the published version
- * - draftM2mLinks: bidirectional manyToMany links kept on publish (informational)
+ * - draftM2mLinks: bidirectional manyToMany links to documents without a published version
  */
-const sumDraftCounts = (entity: any, uid: any): DraftRelationCounts => {
+const sumDraftCountsSync = (entity: any, uid: UID.Schema): DraftRelationCounts => {
   const model = strapi.getModel(uid);
 
   return Object.keys(model.attributes).reduce((counts, attributeName) => {
@@ -49,10 +159,7 @@ const sumDraftCounts = (entity: any, uid: any): DraftRelationCounts => {
         }
 
         if (isBidirectionalManyToMany(attribute)) {
-          return {
-            ...counts,
-            draftM2mLinks: counts.draftM2mLinks + value.count,
-          };
+          return counts;
         }
 
         return {
@@ -63,7 +170,7 @@ const sumDraftCounts = (entity: any, uid: any): DraftRelationCounts => {
       case 'component': {
         const compoCounts = castArray(value).reduce(
           (acc, componentValue) =>
-            mergeDraftRelationCounts(acc, sumDraftCounts(componentValue, attribute.component)),
+            mergeDraftRelationCounts(acc, sumDraftCountsSync(componentValue, attribute.component)),
           EMPTY_DRAFT_RELATION_COUNTS
         );
 
@@ -73,7 +180,7 @@ const sumDraftCounts = (entity: any, uid: any): DraftRelationCounts => {
         const dzCounts = value.reduce((acc: DraftRelationCounts, componentValue: any) => {
           return mergeDraftRelationCounts(
             acc,
-            sumDraftCounts(componentValue, componentValue.__component)
+            sumDraftCountsSync(componentValue, componentValue.__component)
           );
         }, EMPTY_DRAFT_RELATION_COUNTS);
 
@@ -83,6 +190,18 @@ const sumDraftCounts = (entity: any, uid: any): DraftRelationCounts => {
         return counts;
     }
   }, EMPTY_DRAFT_RELATION_COUNTS);
+};
+
+const sumDraftCounts = async (entity: any, uid: UID.Schema): Promise<DraftRelationCounts> => {
+  const counts = sumDraftCountsSync(entity, uid);
+  const draftM2mLinks = await countLinksToUnpublishedDocuments(
+    collectBidirectionalM2mLinks(entity, uid)
+  );
+
+  return {
+    ...counts,
+    draftM2mLinks,
+  };
 };
 
 export { sumDraftCounts };

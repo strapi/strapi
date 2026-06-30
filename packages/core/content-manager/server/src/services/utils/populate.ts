@@ -2,6 +2,7 @@ import { merge, isEmpty, set, propEq } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
+import { isBidirectionalManyToMany } from './draft-relations';
 
 const {
   isVisibleAttribute,
@@ -342,10 +343,20 @@ const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelatio
         }
 
         if (isVisibleAttribute(model, attributeName)) {
-          populateAcc[attributeName] = {
-            count: true,
-            filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
-          };
+          // Bidirectional M2M links on draft entries point at draft rows of related documents.
+          // We need documentId/locale to distinguish truly unpublished targets from published
+          // documents that still have a draft row (those links are kept on publish).
+          if (isBidirectionalManyToMany(attribute)) {
+            populateAcc[attributeName] = {
+              fields: ['documentId', 'locale'],
+              filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
+            };
+          } else {
+            populateAcc[attributeName] = {
+              count: true,
+              filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
+            };
+          }
           hasRelations = true;
         }
         break;

@@ -281,15 +281,11 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         },
       });
 
-      const totalNumberDraftRelations: number = entities!.reduce(
-        (count: number, entity: Document) => {
-          const { unpublishedRelations } = sumDraftCounts(entity, uid);
-          return count + unpublishedRelations;
-        },
-        0
+      const counts = await Promise.all(
+        entities!.map((entity: Document) => sumDraftCounts(entity, uid))
       );
 
-      return totalNumberDraftRelations;
+      return counts.reduce((count, entityCounts) => count + entityCounts.unpublishedRelations, 0);
     },
   };
 };
