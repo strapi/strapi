@@ -6,13 +6,50 @@ import { formatCondition, getAvailableConditionFields } from '../utils/condition
 
 import { GenericInput } from './GenericInputs';
 
-interface TabFormProps {
-  form: Array<Record<string, any>>;
-  formErrors: Record<string, any>;
-  genericInputProps: Record<string, any>;
-  modifiedData: Record<string, any>;
-  onChange: (value: any) => void;
-}
+import type { AnyAttribute, AttributeConditions, IntlLabel } from '../types';
+
+type FormInput = Partial<React.ComponentProps<typeof GenericInput>> & {
+  name: string;
+  type: string;
+  size?: number;
+};
+
+type FormSection = {
+  sectionTitle?: IntlLabel | null;
+  intlLabel?: IntlLabel;
+  items: FormInput[];
+};
+
+type FormError = {
+  id?: string;
+};
+
+type GenericInputProps = Record<string, unknown> & {
+  attributeName?: string;
+  contentTypeSchema?: {
+    attributes?: AnyAttribute[];
+  };
+};
+
+type ModifiedData = Record<string, unknown> & {
+  name?: string;
+};
+
+type TabFormChangeHandler = (value: {
+  target: {
+    name: string;
+    value?: unknown;
+    type?: string;
+  };
+}) => void;
+
+type TabFormProps = {
+  form: FormSection[];
+  formErrors: Record<string, FormError>;
+  genericInputProps: GenericInputProps;
+  modifiedData: ModifiedData;
+  onChange: TabFormChangeHandler;
+};
 
 /* eslint-disable react/no-array-index-key */
 export const TabForm = ({
@@ -23,6 +60,8 @@ export const TabForm = ({
   onChange,
 }: TabFormProps) => {
   const { formatMessage } = useIntl();
+  const sharedInputProps = genericInputProps as Partial<React.ComponentProps<typeof GenericInput>> &
+    GenericInputProps;
 
   return (
     <>
@@ -47,8 +86,12 @@ export const TabForm = ({
             )}
 
             <Grid.Root gap={4}>
-              {section.items.map((input: any, i: number) => {
+              {section.items.map((input, i) => {
                 const key = `${sectionIndex}.${i}`;
+                const intlLabel = input.intlLabel ?? {
+                  id: input.name,
+                  defaultMessage: input.name,
+                };
 
                 /**
                  * Use undefined as the default value because not every input wants a string e.g. Date pickers
@@ -66,7 +109,7 @@ export const TabForm = ({
 
                 // Retrieve the error for a specific input
                 const errorId = pluginOptionError
-                  ? formErrors[pluginOptionError].id
+                  ? formErrors[pluginOptionError]?.id
                   : get(
                       formErrors,
                       [
@@ -86,9 +129,9 @@ export const TabForm = ({
                 if (input.type === 'pushRight') {
                   return (
                     <Grid.Item
-                      col={input.size || 6}
+                      col={input.size ?? 6}
                       xs={12}
-                      key={input.name || key}
+                      key={input.name ?? key}
                       direction="column"
                       alignItems="stretch"
                     >
@@ -99,13 +142,15 @@ export const TabForm = ({
 
                 // Special handling for 'condition-form'
                 if (input.type === 'condition-form') {
-                  const currentCondition = get(modifiedData, input.name);
+                  const currentCondition = get(modifiedData, input.name) as
+                    | AttributeConditions
+                    | undefined;
 
                   // Get all attributes from the content type schema
                   const contentTypeAttributes =
-                    genericInputProps.contentTypeSchema?.attributes || [];
+                    sharedInputProps.contentTypeSchema?.attributes ?? [];
 
-                  if (!genericInputProps.contentTypeSchema) {
+                  if (!sharedInputProps.contentTypeSchema) {
                     console.warn('contentTypeSchema is undefined, skipping condition form');
                     return null;
                   }
@@ -113,7 +158,7 @@ export const TabForm = ({
                   // Filter for boolean and enumeration fields only, excluding the current field
                   const availableFields = getAvailableConditionFields(
                     contentTypeAttributes,
-                    modifiedData.name
+                    modifiedData.name ?? ''
                   );
 
                   const noFieldsMessage = formatMessage({
@@ -124,27 +169,32 @@ export const TabForm = ({
 
                   return (
                     <Grid.Item
-                      col={input.size || 12}
+                      col={input.size ?? 12}
                       xs={12}
-                      key={input.name || key}
+                      key={input.name ?? key}
                       direction="column"
                       alignItems="stretch"
                     >
-                      {!currentCondition || Object.keys(currentCondition).length === 0 ? (
+                      {currentCondition === undefined ||
+                      Object.keys(currentCondition).length === 0 ? (
                         <Box>
-                          {currentCondition && Object.keys(currentCondition).length > 0 && (
-                            <Typography variant="sigma" textColor="neutral800" marginBottom={2}>
-                              {formatCondition(
-                                currentCondition,
-                                availableFields,
-                                genericInputProps.attributeName || modifiedData.name
-                              )}
-                            </Typography>
-                          )}
+                          {currentCondition !== undefined &&
+                            Object.keys(currentCondition).length > 0 && (
+                              <Typography variant="sigma" textColor="neutral800" marginBottom={2}>
+                                {formatCondition(
+                                  currentCondition,
+                                  availableFields,
+                                  sharedInputProps.attributeName ?? modifiedData.name ?? ''
+                                )}
+                              </Typography>
+                            )}
                           <Tooltip label={noFieldsMessage}>
                             <Button
                               marginTop={
-                                currentCondition && Object.keys(currentCondition).length > 0 ? 0 : 4
+                                currentCondition !== undefined &&
+                                Object.keys(currentCondition).length > 0
+                                  ? 0
+                                  : 4
                               }
                               fullWidth={true}
                               variant="secondary"
@@ -169,8 +219,9 @@ export const TabForm = ({
                       ) : (
                         <GenericInput
                           {...input}
-                          {...genericInputProps}
+                          {...sharedInputProps}
                           error={errorId}
+                          intlLabel={intlLabel}
                           onChange={onChange}
                           value={value}
                           autoFocus={i === 0}
@@ -192,16 +243,17 @@ export const TabForm = ({
                 // Default rendering for all other input types
                 return (
                   <Grid.Item
-                    col={input.size || 6}
+                    col={input.size ?? 6}
                     xs={12}
-                    key={input.name || key}
+                    key={input.name ?? key}
                     direction="column"
                     alignItems="stretch"
                   >
                     <GenericInput
                       {...input}
-                      {...genericInputProps}
+                      {...sharedInputProps}
                       error={errorId}
+                      intlLabel={intlLabel}
                       onChange={onChange}
                       value={value}
                       autoFocus={i === 0}

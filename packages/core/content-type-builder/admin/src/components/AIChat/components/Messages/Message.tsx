@@ -104,8 +104,13 @@ type SchemaToolPart = {
   toolCallId?: string;
 };
 
-const isSchemaToolPart = (part: any): part is SchemaToolPart =>
-  part && typeof part === 'object' && part.type === 'tool-schemaGenerationTool';
+const isSchemaToolPart = (part: unknown): part is SchemaToolPart => {
+  if (typeof part !== 'object' || part === null || !('type' in part)) {
+    return false;
+  }
+
+  return part.type === 'tool-schemaGenerationTool';
+};
 
 const capitalize = (s?: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
@@ -166,7 +171,9 @@ const MessageContent = ({
       <MarkdownStyles>
         <Markdown
           components={{
-            a: ({ node, ...props }) => <a target="_blank" rel="noopener noreferrer" {...props} />,
+            a: ({ node: _node, ...props }) => (
+              <a target="_blank" rel="noopener noreferrer" {...props} />
+            ),
           }}
         >
           {part.text}
@@ -275,5 +282,5 @@ export const ChatMessage = ({
   if (message.role === 'user') {
     return <UserMessage message={message as UserMessageType} />;
   }
-  return <AssistantMessage message={message as AssistantMessageType} />;
+  return <AssistantMessage message={message as AssistantMessageType} isLoading={isLoading} />;
 };

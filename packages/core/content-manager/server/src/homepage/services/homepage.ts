@@ -87,9 +87,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     allowedContentTypeUids: RecentDocument['contentTypeUid'][],
     configurations: ContentTypeConfiguration[]
   ): ContentTypeMeta[] => {
-    return allowedContentTypeUids.map((uid) => {
+    return allowedContentTypeUids.reduce<ContentTypeMeta[]>((acc, uid) => {
       const configuration = configurations.find((config) => config.uid === uid);
-      const contentType = strapi.contentType(uid);
+      const contentType = strapi.contentTypes[uid];
+
+      if (contentType === undefined) {
+        return acc;
+      }
+
       const mainField = resolveReadableMainField(
         contentType,
         configuration,
@@ -98,14 +103,16 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const fields = buildHomepageQueryFields(contentType, mainField);
       const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
 
-      return {
+      acc.push({
         fields,
         mainField,
         contentType,
         hasDraftAndPublish,
         uid,
-      };
-    });
+      });
+
+      return acc;
+    }, []);
   };
 
   const formatDocuments = (

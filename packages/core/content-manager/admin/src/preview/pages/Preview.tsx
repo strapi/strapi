@@ -152,21 +152,25 @@ const PreviewPage = () => {
     collectionType: string;
   }>();
   const [{ query }] = useQueryParams<{
-    plugins?: Record<string, unknown>;
+    plugins?: { i18n?: { locale?: string } };
     status?: string;
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+  const locale = typeof params.locale === 'string' ? params.locale : undefined;
 
   const [deviceName, setDeviceName] = React.useState<(typeof DEVICES)[number]['name']>(
     DEVICES[0].name
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
-  const previewHighlightColors: PreviewHighlightColors = {
-    highlightHoverColor: theme.colors.primary500,
-    highlightActiveColor: theme.colors.primary600,
-  };
+  const previewHighlightColors = React.useMemo<PreviewHighlightColors>(
+    () => ({
+      highlightHoverColor: theme.colors.primary500,
+      highlightActiveColor: theme.colors.primary600,
+    }),
+    [theme.colors.primary500, theme.colors.primary600]
+  );
 
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
@@ -203,7 +207,7 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [documentId, toggleNotification, theme, formatMessage]);
+  }, [documentId, toggleNotification, previewHighlightColors, formatMessage]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -224,7 +228,7 @@ const PreviewPage = () => {
     },
     query: {
       documentId,
-      locale: params.locale,
+      locale,
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });

@@ -38,11 +38,9 @@ export default {
     }
   },
 
-  async registerTrads(app: any) {
-    const { locales } = app;
-
+  async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
-      (locales as any[]).map((locale) => {
+      locales.map((locale) => {
         return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {

@@ -11,7 +11,7 @@ import { EnumerationProps } from './types';
 const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
   ({ name, required, label, hint, labelAction, options = [], ...props }, ref) => {
     const { formatMessage } = useIntl();
-    const field = useField(name);
+    const field = useField<string | number | null>(name);
     const fieldRef = useFocusInputField<HTMLDivElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);

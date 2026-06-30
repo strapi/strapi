@@ -50,7 +50,7 @@ describe('Remote Strapi Destination Utils', () => {
       },
     });
 
-    // @ts-ignore
+    // @ts-expect-error -- Custom matcher is registered locally for this assertion.
     expect(ws.send).toHaveBeenCalledWith(expect.toContain(message), expect.anything());
   });
 
@@ -66,7 +66,7 @@ describe('Remote Strapi Destination Utils', () => {
 
     await createDispatcher(ws).dispatch(message);
 
-    // @ts-ignore
+    // @ts-expect-error -- WebSocket send is mocked by the test environment.
     const payload = (ws.send as jest.Mock).mock.calls[0]?.[0];
     const parsed = JSON.parse(payload) as {
       data: Array<{ bytes: string }>;

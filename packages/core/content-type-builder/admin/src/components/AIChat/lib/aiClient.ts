@@ -13,6 +13,10 @@ export interface AITokenData {
   expiresAt: string;
 }
 
+type AITokenResponse = Partial<AITokenData> & {
+  data?: Partial<AITokenData>;
+};
+
 let aiTokenCache: AITokenData | null = null;
 const SESSION_STORAGE_KEY = 'strapi-ai-token';
 const EXPIRY_BUFFER_MS = 60 * 1000;
@@ -86,12 +90,12 @@ export const getAIJwt = async (): Promise<AITokenData | null> => {
   // Fetch from admin endpoint
   try {
     const { get } = getFetchClient();
-    const { data } = await get('/admin/ai-token');
+    const { data } = await get<AITokenResponse>('/admin/ai-token');
 
-    const token = data?.token || data?.data?.token;
-    const expiresAt = data?.expiresAt || data?.data?.expiresAt;
+    const token = data.token ?? data.data?.token;
+    const expiresAt = data.expiresAt ?? data.data?.expiresAt;
 
-    if (token && expiresAt) {
+    if (typeof token === 'string' && typeof expiresAt === 'string') {
       aiTokenCache = { token, expiresAt };
       writeToSession(aiTokenCache);
 
@@ -118,7 +122,7 @@ export const prefetchAIToken = async (): Promise<void> => {
   }
 };
 
-export const safeParseJson = async (response: Response): Promise<any> => {
+export const safeParseJson = async (response: Response): Promise<unknown> => {
   try {
     return await response.json();
   } catch {
@@ -152,12 +156,24 @@ const buildHeaders = (
   };
 };
 
-const shouldRetryForToken = (status: number, body: any): boolean => {
+type ErrorResponseBody = {
+  error?: unknown;
+};
+
+const getErrorMessage = (body: unknown): string => {
+  if (typeof body !== 'object' || body === null || !('error' in body)) {
+    return '';
+  }
+
+  return String((body as ErrorResponseBody).error ?? '').toLowerCase();
+};
+
+const shouldRetryForToken = (status: number, body: unknown): boolean => {
   if (status === 401 || status === 403) {
     return true;
   }
 
-  const msg = (body?.error || '').toString().toLowerCase();
+  const msg = getErrorMessage(body);
   return msg.includes('expired') || msg.includes('invalid token');
 };
 

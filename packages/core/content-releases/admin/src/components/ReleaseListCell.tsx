@@ -21,15 +21,30 @@ interface QueryParams {
   };
 }
 
+type DocumentRow = {
+  id: string | number;
+  documentId: Modules.Documents.ID;
+};
+
+const isDocumentRow = (entry: { id: string | number }): entry is DocumentRow => {
+  if ('documentId' in entry) {
+    return typeof entry.documentId === 'string';
+  }
+
+  return false;
+};
+
 const useReleasesList = (contentTypeUid: UID.ContentType, documentId: Modules.Documents.ID) => {
   const listViewData = useTable('ListView', (state) => state.rows);
-  const documentIds = listViewData.map((entry) => entry.documentId);
+  const documentIds = listViewData
+    .filter((entry) => isDocumentRow(entry))
+    .map((entry) => entry.documentId);
   const [{ query }] = useQueryParams();
   const locale = (query as QueryParams)?.plugins?.i18n?.locale || undefined;
 
   const response = useGetMappedEntriesInReleasesQuery(
     { contentTypeUid, documentIds, locale },
-    { skip: !documentIds || !contentTypeUid || documentIds.length === 0 }
+    { skip: documentIds.length === 0 }
   );
 
   const mappedEntriesInReleases = response.data || {};
@@ -66,7 +81,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
         },
         cellFormatter: (
           props: Modules.Documents.AnyDocument,
-          _: any,
+          _: unknown,
           { model }: { model: UID.ContentType }
         ) => <ReleaseListCell {...props} model={model} />,
       },
