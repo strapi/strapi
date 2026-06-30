@@ -30,7 +30,7 @@ describe('Empty populate sort', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 120_000);
 
   describe('Document Service', () => {
     testInTransaction(
