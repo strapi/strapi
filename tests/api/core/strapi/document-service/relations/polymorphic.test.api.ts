@@ -274,7 +274,7 @@ describe('Document Service polymorphic relations', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  }, 120_000);
+  });
 
   const createDraftWithMorphRelations = async () => {
     const target = await strapi.documents(POLY_TARGET_UID).create({

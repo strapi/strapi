@@ -65,7 +65,7 @@ describe('Document Service', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  }, 120_000);
+  });
 
   describe('Delete', () => {
     testInTransaction('Can delete an entire document', async () => {

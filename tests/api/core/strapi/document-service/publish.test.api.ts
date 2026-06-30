@@ -21,7 +21,7 @@ describe('Document Service', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  }, 120_000);
+  });
 
   describe('Publish', () => {
     testInTransaction('Publishing keeps creator fields from the draft', async () => {

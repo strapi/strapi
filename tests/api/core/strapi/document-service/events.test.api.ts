@@ -42,7 +42,7 @@ describe('Document Service Events', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  }, 120_000);
+  });
 
   describe('Creates', () => {
     it('Creating a document triggers entry.create', async () => {

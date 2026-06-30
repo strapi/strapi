@@ -19,7 +19,7 @@ describe('Document Service', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  }, 120_000);
+  });
 
   describe('Scalar unique fields', () => {
     it('can create a draft document with a duplicated unique field value', async () => {

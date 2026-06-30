@@ -15,7 +15,7 @@ describe('Document Service', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  }, 120_000);
+  });
 
   describe('Middlewares', () => {
     it('Add filters', async () => {

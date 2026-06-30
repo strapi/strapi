@@ -47,7 +47,7 @@ describe('Document Service - Document ID Uniqueness', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  }, 120_000);
+  });
 
   it('prevents creating a document with a duplicate documentId', async () => {
     const api = strapi.documents(ARTICLE_UID);
