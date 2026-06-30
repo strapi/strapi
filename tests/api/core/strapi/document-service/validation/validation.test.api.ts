@@ -16,7 +16,7 @@ describe('Document Service Validations', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 120_000);
 
   beforeEach(() => {
     // app-template enables api.documents.strictParams; reset so "default mode" cases match opt-out behavior

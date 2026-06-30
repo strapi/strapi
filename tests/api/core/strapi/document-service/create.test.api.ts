@@ -25,7 +25,7 @@ describe('Document Service', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 120_000);
 
   describe('Create', () => {
     testInTransaction('Can create a draft document', async () => {

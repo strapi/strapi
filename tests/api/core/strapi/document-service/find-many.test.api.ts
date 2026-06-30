@@ -20,7 +20,7 @@ describe('Document Service', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 120_000);
 
   describe('FindMany and Count', () => {
     it('Find many documents should only return drafts by default', async () => {

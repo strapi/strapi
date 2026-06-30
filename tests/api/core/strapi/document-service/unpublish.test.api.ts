@@ -25,7 +25,7 @@ describe('Document Service', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 120_000);
 
   describe('Unpublish', () => {
     testInTransaction('Can unpublish all locales of a document', async () => {

@@ -32,7 +32,7 @@ describe('Document Service', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 120_000);
 
   describe('hasPublishedVersion parameter', () => {
     describe('findMany', () => {

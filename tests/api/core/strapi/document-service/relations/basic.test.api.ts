@@ -19,7 +19,7 @@ describe('Document Service relations', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 120_000);
 
   describe('Create', () => {
     testInTransaction('Can create a document with relations', async () => {

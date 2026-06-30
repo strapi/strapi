@@ -493,7 +493,7 @@ describe('Document Service - publicationFilter', () => {
 
   afterAll(async () => {
     await destroyTestSetup(testUtils);
-  });
+  }, 120_000);
 
   /**
    * Guarantees deprecated `hasPublishedVersion` and the normalized `publicationFilter` document modes stay
