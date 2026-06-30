@@ -234,7 +234,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
           filter = {
             ...filter,
             options: attribute.enum.map((value) => ({
-              label: value,
+              label: formatMessage({ id: value, defaultMessage: value }),
               value,
             })),
           };

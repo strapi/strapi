@@ -8933,7 +8933,7 @@ __metadata:
     p-map: "npm:4.0.0"
     passport-local: "npm:1.0.0"
     pluralize: "npm:8.0.0"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
     react-dnd-html5-backend: "npm:16.0.1"
@@ -9001,7 +9001,7 @@ __metadata:
     open: "npm:8.4.2"
     ora: "npm:5.4.1"
     pkg-up: "npm:3.1.0"
-    tar: "npm:7.5.16"
+    tar: "npm:7.5.17"
     tsconfig: "npm:5.49.0"
     xdg-app-paths: "npm:8.3.0"
     yup: "npm:0.32.9"
@@ -9052,7 +9052,7 @@ __metadata:
     markdown-it-sup: "npm:1.0.0"
     msw: "npm:2.13.4"
     prismjs: "npm:1.30.0"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
     react-dnd-html5-backend: "npm:16.0.1"
@@ -9101,7 +9101,7 @@ __metadata:
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
@@ -9154,7 +9154,7 @@ __metadata:
     lodash: "npm:4.18.1"
     micromatch: "npm:^4.0.8"
     pluralize: "npm:8.0.0"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-dropzone: "npm:14.3.8"
@@ -9250,7 +9250,7 @@ __metadata:
     ora: "npm:5.4.1"
     package-json: "npm:10.0.1"
     pkg-up: "npm:3.1.0"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     resolve.exports: "npm:2.0.2"
     semver: "npm:7.7.4"
     supertest: "npm:7.2.2"
@@ -9298,7 +9298,7 @@ __metadata:
     semver: "npm:7.7.4"
     stream-chain: "npm:2.2.5"
     stream-json: "npm:1.9.1"
-    tar: "npm:7.5.16"
+    tar: "npm:7.5.17"
     tar-stream: "npm:2.2.0"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
@@ -9474,7 +9474,7 @@ __metadata:
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
@@ -9536,7 +9536,7 @@ __metadata:
     "@strapi/utils": "npm:5.49.0"
     eslint-config-custom: "npm:5.49.0"
     lodash: "npm:4.18.1"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     sift: "npm:16.0.1"
     tsconfig: "npm:5.49.0"
     vitest: "catalog:"
@@ -9783,7 +9783,7 @@ __metadata:
   dependencies:
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.49.0"
-    nodemailer: "npm:8.0.9"
+    nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.49.0"
   languageName: unknown
   linkType: soft
@@ -9805,7 +9805,7 @@ __metadata:
   dependencies:
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.49.0"
-    nodemailer: "npm:8.0.9"
+    nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.49.0"
   languageName: unknown
   linkType: soft
@@ -10089,6 +10089,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/upload@workspace:packages/core/upload"
   dependencies:
+    "@dnd-kit/core": "npm:6.3.1"
     "@mux/mux-player-react": "npm:3.1.0"
     "@radix-ui/react-dialog": "npm:1.0.5"
     "@radix-ui/react-toggle-group": "npm:1.1.11"
@@ -10124,7 +10125,7 @@ __metadata:
     mime-types: "npm:2.1.35"
     msw: "npm:2.13.4"
     prop-types: "npm:^15.8.1"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
     react-dom: "npm:18.3.1"
@@ -13325,7 +13326,7 @@ __metadata:
   dependencies:
     dotenv: "npm:16.6.1"
     lodash: "npm:4.18.1"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     supertest: "npm:7.2.2"
   languageName: unknown
   linkType: soft
@@ -15569,7 +15570,7 @@ __metadata:
     rollup: "npm:4.60.4"
     semver: "npm:7.7.4"
     sort-package-json: "npm:2.10.0"
-    tar: "npm:7.5.16"
+    tar: "npm:7.5.17"
     tsconfig: "npm:5.49.0"
   bin:
     create-strapi-app: ./bin/index.js
@@ -17769,12 +17770,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-prettier@npm:^5.5.5":
-  version: 5.5.5
-  resolution: "eslint-plugin-prettier@npm:5.5.5"
+"eslint-plugin-prettier@npm:^5.5.6":
+  version: 5.5.6
+  resolution: "eslint-plugin-prettier@npm:5.5.6"
   dependencies:
     prettier-linter-helpers: "npm:^1.0.1"
-    synckit: "npm:^0.11.12"
+    synckit: "npm:^0.11.13"
   peerDependencies:
     "@types/eslint": ">=8.0.0"
     eslint: ">=8.0.0"
@@ -17785,7 +17786,7 @@ __metadata:
       optional: true
     eslint-config-prettier:
       optional: true
-  checksum: 10c0/091449b28c77ab2efbbf674e977181f2c8453d95a4df68218bddd87a4dfaa9ecc4eda60164e416f5986fb5d577e66e8d8e1e23d81e8555f8d735375598b03257
+  checksum: 10c0/af37126c947ff3e87ff1ea76408db8cb1c7da966ebdaba68c6dd5924da7eb1b43b1abc4796d753a97b1bc26ea94c5497093e6ab9f8588fffe558d5a554e19bbf
   languageName: node
   linkType: hard
 
@@ -24865,10 +24866,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:8.0.9":
-  version: 8.0.9
-  resolution: "nodemailer@npm:8.0.9"
-  checksum: 10c0/f5c671ed1c28b27fc997416be70c41aa068ea7540feebc8aca1d0c4f18ac1017d05d74d08218b5aa13206d2639d6a4605f9f3b2acbcb84d20b9cc89d50c5ab5a
+"nodemailer@npm:9.0.1":
+  version: 9.0.1
+  resolution: "nodemailer@npm:9.0.1"
+  checksum: 10c0/4213f01aa211127c1ce33243c5e45e7f831601a933d03fa864cd827b1bd5ea2782cb4b43722bee7028cbc193733d9802dad1120fe67181448eb0b7de52218a37
   languageName: node
   linkType: hard
 
@@ -26804,6 +26805,16 @@ __metadata:
   dependencies:
     side-channel: "npm:^1.1.0"
   checksum: 10c0/e6fd5f6f0aab06d480fe9ab15cebfc4ce4235303e2f91dc69a8f7f4df1e668a61c11d1cfbabacf4295cbbeb7b670ed23db45307480726259761f98e5695e93a7
+  languageName: node
+  linkType: hard
+
+"qs@npm:6.15.3":
+  version: 6.15.3
+  resolution: "qs@npm:6.15.3"
+  dependencies:
+    es-define-property: "npm:^1.0.1"
+    side-channel: "npm:^1.1.1"
+  checksum: 10c0/8f3f6e45ece255347d57696628401cde29e9ec649fff698b53bd3150dea7cefdf33036e1bc1826b9f110bfa7cb0ec4ab9f5297eca628ce216c55af82c304e08e
   languageName: node
   linkType: hard
 
@@ -28770,6 +28781,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"side-channel-list@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "side-channel-list@npm:1.0.1"
+  dependencies:
+    es-errors: "npm:^1.3.0"
+    object-inspect: "npm:^1.13.4"
+  checksum: 10c0/d346c787fd2f9f1c2fdea14f00e8250118db0e7596d85a6cb9faa75f105d31a73a8f7a341c93d7df2a2429098c3d37a77bd3be9e88c37094b8c01807bc77c7a2
+  languageName: node
+  linkType: hard
+
 "side-channel-map@npm:^1.0.1":
   version: 1.0.1
   resolution: "side-channel-map@npm:1.0.1"
@@ -28805,6 +28826,19 @@ __metadata:
     side-channel-map: "npm:^1.0.1"
     side-channel-weakmap: "npm:^1.0.2"
   checksum: 10c0/cb20dad41eb032e6c24c0982e1e5a24963a28aa6122b4f05b3f3d6bf8ae7fd5474ef382c8f54a6a3ab86e0cac4d41a23bd64ede3970e5bfb50326ba02a7996e6
+  languageName: node
+  linkType: hard
+
+"side-channel@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "side-channel@npm:1.1.1"
+  dependencies:
+    es-errors: "npm:^1.3.0"
+    object-inspect: "npm:^1.13.4"
+    side-channel-list: "npm:^1.0.1"
+    side-channel-map: "npm:^1.0.1"
+    side-channel-weakmap: "npm:^1.0.2"
+  checksum: 10c0/dc0ab81d67f61bda9247d053ce93f41c3fd8ad2bdcb9cf9d8d2f8540d488f26d87a5e99ebfc07eea49ec025867b2452b705442d974b1478f0395e69f6bfb3270
   languageName: node
   linkType: hard
 
@@ -29387,7 +29421,7 @@ __metadata:
     eslint-plugin-jest-dom: "npm:5.5.0"
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-node: "npm:^11.1.0"
-    eslint-plugin-prettier: "npm:^5.5.5"
+    eslint-plugin-prettier: "npm:^5.5.6"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^4.6.2"
     eslint-plugin-testing-library: "npm:6.5.0"
@@ -29411,7 +29445,7 @@ __metadata:
     plop: "npm:4.0.5"
     prettier: "npm:3.3.3"
     prettier-2: "npm:prettier@^2"
-    qs: "npm:6.15.2"
+    qs: "npm:6.15.3"
     rimraf: "npm:6.1.3"
     rollup: "npm:4.60.4"
     rollup-plugin-html: "npm:0.2.1"
@@ -29420,7 +29454,7 @@ __metadata:
     stream-json: "npm:1.9.1"
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
-    tar: "npm:7.5.16"
+    tar: "npm:7.5.17"
     ts-jest: "npm:29.1.0"
     tsx: "npm:4.22.4"
     typescript: "npm:5.9.3"
@@ -30004,7 +30038,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"synckit@npm:^0.11.12":
+"synckit@npm:^0.11.13":
   version: 0.11.13
   resolution: "synckit@npm:0.11.13"
   dependencies:
@@ -30099,16 +30133,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:7.5.16":
-  version: 7.5.16
-  resolution: "tar@npm:7.5.16"
+"tar@npm:7.5.17":
+  version: 7.5.17
+  resolution: "tar@npm:7.5.17"
   dependencies:
     "@isaacs/fs-minipass": "npm:^4.0.0"
     chownr: "npm:^3.0.0"
     minipass: "npm:^7.1.2"
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
-  checksum: 10c0/4f37f3c4bd2ca2755fd736a5df1d573c1a868ec1b1e893346aeafa95ac510f9e2fd1469420bd866cc7904799e5bd4ac62b5d4f03fe27747d6e1e373b44505c5c
+  checksum: 10c0/794e80834d6fa29a526d7c6dc82684cd1d0fbc4b7dd4a86c730946a996314149b60e29f1bff8623936bb1442da7de241890c16ce6268f16cc5ef2aa5b9615953
   languageName: node
   linkType: hard
 
