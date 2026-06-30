@@ -10,11 +10,13 @@ import { shapeRelationsForMcp } from './sanitizers/shape-relations';
  */
 export const slugifyUidForMcpToolName = (uid: string): string => {
   const [namespace, modelName] = uid.split('::');
-  const modelNameParts = modelName.split('.').map((part) => part.toLowerCase());
+  const parts = modelName.split('.').map((part) => part.toLowerCase());
+
   if (namespace === 'api') {
-    return `${modelNameParts[0]}`;
+    return parts[0];
   }
-  return `${namespace.toLowerCase()}_${modelNameParts[0]}`;
+
+  return `${namespace.toLowerCase()}-${parts.join('_')}`;
 };
 
 type McpPermissionChecker = {

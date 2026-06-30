@@ -3,6 +3,7 @@ import { Navigate, useLocation, useMatch } from 'react-router-dom';
 import { useAuth } from '../../features/Auth';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import { useInitQuery } from '../../services/admin';
+import { retryDynamicImport } from '../../utils/retryDynamicImport';
 
 import { Login as LoginCE } from './components/Login';
 import { FORMS, FormDictionary } from './constants';
@@ -19,11 +20,18 @@ const AuthPage = () => {
   const { hasAdmin } = data ?? {};
   const Login = useEnterprise(
     LoginCE,
-    async () => (await import('../../../../ee/admin/src/pages/AuthPage/components/Login')).LoginEE
+    async () =>
+      (
+        await retryDynamicImport(
+          () => import('../../../../ee/admin/src/pages/AuthPage/components/Login')
+        )
+      ).LoginEE
   );
   const forms = useEnterprise<FormDictionary, Partial<FormDictionary>>(
     FORMS,
-    async () => (await import('../../../../ee/admin/src/pages/AuthPage/constants')).FORMS,
+    async () =>
+      (await retryDynamicImport(() => import('../../../../ee/admin/src/pages/AuthPage/constants')))
+        .FORMS,
     {
       combine(ceForms, eeForms) {
         return {

@@ -52,7 +52,7 @@ export default (plop: NodePlopAPI) => {
       }
 
       const filePath = getFilePath(
-        answers.destination || (answers.isPluginApi && answers.plugin ? 'plugin' : 'api')
+        answers.destination || (answers.isPluginApi && answers.plugin ? 'plugin' : 'new')
       );
       const currentDir = process.cwd();
       let language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
