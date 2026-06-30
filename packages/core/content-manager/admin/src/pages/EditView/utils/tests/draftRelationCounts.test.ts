@@ -309,12 +309,23 @@ describe('draftRelationCounts', () => {
       ).toEqual({ unpublishedRelations: 3, draftM2mLinks: 2 });
     });
 
-    it('uses server counts for saved unmodified documents', () => {
+    it('merges local draft connects when the form is not marked modified yet', () => {
       expect(
         resolveDraftRelationCounts(
           'doc-1',
           false,
           { unpublishedRelations: 1, draftM2mLinks: 0 },
+          { unpublishedRelations: 0, draftM2mLinks: 0 }
+        )
+      ).toEqual({ unpublishedRelations: 1, draftM2mLinks: 0 });
+    });
+
+    it('uses server counts for saved unmodified documents', () => {
+      expect(
+        resolveDraftRelationCounts(
+          'doc-1',
+          false,
+          { unpublishedRelations: 0, draftM2mLinks: 0 },
           { unpublishedRelations: 0, draftM2mLinks: 2 }
         )
       ).toEqual({ unpublishedRelations: 0, draftM2mLinks: 2 });

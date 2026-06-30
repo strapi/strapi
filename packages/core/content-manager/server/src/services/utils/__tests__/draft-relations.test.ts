@@ -106,6 +106,22 @@ describe('draft-relations utils', () => {
       });
     });
 
+    it('counts joinColumn populate shapes that omit a count property', async () => {
+      findMany.mockResolvedValue([]);
+
+      const counts = await sumDraftCounts(
+        {
+          category: { id: 1, documentId: 'draft-category', publishedAt: null },
+        },
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 1,
+        draftM2mLinks: 0,
+      });
+    });
+
     it('ignores bidirectional M2M links to documents that already have a published version', async () => {
       findMany.mockResolvedValue([
         { documentId: 'published-tag', locale: 'en' },

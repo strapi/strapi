@@ -23,6 +23,28 @@ type M2mLinkRef = {
 const toPublishedDocumentKey = (documentId: string, locale?: string | null) =>
   `${documentId}:${locale ?? ''}`;
 
+/**
+ * Draft-count populate uses `{ count: true, filters: { publishedAt: { $null: true } } }`.
+ * joinColumn xToOne / oneToMany paths still return populated entities or arrays (not `{ count }`),
+ * but only rows matching the draft filter are included.
+ */
+const getUnpublishedRelationCount = (value: unknown): number => {
+  if (!value) {
+    return 0;
+  }
+
+  if (typeof value === 'object' && value !== null && 'count' in value) {
+    const count = (value as { count: unknown }).count;
+    return typeof count === 'number' ? count : 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length;
+  }
+
+  return 1;
+};
+
 const collectBidirectionalM2mLinks = (
   entity: any,
   uid: UID.Schema,
@@ -182,7 +204,7 @@ const sumDraftCountsSync = (entity: any, uid: UID.Schema): DraftRelationCounts =
 
         return {
           ...counts,
-          unpublishedRelations: counts.unpublishedRelations + value.count,
+          unpublishedRelations: counts.unpublishedRelations + getUnpublishedRelationCount(value),
         };
       }
       case 'component': {

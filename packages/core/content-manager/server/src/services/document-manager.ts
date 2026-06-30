@@ -268,24 +268,22 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         return 0;
       }
 
-      let localeFilter = {};
-      if (locale) {
-        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
-      }
-
-      const entities = await strapi.db.query(uid).findMany({
+      const entities = await strapi.documents(uid).findMany({
         populate,
-        where: {
-          documentId: { $in: documentIds },
-          ...localeFilter,
-        },
+        filters: { documentId: { $in: documentIds } } as any,
+        locale,
+        status: 'draft',
       });
 
       const counts = await Promise.all(
-        entities!.map((entity: Document) => sumDraftCounts(entity, uid))
+        entities.map((entity: Document) => sumDraftCounts(entity, uid))
       );
 
-      return counts.reduce((count, entityCounts) => count + entityCounts.unpublishedRelations, 0);
+      return counts.reduce(
+        (total, entityCounts) =>
+          total + entityCounts.unpublishedRelations + entityCounts.draftM2mLinks,
+        0
+      );
     },
   };
 };
