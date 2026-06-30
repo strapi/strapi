@@ -451,5 +451,96 @@ describe('5.0.0-discard-drafts migration', () => {
 
       expect(draftRelations.map((row) => row.tag_id)).toEqual([20, 30, 10]);
     });
+
+    it('preserves owner-side order when only inverse order was set in v4 (#24469)', async () => {
+      const articleOwnsTagsAttributes = {
+        ...articleAttributesBase,
+        tags: {
+          type: 'relation',
+          relation: 'manyToMany',
+          target: TAG_UID,
+          inversedBy: 'articles',
+          joinTable: articleToTagJoinTable,
+        },
+      };
+
+      const tagMappedByAttributes = {
+        ...tagAttributes,
+        articles: {
+          type: 'relation',
+          relation: 'manyToMany',
+          target: ARTICLE_UID,
+          mappedBy: 'tags',
+          joinTable: articleToTagJoinTable,
+        },
+      };
+
+      const tagMetaMapped = { ...tagMeta, attributes: tagMappedByAttributes };
+      const articleMetaOwns = { ...articleMeta, attributes: articleOwnsTagsAttributes };
+
+      const db = {
+        metadata: {
+          get(uid: string) {
+            if (uid === ARTICLE_UID) return articleMetaOwns;
+            if (uid === TAG_UID) return tagMetaMapped;
+            if (uid === 'admin::user') return adminUserMeta;
+            return null;
+          },
+          values: () => [articleMetaOwns, tagMetaMapped],
+        },
+        dialect: { getBatchInsertSize: () => 500 },
+      } as unknown as Database;
+
+      global.strapi = {
+        log: { info: jest.fn(), warn: jest.fn() },
+        getModel(uid: string) {
+          if (uid === ARTICLE_UID) {
+            return {
+              uid: ARTICLE_UID,
+              options: { draftAndPublish: true },
+              attributes: articleOwnsTagsAttributes,
+            };
+          }
+          if (uid === TAG_UID) {
+            return { uid: TAG_UID, options: {}, attributes: tagMappedByAttributes };
+          }
+          return null;
+        },
+        contentTypes: {
+          [ARTICLE_UID]: {
+            uid: ARTICLE_UID,
+            options: { draftAndPublish: true },
+            attributes: articleOwnsTagsAttributes,
+          },
+          [TAG_UID]: { uid: TAG_UID, options: {}, attributes: tagMappedByAttributes },
+        },
+        components: {},
+        plugins: {},
+        db,
+        plugin: () => undefined,
+      } as any;
+
+      await knexConnection(JOIN_TABLE).delete();
+      // Article owns relation: tag_order set on inverse side, article_order null on source side
+      await knexConnection(JOIN_TABLE).insert([
+        { tag_id: 10, article_id: 1, article_order: null, tag_order: 3 },
+        { tag_id: 20, article_id: 1, article_order: null, tag_order: 1 },
+        { tag_id: 30, article_id: 1, article_order: null, tag_order: 2 },
+      ]);
+
+      await knexConnection.transaction(async (trx) => {
+        await discardDocumentDrafts.up(trx, db);
+      });
+
+      const draftArticle = await knexConnection('articles').whereNull('published_at').first();
+
+      const draftRelations = await knexConnection(JOIN_TABLE)
+        .where({ article_id: draftArticle.id })
+        .orderBy('article_order', 'asc')
+        .select('tag_id', 'article_order');
+
+      expect(draftRelations.map((row) => row.tag_id)).toEqual([20, 30, 10]);
+      expect(draftRelations.map((row) => row.article_order)).toEqual([1, 2, 3]);
+    });
   });
 });
