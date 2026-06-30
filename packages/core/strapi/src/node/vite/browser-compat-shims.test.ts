@@ -6,7 +6,7 @@ import {
 } from './browser-compat-shims';
 
 describe('browser-compat shims (Vite admin)', () => {
-  const plugin = objectInspectShimPlugin() as {
+  const plugin = objectInspectShimPlugin() as unknown as {
     resolveId: (id: string, importer?: string) => string | null;
     load: (id: string) => string | null;
   };
