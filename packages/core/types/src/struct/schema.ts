@@ -91,6 +91,14 @@ export interface SchemaInfo {
    * property is optional, and if omitted, a default icon might be used by the interface.
    */
   icon?: string;
+
+  /**
+   * Optional URL or root-relative path to a screenshot shown in the dynamic zone component
+   * picker. Use `public/_component-screenshots/` for locally-hosted images (served by the
+   * built-in static middleware) or an absolute URL for CDN-hosted assets. When omitted, the
+   * picker falls back to rendering the `icon`.
+   */
+  screenshot?: string;
 }
 
 /**
