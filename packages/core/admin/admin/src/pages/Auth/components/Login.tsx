@@ -101,55 +101,57 @@ const Login = ({ children, hideForm }: LoginProps) => {
               </Typography>
             ) : null}
           </Column>
-          {!hideForm && <Form
-            method="PUT"
-            initialValues={{
-              email: '',
-              password: '',
-              rememberMe: false,
-            }}
-            onSubmit={(values) => {
-              handleLogin(values);
-            }}
-            validationSchema={LOGIN_SCHEMA}
-          >
-            <Flex direction="column" alignItems="stretch" gap={6}>
-              {[
-                {
-                  label: formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' }),
-                  name: 'email',
-                  placeholder: formatMessage({
-                    id: 'Auth.form.email.placeholder',
-                    defaultMessage: 'kai@doe.com',
-                  }),
-                  required: true,
-                  type: 'email' as const,
-                },
-                {
-                  label: formatMessage({
-                    id: 'global.password',
-                    defaultMessage: 'Password',
-                  }),
-                  name: 'password',
-                  required: true,
-                  type: 'password' as const,
-                },
-                {
-                  label: formatMessage({
-                    id: 'Auth.form.rememberMe.label',
-                    defaultMessage: 'Remember me',
-                  }),
-                  name: 'rememberMe',
-                  type: 'checkbox' as const,
-                },
-              ].map((field) => (
-                <InputRenderer key={field.name} {...field} />
-              ))}
-              <Button fullWidth type="submit">
-                {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
-              </Button>
-            </Flex>
-          </Form>}
+          {!hideForm && (
+            <Form
+              method="PUT"
+              initialValues={{
+                email: '',
+                password: '',
+                rememberMe: false,
+              }}
+              onSubmit={(values) => {
+                handleLogin(values);
+              }}
+              validationSchema={LOGIN_SCHEMA}
+            >
+              <Flex direction="column" alignItems="stretch" gap={6}>
+                {[
+                  {
+                    label: formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' }),
+                    name: 'email',
+                    placeholder: formatMessage({
+                      id: 'Auth.form.email.placeholder',
+                      defaultMessage: 'kai@doe.com',
+                    }),
+                    required: true,
+                    type: 'email' as const,
+                  },
+                  {
+                    label: formatMessage({
+                      id: 'global.password',
+                      defaultMessage: 'Password',
+                    }),
+                    name: 'password',
+                    required: true,
+                    type: 'password' as const,
+                  },
+                  {
+                    label: formatMessage({
+                      id: 'Auth.form.rememberMe.label',
+                      defaultMessage: 'Remember me',
+                    }),
+                    name: 'rememberMe',
+                    type: 'checkbox' as const,
+                  },
+                ].map((field) => (
+                  <InputRenderer key={field.name} {...field} />
+                ))}
+                <Button fullWidth type="submit">
+                  {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
+                </Button>
+              </Flex>
+            </Form>
+          )}
           {children}
         </LayoutContent>
         {!hideForm && (
