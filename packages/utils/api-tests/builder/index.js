@@ -2,6 +2,7 @@
 
 const { get } = require('lodash/fp');
 
+const { createStrapiInstance } = require('../strapi');
 const modelsUtils = require('../models');
 const { sanitize } = require('../../../core/utils');
 const actionRegistry = require('./action-registry');
@@ -77,20 +78,34 @@ const createTestBuilder = (options = {}) => {
     },
 
     async cleanup(options = {}) {
-      const { enableTestDataAutoCleanup = true } = options;
+      const { enableTestDataAutoCleanup = true, strapi: strapiOption } = options;
       const { models, actions } = ctx.state;
 
-      if (enableTestDataAutoCleanup) {
-        for (const model of models.reverse()) {
-          await modelsUtils.cleanupModel(model.uid);
+      let strapi = strapiOption;
+      let shouldDestroyStrapi = false;
+
+      if (!strapi) {
+        strapi = await createStrapiInstance();
+        shouldDestroyStrapi = true;
+      }
+
+      try {
+        if (enableTestDataAutoCleanup) {
+          for (const model of models.reverse()) {
+            await modelsUtils.cleanupModel(model.uid, { strapi });
+          }
+        }
+
+        for (const action of actions.reverse()) {
+          await action.cleanup(ctx, { strapi });
+        }
+      } finally {
+        ctx.resetState();
+
+        if (shouldDestroyStrapi) {
+          await strapi.destroy();
         }
       }
-
-      for (const action of actions.reverse()) {
-        await action.cleanup(ctx);
-      }
-
-      ctx.resetState();
 
       return this;
     },
