@@ -9818,6 +9818,7 @@ __metadata:
     nodemon: "npm:3.0.2"
     ora: "npm:5.4.1"
     outdent: "npm:0.8.0"
+    path-browserify: "npm:1.0.1"
     pkg-up: "npm:3.1.0"
     prettier: "npm:3.3.3"
     react: "npm:18.3.1"
@@ -25639,7 +25640,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-browserify@npm:^1.0.1":
+"path-browserify@npm:1.0.1, path-browserify@npm:^1.0.1":
   version: 1.0.1
   resolution: "path-browserify@npm:1.0.1"
   checksum: 10c0/8b8c3fd5c66bd340272180590ae4ff139769e9ab79522e2eb82e3d571a89b8117c04147f65ad066dccfb42fcad902e5b7d794b3d35e0fd840491a8ddbedf8c66
