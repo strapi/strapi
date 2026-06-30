@@ -74,12 +74,15 @@ const Table = ({
 
   const { canDelete, canUpdate, canRead } = permissions;
 
-  const handleRowClick = (id: Data.ID) => () => {
+  const handleRowClick = (id: Data.ID | null | undefined) => () => {
+    if (id === undefined || id === null) {
+      return;
+    }
     if (canRead) {
       trackUsage('willEditTokenFromList', {
         tokenType,
       });
-      navigate(id.toString());
+      navigate(String(id));
     }
   };
 
@@ -94,11 +97,14 @@ const Table = ({
         <TableImpl.Empty />
         <TableImpl.Loading />
         <TableImpl.Body>
-          {sortedTokens.map((token) => {
+          {sortedTokens.map((token, rowIndex) => {
+            const tokenId = token.id;
+            const rowKey =
+              tokenId !== undefined && tokenId !== null ? String(tokenId) : `token-row-${rowIndex}`;
             const GuidedTourTooltip =
               token.name === 'Read Only' ? tours.apiTokens.ManageAPIToken : React.Fragment;
             return (
-              <TableImpl.Row key={token.id} onClick={handleRowClick(token.id)}>
+              <TableImpl.Row key={rowKey} onClick={handleRowClick(tokenId)}>
                 <TableImpl.Cell maxWidth="25rem">
                   <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                     {token.name}
@@ -154,15 +160,17 @@ const Table = ({
                   <TableImpl.Cell>
                     <Flex justifyContent="end">
                       <GuidedTourTooltip>
-                        {canUpdate && <UpdateButton tokenName={token.name} tokenId={token.id} />}
+                        {canUpdate && tokenId !== undefined && tokenId !== null ? (
+                          <UpdateButton tokenName={token.name} tokenId={tokenId} />
+                        ) : null}
                       </GuidedTourTooltip>
-                      {canDelete && (
+                      {canDelete && tokenId !== undefined && tokenId !== null ? (
                         <DeleteButton
                           tokenName={token.name}
-                          onClickDelete={() => onConfirmDelete?.(token.id)}
+                          onClickDelete={() => onConfirmDelete?.(tokenId)}
                           tokenType={tokenType}
                         />
-                      )}
+                      ) : null}
                     </Flex>
                   </TableImpl.Cell>
                 ) : null}
@@ -192,7 +200,7 @@ const MESSAGES_MAP = {
 
 interface DefaultButtonProps {
   tokenName: string;
-  tokenId: Data.ID;
+  tokenId: Data.ID | null | undefined;
   buttonType?: 'edit' | 'read';
   children: React.ReactNode;
 }
@@ -205,10 +213,14 @@ const DefaultButton = ({
 }: DefaultButtonProps) => {
   const { formatMessage } = useIntl();
 
+  if (tokenId === undefined || tokenId === null) {
+    return null;
+  }
+
   return (
     <LinkButtonStyled
       tag={NavLink}
-      to={tokenId.toString()}
+      to={String(tokenId)}
       onClick={(e: React.MouseEvent) => e.stopPropagation()}
       title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
       variant="ghost"
@@ -267,7 +279,7 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
 
 interface ButtonProps {
   tokenName: string;
-  tokenId: Data.ID;
+  tokenId: Data.ID | null | undefined;
 }
 
 const UpdateButton = ({ tokenName, tokenId }: ButtonProps) => {
