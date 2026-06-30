@@ -3,6 +3,7 @@ import type { Transform } from 'jscodeshift';
 
 import removeSplitVendorChunkPlugin from '../vite-config-remove-split-vendor-chunk-plugin.code';
 import renameDeprecatedOptions from '../vite-config-rename-deprecated-options.code';
+import manualChunksToCodeSplitting from '../vite-config-manual-chunks-to-code-splitting.code';
 import transformWithEsbuildToOxc from '../vite-config-transform-with-esbuild-to-oxc.code';
 
 const ADMIN_CONFIG_PATH = '/project/src/admin/vite.config.ts';
@@ -100,6 +101,80 @@ describe('vite 8 config codemods', () => {
       // `esbuild` here is nested inside `define` (an object with no Vite marker
       // keys of its own), so it must not be renamed to `oxc`.
       expect(output).toContain("esbuild: 'not-a-vite-option'");
+    });
+
+    test('renames worker.rollupOptions to worker.rolldownOptions', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          worker: { rollupOptions: { format: 'es' } },
+        });
+      `;
+
+      const output = applyTransform(renameDeprecatedOptions, source);
+
+      expect(output).toContain('rolldownOptions');
+      expect(output).not.toContain('rollupOptions');
+    });
+
+    test('does not touch files outside src/admin/vite.config', () => {
+      const source = `export default { build: { rollupOptions: {} } };`;
+
+      const output = applyTransform(renameDeprecatedOptions, source, '/project/vite.config.ts');
+
+      expect(output).toBe(source);
+    });
+  });
+
+  describe('manualChunks object -> codeSplitting.groups', () => {
+    test('migrates static manualChunks objects under output', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks: {
+                  vendor: ['react', 'react-dom'],
+                },
+              },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source);
+
+      expect(output).toContain('codeSplitting');
+      expect(output).toContain('name: "vendor"');
+      expect(output).not.toContain('manualChunks');
+    });
+
+    test('leaves function-form manualChunks untouched', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : undefined),
+              },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source);
+
+      expect(output).toBe(source);
+    });
+
+    test('does not touch files outside src/admin/vite.config', () => {
+      const source = `export default { build: { manualChunks: { vendor: ['react'] } } };`;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source, '/project/vite.config.ts');
+
+      expect(output).toBe(source);
     });
   });
 

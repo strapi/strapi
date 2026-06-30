@@ -5,6 +5,7 @@ import type { Transform, ObjectExpression } from 'jscodeshift';
  * deprecation-compat layer but emit warnings):
  *
  *  - `build.rollupOptions`          -> `build.rolldownOptions`
+ *  - `worker.rollupOptions`         -> `worker.rolldownOptions`
  *  - `optimizeDeps.esbuildOptions`  -> `optimizeDeps.rolldownOptions`
  *  - top-level `esbuild`            -> `oxc`
  *
@@ -102,7 +103,7 @@ const transform: Transform = (file, api) => {
       }
 
       // build.rollupOptions -> build.rolldownOptions
-      if (keyName === 'build') {
+      if (keyName === 'build' || keyName === 'worker') {
         changed = renameObjectKey(value, 'rollupOptions', 'rolldownOptions') || changed;
       }
 
