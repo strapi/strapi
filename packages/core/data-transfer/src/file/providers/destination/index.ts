@@ -6,7 +6,7 @@ import tar from 'tar-stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
 
-import { createEncryptionCipher } from '../../../utils/encryption';
+import { createEncryptionStream } from '../../../utils/encryption';
 import type {
   IAsset,
   IDestinationProvider,
@@ -23,6 +23,7 @@ export interface ILocalFileDestinationProviderOptions {
   encryption: {
     enabled: boolean; // if the file should be encrypted
     key?: string; // the key to use when encryption.enabled is true
+    format?: 'legacy' | 'strapiex'; // export format; defaults to strapiex with per-file salt header
   };
 
   compression: {
@@ -134,7 +135,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     if (encryption.enabled && encryption.key) {
-      archiveTransforms.push(createEncryptionCipher(encryption.key));
+      archiveTransforms.push(
+        createEncryptionStream({
+          key: encryption.key,
+          format: encryption.format ?? 'strapiex',
+        })
+      );
     }
 
     this.#archive.pipeline = chain([this.#archive.stream, ...archiveTransforms, outStream]);
