@@ -309,7 +309,29 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   ): Promise<FetchResponse<TData>> => {
     if (responseType !== 'json') {
       if (!response.ok && !validateStatus?.(response.status)) {
-        const fetchError = new FetchError('Server Error');
+        // Strapi servers return a JSON error envelope (`{ error: { message, ... } }`)
+        // for failures regardless of the requested success responseType. Read the body
+        // and try to parse it so callers can surface the actual server-side message
+        // and payload via `error.response.data` instead of seeing only `'Server Error'`.
+        const text = await response.text();
+        let parsedError: ErrorResponse['data'] | undefined;
+        let message = 'Server Error';
+        try {
+          const parsed = text ? JSON.parse(text) : undefined;
+          if (parsed?.error?.message && typeof parsed.error.message === 'string') {
+            message = parsed.error.message;
+          }
+          parsedError = parsed;
+        } catch {
+          parsedError = {
+            error: {
+              name: 'ApplicationError',
+              message: text,
+              status: response.status,
+            },
+          };
+        }
+        const fetchError = new FetchError(message, parsedError ? { data: parsedError } : undefined);
         fetchError.status = response.status;
         throw fetchError;
       }
