@@ -341,6 +341,23 @@ const ListViewPage = () => {
     });
   };
 
+  /**
+   * The first non-interactive (scalar) column is rendered as a link to the entry,
+   * so it can be opened in a new tab (right-click / cmd+click / middle-click).
+   * Interactive cell types embed their own links/menus, so we skip them — wrapping
+   * them in an anchor would nest interactive elements. Computed columns and the
+   * synthetic status/documentId/createdBy/updatedBy columns are not entry fields.
+   */
+  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
+  const primaryLinkField = tableHeaders.find(
+    ({ name, attribute, cellFormatter }) =>
+      !['status', 'documentId'].includes(name) &&
+      !['createdBy', 'updatedBy'].includes(name.split('.')[0]) &&
+      typeof cellFormatter !== 'function' &&
+      attribute &&
+      !NON_LINKABLE_TYPES.includes(attribute.type)
+  )?.name;
+
   const isEmptyState = !isFetching && results.length === 0;
 
   const endActions = (
@@ -530,6 +547,14 @@ const ListViewPage = () => {
                                   content={row[header.name.split('.')[0]]}
                                   rowId={row.documentId}
                                   {...header}
+                                  linkTo={
+                                    header.name === primaryLinkField
+                                      ? {
+                                          pathname: row.documentId,
+                                          search: stringify({ plugins: query.plugins }),
+                                        }
+                                      : undefined
+                                  }
                                 />
                               </Table.Cell>
                             );
