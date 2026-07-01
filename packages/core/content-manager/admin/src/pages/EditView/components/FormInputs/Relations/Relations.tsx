@@ -92,6 +92,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
 
       addFieldRow(`${fieldName}.disconnect`, {
         id: relation.id,
+        status: relation.status,
         apiData: {
           id: relation.id,
           documentId: relation.documentId,
@@ -141,7 +142,7 @@ interface RelationsFieldProps
 
 export interface RelationsFormValue {
   connect?: Relation[];
-  disconnect?: Pick<Relation, 'id'>[];
+  disconnect?: Pick<Relation, 'id' | 'status'>[];
 }
 
 /**
