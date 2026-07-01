@@ -7,6 +7,7 @@ import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
 import type { BuildContext } from '../create-build-context';
+import { objectInspectShimPlugin } from './browser-compat-shims';
 import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
@@ -147,9 +148,12 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
         lodash: getModulePath('lodash'),
+        // Vite 8 externalizes Node `path`; CTB and other admin chunks import path.sep (#26541).
+        path: getModulePath('path-browserify'),
+        'node:path': getModulePath('path-browserify'),
       },
     },
-    plugins: [react(), buildFilesPlugin(ctx)],
+    plugins: [react(), objectInspectShimPlugin(), buildFilesPlugin(ctx)],
   };
 };
 
@@ -169,7 +173,9 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       assetsDir: '',
       minify,
       sourcemap: sourcemaps,
-      rollupOptions: {
+      // Vite 8 bundles with Rolldown; `rollupOptions` is a deprecated alias kept
+      // only for back-compat. Use the non-deprecated key directly.
+      rolldownOptions: {
         input: {
           strapi: ctx.entry,
         },

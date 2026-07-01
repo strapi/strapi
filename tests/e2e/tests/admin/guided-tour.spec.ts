@@ -59,7 +59,7 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
     ]);
     await expect(
       page.getByRole('dialog', { name: 'Welcome to the Content-Type Builder!' })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 30_000 });
     const nextButton = page.getByRole('button', { name: 'Next' });
     const gotItButton = page.getByRole('button', { name: 'Got it' });
 

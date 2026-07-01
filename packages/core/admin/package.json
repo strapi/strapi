@@ -164,15 +164,16 @@
     "@types/passport-local": "1.0.36",
     "@types/pluralize": "0.0.32",
     "@types/react-window": "1.8.8",
-    "@vitejs/plugin-react-swc": "3.11.0",
+    "@types/sanitize-html": "2.13.0",
+    "@vitejs/plugin-react-swc": "4.3.1",
     "koa-body": "6.0.1",
     "msw": "2.13.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
-    "vite": "5.4.21",
-    "vite-plugin-dts": "^4.3.0"
+    "vite": "8.1.0",
+    "vite-plugin-dts": "^5.0.2"
   },
   "peerDependencies": {
     "@strapi/data-transfer": "^5.0.0",
@@ -182,7 +183,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=20.19.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
   "nx": {
