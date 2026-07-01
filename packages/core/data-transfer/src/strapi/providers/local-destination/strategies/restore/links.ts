@@ -1,7 +1,7 @@
 import { Writable } from 'stream';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
-import { ILink, Transaction } from '../../../../../../types';
+import { ILink, Transaction } from '../../../../../types';
 import { createLinkQuery } from '../../../../queries/link';
 
 interface ErrorWithCode extends Error {

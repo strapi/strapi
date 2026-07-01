@@ -62,6 +62,7 @@
   "error.contentType.pluralName-equals-singularName": "This value cannot be the same as the Singular API ID of another content type.",
   "error.contentType.pluralName-equals-collectionName": "This value is already in use by another content type.",
   "error.contentTypeName.reserved-name": "This name cannot be used in your project as it might break other functionalities",
+  "error.category.format": "A category name must start with a letter and only contain letters, numbers, dashes and underscores",
   "error.validation.enum-duplicate": "Duplicate values are not allowed (only alphanumeric characters are taken into account).",
   "error.validation.enum-empty-string": "Empty strings are not allowed",
   "error.validation.enum-regex": "At least one value is invalid. Values should have at least one alphabetical character preceding the first occurence of a number.",

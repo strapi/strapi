@@ -56,9 +56,27 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       },
     });
 
-    return readPermissions
-      .map((permission) => permission.subject)
-      .filter(Boolean) as RecentDocument['contentTypeUid'][];
+    // Deduplicate subjects using a Set: the JOIN across permission -> role -> users produces one row
+    // per role the user belongs to, so a multi-role user gets duplicate subjects.
+    // Using a Set collapses them to unique content type UID.
+    return [
+      ...new Set(
+        readPermissions
+          .map((permission) => permission.subject)
+          .filter((subject): subject is RecentDocument['contentTypeUid'] => {
+            if (!subject) {
+              return false;
+            }
+
+            const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
+            const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
+              | { visible?: boolean }
+              | undefined;
+
+            return contentTypeOptions?.visible !== false;
+          })
+      ),
+    ];
   };
 
   type ContentTypeMeta = {

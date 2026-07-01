@@ -15,6 +15,7 @@ import {
   type MigrationFileOperation,
 } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
+import type { Event } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
@@ -286,4 +287,5 @@ export type {
   BuiltMigrationFile,
   MigrationFileBuilder,
   MigrationFileOperation,
+  Event,
 };

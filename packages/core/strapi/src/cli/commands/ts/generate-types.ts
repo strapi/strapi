@@ -1,6 +1,4 @@
 import { createCommand } from 'commander';
-import tsUtils from '@strapi/typescript-utils';
-import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
@@ -17,6 +15,12 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
     console.error('Flags conflict: both silent and debug mode are enabled, exiting...');
     process.exit(1);
   }
+
+  // Defer heavy requires until the command actually runs
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const tsUtils = require('@strapi/typescript-utils');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createStrapi, compileStrapi } = require('@strapi/core');
 
   const appContext = await compileStrapi({ ignoreDiagnostics: true });
   const app = await createStrapi(appContext).register();

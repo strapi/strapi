@@ -1,4 +1,4 @@
-import type { AwsCredentialIdentity } from '@aws-sdk/types';
+import type { AwsCredentialIdentity, AwsCredentialIdentityProvider } from '@aws-sdk/types';
 import type { DefaultOptions, InitOptions } from '.';
 
 const ENDPOINT_PATTERN = /^(.+\.)?s3[.-]([a-z0-9-]+)\./;
@@ -86,8 +86,18 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
   return { bucket: prefix.substring(0, prefix.length - 1) };
 }
 
-export const extractCredentials = (options: InitOptions): AwsCredentialIdentity | null => {
+export const extractCredentials = (
+  options: InitOptions
+): AwsCredentialIdentity | AwsCredentialIdentityProvider | null => {
   const s3Options = (options as { s3Options?: DefaultOptions }).s3Options;
+
+  // If a credential provider function is supplied, pass it through unchanged so the
+  // AWS SDK resolves (and refreshes) credentials at runtime, rather than capturing a
+  // single static value once at init. This supports credentials that change during
+  // the process lifetime (e.g. periodically refreshed credentials).
+  if (typeof s3Options?.credentials === 'function') {
+    return s3Options.credentials as AwsCredentialIdentityProvider;
+  }
 
   if (s3Options?.credentials) {
     return {

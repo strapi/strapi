@@ -31,12 +31,13 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Create install-and-build script
-        run: printf '#!/bin/sh\nset -e\nyarn install\nyarn build\n' > /tmp/install-and-build.sh
+        run: printf '#!/bin/sh\nset -e\nyarn install\nyarn nx reset\nyarn build\n' > /tmp/install-and-build.sh
 
-      - uses: preactjs/compressed-size-action@v3
+      - uses: preactjs/compressed-size-action@v2
+        id: compressed-size
         with:
           install-script: 'sh /tmp/install-and-build.sh'
-          build-script: 'yarn run build:size'
+          build-script: 'build:size'
           pattern: '**/build/**/*.{js,css,html,svg}'
           strip-hash: "-([-\\w]{8})(\\.\\w+)$"
           minimum-change-threshold: '5%'
@@ -44,3 +45,30 @@ jobs:
           # FIXME: exclude unnamed webpack chunks - remove once webpack
           # does not create them anymore
           exclude: '{**/build/**/+([0-9]{,4})*,**/node_modules/**}'
+
+      - name: Save comment body
+        env:
+          COMMENT_BODY: ${{ steps.compressed-size.outputs.comment-body }}
+        run: |
+          printf '%s\n' "$COMMENT_BODY" > /tmp/admin-bundle-size-comment.md
+
+      - name: Save PR number
+        env:
+          PULL_REQUEST_NUMBER: ${{ github.event.number }}
+        run: |
+          echo "$PULL_REQUEST_NUMBER" > /tmp/admin-bundle-size-pr-number
+
+      - name: Upload comment body
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: admin-bundle-size-comment
+          path: /tmp/admin-bundle-size-comment.md
+          retention-days: 1
+
+      - name: Upload PR number
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: admin-bundle-size-pr-number
+          path: /tmp/admin-bundle-size-pr-number
+          retention-days: 1
