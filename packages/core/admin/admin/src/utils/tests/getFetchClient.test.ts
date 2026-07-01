@@ -228,6 +228,37 @@ describe('getFetchClient', () => {
       });
     });
 
+    it('should expose JSON server errors for non-json response types', async () => {
+      const errorResponse = {
+        data: null,
+        error: {
+          status: 400,
+          name: 'BadRequestError',
+          message: 'Type is required',
+          details: {},
+        },
+      };
+
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 400,
+          ok: false,
+          json: () => Promise.resolve(errorResponse),
+        })
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.get('/api/export', { responseType: 'text' })).rejects.toMatchObject({
+        name: 'FetchError',
+        message: 'Type is required',
+        status: 400,
+        response: {
+          data: errorResponse,
+        },
+      });
+    });
+
     it('should not send Accept and Content-Type headers for blob requests', async () => {
       (window.fetch as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({
