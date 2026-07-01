@@ -184,10 +184,10 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
               settings={{}}
             >
               <Provider store={storeRef.current!}>
-                <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
-                  <QueryClientProvider client={queryClientRef.current!}>
-                    <DndProvider backend={HTML5Backend}>
-                      <LanguageProvider messages={{}}>
+                <LanguageProvider messages={{}}>
+                  <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
+                    <QueryClientProvider client={queryClientRef.current!}>
+                      <DndProvider backend={HTML5Backend}>
                         <Theme
                           themes={{
                             dark: darkTheme,
@@ -221,10 +221,10 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                             </GuidedTourContext>
                           </NotificationsProvider>
                         </Theme>
-                      </LanguageProvider>
-                    </DndProvider>
-                  </QueryClientProvider>
-                </AuthProvider>
+                      </DndProvider>
+                    </QueryClientProvider>
+                  </AuthProvider>
+                </LanguageProvider>
               </Provider>
             </StrapiAppProvider>
           ),

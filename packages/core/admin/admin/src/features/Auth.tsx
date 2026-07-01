@@ -1,8 +1,11 @@
 import * as React from 'react';
 
+import { Dialog } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
@@ -27,9 +30,11 @@ import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { getOrCreateDeviceId } from '../utils/deviceId';
 import {
   attemptTokenRefresh,
+  getFetchClient,
   setOnSessionExpired,
   setOnTokenUpdate,
 } from '../utils/getFetchClient';
+import { hasUnsavedChanges } from '../utils/unsavedChangesRegistry';
 
 import type {
   Permission as PermissionContract,
@@ -109,6 +114,7 @@ const AuthProvider = ({
   _defaultPermissions = [],
   _disableRenewToken = false,
 }: AuthProviderProps) => {
+  const { formatMessage } = useIntl();
   const dispatch = useTypedDispatch();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
@@ -145,11 +151,49 @@ const AuthProvider = ({
   const [loginMutation] = useLoginMutation();
   const [logoutMutation] = useLogoutMutation();
 
-  const clearStateAndLogout = React.useCallback(() => {
+  const pendingLogoutRef = React.useRef<(() => void) | null>(null);
+  const logoutGuardOpenRef = React.useRef(false);
+  const [isSessionLogoutDialogOpen, setIsSessionLogoutDialogOpen] = React.useState(false);
+
+  const runLogoutWithGuard = React.useCallback((logoutFn: () => void) => {
+    if (logoutGuardOpenRef.current) {
+      return;
+    }
+
+    if (!hasUnsavedChanges()) {
+      logoutFn();
+      return;
+    }
+
+    logoutGuardOpenRef.current = true;
+    pendingLogoutRef.current = logoutFn;
+    setIsSessionLogoutDialogOpen(true);
+  }, []);
+
+  const performGlobalLogout = React.useCallback(() => {
+    void (async () => {
+      try {
+        const { post } = getFetchClient();
+        await post('/admin/logout');
+      } catch {
+        // The session may already be invalid.
+      }
+    })();
+
     dispatch(adminApi.util.resetApiState());
     dispatch(logoutAction());
     navigate('/auth/login');
   }, [dispatch, navigate]);
+
+  const performLocalLogout = React.useCallback(() => {
+    dispatch(adminApi.util.resetApiState());
+    dispatch(setToken(null));
+    navigate('/auth/login');
+  }, [dispatch, navigate]);
+
+  const clearStateAndLogout = React.useCallback(() => {
+    runLogoutWithGuard(performGlobalLogout);
+  }, [performGlobalLogout, runLogoutWithGuard]);
 
   /**
    * Clear *only this tab's* session and redirect to login, without removing the
@@ -162,10 +206,31 @@ const AuthProvider = ({
    * goes through `clearStateAndLogout` and broadcasts to all tabs.
    */
   const clearLocalSessionAndRedirect = React.useCallback(() => {
-    dispatch(adminApi.util.resetApiState());
-    dispatch(setToken(null));
-    navigate('/auth/login');
-  }, [dispatch, navigate]);
+    runLogoutWithGuard(performLocalLogout);
+  }, [performLocalLogout, runLogoutWithGuard]);
+
+  const handleConfirmSessionLogout = React.useCallback(() => {
+    logoutGuardOpenRef.current = false;
+    setIsSessionLogoutDialogOpen(false);
+    const logoutFn = pendingLogoutRef.current;
+    pendingLogoutRef.current = null;
+    logoutFn?.();
+  }, []);
+
+  const handleCancelSessionLogout = React.useCallback(() => {
+    logoutGuardOpenRef.current = false;
+    setIsSessionLogoutDialogOpen(false);
+    pendingLogoutRef.current = null;
+  }, []);
+
+  const handleSessionLogoutDialogOpenChange = React.useCallback(
+    (open: boolean) => {
+      if (!open) {
+        handleCancelSessionLogout();
+      }
+    },
+    [handleCancelSessionLogout]
+  );
 
   const resyncToken = React.useCallback(
     (newToken: string) => {
@@ -399,18 +464,31 @@ const AuthProvider = ({
   const isLoading = isLoadingUser || isLoadingPermissions;
 
   return (
-    <Provider
-      token={token}
-      user={user}
-      login={login}
-      logout={logout}
-      permissions={userPermissions}
-      checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}
-      refetchPermissions={refetchPermissions}
-      isLoading={isLoading}
-    >
-      {children}
-    </Provider>
+    <>
+      <Provider
+        token={token}
+        user={user}
+        login={login}
+        logout={logout}
+        permissions={userPermissions}
+        checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}
+        refetchPermissions={refetchPermissions}
+        isLoading={isLoading}
+      >
+        {children}
+      </Provider>
+      <Dialog.Root
+        open={isSessionLogoutDialogOpen}
+        onOpenChange={handleSessionLogoutDialogOpenChange}
+      >
+        <ConfirmDialog onConfirm={handleConfirmSessionLogout} onCancel={handleCancelSessionLogout}>
+          {formatMessage({
+            id: 'global.prompt.unsaved',
+            defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+          })}
+        </ConfirmDialog>
+      </Dialog.Root>
+    </>
   );
 };
 
