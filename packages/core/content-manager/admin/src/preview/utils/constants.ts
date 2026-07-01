@@ -64,3 +64,12 @@ export const PREVIEW_ERROR_MESSAGES = {
   string,
   { message: MessageDescriptor; type: NonNullable<NotificationConfig['type']> }
 >;
+
+/**
+ * Default highlight colors used by the preview script when no theme is available.
+ * In production the admin overrides these with the actual theme colors (primary500/primary600).
+ */
+export const PREVIEW_HIGHLIGHT_COLORS = {
+  highlightHoverColor: '#4945ff',
+  highlightActiveColor: '#271fe0',
+} as const;
