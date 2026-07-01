@@ -237,7 +237,7 @@ export const clickPublishExpectNoDraftRelationsDialog = async (page: Page) => {
   expect(dialogAppeared).toBe(false);
 };
 
-export type DraftRelationsDialogVariant = 'm2m' | 'xToOne';
+export type DraftRelationsDialogVariant = 'm2m' | 'xToOne' | 'mixed';
 
 /**
  * Clicks Publish and asserts the draft-relations confirmation dialog appears with the
@@ -255,6 +255,11 @@ export const clickPublishExpectDraftRelationsDialog = async (
   if (variant === 'm2m') {
     await expect(dialog.getByText(/linked entr(y|ies) (is|are) still in draft/)).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Publish', exact: true })).toBeVisible();
+  } else if (variant === 'mixed') {
+    await expect(dialog.getByText(/not be included in the published version/)).toBeVisible();
+    await expect(dialog.getByText(/many-to-many link/)).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Publish without relations' })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
   } else {
     await expect(dialog.getByText(/related to .* draft entr/)).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Publish without relations' })).toBeVisible();

@@ -67,4 +67,51 @@ test.describe('Bulk publish draft-relations warning', () => {
     await dialog.getByRole('button', { name: 'Cancel' }).click();
     await expect(dialog).not.toBeVisible();
   });
+
+  test('warns when bulk publishing relation-lab entries with xToOne draft-only targets only', async ({
+    page,
+  }) => {
+    await createRelationTarget(page, 'Bulk xToOne target one', { publish: false });
+    await createRelationTarget(page, 'Bulk xToOne target two', { publish: false });
+
+    for (const [title, targetName] of [
+      ['Bulk xToOne lab one', 'Bulk xToOne target one'],
+      ['Bulk xToOne lab two', 'Bulk xToOne target two'],
+    ] as const) {
+      await navToHeader(page, ['Content Manager', 'Relation lab'], 'Relation lab');
+      await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
+      await saveRelationLabDraft(page, title);
+      await connectRelationTarget(page, 'manyToOne', targetName, 'draft');
+      await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+      await findAndClose(page, 'Saved Document');
+    }
+
+    await navToHeader(page, ['Content Manager', 'Relation lab'], 'Relation lab');
+
+    await page
+      .getByRole('row', { name: /Bulk xToOne lab one/ })
+      .getByRole('checkbox')
+      .check();
+    await page
+      .getByRole('row', { name: /Bulk xToOne lab two/ })
+      .getByRole('checkbox')
+      .check();
+
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }).first());
+
+    await expect(page.getByRole('heading', { name: 'Publish entries' })).toBeVisible();
+    await clickAndWait(
+      page,
+      page.getByLabel('Publish entries').getByRole('button', { name: 'Publish' })
+    );
+
+    const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText('not published yet and might lead to unexpected behavior');
+    await expect(dialog).toContainText(/2\s+relations\s+out of\s+2\s+entries/i);
+    await expect(dialog.getByRole('button', { name: 'Publish' })).toBeVisible();
+
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(dialog).not.toBeVisible();
+  });
 });
