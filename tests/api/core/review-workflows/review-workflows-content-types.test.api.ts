@@ -91,12 +91,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   };
 
   const getWorkflows = async (filters) => {
-    const result = await requests.admin({
-      method: 'GET',
-      url: '/review-workflows/workflows',
-      qs: { filters },
-    });
-    return result.body.data;
+    return strapi.plugin('review-workflows').service('workflows').find({ filters });
   };
 
   const createEntry = async (uid, data) => {
