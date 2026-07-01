@@ -41,7 +41,7 @@ import { styled } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
-import { useUploadFilesMutation } from '../../../../services/api';
+import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
   useDeleteAssetMutation,
   useGetAssetQuery,
@@ -693,7 +693,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const [updateAsset] = useUpdateAssetMutation();
   const [replaceMutation, { isLoading: isReplacing }] = useReplaceAssetMutation();
   const [deleteMutation, { isLoading: isDeleting }] = useDeleteAssetMutation();
-  const [uploadFiles, { isLoading: isCropCopying }] = useUploadFilesMutation();
+  const [uploadCroppedCopy, { isLoading: isCropCopying }] = useUploadFileSilentlyMutation();
 
   const [isCropOpen, setIsCropOpen] = React.useState(false);
 
@@ -846,13 +846,18 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   // Save as copy: upload the cropped file as a new asset in the same folder.
   const handleCropSaveAsCopy = async (file: globalThis.File, focalPoint: FocalPoint) => {
     setIsCropOpen(false);
-    const formData = new FormData();
-    formData.append('files', file);
-    formData.append(
-      'fileInfo',
-      JSON.stringify([{ name: asset.name, folder: initialValues.folder, focalPoint }])
-    );
-    const res = await uploadFiles({ formData, totalFiles: 1 });
+    // Silent single-file upload (no global progress dialog). Carry over the
+    // source asset's caption/alt so the copy keeps its metadata.
+    const res = await uploadCroppedCopy({
+      file,
+      fileInfo: {
+        name: asset.name,
+        caption: asset.caption ?? '',
+        alternativeText: asset.alternativeText ?? '',
+        folder: initialValues.folder,
+        focalPoint,
+      },
+    });
     if ('error' in res) {
       notifyCropError();
       return;
