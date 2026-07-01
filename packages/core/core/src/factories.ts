@@ -10,14 +10,12 @@ const symbols = {
   CustomController: Symbol('StrapiCustomCoreController'),
 } as const;
 
-type WithStrapiCallback<T> = T | (<S extends { strapi: Core.Strapi }>(params: S) => T);
-
 const createCoreController = <
   TUID extends UID.ContentType,
   TController extends Core.CoreAPI.Controller.Extendable<TUID>,
 >(
   uid: TUID,
-  cfg?: WithStrapiCallback<
+  cfg?: Utils.MaybeStrapiFactory<
     Utils.PartialWithThis<Core.CoreAPI.Controller.Extendable<TUID> & TController>
   >
 ) => {
@@ -56,7 +54,9 @@ function createCoreService<
   TService extends Core.CoreAPI.Service.Extendable<TUID>,
 >(
   uid: TUID,
-  cfg?: WithStrapiCallback<Utils.PartialWithThis<Core.CoreAPI.Service.Extendable<TUID> & TService>>
+  cfg?: Utils.MaybeStrapiFactory<
+    Utils.PartialWithThis<Core.CoreAPI.Service.Extendable<TUID> & TService>
+  >
 ) {
   return ({
     strapi,
