@@ -1,4 +1,4 @@
-import { useCallback, useEffect, type FocusEvent } from 'react';
+import { useCallback, useEffect, type FocusEvent, type FocusEventHandler } from 'react';
 
 /**
  * Tracks whether the user's most recent interaction was via the keyboard
@@ -46,25 +46,38 @@ const initInteractionListeners = () => {
  * into a field still places the caret where the user clicked instead of
  * selecting everything.
  *
+ * An optional `onFocus` can be passed to be composed with the selection
+ * behaviour — it is always invoked, regardless of the focus source. This
+ * matters because some inputs already receive an `onFocus` (e.g. the Content
+ * Manager's live-preview handler) that must keep working.
+ *
  * @example
  * ```tsx
- * const { onFocus } = useSelectOnFocus();
+ * const { onFocus } = useSelectOnFocus<HTMLInputElement>(props.onFocus);
  *
  * return <TextInput onFocus={onFocus} />;
  * ```
  */
-const useSelectOnFocus = () => {
+const useSelectOnFocus = <TElement extends HTMLInputElement | HTMLTextAreaElement>(
+  onFocus?: FocusEventHandler<TElement>
+) => {
   useEffect(() => {
     initInteractionListeners();
   }, []);
 
-  const onFocus = useCallback((event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (lastInteractionWasKeyboard) {
-      event.currentTarget.select();
-    }
-  }, []);
+  const handleFocus = useCallback(
+    (event: FocusEvent<TElement>) => {
+      if (lastInteractionWasKeyboard) {
+        event.currentTarget.select();
+      }
 
-  return { onFocus };
+      // Preserve any caller-provided handler (must run for every focus).
+      onFocus?.(event);
+    },
+    [onFocus]
+  );
+
+  return { onFocus: handleFocus };
 };
 
 export { useSelectOnFocus };

@@ -11,12 +11,12 @@ import { useField } from '../Form';
 import type { StringProps } from './types';
 
 const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
-  ({ name, required, label, hint, labelAction, ...props }, ref) => {
+  ({ name, required, label, hint, labelAction, onFocus: onFocusProp, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const { formatMessage } = useIntl();
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
-    const { onFocus } = useSelectOnFocus();
+    const { onFocus } = useSelectOnFocus<HTMLInputElement>(onFocusProp);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 

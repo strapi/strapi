@@ -9,10 +9,10 @@ import { useField } from '../Form';
 import type { StringProps } from './types';
 
 const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
-  ({ name, required, label, hint, labelAction, ...props }, ref) => {
+  ({ name, required, label, hint, labelAction, onFocus: onFocusProp, ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLTextAreaElement>(name);
-    const { onFocus } = useSelectOnFocus();
+    const { onFocus } = useSelectOnFocus<HTMLTextAreaElement>(onFocusProp);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
