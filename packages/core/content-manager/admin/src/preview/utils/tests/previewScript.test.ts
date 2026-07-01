@@ -1,5 +1,22 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { INTERNAL_EVENTS, PREVIEW_HIGHLIGHT_COLORS } from '../constants';
-import { previewScript } from '../previewScript';
+
+declare global {
+  interface Window {
+    STRAPI_DISABLE_STEGA_DECODING?: boolean;
+    __strapi_previewCleanup?: () => void;
+    STRAPI_HIGHLIGHT_HOVER_COLOR?: string;
+    STRAPI_HIGHLIGHT_ACTIVE_COLOR?: string;
+  }
+}
+
+// Read the server-side script directly — it is the single source of truth.
+const previewScriptSrc = fs.readFileSync(
+  path.resolve(__dirname, '../../../../../server/src/preview/controllers/previewScript.js'),
+  'utf-8'
+);
 
 const blocksValue = [
   {
@@ -10,12 +27,29 @@ const blocksValue = [
 
 const runPreviewScript = () => {
   window.STRAPI_DISABLE_STEGA_DECODING = true;
-  const script = `(${previewScript.toString()})(${JSON.stringify({
-    shouldRun: true,
-    colors: PREVIEW_HIGHLIGHT_COLORS,
-  })})`;
   // eslint-disable-next-line no-eval
-  eval(script);
+  eval(
+    `(${previewScriptSrc})(${JSON.stringify({
+      colors: PREVIEW_HIGHLIGHT_COLORS,
+      events: INTERNAL_EVENTS,
+      parentOrigin: window.location.origin,
+    })})`
+  );
+};
+
+/**
+ * Dispatch a postMessage from the simulated admin panel to the preview script.
+ * Must supply source and origin so the script's origin check passes in JSDOM
+ * (window.parent === window, window.location.origin === 'http://localhost:1337').
+ */
+const dispatchAdminMessage = (data: unknown) => {
+  window.dispatchEvent(
+    new MessageEvent('message', {
+      data,
+      source: window,
+      origin: window.location.origin,
+    })
+  );
 };
 
 describe('previewScript — blocks field changes', () => {
@@ -36,14 +70,10 @@ describe('previewScript — blocks field changes', () => {
     const handler = jest.fn();
     window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-          payload: { field: 'body', value: blocksValue },
-        },
-      })
-    );
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
+      payload: { field: 'body', value: blocksValue },
+    });
 
     expect(handler).toHaveBeenCalledTimes(1);
     expect(handler.mock.calls[0][0].detail).toEqual({
@@ -56,14 +86,10 @@ describe('previewScript — blocks field changes', () => {
     const handler = jest.fn();
     window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-          payload: { field: 'title', value: 'Plain title' },
-        },
-      })
-    );
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
+      payload: { field: 'title', value: 'Plain title' },
+    });
 
     expect(handler).not.toHaveBeenCalled();
   });
@@ -72,14 +98,10 @@ describe('previewScript — blocks field changes', () => {
     const handler = jest.fn();
     window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-          payload: { field: 'body', value: [] },
-        },
-      })
-    );
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
+      payload: { field: 'body', value: [] },
+    });
 
     expect(handler).not.toHaveBeenCalled();
   });
@@ -88,14 +110,10 @@ describe('previewScript — blocks field changes', () => {
     const handler = jest.fn();
     window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-          payload: { field: 'body', value: null },
-        },
-      })
-    );
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
+      payload: { field: 'body', value: null },
+    });
 
     expect(handler).not.toHaveBeenCalled();
   });
@@ -104,14 +122,10 @@ describe('previewScript — blocks field changes', () => {
     const handler = jest.fn();
     window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-          payload: { field: 'body', value: [{ foo: 'bar' }] },
-        },
-      })
-    );
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
+      payload: { field: 'body', value: [{ foo: 'bar' }] },
+    });
 
     expect(handler).not.toHaveBeenCalled();
   });
@@ -120,14 +134,10 @@ describe('previewScript — blocks field changes', () => {
     const handler = jest.fn();
     window.addEventListener(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, handler as EventListener);
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-          payload: { field: 'body', value: [{ type: 'paragraph', children: 'not an array' }] },
-        },
-      })
-    );
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
+      payload: { field: 'body', value: [{ type: 'paragraph', children: 'not an array' }] },
+    });
 
     expect(handler).not.toHaveBeenCalled();
   });
@@ -141,14 +151,10 @@ describe('previewScript — blocks field changes', () => {
       { type: 'heading', level: 2, children: [{ type: 'text', text: 'Second' }] },
     ];
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: {
-          type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
-          payload: { field: 'body', value: multiBlockValue },
-        },
-      })
-    );
+    dispatchAdminMessage({
+      type: INTERNAL_EVENTS.STRAPI_FIELD_CHANGE,
+      payload: { field: 'body', value: multiBlockValue },
+    });
 
     expect(handler).toHaveBeenCalledTimes(1);
     expect(handler.mock.calls[0][0].detail).toEqual({ field: 'body', value: multiBlockValue });
