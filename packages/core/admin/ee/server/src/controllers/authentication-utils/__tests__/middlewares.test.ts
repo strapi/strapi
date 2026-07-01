@@ -1,7 +1,6 @@
 import { redirectWithAuth } from '../middlewares';
 
-const buildSessionMetadataFromContext = jest.fn((ctx: { request: { ip: string } }) => ({
-  ip: ctx.request.ip,
+const buildSessionMetadataFromContext = jest.fn(() => ({
   deviceName: 'Chrome on macOS',
   loginAt: '2026-07-01T12:00:00.000Z',
 }));
@@ -26,8 +25,7 @@ jest.mock('../../../../../../shared/utils/session-auth', () => ({
   getSessionManager: jest.fn(),
   generateDeviceId: jest.fn(() => 'sso-device-id'),
   buildCookieOptionsWithExpiry: jest.fn(() => ({})),
-  buildSessionMetadataFromContext: (ctx: { request: { ip: string } }) =>
-    buildSessionMetadataFromContext(ctx),
+  buildSessionMetadataFromContext: (ctx: unknown) => buildSessionMetadataFromContext(ctx),
   REFRESH_COOKIE_NAME: 'strapi_admin_refresh',
 }));
 
@@ -69,7 +67,6 @@ describe('redirectWithAuth', () => {
       params: { provider: 'google' },
       state: { user: { id: 42 } },
       request: {
-        ip: '203.0.113.10',
         headers: {
           'user-agent':
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -85,7 +82,6 @@ describe('redirectWithAuth', () => {
     expect(generateRefreshToken).toHaveBeenCalledWith('42', 'sso-device-id', {
       type: 'refresh',
       metadata: {
-        ip: '203.0.113.10',
         deviceName: 'Chrome on macOS',
         loginAt: '2026-07-01T12:00:00.000Z',
       },

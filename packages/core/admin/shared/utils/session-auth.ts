@@ -114,7 +114,6 @@ export const extractDeviceParams = (
 
 export const buildSessionMetadataFromContext = (ctx: Context) =>
   buildSessionMetadata({
-    ip: ctx.request.ip,
     userAgent: ctx.request.headers['user-agent'],
   });
 
