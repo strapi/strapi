@@ -28,6 +28,9 @@ const installArgumentsMap: {
   pnpm: {
     '*': [],
   },
+  nub: {
+    '*': [],
+  },
 };
 
 // Set environment variables for specific package managers, with full semver ranges
@@ -42,6 +45,9 @@ const installEnvMap: {
     '*': {},
   },
   pnpm: {
+    '*': {},
+  },
+  nub: {
     '*': {},
   },
 };

@@ -266,6 +266,10 @@ function getPkgManager(options: Options) {
     return 'pnpm';
   }
 
+  if (userAgent.startsWith('nub')) {
+    return 'nub';
+  }
+
   return 'npm';
 }
 
