@@ -83,6 +83,57 @@ function previewScript(config) {
   };
 
   /**
+   * Group key for the highlight manager. For most fields this is the raw
+   * source attribute (so identical sources share one highlight, which is what
+   * gives multi-media galleries their single bounding box). For blocks fields,
+   * every encoded marker shares the same `path` and `fieldPath` (the blocks
+   * field path). We drop `path` from the key so all marked elements cluster
+   * into a single highlight whose rect spans the entire rendered field.
+   * @param {string} sourceAttr
+   * @returns {string}
+   */
+  const deriveGroupKey = (sourceAttr) => {
+    const params = new URLSearchParams(sourceAttr);
+    const fieldPath = params.get('fieldPath');
+    if (!fieldPath) return sourceAttr;
+    params.delete('path');
+    return params.toString();
+  };
+
+  /**
+   * @param {unknown} value
+   * @returns {boolean}
+   */
+  const isBlocksValue = (value) => {
+    if (!Array.isArray(value) || value.length === 0) return false;
+    return value.every(
+      (n) =>
+        n !== null &&
+        typeof n === 'object' &&
+        'type' in n &&
+        'children' in n &&
+        Array.isArray(/** @type {{ children: unknown }} */ (n).children)
+    );
+  };
+
+  /**
+   * Blocks live updates are rendered by the host frontend (e.g. via BlocksRenderer).
+   * Re-dispatch the change on the iframe window so integrators can subscribe with
+   * `window.addEventListener('strapiFieldChange', …)` without the preview script
+   * attempting to patch the DOM. The admin panel also posts the same payload via
+   * `postMessage`, which hosts can listen for on `window` 'message' events.
+   * @param {string} field
+   * @param {unknown} value
+   */
+  const forwardBlocksFieldChange = (field, value) => {
+    window.dispatchEvent(
+      new CustomEvent(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, {
+        detail: { field, value },
+      })
+    );
+  };
+
+  /**
    * @param {Element} element
    * @returns {boolean}
    */
@@ -287,6 +338,25 @@ function previewScript(config) {
     return sourceAttr;
   };
 
+  /**
+   * Resolve the source attribute to use when opening the popover for a clicked
+   * element. Blocks markers carry a `fieldPath`; redirect the popover to that
+   * field. Falls back to the media-specific normalization for everything else.
+   * @param {string} sourceAttr
+   * @param {Element} element
+   * @returns {string}
+   */
+  const getFocusPath = (sourceAttr, element) => {
+    const params = new URLSearchParams(sourceAttr);
+    const fieldPath = params.get('fieldPath');
+    if (fieldPath) {
+      params.set('path', fieldPath);
+      params.delete('fieldPath');
+      return params.toString();
+    }
+    return getFieldPathForMedia(sourceAttr, element);
+  };
+
   /* -----------------------------------------------------------------------------------------------
    * Functionality pieces
    * ---------------------------------------------------------------------------------------------*/
@@ -474,6 +544,7 @@ function previewScript(config) {
   /**
    * @typedef {{ element: HTMLElement | Window; type: keyof HTMLElementEventMap | 'message'; handler: EventListener; }} EventListenerEntry
    * @typedef {EventListenerEntry[]} EventListenersList
+   * @typedef {{ eventListeners: EventListenersList; cleanup: () => void; }} EventHandlers
    */
 
   /**
@@ -666,7 +737,7 @@ function previewScript(config) {
         if (!anchor) return;
         const sourceAttribute = anchor.getAttribute(SOURCE_ATTRIBUTE);
         if (!sourceAttribute) return;
-        const path = getFieldPathForMedia(sourceAttribute, anchor);
+        const path = getFocusPath(sourceAttribute, anchor);
         const rect = computeGroupRect(group);
         if (!rect) return;
         sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
@@ -754,8 +825,9 @@ function previewScript(config) {
       if (elementToGroupKey.has(element)) {
         return;
       }
-      const groupKey = element.getAttribute(SOURCE_ATTRIBUTE);
-      if (!groupKey) return;
+      const sourceAttr = element.getAttribute(SOURCE_ATTRIBUTE);
+      if (!sourceAttr) return;
+      const groupKey = deriveGroupKey(sourceAttr);
 
       let group = groups.get(groupKey);
 
@@ -1065,6 +1137,13 @@ function previewScript(config) {
    * @param {HighlightManager} highlightManager
    */
   const setupEventHandlers = (highlightManager) => {
+    /** @type {(() => void) | null} */
+    let blocksEditClickOutsideHandler = null;
+    /** @type {(() => void) | null} */
+    let blocksEditScrollHandler = null;
+    /** @type {ResizeObserver | null} */
+    let blocksEditResizeObserver = null;
+
     /**
      * @param {HTMLElement} el
      * @param {string | null} url
@@ -1214,10 +1293,29 @@ function previewScript(config) {
       if (!event.data?.type) return;
       if (event.source !== window.parent || event.origin !== parentOrigin) return;
 
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_SCROLL) {
+        window.scrollBy(event.data.payload.deltaX, event.data.payload.deltaY);
+        return;
+      }
+
       // The user typed in an input, reflect the change in the preview
       if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
         const { field, value } = event.data.payload;
         if (!field) return;
+
+        // Blocks fields ship as an array of nodes. Live updates are delegated
+        // to the host frontend — we re-dispatch as a CustomEvent so integrators
+        // (e.g. BlocksRenderer in dummy-preview) can re-render without DOM patching.
+        if (isBlocksValue(value)) {
+          // Always forward — even when this field is being edited inline.
+          // The parent container has visibility:hidden which inherits to all children
+          // including newly-rendered un-stega'd elements, so there is no risk of
+          // duplicate visible text. Forwarding during editing lets the hidden
+          // container reflow to the correct height as content grows, preventing the
+          // overlay from covering content below the field.
+          forwardBlocksFieldChange(field, value);
+          return;
+        }
 
         const matchedElements = /** @type {HTMLElement[]} */ (
           Array.from(getElementsByPath(field)).filter((el) => el instanceof HTMLElement)
@@ -1378,6 +1476,111 @@ function previewScript(config) {
         highlightManager.focusedHighlights.length = 0;
         highlightManager.setFocusedField(null);
       }
+
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_START) {
+        const { fieldPath } = event.data.payload;
+        // Inject CSS to hide host-rendered blocks content (hides existing + future elements)
+        const styleId = `strapi-blocks-hide-${fieldPath}`;
+        document.getElementById(styleId)?.remove();
+        const style = document.createElement('style');
+        style.id = styleId;
+        // The CSS selector targets all elements whose data-strapi-source contains fieldPath=<path>
+        style.textContent = `[${SOURCE_ATTRIBUTE}*="fieldPath=${fieldPath}"] { visibility: hidden !important; }`;
+        document.head.appendChild(style);
+        // Disable pointer events on the highlight so it can't be double-clicked during editing
+        const matchingGroups = highlightManager.findGroupForPath(fieldPath);
+        matchingGroups.forEach((group) => {
+          group.highlight.style.pointerEvents = 'none';
+        });
+        // Notify the admin when the user clicks anywhere in the iframe so the session can close
+        blocksEditClickOutsideHandler = () => {
+          sendMessage(INTERNAL_EVENTS.STRAPI_CLICK_OUTSIDE_BLOCKS, null);
+        };
+        document.addEventListener('click', blocksEditClickOutsideHandler);
+
+        // Measure the preview's computed typography once so the admin overlay can match it
+        const fieldEls = /** @type {HTMLElement[]} */ (Array.from(getElementsByPath(fieldPath)));
+        const sampleEl = fieldEls[0];
+        /** @type {{ lineHeight?: string; fontSize?: string; paragraphGap?: string }} */
+        const typographySync = {};
+        if (sampleEl) {
+          const cs = window.getComputedStyle(sampleEl);
+          typographySync.lineHeight = cs.lineHeight;
+          typographySync.fontSize = cs.fontSize;
+          const pEl = sampleEl.closest('p') ?? sampleEl.querySelector('p');
+          if (pEl) {
+            typographySync.paragraphGap = window.getComputedStyle(pEl).marginBottom;
+          }
+        }
+
+        // Send position + typography to the admin on scroll
+        blocksEditScrollHandler = () => {
+          const elements = getElementsByPath(fieldPath);
+          let minLeft = Infinity;
+          let minTop = Infinity;
+          let maxRight = -Infinity;
+          let maxBottom = -Infinity;
+          let any = false;
+          elements.forEach((el) => {
+            const r = el.getBoundingClientRect();
+            if (r.width === 0 && r.height === 0) return;
+            any = true;
+            if (r.left < minLeft) minLeft = r.left;
+            if (r.top < minTop) minTop = r.top;
+            if (r.right > maxRight) maxRight = r.right;
+            if (r.bottom > maxBottom) maxBottom = r.bottom;
+          });
+          if (!any) return;
+          sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_POSITION_SYNC, {
+            top: minTop,
+            left: minLeft,
+            right: maxRight,
+            bottom: maxBottom,
+            width: maxRight - minLeft,
+            height: maxBottom - minTop,
+            typography: typographySync,
+          });
+        };
+        window.addEventListener('scroll', blocksEditScrollHandler);
+        // Fire once immediately to send initial position + typography to the admin
+        blocksEditScrollHandler();
+        // Also sync when the preview content reflows as the user types new blocks
+        const containerEl =
+          fieldEls.find(
+            (el) =>
+              new URLSearchParams(el.getAttribute(SOURCE_ATTRIBUTE) ?? '').get('type') === 'blocks'
+          ) ?? fieldEls[0];
+        if (containerEl) {
+          const resizeObs = new ResizeObserver(blocksEditScrollHandler);
+          blocksEditResizeObserver = resizeObs;
+          resizeObs.observe(containerEl);
+        }
+        return;
+      }
+
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_BLOCKS_EDIT_END) {
+        const { fieldPath } = event.data.payload;
+        if (blocksEditClickOutsideHandler) {
+          document.removeEventListener('click', blocksEditClickOutsideHandler);
+          blocksEditClickOutsideHandler = null;
+        }
+        if (blocksEditScrollHandler) {
+          window.removeEventListener('scroll', blocksEditScrollHandler);
+          blocksEditScrollHandler = null;
+        }
+        if (blocksEditResizeObserver) {
+          blocksEditResizeObserver.disconnect();
+          blocksEditResizeObserver = null;
+        }
+        // Remove the CSS rule to restore host content visibility
+        document.getElementById(`strapi-blocks-hide-${fieldPath}`)?.remove();
+        // Restore pointer events on the highlight
+        const matchingGroups = highlightManager.findGroupForPath(fieldPath);
+        matchingGroups.forEach((group) => {
+          group.highlight.style.pointerEvents = '';
+        });
+        return;
+      }
     };
 
     window.addEventListener('message', handleMessage);
@@ -1389,14 +1592,30 @@ function previewScript(config) {
       handler: /** @type {EventListener} */ (handleMessage),
     };
 
-    return [...highlightManager.eventListeners, messageEventListener];
+    return {
+      eventListeners: [...highlightManager.eventListeners, messageEventListener],
+      cleanup: () => {
+        if (blocksEditClickOutsideHandler) {
+          document.removeEventListener('click', blocksEditClickOutsideHandler);
+          blocksEditClickOutsideHandler = null;
+        }
+        if (blocksEditScrollHandler) {
+          window.removeEventListener('scroll', blocksEditScrollHandler);
+          blocksEditScrollHandler = null;
+        }
+        if (blocksEditResizeObserver) {
+          blocksEditResizeObserver.disconnect();
+          blocksEditResizeObserver = null;
+        }
+      },
+    };
   };
 
   /**
    * @param {HTMLElement} overlay
    * @param {ReturnType<typeof setupObservers>} observers
    * @param {ReturnType<typeof setupScrollManagement>} scrollManager
-   * @param {EventListenersList} eventHandlers
+   * @param {EventHandlers} eventHandlers
    * @param {HighlightManager} highlightManager
    */
   const createCleanupSystem = (
@@ -1417,16 +1636,20 @@ function previewScript(config) {
       // Clear all pending click timeouts
       highlightManager.clearAllPendingClicks();
 
-      // Remove highlight event listeners
-      eventHandlers.forEach(({ element, type, handler }) => {
+      // Remove highlight event listeners and session-specific cleanup
+      eventHandlers.eventListeners.forEach(({ element, type, handler }) => {
         element.removeEventListener(type, handler);
       });
+      eventHandlers.cleanup();
 
       // Clean up CSS styles
       const existingStyles = document.getElementById(HIGHLIGHT_STYLES_ID);
       if (existingStyles) {
         existingStyles.remove();
       }
+
+      // Remove any active blocks edit style tags
+      document.querySelectorAll('[id^="strapi-blocks-hide-"]').forEach((el) => el.remove());
 
       overlay.remove();
     };

@@ -20,9 +20,10 @@ const baseHandleConvert = <T extends Element>(
 
   // Make sure we get a block node, not an inline node
   const [, updatedLastNodePath] = Editor.last(editor, []);
+  // Use anchor Point not the full Range: Editor.above with a cross-block Range resolves [] (root) and finds no block.
   const entry = Editor.above(editor, {
     match: (node) => !Editor.isEditor(node) && node.type !== 'text' && node.type !== 'link',
-    at: editor.selection ?? updatedLastNodePath,
+    at: editor.selection?.anchor ?? updatedLastNodePath,
   });
 
   if (!entry || Editor.isEditor(entry[0])) {

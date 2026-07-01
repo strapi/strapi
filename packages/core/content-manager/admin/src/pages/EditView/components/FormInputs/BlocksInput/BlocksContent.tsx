@@ -31,7 +31,7 @@ const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   outline: none;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spaces[3]};
+  gap: var(--preview-block-gap, ${({ theme }) => theme.spaces[3]});
   height: 100%;
   // For fullscreen align input in the center with fixed width
   width: ${(props) => (props.$isExpandedMode ? '512px' : '100%')};
@@ -43,6 +43,13 @@ const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   }
   > *:last-child {
     padding-bottom: ${({ theme }) => theme.spaces[3]};
+  }
+  // When --preview-line-height is set (inline live-preview mode), override DS Typography omega's
+  // own line-height on paragraph elements. Targeting > p avoids compressing heading elements
+  // (h1-h6) which have larger font sizes and need their own line-height values.
+  // && doubles the class specificity to (0,2,0)+(0,0,1)=(0,2,1), beating Typography's (0,1,0).
+  && > p {
+    line-height: var(--preview-line-height, inherit);
   }
 `;
 
@@ -333,6 +340,7 @@ type BaseRenderElementProps = Direction & {
   blocks: Partial<BlocksStore>;
   editor: Editor;
   isMobile: boolean;
+  hideDragHandles?: boolean;
 };
 
 const baseRenderElement = ({
@@ -342,6 +350,7 @@ const baseRenderElement = ({
   dragDirection,
   setDragDirection,
   isMobile,
+  hideDragHandles,
 }: BaseRenderElementProps) => {
   const { element } = props;
 
@@ -356,8 +365,18 @@ const baseRenderElement = ({
 
   const isDraggable = block.isDraggable?.(element) ?? true;
 
-  if (!isDraggable || isMobile) {
-    return block.renderElement(props);
+  if (!isDraggable || isMobile || hideDragHandles) {
+    const el = block.renderElement(props);
+    // In inline live-preview mode, guarantee paragraph line-height matches the preview via
+    // inline style (highest CSS specificity — overrides DS Typography's class regardless of
+    // cascade). The CSS &&>p rule in StyledEditable is a secondary attempt; this inline style
+    // ensures it always works even if the CSS rule loses a specificity battle.
+    if (hideDragHandles && element.type === 'paragraph') {
+      return React.cloneElement(el, {
+        style: { lineHeight: 'var(--preview-line-height, inherit)', ...(el.props?.style ?? {}) },
+      });
+    }
+    return el;
   }
 
   return (
@@ -377,9 +396,22 @@ const dragNoop = () => true;
 interface BlocksContentProps {
   placeholder?: string;
   ariaLabelId: string;
+  autoFocus?: boolean;
+  onFocus?: React.FocusEventHandler<HTMLElement>;
+  onBlur?: React.FocusEventHandler<HTMLElement>;
+  hideDragHandles?: boolean;
+  onEscape?: () => void;
 }
 
-const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
+const BlocksContent = ({
+  placeholder,
+  ariaLabelId,
+  autoFocus,
+  onFocus,
+  onBlur,
+  hideDragHandles,
+  onEscape,
+}: BlocksContentProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode, flushPendingFormSync } =
     useBlocksEditorContext('BlocksContent');
   const isMobile = useIsMobile();
@@ -436,8 +468,16 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
     (props: RenderElementProps) =>
-      baseRenderElement({ props, blocks, editor, dragDirection, setDragDirection, isMobile }),
-    [blocks, editor, dragDirection, isMobile, setDragDirection]
+      baseRenderElement({
+        props,
+        blocks,
+        editor,
+        dragDirection,
+        setDragDirection,
+        isMobile,
+        hideDragHandles,
+      }),
+    [blocks, editor, dragDirection, isMobile, setDragDirection, hideDragHandles]
   );
 
   const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -574,6 +614,9 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       case 'Tab':
         return handleTab(event);
       case 'Escape':
+        if (onEscape) {
+          return onEscape();
+        }
         return ReactEditor.blur(editor);
     }
     handleKeyboardShortcuts(event);
@@ -591,7 +634,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
    */
 
   const handleScrollSelectionIntoView = React.useCallback(() => {
-    if (!editor.selection || !blocksRef.current) {
+    if (!editor.selection || !blocksRef.current || hideDragHandles) {
       return;
     }
 
@@ -608,22 +651,23 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         behavior: 'smooth',
       });
     }
-  }, [editor]);
+  }, [editor, hideDragHandles]);
 
   return (
     <Box
       ref={blocksRef}
       grow={1}
       width="100%"
-      overflow="auto"
+      overflow={hideDragHandles ? 'hidden' : 'auto'}
       fontSize={2}
-      background="neutral0"
+      background={hideDragHandles ? undefined : 'neutral0'}
       color="neutral800"
-      lineHeight={6}
-      paddingLeft={{ initial: 4, medium: 0 }}
-      paddingRight={7}
-      paddingTop={6}
-      paddingBottom={3}
+      lineHeight={hideDragHandles ? undefined : 6}
+      style={hideDragHandles ? { lineHeight: 'var(--preview-line-height, 1.5)' } : undefined}
+      paddingLeft={hideDragHandles ? 0 : { initial: 4, medium: 0 }}
+      paddingRight={hideDragHandles ? 0 : 7}
+      paddingTop={hideDragHandles ? 0 : 6}
+      paddingBottom={hideDragHandles ? 0 : 3}
     >
       <StyledEditable
         aria-labelledby={ariaLabelId}
@@ -635,7 +679,12 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
-        onBlur={flushPendingFormSync}
+        autoFocus={autoFocus}
+        onFocus={onFocus}
+        onBlur={(event) => {
+          flushPendingFormSync();
+          onBlur?.(event);
+        }}
         // As we have our own handler to drag and drop the elements returing true will skip slate's own event handler
         onDrop={dragNoop}
         onDragStart={dragNoop}
