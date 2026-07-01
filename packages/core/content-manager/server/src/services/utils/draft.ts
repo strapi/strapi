@@ -1,6 +1,6 @@
 import { castArray } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
-import type { UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import { type DraftRelationCounts, isBidirectionalManyToMany } from './draft-relations';
 
@@ -49,6 +49,7 @@ const toDraftRelationLink = (
 };
 
 const collectDraftRelationLinks = (
+  strapi: Core.Strapi,
   entity: any,
   uid: UID.Schema,
   documentLocale?: string | null
@@ -71,7 +72,7 @@ const collectDraftRelationLinks = (
             return collected;
           }
 
-          const targetModel = strapi.getModel(attribute.target);
+          const targetModel = strapi.getModel(attribute.target as UID.Schema);
           if (!targetModel || !hasDraftAndPublish(targetModel)) {
             return collected;
           }
@@ -107,7 +108,7 @@ const collectDraftRelationLinks = (
             (componentCollected, componentValue) =>
               mergeCollectedLinks(
                 componentCollected,
-                collectDraftRelationLinks(componentValue, attribute.component, locale)
+                collectDraftRelationLinks(strapi, componentValue, attribute.component, locale)
               ),
             collected
           );
@@ -116,7 +117,7 @@ const collectDraftRelationLinks = (
           return value.reduce((zoneCollected: CollectedDraftRelationLinks, componentValue: any) => {
             return mergeCollectedLinks(
               zoneCollected,
-              collectDraftRelationLinks(componentValue, componentValue.__component, locale)
+              collectDraftRelationLinks(strapi, componentValue, componentValue.__component, locale)
             );
           }, collected);
         }
@@ -128,7 +129,10 @@ const collectDraftRelationLinks = (
   );
 };
 
-const countLinksToUnpublishedDocuments = async (links: DraftRelationLinkRef[]) => {
+const countLinksToUnpublishedDocuments = async (
+  strapi: Core.Strapi,
+  links: DraftRelationLinkRef[]
+) => {
   if (links.length === 0) {
     return 0;
   }
@@ -180,12 +184,16 @@ const countLinksToUnpublishedDocuments = async (links: DraftRelationLinkRef[]) =
  * - unpublishedRelations: xToOne / oneToMany style links stripped from the published version
  * - draftM2mLinks: bidirectional manyToMany links to documents without a published version
  */
-const sumDraftCounts = async (entity: any, uid: UID.Schema): Promise<DraftRelationCounts> => {
-  const { m2mLinks, xToOneLinks } = collectDraftRelationLinks(entity, uid);
+const sumDraftCounts = async (
+  strapi: Core.Strapi,
+  entity: any,
+  uid: UID.Schema
+): Promise<DraftRelationCounts> => {
+  const { m2mLinks, xToOneLinks } = collectDraftRelationLinks(strapi, entity, uid);
 
   const [draftM2mLinks, unpublishedRelations] = await Promise.all([
-    countLinksToUnpublishedDocuments(m2mLinks),
-    countLinksToUnpublishedDocuments(xToOneLinks),
+    countLinksToUnpublishedDocuments(strapi, m2mLinks),
+    countLinksToUnpublishedDocuments(strapi, xToOneLinks),
   ]);
 
   return {

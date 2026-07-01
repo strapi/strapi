@@ -27,69 +27,69 @@ describe('draft-relations utils', () => {
 
   describe('sumDraftCounts', () => {
     const findMany = jest.fn();
-
-    beforeEach(() => {
-      findMany.mockReset();
-
-      global.strapi = {
-        getModel: jest.fn((uid: string) => {
-          if (uid === 'api::article.article') {
-            return {
-              uid,
-              pluginOptions: { i18n: { localized: true } },
-              attributes: {
-                category: {
-                  type: 'relation',
-                  relation: 'manyToOne',
-                  target: 'api::tag.tag',
-                },
-                tags: {
-                  type: 'relation',
-                  relation: 'manyToMany',
-                  target: 'api::tag.tag',
-                  inversedBy: 'articles',
-                },
-                authors: {
-                  type: 'relation',
-                  relation: 'manyToMany',
-                  target: 'api::author.author',
-                  inversedBy: 'articles',
-                },
-              },
-            };
-          }
-
-          if (uid === 'api::author.author') {
-            return {
-              uid,
-              attributes: {
-                name: { type: 'string' },
-              },
-              options: { draftAndPublish: true },
-            };
-          }
-
+    const strapiMock = {
+      getModel: jest.fn((uid: string) => {
+        if (uid === 'api::article.article') {
           return {
             uid,
             pluginOptions: { i18n: { localized: true } },
+            attributes: {
+              category: {
+                type: 'relation',
+                relation: 'manyToOne',
+                target: 'api::tag.tag',
+              },
+              tags: {
+                type: 'relation',
+                relation: 'manyToMany',
+                target: 'api::tag.tag',
+                inversedBy: 'articles',
+              },
+              authors: {
+                type: 'relation',
+                relation: 'manyToMany',
+                target: 'api::author.author',
+                inversedBy: 'articles',
+              },
+            },
+          };
+        }
+
+        if (uid === 'api::author.author') {
+          return {
+            uid,
             attributes: {
               name: { type: 'string' },
             },
             options: { draftAndPublish: true },
           };
-        }),
-        db: {
-          query: jest.fn(() => ({
-            findMany,
-          })),
-        },
-      } as any;
+        }
+
+        return {
+          uid,
+          pluginOptions: { i18n: { localized: true } },
+          attributes: {
+            name: { type: 'string' },
+          },
+          options: { draftAndPublish: true },
+        };
+      }),
+      db: {
+        query: jest.fn(() => ({
+          findMany,
+        })),
+      },
+    } as any;
+
+    beforeEach(() => {
+      findMany.mockReset();
     });
 
     it('splits bidirectional M2M counts from xToOne counts', async () => {
       findMany.mockResolvedValue([]);
 
       const counts = await sumDraftCounts(
+        strapiMock,
         {
           category: { documentId: 'draft-category', locale: 'en' },
           tags: [
@@ -110,6 +110,7 @@ describe('draft-relations utils', () => {
       findMany.mockResolvedValue([{ documentId: 'published-category', locale: 'en' }]);
 
       const counts = await sumDraftCounts(
+        strapiMock,
         {
           category: { documentId: 'published-category', locale: 'en' },
         },
@@ -126,6 +127,7 @@ describe('draft-relations utils', () => {
       findMany.mockResolvedValue([]);
 
       const counts = await sumDraftCounts(
+        strapiMock,
         {
           category: { id: 1, documentId: 'draft-category', publishedAt: null },
         },
@@ -145,6 +147,7 @@ describe('draft-relations utils', () => {
       ]);
 
       const counts = await sumDraftCounts(
+        strapiMock,
         {
           tags: [
             { documentId: 'published-tag', locale: 'en' },
@@ -165,6 +168,7 @@ describe('draft-relations utils', () => {
       findMany.mockResolvedValue([{ documentId: 'tag-fr', locale: 'fr' }]);
 
       const counts = await sumDraftCounts(
+        strapiMock,
         {
           tags: [
             { documentId: 'tag-fr', locale: 'fr' },
@@ -184,6 +188,7 @@ describe('draft-relations utils', () => {
       findMany.mockResolvedValue([{ documentId: 'published-author', locale: null }]);
 
       const counts = await sumDraftCounts(
+        strapiMock,
         {
           authors: [{ documentId: 'published-author', locale: 'en' }],
         },

@@ -254,7 +254,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         );
       }
 
-      return sumDraftCounts(document, uid);
+      return sumDraftCounts(strapi, document, uid);
     },
 
     async countManyEntriesDraftRelations(
@@ -276,7 +276,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       const counts = await Promise.all(
-        entities.map((entity: Document) => sumDraftCounts(entity, uid))
+        entities.map((entity: Document) => sumDraftCounts(strapi, entity, uid))
       );
 
       return counts.reduce(
