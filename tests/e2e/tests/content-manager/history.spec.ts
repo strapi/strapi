@@ -39,8 +39,24 @@ const goToHistoryPage = async (page: Page) => {
   }
 };
 
+const ARTICLE_CTB_URL = '/admin/plugins/content-type-builder/content-types/api::article.article';
+const HOMEPAGE_CTB_URL = '/admin/plugins/content-type-builder/content-types/api::homepage.homepage';
+
 const goToContentTypeBuilder = async (page: Page) => {
   await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+};
+
+/** CTB opens the last visited type; click the sidebar entry and wait for navigation together (Firefox). */
+const goToContentTypeInBuilder = async (
+  page: Page,
+  contentTypeLinkName: string,
+  contentTypePath: string
+) => {
+  await goToContentTypeBuilder(page);
+  await Promise.all([
+    page.waitForURL(contentTypePath),
+    page.getByRole('link', { name: contentTypeLinkName }).click(),
+  ]);
 };
 
 describeOnCondition(edition === 'EE')('History', () => {
@@ -266,10 +282,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Rename field in content-type builder
        */
-      await goToContentTypeBuilder(page);
-      await page.waitForURL(
-        '/admin/plugins/content-type-builder/content-types/api::article.article'
-      );
+      await goToContentTypeInBuilder(page, 'Article', ARTICLE_CTB_URL);
       await page.getByRole('button', { name: 'Edit title' }).first().click();
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
@@ -419,12 +432,7 @@ describeOnCondition(edition === 'EE')('History', () => {
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create relation in Content-Type Builder
-      await goToContentTypeBuilder(page);
-
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      await page.waitForURL(
-        '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
-      );
+      await goToContentTypeInBuilder(page, 'Homepage', HOMEPAGE_CTB_URL);
       await page.getByRole('button', { name: /add another field to this single type/i }).click();
       await page.getByRole('button', { name: /relation/i }).click();
       await page.getByLabel('Basic settings').getByRole('button').nth(1).click();
@@ -492,12 +500,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Rename field in content-type builder
        */
-      await goToContentTypeBuilder(page);
-
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      await page.waitForURL(
-        '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
-      );
+      await goToContentTypeInBuilder(page, 'Homepage', HOMEPAGE_CTB_URL);
       await page.getByRole('button', { name: 'Edit title' }).first().click();
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
