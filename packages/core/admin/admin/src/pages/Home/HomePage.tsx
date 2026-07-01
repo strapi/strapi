@@ -5,6 +5,7 @@ import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useLicenseLimits } from '../../../../ee/admin/src/hooks/useLicenseLimits';
 import { DragLayer, isWidgetDragItem } from '../../components/DragLayer';
 import { GapDropZoneManager } from '../../components/GapDropZone';
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
@@ -18,6 +19,7 @@ import { useAppInfo } from '../../features/AppInfo';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useWidgets } from '../../features/Widgets';
+import { useScopedPersistentState } from '../../hooks/usePersistentState';
 import {
   useGetCountDocumentsQuery,
   useGetHomepageLayoutQuery,
@@ -130,6 +132,12 @@ const HomePageCE = () => {
     }, {})
   );
   const [isAddWidgetModalOpen, setIsAddWidgetModalOpen] = React.useState(false);
+  const { license } = useLicenseLimits();
+  const [trialModalDismissed, setTrialModalDismissed] = useScopedPersistentState(
+    'STRAPI_FREE_TRIAL_WELCOME_MODAL',
+    false
+  );
+  const showFreeTrialModal = license?.isTrial && !trialModalDismissed;
 
   // Use custom hook for widget management
   const {
@@ -309,7 +317,9 @@ const HomePageCE = () => {
             </Button>
           }
         />
-        <FreeTrialWelcomeModal />
+        {showFreeTrialModal && (
+          <FreeTrialWelcomeModal onClose={() => setTrialModalDismissed(true)} />
+        )}
         <FreeTrialEndedModal />
         <AddWidgetModal
           isOpen={isAddWidgetModalOpen}
