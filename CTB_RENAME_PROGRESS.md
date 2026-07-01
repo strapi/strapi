@@ -8,9 +8,11 @@
 > - `CTB_RENAME_STEPS/` — **one kickoff brief per remaining step.** To pick up a
 >   step, open a fresh AI and point it at the single matching
 >   `CTB_RENAME_STEPS/STEP-*.md` file (start with `CTB_RENAME_STEPS/README.md`).
+> - `CTB_AI_V2/` — **AI chat v2 handoff** (operations-based API for strapi-ai +
+>   Strapi client). Start with `CTB_AI_V2/README.md`.
 >
-> Branch: `feat/ctb-rename-migration-builder` (base: `develop`).
-> Linear: CMS-635 (related: CG-979, CG-1001). PR: #26749 (draft).
+> Branch: `feat/ctb-ai-v2-operations` (base: `feat/ctb-rename-migration-builder`).
+> Linear: CMS-635 (related: CG-979, CG-1001). Rename PR: #26749.
 > Last updated: 2026-07-01.
 
 ---
@@ -31,7 +33,7 @@
 | CLI `strapi rename:field` (optional)                           | ✅ done + tested          |
 | CLI `strapi rename:component` (optional)                       | ✅ done + tested          |
 | AI chat v1 rename inference / explicit metadata                | ✅ done + tested          |
-| AI chat v2 operations API                                      | ⬜ separate draft PR      |
+| AI chat v2 operations API (strapi-ai + client)                 | 🚧 draft PR (this branch) |
 | Content-type _level_ rename                                    | ➖ N/A (immutable in CTB) |
 
 Legend: ✅ done · ⬜ missing/todo · ➖ not applicable.
@@ -186,9 +188,26 @@ schema snapshots (matching type + properties) and accepts explicit
 `renames[]` / `previousName` metadata from the AI server. Renames flow into
 `applyChange` state and the existing save → `cleanData` → migration pipeline.
 
-**Follow-up (separate draft PR):** operations-based AI v2 client
-(`feat/ctb-ai-v2-operations`) — `schemaOperationsTool`, `OperationsProvider`,
-`STRAPI_AI_CTB_V2` flag, `/schemas/chat/v2`.
+### 8. AI chat v2 — operations API (in progress, this branch)
+
+v2 replaces full-schema `applyChange` with ordered `DataManager` operations from
+strapi-ai (`schemaOperationsTool`). Gated behind `STRAPI_AI_CTB_V2`.
+
+**Handoff:** [`CTB_AI_V2/AGENT-orchestrator.md`](CTB_AI_V2/AGENT-orchestrator.md) (start here) · [`CTB_AI_V2/`](CTB_AI_V2/)
+
+**Phase 0 done (2026-06-23):**
+
+- strapi-ai `feat/ctb-operations-v2`: `CTBOperation` types + Zod schemas + tests
+- Strapi: mirrored types, `applyCTBOperations()` dispatcher + 9 unit tests
+
+**Phase 1 done (2026-06-23):**
+
+- strapi-ai `feat/ctb-operations-v2`: `schemaOperationsTool`, validator, `POST /schemas/chat/v2`, prompts; `pnpm test` green
+- Strapi: `OperationsProvider`, v2 URL/flag, Message markers, `toCTB` gated; 16 front tests green
+
+**Next:** Phase 2 (swap macro, DZ ops, enable v2 by default) + live E2E with both services running.
+
+Depends on rename migrations landing via #26749 (`feat/ctb-rename-migration-builder`).
 
 ---
 
