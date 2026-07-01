@@ -405,9 +405,32 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   describe('Get workflows', () => {
     let workflow1, workflow2;
 
+    beforeAll(async () => {
+      // Earlier describes create many workflows; delete via API so stages are removed too.
+      const { body } = await requests.admin.get('/review-workflows/workflows?populate=*');
+      for (const workflow of body.data ?? []) {
+        await deleteWorkflow(workflow.id);
+      }
+    });
+
     beforeEach(async () => {
-      workflow1 = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
-      workflow2 = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
+      const emptyRes = await createWorkflow({ contentTypes: [] });
+      expect(emptyRes.status).toBe(201);
+      workflow1 = emptyRes.body.data;
+
+      const assignedRes = await createWorkflow({ contentTypes: [productUID] });
+      expect(assignedRes.status).toBe(201);
+      workflow2 = assignedRes.body.data;
+      expect(assignedRes.body.data.contentTypes).toEqual(expect.arrayContaining([productUID]));
+    });
+
+    afterEach(async () => {
+      if (workflow1?.id) {
+        await deleteWorkflow(workflow1.id);
+      }
+      if (workflow2?.id) {
+        await deleteWorkflow(workflow2.id);
+      }
     });
 
     test('Should list workflows filtered by CT', async () => {

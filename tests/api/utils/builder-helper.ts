@@ -70,7 +70,15 @@ export const createTestSetup = async (
   };
 };
 
-export const destroyTestSetup = async ({ strapi, builder }) => {
+export const destroyTestSetup = async (testUtils) => {
+  if (!testUtils?.strapi || !testUtils?.builder) {
+    return;
+  }
+
+  const { strapi, builder } = testUtils;
+
+  // Reuse the live test app for CTB cleanup; spawning a new Strapi after destroy()
+  // races Jest teardown and fails with "import after environment torn down".
+  await builder.cleanup({ strapi });
   await strapi.destroy();
-  await builder.cleanup();
 };
