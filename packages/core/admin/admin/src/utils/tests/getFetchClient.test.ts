@@ -228,6 +228,62 @@ describe('getFetchClient', () => {
       });
     });
 
+    it('should preserve JSON API errors for text requests', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 400,
+          ok: false,
+          json: () =>
+            Promise.resolve({
+              data: null,
+              error: {
+                status: 400,
+                name: 'BadRequestError',
+                message: 'Type is required',
+                details: {},
+              },
+            }),
+        })
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.get('/api/export', { responseType: 'text' })).rejects.toMatchObject({
+        name: 'FetchError',
+        message: 'Type is required',
+        status: 400,
+        response: {
+          data: {
+            data: null,
+            error: {
+              status: 400,
+              name: 'BadRequestError',
+              message: 'Type is required',
+              details: {},
+            },
+          },
+        },
+      });
+    });
+
+    it('should fall back to a generic FetchError when a blob error response is not JSON', async () => {
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 500,
+          ok: false,
+          json: () => Promise.reject(new SyntaxError('Unexpected token')),
+        })
+      );
+
+      const fetchClient = getFetchClient();
+
+      await expect(fetchClient.get('/api/export', { responseType: 'blob' })).rejects.toMatchObject({
+        name: 'FetchError',
+        message: 'Server Error',
+        status: 500,
+      });
+    });
+
     it('should not send Accept and Content-Type headers for blob requests', async () => {
       (window.fetch as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({
