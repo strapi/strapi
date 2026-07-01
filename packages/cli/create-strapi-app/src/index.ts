@@ -204,7 +204,7 @@ async function run(args: string[]): Promise<void> {
     scope.devDependencies = {
       ...scope.devDependencies,
       typescript: '^5',
-      '@types/node': '^20',
+      '@types/node': '^22',
       '@types/react': '^18',
       '@types/react-dom': '^18',
     };
