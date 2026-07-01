@@ -90,8 +90,6 @@ describe('AssetDetails (asset details drawer body)', () => {
   });
 
   it('opens the fullscreen crop editor from the preview and closes on cancel', async () => {
-    // cropperjs needs a real layout/canvas, so this covers the open/close
-    // wiring only; the crop interaction itself is exercised by e2e.
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
     await screen.findByRole('combobox');
 
