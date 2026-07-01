@@ -250,6 +250,7 @@
   "Settings.roles.form.permissions.attributesPermissions": "Fields permissions",
   "Settings.roles.form.permissions.create": "Create",
   "Settings.roles.form.permissions.delete": "Delete",
+  "Settings.roles.form.permissions.locales.validation": "{count, plural, one {The {actions} action must apply to at least one locale.} other {The {actions} actions must apply to at least one locale.}}",
   "Settings.roles.form.permissions.publish": "Publish",
   "Settings.roles.form.permissions.read": "Read",
   "Settings.roles.form.permissions.update": "Update",
