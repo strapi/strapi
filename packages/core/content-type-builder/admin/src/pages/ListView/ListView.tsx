@@ -116,36 +116,40 @@ const ListView = () => {
 
   const isDeleted = type.status === 'REMOVED';
 
-  const primaryAction = isInDevelopmentMode && (
+  const primaryAction = (
     <Flex gap={2}>
       <LinkToCMSettingsView
         key="link-to-cm-settings-view"
         type={type}
         disabled={type.status === 'NEW' || isDeleted}
       />
-      <Button
-        startIcon={<Pencil />}
-        variant="tertiary"
-        onClick={onEdit}
-        disabled={!canEdit || isDeleted}
-      >
-        {formatMessage({
-          id: 'app.utils.edit',
-          defaultMessage: 'Edit',
-        })}
-      </Button>
+      {isInDevelopmentMode && (
+        <>
+          <Button
+            startIcon={<Pencil />}
+            variant="tertiary"
+            onClick={onEdit}
+            disabled={!canEdit || isDeleted}
+          >
+            {formatMessage({
+              id: 'app.utils.edit',
+              defaultMessage: 'Edit',
+            })}
+          </Button>
 
-      <Button
-        startIcon={<Plus />}
-        variant="secondary"
-        minWidth="max-content"
-        onClick={() => {
-          onOpenModalAddField({ forTarget, targetUid: type.uid });
-        }}
-        disabled={isDeleted}
-      >
-        {type.attributes.length === 0 ? addNewFieldLabel : addAnotherFieldLabel}
-      </Button>
+          <Button
+            startIcon={<Plus />}
+            variant="secondary"
+            minWidth="max-content"
+            onClick={() => {
+              onOpenModalAddField({ forTarget, targetUid: type.uid });
+            }}
+            disabled={isDeleted}
+          >
+            {type.attributes.length === 0 ? addNewFieldLabel : addAnotherFieldLabel}
+          </Button>
+        </>
+      )}
     </Flex>
   );
 
