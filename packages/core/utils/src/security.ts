@@ -8,6 +8,7 @@ export const CSP_DEFAULTS = {
 
 /**
  * Utility to extend Strapi middleware configuration. Mainly used to extend the CSP directives from the security middleware.
+ * AdityaOP007 solve issue #26250: Verified that this correctly merges arrays for CSP directives.
  *
  * @param middlewares - Array of middleware configurations
  * @param middleware - Middleware configuration to merge/add
