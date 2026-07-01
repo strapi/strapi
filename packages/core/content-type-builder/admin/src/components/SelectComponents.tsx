@@ -1,8 +1,10 @@
 import { Field, MultiSelectNested } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { MAX_DZ_DEPTH } from '../constants';
 import { getTrad } from '../utils';
 import { findAttribute } from '../utils/findAttribute';
+import { getDzDepth, getMaxDownwardDzDepth } from '../utils/getMaxDepth';
 
 import { useDataManager } from './DataManager/useDataManager';
 
@@ -25,7 +27,7 @@ type SelectComponentsProps = {
     };
   }) => void;
   value: string[];
-  targetUid: Internal.UID.ContentType;
+  targetUid: Internal.UID.Schema;
 };
 
 export const SelectComponents = ({
@@ -37,8 +39,15 @@ export const SelectComponents = ({
   targetUid,
 }: SelectComponentsProps) => {
   const { formatMessage } = useIntl();
-  const { componentsGroupedByCategory, contentTypes } = useDataManager();
-  const dzSchema = findAttribute(contentTypes[targetUid].attributes, dynamicZoneTarget);
+  const { componentsGroupedByCategory, contentTypes, components, nestedComponents } =
+    useDataManager();
+
+  // The DZ may live inside a component (not just a content-type), so check both maps.
+  const isTargetAComponent = !!components[targetUid as Internal.UID.Component];
+  const schema = isTargetAComponent
+    ? components[targetUid as Internal.UID.Component]
+    : contentTypes[targetUid as Internal.UID.ContentType];
+  const dzSchema = findAttribute(schema?.attributes ?? [], dynamicZoneTarget);
 
   if (!dzSchema) {
     return null;
@@ -48,9 +57,23 @@ export const SelectComponents = ({
 
   const filteredComponentsGroupedByCategory = Object.keys(componentsGroupedByCategory).reduce(
     (acc, current) => {
-      const filteredComponents = componentsGroupedByCategory[current].filter(({ uid }) => {
+      let filteredComponents = componentsGroupedByCategory[current].filter(({ uid }) => {
         return !alreadyUsedComponents.includes(uid);
       });
+
+      // When the DZ lives inside a component, exclude candidates whose downward
+      // DZ depth would exceed MAX_DZ_DEPTH when combined with the current depth.
+      if (isTargetAComponent) {
+        const currentDzDepth = getDzDepth(targetUid, nestedComponents);
+        // Budget remaining for DZ nesting below the candidate (+1 for the edge we're creating).
+        const remainingBudget = MAX_DZ_DEPTH - currentDzDepth - 1;
+
+        filteredComponents = filteredComponents.filter(({ uid }) => {
+          return (
+            getMaxDownwardDzDepth(uid as Internal.UID.Component, components) <= remainingBudget
+          );
+        });
+      }
 
       if (filteredComponents.length > 0) {
         acc[current] = filteredComponents;
@@ -62,10 +85,10 @@ export const SelectComponents = ({
   );
   const options = Object.entries(filteredComponentsGroupedByCategory).reduce(
     (acc, current) => {
-      const [categoryName, components] = current;
+      const [categoryName, categoryComponents] = current;
       const section = {
         label: categoryName,
-        children: components.map(({ uid, info: { displayName } }) => {
+        children: categoryComponents.map(({ uid, info: { displayName } }) => {
           return { label: displayName, value: uid };
         }),
       };
