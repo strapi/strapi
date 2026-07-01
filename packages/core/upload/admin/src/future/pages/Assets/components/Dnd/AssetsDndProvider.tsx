@@ -62,7 +62,7 @@ const getDragItems = (activeData: DragItemData | undefined): DragItemData[] => {
     return [];
   }
 
-  // TODO(CMS-433): include selectedItems from active data for multi-drag payload members.
+  // TODO: include selectedItems from active data for multi-drag payload members.
   return [activeData];
 };
 
@@ -256,4 +256,4 @@ export const AssetsDndProvider = ({ children }: AssetsDndProviderProps) => {
   );
 };
 
-// TODO(CMS-229): FolderTree droppables + keyboard move path.
+// TODO: FolderTree droppables + keyboard move path.
