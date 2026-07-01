@@ -310,3 +310,144 @@ describe('regression: pre-#26086 immediate Readable.from(PassThrough) (#26086)',
     transaction.end();
   });
 });
+
+describe('createAssetsDestinationWritable (asset metadata resilience)', () => {
+  const createStrapiWithQuery = (
+    uploadStream: jest.Mock,
+    {
+      findOne,
+      update = jest.fn().mockResolvedValue(null),
+    }: {
+      findOne: jest.Mock;
+      update?: jest.Mock;
+    }
+  ) =>
+    ({
+      config: {
+        get(service: string) {
+          if (service === 'plugin::upload') {
+            return { provider: 'local' };
+          }
+          return {};
+        },
+      },
+      db: {
+        transaction(fn: (arg: { trx: object; rollback: () => Promise<void> }) => Promise<void>) {
+          fn({ trx: {}, rollback: async () => Promise.resolve() });
+          return Promise.resolve();
+        },
+        query: jest.fn(() => ({
+          findOne,
+          update,
+        })),
+      },
+      plugin(name: string) {
+        if (name === 'upload') {
+          return { provider: { uploadStream } };
+        }
+        return {};
+      },
+    }) as unknown as Core.Strapi;
+
+  test('uploads asset when entity ID mapping is missing but hash matches an existing record', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const mockFindOne = jest
+      .fn()
+      .mockResolvedValueOnce({ id: 42 })
+      .mockResolvedValueOnce({ id: 42, url: 'old.jpg', formats: {} });
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, {
+      findOne: mockFindOne,
+      update: mockUpdate,
+    });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'photo.jpg',
+      filepath: '/photo.jpg',
+      stats: { size: 10 },
+      stream: passThrough,
+      metadata: {
+        hash: 'photo_hash',
+        name: 'photo.jpg',
+        id: 99,
+        url: 'photo.jpg',
+        size: 10,
+        mime: 'image/jpeg',
+      },
+    });
+
+    passThrough.write(Buffer.from('hello'));
+    passThrough.end();
+
+    await waitForUploadStream(uploadStream);
+
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('Resolved upload file ID via hash')
+    );
+    expect(mockUpdate).toHaveBeenCalled();
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+
+  test('uploads asset bytes and warns when no file record can be updated', async () => {
+    const passThrough = new PassThrough();
+    const uploadStream = jest.fn().mockResolvedValue(undefined);
+    const mockFindOne = jest.fn().mockResolvedValue(null);
+    const onWarning = jest.fn();
+
+    const strapi = createStrapiWithQuery(uploadStream, { findOne: mockFindOne });
+    const transaction = createTransaction(strapi);
+    const stream = createAssetsDestinationWritable({
+      strapi,
+      transaction,
+      resolveUploadFileId: () => undefined,
+      restoreMediaEntitiesContent: true,
+      removeAssetsBackup: async () => Promise.resolve(),
+      onWarning,
+    });
+
+    await writeAsset(stream, {
+      filename: 'orphan.jpg',
+      filepath: '/orphan.jpg',
+      stats: { size: 10 },
+      stream: passThrough,
+      metadata: {
+        hash: 'missing_hash',
+        name: 'orphan.jpg',
+        id: 1,
+        url: 'orphan.jpg',
+        size: 10,
+        mime: 'image/jpeg',
+      },
+    });
+
+    passThrough.write(Buffer.from('hello'));
+    passThrough.end();
+
+    await waitForUploadStream(uploadStream);
+
+    expect(onWarning).toHaveBeenCalledWith(
+      expect.stringContaining('could not update the media library record')
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      stream.end((err?: Error | null) => (err ? reject(err) : resolve()));
+    });
+    transaction.end();
+  });
+});

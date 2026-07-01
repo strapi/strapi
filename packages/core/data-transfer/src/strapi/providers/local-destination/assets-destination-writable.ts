@@ -10,7 +10,38 @@ export interface CreateAssetsDestinationWritableOptions {
   resolveUploadFileId: (metadata: { id: number }) => number | undefined;
   restoreMediaEntitiesContent: boolean;
   removeAssetsBackup: () => Promise<void>;
+  onWarning?: (message: string) => void;
 }
+
+const resolveUploadFileIdWithHashFallback = async (
+  strapi: Core.Strapi,
+  uploadData: IFile,
+  resolveUploadFileId: (metadata: { id: number }) => number | undefined,
+  onWarning?: (message: string) => void
+): Promise<number | undefined> => {
+  const mappedId = resolveUploadFileId(uploadData);
+  if (mappedId) {
+    return mappedId;
+  }
+
+  if (!uploadData.hash) {
+    return undefined;
+  }
+
+  const entry = await strapi.db.query('plugin::upload.file').findOne({
+    where: { hash: uploadData.hash },
+    select: ['id'],
+  });
+
+  if (entry?.id) {
+    onWarning?.(
+      `[Data transfer] Resolved upload file ID via hash "${uploadData.hash}" (source id ${uploadData.id} was not mapped).`
+    );
+    return entry.id;
+  }
+
+  return undefined;
+};
 
 /**
  * Writable for restoring upload assets during a local push destination transfer.
@@ -33,6 +64,7 @@ export function createAssetsDestinationWritable(
     resolveUploadFileId,
     restoreMediaEntitiesContent,
     removeAssetsBackup,
+    onWarning,
   } = options;
 
   let pendingUploads = 0;
@@ -51,26 +83,17 @@ export function createAssetsDestinationWritable(
     write(chunk: IAsset, _encoding, callback) {
       const provider = strapi.config.get<{ provider: string }>('plugin::upload').provider;
 
-      const fileId = resolveUploadFileId(chunk.metadata);
-      if (!fileId) {
-        callback(new Error(`File ID not found for ID: ${chunk.metadata.id}`));
-        return;
-      }
-
       if (!transaction) {
         callback(new Error('Transaction not available for asset upload'));
         return;
       }
 
-      // Accumulate all binary chunks from the PassThrough as they arrive (flowing mode).
-      // uploadStream is only started once the stream ends — see constraint (2) above.
       const bufferedChunks: Buffer[] = [];
       chunk.stream.on('data', (c: Buffer) => bufferedChunks.push(c));
 
       pendingUploads += 1;
 
       chunk.stream.once('end', () => {
-        // Build uploadData here so the stream is fully populated before the provider reads it.
         const uploadData = {
           ...chunk.metadata,
           stream: Readable.from(bufferedChunks),
@@ -80,9 +103,23 @@ export function createAssetsDestinationWritable(
         transaction
           .attach(async () => {
             try {
+              const fileId = await resolveUploadFileIdWithHashFallback(
+                strapi,
+                uploadData,
+                resolveUploadFileId,
+                onWarning
+              );
+
               await strapi.plugin('upload').provider.uploadStream(uploadData);
 
               if (!restoreMediaEntitiesContent) {
+                return;
+              }
+
+              if (!fileId) {
+                onWarning?.(
+                  `[Data transfer] Uploaded asset "${chunk.filename}" but could not update the media library record (no ID mapping or hash match).`
+                );
                 return;
               }
 
@@ -91,12 +128,19 @@ export function createAssetsDestinationWritable(
                   where: { id: fileId },
                 });
                 if (!entry) {
-                  throw new Error('file not found');
+                  onWarning?.(
+                    `[Data transfer] Uploaded format variant "${uploadData.type}" for "${chunk.filename}" but parent file record was not found.`
+                  );
+                  return;
                 }
                 const specificFormat = entry?.formats?.[uploadData.type];
-                if (specificFormat) {
-                  specificFormat.url = uploadData.url;
+                if (!specificFormat) {
+                  onWarning?.(
+                    `[Data transfer] Uploaded format variant "${uploadData.type}" for "${chunk.filename}" but no matching format entry exists in the database.`
+                  );
+                  return;
                 }
+                specificFormat.url = uploadData.url;
                 await strapi.db.query('plugin::upload.file').update({
                   where: { id: entry.id },
                   data: {
@@ -111,7 +155,10 @@ export function createAssetsDestinationWritable(
                 where: { id: fileId },
               });
               if (!entry) {
-                throw new Error('file not found');
+                onWarning?.(
+                  `[Data transfer] Uploaded asset "${chunk.filename}" but file record was not found for URL update.`
+                );
+                return;
               }
               entry.url = uploadData.url;
               await strapi.db.query('plugin::upload.file').update({
