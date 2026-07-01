@@ -71,6 +71,6 @@ export const createTestSetup = async (
 };
 
 export const destroyTestSetup = async ({ strapi, builder }) => {
-  await builder.cleanup({ strapi, deleteSchemas: false });
   await strapi.destroy();
+  await builder.cleanup();
 };

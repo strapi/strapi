@@ -25,8 +25,7 @@ module.exports = {
           createdModel = await modelsUtils.createContentType(contentType);
           ctx.addModel(createdModel);
         },
-        cleanup: (_ctx, { strapi } = {}) =>
-          modelsUtils.deleteContentType(createdModel.uid, { strapi }),
+        cleanup: () => modelsUtils.deleteContentType(createdModel.uid),
       };
     },
 
@@ -38,9 +37,9 @@ module.exports = {
           createdModels = await modelsUtils.createContentTypes(contentTypes);
           createdModels.forEach(ctx.addModel);
         },
-        async cleanup(_ctx, { strapi } = {}) {
+        async cleanup() {
           for (const model of createdModels) {
-            await modelsUtils.deleteContentType(model.uid, { strapi });
+            await modelsUtils.deleteContentType(model.uid);
           }
         },
       };
@@ -58,9 +57,9 @@ module.exports = {
             ctx.addModel(model);
           }
         },
-        async cleanup(_ctx, { strapi } = {}) {
+        async cleanup() {
           for (const model of createdModels) {
-            await modelsUtils.deleteContentType(model.uid, { strapi });
+            await modelsUtils.deleteContentType(model.uid);
           }
         },
       };
@@ -75,8 +74,7 @@ module.exports = {
           createdModel = await modelsUtils.createComponent(component);
           ctx.addModel(createdModel);
         },
-        cleanup: (_ctx, { strapi } = {}) =>
-          modelsUtils.deleteComponent(createdModel.uid, { strapi }),
+        cleanup: () => modelsUtils.deleteComponent(createdModel.uid),
       };
     },
   },
@@ -95,8 +93,7 @@ module.exports = {
 
           ctx.addFixtures(modelName, createdEntries);
         },
-        cleanup: (_ctx, { strapi } = {}) =>
-          modelsUtils.deleteFixturesFor(modelName, createdEntries, { strapi }),
+        cleanup: () => modelsUtils.deleteFixturesFor(modelName, createdEntries),
       };
     },
   },
