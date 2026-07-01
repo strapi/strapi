@@ -1,6 +1,14 @@
 import * as React from 'react';
 
-import { Accordion, Box, Flex, FlexComponent, Tooltip, Typography } from '@strapi/design-system';
+import {
+  Accordion,
+  Box,
+  Flex,
+  FlexComponent,
+  Popover,
+  Tooltip,
+  Typography,
+} from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -13,12 +21,67 @@ interface ComponentCategoryProps {
     uid: string;
     displayName: string;
     icon?: string;
+    screenshot?: string;
   }>;
   onAddComponent: (
     componentUid: string
   ) => React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
   variant?: Accordion.Variant;
 }
+
+interface ScreenshotPreviewProps {
+  src: string;
+  alt: string;
+}
+
+/**
+ * Renders a small screenshot thumbnail inside the component picker tile and, on hover,
+ * a larger portaled preview so authors can read the component at a glance without picking it.
+ * Uses a controlled Popover anchored to the thumbnail — the content is portaled, so it escapes
+ * the accordion's overflow clipping.
+ */
+const ScreenshotPreview = ({ src, alt }: ScreenshotPreviewProps) => {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Anchor>
+        <Box
+          tag="img"
+          src={src}
+          alt={alt}
+          width="100%"
+          height="5.2rem"
+          hasRadius
+          style={{ objectFit: 'cover' }}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+        />
+      </Popover.Anchor>
+      <Popover.Content
+        side="top"
+        sideOffset={4}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        style={{ pointerEvents: 'none' }}
+      >
+        <Box padding={2}>
+          <Box
+            tag="img"
+            src={src}
+            alt={alt}
+            hasRadius
+            style={{
+              display: 'block',
+              maxWidth: 'min(60rem, 90vw)',
+              maxHeight: 'min(45rem, 80vh)',
+              objectFit: 'contain',
+            }}
+          />
+        </Box>
+      </Popover.Content>
+    </Popover.Root>
+  );
+};
 
 const ComponentCategory = ({
   category,
@@ -37,7 +100,7 @@ const ComponentCategory = ({
       </Accordion.Header>
       <ResponsiveAccordionContent>
         <Grid paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
-          {components.map(({ uid, displayName, icon }) => (
+          {components.map(({ uid, displayName, icon, screenshot }) => (
             <ComponentBox
               key={uid}
               tag="button"
@@ -59,7 +122,11 @@ const ComponentCategory = ({
                 paddingLeft={2}
                 paddingRight={2}
               >
-                <ComponentIcon color="currentColor" background="primary200" icon={icon} />
+                {screenshot ? (
+                  <ScreenshotPreview src={screenshot} alt={displayName} />
+                ) : (
+                  <ComponentIcon color="currentColor" background="primary200" icon={icon} />
+                )}
 
                 <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
                   <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
