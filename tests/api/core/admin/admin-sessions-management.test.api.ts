@@ -106,7 +106,7 @@ describe('Admin Sessions Management (Active Devices)', () => {
       expect(typeof current.id).toBe('string');
       expect(current.deviceId).toBe(deviceA);
       expect(typeof current.loginAt).toBe('string');
-      expect(typeof current.ip).toBe('string');
+      expect(current).not.toHaveProperty('ip');
       expect(typeof current.lastActiveAt).toBe('string');
       // Device name is derived from the User-Agent sent at login and carried through rotation.
       expect(current.deviceName).toBe('Chrome on macOS');

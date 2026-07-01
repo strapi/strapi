@@ -127,7 +127,7 @@ describe('UP Content API - Active Sessions', () => {
       expect(current).toBeDefined();
       expect(current.current).toBe(true);
       expect(typeof current.loginAt).toBe('string');
-      expect(typeof current.ip).toBe('string');
+      expect(current).not.toHaveProperty('ip');
       expect(current.deviceName).toBe('Chrome on macOS');
       expect(current).not.toHaveProperty('userId');
 
