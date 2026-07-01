@@ -63,13 +63,19 @@ export const openNewRelationLab = async (page: Page) => {
   await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
 };
 
+/** Combobox accessible name includes a relation count after the first link, e.g. `oneToMany (1)`. */
+const relationFieldCombobox = (page: Page, field: RelationLabField | 'manyToMany') =>
+  page.getByRole('combobox', {
+    name: new RegExp(`^${field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}( \\(\\d+\\))?$`),
+  });
+
 export const connectRelationTarget = async (
   page: Page,
   field: RelationLabField | 'manyToMany',
   targetName: string,
   status: 'draft' | 'published'
 ) => {
-  await page.getByRole('combobox', { name: field, exact: true }).click();
+  await clickAndWait(page, relationFieldCombobox(page, field));
   await selectRelationComboboxOption(page, targetName, status);
 };
 
