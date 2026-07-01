@@ -9,9 +9,9 @@
 >   step, open a fresh AI and point it at the single matching
 >   `CTB_RENAME_STEPS/STEP-*.md` file (start with `CTB_RENAME_STEPS/README.md`).
 >
-> Branch: `ben/ctb-rename-migration-builder` (base: `develop`).
-> Linear: CMS-635 (related: CG-979, CG-1001). PR: #26622 (draft).
-> Last updated: 2026-06-12.
+> Branch: `feat/ctb-rename-migration-builder` (base: `develop`).
+> Linear: CMS-635 (related: CG-979, CG-1001). PR: #26749 (draft).
+> Last updated: 2026-07-01.
 
 ---
 
@@ -30,6 +30,8 @@
 | Provider-order `[user, internal]` fresh-DB interaction         | ✅ verified               |
 | CLI `strapi rename:field` (optional)                           | ✅ done + tested          |
 | CLI `strapi rename:component` (optional)                       | ✅ done + tested          |
+| AI chat v1 rename inference / explicit metadata                | ✅ done + tested          |
+| AI chat v2 operations API                                      | ⬜ separate draft PR      |
 | Content-type _level_ rename                                    | ➖ N/A (immutable in CTB) |
 
 Legend: ✅ done · ⬜ missing/todo · ➖ not applicable.
@@ -176,6 +178,17 @@ category changes its uid and emits the `component_type` migration across every
 (happy path, `never`, validation errors) and
 `tests/cli/.../rename-component.test.cli.ts` (component file moved + one guarded
 `component_type` migration).
+
+### E. AI chat v1 rename compatibility ✅ (simple path)
+
+`AIChat/lib/transforms/schemas/toCTB.ts` infers simple 1:1 renames from full
+schema snapshots (matching type + properties) and accepts explicit
+`renames[]` / `previousName` metadata from the AI server. Renames flow into
+`applyChange` state and the existing save → `cleanData` → migration pipeline.
+
+**Follow-up (separate draft PR):** operations-based AI v2 client
+(`feat/ctb-ai-v2-operations`) — `schemaOperationsTool`, `OperationsProvider`,
+`STRAPI_AI_CTB_V2` flag, `/schemas/chat/v2`.
 
 ---
 

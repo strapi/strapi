@@ -1,4 +1,4 @@
-import { transformChatToCTB } from '../toCTB';
+import { transformAttributesFromChatToCTB, transformChatToCTB } from '../toCTB';
 
 import type { ContentType } from '../../../../../../types';
 import type { Schema } from '../../../types/schema';
@@ -86,6 +86,109 @@ describe('transformChatToCTB', () => {
       expect(result.info.pluralName).toBe('my-things');
       expect(result.options).toMatchObject({ draftAndPublish: false });
       expect(result.pluginOptions?.i18n).toMatchObject({ localized: true });
+    });
+  });
+
+  describe('rename migration compatibility', () => {
+    const oldSchema: ContentType = {
+      uid: 'api::article.article' as any,
+      modelType: 'contentType',
+      kind: 'collectionType',
+      modelName: 'article',
+      collectionName: 'articles',
+      globalId: 'Article',
+      visible: true,
+      status: 'UNCHANGED',
+      restrictRelationsTo: null,
+      info: {
+        displayName: 'Article',
+        singularName: 'article',
+        pluralName: 'articles',
+      },
+      options: { draftAndPublish: true },
+      pluginOptions: { i18n: { localized: false } },
+      attributes: [
+        { name: 'title', type: 'string', required: true, status: 'UNCHANGED' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+      ],
+    };
+
+    it('infers a rename when the AI replaces one field with another of the same config', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          heading: { type: 'string', required: true },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toEqual([{ oldName: 'title', newName: 'heading' }]);
+      expect(result.attributes).toEqual([
+        { name: 'heading', type: 'string', required: true, status: 'CHANGED' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+      ]);
+    });
+
+    it('uses explicit schema-level renames when provided by the AI server', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        renames: [{ oldName: 'title', newName: 'heading' }],
+        attributes: {
+          heading: { type: 'string', required: true },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toEqual([{ oldName: 'title', newName: 'heading' }]);
+    });
+
+    it('uses attribute-level previousName metadata when provided', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          heading: { type: 'string', required: true, previousName: 'title' },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const { attributes, renames } = transformAttributesFromChatToCTB(schema, oldSchema);
+
+      expect(renames).toEqual([{ oldName: 'title', newName: 'heading' }]);
+      expect(attributes).toEqual([
+        { name: 'heading', type: 'string', required: true, status: 'CHANGED' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+      ]);
+    });
+
+    it('does not treat delete+add with different configs as a rename', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          summary: { type: 'text' },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toBeUndefined();
+      expect(result.attributes).toEqual([
+        { name: 'summary', type: 'text', status: 'NEW' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+        { name: 'title', type: 'string', required: true, status: 'REMOVED' },
+      ]);
     });
   });
 });
