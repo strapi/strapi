@@ -6,7 +6,7 @@
     "outDir": "../dist",
     "noEmit": false
   },
-  "include": ["./src", "./custom.d.ts", "../shared", "../ee/admin", "../package.json", "./tests"],
+  "include": ["./src", "../shared", "../ee/admin", "../package.json", "./tests"],
   "exclude": [
     "**/__mocks__",
     "./src/**/tests",
