@@ -44,6 +44,12 @@ function detectCompose() {
   } else if (override === 'docker') {
     tryOrder.push(['docker', ['compose'], 'docker compose']);
     tryOrder.push(['docker-compose', [], 'docker-compose']);
+  } else if (process.env.GITHUB_ACTIONS === 'true') {
+    // GitHub Actions: use Docker (daemon is available; podman is often installed but not running).
+    tryOrder.push(['docker', ['compose'], 'docker compose']);
+    tryOrder.push(['docker-compose', [], 'docker-compose']);
+    tryOrder.push(['podman', ['compose'], 'podman compose']);
+    tryOrder.push(['podman-compose', [], 'podman-compose']);
   } else {
     // Auto: prefer podman first (user preference)
     tryOrder.push(['podman', ['compose'], 'podman compose']);
@@ -69,7 +75,14 @@ function detectContainer() {
   if (detectedContainer) return detectedContainer;
 
   const override = process.env.STRAPI_BENCH_RUNTIME;
-  const tryOrder = override === 'docker' ? ['docker', 'podman'] : ['podman', 'docker'];
+  const tryOrder =
+    override === 'docker'
+      ? ['docker', 'podman']
+      : override === 'podman'
+        ? ['podman', 'docker']
+        : process.env.GITHUB_ACTIONS === 'true'
+          ? ['docker', 'podman']
+          : ['podman', 'docker'];
 
   for (const exe of tryOrder) {
     if (probe(exe)) {

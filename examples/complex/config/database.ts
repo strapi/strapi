@@ -1,3 +1,5 @@
+import path from 'path';
+
 export default ({ env }) => {
   const client = env('DATABASE_CLIENT', 'postgres');
 
@@ -42,7 +44,13 @@ export default ({ env }) => {
     },
     sqlite: {
       connection: {
-        filename: env('DATABASE_FILENAME', '.tmp/data.db'),
+        filename: (() => {
+          const f = env('DATABASE_FILENAME');
+          if (!f) {
+            return path.join(process.cwd(), '.tmp', 'data.db');
+          }
+          return path.isAbsolute(f) ? f : path.join(process.cwd(), f);
+        })(),
       },
       useNullAsDefault: true,
     },

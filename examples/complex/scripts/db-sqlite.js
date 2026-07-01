@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const { assertSafeSnapshotName } = require('./db-utils');
+
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
 const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
@@ -65,6 +67,7 @@ switch (command) {
       console.error('Usage: node db-sqlite.js snapshot <name>');
       process.exit(1);
     }
+    assertSafeSnapshotName(snapshotName);
     if (!fs.existsSync(DATABASE_FILENAME)) {
       console.error(`Error: Database file not found: ${DATABASE_FILENAME}`);
       console.error('Run the v4 app with `yarn develop:sqlite` and seed first to create it.');
@@ -83,6 +86,7 @@ switch (command) {
       console.error('Usage: node db-sqlite.js restore <name>');
       process.exit(1);
     }
+    assertSafeSnapshotName(snapshotName);
     const source = snapshotPath(snapshotName);
     if (!fs.existsSync(source)) {
       console.error(`Error: Snapshot not found: ${source}`);
