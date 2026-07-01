@@ -53,7 +53,7 @@ const Layout = () => {
     supportedModelsToDisplay.length > 0 &&
     pathname !== '/content-manager/403'
   ) {
-    return <Navigate to="/403" />;
+    return <Navigate to="/content-manager/403" />;
   }
 
   // Redirect the user to the create content type page
