@@ -63,6 +63,7 @@
     "release": "node scripts/release.js",
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache && tsx scripts/ai-tooling/post-setup.ts",
     "test:api": "node tests/scripts/run-api-tests.js",
+    "test:api:capture-golden": "node tests/scripts/capture-api-golden-snapshot.js",
     "test:api:clean": "rimraf ./coverage",
     "test:clean": "run-s -c test:api:clean test:e2e:clean test:cli:clean",
     "test:cli": "node tests/scripts/run-cli-tests.js",

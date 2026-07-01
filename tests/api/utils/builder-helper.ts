@@ -70,7 +70,23 @@ export const createTestSetup = async (
   };
 };
 
-export const destroyTestSetup = async ({ strapi, builder }) => {
+export type DestroyTestSetupOptions = {
+  /**
+   * When false, run legacy CTB cleanup (many Strapi boots) instead of golden snapshot restore.
+   * Use only when a suite cannot share the shared test app teardown path.
+   */
+  useGoldenRestore?: boolean;
+};
+
+export const destroyTestSetup = async (
+  testSetup: BuilderHelperReturn | undefined,
+  options: DestroyTestSetupOptions = {}
+) => {
+  if (!testSetup) {
+    return;
+  }
+
+  const { strapi, builder } = testSetup;
   await strapi.destroy();
-  await builder.cleanup();
+  await builder.cleanup({ useGoldenRestore: options.useGoldenRestore ?? true });
 };

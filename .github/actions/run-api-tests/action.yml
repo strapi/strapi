@@ -8,12 +8,27 @@ inputs:
     description: 'Should run EE or CE tests'
   jestOptions:
     description: 'Jest options'
+  goldenArtifact:
+    description: 'Pre-captured golden snapshot artifact name (optional)'
+    required: false
 runs:
   using: 'composite'
   steps:
+    - if: ${{ inputs.goldenArtifact != '' }}
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        name: ${{ inputs.goldenArtifact }}
+        path: /tmp/api-golden-restore
+    - if: ${{ inputs.goldenArtifact != '' }}
+      run: |
+        rm -rf test-apps/.golden
+        mkdir -p test-apps/.golden
+        cp -a /tmp/api-golden-restore/. test-apps/.golden/
+      shell: bash
     - run: $GITHUB_ACTION_PATH/script.sh
       env:
         DB_OPTIONS: ${{ inputs.dbOptions }}
         RUN_EE: ${{ inputs.runEE }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
+        GOLDEN_SNAPSHOT_PROVIDED: ${{ inputs.goldenArtifact }}
       shell: bash
