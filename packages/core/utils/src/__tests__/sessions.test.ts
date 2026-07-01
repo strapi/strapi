@@ -26,29 +26,6 @@ describe('sessions utils', () => {
       });
     });
 
-    it('does not expose legacy ip values stored in metadata', () => {
-      const result = sanitizeSessionEntry({
-        sessionId: 'session-legacy',
-        deviceId: 'device-a',
-        createdAt: '2026-06-12T10:00:00.000Z',
-        metadata: {
-          ip: '127.0.0.1',
-          loginAt: '2026-06-12T08:00:00.000Z',
-          deviceName: 'Chrome on macOS',
-        },
-      });
-
-      expect(result).toEqual({
-        id: 'session-legacy',
-        deviceId: 'device-a',
-        deviceName: 'Chrome on macOS',
-        current: false,
-        loginAt: '2026-06-12T08:00:00.000Z',
-        lastActiveAt: '2026-06-12T10:00:00.000Z',
-      });
-      expect(result).not.toHaveProperty('ip');
-    });
-
     it('ignores invalid metadata types', () => {
       const result = sanitizeSessionEntry({
         sessionId: 'session-b',

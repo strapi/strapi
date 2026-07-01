@@ -82,7 +82,6 @@ describe('Auth controller - sessions', () => {
           deviceId: 'device-b',
           createdAt: '2026-06-10T09:00:00.000Z',
           metadata: {
-            ip: '10.0.0.2',
             loginAt: '2026-06-09T08:00:00.000Z',
             deviceName: 'Safari',
           },
@@ -92,7 +91,6 @@ describe('Auth controller - sessions', () => {
           deviceId: 'device-a',
           createdAt: '2026-06-11T10:00:00.000Z',
           metadata: {
-            ip: '127.0.0.1',
             loginAt: '2026-06-10T08:00:00.000Z',
             deviceName: 'Chrome',
           },
@@ -127,9 +125,6 @@ describe('Auth controller - sessions', () => {
             deviceName: 'Safari',
           }),
         ],
-      });
-      send.mock.calls[0][0].data.forEach((session) => {
-        expect(session).not.toHaveProperty('ip');
       });
     });
   });

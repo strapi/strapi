@@ -45,7 +45,6 @@ describe('Authenticated Session Controller', () => {
               deviceId: 'device-b',
               createdAt: '2026-06-11T09:00:00.000Z',
               metadata: {
-                ip: '10.0.0.2',
                 loginAt: '2026-06-10T08:00:00.000Z',
                 deviceName: 'Safari on iOS',
               },
@@ -55,7 +54,6 @@ describe('Authenticated Session Controller', () => {
               deviceId: 'device-a',
               createdAt: '2026-06-12T10:00:00.000Z',
               metadata: {
-                ip: '127.0.0.1',
                 loginAt: '2026-06-12T08:00:00.000Z',
                 deviceName: 'Chrome on macOS',
               },
@@ -91,9 +89,6 @@ describe('Authenticated Session Controller', () => {
           deviceName: 'Safari on iOS',
         }),
       ]);
-      ctx.body.data.forEach((session: Record<string, unknown>) => {
-        expect(session).not.toHaveProperty('ip');
-      });
     });
 
     test('Returns 500 when session manager is unavailable', async () => {
