@@ -1,7 +1,15 @@
 import * as React from 'react';
 
 import { SubNav } from '@strapi/admin/strapi-admin';
-import { Flex, Searchbar, useCollator, useFilter, Divider, Loader } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Searchbar,
+  useCollator,
+  useFilter,
+  Divider,
+  Loader,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
@@ -90,7 +98,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   // Show loading state while data is being fetched
   if (isLoading) {
     return (
-      <SubNav.Main aria-label={label}>
+      <SubNav.Main aria-label={label} isFullPage={isFullPage}>
         <SubNav.Header label={label} />
         <Divider />
         <Flex padding={4} justifyContent="center">
@@ -134,22 +142,18 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   );
 
   return (
-    <SubNav.Main aria-label={label}>
-      {!isFullPage && (
-        <>
-          <SubNav.Header label={label} />
-          <Divider />
-          {searchBar}
-        </>
-      )}
+    <SubNav.Main aria-label={label} isFullPage={isFullPage}>
+      <SubNav.Header label={label} />
+      <Divider />
+      <Box
+        position={isFullPage ? 'sticky' : 'static'}
+        top={isFullPage ? '0px' : undefined}
+        zIndex={isFullPage ? 2 : undefined}
+        background={isFullPage ? 'neutral100' : 'neutral0'}
+      >
+        {searchBar}
+      </Box>
       <SubNav.Content>
-        {isFullPage && (
-          <>
-            <SubNav.Header label={label} />
-            <Divider />
-            {searchBar}
-          </>
-        )}
         <SubNav.Sections>
           {menu.map((section) => {
             return (
