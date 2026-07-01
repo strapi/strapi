@@ -112,4 +112,26 @@ describe('sanitizeQuery', () => {
     });
     expect((result as any).filters.title).not.toHaveProperty('__invalidNestedFilterKey');
   });
+
+  describe('sort', () => {
+    it.each([
+      ['empty array (GraphQL default)', []],
+      ['empty string', ''],
+      ['comma-only string', ','],
+      ['empty object', {}],
+      ['array of empty strings', ['']],
+      ['array with null (qs sort[])', [null]],
+    ])('removes meaningless sort: %s', async (_label, sort) => {
+      const result = await sanitizers.query({ sort, filters: { id: 1 } }, schema);
+
+      expect(result).not.toHaveProperty('sort');
+      expect(result).toHaveProperty('filters');
+    });
+
+    it('keeps meaningful sort', async () => {
+      const result = await sanitizers.query({ sort: 'title:asc', filters: { id: 1 } }, schema);
+
+      expect(result).toHaveProperty('sort', 'title:asc');
+    });
+  });
 });

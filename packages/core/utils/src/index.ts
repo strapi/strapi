@@ -36,8 +36,19 @@ export * from './zod';
 export * from './validation';
 export * from './route-serialization';
 
+export { parseUserAgent, getDeviceName, type ParsedUserAgent } from './user-agent';
+export {
+  sanitizeSessionEntry,
+  buildSessionMetadata,
+  sortSessionsForDisplay,
+  type SanitizedSessionEntry,
+  type SessionDisplayEntry,
+  type SessionEntryLike,
+} from './sessions';
+
 export * from './primitives';
 export * from './content-api-router';
 export * from './security';
 export * from './publication-filter';
 export * from './has-published-version-param';
+export { hasSort } from './sort-query';

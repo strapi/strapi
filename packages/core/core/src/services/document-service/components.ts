@@ -373,7 +373,10 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 ************************** */
 
 // components can have nested compos so this must be recursive
-const createComponent = async <TUID extends UID.Component>(uid: TUID, data: Input<TUID>) => {
+const createComponent = async <TUID extends UID.Component>(
+  uid: TUID,
+  data: Input<TUID>
+): Promise<Data.Component<TUID>> => {
   const schema = strapi.getModel(uid);
 
   const componentData = await createComponents(uid, data);

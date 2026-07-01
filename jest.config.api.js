@@ -35,5 +35,9 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['@swc/jest'],
   },
-  modulePathIgnorePatterns: ['.cache', '<rootDir>/test-apps/e2e/'],
+  modulePathIgnorePatterns: [
+    '[/\\\\]\\.cache[/\\\\]',
+    '[/\\\\]dist[/\\\\]',
+    '<rootDir>/test-apps/e2e/',
+  ],
 };
