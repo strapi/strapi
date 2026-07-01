@@ -3,11 +3,34 @@ import * as React from 'react';
 
 import { immerable } from 'immer';
 
+import { AuthProvider, useAuth } from '../../features/Auth';
+
 export interface PluginConfig
   extends Partial<Pick<Plugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady'>> {
   name: string;
   id: string;
 }
+
+const InjectionZoneAuthBoundary = ({ children }: { children: React.ReactNode }) => {
+  const hasAuthProvider = useAuth('InjectionZoneAuthBoundary', () => true, false);
+
+  if (hasAuthProvider) {
+    return React.createElement(React.Fragment, null, children);
+  }
+
+  return React.createElement(AuthProvider, null, children);
+};
+
+const withInjectionZoneAuth = (Component: React.ComponentType) => {
+  const ComponentWithAuth = (props: Record<string, unknown>) =>
+    React.createElement(InjectionZoneAuthBoundary, null, React.createElement(Component, props));
+
+  ComponentWithAuth.displayName = `InjectionZoneAuthBoundary(${
+    Component.displayName ?? Component.name ?? 'Component'
+  })`;
+
+  return ComponentWithAuth as React.ComponentType;
+};
 
 export class Plugin {
   [immerable] = true;
@@ -47,7 +70,10 @@ export class Plugin {
     component: { name: string; Component: React.ComponentType }
   ) {
     try {
-      this.injectionZones[containerName][blockName].push(component);
+      this.injectionZones[containerName][blockName].push({
+        ...component,
+        Component: withInjectionZoneAuth(component.Component),
+      });
     } catch (err) {
       console.error('Cannot inject component', err);
     }
