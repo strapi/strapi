@@ -2,125 +2,138 @@ import { castArray } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import type { UID } from '@strapi/types';
 
-import {
-  type DraftRelationCounts,
-  EMPTY_DRAFT_RELATION_COUNTS,
-  isBidirectionalManyToMany,
-  mergeDraftRelationCounts,
-} from './draft-relations';
+import { type DraftRelationCounts, isBidirectionalManyToMany } from './draft-relations';
 
 const { isVisibleAttribute, hasDraftAndPublish } = strapiUtils.contentTypes;
 
 const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
   (model.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized === true;
 
-type M2mLinkRef = {
+type DraftRelationLinkRef = {
   targetUid: UID.Schema;
   documentId: string;
   locale?: string | null;
 };
 
+type CollectedDraftRelationLinks = {
+  m2mLinks: DraftRelationLinkRef[];
+  xToOneLinks: DraftRelationLinkRef[];
+};
+
 const toPublishedDocumentKey = (documentId: string, locale?: string | null) =>
   `${documentId}:${locale ?? ''}`;
 
-/**
- * Draft-count populate uses `{ count: true, filters: { publishedAt: { $null: true } } }`.
- * joinColumn xToOne / oneToMany paths still return populated entities or arrays (not `{ count }`),
- * but only rows matching the draft filter are included.
- */
-const getUnpublishedRelationCount = (value: unknown): number => {
-  if (!value) {
-    return 0;
+const mergeCollectedLinks = (
+  left: CollectedDraftRelationLinks,
+  right: CollectedDraftRelationLinks
+): CollectedDraftRelationLinks => ({
+  m2mLinks: [...left.m2mLinks, ...right.m2mLinks],
+  xToOneLinks: [...left.xToOneLinks, ...right.xToOneLinks],
+});
+
+const toDraftRelationLink = (
+  entry: { documentId?: string; locale?: string | null },
+  targetUid: UID.Schema,
+  targetIsLocalized: boolean,
+  documentLocale?: string | null
+): DraftRelationLinkRef | null => {
+  if (!entry?.documentId) {
+    return null;
   }
 
-  if (typeof value === 'object' && value !== null && 'count' in value) {
-    const count = (value as { count: unknown }).count;
-    return typeof count === 'number' ? count : 0;
-  }
-
-  if (Array.isArray(value)) {
-    return value.length;
-  }
-
-  return 1;
+  return {
+    targetUid,
+    documentId: entry.documentId,
+    locale: targetIsLocalized ? (entry.locale ?? documentLocale) : null,
+  };
 };
 
-const collectBidirectionalM2mLinks = (
+const collectDraftRelationLinks = (
   entity: any,
   uid: UID.Schema,
   documentLocale?: string | null
-): M2mLinkRef[] => {
+): CollectedDraftRelationLinks => {
   const model = strapi.getModel(uid);
   const locale = entity.locale ?? documentLocale;
 
-  return Object.keys(model.attributes).reduce((links, attributeName) => {
-    const attribute: any = model.attributes[attributeName];
-    const value = entity[attributeName];
+  return Object.keys(model.attributes).reduce(
+    (collected, attributeName) => {
+      const attribute: any = model.attributes[attributeName];
+      const value = entity[attributeName];
 
-    if (!value) {
-      return links;
-    }
+      if (!value) {
+        return collected;
+      }
 
-    switch (attribute.type) {
-      case 'relation': {
-        if (!('target' in attribute)) {
-          return links;
-        }
+      switch (attribute.type) {
+        case 'relation': {
+          if (!('target' in attribute)) {
+            return collected;
+          }
 
-        const targetModel = strapi.getModel(attribute.target);
-        if (!targetModel || !hasDraftAndPublish(targetModel)) {
-          return links;
-        }
+          const targetModel = strapi.getModel(attribute.target);
+          if (!targetModel || !hasDraftAndPublish(targetModel)) {
+            return collected;
+          }
 
-        if (attribute.target === uid || !isVisibleAttribute(model, attributeName)) {
-          return links;
-        }
+          if (attribute.target === uid || !isVisibleAttribute(model, attributeName)) {
+            return collected;
+          }
 
-        if (isBidirectionalManyToMany(attribute)) {
-          const relatedEntries = castArray(value);
           const targetIsLocalized = isLocalizedContentType(targetModel);
+          const relatedEntries = castArray(value);
+          const links = relatedEntries
+            .map((entry) => toDraftRelationLink(entry, attribute.target, targetIsLocalized, locale))
+            .filter((link): link is DraftRelationLinkRef => link !== null);
 
-          return [
-            ...links,
-            ...relatedEntries.map((entry) => ({
-              targetUid: attribute.target,
-              documentId: entry.documentId,
-              locale: targetIsLocalized ? (entry.locale ?? locale) : null,
-            })),
-          ];
+          if (links.length === 0) {
+            return collected;
+          }
+
+          if (isBidirectionalManyToMany(attribute)) {
+            return {
+              ...collected,
+              m2mLinks: [...collected.m2mLinks, ...links],
+            };
+          }
+
+          return {
+            ...collected,
+            xToOneLinks: [...collected.xToOneLinks, ...links],
+          };
         }
-
-        return links;
+        case 'component': {
+          return castArray(value).reduce(
+            (componentCollected, componentValue) =>
+              mergeCollectedLinks(
+                componentCollected,
+                collectDraftRelationLinks(componentValue, attribute.component, locale)
+              ),
+            collected
+          );
+        }
+        case 'dynamiczone': {
+          return value.reduce((zoneCollected: CollectedDraftRelationLinks, componentValue: any) => {
+            return mergeCollectedLinks(
+              zoneCollected,
+              collectDraftRelationLinks(componentValue, componentValue.__component, locale)
+            );
+          }, collected);
+        }
+        default:
+          return collected;
       }
-      case 'component': {
-        return castArray(value).reduce(
-          (componentLinks, componentValue) => [
-            ...componentLinks,
-            ...collectBidirectionalM2mLinks(componentValue, attribute.component, locale),
-          ],
-          links
-        );
-      }
-      case 'dynamiczone': {
-        return value.reduce((zoneLinks: M2mLinkRef[], componentValue: any) => {
-          return [
-            ...zoneLinks,
-            ...collectBidirectionalM2mLinks(componentValue, componentValue.__component, locale),
-          ];
-        }, links);
-      }
-      default:
-        return links;
-    }
-  }, [] as M2mLinkRef[]);
+    },
+    { m2mLinks: [], xToOneLinks: [] } as CollectedDraftRelationLinks
+  );
 };
 
-const countLinksToUnpublishedDocuments = async (links: M2mLinkRef[]) => {
+const countLinksToUnpublishedDocuments = async (links: DraftRelationLinkRef[]) => {
   if (links.length === 0) {
     return 0;
   }
 
-  const linksByTarget = links.reduce<Map<UID.Schema, M2mLinkRef[]>>((acc, link) => {
+  const linksByTarget = links.reduce<Map<UID.Schema, DraftRelationLinkRef[]>>((acc, link) => {
     const targetLinks = acc.get(link.targetUid) ?? [];
     targetLinks.push(link);
     acc.set(link.targetUid, targetLinks);
@@ -167,79 +180,16 @@ const countLinksToUnpublishedDocuments = async (links: M2mLinkRef[]) => {
  * - unpublishedRelations: xToOne / oneToMany style links stripped from the published version
  * - draftM2mLinks: bidirectional manyToMany links to documents without a published version
  */
-const sumDraftCountsSync = (entity: any, uid: UID.Schema): DraftRelationCounts => {
-  const model = strapi.getModel(uid);
-
-  return Object.keys(model.attributes).reduce((counts, attributeName) => {
-    const attribute: any = model.attributes[attributeName];
-    const value = entity[attributeName];
-
-    if (!value) {
-      return counts;
-    }
-
-    switch (attribute.type) {
-      case 'relation': {
-        if (!('target' in attribute)) {
-          return counts;
-        }
-
-        const targetModel = strapi.getModel(attribute.target);
-        if (!targetModel || !hasDraftAndPublish(targetModel)) {
-          return counts;
-        }
-
-        // Self-referential relations are preserved on publish (see self-referential-relations.ts).
-        if (attribute.target === uid) {
-          return counts;
-        }
-
-        if (!isVisibleAttribute(model, attributeName)) {
-          return counts;
-        }
-
-        if (isBidirectionalManyToMany(attribute)) {
-          return counts;
-        }
-
-        return {
-          ...counts,
-          unpublishedRelations: counts.unpublishedRelations + getUnpublishedRelationCount(value),
-        };
-      }
-      case 'component': {
-        const compoCounts = castArray(value).reduce(
-          (acc, componentValue) =>
-            mergeDraftRelationCounts(acc, sumDraftCountsSync(componentValue, attribute.component)),
-          EMPTY_DRAFT_RELATION_COUNTS
-        );
-
-        return mergeDraftRelationCounts(counts, compoCounts);
-      }
-      case 'dynamiczone': {
-        const dzCounts = value.reduce((acc: DraftRelationCounts, componentValue: any) => {
-          return mergeDraftRelationCounts(
-            acc,
-            sumDraftCountsSync(componentValue, componentValue.__component)
-          );
-        }, EMPTY_DRAFT_RELATION_COUNTS);
-
-        return mergeDraftRelationCounts(counts, dzCounts);
-      }
-      default:
-        return counts;
-    }
-  }, EMPTY_DRAFT_RELATION_COUNTS);
-};
-
 const sumDraftCounts = async (entity: any, uid: UID.Schema): Promise<DraftRelationCounts> => {
-  const counts = sumDraftCountsSync(entity, uid);
-  const draftM2mLinks = await countLinksToUnpublishedDocuments(
-    collectBidirectionalM2mLinks(entity, uid)
-  );
+  const { m2mLinks, xToOneLinks } = collectDraftRelationLinks(entity, uid);
+
+  const [draftM2mLinks, unpublishedRelations] = await Promise.all([
+    countLinksToUnpublishedDocuments(m2mLinks),
+    countLinksToUnpublishedDocuments(xToOneLinks),
+  ]);
 
   return {
-    ...counts,
+    unpublishedRelations,
     draftM2mLinks,
   };
 };

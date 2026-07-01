@@ -2,7 +2,6 @@ import { merge, isEmpty, set, propEq } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
-import { isBidirectionalManyToMany } from './draft-relations';
 
 const {
   isVisibleAttribute,
@@ -13,6 +12,9 @@ const {
 } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
+
+const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
+  (model.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized === true;
 
 const isMorphToRelation = (attribute: any) =>
   isRelation(attribute) && attribute.relation.includes('morphTo');
@@ -343,20 +345,17 @@ const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelatio
         }
 
         if (isVisibleAttribute(model, attributeName)) {
-          // Bidirectional M2M links on draft entries point at draft rows of related documents.
-          // We need documentId/locale to distinguish truly unpublished targets from published
-          // documents that still have a draft row (those links are kept on publish).
-          if (isBidirectionalManyToMany(attribute)) {
-            populateAcc[attributeName] = {
-              fields: ['documentId'],
-              filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
-            };
-          } else {
-            populateAcc[attributeName] = {
-              count: true,
-              filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
-            };
+          // Draft entries link to draft rows of related documents. Populate documentId/locale
+          // so we can distinguish truly unpublished targets from published documents that
+          // still have a draft row (those links are kept on publish for M2M, or remapped for xToOne).
+          const fields: string[] = ['documentId'];
+          if (isLocalizedContentType(targetModel)) {
+            fields.push('locale');
           }
+          populateAcc[attributeName] = {
+            fields,
+            filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
+          };
           hasRelations = true;
         }
         break;

@@ -91,7 +91,7 @@ describe('draft-relations utils', () => {
 
       const counts = await sumDraftCounts(
         {
-          category: { count: 1 },
+          category: { documentId: 'draft-category', locale: 'en' },
           tags: [
             { documentId: 'draft-tag', locale: 'en' },
             { documentId: 'another-draft-tag', locale: 'en' },
@@ -103,6 +103,22 @@ describe('draft-relations utils', () => {
       expect(counts).toEqual({
         unpublishedRelations: 1,
         draftM2mLinks: 2,
+      });
+    });
+
+    it('counts xToOne links to documents that already have a published version as published', async () => {
+      findMany.mockResolvedValue([{ documentId: 'published-category', locale: 'en' }]);
+
+      const counts = await sumDraftCounts(
+        {
+          category: { documentId: 'published-category', locale: 'en' },
+        },
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: 0,
       });
     });
 
