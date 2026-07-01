@@ -1,13 +1,21 @@
 import * as React from 'react';
 
-import { useField, useStrapiApp, useIsMobile, type InputProps } from '@strapi/admin/strapi-admin';
+import {
+  useField,
+  useStrapiApp,
+  useIsMobile,
+  useNotification,
+  type InputProps,
+} from '@strapi/admin/strapi-admin';
 import { Box, Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
+import { useIntl } from 'react-intl';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
 import { EditorLayout } from './EditorLayout';
+import { useWysiwygImageUpload } from './hooks/useWysiwygImageUpload';
 import { insertFile } from './utils/utils';
 import { WysiwygFooter } from './WysiwygFooter';
 import { WysiwygNav, WysiwygPreviewToggleButton } from './WysiwygNav';
@@ -22,6 +30,9 @@ interface WysiwygProps extends Omit<InputProps, 'type'> {
 const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
   ({ hint, disabled, label, name, placeholder, required, labelAction }, forwardedRef) => {
     const field = useField(name);
+    const { formatMessage } = useIntl();
+    const { toggleNotification } = useNotification();
+    const { uploadImages } = useWysiwygImageUpload();
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const editorRef = React.useRef<EditorFromTextArea>(
       null
@@ -52,6 +63,65 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
       setMediaLibVisible(false);
     };
 
+    const handlePasteFiles = React.useCallback(
+      async (event: ClipboardEvent) => {
+        if (disabled || isPreviewMode) {
+          return;
+        }
+
+        const clipboardItems = event.clipboardData?.items;
+
+        if (!clipboardItems?.length) {
+          return;
+        }
+
+        const files = Array.from(clipboardItems)
+          .filter((item) => item.kind === 'file')
+          .map((item) => item.getAsFile())
+          .filter((file): file is File => file !== null);
+
+        if (!files.length) {
+          return;
+        }
+
+        const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+
+        if (!imageFiles.length) {
+          toggleNotification({
+            type: 'warning',
+            message: formatMessage({
+              id: 'components.Wysiwyg.paste.nonImage',
+              defaultMessage: 'Only image files can be pasted into the markdown editor.',
+            }),
+          });
+          return;
+        }
+
+        event.preventDefault();
+
+        try {
+          const uploadedFiles = await uploadImages(imageFiles);
+
+          const formattedFiles = uploadedFiles.map((file) => ({
+            alt: file.alternativeText || file.name,
+            url: prefixFileUrlWithBackendUrl(file.url),
+            mime: file.mime,
+          }));
+
+          insertFile(editorRef, formattedFiles);
+        } catch {
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: 'components.Wysiwyg.paste.uploadError',
+              defaultMessage: 'An error occurred while uploading the pasted image.',
+            }),
+          });
+        }
+      },
+      [disabled, formatMessage, isPreviewMode, toggleNotification, uploadImages]
+    );
+
     return (
       <Field.Root name={name} hint={hint} error={field.error} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
@@ -78,6 +148,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
               isPreviewMode={isPreviewMode}
               name={name}
               onChange={field.onChange}
+              onPasteFiles={handlePasteFiles}
               placeholder={placeholder}
               textareaRef={textareaRef}
               value={field.value}
