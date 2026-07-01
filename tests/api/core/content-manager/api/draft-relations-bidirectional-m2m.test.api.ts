@@ -41,7 +41,7 @@ const articleModel = {
   },
 };
 
-describe('CM API - countDraftRelations splits bidirectional M2M from xToOne', () => {
+describe('CM API - countDraftRelations draft vs published relation targets', () => {
   beforeAll(async () => {
     await builder.addContentType(tagModel).addContentType(articleModel).build();
 
@@ -86,6 +86,50 @@ describe('CM API - countDraftRelations splits bidirectional M2M from xToOne', ()
       body: {
         title: 'Article',
         tags: [draftTagRow.id],
+      },
+    });
+
+    const { body } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${ARTICLE_UID}/${article.documentId}/actions/countDraftRelations`,
+    });
+
+    expect(body.data.unpublishedRelations).toBe(0);
+    expect(body.data.draftM2mLinks).toBe(0);
+  });
+
+  test('returns 0 when manyToOne links use draft rows of published entries', async () => {
+    const {
+      body: {
+        data: { documentId: tagDocumentId },
+      },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${TAG_UID}`,
+      body: { name: 'Published category' },
+    });
+
+    await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${TAG_UID}/${tagDocumentId}/actions/publish`,
+    });
+
+    const {
+      body: { data: draftTagRow },
+    } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${TAG_UID}/${tagDocumentId}`,
+      qs: { status: 'draft' },
+    });
+
+    const {
+      body: { data: article },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${ARTICLE_UID}`,
+      body: {
+        title: 'Article',
+        category: draftTagRow.id,
       },
     });
 

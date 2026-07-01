@@ -143,6 +143,20 @@ test.describe('Publish draft-relations warning — xToOne-style relations', () =
 
       await clickPublishExpectDraftRelationsDialog(page, 'xToOne');
     });
+
+    test(`relation-lab ${field} does not warn when the target document is already published`, async ({
+      page,
+    }) => {
+      const targetName = `${field} published target`;
+
+      await createRelationTarget(page, targetName, { publish: true });
+      await openNewRelationLab(page);
+      await saveRelationLabDraft(page, `Lab ${field} published target`);
+      await connectRelationTarget(page, field, targetName, 'published');
+
+      await clickPublishExpectNoDraftRelationsDialog(page);
+      await findAndClose(page, 'Published Document');
+    });
   }
 
   test('relation-lab unidirectional manyToMany warns when the target document is draft-only', async ({
@@ -154,6 +168,34 @@ test.describe('Publish draft-relations warning — xToOne-style relations', () =
     await openNewRelationLab(page);
     await saveRelationLabDraft(page, 'Lab uni M2M draft target');
     await connectRelationTarget(page, 'manyToMany', targetName, 'draft');
+
+    await clickPublishExpectDraftRelationsDialog(page, 'xToOne');
+  });
+
+  test('relation-lab unidirectional manyToMany does not warn when the target document is already published', async ({
+    page,
+  }) => {
+    const targetName = 'Uni M2M published target';
+
+    await createRelationTarget(page, targetName, { publish: true });
+    await openNewRelationLab(page);
+    await saveRelationLabDraft(page, 'Lab uni M2M published target');
+    await connectRelationTarget(page, 'manyToMany', targetName, 'published');
+
+    await clickPublishExpectNoDraftRelationsDialog(page);
+    await findAndClose(page, 'Published Document');
+  });
+
+  test('relation-lab oneToMany warns when linked to both published and draft-only targets', async ({
+    page,
+  }) => {
+    await createRelationTarget(page, 'O2M mixed published target', { publish: true });
+    await createRelationTarget(page, 'O2M mixed draft target', { publish: false });
+
+    await openNewRelationLab(page);
+    await saveRelationLabDraft(page, 'Lab O2M mixed targets');
+    await connectRelationTarget(page, 'oneToMany', 'O2M mixed published target', 'published');
+    await connectRelationTarget(page, 'oneToMany', 'O2M mixed draft target', 'draft');
 
     await clickPublishExpectDraftRelationsDialog(page, 'xToOne');
   });

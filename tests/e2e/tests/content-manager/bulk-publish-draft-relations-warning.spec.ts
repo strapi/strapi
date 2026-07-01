@@ -7,6 +7,7 @@ import {
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import {
   BIDIRECTIONAL_M2M_LAB_FIELD,
+  clickBulkPublishExpectNoDraftRelationsDialog,
   connectRelationTarget,
   createRelationTarget,
   saveRelationLabDraft,
@@ -113,5 +114,69 @@ test.describe('Bulk publish draft-relations warning', () => {
 
     await dialog.getByRole('button', { name: 'Cancel' }).click();
     await expect(dialog).not.toBeVisible();
+  });
+
+  test('does not warn when bulk publishing relation-lab entries linked to published targets only', async ({
+    page,
+  }) => {
+    await createRelationTarget(page, 'Bulk published M2M one', { publish: true });
+    await createRelationTarget(page, 'Bulk published M2M two', { publish: true });
+
+    for (const [title, targetName] of [
+      ['Bulk published lab one', 'Bulk published M2M one'],
+      ['Bulk published lab two', 'Bulk published M2M two'],
+    ] as const) {
+      await navToHeader(page, ['Content Manager', 'Relation lab'], 'Relation lab');
+      await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
+      await saveRelationLabDraft(page, title);
+      await connectRelationTarget(page, BIDIRECTIONAL_M2M_LAB_FIELD, targetName, 'published');
+      await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+      await findAndClose(page, 'Saved Document');
+    }
+
+    await navToHeader(page, ['Content Manager', 'Relation lab'], 'Relation lab');
+
+    await page
+      .getByRole('row', { name: /Bulk published lab one/ })
+      .getByRole('checkbox')
+      .check();
+    await page
+      .getByRole('row', { name: /Bulk published lab two/ })
+      .getByRole('checkbox')
+      .check();
+
+    await clickBulkPublishExpectNoDraftRelationsDialog(page);
+  });
+
+  test('does not warn when bulk publishing relation-lab entries with xToOne published targets only', async ({
+    page,
+  }) => {
+    await createRelationTarget(page, 'Bulk published xToOne one', { publish: true });
+    await createRelationTarget(page, 'Bulk published xToOne two', { publish: true });
+
+    for (const [title, targetName] of [
+      ['Bulk published xToOne lab one', 'Bulk published xToOne one'],
+      ['Bulk published xToOne lab two', 'Bulk published xToOne two'],
+    ] as const) {
+      await navToHeader(page, ['Content Manager', 'Relation lab'], 'Relation lab');
+      await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
+      await saveRelationLabDraft(page, title);
+      await connectRelationTarget(page, 'manyToOne', targetName, 'published');
+      await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+      await findAndClose(page, 'Saved Document');
+    }
+
+    await navToHeader(page, ['Content Manager', 'Relation lab'], 'Relation lab');
+
+    await page
+      .getByRole('row', { name: /Bulk published xToOne lab one/ })
+      .getByRole('checkbox')
+      .check();
+    await page
+      .getByRole('row', { name: /Bulk published xToOne lab two/ })
+      .getByRole('checkbox')
+      .check();
+
+    await clickBulkPublishExpectNoDraftRelationsDialog(page);
   });
 });

@@ -15,7 +15,7 @@ export type RelationDialogVariant = 'm2m' | 'xToOne';
 /** xToOne-style fields in relation-lab (unidirectional — stripped on publish). */
 export const XTOONE_LAB_FIELDS: RelationLabField[] = ['manyToOne', 'oneToOne', 'oneToMany'];
 
-/** Bidirectional M2M in relation-lab — the relation type this PR fixes. */
+/** Bidirectional M2M in relation-lab. */
 export const BIDIRECTIONAL_M2M_LAB_FIELD: RelationLabField = 'manyToManyBi';
 
 /**
@@ -77,4 +77,27 @@ export const saveRelationLabDraft = async (page: Page, title: string) => {
   await page.getByRole('textbox', { name: 'title' }).fill(title);
   await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
   await findAndClose(page, 'Saved Document');
+};
+
+/**
+ * Bulk-publish selected list entries and assert the draft-relations warning is absent.
+ * Bulk publish always opens a Confirmation dialog ("Are you sure…"); only the draft-relations
+ * paragraph is omitted when countManyEntriesDraftRelations is 0 (see ConfirmDialogPublishAll).
+ */
+export const clickBulkPublishExpectNoDraftRelationsDialog = async (page: Page) => {
+  await clickAndWait(page, page.getByRole('button', { name: 'Publish' }).first());
+
+  await expect(page.getByRole('heading', { name: 'Publish entries' })).toBeVisible();
+  await clickAndWait(
+    page,
+    page.getByLabel('Publish entries').getByRole('button', { name: 'Publish' })
+  );
+
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('Are you sure you want to publish these entries?');
+  await expect(dialog).not.toContainText('not published yet and might lead to unexpected behavior');
+
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).not.toBeVisible();
 };
