@@ -1,12 +1,12 @@
 import { errors } from '@strapi/utils';
 
-import type { Data, Modules } from '@strapi/types';
 import type {
   AdminUserCreationPayload,
   AdminUserUpdatePayload,
   Pagination,
   SanitizedAdminUser,
 } from './shared';
+import type { Data, Modules } from '@strapi/types';
 
 /**
  * /create - Create an admin user
