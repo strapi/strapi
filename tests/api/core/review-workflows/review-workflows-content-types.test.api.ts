@@ -8,6 +8,7 @@ import { describeOnCondition } from 'api-tests/utils';
 import {
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
+  STAGE_MODEL_UID,
 } from '../../../../packages/core/review-workflows/server/src/constants/workflows';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -405,12 +406,23 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   describe('Get workflows', () => {
     let workflow1, workflow2;
 
-    beforeAll(async () => {
-      // Earlier describes create many workflows; delete via API so stages are removed too.
-      const { body } = await requests.admin.get('/review-workflows/workflows?populate=*');
-      for (const workflow of body.data ?? []) {
-        await deleteWorkflow(workflow.id);
+    const deleteWorkflowsFromDb = async (ids: number[]) => {
+      if (!ids.length) {
+        return;
       }
+
+      await strapi.db.query(STAGE_MODEL_UID).deleteMany({
+        where: { workflow: { id: { $in: ids } } },
+      });
+      await strapi.db.query(WORKFLOW_MODEL_UID).deleteMany({
+        where: { id: { $in: ids } },
+      });
+    };
+
+    beforeAll(async () => {
+      // API delete refuses to remove the last workflow; reset via DB so this describe starts clean.
+      await strapi.db.query(STAGE_MODEL_UID).deleteMany({});
+      await strapi.db.query(WORKFLOW_MODEL_UID).deleteMany({});
     });
 
     beforeEach(async () => {
@@ -425,12 +437,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
     });
 
     afterEach(async () => {
-      if (workflow1?.id) {
-        await deleteWorkflow(workflow1.id);
-      }
-      if (workflow2?.id) {
-        await deleteWorkflow(workflow2.id);
-      }
+      await deleteWorkflowsFromDb([workflow1?.id, workflow2?.id].filter(Boolean));
     });
 
     test('Should list workflows filtered by CT', async () => {

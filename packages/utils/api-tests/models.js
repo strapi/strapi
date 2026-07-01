@@ -1,8 +1,11 @@
 'use strict';
 
 const { isFunction, isNil, prop } = require('lodash/fp');
+const { errors, strings } = require('@strapi/utils');
 const { createStrapiInstance } = require('./strapi');
 const componentData = require('../../core/core/src/services/document-service/components');
+
+const { ApplicationError } = errors;
 
 const toContentTypeUID = (name) => {
   return name.includes('::') ? name : `api::${name}.${name}`;
@@ -34,47 +37,66 @@ const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {})
 const createContentType = async (model, { strapi } = {}) => {
   const { contentTypeService, cleanup } = await createHelpers({ strapi });
 
-  const contentType = await contentTypeService.createContentType({
-    contentType: {
-      ...model,
-    },
-  });
-
-  await cleanup();
-
-  return contentType;
-};
-
-const createContentTypes = async (models, { strapi } = {}) => {
-  const { contentTypeService, cleanup } = await createHelpers({ strapi });
-
-  const contentTypes = await contentTypeService.createContentTypes(
-    models.map((model) => ({
+  try {
+    const contentType = await contentTypeService.createContentType({
       contentType: {
         ...model,
       },
-    }))
-  );
+    });
 
-  await cleanup();
+    await cleanup();
+
+    return contentType;
+  } catch (error) {
+    await cleanup();
+
+    if (error instanceof ApplicationError && error.message === 'contentType.alreadyExists') {
+      return { uid: toContentTypeUID(model.singularName) };
+    }
+
+    throw error;
+  }
+};
+
+const createContentTypes = async (models, { strapi } = {}) => {
+  const contentTypes = [];
+
+  for (const model of models) {
+    contentTypes.push(await createContentType(model, { strapi }));
+  }
 
   return contentTypes;
 };
 
 const createComponent = async (component, { strapi } = {}) => {
   const { componentsService, cleanup } = await createHelpers({ strapi });
+  const componentPayload = {
+    category: 'default',
+    icon: 'default',
+    ...component,
+  };
 
-  const createdComponent = await componentsService.createComponent({
-    component: {
-      category: 'default',
-      icon: 'default',
-      ...component,
-    },
-  });
+  try {
+    const createdComponent = await componentsService.createComponent({
+      component: componentPayload,
+    });
 
-  await cleanup();
+    await cleanup();
 
-  return createdComponent;
+    return createdComponent;
+  } catch (error) {
+    await cleanup();
+
+    if (error instanceof ApplicationError && error.message === 'component.alreadyExists') {
+      const uid = `${strings.nameToSlug(componentPayload.category)}.${strings.nameToSlug(
+        componentPayload.displayName
+      )}`;
+
+      return { uid };
+    }
+
+    throw error;
+  }
 };
 
 const createComponents = async (components, { strapi } = {}) => {

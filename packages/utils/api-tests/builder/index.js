@@ -77,17 +77,19 @@ const createTestBuilder = (options = {}) => {
     },
 
     async cleanup(options = {}) {
-      const { enableTestDataAutoCleanup = true } = options;
+      const { enableTestDataAutoCleanup = true, strapi, deleteSchemas = true } = options;
       const { models, actions } = ctx.state;
 
       if (enableTestDataAutoCleanup) {
         for (const model of models.reverse()) {
-          await modelsUtils.cleanupModel(model.uid);
+          await modelsUtils.cleanupModel(model.uid, { strapi });
         }
       }
 
-      for (const action of actions.reverse()) {
-        await action.cleanup(ctx);
+      if (deleteSchemas) {
+        for (const action of actions.reverse()) {
+          await action.cleanup(ctx, { strapi });
+        }
       }
 
       ctx.resetState();
