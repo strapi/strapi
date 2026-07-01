@@ -81,7 +81,11 @@ describe('Auth controller - sessions', () => {
           sessionId: 'session-other',
           deviceId: 'device-b',
           createdAt: '2026-06-10T09:00:00.000Z',
-          metadata: { ip: '10.0.0.2' },
+          metadata: {
+            ip: '10.0.0.2',
+            loginAt: '2026-06-09T08:00:00.000Z',
+            deviceName: 'Safari',
+          },
         },
         {
           sessionId: 'session-current',
@@ -112,9 +116,20 @@ describe('Auth controller - sessions', () => {
       expect(originApi.listSessions).toHaveBeenCalledWith('42');
       expect(send).toHaveBeenCalledWith({
         data: [
-          expect.objectContaining({ id: 'session-current', current: true }),
-          expect.objectContaining({ id: 'session-other', current: false }),
+          expect.objectContaining({
+            id: 'session-current',
+            current: true,
+            deviceName: 'Chrome',
+          }),
+          expect.objectContaining({
+            id: 'session-other',
+            current: false,
+            deviceName: 'Safari',
+          }),
         ],
+      });
+      send.mock.calls[0][0].data.forEach((session) => {
+        expect(session).not.toHaveProperty('ip');
       });
     });
   });
