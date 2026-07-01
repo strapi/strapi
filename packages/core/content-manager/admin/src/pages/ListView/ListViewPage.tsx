@@ -82,7 +82,6 @@ const ListViewPage = () => {
   const { copy } = useClipboard();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
-  const isDesktop = useIsDesktop();
 
   const handleCopyDocumentId = React.useCallback(
     async (e: React.MouseEvent, documentId: string | undefined) => {
@@ -351,7 +350,7 @@ const ListViewPage = () => {
   const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
   const primaryLinkField = tableHeaders.find(
     ({ name, attribute, cellFormatter }) =>
-      !['status', 'documentId'].includes(name) &&
+      !['status'].includes(name) &&
       !['createdBy', 'updatedBy'].includes(name.split('.')[0]) &&
       typeof cellFormatter !== 'function' &&
       attribute &&
