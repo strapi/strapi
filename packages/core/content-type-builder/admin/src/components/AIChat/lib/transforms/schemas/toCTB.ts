@@ -3,6 +3,7 @@ import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import pluralize from 'pluralize';
 
+import { isCtbAiOperationsV2Enabled } from '../../constants';
 import { Schema } from '../../types/schema';
 
 import type { ContentType, Component, AnyAttribute, RenameHop } from '../../../../../types';
@@ -263,6 +264,13 @@ export const transformAttributesFromChatToCTB = (
 
   const explicitRenames = [...schemaRenames, ...explicitAttributeRenames];
   const reconciled = applyExplicitRenames(processedAttributes, removedAttributes, explicitRenames);
+
+  if (isCtbAiOperationsV2Enabled()) {
+    return {
+      attributes: [...reconciled.processedAttributes, ...reconciled.removedAttributes],
+      renames: dedupeRenames(explicitRenames),
+    };
+  }
 
   const inferred = inferRenamesFromAttributeDiff(
     reconciled.processedAttributes,
