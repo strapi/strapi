@@ -263,6 +263,60 @@ describe('draftRelationCounts', () => {
         draftM2mLinks: 0,
       });
     });
+
+    it('subtracts disconnected draft xToOne relations from local counts', () => {
+      const counts = countLocalDraftRelations(
+        {
+          category: {
+            disconnect: [{ id: 1, status: 'draft' }],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: -1,
+        draftM2mLinks: 0,
+      });
+    });
+
+    it('subtracts disconnected draft bidirectional M2M relations from local counts', () => {
+      const counts = countLocalDraftRelations(
+        {
+          tags: {
+            disconnect: [{ id: 1, status: 'draft' }],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: -1,
+      });
+    });
+
+    it('ignores disconnects of published relations', () => {
+      const counts = countLocalDraftRelations(
+        {
+          category: {
+            disconnect: [{ id: 1, status: 'published' }],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      expect(counts).toEqual({
+        unpublishedRelations: 0,
+        draftM2mLinks: 0,
+      });
+    });
   });
 
   describe('resolveDraftRelationCounts', () => {
@@ -297,6 +351,27 @@ describe('draftRelationCounts', () => {
           { unpublishedRelations: 0, draftM2mLinks: 2 }
         )
       ).toEqual({ unpublishedRelations: 0, draftM2mLinks: 2 });
+    });
+
+    it('nets disconnected draft relations against stale server counts when modified', () => {
+      const localCounts = countLocalDraftRelations(
+        {
+          category: {
+            disconnect: [{ id: 1, status: 'draft' }],
+          },
+        },
+        articleSchema,
+        components,
+        'api::article.article'
+      );
+
+      const counts = resolveDraftRelationCounts('doc-1', true, localCounts, {
+        unpublishedRelations: 1,
+        draftM2mLinks: 0,
+      });
+
+      expect(counts).toEqual({ unpublishedRelations: 0, draftM2mLinks: 0 });
+      expect(getDraftRelationsPublishState(counts).hasDraftRelations).toBe(false);
     });
   });
 

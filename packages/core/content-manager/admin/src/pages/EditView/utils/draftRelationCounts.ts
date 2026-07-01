@@ -36,6 +36,11 @@ export const mergeDraftRelationCounts = (
   draftM2mLinks: left.draftM2mLinks + right.draftM2mLinks,
 });
 
+export const clampDraftRelationCounts = (counts: DraftRelationCounts): DraftRelationCounts => ({
+  unpublishedRelations: Math.max(0, counts.unpublishedRelations),
+  draftM2mLinks: Math.max(0, counts.draftM2mLinks),
+});
+
 export const normalizeDraftRelationCounts = (payload: unknown): DraftRelationCounts => {
   if (
     payload &&
@@ -60,11 +65,11 @@ export const resolveDraftRelationCounts = (
   serverCounts: DraftRelationCounts
 ): DraftRelationCounts => {
   if (!documentId) {
-    return localCounts;
+    return clampDraftRelationCounts(localCounts);
   }
 
   if (modified) {
-    return mergeDraftRelationCounts(localCounts, serverCounts);
+    return clampDraftRelationCounts(mergeDraftRelationCounts(localCounts, serverCounts));
   }
 
   return serverCounts;
@@ -127,25 +132,32 @@ export const countLocalDraftRelations = (
           return counts;
         }
 
-        if (typeof value === 'object' && value !== null && 'connect' in value) {
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          ('connect' in value || 'disconnect' in value)
+        ) {
+          const formValue = value as RelationsFormValue;
           const draftConnectCount =
-            (value as RelationsFormValue).connect?.filter((relation) => relation.status === 'draft')
-              .length ?? 0;
+            formValue.connect?.filter((relation) => relation.status === 'draft').length ?? 0;
+          const draftDisconnectCount =
+            formValue.disconnect?.filter((relation) => relation.status === 'draft').length ?? 0;
 
-          if (draftConnectCount === 0) {
+          if (draftConnectCount === 0 && draftDisconnectCount === 0) {
             return counts;
           }
 
           if (isBidirectionalManyToMany(attribute)) {
             return {
               ...counts,
-              draftM2mLinks: counts.draftM2mLinks + draftConnectCount,
+              draftM2mLinks: counts.draftM2mLinks + draftConnectCount - draftDisconnectCount,
             };
           }
 
           return {
             ...counts,
-            unpublishedRelations: counts.unpublishedRelations + draftConnectCount,
+            unpublishedRelations:
+              counts.unpublishedRelations + draftConnectCount - draftDisconnectCount,
           };
         }
 
