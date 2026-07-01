@@ -22,6 +22,8 @@ export type IsEnabled<
     : false
   : false;
 
+type Factory<T> = T | ((params: { strapi: Strapi }) => T)
+
 export type LoadedPlugin = {
   config: {
     default: Record<string, unknown> | ((opts: { env: typeof env }) => Record<string, unknown>);
@@ -30,9 +32,9 @@ export type LoadedPlugin = {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  routes: Record<string, Router>;
-  controllers: Record<string, Controller>;
-  services: Record<string, Service>;
+  routes: Record<string, Factory<Router>>;
+  controllers: Record<string, Factory<Controller>>;
+  services: Record<string, Factory<Service>>;
   policies: Record<string, Policy>;
   middlewares: Record<string, Middleware>;
   contentTypes: Record<string, { schema: ContentTypeSchema }>;
