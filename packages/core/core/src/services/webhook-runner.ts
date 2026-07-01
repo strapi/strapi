@@ -169,6 +169,30 @@ class WebhookRunner {
     this.add(webhook);
   }
 
+  /**
+   * Replace the whole in-memory registry with a fresh set of webhooks.
+   *
+   * The registry is otherwise only mutated locally (via add/update/remove)
+   * by the instance that handled the admin request. In a clustered or
+   * horizontally-scaled deployment every other instance keeps a stale copy
+   * until it restarts. Reloading from the persisted webhooks lets any
+   * instance converge on the current configuration. See issue #22595.
+   */
+  reload(webhooks: Webhook[]) {
+    debug(`Reloading webhook registry with ${webhooks.length} webhook(s)`);
+
+    // Runs synchronously: listeners are torn down and re-registered within the
+    // same tick, so no event can be missed in between.
+    for (const event of [...this.webhooksMap.keys()]) {
+      this.deleteListener(event);
+    }
+    this.webhooksMap.clear();
+
+    for (const webhook of webhooks) {
+      this.add(webhook);
+    }
+  }
+
   remove(webhook: Webhook) {
     debug(`Unregistering webhook '${webhook.id}'`);
 
