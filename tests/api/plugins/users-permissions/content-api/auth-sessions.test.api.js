@@ -127,14 +127,51 @@ describe('UP Content API - Active Sessions', () => {
       expect(current).toBeDefined();
       expect(current.current).toBe(true);
       expect(typeof current.loginAt).toBe('string');
-      expect(current).not.toHaveProperty('ip');
       expect(current.deviceName).toBe('Chrome on macOS');
       expect(current).not.toHaveProperty('userId');
+
+      for (const session of res.body.data) {
+        expect(session).not.toHaveProperty('ip');
+      }
+
+      const [storedSession] = await strapi.db.query('admin::session').findMany({
+        where: { sessionId: currentSessionId, origin: 'users-permissions', status: 'active' },
+      });
+      expect(storedSession?.metadata).toBeDefined();
+      expect(storedSession.metadata).not.toHaveProperty('ip');
 
       // Clean up sessions created here.
       await strapi.db
         .query('admin::session')
         .deleteMany({ where: { origin: 'users-permissions' } });
+    });
+
+    it('does not expose legacy ip metadata stored in the database', async () => {
+      const login = await loginUser();
+      expect(login.statusCode).toBe(200);
+
+      const currentSessionId = sessionIdFromToken(login.body.jwt);
+
+      await strapi.db.query('admin::session').update({
+        where: { sessionId: currentSessionId },
+        data: {
+          metadata: {
+            ip: '203.0.113.42',
+            loginAt: new Date().toISOString(),
+            deviceName: 'Chrome on macOS',
+          },
+        },
+      });
+
+      const res = await createAuthRequest().setToken(login.body.jwt)({
+        method: 'GET',
+        url: '/sessions',
+      });
+
+      expect(res.statusCode).toBe(200);
+      const current = res.body.data.find((s) => s.id === currentSessionId);
+      expect(current).toBeDefined();
+      expect(current).not.toHaveProperty('ip');
     });
 
     it('revokes a specific session and prevents its refresh token from rotating', async () => {

@@ -38,7 +38,7 @@ describe('Admin Sessions Management (Active Devices)', () => {
   const secret = () => strapi.config.get('admin.auth.secret');
 
   /**
-   * Logs in over HTTP (so metadata like ip/loginAt is captured), then exchanges the
+   * Logs in over HTTP (so metadata like loginAt/deviceName is captured), then exchanges the
    * refresh cookie for an access token. Returns the access token + the active sessionId.
    */
   const CHROME_UA =
@@ -106,11 +106,43 @@ describe('Admin Sessions Management (Active Devices)', () => {
       expect(typeof current.id).toBe('string');
       expect(current.deviceId).toBe(deviceA);
       expect(typeof current.loginAt).toBe('string');
-      expect(current).not.toHaveProperty('ip');
       expect(typeof current.lastActiveAt).toBe('string');
       // Device name is derived from the User-Agent sent at login and carried through rotation.
       expect(current.deviceName).toBe('Chrome on macOS');
       expect(other.deviceId).toBe(deviceB);
+
+      for (const session of res.body.data) {
+        expect(session).not.toHaveProperty('ip');
+      }
+
+      const [storedSession] = await strapi.db
+        .query(SESSION_UID)
+        .findMany({ where: { deviceId: deviceA, status: 'active' } });
+      expect(storedSession?.metadata).toBeDefined();
+      expect(storedSession.metadata).not.toHaveProperty('ip');
+    });
+
+    it('does not expose legacy ip metadata stored in the database', async () => {
+      const { accessToken, sessionId } = await loginAndExchange(deviceA);
+
+      await strapi.db.query(SESSION_UID).update({
+        where: { sessionId },
+        data: {
+          metadata: {
+            ip: '203.0.113.42',
+            loginAt: new Date().toISOString(),
+            deviceName: 'Chrome on macOS',
+          },
+        },
+      });
+
+      const res = await createRequest({ strapi })
+        .setToken(accessToken)
+        .get('/admin/users/me/sessions');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body.data[0]).not.toHaveProperty('ip');
     });
   });
 
