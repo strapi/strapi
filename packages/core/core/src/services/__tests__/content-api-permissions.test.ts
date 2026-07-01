@@ -419,5 +419,56 @@ describe('Content API - Permissions', () => {
       };
       expect(bodySchema?.shape?.clientMutationId).toBeDefined();
     });
+
+    // Regression: when route registration runs more than once in a single
+    // process (repeated test setup, or a future in-process reload/HMR), it
+    // re-runs over the SAME persistent route singleton. applyExtraParams must be
+    // idempotent on re-application — it must NOT re-throw the duplicate-param
+    // guard for params IT already merged.
+    it('applyExtraParamsToRoutes is idempotent when re-applied to the same route (reload-safe)', () => {
+      contentAPI.addQueryParams({ search: { schema: z.string() } });
+      contentAPI.addInputParams({ clientMutationId: { schema: z.string() } });
+      const route = contentAPIRoute({
+        method: 'POST',
+        request: { query: {}, body: {} },
+      });
+
+      // First registration pass.
+      expect(() => contentAPI.applyExtraParamsToRoutes([route])).not.toThrow();
+      // Second pass over the SAME route object (simulating an in-process reload)
+      // must be a no-op, not a throw.
+      expect(() => contentAPI.applyExtraParamsToRoutes([route])).not.toThrow();
+
+      expect(route.request?.query).toHaveProperty('search');
+      const bodySchema = route.request?.body?.['application/json'] as {
+        shape: Record<string, z.ZodType>;
+      };
+      expect(bodySchema?.shape?.clientMutationId).toBeDefined();
+    });
+
+    // A FRESH content-api instance (created on each boot) re-applying onto a
+    // route that still carries a previous boot's merge must also be a no-op:
+    // the marker lives on the persistent route, not on the service.
+    it('applyExtraParamsToRoutes from a fresh content-api instance is idempotent on an already-merged route', () => {
+      contentAPI.addQueryParams({ search: { schema: z.string() } });
+      const route = contentAPIRoute({ request: { query: {} } });
+      contentAPI.applyExtraParamsToRoutes([route]);
+
+      const nextBootContentAPI = createContentAPI(global.strapi);
+      nextBootContentAPI.addQueryParams({ search: { schema: z.string() } });
+      expect(() => nextBootContentAPI.applyExtraParamsToRoutes([route])).not.toThrow();
+      expect(route.request?.query).toHaveProperty('search');
+    });
+
+    // The idempotency marker must NOT leak into serialization. getRoutesMap and
+    // the permission UIs spread `{...route}`; a stray enumerable marker would
+    // appear in the API-token / Roles permission payloads.
+    it('does not add an enumerable property to the route (marker is non-enumerable)', () => {
+      contentAPI.addQueryParams({ search: { schema: z.string() } });
+      const route = contentAPIRoute({ request: { query: {} } });
+      const keysBefore = Object.keys(route).sort();
+      contentAPI.applyExtraParamsToRoutes([route]);
+      expect(Object.keys(route).sort()).toEqual(keysBefore);
+    });
   });
 });
