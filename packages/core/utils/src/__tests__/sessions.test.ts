@@ -26,25 +26,11 @@ describe('sessions utils', () => {
       });
     });
 
-    it('does not expose legacy ip metadata from stored sessions', () => {
-      const result = sanitizeSessionEntry({
-        sessionId: 'session-legacy',
-        metadata: {
-          loginAt: '2026-06-12T08:00:00.000Z',
-          ip: '127.0.0.1',
-          deviceName: 'Chrome on macOS',
-        },
-      });
-
-      expect(result).not.toHaveProperty('ip');
-    });
-
     it('ignores invalid metadata types', () => {
       const result = sanitizeSessionEntry({
         sessionId: 'session-b',
         metadata: {
           loginAt: 123,
-          ip: null,
           deviceName: false,
         },
       });

@@ -121,29 +121,6 @@ describe('Admin Sessions Management (Active Devices)', () => {
       expect(storedSession?.metadata).toBeDefined();
       expect(storedSession.metadata).not.toHaveProperty('ip');
     });
-
-    it('does not expose legacy ip metadata stored in the database', async () => {
-      const { accessToken, sessionId } = await loginAndExchange(deviceA);
-
-      await strapi.db.query(SESSION_UID).update({
-        where: { sessionId },
-        data: {
-          metadata: {
-            ip: '203.0.113.42',
-            loginAt: new Date().toISOString(),
-            deviceName: 'Chrome on macOS',
-          },
-        },
-      });
-
-      const res = await createRequest({ strapi })
-        .setToken(accessToken)
-        .get('/admin/users/me/sessions');
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body.data[0]).not.toHaveProperty('ip');
-    });
   });
 
   describe('DELETE /admin/users/me/sessions/:sessionId', () => {

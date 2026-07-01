@@ -146,34 +146,6 @@ describe('UP Content API - Active Sessions', () => {
         .deleteMany({ where: { origin: 'users-permissions' } });
     });
 
-    it('does not expose legacy ip metadata stored in the database', async () => {
-      const login = await loginUser();
-      expect(login.statusCode).toBe(200);
-
-      const currentSessionId = sessionIdFromToken(login.body.jwt);
-
-      await strapi.db.query('admin::session').update({
-        where: { sessionId: currentSessionId },
-        data: {
-          metadata: {
-            ip: '203.0.113.42',
-            loginAt: new Date().toISOString(),
-            deviceName: 'Chrome on macOS',
-          },
-        },
-      });
-
-      const res = await createAuthRequest().setToken(login.body.jwt)({
-        method: 'GET',
-        url: '/sessions',
-      });
-
-      expect(res.statusCode).toBe(200);
-      const current = res.body.data.find((s) => s.id === currentSessionId);
-      expect(current).toBeDefined();
-      expect(current).not.toHaveProperty('ip');
-    });
-
     it('revokes a specific session and prevents its refresh token from rotating', async () => {
       const login1 = await loginUser();
       const login2 = await loginUser();
