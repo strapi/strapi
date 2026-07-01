@@ -1,7 +1,15 @@
 import * as React from 'react';
 
 import { SubNav } from '@strapi/admin/strapi-admin';
-import { Flex, Searchbar, useCollator, useFilter, Divider, Loader } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Searchbar,
+  useCollator,
+  useFilter,
+  Divider,
+  Loader,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
@@ -90,7 +98,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   // Show loading state while data is being fetched
   if (isLoading) {
     return (
-      <SubNav.Main aria-label={label}>
+      <SubNav.Main aria-label={label} isFullPage={isFullPage}>
         <SubNav.Header label={label} />
         <Divider />
         <Flex padding={4} justifyContent="center">
@@ -100,51 +108,52 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
     );
   }
 
+  const searchBar = (
+    <Flex
+      paddingLeft={{
+        initial: 3,
+        large: 5,
+      }}
+      paddingRight={{
+        initial: 3,
+        large: 5,
+      }}
+      paddingTop={5}
+      paddingBottom={{ initial: 1, large: 0 }}
+      gap={3}
+      direction="column"
+      alignItems="stretch"
+    >
+      <Searchbar
+        value={search}
+        onChange={handleChangeSearch}
+        onClear={handleClear}
+        placeholder={formatMessage({
+          id: 'search.placeholder',
+          defaultMessage: 'Search',
+        })}
+        size="S"
+        // eslint-disable-next-line react/no-children-prop
+        children={undefined}
+        name={'search_contentType'}
+        clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+      />
+    </Flex>
+  );
+
   return (
-    <SubNav.Main aria-label={label}>
-      {!isFullPage && (
-        <>
-          <SubNav.Header label={label} />
-          <Divider />
-        </>
-      )}
+    <SubNav.Main aria-label={label} isFullPage={isFullPage}>
+      <SubNav.Header label={label} />
+      <Divider />
+      <Box
+        position={isFullPage ? 'sticky' : 'static'}
+        top={isFullPage ? '0px' : undefined}
+        zIndex={isFullPage ? 2 : undefined}
+        background={isFullPage ? 'neutral100' : 'neutral0'}
+      >
+        {searchBar}
+      </Box>
       <SubNav.Content>
-        {isFullPage && (
-          <>
-            <SubNav.Header label={label} />
-            <Divider />
-          </>
-        )}
-        <Flex
-          paddingLeft={{
-            initial: 3,
-            large: 5,
-          }}
-          paddingRight={{
-            initial: 3,
-            large: 5,
-          }}
-          paddingTop={5}
-          paddingBottom={{ initial: 1, large: 0 }}
-          gap={3}
-          direction="column"
-          alignItems="stretch"
-        >
-          <Searchbar
-            value={search}
-            onChange={handleChangeSearch}
-            onClear={handleClear}
-            placeholder={formatMessage({
-              id: 'search.placeholder',
-              defaultMessage: 'Search',
-            })}
-            size="S"
-            // eslint-disable-next-line react/no-children-prop
-            children={undefined}
-            name={'search_contentType'}
-            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-          />
-        </Flex>
         <SubNav.Sections>
           {menu.map((section) => {
             return (
