@@ -1,5 +1,6 @@
 'use strict';
 
+import jwt from 'jsonwebtoken';
 import { createStrapiInstance, superAdmin } from 'api-tests/strapi';
 import { createRequest } from 'api-tests/request';
 
@@ -17,7 +18,16 @@ describe('Admin Logout Sessions', () => {
   });
 
   afterAll(async () => {
-    await strapi.destroy();
+    if (strapi) {
+      await strapi.db.query('admin::session').deleteMany({});
+      await strapi.destroy();
+    }
+  });
+
+  afterEach(async () => {
+    if (strapi) {
+      await strapi.db.query('admin::session').deleteMany({});
+    }
   });
 
   const getCookie = (res: any, name: string): string | undefined => {
@@ -115,8 +125,9 @@ describe('Admin Logout Sessions', () => {
     expect(res.statusCode).toBe(200);
 
     // Derive userId from the access token payload
-    const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(accessToken, strapi.config.get('admin.auth.secret')) as any;
+    const decoded = jwt.verify(accessToken, strapi.config.get('admin.auth.secret')) as {
+      userId: string;
+    };
     const userId = String(decoded.userId);
 
     const sessions = await strapi.db.query('admin::session').findMany({ where: { userId } });
@@ -162,6 +173,44 @@ describe('Admin Logout Sessions', () => {
     //   expect(sessions.some((s: any) => s.deviceId === deviceId2)).toBe(true);
     // }
   );
+
+  it('logout revokes the current session when client deviceId differs from the session record (SSO-like)', async () => {
+    const rq = createRequest({ strapi });
+    const wrongClientDeviceId = '99999999-9999-4999-8999-999999999999';
+
+    // SSO omits deviceId, so the server generates one.
+    const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+    expect(loginRes.statusCode).toBe(200);
+
+    const refreshCookie = getCookie(loginRes, cookieName)!;
+    const cookiePair = refreshCookie.split(';')[0];
+    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: cookiePair },
+    });
+    const accessToken = tokenRes.body?.data?.token as string;
+
+    const decoded = jwt.verify(accessToken, strapi.config.get('admin.auth.secret')) as {
+      userId: string;
+      sessionId: string;
+    };
+    const userId = String(decoded.userId);
+
+    const sessionFromToken = await strapi.db.query('admin::session').findOne({
+      where: { sessionId: decoded.sessionId, status: 'active' },
+    });
+    expect(sessionFromToken?.deviceId).toBeDefined();
+    expect(sessionFromToken?.deviceId).not.toBe(wrongClientDeviceId);
+
+    const res = await createRequest({ strapi })
+      .setToken(accessToken)
+      .post('/admin/logout', { body: { deviceId: wrongClientDeviceId } });
+    expect(res.statusCode).toBe(200);
+
+    const sessionsAfter = await strapi.db.query('admin::session').findMany({
+      where: { userId, deviceId: sessionFromToken!.deviceId, status: 'active' },
+    });
+    expect(sessionsAfter).toHaveLength(0);
+  });
 
   it('device B remains valid after device-scoped logout of device A', async () => {
     const rq = createRequest({ strapi });

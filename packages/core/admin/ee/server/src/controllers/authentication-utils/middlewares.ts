@@ -5,6 +5,7 @@ import utils from './utils';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
+  buildSessionMetadataFromContext,
   getSessionManager,
   generateDeviceId,
 } from '../../../../../shared/utils/session-auth';
@@ -118,6 +119,7 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
       'admin'
     ).generateRefreshToken(userId, deviceId, {
       type: 'refresh',
+      metadata: buildSessionMetadataFromContext(ctx),
     });
 
     const cookieOptions = buildCookieOptionsWithExpiry('refresh', absoluteExpiresAt);

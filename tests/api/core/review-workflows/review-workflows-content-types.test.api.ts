@@ -8,6 +8,7 @@ import { describeOnCondition } from 'api-tests/utils';
 import {
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
+  STAGE_MODEL_UID,
 } from '../../../../packages/core/review-workflows/server/src/constants/workflows';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -90,12 +91,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   };
 
   const getWorkflows = async (filters) => {
-    const result = await requests.admin({
-      method: 'GET',
-      url: '/review-workflows/workflows',
-      qs: { filters },
-    });
-    return result.body.data;
+    return strapi.plugin('review-workflows').service('workflows').find({ filters });
   };
 
   const createEntry = async (uid, data) => {
@@ -405,9 +401,38 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   describe('Get workflows', () => {
     let workflow1, workflow2;
 
+    const deleteWorkflowsFromDb = async (ids: number[]) => {
+      if (!ids.length) {
+        return;
+      }
+
+      await strapi.db.query(STAGE_MODEL_UID).deleteMany({
+        where: { workflow: { id: { $in: ids } } },
+      });
+      await strapi.db.query(WORKFLOW_MODEL_UID).deleteMany({
+        where: { id: { $in: ids } },
+      });
+    };
+
+    beforeAll(async () => {
+      // API delete refuses to remove the last workflow; reset via DB so this describe starts clean.
+      await strapi.db.query(STAGE_MODEL_UID).deleteMany({});
+      await strapi.db.query(WORKFLOW_MODEL_UID).deleteMany({});
+    });
+
     beforeEach(async () => {
-      workflow1 = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
-      workflow2 = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
+      const emptyRes = await createWorkflow({ contentTypes: [] });
+      expect(emptyRes.status).toBe(201);
+      workflow1 = emptyRes.body.data;
+
+      const assignedRes = await createWorkflow({ contentTypes: [productUID] });
+      expect(assignedRes.status).toBe(201);
+      workflow2 = assignedRes.body.data;
+      expect(assignedRes.body.data.contentTypes).toEqual(expect.arrayContaining([productUID]));
+    });
+
+    afterEach(async () => {
+      await deleteWorkflowsFromDb([workflow1?.id, workflow2?.id].filter(Boolean));
     });
 
     test('Should list workflows filtered by CT', async () => {

@@ -1,5 +1,10 @@
 import crypto from 'crypto';
+import type { Context } from 'koa';
 import type { Modules } from '@strapi/types';
+import { buildSessionMetadata } from '@strapi/utils';
+
+const ADMIN_ORIGIN = 'admin';
+const SESSION_CONTENT_TYPE = 'admin::session';
 
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
 
@@ -105,4 +110,55 @@ export const extractDeviceParams = (
   const rememberMe = Boolean(body.rememberMe);
 
   return { deviceId, rememberMe };
+};
+
+export const buildSessionMetadataFromContext = (ctx: Context) =>
+  buildSessionMetadata({
+    userAgent: ctx.request.headers['user-agent'],
+  });
+
+/**
+ * Resolves the device id to use when revoking sessions on logout.
+ * SSO assigns deviceId server-side, so the client-provided value may not match
+ * the active session row. Prefer the deviceId stored on the session backing
+ * the current access token when available.
+ */
+export const resolveLogoutDeviceId = async (
+  ctx: Context,
+  userId: string
+): Promise<string | undefined> => {
+  const bodyDeviceId = (ctx.request.body as { deviceId?: string } | undefined)?.deviceId;
+  const clientDeviceId = typeof bodyDeviceId === 'string' ? bodyDeviceId : undefined;
+
+  let currentSessionId = (ctx.state.session as { id?: string } | undefined)?.id;
+
+  if (!currentSessionId) {
+    const authorization = ctx.request.header.authorization;
+    const token =
+      authorization?.startsWith('Bearer ') || authorization?.startsWith('bearer ')
+        ? authorization.split(/\s+/)[1]
+        : undefined;
+
+    if (token) {
+      const sessionManager = getSessionManager();
+      const result = sessionManager?.('admin').validateAccessToken(token);
+      if (result?.isValid) {
+        currentSessionId = result.payload.sessionId;
+      }
+    }
+  }
+
+  if (!currentSessionId) {
+    return clientDeviceId;
+  }
+
+  const session = await strapi.db.query(SESSION_CONTENT_TYPE).findOne({
+    where: { sessionId: currentSessionId },
+  });
+
+  if (session?.userId !== userId || session?.origin !== ADMIN_ORIGIN) {
+    return clientDeviceId;
+  }
+
+  return typeof session.deviceId === 'string' ? session.deviceId : clientDeviceId;
 };

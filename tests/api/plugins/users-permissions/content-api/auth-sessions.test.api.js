@@ -71,11 +71,12 @@ const recreateStrapiInstance = async ({ jwtManagement = 'refresh', enableRoutes 
       s.config.set('plugin::users-permissions.jwtManagement', jwtManagement);
       s.config.set('plugin::users-permissions.sessions.httpOnly', false);
       s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
-      for (const { route, role } of enableRoutes) {
-        await enableAuthRoute(s, route, role);
-      }
     },
   });
+
+  for (const { route, role } of enableRoutes) {
+    await enableAuthRoute(strapi, route, role);
+  }
 };
 
 describe('UP Content API - Active Sessions', () => {
@@ -127,9 +128,18 @@ describe('UP Content API - Active Sessions', () => {
       expect(current).toBeDefined();
       expect(current.current).toBe(true);
       expect(typeof current.loginAt).toBe('string');
-      expect(typeof current.ip).toBe('string');
       expect(current.deviceName).toBe('Chrome on macOS');
       expect(current).not.toHaveProperty('userId');
+
+      for (const session of res.body.data) {
+        expect(session).not.toHaveProperty('ip');
+      }
+
+      const [storedSession] = await strapi.db.query('admin::session').findMany({
+        where: { sessionId: currentSessionId, origin: 'users-permissions', status: 'active' },
+      });
+      expect(storedSession?.metadata).toBeDefined();
+      expect(storedSession.metadata).not.toHaveProperty('ip');
 
       // Clean up sessions created here.
       await strapi.db
