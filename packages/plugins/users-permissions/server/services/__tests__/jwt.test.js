@@ -2,6 +2,7 @@
 
 /* eslint-env jest */
 
+const jwt = require('jsonwebtoken');
 const jwtService = require('../jwt');
 const {
   createMockSessionManager,
@@ -186,6 +187,56 @@ describe('JWT Service', () => {
       strapi.db.query().findOne.mockResolvedValue(null);
 
       await expect(service.verify(token)).rejects.toThrow('Invalid token.');
+    });
+  });
+
+  describe('verify method for legacy-support mode (issue #26587)', () => {
+    const secret = 'legacy-jwt-secret';
+
+    beforeEach(() => {
+      strapi.config.get.mockImplementation((path, defaultValue) => {
+        if (path === 'plugin::users-permissions.jwtManagement') {
+          return 'legacy-support';
+        }
+        if (path === 'plugin::users-permissions.jwtSecret') {
+          return secret;
+        }
+        if (path === 'plugin::users-permissions.jwt') {
+          return {};
+        }
+        return defaultValue;
+      });
+    });
+
+    it('accepts HS256 tokens (expected default)', async () => {
+      const token = jwt.sign({ id: 1 }, secret, { algorithm: 'HS256' });
+      await expect(service.verify(token)).resolves.toMatchObject({ id: 1 });
+    });
+
+    it('rejects HS384 and HS512 tokens when no algorithm is configured', async () => {
+      const hs384 = jwt.sign({ id: 2 }, secret, { algorithm: 'HS384' });
+      const hs512 = jwt.sign({ id: 3 }, secret, { algorithm: 'HS512' });
+
+      await expect(service.verify(hs384)).rejects.toThrow('Invalid token.');
+      await expect(service.verify(hs512)).rejects.toThrow('Invalid token.');
+    });
+
+    it('rejects unexpected algorithms once algorithm is configured', async () => {
+      strapi.config.get.mockImplementation((path, defaultValue) => {
+        if (path === 'plugin::users-permissions.jwtManagement') {
+          return 'legacy-support';
+        }
+        if (path === 'plugin::users-permissions.jwtSecret') {
+          return secret;
+        }
+        if (path === 'plugin::users-permissions.jwt') {
+          return { algorithm: 'HS256' };
+        }
+        return defaultValue;
+      });
+
+      const hs384 = jwt.sign({ id: 4 }, secret, { algorithm: 'HS384' });
+      await expect(service.verify(hs384)).rejects.toThrow('Invalid token.');
     });
   });
 });
