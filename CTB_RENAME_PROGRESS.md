@@ -8,12 +8,10 @@
 > - `CTB_RENAME_STEPS/` — **one kickoff brief per remaining step.** To pick up a
 >   step, open a fresh AI and point it at the single matching
 >   `CTB_RENAME_STEPS/STEP-*.md` file (start with `CTB_RENAME_STEPS/README.md`).
-> - `CTB_AI_V2/` — **AI chat v2 handoff** (operations-based API for strapi-ai +
->   Strapi client). Start with `CTB_AI_V2/README.md`.
 >
-> Branch: `feat/ctb-rename-migration-builder` (base: `develop`).
-> Linear: CMS-635 (related: CG-979, CG-1001). PR: #26749 (draft; supersedes #26622).
-> Last updated: 2026-06-22.
+> Branch: `ben/ctb-rename-migration-builder` (base: `develop`).
+> Linear: CMS-635 (related: CG-979, CG-1001). PR: #26622 (draft).
+> Last updated: 2026-06-12.
 
 ---
 
@@ -33,7 +31,6 @@
 | CLI `strapi rename:field` (optional)                           | ✅ done + tested          |
 | CLI `strapi rename:component` (optional)                       | ✅ done + tested          |
 | Content-type _level_ rename                                    | ➖ N/A (immutable in CTB) |
-| AI chat v2 (operations API — strapi-ai + client)               | ⬜ see `CTB_AI_V2/`       |
 
 Legend: ✅ done · ⬜ missing/todo · ➖ not applicable.
 
@@ -179,29 +176,6 @@ category changes its uid and emits the `component_type` migration across every
 (happy path, `never`, validation errors) and
 `tests/cli/.../rename-component.test.cli.ts` (component file moved + one guarded
 `component_type` migration).
-
-### 8. AI chat v2 — operations API (in progress)
-
-Rename migrations work for **manual** CTB edits but not for **AI chat** (v1 uses
-`applyChange` with schema snapshots). v2 replaces that with ordered `DataManager`
-operations from strapi-ai.
-
-**Handoff:** [`CTB_AI_V2/AGENT-orchestrator.md`](CTB_AI_V2/AGENT-orchestrator.md) (start here) · [`CTB_AI_V2/`](CTB_AI_V2/)
-
-**Phase 0 done (2026-06-23):**
-
-- strapi-ai `feat/ctb-operations-v2`: `CTBOperation` types + Zod schemas + tests
-- Strapi: mirrored types, `applyCTBOperations()` dispatcher + 9 unit tests
-
-**Phase 1 done (2026-06-23):**
-
-- strapi-ai `feat/ctb-operations-v2`: `schemaOperationsTool`, validator, `POST /schemas/chat/v2`, prompts; `pnpm test` green
-- Strapi: `OperationsProvider`, v2 URL/flag, Message markers, `toCTB` gated; 16 front tests green
-
-**Next:** Phase 2 (swap macro, DZ ops, enable v2 by default) + live E2E with both services running.
-
-Interim: client-side rename inference in `AIChat/lib/transforms/schemas/toCTB.ts`
-(v1 safety net only — gate when v2 enabled).
 
 ---
 

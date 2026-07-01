@@ -1,5 +1,3 @@
-import type { RenameHop } from '../../../../types';
-
 /**
  * Strapi schema, this is a simplification to make it easier to work with
  */
@@ -17,10 +15,5 @@ export type Schema = {
     draftAndPublish?: boolean;
     localized?: boolean;
   };
-  /**
-   * Optional ordered rename hops for this schema. The AI server does not emit
-   * this today, but the CTB admin transform accepts it for forward compatibility.
-   */
-  renames?: RenameHop[];
   attributes: Record<string, { type: string; [key: string]: any }>;
 };

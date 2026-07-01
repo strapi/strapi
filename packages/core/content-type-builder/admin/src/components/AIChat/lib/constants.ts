@@ -11,10 +11,6 @@ export const STRAPI_MAX_ATTACHMENT_SIZE = 15 * 1024 * 1024; // 15MB
 export const STRAPI_AI_URL =
   process.env.STRAPI_AI_URL?.replace(/\/+$/, '') ?? 'https://strapi-ai.apps.strapi.io';
 export const STRAPI_AI_CHAT_URL = `${STRAPI_AI_URL}/schemas/chat`;
-export const STRAPI_AI_CHAT_URL_V2 = `${STRAPI_AI_URL}/schemas/chat/v2`;
-
-/** When true, chat uses v2 operations API and applies `tool-schemaOperationsTool` output. */
-export const isCtbAiOperationsV2Enabled = () => process.env.STRAPI_AI_CTB_V2 === 'true';
 export const STRAPI_AI_TITLE_URL = `/schemas/chat/generate-title` as const;
 export const STRAPI_AI_FEEDBACK_URL = `/schemas/chat/feedback` as const;
 export const STRAPI_AI_PROJECT_URL = `/schemas/chat/attachment` as const;

@@ -3,13 +3,11 @@ import { createContext, useContext, ReactNode, useEffect, useState } from 'react
 import { GUIDED_TOUR_REQUIRED_ACTIONS, useGuidedTour } from '@strapi/admin/strapi-admin';
 
 import { useDataManager } from '../../DataManager/useDataManager';
-import { isCtbAiOperationsV2Enabled } from '../lib/constants';
 import { transformChatToCTB } from '../lib/transforms/schemas/toCTB';
 import { SchemaChange } from '../lib/types/annotations';
 import { AIMessage } from '../lib/types/messages';
 
 import { useStrapiChat } from './ChatProvider';
-import { messageHasOperationsToolPart } from './OperationsProvider';
 
 interface SchemaContextType {
   lastRevisedId: string | null;
@@ -62,11 +60,6 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
     if (latestMessage.role !== 'assistant') return;
     // Wait until message streaming has finished
     if (status !== 'ready') return;
-
-    // v2 operations path handles this message — avoid double apply via applyChange
-    if (isCtbAiOperationsV2Enabled() && messageHasOperationsToolPart(latestMessage)) {
-      return;
-    }
 
     // const schemaChanges = latestMessage.schemaChanges;
     const schemaChanges = extractSchemaChangesFromMessage(latestMessage);
