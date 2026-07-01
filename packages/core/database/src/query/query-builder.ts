@@ -11,10 +11,11 @@ import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
 
 interface State {
-  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
+  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'min' | 'truncate';
   select: Array<string | Knex.Raw>;
   count: string | null;
   max: string | null;
+  min: string | null;
   first: boolean;
   data: Record<string, unknown> | (null | Record<string, unknown>)[] | null;
   where: Record<string, unknown>[];
@@ -73,6 +74,8 @@ export interface QueryBuilder {
   count(count?: string): QueryBuilder;
 
   max(column: string): QueryBuilder;
+
+  min(column: string): QueryBuilder;
 
   where(where?: object): QueryBuilder;
 
@@ -139,6 +142,7 @@ const createQueryBuilder = (
       select: [],
       count: null,
       max: null,
+      min: null,
       first: false,
       data: null,
       where: [],
@@ -259,6 +263,13 @@ const createQueryBuilder = (
     max(column: string) {
       state.type = 'max';
       state.max = column;
+
+      return this;
+    },
+
+    min(column: string) {
+      state.type = 'min';
+      state.min = column;
 
       return this;
     },
@@ -588,6 +599,11 @@ const createQueryBuilder = (
         case 'max': {
           const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.max));
           qb.max({ max: dbColumnName });
+          break;
+        }
+        case 'min': {
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.min));
+          qb.min({ min: dbColumnName });
           break;
         }
         case 'insert': {
