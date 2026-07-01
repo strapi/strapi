@@ -41,6 +41,7 @@ export interface Auth {
     expiresIn?: string | number;
     [key: string]: unknown;
   };
+  disableLocalLoginForSSO?: boolean;
 }
 
 export interface TransferToken {

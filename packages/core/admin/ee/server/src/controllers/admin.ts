@@ -10,6 +10,7 @@ export default {
   // NOTE: Overrides CE admin controller
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
+    const disableLocalLoginForSSO = strapi.config.get('admin.auth.disableLocalLoginForSSO', false);
     const isAILicense = strapi.ee.features.isEnabled('cms-ai');
     const isAIConfigured = strapi.config.get('admin.ai', { enabled: isAILicense });
 
@@ -19,7 +20,7 @@ export default {
           isEE: strapi.EE,
           isTrial: strapi.ee.isTrial,
           features: strapi.ee.features.list(),
-          flags,
+          flags: { ...flags, disableLocalLoginForSSO },
           type: strapi.ee.type,
           ai: {
             enabled: isAILicense && isAIConfigured.enabled,
@@ -27,7 +28,7 @@ export default {
         },
       };
     } catch (err) {
-      return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
+      return { data: { isEE: false, features: [], flags: { ...flags, disableLocalLoginForSSO }, ai: { enabled: false } } };
     }
   },
 

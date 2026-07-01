@@ -20,6 +20,33 @@ describe('ResetPassword', () => {
     expect(getByRole('link', { name: 'Forgot your password?' })).toBeInTheDocument();
   });
 
+  describe('hideForm', () => {
+    it('hides the form fields, login button and forgot-password link', () => {
+      const { queryByRole, queryByLabelText, getByRole } = render(<Login hideForm />);
+
+      // heading still renders
+      expect(getByRole('heading', { name: 'Welcome!' })).toBeInTheDocument();
+
+      FIELD_LABELS.forEach((label) => {
+        expect(queryByLabelText(new RegExp(`^${label}`, 'i'))).not.toBeInTheDocument();
+      });
+
+      expect(queryByRole('button', { name: 'Login' })).not.toBeInTheDocument();
+      expect(queryByRole('link', { name: 'Forgot your password?' })).not.toBeInTheDocument();
+    });
+
+    it('still renders children when the form is hidden', () => {
+      const { getByText, queryByRole } = render(
+        <Login hideForm>
+          <span>SSO content</span>
+        </Login>
+      );
+
+      expect(getByText('SSO content')).toBeInTheDocument();
+      expect(queryByRole('button', { name: 'Login' })).not.toBeInTheDocument();
+    });
+  });
+
   describe('validation', () => {
     it('shoudl fail if we dont fill in any field', async () => {
       const { getByRole, findAllByText } = render(<Login />);
