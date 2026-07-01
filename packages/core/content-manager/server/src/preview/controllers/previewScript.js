@@ -1,78 +1,92 @@
-// NOTE: This override is for the properties on _user's site_, it's not about Strapi Admin.
-declare global {
-  interface Window {
-    __strapi_previewCleanup?: () => void;
-    STRAPI_HIGHLIGHT_HOVER_COLOR?: string;
-    STRAPI_HIGHLIGHT_ACTIVE_COLOR?: string;
-    STRAPI_DISABLE_STEGA_DECODING?: boolean;
-  }
-}
+/* eslint-disable */
+// @ts-check
 
 /**
- * previewScript will be injected into the preview iframe after being stringified.
- * Therefore it CANNOT use any imports, or refer to any variables outside of its own scope.
- * It's why many functions are defined within previewScript, it's the only way to avoid going full spaghetti.
- * To get a better overview of everything previewScript does, go to the orchestration part at its end.
+ * STANDALONE PREVIEW SCRIPT
+ *
+ * This file is NOT bundled. It is served verbatim by the content-manager server
+ * (GET /content-manager/preview/script) and injected into the user's site inside
+ * the preview iframe by the admin (over postMessage, the STRAPI_SCRIPT event).
+ *
+ * Because it runs in the user's page, it CANNOT use any imports or refer to any
+ * variable outside of its own scope. Everything it needs is either defined within
+ * `previewScript` or passed in through the `config` argument that the admin injects
+ * at invocation time. Writing in JS and keeping it out of any bundler is deliberate:
+ * it guarantees the served text is exactly what's written here (no helper hoisting, no wrapping),
+ * which is what makes it safe to evaluate as-is in the iframe.
  */
-type PreviewScriptColors = {
-  highlightHoverColor: string;
-  highlightActiveColor: string;
-};
 
-type PreviewScriptConfig = {
-  shouldRun?: boolean;
-  colors: PreviewScriptColors;
-};
+/**
+ * @typedef {Object} PreviewScriptColors
+ * @property {string} highlightHoverColor
+ * @property {string} highlightActiveColor
+ */
 
-const previewScript = (config: PreviewScriptConfig) => {
-  const { shouldRun = true, colors } = config;
+/**
+ * @typedef {typeof import('../../../../admin/src/preview/utils/constants').INTERNAL_EVENTS} InternalEvents
+ */
+
+/**
+ * @typedef {Object} PreviewScriptConfig
+ * @property {PreviewScriptColors} colors
+ * @property {InternalEvents} events Internal event names, owned by the admin (INTERNAL_EVENTS).
+ * @property {string} parentOrigin Admin panel origin used to validate and target postMessage traffic.
+ */
+
+/**
+ * @typedef {Object} WindowExtensions
+ * @property {string} [STRAPI_HIGHLIGHT_HOVER_COLOR] Optional override for the highlight hover color, injected by the admin.
+ * @property {string} [STRAPI_HIGHLIGHT_ACTIVE_COLOR] Optional override for the highlight active color, injected by the admin.
+ * @property {boolean} [STRAPI_DISABLE_STEGA_DECODING] Optional flag to disable steganography decoding, injected by the admin.
+ * @property {() => void} [__strapi_previewCleanup] Optional cleanup function, injected by the admin.
+ */
+
+/**
+ * @param {PreviewScriptConfig} config
+ */
+function previewScript(config) {
+  const { colors, events: INTERNAL_EVENTS, parentOrigin } = config;
+
+  /** @type {typeof window & WindowExtensions} */
+  const win = window;
 
   /* -----------------------------------------------------------------------------------------------
    * Params
    * ---------------------------------------------------------------------------------------------*/
   const HIGHLIGHT_PADDING = 2; // in pixels
-  const HIGHLIGHT_HOVER_COLOR = window.STRAPI_HIGHLIGHT_HOVER_COLOR ?? colors.highlightHoverColor;
-  const HIGHLIGHT_ACTIVE_COLOR =
-    window.STRAPI_HIGHLIGHT_ACTIVE_COLOR ?? colors.highlightActiveColor;
+  const HIGHLIGHT_HOVER_COLOR = win.STRAPI_HIGHLIGHT_HOVER_COLOR ?? colors.highlightHoverColor;
+  const HIGHLIGHT_ACTIVE_COLOR = win.STRAPI_HIGHLIGHT_ACTIVE_COLOR ?? colors.highlightActiveColor;
   const HIGHLIGHT_STYLES_ID = 'strapi-preview-highlight-styles';
   const DOUBLE_CLICK_TIMEOUT = 300; // milliseconds to wait for potential double-click
 
-  const DISABLE_STEGA_DECODING = window.STRAPI_DISABLE_STEGA_DECODING ?? false;
+  const DISABLE_STEGA_DECODING = win.STRAPI_DISABLE_STEGA_DECODING ?? false;
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
   const OVERLAY_ID = 'strapi-preview-overlay';
-  const INTERNAL_EVENTS = {
-    STRAPI_FIELD_FOCUS: 'strapiFieldFocus',
-    STRAPI_FIELD_BLUR: 'strapiFieldBlur',
-    STRAPI_FIELD_CHANGE: 'strapiFieldChange',
-    STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
-    STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
-  } as const;
-
-  /**
-   * Calling the function in no-run mode lets us retrieve the constants from other files and keep
-   * a single source of truth for them. It's the only way to do this because this script can't
-   * refer to any variables outside of its own scope, because it's stringified before it's run.
-   */
-  if (!shouldRun) {
-    return { INTERNAL_EVENTS };
-  }
 
   /* -----------------------------------------------------------------------------------------------
    * Utils
    * ---------------------------------------------------------------------------------------------*/
 
-  const sendMessage = (
-    type: (typeof INTERNAL_EVENTS)[keyof typeof INTERNAL_EVENTS],
-    payload: unknown
-  ) => {
-    window.parent.postMessage({ type, payload }, '*');
+  /**
+   * @param {InternalEvents[keyof InternalEvents]} type
+   * @param {unknown} payload
+   */
+  const sendMessage = (type, payload) => {
+    window.parent.postMessage({ type, payload }, parentOrigin);
   };
 
-  const getElementsByPath = (path: string) => {
+  /**
+   * @param {string} path
+   */
+  const getElementsByPath = (path) => {
     return document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
   };
 
-  const isMediaElement = (element: Element): boolean => {
+  /**
+   * @param {Element} element
+   * @returns {boolean}
+   */
+  const isMediaElement = (element) => {
     return element.tagName === 'IMG' || element.tagName === 'VIDEO' || element.tagName === 'AUDIO';
   };
 
@@ -89,16 +103,26 @@ const previewScript = (config: PreviewScriptConfig) => {
    * which is what was producing duplicate previews. The childList observer
    * below uses these maps to drop the injection whenever its associated
    * original is removed.
+   *
+   * @type {Map<HTMLElement, HTMLElement>}
    */
-  const originalToInjection = new Map<HTMLElement, HTMLElement>();
-  const injectionToOriginal = new Map<HTMLElement, HTMLElement>();
+  const originalToInjection = new Map();
+  /** @type {Map<HTMLElement, HTMLElement>} */
+  const injectionToOriginal = new Map();
 
-  const trackInjection = (original: HTMLElement, injection: HTMLElement) => {
+  /**
+   * @param {HTMLElement} original
+   * @param {HTMLElement} injection
+   */
+  const trackInjection = (original, injection) => {
     originalToInjection.set(original, injection);
     injectionToOriginal.set(injection, original);
   };
 
-  const untrackInjection = (injection: HTMLElement) => {
+  /**
+   * @param {HTMLElement} injection
+   */
+  const untrackInjection = (injection) => {
     const original = injectionToOriginal.get(injection);
     if (original) originalToInjection.delete(original);
     injectionToOriginal.delete(injection);
@@ -133,7 +157,13 @@ const previewScript = (config: PreviewScriptConfig) => {
    * so cleanup removes the wrapper rather than leaving an empty cell.
    */
   const CLONE_WRAPPER_ATTRIBUTE = 'data-strapi-media-clone-wrapper';
-  const createMediaPlaceholder = (sourceAttr: string, rect: DOMRect): HTMLElement => {
+
+  /**
+   * @param {string} sourceAttr
+   * @param {DOMRect} rect
+   * @returns {HTMLElement}
+   */
+  const createMediaPlaceholder = (sourceAttr, rect) => {
     const placeholder = document.createElement('div');
     placeholder.setAttribute(PLACEHOLDER_ATTRIBUTE, '');
     placeholder.setAttribute(SOURCE_ATTRIBUTE, sourceAttr);
@@ -161,8 +191,12 @@ const previewScript = (config: PreviewScriptConfig) => {
    * value as src, the browser resolves it against the iframe origin and
    * fails to load. Resolve against the original element's existing src
    * origin so the swap targets the same backend.
+   *
+   * @param {HTMLElement} originalEl
+   * @param {string} rawUrl
+   * @returns {string}
    */
-  const resolveMediaUrl = (originalEl: HTMLElement, rawUrl: string): string => {
+  const resolveMediaUrl = (originalEl, rawUrl) => {
     if (/^(?:[a-z]+:)?\/\//i.test(rawUrl) || rawUrl.startsWith('data:')) {
       return rawUrl;
     }
@@ -176,6 +210,28 @@ const previewScript = (config: PreviewScriptConfig) => {
     }
   };
 
+  const SAFE_MEDIA_URL_PROTOCOLS = new Set(['http:', 'https:', 'data:']);
+
+  /**
+   * Reject dangerous URL schemes before assigning media `src` attributes.
+   *
+   * @param {string | null | undefined} url
+   * @returns {string | null}
+   */
+  const sanitizeMediaUrl = (url) => {
+    if (!url) return null;
+
+    try {
+      const parsed = new URL(url, window.location.href);
+      if (!SAFE_MEDIA_URL_PROTOCOLS.has(parsed.protocol)) {
+        return null;
+      }
+      return parsed.href;
+    } catch {
+      return url.startsWith('/') ? url : null;
+    }
+  };
+
   /**
    * Extract a recognizable media filename from a URL string. Works for
    * direct backend URLs, relative paths, and proxy URLs that embed the
@@ -183,8 +239,11 @@ const previewScript = (config: PreviewScriptConfig) => {
    * Used to detect whether the rendered element already shows the same
    * asset as the form value, so we can skip src updates that would only
    * substitute one URL representation for another.
+   *
+   * @param {string} raw
+   * @returns {string}
    */
-  const getMediaFilename = (raw: string): string => {
+  const getMediaFilename = (raw) => {
     if (!raw) return '';
     let decoded = raw;
     try {
@@ -203,9 +262,13 @@ const previewScript = (config: PreviewScriptConfig) => {
    *   attribute was copied from the post-normalization media element, so it's already correct
    * - For non-media elements with model=plugin::upload.file (e.g., caption text): strip the last
    *   segment to focus the parent media field (e.g., "hero.caption" -> "hero")
+   *
+   * @param {string} sourceAttr
+   * @param {Element} element
+   * @returns {string}
    */
-  const getFieldPathForMedia = (sourceAttr: string, element: Element): string => {
-    if (isMediaElement(element) || injectionToOriginal.has(element as HTMLElement)) {
+  const getFieldPathForMedia = (sourceAttr, element) => {
+    if (isMediaElement(element) || injectionToOriginal.has(/** @type {HTMLElement} */ (element))) {
       return sourceAttr;
     }
 
@@ -233,13 +296,24 @@ const previewScript = (config: PreviewScriptConfig) => {
       return;
     }
 
-    const { vercelStegaDecode: stegaDecode, vercelStegaClean: stegaClean } = await import(
-      // @ts-expect-error it's not a local dependency
-      // eslint-disable-next-line import/no-unresolved
-      'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
-    );
+    let stegaDecode;
+    let stegaClean;
 
-    const applyStegaToElement = (element: Element) => {
+    try {
+      // The specifier is a plain external URL. This file is never bundled, so the
+      // import is left exactly as written and evaluated natively inside the iframe.
+      ({ vercelStegaDecode: stegaDecode, vercelStegaClean: stegaClean } = await import(
+        // @ts-ignore it's not a local dependency
+        'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
+      ));
+    } catch {
+      return;
+    }
+
+    /**
+     * @param {Element} element
+     */
+    const applyStegaToElement = (element) => {
       // Handle img and video tags - check src attribute for stega encoding
       if (isMediaElement(element)) {
         const src = element.getAttribute('src');
@@ -248,7 +322,7 @@ const previewScript = (config: PreviewScriptConfig) => {
             const result = stegaDecode(src);
             if (result && 'strapiSource' in result) {
               // Parse the source and remove .url suffix to point to the media field
-              const sourceValue = result.strapiSource as string;
+              const sourceValue = result.strapiSource;
               const pathMatch = sourceValue.match(/path=([^&]+)/);
               if (pathMatch) {
                 const originalPath = pathMatch[1];
@@ -306,7 +380,7 @@ const previewScript = (config: PreviewScriptConfig) => {
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
-              const element = node as Element;
+              const element = /** @type {Element} */ (node);
               // Process the added element
               applyStegaToElement(element);
               // Process all child elements
@@ -323,7 +397,7 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         // Handle src attribute changes for img/video elements
         if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
-          const target = mutation.target as Element;
+          const target = /** @type {Element} */ (mutation.target);
           if (isMediaElement(target)) {
             applyStegaToElement(target);
           }
@@ -378,7 +452,7 @@ const previewScript = (config: PreviewScriptConfig) => {
 
   const createOverlaySystem = () => {
     // Clean up before creating a new overlay so we can safely call previewScript multiple times
-    window.__strapi_previewCleanup?.();
+    win.__strapi_previewCleanup?.();
     document.getElementById(OVERLAY_ID)?.remove();
 
     const overlay = document.createElement('div');
@@ -397,11 +471,10 @@ const previewScript = (config: PreviewScriptConfig) => {
     return overlay;
   };
 
-  type EventListenersList = Array<{
-    element: HTMLElement | Window;
-    type: keyof HTMLElementEventMap | 'message';
-    handler: EventListener;
-  }>;
+  /**
+   * @typedef {{ element: HTMLElement | Window; type: keyof HTMLElementEventMap | 'message'; handler: EventListener; }} EventListenerEntry
+   * @typedef {EventListenerEntry[]} EventListenersList
+   */
 
   /**
    * Group all elements that share the exact same `data-strapi-source` value
@@ -411,21 +484,31 @@ const previewScript = (config: PreviewScriptConfig) => {
    * grouping is keyed off the source string so other accidental same-source
    * renders (e.g. the title rendered twice) also collapse to one highlight,
    * which matches how the focused state already behaves.
+   *
+   * @typedef {{ highlight: HTMLElement; elements: Set<HTMLElement>; }} HighlightGroup
    */
-  type HighlightGroup = {
-    highlight: HTMLElement;
-    elements: Set<HTMLElement>;
-  };
 
-  const createHighlightManager = (overlay: HTMLElement) => {
-    const groups = new Map<string, HighlightGroup>();
-    const elementToGroupKey = new Map<HTMLElement, string>();
-    const eventListeners: EventListenersList = [];
-    const focusedHighlights: HTMLElement[] = [];
-    const pendingClicks = new Map<HighlightGroup, number>();
-    let focusedField: string | null = null;
+  /**
+   * @param {HTMLElement} overlay
+   */
+  const createHighlightManager = (overlay) => {
+    /** @type {Map<string, HighlightGroup>} */
+    const groups = new Map();
+    /** @type {Map<HTMLElement, string>} */
+    const elementToGroupKey = new Map();
+    /** @type {EventListenersList} */
+    const eventListeners = [];
+    /** @type {HTMLElement[]} */
+    const focusedHighlights = [];
+    /** @type {Map<HighlightGroup, number>} */
+    const pendingClicks = new Map();
+    /** @type {string | null} */
+    let focusedField = null;
 
-    const computeGroupRect = (group: HighlightGroup) => {
+    /**
+     * @param {HighlightGroup} group
+     */
+    const computeGroupRect = (group) => {
       let minLeft = Infinity;
       let minTop = Infinity;
       let maxRight = -Infinity;
@@ -449,7 +532,10 @@ const previewScript = (config: PreviewScriptConfig) => {
       };
     };
 
-    const drawGroup = (group: HighlightGroup) => {
+    /**
+     * @param {HighlightGroup} group
+     */
+    const drawGroup = (group) => {
       const rect = computeGroupRect(group);
       if (!rect) {
         group.highlight.style.display = 'none';
@@ -469,12 +555,13 @@ const previewScript = (config: PreviewScriptConfig) => {
      * Pick the underlying source element under the pointer so single-click
      * redispatch hits the specific item the user clicked, even when the group
      * highlight covers several elements (multi-media gallery).
+     *
+     * @param {HighlightGroup} group
+     * @param {number} x
+     * @param {number} y
+     * @returns {HTMLElement | null}
      */
-    const pickElementAtPoint = (
-      group: HighlightGroup,
-      x: number,
-      y: number
-    ): HTMLElement | null => {
+    const pickElementAtPoint = (group, x, y) => {
       for (const el of group.elements) {
         const r = el.getBoundingClientRect();
         if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
@@ -485,13 +572,21 @@ const previewScript = (config: PreviewScriptConfig) => {
       return first ?? null;
     };
 
-    const createGroup = (groupKey: string): HighlightGroup => {
+    /**
+     * @param {string} groupKey
+     * @returns {HighlightGroup}
+     */
+    const createGroup = (groupKey) => {
       const highlight = document.createElement('div');
       highlight.className = 'strapi-highlight';
-      const group: HighlightGroup = { highlight, elements: new Set() };
+      /** @type {HighlightGroup} */
+      const group = { highlight, elements: new Set() };
 
-      const clickHandler = (event: MouseEvent) => {
-        if ((event as any).__strapi_redispatched) {
+      /**
+       * @param {MouseEvent} event
+       */
+      const clickHandler = (event) => {
+        if (/** @type {any} */ (event).__strapi_redispatched) {
           return;
         }
 
@@ -514,7 +609,8 @@ const previewScript = (config: PreviewScriptConfig) => {
           const underlying = pickElementAtPoint(group, event.clientX, event.clientY);
           if (!underlying) return;
 
-          let targetElement: HTMLElement = underlying;
+          /** @type {HTMLElement} */
+          let targetElement = underlying;
           if (isMediaElement(underlying)) {
             let parent = underlying.parentElement;
             while (parent) {
@@ -546,14 +642,17 @@ const previewScript = (config: PreviewScriptConfig) => {
             shiftKey: event.shiftKey,
             metaKey: event.metaKey,
           });
-          (newEvent as any).__strapi_redispatched = true;
+          /** @type {any} */ (newEvent).__strapi_redispatched = true;
           targetElement.dispatchEvent(newEvent);
         }, DOUBLE_CLICK_TIMEOUT);
 
         pendingClicks.set(group, timeout);
       };
 
-      const doubleClickHandler = (event: MouseEvent) => {
+      /**
+       * @param {MouseEvent} event
+       */
+      const doubleClickHandler = (event) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -583,7 +682,10 @@ const previewScript = (config: PreviewScriptConfig) => {
         });
       };
 
-      const mouseDownHandler = (event: MouseEvent) => {
+      /**
+       * @param {MouseEvent} event
+       */
+      const mouseDownHandler = (event) => {
         if (event.detail >= 2) {
           event.preventDefault();
         }
@@ -594,9 +696,17 @@ const previewScript = (config: PreviewScriptConfig) => {
       highlight.addEventListener('mousedown', mouseDownHandler);
 
       eventListeners.push(
-        { element: highlight, type: 'click', handler: clickHandler as EventListener },
-        { element: highlight, type: 'dblclick', handler: doubleClickHandler as EventListener },
-        { element: highlight, type: 'mousedown', handler: mouseDownHandler as EventListener }
+        { element: highlight, type: 'click', handler: /** @type {EventListener} */ (clickHandler) },
+        {
+          element: highlight,
+          type: 'dblclick',
+          handler: /** @type {EventListener} */ (doubleClickHandler),
+        },
+        {
+          element: highlight,
+          type: 'mousedown',
+          handler: /** @type {EventListener} */ (mouseDownHandler),
+        }
       );
 
       overlay.appendChild(highlight);
@@ -604,7 +714,11 @@ const previewScript = (config: PreviewScriptConfig) => {
       return group;
     };
 
-    const destroyGroup = (groupKey: string, group: HighlightGroup) => {
+    /**
+     * @param {string} groupKey
+     * @param {HighlightGroup} group
+     */
+    const destroyGroup = (groupKey, group) => {
       const pendingTimeout = pendingClicks.get(group);
       if (pendingTimeout) {
         window.clearTimeout(pendingTimeout);
@@ -633,7 +747,10 @@ const previewScript = (config: PreviewScriptConfig) => {
       groups.delete(groupKey);
     };
 
-    const createHighlightForElement = (element: HTMLElement) => {
+    /**
+     * @param {HTMLElement} element
+     */
+    const createHighlightForElement = (element) => {
       if (elementToGroupKey.has(element)) {
         return;
       }
@@ -654,9 +771,12 @@ const previewScript = (config: PreviewScriptConfig) => {
         !injectionToOriginal.has(element) &&
         !element.hasAttribute(CLONE_ATTRIBUTE)
       ) {
-        const ghostInjections: HTMLElement[] = [];
-        const ghostPlaceholders: HTMLElement[] = [];
-        const ghostClones: HTMLElement[] = [];
+        /** @type {HTMLElement[]} */
+        const ghostInjections = [];
+        /** @type {HTMLElement[]} */
+        const ghostPlaceholders = [];
+        /** @type {HTMLElement[]} */
+        const ghostClones = [];
         group.elements.forEach((el) => {
           if (injectionToOriginal.has(el)) {
             ghostInjections.push(el);
@@ -673,7 +793,9 @@ const previewScript = (config: PreviewScriptConfig) => {
             // Tag-swap injection of a clone (e.g. user added a video as
             // the new item, swapping our cloned IMG for a VIDEO). Remove
             // the wrapper so we don't leave an empty layout cell behind.
-            const wrapper = orig.closest(`[${CLONE_WRAPPER_ATTRIBUTE}]`) as HTMLElement | null;
+            const wrapper = /** @type {HTMLElement | null} */ (
+              orig.closest(`[${CLONE_WRAPPER_ATTRIBUTE}]`)
+            );
             (wrapper ?? orig).remove();
           } else if (orig?.hasAttribute(PLACEHOLDER_ATTRIBUTE)) {
             orig.remove();
@@ -694,7 +816,9 @@ const previewScript = (config: PreviewScriptConfig) => {
         ghostClones.forEach((clone) => {
           group?.elements.delete(clone);
           elementToGroupKey.delete(clone);
-          const wrapper = clone.closest(`[${CLONE_WRAPPER_ATTRIBUTE}]`) as HTMLElement | null;
+          const wrapper = /** @type {HTMLElement | null} */ (
+            clone.closest(`[${CLONE_WRAPPER_ATTRIBUTE}]`)
+          );
           (wrapper ?? clone).remove();
         });
       }
@@ -707,14 +831,17 @@ const previewScript = (config: PreviewScriptConfig) => {
       drawGroup(group);
     };
 
-    const removeHighlightForElement = (element: Element) => {
-      const groupKey = elementToGroupKey.get(element as HTMLElement);
+    /**
+     * @param {Element} element
+     */
+    const removeHighlightForElement = (element) => {
+      const groupKey = elementToGroupKey.get(/** @type {HTMLElement} */ (element));
       if (!groupKey) return;
       const group = groups.get(groupKey);
       if (!group) return;
 
-      group.elements.delete(element as HTMLElement);
-      elementToGroupKey.delete(element as HTMLElement);
+      group.elements.delete(/** @type {HTMLElement} */ (element));
+      elementToGroupKey.delete(/** @type {HTMLElement} */ (element));
 
       if (group.elements.size === 0) {
         destroyGroup(groupKey, group);
@@ -728,11 +855,15 @@ const previewScript = (config: PreviewScriptConfig) => {
      * to `getElementsByPath` so this preserves the same loose substring match
      * the highlight system has always used (e.g. focusing `hero` matches
      * `hero.caption` too).
+     *
+     * @param {string} path
+     * @returns {HighlightGroup[]}
      */
-    const findGroupForPath = (path: string): HighlightGroup[] => {
-      const matched = new Set<HighlightGroup>();
+    const findGroupForPath = (path) => {
+      /** @type {Set<HighlightGroup>} */
+      const matched = new Set();
       getElementsByPath(path).forEach((el) => {
-        const key = elementToGroupKey.get(el as HTMLElement);
+        const key = elementToGroupKey.get(/** @type {HTMLElement} */ (el));
         if (!key) return;
         const group = groups.get(key);
         if (group) matched.add(group);
@@ -761,7 +892,8 @@ const previewScript = (config: PreviewScriptConfig) => {
       createHighlightForElement,
       removeHighlightForElement,
       findGroupForPath,
-      setFocusedField: (field: string | null) => {
+      /** @param {string | null} field */
+      setFocusedField: (field) => {
         focusedField = field;
       },
       getFocusedField: () => focusedField,
@@ -772,19 +904,24 @@ const previewScript = (config: PreviewScriptConfig) => {
     };
   };
 
-  type HighlightManager = ReturnType<typeof createHighlightManager>;
+  /**
+   * @typedef {ReturnType<typeof createHighlightManager>} HighlightManager
+   */
 
   /**
    * We need to track scroll in all the element parents in order to keep the highlight position
    * in sync with the element position. Listening to window scroll is not enough because the
    * element can be inside one or more scrollable containers.
+   *
+   * @param {HighlightManager} highlightManager
    */
-  const setupScrollManagement = (highlightManager: HighlightManager) => {
+  const setupScrollManagement = (highlightManager) => {
     const updateOnScroll = () => {
       highlightManager.updateAllHighlights();
     };
 
-    const scrollableElements = new Set<Element | Window>();
+    /** @type {Set<Element | Window>} */
+    const scrollableElements = new Set();
     scrollableElements.add(window);
 
     // Find all scrollable ancestors for all tracked elements and set up scroll listeners
@@ -818,7 +955,7 @@ const previewScript = (config: PreviewScriptConfig) => {
           window.removeEventListener('scroll', updateOnScroll);
           window.removeEventListener('resize', updateOnScroll);
         } else {
-          (element as Element).removeEventListener('scroll', updateOnScroll);
+          /** @type {Element} */ (element).removeEventListener('scroll', updateOnScroll);
         }
       });
     };
@@ -826,15 +963,19 @@ const previewScript = (config: PreviewScriptConfig) => {
     return { cleanup };
   };
 
-  const setupObservers = (
-    highlightManager: HighlightManager,
-    stegaObserver: MutationObserver | undefined
-  ) => {
+  /**
+   * @param {HighlightManager} highlightManager
+   * @param {MutationObserver | undefined} stegaObserver
+   */
+  const setupObservers = (highlightManager, stegaObserver) => {
     const resizeObserver = new ResizeObserver(() => {
       highlightManager.updateAllHighlights();
     });
 
-    const observeElementForResize = (element: Element) => {
+    /**
+     * @param {Element} element
+     */
+    const observeElementForResize = (element) => {
       resizeObserver.observe(element);
     };
 
@@ -846,8 +987,9 @@ const previewScript = (config: PreviewScriptConfig) => {
     const highlightObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === SOURCE_ATTRIBUTE) {
-          const target = mutation.target as HTMLElement;
+          const target = /** @type {HTMLElement} */ (mutation.target);
           if (target.hasAttribute(SOURCE_ATTRIBUTE)) {
+            highlightManager.removeHighlightForElement(target);
             highlightManager.createHighlightForElement(target);
             observeElementForResize(target);
           } else {
@@ -858,7 +1000,7 @@ const previewScript = (config: PreviewScriptConfig) => {
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
-              const element = node as Element;
+              const element = /** @type {Element} */ (node);
               // Check if the added element has source attribute
               if (element.hasAttribute(SOURCE_ATTRIBUTE) && element instanceof HTMLElement) {
                 highlightManager.createHighlightForElement(element);
@@ -877,8 +1019,11 @@ const previewScript = (config: PreviewScriptConfig) => {
 
           mutation.removedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
-              const element = node as Element;
+              const element = /** @type {Element} */ (node);
               highlightManager.removeHighlightForElement(element);
+              element.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`).forEach((childElement) => {
+                highlightManager.removeHighlightForElement(childElement);
+              });
 
               // If a tracked media original (or its ancestor) was removed —
               // typically when the host framework re-renders after save and
@@ -916,8 +1061,16 @@ const previewScript = (config: PreviewScriptConfig) => {
     };
   };
 
-  const setupEventHandlers = (highlightManager: HighlightManager) => {
-    const setMediaElement = (el: HTMLElement, url: string | null, mime?: string) => {
+  /**
+   * @param {HighlightManager} highlightManager
+   */
+  const setupEventHandlers = (highlightManager) => {
+    /**
+     * @param {HTMLElement} el
+     * @param {string | null} url
+     * @param {string} [mime]
+     */
+    const setMediaElement = (el, url, mime) => {
       const original = injectionToOriginal.get(el) ?? el;
       const injection = originalToInjection.get(original) ?? null;
 
@@ -987,11 +1140,15 @@ const previewScript = (config: PreviewScriptConfig) => {
       // Resolve relative form-value URLs against the existing src's origin
       // so the swap targets the Strapi backend, not the iframe origin.
       const resolvedUrl = resolveMediaUrl(original, url);
+      const safeUrl = sanitizeMediaUrl(resolvedUrl);
+      if (!safeUrl) {
+        return;
+      }
 
       // No mime info — fall back to updating whatever's active
       if (!desiredTag) {
-        if (active.getAttribute('src') !== resolvedUrl) {
-          active.setAttribute('src', resolvedUrl);
+        if (active.getAttribute('src') !== safeUrl) {
+          active.setAttribute('src', safeUrl);
         }
         active.style.display = '';
         return;
@@ -1000,8 +1157,8 @@ const previewScript = (config: PreviewScriptConfig) => {
       // Original's tag matches: restore it (removing any previous injection)
       if (original.tagName === desiredTag) {
         removeInjection();
-        if (original.getAttribute('src') !== resolvedUrl) {
-          original.setAttribute('src', resolvedUrl);
+        if (original.getAttribute('src') !== safeUrl) {
+          original.setAttribute('src', safeUrl);
         }
         original.style.display = '';
         return;
@@ -1009,8 +1166,8 @@ const previewScript = (config: PreviewScriptConfig) => {
 
       // Existing injection of the right tag: just update its src
       if (injection && injection.tagName === desiredTag) {
-        if (injection.getAttribute('src') !== resolvedUrl) {
-          injection.setAttribute('src', resolvedUrl);
+        if (injection.getAttribute('src') !== safeUrl) {
+          injection.setAttribute('src', safeUrl);
         }
         return;
       }
@@ -1018,7 +1175,7 @@ const previewScript = (config: PreviewScriptConfig) => {
       // Need a fresh injection of the correct tag
       removeInjection();
 
-      const newInjection = document.createElement(desiredTag) as HTMLElement;
+      const newInjection = /** @type {HTMLElement} */ (document.createElement(desiredTag));
       // Mirror the original's attributes so styling/classes carry over.
       // Skip src/srcset — those carry the *previous* media's URL and would
       // make the new element try to load it (a video element fed an image
@@ -1034,7 +1191,7 @@ const previewScript = (config: PreviewScriptConfig) => {
         if (isAudio && skipForAudio.has(attr.name)) return;
         newInjection.setAttribute(attr.name, attr.value);
       });
-      newInjection.setAttribute('src', resolvedUrl);
+      newInjection.setAttribute('src', safeUrl);
       if (desiredTag === 'VIDEO' || desiredTag === 'AUDIO') {
         newInjection.setAttribute('controls', '');
       }
@@ -1050,16 +1207,20 @@ const previewScript = (config: PreviewScriptConfig) => {
       trackInjection(original, newInjection);
     };
 
-    const handleMessage = (event: MessageEvent) => {
+    /**
+     * @param {MessageEvent} event
+     */
+    const handleMessage = (event) => {
       if (!event.data?.type) return;
+      if (event.source !== window.parent || event.origin !== parentOrigin) return;
 
       // The user typed in an input, reflect the change in the preview
       if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
         const { field, value } = event.data.payload;
         if (!field) return;
 
-        const matchedElements = Array.from(getElementsByPath(field)).filter(
-          (el): el is HTMLElement => el instanceof HTMLElement
+        const matchedElements = /** @type {HTMLElement[]} */ (
+          Array.from(getElementsByPath(field)).filter((el) => el instanceof HTMLElement)
         );
 
         // A cleared media field is represented by a placeholder div sitting
@@ -1069,9 +1230,12 @@ const previewScript = (config: PreviewScriptConfig) => {
         // placeholders (those whose original was unmounted by the host
         // framework after save) are not in the injection maps but still
         // need to be matchable.
-        const isMediaTarget = (el: Element) =>
+        /**
+         * @param {Element} el
+         */
+        const isMediaTarget = (el) =>
           isMediaElement(el) ||
-          injectionToOriginal.has(el as HTMLElement) ||
+          injectionToOriginal.has(/** @type {HTMLElement} */ (el)) ||
           el.hasAttribute(PLACEHOLDER_ATTRIBUTE);
 
         // Multi-media field: value is an array of media items. After the
@@ -1087,8 +1251,10 @@ const previewScript = (config: PreviewScriptConfig) => {
             // Walk up until we reach an ancestor whose parent lays out
             // children as siblings (flex/grid). Record indices so we can
             // re-find the media element inside each cloned wrapper.
-            const indices: number[] = [];
-            let template: HTMLElement = lastEl;
+            /** @type {number[]} */
+            const indices = [];
+            /** @type {HTMLElement} */
+            let template = lastEl;
             let parent = template.parentElement;
             const SIBLING_LAYOUTS = new Set(['flex', 'inline-flex', 'grid', 'inline-grid']);
             const MAX_DEPTH = 5;
@@ -1101,12 +1267,14 @@ const previewScript = (config: PreviewScriptConfig) => {
               parent = parent.parentElement;
             }
 
-            let insertAfter: HTMLElement = template;
+            /** @type {HTMLElement} */
+            let insertAfter = template;
             for (let i = mediaEls.length; i < value.length; i++) {
-              const wrapperClone = template.cloneNode(true) as HTMLElement;
-              let cloneMedia: HTMLElement = wrapperClone;
+              const wrapperClone = /** @type {HTMLElement} */ (template.cloneNode(true));
+              /** @type {HTMLElement} */
+              let cloneMedia = wrapperClone;
               for (let j = indices.length - 1; j >= 0; j--) {
-                cloneMedia = cloneMedia.children[indices[j]] as HTMLElement;
+                cloneMedia = /** @type {HTMLElement} */ (cloneMedia.children[indices[j]]);
               }
               cloneMedia.setAttribute(CLONE_ATTRIBUTE, '');
               cloneMedia.removeAttribute('id');
@@ -1121,8 +1289,8 @@ const previewScript = (config: PreviewScriptConfig) => {
           mediaEls.forEach((el, index) => {
             const item = value[index];
             if (item && typeof item === 'object') {
-              const url = (item as any).url as string | undefined;
-              const mime = (item as any).mime as string | undefined;
+              const url = item.url;
+              const mime = item.mime;
               setMediaElement(el, url || null, mime);
             } else {
               setMediaElement(el, null);
@@ -1132,13 +1300,10 @@ const previewScript = (config: PreviewScriptConfig) => {
           matchedElements.forEach((element) => {
             if (isMediaTarget(element)) {
               const url = typeof value === 'object' && value !== null ? value.url : value;
-              const mime =
-                typeof value === 'object' && value !== null
-                  ? (value.mime as string | undefined)
-                  : undefined;
+              const mime = typeof value === 'object' && value !== null ? value.mime : undefined;
               setMediaElement(element, url || null, mime);
             } else {
-              element.textContent = value || '';
+              element.textContent = value == null ? '' : String(value);
             }
           });
         }
@@ -1166,7 +1331,7 @@ const previewScript = (config: PreviewScriptConfig) => {
               const propertyName = elementPath.slice(field.length + 1);
               const propertyValue = value[propertyName];
               if (element instanceof HTMLElement && propertyValue !== undefined) {
-                element.textContent = propertyValue || '';
+                element.textContent = propertyValue == null ? '' : String(propertyValue);
               }
             }
           });
@@ -1183,7 +1348,7 @@ const previewScript = (config: PreviewScriptConfig) => {
         if (!field) return;
 
         // Clear existing focused highlights
-        highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
+        highlightManager.focusedHighlights.forEach((highlight) => {
           highlight.classList.remove('strapi-highlight-focused');
         });
         highlightManager.focusedHighlights.length = 0;
@@ -1207,7 +1372,7 @@ const previewScript = (config: PreviewScriptConfig) => {
         const { field } = event.data.payload;
         if (field !== highlightManager.getFocusedField()) return;
 
-        highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
+        highlightManager.focusedHighlights.forEach((highlight) => {
           highlight.classList.remove('strapi-highlight-focused');
         });
         highlightManager.focusedHighlights.length = 0;
@@ -1220,21 +1385,28 @@ const previewScript = (config: PreviewScriptConfig) => {
     // Add the message handler to the cleanup list
     const messageEventListener = {
       element: window,
-      type: 'message' as keyof HTMLElementEventMap,
-      handler: handleMessage as EventListener,
+      type: /** @type {keyof HTMLElementEventMap} */ ('message'),
+      handler: /** @type {EventListener} */ (handleMessage),
     };
 
     return [...highlightManager.eventListeners, messageEventListener];
   };
 
+  /**
+   * @param {HTMLElement} overlay
+   * @param {ReturnType<typeof setupObservers>} observers
+   * @param {ReturnType<typeof setupScrollManagement>} scrollManager
+   * @param {EventListenersList} eventHandlers
+   * @param {HighlightManager} highlightManager
+   */
   const createCleanupSystem = (
-    overlay: HTMLElement,
-    observers: ReturnType<typeof setupObservers>,
-    scrollManager: ReturnType<typeof setupScrollManagement>,
-    eventHandlers: EventListenersList,
-    highlightManager: HighlightManager
+    overlay,
+    observers,
+    scrollManager,
+    eventHandlers,
+    highlightManager
   ) => {
-    window.__strapi_previewCleanup = () => {
+    win.__strapi_previewCleanup = () => {
       observers.resizeObserver.disconnect();
       observers.highlightObserver.disconnect();
       observers.stegaObserver?.disconnect();
@@ -1264,15 +1436,15 @@ const previewScript = (config: PreviewScriptConfig) => {
    * Orchestration
    * ---------------------------------------------------------------------------------------------*/
 
-  setupStegaDOMObserver().then((stegaObserver) => {
-    createHighlightStyles();
-    const overlay = createOverlaySystem();
-    const highlightManager = createHighlightManager(overlay);
-    const observers = setupObservers(highlightManager, stegaObserver);
-    const scrollManager = setupScrollManagement(highlightManager);
-    const eventHandlers = setupEventHandlers(highlightManager);
-    createCleanupSystem(overlay, observers, scrollManager, eventHandlers, highlightManager);
-  });
-};
-
-export { previewScript };
+  setupStegaDOMObserver()
+    .catch(() => undefined)
+    .then((stegaObserver) => {
+      createHighlightStyles();
+      const overlay = createOverlaySystem();
+      const highlightManager = createHighlightManager(overlay);
+      const observers = setupObservers(highlightManager, stegaObserver);
+      const scrollManager = setupScrollManagement(highlightManager);
+      const eventHandlers = setupEventHandlers(highlightManager);
+      createCleanupSystem(overlay, observers, scrollManager, eventHandlers, highlightManager);
+    });
+}
