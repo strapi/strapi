@@ -1,0 +1,118 @@
+# SECURITY (read before editing):
+# Triggered by `workflow_run` on the "Tests" workflow — always runs from the
+# BASE branch with the base-repo token. PR head code is never executed.
+# PR-controlled values are only passed via github-script `process.env`.
+
+name: CodeRabbit on green CI
+
+on:
+  workflow_run:
+    workflows: ['Tests']
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  ping-coderabbit:
+    name: Request CodeRabbit review when CI is green
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      checks: read
+      contents: read
+
+    steps:
+      - name: Request CodeRabbit review
+        uses: actions/github-script@v7
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          # Base branches eligible for review (matches .coderabbit.yaml).
+          ALLOWED_BASES: ${{ vars.CODERABBIT_BASE_BRANCHES || 'develop' }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const headSha = process.env.HEAD_SHA;
+
+            // Resolve the PR from the head SHA (works for fork PRs).
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner,
+              repo,
+              commit_sha: headSha,
+            });
+            const pr = prs.find((p) => p.state === 'open');
+            if (!pr) {
+              core.info(`No open PR associated with ${headSha} — skipping (likely a branch push).`);
+              return;
+            }
+
+            // Skip drafts (CodeRabbit also skips drafts, but avoid the noisy comment).
+            if (pr.draft) {
+              core.info(`PR #${pr.number} is a draft — skipping.`);
+              return;
+            }
+
+            // Gate on base branch: exact match for `develop`, prefix match for release branches.
+            const allowed = (process.env.ALLOWED_BASES || 'develop')
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean);
+            const baseRef = pr.base.ref;
+            const baseOk =
+              allowed.includes(baseRef) || baseRef.startsWith('releases/');
+            if (!baseOk) {
+              core.info(`PR #${pr.number} base '${baseRef}' is not eligible — skipping.`);
+              return;
+            }
+
+            // Confirm ALL check runs on the head SHA are green. The "Tests"
+            // workflow passing doesn't guarantee other required checks passed.
+            const { data: checks } = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: headSha,
+              per_page: 100,
+            });
+            const unfinished = checks.check_runs.filter(
+              (c) => c.status !== 'completed'
+            );
+            const failed = checks.check_runs.filter(
+              (c) =>
+                c.status === 'completed' &&
+                !['success', 'neutral', 'skipped'].includes(c.conclusion)
+            );
+            if (unfinished.length > 0) {
+              core.info(
+                `Not all checks finished (${unfinished.length} pending) — skipping; ` +
+                  `a later run will re-trigger this.`
+              );
+              return;
+            }
+            if (failed.length > 0) {
+              core.info(
+                `Some checks are not green (${failed.map((c) => c.name).join(', ')}) — skipping.`
+              );
+              return;
+            }
+
+            // Idempotency: don't re-ping if we already requested a review for the
+            // current head SHA.
+            const marker = `<!-- coderabbit-requested:${headSha} -->`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
+            if (comments.some((c) => (c.body || '').includes(marker))) {
+              core.info(`Already requested CodeRabbit review for ${headSha} — skipping.`);
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pr.number,
+              body: `${marker}\n@coderabbitai review`,
+            });
+            core.info(`Requested CodeRabbit review on PR #${pr.number}.`);
