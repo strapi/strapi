@@ -83,7 +83,7 @@
     "cropperjs": "1.6.1",
     "date-fns": "2.30.0",
     "file-type": "21.3.4",
-    "formik": "2.4.5",
+    "formik": "2.4.9",
     "fs-extra": "11.3.4",
     "immer": "9.0.21",
     "koa-range": "0.3.0",

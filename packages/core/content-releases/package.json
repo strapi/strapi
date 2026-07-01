@@ -71,7 +71,7 @@
     "@strapi/utils": "5.49.0",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
-    "formik": "2.4.5",
+    "formik": "2.4.9",
     "lodash": "4.18.1",
     "qs": "6.15.3",
     "react-intl": "6.6.2",
