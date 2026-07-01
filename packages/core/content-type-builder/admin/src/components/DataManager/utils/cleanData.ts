@@ -157,9 +157,14 @@ const formatTypeForRequest = (type: ContentType | Component) => {
     action,
     uid: type.uid,
     category: 'category' in type ? type.category : undefined,
-    ...omit(type, ['info', 'options', 'visible', 'uid', 'restrictRelationsTo']),
+    ...omit(type, ['info', 'options', 'visible', 'uid', 'restrictRelationsTo', 'renames']),
     ...type.options,
     ...type.info,
+    // Forward the ordered rename path (existing fields only) so the server can
+    // generate a data-preserving migration that replays each hop verbatim.
+    ...(action === 'update' && Array.isArray(type.renames) && type.renames.length > 0
+      ? { renames: type.renames }
+      : {}),
     attributes: type.attributes.map((attr) => {
       let action;
 

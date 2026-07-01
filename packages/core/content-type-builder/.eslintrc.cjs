@@ -7,6 +7,7 @@ const config = {
     'dist/',
     '.eslintrc.cjs',
     'rollup.config.mjs',
+    'vitest.config.ts',
     'coverage/',
     'lint-staged.config.mjs',
   ],

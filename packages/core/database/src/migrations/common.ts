@@ -2,6 +2,7 @@ import type { Resolver } from 'umzug';
 import type { Knex } from 'knex';
 
 import type { Database } from '..';
+import type { MigrationFileBuilder } from './file-builder';
 
 export interface UserMigrationProvider {
   shouldRun(): Promise<boolean>;
@@ -17,6 +18,7 @@ export interface InternalMigrationProvider {
 }
 export interface MigrationProvider {
   providers: { internal: InternalMigrationProvider };
+  createFileBuilder(): MigrationFileBuilder;
   shouldRun(): Promise<boolean>;
   up(): Promise<void>;
   down(): Promise<void>;
