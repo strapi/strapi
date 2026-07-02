@@ -9,11 +9,36 @@ describe('createLinksStream', () => {
     const connection = {
       client: { connectionSettings: {} },
       queryBuilder() {
+        let joinMode: 'inner' | 'left' | null = null;
+
         const qb: Record<string, unknown> = {
           from: jest.fn().mockReturnThis(),
           select: jest.fn().mockReturnThis(),
+          innerJoin: jest.fn(function innerJoin() {
+            joinMode = 'inner';
+            return this;
+          }),
+          leftJoin: jest.fn(function leftJoin() {
+            joinMode = 'left';
+            return this;
+          }),
+          whereNotNull: jest.fn().mockReturnThis(),
+          whereNull: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
           transacting: jest.fn().mockReturnThis(),
-          then: (resolve: (value: unknown) => void) => resolve(joinTableRows),
+          then(resolve: (value: unknown) => void) {
+            if (joinMode === 'inner') {
+              resolve([]);
+              return;
+            }
+
+            if (joinMode === 'left') {
+              resolve(joinTableRows);
+              return;
+            }
+
+            resolve(joinTableRows);
+          },
         };
 
         return qb;
@@ -28,33 +53,31 @@ describe('createLinksStream', () => {
       db: {
         connection,
         metadata: {
-          get: jest.fn(() => ({
-            tableName: 'chapters',
-            attributes: {
-              nodes: {
-                type: 'relation',
-                relation: 'oneToMany',
-                target: 'api::node.node',
-                owner: true,
-                joinTable: {
-                  name: 'chapters_node_lnk',
-                  joinColumn: { name: 'chapter_id' },
-                  inverseJoinColumn: { name: 'node_id' },
-                  orderColumnName: 'chapter_ord',
-                },
-              },
-            },
-          })),
-        },
-        query: jest.fn((uid: string) => ({
-          findOne: jest.fn(async ({ where }: { where: { id: number } }) => {
-            if (uid === 'api::chapter.chapter' && where.id === 1) {
-              return { id: 1 };
+          get: jest.fn((uid: string) => {
+            if (uid === 'api::node.node') {
+              return { tableName: 'nodes', attributes: {} };
             }
 
-            return null;
+            return {
+              tableName: 'chapters',
+              attributes: {
+                nodes: {
+                  type: 'relation',
+                  relation: 'oneToMany',
+                  target: 'api::node.node',
+                  owner: true,
+                  joinTable: {
+                    name: 'chapters_node_lnk',
+                    joinColumn: { name: 'chapter_id' },
+                    inverseJoinColumn: { name: 'node_id' },
+                    orderColumnName: 'chapter_ord',
+                  },
+                },
+              },
+            };
           }),
-        })),
+        },
+        query: jest.fn(),
       },
     } as unknown as import('@strapi/types').Core.Strapi;
 

@@ -1,6 +1,6 @@
 import { createLinkQuery, filterValidRelationalAttributes } from '../link';
 
-describe('link queries realtion fitlers', () => {
+describe('link queries relation filters', () => {
   test('filter out non relation attributes', () => {
     const attributes = {
       id: { type: 'increments', columnName: 'id' },
@@ -57,6 +57,50 @@ describe('link queries realtion fitlers', () => {
 });
 
 describe('createLinkQuery', () => {
+  const createQueryBuilderMock = ({
+    rows,
+    filterInnerJoin,
+    filterLeftJoin,
+  }: {
+    rows: Record<string, unknown>[];
+    filterInnerJoin?: (row: Record<string, unknown>) => boolean;
+    filterLeftJoin?: (row: Record<string, unknown>) => boolean;
+  }) => {
+    let joinMode: 'inner' | 'left' | null = null;
+
+    const qb: Record<string, unknown> = {
+      from: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      innerJoin: jest.fn(function innerJoin() {
+        joinMode = 'inner';
+        return this;
+      }),
+      leftJoin: jest.fn(function leftJoin() {
+        joinMode = 'left';
+        return this;
+      }),
+      whereNotNull: jest.fn().mockReturnThis(),
+      whereNull: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      transacting: jest.fn().mockReturnThis(),
+      then(resolve: (value: unknown) => void) {
+        if (joinMode === 'inner' && filterInnerJoin) {
+          resolve(rows.filter(filterInnerJoin));
+          return;
+        }
+
+        if (joinMode === 'left' && filterLeftJoin) {
+          resolve(rows.filter(filterLeftJoin));
+          return;
+        }
+
+        resolve(rows);
+      },
+    };
+
+    return qb;
+  };
+
   const buildJoinTableStrapi = ({
     joinTableRows,
     existingLeftIds = new Set<number>(),
@@ -68,53 +112,47 @@ describe('createLinkQuery', () => {
   }) => {
     const connection = {
       client: { connectionSettings: {} },
-      queryBuilder() {
-        const qb: Record<string, unknown> = {
-          from: jest.fn().mockReturnThis(),
-          select: jest.fn().mockReturnThis(),
-          transacting: jest.fn().mockReturnThis(),
-          then: (resolve: (value: unknown) => void) => resolve(joinTableRows),
-        };
-
-        return qb;
-      },
+      queryBuilder: () =>
+        createQueryBuilderMock({
+          rows: joinTableRows,
+          filterInnerJoin: (row) =>
+            existingLeftIds.has(row.chapter_id as number) &&
+            existingRightIds.has(row.node_id as number),
+          filterLeftJoin: (row) =>
+            !existingLeftIds.has(row.chapter_id as number) ||
+            !existingRightIds.has(row.node_id as number),
+        }),
     };
 
     return {
       db: {
         connection,
         metadata: {
-          get: jest.fn(() => ({
-            tableName: 'chapters',
-            attributes: {
-              nodes: {
-                type: 'relation',
-                relation: 'oneToMany',
-                target: 'api::node.node',
-                owner: true,
-                joinTable: {
-                  name: 'chapters_node_lnk',
-                  joinColumn: { name: 'chapter_id' },
-                  inverseJoinColumn: { name: 'node_id' },
-                  orderColumnName: 'chapter_ord',
+          get: jest.fn((uid: string) => {
+            if (uid === 'api::node.node') {
+              return { tableName: 'nodes', attributes: {} };
+            }
+
+            return {
+              tableName: 'chapters',
+              attributes: {
+                nodes: {
+                  type: 'relation',
+                  relation: 'oneToMany',
+                  target: 'api::node.node',
+                  owner: true,
+                  joinTable: {
+                    name: 'chapters_node_lnk',
+                    joinColumn: { name: 'chapter_id' },
+                    inverseJoinColumn: { name: 'node_id' },
+                    orderColumnName: 'chapter_ord',
+                  },
                 },
               },
-            },
-          })),
-        },
-        query: jest.fn((uid: string) => ({
-          findOne: jest.fn(async ({ where }: { where: { id: number } }) => {
-            if (uid === 'api::chapter.chapter' && existingLeftIds.has(where.id)) {
-              return { id: where.id };
-            }
-
-            if (uid === 'api::node.node' && existingRightIds.has(where.id)) {
-              return { id: where.id };
-            }
-
-            return null;
+            };
           }),
-        })),
+        },
+        query: jest.fn(),
       },
     } as unknown as import('@strapi/types').Core.Strapi;
   };
@@ -175,44 +213,37 @@ describe('createLinkQuery', () => {
   test('does not export joinColumn links when the relation target is missing', async () => {
     const connection = {
       client: { connectionSettings: {} },
-      queryBuilder() {
-        const qb: Record<string, unknown> = {
-          select: jest.fn().mockReturnThis(),
-          from: jest.fn().mockReturnThis(),
-          transacting: jest.fn().mockReturnThis(),
-          then: (resolve: (value: unknown) => void) => resolve([{ id: 1, author_id: 42 }]),
-        };
-
-        return qb;
-      },
+      queryBuilder: () =>
+        createQueryBuilderMock({
+          rows: [{ id: 1, author_id: 42 }],
+          filterInnerJoin: () => false,
+        }),
     };
 
     const strapi = {
       db: {
         connection,
         metadata: {
-          get: jest.fn(() => ({
-            tableName: 'articles',
-            attributes: {
-              author: {
-                type: 'relation',
-                relation: 'manyToOne',
-                target: 'api::author.author',
-                owner: true,
-                joinColumn: { name: 'author_id' },
-              },
-            },
-          })),
-        },
-        query: jest.fn((uid: string) => ({
-          findOne: jest.fn(async ({ where }: { where: { id: number } }) => {
-            if (uid === 'api::article.article' && where.id === 1) {
-              return { id: 1 };
+          get: jest.fn((uid: string) => {
+            if (uid === 'api::author.author') {
+              return { tableName: 'authors', attributes: {} };
             }
 
-            return null;
+            return {
+              tableName: 'articles',
+              attributes: {
+                author: {
+                  type: 'relation',
+                  relation: 'manyToOne',
+                  target: 'api::author.author',
+                  owner: true,
+                  joinColumn: { name: 'author_id' },
+                },
+              },
+            };
           }),
-        })),
+        },
+        query: jest.fn(),
       },
     } as unknown as import('@strapi/types').Core.Strapi;
 

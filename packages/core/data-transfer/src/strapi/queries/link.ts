@@ -6,6 +6,16 @@ import { ILink } from '../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
+const getMetadataTableName = (strapi: Core.Strapi, uid: string) => {
+  const metadata = strapi.db.metadata.get(uid);
+
+  if (!metadata) {
+    throw new Error(`No metadata found for ${uid}`);
+  }
+
+  return metadata.tableName;
+};
+
 const entityExists = async (strapi: Core.Strapi, uid: string, id: number | null | undefined) => {
   if (id == null) {
     return false;
@@ -39,6 +49,11 @@ const yieldLinkIfEntitiesExist = async (
   onOrphanedLink?.(link);
   return null;
 };
+
+const aliasColumn = (tableAlias: string, column: string) => `${tableAlias}.${column}`;
+
+const selectAliasedColumns = (tableAlias: string, columns: string[]) =>
+  columns.map((column) => ({ [column]: aliasColumn(tableAlias, column) }));
 
 export const createLinkQuery = (
   strapi: Core.Strapi,
@@ -78,11 +93,52 @@ export const createLinkQuery = (
       // TODO: handle manyToOne joinColumn
       if (attribute.joinColumn) {
         const joinColumnName: string = attribute.joinColumn.name;
+        const ownerAlias = 'owner';
+        const targetAlias = 'target';
+        const ownerTable = addSchema(metadata.tableName);
+        const targetTable = addSchema(getMetadataTableName(strapi, target));
+
+        if (onOrphanedLink) {
+          const orphanQb = connection
+            .queryBuilder()
+            .select(`${ownerAlias}.id`, `${ownerAlias}.${joinColumnName} as ${joinColumnName}`)
+            .from({ [ownerAlias]: ownerTable })
+            .leftJoin(
+              { [targetAlias]: targetTable },
+              aliasColumn(ownerAlias, joinColumnName),
+              `${targetAlias}.id`
+            )
+            .whereNotNull(aliasColumn(ownerAlias, joinColumnName))
+            .whereNull(`${targetAlias}.id`);
+
+          if (trx) {
+            orphanQb.transacting(trx);
+          }
+
+          const orphanedEntries = await orphanQb;
+
+          for (const entry of orphanedEntries) {
+            const ref = entry[joinColumnName];
+
+            onOrphanedLink({
+              kind,
+              relation,
+              left: { type: uid, ref: entry.id, field: fieldName },
+              right: { type: target, ref },
+            });
+          }
+        }
 
         const qb = connection
           .queryBuilder()
-          .select('id', joinColumnName)
-          .from(addSchema(metadata.tableName));
+          .select(`${ownerAlias}.id`, `${ownerAlias}.${joinColumnName} as ${joinColumnName}`)
+          .from({ [ownerAlias]: ownerTable })
+          .innerJoin(
+            { [targetAlias]: targetTable },
+            aliasColumn(ownerAlias, joinColumnName),
+            `${targetAlias}.id`
+          )
+          .whereNotNull(aliasColumn(ownerAlias, joinColumnName));
 
         if (trx) {
           qb.transacting(trx);
@@ -94,20 +150,12 @@ export const createLinkQuery = (
         for (const entry of entries) {
           const ref = entry[joinColumnName];
 
-          if (ref !== null) {
-            const link = {
-              kind,
-              relation,
-              left: { type: uid, ref: entry.id, field: fieldName },
-              right: { type: target, ref },
-            };
-
-            const validLink = await yieldLinkIfEntitiesExist(strapi, link, onOrphanedLink);
-
-            if (validLink) {
-              yield validLink;
-            }
-          }
+          yield {
+            kind,
+            relation,
+            left: { type: uid, ref: entry.id, field: fieldName },
+            right: { type: target, ref },
+          };
         }
       }
 
@@ -151,6 +199,106 @@ export const createLinkQuery = (
           if (inverseOrderColumnName) {
             columns.right.order = inverseOrderColumnName as string;
           }
+
+          const joinAlias = 'join';
+          const leftAlias = 'left';
+          const rightAlias = 'right';
+          const joinTable = addSchema(name);
+          const leftTable = addSchema(metadata.tableName);
+          const rightTable = addSchema(getMetadataTableName(strapi, attribute.target));
+
+          const validColumns = [
+            columns.left.ref,
+            columns.left.order,
+            columns.right.ref,
+            columns.right.order,
+          ].filter((column: string | null | undefined) => !isNil(column)) as string[];
+
+          const buildJoinTableLink = (entry: Record<string, unknown>): ILink => {
+            const linkLeft: Partial<ILink['left']> = { type: uid, field: fieldName };
+            const linkRight: Partial<ILink['right']> = {
+              type: attribute.target,
+              field: attribute.inversedBy,
+            };
+
+            if (columns.left.ref) {
+              linkLeft.ref = entry[columns.left.ref] as number;
+            }
+
+            if (columns.right.ref) {
+              linkRight.ref = entry[columns.right.ref] as number;
+            }
+
+            if (columns.left.order) {
+              linkLeft.pos = entry[columns.left.order] as number;
+            }
+
+            if (columns.right.order) {
+              linkRight.pos = entry[columns.right.order] as number;
+            }
+
+            return {
+              kind,
+              relation,
+              left: clone(linkLeft as ILink['left']),
+              right: clone(linkRight as ILink['right']),
+            };
+          };
+
+          if (onOrphanedLink) {
+            const orphanQb = connection
+              .queryBuilder()
+              .select(selectAliasedColumns(joinAlias, validColumns))
+              .from({ [joinAlias]: joinTable })
+              .leftJoin(
+                { [leftAlias]: leftTable },
+                aliasColumn(joinAlias, joinColumn.name),
+                `${leftAlias}.id`
+              )
+              .leftJoin(
+                { [rightAlias]: rightTable },
+                aliasColumn(joinAlias, inverseJoinColumn.name),
+                `${rightAlias}.id`
+              )
+              .where((builder) => {
+                builder.whereNull(`${leftAlias}.id`).orWhereNull(`${rightAlias}.id`);
+              });
+
+            if (trx) {
+              orphanQb.transacting(trx);
+            }
+
+            const orphanedEntries = await orphanQb;
+
+            for (const entry of orphanedEntries) {
+              onOrphanedLink(buildJoinTableLink(entry));
+            }
+          }
+
+          const qb = connection
+            .queryBuilder()
+            .select(selectAliasedColumns(joinAlias, validColumns))
+            .from({ [joinAlias]: joinTable })
+            .innerJoin(
+              { [leftAlias]: leftTable },
+              aliasColumn(joinAlias, joinColumn.name),
+              `${leftAlias}.id`
+            )
+            .innerJoin(
+              { [rightAlias]: rightTable },
+              aliasColumn(joinAlias, inverseJoinColumn.name),
+              `${rightAlias}.id`
+            );
+
+          if (trx) {
+            qb.transacting(trx);
+          }
+
+          const entries = await qb;
+
+          for (const entry of entries) {
+            yield buildJoinTableLink(entry);
+          }
         }
 
         if (kind === 'relation.morph') {
@@ -160,64 +308,62 @@ export const createLinkQuery = (
           columns.right.type = morphColumn.typeColumn.name;
           columns.right.field = 'field';
           columns.right.order = 'order';
-        }
 
-        const validColumns = [
-          // Left
-          columns.left.ref,
-          columns.left.order,
-          // Right
-          columns.right.ref,
-          columns.right.type,
-          columns.right.field,
-          columns.right.order,
-        ].filter((column: string | null | undefined) => !isNil(column));
+          const validColumns = [
+            columns.left.ref,
+            columns.left.order,
+            columns.right.ref,
+            columns.right.type,
+            columns.right.field,
+            columns.right.order,
+          ].filter((column: string | null | undefined) => !isNil(column));
 
-        qb.select(validColumns);
+          qb.select(validColumns);
 
-        if (trx) {
-          qb.transacting(trx);
-        }
-
-        // TODO: stream the query to improve performances
-        const entries = await qb;
-
-        for (const entry of entries) {
-          if (columns.left.ref) {
-            left.ref = entry[columns.left.ref];
+          if (trx) {
+            qb.transacting(trx);
           }
 
-          if (columns.right.ref) {
-            right.ref = entry[columns.right.ref];
-          }
+          // TODO: stream the query to improve performances
+          const entries = await qb;
 
-          if (columns.left.order) {
-            left.pos = entry[columns.left.order as string];
-          }
+          for (const entry of entries) {
+            if (columns.left.ref) {
+              left.ref = entry[columns.left.ref];
+            }
 
-          if (columns.right.order) {
-            right.pos = entry[columns.right.order as string];
-          }
+            if (columns.right.ref) {
+              right.ref = entry[columns.right.ref];
+            }
 
-          if (columns.right.type) {
-            right.type = entry[columns.right.type as string];
-          }
+            if (columns.left.order) {
+              left.pos = entry[columns.left.order as string];
+            }
 
-          if (columns.right.field) {
-            right.field = entry[columns.right.field as string];
-          }
+            if (columns.right.order) {
+              right.pos = entry[columns.right.order as string];
+            }
 
-          const link: ILink = {
-            kind,
-            relation,
-            left: clone(left as ILink['left']),
-            right: clone(right as ILink['right']),
-          };
+            if (columns.right.type) {
+              right.type = entry[columns.right.type as string];
+            }
 
-          const validLink = await yieldLinkIfEntitiesExist(strapi, link, onOrphanedLink);
+            if (columns.right.field) {
+              right.field = entry[columns.right.field as string];
+            }
 
-          if (validLink) {
-            yield validLink;
+            const link: ILink = {
+              kind,
+              relation,
+              left: clone(left as ILink['left']),
+              right: clone(right as ILink['right']),
+            };
+
+            const validLink = await yieldLinkIfEntitiesExist(strapi, link, onOrphanedLink);
+
+            if (validLink) {
+              yield validLink;
+            }
           }
         }
       }
