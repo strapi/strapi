@@ -26,15 +26,19 @@
     ]
   },
   "resolutions": {
-    "@babel/helpers": "7.27.0",
-    "@babel/runtime": "7.26.10",
-    "@babel/runtime-corejs3": "7.26.10"
+    "@babel/helpers": "7.29.2",
+    "@babel/runtime": "7.29.2",
+    "@babel/runtime-corejs3": "7.29.2",
+    "uuid@^8.3.2": "11.1.1",
+    "qs@~6.14.0": "6.15.2",
+    "serialize-javascript@^6.0.0": "7.0.5",
+    "serialize-javascript@^6.0.1": "7.0.5"
   },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "2.0.1",
-    "@docusaurus/core": "3.10.0",
-    "@docusaurus/preset-classic": "3.10.0",
-    "@docusaurus/theme-mermaid": "3.10.0",
+    "@docusaurus/core": "3.10.1",
+    "@docusaurus/preset-classic": "3.10.1",
+    "@docusaurus/theme-mermaid": "3.10.1",
     "@mdx-js/react": "3.1.1",
     "clsx": "2.1.1",
     "prism-react-renderer": "2.4.1",
@@ -42,13 +46,16 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.10.0",
+    "@docusaurus/babel": "3.10.1",
+    "@docusaurus/module-type-aliases": "3.10.1",
+    "@docusaurus/tsconfig": "3.10.1",
+    "@types/mdast": "4.0.4",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
-    "docusaurus-plugin-typedoc": "0.22.0",
-    "typedoc": "0.25.10",
-    "typedoc-plugin-markdown": "3.17.1",
-    "typescript": "5.4.5",
+    "docusaurus-plugin-typedoc": "1.4.2",
+    "typedoc": "0.28.19",
+    "typedoc-plugin-markdown": "4.11.0",
+    "typescript": "5.9.3",
     "unist-util-visit": "5.0.0"
   }
 }

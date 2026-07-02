@@ -1,3 +1,5 @@
+// @ts-check
+
 'use strict';
 
 const fse = require('fs-extra');
@@ -13,5 +15,5 @@ const getConfigPath = require('./get-config-path');
 module.exports = (dir, filename = undefined) => {
   const filePath = getConfigPath(dir, { filename });
 
-  return fse.pathExistsSync(filePath);
+  return filePath ? fse.pathExistsSync(filePath) : false;
 };

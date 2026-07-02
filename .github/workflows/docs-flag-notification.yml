@@ -1,0 +1,33 @@
+name: 'Notify docs team on "flag: requires manual documentation" label'
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  notify-docs:
+    if: "github.event.label.name == 'flag: requires manual documentation'"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_DOCUMENTATION_OPS }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "No Slack webhook configured, skipping"
+            exit 0
+          fi
+
+          TEXT=":label: *Docs flag added* on strapi/strapi\n<${PR_URL}|#${PR_NUMBER} — ${PR_TITLE}>\nFlagged by @${ACTOR}"
+
+          FORMATTED=$(printf "$TEXT")
+          curl -s -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-type: application/json' \
+            -d "$(jq -n --arg text "$FORMATTED" '{text: $text}')" || echo "Slack notification failed (non-blocking)"

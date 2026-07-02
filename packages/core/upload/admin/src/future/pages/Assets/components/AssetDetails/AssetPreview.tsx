@@ -4,7 +4,7 @@ import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../../enums';
+import { ASSET_TYPES } from '../../../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -45,6 +45,17 @@ const StyledImage = styled.img`
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+`;
+
+/**
+ * Top-right overlay slot for image actions (crop / rotate). Sits above the
+ * image (z-index 3 > AssetContainer 2) so the buttons stay clickable.
+ */
+const ActionsOverlay = styled(Flex)`
+  position: absolute;
+  top: ${({ theme }) => theme.spaces[3]};
+  right: ${({ theme }) => theme.spaces[3]};
+  z-index: 3;
 `;
 
 const StyledVideo = styled.video`
@@ -99,25 +110,36 @@ const AssetLoader = () => {
 
 interface AssetPreviewProps {
   asset: File | AssetWithPopulatedCreatedBy;
+  actions?: React.ReactNode;
+  isLoading?: boolean;
 }
 
-export const AssetPreview = ({ asset }: AssetPreviewProps) => {
+export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
-  const { alternativeText, ext, mime, url } = asset;
-  const mediaUrl = prefixFileUrlWithBackendUrl(url);
+  const { alternativeText, ext, mime, url, updatedAt } = asset;
+  // Append the asset's `updatedAt` as a cache-buster so a freshly replaced
+  // file (often served at the same URL) shows the new content instead of the
+  // browser-cached old version.
+  const cacheKey = updatedAt ? new Date(updatedAt).getTime() : undefined;
+  const appendCacheBuster = (raw: string | undefined) => {
+    if (!raw || cacheKey === undefined) return raw;
+    return raw.includes('?') ? `${raw}&v=${cacheKey}` : `${raw}?v=${cacheKey}`;
+  };
+  const mediaUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
   const [isMediaLoaded, setIsMediaLoaded] = React.useState(false);
   React.useEffect(() => {
     setIsMediaLoaded(false);
   }, [mediaUrl]);
 
-  if (mime?.includes(AssetType.Image)) {
-    const imageUrl = prefixFileUrlWithBackendUrl(url);
+  if (mime?.includes(ASSET_TYPES.Image)) {
+    const imageUrl = appendCacheBuster(prefixFileUrlWithBackendUrl(url));
 
     if (imageUrl) {
       return (
         <PreviewContainer>
-          {!isMediaLoaded && <AssetLoader />}
+          {(!isMediaLoaded || isLoading) && <AssetLoader />}
+          {actions ? <ActionsOverlay>{actions}</ActionsOverlay> : null}
           <AssetContainer>
             <StyledImage
               src={imageUrl}
@@ -131,7 +153,7 @@ export const AssetPreview = ({ asset }: AssetPreviewProps) => {
     }
   }
 
-  if (mime?.includes(AssetType.Video) && mediaUrl) {
+  if (mime?.includes(ASSET_TYPES.Video) && mediaUrl) {
     return (
       <PreviewContainer>
         {!isMediaLoaded && <AssetLoader />}
@@ -153,7 +175,7 @@ export const AssetPreview = ({ asset }: AssetPreviewProps) => {
     );
   }
 
-  if (mime?.includes(AssetType.Audio) && mediaUrl) {
+  if (mime?.includes(ASSET_TYPES.Audio) && mediaUrl) {
     return (
       <PreviewContainer>
         {!isMediaLoaded && <AssetLoader />}

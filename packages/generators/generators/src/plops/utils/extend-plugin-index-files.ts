@@ -277,7 +277,10 @@ const handleEmptyFile = (root: jscodeshift.Collection<any>, firstStatement: any)
 };
 
 // Helper to find the exported object regardless of export pattern
-const findExportedObject = (root: jscodeshift.Collection<any>, exportedValue: any): any => {
+const findExportedObject = (
+  root: jscodeshift.Collection<any>,
+  exportedValue: any
+): jscodeshift.ObjectExpression | null => {
   // Case 1: Direct object export
   if (j.ObjectExpression.check(exportedValue)) {
     return exportedValue;

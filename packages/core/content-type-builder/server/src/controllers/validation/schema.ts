@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { strings, validateZod, contentTypes } from '@strapi/utils';
+import { strings, validateZodSchema, contentTypes } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
 import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
 
@@ -735,6 +735,7 @@ const baseContentTypeSchema = z.object({
 
 const baseCreateContentTypeSchema = baseContentTypeSchema.extend({
   action: z.literal('create'),
+  plugin: z.string().min(1).optional(),
   collectionName: z.string().regex(COLLECTION_NAME_REGEX).optional(),
   singularName: z
     .string()
@@ -866,14 +867,19 @@ export type Schema = {
   >;
 };
 
-export const validateUpdateSchema = validateZod(
-  z.object(
-    {
-      data: schemaSchema,
-    },
-    {
-      invalid_type_error: 'Invalid schema, expected an object with a data property',
-      required_error: 'Schema is required',
-    }
-  )
+const updateSchemaInput = z.object(
+  {
+    data: schemaSchema,
+  },
+  {
+    invalid_type_error: 'Invalid schema, expected an object with a data property',
+    required_error: 'Schema is required',
+  }
+);
+
+// TODO: Remove cast when content-type-builder migrates to Zod 4
+export const validateUpdateSchema = validateZodSchema(
+  updateSchemaInput as unknown as import('@strapi/utils').z.ZodType<
+    z.infer<typeof updateSchemaInput>
+  >
 );

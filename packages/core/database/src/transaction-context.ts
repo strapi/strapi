@@ -1,6 +1,18 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { Knex } from 'knex';
 
+/**
+ * After the user calls the Knex transactor’s `commit` or `rollback` (e.g. via
+ * the callback object returned from `Database#transaction`, or after the
+ * container’s promise has settled in Knex), a second finalisation is invalid
+ * and can throw (e.g. "Transaction query already complete"). Knex exposes
+ * `isCompleted()` for this; optional for mocks that omit it.
+ */
+const isTransactorComplete = (trx: Knex.Transaction) => {
+  const t = trx as Knex.Transaction & { isCompleted?: () => boolean };
+  return typeof t.isCompleted === 'function' && t.isCompleted();
+};
+
 export type Callback = (...args: any[]) => Promise<any> | any;
 
 export interface TransactionObject {
@@ -37,6 +49,12 @@ const transactionCtx = {
 
   async commit(trx: Knex.Transaction) {
     const store = storage.getStore();
+    if (isTransactorComplete(trx)) {
+      if (store?.trx) {
+        store.trx = null;
+      }
+      return;
+    }
 
     // Clear transaction from store
     if (store?.trx) {
@@ -57,6 +75,12 @@ const transactionCtx = {
 
   async rollback(trx: Knex.Transaction) {
     const store = storage.getStore();
+    if (isTransactorComplete(trx)) {
+      if (store?.trx) {
+        store.trx = null;
+      }
+      return;
+    }
 
     // Clear transaction from store
     if (store?.trx) {

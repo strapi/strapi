@@ -62,9 +62,6 @@ describe('Upload plugin bootstrap function', () => {
             weeklyMetrics: {
               registerCron() {},
             },
-            aiMetadataJobs: {
-              registerCron() {},
-            },
             extensions: {
               signFileUrlsOnDocumentService: jest.fn(),
             },
