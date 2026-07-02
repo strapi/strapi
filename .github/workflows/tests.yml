@@ -39,6 +39,9 @@ jobs:
       e2e_scope: ${{ steps.classify.outputs.e2e_scope }}
       e2e_test_files: ${{ steps.classify.outputs.e2e_test_files }}
       e2e_domains: ${{ steps.classify.outputs.e2e_domains }}
+      cli_scope: ${{ steps.classify.outputs.cli_scope }}
+      cli_test_files: ${{ steps.classify.outputs.cli_test_files }}
+      cli_domains: ${{ steps.classify.outputs.cli_domains }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -53,6 +56,7 @@ jobs:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_EVENT_PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           GITHUB_EVENT_PULL_REQUEST_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          FORCE_FULL_CI: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'ci:full') }}
         run: bash .github/scripts/classify-ci-test-scope.sh
 
   # Always run build in case an unrecognized file change could affect it
@@ -273,7 +277,12 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: |
+          if [[ "${{ needs.conditions.outputs.e2e_scope }}" == "selective" ]]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install --with-deps
+          fi
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
@@ -329,7 +338,12 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: |
+          if [[ "${{ needs.conditions.outputs.e2e_scope }}" == "selective" ]]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install --with-deps
+          fi
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
@@ -360,7 +374,9 @@ jobs:
         continue-on-error: true
 
   cli:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true')
+      && (needs.conditions.outputs.cli_scope == 'full' || matrix.node == 24)
     timeout-minutes: 60
     needs: [conditions, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
@@ -383,7 +399,11 @@ jobs:
         uses: ./.github/actions/run-build
 
       - name: Run CLI tests
-        run: yarn test:cli
+        uses: ./.github/actions/run-cli-tests
+        with:
+          scope: ${{ needs.conditions.outputs.cli_scope }}
+          testFiles: ${{ needs.conditions.outputs.cli_test_files }}
+          cliDomains: ${{ needs.conditions.outputs.cli_domains }}
 
   api_ce_pg:
     if: >-

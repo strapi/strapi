@@ -1,0 +1,21 @@
+name: 'Run CLI tests'
+description: 'Run CLI tests'
+inputs:
+  scope:
+    description: 'Test scope: full (default) or selective (changed files only)'
+    default: 'full'
+  testFiles:
+    description: 'Space-separated CLI test file paths (selective scope only)'
+    default: ''
+  cliDomains:
+    description: 'Space-separated CLI domain names (selective scope only)'
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - run: $GITHUB_ACTION_PATH/script.sh
+      env:
+        SCOPE: ${{ inputs.scope }}
+        TEST_FILES: ${{ inputs.testFiles }}
+        CLI_DOMAINS: ${{ inputs.cliDomains }}
+      shell: bash

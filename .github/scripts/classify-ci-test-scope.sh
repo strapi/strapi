@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Classify PR diffs for selective API / E2E CI on test-only pull requests.
-# Writes api_scope, e2e_scope, and related outputs to GITHUB_OUTPUT.
+# Classify PR diffs for selective API / E2E / CLI CI on test-only pull requests.
+# Writes *_scope and test file outputs to GITHUB_OUTPUT.
 set -euo pipefail
 
 write_default_full_scope() {
@@ -11,11 +11,33 @@ write_default_full_scope() {
     echo 'e2e_scope=full'
     echo 'e2e_test_files='
     echo 'e2e_domains='
+    echo 'cli_scope=full'
+    echo 'cli_test_files='
+    echo 'cli_domains='
+  } >>"$GITHUB_OUTPUT"
+}
+
+force_full_scope() {
+  {
+    echo 'test_only=true'
+    echo 'api_scope=full'
+    echo 'api_test_files='
+    echo 'e2e_scope=full'
+    echo 'e2e_test_files='
+    echo 'e2e_domains='
+    echo 'cli_scope=full'
+    echo 'cli_test_files='
+    echo 'cli_domains='
   } >>"$GITHUB_OUTPUT"
 }
 
 if [[ "${GITHUB_EVENT_NAME:-}" != 'pull_request' ]]; then
   write_default_full_scope
+  exit 0
+fi
+
+if [[ "${FORCE_FULL_CI:-false}" == 'true' ]]; then
+  force_full_scope
   exit 0
 fi
 
@@ -68,6 +90,8 @@ fi
 api_test_files=()
 e2e_test_files=()
 e2e_domains=()
+cli_test_files=()
+cli_domains=()
 
 for file in "${changed_files[@]}"; do
   if [[ "$file" =~ ^tests/api/.+\.test\.api\.(js|ts)$ ]]; then
@@ -87,6 +111,24 @@ for file in "${changed_files[@]}"; do
     domain="${file#tests/e2e/tests/}"
     domain="${domain%%/*}"
     e2e_domains+=("$domain")
+    continue
+  fi
+
+  if [[ "$file" =~ ^tests/cli/tests/.+\.test\.cli\.(js|ts)$ ]]; then
+    cli_test_files+=("$file")
+    domain="${file#tests/cli/tests/}"
+    domain="${domain%%/*}"
+    cli_domains+=("$domain")
+    continue
+  fi
+
+  if [[ "$file" =~ ^tests/cli/tests/.+/__snapshots__/(.+)\.(snap)$ ]]; then
+    snapshot_test_file="${BASH_REMATCH[1]}"
+    cli_dir="${file%/__snapshots__/*}"
+    cli_test_files+=("${cli_dir}/${snapshot_test_file}")
+    domain="${cli_dir#tests/cli/tests/}"
+    domain="${domain%%/*}"
+    cli_domains+=("$domain")
   fi
 done
 
@@ -102,6 +144,8 @@ unique_space_list() {
 api_test_files_output="$(unique_space_list "${api_test_files[@]}")"
 e2e_test_files_output="$(unique_space_list "${e2e_test_files[@]}")"
 e2e_domains_output="$(unique_space_list "${e2e_domains[@]}")"
+cli_test_files_output="$(unique_space_list "${cli_test_files[@]}")"
+cli_domains_output="$(unique_space_list "${cli_domains[@]}")"
 
 if [[ -n "$api_test_files_output" ]]; then
   api_scope='selective'
@@ -115,6 +159,12 @@ else
   e2e_scope='full'
 fi
 
+if [[ -n "$cli_test_files_output" ]]; then
+  cli_scope='selective'
+else
+  cli_scope='full'
+fi
+
 {
   echo 'test_only=true'
   echo "api_scope=${api_scope}"
@@ -122,4 +172,7 @@ fi
   echo "e2e_scope=${e2e_scope}"
   echo "e2e_test_files=${e2e_test_files_output}"
   echo "e2e_domains=${e2e_domains_output}"
+  echo "cli_scope=${cli_scope}"
+  echo "cli_test_files=${cli_test_files_output}"
+  echo "cli_domains=${cli_domains_output}"
 } >>"$GITHUB_OUTPUT"
