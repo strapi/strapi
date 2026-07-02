@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { maxGreaterThanMin, maxLengthGreaterThanMinLength } from '../schema';
+import {
+  maxGreaterThanMin,
+  maxLengthGreaterThanMinLength,
+  verifyDraftAndPublishReservedAttributes,
+} from '../schema';
 
 describe('Schema', () => {
   let ctx: z.RefinementCtx & { addIssue: jest.Mock };
@@ -91,6 +95,69 @@ describe('Schema', () => {
       // not a number
       expectError({ max: 1, min: 'hello' }, false);
       expectError({ max: 'hello', min: 1 }, false);
+    });
+  });
+
+  describe('verifyDraftAndPublishReservedAttributes', () => {
+    let expectError: (value: Record<string, unknown>, shouldError: boolean) => void;
+
+    beforeEach(() => {
+      global.strapi = {
+        contentTypes: {
+          'api::reservation.reservation': {
+            attributes: {
+              title: { type: 'string' },
+              status: { type: 'enumeration', enum: ['confirmed', 'canceled'] },
+            },
+          },
+        },
+      } as any;
+
+      expectError = (value: Record<string, unknown>, shouldError: boolean) => {
+        verifyDraftAndPublishReservedAttributes(value, ctx);
+        expectAddIssue(shouldError);
+      };
+    });
+
+    test('blocks enabling draft and publish when a status attribute exists', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          attributes: [
+            {
+              action: 'update',
+              name: 'status',
+              properties: { type: 'enumeration', enum: ['confirmed', 'canceled'] },
+            },
+          ],
+        },
+        true
+      );
+    });
+
+    test('allows enabling draft and publish when status is removed in the same update', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          attributes: [{ action: 'delete', name: 'status' }],
+        },
+        false
+      );
+    });
+
+    test('allows draft and publish when no reserved attributes are present', () => {
+      expectError(
+        {
+          action: 'create',
+          draftAndPublish: true,
+          attributes: [{ action: 'create', name: 'title', properties: { type: 'string' } }],
+        },
+        false
+      );
     });
   });
 });

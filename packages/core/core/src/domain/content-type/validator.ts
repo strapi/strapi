@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { yup, strings, contentTypes } from '@strapi/utils';
+import { yup, strings } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
 const LIFECYCLES = [
@@ -52,20 +52,9 @@ const contentTypeSchemaValidator = yup.object().shape({
     attributes: yup.object().test({
       name: 'valuesCollide',
       message: 'Some values collide when normalized',
-      test(attributes: Schema.ContentType['attributes'], context: yup.TestContext) {
-        const schema = context.parent as Schema.ContentType;
-        const draftAndPublish = schema.options?.draftAndPublish === true;
-
+      test(attributes: Schema.ContentType['attributes']) {
         for (const attrName of Object.keys(attributes)) {
           const attr = attributes[attrName];
-
-          if (
-            draftAndPublish &&
-            contentTypes.RESERVED_ATTRIBUTE_NAMES_DRAFT_PUBLISH.includes(_.snakeCase(attrName))
-          ) {
-            const message = `The attribute name '${attrName}' is reserved when 'draftAndPublish' is enabled. Rename the attribute or disable the 'draftAndPublish' option.`;
-            return this.createError({ message });
-          }
 
           if (attr.type === 'enumeration') {
             const regressedValues = attr.enum.map(strings.toRegressedEnumValue);

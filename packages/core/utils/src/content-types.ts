@@ -157,6 +157,18 @@ const getReservedAttributeNames = ({
 
 const getReservedModelNames = (): string[] => [...RESERVED_MODEL_NAMES];
 
+const findDraftAndPublishReservedAttributeNames = (attributeNames: Iterable<string>): string[] => {
+  return [...attributeNames].filter((name) =>
+    matchesReservedName(snakeCase(name), RESERVED_ATTRIBUTE_NAMES_DRAFT_PUBLISH)
+  );
+};
+
+const getDraftAndPublishReservedAttributeWarning = (uid: string, attributeName: string): string =>
+  `The attribute name '${attributeName}' on content type '${uid}' is reserved when 'draftAndPublish' is enabled. It conflicts with the Document Service / REST 'status' query parameter. Rename the attribute or disable the 'draftAndPublish' option.`;
+
+const getDraftAndPublishEnableBlockedMessage = (attributeNames: string[]): string =>
+  `Cannot enable draft and publish while the following attribute names are reserved: ${attributeNames.join(', ')}. Rename them or remove them first.`;
+
 const getTimestamps = (model: Model) => {
   const attributes: string[] = [];
 
@@ -416,6 +428,9 @@ export {
   isReservedModelName,
   getReservedAttributeNames,
   getReservedModelNames,
+  findDraftAndPublishReservedAttributeNames,
+  getDraftAndPublishReservedAttributeWarning,
+  getDraftAndPublishEnableBlockedMessage,
   getNonWritableAttributes,
   getComponentAttributes,
   getMediaAttributes,
