@@ -34,7 +34,6 @@ import { AdminUser } from '../../../shared/contracts/shared';
 
 const buildSessionMetadataFromContext = (ctx: Context) =>
   buildSessionMetadata({
-    ip: ctx.request.ip,
     userAgent: ctx.request.headers['user-agent'],
   });
 
