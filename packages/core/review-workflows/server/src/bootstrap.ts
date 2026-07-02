@@ -39,8 +39,7 @@ const registerWebhookEvents = async () =>
     strapi.get('webhookStore').addAllowedEvent(eventKey, event)
   );
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default async (_args: { strapi: Core.Strapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Permissions
   const { actionProvider } = getAdminService('permission');
   await actionProvider.registerMany(actions.reviewWorkflows);
