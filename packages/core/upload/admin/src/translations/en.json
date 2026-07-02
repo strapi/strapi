@@ -170,6 +170,11 @@
   "modal.nav.url": "From url",
   "modal.remove.success-label": "Elements have been successfully deleted.",
   "modal.move.success-label": "Elements have been moved successfully",
+  "modal.move.error-label": "An error occurred while moving the elements.",
+  "dnd.announce.drag-start": "Picked up {name}. Drop on a folder to move.",
+  "dnd.announce.invalid-drop": "Cannot move item to this folder.",
+  "dnd.announce.move-failure": "Move failed. {message}",
+  "dnd.announce.cancel": "Drag cancelled.",
   "modal.selected-list.sub-header-subtitle": "Drag & drop to reorder the assets in the field",
   "modal.upload-list.footer.button": "Upload {number, plural, one {# asset} other {# assets}} to the library",
   "modal.upload-list.sub-header-subtitle": "Manage the assets before adding them to the Media Library",
@@ -243,5 +248,14 @@
   "view.grid": "Grid view",
   "ai.modal.uploading.title": "Uploading and processing with AI...",
   "ai.modal.title": "{count, plural, one {# asset uploaded} other {# assets uploaded}}, review AI generated metadata",
-  "ai.modal.error": "Could not generate AI metadata for the uploaded files."
+  "ai.modal.error": "Could not generate AI metadata for the uploaded files.",
+  "sidebar.title": "Media library",
+  "sidebar.home": "Home",
+  "sidebar.folders": "Folders",
+  "sidebar.tree.aria-label": "Media library folders",
+  "sidebar.tree.expand": "Expand {name}",
+  "sidebar.tree.collapse": "Collapse {name}",
+  "sidebar.tree.empty": "No folders yet",
+  "sidebar.tree.loading": "Loading folders...",
+  "sidebar.tree.error": "Could not load folders."
 }

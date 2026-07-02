@@ -286,7 +286,7 @@ test.describe('Home as super admin', () => {
   });
 
   test('a super admin should see the deploy now widget', async ({ page }) => {
-    const deployWidget = page.getByLabel(/Deploy/i, { exact: true });
+    const deployWidget = page.locator('[data-strapi-widget-id="plugin::admin.deploy-now"]');
     await expect(deployWidget).toBeVisible();
     await expect(deployWidget.getByText('Ready to go live')).toBeVisible();
     await expect(deployWidget.getByText('Deploy with Strapi Cloud')).toBeVisible();
@@ -309,7 +309,7 @@ test.describe('Home as editor', () => {
   });
 
   test('a user should see the deploy now widget regardless of their role', async ({ page }) => {
-    const deployWidget = page.getByLabel(/Deploy/i, { exact: true });
+    const deployWidget = page.locator('[data-strapi-widget-id="plugin::admin.deploy-now"]');
     await expect(deployWidget).toBeVisible();
     await expect(deployWidget.getByRole('link', { name: /deploy now/i })).toBeVisible();
   });

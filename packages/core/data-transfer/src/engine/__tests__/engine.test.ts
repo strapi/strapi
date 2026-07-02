@@ -16,7 +16,7 @@ import type {
   ISourceProvider,
   ITransferEngineOptions,
   TransferFilterPreset,
-} from '../../../types';
+} from '../../types';
 
 import { extendExpectForDataTransferTests } from '../../__tests__/test-utils';
 import { TransferEngineValidationError } from '../errors';

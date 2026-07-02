@@ -14,6 +14,7 @@ const config = {
     'bin/',
     'templates/',
     'rollup.config.mjs',
+    'lint-staged.config.mjs',
   ],
 };
 
