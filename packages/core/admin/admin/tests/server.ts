@@ -126,7 +126,6 @@ export const server: SetupServer = setupServer(
             current: true,
             loginAt: '2026-06-12T08:00:00.000Z',
             lastActiveAt: '2026-06-12T10:00:00.000Z',
-            ip: '127.0.0.1',
           },
           {
             id: 'session-other',
@@ -134,7 +133,6 @@ export const server: SetupServer = setupServer(
             current: false,
             loginAt: '2026-06-10T08:00:00.000Z',
             lastActiveAt: '2026-06-11T09:00:00.000Z',
-            ip: '10.0.0.2',
           },
         ],
       })

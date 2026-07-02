@@ -63,7 +63,10 @@ export const resolveDraftRelationCounts = (
     return localCounts;
   }
 
-  if (modified) {
+  const hasUnsavedDraftRelations =
+    localCounts.unpublishedRelations > 0 || localCounts.draftM2mLinks > 0;
+
+  if (modified || hasUnsavedDraftRelations) {
     return mergeDraftRelationCounts(localCounts, serverCounts);
   }
 
