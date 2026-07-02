@@ -160,6 +160,58 @@ describe('Test Graphql API End to End', () => {
       }));
     });
 
+    test("Can't list a private field", async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            posts_connection {
+              data {
+                attributes {
+                  name
+                  privateNote
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        errors: [
+          {
+            message: 'Cannot query field "privateNote" on type "Post".',
+          },
+        ],
+      });
+    });
+
+    test("Can't filter by a private field", async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          query findPosts($filters: PostFiltersInput) {
+            posts_connection(filters: $filters) {
+              data {
+                attributes {
+                  name
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          filters: {
+            privateNote: { eq: 'stored but hidden' },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.errors[0].message).toContain(
+        'Field "privateNote" is not defined by type "PostFiltersInput"'
+      );
+    });
+
     test('List posts with GET', async () => {
       const graphqlQueryGET = (body) => {
         return rq({
@@ -581,6 +633,7 @@ describe('Test Graphql API End to End', () => {
 
     test('Update Post', async () => {
       const newName = 'new post name';
+      const newPrivateNote = 'updated private note';
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           mutation updatePost($documentId: ID!, $data: PostInput!) {
@@ -598,6 +651,7 @@ describe('Test Graphql API End to End', () => {
           documentId: data.posts[0].documentId,
           data: {
             name: newName,
+            privateNote: newPrivateNote,
           },
         },
       });
@@ -615,6 +669,12 @@ describe('Test Graphql API End to End', () => {
           },
         },
       });
+
+      const updatedPost = await strapi.db.query('api::post.post').findOne({
+        where: { documentId: data.posts[0].documentId },
+      });
+
+      expect(updatedPost.privateNote).toBe(newPrivateNote);
 
       const newPost = res.body.data.updatePost.data;
 
