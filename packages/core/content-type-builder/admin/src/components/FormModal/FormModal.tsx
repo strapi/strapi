@@ -526,7 +526,7 @@ export const FormModal = () => {
         val = null;
       } else if (name === 'enum') {
         // For enum values, ensure we're working with an array
-        val = Array.isArray(value) ? value : [String(value ?? '')];
+        val = Array.isArray(value) ? value : typeof value === 'string' ? [value] : [];
       } else {
         val = value;
       }
