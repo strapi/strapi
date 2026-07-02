@@ -99,7 +99,10 @@ describe('Schema', () => {
   });
 
   describe('verifyDraftAndPublishReservedAttributes', () => {
-    let expectError: (value: Record<string, unknown>, shouldError: boolean) => void;
+    let expectError: (
+      value: Parameters<typeof verifyDraftAndPublishReservedAttributes>[0],
+      shouldError: boolean
+    ) => void;
 
     beforeEach(() => {
       global.strapi = {
@@ -113,7 +116,7 @@ describe('Schema', () => {
         },
       } as any;
 
-      expectError = (value: Record<string, unknown>, shouldError: boolean) => {
+      expectError = (value, shouldError) => {
         verifyDraftAndPublishReservedAttributes(value, ctx);
         expectAddIssue(shouldError);
       };
@@ -129,7 +132,6 @@ describe('Schema', () => {
             {
               action: 'update',
               name: 'status',
-              properties: { type: 'enumeration', enum: ['confirmed', 'canceled'] },
             },
           ],
         },
@@ -154,7 +156,7 @@ describe('Schema', () => {
         {
           action: 'create',
           draftAndPublish: true,
-          attributes: [{ action: 'create', name: 'title', properties: { type: 'string' } }],
+          attributes: [{ action: 'create', name: 'title' }],
         },
         false
       );
