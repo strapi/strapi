@@ -182,6 +182,43 @@ export const withContentManagerPublish = async (
   await done;
 };
 
+/**
+ * Clicks Publish (or a custom publish button) and confirms the draft-relations
+ * dialog when it appears. Bidirectional M2M warnings use a "Publish" confirm;
+ * xToOne-style warnings use "Publish without relations".
+ */
+export const publishAndConfirmDraftRelations = async (
+  page: Page,
+  publishButton: Locator = page.getByRole('button', { name: 'Publish' })
+) => {
+  const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+  const publishDone = waitForContentManagerMutation(page, 'publish');
+
+  await publishButton.click();
+
+  const dialogAppeared = await Promise.race([
+    dialog.waitFor({ state: 'visible', timeout: 5000 }).then(() => true as const),
+    publishDone.then(() => false as const),
+  ]);
+
+  if (!dialogAppeared) {
+    return;
+  }
+
+  const publishWithoutRelations = dialog.getByRole('button', {
+    name: 'Publish without relations',
+  });
+
+  if (await publishWithoutRelations.isVisible()) {
+    await withContentManagerPublish(page, () => publishWithoutRelations.click());
+    return;
+  }
+
+  await withContentManagerPublish(page, () =>
+    dialog.getByRole('button', { name: 'Publish', exact: true }).click()
+  );
+};
+
 /** Map a segment under `/admin` (or legacy `/admin/…`) to a pathname. */
 function resolveAdminUrl(adminPath: string): string {
   let s = adminPath.trim();
@@ -747,6 +784,53 @@ export const isElementBefore = async (firstLocator, secondLocator) => {
   return await firstHandle.evaluate((first, second) => {
     return !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
   }, secondHandle);
+};
+
+type DynamicZoneInsertPosition = 'above' | 'below';
+
+/**
+ * Insert a component in a dynamic zone relative to an existing component.
+ *
+ * Radix nested menus need a real click on the sub-trigger to open the picker; only the leaf
+ * component item uses `dispatchEvent('click')` (see DynamicComponent unit tests).
+ */
+export const insertDynamicZoneComponent = async (
+  page: Page,
+  options: {
+    relativeToComponent: RegExp | string;
+    position: DynamicZoneInsertPosition;
+    componentToAdd: RegExp | string;
+    expectedComponentCount?: number;
+  }
+) => {
+  const { relativeToComponent, position, componentToAdd, expectedComponentCount } = options;
+
+  const componentItem = page.getByRole('listitem').filter({
+    has: page.getByRole('button', { name: relativeToComponent }),
+  });
+
+  await expect(componentItem).toHaveCount(1);
+
+  const moreActionsBtn = componentItem.getByRole('button', { name: /more actions/i });
+  await moreActionsBtn.scrollIntoViewIfNeeded();
+  await moreActionsBtn.click();
+
+  const insertLabel = position === 'above' ? /add component above/i : /add component below/i;
+  const insertMenuItem = page.getByRole('menuitem', { name: insertLabel });
+  await expect(insertMenuItem).toBeVisible();
+  await insertMenuItem.click();
+
+  const componentMenuItem = page.getByRole('menuitem', { name: componentToAdd }).last();
+  await expect(componentMenuItem).toBeVisible();
+  await componentMenuItem.dispatchEvent('click');
+
+  const components = page.getByRole('listitem').filter({ has: page.getByRole('heading') });
+
+  if (expectedComponentCount !== undefined) {
+    await expect(components).toHaveCount(expectedComponentCount);
+  } else {
+    await expect(insertMenuItem).toBeHidden();
+  }
 };
 
 /**

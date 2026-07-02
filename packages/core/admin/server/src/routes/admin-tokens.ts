@@ -5,7 +5,6 @@ export default [
     handler: 'admin-token.create',
     config: {
       policies: [
-        'admin::isAdminTokensEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::admin-tokens.create'] } },
       ],
@@ -17,7 +16,6 @@ export default [
     handler: 'admin-token.list',
     config: {
       policies: [
-        'admin::isAdminTokensEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::admin-tokens.read'] } },
       ],
@@ -29,7 +27,6 @@ export default [
     handler: 'admin-token.revoke',
     config: {
       policies: [
-        'admin::isAdminTokensEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::admin-tokens.delete'] } },
       ],
@@ -41,7 +38,6 @@ export default [
     handler: 'admin-token.get',
     config: {
       policies: [
-        'admin::isAdminTokensEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::admin-tokens.read'] } },
       ],
@@ -53,7 +49,6 @@ export default [
     handler: 'admin-token.update',
     config: {
       policies: [
-        'admin::isAdminTokensEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::admin-tokens.update'] } },
       ],
@@ -65,7 +60,6 @@ export default [
     handler: 'admin-token.regenerate',
     config: {
       policies: [
-        'admin::isAdminTokensEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::admin-tokens.regenerate'] } },
       ],
@@ -77,7 +71,6 @@ export default [
     handler: 'admin-token.getOwnerPermissions',
     config: {
       policies: [
-        'admin::isAdminTokensEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::admin-tokens.read'] } },
       ],

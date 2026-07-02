@@ -519,6 +519,12 @@ describe('Role', () => {
       const getPermissionsWithNestedFields = jest.fn(() => permissions.map(createPermission)); // cloned, otherwise it is modified inside createRolesIfNoneExist()
 
       global.strapi = {
+        contentTypes: {
+          'plugin::users-permissions.role': {
+            uid: 'plugin::users-permissions.role',
+            pluginOptions: { 'content-manager': { visible: false } },
+          },
+        },
         db: { query: () => ({ count, create }) },
         admin: {
           services: {
@@ -568,7 +574,7 @@ describe('Role', () => {
       });
 
       expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, {
-        restrictedSubjects: ['plugin::users-permissions.user'],
+        restrictedSubjects: ['plugin::users-permissions.user', 'plugin::users-permissions.role'],
       });
 
       expect(createMany).toHaveBeenCalledTimes(2);

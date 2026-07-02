@@ -7,8 +7,8 @@ import { Database } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
-import tsUtils from '@strapi/typescript-utils';
 import { loadConfiguration } from './configuration';
+import { warnDeprecatedServerConfig } from './configuration/server-config';
 
 import * as factories from './factories';
 
@@ -38,6 +38,16 @@ import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+
+// Lazy: only resolved when `useTypescriptMigrations` is true (default false)
+let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
+const tsUtils = (): typeof import('@strapi/typescript-utils') => {
+  if (!lazyTsUtils) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    lazyTsUtils = require('@strapi/typescript-utils');
+  }
+  return lazyTsUtils as typeof import('@strapi/typescript-utils');
+};
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -265,6 +275,8 @@ class Strapi extends Container implements Core.Strapi {
       ...config.get('server.logger.config'),
     });
 
+    warnDeprecatedServerConfig(config, logger);
+
     // Instantiate the Strapi container
     this.add('config', () => config)
       .add('query-params', createQueryParamService(this))
@@ -283,9 +295,9 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
       .add('db', () => {
-        const tsDir = tsUtils.resolveOutDirSync(this.dirs.app.root);
-        const tsMigrationsEnabled =
-          this.config.get('database.settings.useTypescriptMigrations') === true && tsDir;
+        const useTSM = this.config.get('database.settings.useTypescriptMigrations') === true;
+        const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;
+        const tsMigrationsEnabled = useTSM && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
         return new Database(
           _.merge(this.config.get('database'), {

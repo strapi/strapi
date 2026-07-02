@@ -17,7 +17,6 @@ import { HOOKS } from '../../../constants/hooks';
 import { useContentTypeSchema } from '../../../hooks/useContentTypeSchema';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Schema } from '../../../hooks/useDocument';
-import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { getMainField } from '../../../utils/attributes';
 import { getTranslation } from '../../../utils/translations';
 import { getDisplayName } from '../../../utils/users';
@@ -100,10 +99,6 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
 
   const { users = [] } = userData ?? {};
 
-  const { metadata } = useGetContentTypeConfigurationQuery(model, {
-    selectFromResult: ({ data }) => ({ metadata: data?.contentType.metadatas ?? {} }),
-  });
-
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
@@ -182,11 +177,16 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
 
         const attribute = attributes[name];
 
-        if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
+        if (!attribute || NOT_ALLOWED_FILTERS.includes(attribute.type)) {
           return null;
         }
 
-        const { mainField: mainFieldName = '', label } = metadata[name].list;
+        const fieldMetadata = layout.metadatas?.[name];
+        if (!fieldMetadata) {
+          return null;
+        }
+
+        const { mainField: mainFieldName = '', label } = fieldMetadata;
 
         let filter: Filters.Filter = {
           name,
@@ -234,7 +234,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
           filter = {
             ...filter,
             options: attribute.enum.map((value) => ({
-              label: value,
+              label: formatMessage({ id: value, defaultMessage: value }),
               value,
             })),
           };
@@ -281,7 +281,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     canReadAdminUsers,
     model,
     attributes,
-    metadata,
+    layout.metadatas,
     schemas,
     layout,
     users,

@@ -30,6 +30,53 @@ test.each(action.BLOCKING_LABELS)('Test blocking labels %s', async (label) => {
   setFailed.mockRestore();
 });
 
+test('Test needs-qa blocks PR without QA completion label', async () => {
+  github.context = {
+    payload: {
+      pull_request: {
+        labels: [{ name: 'needs-qa' }, { name: 'pr: enhancement' }, { name: 'source: core' }],
+      },
+    },
+  };
+
+  const setFailed = jest.spyOn(core, 'setFailed');
+
+  await action();
+
+  expect(setFailed).toHaveBeenCalled();
+  expect(setFailed.mock.calls[0][0]).toBe(
+    `The PR has been labelled with 'needs-qa' and must be resolved with one of: qa-done, qa-skipped.`
+  );
+
+  setFailed.mockRestore();
+});
+
+test.each(action.QA_COMPLETION_LABELS)('Test needs-qa allows PR with %s label', async (label) => {
+  github.context = {
+    payload: {
+      pull_request: {
+        base: {
+          ref: 'main',
+        },
+        labels: [
+          { name: 'needs-qa' },
+          { name: label },
+          { name: 'pr: enhancement' },
+          { name: 'source: core' },
+        ],
+      },
+    },
+  };
+
+  const setFailed = jest.spyOn(core, 'setFailed');
+
+  await action();
+
+  expect(setFailed).not.toHaveBeenCalled();
+
+  setFailed.mockRestore();
+});
+
 test('Test missing source label', async () => {
   github.context = {
     payload: {

@@ -45,12 +45,17 @@ const EditViewPage = () => {
   const location = useLocation();
   const [
     {
-      query: { status },
+      query: { status, plugins },
     },
     setQuery,
-  ] = useQueryParams<{ status: 'draft' | 'published' }>({
+  ] = useQueryParams<{
+    status: 'draft' | 'published';
+    plugins?: { i18n?: { locale?: string } };
+  }>({
     status: 'draft',
   });
+
+  const activeLocale = plugins?.i18n?.locale;
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDesktop = useIsDesktop();
@@ -162,6 +167,7 @@ const EditViewPage = () => {
         </tours.contentManager.Introduction>
       )}
       <Form
+        key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}`}
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
