@@ -108,12 +108,14 @@ jobs:
               // Clean up the content
               content = content.trim();
               
-              // Check if content is empty or just placeholder text
-              if (!content || 
-                  content === 'No response' || 
+              // Check if content is empty or just placeholder text.
+              // Note: don't reject on length — valid version values can be
+              // short (e.g. Node "24", Package Manager "4").
+              if (!content ||
+                  content === '_No response_' ||
+                  content === 'No response' ||
                   content === 'N/A' ||
-                  content === 'None' ||
-                  content.length < 3) {
+                  content === 'None') {
                 missingItems.push(field.label);
               }
             }
