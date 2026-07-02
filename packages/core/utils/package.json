@@ -63,7 +63,7 @@
   "devDependencies": {
     "@types/http-errors": "2.0.4",
     "@types/koa": "2.15.2",
-    "@types/node": "20.19.41",
+    "@types/node": "22.20.0",
     "eslint-config-custom": "5.49.0",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
@@ -72,7 +72,7 @@
     "vitest-config": "5.49.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

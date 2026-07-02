@@ -115,7 +115,7 @@
     "qs@~6.14.0": "6.15.2",
     "tmp@^0.2.3": "0.2.7",
     "tmp@~0.2.1": "0.2.7",
-    "@types/node": "20.19.41"
+    "@types/node": "22.20.0"
   },
   "devDependencies": {
     "@babel/core": "7.29.6",
@@ -208,7 +208,7 @@
   },
   "packageManager": "yarn@4.12.0",
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
   "isStrapiMonorepo": true

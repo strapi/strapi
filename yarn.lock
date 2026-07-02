@@ -9210,7 +9210,7 @@ __metadata:
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/node-schedule": "npm:2.1.7"
     "@vercel/stega": "npm:0.1.2"
     bcryptjs: "npm:2.4.3"
@@ -9277,7 +9277,7 @@ __metadata:
     "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/semver": "npm:7.5.0"
     "@types/stream-chain": "npm:2.0.1"
     "@types/stream-json": "npm:1.7.8"
@@ -9914,7 +9914,7 @@ __metadata:
     "@types/inquirer": "npm:9.0.9"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/nodemon": "npm:1.19.6"
     "@types/webpack-bundle-analyzer": "npm:4.7.0"
     "@types/webpack-hot-middleware": "npm:2.25.12"
@@ -10154,7 +10154,7 @@ __metadata:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
     "@types/koa": "npm:2.15.2"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.49.0"
     execa: "npm:5.1.1"
@@ -10684,10 +10684,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node20@npm:20.1.6":
-  version: 20.1.6
-  resolution: "@tsconfig/node20@npm:20.1.6"
-  checksum: 10c0/736bca8c405222e78f77da068bf705b398e3afb3f2ec3c1d2a8792505283863bef8cca5646358fcbabd3b07c6fbbf0b1acdf09aa182254fe60eb519827737f09
+"@tsconfig/node22@npm:22.0.5":
+  version: 22.0.5
+  resolution: "@tsconfig/node22@npm:22.0.5"
+  checksum: 10c0/c64b1d51e1556da9212463799f5096289d2cc8561eaed10cd0a0a36c25790b4c6bed30c0f846afccf8da75b5750326fa281216a908c2b67ead7b55adaf3eda22
   languageName: node
   linkType: hard
 
@@ -11482,12 +11482,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.19.41":
-  version: 20.19.41
-  resolution: "@types/node@npm:20.19.41"
+"@types/node@npm:22.20.0":
+  version: 22.20.0
+  resolution: "@types/node@npm:22.20.0"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10c0/aa2a07317bbd700bea68d5784b403a738dbcebadbe2d8ef05649f7953065120d5d37f7edfdd7881df3a3bd15328c8a4dc46fdd69732ab540d552c505378c585b
+  checksum: 10c0/55d78223205bd5f81f043d71b7a5c8d8854b9ef44ef81291680943adb27fa5ba1f092658c87183d5bc8cf6baf6a57b81dad966eb3afa452cc301a615b6d9b20e
   languageName: node
   linkType: hard
 
@@ -15174,7 +15174,7 @@ __metadata:
     "@actions/github": "npm:^6.0.0"
     "@linear/sdk": "npm:^37.0.0"
     "@notionhq/client": "npm:^2.2.15"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     tsup: "npm:^8.0.0"
     typescript: "npm:^5.4.0"
   languageName: unknown
@@ -15203,7 +15203,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
     better-sqlite3: "npm:12.8.0"
@@ -16627,7 +16627,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:20.19.41"
+    "@types/node": "npm:22.20.0"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
     better-sqlite3: "npm:12.8.0"
@@ -30636,7 +30636,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   dependencies:
-    "@tsconfig/node20": "npm:20.1.6"
+    "@tsconfig/node22": "npm:22.0.5"
   languageName: unknown
   linkType: soft
 

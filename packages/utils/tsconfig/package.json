@@ -3,6 +3,6 @@
   "version": "5.49.0",
   "private": true,
   "devDependencies": {
-    "@tsconfig/node20": "20.1.6"
+    "@tsconfig/node22": "22.0.5"
   }
 }
