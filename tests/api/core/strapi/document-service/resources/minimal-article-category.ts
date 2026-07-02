@@ -13,6 +13,32 @@ import dzCompSchema from './schemas/dz-comp';
 
 export const ARTICLE_UID = 'api::article.article' as const;
 export const CATEGORY_UID = 'api::category.category' as const;
+export const AUTHOR_UID = 'api::author.author' as const;
+
+const authorSchema = {
+  kind: 'collectionType' as const,
+  collectionName: 'authors',
+  singularName: 'author',
+  pluralName: 'authors',
+  displayName: 'Author',
+  description: '',
+  draftAndPublish: true,
+  pluginOptions: {
+    i18n: {
+      localized: false,
+    },
+  },
+  attributes: {
+    name: {
+      type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: false,
+        },
+      },
+    },
+  },
+};
 
 const minimalCategorySchema = {
   ...categorySchema,
@@ -52,9 +78,27 @@ const articleWithCategoriesSchema = {
 };
 
 const articleWithComponentsSchema = {
-  ...articleWithCategoriesSchema,
+  kind: 'collectionType' as const,
+  collectionName: 'articles',
+  singularName: 'article',
+  pluralName: 'articles',
+  displayName: 'Article',
+  description: '',
+  draftAndPublish: true,
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
   attributes: {
-    ...articleWithCategoriesSchema.attributes,
+    title: {
+      type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
     comp: {
       type: 'component',
       repeatable: false,
@@ -73,6 +117,18 @@ const articleWithComponentsSchema = {
       },
       type: 'dynamiczone',
       components: ['article.dz-comp'],
+    },
+  },
+};
+
+const articleWithComponentsSchemaWithCategories = {
+  ...articleWithComponentsSchema,
+  attributes: {
+    ...articleWithComponentsSchema.attributes,
+    categories: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: CATEGORY_UID,
     },
   },
 };
@@ -146,19 +202,59 @@ const deleteArticleFixtures = (fixtures: { category: typeof categoryFixtures }) 
   ];
 };
 
+type MinimalArticleCategoryOptions = {
+  withComponents?: boolean;
+  withAuthor?: boolean;
+  withCategory?: boolean;
+  withFixtures?: boolean;
+};
+
 export const createMinimalArticleCategoryResources = (
-  options: { withComponents?: boolean } = {}
+  options: MinimalArticleCategoryOptions = {}
 ): BuilderResources => {
-  const articleSchema = options.withComponents
-    ? articleWithComponentsSchema
+  const {
+    withComponents = false,
+    withAuthor = false,
+    withCategory = true,
+    withFixtures = true,
+  } = options;
+
+  const articleSchema = withComponents
+    ? withCategory
+      ? articleWithComponentsSchemaWithCategories
+      : articleWithComponentsSchema
     : articleWithCategoriesSchema;
 
-  const components = options.withComponents
+  const components = withComponents
     ? {
         'article.comp': compSchema,
         'article.dz_comp': dzCompSchema,
       }
     : {};
+
+  const contentTypes: BuilderResources['schemas']['content-types'] = {};
+
+  if (withCategory) {
+    contentTypes[CATEGORY_UID] = minimalCategorySchema;
+  }
+
+  contentTypes[ARTICLE_UID] = articleSchema;
+
+  if (withAuthor) {
+    contentTypes[AUTHOR_UID] = authorSchema;
+  }
+
+  const fixtures: BuilderResources['fixtures']['content-types'] = {};
+
+  if (withCategory) {
+    fixtures[CATEGORY_UID] = withFixtures ? categoryFixtures : [];
+  }
+
+  fixtures[ARTICLE_UID] = withFixtures && withComponents ? deleteArticleFixtures : [];
+
+  if (withAuthor) {
+    fixtures[AUTHOR_UID] = [];
+  }
 
   return {
     locales: [
@@ -167,16 +263,10 @@ export const createMinimalArticleCategoryResources = (
     ],
     schemas: {
       components,
-      'content-types': {
-        [CATEGORY_UID]: minimalCategorySchema,
-        [ARTICLE_UID]: articleSchema,
-      },
+      'content-types': contentTypes,
     },
     fixtures: {
-      'content-types': {
-        [CATEGORY_UID]: categoryFixtures,
-        [ARTICLE_UID]: options.withComponents ? deleteArticleFixtures : [],
-      },
+      'content-types': fixtures,
     },
   };
 };

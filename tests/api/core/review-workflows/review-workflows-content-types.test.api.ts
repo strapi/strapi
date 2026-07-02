@@ -405,7 +405,13 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   describe('Get workflows', () => {
     let workflow1, workflow2;
 
+    const deleteAllWorkflows = async () => {
+      const { body } = await requests.admin.get('/review-workflows/workflows');
+      await Promise.all(body.data.map((workflow) => deleteWorkflow(workflow.id)));
+    };
+
     beforeEach(async () => {
+      await deleteAllWorkflows();
       workflow1 = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
       workflow2 = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
     });
