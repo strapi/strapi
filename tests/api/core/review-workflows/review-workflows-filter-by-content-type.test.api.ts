@@ -9,6 +9,7 @@ import {
   WORKFLOW_MODEL_UID,
   STAGE_MODEL_UID,
 } from '../../../../packages/core/review-workflows/server/src/constants/workflows';
+import { getWorkflowContentTypeFilter } from '../../../../packages/core/review-workflows/server/src/utils/review-workflows';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -45,11 +46,15 @@ describeOnCondition(edition === 'EE')('Review workflows - Filter by content type
     });
   };
 
-  const getWorkflows = async (filters) => {
+  const getWorkflows = async (contentTypeUID) => {
     const result = await requests.admin({
       method: 'GET',
       url: '/review-workflows/workflows',
-      qs: { filters },
+      qs: {
+        filters: {
+          contentTypes: getWorkflowContentTypeFilter({ strapi }, contentTypeUID),
+        },
+      },
     });
     return result.body.data;
   };
@@ -88,7 +93,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Filter by content type
     });
 
     test('Should list workflows filtered by CT', async () => {
-      const workflows = await getWorkflows({ contentTypes: productUID });
+      const workflows = await getWorkflows(productUID);
 
       expect(workflows).toHaveLength(1);
       expect(workflows[0]).toMatchObject({ id: workflow2.id });
@@ -100,7 +105,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Filter by content type
         data: { contentTypes: [`${productUID}-2`] },
       });
 
-      const workflows = await getWorkflows({ contentTypes: productUID });
+      const workflows = await getWorkflows(productUID);
 
       expect(workflows).toHaveLength(1);
       expect(workflows[0]).toMatchObject({ id: workflow2.id });
