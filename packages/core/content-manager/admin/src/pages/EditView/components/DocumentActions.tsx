@@ -749,7 +749,9 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    setLocalDraftRelationCounts(countLocalDraftRelations(formValues, schema, components, model));
+    setLocalDraftRelationCounts(
+      countLocalDraftRelations(formValues as AnyData, schema, components, model)
+    );
   }, [components, formValues, model, schema]);
 
   const fetchDraftRelationsCount = React.useCallback(async () => {
@@ -992,7 +994,7 @@ const PublishAction: DocumentActionComponent = ({
       resolveDraftRelationCounts(
         documentId,
         modified,
-        countLocalDraftRelations(getValues(), schema, components, model),
+        countLocalDraftRelations(getValues() as AnyData, schema, components, model),
         serverDraftRelationCounts
       ),
     [components, documentId, getValues, model, modified, schema, serverDraftRelationCounts]
@@ -1004,14 +1006,8 @@ const PublishAction: DocumentActionComponent = ({
     localDraftRelationCounts,
     serverDraftRelationCounts
   );
-  const {
-    hasUnpublishedRelations,
-    hasDraftM2mLinks,
-    hasDraftRelations,
-    dialogVariant,
-    bodyIcon,
-    confirmLabel,
-  } = getDraftRelationsPublishState(draftRelationCounts);
+  const { hasUnpublishedRelations, hasDraftM2mLinks, dialogVariant, bodyIcon, confirmLabel } =
+    getDraftRelationsPublishState(draftRelationCounts);
 
   const supportsDraftRelationWarning = Boolean(schema?.options?.draftAndPublish);
 

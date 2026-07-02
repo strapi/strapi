@@ -97,7 +97,6 @@ describe('homepage service', () => {
           })),
         })),
         contentType: jest.fn((uid: keyof typeof contentTypes) => contentTypes[uid]),
-        contentTypes,
         documents: jest.fn((uid: keyof typeof contentTypes) => {
           if (uid === 'api::article.article') {
             return { findMany: findArticleDocuments };
