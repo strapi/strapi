@@ -347,14 +347,17 @@ const ListViewPage = () => {
    * them in an anchor would nest interactive elements. Computed columns and the
    * synthetic status/documentId/createdBy/updatedBy columns are not entry fields.
    */
-  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
+  // Text-like scalar types the entry can be linked from. We only link genuine
+  // text columns (the title etc.), never relations/media/components (interactive
+  // cells) or `documentId` — which is rendered by its own copy-ID cell and never
+  // goes through CellContent, so it can't carry the link.
+  const LINKABLE_TEXT_TYPES = ['string', 'text', 'email', 'uid', 'enumeration'];
   const primaryLinkField = tableHeaders.find(
     ({ name, attribute, cellFormatter }) =>
-      !['status'].includes(name) &&
-      !['createdBy', 'updatedBy'].includes(name.split('.')[0]) &&
+      name !== 'documentId' &&
       typeof cellFormatter !== 'function' &&
       attribute &&
-      !NON_LINKABLE_TYPES.includes(attribute.type)
+      LINKABLE_TEXT_TYPES.includes(attribute.type)
   )?.name;
 
   const isEmptyState = !isFetching && results.length === 0;
