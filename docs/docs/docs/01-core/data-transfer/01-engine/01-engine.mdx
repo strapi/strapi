@@ -9,7 +9,7 @@ tags:
 The transfer engine manages the data transfer process by facilitating communication between a source provider and a destination provider.
 
 :::caution
-**Destructive Operation**: Currently, the transfer engine is designed as a synchronization tool. When using the default `local-destination` provider, the engine uses a **restore strategy** by default. This will **delete all existing data** (entities, links, assets, and configuration) in the destination database during the bootstrap phase before any new data is written.
+**Destructive operation**: Importing or transferring data **into a Strapi instance** (via the [local](../02-providers/04-local-strapi/02-destination.md) or [remote](../02-providers/05-remote-strapi/03-destination.md) Strapi destination providers) uses the **restore** strategy by default. After bootstrap, init, and the integrity check pass, the engine runs `beforeTransfer()` on the destination, which clears existing destination records and media matching the transfer scope before new data is written. Exporting to a file does not modify a Strapi instance.
 :::
 
 ## Architecture Overview
@@ -95,12 +95,12 @@ sequenceDiagram
     participant DH as Diff Handler
 
     rect rgb(230, 245, 230)
-        Note over Client,DP: 1️⃣ Bootstrap & Initialize Phase (Destructive)
+        Note over Client,DP: 1️⃣ Bootstrap & Initialize Phase
         Client->>+TE: Start Transfer
         TE->>SP: Bootstrap
         Note right of SP: Connect to files,<br/>databases, etc.
         TE->>DP: Bootstrap
-        Note right of DP: Setup connections &<br/>WIPE DESTINATION DATA (Restore)
+        Note right of DP: Setup connections,<br/>prepare storage
         TE->>SP: Get Metadata
         SP-->>TE: Source Metadata
         TE->>DP: Get Metadata
@@ -128,6 +128,12 @@ sequenceDiagram
                 DH-->>TE: Schema Validation Error
             end
         end
+    end
+
+    rect rgb(240, 230, 230)
+        Note over Client,DP: Before Transfer (Restore)
+        TE->>DP: beforeTransfer
+        Note right of DP: Clear destination data<br/>matching transfer scope
     end
 
     rect rgb(245, 235, 250)
@@ -169,11 +175,29 @@ sequenceDiagram
     end
 ```
 
-### The Bootstrap Phase and Data Loss
+### Restore strategy and data loss
 
-A transfer starts by bootstrapping and initializing itself and the providers. In this stage, providers establish connections to the database and file systems.
+When the destination is a Strapi instance and `strategy` is `restore` (the only supported conflict strategy today), the local destination provider prepares the instance during `beforeTransfer()` — **after** version and schema integrity checks pass and **before** any transfer stages run.
 
-**Important:** For the `local-destination` provider, the `bootstrap` method checks the transfer strategy. Currently, `restore` is the only supported strategy for full transfers. When this is active, the provider executes a internal `#deleteAll()` method which truncates all tables and removes all assets in the destination before the transfer begins. This ensures no ID conflicts occur during the `entities` and `links` stages, but it means the operation is **non-reversible** and will result in the loss of all pre-existing data on the destination instance.
+In that step the provider may back up the local `uploads` folder, delete existing media files, and call `restore.deleteRecords()` to remove destination entities, internal models, and configuration records scoped by the `restore` options (see [Local Strapi destination restore options](../02-providers/04-local-strapi/02-destination.md)). The CLI builds those options from `--only` and `--exclude`; by default `admin::` content types are not cleared.
+
+This avoids ID conflicts during the `entities` and `links` stages, but it is **not a merge**: once the transfer completes successfully, pre-existing destination data in scope is replaced. If the transfer fails after `beforeTransfer()`, database changes run inside a transaction and may be rolled back; asset backup behavior is described in the destination provider documentation.
+
+A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
+
+After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
+
+Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff', handler)`) before this feature is stable.
+
+Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
+
+1. schemas - content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
+2. entities - all entities (including components, dynamic zones, and media data but not media files) _without their relations_
+3. assets - the files from the /uploads folder
+4. links - the relations between entities
+5. configuration - the Strapi project configuration data
+
+Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
 
 ## Setting up the transfer engine
 
