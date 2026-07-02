@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.46.0",
+  "version": "5.50.0",
   "description": "Create and manage content types",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -62,6 +62,8 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -72,10 +74,10 @@
     "@dnd-kit/utilities": "3.2.2",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.2.0",
-    "@strapi/generators": "5.46.0",
-    "@strapi/icons": "2.2.0",
-    "@strapi/utils": "5.46.0",
+    "@strapi/design-system": "2.2.1",
+    "@strapi/generators": "5.50.0",
+    "@strapi/icons": "2.2.1",
+    "@strapi/utils": "5.50.0",
     "ai": "5.0.52",
     "date-fns": "2.30.0",
     "fs-extra": "11.3.4",
@@ -84,7 +86,7 @@
     "lodash": "4.18.1",
     "micromatch": "^4.0.8",
     "pluralize": "8.0.0",
-    "qs": "6.15.0",
+    "qs": "6.15.3",
     "react-dropzone": "14.3.8",
     "react-intl": "6.6.2",
     "react-markdown": "9.1.0",
@@ -93,10 +95,10 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.46.0",
-    "@strapi/types": "5.46.0",
+    "@strapi/admin": "5.50.0",
+    "@strapi/types": "5.50.0",
     "@testing-library/dom": "10.4.1",
-    "@testing-library/react": "16.3.0",
+    "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
     "@types/fs-extra": "11.0.4",
     "@types/micromatch": "^4.0.9",
@@ -107,7 +109,9 @@
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
     "react-router-dom": "6.30.3",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "vitest": "catalog:",
+    "vitest-config": "5.50.0"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
@@ -117,7 +121,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

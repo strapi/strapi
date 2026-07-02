@@ -90,7 +90,17 @@ const getIsVersionLatestModification = (
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
-   * Returns available locales of a document for the current status
+   * Returns available locales of a document for the current status.
+   *
+   * The result is sorted with the default locale (as defined by the i18n plugin)
+   * at index 0 when present. This is the canonical-source invariant relied on by
+   * `useDocument.getInitialFormValues` in the admin: when creating a new locale
+   * draft, non-localized scalar/media values are inherited from
+   * `availableLocales[0]`. Putting the default locale first means inheritance
+   * stays predictable when sibling locales have drifted on non-localized fields
+   * (which can happen because the server only syncs non-localized fields at
+   * locale-creation time, not on subsequent updates — see
+   * `copyNonLocalizedFields` in document-service/internationalization.ts).
    */
   async getAvailableLocales(
     uid: UID.ContentType,
@@ -131,11 +141,30 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       }
     );
 
-    return (
-      mappingResult
-        // Filter just in case there is a document with no drafts
-        .filter(Boolean) as unknown as DocumentMetadata['availableLocales']
-    );
+    const filtered = mappingResult.filter(Boolean) as unknown as NonNullable<
+      DocumentMetadata['availableLocales']
+    >;
+
+    // Sort the default locale first so `availableLocales[0]` is the canonical
+    // source for non-localized field inheritance in the admin. Guarded so that
+    // we no-op if the i18n plugin or its locales service is unavailable.
+    let defaultLocaleCode: string | undefined;
+    try {
+      defaultLocaleCode = await strapi.plugin('i18n')?.service('locales')?.getDefaultLocale();
+    } catch {
+      // i18n plugin disabled or service errored — leave order untouched.
+    }
+
+    if (!defaultLocaleCode) {
+      return filtered as DocumentMetadata['availableLocales'];
+    }
+
+    // Stable partition: move the default locale entry to the front, keep the
+    // rest of the order intact.
+    const defaultEntries = filtered.filter((entry) => entry.locale === defaultLocaleCode);
+    const otherEntries = filtered.filter((entry) => entry.locale !== defaultLocaleCode);
+
+    return [...defaultEntries, ...otherEntries] as DocumentMetadata['availableLocales'];
   },
 
   /**

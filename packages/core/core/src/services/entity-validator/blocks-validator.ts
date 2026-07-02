@@ -80,7 +80,7 @@ const quoteNodeValidator = yup.object().shape({
 
 const codeBlockValidator = yup.object().shape({
   type: yup.string().equals(['code']).required(),
-  syntax: yup.string().nullable(),
+  language: yup.string().nullable(),
   children: yup
     .array()
     .of(textNodeValidator)

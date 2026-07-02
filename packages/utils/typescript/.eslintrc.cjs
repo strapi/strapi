@@ -9,6 +9,7 @@ const config = {
     '.eslintrc.cjs',
     'index.d.ts',
     'coverage/',
+    'lint-staged.config.mjs',
   ],
 };
 
