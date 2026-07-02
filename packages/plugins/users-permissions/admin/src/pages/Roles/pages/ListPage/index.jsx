@@ -89,7 +89,7 @@ export const RolesListPage = () => {
     } catch (error) {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
@@ -177,6 +177,7 @@ export const RolesListPage = () => {
               onClick={() => trackUsage('willCreateRole')}
               startIcon={<Plus />}
               size="S"
+              fullWidth
             >
               {formatMessage({
                 id: getTrad('List.button.roles'),

@@ -154,6 +154,7 @@ const ReleasesSettingsPage = () => {
                         loading={isSubmitting}
                         startIcon={<Check />}
                         type="submit"
+                        fullWidth
                       >
                         {formatMessage({
                           id: 'global.save',

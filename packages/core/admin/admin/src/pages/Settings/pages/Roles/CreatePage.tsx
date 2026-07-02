@@ -64,6 +64,7 @@ const CreatePage = () => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
+  const [hasLocaleValidationErrors, setHasLocaleValidationErrors] = React.useState(false);
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -100,6 +101,11 @@ const CreatePage = () => {
     data: CreateRoleFormValues,
     formik: FormikHelpers<CreateRoleFormValues>
   ) => {
+    // Re-check via ref on submit: state may lag behind the latest matrix edits when save is clicked quickly
+    if (permissionsRef.current?.hasLocaleValidationErrors()) {
+      return;
+    }
+
     try {
       if (id) {
         trackUsage('willDuplicateRole');
@@ -191,20 +197,27 @@ const CreatePage = () => {
             <>
               <Layouts.Header
                 primaryAction={
-                  <Flex gap={2}>
+                  <Flex width="100%" gap={2}>
                     <Button
                       variant="secondary"
                       onClick={() => {
                         handleReset();
                         permissionsRef.current?.resetForm();
                       }}
+                      fullWidth
                     >
                       {formatMessage({
                         id: 'app.components.Button.reset',
                         defaultMessage: 'Reset',
                       })}
                     </Button>
-                    <Button type="submit" loading={isSubmitting} startIcon={<Check />}>
+                    <Button
+                      type="submit"
+                      loading={isSubmitting}
+                      disabled={hasLocaleValidationErrors}
+                      startIcon={<Check />}
+                      fullWidth
+                    >
                       {formatMessage({
                         id: 'global.save',
                         defaultMessage: 'Save',
@@ -298,6 +311,7 @@ const CreatePage = () => {
                   <Box shadow="filterShadow" hasRadius>
                     <Permissions
                       isFormDisabled={false}
+                      onLocaleValidationChange={setHasLocaleValidationErrors}
                       ref={permissionsRef}
                       permissions={rolePermissions}
                       layout={permissionsLayout}

@@ -46,6 +46,7 @@ const EditPage = () => {
   const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
   const permissionsRef = React.useRef<PermissionsAPI>(null);
+  const [hasLocaleValidationErrors, setHasLocaleValidationErrors] = React.useState(false);
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -95,6 +96,11 @@ const EditPage = () => {
     data: EditRoleFormValues,
     formik: FormikHelpers<EditRoleFormValues>
   ) => {
+    // Re-check via ref on submit: state may lag behind the latest matrix edits when save is clicked quickly
+    if (permissionsRef.current?.hasLocaleValidationErrors()) {
+      return;
+    }
+
     try {
       const { permissionsToSend, didUpdateConditions } =
         permissionsRef.current?.getPermissions() ?? {};
@@ -189,19 +195,18 @@ const EditPage = () => {
           <form onSubmit={handleSubmit}>
             <Layouts.Header
               primaryAction={
-                <Flex gap={2}>
-                  <Button
-                    type="submit"
-                    startIcon={<Check />}
-                    disabled={role.code === 'strapi-super-admin'}
-                    loading={isSubmitting}
-                  >
-                    {formatMessage({
-                      id: 'global.save',
-                      defaultMessage: 'Save',
-                    })}
-                  </Button>
-                </Flex>
+                <Button
+                  type="submit"
+                  startIcon={<Check />}
+                  disabled={role.code === 'strapi-super-admin' || hasLocaleValidationErrors}
+                  loading={isSubmitting}
+                  fullWidth
+                >
+                  {formatMessage({
+                    id: 'global.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
               }
               title={formatMessage({
                 id: 'Settings.roles.edit.title',
@@ -231,6 +236,7 @@ const EditPage = () => {
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}
+                    onLocaleValidationChange={setHasLocaleValidationErrors}
                     permissions={permissions}
                     ref={permissionsRef}
                     layout={permissionsLayout}

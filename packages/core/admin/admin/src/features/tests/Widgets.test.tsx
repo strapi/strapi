@@ -1,6 +1,6 @@
 import { server } from '@tests/server';
 import { waitFor, renderHook, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import {
   calculateWidgetRows,
@@ -118,8 +118,8 @@ describe('useWidgets', () => {
 
     // Setup MSW handlers
     server.use(
-      rest.put('/admin/homepage/layout', (req, res, ctx) => {
-        return res(ctx.json({ success: true }));
+      http.put('/admin/homepage/layout', () => {
+        return HttpResponse.json({ success: true });
       })
     );
   });
@@ -343,8 +343,8 @@ describe('useWidgets', () => {
     it('should handle API errors gracefully', async () => {
       // Mock API error
       server.use(
-        rest.put('/admin/homepage/layout', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: { message: 'Server error' } }));
+        http.put('/admin/homepage/layout', () => {
+          return HttpResponse.json({ error: { message: 'Server error' } }, { status: 500 });
         })
       );
 
@@ -359,15 +359,14 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for error notification to prevent act warnings from Sonner
       await screen.findByText('Server error');
     });
 
     it('should handle network errors gracefully', async () => {
       // Mock network error
       server.use(
-        rest.put('/admin/homepage/layout', (req, res, _ctx) => {
-          return res.networkError('Network error');
+        http.put('/admin/homepage/layout', () => {
+          return HttpResponse.error();
         })
       );
 
@@ -382,8 +381,11 @@ describe('useWidgets', () => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
 
-      // Wait for error notification to prevent act warnings from Sonner
-      await screen.findByText('Network error');
+      // Under msw v1 the network-error message was the string passed to
+      // `res.networkError(...)`. Under msw v2 + undici the thrown `TypeError`
+      // surfaces with messages like "Failed to fetch" / "fetch failed" /
+      // "Network Error" depending on how axios wraps it. Match any of them.
+      await screen.findByText(/failed to fetch|fetch failed|network ?error/i);
     });
   });
 

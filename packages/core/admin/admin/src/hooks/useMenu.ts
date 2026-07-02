@@ -6,6 +6,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { useTypedSelector } from '../core/store/hooks';
 import { useAuth, AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
+import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
 /* -------------------------------------------------------------------------------------------------
  * useMenu
@@ -16,6 +17,7 @@ export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'> 
 };
 export type MobileMenuItem = {
   to: string;
+  target?: string;
   link?: string;
 };
 
@@ -27,9 +29,10 @@ export interface Menu {
   isLoading: boolean;
 }
 
-const useMenu = (shouldUpdateStrapi: boolean) => {
+const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
   const checkUserHasPermissions = useAuth('useMenu', (state) => state.checkUserHasPermissions);
-  const menu = useStrapiApp('useMenu', (state) => state.menu);
+  const rawMenu = useStrapiApp('useMenu', (state) => state.menu);
+  const menu = React.useMemo(() => normalizeMenuLinks(rawMenu), [rawMenu]);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
@@ -49,7 +52,8 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
           id: 'global.marketplace',
           defaultMessage: 'Marketplace',
         },
-        to: '/marketplace',
+        to: 'https://market.strapi.io',
+        target: '_blank',
         permissions: permissions.marketplace?.main ?? [],
         position: 7,
       },
@@ -107,7 +111,10 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
       setMenuWithUserPermissions((state) => ({
         ...state,
         generalSectionLinks: authorizedGeneralSectionLinks,
-        pluginsSectionLinks: authorizedPluginSectionLinks,
+        pluginsSectionLinks: hideCloudDeployMenuLinkInProduction(
+          authorizedPluginSectionLinks,
+          currentEnvironment
+        ),
         isLoading: false,
       }));
     }
@@ -120,6 +127,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
     permissions,
     shouldUpdateStrapi,
     checkUserHasPermissions,
+    currentEnvironment,
   ]);
 
   return menuWithUserPermissions;
@@ -134,11 +142,12 @@ const getGeneralLinks = async (
   shouldUpdateStrapi: boolean = false,
   checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
+  const generalSectionLinks = normalizeMenuLinks(generalSectionRawLinks);
   const generalSectionLinksPermissions = await Promise.all(
-    generalSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
+    generalSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
-  const authorizedGeneralSectionLinks = generalSectionRawLinks.filter(
+  const authorizedGeneralSectionLinks = generalSectionLinks.filter(
     (_, index) => generalSectionLinksPermissions[index].length > 0
   );
 
@@ -161,15 +170,64 @@ const getPluginSectionLinks = async (
   pluginsSectionRawLinks: MenuItem[],
   checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
+  const pluginSectionLinks = normalizeMenuLinks(pluginsSectionRawLinks);
   const pluginSectionLinksPermissions = await Promise.all(
-    pluginsSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
+    pluginSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
-  const authorizedPluginSectionLinks = pluginsSectionRawLinks.filter(
+  const authorizedPluginSectionLinks = pluginSectionLinks.filter(
     (_, index) => pluginSectionLinksPermissions[index].length > 0
   );
 
   return authorizedPluginSectionLinks;
 };
 
-export { useMenu };
+const normalizeMenuLinks = (links: unknown): MenuItem[] => {
+  if (!Array.isArray(links)) {
+    return [];
+  }
+
+  const isValidIcon = (icon: unknown) => {
+    if (typeof icon === 'string' || typeof icon === 'function' || React.isValidElement(icon)) {
+      return true;
+    }
+
+    if (!icon || typeof icon !== 'object') {
+      return false;
+    }
+
+    const reactType = (icon as { $$typeof?: symbol }).$$typeof;
+
+    return (
+      reactType === Symbol.for('react.forward_ref') ||
+      reactType === Symbol.for('react.memo') ||
+      reactType === Symbol.for('react.lazy')
+    );
+  };
+
+  return links.reduce<MenuItem[]>((acc, link) => {
+    if (!link || typeof link !== 'object') {
+      return acc;
+    }
+
+    const candidate = link as Partial<MenuItem>;
+
+    if (
+      typeof candidate.to !== 'string' ||
+      !isValidIcon(candidate.icon) ||
+      typeof candidate.intlLabel?.id !== 'string' ||
+      typeof candidate.intlLabel.defaultMessage !== 'string'
+    ) {
+      return acc;
+    }
+
+    acc.push({
+      ...candidate,
+      permissions: Array.isArray(candidate.permissions) ? candidate.permissions : [],
+    } as MenuItem);
+
+    return acc;
+  }, []);
+};
+
+export { useMenu, normalizeMenuLinks };

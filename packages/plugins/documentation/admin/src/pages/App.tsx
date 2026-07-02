@@ -135,6 +135,7 @@ const App = () => {
               disabled={!allowedActions.canRead || !data?.currentVersion || !data?.prefix}
               href={createDocumentationHref(`${data?.prefix}/v${data?.currentVersion}`)}
               startIcon={<Show />}
+              fullWidth
             >
               {formatMessage({
                 id: getTrad('pages.PluginPage.Button.open'),

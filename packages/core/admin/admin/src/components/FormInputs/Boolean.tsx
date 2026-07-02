@@ -9,7 +9,7 @@ import { useField } from '../Form';
 import { InputProps } from './types';
 
 const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
-  ({ name, required, label, hint, labelAction, ...props }, ref) => {
+  ({ name, required, label, hint, labelAction, disabled, ...props }, ref) => {
     const { formatMessage } = useIntl();
     const field = useField<boolean | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
@@ -20,7 +20,7 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
       field.onChange(name, null);
     };
 
-    const showClearButton = !required && field.value !== null;
+    const showClearButton = !required && field.value !== null && !disabled;
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required} maxWidth="320px">
@@ -45,6 +45,7 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
           })}
           onChange={field.onChange}
           name={name}
+          disabled={disabled}
           {...props}
         />
         <Field.Hint />

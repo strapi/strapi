@@ -144,7 +144,7 @@ const ApplicationInfoPage = () => {
             })}
             primaryAction={
               canUpdate && (
-                <Button disabled={isSaveDisabled} type="submit" startIcon={<Check />}>
+                <Button disabled={isSaveDisabled} type="submit" startIcon={<Check />} fullWidth>
                   {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                 </Button>
               )
@@ -185,6 +185,8 @@ const ApplicationInfoPage = () => {
                         <Link
                           href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
                           endIcon={<ExternalLink />}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           {formatMessage({
                             id: 'Settings.application.link-upgrade',
@@ -212,7 +214,11 @@ const ApplicationInfoPage = () => {
                           { communityEdition }
                         )}
                       </Typography>
-                      <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
+                      <Link
+                        href="https://strapi.io/pricing-self-hosted"
+                        endIcon={<ExternalLink />}
+                        target="_blank"
+                      >
                         {formatMessage({
                           id: 'Settings.application.link-pricing',
                           defaultMessage: 'See all pricing plans',

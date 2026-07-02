@@ -6,37 +6,30 @@ import { Initializer } from './components/Initializer';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
+
 const pluginName = 'Deploy';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
-    const { backendURL } = window.strapi;
+  register(app: StrapiApp) {
+    app.addMenuLink({
+      to: `plugins/${pluginId}`,
+      icon: Cloud,
+      intlLabel: {
+        id: `${pluginId}.Plugin.name`,
+        defaultMessage: pluginName,
+      },
+      Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
+      permissions: [],
+    });
 
-    // Only add the plugin menu link and registering it if the project is on development (localhost).
-    if (backendURL?.includes('localhost')) {
-      app.addMenuLink({
-        to: `plugins/${pluginId}`,
-        icon: Cloud,
-        intlLabel: {
-          id: `${pluginId}.Plugin.name`,
-          defaultMessage: pluginName,
-        },
-        Component: async () => {
-          const { App } = await import('./pages/App');
-
-          return App;
-        },
-      });
-      const plugin = {
-        id: pluginId,
-        initializer: Initializer,
-        isReady: false,
-        name: pluginName,
-      };
-
-      app.registerPlugin(plugin);
-    }
+    app.registerPlugin({
+      id: pluginId,
+      initializer: Initializer,
+      isReady: false,
+      name: pluginName,
+    });
   },
 
   async registerTrads(app: any) {

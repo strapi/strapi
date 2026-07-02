@@ -61,7 +61,7 @@ const AdvancedSettingsPage = () => {
           type: 'danger',
           message: formatMessage({
             id: getTrad('notification.error'),
-            defaultMessage: 'An error occured',
+            defaultMessage: 'An error occurred',
           }),
         });
       },
@@ -135,6 +135,7 @@ const AdvancedSettingsPage = () => {
                     disabled={!modified || !canUpdate}
                     startIcon={<Check />}
                     size="S"
+                    fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>

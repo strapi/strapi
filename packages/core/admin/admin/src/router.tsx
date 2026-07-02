@@ -52,12 +52,12 @@ const getInitialRoutes = (): RouteObject[] => [
     },
   },
   {
-    path: 'marketplace',
+    path: 'me/sessions',
     lazy: async () => {
-      const { ProtectedMarketplacePage } = await import('./pages/Marketplace/MarketplacePage');
+      const { SessionsPage } = await import('./pages/SessionsPage');
 
       return {
-        Component: ProtectedMarketplacePage,
+        Component: SessionsPage,
       };
     },
   },
@@ -93,7 +93,7 @@ const getInitialRoutes = (): RouteObject[] => [
       //     ),
       //   }))
       // ),
-      ...[...getSettingsEERoutes(), ...ROUTES_CE].filter(
+      ...[...getSettingsEERoutes(), ...ROUTES_CE()].filter(
         (route, index, refArray) => refArray.findIndex((obj) => obj.path === route.path) === index
       ),
     ],
