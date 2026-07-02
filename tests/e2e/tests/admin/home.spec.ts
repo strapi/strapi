@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, navToHeader, withContentManagerSave } from '../../../utils/shared';
+import { clickAndWait, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
@@ -168,7 +168,7 @@ test.describe('Home as super admin', () => {
       await navToHeader(page, ['Content Manager', 'Article'], 'Article');
       await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
       await page.getByRole('textbox', { name: /title/i }).fill('Test article');
-      await withContentManagerSave(page, () => page.getByRole('button', { name: /save/i }).click());
+      await page.getByRole('button', { name: /save/i }).click();
 
       // Upload an asset
       await navToHeader(page, ['Media Library'], 'Media Library');

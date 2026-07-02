@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { clickAndWait, withContentManagerSave } from '../../../../utils/shared';
+import { clickAndWait } from '../../../../utils/shared';
 
 test.describe('Relations on the fly - Create a Relation and Save', () => {
   test.beforeEach(async ({ page }) => {
@@ -32,7 +32,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     await expect(name).toHaveValue('Mr. Plop');
 
     // Step 4. Save the related document as draft
-    await withContentManagerSave(page, () => page.getByRole('button', { name: 'Save' }).click());
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await expect(name).toHaveValue('Mr. Plop');
     await expect(page.getByRole('status', { name: 'Draft' }).first()).toBeVisible();
 
