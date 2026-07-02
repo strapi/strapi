@@ -6,6 +6,12 @@ inputs:
     required: true
   runEE:
     description: 'Should run EE or CE tests'
+  scope:
+    description: 'Test scope: full (default) or selective (changed files only)'
+    default: 'full'
+  testFiles:
+    description: 'Space-separated API test file paths (selective scope only)'
+    default: ''
   jestOptions:
     description: 'Jest options'
 runs:
@@ -15,5 +21,7 @@ runs:
       env:
         DB_OPTIONS: ${{ inputs.dbOptions }}
         RUN_EE: ${{ inputs.runEE }}
+        SCOPE: ${{ inputs.scope }}
+        TEST_FILES: ${{ inputs.testFiles }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
       shell: bash

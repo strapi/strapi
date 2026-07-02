@@ -33,14 +33,27 @@ jobs:
       docs: ${{ steps.filter.outputs.docs }}
       global: ${{ steps.filter.outputs.global }}
       is_local: ${{ github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
+      test_only: ${{ steps.classify.outputs.test_only }}
+      api_scope: ${{ steps.classify.outputs.api_scope }}
+      api_test_files: ${{ steps.classify.outputs.api_test_files }}
+      e2e_scope: ${{ steps.classify.outputs.e2e_scope }}
+      e2e_test_files: ${{ steps.classify.outputs.e2e_test_files }}
+      e2e_domains: ${{ steps.classify.outputs.e2e_domains }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          fetch-depth: 2 # need to check out previous 2 commits to see what has changed
+          fetch-depth: 0
       - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3.0.3
         id: filter
         with:
           filters: .github/filters.yaml
+      - name: Classify test-only PR scope
+        id: classify
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_EVENT_PULL_REQUEST_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash .github/scripts/classify-ci-test-scope.sh
 
   # Always run build in case an unrecognized file change could affect it
   # Build must complete before any other step that uses build, so that it gets cached here and doesn't build multiple times
@@ -240,7 +253,9 @@ jobs:
           retention-days: 1
 
   e2e_ce:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true')
+      && (needs.conditions.outputs.e2e_scope == 'full' || (matrix.project == 'chromium' && matrix.shard == '1/4'))
     timeout-minutes: 60
     needs: [conditions, build]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -266,6 +281,9 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
+          scope: ${{ needs.conditions.outputs.e2e_scope }}
+          testFiles: ${{ needs.conditions.outputs.e2e_test_files }}
+          e2eDomains: ${{ needs.conditions.outputs.e2e_domains }}
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -286,7 +304,9 @@ jobs:
         continue-on-error: true
 
   e2e_ee:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true')
+      && (needs.conditions.outputs.e2e_scope == 'full' || (matrix.project == 'chromium' && matrix.shard == '1/4'))
     timeout-minutes: 60
     needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -317,6 +337,9 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
+          scope: ${{ needs.conditions.outputs.e2e_scope }}
+          testFiles: ${{ needs.conditions.outputs.e2e_test_files }}
+          e2eDomains: ${{ needs.conditions.outputs.e2e_domains }}
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -363,7 +386,9 @@ jobs:
         run: yarn test:cli
 
   api_ce_pg:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true')
+      && needs.conditions.outputs.api_scope != 'selective'
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -404,7 +429,9 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
-    if: needs.conditions.outputs.global == 'true' ||  needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true')
+      && needs.conditions.outputs.api_scope != 'selective'
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -444,7 +471,9 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true')
+      && (needs.conditions.outputs.api_scope == 'full' || (matrix.node == 24 && matrix.shard == '1/4'))
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -465,6 +494,8 @@ jobs:
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
+          scope: ${{ needs.conditions.outputs.api_scope }}
+          testFiles: ${{ needs.conditions.outputs.api_test_files }}
           jestOptions: '--shard=${{ matrix.shard }}'
 
   # EE
@@ -472,7 +503,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true')
+      && needs.conditions.outputs.is_local == 'true'
+      && needs.conditions.outputs.api_scope != 'selective'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -516,7 +550,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true')
+      && needs.conditions.outputs.is_local == 'true'
+      && needs.conditions.outputs.api_scope != 'selective'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -559,7 +596,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    if: >-
+      (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true')
+      && needs.conditions.outputs.is_local == 'true'
+      && (needs.conditions.outputs.api_scope == 'full' || (matrix.node == 24 && matrix.shard == '1/4'))
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -580,6 +620,8 @@ jobs:
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
+          scope: ${{ needs.conditions.outputs.api_scope }}
+          testFiles: ${{ needs.conditions.outputs.api_test_files }}
           jestOptions: '--shard=${{ matrix.shard }}'
   sonarqube:
     name: SonarQube Analysis

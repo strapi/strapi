@@ -3,6 +3,15 @@ description: 'Run e2e tests'
 inputs:
   runEE:
     description: 'Should run EE or CE e2e tests'
+  scope:
+    description: 'Test scope: full (default) or selective (changed files only)'
+    default: 'full'
+  testFiles:
+    description: 'Space-separated E2E spec file paths (selective scope only)'
+    default: ''
+  e2eDomains:
+    description: 'Space-separated E2E domain names (selective scope only)'
+    default: ''
   jestOptions:
     description: 'Jest options'
 runs:
@@ -11,6 +20,9 @@ runs:
     - run: $GITHUB_ACTION_PATH/script.sh
       env:
         RUN_EE: ${{ inputs.runEE }}
+        SCOPE: ${{ inputs.scope }}
+        TEST_FILES: ${{ inputs.testFiles }}
+        E2E_DOMAINS: ${{ inputs.e2eDomains }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
         STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR: true
       shell: bash
