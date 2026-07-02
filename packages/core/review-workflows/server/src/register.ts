@@ -3,7 +3,6 @@ import { defaultsDeep, filter, pipe } from 'lodash/fp';
 import type { Core, UID } from '@strapi/types';
 
 import { getService, getAdminService } from './utils';
-import migrateStageAttribute from './migrations/shorten-stage-attribute';
 import migrateReviewWorkflowStagesColor from './migrations/set-stages-default-color';
 import migrateReviewWorkflowStagesRoles from './migrations/set-stages-roles';
 import migrateReviewWorkflowStagesTransferToRoles from './migrations/setup-stage-transfer-to-roles';
@@ -104,7 +103,6 @@ function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Data Migrations
-  strapi.hook('strapi::content-types.beforeSync').register(migrateStageAttribute);
   strapi.hook('strapi::content-types.afterSync').register(persistRWOnDowngrade({ strapi }));
   strapi
     .hook('strapi::content-types.afterSync')
