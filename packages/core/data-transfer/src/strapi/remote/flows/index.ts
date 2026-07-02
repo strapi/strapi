@@ -1,4 +1,4 @@
-import type { TransferStage } from '../../../../types';
+import type { TransferStage } from '../../../types';
 
 export type Step =
   | { kind: 'action'; action: string }

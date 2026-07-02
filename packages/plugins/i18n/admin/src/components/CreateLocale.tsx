@@ -282,7 +282,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
     },
     {
       hint: {
-        id: getTranslation('Settings.locales.modal.create.name.label.description'),
+        id: getTranslation('Settings.locales.modal.create.name.description'),
         defaultMessage: 'Locale will be displayed under that name in the administration panel',
       },
       label: {

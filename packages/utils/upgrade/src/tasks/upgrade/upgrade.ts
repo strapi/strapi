@@ -71,15 +71,15 @@ export const upgrade = async (options: UpgradeOptions) => {
 };
 
 const runUpgradePrompts = async (upgrader: Upgrader, options: UpgradeOptions) => {
-  if (options.target === Version.ReleaseType.Latest) {
+  if (options.target === Version.RELEASE_TYPES.Latest) {
     await prompts.latest(upgrader, options);
   }
 };
 
 const addUpgradeRequirements = (upgrader: Upgrader, options: UpgradeOptions): void => {
-  // Don't add the same requirements when manually targeting a major upgrade
-  // using a semver as it's implied that the users know what they're doing
-  if (options.target === Version.ReleaseType.Major) {
+  // Major release upgrades enforce stepping through the latest patch for the current major.
+  // Semver targets (via the "to" command) skip these checks intentionally.
+  if (options.target === Version.RELEASE_TYPES.Major) {
     upgrader
       .addRequirement(requirements.major.REQUIRE_AVAILABLE_NEXT_MAJOR)
       .addRequirement(requirements.major.REQUIRE_LATEST_FOR_CURRENT_MAJOR);

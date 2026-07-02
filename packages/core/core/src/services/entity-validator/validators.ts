@@ -43,6 +43,63 @@ const toNumberSafe = (value: unknown): number | undefined => {
   return Number.isFinite(num) ? num : undefined;
 };
 
+const BIG_INTEGER_REGEX = /^[+-]?\d+$/;
+
+const toBigIntegerString = (value: unknown): string | undefined => {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value) || !Number.isInteger(value)) {
+      return undefined;
+    }
+
+    return value.toString();
+  }
+
+  if (typeof value === 'string') {
+    const trimmedValue = value.trim();
+
+    if (!BIG_INTEGER_REGEX.test(trimmedValue)) {
+      return undefined;
+    }
+
+    return BigInt(trimmedValue).toString();
+  }
+
+  return undefined;
+};
+
+const isValidBigInteger = (value: unknown): boolean => toBigIntegerString(value) != null;
+
+const isValidFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+const isValidInteger = (value: unknown): value is number =>
+  isValidFiniteNumber(value) && Number.isInteger(value);
+
+const shouldSkipUniqueValidation = (
+  attrType: Schema.Attribute.AnyAttribute['type'],
+  value: unknown
+): boolean => {
+  switch (attrType) {
+    case 'integer':
+      return !isValidInteger(value);
+    case 'float':
+    case 'decimal':
+      return !isValidFiniteNumber(value);
+    case 'biginteger':
+      return !isValidBigInteger(value);
+    default:
+      return false;
+  }
+};
+
 /**
  * Adds minLength validator
  */
@@ -372,6 +429,12 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       return true;
     }
 
+    // Skip unique checks for invalid scalar numeric values and let the type validator fail.
+    // This prevents malformed values from reaching the DB query layer when abortEarly=false.
+    if (shouldSkipUniqueValidation(attr.type, value)) {
+      return true;
+    }
+
     /**
      * We don't validate any unique constraint for draft entries.
      */
@@ -499,7 +562,13 @@ export const floatValidator = (
   metas: ValidatorMetas<Schema.Attribute.Decimal | Schema.Attribute.Float>,
   options: ValidatorOptions
 ) => {
-  let schema = yup.number();
+  let schema = yup
+    .number()
+    .test(
+      'is-finite-number',
+      '${path} must be a finite number',
+      (value) => value == null || isValidFiniteNumber(value)
+    );
 
   schema = addMinFloatValidator(schema, metas, options);
   schema = addMaxFloatValidator(schema, metas);
@@ -512,7 +581,17 @@ export const bigintegerValidator = (
   metas: ValidatorMetas<Schema.Attribute.BigInteger>,
   options: ValidatorOptions
 ) => {
-  const schema = yup.mixed();
+  const schema = yup
+    .mixed()
+    .transform((value, originalValue) => toBigIntegerString(originalValue) ?? value)
+    .test('is-biginteger', '${path} must be a valid integer', (value) => {
+      if (value == null) {
+        return true;
+      }
+
+      return isValidBigInteger(value);
+    });
+
   return addUniqueValidator(schema, metas, options);
 };
 

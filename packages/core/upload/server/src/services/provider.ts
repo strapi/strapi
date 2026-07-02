@@ -2,7 +2,7 @@ import { isFunction } from 'lodash/fp';
 import { file as fileUtils } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-import { Config, UploadableFile } from '../types';
+import { Config, File, UploadableFile } from '../types';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async checkFileSize(file: UploadableFile) {
@@ -30,5 +30,37 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         delete file.filepath;
       }
     }
+  },
+
+  async replace(newFile: UploadableFile, oldFile: File) {
+    const provider = strapi.plugin('upload').provider;
+
+    if (isFunction(provider.replaceStream)) {
+      newFile.stream = newFile.getStream();
+      await provider.replaceStream(newFile, oldFile);
+
+      delete newFile.stream;
+
+      if ('filepath' in newFile) {
+        delete newFile.filepath;
+      }
+      return;
+    }
+
+    if (isFunction(provider.replace)) {
+      newFile.buffer = await fileUtils.streamToBuffer(newFile.getStream());
+      await provider.replace(newFile, oldFile);
+
+      delete newFile.buffer;
+
+      if ('filepath' in newFile) {
+        delete newFile.filepath;
+      }
+      return;
+    }
+
+    // Fallback: delete old then upload new — preserves current behavior for the file.
+    await provider.delete(oldFile);
+    await this.upload(newFile);
   },
 });
