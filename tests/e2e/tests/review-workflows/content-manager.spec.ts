@@ -3,6 +3,18 @@ import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
 
+const waitForAssigneeUpdate = (page) =>
+  page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PUT' && response.url().includes('/assignee') && response.ok()
+  );
+
+const waitForStageUpdate = (page) =>
+  page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PUT' && response.url().includes('/stage') && response.ok()
+  );
+
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const checkAssignee = async (page) => {
@@ -11,7 +23,9 @@ const checkAssignee = async (page) => {
    */
   await expect(page.getByRole('combobox', { name: 'Assignee' })).toBeVisible();
   await page.getByRole('combobox', { name: 'Assignee' }).click();
+  const assigneeUpdated = waitForAssigneeUpdate(page);
   await page.getByRole('option', { name: 'editor testing' }).click();
+  await assigneeUpdated;
 
   await findAndClose(page, 'Assignee updated');
 
@@ -29,7 +43,9 @@ const checkStage = async (page) => {
    */
   await expect(page.getByRole('combobox', { name: 'Review stage' })).toBeVisible();
   await page.getByRole('combobox', { name: 'Review stage' }).click();
+  const stageUpdated = waitForStageUpdate(page);
   await page.getByRole('option', { name: 'In progress' }).click();
+  await stageUpdated;
 
   await findAndClose(page, 'Review stage updated');
 
@@ -62,7 +78,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     /**
      * Go back to ensure the list view has correctly updated
      */
-    await page.getByRole('link', { name: 'Back' }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
     await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
 
     /**
@@ -87,7 +103,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     /**
      * Go back to ensure the list view has correctly updated
      */
-    await page.getByRole('link', { name: 'Back' }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
     await expect(page.getByRole('gridcell', { name: 'In progress' })).toBeVisible();
 
     /**
@@ -147,7 +163,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
         );
 
         // Confirm the list view updated
-        await page.getByRole('link', { name: 'Back' }).click();
+        await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
         await expect(page.getByRole('gridcell', { name: 'In progress' })).toBeVisible();
       });
     }
