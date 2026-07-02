@@ -69,7 +69,13 @@ export const CheckboxWithNumberField = ({
                 onValueChange={(value: string | number | undefined) => {
                   onChange({ target: { name, value: value ?? 0, type } });
                 }}
-                value={typeof value === 'number' ? value : 0}
+                value={
+                  typeof value === 'number'
+                    ? value
+                    : typeof value === 'string'
+                      ? Number(value) || 0
+                      : 0
+                }
               />
               <Field.Error />
             </Field.Root>
