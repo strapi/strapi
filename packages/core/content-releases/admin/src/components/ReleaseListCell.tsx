@@ -44,7 +44,7 @@ const useReleasesList = (contentTypeUid: UID.ContentType, documentId: Modules.Do
 
   const response = useGetMappedEntriesInReleasesQuery(
     { contentTypeUid, documentIds, locale },
-    { skip: documentIds.length === 0 }
+    { skip: !contentTypeUid || documentIds.length === 0 }
   );
 
   const mappedEntriesInReleases = response.data || {};
