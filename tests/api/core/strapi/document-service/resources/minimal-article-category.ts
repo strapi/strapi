@@ -202,11 +202,55 @@ const deleteArticleFixtures = (fixtures: { category: typeof categoryFixtures }) 
   ];
 };
 
+const findOneArticleFixtures = (fixtures: { category: typeof categoryFixtures }) => {
+  const category = (name: string) => {
+    const categoryID = fixtures.category.find((cat) => cat.name === name)?.id;
+
+    if (!categoryID) {
+      throw new Error(`Invalid fixture category '${name}': not found`);
+    }
+
+    return categoryID;
+  };
+
+  return [
+    {
+      documentId: 'Article1',
+      title: 'Article1-Draft-EN',
+      publishedAt: null,
+      locale: 'en',
+      categories: [category('Cat1-EN')],
+      createdBy: 1,
+      updatedBy: 1,
+    },
+    {
+      documentId: 'Article2',
+      title: 'Article2-Published-EN',
+      publishedAt: '2019-01-01T00:00:00.000Z',
+      locale: 'en',
+      categories: [],
+      createdBy: 1,
+      updatedBy: 1,
+    },
+  ];
+};
+
+const findOneAuthorFixtures = [
+  {
+    documentId: 'Author1',
+    name: 'Author1-Draft',
+    publishedAt: null,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+];
+
 type MinimalArticleCategoryOptions = {
   withComponents?: boolean;
   withAuthor?: boolean;
   withCategory?: boolean;
   withFixtures?: boolean;
+  withFindOneFixtures?: boolean;
 };
 
 export const createMinimalArticleCategoryResources = (
@@ -217,6 +261,7 @@ export const createMinimalArticleCategoryResources = (
     withAuthor = false,
     withCategory = true,
     withFixtures = true,
+    withFindOneFixtures = false,
   } = options;
 
   const articleSchema = withComponents
@@ -250,10 +295,17 @@ export const createMinimalArticleCategoryResources = (
     fixtures[CATEGORY_UID] = withFixtures ? categoryFixtures : [];
   }
 
-  fixtures[ARTICLE_UID] = withFixtures && withComponents ? deleteArticleFixtures : [];
+  if (withFindOneFixtures) {
+    fixtures[ARTICLE_UID] = findOneArticleFixtures;
+    if (withAuthor) {
+      fixtures[AUTHOR_UID] = findOneAuthorFixtures;
+    }
+  } else {
+    fixtures[ARTICLE_UID] = withFixtures && withComponents ? deleteArticleFixtures : [];
 
-  if (withAuthor) {
-    fixtures[AUTHOR_UID] = [];
+    if (withAuthor) {
+      fixtures[AUTHOR_UID] = [];
+    }
   }
 
   return {
