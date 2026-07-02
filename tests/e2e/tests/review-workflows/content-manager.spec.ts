@@ -15,6 +15,21 @@ const waitForStageUpdate = (page) =>
       response.request().method() === 'PUT' && response.url().includes('/stage') && response.ok()
   );
 
+const waitForArticleList = (page) =>
+  page.waitForResponse((response) => {
+    if (response.request().method() !== 'GET' || !response.ok()) {
+      return false;
+    }
+    const { pathname } = new URL(response.url());
+    return /\/collection-types\/api::article\.article$/.test(pathname);
+  });
+
+const goBackToArticleList = async (page) => {
+  const listLoaded = waitForArticleList(page);
+  await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+  await listLoaded;
+};
+
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const checkAssignee = async (page) => {
@@ -78,7 +93,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     /**
      * Go back to ensure the list view has correctly updated
      */
-    await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+    await goBackToArticleList(page);
     await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
 
     /**
@@ -103,7 +118,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     /**
      * Go back to ensure the list view has correctly updated
      */
-    await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+    await goBackToArticleList(page);
     await expect(page.getByRole('gridcell', { name: 'In progress' })).toBeVisible();
 
     /**
@@ -138,7 +153,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
         );
 
         // Confirm the list view updated
-        await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+        await goBackToArticleList(page);
         await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
       });
 
@@ -163,7 +178,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
         );
 
         // Confirm the list view updated
-        await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+        await goBackToArticleList(page);
         await expect(page.getByRole('gridcell', { name: 'In progress' })).toBeVisible();
       });
     }
