@@ -449,11 +449,11 @@ export const FormModal = () => {
       // Check form validity for creating a 'common attribute'
       // We need to make sure that it is independent from the step
     } else if (isCreatingAttribute && !isInFirstComponentStep) {
-      const computedAttrbiuteType = attributeType === 'relation' ? 'relation' : modifiedData.type;
+      const computedAttributeType = attributeType === 'relation' ? 'relation' : modifiedData.type;
 
       let alreadyTakenTargetContentTypeAttributes: Array<{ name: string }> = [];
 
-      if (computedAttrbiuteType === 'relation') {
+      if (computedAttributeType === 'relation') {
         const targetContentTypeUID = toStringValue(get(modifiedData, ['target'], ''));
 
         const targetContentTypeAttributes = get(
@@ -479,7 +479,7 @@ export const FormModal = () => {
       }
       schema = forms.attribute.schema(
         type,
-        (computedAttrbiuteType ?? 'string') as Parameters<typeof forms.attribute.schema>[1],
+        (computedAttributeType ?? 'string') as Parameters<typeof forms.attribute.schema>[1],
         reservedNames,
         alreadyTakenTargetContentTypeAttributes,
         { modifiedData, initialData },
