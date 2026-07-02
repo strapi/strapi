@@ -23,6 +23,18 @@ const getTokenOptions = () => {
 };
 
 /**
+ * True when the project set `admin.auth.options.expiresIn`.
+ * Do not use merged options from {@link getTokenOptions}: defaults always inject `expiresIn: '30d'`,
+ * which would make every install look like a legacy config (see GitHub #25989).
+ */
+const hasUserConfiguredAuthOptionsExpiresIn = (adminAuthOptions: unknown): boolean => {
+  if (adminAuthOptions == null || typeof adminAuthOptions !== 'object') {
+    return false;
+  }
+  return (adminAuthOptions as { expiresIn?: unknown }).expiresIn != null;
+};
+
+/**
  * Create a random token
  */
 const createToken = (): string => {
@@ -38,7 +50,12 @@ For security reasons, prefer storing the secret in an environment variable and r
   }
 };
 
-export { createToken, getTokenOptions, checkSecretIsDefined };
+export {
+  createToken,
+  getTokenOptions,
+  checkSecretIsDefined,
+  hasUserConfiguredAuthOptionsExpiresIn,
+};
 
 /**
  * Convert an expiresIn value (string or number) into seconds.

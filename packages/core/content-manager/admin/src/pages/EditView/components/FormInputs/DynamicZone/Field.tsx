@@ -13,6 +13,7 @@ import { useIntl } from 'react-intl';
 
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
+import { usePrev } from '../../../../../hooks/usePrev';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
@@ -59,33 +60,65 @@ const DynamicZone = ({
 
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
   const [liveText, setLiveText] = React.useState('');
+  const [openComponentKey, setOpenComponentKey] = React.useState<string | null>(null);
 
   const {
     currentDocument: { components, isLoading },
   } = useDocumentContext('DynamicZone');
 
   const disabled = disabledProp || isLoading;
-  const { addFieldRow, removeFieldRow, moveFieldRow } = useForm(
-    'DynamicZone',
-    ({ addFieldRow, removeFieldRow, moveFieldRow }) => ({
-      addFieldRow,
-      removeFieldRow,
-      moveFieldRow,
-    })
-  );
+  const addFieldRow = useForm('DynamicZone', (state) => state.addFieldRow);
+  const removeFieldRow = useForm('DynamicZone', (state) => state.removeFieldRow);
+  const moveFieldRow = useForm('DynamicZone', (state) => state.moveFieldRow);
 
   type DzWithTempKey =
     Schema.Attribute.GetDynamicZoneValue<Schema.Attribute.DynamicZone>[number] & {
-      __temp_key__: number;
+      __temp_key__: string;
     };
 
-  const { value = [], error } = useField<Array<DzWithTempKey>>(name);
+  const { value: rawValue, error } = useField<Array<DzWithTempKey>>(name);
+  // `value` can be `null` (for example after closing a relation modal). Match
+  // RepeatableComponent: only accept arrays, otherwise treat as empty. (#26815)
+  const value = React.useMemo(() => (Array.isArray(rawValue) ? rawValue : []), [rawValue]);
+
+  /**
+   * Track the previous value array to detect when a new component is added.
+   * When the array grows, we find the newly added item and force its accordion open.
+   * This mirrors the same pattern used in RepeatableComponent.
+   */
+  const prevValue = usePrev(value);
+
+  React.useEffect(() => {
+    if (prevValue && prevValue.length < value.length) {
+      const prevKeys = new Set(prevValue.map((v) => v.__temp_key__));
+      const newItem = value.find((v) => !prevKeys.has(v.__temp_key__));
+      if (newItem) {
+        setOpenComponentKey(newItem.__temp_key__);
+      }
+    } else if (openComponentKey !== null) {
+      // Component was removed before forceOpen was handled — clear stale key
+      const currentKeys = new Set(value.map((v) => v.__temp_key__));
+      if (!currentKeys.has(openComponentKey)) {
+        setOpenComponentKey(null);
+      }
+    }
+  }, [value, prevValue, openComponentKey]);
+
+  const handleForceOpenHandled = React.useCallback(() => {
+    setOpenComponentKey(null);
+  }, []);
 
   const dynamicComponentsByCategory = React.useMemo(() => {
     return attribute.components.reduce<
       NonNullable<DynamicComponentProps['dynamicComponentsByCategory']>
     >((acc, componentUid) => {
-      const { category, info } = components[componentUid] ?? { info: {} };
+      const componentSchema = components[componentUid];
+
+      if (!componentSchema) {
+        return acc;
+      }
+
+      const { category, info } = componentSchema;
 
       const component = { uid: componentUid, displayName: info.displayName, icon: info.icon };
 
@@ -105,20 +138,28 @@ const DynamicZone = ({
 
   const dynamicDisplayedComponentsLength = value.length;
 
-  const handleAddComponent = (uid: string, position?: number) => {
-    setAddComponentIsOpen(false);
+  const handleAddComponent = React.useCallback(
+    (uid: string, position?: number) => {
+      const schema = components[uid];
 
-    const schema = components[uid];
-    const form = createDefaultForm(schema, components);
-    const transformations = pipe(transformDocument(schema, components), (data) => ({
-      ...data,
-      __component: uid,
-    }));
+      if (!schema) {
+        return;
+      }
 
-    const data = transformations(form);
+      setAddComponentIsOpen(false);
 
-    addFieldRow(name, data, position);
-  };
+      const form = createDefaultForm(schema, components);
+      const transformations = pipe(transformDocument(schema, components), (data) => ({
+        ...data,
+        __component: uid,
+      }));
+
+      const data = transformations(form);
+
+      addFieldRow(name, data, position);
+    },
+    [addFieldRow, components, name]
+  );
 
   const handleClickOpenPicker = () => {
     if (dynamicDisplayedComponentsLength < max) {
@@ -133,72 +174,85 @@ const DynamicZone = ({
     }
   };
 
-  const handleMoveComponent = (newIndex: number, currentIndex: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.reorder'),
-          defaultMessage: '{item}, moved. New position in list: {position}.',
-        },
-        {
-          item: `${name}.${currentIndex}`,
-          position: getItemPos(newIndex),
-        }
-      )
-    );
+  const handleMoveComponent = React.useCallback(
+    (newIndex: number, currentIndex: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.reorder'),
+            defaultMessage: '{item}, moved. New position in list: {position}.',
+          },
+          {
+            item: `${name}.${currentIndex}`,
+            position: `${newIndex + 1} of ${value.length}`,
+          }
+        )
+      );
 
-    moveFieldRow(name, currentIndex, newIndex);
-  };
+      moveFieldRow(name, currentIndex, newIndex);
+    },
+    [formatMessage, moveFieldRow, name, value.length]
+  );
 
-  const getItemPos = (index: number) => `${index + 1} of ${value.length}`;
+  const handleCancel = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.cancel-item'),
+            defaultMessage: '{item}, dropped. Re-order cancelled.',
+          },
+          {
+            item: `${name}.${index}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name]
+  );
 
-  const handleCancel = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.cancel-item'),
-          defaultMessage: '{item}, dropped. Re-order cancelled.',
-        },
-        {
-          item: `${name}.${index}`,
-        }
-      )
-    );
-  };
+  const handleGrabItem = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.grab-item'),
+            defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+          },
+          {
+            item: `${name}.${index}`,
+            position: `${index + 1} of ${value.length}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name, value.length]
+  );
 
-  const handleGrabItem = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.grab-item'),
-          defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
-        },
-        {
-          item: `${name}.${index}`,
-          position: getItemPos(index),
-        }
-      )
-    );
-  };
+  const handleDropItem = React.useCallback(
+    (index: number) => {
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('dnd.drop-item'),
+            defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+          },
+          {
+            item: `${name}.${index}`,
+            position: `${index + 1} of ${value.length}`,
+          }
+        )
+      );
+    },
+    [formatMessage, name, value.length]
+  );
 
-  const handleDropItem = (index: number) => {
-    setLiveText(
-      formatMessage(
-        {
-          id: getTranslation('dnd.drop-item'),
-          defaultMessage: `{item}, dropped. Final position in list: {position}.`,
-        },
-        {
-          item: `${name}.${index}`,
-          position: getItemPos(index),
-        }
-      )
-    );
-  };
-
-  const handleRemoveComponent = (name: string, currentIndex: number) => () => {
-    removeFieldRow(name, currentIndex);
-  };
+  const handleRemoveComponent = React.useCallback(
+    (currentIndex: number) => {
+      removeFieldRow(name, currentIndex);
+    },
+    [name, removeFieldRow]
+  );
 
   const hasError = error !== undefined;
 
@@ -246,7 +300,7 @@ const DynamicZone = ({
 
   return (
     <DynamicZoneProvider isInDynamicZone>
-      <Flex direction="column" alignItems="stretch" gap={6}>
+      <Flex direction="column" alignItems="stretch" gap={{ initial: 4, medium: 6 }}>
         {dynamicDisplayedComponentsLength > 0 && (
           <Box>
             <DynamicZoneLabel
@@ -280,13 +334,15 @@ const DynamicZone = ({
                     index={index}
                     componentUid={field.__component}
                     onMoveComponent={handleMoveComponent}
-                    onRemoveComponentClick={handleRemoveComponent(name, index)}
+                    onRemoveComponentClick={handleRemoveComponent}
                     onCancel={handleCancel}
                     onDropItem={handleDropItem}
                     onGrabItem={handleGrabItem}
                     onAddComponent={handleAddComponent}
                     dynamicComponentsByCategory={dynamicComponentsByCategory}
                     totalLength={dynamicDisplayedComponentsLength}
+                    forceOpen={openComponentKey === field.__temp_key__}
+                    onForceOpenHandled={handleForceOpenHandled}
                   >
                     {children}
                   </DynamicComponent>

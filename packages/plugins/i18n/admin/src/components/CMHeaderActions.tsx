@@ -40,10 +40,10 @@ import { styled } from 'styled-components';
 import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
 import { useI18n } from '../hooks/useI18n';
 import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
+import { useLazyGetFillFromLocaleDataQuery } from '../services/fillFromLocale';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
 import { useGetSettingsQuery } from '../services/settings';
-import { cleanData } from '../utils/clean';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
@@ -161,7 +161,6 @@ const LocalePickerAction = ({
   });
   const { data: settings } = useGetSettingsQuery();
   const isAiAvailable = useAIAvailability();
-  const setValues = useForm('LocalePickerAction', (state) => state.setValues);
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -181,56 +180,9 @@ const LocalePickerAction = ({
     [query.plugins, setQuery]
   );
 
-  const nonTranslatedFields = React.useMemo(() => {
-    if (!schema?.attributes) return [];
-    return Object.keys(schema.attributes).filter((field) => {
-      const attribute = schema.attributes[field] as Record<string, unknown>;
-      return (attribute?.pluginOptions as any)?.i18n?.localized === false;
-    });
-  }, [schema?.attributes]);
-
-  const sourceLocaleData = React.useMemo(() => {
-    if (!Array.isArray(locales) || !meta?.availableLocales) return null;
-
-    const defaultLocale = locales.find((locale: Locale) => locale.isDefault);
-    const existingLocales = meta.availableLocales.map((loc) => loc.locale);
-
-    const sourceLocaleCode =
-      defaultLocale &&
-      existingLocales.includes(defaultLocale.code) &&
-      defaultLocale.code !== currentDesiredLocale
-        ? defaultLocale.code
-        : existingLocales.find((locale) => locale !== currentDesiredLocale);
-
-    if (!sourceLocaleCode) return null;
-
-    // Find the document data from availableLocales (now includes non-translatable fields)
-    const sourceLocaleDoc = meta.availableLocales.find((loc) => loc.locale === sourceLocaleCode);
-
-    return sourceLocaleDoc
-      ? { locale: sourceLocaleCode, data: sourceLocaleDoc as Record<string, unknown> }
-      : null;
-  }, [locales, meta?.availableLocales, currentDesiredLocale]);
-
-  /**
-   * Prefilling form with non-translatable fields from already existing locale
-   */
-  React.useEffect(() => {
-    // Only run when creating a new locale (no document ID yet) and when we have non-translatable fields
-    if (!document?.id && nonTranslatedFields.length > 0 && sourceLocaleData?.data) {
-      const dataToSet = nonTranslatedFields.reduce(
-        (acc: Record<string, unknown>, field: string) => {
-          acc[field] = sourceLocaleData.data[field];
-          return acc;
-        },
-        {}
-      );
-
-      if (Object.keys(dataToSet).length > 0) {
-        setValues(dataToSet);
-      }
-    }
-  }, [document?.id, nonTranslatedFields, sourceLocaleData?.data, setValues]);
+  // Non-localized prefill is handled in `useDocument.getInitialFormValues`
+  // so inherited values persist in initial form state, even after form resets or re-initialization.
+  // Doing this here with setValues would not persist if the cache is reused.
 
   React.useEffect(() => {
     if (!Array.isArray(locales) || !hasI18n) {
@@ -528,19 +480,16 @@ const FillFromAnotherLocaleAction = ({
   collectionType,
 }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { hasI18n } = useI18n();
   const currentDesiredLocale = query.plugins?.i18n?.locale;
   const [localeSelected, setLocaleSelected] = React.useState<string | null>(null);
   const setValues = useForm('FillFromAnotherLocale', (state) => state.setValues);
 
-  const { getDocument } = useDocumentActions();
-  const { schema, components } = useDocument({
-    model,
-    documentId,
-    collectionType,
-    params: { locale: currentDesiredLocale },
-  });
+  const [getFillFromLocaleData, { isLoading: isFillFromLocaleLoading }] =
+    useLazyGetFillFromLocaleDataQuery();
   const { data: locales = [] } = useGetLocalesQuery();
 
   const isAIAvailable = useAIAvailability();
@@ -552,23 +501,30 @@ const FillFromAnotherLocaleAction = ({
     : [];
 
   const fillFromLocale = (onClose: () => void) => async () => {
-    const response = await getDocument({
-      collectionType,
-      model,
-      documentId,
-      params: { locale: localeSelected },
-    });
-    if (!response || !schema) {
+    if (!localeSelected || !currentDesiredLocale) {
       return;
     }
 
-    const { data } = response;
+    try {
+      const { data } = await getFillFromLocaleData({
+        model,
+        documentId,
+        sourceLocale: localeSelected,
+        targetLocale: currentDesiredLocale,
+        collectionType: collectionType as 'collection-types' | 'single-types',
+      }).unwrap();
 
-    const cleanedData = cleanData(data, schema, components);
+      if (data) {
+        setValues(data);
+      }
 
-    setValues(cleanedData);
-
-    onClose();
+      onClose();
+    } catch (err) {
+      toggleNotification({
+        type: 'danger',
+        message: formatAPIError(err as Parameters<typeof formatAPIError>[0]),
+      });
+    }
   };
 
   if (!hasI18n) {
@@ -633,13 +589,24 @@ const FillFromAnotherLocaleAction = ({
           </Dialog.Body>
           <Dialog.Footer>
             <Flex gap={2} width="100%">
-              <Button flex="auto" variant="tertiary" onClick={onClose}>
+              <Button
+                flex="auto"
+                variant="tertiary"
+                onClick={onClose}
+                disabled={isFillFromLocaleLoading}
+              >
                 {formatMessage({
                   id: getTranslation('CMEditViewCopyLocale.cancel-text'),
                   defaultMessage: 'No, cancel',
                 })}
               </Button>
-              <Button flex="auto" variant="success" onClick={fillFromLocale(onClose)}>
+              <Button
+                flex="auto"
+                variant="success"
+                onClick={fillFromLocale(onClose)}
+                loading={isFillFromLocaleLoading}
+                disabled={isFillFromLocaleLoading}
+              >
                 {formatMessage({
                   id: getTranslation('CMEditViewCopyLocale.submit-text'),
                   defaultMessage: 'Yes, fill in',
@@ -889,20 +856,16 @@ const BulkLocaleAction: DocumentActionComponent = ({
       });
     }
 
-    // Build the validation errors for each locale.
-    const allDocuments = [document, ...(document.localizations ?? [])];
-    const errors = allDocuments.reduce<FormErrors>((errs, document) => {
-      if (!document) {
-        return errs;
-      }
-
-      // Validate each locale entry via the useDocument validate function and store any errors in a dictionary
+    // Validate the current document locale only. Other locales have minimal
+    // data populated for performance reasons and will be validated server-side
+    // during the actual bulk publish operation.
+    const errors: FormErrors = {};
+    if (document.locale) {
       const validation = validate(document as Modules.Documents.AnyDocument);
       if (validation !== null) {
-        errs[document.locale] = validation;
+        errors[document.locale] = validation;
       }
-      return errs;
-    }, {});
+    }
 
     return [locales, errors];
   }, [document, meta?.availableLocales, validate]);

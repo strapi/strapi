@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import type { Core } from '@strapi/types';
+import { registerOpenAPIRoute } from './openapi';
 
 const createRouteScopeGenerator = (namespace: string) => (route: Core.RouteInput) => {
   const prefix = namespace.endsWith('::') ? namespace : `${namespace}.`;
@@ -22,6 +23,7 @@ export default (strapi: Core.Strapi) => {
   registerAdminRoutes(strapi);
   registerAPIRoutes(strapi);
   registerPluginRoutes(strapi);
+  registerOpenAPIRoute(strapi);
 };
 
 /**
@@ -61,6 +63,7 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
         generateRouteScope(route);
         route.info = { pluginName };
       });
+      strapi.contentAPI.applyExtraParamsToRoutes(plugin.routes);
 
       strapi.server.routes({
         type: 'admin',
@@ -79,6 +82,7 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
           generateRouteScope(route);
           route.info = { pluginName };
         });
+        strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
 
         strapi.server.routes(router);
       });
@@ -106,6 +110,7 @@ const registerAPIRoutes = (strapi: Core.Strapi) => {
         generateRouteScope(route);
         route.info = { apiName };
       });
+      strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
 
       return strapi.server.routes(router);
     });

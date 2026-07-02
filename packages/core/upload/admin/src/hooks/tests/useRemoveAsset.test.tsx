@@ -4,7 +4,7 @@ import { adminApi, NotificationsProvider, useNotification } from '@strapi/admin/
 import { DesignSystemProvider } from '@strapi/design-system';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
 import { Provider } from 'react-redux';
@@ -131,8 +131,8 @@ describe('useRemoveAsset', () => {
 
   test('calls toggleNotification in case of an error', async () => {
     server.use(
-      rest.delete('/upload/:type/:id', (req, res, ctx) => {
-        return res(ctx.status(500));
+      http.delete('/upload/:type/:id', () => {
+        return new HttpResponse(null, { status: 500 });
       })
     );
     const originalConsoleError = console.error;

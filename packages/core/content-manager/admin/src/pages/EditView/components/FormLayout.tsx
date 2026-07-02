@@ -48,7 +48,7 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   document: ReturnType<UseDocument>;
 }
 
-const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
+const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const modelUid = document.schema?.uid;
 
@@ -60,14 +60,7 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
   };
 
   return (
-    <Flex
-      direction="column"
-      alignItems="stretch"
-      gap={{
-        initial: 4,
-        large: 6,
-      }}
-    >
+    <Flex direction="column" alignItems="stretch" gap={6}>
       {layout.map((panel, index) => {
         if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
           const [row] = panel;
@@ -88,17 +81,10 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
 
         return (
           <Box key={index} {...(hasBackground && panelStyles)}>
-            <Flex
-              direction="column"
-              alignItems="stretch"
-              gap={{
-                initial: 4,
-                large: 6,
-              }}
-            >
+            <Flex direction="column" alignItems="stretch" gap={6}>
               {panel.map((row, gridRowIndex) => {
                 return (
-                  <ResponsiveGridRoot key={gridRowIndex} gap={4}>
+                  <ResponsiveGridRoot key={gridRowIndex} gap={{ initial: 6, medium: 4 }}>
                     {row.map(({ size, ...field }) => {
                       return (
                         <ResponsiveGridItem
@@ -126,6 +112,8 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
       })}
     </Flex>
   );
-};
+});
+
+FormLayout.displayName = 'FormLayout';
 
 export { FormLayout, FormLayoutProps };

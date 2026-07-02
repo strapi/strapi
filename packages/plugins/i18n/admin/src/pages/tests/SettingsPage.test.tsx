@@ -1,6 +1,6 @@
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { render, screen, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
@@ -45,7 +45,7 @@ describe('Settings Page', () => {
   });
 
   it('renders the no locales layout correctly', async () => {
-    server.use(rest.get('/i18n/locales', (_, res, ctx) => res(ctx.json([]))));
+    server.use(http.get('/i18n/locales', () => HttpResponse.json([])));
 
     render(<SettingsPage />);
 

@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { open } from 'node:fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
 import {
   detectMimeType,
@@ -15,8 +15,24 @@ jest.mock('file-type', () => ({
   fileTypeFromBuffer: jest.fn(),
 }));
 
-const mockReadFile = jest.mocked(readFile);
+const mockOpen = jest.mocked(open);
 const mockFileTypeFromBuffer = jest.mocked(fileTypeFromBuffer);
+
+const mockFileRead = (content: Buffer | string) => {
+  const source = Buffer.isBuffer(content) ? content : Buffer.from(content);
+  const fileHandle = {
+    read: jest.fn(async (buffer: Buffer, offset: number, length: number) => {
+      const bytesRead = source.copy(buffer, offset, 0, Math.min(source.length, length));
+
+      return { bytesRead, buffer };
+    }),
+    close: jest.fn().mockResolvedValue(undefined),
+  };
+
+  mockOpen.mockResolvedValue(fileHandle as any);
+
+  return fileHandle;
+};
 
 const mockStrapi = {
   log: {
@@ -39,7 +55,7 @@ describe('mime-validation', () => {
 
   describe('detectMimeType', () => {
     it('should throw error when file reading fails', async () => {
-      mockReadFile.mockRejectedValue(new Error('File not found'));
+      mockOpen.mockRejectedValue(new Error('File not found'));
 
       await expect(detectMimeType({ path: '/nonexistent/file.jpg' })).rejects.toThrow(
         'Failed to read file: File not found'
@@ -48,7 +64,7 @@ describe('mime-validation', () => {
 
     it('should return undefined when MIME type detection returns no result', async () => {
       const mockBuffer = Buffer.from('unknown data');
-      mockReadFile.mockResolvedValue(mockBuffer);
+      mockFileRead(mockBuffer);
       mockFileTypeFromBuffer.mockResolvedValue(undefined);
 
       const result = await detectMimeType({ path: '/path/to/unknown.file' });
@@ -56,14 +72,28 @@ describe('mime-validation', () => {
       expect(result).toBeUndefined();
     });
 
+    it('should only read the first bytes needed for MIME detection', async () => {
+      const fileHandle = mockFileRead(Buffer.alloc(10_000, 'a'));
+      mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });
+
+      const result = await detectMimeType({ path: '/path/to/large-video.mp4' });
+
+      expect(result).toBe('image/jpeg');
+      expect(mockOpen).toHaveBeenCalledWith('/path/to/large-video.mp4', 'r');
+      expect(fileHandle.read).toHaveBeenCalledWith(expect.any(Buffer), 0, 4100, 0);
+      expect(fileHandle.close).toHaveBeenCalledTimes(1);
+      expect(mockFileTypeFromBuffer.mock.calls[0][0]).toHaveLength(4100);
+    });
+
     it('should throw error when MIME type detection fails', async () => {
       const mockBuffer = Buffer.from('corrupted data');
-      mockReadFile.mockResolvedValue(mockBuffer);
+      const fileHandle = mockFileRead(mockBuffer);
       mockFileTypeFromBuffer.mockRejectedValue(new Error('Invalid file format'));
 
       await expect(detectMimeType({ path: '/path/to/corrupted.file' })).rejects.toThrow(
         'Failed to detect MIME type: Invalid file format'
       );
+      expect(fileHandle.close).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -81,6 +111,14 @@ describe('mime-validation', () => {
 
       expect(isMimeTypeAllowed('image/jpeg', config)).toBe(true);
       expect(isMimeTypeAllowed('application/pdf', config)).toBe(true);
+    });
+
+    it('should return false when allowedTypes is explicit empty array (nothing allowed)', () => {
+      const config: SecurityConfig = { allowedTypes: [] };
+
+      expect(isMimeTypeAllowed('image/jpeg', config)).toBe(false);
+      expect(isMimeTypeAllowed('application/pdf', config)).toBe(false);
+      expect(isMimeTypeAllowed('text/plain', config)).toBe(false);
     });
 
     it('should deny MIME type when in denied list', () => {
@@ -188,8 +226,51 @@ describe('mime-validation', () => {
       expect(result.error).toBeUndefined();
     });
 
+    it('when no config, runs detection and returns detectedMime so stored file uses detected type when declared is octet-stream', async () => {
+      mockFileRead(Buffer.from('fake docx content'));
+      mockFileTypeFromBuffer.mockResolvedValue({
+        mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ext: 'docx',
+      });
+
+      const fileWithOctetStream = {
+        name: 'document.docx',
+        path: '/tmp/document.docx',
+        size: 100000,
+        mimetype: 'application/octet-stream',
+      };
+      const config: SecurityConfig = {};
+
+      const result = await validateFile(fileWithOctetStream, config, mockStrapi);
+
+      expect(result.isValid).toBe(true);
+      expect(result.detectedMime).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
+      expect(mockOpen).toHaveBeenCalled();
+      expect(mockFileTypeFromBuffer).toHaveBeenCalled();
+    });
+
+    it('when no config and detection returns nothing, uses extension so stored mime is not octet-stream', async () => {
+      mockFileRead(Buffer.from('unknown binary'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined);
+
+      const fileWithOctetStream = {
+        name: 'document.pdf',
+        path: '/tmp/document.pdf',
+        size: 100000,
+        mimetype: 'application/octet-stream',
+      };
+      const config: SecurityConfig = {};
+
+      const result = await validateFile(fileWithOctetStream, config, mockStrapi);
+
+      expect(result.isValid).toBe(true);
+      expect(result.detectedMime).toBe('application/pdf');
+    });
+
     it('should validate MIME type successfully', async () => {
-      mockReadFile.mockResolvedValue(Buffer.from('fake image'));
+      mockFileRead(Buffer.from('fake image'));
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });
 
       const config: SecurityConfig = {
@@ -202,7 +283,7 @@ describe('mime-validation', () => {
     });
 
     it('should reject disallowed MIME type', async () => {
-      mockReadFile.mockResolvedValue(Buffer.from('fake image'));
+      mockFileRead(Buffer.from('fake image'));
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });
 
       const config: SecurityConfig = {
@@ -213,7 +294,64 @@ describe('mime-validation', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
-      expect(result.error?.message).toContain('image/jpeg');
+      expect(
+        result.error?.message?.includes('image/jpeg') ||
+          result.error?.details?.finalType === 'image/jpeg' ||
+          result.error?.details?.reason?.includes('allow list')
+      ).toBe(true);
+    });
+
+    it('should allow SVG when detection returns application/xml but extension is image/svg+xml and image/* is allowed', async () => {
+      mockFileRead('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>');
+      mockFileTypeFromBuffer.mockResolvedValue({ mime: 'application/xml', ext: 'xml' });
+
+      const svgFile = {
+        name: 'logo.svg',
+        path: '/tmp/logo.svg',
+        size: 1000,
+        type: 'image/svg+xml',
+      };
+      const config: SecurityConfig = {
+        allowedTypes: ['image/*'],
+      };
+
+      const result = await validateFile(svgFile, config, mockStrapi);
+
+      expect(result.isValid).toBe(true);
+      expect(result.detectedMime).toBe('image/svg+xml');
+    });
+
+    it('should reject all files when allowedTypes is explicit empty array', async () => {
+      mockFileRead(Buffer.from('fake image'));
+      mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });
+
+      const config: SecurityConfig = { allowedTypes: [] };
+
+      const result = await validateFile(mockFile, config, mockStrapi);
+
+      expect(result.isValid).toBe(false);
+      expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
+      expect(
+        result.error?.details?.reason?.includes('allow list') ||
+          result.error?.message?.includes('not allowed')
+      ).toBe(true);
+    });
+
+    it('should reject undetectable file when allowedTypes is explicit empty array', async () => {
+      mockFileRead(Buffer.from('binary data'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined);
+
+      const fileWithOctetStream = {
+        ...mockFile,
+        name: 'unknown.bin',
+        type: 'application/octet-stream',
+      };
+      const config: SecurityConfig = { allowedTypes: [] };
+
+      const result = await validateFile(fileWithOctetStream, config, mockStrapi);
+
+      expect(result.isValid).toBe(false);
+      expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
     });
 
     it('should handle files without path', async () => {
@@ -225,7 +363,7 @@ describe('mime-validation', () => {
       const result = await validateFile(fileWithoutPath, config, mockStrapi);
 
       expect(result.isValid).toBe(true);
-      expect(mockReadFile).not.toHaveBeenCalled();
+      expect(mockOpen).not.toHaveBeenCalled();
     });
 
     it('should extract file info from various file object formats', async () => {
@@ -268,7 +406,7 @@ describe('mime-validation', () => {
     });
 
     it('should handle single file', async () => {
-      mockReadFile.mockResolvedValue(Buffer.from('fake image'));
+      mockFileRead(Buffer.from('fake image'));
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });
 
       const results = await validateFiles(mockFile1, mockStrapi);
@@ -278,7 +416,7 @@ describe('mime-validation', () => {
     });
 
     it('should handle array of files', async () => {
-      mockReadFile.mockResolvedValue(Buffer.from('fake data'));
+      mockFileRead(Buffer.from('fake data'));
       mockFileTypeFromBuffer
         .mockResolvedValueOnce({ mime: 'image/jpeg', ext: 'jpg' })
         .mockResolvedValueOnce({ mime: 'application/pdf', ext: 'pdf' });
@@ -296,7 +434,7 @@ describe('mime-validation', () => {
     });
 
     it('should handle validation errors gracefully', async () => {
-      mockReadFile.mockRejectedValue(new Error('Unexpected error'));
+      mockOpen.mockRejectedValue(new Error('Unexpected error'));
       mockStrapi.config.get.mockReturnValue({
         allowedTypes: ['application/pdf'],
       });
@@ -318,6 +456,30 @@ describe('mime-validation', () => {
       expect(results[0].isValid).toBe(true);
       expect(mockStrapi.log.warn).toHaveBeenCalledWith(
         expect.stringContaining('No upload security configuration found')
+      );
+    });
+
+    it('when no config, still runs detection and returns detectedMime so enforceUploadSecurity can set detectedMimeType for octet-stream', async () => {
+      mockStrapi.config.get.mockReturnValue({});
+      mockFileRead(Buffer.from('fake docx'));
+      mockFileTypeFromBuffer.mockResolvedValue({
+        mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ext: 'docx',
+      });
+
+      const fileWithOctetStream = {
+        name: 'document.docx',
+        path: '/tmp/document.docx',
+        size: 100000,
+        mimetype: 'application/octet-stream',
+      };
+
+      const results = await validateFiles([fileWithOctetStream], mockStrapi);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].isValid).toBe(true);
+      expect(results[0].detectedMime).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       );
     });
 
@@ -370,7 +532,7 @@ describe('mime-validation', () => {
       mockStrapi.config.get.mockReturnValue({
         allowedTypes: ['image/jpeg'],
       });
-      mockReadFile.mockResolvedValue(Buffer.from('fake image'));
+      mockFileRead(Buffer.from('fake image'));
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });
     });
 
@@ -379,6 +541,77 @@ describe('mime-validation', () => {
 
       expect(result.validFiles).toHaveLength(1);
       expect(result.validFileNames).toEqual(['test.jpg']);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should enrich valid files with detected MIME type', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['application/*'],
+      });
+      mockFileRead(Buffer.from('fake docx'));
+      mockFileTypeFromBuffer.mockResolvedValue({
+        mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ext: 'docx',
+      });
+
+      const fileWithGenericMime = {
+        name: 'test.docx',
+        path: '/tmp/test.docx',
+        size: 100000,
+        type: 'application/octet-stream', // Generic MIME from client
+      };
+
+      const result = await enforceUploadSecurity([fileWithGenericMime], mockStrapi);
+
+      expect(result.validFiles).toHaveLength(1);
+      expect(result.validFiles[0].detectedMimeType).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('when no config, enriches file with detectedMimeType when declared is application/octet-stream so stored mime is detected type', async () => {
+      mockStrapi.config.get.mockReturnValue({});
+      mockFileRead(Buffer.from('fake docx'));
+      mockFileTypeFromBuffer.mockResolvedValue({
+        mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ext: 'docx',
+      });
+
+      const fileWithOctetStream = {
+        name: 'document.docx',
+        path: '/tmp/document.docx',
+        size: 100000,
+        mimetype: 'application/octet-stream',
+      };
+
+      const result = await enforceUploadSecurity([fileWithOctetStream], mockStrapi);
+
+      expect(result.validFiles).toHaveLength(1);
+      expect(result.validFiles[0].detectedMimeType).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('when no config and detection fails (undefined), uses extension so stored mime is not octet-stream', async () => {
+      mockStrapi.config.get.mockReturnValue({});
+      mockFileRead(Buffer.from('content'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined);
+
+      const fileWithExtOnly = {
+        name: 'document.docx',
+        path: '/tmp/document.docx',
+        size: 100,
+        mimetype: 'application/octet-stream',
+      };
+
+      const result = await enforceUploadSecurity([fileWithExtOnly], mockStrapi);
+
+      expect(result.validFiles).toHaveLength(1);
+      expect(result.validFiles[0].detectedMimeType).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
       expect(result.errors).toHaveLength(0);
     });
 

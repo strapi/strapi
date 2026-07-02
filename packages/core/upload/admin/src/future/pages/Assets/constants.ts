@@ -6,7 +6,7 @@ export const localStorageKeys = {
 
 export const viewOptions = {
   GRID: 0,
-  LIST: 1,
+  TABLE: 1,
 };
 
 interface TableHeader {
@@ -20,14 +20,19 @@ export const TABLE_HEADERS: TableHeader[] = [
     name: 'name',
     label: { id: getTranslationKey('list.table.header.name'), defaultMessage: 'name' },
   },
-  // TODO translation keys
   {
     name: 'createdAt',
-    label: { id: 'TODO: creation date', defaultMessage: 'creation date' },
+    label: {
+      id: getTranslationKey('list.table.header.creationDate'),
+      defaultMessage: 'creation date',
+    },
   },
   {
     name: 'updatedAt',
-    label: { id: 'TODO: last modified', defaultMessage: 'last modified' },
+    label: {
+      id: getTranslationKey('list.table.header.lastModified'),
+      defaultMessage: 'last modified',
+    },
   },
   {
     name: 'size',
