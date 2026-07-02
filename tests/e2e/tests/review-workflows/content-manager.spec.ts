@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  navToHeader,
+} from '../../../utils/shared';
 
 const waitForAssigneeUpdate = (page) =>
   page.waitForResponse(
@@ -15,19 +20,8 @@ const waitForStageUpdate = (page) =>
       response.request().method() === 'PUT' && response.url().includes('/stage') && response.ok()
   );
 
-const waitForArticleList = (page) =>
-  page.waitForResponse((response) => {
-    if (response.request().method() !== 'GET' || !response.ok()) {
-      return false;
-    }
-    const { pathname } = new URL(response.url());
-    return /\/collection-types\/api::article\.article$/.test(pathname);
-  });
-
 const goBackToArticleList = async (page) => {
-  const listLoaded = waitForArticleList(page);
-  await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
-  await listLoaded;
+  await navToHeader(page, ['Content Manager', 'Article'], 'Article');
 };
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
