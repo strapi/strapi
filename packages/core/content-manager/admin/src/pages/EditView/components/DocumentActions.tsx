@@ -747,12 +747,8 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    if (!documentId || modified) {
-      setLocalDraftRelationCounts(countLocalDraftRelations(formValues, schema, components, model));
-    } else {
-      setLocalDraftRelationCounts(EMPTY_DRAFT_RELATION_COUNTS);
-    }
-  }, [components, documentId, formValues, model, modified, schema]);
+    setLocalDraftRelationCounts(countLocalDraftRelations(formValues, schema, components, model));
+  }, [components, formValues, model, schema]);
 
   const fetchDraftRelationsCount = React.useCallback(async () => {
     if (!document?.documentId || isListView) {
@@ -989,6 +985,17 @@ const PublishAction: DocumentActionComponent = ({
     }
   };
 
+  const getFreshDraftRelationCounts = React.useCallback(
+    (): DraftRelationCounts =>
+      resolveDraftRelationCounts(
+        documentId,
+        modified,
+        countLocalDraftRelations(getValues(), schema, components, model),
+        serverDraftRelationCounts
+      ),
+    [components, documentId, getValues, model, modified, schema, serverDraftRelationCounts]
+  );
+
   const draftRelationCounts = resolveDraftRelationCounts(
     documentId,
     modified,
@@ -1003,6 +1010,8 @@ const PublishAction: DocumentActionComponent = ({
     bodyIcon,
     confirmLabel,
   } = getDraftRelationsPublishState(draftRelationCounts);
+
+  const supportsDraftRelationWarning = Boolean(schema?.options?.draftAndPublish);
 
   /**
    * Disabled when:
@@ -1044,7 +1053,7 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
-      if (hasDraftRelations) {
+      if (getDraftRelationsPublishState(getFreshDraftRelationCounts()).hasDraftRelations) {
         openPublishConfirmDialog(publishConfirmScope);
         return;
       }
@@ -1059,7 +1068,7 @@ const PublishAction: DocumentActionComponent = ({
     };
   }, [
     fromRelationModal,
-    hasDraftRelations,
+    getFreshDraftRelationCounts,
     isDisabled,
     isRelationModalOpen,
     performPublish,
@@ -1076,21 +1085,23 @@ const PublishAction: DocumentActionComponent = ({
     loading: isLoading,
     position: ['panel', 'preview', 'relation-modal'],
     disabled: isDisabled,
-    publishConfirmScope: hasDraftRelations ? publishConfirmScope : undefined,
+    publishConfirmScope: supportsDraftRelationWarning ? publishConfirmScope : undefined,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
     }),
     onClick: async () => {
-      if (hasDraftRelations) {
-        // In this case we need to show the user a confirmation dialog.
-        // Return from the onClick and let the dialog handle the process.
+      if (getDraftRelationsPublishState(getFreshDraftRelationCounts()).hasDraftRelations) {
+        // Let DocumentActionButton open the confirmation dialog.
         return;
       }
 
       await performPublish();
+
+      // Skip the registered dialog when publishing directly.
+      return true;
     },
-    dialog: hasDraftRelations
+    dialog: supportsDraftRelationWarning
       ? {
           type: 'dialog',
           variant: dialogVariant,

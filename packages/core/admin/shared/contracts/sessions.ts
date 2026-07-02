@@ -17,8 +17,6 @@ export interface SanitizedAdminSession {
   loginAt?: string;
   /** ISO timestamp of the last time this session was refreshed/used. */
   lastActiveAt?: string;
-  /** IP address captured at login, when available. */
-  ip?: string;
 }
 
 /**

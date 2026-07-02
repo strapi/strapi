@@ -916,7 +916,7 @@ describe('SessionManager sessions management', () => {
 
   describe('generateRefreshToken metadata', () => {
     it('should persist provided metadata on the created session record', async () => {
-      const metadata = { loginAt: '2026-06-12T00:00:00.000Z', ip: '127.0.0.1' };
+      const metadata = { loginAt: '2026-06-12T00:00:00.000Z', deviceName: 'Chrome on macOS' };
 
       await sessionManager('admin').generateRefreshToken('user123', 'device456', { metadata });
 
