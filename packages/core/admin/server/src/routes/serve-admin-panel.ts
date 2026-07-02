@@ -57,12 +57,17 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
 };
 
 // serveStatic is not supposed to be used to serve a folder that have sub-folders
-const serveStatic = (filesDir: any, koaStaticOptions = {}) => {
+export const serveStatic = (filesDir: any, koaStaticOptions = {}) => {
   const serve = koaStatic(filesDir, koaStaticOptions);
 
   return async (ctx: Context, next: Next) => {
+    if (!extname(ctx.path)) {
+      await next();
+      return;
+    }
+
     const prev = ctx.path;
-    const newPath = basename(ctx.path);
+    const newPath = `/${basename(ctx.path)}`;
 
     ctx.path = newPath;
     await serve(ctx, async () => {

@@ -88,6 +88,10 @@ const recreateStrapiInstance = async (config = {}) => {
       }
     },
   });
+  // The previous instance already seeded `internals.user`; remove it before
+  // re-seeding so we don't attempt to create a duplicate (the user service now
+  // goes through the Document Service, which validates uniqueness).
+  await strapi.db.query('plugin::users-permissions.user').deleteMany();
   await createAuthenticatedUser({ strapi, userInfo: internals.user });
 };
 

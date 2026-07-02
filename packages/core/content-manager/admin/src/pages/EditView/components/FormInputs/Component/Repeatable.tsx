@@ -55,7 +55,7 @@ const RepeatableComponent = ({
   const components = currentDocument.components;
 
   const {
-    value = [],
+    value: rawValue,
     error,
     rawError,
   } = useField<Schema.Attribute.ComponentValue<`${string}.${string}`, true>>(name);
@@ -63,6 +63,7 @@ const RepeatableComponent = ({
   const moveFieldRow = useForm('RepeatableComponent', (state) => state.moveFieldRow);
   const removeFieldRow = useForm('RepeatableComponent', (state) => state.removeFieldRow);
   const { max = Infinity } = attribute;
+  const value = React.useMemo(() => (Array.isArray(rawValue) ? rawValue : []), [rawValue]);
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
