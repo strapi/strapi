@@ -2,11 +2,11 @@
 
 module.exports = {
   setupFilesAfterEnv: [__dirname + '/tests/setup/unit.setup.js'],
-  modulePathIgnorePatterns: ['.cache', 'dist'],
+  modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
   testPathIgnorePatterns: [
     '.testdata.{js,ts}',
     '.test.utils.{js,ts}',
-    '.d.ts',
+    '\\.d\\.ts$',
     '__tests__/resources',
     'tests/resources',
     // Prevent Jest from running Vitest test files

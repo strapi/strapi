@@ -12,7 +12,7 @@ import { Folder as FolderIcon, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../enums';
+import { ASSET_TYPES } from '../../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
@@ -165,7 +165,7 @@ interface AssetPreviewProps {
 const AssetPreview = ({ asset }: AssetPreviewProps) => {
   const { alternativeText, ext, formats, mime, url } = asset;
 
-  if (mime?.includes(AssetType.Image)) {
+  if (mime?.includes(ASSET_TYPES.Image)) {
     const mediaURL =
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
 

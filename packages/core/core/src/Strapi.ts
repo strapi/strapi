@@ -8,6 +8,7 @@ import { Database } from '@strapi/database';
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
 import { loadConfiguration } from './configuration';
+import { warnDeprecatedServerConfig } from './configuration/server-config';
 
 import * as factories from './factories';
 
@@ -273,6 +274,8 @@ class Strapi extends Container implements Core.Strapi {
       ...config.get('logger'), // DEPRECATED
       ...config.get('server.logger.config'),
     });
+
+    warnDeprecatedServerConfig(config, logger);
 
     // Instantiate the Strapi container
     this.add('config', () => config)
