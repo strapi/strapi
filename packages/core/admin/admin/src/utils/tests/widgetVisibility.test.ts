@@ -1,4 +1,9 @@
-import { hideDeployNowWidgetInProduction, DEPLOY_NOW_WIDGET_UID } from '../widgetVisibility';
+import {
+  hideCloudDeployMenuLinkInProduction,
+  hideDeployNowWidgetInProduction,
+  CLOUD_DEPLOY_MENU_LINK,
+  DEPLOY_NOW_WIDGET_UID,
+} from '../widgetVisibility';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 
@@ -35,5 +40,24 @@ describe('hideDeployNowWidgetInProduction', () => {
     expect(hideDeployNowWidgetInProduction(widgetsWithDeploy, undefined)).toEqual(
       widgetsWithDeploy
     );
+  });
+});
+
+describe('hideCloudDeployMenuLinkInProduction', () => {
+  const menuLinks = [
+    { to: 'plugins/upload', intlLabel: { id: 'upload', defaultMessage: 'Media Library' } },
+    { to: CLOUD_DEPLOY_MENU_LINK, intlLabel: { id: 'cloud', defaultMessage: 'Deploy' } },
+  ];
+
+  it('removes the cloud deploy menu link in production', () => {
+    expect(hideCloudDeployMenuLinkInProduction(menuLinks, 'production')).toEqual([menuLinks[0]]);
+  });
+
+  it('keeps the cloud deploy menu link outside production', () => {
+    expect(hideCloudDeployMenuLinkInProduction(menuLinks, 'development')).toEqual(menuLinks);
+  });
+
+  it('keeps the cloud deploy menu link when the environment is unknown', () => {
+    expect(hideCloudDeployMenuLinkInProduction(menuLinks, undefined)).toEqual(menuLinks);
   });
 });

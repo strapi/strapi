@@ -69,6 +69,7 @@ describe('homepage service', () => {
             },
           },
         },
+        contentTypes,
         requestContext: {
           get: jest.fn(() => ({
             state: {
@@ -119,6 +120,94 @@ describe('homepage service', () => {
       expect(result).toMatchObject([
         { documentId: 'article-1', contentTypeUid: 'api::article.article' },
         { documentId: 'page-1', contentTypeUid: 'api::page.page' },
+      ]);
+    });
+
+    it('excludes non-displayed content types from recent documents', async () => {
+      const contentTypes = {
+        'api::article.article': {
+          uid: 'api::article.article',
+          info: { displayName: 'Article' },
+          kind: 'collectionType',
+          options: {},
+          attributes: {},
+        },
+        'plugin::users-permissions.role': {
+          uid: 'plugin::users-permissions.role',
+          info: { displayName: 'Role' },
+          kind: 'collectionType',
+          options: {},
+          attributes: {},
+          pluginOptions: { 'content-manager': { visible: false } },
+        },
+      };
+
+      const findArticleDocuments = jest.fn(async () => [
+        {
+          documentId: 'article-1',
+          title: 'Article 1',
+          updatedAt: '2026-01-02T00:00:00.000Z',
+        },
+      ]);
+      const findConfigurations = jest.fn(async () => [
+        {
+          value: JSON.stringify({
+            uid: 'api::article.article',
+            settings: { mainField: 'title' },
+          }),
+        },
+      ]);
+
+      const strapi = {
+        admin: {
+          services: {
+            permission: {
+              findMany: jest.fn(async () => [
+                { subject: 'api::article.article' },
+                { subject: 'plugin::users-permissions.role' },
+              ]),
+            },
+          },
+        },
+        contentTypes,
+        requestContext: {
+          get: jest.fn(() => ({
+            state: {
+              user: { id: 1 },
+              userAbility: {},
+            },
+          })),
+        },
+        db: {
+          query: jest.fn(() => ({
+            findMany: findConfigurations,
+          })),
+        },
+        plugin: jest.fn(() => ({
+          service: jest.fn(() => ({
+            create: jest.fn(() => ({
+              cannot: {
+                read: jest.fn(() => false),
+              },
+              sanitizedQuery: {
+                read: jest.fn(async (query: unknown) => query),
+              },
+            })),
+          })),
+        })),
+        contentType: jest.fn((uid: keyof typeof contentTypes) => contentTypes[uid]),
+        documents: jest.fn(() => ({
+          findMany: findArticleDocuments,
+        })),
+      };
+
+      const service = createHomepageService({ strapi } as any);
+
+      const result = await service.queryLastDocuments({ sort: 'updatedAt:desc' });
+
+      expect(findArticleDocuments).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject([
+        { documentId: 'article-1', contentTypeUid: 'api::article.article' },
       ]);
     });
   });
