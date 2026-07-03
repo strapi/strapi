@@ -120,6 +120,75 @@ export default {
           });
         });
       },
+      replaceStream(newFile: File, oldFile: File): Promise<void> {
+        if (!newFile.stream) {
+          return Promise.reject(new Error('Missing file stream'));
+        }
+
+        // If the destination path is unchanged, writing the new file overwrites
+        // the old one atomically. If the hash or extension changed, write the
+        // new file first then unlink the old one so we never leave a gap.
+        const newPath = path.join(uploadPath, `${newFile.hash}${newFile.ext}`);
+        const oldPath = path.join(uploadPath, `${oldFile.hash}${oldFile.ext}`);
+        const samePath = newPath === oldPath;
+
+        const { stream } = newFile;
+
+        return new Promise((resolve, reject) => {
+          pipeline(stream, fs.createWriteStream(newPath), (err) => {
+            if (err) {
+              return reject(err);
+            }
+
+            newFile.url = `/${UPLOADS_FOLDER_NAME}/${newFile.hash}${newFile.ext}`;
+
+            if (!samePath && fs.existsSync(oldPath)) {
+              fs.unlink(oldPath, (unlinkErr) => {
+                if (unlinkErr) {
+                  return reject(unlinkErr);
+                }
+                resolve();
+              });
+              return;
+            }
+
+            resolve();
+          });
+        });
+      },
+      replace(newFile: File, oldFile: File): Promise<void> {
+        if (!newFile.buffer) {
+          return Promise.reject(new Error('Missing file buffer'));
+        }
+
+        const newPath = path.join(uploadPath, `${newFile.hash}${newFile.ext}`);
+        const oldPath = path.join(uploadPath, `${oldFile.hash}${oldFile.ext}`);
+        const samePath = newPath === oldPath;
+
+        const { buffer } = newFile;
+
+        return new Promise((resolve, reject) => {
+          fs.writeFile(newPath, buffer, (err) => {
+            if (err) {
+              return reject(err);
+            }
+
+            newFile.url = `/${UPLOADS_FOLDER_NAME}/${newFile.hash}${newFile.ext}`;
+
+            if (!samePath && fs.existsSync(oldPath)) {
+              fs.unlink(oldPath, (unlinkErr) => {
+                if (unlinkErr) {
+                  return reject(unlinkErr);
+                }
+                resolve();
+              });
+              return;
+            }
+
+            resolve();
+          });
+        });
+      },
       delete(file: File): Promise<string | void> {
         return new Promise((resolve, reject) => {
           const filePath = path.join(uploadPath, `${file.hash}${file.ext}`);

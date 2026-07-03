@@ -373,7 +373,10 @@ export declare namespace CountDraftRelations {
   }
 
   export interface Response {
-    data: number;
+    data: {
+      unpublishedRelations: number;
+      draftM2mLinks: number;
+    };
     error?: errors.ApplicationError;
   }
 }

@@ -3,6 +3,7 @@ import * as React from 'react';
 import { SubNav } from '@strapi/admin/strapi-admin';
 import { Flex, Searchbar, useCollator, useFilter, Divider, Loader } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { useLocation } from 'react-router-dom';
 
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { useTypedSelector } from '../modules/hooks';
@@ -11,6 +12,8 @@ import { getTranslation } from '../utils/translations';
 const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const [search, setSearch] = React.useState('');
   const { formatMessage, locale } = useIntl();
+  const { search: locationSearch } = useLocation();
+  const i18nLocale = new URLSearchParams(locationSearch).get('plugins[i18n][locale]');
 
   // Initialize Content Manager data to ensure links are available
   const { isLoading } = useContentManagerInitData();
@@ -159,6 +162,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
                       key={link.uid}
                       to={{
                         pathname: link.to,
+                        search: i18nLocale ? `?plugins[i18n][locale]=${i18nLocale}` : '',
                       }}
                       label={link.title}
                     />

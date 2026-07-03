@@ -285,6 +285,76 @@ describe('convert-query-params', () => {
 
         expect(newPopulate).toStrictEqual({ [key]: { count: true } });
       });
+
+      test.each<[label: string, key: string, populateValue: null | undefined]>([
+        ['dynamic zone', 'dz', null],
+        ['dynamic zone', 'dz', undefined],
+        ['morph to one', 'morph_to_one', null],
+        ['morph to one', 'morph_to_one', undefined],
+        ['morph to many', 'morph_to_many', null],
+        ['morph to many', 'morph_to_many', undefined],
+      ])('%s attributes ignore nil wildcard populate (%s)', (_, key, populateValue) => {
+        const populate = { [key]: { populate: populateValue } };
+
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
+
+        expect(newPopulate).toStrictEqual({ [key]: {} });
+      });
+
+      test.each<[label: string, key: string]>([
+        ['dynamic zone', 'dz'],
+        ['morph to one', 'morph_to_one'],
+        ['morph to many', 'morph_to_many'],
+      ])('%s attributes accept wildcard populate only as *', (_, key) => {
+        const populate = { [key]: { populate: '*' } };
+
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
+
+        expect(newPopulate).toStrictEqual({ [key]: { populate: true } });
+      });
+
+      const invalidPolymorphicNestedPopulateMessage =
+        `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
+        `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
+        `Consider using the fragment API for more granular population control.`;
+
+      test.each<[label: string, key: string]>([
+        ['dynamic zone', 'dz'],
+        ['morph to one', 'morph_to_one'],
+        ['morph to many', 'morph_to_many'],
+      ])('%s attributes reject non-wildcard string populate', (_, key) => {
+        const populate = { [key]: { populate: 'deep' } };
+
+        expect(() =>
+          transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
+        ).toThrowError(invalidPolymorphicNestedPopulateMessage);
+      });
+
+      test.each<[label: string, key: string]>([
+        ['dynamic zone', 'dz'],
+        ['morph to one', 'morph_to_one'],
+        ['morph to many', 'morph_to_many'],
+      ])('%s attributes reject object populate', (_, key) => {
+        const populate = { [key]: { populate: { title: true } } };
+
+        expect(() =>
+          transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
+        ).toThrowError(invalidPolymorphicNestedPopulateMessage);
+      });
+
+      test('array populate strings stay arrays (dot notation for dynamic zone)', () => {
+        const populate = ['dz', 'dz.field'];
+
+        expect(
+          transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
+        ).toStrictEqual(['dz', 'dz.field']);
+      });
     });
   });
 

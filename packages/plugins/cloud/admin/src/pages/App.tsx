@@ -5,12 +5,18 @@
  *
  */
 
-import { Page } from '@strapi/strapi/admin';
-import { Routes, Route } from 'react-router-dom';
+import { Page, useAppInfo } from '@strapi/strapi/admin';
+import { Navigate, Routes, Route } from 'react-router-dom';
 
 import { HomePage } from './HomePage';
 
 const App = () => {
+  const currentEnvironment = useAppInfo('CloudApp', (state) => state.currentEnvironment);
+
+  if (currentEnvironment === 'production') {
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <div>
       <Routes>
