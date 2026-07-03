@@ -64,6 +64,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
 
     const { regex } = attribute;
     const validationRegExp = regex ? new RegExp(regex) : UID_REGEX;
+    const trimmedDebouncedValue = debouncedValue?.trim() ?? '';
 
     const {
       data: defaultGeneratedUID,
@@ -141,15 +142,15 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
       {
         contentTypeUID: currentDocumentMeta.model,
         field: name,
-        value: debouncedValue ? debouncedValue.trim() : '',
+        value: trimmedDebouncedValue,
         params,
       },
       {
         // Don't check availability if the value is empty or wasn't changed
         skip: !Boolean(
           (hasChanged || isCloning) &&
-            debouncedValue !== undefined &&
-            validationRegExp.test(debouncedValue.trim())
+            trimmedDebouncedValue !== '' &&
+            validationRegExp.test(trimmedDebouncedValue)
         ),
       }
     );
@@ -191,7 +192,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     const shouldShowAvailability =
-      (hasChanged || isCloning) && debouncedValue != null && availability && !showRegenerate;
+      (hasChanged || isCloning) && trimmedDebouncedValue !== '' && availability && !showRegenerate;
 
     return (
       <Field.Root hint={hint} name={name} error={field.error} required={required}>

@@ -544,6 +544,8 @@ export interface UseTrackingReturn {
  */
 const useTracking = (): UseTrackingReturn => {
   const deviceType = useDeviceType();
+  const deviceTypeRef = React.useRef(deviceType);
+  deviceTypeRef.current = deviceType;
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
@@ -560,7 +562,7 @@ const useTracking = (): UseTrackingReturn => {
               userId,
               eventProperties: { ...properties },
               userProperties: {
-                deviceType,
+                deviceType: deviceTypeRef.current,
               },
               groupProperties: {
                 ...telemetryProperties,
@@ -584,7 +586,7 @@ const useTracking = (): UseTrackingReturn => {
 
       return null;
     },
-    [deviceType, telemetryProperties, userId, uuid]
+    [telemetryProperties, userId, uuid]
   );
 
   return { trackUsage };
