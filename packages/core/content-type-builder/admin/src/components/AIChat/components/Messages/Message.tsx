@@ -266,13 +266,7 @@ const AssistantMessage = ({
   );
 };
 
-export const ChatMessage = ({
-  message,
-  isLoading,
-}: {
-  message: AIMessage;
-  isLoading?: boolean;
-}) => {
+export const ChatMessage = ({ message }: { message: AIMessage }) => {
   /**
    * IMPORTANT: Messages are rendered using react-markdown (heavy compute)
    * Component re-renders on each message update, but AI SDK v5 provides
@@ -282,5 +276,5 @@ export const ChatMessage = ({
   if (message.role === 'user') {
     return <UserMessage message={message as UserMessageType} />;
   }
-  return <AssistantMessage message={message as AssistantMessageType} isLoading={isLoading} />;
+  return <AssistantMessage message={message as AssistantMessageType} />;
 };
