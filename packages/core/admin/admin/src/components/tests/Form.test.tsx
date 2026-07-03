@@ -1,3 +1,4 @@
+import { act } from '@testing-library/react';
 import { renderHook } from '@tests/utils';
 
 import { Form, useField } from '../Form';
@@ -122,5 +123,29 @@ describe('useField hook', () => {
     });
 
     expect(result.current.error).toBeUndefined();
+  });
+
+  it('handles multi-select change events from input-like targets', () => {
+    const { result } = renderHook(() => useField('options'), {
+      wrapper: createFormWrapper({}),
+    });
+
+    act(() => {
+      result.current.onChange({
+        target: {
+          name: 'options',
+          type: 'select-multiple',
+          value: '',
+          multiple: true,
+          options: [
+            { selected: true, value: 'first' },
+            { selected: false, value: 'second' },
+            { selected: true, value: 'third' },
+          ],
+        },
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(result.current.value).toEqual(['first', 'third']);
   });
 });

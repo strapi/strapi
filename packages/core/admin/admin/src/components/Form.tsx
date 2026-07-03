@@ -44,8 +44,25 @@ type FormFieldEventWithFallbackTarget = Omit<FormFieldEvent, 'target' | 'current
   target?: (FormFieldTarget & { id?: string; name?: string }) | undefined;
   currentTarget?: (FormFieldTarget & { id?: string; name?: string }) | undefined;
 };
+type MultipleSelectTarget = FormFieldTarget & {
+  multiple: true;
+  options: ArrayLike<HTMLOptionElement>;
+};
 type FormFieldRowValue = Record<string, unknown>;
 type FormFieldRowValueWithKey = FormFieldRowValue & { __temp_key__?: string };
+
+const isArrayLikeOptions = (options: unknown): options is ArrayLike<HTMLOptionElement> => {
+  return typeof options === 'object' && options !== null && 'length' in options;
+};
+
+const isMultipleSelectTarget = (target: FormFieldTarget): target is MultipleSelectTarget => {
+  return (
+    'multiple' in target &&
+    target.multiple === true &&
+    'options' in target &&
+    isArrayLikeOptions(target.options)
+  );
+};
 
 interface FormContextValue<TFormValues extends FormValues = FormValues>
   extends FormState<TFormValues> {
@@ -388,7 +405,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       } else if (/checkbox/.test(type)) {
         // Get & invert the current value of the checkbox.
         val = !getIn(state.values, field);
-      } else if (target instanceof HTMLSelectElement && target.multiple) {
+      } else if (isMultipleSelectTarget(target)) {
         // This will handle native select elements incl. ones with mulitple options.
         val = Array.from<HTMLOptionElement>(target.options)
           .filter((el) => el.selected)
