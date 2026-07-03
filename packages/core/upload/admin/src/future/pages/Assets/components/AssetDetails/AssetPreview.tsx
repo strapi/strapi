@@ -121,7 +121,7 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
   // file (often served at the same URL) shows the new content instead of the
   // browser-cached old version. Signed URLs are excluded: their query string
   // is part of the SigV4 signature, so appending a param invalidates the
-  // signature and the request fails with 403. See strapi/strapi#26581.
+  // signature and the request fails with 403. See #26581.
   const cacheKey = updatedAt && !isUrlSigned ? new Date(updatedAt).getTime() : undefined;
   const appendCacheBuster = (raw: string | undefined) => {
     if (!raw || cacheKey === undefined) return raw;
@@ -167,9 +167,6 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
               ref={imageRef}
               src={imageUrl}
               alt={alternativeText || asset.name || ''}
-              // Match the grid thumbnail's CORS mode so a cached no-CORS
-              // response can't break this cross-origin load. See
-              // strapi/strapi#26581.
               crossOrigin={isLocal ? undefined : 'anonymous'}
               onLoad={() => setIsMediaLoaded(true)}
               onError={() => setIsMediaLoaded(true)}

@@ -75,7 +75,7 @@ describe('ImageAssetCard', () => {
     expect(image).toHaveAttribute('src', 'http://somewhere.com/hello.png?token=xyz');
   });
 
-  it('forwards crossOrigin to the underlying image (strapi/strapi#26581)', () => {
+  it('forwards crossOrigin to the underlying image (#26581)', () => {
     renderTL(
       <DesignSystemProvider>
         <ImageAssetCard

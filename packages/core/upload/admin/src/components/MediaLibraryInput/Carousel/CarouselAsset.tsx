@@ -62,13 +62,6 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
       ? assetUrl
       : `${assetUrl}${assetUrl.includes('?') ? '&' : '?'}updatedAt=${asset.updatedAt}`;
 
-    // Load the thumbnail with the same CORS mode as the preview dialog
-    // (AssetPreview uses crossOrigin="anonymous"). Both render the identical
-    // thumbnail URL; for signed URLs the URL is not cache-busted, so if the two
-    // loads used different CORS modes Chrome/Safari would cache the plain
-    // (no-Origin) response here and reuse it for the cross-origin preview
-    // request, which then fails the CORS check. Only applied to remote assets —
-    // local files never need CORS. See strapi/strapi#26581.
     const crossOrigin = asset.isLocal ? undefined : 'anonymous';
 
     return (

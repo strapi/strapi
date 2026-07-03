@@ -19,7 +19,7 @@ const createImageAsset = (overrides: Partial<File> = {}): File => ({
 });
 
 describe('future | AssetPreview', () => {
-  // strapi/strapi#26581: a signed URL's query string is part of the SigV4
+  // #26581: a signed URL's query string is part of the SigV4
   // signature, so appending a cache-buster invalidates it (403). The preview
   // must leave signed URLs untouched.
   it('does not append a cache-buster to signed URLs', () => {

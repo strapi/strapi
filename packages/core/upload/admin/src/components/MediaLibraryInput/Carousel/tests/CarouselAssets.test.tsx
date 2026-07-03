@@ -63,7 +63,7 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
     expect(getByRole('img', { name: 'alternative text' })).toBeInTheDocument();
   });
 
-  it('should load a remote thumbnail with crossOrigin="anonymous" (strapi/strapi#26581)', () => {
+  it('should load a remote thumbnail with crossOrigin="anonymous" (#26581)', () => {
     const { getByRole } = setup();
 
     // The same signed URL is also loaded by the preview dialog with

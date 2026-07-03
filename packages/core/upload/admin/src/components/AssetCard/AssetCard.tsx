@@ -65,12 +65,6 @@ export const AssetCard = ({
         width={asset.width!}
         updatedAt={asset.updatedAt}
         isUrlSigned={asset?.isUrlSigned || false}
-        // Load remote thumbnails with the same CORS mode as the edit/preview
-        // dialog (AssetPreview uses crossOrigin="anonymous"). All of these
-        // render the identical asset URL; if the card loaded it without CORS
-        // first, Chrome/Safari would cache that no-CORS response and reuse it
-        // for the cross-origin preview request, which then fails the CORS
-        // check. Local files never need CORS. See strapi/strapi#26581.
         crossOrigin={local ? undefined : 'anonymous'}
         {...commonAssetCardProps}
       />

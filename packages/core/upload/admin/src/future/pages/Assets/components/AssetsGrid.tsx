@@ -219,10 +219,6 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
           <StyledImage
             src={mediaURL}
             alt={alternativeText || ''}
-            // Load remote thumbnails with the same CORS mode as the detail
-            // preview so the browser can't cache a no-CORS response here and
-            // reuse it for the cross-origin preview request. See
-            // strapi/strapi#26581.
             crossOrigin={isLocal ? undefined : 'anonymous'}
             draggable={false}
             onDragStart={(e) => e.preventDefault()}

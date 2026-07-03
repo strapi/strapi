@@ -189,7 +189,7 @@ describe('AssetsGrid', () => {
         expect(screen.getByRole('img')).toBeInTheDocument();
       });
 
-      it('loads remote thumbnails with crossOrigin="anonymous" (strapi/strapi#26581)', () => {
+      it('loads remote thumbnails with crossOrigin="anonymous" (#26581)', () => {
         setup({ assets: [createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg')] });
         expect(screen.getByRole('img')).toHaveAttribute('crossorigin', 'anonymous');
       });
