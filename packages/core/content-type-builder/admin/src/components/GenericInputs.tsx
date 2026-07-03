@@ -192,9 +192,16 @@ const GenericInput = ({
   const value = defaultValue ?? undefined;
   const stringValue =
     typeof value === 'string' || typeof value === 'number' ? value.toString() : '';
-  const numberValue = typeof value === 'number' ? value : undefined;
+  const numberValue = typeof value === 'string' || typeof value === 'number' ? value : undefined;
   const selectValue =
     typeof value === 'string' || typeof value === 'number' || value === null ? value : undefined;
+  const jsonValue =
+    value !== undefined &&
+    (typeof value === 'object' || typeof value === 'boolean' || typeof value === 'number')
+      ? JSON.stringify(value, null, 2)
+      : typeof value === 'string'
+        ? value
+        : undefined;
 
   /*
    TODO: ideally we should pass in `defaultValue` and `value` for
@@ -272,7 +279,7 @@ const GenericInput = ({
       case 'json': {
         return (
           <JSONInput
-            value={typeof value === 'string' ? value : undefined}
+            value={jsonValue}
             disabled={disabled}
             onChange={(json) => {
               // Default to null when the field is not required and there is no input value
@@ -290,9 +297,7 @@ const GenericInput = ({
       case 'bool': {
         return (
           <Toggle
-            checked={
-              typeof defaultValue === 'boolean' || defaultValue === null ? defaultValue : false
-            }
+            checked={defaultValue === null ? null : Boolean(defaultValue)}
             disabled={disabled}
             offLabel={formatMessage({
               id: 'app.components.ToggleCheckbox.off-label',
