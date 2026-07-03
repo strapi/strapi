@@ -188,6 +188,17 @@ describe('AssetsGrid', () => {
         setup({ assets: [asset] });
         expect(screen.getByRole('img')).toBeInTheDocument();
       });
+
+      it('loads remote thumbnails with crossOrigin="anonymous" (strapi/strapi#26581)', () => {
+        setup({ assets: [createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg')] });
+        expect(screen.getByRole('img')).toHaveAttribute('crossorigin', 'anonymous');
+      });
+
+      it('does not set crossOrigin for local assets', () => {
+        const asset = { ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'), isLocal: true };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
+      });
     });
 
     describe('renders cards for all media types', () => {

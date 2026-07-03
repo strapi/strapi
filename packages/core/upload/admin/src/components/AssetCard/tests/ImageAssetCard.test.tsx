@@ -75,6 +75,47 @@ describe('ImageAssetCard', () => {
     expect(image).toHaveAttribute('src', 'http://somewhere.com/hello.png?token=xyz');
   });
 
+  it('forwards crossOrigin to the underlying image (strapi/strapi#26581)', () => {
+    renderTL(
+      <DesignSystemProvider>
+        <ImageAssetCard
+          alt="Alternative text"
+          name="hello.png"
+          extension="png"
+          thumbnail="http://somewhere.com/hello.png?token=xyz"
+          selected={false}
+          onSelect={jest.fn()}
+          onEdit={jest.fn()}
+          isUrlSigned={true}
+          crossOrigin="anonymous"
+        />
+      </DesignSystemProvider>
+    );
+
+    const image = screen.getByAltText('Alternative text');
+    expect(image).toHaveAttribute('crossorigin', 'anonymous');
+  });
+
+  it('does not set crossOrigin when not provided (local assets)', () => {
+    renderTL(
+      <DesignSystemProvider>
+        <ImageAssetCard
+          alt="Alternative text"
+          name="hello.png"
+          extension="png"
+          thumbnail="http://somewhere.com/hello.png"
+          selected={false}
+          onSelect={jest.fn()}
+          onEdit={jest.fn()}
+          isUrlSigned={false}
+        />
+      </DesignSystemProvider>
+    );
+
+    const image = screen.getByAltText('Alternative text');
+    expect(image).not.toHaveAttribute('crossorigin');
+  });
+
   it('shows selected state when selected', () => {
     renderTL(
       <DesignSystemProvider>

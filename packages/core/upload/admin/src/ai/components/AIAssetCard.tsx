@@ -223,7 +223,17 @@ const Asset = ({ assetType, thumbnailUrl, assetUrl, asset }: AssetProps) => {
 
   switch (assetType) {
     case ASSET_TYPES.Image:
-      return <CardAsset src={thumbnailUrl} size="S" alt={asset.alternativeText || asset.name} />;
+      // crossOrigin matches the edit/preview dialog so the browser doesn't
+      // cache a no-CORS response here and reuse it for the cross-origin
+      // preview request. See strapi/strapi#26581.
+      return (
+        <CardAsset
+          src={thumbnailUrl}
+          size="S"
+          alt={asset.alternativeText || asset.name}
+          crossOrigin="anonymous"
+        />
+      );
     case ASSET_TYPES.Video:
       return (
         <CardAsset size="S">

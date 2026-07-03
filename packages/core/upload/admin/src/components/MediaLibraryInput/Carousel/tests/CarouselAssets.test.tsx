@@ -63,6 +63,26 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
     expect(getByRole('img', { name: 'alternative text' })).toBeInTheDocument();
   });
 
+  it('should load a remote thumbnail with crossOrigin="anonymous" (strapi/strapi#26581)', () => {
+    const { getByRole } = setup();
+
+    // The same signed URL is also loaded by the preview dialog with
+    // crossOrigin="anonymous"; the thumbnail must match so the browser does not
+    // cache a no-CORS response and reuse it for the cross-origin preview load.
+    expect(getByRole('img', { name: 'alternative text' })).toHaveAttribute(
+      'crossorigin',
+      'anonymous'
+    );
+  });
+
+  it('should not set crossOrigin for local assets', () => {
+    const { getByRole } = setup({
+      assets: [{ ...ASSET_FIXTURES[0], isLocal: true }],
+    });
+
+    expect(getByRole('img', { name: 'alternative text' })).not.toHaveAttribute('crossorigin');
+  });
+
   it('should render actions buttons', () => {
     const { getByRole } = setup();
 
