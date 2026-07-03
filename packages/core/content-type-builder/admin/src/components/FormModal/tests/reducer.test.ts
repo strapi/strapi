@@ -387,6 +387,44 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('Should reset to the initial state when the component to create has no displayName', () => {
+      const action = actions.resetPropsAndSaveCurrentData({ uid: 'api::address.address' });
+
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          type: 'component',
+          createComponent: true,
+          componentToCreate: {
+            type: 'component',
+            icon: 'air-freshener',
+            category: 'default',
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(initialState);
+    });
+
+    it('Should reset to the initial state when the component to create has no category', () => {
+      const action = actions.resetPropsAndSaveCurrentData({ uid: 'api::address.address' });
+
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          type: 'component',
+          createComponent: true,
+          componentToCreate: {
+            type: 'component',
+            displayName: 'compo',
+            icon: 'air-freshener',
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(initialState);
+    });
   });
 
   describe('RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ', () => {
