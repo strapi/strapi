@@ -20,10 +20,6 @@ export class PreviewFieldError extends Error {
 
 type PathPart = { name: string; index?: number };
 
-const isFieldData = (value: unknown): value is FieldData => {
-  return typeof value === 'object' && value !== null && Array.isArray(value) === false;
-};
-
 // Helper function to parse path with array indices and return clean attribute names
 export const parsePathWithIndices = (path: string): PathPart[] => {
   // Split by dots, then parse array indices from each part. For example:
@@ -95,26 +91,19 @@ export function getAttributeSchemaFromPath({
           throw new PreviewFieldError('INVALID_FIELD_PATH');
         }
 
-        const componentListData = currentData[currentPart.name];
-        const componentData = Array.isArray(componentListData)
-          ? componentListData[currentPart.index]
-          : undefined;
-
-        if (isFieldData(componentData) === false) {
-          throw new PreviewFieldError('INVALID_FIELD_PATH');
-        }
-
-        return visitor(remainingParts, componentAttributes, componentData);
+        return visitor(
+          remainingParts,
+          componentAttributes,
+          (currentData[currentPart.name] as FieldData[])[currentPart.index]
+        );
       }
 
       // Non repeatable component
-      const componentData = currentData[currentPart.name];
-
-      if (isFieldData(componentData) === false) {
-        throw new PreviewFieldError('INVALID_FIELD_PATH');
-      }
-
-      return visitor(remainingParts, componentAttributes, componentData);
+      return visitor(
+        remainingParts,
+        componentAttributes,
+        currentData[currentPart.name] as FieldData
+      );
     }
 
     if (currentAttribute.type === 'dynamiczone') {
@@ -123,20 +112,8 @@ export function getAttributeSchemaFromPath({
         throw new PreviewFieldError('INVALID_FIELD_PATH');
       }
 
-      const dynamicZoneData = currentData[currentPart.name];
-      const componentData = Array.isArray(dynamicZoneData)
-        ? dynamicZoneData[currentPart.index]
-        : undefined;
-
-      if (
-        isFieldData(componentData) === false ||
-        typeof componentData.__component !== 'string' ||
-        components[componentData.__component] === undefined
-      ) {
-        throw new PreviewFieldError('INVALID_FIELD_PATH');
-      }
-
-      const componentAttributes = components[componentData.__component].attributes;
+      const componentData = (currentData[currentPart.name] as FieldData[])[currentPart.index];
+      const componentAttributes = components[componentData.__component as UID.Component].attributes;
       return visitor(remainingParts, componentAttributes, componentData);
     }
 
