@@ -47,9 +47,10 @@ test.describe(
       await navToHeader(page, ['Content-Type Builder', 'Dog'], 'Dog');
       await clickAndWait(page, page.getByRole('button', { name: 'Delete likesCats' }));
 
-      // 3. The warning dialog lists the dependent fields and asks for confirmation.
+      // 3. The warning dialog names the dependent fields and asks for confirmation.
       const dialog = page.getByRole('alertdialog');
-      await expect(dialog).toContainText('conditions that depend on this field');
+      await expect(dialog).toContainText('bestFriendCats');
+      await expect(dialog).toContainText('preferredCatPersonality');
       await dialog.getByRole('button', { name: 'Confirm' }).click();
 
       // 4. Persist the schema change.
