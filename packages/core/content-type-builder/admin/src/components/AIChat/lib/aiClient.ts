@@ -92,8 +92,8 @@ export const getAIJwt = async (): Promise<AITokenData | null> => {
     const { get } = getFetchClient();
     const { data } = await get<AITokenResponse>('/admin/ai-token');
 
-    const token = data.token ?? data.data?.token;
-    const expiresAt = data.expiresAt ?? data.data?.expiresAt;
+    const token = data?.token || data?.data?.token;
+    const expiresAt = data?.expiresAt || data?.data?.expiresAt;
 
     if (typeof token === 'string' && typeof expiresAt === 'string') {
       aiTokenCache = { token, expiresAt };

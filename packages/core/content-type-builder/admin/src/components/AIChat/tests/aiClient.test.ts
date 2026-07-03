@@ -29,6 +29,27 @@ describe('aiClient', () => {
     expect(getFetchClient().get).toHaveBeenCalledTimes(1);
   });
 
+  test('getAIJwt falls back to nested token data when top-level fields are empty', async () => {
+    const expiresAt = new Date(Date.now() + 3600_000).toISOString();
+
+    (getFetchClient as jest.Mock).mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        data: {
+          token: '',
+          expiresAt: '',
+          data: {
+            token: 'nested-token',
+            expiresAt,
+          },
+        },
+      }),
+    });
+
+    const token = await getAIJwt();
+
+    expect(token).toEqual({ token: 'nested-token', expiresAt });
+  });
+
   test('fetchAI retries once on 401 and succeeds with refreshed token', async () => {
     (getFetchClient as jest.Mock).mockReturnValue({
       get: jest
