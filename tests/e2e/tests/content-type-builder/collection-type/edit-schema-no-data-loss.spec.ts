@@ -62,6 +62,9 @@ test.describe('CTB - Edit schema without data loss', { tag: ['@critical'] }, () 
     await expect(page.getByRole('textbox', { name: 'title' })).toHaveValue(
       'West Ham post match analysis'
     );
+    await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
+      'west-ham-post-match-analysis'
+    );
 
     // Add a new field — existing data must survive the schema change + restart
     await addAttributesToContentType(page, 'Article', [{ type: 'text', name: 'tempnotes' }]);
@@ -69,6 +72,9 @@ test.describe('CTB - Edit schema without data loss', { tag: ['@critical'] }, () 
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
     await expect(page.getByRole('textbox', { name: 'title' })).toHaveValue(
       'West Ham post match analysis'
+    );
+    await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
+      'west-ham-post-match-analysis'
     );
 
     // Remove the field again — existing data must still survive
@@ -81,6 +87,9 @@ test.describe('CTB - Edit schema without data loss', { tag: ['@critical'] }, () 
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
     await expect(page.getByRole('textbox', { name: 'title' })).toHaveValue(
       'West Ham post match analysis'
+    );
+    await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
+      'west-ham-post-match-analysis'
     );
   });
 });
