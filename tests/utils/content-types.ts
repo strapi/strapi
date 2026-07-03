@@ -631,8 +631,14 @@ export const addAttributes = async (
       }
     } else if (
       options?.clickFinish !== false &&
-      // Creating a DZ closes the modal when components are added; there is no Finish on the CT field list.
-      !isDynamicZoneAttribute(attribute)
+      // These attribute types finalize themselves, so there is no "Finish" to click on the CT field
+      // list afterwards:
+      //  - relation: addRelationAttribute already clicks Finish internally,
+      //  - component: creating a new component closes the modal once its first field is added,
+      //  - dynamic zone: adding its components closes the modal (no Finish on the CT field list).
+      !isDynamicZoneAttribute(attribute) &&
+      !isComponentAttribute(attribute) &&
+      !isRelationAttribute(attribute)
     ) {
       await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
     }
