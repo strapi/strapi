@@ -1022,6 +1022,10 @@ export default {
       });
 
       if (!entity) {
+        if (await documentManager.exists(model, id)) {
+          return { data: { unpublishedRelations: 0, draftM2mLinks: 0 } };
+        }
+
         return ctx.notFound();
       }
 

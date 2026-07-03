@@ -336,7 +336,7 @@ export default {
 
     const document = await findDocument({}, model, { locale });
     if (!document) {
-      return ctx.notFound();
+      return { data: { unpublishedRelations: 0, draftM2mLinks: 0 } };
     }
 
     if (permissionChecker.cannot.read(document)) {
