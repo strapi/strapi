@@ -92,6 +92,10 @@ test.describe('Content Manager - advanced filters', { tag: ['@extended'] }, () =
       await test.step(`name ${operatorLabel} "${value}"`, async () => {
         await applyFilter(page, 'name', operatorLabel, value);
 
+        // The filter is applied — its chip is shown.
+        const chip = page.getByRole('button', { name: `name ${operatorLabel} ${value}` });
+        await expect(chip).toBeVisible();
+
         // UI: exactly the expected rows are shown.
         for (const name of ALL_AUTHORS) {
           const cell = page.getByRole('gridcell', { name, exact: true });
@@ -108,7 +112,8 @@ test.describe('Content Manager - advanced filters', { tag: ['@extended'] }, () =
 
         // Remove the filter chip so the next case starts from an unfiltered list.
         // (The CM persists the list query, so navigating wouldn't clear it.)
-        await page.getByRole('button', { name: `name ${operatorLabel} ${value}` }).click();
+        await chip.click();
+        await expect(chip).toHaveCount(0);
         await expect(page.getByRole('gridcell', { name: 'Ted Lasso', exact: true })).toBeVisible();
       });
     }
