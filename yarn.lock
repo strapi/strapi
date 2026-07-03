@@ -9303,7 +9303,7 @@ __metadata:
     typescript: "npm:5.9.3"
     vitest: "catalog:"
     vitest-config: "npm:5.50.0"
-    ws: "npm:8.20.1"
+    ws: "npm:8.21.0"
   languageName: unknown
   linkType: soft
 
@@ -32378,7 +32378,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.20.1, ws@npm:^8.19.0, ws@npm:^8.8.0":
+"ws@npm:8.21.0":
+  version: 8.21.0
+  resolution: "ws@npm:8.21.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 10c0/ef4a243476283fc49bc7550966c4af4aa0eef56273837211e700de3b664e08604a760cdddcb5ba43c049140e74ccfec5b0ee0bb439e08c2adf9138902fdde5f9
+  languageName: node
+  linkType: hard
+
+"ws@npm:^8.19.0, ws@npm:^8.8.0":
   version: 8.20.1
   resolution: "ws@npm:8.20.1"
   peerDependencies:
