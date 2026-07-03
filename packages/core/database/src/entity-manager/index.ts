@@ -1177,19 +1177,6 @@ export const createEntityManager = (db: Database): EntityManager => {
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
 
-              // When a connect item's position.before/after references an id that is
-              // also being disconnected, the referenced row will be deleted before the
-              // adjacentRelations query runs, causing sortConnectArray to throw.
-              // Rewrite such positions to {end: true} so the ordering gracefully
-              // falls back to appending instead of crashing.
-              const disconnectIds = new Set(toIds(cleanRelationData.disconnect));
-              const resolvedConnect = (cleanRelationData.connect ?? []).map((item) => {
-                const adjacentId = item.position?.before ?? item.position?.after;
-                return adjacentId != null && disconnectIds.has(adjacentId)
-                  ? { ...item, position: { end: true } }
-                  : item;
-              });
-
               // Use id-only comparison so a disconnect item whose id also appears in
               // the connect array is correctly excluded from deletion (deep-equality
               // fails because connect items carry extra fields like `position`).
@@ -1200,6 +1187,74 @@ export const createEntityManager = (db: Database): EntityManager => {
                   cleanRelationData.connect ?? []
                 )
               );
+
+              // When a connect item's position.before/after references an id that is
+              // about to be deleted (relIdsToDelete), the referenced row won't exist by
+              // the time the adjacentRelations query runs below, causing sortConnectArray
+              // to throw. Rewrite such a position to point at the nearest surviving
+              // neighbor in the relation's current order, so the item lands where the
+              // deleted relation used to be instead of always falling back to the end.
+              const deletedIds = new Set(relIdsToDelete);
+              let resolvedConnect = cleanRelationData.connect ?? [];
+
+              if (
+                hasOrderColumn(attribute) &&
+                !isEmpty(relIdsToDelete) &&
+                resolvedConnect.some((item) => {
+                  const adjacentId = item.position?.before ?? item.position?.after;
+                  return adjacentId != null && deletedIds.has(adjacentId);
+                })
+              ) {
+                const currentOrder = await this.createQueryBuilder(joinTable.name)
+                  .select([inverseJoinColumn.name, orderColumnName])
+                  .where({ [joinColumn.name]: id })
+                  .where(joinTable.on || {})
+                  .orderBy(orderColumnName)
+                  .transacting(trx)
+                  .execute<Array<Record<string, any>>>();
+
+                const orderedIds = currentOrder.map((rel) => rel[inverseJoinColumn.name]);
+
+                // A neighbor is only a valid fallback target if it survives the delete
+                // and isn't the item being connected itself (it would otherwise be found
+                // at its own current position in orderedIds and produce a self-reference).
+                const findSurvivingNeighbor = (targetId: ID, direction: 1 | -1, ownId: ID) => {
+                  let index = orderedIds.indexOf(targetId);
+                  while (index !== -1) {
+                    index += direction;
+                    const candidate = orderedIds[index];
+                    if (candidate === undefined) {
+                      return undefined;
+                    }
+                    if (!deletedIds.has(candidate) && candidate !== ownId) {
+                      return candidate;
+                    }
+                  }
+                  return undefined;
+                };
+
+                resolvedConnect = resolvedConnect.map((item) => {
+                  const { before, after } = item.position ?? {};
+                  const adjacentId = before ?? after;
+
+                  if (adjacentId == null || !deletedIds.has(adjacentId)) {
+                    return item;
+                  }
+
+                  const neighborId = before
+                    ? findSurvivingNeighbor(before, 1, item.id)
+                    : findSurvivingNeighbor(after as ID, -1, item.id);
+
+                  if (neighborId === undefined) {
+                    return { ...item, position: before ? { end: true } : { start: true } };
+                  }
+
+                  return {
+                    ...item,
+                    position: before ? { before: neighborId } : { after: neighborId },
+                  };
+                });
+              }
 
               if (!isEmpty(relIdsToDelete)) {
                 await deleteRelations({ id, attribute, db, relIdsToDelete, transaction: trx });
@@ -1241,9 +1296,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                         [joinColumn.name]: id,
                         [inverseJoinColumn.name]: {
                           $in: compact(
-                            resolvedConnect.map(
-                              (r) => r.position?.after || r.position?.before
-                            )
+                            resolvedConnect.map((r) => r.position?.after || r.position?.before)
                           ),
                         },
                       },
