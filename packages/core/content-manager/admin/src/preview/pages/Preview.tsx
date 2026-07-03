@@ -157,20 +157,16 @@ const PreviewPage = () => {
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const locale = typeof params.locale === 'string' ? params.locale : undefined;
 
   const [deviceName, setDeviceName] = React.useState<(typeof DEVICES)[number]['name']>(
     DEVICES[0].name
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
-  const previewHighlightColors = React.useMemo<PreviewHighlightColors>(
-    () => ({
-      highlightHoverColor: theme.colors.primary500,
-      highlightActiveColor: theme.colors.primary600,
-    }),
-    [theme.colors.primary500, theme.colors.primary600]
-  );
+  const previewHighlightColors: PreviewHighlightColors = {
+    highlightHoverColor: theme.colors.primary500,
+    highlightActiveColor: theme.colors.primary600,
+  };
 
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
@@ -207,7 +203,9 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [documentId, toggleNotification, previewHighlightColors, formatMessage]);
+    // Preserve the existing dependency behavior: previewHighlightColors is derived from theme.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documentId, toggleNotification, theme, formatMessage]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -228,7 +226,7 @@ const PreviewPage = () => {
     },
     query: {
       documentId,
-      locale,
+      locale: params.locale as GetPreviewUrl.Request['query']['locale'],
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });
