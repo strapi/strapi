@@ -1,10 +1,59 @@
-import type { AnyAttribute, AttributeConditions, ContentTypes } from '../types';
+import type {
+  AnyAttribute,
+  AttributeConditionValue,
+  AttributeConditions,
+  ContentTypes,
+} from '../types';
 
 interface DependentRow {
   contentTypeUid: string;
   contentType: string;
   attribute: string;
 }
+
+type VisibleConditionEntry = {
+  operator: string;
+  fieldVar: { var: string };
+  value: AttributeConditionValue;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isFieldVar = (value: unknown): value is { var: string } =>
+  isRecord(value) && typeof value.var === 'string';
+
+const isAttributeConditionValue = (value: unknown): value is AttributeConditionValue =>
+  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
+
+export const getVisibleConditionEntries = (
+  condition?: AttributeConditions | null
+): VisibleConditionEntry[] => {
+  const visible = condition?.visible;
+
+  if (!isRecord(visible)) {
+    return [];
+  }
+
+  return Object.entries(visible).reduce<VisibleConditionEntry[]>((entries, [operator, rule]) => {
+    if (!Array.isArray(rule)) {
+      return entries;
+    }
+
+    const [fieldVar, value] = rule;
+
+    if (!isFieldVar(fieldVar) || !isAttributeConditionValue(value)) {
+      return entries;
+    }
+
+    entries.push({ operator, fieldVar, value });
+
+    return entries;
+  }, []);
+};
+
+export const getFirstVisibleConditionEntry = (condition?: AttributeConditions | null) =>
+  getVisibleConditionEntries(condition)[0] ?? null;
 
 export const checkDependentRows = (
   contentTypes: ContentTypes,
@@ -23,19 +72,16 @@ export const checkDependentRows = (
         : contentType.attributes;
 
       Object.entries(attributes).forEach(([attrName, attr]) => {
-        if (attr.conditions?.visible !== undefined) {
-          Object.entries(attr.conditions.visible).forEach(([, conditions]) => {
-            const [fieldVar] = conditions;
-            // Check if this condition references our field
-            if (fieldVar.var === fieldName) {
-              dependentRows.push({
-                contentTypeUid,
-                contentType: contentType.info.displayName,
-                attribute: attr.name || attrName,
-              });
-            }
-          });
-        }
+        getVisibleConditionEntries(attr.conditions).forEach(({ fieldVar }) => {
+          // Check if this condition references our field
+          if (fieldVar.var === fieldName) {
+            dependentRows.push({
+              contentTypeUid,
+              contentType: contentType.info.displayName,
+              attribute: attr.name || attrName,
+            });
+          }
+        });
       });
     }
   });
@@ -47,18 +93,13 @@ export const formatCondition = (
   availableFields: Array<{ name: string; type: string }>,
   attributeName: string
 ): string => {
-  if (condition.visible === undefined) {
+  const conditionEntry = getFirstVisibleConditionEntry(condition);
+
+  if (conditionEntry === null) {
     return '';
   }
 
-  const conditionEntry = Object.entries(condition.visible)[0];
-
-  if (conditionEntry === undefined) {
-    return '';
-  }
-
-  const [operator, conditions] = conditionEntry;
-  const [fieldVar, value] = conditions;
+  const { operator, fieldVar, value } = conditionEntry;
 
   const dependsOnField = availableFields.find((field) => field.name === fieldVar.var);
   const dependsOnFieldName = dependsOnField ? dependsOnField.name : fieldVar.var;

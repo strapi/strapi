@@ -21,6 +21,7 @@ import * as yup from 'yup';
 
 import { pluginId } from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
+import { getFirstVisibleConditionEntry } from '../../utils/conditions';
 import { findAttribute } from '../../utils/findAttribute';
 import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 // New compos
@@ -197,22 +198,12 @@ export const FormModal = () => {
 
     // Find all fields that reference this field in their conditions
     const referencedFields = contentTypeAttributes.filter((attr) => {
-      if (attr.conditions === undefined) {
+      const conditionEntry = getFirstVisibleConditionEntry(attr.conditions);
+      if (conditionEntry === null) {
         return false;
       }
 
-      const condition = attr.conditions.visible;
-      if (condition === undefined) {
-        return false;
-      }
-
-      const conditionEntry = Object.entries(condition)[0];
-      if (conditionEntry === undefined) {
-        return false;
-      }
-
-      const [, conditions] = conditionEntry;
-      const [fieldVar, value] = conditions;
+      const { fieldVar, value } = conditionEntry;
 
       // Check if this condition references our field
       if (fieldVar.var !== oldName) {

@@ -17,6 +17,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AttributeIcon } from '../../../components/AttributeIcon';
+import { getFirstVisibleConditionEntry } from '../../../utils/conditions';
 import { getTrad } from '../../../utils/getTrad';
 import { ApplyConditionButton } from '../../ApplyConditionButton';
 
@@ -60,7 +61,9 @@ interface LocalValue {
 }
 
 const convertFromJsonLogic = (jsonLogic?: AttributeConditions | null): LocalValue => {
-  if (jsonLogic?.visible === undefined) {
+  const conditionEntry = getFirstVisibleConditionEntry(jsonLogic);
+
+  if (conditionEntry === null) {
     return {
       dependsOn: '',
       operator: 'is',
@@ -69,19 +72,7 @@ const convertFromJsonLogic = (jsonLogic?: AttributeConditions | null): LocalValu
     };
   }
 
-  const conditionEntry = Object.entries(jsonLogic.visible)[0];
-
-  if (conditionEntry === undefined) {
-    return {
-      dependsOn: '',
-      operator: 'is',
-      value: '',
-      action: 'show',
-    };
-  }
-
-  const [operator, conditions] = conditionEntry;
-  const [fieldVar, value] = conditions;
+  const { operator, fieldVar, value } = conditionEntry;
 
   // Assume 'visible' implies 'show' for now; adjust if backend uses 'hidden' key
   return {
@@ -134,7 +125,7 @@ export const ConditionForm = ({
   const { formatMessage } = useIntl();
   const [localValue, setLocalValue] = React.useState<LocalValue>(convertFromJsonLogic(value));
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const hasCondition = value?.visible !== undefined;
+  const hasCondition = getFirstVisibleConditionEntry(value) !== null;
 
   // Add safety check for conditionFields
   if (!Array.isArray(conditionFields)) {

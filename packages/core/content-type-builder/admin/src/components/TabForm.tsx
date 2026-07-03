@@ -2,7 +2,7 @@ import { Box, Grid, Typography, Button, Tooltip } from '@strapi/design-system';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
-import { formatCondition, getAvailableConditionFields } from '../utils/conditions';
+import { getAvailableConditionFields } from '../utils/conditions';
 
 import { GenericInput } from './GenericInputs';
 
@@ -144,6 +144,7 @@ export const TabForm = ({
                 if (input.type === 'condition-form') {
                   const currentCondition = get(modifiedData, input.name) as
                     | AttributeConditions
+                    | null
                     | undefined;
 
                   // Get all attributes from the content type schema
@@ -175,27 +176,13 @@ export const TabForm = ({
                       direction="column"
                       alignItems="stretch"
                     >
-                      {currentCondition === undefined ||
+                      {currentCondition === null ||
+                      currentCondition === undefined ||
                       Object.keys(currentCondition).length === 0 ? (
                         <Box>
-                          {currentCondition !== undefined &&
-                            Object.keys(currentCondition).length > 0 && (
-                              <Typography variant="sigma" textColor="neutral800" marginBottom={2}>
-                                {formatCondition(
-                                  currentCondition,
-                                  availableFields,
-                                  sharedInputProps.attributeName ?? modifiedData.name ?? ''
-                                )}
-                              </Typography>
-                            )}
                           <Tooltip label={noFieldsMessage}>
                             <Button
-                              marginTop={
-                                currentCondition !== undefined &&
-                                Object.keys(currentCondition).length > 0
-                                  ? 0
-                                  : 4
-                              }
+                              marginTop={4}
                               fullWidth={true}
                               variant="secondary"
                               onClick={() => {
