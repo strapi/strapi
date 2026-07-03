@@ -60,7 +60,7 @@ import { DocumentStatus } from '../EditView/components/DocumentStatus';
 import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { listViewFilters as Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
-import { CellContent } from './components/TableCells/CellContent';
+import { CellContent, hasContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
 import type { Modules } from '@strapi/types';
@@ -341,24 +341,35 @@ const ListViewPage = () => {
   };
 
   /**
-   * The first non-interactive (scalar) column is rendered as a link to the entry,
-   * so it can be opened in a new tab (right-click / cmd+click / middle-click).
-   * Interactive cell types embed their own links/menus, so we skip them — wrapping
-   * them in an anchor would nest interactive elements. Computed columns and the
-   * synthetic status/documentId/createdBy/updatedBy columns are not entry fields.
+   * The entry link is rendered on the first non-interactive column *that has a
+   * value for the row* (resolved per row, so an empty cell — rendered as "-" —
+   * is skipped and the next candidate carries the link instead). Any scalar
+   * column qualifies — text, numbers, dates (createdAt/updatedAt), `id`, and
+   * `documentId` (its id text becomes the link, the copy button stays separate).
+   * Only genuinely interactive cells are skipped: relations, media, components,
+   * dynamic zones (they embed their own links/menus), plugin-formatted columns
+   * (`cellFormatter`), and the synthetic `status` column.
    */
-  // Text-like scalar types the entry can be linked from. We only link genuine
-  // text columns (the title etc.), never relations/media/components (interactive
-  // cells) or `documentId` — which is rendered by its own copy-ID cell and never
-  // goes through CellContent, so it can't carry the link.
-  const LINKABLE_TEXT_TYPES = ['string', 'text', 'email', 'uid', 'enumeration'];
-  const primaryLinkField = tableHeaders.find(
+  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
+  const linkCandidates = tableHeaders.filter(
     ({ name, attribute, cellFormatter }) =>
-      name !== 'documentId' &&
+      name !== 'status' &&
       typeof cellFormatter !== 'function' &&
       attribute &&
-      LINKABLE_TEXT_TYPES.includes(attribute.type)
-  )?.name;
+      !NON_LINKABLE_TYPES.includes(attribute.type)
+  );
+
+  // The link column for a given row: the first candidate that actually has a
+  // value (uses CellContent's own hasContent so it matches the "-" the cell
+  // would otherwise render). documentId is checked directly (its own cell).
+  const getRowLinkField = (row: (typeof results)[number]) =>
+    linkCandidates.find((header) => {
+      if (header.name === 'documentId') {
+        return Boolean(row.documentId);
+      }
+      const value = row[header.name.split('.')[0]];
+      return hasContent(value, header.mainField, header.attribute);
+    })?.name;
 
   const isEmptyState = !isFetching && results.length === 0;
 
@@ -480,6 +491,7 @@ const ListViewPage = () => {
                   <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
                   <Table.Body>
                     {results.map((row) => {
+                      const rowLinkField = getRowLinkField(row);
                       return (
                         <Table.Row
                           cursor="pointer"
@@ -512,12 +524,32 @@ const ListViewPage = () => {
                               );
                             }
                             if (header.name === 'documentId') {
+                              // When documentId is the primary link column, only its
+                              // id text becomes the link; the copy button stays outside.
+                              const isDocumentIdLink =
+                                header.name === rowLinkField && Boolean(row.documentId);
                               return (
                                 <Table.Cell key={header.name}>
                                   <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
-                                    <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
-                                      {row.documentId || '-'}
-                                    </Typography>
+                                    {isDocumentIdLink ? (
+                                      <Typography
+                                        tag={ReactRouterLink}
+                                        to={{
+                                          pathname: row.documentId,
+                                          search: stringify({ plugins: query.plugins }),
+                                        }}
+                                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                        textColor="neutral800"
+                                        maxWidth="30rem"
+                                        ellipsis
+                                      >
+                                        {row.documentId}
+                                      </Typography>
+                                    ) : (
+                                      <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
+                                        {row.documentId || '-'}
+                                      </Typography>
+                                    )}
                                     {row.documentId && (
                                       <IconButton
                                         variant="ghost"
@@ -550,7 +582,7 @@ const ListViewPage = () => {
                                   rowId={row.documentId}
                                   {...header}
                                   linkTo={
-                                    header.name === primaryLinkField
+                                    header.name === rowLinkField
                                       ? {
                                           pathname: row.documentId,
                                           search: stringify({ plugins: query.plugins }),

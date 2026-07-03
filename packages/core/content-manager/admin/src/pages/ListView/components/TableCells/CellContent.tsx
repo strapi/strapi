@@ -157,5 +157,5 @@ const isSingleRelation = (
   type: Extract<CellContentProps['attribute'], { type: 'relation' }>['relation']
 ) => ['oneToOne', 'manyToOne', 'oneToOneMorph'].includes(type);
 
-export { CellContent };
+export { CellContent, hasContent };
 export type { CellContentProps };
