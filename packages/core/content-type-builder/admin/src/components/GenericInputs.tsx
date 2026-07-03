@@ -192,7 +192,19 @@ const GenericInput = ({
   const value = defaultValue ?? undefined;
   const stringValue =
     typeof value === 'string' || typeof value === 'number' ? value.toString() : '';
-  const numberValue = typeof value === 'string' || typeof value === 'number' ? value : undefined;
+  const numberValue = (() => {
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : undefined;
+    }
+
+    if (typeof value === 'string' && value.trim() !== '') {
+      const parsedValue = Number(value);
+
+      return Number.isFinite(parsedValue) ? parsedValue : undefined;
+    }
+
+    return undefined;
+  })();
   const selectValue =
     typeof value === 'string' || typeof value === 'number' || value === null ? value : undefined;
   const jsonValue =

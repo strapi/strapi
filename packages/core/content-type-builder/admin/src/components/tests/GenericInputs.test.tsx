@@ -10,8 +10,13 @@ jest.mock('@strapi/design-system', () => {
     JSONInput: ({ value }: { value?: string }) => (
       <textarea aria-label="json-value" value={value ?? ''} readOnly />
     ),
-    NumberInput: ({ value }: { value?: string | number }) => (
-      <input aria-label="number-value" value={value ?? ''} readOnly />
+    NumberInput: ({ value }: { value?: number }) => (
+      <input
+        aria-label="number-value"
+        data-value-type={typeof value}
+        value={value ?? ''}
+        readOnly
+      />
     ),
     Toggle: ({ checked }: { checked?: boolean | null }) => (
       <input aria-label="boolean-value" type="checkbox" checked={Boolean(checked)} readOnly />
@@ -31,10 +36,22 @@ const setup = (props: Partial<React.ComponentProps<typeof GenericInput>>) =>
   );
 
 describe('CTB | GenericInput', () => {
-  it('passes numeric strings through to number inputs', () => {
+  it('normalizes numeric strings for number inputs', () => {
     setup({ type: 'number', value: '5' });
 
-    expect(screen.getByRole('textbox', { name: 'number-value' })).toHaveValue('5');
+    const input = screen.getByRole('textbox', { name: 'number-value' });
+
+    expect(input).toHaveValue('5');
+    expect(input).toHaveAttribute('data-value-type', 'number');
+  });
+
+  it('keeps invalid number input values empty', () => {
+    setup({ type: 'number', value: 'not-a-number' });
+
+    const input = screen.getByRole('textbox', { name: 'number-value' });
+
+    expect(input).toHaveValue('');
+    expect(input).toHaveAttribute('data-value-type', 'undefined');
   });
 
   it('formats object values for JSON inputs', () => {
