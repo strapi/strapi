@@ -21,6 +21,19 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
   const permissionService = strapi.admin.services.permission;
 
+  const getRegisteredContentType = (uid: RecentDocument['contentTypeUid']) => {
+    const contentType = strapi.contentTypes[uid];
+
+    if (contentType === undefined) {
+      strapi.log.warn(
+        `Skipping homepage content type "${uid}" because it is no longer registered.`
+      );
+      return undefined;
+    }
+
+    return contentType;
+  };
+
   type ContentTypeConfiguration = {
     uid: RecentDocument['contentTypeUid'];
     settings: { mainField: string };
@@ -100,7 +113,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   ): ContentTypeMeta[] => {
     return allowedContentTypeUids.reduce<ContentTypeMeta[]>((acc, uid) => {
       const configuration = configurations.find((config) => config.uid === uid);
-      const contentType = strapi.contentTypes[uid];
+      const contentType = getRegisteredContentType(uid);
 
       if (contentType === undefined) {
         return acc;
@@ -216,7 +229,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const permittedContentTypes = await getPermittedContentTypes();
       const allowedContentTypeUids = draftAndPublishOnly
         ? permittedContentTypes.filter((uid) => {
-            return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
+            const contentType = getRegisteredContentType(uid);
+
+            return contentType !== undefined && contentTypes.hasDraftAndPublish(contentType);
           })
         : permittedContentTypes;
       // Fetch the configuration for each content type in a single query
