@@ -1,5 +1,6 @@
 import type { Constants, If, Intersect } from '../../../utils';
 import type { Attribute } from '../..';
+import type { ContentType } from '../../../data';
 
 export type MediaTargetUID = 'plugin::upload.file';
 export type MediaKind = 'images' | 'videos' | 'files' | 'audios';
@@ -34,8 +35,8 @@ export type Media<
 
 export type MediaValue<TMultiple extends Constants.BooleanValue = Constants.False> = If<
   TMultiple,
-  any[],
-  any
+  ContentType<MediaTargetUID>[],
+  ContentType<MediaTargetUID>
 >;
 
 export type GetMediaValue<TAttribute extends Attribute.Attribute> =
