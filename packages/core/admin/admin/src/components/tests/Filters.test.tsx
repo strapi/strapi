@@ -2,6 +2,8 @@ import { fireEvent, render as renderRTL, screen, waitFor } from '@tests/utils';
 
 import { Filters } from '../Filters';
 
+import type { RenderOptions } from '@tests/utils';
+
 const DEFAULT_FILTERS = [
   {
     name: 'name',
@@ -31,13 +33,14 @@ const DEFAULT_FILTERS = [
 ] satisfies Filters.Filter[];
 
 describe('Filters', () => {
-  const render = (props?: Partial<Filters.Props>) =>
+  const render = ({ initialEntries, ...props }: Partial<Filters.Props> & RenderOptions = {}) =>
     renderRTL(
       <Filters.Root options={DEFAULT_FILTERS} {...props}>
         <Filters.Trigger />
         <Filters.Popover />
         <Filters.List />
-      </Filters.Root>
+      </Filters.Root>,
+      { initialEntries }
     );
 
   it('should open the popover when the trigger is clicked', async () => {
@@ -140,6 +143,51 @@ describe('Filters', () => {
 
     await user.click(screen.getByRole('option', { name: 'is null' }));
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    await screen.findByText('Updated At $null');
+    expect(screen.queryByText(/Updated At \$eq/)).not.toBeInTheDocument();
+  });
+
+  it('should reset the operator and value when changing fields', async () => {
+    const { user } = render();
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.type(await screen.findByRole('textbox', { name: 'Name' }), 'Jimbob');
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('option', { name: 'Updated At' }));
+
+    expect(await screen.findByRole('combobox', { name: 'Select filter' })).toHaveTextContent(
+      'is null'
+    );
+    expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    await screen.findByText('Updated At $null');
+    expect(screen.queryByText(/Jimbob/)).not.toBeInTheDocument();
+  });
+
+  it('should sanitize removed operators when editing existing datetime filters', async () => {
+    const { user } = render({
+      initialEntries: [
+        {
+          pathname: '/',
+          search: 'filters[$and][0][updatedAt][$eq]=2026-06-13T10:15:00.000Z&' + 'page=1',
+        },
+      ],
+    });
+
+    const filterTagWithExactOperator = await screen.findByText(/Updated At \$eq/);
+    await user.click(filterTagWithExactOperator);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Update filter' })).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('combobox', { name: 'Select filter' })).toHaveTextContent('is null');
+    expect(screen.queryByLabelText('Updated At')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
 
     await screen.findByText('Updated At $null');
     expect(screen.queryByText(/Updated At \$eq/)).not.toBeInTheDocument();

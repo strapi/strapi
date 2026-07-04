@@ -203,6 +203,11 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
 
     return { ...values, filter: getDefaultFilterOperator(filter), value: undefined };
   }, [editingFilter, options]);
+  const hasSanitizedEditingFilter =
+    editingFilter !== null &&
+    (initialValues.name !== editingFilter.name ||
+      initialValues.filter !== editingFilter.filter ||
+      initialValues.value !== editingFilter.value);
 
   if (options.length === 0) {
     return null;
@@ -344,7 +349,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                   />
                 ) : null}
                 <Button
-                  disabled={!modified || isSubmitting}
+                  disabled={(!modified && !hasSanitizedEditingFilter) || isSubmitting}
                   size="L"
                   variant="secondary"
                   startIcon={<Plus />}
