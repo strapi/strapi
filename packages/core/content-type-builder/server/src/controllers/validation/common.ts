@@ -16,6 +16,7 @@ export const CATEGORY_NAME_REGEX = /^[A-Za-z][-_0-9A-Za-z]*$/;
 export const ICON_REGEX = /^[A-Za-z0-9][-A-Za-z0-9]*$/;
 export const UID_REGEX = /^[A-Za-z0-9-_.~]*$/;
 export const KEBAB_BASE_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const GRAPHQL_RESERVED_ENUM_VALUES = new Set(['true', 'false', 'null']);
 
 export type CommonTestConfig = TestConfig<unknown | undefined, Record<string, unknown>>;
 
@@ -59,6 +60,12 @@ export const isValidEnum: CommonTestConfig = {
   name: 'isValidEnum',
   message: '${path} should not start with number',
   test: (val) => val === '' || !strings.startsWithANumber(val as string),
+};
+
+export const isValidGraphQLEnumValue: CommonTestConfig = {
+  name: 'isValidGraphQLEnumValue',
+  message: '${path} must not be one of the GraphQL reserved values: true, false, null',
+  test: (val) => val === '' || !GRAPHQL_RESERVED_ENUM_VALUES.has(val as string),
 };
 
 export const areEnumValuesUnique: CommonTestConfig = {
