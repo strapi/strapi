@@ -540,17 +540,45 @@ export const createEntityManager = (db: Database): EntityManager => {
       return entity;
     },
 
-    // TODO: unlike delete(), deleteMany does not run deleteRelations() per removed row.
     async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
       // Only apply filter criteria (_q / where / filters), same as count — not full findMany params.
-      // limit, offset, orderBy, populate, etc. must be ignored: populate throws on delete results,
-      // and pagination keys can make deleteMany diverge from findMany or delete an unexpected slice.
-      const deletedRows = await this.createQueryBuilder(uid)
-        .init(pick(['_q', 'where', 'filters'], params))
-        .delete()
-        .execute<number>({ mapResults: false });
+      const filterParams = pick(['_q', 'where', 'filters'], params);
+
+      // Detect nested entity filters: where keys that correspond to relation attributes
+      // When present, processWhere in the query builder generates JOINs which don't work
+      // with DELETE. Use a two-step approach: SELECT matching IDs first, then DELETE by ID.
+      const metadata = db.metadata.get(uid);
+      const hasRelationFilter = hasAnyRelationWhere(metadata, filterParams.where);
+
+      let deletedRows: number;
+      if (hasRelationFilter) {
+        // Step 1: Get IDs for entities matching the filter
+        const rows = await this.createQueryBuilder(uid)
+          .init(filterParams)
+          .select('id')
+          .execute<{ id: number }[]>();
+
+        const ids = rows.map((r) => r.id);
+        if (ids.length === 0) {
+          const result = { count: 0 };
+          await db.lifecycles.run('afterDeleteMany', uid, { params, result }, states);
+          return result;
+        }
+
+        // Step 2: Delete by IDs
+        deletedRows = await this.createQueryBuilder(uid)
+          .where({ id: { $in: ids } })
+          .delete()
+          .execute<number>({ mapResults: false });
+      } else {
+        // Direct DELETE with simple where (no JOIN needed)
+        deletedRows = await this.createQueryBuilder(uid)
+          .init(filterParams)
+          .delete()
+          .execute<number>({ mapResults: false });
+      }
 
       const result = { count: deletedRows };
 
@@ -1648,5 +1676,39 @@ export const createEntityManager = (db: Database): EntityManager => {
 
       return repoMap[uid];
     },
+  };
+
+  function hasAnyRelationWhere(metadata, where) {
+    if (!where || typeof where !== 'object') return false;
+
+    for (const key of Object.keys(where)) {
+      // Skip operators at this level
+      if (key === '$and' || key === '$or' || key === '$not') {
+        const clauses = Array.isArray(where[key]) ? where[key] : [where[key]];
+        for (const clause of clauses) {
+          if (hasAnyRelationWhere(metadata, clause)) return true;
+        }
+        continue;
+      }
+      if (key.startsWith('$')) continue;
+
+      const value = where[key];
+      const attribute = metadata.attributes[key];
+
+      // If attribute is a relation type and value is an object (filter), it's a nested filter
+      if (attribute && attribute.type === 'relation') {
+        if (typeof value === 'object' && value !== null) {
+          return true;
+        }
+        continue;
+      }
+
+      // Recurse into scalar filters that contain nested conditions (unlikely but safe)
+      if (!attribute && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        if (hasAnyRelationWhere(metadata, value)) return true;
+      }
+    }
+
+    return false;
   };
 };
