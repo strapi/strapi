@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "5.44.0",
+  "version": "5.50.0",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -44,6 +44,8 @@
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T  rollup -c -w"
   },
   "dependencies": {
@@ -60,15 +62,17 @@
   },
   "devDependencies": {
     "@types/http-errors": "2.0.4",
-    "@types/koa": "2.13.4",
-    "@types/node": "24.10.0",
-    "eslint-config-custom": "5.44.0",
+    "@types/koa": "2.15.2",
+    "@types/node": "20.19.41",
+    "eslint-config-custom": "5.50.0",
     "koa": "2.16.4",
     "koa-body": "6.0.1",
-    "tsconfig": "5.44.0"
+    "tsconfig": "5.50.0",
+    "vitest": "catalog:",
+    "vitest-config": "5.50.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

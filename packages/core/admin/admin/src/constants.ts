@@ -114,6 +114,13 @@ export const HOOKS = {
   INJECT_COLUMN_IN_TABLE: 'Admin/CM/pages/ListView/inject-column-in-table',
 
   /**
+   * Hook that allows to mutate the displayed filters of the list view
+   * @constant
+   * @type {string}
+   */
+  INJECT_LIST_VIEW_FILTERS: 'Admin/CM/pages/ListView/inject-in-filters',
+
+  /**
    * Hook that allows to mutate the CM's collection types links pre-set filters
    * @constant
    * @type {string}
@@ -144,8 +151,6 @@ export type SettingsMenu = {
   admin: SettingsMenuLink[];
   global: SettingsMenuLink[];
 };
-
-const isAdminTokensFutureEnabled = () => window.strapi.future.isEnabled('adminTokens') === true;
 
 export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
   global: [
@@ -214,15 +219,11 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
     },
-    ...(isAdminTokensFutureEnabled() === true
-      ? [
-          {
-            intlLabel: { id: 'Settings.adminTokens.title', defaultMessage: 'Admin Tokens' },
-            to: '/settings/admin-tokens',
-            id: 'admin-tokens',
-          },
-        ]
-      : []),
+    {
+      intlLabel: { id: 'Settings.adminTokens.title', defaultMessage: 'Admin Tokens' },
+      to: '/settings/admin-tokens',
+      id: 'admin-tokens',
+    },
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
     window.strapi?.flags?.promoteEE
       ? [

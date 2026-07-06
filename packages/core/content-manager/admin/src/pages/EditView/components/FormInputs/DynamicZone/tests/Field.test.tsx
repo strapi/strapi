@@ -15,12 +15,57 @@ jest.mock('../../../InputRenderer', () => ({
   InputRenderer: () => 'INPUTS',
 }));
 
+const useDocMock = jest.fn();
+const useDocumentMock = jest.fn();
+
+jest.mock('../../../../../../hooks/useDocument', () => ({
+  useDoc: (...args: unknown[]) => useDocMock(...args),
+  useDocument: (...args: unknown[]) => useDocumentMock(...args),
+}));
+
+jest.mock('../../../../../../hooks/useDocumentLayout', () => ({
+  useDocumentLayout: () => ({
+    edit: {
+      components: {
+        'blog.test-como': { settings: { mainField: 'name' } },
+      },
+    },
+  }),
+}));
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useIsDesktop: jest.fn().mockReturnValue(true),
 }));
 
 describe('DynamicZone', () => {
+  beforeEach(() => {
+    // Keep DocumentContext deterministic by avoiding RTK-query / schema fetch timing.
+    useDocMock.mockReturnValue({
+      collectionType: 'collectionType',
+      model: 'api::address.address',
+      id: 'create',
+    });
+
+    useDocumentMock.mockReturnValue({
+      isLoading: false,
+      components: {
+        'blog.test-como': {
+          category: 'blog',
+          info: { displayName: 'test comp' },
+          attributes: {
+            name: { type: 'string', default: 'toto' },
+          },
+        },
+        'seo.metadata': {
+          category: 'seo',
+          info: { displayName: 'metadata' },
+          attributes: {},
+        },
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -61,9 +106,9 @@ describe('DynamicZone', () => {
   });
 
   const waitForQueryToFinish = async () => {
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeEnabled()
-    );
+    // Wait for the button to be rendered (DocumentContext is mocked to be "ready").
+    const addComponentButton = await screen.findByRole('button', { name: /Add a component to/i });
+    expect(addComponentButton).toBeEnabled();
   };
 
   describe('rendering', () => {
@@ -109,6 +154,43 @@ describe('DynamicZone', () => {
       expect(screen.getByText('dynamic description')).toBeInTheDocument();
 
       expect(screen.getByText('test comp - test')).toBeInTheDocument();
+    });
+
+    // Regression test for https://github.com/strapi/strapi/issues/26815
+    it('should not crash when the dynamic zone value is null', async () => {
+      render({
+        initialFormValues: {
+          DynamicZoneComponent: null,
+        },
+      });
+
+      // Before the fix, a `null` value bypassed the `value = []` default and crashed
+      // on `value.length` / `value.map`.
+      await waitForQueryToFinish();
+
+      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeInTheDocument();
+    });
+
+    it('should ignore dynamic-zone component UIDs whose schema is unavailable', async () => {
+      const { user } = render({
+        attribute: {
+          ...defaultProps.attribute,
+          components: ['blog.test-como', 'shared.deleted-component'],
+        },
+      });
+
+      await waitForQueryToFinish();
+
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+
+      expect(screen.getByRole('button', { name: 'test comp' })).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'shared.deleted-component' })
+      ).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
+
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
     });
   });
 

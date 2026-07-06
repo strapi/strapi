@@ -14,7 +14,7 @@ const authenticate = async (ctx) => {
     const token = await getService('jwt').getToken(ctx);
 
     if (token) {
-      const { id } = token;
+      const { id, sessionId } = token;
 
       // Invalid token
       if (id === undefined) {
@@ -49,6 +49,11 @@ const authenticate = async (ctx) => {
       const ability = await strapi.contentAPI.permissions.engine.generateAbility(permissions);
 
       ctx.state.user = user;
+      // Expose the session backing this request (refresh mode only) so endpoints
+      // can flag the "current" session when listing active sessions.
+      if (sessionId) {
+        ctx.state.session = { id: sessionId };
+      }
 
       return {
         authenticated: true,

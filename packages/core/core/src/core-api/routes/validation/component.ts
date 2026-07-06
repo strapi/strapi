@@ -38,6 +38,6 @@ export class CoreComponentRouteValidator extends AbstractCoreRouteValidator<UID.
 
     const entries = Object.entries({ ..._scalarFields, ..._populatableFields });
 
-    return createAttributesSchema(entries);
+    return createAttributesSchema(this._strapi, entries);
   }
 }
