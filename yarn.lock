@@ -7546,9 +7546,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-swc@npm:0.4.0":
-  version: 0.4.0
-  resolution: "@rollup/plugin-swc@npm:0.4.0"
+"@rollup/plugin-swc@npm:0.4.1":
+  version: 0.4.1
+  resolution: "@rollup/plugin-swc@npm:0.4.1"
   dependencies:
     "@rollup/pluginutils": "npm:^5.0.1"
     smob: "npm:^1.4.0"
@@ -7558,7 +7558,7 @@ __metadata:
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: 10c0/65bd1ecb54f69324d5d80bada3afd5b1e2c881b013be8216f0ed1086f514d3cc5bcacd585f600bd1dfacefdba5112334ac9c6956fe307abe036c7d35a293bf00
+  checksum: 10c0/4c79823e782ab4ab6d0e798624fdbc0ff487340840a08fd5d5ed08953beff90947a9db1db1a91aedb71d7640a64b294faca996c766b94392002b19d7688653b7
   languageName: node
   linkType: hard
 
@@ -29387,7 +29387,7 @@ __metadata:
     "@rollup/plugin-image": "npm:3.0.3"
     "@rollup/plugin-json": "npm:6.1.0"
     "@rollup/plugin-node-resolve": "npm:15.3.1"
-    "@rollup/plugin-swc": "npm:0.4.0"
+    "@rollup/plugin-swc": "npm:0.4.1"
     "@strapi/admin-test-utils": "workspace:*"
     "@strapi/eslint-config": "npm:0.2.0"
     "@swc-node/register": "npm:1.11.1"
