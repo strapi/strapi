@@ -4,6 +4,24 @@ import _ from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 
+const ROUNDED_CHARS = {
+  top: '─',
+  'top-mid': '┬',
+  'top-left': '╭',
+  'top-right': '╮',
+  bottom: '─',
+  'bottom-mid': '┴',
+  'bottom-left': '╰',
+  'bottom-right': '╯',
+  left: '│',
+  right: '│',
+  middle: '│',
+  mid: '',
+  'left-mid': '',
+  'mid-mid': '',
+  'right-mid': '',
+};
+
 export const createStartupLogger = (app: Core.Strapi) => {
   return {
     logStats() {
@@ -14,7 +32,7 @@ export const createStartupLogger = (app: Core.Strapi) => {
 
       const infoTable = new CLITable({
         colWidths: [20, 50],
-        chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
+        chars: ROUNDED_CHARS,
       });
 
       const dbInfo = app.db?.getInfo();

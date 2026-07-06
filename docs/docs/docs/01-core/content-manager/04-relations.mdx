@@ -53,7 +53,7 @@ following conditions:
 - The field is a repeatable component
 - The field is a dynamic zone
 
-These paths _do not_ take into account index values. So if you have a repetable component field where the schema looks like:
+These paths _do not_ take into account index values. So if you have a repeatable component field where the schema looks like:
 
 ```json
 {
@@ -93,18 +93,18 @@ Then the path to the relation field would be `repeatable_single_component_relati
 relations are added the path to the field in the redux store would be `repeatable_single_component_relation.0.categories`.
 
 Inside the reducer we reduce the array of `relationalFieldPaths` to an object with the `initialValues` clone as
-as the base. If there is `modifiedData` in the browser i.e. you've made changes to the entity and saved those changes,
+the base. If there is `modifiedData` in the browser i.e. you've made changes to the entity and saved those changes,
 we just replace the first level of the field with the `modifiedData` so the data structure is preserved and we're not
-loosing the relations we had already loaded in the component. If the first part of the path is highlighted as the
-`relationalField` then we simply replace that intial object with an empty array.
+losing the relations we had already loaded in the component. If the first part of the path is highlighted as the
+`relationalField` then we simply replace that initial object with an empty array.
 
 However, if the first part of the path is either a repeatable component, a dynamic zone or a regular component then we
 recursively find the relation fields and replace the object with an array. This is handled by the `findLeafByPathAndReplace`
 utility function. This function in short, takes an end path (in this case the relational field) and a primitive to replace
 when it finds the endpath (an empty array in this case). It then recursively reduces the paths to the relational field mapping
-through arrays if necessary (in the instance of repetable components for example) replacing the endpath with the primitive.
+through arrays if necessary (in the instance of repeatable components for example) replacing the endpath with the primitive.
 
-When this is done, we have sucessfully prepared our initial data for usage with relations.
+When this is done, we have successfully prepared our initial data for usage with relations.
 
 ### Handling updates to relation fields
 
@@ -119,9 +119,9 @@ the beginning of the list. This is the expected behaviour, to keep the order of 
 :::
 
 The `RelationInput` component takes the field in `modifiedData` as its source of truth. You could therefore consider this to
-be the `browserState` and `initialData` to be the `serverState`. When relations are loaded they're added to both the `intialData`
+be the `browserState` and `initialData` to be the `serverState`. When relations are loaded they're added to both the `initialData`
 and `modifiedData` objects, but when you connect/disconnect only the `modifiedData` is updated. This is useful when we're preparing
-data for the api.
+data for the API.
 
 ### Cleaning data to be posted to the API
 

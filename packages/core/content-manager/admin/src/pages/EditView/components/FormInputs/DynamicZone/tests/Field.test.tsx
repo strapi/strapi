@@ -1,5 +1,5 @@
 import { Form } from '@strapi/admin/strapi-admin';
-import { render as renderRTL, screen, waitFor } from '@tests/utils';
+import { render as renderRTL, screen, waitFor, fireEvent, act } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
 import { DynamicZone, DynamicZoneProps } from '../Field';
@@ -15,12 +15,57 @@ jest.mock('../../../InputRenderer', () => ({
   InputRenderer: () => 'INPUTS',
 }));
 
+const useDocMock = jest.fn();
+const useDocumentMock = jest.fn();
+
+jest.mock('../../../../../../hooks/useDocument', () => ({
+  useDoc: (...args: unknown[]) => useDocMock(...args),
+  useDocument: (...args: unknown[]) => useDocumentMock(...args),
+}));
+
+jest.mock('../../../../../../hooks/useDocumentLayout', () => ({
+  useDocumentLayout: () => ({
+    edit: {
+      components: {
+        'blog.test-como': { settings: { mainField: 'name' } },
+      },
+    },
+  }),
+}));
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useIsDesktop: jest.fn().mockReturnValue(true),
 }));
 
 describe('DynamicZone', () => {
+  beforeEach(() => {
+    // Keep DocumentContext deterministic by avoiding RTK-query / schema fetch timing.
+    useDocMock.mockReturnValue({
+      collectionType: 'collectionType',
+      model: 'api::address.address',
+      id: 'create',
+    });
+
+    useDocumentMock.mockReturnValue({
+      isLoading: false,
+      components: {
+        'blog.test-como': {
+          category: 'blog',
+          info: { displayName: 'test comp' },
+          attributes: {
+            name: { type: 'string', default: 'toto' },
+          },
+        },
+        'seo.metadata': {
+          category: 'seo',
+          info: { displayName: 'metadata' },
+          attributes: {},
+        },
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -61,9 +106,9 @@ describe('DynamicZone', () => {
   });
 
   const waitForQueryToFinish = async () => {
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeEnabled()
-    );
+    // Wait for the button to be rendered (DocumentContext is mocked to be "ready").
+    const addComponentButton = await screen.findByRole('button', { name: /Add a component to/i });
+    expect(addComponentButton).toBeEnabled();
   };
 
   describe('rendering', () => {
@@ -109,6 +154,43 @@ describe('DynamicZone', () => {
       expect(screen.getByText('dynamic description')).toBeInTheDocument();
 
       expect(screen.getByText('test comp - test')).toBeInTheDocument();
+    });
+
+    // Regression test for https://github.com/strapi/strapi/issues/26815
+    it('should not crash when the dynamic zone value is null', async () => {
+      render({
+        initialFormValues: {
+          DynamicZoneComponent: null,
+        },
+      });
+
+      // Before the fix, a `null` value bypassed the `value = []` default and crashed
+      // on `value.length` / `value.map`.
+      await waitForQueryToFinish();
+
+      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeInTheDocument();
+    });
+
+    it('should ignore dynamic-zone component UIDs whose schema is unavailable', async () => {
+      const { user } = render({
+        attribute: {
+          ...defaultProps.attribute,
+          components: ['blog.test-como', 'shared.deleted-component'],
+        },
+      });
+
+      await waitForQueryToFinish();
+
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+
+      expect(screen.getByRole('button', { name: 'test comp' })).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'shared.deleted-component' })
+      ).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
+
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
     });
   });
 
@@ -306,49 +388,99 @@ describe('DynamicZone', () => {
     });
   });
 
-  describe.skip('Add component button', () => {
-    it('should render the close label if the component picker is open prop is true', async () => {
+  describe('forceOpen auto-expand', () => {
+    afterEach(async () => {
+      // Flush pending requestAnimationFrame callbacks scheduled by the forceOpen
+      // effect. Without this, the rAF from test N leaks into test N+1 and can
+      // interfere with its render.
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+    });
+
+    it('should expand the new component accordion when adding to an empty zone', async () => {
       const { user } = render();
 
       await waitForQueryToFinish();
 
-      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
+
+      // The newly added accordion should be expanded (its content is visible)
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
+    });
+
+    it('should expand the new component when adding to a non-empty zone', async () => {
+      const { user } = render({
+        initialFormValues: {
+          DynamicZoneComponent: [
+            {
+              __temp_key__: 'a0',
+              __component: 'blog.test-como',
+              name: 'existing',
+              id: 1,
+            },
+          ],
+        },
+      });
+
+      await waitForQueryToFinish();
+
+      expect(screen.getByText('test comp - existing')).toBeInTheDocument();
 
       await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
 
-      expect(screen.getByRole('button', { name: /Close/ })).toBeInTheDocument();
+      // Both the existing and new component should be visible
+      await waitFor(() => {
+        const triggers = screen.getAllByRole('button', { name: /test comp/i });
+        expect(triggers.length).toBe(2);
+      });
+
+      // The new component should have its accordion expanded (default name is 'toto')
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
     });
 
-    it('should render the name of the field when the label is an empty string', async () => {
-      render({ label: '' });
+    it('should forceOpen the inserted component when using "Add component above"', async () => {
+      const { user } = render({
+        initialFormValues: {
+          DynamicZoneComponent: [
+            {
+              __temp_key__: 'a0',
+              __component: 'blog.test-como',
+              name: 'first',
+              id: 1,
+            },
+            {
+              __temp_key__: 'a5',
+              __component: 'blog.test-como',
+              name: 'second',
+              id: 2,
+            },
+          ],
+        },
+      });
 
       await waitForQueryToFinish();
 
-      expect(
-        screen.getByRole('button', { name: `Add a component to ${TEST_NAME}` })
-      ).toBeInTheDocument();
-    });
+      expect(screen.getByText('test comp - first')).toBeInTheDocument();
+      expect(screen.getByText('test comp - second')).toBeInTheDocument();
 
-    /**
-     * TODO: re-add this test when errors are reimplemented
-     */
-    it.skip('should render a too high error if there is hasMaxError is true and the component is not open', async () => {
-      render();
+      // Open the "More actions" menu on the second component and add above
+      const moreButtons = screen.getAllByRole('button', { name: 'More actions' });
+      await user.click(moreButtons[1]);
+      await user.click(screen.getByRole('menuitem', { name: 'Add component above' }));
 
-      await waitForQueryToFinish();
+      /**
+       * @note – fireEvent is needed here (same pattern as existing DynamicComponent tests)
+       */
+      fireEvent.click(screen.getByRole('menuitem', { name: 'test comp' }));
 
-      expect(screen.getByRole('button', { name: /The value is too high./ })).toBeInTheDocument();
-    });
-
-    /**
-     * TODO: re-add this test when errors are reimplemented
-     */
-    it.skip('should render a label telling the user there are X missing components if hasMinError is true and the component is not open', async () => {
-      render();
-
-      await waitForQueryToFinish();
-
-      expect(screen.getByRole('button', { name: /missing components/ })).toBeInTheDocument();
+      // There should now be 3 components (the inserted one between first and second)
+      await waitFor(() => {
+        const triggers = screen.getAllByRole('button', { name: /test comp/i });
+        expect(triggers.length).toBe(3);
+      });
     });
   });
 });

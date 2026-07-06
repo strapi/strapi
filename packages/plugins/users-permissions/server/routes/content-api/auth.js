@@ -94,6 +94,7 @@ module.exports = (strapi) => {
       path: '/auth/send-email-confirmation',
       handler: 'auth.sendEmailConfirmation',
       config: {
+        middlewares: ['plugin::users-permissions.rateLimit'],
         prefix: '',
       },
       request: {
@@ -124,6 +125,18 @@ module.exports = (strapi) => {
       method: 'POST',
       path: '/auth/logout',
       handler: 'auth.logout',
+      config: { prefix: '' },
+    },
+    {
+      method: 'GET',
+      path: '/auth/sessions',
+      handler: 'auth.getSessions',
+      config: { prefix: '' },
+    },
+    {
+      method: 'DELETE',
+      path: '/auth/sessions/:sessionId',
+      handler: 'auth.revokeSession',
       config: { prefix: '' },
     },
   ];

@@ -162,11 +162,11 @@ export default {
 
     await validatedUpdatePermissionsInput(input);
 
-    if (!role) {
-      return ctx.notFound('role.notFound');
-    }
+    const normalizedPermissions = (await roleService.hooks.willValidateUpdatePermissions.call(
+      input.permissions
+    )) as typeof input.permissions;
 
-    const permissions = await roleService.assignPermissions(role.id, input.permissions);
+    const permissions = await roleService.assignPermissions(role.id, normalizedPermissions);
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 

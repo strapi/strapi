@@ -1,4 +1,6 @@
-export default ({ env }) => {
+import type { Core } from '@strapi/strapi';
+
+export default ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database => {
   const client = env('DATABASE_CLIENT', 'postgres');
 
   const connections = {
@@ -40,17 +42,27 @@ export default ({ env }) => {
       },
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
+    sqlite: {
+      connection: {
+        filename: env('DATABASE_FILENAME', '.tmp/data.db'),
+      },
+      useNullAsDefault: true,
+    },
   };
 
-  if (!connections[client]) {
-    throw new Error(`Unsupported DATABASE_CLIENT: ${client}. Use "postgres" or "mysql".`);
+  if (!(client in connections)) {
+    throw new Error(
+      `Unsupported DATABASE_CLIENT: ${client}. Use "postgres", "mysql", or "sqlite".`
+    );
   }
+
+  type DatabaseClient = keyof typeof connections;
 
   return {
     connection: {
-      client,
-      ...connections[client],
+      client: client as DatabaseClient,
+      ...connections[client as DatabaseClient],
       acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
     },
-  };
+  } as Core.Config.Database;
 };

@@ -35,6 +35,12 @@ const render = ({
   });
 
 describe('UIDInput', () => {
+  // If a previous test throws before `jest.useRealTimers()`, fake timers leak into
+  // the next test and break msw v2's interceptor.
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   test('renders', async () => {
     render({
       hint: 'hint',
@@ -72,7 +78,11 @@ describe('UIDInput', () => {
   });
 
   test('Regenerates the value based on the target field', async () => {
-    jest.useFakeTimers();
+    // MSW v2 / undici use microtasks internally between request emission and handler
+    // resolution. Faking `queueMicrotask` / `setImmediate` doesn't block completion but
+    // stalls them long enough that each fetch here takes ~10s instead of ~100ms. Keep
+    // them real so the file runs in single-digit seconds.
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
     const { user } = render({ initialValues: { name: 'foo' } });
     await waitForInput();
 
@@ -121,7 +131,11 @@ describe('UIDInput', () => {
     expect(screen.queryByText('Available')).not.toBeInTheDocument();
     expect(screen.queryByText('Unvailable')).not.toBeInTheDocument();
 
-    jest.useFakeTimers();
+    // MSW v2 / undici use microtasks internally between request emission and handler
+    // resolution. Faking `queueMicrotask` / `setImmediate` doesn't block completion but
+    // stalls them long enough that each fetch here takes ~10s instead of ~100ms. Keep
+    // them real so the file runs in single-digit seconds.
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
     const input = screen.getByRole('textbox');
     await user.clear(input);
     await user.type(input, 'not-taken');
