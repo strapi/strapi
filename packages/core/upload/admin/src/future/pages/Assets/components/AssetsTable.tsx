@@ -66,6 +66,7 @@ const StyledTr = styled.tr<{
   $isSelected?: boolean;
 }>`
   height: 48px;
+  user-select: none;
   background: ${({ theme, $isSelected }) =>
     $isSelected ? theme.colors.primary100 : theme.colors.neutral0};
   cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
@@ -183,7 +184,8 @@ const AssetRow = ({ asset, orderedAssetIds, onAssetItemClick }: AssetRowProps) =
 
   const selected = isSelected(asset.id);
 
-  // OS file-manager click semantics: shift selects range, cmd/ctrl toggles, click selects single.
+  // Click semantics: plain click selects one; cmd/ctrl toggles; shift selects a contiguous
+  // range (anchor → target), replacing the current selection.
   const handleRowClick = (e: React.MouseEvent) => {
     if (e.shiftKey) {
       selectRange(orderedAssetIds, asset.id);
