@@ -55,7 +55,7 @@ Endpoints (admin server):
 - `POST /admin/reset-password`
 - `POST /admin/access-token` — rotates the refresh cookie and returns `{ data: { token } }`
 - `POST /admin/logout` — clears cookie and revokes refresh tokens; body may include `{ deviceId }` to revoke a single device family
-- `GET /admin/users/me/sessions` — lists the current admin user's active sessions (device label, IP, signed-in time, last used)
+- `GET /admin/users/me/sessions` — lists the current admin user's active sessions (device label, signed-in time, last used)
 - `DELETE /admin/users/me/sessions/:sessionId` — revokes a single session owned by the current user
 - `DELETE /admin/users/me/sessions` — revokes all sessions; query `?keepCurrent=true` preserves the session backing the current request ("log out of other devices")
 

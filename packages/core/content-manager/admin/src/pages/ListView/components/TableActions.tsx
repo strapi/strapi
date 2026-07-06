@@ -7,10 +7,10 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { Button, LinkButton, Modal } from '@strapi/design-system';
-import { Duplicate, Pencil } from '@strapi/icons';
+import { Duplicate, ExternalLink, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useHref, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
@@ -137,6 +137,43 @@ const StyledPencil = styled(Pencil)`
   }
 `;
 
+const OpenInNewTabAction: DocumentActionComponent = ({ documentId }) => {
+  const { formatMessage } = useIntl();
+  const { canRead } = useDocumentRBAC('OpenInNewTabAction', ({ canRead }) => ({ canRead }));
+  const [{ query }] = useQueryParams<{ plugins?: object }>();
+
+  // Resolve the entry's absolute URL (incl. router basename) so we can open it
+  // in a real new browser tab. The primary list-view cell is also a link, this
+  // gives the same affordance an explicit, discoverable menu entry.
+  const href = useHref({
+    pathname: documentId ?? '',
+    search: stringify({ plugins: query.plugins }),
+  });
+
+  return {
+    disabled: !canRead || !documentId,
+    icon: <StyledExternalLink />,
+    label: formatMessage({
+      id: 'content-manager.actions.open-in-new-tab.label',
+      defaultMessage: 'Open in new tab',
+    }),
+    position: 'table-row',
+    onClick: () => {
+      window.open(href, '_blank', 'noopener,noreferrer');
+    },
+  };
+};
+
+// No `type` is set: it's an optional discriminator constrained to a known union
+// and this action is identified by its component name instead.
+OpenInNewTabAction.position = 'table-row';
+
+const StyledExternalLink = styled(ExternalLink)`
+  path {
+    fill: currentColor;
+  }
+`;
+
 const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
@@ -253,6 +290,6 @@ const StyledDuplicate = styled(Duplicate)`
   }
 `;
 
-const DEFAULT_TABLE_ROW_ACTIONS = [EditAction, CloneAction];
+const DEFAULT_TABLE_ROW_ACTIONS = [EditAction, OpenInNewTabAction, CloneAction];
 
 export { TableActions, DEFAULT_TABLE_ROW_ACTIONS };
