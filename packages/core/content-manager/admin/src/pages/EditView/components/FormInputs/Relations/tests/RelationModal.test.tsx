@@ -19,6 +19,15 @@ describe('Document Modal Reducer', () => {
     collectionType: 'collection-types',
     params: { locale: 'en' },
   };
+  const parentFormValues = {
+    blocks: [
+      {
+        __component: 'page-blocks.product-carousel',
+        __temp_key__: 'parent-component-key',
+        title: 'Summer shoes',
+      },
+    ],
+  };
 
   // Initial state for most tests
   const initialState: State = {
@@ -114,6 +123,112 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: true,
+      });
+    });
+
+    it('should store parent form values when opening a relation', () => {
+      const action: Action = {
+        type: 'GO_TO_RELATION',
+        payload: {
+          document: doc3,
+          shouldBypassConfirmation: false,
+          fieldToConnect: 'blocks.0.products',
+          fieldToConnectUID: 'page-blocks.product-carousel',
+          parentFormValues,
+        },
+      };
+
+      const result = reducer(stateWithHistory, action);
+
+      expect(result).toEqual({
+        ...stateWithHistory,
+        documentHistory: [doc1, doc2, doc3],
+        confirmDialogIntent: null,
+        fieldToConnect: 'blocks.0.products',
+        fieldToConnectUID: 'page-blocks.product-carousel',
+        parentFormValues,
+      });
+    });
+
+    it('should preserve parent form values while waiting for confirmation', () => {
+      const action: Action = {
+        type: 'GO_TO_RELATION',
+        payload: {
+          document: doc3,
+          shouldBypassConfirmation: false,
+          fieldToConnect: 'blocks.0.products',
+          fieldToConnectUID: 'page-blocks.product-carousel',
+          parentFormValues,
+        },
+      };
+
+      const result = reducer(stateWithUnsavedChanges, action);
+
+      expect(result).toEqual({
+        ...stateWithUnsavedChanges,
+        confirmDialogIntent: doc3,
+        fieldToConnect: 'blocks.0.products',
+        fieldToConnectUID: 'page-blocks.product-carousel',
+        parentFormValues,
+      });
+    });
+
+    it('should preserve parent form values when bypassing confirmation', () => {
+      const stateWithDialog: State = {
+        ...stateWithUnsavedChanges,
+        confirmDialogIntent: doc3,
+        fieldToConnect: 'blocks.0.products',
+        fieldToConnectUID: 'page-blocks.product-carousel',
+        parentFormValues,
+      };
+      const action: Action = {
+        type: 'GO_TO_RELATION',
+        payload: {
+          document: doc3,
+          shouldBypassConfirmation: true,
+          fieldToConnect: stateWithDialog.fieldToConnect,
+          fieldToConnectUID: stateWithDialog.fieldToConnectUID,
+          parentFormValues: stateWithDialog.parentFormValues,
+        },
+      };
+
+      const result = reducer(stateWithDialog, action);
+
+      expect(result).toEqual({
+        ...stateWithDialog,
+        documentHistory: [doc1, doc2, doc3],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+      });
+    });
+  });
+
+  describe('GO_TO_CREATED_RELATION action', () => {
+    it('should clear parent form values after connecting the created relation', () => {
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: {
+          document: doc3,
+          shouldBypassConfirmation: true,
+        },
+      };
+
+      const result = reducer(
+        {
+          ...stateWithHistory,
+          fieldToConnect: 'blocks.0.products',
+          fieldToConnectUID: 'page-blocks.product-carousel',
+          parentFormValues,
+        },
+        action
+      );
+
+      expect(result).toEqual({
+        ...stateWithHistory,
+        documentHistory: [doc1, doc3],
+        fieldToConnect: undefined,
+        fieldToConnectUID: undefined,
+        parentFormValues: undefined,
       });
     });
   });
@@ -267,6 +382,33 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: false,
         hasUnsavedChanges: false,
+      });
+    });
+
+    it('should clear parent form values when closing the modal', () => {
+      const action: Action = {
+        type: 'CLOSE_MODAL',
+        payload: {
+          shouldBypassConfirmation: true,
+        },
+      };
+
+      const result = reducer(
+        {
+          ...stateWithUnsavedChanges,
+          fieldToConnect: 'blocks.0.products',
+          fieldToConnectUID: 'page-blocks.product-carousel',
+          parentFormValues,
+        },
+        action
+      );
+
+      expect(result).toEqual({
+        documentHistory: [],
+        confirmDialogIntent: null,
+        isModalOpen: false,
+        hasUnsavedChanges: false,
+        parentFormValues: undefined,
       });
     });
   });
