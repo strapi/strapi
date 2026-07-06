@@ -3,8 +3,11 @@ import { createCommand, Option } from 'commander';
 import {
   excludeOption,
   onlyOption,
+  excludeContentTypesOption,
+  onlyContentTypesOption,
   throttleOption,
   validateExcludeOnly,
+  validateContentTypeTransferOptions,
 } from '../../utils/data-transfer';
 import { promptEncryptionKey } from '../../utils/commander';
 import action from './action';
@@ -45,8 +48,11 @@ const command = () => {
     )
     .addOption(excludeOption)
     .addOption(onlyOption)
+    .addOption(excludeContentTypesOption)
+    .addOption(onlyContentTypesOption)
     .addOption(throttleOption)
     .hook('preAction', validateExcludeOnly)
+    .hook('preAction', validateContentTypeTransferOptions)
     .hook('preAction', prepareExportDirFormatCli)
     .hook('preAction', promptEncryptionKey)
     .action(action);

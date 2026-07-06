@@ -15,7 +15,7 @@ import {
   TRANSFER_PROGRESS_FIELD_SEP,
   exitWith,
 } from './helpers';
-import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
+import { getParseListWithChoices, parseInteger, parseList, confirmMessage } from './commander';
 
 const {
   errors: { TransferEngineInitializationError },
@@ -188,6 +188,24 @@ const onlyOption = new Option(
   `Include only these types of data (plus schemas). Available types: ${transferDataTypes.join(',')}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
 
+const excludeContentTypesOption = new Option(
+  '--exclude-content-types <comma-separated UIDs>',
+  'Exclude these content types from entities and links (e.g. plugin::upload.file)'
+).argParser(parseList);
+
+const onlyContentTypesOption = new Option(
+  '--only-content-types <comma-separated UIDs>',
+  'Transfer only these content types in entities and links (e.g. api::article.article)'
+).argParser(parseList);
+
+type ContentTypeTransferOptions = {
+  excludeContentTypes?: string[];
+  onlyContentTypes?: string[];
+};
+
+type TransferCliFilterOptions = Partial<engineDataTransfer.ITransferEngineOptions> &
+  ContentTypeTransferOptions;
+
 const validateExcludeOnly = (command: Command) => {
   const { exclude, only } = command.opts();
   if (!only || !exclude) {
@@ -206,6 +224,80 @@ const validateExcludeOnly = (command: Command) => {
     );
   }
 };
+
+const validateContentTypeTransferOptions = (command: Command) => {
+  const { excludeContentTypes, onlyContentTypes } = command.opts();
+
+  if (!excludeContentTypes?.length || !onlyContentTypes?.length) {
+    return;
+  }
+
+  const overlap = excludeContentTypes.filter((uid: string) => onlyContentTypes.includes(uid));
+  if (overlap.length > 0) {
+    exitWith(
+      1,
+      `Content types may not be used in both "--exclude-content-types" and "--only-content-types". Found in both: ${overlap.join(
+        ','
+      )}`
+    );
+  }
+};
+
+const assertKnownContentTypes = (uids: string[], strapi: Core.Strapi, flag: string) => {
+  const known = new Set(Object.keys(strapi.contentTypes));
+  const unknown = uids.filter((uid) => !known.has(uid));
+
+  if (unknown.length > 0) {
+    exitWith(1, `Unknown content type(s) for ${flag}: ${unknown.join(', ')}`);
+  }
+};
+
+const validateContentTypeTransferOptionsForStrapi = (
+  opts: ContentTypeTransferOptions,
+  strapi: Core.Strapi
+) => {
+  if (opts.excludeContentTypes?.length) {
+    assertKnownContentTypes(opts.excludeContentTypes, strapi, '--exclude-content-types');
+  }
+
+  if (opts.onlyContentTypes?.length) {
+    assertKnownContentTypes(opts.onlyContentTypes, strapi, '--only-content-types');
+  }
+};
+
+const shouldIncludeContentTypeInTransfer = (
+  uid: string,
+  opts: TransferCliFilterOptions
+): boolean => {
+  if (isIgnoredContentType(uid)) {
+    return false;
+  }
+
+  if (opts.excludeContentTypes?.includes(uid)) {
+    return false;
+  }
+
+  if (opts.onlyContentTypes?.length) {
+    return opts.onlyContentTypes.includes(uid);
+  }
+
+  return true;
+};
+
+const createEntityFilter = (opts: TransferCliFilterOptions) => {
+  return (entity: { type: string }) => shouldIncludeContentTypeInTransfer(entity.type, opts);
+};
+
+const createLinkFilter = (opts: TransferCliFilterOptions) => {
+  return (link: { left: { type: string }; right: { type: string } }) =>
+    shouldIncludeContentTypeInTransfer(link.left.type, opts) &&
+    shouldIncludeContentTypeInTransfer(link.right.type, opts);
+};
+
+const buildTransferTransforms = (opts: TransferCliFilterOptions) => ({
+  links: [{ filter: createLinkFilter(opts) }],
+  entities: [{ filter: createEntityFilter(opts) }],
+});
 
 const errorColors = {
   fatal: chalk.red,
@@ -535,14 +627,12 @@ type RestoreConfig = NonNullable<
 >;
 
 // Based on exclude/only from options, create the restore object to match
-const parseRestoreFromOptions = (
-  opts: Partial<engineDataTransfer.ITransferEngineOptions>,
-  strapi: Core.Strapi
-) => {
+const parseRestoreFromOptions = (opts: TransferCliFilterOptions, strapi: Core.Strapi) => {
   const entitiesOptions: RestoreConfig['entities'] = {
     exclude: [
       ...Object.keys(strapi.contentTypes).filter(isIgnoredContentType),
       ...IGNORED_CONTENT_TYPES,
+      ...(opts.excludeContentTypes ?? []),
     ],
     include: undefined,
   };
@@ -555,11 +645,14 @@ const parseRestoreFromOptions = (
   if (!contentInScope) {
     // Nothing from the entities stage is transferred; do not delete any records beforehand.
     entitiesOptions.include = [];
+  } else if (opts.onlyContentTypes?.length) {
+    // Only wipe content types that are being replaced by this transfer.
+    entitiesOptions.include = opts.onlyContentTypes;
   } else if (shouldSkipStage(opts, 'config')) {
     // When config is excluded, scope pre-transfer deletion to user content types only.
     // Internal models (e.g. strapi::core-store) must not be wiped via the entities path.
     entitiesOptions.include = Object.keys(strapi.contentTypes).filter(
-      (uid) => !isIgnoredContentType(uid)
+      (uid) => !isIgnoredContentType(uid) && !opts.excludeContentTypes?.includes(uid)
     );
   }
 
@@ -584,10 +677,17 @@ export {
   isIgnoredContentType,
   createStrapiInstance,
   excludeOption,
+  excludeContentTypesOption,
+  onlyContentTypesOption,
   exitMessageText,
   onlyOption,
   throttleOption,
   validateExcludeOnly,
+  validateContentTypeTransferOptions,
+  validateContentTypeTransferOptionsForStrapi,
+  buildTransferTransforms,
+  createEntityFilter,
+  createLinkFilter,
   formatDiagnostic,
   abortTransfer,
   setSignalHandler,
@@ -596,3 +696,5 @@ export {
   shouldSkipStage,
   parseRestoreFromOptions,
 };
+
+export type { ContentTypeTransferOptions, TransferCliFilterOptions };

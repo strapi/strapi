@@ -2,6 +2,11 @@ import type { Core } from '@strapi/types';
 
 import { parseRestoreFromOptions } from '../data-transfer';
 
+jest.mock('@strapi/core', () => ({
+  createStrapi: jest.fn(),
+  compileStrapi: jest.fn(),
+}));
+
 const mockStrapi = {
   contentTypes: {
     'api::article.article': {},
@@ -9,6 +14,7 @@ const mockStrapi = {
     'admin::user': {},
     'plugin::content-releases.release': {},
     'plugin::upload.file': {},
+    'plugin::upload.folder': {},
   },
 } as unknown as Core.Strapi;
 
@@ -29,6 +35,7 @@ describe('parseRestoreFromOptions', () => {
       'api::article.article',
       'api::category.category',
       'plugin::upload.file',
+      'plugin::upload.folder',
     ]);
     expect(restore.configuration?.coreStore).toBe(false);
     expect(restore.configuration?.webhook).toBe(false);
@@ -42,6 +49,7 @@ describe('parseRestoreFromOptions', () => {
       'api::article.article',
       'api::category.category',
       'plugin::upload.file',
+      'plugin::upload.folder',
     ]);
     expect(restore.configuration?.coreStore).toBe(false);
     expect(restore.configuration?.webhook).toBe(false);
@@ -63,5 +71,25 @@ describe('parseRestoreFromOptions', () => {
     expect(restore.configuration?.coreStore).toBe(true);
     expect(restore.configuration?.webhook).toBe(true);
     expect(restore.assets).toBe(false);
+  });
+
+  test('--exclude-content-types preserves excluded types during restore', () => {
+    const restore = parseRestoreFromOptions(
+      { excludeContentTypes: ['plugin::upload.file', 'plugin::upload.folder'] },
+      mockStrapi
+    );
+
+    expect(restore.entities?.exclude).toEqual(
+      expect.arrayContaining(['plugin::upload.file', 'plugin::upload.folder'])
+    );
+  });
+
+  test('--only-content-types scopes restore deletion to listed types', () => {
+    const restore = parseRestoreFromOptions(
+      { onlyContentTypes: ['api::article.article'] },
+      mockStrapi
+    );
+
+    expect(restore.entities?.include).toEqual(['api::article.article']);
   });
 });

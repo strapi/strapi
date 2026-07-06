@@ -13,7 +13,6 @@ import {
 
 import {
   buildTransferTable,
-  isIgnoredContentType,
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
@@ -23,6 +22,8 @@ import {
   setSignalHandler,
   getDiffHandler,
   parseRestoreFromOptions,
+  buildTransferTransforms,
+  validateContentTypeTransferOptionsForStrapi,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 
@@ -47,6 +48,8 @@ interface CmdOptions {
   force?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
+  excludeContentTypes?: string[];
+  onlyContentTypes?: string[];
   throttle?: number;
 }
 
@@ -74,6 +77,7 @@ export default async (opts: CmdOptions) => {
    * To local Strapi instance
    */
   const strapiInstance = await createStrapiInstance();
+  validateContentTypeTransferOptionsForStrapi(opts, strapiInstance);
 
   /**
    * Configure and run the transfer engine
@@ -84,20 +88,7 @@ export default async (opts: CmdOptions) => {
     exclude: opts.exclude,
     only: opts.only,
     throttle: opts.throttle,
-    transforms: {
-      links: [
-        {
-          filter(link) {
-            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
-          },
-        },
-      ],
-      entities: [
-        {
-          filter: (entity) => !isIgnoredContentType(entity.type),
-        },
-      ],
-    },
+    transforms: buildTransferTransforms(opts),
   };
 
   const destinationOptions = {
@@ -106,7 +97,7 @@ export default async (opts: CmdOptions) => {
     },
     autoDestroy: false,
     strategy: opts.conflictStrategy || DEFAULT_CONFLICT_STRATEGY,
-    restore: parseRestoreFromOptions(engineOptions, strapiInstance),
+    restore: parseRestoreFromOptions(opts, strapiInstance),
   };
 
   const destination = createLocalStrapiDestinationProvider(destinationOptions);

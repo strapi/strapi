@@ -199,6 +199,16 @@ Once the integrity check has passed, the transfer begins by opening streams from
 
 Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
 
+### Excluding content types from the CLI
+
+Export, import, and transfer accept `--exclude-content-types` and `--only-content-types` with comma-separated content type UIDs (for example `plugin::upload.file,plugin::upload.folder`). These filters apply to the **entities** and **links** stages:
+
+- Excluded types are omitted from the transfer stream and related links touching those types are skipped automatically.
+- On import/transfer restore, excluded types are not deleted on the destination before data is inserted.
+- `--only-content-types` limits transferred entities and links to the listed UIDs and scopes pre-transfer deletion to those types only.
+
+To skip upload binaries as well, combine with `--exclude files`. Programmatic transfers can use the same rules via entity and link transform filters.
+
 ## Setting up the transfer engine
 
 A transfer engine object is created by using `createTransferEngine`, which accepts a [source provider](../02-providers/01-source-providers.md), a [destination provider](../02-providers/02-destination-providers.md), and an options object.

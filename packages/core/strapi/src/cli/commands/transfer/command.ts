@@ -5,8 +5,11 @@ import { exitWith, assertUrlHasProtocol, ifOptions } from '../../utils/helpers';
 import {
   excludeOption,
   onlyOption,
+  excludeContentTypesOption,
+  onlyContentTypesOption,
   throttleOption,
   validateExcludeOnly,
+  validateContentTypeTransferOptions,
 } from '../../utils/data-transfer';
 
 import action from './action';
@@ -46,8 +49,11 @@ const command = () => {
       .addOption(forceOption)
       .addOption(excludeOption)
       .addOption(onlyOption)
+      .addOption(excludeContentTypesOption)
+      .addOption(onlyContentTypesOption)
       .addOption(throttleOption)
       .hook('preAction', validateExcludeOnly)
+      .hook('preAction', validateContentTypeTransferOptions)
       .hook(
         'preAction',
         ifOptions(

@@ -6,7 +6,6 @@ import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@str
 import {
   buildTransferTable,
   createStrapiInstance,
-  isIgnoredContentType,
   formatDiagnostic,
   loadersFactory,
   exitMessageText,
@@ -16,6 +15,8 @@ import {
   getDiffHandler,
   getAssetsBackupHandler,
   parseRestoreFromOptions,
+  buildTransferTransforms,
+  validateContentTypeTransferOptionsForStrapi,
 } from '../../utils/data-transfer';
 import {
   exitWith,
@@ -52,6 +53,8 @@ interface CmdOptions {
   verbose?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
+  excludeContentTypes?: string[];
+  onlyContentTypes?: string[];
   throttle?: number;
   force?: boolean;
   checksums?: boolean;
@@ -76,6 +79,7 @@ export default async (opts: CmdOptions) => {
   }
 
   const strapi = await createStrapiInstance();
+  validateContentTypeTransferOptionsForStrapi(opts, strapi);
   const checksumsEnabled = opts.checksums !== false;
   let source;
   let destination;
@@ -153,22 +157,7 @@ export default async (opts: CmdOptions) => {
     exclude: opts.exclude,
     only: opts.only,
     throttle: opts.throttle,
-    transforms: {
-      links: [
-        {
-          filter(link) {
-            return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
-          },
-        },
-      ],
-      entities: [
-        {
-          filter(entity) {
-            return !isIgnoredContentType(entity.type);
-          },
-        },
-      ],
-    },
+    transforms: buildTransferTransforms(opts),
   });
 
   engine.diagnostics.onDiagnostic(formatDiagnostic('transfer', opts.verbose));

@@ -4,8 +4,11 @@ import { createCommand, Option } from 'commander';
 import {
   excludeOption,
   onlyOption,
+  excludeContentTypesOption,
+  onlyContentTypesOption,
   throttleOption,
   validateExcludeOnly,
+  validateContentTypeTransferOptions,
 } from '../../utils/data-transfer';
 import { getCommanderConfirmMessage, forceOption } from '../../utils/commander';
 import { exitWith } from '../../utils/helpers';
@@ -34,8 +37,11 @@ const command = () => {
       .addOption(forceOption)
       .addOption(excludeOption)
       .addOption(onlyOption)
+      .addOption(excludeContentTypesOption)
+      .addOption(onlyContentTypesOption)
       .addOption(throttleOption)
       .hook('preAction', validateExcludeOnly)
+      .hook('preAction', validateContentTypeTransferOptions)
       .hook('preAction', async (thisCommand) => {
         const opts = thisCommand.opts();
         const ext = path.extname(String(opts.file));
