@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 /**
  * @description Determines the format of the data response
@@ -10,8 +10,8 @@ import type { OpenAPIV3 } from 'openapi-types';
  */
 export default (
   isListOfEntities: boolean,
-  attributes: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
-): OpenAPIV3.SchemaObject => {
+  attributes: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject>
+): OpenAPIV3_1.SchemaObject => {
   if (isListOfEntities) {
     return {
       type: 'array',

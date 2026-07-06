@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import pascalCase from './pascal-case';
 
 interface Options {
@@ -17,8 +17,8 @@ const getApiResponse = ({
   uniqueName,
   route,
   isListOfEntities = false,
-}: Options): OpenAPIV3.ResponsesObject => {
-  const getSchema = (): OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject => {
+}: Options): OpenAPIV3_1.ResponsesObject => {
+  const getSchema = (): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject => {
     if (route.method === 'DELETE') {
       return {
         type: 'integer',

@@ -8,10 +8,4 @@ export const PERMISSIONS = {
     { action: 'plugin::documentation.settings.regenerate', subject: null },
     { action: 'plugin::documentation.settings.update', subject: null },
   ],
-  open: [
-    { action: 'plugin::documentation.read', subject: null },
-    { action: 'plugin::documentation.settings.regenerate', subject: null },
-  ],
-  regenerate: [{ action: 'plugin::documentation.settings.regenerate', subject: null }],
-  update: [{ action: 'plugin::documentation.settings.update', subject: null }],
 };

@@ -9607,6 +9607,7 @@ __metadata:
     "@strapi/admin-test-utils": "npm:5.50.0"
     "@strapi/design-system": "npm:2.2.1"
     "@strapi/icons": "npm:2.2.1"
+    "@strapi/openapi": "npm:5.50.0"
     "@strapi/strapi": "npm:5.50.0"
     "@strapi/types": "npm:5.50.0"
     "@strapi/utils": "npm:5.50.0"

@@ -1,5 +1,5 @@
 import type { Struct } from '@strapi/types';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import getSchemaData from './get-schema-data';
 import pascalCase from './pascal-case';
@@ -32,8 +32,8 @@ const convertComponentName = (component: string, isRef = false): string => {
 const cleanSchemaAttributes = (
   attributes: Struct.SchemaAttributes,
   { typeMap = new Map(), isRequest = false, didAddStrapiComponentsToSchemas }: Options
-): Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject> => {
-  const schemaAttributes: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject> = {};
+): Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject> => {
+  const schemaAttributes: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject> = {};
 
   for (const prop of Object.keys(attributes)) {
     const attribute = attributes[prop];
@@ -105,7 +105,7 @@ const cleanSchemaAttributes = (
       }
       case 'component': {
         const componentAttributes = strapi.components[attribute.component].attributes;
-        const rawComponentSchema: OpenAPIV3.SchemaObject = {
+        const rawComponentSchema: OpenAPIV3_1.SchemaObject = {
           type: 'object',
           properties: {
             ...(isRequest ? {} : { id: { oneOf: [{ type: 'string' }, { type: 'number' }] } }),
@@ -117,7 +117,7 @@ const cleanSchemaAttributes = (
           },
         };
 
-        const refComponentSchema: OpenAPIV3.ReferenceObject = {
+        const refComponentSchema: OpenAPIV3_1.ReferenceObject = {
           $ref: convertComponentName(attribute.component, true),
         };
 
@@ -140,7 +140,7 @@ const cleanSchemaAttributes = (
       case 'dynamiczone': {
         const components = attribute.components.map((component) => {
           const componentAttributes = strapi.components[component].attributes;
-          const rawComponentSchema: OpenAPIV3.SchemaObject = {
+          const rawComponentSchema: OpenAPIV3_1.SchemaObject = {
             type: 'object',
             properties: {
               ...(isRequest ? {} : { id: { oneOf: [{ type: 'string' }, { type: 'number' }] } }),
@@ -153,7 +153,7 @@ const cleanSchemaAttributes = (
             },
           };
 
-          const refComponentSchema: OpenAPIV3.ReferenceObject = {
+          const refComponentSchema: OpenAPIV3_1.ReferenceObject = {
             $ref: convertComponentName(component, true),
           };
 
@@ -164,7 +164,7 @@ const cleanSchemaAttributes = (
           const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
           return finalComponentSchema;
         });
-        let discriminator: OpenAPIV3.DiscriminatorObject | undefined;
+        let discriminator: OpenAPIV3_1.DiscriminatorObject | undefined;
         if (components.every((component) => Object.hasOwn(component, '$ref'))) {
           discriminator = {
             propertyName: '__component',
@@ -194,7 +194,7 @@ const cleanSchemaAttributes = (
         const isListOfEntities = attribute.multiple ?? false;
 
         if (isRequest) {
-          const oneOfType: OpenAPIV3.SchemaObject = {
+          const oneOfType: OpenAPIV3_1.SchemaObject = {
             oneOf: [{ type: 'integer' }, { type: 'string' }],
             example: 'string or id',
           };
@@ -216,7 +216,7 @@ const cleanSchemaAttributes = (
         const isListOfEntities = attribute.relation.includes('ToMany');
 
         if (isRequest) {
-          const oneOfType: OpenAPIV3.SchemaObject = {
+          const oneOfType: OpenAPIV3_1.SchemaObject = {
             oneOf: [{ type: 'integer' }, { type: 'string' }],
             example: 'string or id',
           };

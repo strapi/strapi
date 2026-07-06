@@ -1,1 +1,2 @@
-export * from './exports';
+export { generate } from './exports';
+export type { GenerationOptions, GeneratorOutput } from './exports';

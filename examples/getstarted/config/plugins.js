@@ -34,5 +34,5 @@ module.exports = () => ({
   todo: {
     enabled: false,
     resolve: `../plugins/todo-example`, // From the /examples/plugins folder
-  },
+  }
 });

@@ -1,11 +1,6 @@
 import { adminApi } from '@strapi/admin/strapi-admin';
 
-import { DocumentInfos } from '../types';
-
-type SettingsInput = {
-  restrictedAccess: boolean;
-  password: string;
-};
+import { DocumentInfos, SettingsInput } from '../types';
 
 const api = adminApi
   .enhanceEndpoints({
@@ -19,14 +14,6 @@ const api = adminApi
           providesTags: ['DocumentInfo'],
         }),
 
-        deleteVersion: builder.mutation<void, { version: string }>({
-          query: ({ version }) => ({
-            url: `/documentation/deleteDoc/${version}`,
-            method: 'DELETE',
-          }),
-          invalidatesTags: ['DocumentInfo'],
-        }),
-
         updateSettings: builder.mutation<void, { body: SettingsInput }>({
           query: ({ body }) => ({
             url: `/documentation/updateSettings`,
@@ -35,21 +22,8 @@ const api = adminApi
           }),
           invalidatesTags: ['DocumentInfo'],
         }),
-
-        regenerateDoc: builder.mutation<void, { version: string }>({
-          query: ({ version }) => ({
-            url: `/documentation/regenerateDoc`,
-            method: 'POST',
-            data: { version },
-          }),
-        }),
       };
     },
   });
 
-export const {
-  useGetInfoQuery,
-  useDeleteVersionMutation,
-  useUpdateSettingsMutation,
-  useRegenerateDocMutation,
-} = api;
+export const { useGetInfoQuery, useUpdateSettingsMutation } = api;

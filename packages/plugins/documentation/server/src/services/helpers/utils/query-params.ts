@@ -1,6 +1,6 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
-const params: OpenAPIV3.ParameterObject[] = [
+const params: OpenAPIV3_1.ParameterObject[] = [
   {
     name: 'sort',
     in: 'query',
