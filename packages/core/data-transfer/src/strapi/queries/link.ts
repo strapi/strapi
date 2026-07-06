@@ -16,12 +16,18 @@ const getMetadataTableName = (strapi: Core.Strapi, uid: string) => {
   return metadata.tableName;
 };
 
-const entityExists = async (strapi: Core.Strapi, uid: string, id: number | null | undefined) => {
-  if (id == null) {
+const entityExists = async (
+  strapi: Core.Strapi,
+  uid: string,
+  ref: number | string | null | undefined
+) => {
+  if (ref == null) {
     return false;
   }
 
-  const entry = await strapi.db.query(uid as UID.Schema).findOne({ select: ['id'], where: { id } });
+  const where = typeof ref === 'number' ? { id: ref } : { documentId: ref };
+
+  const entry = await strapi.db.query(uid as UID.Schema).findOne({ select: ['id'], where });
 
   return entry != null;
 };

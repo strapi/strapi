@@ -60,7 +60,7 @@ import { DocumentStatus } from '../EditView/components/DocumentStatus';
 import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { listViewFilters as Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
-import { CellContent } from './components/TableCells/CellContent';
+import { CellContent, hasContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
 import type { Modules } from '@strapi/types';
@@ -82,7 +82,6 @@ const ListViewPage = () => {
   const { copy } = useClipboard();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
-  const isDesktop = useIsDesktop();
 
   const handleCopyDocumentId = React.useCallback(
     async (e: React.MouseEvent, documentId: string | undefined) => {
@@ -341,6 +340,37 @@ const ListViewPage = () => {
     });
   };
 
+  /**
+   * The entry link is rendered on the first non-interactive column *that has a
+   * value for the row* (resolved per row, so an empty cell — rendered as "-" —
+   * is skipped and the next candidate carries the link instead). Any scalar
+   * column qualifies — text, numbers, dates (createdAt/updatedAt), `id`, and
+   * `documentId` (its id text becomes the link, the copy button stays separate).
+   * Only genuinely interactive cells are skipped: relations, media, components,
+   * dynamic zones (they embed their own links/menus), plugin-formatted columns
+   * (`cellFormatter`), and the synthetic `status` column.
+   */
+  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
+  const linkCandidates = tableHeaders.filter(
+    ({ name, attribute, cellFormatter }) =>
+      name !== 'status' &&
+      typeof cellFormatter !== 'function' &&
+      attribute &&
+      !NON_LINKABLE_TYPES.includes(attribute.type)
+  );
+
+  // The link column for a given row: the first candidate that actually has a
+  // value (uses CellContent's own hasContent so it matches the "-" the cell
+  // would otherwise render). documentId is checked directly (its own cell).
+  const getRowLinkField = (row: (typeof results)[number]) =>
+    linkCandidates.find((header) => {
+      if (header.name === 'documentId') {
+        return Boolean(row.documentId);
+      }
+      const value = row[header.name.split('.')[0]];
+      return hasContent(value, header.mainField, header.attribute);
+    })?.name;
+
   const isEmptyState = !isFetching && results.length === 0;
 
   const endActions = (
@@ -461,6 +491,7 @@ const ListViewPage = () => {
                   <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
                   <Table.Body>
                     {results.map((row) => {
+                      const rowLinkField = getRowLinkField(row);
                       return (
                         <Table.Row
                           cursor="pointer"
@@ -493,12 +524,32 @@ const ListViewPage = () => {
                               );
                             }
                             if (header.name === 'documentId') {
+                              // When documentId is the primary link column, only its
+                              // id text becomes the link; the copy button stays outside.
+                              const isDocumentIdLink =
+                                header.name === rowLinkField && Boolean(row.documentId);
                               return (
                                 <Table.Cell key={header.name}>
                                   <Flex gap={2} alignItems="center" width="100%" minWidth={0}>
-                                    <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
-                                      {row.documentId || '-'}
-                                    </Typography>
+                                    {isDocumentIdLink ? (
+                                      <Typography
+                                        tag={ReactRouterLink}
+                                        to={{
+                                          pathname: row.documentId,
+                                          search: stringify({ plugins: query.plugins }),
+                                        }}
+                                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                        textColor="neutral800"
+                                        maxWidth="30rem"
+                                        ellipsis
+                                      >
+                                        {row.documentId}
+                                      </Typography>
+                                    ) : (
+                                      <Typography textColor="neutral800" maxWidth="30rem" ellipsis>
+                                        {row.documentId || '-'}
+                                      </Typography>
+                                    )}
                                     {row.documentId && (
                                       <IconButton
                                         variant="ghost"
@@ -530,6 +581,14 @@ const ListViewPage = () => {
                                   content={row[header.name.split('.')[0]]}
                                   rowId={row.documentId}
                                   {...header}
+                                  linkTo={
+                                    header.name === rowLinkField
+                                      ? {
+                                          pathname: row.documentId,
+                                          search: stringify({ plugins: query.plugins }),
+                                        }
+                                      : undefined
+                                  }
                                 />
                               </Table.Cell>
                             );

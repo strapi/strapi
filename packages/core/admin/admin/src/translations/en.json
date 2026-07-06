@@ -753,7 +753,6 @@
   "Settings.sessions.title": "Active Devices",
   "Settings.sessions.subtitle": "These are the devices and sessions currently signed in to your account.",
   "Settings.sessions.device": "Device",
-  "Settings.sessions.ip": "IP address",
   "Settings.sessions.loginAt": "Signed in",
   "Settings.sessions.lastActiveAt": "Last used",
   "Settings.sessions.actions": "Actions",
