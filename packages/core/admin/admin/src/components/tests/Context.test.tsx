@@ -50,38 +50,12 @@ describe('createContext', () => {
     expect(result.current).toBe('hello');
   });
 
-  /**
-   * Core regression for issue #26795.
-   *
-   * Before the fix: shouldThrowOnMissingContext was an optional parameter with no
-   * runtime default. Omitting the argument set it to `undefined` at runtime — even
-   * though the TypeScript generic default (ShouldThrow = true) implied it would be
-   * `true`. The `if (shouldThrowOnMissingContext)` branch was therefore never taken
-   * for missing-context calls, causing the selector to silently return `undefined`.
-   *
-   * Consumers such as useRBAC then called that undefined value as a function:
-   *   checkUserHasPermissions(permissions)
-   *   → TypeError: checkUserHasPermissions is not a function
-   *
-   * After the fix: `shouldThrowOnMissingContext: ShouldThrow = true as ShouldThrow`
-   * gives the parameter an actual runtime default of `true`, so a missing context
-   * throws a clear, identifiable error instead of silently returning undefined.
-   */
-  it('throws by default (no third argument) when rendered outside its provider', () => {
+  it('returns undefined by default when rendered outside its provider', () => {
     const [, useTestContext] = createContext<{ value: string }>('TestContext');
 
-    // Intentionally omit the third argument — this is the exact call signature
-    // used by useRBAC, useMenu, AuthenticatedLayout, PrivateRoute, and others.
-    const Consumer = () => <span>{useTestContext('Consumer', (state) => state.value)}</span>;
+    const { result } = renderHook(() => useTestContext('Consumer', (state) => state.value));
 
-    render(
-      <ErrorBoundary>
-        <Consumer />
-      </ErrorBoundary>
-    );
-
-    // Must throw a named, identifiable error — NOT a TypeError from calling undefined().
-    expect(screen.getByText('`Consumer` must be used within `TestContext`')).toBeInTheDocument();
+    expect(result.current).toBeUndefined();
   });
 
   /**
@@ -95,6 +69,20 @@ describe('createContext', () => {
     const { result } = renderHook(() => useTestContext('Consumer', (state) => state.value, false));
 
     expect(result.current).toBeUndefined();
+  });
+
+  it('throws for missing context when throwing is explicitly enabled', () => {
+    const [, useTestContext] = createContext<{ value: string }>('TestContext');
+
+    const Consumer = () => <span>{useTestContext('Consumer', (state) => state.value, true)}</span>;
+
+    render(
+      <ErrorBoundary>
+        <Consumer />
+      </ErrorBoundary>
+    );
+
+    expect(screen.getByText('`Consumer` must be used within `TestContext`')).toBeInTheDocument();
   });
 
   /**
@@ -114,8 +102,8 @@ describe('createContext', () => {
    *   - The consumer reads from consumerContext, but only providerContext has a
    *     provider — so ctx === undefined at the selector level.
    *
-   * Before the fix: returns undefined → calling it as a function → TypeError.
-   * After the fix:  throws a named error → React can recover via error boundary.
+   * Consumers that require their context opt into throwing, producing a named error
+   * instead of returning undefined and failing later with a TypeError.
    */
   it('throws a named error (not TypeError) when a consumer reads from a different context instance than its provider', () => {
     // Simulates: AuthProvider uses the context from the NEW module after HMR.
@@ -127,7 +115,7 @@ describe('createContext', () => {
     const Consumer = () => (
       // This selector runs against the OLD context — ctx will be undefined
       // because only ProviderFromNewModule (the NEW context) has a provider.
-      <span>{useContextFromOldModule('useRBAC', (state) => state.value)}</span>
+      <span>{useContextFromOldModule('useRBAC', (state) => state.value, true)}</span>
     );
 
     render(

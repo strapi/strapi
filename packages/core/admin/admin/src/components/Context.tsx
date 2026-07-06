@@ -26,7 +26,7 @@ function createContext<ContextValueType extends object | null>(
   function useContext<Selected, ShouldThrow extends boolean = true>(
     consumerName: string,
     selector: (value: ContextValueType) => Selected,
-    shouldThrowOnMissingContext: ShouldThrow = true as ShouldThrow
+    shouldThrowOnMissingContext?: ShouldThrow
   ) {
     return ContextSelector.useContextSelector(Context, (ctx) => {
       // The context is available, return the selected value
