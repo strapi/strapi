@@ -5,7 +5,6 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { isGroupExpressionValid } from './utils/isGroupExpressionValid';
 
 export const CONTENT_STRUCTURE_FILE_NAME = 'groups.json';
-
 const MAX_DEPTH = 3;
 
 export interface ContentStructureService {
@@ -15,7 +14,7 @@ export interface ContentStructureService {
   read(): Promise<Modules.ContentStructure.ContentStructureFile | null>;
 
   /**
-   * Yields an extremely tolerant version of the groups configuration file. Invlalid references are repaired or ignored. Warnings fire for each repair/omission.
+   * Yields an extremely tolerant version of the groups configuration file. Invalid references are repaired or ignored. Warnings fire for each repair/omission.
    */
   getCleanedFile(): Promise<Modules.ContentStructure.ContentStructureFile | null>;
 
@@ -25,8 +24,9 @@ export interface ContentStructureService {
   resolve(): Promise<Modules.ContentStructure.ResolvedContentStructure>;
 
   /**
-   * Writes a new config and invalidates the cache. Does NOT perform validation - this is left to the caller.
-   * Doesn't change strapi.reload.isWatching.
+   * Writes a new config and invalidates the cache. Does NOT perform validation - this is
+   * left to the caller. The Save that triggers the write restarts the server via the
+   * standard update-schema flow, which reloads the file; this method only persists it.
    */
   write(structure: Modules.ContentStructure.ContentStructureFile): Promise<void>;
 
