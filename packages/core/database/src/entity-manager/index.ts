@@ -1213,7 +1213,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               // to throw. Rewrite such a position to point at the nearest surviving
               // neighbor in the relation's current order, so the item lands where the
               // deleted relation used to be instead of always falling back to the end.
-              const deletedIds = new Set(relIdsToDelete);
+              const idKey = (value: ID) => String(value);
+              const deletedIds = new Set(relIdsToDelete.map(idKey));
               let resolvedConnect = cleanRelationData.connect ?? [];
 
               if (
@@ -1221,7 +1222,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 !isEmpty(relIdsToDelete) &&
                 resolvedConnect.some((item) => {
                   const adjacentId = item.position?.before ?? item.position?.after;
-                  return adjacentId != null && deletedIds.has(adjacentId);
+                  return adjacentId != null && deletedIds.has(idKey(adjacentId));
                 })
               ) {
                 const currentOrder = await this.createQueryBuilder(joinTable.name)
@@ -1233,45 +1234,107 @@ export const createEntityManager = (db: Database): EntityManager => {
                   .execute<Array<Record<string, any>>>();
 
                 const orderedIds = currentOrder.map((rel) => rel[inverseJoinColumn.name]);
+                const orderedIdKeys = orderedIds.map(idKey);
+                const connectIds = new Set(resolvedConnect.map((item) => idKey(item.id)));
+                const deletedIdsInCurrentOrder = new Set(
+                  orderedIds.map(idKey).filter((orderedId) => deletedIds.has(orderedId))
+                );
 
                 // A neighbor is only a valid fallback target if it survives the delete
-                // and isn't the item being connected itself (it would otherwise be found
-                // at its own current position in orderedIds and produce a self-reference).
-                const findSurvivingNeighbor = (targetId: ID, direction: 1 | -1, ownId: ID) => {
-                  let index = orderedIds.indexOf(targetId);
+                // and isn't being moved by this connect payload.
+                const findSurvivingNeighbor = (targetId: ID, direction: 1 | -1) => {
+                  let index = orderedIdKeys.indexOf(idKey(targetId));
                   while (index !== -1) {
                     index += direction;
                     const candidate = orderedIds[index];
                     if (candidate === undefined) {
                       return undefined;
                     }
-                    if (!deletedIds.has(candidate) && candidate !== ownId) {
+                    const candidateKey = idKey(candidate);
+                    if (!deletedIds.has(candidateKey) && !connectIds.has(candidateKey)) {
                       return candidate;
                     }
                   }
                   return undefined;
                 };
 
-                resolvedConnect = resolvedConnect.map((item) => {
+                const positionByConnectId = new Map<
+                  ID,
+                  NonNullable<(typeof resolvedConnect)[number]['position']>
+                >();
+                const connectGroups = new Map<
+                  string,
+                  { targetId: ID; before: typeof resolvedConnect; after: typeof resolvedConnect }
+                >();
+
+                const getConnectGroup = (targetId: ID) => {
+                  const targetKey = idKey(targetId);
+                  let group = connectGroups.get(targetKey);
+                  if (!group) {
+                    group = { targetId, before: [], after: [] };
+                    connectGroups.set(targetKey, group);
+                  }
+                  return group;
+                };
+
+                resolvedConnect.forEach((item) => {
                   const { before, after } = item.position ?? {};
                   const adjacentId = before ?? after;
 
-                  if (adjacentId == null || !deletedIds.has(adjacentId)) {
-                    return item;
+                  if (
+                    adjacentId == null ||
+                    !deletedIds.has(idKey(adjacentId)) ||
+                    !deletedIdsInCurrentOrder.has(idKey(adjacentId))
+                  ) {
+                    return;
                   }
 
-                  const neighborId = before
-                    ? findSurvivingNeighbor(before, 1, item.id)
-                    : findSurvivingNeighbor(after as ID, -1, item.id);
+                  const group = getConnectGroup(adjacentId);
+                  if (before) {
+                    group.before.push(item);
+                  } else {
+                    group.after.push(item);
+                  }
+                });
 
-                  if (neighborId === undefined) {
-                    return { ...item, position: before ? { end: true } : { start: true } };
+                connectGroups.forEach(({ targetId, before, after }) => {
+                  const previousNeighbor = findSurvivingNeighbor(targetId, -1);
+                  const nextNeighbor = findSurvivingNeighbor(targetId, 1);
+                  let previousPositionId = previousNeighbor;
+
+                  before.forEach((item) => {
+                    if (previousPositionId !== undefined) {
+                      positionByConnectId.set(item.id, { after: previousPositionId });
+                    } else if (nextNeighbor !== undefined) {
+                      positionByConnectId.set(item.id, { before: nextNeighbor });
+                    } else {
+                      positionByConnectId.set(item.id, { start: true });
+                    }
+
+                    previousPositionId = item.id;
+                  });
+
+                  after.forEach((item) => {
+                    if (previousPositionId !== undefined) {
+                      positionByConnectId.set(item.id, { after: previousPositionId });
+                    } else if (nextNeighbor !== undefined) {
+                      positionByConnectId.set(item.id, { before: nextNeighbor });
+                    } else {
+                      positionByConnectId.set(item.id, { start: true });
+                    }
+
+                    previousPositionId = item.id;
+                  });
+                });
+
+                resolvedConnect = resolvedConnect.map((item) => {
+                  const position = positionByConnectId.get(item.id);
+
+                  if (position) {
+                    return { ...item, position };
                   }
 
-                  return {
-                    ...item,
-                    position: before ? { before: neighborId } : { after: neighborId },
-                  };
+                  return item;
                 });
               }
 
