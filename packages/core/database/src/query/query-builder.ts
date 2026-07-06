@@ -421,9 +421,16 @@ const createQueryBuilder = (
       const subQB = this.getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
-      const connection = db.getConnection(tableName);
+      const qb = db.getConnection(tableName);
 
-      return (connection[originalType] as Knex)().whereIn('id', nestedSubQuery);
+      // Restore type mutated by select('id') so execute() returns the write row count.
+      state.type = originalType;
+
+      if (originalType === 'update') {
+        return qb.update(state.data).whereIn('id', nestedSubQuery);
+      }
+
+      return qb.delete().whereIn('id', nestedSubQuery);
     },
 
     processState() {
