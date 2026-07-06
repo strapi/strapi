@@ -13,6 +13,7 @@ import {
   KEBAB_BASE_REGEX,
   NAME_REGEX,
 } from './common';
+import { contentStructureFileSchema, type ContentStructureFileInput } from './content-structure';
 
 type SchemaMeta =
   | {
@@ -791,6 +792,7 @@ const schemaSchema = z.object({
     )
     .optional()
     .default([]),
+  contentStructure: contentStructureFileSchema.optional(),
 });
 
 type CreateComponentType = z.infer<typeof createComponentSchema>;
@@ -811,6 +813,7 @@ export type Schema = {
     | UpdateCollectionType
     | DeleteContentType
   >;
+  contentStructure?: ContentStructureFileInput;
 };
 
 const updateSchemaInput = z.object(
