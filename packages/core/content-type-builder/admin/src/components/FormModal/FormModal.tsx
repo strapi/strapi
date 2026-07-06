@@ -600,6 +600,7 @@ export const FormModal = () => {
             data: {
               icon: modifiedData.icon,
               displayName: modifiedData.displayName,
+              category: modifiedData.category,
             },
             componentUID: targetUid,
           });
