@@ -129,3 +129,74 @@ describe('Local source assets stream warnings', () => {
     });
   });
 });
+
+describe('Local source assets stream — remote asset size', () => {
+  test('reports a size that matches the streamed bytes for a remote (cloud) file', async () => {
+    // A Cloudinary-hosted SVG in a subfolder. Its response has NO content-length
+    // header (chunked transfer) — common for cloud/CDN providers. The tar entry
+    // is built from stats.size, so if that doesn't match the streamed bytes the
+    // export crashes with "Failed to create an asset tar entry".
+    const body = Buffer.from('<svg data-note="chunked, no content-length" />');
+
+    const remoteFile = {
+      id: 7,
+      hash: 'New_Balance2_13004e51a8',
+      ext: '.svg',
+      url: 'https://res.cloudinary.com/demo/image/upload/cms/New_Balance2_13004e51a8.svg',
+      provider: 'cloudinary',
+      formats: undefined,
+    };
+
+    // Each fetch() must return a fresh response (a body stream is consumed once):
+    // once for getFileStatsForTransfer, once for getFileStream.
+    const fetch = jest.fn(() =>
+      Promise.resolve({
+        status: 200,
+        headers: { get: () => null }, // no content-length (chunked)
+        body: Readable.toWeb(Readable.from([body])),
+      })
+    );
+
+    const strapi = {
+      db: {
+        queryBuilder: jest.fn(() => ({
+          select: jest.fn().mockReturnThis(),
+          stream: jest.fn(() => Readable.from([remoteFile])),
+        })),
+      },
+      dirs: { static: { public: '/tmp/unused' } },
+      log: { warn: jest.fn() },
+      fetch,
+      plugins: {
+        upload: { provider: { isPrivate: jest.fn().mockResolvedValue(false) } },
+      },
+      config: { get: jest.fn(() => ({ provider: 'cloudinary' })) },
+    } as any;
+
+    // Consume each asset's stream DURING iteration, exactly like the file
+    // destination does (it pipes the stream into the tar before pulling the next
+    // asset). This also matches how temp files are cleaned up as we advance.
+    const stream = createAssetsStream(strapi);
+    let assetCount = 0;
+    let declaredSize = -1;
+    let streamedBytes = -1;
+
+    for await (const asset of stream) {
+      assetCount += 1;
+      declaredSize = (asset as any).stats.size;
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of (asset as any).stream) {
+        chunks.push(chunk as Buffer);
+      }
+      streamedBytes = Buffer.concat(chunks).length;
+    }
+
+    expect(assetCount).toBe(1);
+
+    // The declared size (used for the tar entry header) MUST equal the streamed
+    // bytes. Before the fix it does not: content-length is missing, so stats.size
+    // is 0 while the stream carries the real bytes → the tar entry write fails.
+    expect(declaredSize).toBe(streamedBytes);
+  });
+});
