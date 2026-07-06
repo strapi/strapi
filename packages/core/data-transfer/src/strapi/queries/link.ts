@@ -99,10 +99,12 @@ export const createLinkQuery = (
       // TODO: handle manyToOne joinColumn
       if (attribute.joinColumn) {
         const joinColumnName: string = attribute.joinColumn.name;
+        const referencedColumn = attribute.joinColumn.referencedColumn ?? 'id';
         const ownerAlias = 'owner';
         const targetAlias = 'target';
         const ownerTable = addSchema(metadata.tableName);
         const targetTable = addSchema(getMetadataTableName(strapi, target));
+        const targetReferencedColumn = aliasColumn(targetAlias, referencedColumn);
 
         if (onOrphanedLink) {
           const orphanQb = connection
@@ -112,10 +114,10 @@ export const createLinkQuery = (
             .leftJoin(
               { [targetAlias]: targetTable },
               aliasColumn(ownerAlias, joinColumnName),
-              `${targetAlias}.id`
+              targetReferencedColumn
             )
             .whereNotNull(aliasColumn(ownerAlias, joinColumnName))
-            .whereNull(`${targetAlias}.id`);
+            .whereNull(targetReferencedColumn);
 
           if (trx) {
             orphanQb.transacting(trx);
@@ -142,7 +144,7 @@ export const createLinkQuery = (
           .innerJoin(
             { [targetAlias]: targetTable },
             aliasColumn(ownerAlias, joinColumnName),
-            `${targetAlias}.id`
+            targetReferencedColumn
           )
           .whereNotNull(aliasColumn(ownerAlias, joinColumnName));
 
@@ -212,6 +214,11 @@ export const createLinkQuery = (
           const joinTable = addSchema(name);
           const leftTable = addSchema(metadata.tableName);
           const rightTable = addSchema(getMetadataTableName(strapi, attribute.target));
+          const leftReferencedColumn = aliasColumn(leftAlias, joinColumn.referencedColumn ?? 'id');
+          const rightReferencedColumn = aliasColumn(
+            rightAlias,
+            inverseJoinColumn.referencedColumn ?? 'id'
+          );
 
           const validColumns = [
             columns.left.ref,
@@ -259,15 +266,15 @@ export const createLinkQuery = (
               .leftJoin(
                 { [leftAlias]: leftTable },
                 aliasColumn(joinAlias, joinColumn.name),
-                `${leftAlias}.id`
+                leftReferencedColumn
               )
               .leftJoin(
                 { [rightAlias]: rightTable },
                 aliasColumn(joinAlias, inverseJoinColumn.name),
-                `${rightAlias}.id`
+                rightReferencedColumn
               )
               .where((builder) => {
-                builder.whereNull(`${leftAlias}.id`).orWhereNull(`${rightAlias}.id`);
+                builder.whereNull(leftReferencedColumn).orWhereNull(rightReferencedColumn);
               });
 
             if (trx) {
@@ -288,12 +295,12 @@ export const createLinkQuery = (
             .innerJoin(
               { [leftAlias]: leftTable },
               aliasColumn(joinAlias, joinColumn.name),
-              `${leftAlias}.id`
+              leftReferencedColumn
             )
             .innerJoin(
               { [rightAlias]: rightTable },
               aliasColumn(joinAlias, inverseJoinColumn.name),
-              `${rightAlias}.id`
+              rightReferencedColumn
             );
 
           if (trx) {

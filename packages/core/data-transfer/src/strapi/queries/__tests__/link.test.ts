@@ -256,6 +256,62 @@ describe('createLinkQuery', () => {
     expect(links).toEqual([]);
   });
 
+  test('exports joinColumn links using referencedColumn when it is not id', async () => {
+    const connection = {
+      client: { connectionSettings: {} },
+      queryBuilder: () =>
+        createQueryBuilderMock({
+          rows: [
+            { id: 1, document_id: 'doc-1' },
+            { id: 2, document_id: 'doc-1' },
+          ],
+          filterInnerJoin: (row) => row.document_id === 'doc-1',
+        }),
+    };
+
+    const strapi = {
+      db: {
+        connection,
+        metadata: {
+          get: jest.fn((uid: string) => ({
+            tableName: 'articles',
+            attributes: {
+              localizations: {
+                type: 'relation',
+                relation: 'oneToMany',
+                target: uid,
+                owner: true,
+                joinColumn: { name: 'document_id', referencedColumn: 'document_id' },
+              },
+            },
+          })),
+        },
+        query: jest.fn(),
+      },
+    } as unknown as import('@strapi/types').Core.Strapi;
+
+    const links = [];
+
+    for await (const link of createLinkQuery(strapi)().generateAll('api::article.article')) {
+      links.push(link);
+    }
+
+    expect(links).toEqual([
+      {
+        kind: 'relation.circular',
+        relation: 'oneToMany',
+        left: { type: 'api::article.article', ref: 1, field: 'localizations' },
+        right: { type: 'api::article.article', ref: 'doc-1' },
+      },
+      {
+        kind: 'relation.circular',
+        relation: 'oneToMany',
+        left: { type: 'api::article.article', ref: 2, field: 'localizations' },
+        right: { type: 'api::article.article', ref: 'doc-1' },
+      },
+    ]);
+  });
+
   test('invokes onOrphanedLink when a join-table link references a missing entity', async () => {
     const onOrphanedLink = jest.fn();
     const strapi = buildJoinTableStrapi({
