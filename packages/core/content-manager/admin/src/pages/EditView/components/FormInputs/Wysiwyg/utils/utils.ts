@@ -114,6 +114,41 @@ export const insertListOrTitle = (markdown: string) => {
   return textToInsert;
 };
 
+const INLINE_MARKDOWN_WRAPPERS: Record<string, { prefix: string; suffix: string }> = {
+  Bold: { prefix: '**', suffix: '**' },
+  Italic: { prefix: '_', suffix: '_' },
+  Underline: { prefix: '<u>', suffix: '</u>' },
+  Strikethrough: { prefix: '~~', suffix: '~~' },
+};
+
+const LINK_MARKDOWN_PATTERN = /^\[(.+)\]\([^)]*\)$/;
+
+export const toggleMarkdownSelection = (text: string, markdownType: string) => {
+  if (markdownType === 'Link') {
+    const linkMatch = text.match(LINK_MARKDOWN_PATTERN);
+
+    if (linkMatch) {
+      return linkMatch[1];
+    }
+
+    return replaceText(markdownType, text);
+  }
+
+  const wrapper = INLINE_MARKDOWN_WRAPPERS[markdownType];
+
+  if (!wrapper) {
+    return replaceText(markdownType, text);
+  }
+
+  const { prefix, suffix } = wrapper;
+
+  if (text.startsWith(prefix) && text.endsWith(suffix)) {
+    return text.slice(prefix.length, text.length - suffix.length);
+  }
+
+  return replaceText(markdownType, text);
+};
+
 // EDITOR ACTIONS FUNCTIONS
 
 export const markdownHandler = (
@@ -124,7 +159,7 @@ export const markdownHandler = (
   let textToInsert;
 
   if (textToEdit) {
-    const editedText = replaceText(markdownType, textToEdit);
+    const editedText = toggleMarkdownSelection(textToEdit, markdownType);
     editor.current.replaceSelection(editedText);
     editor.current.focus();
   } else {

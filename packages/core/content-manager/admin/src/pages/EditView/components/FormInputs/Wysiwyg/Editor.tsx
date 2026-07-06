@@ -5,6 +5,7 @@ import { styled } from 'styled-components';
 
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 import { newlineAndIndentContinueMarkdownList } from './utils/continueList';
+import { createMarkdownKeyboardShortcuts } from './utils/keyboardShortcuts';
 
 import type { FieldValue, InputProps } from '@strapi/admin/strapi-admin';
 
@@ -20,6 +21,7 @@ interface EditorProps extends Omit<FieldValue, 'initialValue'>, Omit<InputProps,
   isPreviewMode?: boolean;
   isExpandMode?: boolean;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
+  onPasteFiles?: (event: ClipboardEvent) => void;
 }
 
 const Editor = React.forwardRef<EditorApi, EditorProps>(
@@ -35,14 +37,20 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
       placeholder,
       textareaRef,
       value,
+      onPasteFiles,
     },
     forwardedRef
   ) => {
     const onChangeRef = React.useRef(onChange);
+    const onPasteFilesRef = React.useRef(onPasteFiles);
 
     React.useEffect(() => {
       onChangeRef.current = onChange;
     }, [onChange]);
+
+    React.useEffect(() => {
+      onPasteFilesRef.current = onPasteFiles;
+    }, [onPasteFiles]);
 
     React.useEffect(() => {
       if (editorRef.current) {
@@ -56,6 +64,7 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
           Enter: 'newlineAndIndentContinueMarkdownList',
           Tab: false,
           'Shift-Tab': false,
+          ...createMarkdownKeyboardShortcuts(editorRef),
         },
         readOnly: false,
         smartIndent: false,
@@ -74,6 +83,17 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
         }
         onChangeRef.current(name, cm.getValue());
       });
+
+      const handlePaste = (event: ClipboardEvent) => {
+        onPasteFilesRef.current?.(event);
+      };
+
+      const wrapper = editorRef.current.getWrapperElement();
+      wrapper.addEventListener('paste', handlePaste);
+
+      return () => {
+        wrapper.removeEventListener('paste', handlePaste);
+      };
     }, [editorRef, textareaRef, name, placeholder]);
 
     React.useEffect(() => {
