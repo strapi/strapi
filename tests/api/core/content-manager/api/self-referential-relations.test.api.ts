@@ -84,10 +84,11 @@ const updateCategory = async (documentId: string, body: Record<string, unknown>)
     body,
   });
 
-const publishCategory = async (documentId: string) =>
+const publishCategory = async (documentId: string, body?: Record<string, unknown>) =>
   rq({
     method: 'POST',
     url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
+    body,
   });
 
 const discardCategory = async (documentId: string) =>
@@ -295,6 +296,86 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     const publishedLinks = joinRows.filter((row: any) => row[joinColumn.name] === publishedA.id);
     expect(publishedLinks).toHaveLength(1);
     expect(publishedLinks[0][inverseJoinColumn.name]).toBe(publishedB.id);
+  });
+
+  test('regression: published self-referential oneToMany order is preserved when a child is republished', async () => {
+    const parent = await createCategory('Page 1');
+    const childA = await createCategory('Page 1.1');
+    const childB = await createCategory('Page 1.2');
+    const childC = await createCategory('Page 1.3');
+    const childD = await createCategory('Page 1.4');
+    const expectedOrder = [
+      childA.documentId,
+      childB.documentId,
+      childC.documentId,
+      childD.documentId,
+    ];
+    const expectChildrenToPointToParent = async () => {
+      for (const child of [childA, childB, childC, childD]) {
+        expect(await getRelationTargets(child.documentId, 'parent', 'published')).toEqual([
+          parent.documentId,
+        ]);
+      }
+    };
+
+    for (const child of [childA, childB, childC, childD]) {
+      await updateCategory(child.documentId, {
+        name: child.name,
+        parent: { documentId: parent.documentId, locale: null },
+      });
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      children: [childD, childC, childB, childA].map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'draft')).toEqual(expectedOrder);
+
+    for (const child of [childA, childB, childC, childD]) {
+      await publishCategory(child.documentId);
+    }
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+    await expectChildrenToPointToParent();
+
+    for (const child of [childA, childB, childC, childD]) {
+      await updateCategory(child.documentId, {
+        name: `${child.name} - edited`,
+      });
+      await publishCategory(child.documentId);
+
+      expect({
+        republishedChild: child.name,
+        publishedOrder: await getRelationTargets(parent.documentId, 'children', 'published'),
+      }).toEqual({
+        republishedChild: child.name,
+        publishedOrder: expectedOrder,
+      });
+      await expectChildrenToPointToParent();
+    }
+
+    await updateCategory(parent.documentId, { name: 'Page 1 - edited' });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+    await expectChildrenToPointToParent();
+
+    await updateCategory(childC.documentId, { name: 'Page 1.3 - draft edit' });
+    await discardCategory(childC.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+    await expectChildrenToPointToParent();
   });
 
   // A single entry whose unidirectional relation points at itself must keep that relation in
