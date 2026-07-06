@@ -2,7 +2,9 @@ import { test, expect } from '@playwright/test';
 
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { login } from '../../../utils/login';
-import { clickAndWait, navToHeader } from '../../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+
+const PRODUCT_EDIT_URL = /\/admin\/content-manager\/collection-types\/api::product\.product\/[^/]+/;
 
 function createSearchTest(testFunction, description, searchTerm) {
   testFunction(description, async ({ page }) => {
@@ -10,11 +12,17 @@ function createSearchTest(testFunction, description, searchTerm) {
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
     await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
     await page.getByRole('textbox', { name: 'name' }).fill(searchTerm);
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+    await Promise.all([
+      page.waitForURL(PRODUCT_EDIT_URL),
+      page.getByRole('button', { name: 'Save' }).click(),
+    ]);
+    await findAndClose(page, 'Saved document');
     await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
 
     // Search
-    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    const searchButton = page.getByRole('button', { name: 'Search', exact: true });
+    await expect(searchButton).toBeVisible();
+    await clickAndWait(page, searchButton);
     await page.fill('input[name="search"]', searchTerm);
     await page.locator('input[name="search"]').press('Enter');
 
