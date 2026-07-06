@@ -14,7 +14,6 @@ export interface SanitizedSessionEntry {
   current: boolean;
   loginAt?: string;
   lastActiveAt?: string;
-  ip?: string;
 }
 
 export interface SessionDisplayEntry {
@@ -41,7 +40,6 @@ export const sanitizeSessionEntry = (
     // The active record is re-created on each rotation, so its creation time is the
     // best available "last used" signal without an extra write per request.
     lastActiveAt: session.createdAt ? new Date(session.createdAt).toISOString() : undefined,
-    ip: typeof metadata.ip === 'string' ? metadata.ip : undefined,
   };
 };
 
@@ -49,7 +47,6 @@ export const sanitizeSessionEntry = (
  * Builds origin-defined session metadata from generic request context fields.
  */
 export const buildSessionMetadata = (params: {
-  ip?: string;
   userAgent?: string | null;
   loginAt?: string;
 }): Record<string, unknown> => {
@@ -57,7 +54,6 @@ export const buildSessionMetadata = (params: {
 
   return {
     loginAt: params.loginAt ?? new Date().toISOString(),
-    ip: params.ip,
     ...(deviceName ? { deviceName } : {}),
   };
 };
