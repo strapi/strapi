@@ -171,6 +171,20 @@ const createStrapiInstance = async (opts: { logLevel?: string } = {}): Promise<C
 
 const transferDataTypes = Object.keys(engineDataTransfer.TransferGroupPresets);
 
+const TRANSFER_FILTER_PRESET_DESCRIPTIONS: Record<engineDataTransfer.TransferFilterPreset, string> =
+  {
+    content: 'entities and links (incl. media library DB records)',
+    files: 'upload binaries in public/uploads (not media library DB records)',
+    config: 'core store and webhooks',
+  };
+
+const transferFilterPresetsHelp = transferDataTypes
+  .map(
+    (type) =>
+      `${type} (${TRANSFER_FILTER_PRESET_DESCRIPTIONS[type as engineDataTransfer.TransferFilterPreset]})`
+  )
+  .join('; ');
+
 const throttleOption = new Option(
   '--throttle <delay after each entity>',
   `Add a delay in milliseconds between each transferred entity`
@@ -180,12 +194,12 @@ const throttleOption = new Option(
 
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
-  `Exclude data using comma-separated types. Available types: ${transferDataTypes.join(',')}`
+  `Exclude data: ${transferFilterPresetsHelp}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "exclude"'));
 
 const onlyOption = new Option(
   '--only <command-separated data types>',
-  `Include only these types of data (plus schemas). Available types: ${transferDataTypes.join(',')}`
+  `Include only these types (plus schemas): ${transferFilterPresetsHelp}`
 ).argParser(getParseListWithChoices(transferDataTypes, 'Invalid options for "only"'));
 
 const validateExcludeOnly = (command: Command) => {
@@ -530,6 +544,31 @@ const shouldSkipStage = (
   return false;
 };
 
+const logTransferFilterSummary = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => {
+  const { exclude, only } = opts;
+  if (!exclude?.length && !only?.length) {
+    return;
+  }
+
+  const parts: string[] = [];
+  if (exclude?.length) {
+    parts.push(`excluding ${exclude.join(', ')}`);
+  }
+  if (only?.length) {
+    parts.push(`only ${only.join(', ')}`);
+  }
+
+  console.log(chalk.dim(`Transfer filters: ${parts.join('; ')}.`));
+
+  if (shouldSkipStage(opts, 'files')) {
+    console.log(
+      chalk.dim(
+        'Note: Media library records (plugin::upload.file, plugin::upload.folder) are still transferred via the content stage. Sync upload binaries separately (e.g. rsync public/uploads).'
+      )
+    );
+  }
+};
+
 type RestoreConfig = NonNullable<
   strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore']
 >;
@@ -595,4 +634,5 @@ export {
   getAssetsBackupHandler,
   shouldSkipStage,
   parseRestoreFromOptions,
+  logTransferFilterSummary,
 };
