@@ -216,15 +216,18 @@ test.each(['NONE', 'CONTRIBUTOR', 'FIRST_TIME_CONTRIBUTOR', 'COLLABORATOR'])(
     };
 
     const setFailed = jest.spyOn(core, 'setFailed');
+    const info = jest.spyOn(core, 'info');
 
     await action();
 
+    expect(info).toHaveBeenCalledWith(`PR author_association: ${authorAssociation}`);
     expect(setFailed).toHaveBeenCalled();
     expect(setFailed.mock.calls[0][0]).toBe(
       'Community PRs must target `develop`, not `main`. Please edit the PR and change the base branch to `develop`.'
     );
 
     setFailed.mockRestore();
+    info.mockRestore();
   }
 );
 
@@ -245,12 +248,15 @@ test.each(action.STRAPI_ENGINEER_ASSOCIATIONS)(
     };
 
     const setFailed = jest.spyOn(core, 'setFailed');
+    const info = jest.spyOn(core, 'info');
 
     await action();
 
+    expect(info).toHaveBeenCalledWith(`PR author_association: ${authorAssociation}`);
     expect(setFailed).not.toHaveBeenCalled();
 
     setFailed.mockRestore();
+    info.mockRestore();
   }
 );
 

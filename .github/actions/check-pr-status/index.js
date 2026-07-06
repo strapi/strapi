@@ -53,12 +53,16 @@ async function main() {
     const authorAssociation = github.context.payload.pull_request?.author_association;
     const isStrapiEngineer = STRAPI_ENGINEER_ASSOCIATIONS.includes(authorAssociation);
 
-    if (baseRef === 'main' && isStrapiEngineer === false) {
-      core.setFailed(
-        'Community PRs must target `develop`, not `main`. Please edit the PR and change the base branch to `develop`.'
-      );
+    if (baseRef === 'main') {
+      core.info(`PR author_association: ${authorAssociation ?? 'undefined'}`);
 
-      return;
+      if (isStrapiEngineer === false) {
+        core.setFailed(
+          'Community PRs must target `develop`, not `main`. Please edit the PR and change the base branch to `develop`.'
+        );
+
+        return;
+      }
     }
 
     const milestone = github.context.payload.pull_request?.milestone;
