@@ -43,8 +43,23 @@ const errorsOf = async (value: unknown): Promise<string[]> => {
 };
 
 describe('permission validation — action-validity', () => {
+  let previousStrapi: unknown;
+
+  beforeEach(() => {
+    previousStrapi = (global as any).strapi;
+  });
+
   afterEach(() => {
-    delete (global as any).strapi;
+    // global.strapi is non-configurable (unit.setup.js); delete throws and the setter rejects undefined.
+    if (previousStrapi !== undefined) {
+      (global as any).strapi = previousStrapi;
+    } else {
+      (global as any).strapi = {
+        plugins: {},
+        api: {},
+        admin: { services: {} },
+      };
+    }
   });
 
   test('accepts a permission whose action exists in the provider', async () => {
