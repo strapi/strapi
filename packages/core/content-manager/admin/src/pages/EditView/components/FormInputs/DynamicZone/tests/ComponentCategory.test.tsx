@@ -23,7 +23,7 @@ describe('ComponentCategory', () => {
       ],
     });
 
-    await user.click(getByRole('button', { name: /testing/ }));
+    await user.click(getByRole('button', { name: /testing/i }));
 
     expect(getByRole('button', { name: /myComponent/ })).toBeInTheDocument();
   });
@@ -33,7 +33,7 @@ describe('ComponentCategory', () => {
       category: 'myCategory',
     });
 
-    expect(getByText(/myCategory/)).toBeInTheDocument();
+    expect(getByText(/myCategory/i)).toBeInTheDocument();
   });
 
   it('should call onAddComponent with the componentUid when a ComponentCard is clicked', async () => {
@@ -49,7 +49,7 @@ describe('ComponentCategory', () => {
       ],
     });
 
-    await user.click(getByRole('button', { name: /testing/ }));
+    await user.click(getByRole('button', { name: /testing/i }));
 
     await user.click(getByRole('button', { name: /myComponent/ }));
 

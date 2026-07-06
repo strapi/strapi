@@ -18,6 +18,11 @@ describe('Document Service Validations', () => {
     await destroyTestSetup(testUtils);
   });
 
+  beforeEach(() => {
+    // app-template enables api.documents.strictParams; reset so "default mode" cases match opt-out behavior
+    strapi.config.set('api.documents.strictParams', undefined);
+  });
+
   const methods = [
     'findMany',
     'findFirst',

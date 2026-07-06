@@ -44,9 +44,29 @@ describe('serveAdminPanel route', () => {
       await middleware(ctx as unknown as Context, next);
 
       expect(staticMiddleware).toHaveBeenCalledTimes(1);
-      expect(staticPath).toBe('index.js');
+      expect(staticPath).toBe('/index.js');
       expect(next).toHaveBeenCalledTimes(1);
       expect(ctx.path).toBe('/admin/assets/index.js');
+    });
+
+    test('keeps rewritten dotted content-manager paths URL-safe', async () => {
+      let staticPath: string | undefined;
+      const staticMiddleware = jest.fn(async (_ctx, next) => {
+        staticPath = _ctx.path;
+        await next();
+      });
+      koaStatic.mockReturnValue(staticMiddleware);
+
+      const middleware = serveStatic('/tmp/build');
+      const ctx = { path: '/admin/content-manager/collection-types/api::article.article' };
+      const next = jest.fn();
+
+      await middleware(ctx as unknown as Context, next);
+
+      expect(staticMiddleware).toHaveBeenCalledTimes(1);
+      expect(staticPath).toBe('/api::article.article');
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(ctx.path).toBe('/admin/content-manager/collection-types/api::article.article');
     });
   });
 });

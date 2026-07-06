@@ -86,7 +86,46 @@ describe('convert-query-params', () => {
     test.todo('partial filtering works');
   });
 
-  test.todo('convertSortQueryParams');
+  describe('convertSortQueryParams', () => {
+    test.each<[string, unknown, object]>([
+      ['single field string', 'title:asc', [{ title: 'asc' }]],
+      ['defaults to asc when order is omitted', 'title', [{ title: 'asc' }]],
+      ['is case insensitive on order', 'title:DESC', [{ title: 'DESC' }]],
+      [
+        'array of field strings',
+        ['title:asc', 'createdAt:desc'],
+        [{ title: 'asc' }, { createdAt: 'desc' }],
+      ],
+      [
+        'comma-separated field string',
+        'title:asc,createdAt:desc',
+        [{ title: 'asc' }, { createdAt: 'desc' }],
+      ],
+      ['nested sort object', { title: 'asc' }, { title: 'asc' }],
+    ])('accepts: %s', (key, input, expectedOutput) => {
+      const res = transformer.private_convertSortQueryParams(input as never);
+      expect(res).toEqual(expectedOutput);
+    });
+
+    test.each<[string, unknown]>([
+      ['invalid order suffix', 'title:asc$'],
+      ['unsupported order value', 'title:ascending'],
+      ['unsupported order value on a nested sort object', { title: 'ascending' }],
+    ])('rejects with a ValidationError: %s', (key, input) => {
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        'Invalid order. order can only be one of asc|desc|ASC|DESC'
+      );
+    });
+
+    test.each<[string, unknown]>([
+      ['a number', 1234],
+      ['null', null],
+    ])('rejects with a ValidationError: %s', (key, input) => {
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+      );
+    });
+  });
 
   describe('convertStartQueryParams', () => {
     it('accepts valid non-negative integers', () => {
@@ -284,6 +323,76 @@ describe('convert-query-params', () => {
         );
 
         expect(newPopulate).toStrictEqual({ [key]: { count: true } });
+      });
+
+      test.each<[label: string, key: string, populateValue: null | undefined]>([
+        ['dynamic zone', 'dz', null],
+        ['dynamic zone', 'dz', undefined],
+        ['morph to one', 'morph_to_one', null],
+        ['morph to one', 'morph_to_one', undefined],
+        ['morph to many', 'morph_to_many', null],
+        ['morph to many', 'morph_to_many', undefined],
+      ])('%s attributes ignore nil wildcard populate (%s)', (_, key, populateValue) => {
+        const populate = { [key]: { populate: populateValue } };
+
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
+
+        expect(newPopulate).toStrictEqual({ [key]: {} });
+      });
+
+      test.each<[label: string, key: string]>([
+        ['dynamic zone', 'dz'],
+        ['morph to one', 'morph_to_one'],
+        ['morph to many', 'morph_to_many'],
+      ])('%s attributes accept wildcard populate only as *', (_, key) => {
+        const populate = { [key]: { populate: '*' } };
+
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
+
+        expect(newPopulate).toStrictEqual({ [key]: { populate: true } });
+      });
+
+      const invalidPolymorphicNestedPopulateMessage =
+        `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
+        `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
+        `Consider using the fragment API for more granular population control.`;
+
+      test.each<[label: string, key: string]>([
+        ['dynamic zone', 'dz'],
+        ['morph to one', 'morph_to_one'],
+        ['morph to many', 'morph_to_many'],
+      ])('%s attributes reject non-wildcard string populate', (_, key) => {
+        const populate = { [key]: { populate: 'deep' } };
+
+        expect(() =>
+          transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
+        ).toThrowError(invalidPolymorphicNestedPopulateMessage);
+      });
+
+      test.each<[label: string, key: string]>([
+        ['dynamic zone', 'dz'],
+        ['morph to one', 'morph_to_one'],
+        ['morph to many', 'morph_to_many'],
+      ])('%s attributes reject object populate', (_, key) => {
+        const populate = { [key]: { populate: { title: true } } };
+
+        expect(() =>
+          transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
+        ).toThrowError(invalidPolymorphicNestedPopulateMessage);
+      });
+
+      test('array populate strings stay arrays (dot notation for dynamic zone)', () => {
+        const populate = ['dz', 'dz.field'];
+
+        expect(
+          transformer.private_convertPopulateQueryParams(populate, models['api::dog.dog'])
+        ).toStrictEqual(['dz', 'dz.field']);
       });
     });
   });

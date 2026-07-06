@@ -158,18 +158,17 @@ export interface Query {
   pageSize?: number;
 }
 
-class InvalidOrderError extends Error {
+class InvalidOrderError extends ValidationError {
   constructor() {
-    super();
-    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+    super('Invalid order. order can only be one of asc|desc|ASC|DESC');
   }
 }
 
-class InvalidSortError extends Error {
+class InvalidSortError extends ValidationError {
   constructor() {
-    super();
-    this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
+    super(
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+    );
   }
 }
 
@@ -469,7 +468,11 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          *
          * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
          */
-        if ('populate' in subPopulate && subPopulate.populate !== '*') {
+        if (
+          'populate' in subPopulate &&
+          !isNil(subPopulate.populate) &&
+          subPopulate.populate !== '*'
+        ) {
           throw new ValidationError(
             `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
               `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
@@ -481,7 +484,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         const newSubPopulate = {};
 
         // case: { populate: '*' }
-        if ('populate' in subPopulate) {
+        if ('populate' in subPopulate && subPopulate.populate === '*') {
           Object.assign(newSubPopulate, { populate: true });
         }
 

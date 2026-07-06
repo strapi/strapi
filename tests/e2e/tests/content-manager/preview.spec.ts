@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  publishAndConfirmDraftRelations,
+} from '../../../utils/shared';
 import { resetFiles } from '../../../utils/file-reset';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -22,13 +27,15 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Check that preview opens in its own page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await page.getByRole('link', { name: /open preview/i }).click();
     // Draft status is visible (second Draft text is the draft tab)
     await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
     await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
 
     // Copies the link of the page
-    await page.getByRole('button', { name: /copy preview link/i }).click();
+    const copyPreviewLink = page.getByRole('button', { name: /copy preview link/i });
+    await expect(copyPreviewLink).toBeVisible();
+    await copyPreviewLink.click();
     await findAndClose(page, 'Copied preview link');
 
     // Should go back to the edit view on close
@@ -87,7 +94,7 @@ test.describe('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Publish the document
-    await page.getByRole('button', { name: /publish/i }).click();
+    await publishAndConfirmDraftRelations(page, page.getByRole('button', { name: /publish/i }));
 
     // Check that preview opens in its own page
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
@@ -123,7 +130,7 @@ test.describe('Preview', () => {
     // Try to publish - should work without conditional field validation errors
     const publishButton = page.getByRole('button', { name: /publish/i });
     await expect(publishButton).toBeEnabled();
-    await clickAndWait(page, publishButton);
+    await publishAndConfirmDraftRelations(page, publishButton);
 
     // Verify publication succeeded and no error notifications appeared
     await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
@@ -179,7 +186,7 @@ describeOnCondition(edition === 'EE')('Advanced Preview', () => {
 
     // Publish
     await expect(publishButton).toBeEnabled();
-    await clickAndWait(page, publishButton);
+    await publishAndConfirmDraftRelations(page, publishButton);
     await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
     await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
     await expect(publishedTab).toBeEnabled();
