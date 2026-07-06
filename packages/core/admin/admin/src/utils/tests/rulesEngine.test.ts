@@ -18,7 +18,7 @@ describe('RulesEngine with is & isNot operator', () => {
   });
 
   describe('generate() and evaluate()', () => {
-    const cases: { condition: Condition; data: any; expected: boolean }[] = [
+    const cases: { condition: Condition; data: unknown; expected: boolean }[] = [
       {
         condition: { dependsOn: 'type', operator: 'is', value: 'international' },
         data: { type: 'international' },
@@ -71,9 +71,9 @@ describe('RulesEngine with is & isNot operator', () => {
 
   describe('evaluate() error handling', () => {
     it('should throw on invalid logic input', () => {
-      expect(() => engine.evaluate({ foo: 'bar' } as any, {})).toThrow(
-        'Invalid condition: Unrecognized operation foo'
-      );
+      expect(() =>
+        engine.evaluate({ foo: 'bar' } as unknown as Parameters<typeof engine.evaluate>[0], {})
+      ).toThrow('Invalid condition: Unrecognized operation foo');
     });
   });
 });

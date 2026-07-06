@@ -107,7 +107,7 @@ export const createAssetsStream = (
     options.onWarning?.(message);
   };
 
-  const generator: () => AsyncGenerator<IAsset, void> = async function* () {
+  const generator: () => AsyncGenerator<IAsset, void> = async function* generateAssets() {
     const stream: Readable = strapi.db
       .queryBuilder('plugin::upload.file')
       // Create a query builder instance (default type is 'select')

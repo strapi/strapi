@@ -27,7 +27,7 @@ const alreadyUsedAttributeNames = (
 };
 
 const getUsedContentTypeAttributeNames = (
-  ctShema: any,
+  ctShema: { attributes?: Record<string, unknown> },
   isEdition: boolean,
   attributeNameToEdit: string
 ) => {
@@ -181,7 +181,7 @@ const isMinSuperiorThanMax = <
       return true;
     }
 
-    const { max } = (this as any).parent;
+    const { max } = this.parent as { max?: T };
 
     if (!max) {
       return true;

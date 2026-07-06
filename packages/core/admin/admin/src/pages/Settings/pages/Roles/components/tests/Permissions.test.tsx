@@ -164,7 +164,7 @@ const i18nLayout = {
     plugins: { subjects: [] },
     settings: { subjects: [] },
   },
-} as any;
+} as unknown as React.ComponentProps<typeof Permissions>['layout'];
 
 const makePermission = (locales: string[] | null) => ({
   id: 1,
@@ -173,7 +173,7 @@ const makePermission = (locales: string[] | null) => ({
   action: READ_ACTION,
   actionParameters: {},
   subject: ARTICLE_UID,
-  properties: { fields: ['title'], locales } as any,
+  properties: { fields: ['title'], locales },
   conditions: [],
 });
 

@@ -140,7 +140,7 @@ describe('Content-Type', () => {
       ],
     ];
 
-    // @ts-expect-error
+    // @ts-expect-error test matrix includes dynamic field tuples
     test.each(testsB)('requiredOnly : %p -> %p', (existingFields: any, expectedResult: any) => {
       const res = getNestedFields(contentTypes.user as any, {
         components: strapi.components,
@@ -416,7 +416,7 @@ describe('Content-Type', () => {
       [['restaurant.address.gpsCoordinates.lat'], ['restaurant.address.gpsCoordinates.lat']],
     ];
 
-    // @ts-expect-error
+    // @ts-expect-error test matrix includes invalid field fixtures
     test.each(tests)('given fields %p, it returns %p', (fields, expectedFields) => {
       // @ts-expect-error testing invalid fields type
       const permissions = toPermission([
