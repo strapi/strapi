@@ -10,6 +10,7 @@ const config = {
     'coverage/',
     'dist',
     'rollup.config.mjs',
+    'lint-staged.config.mjs',
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,

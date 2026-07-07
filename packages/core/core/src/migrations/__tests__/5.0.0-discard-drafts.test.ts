@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import { createConnection } from '../../../../database/src/connection';
+import { createConnection } from '@strapi/database/src/connection';
 
 import { discardDocumentDrafts } from '../database/5.0.0-discard-drafts';
 

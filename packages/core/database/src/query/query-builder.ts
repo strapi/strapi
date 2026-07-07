@@ -314,14 +314,24 @@ const createQueryBuilder = (
     },
 
     init(params = {}) {
-      const { _q, filters, where, select, limit, offset, orderBy, groupBy, populate } = params;
+      const {
+        _q: searchQuery,
+        filters,
+        where,
+        select,
+        limit,
+        offset,
+        orderBy,
+        groupBy,
+        populate,
+      } = params;
 
       if (!_.isNil(where)) {
         this.where(where);
       }
 
-      if (!_.isNil(_q)) {
-        this.search(_q);
+      if (!_.isNil(searchQuery)) {
+        this.search(searchQuery);
       }
 
       if (!_.isNil(select)) {
