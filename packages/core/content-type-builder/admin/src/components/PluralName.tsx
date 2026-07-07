@@ -6,21 +6,15 @@ import { useIntl } from 'react-intl';
 
 import { nameToSlug } from '../utils/nameToSlug';
 
-import type { IntlLabel } from '../types';
-
-interface Description {
-  id: string;
-  defaultMessage: string;
-  values?: Record<string, any>;
-}
+import type { FormChangeHandler, IntlLabel } from '../types';
 
 interface PluralNameProps {
-  description?: Description;
+  description?: IntlLabel;
   error?: string;
   intlLabel: IntlLabel;
-  modifiedData: Record<string, any>;
+  modifiedData: { displayName?: string };
   name: string;
-  onChange: (value: { target: { name: string; value: string } }) => void;
+  onChange: FormChangeHandler<string>;
   value?: string;
 }
 

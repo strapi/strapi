@@ -36,16 +36,16 @@ The following are the most important packages (not exhaustive — run `yarn work
 
 **`.ai/skills/`** is the canonical source for committed repo skills. Each subdirectory containing a `SKILL.md` is a skill.
 
-The AI-tooling well-known locations are **symlink targets** maintained by `yarn ai-tooling:sync`: `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`.
+The AI-tooling well-known locations are **symlink targets** maintained by `yarn ai:sync`: `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`.
 
-Run `yarn ai-tooling:sync` after adding or removing a skill in `.ai/skills/` to keep all three target dirs up to date. Links are local-only (gitignored target dirs) — only `.ai/skills/` content is committed.
+Run `yarn ai:sync` after adding or removing a skill in `.ai/skills/` to keep all three target dirs up to date. Links are local-only (gitignored target dirs) — only `.ai/skills/` content is committed.
 
 On **Windows**, the CLI creates directory **junctions** (no extra setup). Directory symlinks require Developer Mode or an elevated shell.
 
 ```bash
-yarn ai-tooling:sync    # idempotent — create/prune .ai links in all 3 tool dirs
-yarn ai-tooling:unlink  # remove only .ai-sourced links (leaves brain links intact)
-yarn ai-tooling:status  # read-only report: linked / missing / conflict / stale
+yarn ai:sync    # idempotent — create/prune .ai links in all 3 tool dirs
+yarn ai:unlink  # remove only .ai-sourced links (leaves brain links intact)
+yarn ai:status  # read-only report: linked / missing / conflict / stale
 ```
 
 ---
@@ -68,8 +68,8 @@ yarn ai-tooling:status  # read-only report: linked / missing / conflict / stale
 ```bash
 # Initial setup (run once after cloning)
 yarn install
-yarn setup                    # clean + build all packages; hints to run ai-tooling:sync if links are missing
-yarn ai-tooling:sync          # link .ai/skills into .agents/ .claude/ .cursor/
+yarn setup                    # clean + build all packages; hints to run ai:sync if links are missing
+yarn ai:sync          # link .ai/skills into .agents/ .claude/ .cursor/
 ```
 
 ---

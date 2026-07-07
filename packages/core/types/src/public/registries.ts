@@ -11,11 +11,9 @@ import type { ComponentSchema, ContentTypeSchema } from '../struct';
  * Example usage of ContentTypeSchemas:
  * ```ts
  * declare module '@strapi/types' {
- *   export module Public {
- *     export module Registries {
- *       export interface ContentTypesSchemas {
- *         'api::foo.foo': { ... }
- *       }
+ *   export namespace Public {
+ *     export interface ContentTypeSchemas {
+ *       'api::foo.foo': { ... }
  *     }
  *   }
  * }
@@ -34,11 +32,9 @@ export interface ContentTypeSchemas {
  * Example usage of ComponentSchemas:
  * ```ts
  * declare module '@strapi/types' {
- *   export module Public {
- *     export module Registries {
- *       export interface ComponentSchemas {
- *         'default.foo': { ... }
- *       }
+ *   export namespace Public {
+ *     export interface ComponentSchemas {
+ *       'default.foo': { ... }
  *     }
  *   }
  * }

@@ -12,6 +12,7 @@ import {
   BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
+import upperFirst from 'lodash/upperFirst';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -150,7 +151,7 @@ const DynamicComponent = ({
   );
   const isNewItem = useForm(
     'DynamicComponent',
-    (state) => getIn(state.values, componentPath)?.id == null
+    (state) => getIn<{ id?: unknown }>(state.values, componentPath)?.id == null
   );
   const rawError = useForm('DynamicComponent', (state) => getIn(state.errors, componentPath));
 
@@ -281,7 +282,7 @@ const DynamicComponent = ({
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
                   <Menu.Label>
-                    {formatMessage({ id: category, defaultMessage: category })}
+                    {formatMessage({ id: category, defaultMessage: upperFirst(category) })}
                   </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index)}>
@@ -303,7 +304,7 @@ const DynamicComponent = ({
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
                   <Menu.Label>
-                    {formatMessage({ id: category, defaultMessage: category })}
+                    {formatMessage({ id: category, defaultMessage: upperFirst(category) })}
                   </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
