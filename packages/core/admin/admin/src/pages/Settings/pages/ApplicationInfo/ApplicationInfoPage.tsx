@@ -11,7 +11,6 @@ import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
-import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
@@ -28,7 +27,6 @@ const AIUageDataCE = () => null;
 const ApplicationInfoPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
   const { logos: serverLogos, updateProjectSettings } = useConfiguration('ApplicationInfoPage');
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
