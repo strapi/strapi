@@ -14,6 +14,10 @@ import { ItemTypes } from './constants/dragAndDrop';
 import { useContentManagerInitData } from './hooks/useContentManagerInitData';
 import { getTranslation } from './utils/translations';
 
+import type { CardDragPreviewProps } from './components/DragPreviews/CardDragPreview';
+import type { ComponentDragPreviewProps } from './components/DragPreviews/ComponentDragPreview';
+import type { RelationDragPreviewProps } from './components/DragPreviews/RelationDragPreview';
+
 /* -------------------------------------------------------------------------------------------------
  * Layout
  * -----------------------------------------------------------------------------------------------*/
@@ -127,17 +131,42 @@ function renderDraglayerItem({ type, item }: Parameters<DragLayerProps['renderIt
   switch (actualType) {
     case ItemTypes.EDIT_FIELD:
     case ItemTypes.FIELD:
-      return <CardDragPreview label={item.label} />;
+      return isCardDragItem(item) ? <CardDragPreview label={item.label} /> : null;
     case ItemTypes.COMPONENT:
     case ItemTypes.DYNAMIC_ZONE:
-      return <ComponentDragPreview displayedValue={item.displayedValue} />;
+      return isComponentDragItem(item) ? (
+        <ComponentDragPreview displayedValue={item.displayedValue} />
+      ) : null;
 
     case ItemTypes.RELATION:
-      return <RelationDragPreview {...item} />;
+      return isRelationDragItem(item) ? <RelationDragPreview {...item} /> : null;
 
     default:
       return null;
   }
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return value !== null && typeof value === 'object';
+};
+
+const isCardDragItem = (item: unknown): item is CardDragPreviewProps => {
+  return isRecord(item) && typeof item.label === 'string';
+};
+
+const isComponentDragItem = (item: unknown): item is ComponentDragPreviewProps => {
+  return isRecord(item) && typeof item.displayedValue === 'string';
+};
+
+const isRelationDragItem = (item: unknown): item is RelationDragPreviewProps => {
+  return (
+    isRecord(item) &&
+    typeof item.displayedValue === 'string' &&
+    (typeof item.id === 'string' || typeof item.id === 'number') &&
+    typeof item.index === 'number' &&
+    typeof item.width === 'number' &&
+    (item.status === undefined || typeof item.status === 'string')
+  );
+};
 
 export { Layout };

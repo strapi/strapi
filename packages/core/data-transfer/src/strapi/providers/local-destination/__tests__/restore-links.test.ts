@@ -12,9 +12,39 @@ jest.mock('../../../queries/link', () => ({
 
 afterEach(() => {
   jest.clearAllMocks();
+  insert.mockReset();
+  insert.mockResolvedValue(undefined);
 });
 
-const strapi = {} as unknown as Core.Strapi;
+beforeEach(() => {
+  insert.mockResolvedValue(undefined);
+});
+
+const strapi = {
+  db: {
+    metadata: {
+      get: () => ({ attributes: {} }),
+    },
+  },
+} as unknown as Core.Strapi;
+
+const strapiWithLocalizationsJoinColumn = {
+  db: {
+    metadata: {
+      get: () => ({
+        attributes: {
+          localizations: {
+            type: 'relation',
+            joinColumn: {
+              name: 'document_id',
+              referencedColumn: 'document_id',
+            },
+          },
+        },
+      }),
+    },
+  },
+} as unknown as Core.Strapi;
 
 const transaction = {
   attach: jest.fn(async (callback: (trx?: unknown) => unknown) => {
@@ -117,6 +147,37 @@ describe('createLinksWriteStream', () => {
     expect(insert).toHaveBeenCalledTimes(1);
     expect(onWarning).toHaveBeenCalledTimes(1);
     expect(onWarning).toHaveBeenCalledWith(expect.stringContaining('foreign key constraint'));
+  });
+
+  test('Should insert localizations links with mapped row id and unchanged document_id', async () => {
+    const documentId = 'kq4sntx4a0kymmdpvwvyblb9';
+    const mappings: Record<string, Record<number, number>> = {
+      'api::article.article': { 1: 101 },
+    };
+    const mapID = (uid: string, id: number) => mappings[uid]?.[id];
+    const onWarning = jest.fn();
+
+    const stream = createLinksWriteStream(
+      mapID,
+      strapiWithLocalizationsJoinColumn,
+      transaction,
+      onWarning
+    );
+
+    await writeLink(stream, {
+      kind: 'relation.circular',
+      relation: 'oneToMany',
+      left: { type: 'api::article.article', ref: 1, field: 'localizations' },
+      right: { type: 'api::article.article', ref: documentId },
+    });
+
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        left: expect.objectContaining({ ref: 101 }),
+        right: expect.objectContaining({ ref: documentId }),
+      })
+    );
+    expect(onWarning).not.toHaveBeenCalled();
   });
 
   test('Should propagate non foreign key errors', async () => {

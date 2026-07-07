@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-sentry",
-  "version": "5.49.0",
+  "version": "5.50.0",
   "description": "Send Strapi error events to Sentry",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -51,7 +51,7 @@
     "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"
@@ -62,7 +62,7 @@
     "@strapi/icons": "2.2.1"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.49.0",
+    "@strapi/strapi": "5.50.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",

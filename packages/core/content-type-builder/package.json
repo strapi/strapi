@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.49.0",
+  "version": "5.50.0",
   "description": "Create and manage content types",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -53,7 +53,7 @@
     "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
@@ -75,9 +75,9 @@
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.2.1",
-    "@strapi/generators": "5.49.0",
+    "@strapi/generators": "5.50.0",
     "@strapi/icons": "2.2.1",
-    "@strapi/utils": "5.49.0",
+    "@strapi/utils": "5.50.0",
     "ai": "5.0.52",
     "date-fns": "2.30.0",
     "fs-extra": "11.3.4",
@@ -95,8 +95,8 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.49.0",
-    "@strapi/types": "5.49.0",
+    "@strapi/admin": "5.50.0",
+    "@strapi/types": "5.50.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
@@ -111,7 +111,7 @@
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
     "vitest": "catalog:",
-    "vitest-config": "5.49.0"
+    "vitest-config": "5.50.0"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

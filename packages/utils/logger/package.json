@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "5.49.0",
+  "version": "5.50.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -36,7 +36,7 @@
     "build:code": "run -T  rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc --noEmit",
     "watch": "run -T rollup -c -w"
   },
@@ -45,8 +45,8 @@
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.49.0",
-    "tsconfig": "5.49.0"
+    "eslint-config-custom": "5.50.0",
+    "tsconfig": "5.50.0"
   },
   "engines": {
     "node": ">=20.19.0 <=26.x.x",
