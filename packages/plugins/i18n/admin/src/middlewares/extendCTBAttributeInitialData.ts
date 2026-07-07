@@ -36,7 +36,7 @@ const extendCTBAttributeInitialDataMiddleware: () => Middleware<
                 ...action.payload,
                 options: {
                   pluginOptions: {
-                    ...(action?.payload?.options?.pluginOptions ?? {}),
+                    ...action?.payload?.options?.pluginOptions,
                     i18n: {
                       localized: true,
                     },

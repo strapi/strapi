@@ -617,8 +617,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
-                  ...(('on' in joinTable && joinTable.on) || {}),
-                  ...(data.__pivot || {}),
+                  ...('on' in joinTable && joinTable.on),
+                  ...data.__pivot,
                   order: idx + 1,
                   field: attributeName,
                 };
@@ -654,8 +654,8 @@ export const createEntityManager = (db: Database): EntityManager => {
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField as '__type'],
-            ...(('on' in joinTable && joinTable.on) || {}),
-            ...(data.__pivot || {}),
+            ...('on' in joinTable && joinTable.on),
+            ...data.__pivot,
             order: idx + 1,
           })) satisfies Record<string, any>[];
 
@@ -759,8 +759,8 @@ export const createEntityManager = (db: Database): EntityManager => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
-              ...(('on' in joinTable && joinTable.on) || {}),
-              ...(data.__pivot || {}),
+              ...('on' in joinTable && joinTable.on),
+              ...data.__pivot,
             };
           }) satisfies Record<string, any>[];
 
@@ -888,7 +888,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                       [idColumn.name]: id,
                       [typeColumn.name]: uid,
                       [joinColumn.name]: item.id,
-                      ...(joinTable.on || {}),
+                      ...joinTable.on,
                       field: attributeName,
                     };
                   }),
@@ -908,8 +908,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                   .where({
                     [idColumn.name]: id,
                     [typeColumn.name]: uid,
-                    ...(joinTable.on || {}),
-                    ...(data.__pivot || {}),
+                    ...joinTable.on,
+                    ...data.__pivot,
                   })
                   .max('order')
                   .first()
@@ -922,8 +922,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
-                  ...(joinTable.on || {}),
-                  ...(data.__pivot || {}),
+                  ...joinTable.on,
+                  ...data.__pivot,
                   order: startOrder + idx + 1,
                   field: attributeName,
                 })) satisfies Record<string, any>[];
@@ -940,7 +940,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .where({
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
                 field: attributeName,
               })
               .transacting(trx)
@@ -951,8 +951,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
+                ...joinTable.on,
+                ...data.__pivot,
                 order: idx + 1,
                 field: attributeName,
               })) satisfies Record<string, any>[];
@@ -992,8 +992,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: id,
                 [idColumn.name]: data.id,
                 [typeColumn.name]: data[typeField],
-                ...(('on' in joinTable && joinTable.on) || {}),
-                ...(data.__pivot || {}),
+                ...('on' in joinTable && joinTable.on),
+                ...data.__pivot,
                 order: idx + 1,
               })),
               ...(cleanRelationData.connect ?? []).map((data, idx) => ({
@@ -1001,8 +1001,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [idColumn.name]: data.id,
                 // @ts-expect-error TODO
                 [typeColumn.name]: data[typeField],
-                ...(('on' in joinTable && joinTable.on) || {}),
-                ...(data.__pivot || {}),
+                ...('on' in joinTable && joinTable.on),
+                ...data.__pivot,
                 order: idx + 1,
               })),
             ];
@@ -1051,7 +1051,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                     [idColumn.name]: item.id,
                     [typeColumn.name]: item[typeField],
                     [joinColumn.name]: id,
-                    ...(joinTable.on || {}),
+                    ...joinTable.on,
                   };
                 }),
               };
@@ -1080,8 +1080,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: id,
                 [idColumn.name]: data.id,
                 [typeColumn.name]: data[typeField as '__type'],
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
+                ...joinTable.on,
+                ...data.__pivot,
                 field: attributeName,
               })) satisfies Record<string, any>[];
 
@@ -1123,7 +1123,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .delete()
               .where({
                 [joinColumn.name]: id,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
               })
               .transacting(trx)
               .execute();
@@ -1133,8 +1133,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               [idColumn.name]: data.id,
               [typeColumn.name]: data[typeField],
               field: attributeName,
-              ...(joinTable.on || {}),
-              ...(data.__pivot || {}),
+              ...joinTable.on,
+              ...data.__pivot,
               order: idx + 1,
             })) satisfies Record<string, any>[];
 
@@ -1374,8 +1374,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               const insert = uniqBy('id', cleanRelationData.connect).map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
-                ...(joinTable.on || {}),
-                ...(relToAdd.__pivot || {}),
+                ...joinTable.on,
+                ...relToAdd.__pivot,
               }));
 
               if (hasOrderColumn(attribute)) {
@@ -1491,8 +1491,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               const insert = uniqBy('id', cleanRelationData.set).map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
-                ...(joinTable.on || {}),
-                ...(relToAdd.__pivot || {}),
+                ...joinTable.on,
+                ...relToAdd.__pivot,
               }));
 
               // add order value
@@ -1627,7 +1627,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .where({
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
                 field: attributeName,
               })
               .transacting(trx)
@@ -1657,7 +1657,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .delete()
             .where({
               [joinColumn.name]: id,
-              ...(joinTable.on || {}),
+              ...joinTable.on,
             })
             .transacting(trx)
             .execute();

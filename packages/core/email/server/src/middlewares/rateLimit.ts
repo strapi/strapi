@@ -10,7 +10,7 @@ export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
     const pluginConfig = strapi.config.get('plugin::email') as any;
     const rateLimitConfig = {
       enabled: true,
-      ...(pluginConfig.ratelimit || {}),
+      ...pluginConfig.ratelimit,
     };
 
     if (rateLimitConfig.enabled === true) {
