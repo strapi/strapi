@@ -37,6 +37,7 @@ import { AssetSelectionProvider, useAssetSelection } from './hooks/useAssetSelec
 import { useFolderInfo } from './hooks/useFolderInfo';
 import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
+import { getListQueryKey } from './utils/listQueryKey';
 
 import type { UploadFileInfo } from '../../../../../shared/contracts/files';
 
@@ -139,21 +140,23 @@ const AssetsView = ({ view, folderId, onAssetItemClick }: AssetsViewProps) => {
 /* -------------------------------------------------------------------------------------------------
  * ClearSelectionOnChange
  *
- * Selection is page-scoped: it resets on folder navigation and on view switch.
- * Lives inside the AssetSelectionProvider so it can consume `clear`.
+ * Selection is list-scoped: it resets when the user is looking at a different list.
+ * The list fingerprint is getListQueryKey() — folder, view, search, sort, filter.
+ *
+ * Hybrid rule: infinite scroll does not change the key (selection persists).
+ * Search/sort/filter changes do (selection clears) — same mental model as folder nav.
  * -----------------------------------------------------------------------------------------------*/
 
 interface ClearSelectionOnChangeProps {
-  folderId: number | null;
-  view: number;
+  listQueryKey: string;
 }
 
-const ClearSelectionOnChange = ({ folderId, view }: ClearSelectionOnChangeProps) => {
+const ClearSelectionOnChange = ({ listQueryKey }: ClearSelectionOnChangeProps) => {
   const { clear } = useAssetSelection();
 
   useEffect(() => {
     clear();
-  }, [folderId, view, clear]);
+  }, [listQueryKey, clear]);
 
   return null;
 };
@@ -299,12 +302,20 @@ export const AssetsPage = () => {
     }
   };
 
+  const listQueryKey = getListQueryKey({
+    folderId: currentFolderId,
+    view,
+    search: '', // TODO: wire when building header search
+    sort: null, // TODO: wire when building header sort
+    filter: null, // TODO: wire when building header filters
+  });
+
   return (
     <>
       <UploadDropZoneProvider onDrop={handleDrop}>
         <AssetsDndProvider>
           <AssetSelectionProvider>
-            <ClearSelectionOnChange folderId={currentFolderId} view={view} />
+            <ClearSelectionOnChange listQueryKey={listQueryKey} />
             <Box ref={uploadDropZoneRef}>
               <Layouts.Root
                 minHeight="100vh"

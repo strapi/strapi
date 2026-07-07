@@ -212,6 +212,15 @@ const AssetRow = ({ asset, orderedAssetIds, onAssetItemClick }: AssetRowProps) =
     onAssetItemClick(asset.id);
   };
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (e.shiftKey) {
+      selectRange(orderedAssetIds, asset.id);
+    } else {
+      toggle(asset.id);
+    }
+  };
+
   return (
     <StyledTr
       ref={setNodeRef}
@@ -222,7 +231,6 @@ const AssetRow = ({ asset, orderedAssetIds, onAssetItemClick }: AssetRowProps) =
       $isSelected={selected}
       tabIndex={0}
       role="row"
-      aria-selected={selected}
       onDragStart={(e) => e.preventDefault()}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
@@ -233,7 +241,7 @@ const AssetRow = ({ asset, orderedAssetIds, onAssetItemClick }: AssetRowProps) =
           <Flex>
             <Checkbox
               checked={selected}
-              onCheckedChange={() => toggle(asset.id)}
+              onClick={handleCheckboxClick}
               aria-label={formatMessage(
                 {
                   id: getTranslationKey('list.table.row.select'),
