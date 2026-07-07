@@ -122,3 +122,10 @@ export interface ContextDelegatedResponseSuccessMethods {
   /** 204 | 200 */
   deleted(response?: unknown): void;
 }
+
+// Keep Koa's response type in sync with the helpers registered at runtime in `koa.ts`.
+declare module 'koa' {
+  interface BaseResponse
+    extends ContextDelegatedResponseErrorMethods,
+      ContextDelegatedResponseSuccessMethods {}
+}
