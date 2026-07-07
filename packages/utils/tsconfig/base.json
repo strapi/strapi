@@ -11,6 +11,8 @@
     "noImplicitAny": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noUncheckedSideEffectImports": true,
+    "erasableSyntaxOnly": true
   }
 }

@@ -13,5 +13,6 @@
   "settings.review-workflows.workflow.stageRequiredToPublish.label": "Vereiste fase voor publicatie",
   "settings.stage.name.label": "Fasenaam",
   "widget.assigned.no-data": "Geen items",
-  "widget.assigned.title": "Aan mij toegewezen"
+  "widget.assigned.title": "Aan mij toegewezen",
+  "stage.label": "Beoordelingsfase"
 }

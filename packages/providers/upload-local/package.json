@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-local",
-  "version": "5.45.0",
+  "version": "5.50.0",
   "description": "Local provider for strapi upload",
   "keywords": [
     "upload",
@@ -46,19 +46,19 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.45.0",
+    "@strapi/utils": "5.50.0",
     "fs-extra": "11.3.4"
   },
   "devDependencies": {
-    "@strapi/types": "5.45.0",
+    "@strapi/types": "5.50.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "5.45.0",
+    "eslint-config-custom": "5.50.0",
     "memfs": "4.6.0",
-    "tsconfig": "5.45.0"
+    "tsconfig": "5.50.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

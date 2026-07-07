@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "5.45.0",
+  "version": "5.50.0",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -39,12 +39,14 @@
     "lint": "run -T tsc --noEmit && run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/utils": "5.45.0",
-    "ajv": "8.18.0",
+    "@strapi/utils": "5.50.0",
+    "ajv": "8.20.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "11.3.4",
@@ -55,11 +57,13 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.45.0",
-    "tsconfig": "5.45.0"
+    "eslint-config-custom": "5.50.0",
+    "tsconfig": "5.50.0",
+    "vitest": "catalog:",
+    "vitest-config": "5.50.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=24.x.x",
+    "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

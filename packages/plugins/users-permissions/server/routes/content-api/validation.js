@@ -3,6 +3,36 @@
 const { AbstractRouteValidator } = require('@strapi/utils');
 const z = require('zod/v4');
 
+// A single role relation entry, referenced by numeric `id` (legacy) or by
+// `documentId` (the v5 default), but must carry at least one of them. The
+// detailed rules (min one role on create, cannot remove the last role on
+// update) stay in the Yup controller validator.
+const roleRelationEntry = z
+  .object({
+    id: z.union([z.number(), z.string()]).optional(),
+    documentId: z.string().optional(),
+  })
+  .refine((entry) => entry.id != null || entry.documentId != null, {
+    message: 'Relation entry must include an id or documentId',
+  });
+
+// The `role` relation input: shorthand scalar (numeric id or documentId) or the
+// longhand connect/disconnect object, matching every other v5 relation. The
+// object form must carry at least one of connect/disconnect (an empty object is
+// a no-op and almost certainly a mistake).
+const roleRelationInput = z.union([
+  z.number(),
+  z.string(),
+  z
+    .object({
+      connect: z.array(roleRelationEntry).optional(),
+      disconnect: z.array(roleRelationEntry).optional(),
+    })
+    .refine((input) => input.connect != null || input.disconnect != null, {
+      message: 'Relation input must include connect or disconnect',
+    }),
+]);
+
 class UsersPermissionsRouteValidator extends AbstractRouteValidator {
   constructor(strapi) {
     super();
@@ -201,7 +231,7 @@ class UsersPermissionsRouteValidator extends AbstractRouteValidator {
       username: z.string(),
       email: z.email(),
       password: z.string(),
-      role: z.number().optional(),
+      role: roleRelationInput.optional(),
     });
   }
 
@@ -210,7 +240,7 @@ class UsersPermissionsRouteValidator extends AbstractRouteValidator {
       username: z.string().optional(),
       email: z.email().optional(),
       password: z.string().optional(),
-      role: z.number().optional(),
+      role: roleRelationInput.optional(),
     });
   }
 

@@ -36,7 +36,7 @@ const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
           {options.map(({ value, label, disabled, hidden }) => {
             return (
               <SingleSelectOption key={value} value={value} disabled={disabled} hidden={hidden}>
-                {label ?? value}
+                {label ?? formatMessage({ id: value, defaultMessage: value })}
               </SingleSelectOption>
             );
           })}

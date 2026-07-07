@@ -1,4 +1,9 @@
-import { getFetchClient, setOnTokenUpdate } from '../getFetchClient';
+import {
+  getFetchClient,
+  setOnSessionExpired,
+  setOnTokenUpdate,
+  triggerSessionExpired,
+} from '../getFetchClient';
 
 describe('getFetchClient', () => {
   const originalLocalStorage = window.localStorage;
@@ -105,6 +110,56 @@ describe('getFetchClient', () => {
       'http://localhost:1337/test-fetch-client?page=1&pageSize=10&sort=short_text:ASC&filters[$and][0][biginteger][$eq]=3&filters[$and][1][short_text][$eq]=test&locale=en',
       expect.anything()
     );
+  });
+
+  describe('204 no-content response', () => {
+    it('should return empty data for 204 responses without calling response.json()', async () => {
+      const jsonMock = jest.fn();
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 204,
+          ok: true,
+          json: jsonMock,
+        })
+      );
+
+      const fetchClient = getFetchClient();
+      const result = await fetchClient.post('/admin/forgot-password', {
+        email: 'test@example.com',
+      });
+
+      expect(result).toEqual({ data: {}, status: 204 });
+      expect(jsonMock).not.toHaveBeenCalled();
+    });
+
+    it('should handle 204 responses for all HTTP methods', async () => {
+      const mock204 = () =>
+        Promise.resolve({
+          status: 204,
+          ok: true,
+          json: jest.fn(),
+        });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(mock204)
+        .mockImplementationOnce(mock204)
+        .mockImplementationOnce(mock204)
+        .mockImplementationOnce(mock204);
+
+      const fetchClient = getFetchClient();
+
+      const getResult = await fetchClient.get('/test');
+      expect(getResult).toEqual({ data: {}, status: 204 });
+
+      const postResult = await fetchClient.post('/test', {});
+      expect(postResult).toEqual({ data: {}, status: 204 });
+
+      const putResult = await fetchClient.put('/test', {});
+      expect(putResult).toEqual({ data: {}, status: 204 });
+
+      const delResult = await fetchClient.del('/test');
+      expect(delResult).toEqual({ data: {}, status: 204 });
+    });
   });
 
   describe('responseType', () => {
@@ -502,6 +557,38 @@ describe('getFetchClient', () => {
 
       expect(data).toEqual({ data: 'upload success' });
       expect(window.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('session-expired callback', () => {
+    afterEach(() => {
+      setOnSessionExpired(null);
+    });
+
+    it('should invoke the registered callback when triggerSessionExpired is called', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      triggerSessionExpired();
+
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should be a no-op when no callback is registered', () => {
+      // Explicit clear in case any prior test left one set.
+      setOnSessionExpired(null);
+
+      expect(() => triggerSessionExpired()).not.toThrow();
+    });
+
+    it('should clear the callback when set to null', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+      setOnSessionExpired(null);
+
+      triggerSessionExpired();
+
+      expect(callback).not.toHaveBeenCalled();
     });
   });
 });
