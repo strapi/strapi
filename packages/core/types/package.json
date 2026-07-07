@@ -39,7 +39,7 @@
     "clean": "run -T rimraf ./dist",
     "doc:ts": "typedoc",
     "doc:ts:watch": "typedoc --watch",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc --noEmit",
     "watch": "run -T tsc -p tsconfig.build.json -w"
   },

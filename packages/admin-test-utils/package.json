@@ -73,7 +73,7 @@
     "watch:code": "run -T rollup -c -w",
     "watch:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly -w",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc --noEmit"
   },
   "dependencies": {
