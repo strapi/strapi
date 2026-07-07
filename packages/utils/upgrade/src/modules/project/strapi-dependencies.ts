@@ -15,6 +15,21 @@ export type UnpinnedStrapiDependency = {
   section: StrapiDependencySection;
 };
 
+const asDependencyRecord = (value: unknown): Record<string, string> | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as Record<string, string>;
+};
+
+export const getPackageDependencyRecords = (packageJSON: MinimalPackageJSON) => {
+  return {
+    dependencies: asDependencyRecord(packageJSON.dependencies),
+    devDependencies: asDependencyRecord(packageJSON.devDependencies),
+  };
+};
+
 export const isPinnedSemVer = (version: string): boolean => {
   return isLiteralSemVer(version) && semver.valid(version) === version;
 };
@@ -74,25 +89,24 @@ export const pinStrapiDependencies = (
   pinVersion: string,
   unpinned: UnpinnedStrapiDependency[]
 ): MinimalPackageJSON => {
-  const updated: MinimalPackageJSON = {
-    ...packageJSON,
-    dependencies: packageJSON.dependencies ? { ...packageJSON.dependencies } : undefined,
-    devDependencies: packageJSON.devDependencies ? { ...packageJSON.devDependencies } : undefined,
+  const dependencies: Record<string, string> = {
+    ...asDependencyRecord(packageJSON.dependencies),
+  };
+  const devDependencies: Record<string, string> = {
+    ...asDependencyRecord(packageJSON.devDependencies),
   };
 
   for (const { name, section } of unpinned) {
     if (section === 'dependencies') {
-      updated.dependencies = {
-        ...updated.dependencies,
-        [name]: pinVersion,
-      };
+      dependencies[name] = pinVersion;
     } else {
-      updated.devDependencies = {
-        ...updated.devDependencies,
-        [name]: pinVersion,
-      };
+      devDependencies[name] = pinVersion;
     }
   }
 
-  return updated;
+  return {
+    ...packageJSON,
+    dependencies,
+    devDependencies,
+  };
 };

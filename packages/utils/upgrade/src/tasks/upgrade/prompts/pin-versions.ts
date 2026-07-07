@@ -3,6 +3,7 @@ import * as f from '../../../modules/format';
 import { saveJSON } from '../../../modules/json';
 import {
   findUnpinnedStrapiDependencies,
+  getPackageDependencyRecords,
   getStrapiPinTargetVersion,
   pinStrapiDependencies,
 } from '../../../modules/project/strapi-dependencies';
@@ -20,10 +21,9 @@ import type { UpgradeOptions } from '../types';
 export const pinVersions = async (project: Project, options: UpgradeOptions) => {
   assertAppProject(project);
 
-  const unpinned = findUnpinnedStrapiDependencies(
-    project.packageJSON.dependencies,
-    project.packageJSON.devDependencies
-  );
+  const { dependencies, devDependencies } = getPackageDependencyRecords(project.packageJSON);
+
+  const unpinned = findUnpinnedStrapiDependencies(dependencies, devDependencies);
 
   if (unpinned.length === 0) {
     return;
