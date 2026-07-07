@@ -53,7 +53,7 @@ Every incoming request flows through a layered backend architecture: **Routes ‚Ü
 
 ## Getting Started
 
-<a href="https://docs.strapi.io/developer-docs/latest/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://docs.strapi.io/cms/quick-start" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 ### ‚è≥ Installation
 
@@ -124,7 +124,7 @@ For general help, refer to the [official Strapi documentation](https://docs.stra
 
 ## Migration
 
-Follow our [migration guides](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides.html) on the documentation to keep your projects up-to-date.
+Follow our [migration guides](https://docs.strapi.io/cms/upgrades) on the documentation to keep your projects up-to-date.
 
 ## Roadmap
 
