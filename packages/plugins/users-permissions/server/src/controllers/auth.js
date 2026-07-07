@@ -455,7 +455,7 @@ module.exports = ({ strapi }) => ({
           callback: customCallback,
         };
         ctx.state.oauthConnect = { callback: customCallback };
-      } catch (e) {
+      } catch {
         throw new ValidationError('Invalid callback URL provided', { callback: customCallback });
       }
     }

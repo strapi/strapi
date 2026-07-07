@@ -190,7 +190,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     await commit();
-  } catch (error) {
+  } catch {
     // Example of errors: SQLite does not support FOR UPDATE
     await rollback();
   }
