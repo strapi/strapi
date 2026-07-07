@@ -31,5 +31,15 @@ export const base = {
     // TODO @Nico Phase 2 — `yarn lint` lints kitchensink + todo-example; decide
     // whether to lint those example apps here too.
     'examples/**',
+    // Outside Nx `lint` graph — `yarn lint` runs per-package eslint only (38 projects).
+    'tests/**', // has tests/.eslintrc.cjs but no package lint script
+    'scripts/**', // root repo scripts (package scripts/ dirs are per-package eslint)
+    '.commitlintrc.ts', // root config, not in Nx lint graph
+    'templates/**', // root templates/website demo app
+    // Per-package eslint ignores we mirror here (oxlint has no per-package config).
+    'packages/cli/create-strapi-app/templates/**',
+    // .github/actions/check-pr-status has an Nx lint target; these paths do not.
+    '.github/scripts/**',
+    '.github/actions/community-pr-triage/**',
   ],
 } satisfies Partial<OxlintConfig>;
