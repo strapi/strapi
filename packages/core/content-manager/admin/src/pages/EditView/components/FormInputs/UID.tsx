@@ -147,10 +147,10 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
       },
       {
         // Don't check availability if the value is empty or wasn't changed
-        skip: !Boolean(
+        skip: !(
           (hasChanged || isCloning) &&
-            trimmedDebouncedValue !== '' &&
-            validationRegExp.test(trimmedDebouncedValue)
+          trimmedDebouncedValue !== '' &&
+          validationRegExp.test(trimmedDebouncedValue)
         ),
       }
     );

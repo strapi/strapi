@@ -39,13 +39,13 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       const auditLog: Log = { ...rest, user: userId };
 
       // Save to database
-      await strapi.db?.query('admin::audit-log').create({ data: auditLog });
+      await strapi.db.query('admin::audit-log').create({ data: auditLog });
 
       return this;
     },
 
     async findMany(query: unknown) {
-      const { results, pagination } = await strapi.db?.query('admin::audit-log').findPage({
+      const { results, pagination } = await strapi.db.query('admin::audit-log').findPage({
         populate: ['user'],
         select: ['action', 'date', 'payload'],
         ...strapi.get('query-params').transform('admin::audit-log', query),
@@ -66,7 +66,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     },
 
     async findOne(id: unknown) {
-      const result: any = await strapi.db?.query('admin::audit-log').findOne({
+      const result: any = await strapi.db.query('admin::audit-log').findOne({
         where: { id },
         populate: ['user'],
         select: ['action', 'date', 'payload'],
@@ -84,7 +84,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     },
 
     deleteExpiredEvents(expirationDate: Date) {
-      return strapi.db?.query('admin::audit-log').deleteMany({
+      return strapi.db.query('admin::audit-log').deleteMany({
         where: {
           date: {
             $lt: expirationDate.toISOString(),

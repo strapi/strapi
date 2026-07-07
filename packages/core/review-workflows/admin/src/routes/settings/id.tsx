@@ -391,7 +391,7 @@ const EditPage = () => {
                     disabled={!modified || isSubmitting || values.stages.length === 0}
                     // if the confirm dialog is open the loading state is on
                     // the confirm button already
-                    loading={!Boolean(Object.keys(savePrompts).length > 0) && isSubmitting}
+                    loading={Object.keys(savePrompts).length === 0 && isSubmitting}
                     fullWidth
                   >
                     {formatMessage({
