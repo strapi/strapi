@@ -100,7 +100,7 @@ const loadAPI = async (apiName: string, dir: string) => {
   ).map((result) => result?.result);
 
   return {
-    ...(index || {}),
+    ...index,
     config: config || {},
     routes: routes || [],
     controllers: controllers || {},
