@@ -14,7 +14,7 @@ const config = {
   overrides: [
     {
       files: ['**/*'],
-      excludedFiles: ['admin/**/*', 'ee/admin/**/*', 'server/**/*'],
+      excludedFiles: ['admin/**/*', 'ee/admin/**/*', 'ee/server/**/*', 'server/**/*'],
       extends: ['eslint-config-custom/back'],
     },
   ],
