@@ -338,9 +338,7 @@ describe('normalizeContentManagerLayout', () => {
       }
     );
 
-    expect(
-      (normalized.contentType.metadatas.category?.edit as { mainField?: string }).mainField
-    ).toBe('name');
+    expect(normalized.contentType.metadatas.category?.edit?.mainField).toBe('name');
     expect(normalized.contentType.metadatas.category?.list.mainField).toBe('name');
   });
 });
