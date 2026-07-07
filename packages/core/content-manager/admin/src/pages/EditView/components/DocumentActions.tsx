@@ -1117,6 +1117,7 @@ const PublishAction: DocumentActionComponent = ({
     getFreshDraftRelationCounts,
     isDisabled,
     isRelationModalOpen,
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- deps review
     performPublish,
     publishConfirmScope,
     schema?.options?.draftAndPublish,
