@@ -7,6 +7,9 @@ import createBuilder from './schema-builder';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
+import type { CoreContentStructureService } from './content-structure';
+
+type ContentTypeKind = 'collectionType' | 'singleType';
 
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
   schema.components.forEach((component) => {
@@ -133,7 +136,11 @@ export const getSchema = async () => {
     };
   }, strapi.components);
 
+  const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
+  const contentStructure = await coreContentStructure.getCleanedFile();
+
   return {
+    contentStructure,
     contentTypes,
     components,
   };
@@ -143,7 +150,7 @@ export const updateSchema = async (schema: CTBSchema) => {
   const builder = createBuilder();
   const apiHandler = getService('api-handler');
 
-  const { components, contentTypes } = schema;
+  const { components, contentTypes, contentStructure } = schema;
 
   // pre-process data
   removeEmptyDefaultsOnUpdates(schema);
@@ -244,6 +251,23 @@ export const updateSchema = async (schema: CTBSchema) => {
       builder.deleteComponent(uid);
     }
   }
+
+  const createdUids = new Map<string, ContentTypeKind>();
+  const deletedUids = new Set<string>();
+
+  for (const contentType of contentTypes) {
+    if (contentType.action === 'create') {
+      createdUids.set(contentType.uid, contentType.kind ?? 'collectionType');
+    } else if (contentType.action === 'delete') {
+      deletedUids.add(contentType.uid);
+    }
+  }
+
+  await getService('content-structure').persistFromUpdate({
+    incomingStructure: contentStructure,
+    createdUids,
+    deletedUids,
+  });
 
   // run sanity checks on the schema
   // Relations target existing types
