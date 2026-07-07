@@ -1,4 +1,4 @@
-import { fireEvent, getByText, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { mockData } from '@tests/mockData';
 import { render, waitFor, server, screen } from '@tests/utils';
 import { http, HttpResponse } from 'msw';

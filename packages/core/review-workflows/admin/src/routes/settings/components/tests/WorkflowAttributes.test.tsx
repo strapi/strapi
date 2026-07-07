@@ -13,7 +13,7 @@ const setup = ({
   },
   ...props
 }: WorkflowAttributesProps & {
-  initialValues?: Record<string, any>;
+  initialValues?: Record<string, unknown>;
 } = {}) => ({
   ...render(<WorkflowAttributes {...props} />, {
     renderOptions: {

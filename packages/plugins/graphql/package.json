@@ -52,7 +52,7 @@
     "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:unit": "run -T jest --passWithNoTests",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"

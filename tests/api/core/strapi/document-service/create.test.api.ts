@@ -2,8 +2,15 @@ import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
-import resources from './resources/index';
+import { createMinimalArticleCategoryResources } from './resources/minimal-article-category';
 import { ARTICLE_UID, findArticlesDb, AUTHOR_UID } from './utils';
+
+const resources = createMinimalArticleCategoryResources({
+  withComponents: true,
+  withAuthor: true,
+  withCategory: false,
+  withFixtures: false,
+});
 
 let strapi: Core.Strapi;
 

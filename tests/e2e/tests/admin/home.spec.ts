@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, navToHeader } from '../../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
@@ -168,7 +168,11 @@ test.describe('Home as super admin', () => {
       await navToHeader(page, ['Content Manager', 'Article'], 'Article');
       await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
       await page.getByRole('textbox', { name: /title/i }).fill('Test article');
-      await page.getByRole('button', { name: /save/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/admin\/content-manager\/collection-types\/api::article\.article\/[^/]+/),
+        page.getByRole('button', { name: /save/i }).click(),
+      ]);
+      await findAndClose(page, 'Saved document');
 
       // Upload an asset
       await navToHeader(page, ['Media Library'], 'Media Library');
@@ -241,8 +245,15 @@ test.describe('Home as super admin', () => {
       await page.getByRole('option', { name: 'Full access' }).click();
       await page.getByRole('button', { name: /save/i }).click();
 
-      // Go back to the home page
+      // Go back to the home page and wait for refreshed statistics
+      const keyStatisticsReady = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.url().includes('/homepage/key-statistics') &&
+          response.ok()
+      );
       await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+      await keyStatisticsReady;
 
       // The numbers should be updated
       await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText(
