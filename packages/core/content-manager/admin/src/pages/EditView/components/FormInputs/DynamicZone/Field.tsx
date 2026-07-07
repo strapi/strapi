@@ -76,7 +76,10 @@ const DynamicZone = ({
       __temp_key__: string;
     };
 
-  const { value = [], error } = useField<Array<DzWithTempKey>>(name);
+  const { value: rawValue, error } = useField<Array<DzWithTempKey>>(name);
+  // `value` can be `null` (for example after closing a relation modal). Match
+  // RepeatableComponent: only accept arrays, otherwise treat as empty. (#26815)
+  const value = React.useMemo(() => (Array.isArray(rawValue) ? rawValue : []), [rawValue]);
 
   /**
    * Track the previous value array to detect when a new component is added.
@@ -109,7 +112,13 @@ const DynamicZone = ({
     return attribute.components.reduce<
       NonNullable<DynamicComponentProps['dynamicComponentsByCategory']>
     >((acc, componentUid) => {
-      const { category, info } = components[componentUid] ?? { info: {} };
+      const componentSchema = components[componentUid];
+
+      if (!componentSchema) {
+        return acc;
+      }
+
+      const { category, info } = componentSchema;
 
       const component = { uid: componentUid, displayName: info.displayName, icon: info.icon };
 
@@ -131,9 +140,14 @@ const DynamicZone = ({
 
   const handleAddComponent = React.useCallback(
     (uid: string, position?: number) => {
+      const schema = components[uid];
+
+      if (!schema) {
+        return;
+      }
+
       setAddComponentIsOpen(false);
 
-      const schema = components[uid];
       const form = createDefaultForm(schema, components);
       const transformations = pipe(transformDocument(schema, components), (data) => ({
         ...data,

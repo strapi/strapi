@@ -3,11 +3,7 @@
 /** @type {import('eslint').Linter.Config} */
 const config = {
   root: true,
-  ignorePatterns: [
-    'dist',
-    'rollup.config.mjs',
-    '.eslintrc.cjs',
-  ],
+  ignorePatterns: ['dist', 'rollup.config.mjs', '.eslintrc.cjs', 'lint-staged.config.mjs'],
   overrides: [
     {
       files: ['**'],

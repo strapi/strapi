@@ -8,6 +8,10 @@ tags:
 
 The transfer engine manages the data transfer process by facilitating communication between a source provider and a destination provider.
 
+:::caution
+**Destructive operation**: Importing or transferring data **into a Strapi instance** (via the [local](../02-providers/04-local-strapi/02-destination.md) or [remote](../02-providers/05-remote-strapi/03-destination.md) Strapi destination providers) uses the **restore** strategy by default. After bootstrap, init, and the integrity check pass, the engine runs `beforeTransfer()` on the destination, which clears existing destination records and media matching the transfer scope before new data is written. Exporting to a file does not modify a Strapi instance.
+:::
+
 ## Architecture Overview
 
 ```mermaid
@@ -126,6 +130,12 @@ sequenceDiagram
         end
     end
 
+    rect rgb(240, 230, 230)
+        Note over Client,DP: Before Transfer (Restore)
+        TE->>DP: beforeTransfer
+        Note right of DP: Clear destination data<br/>matching transfer scope
+    end
+
     rect rgb(245, 235, 250)
         Note over Client,DP: 3️⃣ Data Transfer Phase
 
@@ -164,6 +174,14 @@ sequenceDiagram
         TE->>-Client: Transfer Complete
     end
 ```
+
+### Restore strategy and data loss
+
+When the destination is a Strapi instance and `strategy` is `restore` (the only supported conflict strategy today), the local destination provider prepares the instance during `beforeTransfer()` — **after** version and schema integrity checks pass and **before** any transfer stages run.
+
+In that step the provider may back up the local `uploads` folder, delete existing media files, and call `restore.deleteRecords()` to remove destination entities, internal models, and configuration records scoped by the `restore` options (see [Local Strapi destination restore options](../02-providers/04-local-strapi/02-destination.md)). The CLI builds those options from `--only` and `--exclude`; by default `admin::` content types are not cleared.
+
+This avoids ID conflicts during the `entities` and `links` stages, but it is **not a merge**: once the transfer completes successfully, pre-existing destination data in scope is replaced. If the transfer fails after `beforeTransfer()`, database changes run inside a transaction and may be rolled back; asset backup behavior is described in the destination provider documentation.
 
 A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
 

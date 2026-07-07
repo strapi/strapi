@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { WidgetComponent } from '../HomePage';
 

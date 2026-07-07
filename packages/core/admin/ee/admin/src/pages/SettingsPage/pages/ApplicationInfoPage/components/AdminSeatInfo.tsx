@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { Flex, Tooltip, Typography, Link, Grid } from '@strapi/design-system';
 import { ExternalLink, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -60,15 +62,14 @@ export const AdminSeatInfoEE = () => {
               {
                 permittedSeats,
                 enforcementUserCount,
-                text: (chunks) =>
-                  (
-                    <Typography
-                      fontWeight="semiBold"
-                      textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
-                    >
-                      {chunks}
-                    </Typography>
-                  ) as any,
+                text: (chunks: ReactNode) => (
+                  <Typography
+                    fontWeight="semiBold"
+                    textColor={enforcementUserCount > permittedSeats ? 'danger500' : undefined}
+                  >
+                    {chunks}
+                  </Typography>
+                ),
               }
             )}
           </Typography>

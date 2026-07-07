@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-amazon-ses",
-  "version": "5.48.0",
+  "version": "5.50.0",
   "description": "Amazon SES provider for strapi email",
   "keywords": [
     "email",
@@ -37,20 +37,20 @@
     "build:code": "run -T  rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "3.1023.0",
-    "@strapi/utils": "5.48.0"
+    "@strapi/utils": "5.50.0"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.48.0",
-    "tsconfig": "5.48.0",
+    "eslint-config-custom": "5.50.0",
+    "tsconfig": "5.50.0",
     "vitest": "catalog:",
-    "vitest-config": "5.48.0"
+    "vitest-config": "5.50.0"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

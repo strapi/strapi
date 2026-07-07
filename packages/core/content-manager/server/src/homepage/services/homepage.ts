@@ -21,6 +21,19 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
   const permissionService = strapi.admin.services.permission;
 
+  const getRegisteredContentType = (uid: RecentDocument['contentTypeUid']) => {
+    const contentType = strapi.contentTypes[uid];
+
+    if (contentType === undefined) {
+      strapi.log.warn(
+        `Skipping homepage content type "${uid}" because it is no longer registered.`
+      );
+      return undefined;
+    }
+
+    return contentType;
+  };
+
   type ContentTypeConfiguration = {
     uid: RecentDocument['contentTypeUid'];
     settings: { mainField: string };
@@ -56,9 +69,27 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       },
     });
 
-    return readPermissions
-      .map((permission) => permission.subject)
-      .filter(Boolean) as RecentDocument['contentTypeUid'][];
+    // Deduplicate subjects using a Set: the JOIN across permission -> role -> users produces one row
+    // per role the user belongs to, so a multi-role user gets duplicate subjects.
+    // Using a Set collapses them to unique content type UID.
+    return [
+      ...new Set(
+        readPermissions
+          .map((permission) => permission.subject)
+          .filter((subject): subject is RecentDocument['contentTypeUid'] => {
+            if (!subject) {
+              return false;
+            }
+
+            const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
+            const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
+              | { visible?: boolean }
+              | undefined;
+
+            return contentTypeOptions?.visible !== false;
+          })
+      ),
+    ];
   };
 
   type ContentTypeMeta = {
@@ -80,9 +111,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     allowedContentTypeUids: RecentDocument['contentTypeUid'][],
     configurations: ContentTypeConfiguration[]
   ): ContentTypeMeta[] => {
-    return allowedContentTypeUids.map((uid) => {
+    return allowedContentTypeUids.reduce<ContentTypeMeta[]>((acc, uid) => {
       const configuration = configurations.find((config) => config.uid === uid);
-      const contentType = strapi.contentType(uid);
+      const contentType = getRegisteredContentType(uid);
+
+      if (contentType === undefined) {
+        return acc;
+      }
+
       const mainField = resolveReadableMainField(
         contentType,
         configuration,
@@ -91,14 +127,16 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const fields = buildHomepageQueryFields(contentType, mainField);
       const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
 
-      return {
+      acc.push({
         fields,
         mainField,
         contentType,
         hasDraftAndPublish,
         uid,
-      };
-    });
+      });
+
+      return acc;
+    }, []);
   };
 
   const formatDocuments = (
@@ -191,7 +229,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const permittedContentTypes = await getPermittedContentTypes();
       const allowedContentTypeUids = draftAndPublishOnly
         ? permittedContentTypes.filter((uid) => {
-            return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
+            const contentType = getRegisteredContentType(uid);
+
+            return contentType !== undefined && contentTypes.hasDraftAndPublish(contentType);
           })
         : permittedContentTypes;
       // Fetch the configuration for each content type in a single query

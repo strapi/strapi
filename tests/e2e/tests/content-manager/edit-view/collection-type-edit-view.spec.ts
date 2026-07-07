@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { clickAndWait, findAndClose } from '../../../../utils/shared';
+import {
+  clickAndWait,
+  findAndClose,
+  publishAndConfirmDraftRelations,
+} from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -15,51 +19,79 @@ test.describe('Edit View', () => {
       /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
 
-    // TODO: Skip this test for now since there is a known bug with the draft relations check
-    test.fixme(
-      'as a user I want to be warned if I try to publish content that has draft relations',
-      async ({ page }) => {
-        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-        await page.getByRole('link', { name: 'Create new entry' }).click();
+    test('as a user I want to be warned if I try to publish content that has draft relations', async ({
+      page,
+    }) => {
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await page.getByRole('link', { name: 'Create new entry' }).click();
 
-        // Wait for the URL to match the CREATE_URL pattern
-        await page.waitForURL(CREATE_URL);
+      // Wait for the URL to match the CREATE_URL pattern
+      await page.waitForURL(CREATE_URL);
 
-        // Add a new relation to the entry
-        await page.getByRole('combobox', { name: 'authors' }).click();
-        await page.getByLabel('Coach BeardDraft').click();
-        // Attempt to publish the entry
-        await page.getByRole('button', { name: 'Publish' }).click();
+      // Add a new relation to the entry
+      await page.getByRole('textbox', { name: 'title' }).fill('Draft relations warning test');
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('Coach BeardDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
 
-        // Verify that a warning about a single draft relation is displayed
-        await expect(page.getByText('This entry is related to 1')).toBeVisible();
-        await page.getByRole('button', { name: 'Cancel' }).click();
+      const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
 
-        // Save the current state of the entry
-        await page.getByRole('button', { name: 'Save' }).click();
-        await findAndClose(page, 'Saved Document');
+      // Attempt to publish the entry
+      await page.getByRole('button', { name: 'Publish' }).click();
 
-        // Add another relation to the entry
-        await page.getByRole('combobox', { name: 'authors' }).click();
-        await page.getByLabel('Led TassoDraft').click();
-        // Attempt to publish the entry again
-        await page.getByRole('button', { name: 'Publish' }).click();
+      // Verify that a warning about a single draft relation is displayed
+      await expect(confirmationDialog).toBeVisible();
+      await expect(confirmationDialog.getByText(/1 linked entry is still in draft/)).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/will appear on the live site once that entry is published/)
+      ).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
 
-        // Verify that a warning about two draft relations is displayed
-        await expect(page.getByText('This entry is related to 2')).toBeVisible();
-        await page.getByRole('button', { name: 'Cancel' }).click();
+      // Save the current state of the entry
+      await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
-        // Save the current state of the entry
-        await page.getByRole('button', { name: 'Save' }).click();
-        await findAndClose(page, 'Saved Document');
+      // Add another relation to the entry
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('Led TassoDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
+      // Attempt to publish the entry again
+      await page.getByRole('button', { name: 'Publish' }).click();
 
-        // Attempt to publish the entry once more
-        await page.getByRole('button', { name: 'Publish' }).click();
+      // Verify that a warning about two draft relations is displayed
+      await expect(confirmationDialog).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/2 linked entries are still in draft/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(
+          /will appear on the live site once those entries are published/
+        )
+      ).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: 'Cancel' }).click();
 
-        // Verify that the warning about three draft relations is still displayed
-        await expect(page.getByText('This entry is related to 3')).toBeVisible();
-      }
-    );
+      // Save the current state of the entry
+      await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
+      // Add another relation to the entry
+      await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByLabel('Ted LassoDraft').click();
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
+      // Attempt to publish the entry again
+      await page.getByRole('button', { name: 'Publish' }).click();
+
+      // Verify that a warning about three draft relations is displayed
+      await expect(confirmationDialog).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(/3 linked entries are still in draft/)
+      ).toBeVisible();
+      await expect(
+        confirmationDialog.getByText(
+          /will appear on the live site once those entries are published/
+        )
+      ).toBeVisible();
+    });
 
     test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
       page,
@@ -253,6 +285,24 @@ test.describe('Edit View', () => {
       await page.getByRole('textbox', { name: 'title' }).press('Enter');
       await findAndClose(page, 'Saved Document');
 
+      // Ctrl + Enter saves a draft (without publishing)
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American draft');
+      await page.keyboard.press('Control+Enter');
+      await findAndClose(page, 'Saved Document');
+      // The document was only saved as a draft, so the published tab stays disabled
+      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+
+      // Ctrl + S is an alias for saving a draft
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American draft via Ctrl+S');
+      await page.keyboard.press('Control+s');
+      await findAndClose(page, 'Saved Document');
+      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+
+      // Restore the title for the publish assertions below
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
+      await page.getByRole('textbox', { name: 'title' }).press('Enter');
+      await findAndClose(page, 'Saved Document');
+
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'true'
@@ -265,8 +315,14 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
       await expect(page.getByText('Modified')).not.toBeVisible();
 
-      // Press Ctrl + Enter to publish the document
-      await page.keyboard.press('Control+Enter');
+      // Press Ctrl + Shift + Enter to publish the document
+      await page.keyboard.press('Control+Shift+Enter');
+      const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+      await expect(confirmationDialog).toBeVisible();
+      await clickAndWait(
+        page,
+        confirmationDialog.getByRole('button', { name: 'Publish', exact: true })
+      );
       await findAndClose(page, 'Published Document');
 
       /**
@@ -284,7 +340,7 @@ test.describe('Edit View', () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
 
-      await page.getByRole('button', { name: 'Publish' }).click();
+      await publishAndConfirmDraftRelations(page);
 
       await findAndClose(page, 'Published Document');
 
@@ -322,7 +378,7 @@ test.describe('Edit View', () => {
       );
       await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
 
-      await page.getByRole('button', { name: 'Publish' }).click();
+      await publishAndConfirmDraftRelations(page);
       await findAndClose(page, 'Published Document');
 
       await expect(page.getByRole('tab', { name: 'Draft' })).toBeVisible();

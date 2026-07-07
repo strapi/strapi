@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { render } from '@testing-library/react';
-import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 import { login } from '../../../../../admin/src/reducer';
@@ -16,7 +15,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({
-    formatMessage: ({ defaultMessage }: any) => defaultMessage,
+    formatMessage: ({ defaultMessage }: { defaultMessage: string }) => defaultMessage,
   }),
 }));
 
@@ -27,7 +26,7 @@ jest.mock('../../../../../admin/src/services/auth', () => ({
 }));
 
 jest.mock('../../../../../admin/src/features/Auth', () => ({
-  AuthProvider: ({ children }: any) => <>{children}</>,
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 jest.mock('../../../../../admin/src/reducer', () => ({

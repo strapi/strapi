@@ -175,14 +175,14 @@ const attemptTokenRefresh = async (): Promise<string> => {
   return newToken;
 };
 
-type FetchResponse<TData = any> = {
+type FetchResponse<TData = unknown> = {
   data: TData;
   status?: number;
   headers?: Headers;
 };
 
 type FetchOptions = {
-  params?: any;
+  params?: unknown;
   signal?: AbortSignal;
   headers?: Record<string, string>;
   validateStatus?: ((status: number) => boolean) | null;
@@ -195,7 +195,7 @@ type FetchConfig = {
 
 interface ErrorResponse {
   data: {
-    data?: any;
+    data?: unknown;
     error: ApiError & { status?: number };
   };
 }
@@ -244,19 +244,19 @@ type FetchClient = {
       url: string,
       config: FetchOptions & { responseType: 'arrayBuffer' }
     ): Promise<FetchResponse<ArrayBuffer>>;
-    <TData = any>(url: string, config?: FetchOptions): Promise<FetchResponse<TData>>;
+    <TData = unknown>(url: string, config?: FetchOptions): Promise<FetchResponse<TData>>;
   };
-  put: <TData = any, TSend = any>(
+  put: <TData = unknown, TSend = unknown>(
     url: string,
     data?: TSend,
     config?: FetchOptions
   ) => Promise<FetchResponse<TData>>;
-  post: <TData = any, TSend = any>(
+  post: <TData = unknown, TSend = unknown>(
     url: string,
     data?: TSend,
     config?: FetchOptions
   ) => Promise<FetchResponse<TData>>;
-  del: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
+  del: <TData = unknown>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
 };
 
 /**
@@ -302,7 +302,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
   // Add a response interceptor to return the response
-  const responseInterceptor = async <TData = any>(
+  const responseInterceptor = async <TData = unknown>(
     response: Response,
     validateStatus?: FetchOptions['validateStatus'],
     responseType: NonNullable<FetchOptions['responseType']> = 'json'
@@ -355,7 +355,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       // constructor is not the same identity as the one this module closes over. Name
       // comparison is realm-agnostic.
       if ((error as Error | null)?.name === 'SyntaxError' && response.ok) {
-        return { data: {}, status: response.status } as FetchResponse<any>;
+        return { data: {}, status: response.status } as FetchResponse<TData>;
       } else {
         throw error;
       }
@@ -449,7 +449,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       return withTokenRefresh(url, executeRequest);
     },
-    post: async <TData, TSend = any>(
+    post: async <TData, TSend = unknown>(
       url: string,
       data?: TSend,
       options?: FetchOptions
@@ -481,7 +481,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       return withTokenRefresh(url, executeRequest);
     },
-    put: async <TData, TSend = any>(
+    put: async <TData, TSend = unknown>(
       url: string,
       data?: TSend,
       options?: FetchOptions
