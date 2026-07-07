@@ -17,6 +17,60 @@ interface RelationData {
   };
 }
 
+const entryKey = (entry: { document_id: unknown; locale: unknown }) =>
+  `${String(entry.document_id)}:${String(entry.locale)}`;
+
+const getPublishedCounterparts = async (
+  trx: any,
+  tableName: string,
+  draftIds: unknown[]
+): Promise<Record<string, Data.ID>> => {
+  const ids = [...new Set(draftIds.map((id) => String(id)))];
+
+  if (ids.length === 0) {
+    return {};
+  }
+
+  const drafts = await strapi.db
+    .getConnection()
+    .select('id', 'document_id', 'locale')
+    .from(tableName)
+    .whereIn('id', ids)
+    .transacting(trx);
+
+  if (drafts.length === 0) {
+    return {};
+  }
+
+  const documentIds = drafts.map((entry: { document_id: unknown }) => entry.document_id) as any[];
+
+  const publishedEntries = await strapi.db
+    .getConnection()
+    .select('id', 'document_id', 'locale')
+    .from(tableName)
+    .whereIn('document_id', documentIds)
+    .whereNotNull('published_at')
+    .transacting(trx);
+
+  const publishedByDocument = keyBy(entryKey, publishedEntries);
+
+  return drafts.reduce(
+    (
+      acc: Record<string, Data.ID>,
+      draft: { id: Data.ID; document_id: unknown; locale: unknown }
+    ) => {
+      const published = publishedByDocument[entryKey(draft)];
+
+      if (published) {
+        acc[String(draft.id)] = published.id;
+      }
+
+      return acc;
+    },
+    {}
+  );
+};
+
 /**
  * Preserves self-referential relations during publish/discard operations.
  *
@@ -39,8 +93,7 @@ interface RelationData {
  */
 const load = async (
   uid: UID.ContentType,
-  sourceEntries: VersionEntry[],
-  replacedEntries: VersionEntry[] = []
+  sourceEntries: VersionEntry[]
 ): Promise<RelationData[]> => {
   const updates: RelationData[] = [];
   const dbModel = strapi.db.metadata.get(uid);
@@ -66,7 +119,6 @@ const load = async (
       const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
       const sourceIds = sourceEntries.map((entry) => String(entry.id));
-      const replacedIds = replacedEntries.map((entry) => String(entry.id));
 
       // Load relations where both source and target are among the entries being processed.
       // These are the self-referential relations that would be lost during the
@@ -87,45 +139,84 @@ const load = async (
         });
       }
 
-      if (replacedIds.length === 0) {
-        continue;
-      }
-
-      // When only one side of a self-relation is republished/discarded, the normal relation
-      // write recreates the row but assigns fresh order values. Capture those rows so sync()
-      // can restore the join-table payload after the replacement row exists.
-      const [sourceOnlyRelations, targetOnlyRelations] = await Promise.all([
+      // Use draft-side rows as the source of truth for one-sided self-relations. This covers
+      // first-published entries, where no old published row exists yet, and prevents stale old
+      // published rows from restoring relations that were removed from the draft.
+      const [sourceDraftRelations, targetDraftRelations] = await Promise.all([
         strapi.db
           .getConnection()
           .select('*')
           .from(joinTable.name)
-          .whereIn(sourceColumnName, replacedIds)
-          .whereNotIn(targetColumnName, replacedIds)
+          .whereIn(sourceColumnName, sourceIds)
+          .whereNotIn(targetColumnName, sourceIds)
           .transacting(trx),
         strapi.db
           .getConnection()
           .select('*')
           .from(joinTable.name)
-          .whereIn(targetColumnName, replacedIds)
-          .whereNotIn(sourceColumnName, replacedIds)
+          .whereIn(targetColumnName, sourceIds)
+          .whereNotIn(sourceColumnName, sourceIds)
           .transacting(trx),
       ]);
 
-      if (sourceOnlyRelations.length > 0) {
-        updates.push({
-          joinTable,
-          relations: sourceOnlyRelations,
-          remap: { source: true, target: false },
-        });
+      if (sourceDraftRelations.length > 0) {
+        const publishedTargets = await getPublishedCounterparts(
+          trx,
+          dbModel.tableName,
+          sourceDraftRelations.map((relation) => relation[targetColumnName])
+        );
+        const relations = sourceDraftRelations
+          .map((relation) => {
+            const publishedTarget = publishedTargets[String(relation[targetColumnName])];
+
+            if (publishedTarget == null) {
+              return null;
+            }
+
+            return { ...relation, [targetColumnName]: publishedTarget };
+          })
+          .filter(Boolean) as Record<string, unknown>[];
+
+        if (relations.length > 0) {
+          updates.push({
+            joinTable,
+            relations,
+            remap: { source: true, target: false },
+          });
+        }
       }
 
-      if (targetOnlyRelations.length > 0) {
-        updates.push({
-          joinTable,
-          relations: targetOnlyRelations,
-          remap: { source: false, target: true },
-        });
+      if (targetDraftRelations.length > 0) {
+        const publishedSources = await getPublishedCounterparts(
+          trx,
+          dbModel.tableName,
+          targetDraftRelations.map((relation) => relation[sourceColumnName])
+        );
+        const relations = targetDraftRelations
+          .map((relation) => {
+            const publishedSource = publishedSources[String(relation[sourceColumnName])];
+
+            if (publishedSource == null) {
+              return null;
+            }
+
+            return { ...relation, [sourceColumnName]: publishedSource };
+          })
+          .filter(Boolean) as Record<string, unknown>[];
+
+        if (relations.length > 0) {
+          updates.push({
+            joinTable,
+            relations,
+            remap: { source: false, target: true },
+          });
+        }
       }
+
+      // One-sided rows attached to replaced published entries are intentionally not restored
+      // from the old published state. The draft-side capture above represents the current
+      // logical relation set; restoring old rows here can resurrect relations removed from the
+      // draft before publishing.
     }
   });
 

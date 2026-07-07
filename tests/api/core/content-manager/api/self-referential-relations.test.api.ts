@@ -378,6 +378,90 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     await expectChildrenToPointToParent();
   });
 
+  test('regression: published self-referential oneToMany order is preserved when children are published after the parent', async () => {
+    const parent = await createCategory('Draft-child Page 1');
+    const childA = await createCategory('Draft-child Page 1.1');
+    const childB = await createCategory('Draft-child Page 1.2');
+    const childC = await createCategory('Draft-child Page 1.3');
+    const childD = await createCategory('Draft-child Page 1.4');
+    const children = [childA, childB, childC, childD];
+    const expectedOrder = children.map((child) => child.documentId);
+
+    for (const child of children) {
+      await updateCategory(child.documentId, {
+        name: child.name,
+        parent: { documentId: parent.documentId, locale: null },
+      });
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      children: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'draft')).toEqual(expectedOrder);
+
+    await publishCategory(parent.documentId);
+
+    for (const [index, child] of children.entries()) {
+      await publishCategory(child.documentId);
+
+      expect({
+        publishedChild: child.name,
+        publishedOrder: await getRelationTargets(parent.documentId, 'children', 'published'),
+      }).toEqual({
+        publishedChild: child.name,
+        publishedOrder: expectedOrder.slice(0, index + 1),
+      });
+    }
+  });
+
+  test('regression: removed self-referential oneToMany relation stays removed after publishing the parent', async () => {
+    const parent = await createCategory('Removed-child Page 1');
+    const childA = await createCategory('Removed-child Page 1.1');
+    const childB = await createCategory('Removed-child Page 1.2');
+    const childC = await createCategory('Removed-child Page 1.3');
+    const children = [childA, childB, childC];
+
+    for (const child of children) {
+      await updateCategory(child.documentId, {
+        name: child.name,
+        parent: { documentId: parent.documentId, locale: null },
+      });
+      await publishCategory(child.documentId);
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      children: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      children.map((child) => child.documentId)
+    );
+
+    const remainingChildren = [childA, childC];
+    await updateCategory(parent.documentId, {
+      name: `${parent.name} - removed child`,
+      children: [...remainingChildren].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      remainingChildren.map((child) => child.documentId)
+    );
+  });
+
   // A single entry whose unidirectional relation points at itself must keep that relation in
   // its published version: during the delete-and-recreate publish cycle the self-link has to
   // be re-pointed to the entry's own published version rather than dropped. These cover the
