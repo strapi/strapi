@@ -44,10 +44,10 @@ export interface ContentTypeBuilderContentStructureService {
   /**
    * Attempts to persist the provided `incomingStructure` to the `groups.json` file (via the
    * core content-structure service). Prior to invoking the core service, this method:
-   * - Prunes references to content types that are deleted or whose kind has changed as a
-   *   result of the same save operation.
+   * - Prunes references to content types that are deleted in the same save operation.
    * - Validates the pruned structure's references against the effective set of content types
-   *   (produced from `createdUids`, `deletedUids`, and the pre-existing registry).
+   *   (produced from `createdUids`, `deletedUids`, and the pre-existing registry). Any reference
+   *   to a non-existent content type (or one whose kind does not match its section)throws an ApplicationError.
    * Returns true if a file write occurred, false if a write was not necessary.
    * Invokes `validateContentTypeUidReferences()`, which throws an ApplicationError if a
    * referenced contentTypeUid is invalid.
@@ -152,18 +152,15 @@ export function createContentStructureService(
   };
 
   /**
-   * Remove references to content types that are deleted or whose kind has changed as a result of the same save operation.
+   * Remove references to content types that have been deleted
    */
   const pruneStructure = (
     file: ContentStructureFile,
-    deletedUids: Set<string>,
-    contentTypeKinds: Map<string, ContentTypeKind>
+    deletedUids: Set<string>
   ): ContentStructureFile => {
     const cloned = cloneFile(file);
 
     for (const sectionKey of SECTION_KEYS) {
-      const expectedKind = expectedKindFor(sectionKey);
-
       for (const group of cloned.sections[sectionKey].groups) {
         group.children = group.children.filter((child) => {
           if (child.type !== 'contentType') {
@@ -174,13 +171,6 @@ export function createContentStructureService(
 
           if (deletedUids.has(uid)) {
             warn(`Pruned deleted content type "${uid}" from group "${group.id}"`);
-            return false;
-          }
-
-          if (contentTypeKinds.has(uid) && contentTypeKinds.get(uid) !== expectedKind) {
-            warn(
-              `Pruned content type "${uid}" from group "${group.id}": its kind no longer belongs in section "${sectionKey}"`
-            );
             return false;
           }
 
@@ -255,8 +245,7 @@ export function createContentStructureService(
     if (incomingStructure !== undefined && incomingStructure !== null) {
       const pruned = pruneStructure(
         formatContentStructureObjectAsFile(incomingStructure),
-        deletedUids,
-        effectiveKinds
+        deletedUids
       );
 
       validateContentTypeUidReferences(pruned, effectiveKinds);
@@ -272,7 +261,7 @@ export function createContentStructureService(
         return false;
       }
 
-      const pruned = pruneStructure(current, deletedUids, effectiveKinds);
+      const pruned = pruneStructure(current, deletedUids);
 
       await contentStructureService.write(pruned);
       return true;
