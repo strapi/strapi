@@ -4,6 +4,7 @@ import type * as contentTypes from '../services/content-types';
 import type * as componentCategories from '../services/component-categories';
 import type * as apiHandler from '../services/api-handler';
 import type * as schema from '../services/schema';
+import type { createContentStructureService } from '../services/content-structure';
 
 type S = {
   'content-types': typeof contentTypes;
@@ -12,6 +13,7 @@ type S = {
   builder: typeof builder;
   'api-handler': typeof apiHandler;
   schema: typeof schema;
+  'content-structure': typeof createContentStructureService;
 };
 
 export function getService<T extends keyof S>(
