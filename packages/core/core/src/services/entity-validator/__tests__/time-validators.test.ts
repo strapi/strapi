@@ -1,7 +1,9 @@
-import strapiUtils, { errors } from '@strapi/utils';
+import * as strapiUtils from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import { Validators } from '../validators';
 import { mockOptions } from './utils';
+
+const { errors } = strapiUtils;
 
 describe('Time validator', () => {
   describe('unique', () => {

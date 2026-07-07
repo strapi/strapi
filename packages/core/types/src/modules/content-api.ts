@@ -1,4 +1,4 @@
-import permissions from '@strapi/permissions';
+import { engine } from '@strapi/permissions';
 import { providerFactory, sanitize, validate } from '@strapi/utils';
 import type { z } from 'zod/v4';
 
@@ -56,7 +56,7 @@ type ActionProvider = {
 } & ReturnType<typeof providerFactory>;
 
 export interface PermissionUtilities {
-  engine: ReturnType<typeof permissions.engine.new>;
+  engine: ReturnType<typeof engine.new>;
   providers: {
     action: ActionProvider;
     condition: ConditionProvider;
