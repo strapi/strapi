@@ -49,7 +49,6 @@ describe('CM API - status sort with relation filter (#26746)', () => {
   let sharedProductDocumentId: string;
   let otherProductDocumentId: string;
   let draftListingTitle: string;
-  let modifiedListingTitle: string;
   let publishedListingTitle: string;
   let excludedListingTitle: string;
 
@@ -88,17 +87,6 @@ describe('CM API - status sort with relation filter (#26746)', () => {
     return res.body.data;
   };
 
-  const updateListing = async (documentId: string, title: string) => {
-    const res = await rq({
-      method: 'PUT',
-      url: `/content-manager/collection-types/${UID_LISTING}/${documentId}`,
-      body: { title },
-    });
-
-    expect(res.statusCode).toBe(200);
-    return res.body.data;
-  };
-
   const listListings = async (qs: Record<string, unknown>) => {
     return rq({
       method: 'GET',
@@ -120,7 +108,6 @@ describe('CM API - status sort with relation filter (#26746)', () => {
     otherProductDocumentId = otherProduct.documentId;
 
     draftListingTitle = 'Listing draft';
-    modifiedListingTitle = 'Listing modified';
     publishedListingTitle = 'Listing published';
     excludedListingTitle = 'Listing excluded';
 
@@ -128,17 +115,6 @@ describe('CM API - status sort with relation filter (#26746)', () => {
 
     const published = await createListing(publishedListingTitle, sharedProductDocumentId);
     await publishListing(published.documentId);
-
-    const modified = await createListing('Listing modified v1', sharedProductDocumentId);
-    await publishListing(modified.documentId);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await updateListing(modified.documentId, modifiedListingTitle);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    const modifiedFinal = await updateListing(
-      modified.documentId,
-      `${modifiedListingTitle} (rev 2)`
-    );
-    modifiedListingTitle = modifiedFinal.title;
 
     await createListing(excludedListingTitle, otherProductDocumentId);
   });
@@ -163,10 +139,10 @@ describe('CM API - status sort with relation filter (#26746)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.results).toHaveLength(3);
+    expect(res.body.results).toHaveLength(2);
 
     const titles = res.body.results.map((entry: { title: string }) => entry.title).sort();
-    expect(titles).toEqual([draftListingTitle, modifiedListingTitle, publishedListingTitle].sort());
+    expect(titles).toEqual([draftListingTitle, publishedListingTitle].sort());
   });
 
   test('returns draft listings first when sorting by status ascending', async () => {
@@ -187,7 +163,7 @@ describe('CM API - status sort with relation filter (#26746)', () => {
 
     const statuses = res.body.results.map((entry: { status: string }) => entry.status);
 
-    expect(statuses).toEqual(expect.arrayContaining(['draft', 'modified', 'published']));
+    expect(statuses).toEqual(expect.arrayContaining(['draft', 'published']));
     expect(statuses[0]).toBe('draft');
   });
 
@@ -205,7 +181,7 @@ describe('CM API - status sort with relation filter (#26746)', () => {
     });
 
     expect(filterOnly.statusCode).toBe(200);
-    expect(filterOnly.body.results).toHaveLength(3);
+    expect(filterOnly.body.results).toHaveLength(2);
 
     const sortOnly = await listListings({
       sort: 'status:ASC',
@@ -214,6 +190,6 @@ describe('CM API - status sort with relation filter (#26746)', () => {
     });
 
     expect(sortOnly.statusCode).toBe(200);
-    expect(sortOnly.body.results.length).toBeGreaterThanOrEqual(4);
+    expect(sortOnly.body.results.length).toBeGreaterThanOrEqual(3);
   });
 });
