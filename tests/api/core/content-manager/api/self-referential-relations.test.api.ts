@@ -186,6 +186,21 @@ const getLocalizedRelationTargets = async (
   return res.body.results.map((result: { documentId: string }) => result.documentId);
 };
 
+const getCategoryVersionId = async (
+  documentId: string,
+  status: 'draft' | 'published'
+): Promise<number> => {
+  const [entry] = await strapi.db.query('api::category.category').findMany({
+    where: {
+      documentId,
+      publishedAt: status === 'published' ? { $notNull: true } : null,
+    },
+    select: ['id'],
+  });
+
+  return entry.id;
+};
+
 describe('CM API - Self-referential relations with Draft & Publish', () => {
   beforeAll(async () => {
     await builder.addContentTypes([category, localizedCategory]).build();
@@ -544,6 +559,108 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
       remainingChildren.map((child) => child.documentId)
     );
+  });
+
+  test('regression: publish drops one-sided self-referential relations to draft-only targets', async () => {
+    const parent = await createCategory('Draft-only target Page 1');
+    const child = await createCategory('Draft-only target Page 1.1');
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      related: [{ documentId: child.documentId, locale: null }],
+    });
+
+    expect(await getRelationTargets(parent.documentId, 'related', 'draft')).toEqual([
+      child.documentId,
+    ]);
+
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'related', 'published')).toEqual([]);
+
+    const categoryMeta = strapi.db.metadata.get('api::category.category');
+    const {
+      name: joinTableName,
+      joinColumn,
+      inverseJoinColumn,
+    } = categoryMeta.attributes.related.joinTable;
+    const parentPublishedId = await getCategoryVersionId(parent.documentId, 'published');
+    const childDraftId = await getCategoryVersionId(child.documentId, 'draft');
+    const stalePublishedRows = await strapi.db
+      .getConnection()
+      .select('*')
+      .from(joinTableName)
+      .where({
+        [joinColumn.name]: parentPublishedId,
+        [inverseJoinColumn.name]: childDraftId,
+      });
+
+    expect(stalePublishedRows).toHaveLength(0);
+  });
+
+  test('regression: discarding parent draft preserves multi-entry self-referential relations without mixed-state rows', async () => {
+    const parent = await createCategory('Discard parent Page 1');
+    const childA = await createCategory('Discard parent Page 1.1');
+    const childB = await createCategory('Discard parent Page 1.2');
+    const childC = await createCategory('Discard parent Page 1.3');
+    const children = [childA, childB, childC];
+    const expectedOrder = children.map((child) => child.documentId);
+
+    await publishCategory(parent.documentId);
+
+    for (const child of children) {
+      await updateCategory(child.documentId, {
+        name: child.name,
+        parent: { documentId: parent.documentId, locale: null },
+      });
+      await publishCategory(child.documentId);
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      children: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    await updateCategory(parent.documentId, { name: `${parent.name} - draft edit` });
+    await discardCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'children', 'draft')).toEqual(expectedOrder);
+    expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
+      expectedOrder
+    );
+
+    const parentDraftId = await getCategoryVersionId(parent.documentId, 'draft');
+    const parentPublishedId = await getCategoryVersionId(parent.documentId, 'published');
+    const childVersionIds = await Promise.all(
+      children.map(async (child) => ({
+        draft: await getCategoryVersionId(child.documentId, 'draft'),
+        published: await getCategoryVersionId(child.documentId, 'published'),
+      }))
+    );
+
+    const categoryMeta = strapi.db.metadata.get('api::category.category');
+    const {
+      name: joinTableName,
+      joinColumn,
+      inverseJoinColumn,
+    } = categoryMeta.attributes.parent.joinTable;
+    const joinRows = await strapi.db.getConnection().select('*').from(joinTableName);
+    const pairCount = (sourceId: number, targetId: number) =>
+      joinRows.filter(
+        (row: Record<string, unknown>) =>
+          row[joinColumn.name] === sourceId && row[inverseJoinColumn.name] === targetId
+      ).length;
+
+    for (const childIds of childVersionIds) {
+      expect(pairCount(childIds.draft, parentDraftId)).toBe(1);
+      expect(pairCount(childIds.published, parentPublishedId)).toBe(1);
+      expect(pairCount(childIds.published, parentDraftId)).toBe(0);
+      expect(pairCount(childIds.draft, parentPublishedId)).toBe(0);
+    }
   });
 
   test('regression: self-referential manyToMany order and removals are preserved in published relations', async () => {

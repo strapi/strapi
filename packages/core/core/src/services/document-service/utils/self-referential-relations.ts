@@ -1,7 +1,7 @@
 /* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash/fp';
 import type { Data, UID } from '@strapi/types';
-import type { JoinTable } from '@strapi/database';
+import type { Database, JoinTable } from '@strapi/database';
 
 interface VersionEntry {
   id: Data.ID;
@@ -17,15 +17,20 @@ interface RelationData {
   };
 }
 
+type TargetStatus = 'draft' | 'published';
+type DatabaseQueryBuilder = ReturnType<Database['getConnection']>;
+type DatabaseTransaction = Parameters<DatabaseQueryBuilder['transacting']>[0];
+
 const entryKey = (entry: { document_id: unknown; locale: unknown }) =>
   `${String(entry.document_id)}:${String(entry.locale)}`;
 
-const getPublishedCounterparts = async (
-  trx: any,
+const getCounterparts = async (
+  trx: DatabaseTransaction,
   tableName: string,
-  draftIds: unknown[]
+  idsToResolve: unknown[],
+  status: TargetStatus
 ): Promise<Record<string, Data.ID>> => {
-  const ids = [...new Set(draftIds.map((id) => String(id)))];
+  const ids = [...new Set(idsToResolve.map((id) => String(id)))];
 
   if (ids.length === 0) {
     return {};
@@ -42,27 +47,33 @@ const getPublishedCounterparts = async (
     return {};
   }
 
-  const documentIds = drafts.map((entry: { document_id: unknown }) => entry.document_id) as any[];
+  const documentIds = [
+    ...new Set(drafts.map((entry: { document_id: Data.ID }) => entry.document_id)),
+  ];
 
-  const publishedEntries = await strapi.db
+  const counterpartsQuery = strapi.db
     .getConnection()
     .select('id', 'document_id', 'locale')
     .from(tableName)
     .whereIn('document_id', documentIds)
-    .whereNotNull('published_at')
     .transacting(trx);
 
-  const publishedByDocument = keyBy(entryKey, publishedEntries);
+  const counterparts =
+    status === 'published'
+      ? await counterpartsQuery.whereNotNull('published_at')
+      : await counterpartsQuery.whereNull('published_at');
+
+  const counterpartByDocument = keyBy(entryKey, counterparts);
 
   return drafts.reduce(
     (
       acc: Record<string, Data.ID>,
       draft: { id: Data.ID; document_id: unknown; locale: unknown }
     ) => {
-      const published = publishedByDocument[entryKey(draft)];
+      const counterpart = counterpartByDocument[entryKey(draft)];
 
-      if (published) {
-        acc[String(draft.id)] = published.id;
+      if (counterpart) {
+        acc[String(draft.id)] = counterpart.id;
       }
 
       return acc;
@@ -93,7 +104,8 @@ const getPublishedCounterparts = async (
  */
 const load = async (
   uid: UID.ContentType,
-  sourceEntries: VersionEntry[]
+  sourceEntries: VersionEntry[],
+  targetStatus: TargetStatus
 ): Promise<RelationData[]> => {
   const updates: RelationData[] = [];
   const dbModel = strapi.db.metadata.get(uid);
@@ -139,9 +151,10 @@ const load = async (
         });
       }
 
-      // Use draft-side rows as the source of truth for one-sided self-relations. This covers
-      // first-published entries, where no old published row exists yet, and prevents stale old
-      // published rows from restoring relations that were removed from the draft.
+      // Use rows from the state being copied as the source of truth for one-sided
+      // self-relations. Publishing maps untouched targets to published counterparts and drops
+      // draft-only targets; discarding maps untouched targets to draft counterparts. This avoids
+      // restoring stale old rows that were removed from the copied state.
       const [sourceDraftRelations, targetDraftRelations] = await Promise.all([
         strapi.db
           .getConnection()
@@ -159,21 +172,31 @@ const load = async (
           .transacting(trx),
       ]);
 
-      if (sourceDraftRelations.length > 0) {
-        const publishedTargets = await getPublishedCounterparts(
+      const [targetCounterparts, sourceCounterparts] = await Promise.all([
+        getCounterparts(
           trx,
           dbModel.tableName,
-          sourceDraftRelations.map((relation) => relation[targetColumnName])
-        );
+          sourceDraftRelations.map((relation) => relation[targetColumnName]),
+          targetStatus
+        ),
+        getCounterparts(
+          trx,
+          dbModel.tableName,
+          targetDraftRelations.map((relation) => relation[sourceColumnName]),
+          targetStatus
+        ),
+      ]);
+
+      if (sourceDraftRelations.length > 0) {
         const relations = sourceDraftRelations
           .map((relation) => {
-            const publishedTarget = publishedTargets[String(relation[targetColumnName])];
+            const targetCounterpart = targetCounterparts[String(relation[targetColumnName])];
 
-            if (publishedTarget == null) {
+            if (targetCounterpart == null) {
               return null;
             }
 
-            return { ...relation, [targetColumnName]: publishedTarget };
+            return { ...relation, [targetColumnName]: targetCounterpart };
           })
           .filter(Boolean) as Record<string, unknown>[];
 
@@ -187,20 +210,15 @@ const load = async (
       }
 
       if (targetDraftRelations.length > 0) {
-        const publishedSources = await getPublishedCounterparts(
-          trx,
-          dbModel.tableName,
-          targetDraftRelations.map((relation) => relation[sourceColumnName])
-        );
         const relations = targetDraftRelations
           .map((relation) => {
-            const publishedSource = publishedSources[String(relation[sourceColumnName])];
+            const sourceCounterpart = sourceCounterparts[String(relation[sourceColumnName])];
 
-            if (publishedSource == null) {
+            if (sourceCounterpart == null) {
               return null;
             }
 
-            return { ...relation, [sourceColumnName]: publishedSource };
+            return { ...relation, [sourceColumnName]: sourceCounterpart };
           })
           .filter(Boolean) as Record<string, unknown>[];
 
@@ -213,10 +231,9 @@ const load = async (
         }
       }
 
-      // One-sided rows attached to replaced published entries are intentionally not restored
-      // from the old published state. The draft-side capture above represents the current
-      // logical relation set; restoring old rows here can resurrect relations removed from the
-      // draft before publishing.
+      // One-sided rows from the replaced state are intentionally not restored here. The rows
+      // captured above represent the current logical relation set; restoring stale old rows can
+      // resurrect relations that were removed before publishing or discarding.
     }
   });
 

@@ -584,7 +584,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
-    const selfRelationsToSync = await selfReferentialRelations.load(uid, draftsToPublish);
+    const selfRelationsToSync = await selfReferentialRelations.load(
+      uid,
+      draftsToPublish,
+      'published'
+    );
 
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
@@ -689,7 +693,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
-    const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft);
+    const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft, 'draft');
 
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
