@@ -55,6 +55,34 @@ const category = {
   },
 } as const;
 
+const localizedCategory = {
+  displayName: 'localized category',
+  singularName: 'localized-category',
+  pluralName: 'localized-categories',
+  kind: 'collectionType',
+  draftAndPublish: true,
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  attributes: {
+    name: {
+      type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    related: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::localized-category.localized-category',
+    },
+  },
+} as const;
+
 const getCategory = async (
   documentId: string,
   status: 'draft' | 'published' = 'draft'
@@ -77,10 +105,33 @@ const createCategory = async (name: string): Promise<CategoryEntry> => {
   return res.body.data as CategoryEntry;
 };
 
+const createLocalizedCategory = async (name: string, locale: string): Promise<CategoryEntry> => {
+  const res = await rq({
+    method: 'POST',
+    url: '/content-manager/collection-types/api::localized-category.localized-category',
+    qs: { locale },
+    body: { name },
+  });
+
+  return res.body.data as CategoryEntry;
+};
+
 const updateCategory = async (documentId: string, body: Record<string, unknown>) =>
   rq({
     method: 'PUT',
     url: `/content-manager/collection-types/api::category.category/${documentId}`,
+    body,
+  });
+
+const updateLocalizedCategory = async (
+  documentId: string,
+  locale: string,
+  body: Record<string, unknown>
+) =>
+  rq({
+    method: 'PUT',
+    url: `/content-manager/collection-types/api::localized-category.localized-category/${documentId}`,
+    qs: { locale },
     body,
   });
 
@@ -89,6 +140,13 @@ const publishCategory = async (documentId: string, body?: Record<string, unknown
     method: 'POST',
     url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
     body,
+  });
+
+const publishLocalizedCategory = async (documentId: string, locale: string) =>
+  rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/api::localized-category.localized-category/${documentId}/actions/publish`,
+    qs: { locale },
   });
 
 const discardCategory = async (documentId: string) =>
@@ -101,12 +159,28 @@ const discardCategory = async (documentId: string) =>
 const getRelationTargets = async (
   documentId: string,
   field: string,
-  status: 'draft' | 'published'
+  status: 'draft' | 'published',
+  locale?: string
 ): Promise<string[]> => {
   const res = await rq({
     method: 'GET',
     url: `/content-manager/relations/api::category.category/${documentId}/${field}`,
-    qs: { status },
+    qs: { status, locale },
+  });
+
+  return res.body.results.map((result: { documentId: string }) => result.documentId);
+};
+
+const getLocalizedRelationTargets = async (
+  documentId: string,
+  field: string,
+  status: 'draft' | 'published',
+  locale: string
+): Promise<string[]> => {
+  const res = await rq({
+    method: 'GET',
+    url: `/content-manager/relations/api::localized-category.localized-category/${documentId}/${field}`,
+    qs: { status, locale },
   });
 
   return res.body.results.map((result: { documentId: string }) => result.documentId);
@@ -114,10 +188,20 @@ const getRelationTargets = async (
 
 describe('CM API - Self-referential relations with Draft & Publish', () => {
   beforeAll(async () => {
-    await builder.addContentType(category).build();
+    await builder.addContentTypes([category, localizedCategory]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+
+    await rq({
+      method: 'POST',
+      url: '/i18n/locales',
+      body: {
+        code: 'fr',
+        name: 'French',
+        isDefault: false,
+      },
+    });
 
     // Create two categories
     for (const name of ['Category A', 'Category B']) {
@@ -460,6 +544,83 @@ describe('CM API - Self-referential relations with Draft & Publish', () => {
     expect(await getRelationTargets(parent.documentId, 'children', 'published')).toEqual(
       remainingChildren.map((child) => child.documentId)
     );
+  });
+
+  test('regression: self-referential manyToMany order and removals are preserved in published relations', async () => {
+    const parent = await createCategory('ManyToMany Page 1');
+    const childA = await createCategory('ManyToMany Page 1.1');
+    const childB = await createCategory('ManyToMany Page 1.2');
+    const childC = await createCategory('ManyToMany Page 1.3');
+    const children = [childA, childB, childC];
+
+    for (const child of children) {
+      await publishCategory(child.documentId);
+    }
+
+    await updateCategory(parent.documentId, {
+      name: parent.name,
+      relatedMany: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'relatedMany', 'published')).toEqual(
+      children.map((child) => child.documentId)
+    );
+
+    const remainingChildren = [childA, childC];
+    await updateCategory(parent.documentId, {
+      name: `${parent.name} - removed child`,
+      relatedMany: [...remainingChildren].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: null,
+      })),
+    });
+    await publishCategory(parent.documentId);
+
+    expect(await getRelationTargets(parent.documentId, 'relatedMany', 'published')).toEqual(
+      remainingChildren.map((child) => child.documentId)
+    );
+  });
+
+  test('regression: localized self-referential relations map to the same locale on publish', async () => {
+    const parent = await createLocalizedCategory('Localized Page 1', 'fr');
+    const childA = await createLocalizedCategory('Localized Page 1.1', 'fr');
+    const childB = await createLocalizedCategory('Localized Page 1.2', 'fr');
+    const children = [childA, childB];
+
+    for (const child of children) {
+      await publishLocalizedCategory(child.documentId, 'fr');
+    }
+
+    await updateLocalizedCategory(parent.documentId, 'fr', {
+      name: parent.name,
+      related: [...children].reverse().map((child) => ({
+        documentId: child.documentId,
+        locale: 'fr',
+      })),
+    });
+    await publishLocalizedCategory(parent.documentId, 'fr');
+
+    expect(
+      await getLocalizedRelationTargets(parent.documentId, 'related', 'published', 'fr')
+    ).toEqual(children.map((child) => child.documentId));
+
+    const remainingChildren = [childA];
+    await updateLocalizedCategory(parent.documentId, 'fr', {
+      name: `${parent.name} - removed child`,
+      related: remainingChildren.map((child) => ({
+        documentId: child.documentId,
+        locale: 'fr',
+      })),
+    });
+    await publishLocalizedCategory(parent.documentId, 'fr');
+
+    expect(
+      await getLocalizedRelationTargets(parent.documentId, 'related', 'published', 'fr')
+    ).toEqual(remainingChildren.map((child) => child.documentId));
   });
 
   // A single entry whose unidirectional relation points at itself must keep that relation in
