@@ -459,7 +459,7 @@ describe('user-permissions auth', () => {
             sanitize: {
               output: jest.fn((user) => {
                 // Simulate sanitizing the user object
-                const { resetPasswordToken, ...sanitizedUser } = user;
+                const { resetPasswordToken: _resetPasswordToken, ...sanitizedUser } = user;
                 return sanitizedUser;
               }),
             },

@@ -13,7 +13,7 @@ const createPolicy = (options: Options) => {
     if (validator) {
       try {
         validator(config);
-      } catch (e) {
+      } catch {
         throw new Error(`Invalid config passed to "${name}" policy.`);
       }
     }

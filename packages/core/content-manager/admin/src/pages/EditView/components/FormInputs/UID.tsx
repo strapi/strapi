@@ -123,7 +123,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
             message: formatAPIError(res.error),
           });
         }
-      } catch (err) {
+      } catch {
         toggleNotification({
           type: 'danger',
           message: formatMessage({

@@ -161,7 +161,7 @@ const command = () => {
                         return 'URL must use http: or https: protocol';
                       }
                       return true;
-                    } catch (error) {
+                    } catch {
                       return 'Please enter a valid URL (e.g., http://localhost:1337/admin or https://example.com/admin)';
                     }
                   },

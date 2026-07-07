@@ -124,7 +124,7 @@ const resolveCustomMiddleware = (resolve: string, strapi: Core.Strapi) => {
 
   try {
     return importDefault(modulePath);
-  } catch (err) {
+  } catch {
     throw new Error(`Could not load middleware "${modulePath}".`);
   }
 };

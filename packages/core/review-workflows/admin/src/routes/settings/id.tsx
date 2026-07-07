@@ -240,7 +240,7 @@ const EditPage = () => {
           navigate(`../${res.data.id}`, { replace: true });
         }
       }
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({

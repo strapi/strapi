@@ -32,7 +32,7 @@ export const useServerRestartWatcher = () => {
           }, 200);
         });
       }
-    } catch (err) {
+    } catch {
       return new Promise((resolve) => {
         setTimeout(() => {
           return serverRestartWatcher(startTime).then(resolve);

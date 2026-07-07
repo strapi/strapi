@@ -239,7 +239,7 @@ export const AssetsPage = () => {
     formData.append('fileInfo', JSON.stringify(fileInfoArray));
     try {
       await uploadFiles({ formData, totalFiles: files.length }).unwrap();
-    } catch (error) {
+    } catch {
       // Error is already dispatched to store from the API queryFn
     }
   };
@@ -263,7 +263,7 @@ export const AssetsPage = () => {
   const handleUrlUpload = async (urls: string[]) => {
     try {
       await uploadFromUrls({ urls, folderId: currentFolderId }).unwrap();
-    } catch (error) {
+    } catch {
       // Error is already dispatched to store from the API queryFn
     }
   };

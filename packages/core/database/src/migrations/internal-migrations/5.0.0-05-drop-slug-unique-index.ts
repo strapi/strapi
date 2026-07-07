@@ -16,7 +16,7 @@ const dropIndex = async (knex: Knex, tableName: string, columnName: string) => {
       // to `tableName_columnName_uq`.
       table.dropUnique([columnName], `${tableName}_${columnName}_unique`);
     });
-  } catch (error) {
+  } catch {
     // If unique index does not exist, do nothing
   }
 };

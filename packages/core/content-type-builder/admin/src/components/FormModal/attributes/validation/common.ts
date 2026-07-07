@@ -127,7 +127,7 @@ const createTextShape = (usedAttributeNames: Array<string>, reservedNames: Array
         test(value) {
           try {
             return new RegExp(value || '') !== null;
-          } catch (e) {
+          } catch {
             return false;
           }
         },
@@ -155,7 +155,7 @@ const createStringShape = (usedAttributeNames: Array<string>, reservedNames: Arr
         test(value) {
           try {
             return new RegExp(value || '') !== null;
-          } catch (e) {
+          } catch {
             return false;
           }
         },

@@ -47,7 +47,7 @@ const extendCTBAttributeInitialDataMiddleware: () => Middleware<
           }
 
           return next(action);
-        } catch (err) {
+        } catch {
           return next(action);
         }
       };

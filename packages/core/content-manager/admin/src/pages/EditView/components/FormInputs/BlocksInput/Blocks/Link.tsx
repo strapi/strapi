@@ -134,7 +134,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         new URL(
           e.target.value?.startsWith('/') ? `https://strapi.io${e.target.value}` : e.target.value
         );
-      } catch (error) {
+      } catch {
         setIsSaveDisabled(true);
       }
     };
@@ -407,7 +407,7 @@ const withLinks = (editor: Editor) => {
         editor.shouldSaveLinkPath = false;
         insertLink(editor, { url: pastedText });
         return;
-      } catch (error) {
+      } catch {
         // continue normal data insertion
       }
     }

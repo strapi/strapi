@@ -109,7 +109,7 @@ const convertToJsonLogic = (value: LocalValue): AttributeConditions | null => {
         [operator]: conditionRule,
       },
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 };
