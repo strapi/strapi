@@ -348,6 +348,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                     type={filter.mainField?.type ?? filter.type}
                   />
                 ) : null}
+                {/* Allow saving when an existing URL filter uses an operator that is no longer offered. */}
                 <Button
                   disabled={(!modified && !hasSanitizedEditingFilter) || isSubmitting}
                   size="L"

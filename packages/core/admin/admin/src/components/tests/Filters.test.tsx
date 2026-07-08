@@ -62,6 +62,16 @@ describe('Filters', () => {
     expect(addFilterButton).toBeDisabled();
   });
 
+  it('should not render the popover content when no filters are provided', async () => {
+    const { user } = render({ options: [] });
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+    expect(screen.queryByRole('combobox', { name: 'Select field' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'Select filter' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add filter' })).not.toBeInTheDocument();
+  });
+
   it("should add a filter to the list when the 'Add filter' button is clicked & close the popover", async () => {
     const { user } = render();
 
