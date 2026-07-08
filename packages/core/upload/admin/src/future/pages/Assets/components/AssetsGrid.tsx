@@ -207,7 +207,7 @@ interface AssetPreviewProps {
 }
 
 const AssetPreview = ({ asset }: AssetPreviewProps) => {
-  const { alternativeText, ext, formats, mime, url, isLocal } = asset;
+  const { alternativeText, ext, formats, mime, url, isLocal, isUrlSigned } = asset;
 
   if (mime?.includes(ASSET_TYPES.Image)) {
     const mediaURL =
@@ -219,7 +219,10 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
           <StyledImage
             src={mediaURL}
             alt={alternativeText || ''}
-            crossOrigin={isLocal ? undefined : 'anonymous'}
+            // Only signed remote URLs need crossOrigin (cache collision with
+            // the preview). Public/unsigned remote thumbnails must render
+            // without a bucket CORS rule. See #26581.
+            crossOrigin={!isLocal && isUrlSigned ? 'anonymous' : undefined}
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
           />

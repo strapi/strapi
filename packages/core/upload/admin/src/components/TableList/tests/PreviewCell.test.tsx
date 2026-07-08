@@ -35,16 +35,25 @@ const baseImage: File = {
 const render = (content: File) => renderTL(<PreviewCell content={content} />);
 
 describe('PreviewCell', () => {
-  it('forwards crossOrigin to the underlying image for remote assets (#26581)', () => {
-    render(baseImage);
+  it('forwards crossOrigin to the underlying image for signed remote assets (#26581)', () => {
+    render({ ...baseImage, isUrlSigned: true });
 
     const image = screen.getByAltText('Alternative text');
     expect(image).toHaveAttribute('src', 'http://somewhere.com/hello.png');
     expect(image).toHaveAttribute('crossorigin', 'anonymous');
   });
 
+  it('does not set crossOrigin for unsigned remote assets (#26581 regression)', () => {
+    // Public/unsigned remote thumbnails are cache-busted, so they must render
+    // without requiring a bucket CORS rule.
+    render({ ...baseImage, isUrlSigned: false });
+
+    const image = screen.getByAltText('Alternative text');
+    expect(image).not.toHaveAttribute('crossorigin');
+  });
+
   it('does not set crossOrigin for local assets', () => {
-    render({ ...baseImage, isLocal: true });
+    render({ ...baseImage, isLocal: true, isUrlSigned: true });
 
     const image = screen.getByAltText('Alternative text');
     expect(image).not.toHaveAttribute('crossorigin');

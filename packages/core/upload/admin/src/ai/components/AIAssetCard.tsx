@@ -228,7 +228,12 @@ const Asset = ({ assetType, thumbnailUrl, assetUrl, asset }: AssetProps) => {
           src={thumbnailUrl}
           size="S"
           alt={asset.alternativeText || asset.name}
-          crossOrigin="anonymous"
+          // AI assets are always remote; only gate crossOrigin on whether the
+          // URL is signed. A signed URL is loaded without a cache-buster, so it
+          // can collide with the preview in the browser cache and both must opt
+          // into CORS. Unsigned (public) URLs must render without a bucket CORS
+          // rule. See #26581.
+          crossOrigin={asset.isUrlSigned ? 'anonymous' : undefined}
         />
       );
     case ASSET_TYPES.Video:

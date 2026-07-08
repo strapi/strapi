@@ -167,7 +167,7 @@ export const AssetPreview = ({ asset, actions, isLoading = false }: AssetPreview
               ref={imageRef}
               src={imageUrl}
               alt={alternativeText || asset.name || ''}
-              crossOrigin={isLocal ? undefined : 'anonymous'}
+              crossOrigin={!isLocal && isUrlSigned ? 'anonymous' : undefined}
               onLoad={() => setIsMediaLoaded(true)}
               onError={() => setIsMediaLoaded(true)}
             />

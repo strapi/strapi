@@ -47,7 +47,7 @@ describe('future | AssetPreview', () => {
     );
   });
 
-  it('loads remote images with crossOrigin="anonymous"', () => {
+  it('loads signed remote images with crossOrigin="anonymous"', () => {
     render(<AssetPreview asset={createImageAsset({ isUrlSigned: true })} />);
 
     expect(screen.getByRole('img', { name: 'A photo' })).toHaveAttribute(
@@ -56,8 +56,16 @@ describe('future | AssetPreview', () => {
     );
   });
 
+  it('does not set crossOrigin for unsigned remote assets (#26581 regression)', () => {
+    // Public/unsigned remote images are cache-busted, so they must render
+    // without requiring a bucket CORS rule.
+    render(<AssetPreview asset={createImageAsset({ isUrlSigned: false })} />);
+
+    expect(screen.getByRole('img', { name: 'A photo' })).not.toHaveAttribute('crossorigin');
+  });
+
   it('does not set crossOrigin for local assets', () => {
-    render(<AssetPreview asset={createImageAsset({ isLocal: true })} />);
+    render(<AssetPreview asset={createImageAsset({ isLocal: true, isUrlSigned: true })} />);
 
     expect(screen.getByRole('img', { name: 'A photo' })).not.toHaveAttribute('crossorigin');
   });

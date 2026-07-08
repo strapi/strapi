@@ -189,13 +189,32 @@ describe('AssetsGrid', () => {
         expect(screen.getByRole('img')).toBeInTheDocument();
       });
 
-      it('loads remote thumbnails with crossOrigin="anonymous" (#26581)', () => {
-        setup({ assets: [createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg')] });
+      it('loads signed remote thumbnails with crossOrigin="anonymous" (#26581)', () => {
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: true,
+        };
+        setup({ assets: [asset] });
         expect(screen.getByRole('img')).toHaveAttribute('crossorigin', 'anonymous');
       });
 
+      it('does not set crossOrigin for unsigned remote assets (#26581 regression)', () => {
+        // Public/unsigned remote thumbnails are cache-busted, so they must
+        // render without requiring a bucket CORS rule.
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isUrlSigned: false,
+        };
+        setup({ assets: [asset] });
+        expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
+      });
+
       it('does not set crossOrigin for local assets', () => {
-        const asset = { ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'), isLocal: true };
+        const asset = {
+          ...createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg'),
+          isLocal: true,
+          isUrlSigned: true,
+        };
         setup({ assets: [asset] });
         expect(screen.getByRole('img')).not.toHaveAttribute('crossorigin');
       });
