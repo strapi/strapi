@@ -66,7 +66,7 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
     );
   }
 
-  const { alternativeText, ext, formats, mime, name, url } = content;
+  const { alternativeText, ext, formats, isLocal, mime, name, url } = content;
 
   const fileExtension = getFileExtension(ext);
 
@@ -74,18 +74,11 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
     const mediaURL =
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
 
-    // NOTE (#26581): the other thumbnail render sites load remote
-    // assets with crossOrigin="anonymous" so a cached no-CORS response can't
-    // poison the cross-origin preview request. Avatar.Item (from
-    // @strapi/design-system) does not forward crossOrigin to its underlying
-    // <img>, so this list-view thumbnail can still cache a no-CORS response for
-    // private/signed URLs. The design-system fix is in https://github.com/strapi/design-system/pull/2031;
-    // once released and the dependency is bumped, pass
-    // crossOrigin={isLocal ? undefined : 'anonymous'} here.
     return (
       <Avatar.Item
         src={mediaURL}
         alt={alternativeText || undefined}
+        crossOrigin={isLocal ? undefined : 'anonymous'}
         preview
         fallback={alternativeText}
       />

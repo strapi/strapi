@@ -53,7 +53,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.2.1",
+    "@strapi/design-system": "2.2.2",
     "@strapi/icons": "2.2.1",
     "@strapi/utils": "5.50.1",
     "bcryptjs": "2.4.3",
