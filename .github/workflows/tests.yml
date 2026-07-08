@@ -127,7 +127,7 @@ jobs:
     name: 'typescript (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ubuntu-latest
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.backend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true'
     strategy:
       matrix:
         node: [22, 24, 26]
@@ -404,10 +404,10 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
-    if: needs.conditions.outputs.global == 'true' ||  needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [conditions, build]
-    name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       fail-fast: false
       matrix:
@@ -427,7 +427,7 @@ jobs:
           --health-timeout=5s
           --health-retries=3
         ports:
-          # Maps tcp port 5432 on service container to the host
+          # Maps tcp port 3306 on service container to the host
           - 3306:3306
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -538,7 +538,7 @@ jobs:
           --health-timeout=5s
           --health-retries=3
         ports:
-          # Maps tcp port 5432 on service container to the host
+          # Maps tcp port 3306 on service container to the host
           - 3306:3306
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -558,7 +558,7 @@ jobs:
   api_ee_sqlite:
     runs-on: ubuntu-latest
     needs: [conditions, build]
-    name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[EE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
