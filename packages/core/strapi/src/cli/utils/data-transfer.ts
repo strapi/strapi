@@ -560,10 +560,10 @@ const logTransferFilterSummary = (opts: Partial<engineDataTransfer.ITransferEngi
 
   console.log(chalk.dim(`Transfer filters: ${parts.join('; ')}.`));
 
-  if (shouldSkipStage(opts, 'files')) {
+  if (shouldSkipStage(opts, 'files') && !shouldSkipStage(opts, 'content')) {
     console.log(
       chalk.dim(
-        'Note: Media library records (plugin::upload.file, plugin::upload.folder) are still transferred via the content stage. Sync upload binaries separately (e.g. rsync public/uploads).'
+        'Note: Media library records (plugin::upload.file, plugin::upload.folder) are still transferred with the rest of your content (the entities stage). Sync upload binaries separately (e.g. rsync public/uploads).'
       )
     );
   }

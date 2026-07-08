@@ -43,4 +43,18 @@ describe('logTransferFilterSummary', () => {
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only content'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
   });
+
+  test('does not print files note when content is also skipped via --only config', () => {
+    logTransferFilterSummary({ only: ['config'] });
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only config'));
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
+  });
+
+  test('does not print files note when content is also skipped via --exclude files,content', () => {
+    logTransferFilterSummary({ exclude: ['files', 'content'] });
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('excluding files, content'));
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
+  });
 });
