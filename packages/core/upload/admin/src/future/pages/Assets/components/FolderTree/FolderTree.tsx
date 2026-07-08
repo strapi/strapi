@@ -350,8 +350,16 @@ export const FolderTree = ({ currentFolderId, onSelectFolder }: FolderTreeProps)
           </Typography>
         </RowButton>
 
-        <Box>
-          <Flex alignItems="center" gap={1} padding={1}>
+        <Box marginTop={4}>
+          <Flex
+            alignItems="center"
+            gap={1}
+            paddingTop={1}
+            paddingBottom={1}
+            paddingLeft={2}
+            paddingRight={2}
+            marginBottom={2}
+          >
             <FolderIcon aria-hidden width="1.6rem" height="1.6rem" fill="neutral500" />
             <Typography
               variant="sigma"

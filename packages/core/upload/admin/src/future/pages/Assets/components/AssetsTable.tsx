@@ -321,6 +321,7 @@ const FolderRow = ({ folder }: FolderRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
+  const { isFolderSelected, toggleFolder } = useAssetSelection();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
@@ -348,19 +349,21 @@ const FolderRow = ({ folder }: FolderRowProps) => {
       $isMovePending={isMovePending}
       $isValidDropTarget={showValidDropHighlight}
       $isInvalidDropTarget={showInvalidDropCursor}
+      $isSelected={isFolderSelected(folder.id)}
       tabIndex={0}
       role="row"
       onDragStart={(e) => e.preventDefault()}
       onClick={() => navigateToFolder(folder)}
       onKeyDown={handleKeyDown}
     >
-      {/* TODO: Folder selection is out of scope — checkbox is shown but inert. */}
+      {/* Folders are selectable via their checkbox only (plain toggle) — row
+          click keeps navigating, and range/select-all stay asset-only. */}
       {!isMobile && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
-              disabled
-              checked={false}
+              checked={isFolderSelected(folder.id)}
+              onCheckedChange={() => toggleFolder(folder.id)}
               aria-label={formatMessage(
                 {
                   id: getTranslationKey('list.table.row.select'),

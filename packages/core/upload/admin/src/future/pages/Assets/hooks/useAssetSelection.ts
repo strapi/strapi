@@ -28,12 +28,21 @@ import {
  * the context data-source-agnostic.
  */
 export interface AssetSelection {
-  /** Selected asset ids only (folders are never selectable for now). */
+  /** Selected asset ids. */
   selectedIds: Set<number>;
+  /**
+   * Selected folder ids. Folders are selectable only via their checkbox
+   * (plain toggle) — click/range/select-all semantics stay asset-only, so the
+   * pure selection state machine in `utils/selection.ts` is untouched.
+   */
+  selectedFolderIds: Set<number>;
   anchorId: number | null;
   isSelected: (id: number) => boolean;
+  isFolderSelected: (id: number) => boolean;
   /** Additive toggle (Cmd/Ctrl+click, row checkbox). */
   toggle: (id: number) => void;
+  /** Additive toggle for a folder (checkbox only). */
+  toggleFolder: (id: number) => void;
   /** Plain click — replaces the selection with a single id. */
   selectOnly: (id: number) => void;
   /** Shift+click — selects the contiguous range from the anchor to the target. */
@@ -52,10 +61,30 @@ interface AssetSelectionProviderProps {
 
 export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps) => {
   const [state, setState] = useState<SelectionState>(createEmptySelection);
+  const [selectedFolderIds, setSelectedFolderIds] = useState<Set<number>>(() => new Set());
 
   const isSelected = useCallback((id: number) => state.selectedIds.has(id), [state.selectedIds]);
 
+  const isFolderSelected = useCallback(
+    (id: number) => selectedFolderIds.has(id),
+    [selectedFolderIds]
+  );
+
   const toggle = useCallback((id: number) => setState((prev) => toggleSelection(prev, id)), []);
+
+  const toggleFolder = useCallback(
+    (id: number) =>
+      setSelectedFolderIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+        return next;
+      }),
+    []
+  );
 
   const selectOnly = useCallback((id: number) => setState((prev) => selectOnlyState(prev, id)), []);
 
@@ -67,14 +96,20 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
 
   const selectAll = useCallback((orderedIds: number[]) => setState(selectAllState(orderedIds)), []);
 
-  const clear = useCallback(() => setState(clearSelection()), []);
+  const clear = useCallback(() => {
+    setState(clearSelection());
+    setSelectedFolderIds(new Set());
+  }, []);
 
   const value = useMemo<AssetSelection>(
     () => ({
       selectedIds: state.selectedIds,
+      selectedFolderIds,
       anchorId: state.anchorId,
       isSelected,
+      isFolderSelected,
       toggle,
+      toggleFolder,
       selectOnly,
       selectRange,
       selectAll,
@@ -82,9 +117,12 @@ export const AssetSelectionProvider = ({ children }: AssetSelectionProviderProps
     }),
     [
       state.selectedIds,
+      selectedFolderIds,
       state.anchorId,
       isSelected,
+      isFolderSelected,
       toggle,
+      toggleFolder,
       selectOnly,
       selectRange,
       selectAll,

@@ -263,7 +263,7 @@
   "list.bulk-actions.move": "Move",
   "list.bulk-actions.delete": "Delete",
   "list.bulk-actions.delete.confirm.title": "Delete {count, plural, =1 {# item} other {# items}}?",
-  "list.bulk-actions.delete.confirm.description": "These items cannot be recovered once deleted. If they are currently in use, linked content will break and image containers will be empty.",
+  "list.bulk-actions.delete.confirm.description": "These items cannot be recovered once deleted, and deleting a folder also deletes everything inside it. If they are currently in use, linked content will break and image containers will be empty.",
   "list.bulk-actions.delete.success": "{count, plural, =1 {# item has been deleted} other {# items have been deleted}}",
   "list.bulk-actions.delete.error": "An error occurred while deleting the items.",
   "list.bulk-actions.create-metadata-not-available": "Generate metadata isn't available yet",

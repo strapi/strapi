@@ -136,16 +136,16 @@ const assetsApi = uploadApi.injectEndpoints({
       ],
     }),
     /**
-     * Permanently delete several assets in one request. Same endpoint as the
-     * legacy bulk remove (`POST /upload/actions/bulk-delete`) so server
-     * behaviour is unchanged. Folder counts change, so folder lists are
-     * invalidated too.
+     * Permanently delete several assets and/or folders in one request. Same
+     * endpoint as the legacy bulk remove (`POST /upload/actions/bulk-delete`,
+     * handled by `admin-folder-file.deleteMany`) so server behaviour is
+     * unchanged — folder deletion cascades to everything inside.
      */
-    bulkDeleteAssets: builder.mutation<unknown, number[]>({
-      query: (fileIds) => ({
+    bulkDeleteItems: builder.mutation<unknown, { fileIds: number[]; folderIds: number[] }>({
+      query: ({ fileIds, folderIds }) => ({
         url: '/upload/actions/bulk-delete',
         method: 'POST',
-        data: { fileIds },
+        data: { fileIds, folderIds },
       }),
       invalidatesTags: [
         { type: 'Asset' as const, id: 'LIST' },
@@ -161,5 +161,5 @@ export const {
   useUpdateAssetMutation,
   useReplaceAssetMutation,
   useDeleteAssetMutation,
-  useBulkDeleteAssetsMutation,
+  useBulkDeleteItemsMutation,
 } = assetsApi;
