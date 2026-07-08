@@ -1,17 +1,20 @@
+import { useState, type MouseEvent } from 'react';
+
 import { useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Button, Flex, IconButton, Typography } from '@strapi/design-system';
-import { Cross, Folder, Sparkle, Trash } from '@strapi/icons';
+import { Box, Button, Dialog, Flex, IconButton, Typography } from '@strapi/design-system';
+import { Cross, Folder, Sparkle, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
+import { useBulkDeleteAssetsMutation } from '../../../services/assets';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
 /**
  * Floating bulk action bar for the future Media Library.
  *
- * TODO: Move / delete / create-metadata controls are styled stubs (toast on click)
+ * TODO: Move / create-metadata controls are styled stubs (toast on click)
  */
 const Bar = styled(Flex)`
   position: fixed;
@@ -45,6 +48,8 @@ export const BulkActionsBar = () => {
   const { toggleNotification } = useNotification();
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
   const { selectedIds, clear } = useAssetSelection();
+  const [bulkDeleteAssets, { isLoading: isDeleting }] = useBulkDeleteAssetsMutation();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const count = selectedIds.size;
 
@@ -56,6 +61,46 @@ export const BulkActionsBar = () => {
         defaultMessage,
       }),
     });
+  };
+
+  const handleConfirmDelete = async (e: MouseEvent) => {
+    // Radix AlertDialog.Action closes the dialog on click by default; prevent
+    // that so the dialog stays open showing the loader while the request runs
+    // (a bulk delete can take a while depending on the number of assets).
+    e.preventDefault();
+
+    // Guard re-entry while pending.
+    if (isDeleting) {
+      return;
+    }
+
+    const res = await bulkDeleteAssets(Array.from(selectedIds));
+    setIsDeleteDialogOpen(false);
+
+    if ('error' in res) {
+      // Keep the selection so the user can retry.
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslationKey('list.bulk-actions.delete.error'),
+          defaultMessage: 'An error occurred while deleting the items.',
+        }),
+      });
+      return;
+    }
+
+    toggleNotification({
+      type: 'success',
+      message: formatMessage(
+        {
+          id: getTranslationKey('list.bulk-actions.delete.success'),
+          defaultMessage:
+            '{count, plural, =1 {# item has been deleted} other {# items have been deleted}}',
+        },
+        { count }
+      ),
+    });
+    clear();
   };
 
   if (count === 0) {
@@ -117,21 +162,69 @@ export const BulkActionsBar = () => {
           <Folder />
         </IconButton>
 
-        <IconButton
-          variant="danger-light"
-          label={formatMessage({
-            id: getTranslationKey('list.bulk-actions.delete'),
-            defaultMessage: 'Delete',
-          })}
-          onClick={() =>
-            showStubNotification(
-              'list.bulk-actions.delete-not-available',
-              "Bulk delete isn't available yet"
-            )
-          }
+        <Dialog.Root
+          open={isDeleteDialogOpen}
+          onOpenChange={(open: boolean) => {
+            // The dialog must stay open while the request runs — a bulk delete
+            // can't be aborted halfway, so the loader is the source of truth.
+            if (!isDeleting) {
+              setIsDeleteDialogOpen(open);
+            }
+          }}
         >
-          <Trash />
-        </IconButton>
+          <Dialog.Trigger>
+            <IconButton
+              variant="danger-light"
+              label={formatMessage({
+                id: getTranslationKey('list.bulk-actions.delete'),
+                defaultMessage: 'Delete',
+              })}
+            >
+              <Trash />
+            </IconButton>
+          </Dialog.Trigger>
+          <Dialog.Content>
+            <Dialog.Header>
+              {formatMessage(
+                {
+                  id: getTranslationKey('list.bulk-actions.delete.confirm.title'),
+                  defaultMessage: 'Delete {count, plural, =1 {# item} other {# items}}?',
+                },
+                { count }
+              )}
+            </Dialog.Header>
+            <Dialog.Body
+              icon={<WarningCircle width="24px" height="24px" fill="danger600" />}
+              textAlign="center"
+            >
+              {formatMessage({
+                id: getTranslationKey('list.bulk-actions.delete.confirm.description'),
+                defaultMessage:
+                  'These items cannot be recovered once deleted. If they are currently in use, linked content will break and image containers will be empty.',
+              })}
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Dialog.Cancel>
+                <Button variant="tertiary" disabled={isDeleting} fullWidth>
+                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+                </Button>
+              </Dialog.Cancel>
+              <Dialog.Action>
+                <Button
+                  variant="danger-light"
+                  loading={isDeleting}
+                  onClick={handleConfirmDelete}
+                  fullWidth
+                >
+                  {formatMessage({
+                    id: 'app.components.Button.confirm',
+                    defaultMessage: 'Confirm',
+                  })}
+                </Button>
+              </Dialog.Action>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Root>
       </ActionCluster>
 
       <VerticalDivider aria-hidden />
@@ -143,6 +236,7 @@ export const BulkActionsBar = () => {
           defaultMessage: 'Clear selection',
         })}
         onClick={clear}
+        disabled={isDeleting}
       >
         <Cross />
       </IconButton>
