@@ -8,6 +8,8 @@ const utils = require('../../../../utils');
 // eslint-disable-next-line
 const { resetDatabaseAndImportDataFromPathProgrammatic } = require('../../../../utils/dts-import');
 
+const UPLOAD_CONTENT_TYPES = 'plugin::upload.file,plugin::upload.folder';
+
 describe('import', () => {
   let appPath;
   let expectedDbState;
@@ -140,6 +142,70 @@ describe('import', () => {
       expect(stateAfterImport.articles).toBe(expectedDbState.articles);
       expect(stateAfterImport.categories).toBe(expectedDbState.categories);
     });
+  });
+
+  it('should import export without media (issue #25008) and preserve existing upload records', async () => {
+    const excludedFilename = 'output-no-media-import';
+    const exportResult = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '--no-encrypt',
+        '--no-compress',
+        '-f',
+        excludedFilename,
+        '--exclude',
+        'files',
+        '--exclude-content-types',
+        UPLOAD_CONTENT_TYPES,
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+    expect(exportResult.status).toBe(0);
+
+    const importTar = path.join(appPath, `${excludedFilename}.tar`);
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'import',
+        '-f',
+        importTar,
+        '--force',
+        '--exclude',
+        'files',
+        '--exclude-content-types',
+        UPLOAD_CONTENT_TYPES,
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+    const stateAfterImport = utils.getDbState(appPath);
+    if (stateAfterImport.error) {
+      throw new Error(`Failed to read DB after import: ${stateAfterImport.error}`);
+    }
+
+    expect(stateAfterImport.articles).toBe(expectedDbState.articles);
+    expect(stateAfterImport.categories).toBe(expectedDbState.categories);
+    expect(stateAfterImport.uploadFiles).toBe(expectedDbState.uploadFiles);
+    expect(stateAfterImport.uploadFolders).toBe(expectedDbState.uploadFolders);
+    expect(stateAfterImport.uploadFiles).toBeGreaterThan(0);
   });
 
   test.todo('import from .tar.gz (compressed) and verify DB state');

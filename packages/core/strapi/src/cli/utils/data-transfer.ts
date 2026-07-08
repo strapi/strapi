@@ -120,6 +120,9 @@ const IGNORED_CONTENT_TYPES = [
   'plugin::content-releases.release-action',
 ];
 
+/** Media library content types — common target for `--exclude-content-types` (see issue #25008). */
+const UPLOAD_CONTENT_TYPE_UIDS = ['plugin::upload.file', 'plugin::upload.folder'] as const;
+
 const isIgnoredContentType = (type: string) =>
   IGNORED_CONTENT_TYPE_PREFIXES.some((prefix) => type.startsWith(prefix)) ||
   IGNORED_CONTENT_TYPES.includes(type);
@@ -190,7 +193,7 @@ const onlyOption = new Option(
 
 const excludeContentTypesOption = new Option(
   '--exclude-content-types <comma-separated UIDs>',
-  'Exclude these content types from entities and links (e.g. plugin::upload.file)'
+  `Exclude content types from entities and links (e.g. ${UPLOAD_CONTENT_TYPE_UIDS.join(',')} to omit the media library; combine with --exclude files to skip upload binaries too — see issue #25008)`
 ).argParser(parseList);
 
 const onlyContentTypesOption = new Option(
@@ -695,6 +698,7 @@ export {
   getAssetsBackupHandler,
   shouldSkipStage,
   parseRestoreFromOptions,
+  UPLOAD_CONTENT_TYPE_UIDS,
 };
 
 export type { ContentTypeTransferOptions, TransferCliFilterOptions };

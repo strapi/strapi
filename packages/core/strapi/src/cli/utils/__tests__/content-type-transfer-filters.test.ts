@@ -1,4 +1,4 @@
-import { createEntityFilter, createLinkFilter } from '../data-transfer';
+import { createEntityFilter, createLinkFilter, UPLOAD_CONTENT_TYPE_UIDS } from '../data-transfer';
 
 jest.mock('@strapi/core', () => ({
   createStrapi: jest.fn(),
@@ -7,10 +7,10 @@ jest.mock('@strapi/core', () => ({
 
 describe('content type transfer filters', () => {
   const entityFilter = createEntityFilter({
-    excludeContentTypes: ['plugin::upload.file', 'plugin::upload.folder'],
+    excludeContentTypes: [...UPLOAD_CONTENT_TYPE_UIDS],
   });
   const linkFilter = createLinkFilter({
-    excludeContentTypes: ['plugin::upload.file', 'plugin::upload.folder'],
+    excludeContentTypes: [...UPLOAD_CONTENT_TYPE_UIDS],
   });
 
   test('entity filter excludes listed content types', () => {
