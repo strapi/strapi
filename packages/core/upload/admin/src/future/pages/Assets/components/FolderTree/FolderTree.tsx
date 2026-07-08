@@ -205,7 +205,7 @@ const FolderTreeItem = ({
   const isActive = currentFolderId === id;
 
   // TODO: full `role="tree"` + arrow-key treeview navigation before revamp GA
-  // if an accessibility audit requires it (CMS-133 v1 is button rows only).
+  // if an accessibility audit requires it (v1 is button rows only).
   return (
     <li>
       <Flex alignItems="center" paddingLeft={`${level * INDENT_PER_LEVEL_REM}rem`} gap={1}>

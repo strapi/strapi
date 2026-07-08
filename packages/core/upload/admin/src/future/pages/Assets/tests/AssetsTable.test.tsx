@@ -2,11 +2,25 @@ import { userEvent } from '@testing-library/user-event';
 import { render, screen } from '@tests/utils';
 
 import { AssetsTable } from '../components/AssetsTable';
+import { BulkActionsBar } from '../components/BulkActionsBar';
+import { AssetSelectionProvider } from '../hooks/useAssetSelection';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
 
 const mockNavigateToFolder = jest.fn();
+const mockOnAssetItemClick = jest.fn();
+const mockToggleNotification = jest.fn();
+const mockUseAIAvailability = jest.fn(() => ({ status: 'success' as const, isEnabled: true }));
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useNotification: () => ({ toggleNotification: mockToggleNotification }),
+}));
+
+jest.mock('../../../../hooks/useAiAvailability', () => ({
+  useAIAvailability: () => mockUseAIAvailability(),
+}));
 
 jest.mock('../hooks/useFolderNavigation', () => ({
   useFolderNavigation: () => ({
@@ -68,11 +82,33 @@ interface SetupProps {
 }
 
 const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
-  render(<AssetsTable assets={assets} folders={folders} onAssetItemClick={jest.fn()} />);
+  render(
+    <>
+      <AssetsTable assets={assets} folders={folders} onAssetItemClick={mockOnAssetItemClick} />
+      <BulkActionsBar />
+    </>,
+    { renderOptions: { wrapper: AssetSelectionProvider } }
+  );
 
 describe('AssetsTable', () => {
+  beforeAll(() => {
+    // Render in desktop mode so the checkbox column is present (useIsMobile reads
+    // matchMedia, which jsdom otherwise reports as not-matching → mobile).
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: true,
+      media: query,
+      onchange: null,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }));
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAIAvailability.mockReturnValue({ status: 'success', isEnabled: true });
   });
 
   describe('Table rendering', () => {
@@ -220,6 +256,166 @@ describe('AssetsTable', () => {
 
       expect(screen.getByText('Photos')).toBeInTheDocument();
       expect(screen.queryByText('No content found')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Selection', () => {
+    it('renders a selection checkbox on each asset row', () => {
+      setup();
+
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).toBeInTheDocument();
+    });
+
+    it('renders a disabled checkbox on folder rows', () => {
+      setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+
+      const folderCheckbox = screen.getByRole('checkbox', { name: 'Select Photos' });
+      expect(folderCheckbox).toBeDisabled();
+    });
+
+    it('selects an asset when its row body is clicked', async () => {
+      const { user } = setup();
+
+      // rows[0] is the header; rows[1] is the first asset row (image1.png).
+      const firstAssetRow = screen.getAllByRole('row')[1];
+      await user.click(firstAssetRow);
+
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+    });
+
+    it('opens details (and does not select) when the filename is clicked', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByText('image1.png'));
+
+      expect(mockOnAssetItemClick).toHaveBeenCalledWith(1);
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
+    });
+
+    it('toggles selection via the row checkbox without opening details', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+
+      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(mockOnAssetItemClick).not.toHaveBeenCalled();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).not.toBeChecked();
+    });
+
+    it('selects all assets via the header checkbox and shows indeterminate when partial', async () => {
+      const { user } = setup();
+
+      const selectAll = screen.getByRole('checkbox', { name: 'Select all assets' });
+
+      await user.click(selectAll);
+
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image2.png' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).toBeChecked();
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+
+      // Unchecking one asset leaves the header checkbox in the indeterminate state.
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      expect(selectAll).toHaveAttribute('data-state', 'indeterminate');
+    });
+
+    it('clears the selection from the header checkbox when all are selected', async () => {
+      const { user } = setup();
+
+      const selectAll = screen.getByRole('checkbox', { name: 'Select all assets' });
+
+      await user.click(selectAll);
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+
+      await user.click(selectAll);
+      expect(screen.queryByText(/items? selected/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('BulkActionsBar', () => {
+    it('is hidden when nothing is selected', () => {
+      setup();
+
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('shows the singular count and clears the selection on close', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+
+      const bar = screen.getByRole('region', { name: 'Bulk actions' });
+      expect(bar).toBeInTheDocument();
+      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Clear selection' }));
+
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).not.toBeChecked();
+    });
+
+    it('renders stub action buttons when assets are selected', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+
+      expect(screen.getByRole('button', { name: 'Create metadata' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Clear selection' })).toBeInTheDocument();
+    });
+
+    it('shows an info toast when Create metadata is clicked', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Create metadata' }));
+
+      expect(mockToggleNotification).toHaveBeenCalledWith({
+        type: 'info',
+        message: "Generate metadata isn't available yet",
+      });
+    });
+
+    it('shows an info toast when Move is clicked', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Move' }));
+
+      expect(mockToggleNotification).toHaveBeenCalledWith({
+        type: 'info',
+        message: "Bulk move isn't available yet",
+      });
+    });
+
+    it('shows an info toast when Delete is clicked', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+      expect(mockToggleNotification).toHaveBeenCalledWith({
+        type: 'info',
+        message: "Bulk delete isn't available yet",
+      });
+    });
+
+    it('hides Create metadata when AI metadata is unavailable', async () => {
+      mockUseAIAvailability.mockReturnValue({ status: 'success', isEnabled: false });
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+
+      expect(screen.queryByRole('button', { name: 'Create metadata' })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
     });
   });
 });
