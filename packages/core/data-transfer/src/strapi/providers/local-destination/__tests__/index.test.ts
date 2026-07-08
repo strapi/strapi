@@ -128,7 +128,7 @@ describe('Local Strapi Source Destination', () => {
                 },
               },
             }),
-            /* @ts-ignore: disable-next-line */
+            // @ts-expect-error -- Invalid strategy exercises provider validation.
             strategy: 'foo',
           });
           await invalidProvider.bootstrap();

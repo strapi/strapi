@@ -17,6 +17,7 @@ import {
   parseRestoreFromOptions,
   buildTransferTransforms,
   validateContentTypeTransferOptionsForStrapi,
+  logTransferFilterSummary,
 } from '../../utils/data-transfer';
 import {
   exitWith,
@@ -261,6 +262,7 @@ export default async (opts: CmdOptions) => {
   progress.on('transfer::start', async () => {
     transferPrepStartedAt = Date.now();
     prepStepDetail = null;
+    logTransferFilterSummary({ exclude: opts.exclude, only: opts.only });
     startingSpinner = ora(formatPrepSpinnerLine()).start();
     startingElapsedInterval = setInterval(() => {
       if (startingSpinner && transferPrepStartedAt != null) {

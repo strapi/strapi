@@ -197,6 +197,42 @@ Once the integrity check has passed, the transfer begins by opening streams from
 4. links - the relations between entities
 5. configuration - the Strapi project configuration data
 
+### Media library vs upload binaries
+
+Strapi stores media in two parts that transfer on different stages:
+
+- **entities** stage — media library database records (`plugin::upload.file`, `plugin::upload.folder`) are transferred as part of `content`, along with other entities
+- **assets** stage — the binary files on disk under `public/uploads`
+
+The CLI `--exclude files` (or `--only` without `files`) skips only the **assets** stage. Media library records are still transferred unless you exclude them programmatically.
+
+To exclude upload content types from the entities stage, use entity and link transform filters:
+
+```typescript
+const UPLOAD_TYPES = ['plugin::upload.file', 'plugin::upload.folder'];
+
+const options = {
+  transforms: {
+    entities: [
+      {
+        filter(entity) {
+          return !UPLOAD_TYPES.includes(entity.type);
+        },
+      },
+    ],
+    links: [
+      {
+        filter(link) {
+          return !UPLOAD_TYPES.includes(link.left.type) && !UPLOAD_TYPES.includes(link.right.type);
+        },
+      },
+    ],
+  },
+};
+```
+
+When skipping the assets stage, sync upload binaries separately — for example with `rsync -avz public/uploads/ user@host:/path/to/strapi/public/uploads/`.
+
 Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
 
 ### Excluding content types from the CLI

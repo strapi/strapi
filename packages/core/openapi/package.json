@@ -1,6 +1,6 @@
 {
   "name": "@strapi/openapi",
-  "version": "5.50.0",
+  "version": "5.50.1",
   "description": "A tool set to help generate and validate API documentation for Strapi projects",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -47,7 +47,7 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "watch": "run -T rollup -c -w",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch"
@@ -62,7 +62,7 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/types": "5.50.0",
+    "@strapi/types": "5.50.1",
     "@types/debug": "^4"
   }
 }

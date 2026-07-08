@@ -3,13 +3,15 @@ import { useCallback, useMemo } from 'react';
 import { parse, stringify } from 'qs';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+type QueryParams = Record<string, unknown>;
+
 const useSearch = () => {
   const { search } = useLocation();
 
   return useMemo(() => search, [search]);
 };
 
-const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
+const useQueryParams = <TQuery extends object = QueryParams>(initialParams?: TQuery) => {
   const search = useSearch();
   const navigate = useNavigate();
 
