@@ -133,6 +133,25 @@ describe('LivePreviewBlocksSurface', () => {
     expect(mockSetBlocksEditSession).not.toHaveBeenCalled();
   });
 
+  test.each([
+    ['[role="listbox"]', 'Radix Select dropdown (block type selector)'],
+    ['[role="dialog"]', 'Radix Dialog (image / link modal)'],
+    ['[role="menu"]', 'Radix DropdownMenu (BlocksToolbar overflow menu)'],
+  ])('does not end session on mousedown inside a portaled %s (%s)', (selector) => {
+    setupContext({ blocksEditSession: makeSession() });
+    render(<LivePreviewBlocksSurface documentResponse={mockDocumentResponse} />);
+
+    const portaledEl = document.createElement('div');
+    portaledEl.setAttribute('role', selector.match(/role="([^"]+)"/)?.[1] ?? '');
+    document.body.appendChild(portaledEl);
+
+    fireEvent.mouseDown(portaledEl);
+
+    expect(mockSetBlocksEditSession).not.toHaveBeenCalled();
+
+    portaledEl.remove();
+  });
+
   test('ends session when the iframe sends STRAPI_CLICK_OUTSIDE_BLOCKS', () => {
     setupContext({ blocksEditSession: makeSession() });
     render(<LivePreviewBlocksSurface documentResponse={mockDocumentResponse} />);

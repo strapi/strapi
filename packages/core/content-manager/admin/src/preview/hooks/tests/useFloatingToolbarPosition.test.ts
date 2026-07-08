@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { Range } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
 
+import { TOOLBAR_HEIGHT, TOOLBAR_WIDTH } from '../../utils/constants';
 import { useFloatingToolbarPosition } from '../useFloatingToolbarPosition';
 
 jest.mock('slate-react', () => ({
@@ -21,8 +22,6 @@ const mockUseSlate = useSlate as jest.Mock;
 const mockToDOMRange = ReactEditor.toDOMRange as jest.Mock;
 const mockIsCollapsed = Range.isCollapsed as jest.Mock;
 
-const TOOLBAR_HEIGHT = 46;
-const TOOLBAR_WIDTH = 400;
 const OFFSET = 8;
 
 const makeRect = (overrides: Record<string, number> = {}) => ({
@@ -127,6 +126,30 @@ describe('useFloatingToolbarPosition', () => {
 
     expect(result.current).toEqual({
       top: 50 + OFFSET,
+      left: 50,
+      visible: true,
+      flipBelow: true,
+    });
+  });
+
+  test('flips toolbar below when selection is near the top of the iframe but not the viewport top', () => {
+    // Without iframeRef: rect.top=230 > 54 → no flip
+    // With iframeRef at top=200: rect.top - iframeTop = 230 - 200 = 30 < 54 → flipBelow=true
+    // top = bottom + OFFSET = 250 + 8 = 258
+    const iframeRef = {
+      current: { getBoundingClientRect: jest.fn().mockReturnValue({ top: 200 }) },
+    } as unknown as React.RefObject<HTMLIFrameElement>;
+
+    mockToDOMRange.mockReturnValue({
+      getBoundingClientRect: jest
+        .fn()
+        .mockReturnValue(makeRect({ top: 230, bottom: 250, left: 200, width: 100 })),
+    });
+
+    const { result } = renderHook(() => useFloatingToolbarPosition(iframeRef));
+
+    expect(result.current).toEqual({
+      top: 250 + OFFSET,
       left: 50,
       visible: true,
       flipBelow: true,

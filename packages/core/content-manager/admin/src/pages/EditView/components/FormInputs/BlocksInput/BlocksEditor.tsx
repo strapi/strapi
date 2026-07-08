@@ -284,6 +284,10 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     const flushPendingFormSync = React.useCallback(() => {
       if (!debounceTimeout.current) {
+        // In livePreviewSync mode onChange fires synchronously on every change, so there is
+        // never a pending debounced update. React commits batched state updates between
+        // browser events, meaning the form state is already up-to-date before any subsequent
+        // event (e.g. a Save click) reads it — no flushSync is needed here.
         return;
       }
       clearTimeout(debounceTimeout.current);
@@ -394,6 +398,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           >
             {isLivePreviewInline ? (
               <>
+                {/* TODO: surface the error prop to the user in the inline overlay (EditorLayout is omitted here) */}
                 {floatingToolbar}
                 <BlocksContent {...contentProps} hideDragHandles />
               </>

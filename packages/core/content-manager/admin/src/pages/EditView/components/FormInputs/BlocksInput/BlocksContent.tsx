@@ -373,7 +373,7 @@ const baseRenderElement = ({
     // ensures it always works even if the CSS rule loses a specificity battle.
     if (hideDragHandles && element.type === 'paragraph') {
       return React.cloneElement(el, {
-        style: { lineHeight: 'var(--preview-line-height, inherit)', ...(el.props?.style ?? {}) },
+        style: { ...(el.props?.style ?? {}), lineHeight: 'var(--preview-line-height, inherit)' },
       });
     }
     return el;

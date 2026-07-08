@@ -66,6 +66,12 @@ export const PREVIEW_ERROR_MESSAGES = {
 >;
 
 /**
+ * Dimensions of the floating blocks toolbar, used by both the position hook and the toolbar component.
+ */
+export const TOOLBAR_HEIGHT = 46;
+export const TOOLBAR_WIDTH = 400;
+
+/**
  * Default highlight colors used by the preview script when no theme is available.
  * In production the admin overrides these with the actual theme colors (primary500/primary600).
  */

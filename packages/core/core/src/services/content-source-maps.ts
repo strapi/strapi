@@ -244,7 +244,8 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
           }
 
           if (attribute.type === 'blocks' && Array.isArray(value)) {
-            const fieldPath = path.rawWithIndices!;
+            const fieldPath = path.rawWithIndices;
+            if (!fieldPath) return;
             set(
               key,
               this.encodeBlocks(value, {
@@ -269,7 +270,8 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
             const encodedPath =
               isInsideMultiMedia && parent?.path?.rawWithIndices
                 ? `${parent.path.rawWithIndices}.${key}`
-                : path.rawWithIndices!;
+                : path.rawWithIndices;
+            if (!encodedPath) return;
 
             set(
               key,

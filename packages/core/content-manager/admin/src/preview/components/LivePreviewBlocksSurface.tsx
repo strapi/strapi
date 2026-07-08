@@ -88,7 +88,9 @@ const LivePreviewBlocksEditor = ({
         // but the mousedown fires before Radix can register the selection.
         target.closest?.('[role="listbox"]') ||
         // Radix Dialog portals (e.g. image block modal, link modal)
-        target.closest?.('[role="dialog"]');
+        target.closest?.('[role="dialog"]') ||
+        // Radix DropdownMenu portal (overflow menu in BlocksToolbar when items don't fit)
+        target.closest?.('[role="menu"]');
       if (!isInsideEditor && !isInsidePortaledUI) {
         endSession();
       }
@@ -211,7 +213,8 @@ const LivePreviewBlocksEditor = ({
           if (
             target.closest('[data-preview-blocks-ui]') ||
             target.closest('[role="listbox"]') ||
-            target.closest('[role="dialog"]')
+            target.closest('[role="dialog"]') ||
+            target.closest('[role="menu"]')
           ) {
             return;
           }
