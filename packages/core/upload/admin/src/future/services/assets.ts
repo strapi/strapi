@@ -150,6 +150,9 @@ const assetsApi = uploadApi.injectEndpoints({
       invalidatesTags: [
         { type: 'Asset' as const, id: 'LIST' },
         { type: 'Folder' as const, id: 'LIST' },
+        // The sidebar FolderTree reads /upload/folder-structure, which carries
+        // its own tag — without it, deleted folders linger in the tree.
+        { type: 'Folder' as const, id: 'STRUCTURE' },
       ],
     }),
   }),
