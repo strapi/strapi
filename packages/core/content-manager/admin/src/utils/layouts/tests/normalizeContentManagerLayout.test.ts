@@ -338,6 +338,7 @@ describe('normalizeContentManagerLayout', () => {
       }
     );
 
+    // @ts-expect-error - suspicious type assertion
     expect(normalized.contentType.metadatas.category?.edit?.mainField).toBe('name');
     expect(normalized.contentType.metadatas.category?.list.mainField).toBe('name');
   });
