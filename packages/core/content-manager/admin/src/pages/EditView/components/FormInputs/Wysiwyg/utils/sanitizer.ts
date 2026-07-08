@@ -42,7 +42,8 @@ const ALLOWED_ATTR = [
  * URL scheme allowlist: http(s), ftp, mailto, tel, plus protocol-relative,
  * fragment, and relative URLs. Mirrors sanitize-html's prior allowedSchemes.
  */
-const ALLOWED_URI_REGEXP = /^(?:(?:https?|ftp|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i;
+// oxlint-disable-next-line no-useless-escape
+const ALLOWED_URI_REGEXP = /^(?:(?:https?|ftp|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i;
 
 /**
  * DOMPurify permits `data:` URIs on media tags (img/source/video/audio)
