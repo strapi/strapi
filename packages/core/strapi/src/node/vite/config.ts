@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react-swc';
 import { getUserConfig } from '../core/config';
 import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
 import { buildAdminViteResolveAliases } from '../core/admin-vite-aliases';
+import { collectAdminOptimizeDepsExclude } from '../core/admin-vite-optimize-exclude';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
@@ -15,6 +16,11 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
   const designSystemLinked = isDesignSystemLinked();
+  const pluginOptimizeDepsExclude = await collectAdminOptimizeDepsExclude(ctx.cwd, ctx.plugins);
+  const optimizeDepsExclude = [
+    ...(designSystemLinked ? ['@strapi/design-system'] : []),
+    ...pluginOptimizeDepsExclude,
+  ];
 
   return {
     root: ctx.cwd,
@@ -33,8 +39,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
       // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
-      // so changes are reflected without clearing node_modules/.strapi/vite cache
-      ...(designSystemLinked && { exclude: ['@strapi/design-system'] }),
+      // so changes are reflected without clearing node_modules/.strapi/vite cache.
+      // Also skip pre-built ESM plugin UI libraries with React peers (see collectAdminOptimizeDepsExclude).
+      ...(optimizeDepsExclude.length > 0 && { exclude: optimizeDepsExclude }),
       include: [
         // pre-bundle React dependencies to avoid React duplicates,
         // even if React dependencies are not direct dependencies
