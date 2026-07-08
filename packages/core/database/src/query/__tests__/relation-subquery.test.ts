@@ -47,6 +47,7 @@ const makeDb = () => {
     metadata,
     getConnection: (table?: string) => (table ? connection(table) : connection),
     dialect: {
+      client: 'sqlite',
       useReturning: () => false,
       transformErrors(e: Error) {
         throw e;
@@ -96,6 +97,12 @@ describe('relation subquery path (deleteMany / updateMany)', () => {
       ['Samuel UMTITI'],
     ],
     ['scalar relation id', { where: { related: 1 } }, 2, ['Samuel UMTITI']],
+    [
+      '_q + relation where',
+      { _q: 'LLORIS', where: { related: { title: 'Category A' } } },
+      1,
+      ['Samuel UMTITI', 'Lucas HERNANDEZ'],
+    ],
   ])('deleteMany: %s', async (_label, params, expectedDeleted, expectedRemaining) => {
     const { db, connection } = makeDb();
     await setupTables(connection);

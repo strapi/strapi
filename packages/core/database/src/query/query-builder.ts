@@ -106,6 +106,8 @@ export interface QueryBuilder {
 
   shouldUseSubQuery(): boolean;
 
+  hasJoins(): boolean;
+
   runSubQuery(): any;
 
   processState(): void;
@@ -422,6 +424,10 @@ const createQueryBuilder = (
 
     shouldUseSubQuery() {
       return ['delete', 'update'].includes(state.type) && state.joins.length > 0;
+    },
+
+    hasJoins() {
+      return state.joins.length > 0;
     },
 
     runSubQuery() {
