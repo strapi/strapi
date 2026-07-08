@@ -1,6 +1,7 @@
 import { pruneSchema } from '@graphql-tools/utils';
 import { makeSchema } from 'nexus';
 import { prop, startsWith } from 'lodash/fp';
+import { importModule } from '@strapi/utils';
 import type * as Nexus from 'nexus';
 import type { Core, Struct } from '@strapi/types';
 
@@ -20,9 +21,6 @@ import {
 import { TypeRegistry } from '../type-registry';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { mergeSchemas, addResolversToSchema } = require('@graphql-tools/schema');
-
   const { service: getGraphQLService } = strapi.plugin('graphql');
   const { config } = strapi.plugin('graphql');
 
@@ -36,7 +34,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   // Cached set of built-in query fields (populated at bootstrap)
   let builtInQueryFields: Set<string> = new Set();
 
-  const buildSchema = () => {
+  const graphqlToolsPromise =
+    importModule<typeof import('@graphql-tools/schema')>('@graphql-tools/schema');
+
+  const buildMergedSchema = async ({ registry }: { registry: TypeRegistry }) => {
+    const { mergeSchemas } = await graphqlToolsPromise;
+    const { types, typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
+    const nexusSchema = makeSchema({ types: [registry.definitions, types] });
+
+    return mergeSchemas({
+      typeDefs,
+      schemas: [nexusSchema],
+    });
+  };
+
+  const buildSchema = async () => {
+    const { addResolversToSchema } = await graphqlToolsPromise;
+
     const isShadowCRUDEnabled = !!config('shadowCRUD');
 
     // Create a new empty type registry
@@ -54,7 +68,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     // Build a merged schema from both Nexus types & SDL type definitions
-    const schema = buildMergedSchema({ registry });
+    const schema = await buildMergedSchema({ registry });
 
     // Generate the extension configuration for the content API.
     // This extension instance needs to be generated after the Nexus schema's
@@ -117,23 +131,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   const isBuiltInQueryField = (fieldName: string) =>
     builtInQueryFields.has(fieldName) || fieldName.endsWith('_connection');
-
-  const buildMergedSchema = ({ registry }: { registry: TypeRegistry }) => {
-    // Here we extract types, plugins & typeDefs from a temporary generated
-    // extension since there won't be any addition allowed after schemas generation
-    const { types, typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
-
-    // Nexus schema built with user-defined & shadow CRUD auto generated Nexus types
-    const nexusSchema = makeSchema({ types: [registry.definitions, types] });
-
-    // Merge type definitions with the Nexus schema
-    return mergeSchemas({
-      typeDefs,
-      // Give access to the shadowCRUD & nexus based types
-      // Note: This is necessary so that types defined in SDL can reference types defined with Nexus
-      schemas: [nexusSchema],
-    });
-  };
 
   const shadowCRUD = () => {
     const extensionService = getGraphQLService('extension');

@@ -70,7 +70,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async registerCron() {
       const weeklySchedule = await this.ensureWeeklyStoredCronSchedule();
 
-      strapi.cron.add({
+      await strapi.cron.add({
         reviewWorkflowsWeekly: {
           task: this.sendMetrics.bind(this),
           options: weeklySchedule,

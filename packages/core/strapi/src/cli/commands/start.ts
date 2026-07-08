@@ -2,6 +2,7 @@ import { createCommand } from 'commander';
 import fs from 'fs';
 import path from 'path';
 import { createStrapi } from '@strapi/core';
+import { importModule } from '@strapi/utils';
 
 import type { StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
@@ -23,8 +24,9 @@ const action = async () => {
       distDir = quickOutDir;
     } else {
       // Custom/extended tsconfig or unbuilt project — fall back to the slow correct path
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const tsUtils = require('@strapi/typescript-utils');
+      const tsUtils = await importModule<typeof import('@strapi/typescript-utils')>(
+        '@strapi/typescript-utils'
+      );
       const outDir = await tsUtils.resolveOutDir(appDir);
 
       if (!fs.existsSync(outDir)) {

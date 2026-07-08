@@ -1,12 +1,4 @@
-// Lazy: only resolved when compileStrapi is invoked (develop / build)
-let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
-const tsUtils = (): typeof import('@strapi/typescript-utils') => {
-  if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyTsUtils = require('@strapi/typescript-utils');
-  }
-  return lazyTsUtils as typeof import('@strapi/typescript-utils');
-};
+import { importModule } from '@strapi/utils';
 
 interface Options {
   appDir?: string;
@@ -15,12 +7,15 @@ interface Options {
 
 export default async function compile(options?: Options) {
   const { appDir = process.cwd(), ignoreDiagnostics = false } = options ?? {};
-  const isTSProject = await tsUtils().isUsingTypeScript(appDir);
-  const outDir = await tsUtils().resolveOutDir(appDir);
+  const tsUtils = await importModule<typeof import('@strapi/typescript-utils')>(
+    '@strapi/typescript-utils'
+  );
+  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
+  const outDir = await tsUtils.resolveOutDir(appDir);
 
   if (isTSProject) {
     try {
-      await tsUtils().compile(appDir, {
+      await tsUtils.compile(appDir, {
         configOptions: { options: { incremental: true }, ignoreDiagnostics },
       });
     } catch (err: unknown) {

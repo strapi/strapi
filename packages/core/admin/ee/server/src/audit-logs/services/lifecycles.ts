@@ -156,9 +156,9 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       // Manage audit logs auto deletion
       const retentionDays = getRetentionDays(strapi);
 
-      strapi.cron.add({
+      await strapi.cron.add({
         deleteExpiredAuditLogs: {
-          task: async () => {
+          async task() {
             const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
             await auditLogsService.deleteExpiredEvents(expirationDate);
           },

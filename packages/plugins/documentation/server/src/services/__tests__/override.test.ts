@@ -17,7 +17,7 @@ describe('Documentation plugin | Override service', () => {
     strapi = strapiMock;
   });
 
-  it('should register an override', () => {
+  it('should register an override', async () => {
     const mockOverride = {
       openapi: '3.0.0',
       info: {
@@ -27,12 +27,12 @@ describe('Documentation plugin | Override service', () => {
     } as any;
 
     const overrideService = override({ strapi });
-    overrideService.registerOverride(mockOverride);
+    await overrideService.registerOverride(mockOverride);
 
     expect(overrideService.registeredOverrides).toEqual([mockOverride]);
   });
 
-  it('should not register an override from a plugin that is not in the config', () => {
+  it('should not register an override from a plugin that is not in the config', async () => {
     const mockOverride = {
       openapi: '3.0.0',
       info: {
@@ -42,12 +42,12 @@ describe('Documentation plugin | Override service', () => {
     } as any;
 
     const overrideService = override({ strapi });
-    overrideService.registerOverride(mockOverride, { pluginOrigin: 'test' });
+    await overrideService.registerOverride(mockOverride, { pluginOrigin: 'test' });
 
     expect(overrideService.registeredOverrides).toEqual([]);
   });
 
-  it('should register an override from a plugin that is in the config and exclude it from generation', () => {
+  it('should register an override from a plugin that is in the config and exclude it from generation', async () => {
     const mockOverride = {
       openapi: '3.0.0',
       info: {
@@ -63,7 +63,7 @@ describe('Documentation plugin | Override service', () => {
     });
 
     const overrideService = override({ strapi });
-    overrideService.registerOverride(mockOverride, {
+    await overrideService.registerOverride(mockOverride, {
       pluginOrigin: 'test',
       excludeFromGeneration: ['test', 'some-other-api-to-exclude'],
     });

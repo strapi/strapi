@@ -28,8 +28,8 @@ const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
   });
 };
 
-const startCron = (strapi: Core.Strapi) => {
-  strapi.cron.add({
+const startCron = async (strapi: Core.Strapi) => {
+  await strapi.cron.add({
     sendProjectInformation: {
       task: () => sendUpdateProjectInformation(strapi),
       options: '0 0 0 * * *',

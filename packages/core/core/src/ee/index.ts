@@ -219,7 +219,7 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (!shouldStayOffline) {
     await onlineUpdate({ strapi });
 
-    strapi.cron.add({
+    await strapi.cron.add({
       onlineUpdate: {
         task: () => onlineUpdate({ strapi }),
         options: shiftCronExpression('0 0 */12 * * *'),

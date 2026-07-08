@@ -1,5 +1,6 @@
 import fse from 'fs-extra';
 import type { Umzug } from 'umzug';
+import { importModule } from '@strapi/utils';
 
 import { createStorage } from './storage';
 import { wrapTransaction } from './common';
@@ -48,10 +49,9 @@ export const createUserMigrationProvider = (db: Database): UserMigrationProvider
 
   // Lazy: defer `umzug` (and its inquirer / @rushstack chain) until first call
   let lazyProvider: Umzug<typeof context> | undefined;
-  const provider = (): Umzug<typeof context> => {
+  const provider = async (): Promise<Umzug<typeof context>> => {
     if (lazyProvider) return lazyProvider;
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { Umzug: UmzugCtor } = require('umzug') as typeof import('umzug');
+    const { Umzug: UmzugCtor } = await importModule<typeof import('umzug')>('umzug');
     lazyProvider = new UmzugCtor({
       storage: createStorage({ db, tableName: 'strapi_migrations' }),
       logger: {
@@ -80,14 +80,14 @@ export const createUserMigrationProvider = (db: Database): UserMigrationProvider
 
   return {
     async shouldRun() {
-      const pendingMigrations = await provider().pending();
+      const pendingMigrations = await (await provider()).pending();
       return pendingMigrations.length > 0 && db.config?.settings?.runMigrations === true;
     },
     async up() {
-      await provider().up();
+      await (await provider()).up();
     },
     async down() {
-      await provider().down();
+      await (await provider()).down();
     },
   };
 };

@@ -1,4 +1,5 @@
 import { createCommand } from 'commander';
+import { importModule } from '@strapi/utils';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
@@ -16,11 +17,11 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
     process.exit(1);
   }
 
-  // Defer heavy requires until the command actually runs
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const tsUtils = require('@strapi/typescript-utils');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { createStrapi, compileStrapi } = require('@strapi/core');
+  const tsUtils = await importModule<typeof import('@strapi/typescript-utils')>(
+    '@strapi/typescript-utils'
+  );
+  const { createStrapi, compileStrapi } =
+    await importModule<typeof import('@strapi/core')>('@strapi/core');
 
   const appContext = await compileStrapi({ ignoreDiagnostics: true });
   const app = await createStrapi(appContext).register();

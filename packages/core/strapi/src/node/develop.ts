@@ -4,6 +4,7 @@ import cluster from 'node:cluster';
 
 import type chokidarType from 'chokidar';
 import type { createStrapi as CreateStrapi } from '@strapi/core';
+import { importModule } from '@strapi/utils';
 import type { CLIContext } from '../cli/types';
 import { handleAdminDependencies } from './core/ensure-admin-dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
@@ -12,14 +13,18 @@ import type { ViteWatcher } from './vite/watch';
 import type { Logger } from '../cli/utils/logger';
 
 // Lazy: worker-only deps; primary cluster process should not pay for them
-const lazy = <T>(spec: string): (() => T) => {
+const lazy = <T>(specifier: string) => {
   let cached: T | undefined;
-  return (): T => {
-    if (cached === undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      cached = require(spec);
+  let promise: Promise<T> | undefined;
+  return async (): Promise<T> => {
+    if (cached !== undefined) {
+      return cached;
     }
-    return cached as T;
+    promise ??= importModule<T>(specifier).then((mod) => {
+      cached = mod;
+      return mod;
+    });
+    return promise;
   };
 };
 const tsUtils = lazy<typeof import('@strapi/typescript-utils')>('@strapi/typescript-utils');
@@ -117,7 +122,7 @@ const develop = async ({
       // Build without diagnostics in case schemas have changed
       await cleanupDistDirectory({ tsconfig, logger, timer });
       try {
-        await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+        await (await tsUtils()).compile(cwd, { configOptions: { ignoreDiagnostics: true } });
       } catch (err: unknown) {
         logger.error(`Error during initial TypeScript compilation: ${(err as Error).message}`);
         // We don't return here because we want to attempt to start the server even if the initial compilation fails, as it can be fixed while the server is running
@@ -134,7 +139,9 @@ const develop = async ({
       const contextSpinner = logger.spinner(`Building build context`).start();
       console.log('');
 
-      const ctx = await buildCtx().createBuildContext({
+      const ctx = await (
+        await buildCtx()
+      ).createBuildContext({
         cwd,
         logger,
         tsconfig,
@@ -147,7 +154,7 @@ const develop = async ({
       timer.start('creatingAdmin');
       const adminSpinner = logger.spinner(`Creating admin`).start();
 
-      await staticFs().writeStaticClientFiles(ctx);
+      await (await staticFs()).writeStaticClientFiles(ctx);
 
       if (ctx.bundler === 'webpack') {
         const { build: buildWebpack } = await import('./webpack/build');
@@ -169,7 +176,7 @@ const develop = async ({
             try {
               // Build without diagnostics in case schemas have changed
               await cleanupDistDirectory({ tsconfig, logger, timer });
-              await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: true } });
+              await (await tsUtils()).compile(cwd, { configOptions: { ignoreDiagnostics: true } });
             } catch (err: unknown) {
               const message = err instanceof Error ? err.message : String(err);
               logger.error(`Error during TypeScript compilation on reload: ${message}`);
@@ -201,7 +208,7 @@ const develop = async ({
     timer.start('loadStrapi');
     const loadStrapiSpinner = logger.spinner(`Loading Strapi`).start();
 
-    const strapi = core().createStrapi({
+    const strapi = (await core()).createStrapi({
       appDir: cwd,
       distDir: tsconfig?.config.options.outDir ?? '',
       autoReload: true,
@@ -222,10 +229,10 @@ const develop = async ({
     const compilingTsSpinner = logger.spinner(`Compiling TS`);
 
     let watcherStarted = false;
-    const ensureWatcher = () => {
+    const ensureWatcher = async () => {
       if (!watcherStarted) {
         watcherStarted = true;
-        startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
+        await startWatcher(strapiInstance, cwd, polling ?? false, logger, bundleWatcher);
       }
     };
 
@@ -234,7 +241,9 @@ const develop = async ({
         timer.start('createBuildContext');
         contextSpinner.start();
 
-        const ctx = await buildCtx().createBuildContext({
+        const ctx = await (
+          await buildCtx()
+        ).createBuildContext({
           cwd,
           logger,
           strapi,
@@ -248,7 +257,7 @@ const develop = async ({
         timer.start('creatingAdmin');
         adminSpinner.start();
 
-        await staticFs().writeStaticClientFiles(ctx);
+        await (await staticFs()).writeStaticClientFiles(ctx);
 
         if (ctx.bundler === 'webpack') {
           const { watch: watchWebpack } = await import('./webpack/watch');
@@ -273,7 +282,9 @@ const develop = async ({
         timer.start('generatingTS');
         generatingTsSpinner.start();
 
-        await tsUtils().generators.generate({
+        await (
+          await tsUtils()
+        ).generators.generate({
           strapi: strapiInstance,
           pwd: cwd,
           rootDir: undefined,
@@ -291,14 +302,14 @@ const develop = async ({
         compilingTsSpinner.start();
 
         await cleanupDistDirectory({ tsconfig, logger, timer });
-        await tsUtils().compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+        await (await tsUtils()).compile(cwd, { configOptions: { ignoreDiagnostics: false } });
 
         const compilingDuration = timer.end('compilingTS');
         compilingTsSpinner.text = `Compiling TS (${prettyTime(compilingDuration)})`;
         compilingTsSpinner.succeed();
       }
 
-      ensureWatcher();
+      await ensureWatcher();
 
       strapiInstance.start();
     } catch (err: unknown) {
@@ -322,12 +333,12 @@ const develop = async ({
         generatingTsSpinner.fail();
       }
 
-      ensureWatcher();
+      await ensureWatcher();
     }
   }
 };
 
-function startWatcher(
+async function startWatcher(
   strapiInstance: Awaited<ReturnType<typeof CreateStrapi>>,
   cwd: string,
   polling: boolean,
@@ -341,7 +352,10 @@ function startWatcher(
     }
   };
 
-  const watcher = chokidar()
+  const chokidarLib = await chokidar();
+  const utilsLib = await utils();
+
+  const watcher = chokidarLib
     .watch(cwd, {
       ignoreInitial: true,
       usePolling: polling,
@@ -367,7 +381,7 @@ function startWatcher(
         '**/public',
         '**/public/**',
         strapiInstance.dirs.static.public,
-        utils().strings.joinBy('/', strapiInstance.dirs.static.public, '**'),
+        utilsLib.strings.joinBy('/', strapiInstance.dirs.static.public, '**'),
         '**/*.db*',
         '**/exports/**',
         '**/dist/**',

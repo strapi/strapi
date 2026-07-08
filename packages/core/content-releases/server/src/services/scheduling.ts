@@ -20,7 +20,7 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const taskName = `publishRelease_${releaseId}`;
 
-      strapi.cron.add({
+      await strapi.cron.add({
         [taskName]: {
           async task() {
             await getService('release', { strapi }).publish(releaseId);

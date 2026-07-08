@@ -35,9 +35,9 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
       return isDisabled;
     },
 
-    register() {
+    async register() {
       if (!isDisabled && sendEvent) {
-        strapi.cron.add({
+        await strapi.cron.add({
           sendPingEvent: {
             task: () => sendEvent('ping'),
             options: '0 0 12 * * *',

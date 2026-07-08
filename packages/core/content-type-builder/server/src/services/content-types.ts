@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { getOr } from 'lodash/fp';
-import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
+import { contentTypes as contentTypesUtils, errors, importModule } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
@@ -128,14 +128,14 @@ export const createContentType = async (
 /**
  * Generate an API skeleton
  */
-export const generateAPI = ({
+export const generateAPI = async ({
   singularName,
   kind = 'collectionType',
   pluralName,
   displayName,
 }: any) => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const strapiGenerators = require('@strapi/generators');
+  const strapiGenerators =
+    await importModule<typeof import('@strapi/generators')>('@strapi/generators');
   return strapiGenerators.generate(
     'content-type',
     {

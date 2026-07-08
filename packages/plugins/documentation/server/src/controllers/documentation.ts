@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import fs from 'fs-extra';
 import _ from 'lodash';
 import koaStatic from 'koa-static';
-import { yup, validateYupSchema } from '@strapi/utils';
+import { yup, validateYupSchema, importModule } from '@strapi/utils';
 
 import type Koa from 'koa';
 import type {} from 'koa-body';
@@ -108,9 +108,7 @@ export default {
   },
 
   async loginView(ctx: Koa.Context, next: Koa.Next) {
-    // lazy require cheerio
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const cheerio = require('cheerio');
+    const cheerio = await importModule<typeof import('cheerio')>('cheerio');
 
     const { error } = ctx.query;
 

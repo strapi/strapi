@@ -109,7 +109,7 @@ export const determineLandingPage = (
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   // Generate the GraphQL schema for the content API
-  const schema = strapi.plugin('graphql').service('content-api').buildSchema();
+  const schema = await strapi.plugin('graphql').service('content-api').buildSchema();
 
   if (isEmpty(schema)) {
     strapi.log.warn('The GraphQL schema has not been generated because it is empty');

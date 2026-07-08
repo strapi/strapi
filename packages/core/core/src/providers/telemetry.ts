@@ -6,7 +6,7 @@ export default defineProvider({
     strapi.add('telemetry', () => createTelemetry(strapi));
   },
   async register(strapi) {
-    strapi.get('telemetry').register();
+    await strapi.get('telemetry').register();
   },
   async bootstrap(strapi) {
     strapi.get('telemetry').bootstrap();

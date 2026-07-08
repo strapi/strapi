@@ -1,4 +1,5 @@
 import type { Umzug } from 'umzug';
+import { importModule } from '@strapi/utils';
 
 import { wrapTransaction } from './common';
 import { internalMigrations } from './internal-migrations';
@@ -14,10 +15,9 @@ export const createInternalMigrationProvider = (db: Database): InternalMigration
 
   // Lazy: defer `umzug` (and its inquirer / @rushstack chain) until first call
   let lazyProvider: Umzug<typeof context> | undefined;
-  const provider = (): Umzug<typeof context> => {
+  const provider = async (): Promise<Umzug<typeof context>> => {
     if (lazyProvider) return lazyProvider;
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { Umzug: UmzugCtor } = require('umzug') as typeof import('umzug');
+    const { Umzug: UmzugCtor } = await importModule<typeof import('umzug')>('umzug');
     lazyProvider = new UmzugCtor({
       storage: createStorage({ db, tableName: 'strapi_migrations_internal' }),
       logger: {
@@ -53,14 +53,14 @@ export const createInternalMigrationProvider = (db: Database): InternalMigration
       migrations.push(migration);
     },
     async shouldRun() {
-      const pendingMigrations = await provider().pending();
+      const pendingMigrations = await (await provider()).pending();
       return pendingMigrations.length > 0;
     },
     async up() {
-      await provider().up();
+      await (await provider()).up();
     },
     async down() {
-      await provider().down();
+      await (await provider()).down();
     },
   };
 };

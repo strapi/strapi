@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import { importModule } from '@strapi/utils';
 
 import { getPluginsThatNeedDocumentation } from './utils/get-plugins-that-need-documentation';
 import type { PluginConfig } from '../types';
@@ -30,7 +31,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       return excludedFromGeneration.includes(name);
     },
 
-    registerOverride(
+    async registerOverride(
       override: Partial<PluginConfig>,
       opts?: { pluginOrigin: string; excludeFromGeneration?: string[] }
     ) {
@@ -49,8 +50,8 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       let overrideToRegister = override;
       // Parse yaml if we receive a string
       if (typeof override === 'string') {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        overrideToRegister = require('yaml').parse(overrideToRegister);
+        const yaml = await importModule<typeof import('yaml')>('yaml');
+        overrideToRegister = yaml.parse(override);
       }
       // receive an object we can register it directly
       registeredOverrides.push(overrideToRegister);

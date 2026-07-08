@@ -43,7 +43,7 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   }
 
   if (strapi.plugin('documentation')) {
-    strapi
+    await strapi
       .plugin('documentation')
       .service('override')
       .registerOverride(spec, {

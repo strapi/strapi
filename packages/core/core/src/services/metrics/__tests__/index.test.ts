@@ -7,9 +7,9 @@ describe('metrics', () => {
   beforeEach(() => {
     fetch.mockClear();
   });
-  test('Initializes a middleware', () => {
+  test('Initializes a middleware', async () => {
     const use = jest.fn();
-    const add = jest.fn();
+    const add = jest.fn().mockResolvedValue(undefined);
 
     const metricsInstance = metrics({
       config: {
@@ -39,16 +39,16 @@ describe('metrics', () => {
       fetch,
     } as any);
 
-    metricsInstance.register();
+    await metricsInstance.register();
 
     expect(use).toHaveBeenCalled();
 
     metricsInstance.destroy();
   });
 
-  test('Does not init middleware if disabled', () => {
+  test('Does not init middleware if disabled', async () => {
     const use = jest.fn();
-    const add = jest.fn();
+    const add = jest.fn().mockResolvedValue(undefined);
 
     const metricsInstance = metrics({
       config: {
@@ -78,7 +78,7 @@ describe('metrics', () => {
       fetch,
     } as any);
 
-    metricsInstance.register();
+    await metricsInstance.register();
 
     expect(use).not.toHaveBeenCalled();
 

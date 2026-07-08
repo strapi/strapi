@@ -172,7 +172,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       // Schedule a job to delete expired history versions every day at midnight
-      strapi.cron.add({
+      await strapi.cron.add({
         deleteHistoryDaily: {
           async task() {
             const BATCH_SIZE = 1000;
