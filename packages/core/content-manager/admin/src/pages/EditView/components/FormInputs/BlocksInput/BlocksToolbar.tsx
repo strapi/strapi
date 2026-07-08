@@ -22,13 +22,7 @@ import { getTranslation } from '../../../../../utils/translations';
 import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
 
 import { insertLink } from './Blocks/Link';
-import {
-  type BlocksStore,
-  type SelectorBlock,
-  type SelectorBlockKey,
-  isSelectorBlockKey,
-  useBlocksEditorContext,
-} from './BlocksEditor';
+import { type BlocksStore, type SelectorBlock, useBlocksEditorContext } from './BlocksEditor';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`

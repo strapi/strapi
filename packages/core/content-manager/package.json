@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.49.0",
+  "version": "5.50.1",
   "description": "A powerful UI to easily manage your data.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -57,7 +57,7 @@
     "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json && run -T tsc --noEmit -p server/tsconfig.preview-script.json",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
@@ -75,8 +75,8 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.2.1",
     "@strapi/icons": "2.2.1",
-    "@strapi/types": "5.49.0",
-    "@strapi/utils": "5.49.0",
+    "@strapi/types": "5.50.1",
+    "@strapi/utils": "5.50.1",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "dompurify": "3.4.11",
@@ -111,8 +111,8 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.49.0",
-    "@strapi/database": "5.49.0",
+    "@strapi/admin": "5.50.1",
+    "@strapi/database": "5.50.1",
     "@testing-library/react": "16.3.2",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",

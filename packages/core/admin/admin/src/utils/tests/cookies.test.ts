@@ -39,4 +39,34 @@ describe('Cookie Utilities', () => {
       expect(getCookieValue('deleteMe')).toBeNull();
     });
   });
+
+  describe('AUTH_COOKIE_NAME', () => {
+    const ORIGINAL_ENV = process.env;
+
+    afterEach(() => {
+      process.env = ORIGINAL_ENV;
+    });
+
+    const loadAuthCookieName = (): string => {
+      let name = '';
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        name = require('../cookies').AUTH_COOKIE_NAME;
+      });
+      return name;
+    };
+
+    it('should default to jwtToken', () => {
+      process.env = { ...ORIGINAL_ENV };
+      delete process.env.STRAPI_ADMIN_AUTH_COOKIE_NAME;
+
+      expect(loadAuthCookieName()).toBe('jwtToken');
+    });
+
+    it('should use STRAPI_ADMIN_AUTH_COOKIE_NAME when set', () => {
+      process.env = { ...ORIGINAL_ENV, STRAPI_ADMIN_AUTH_COOKIE_NAME: 'my_custom_auth_cookie' };
+
+      expect(loadAuthCookieName()).toBe('my_custom_auth_cookie');
+    });
+  });
 });

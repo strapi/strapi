@@ -79,36 +79,6 @@ function array(key: string, defaultValue?: string[]): string[] | undefined {
   });
 }
 
-function required(key: string): string {
-  const value = envFn(key);
-
-  if (value === undefined) {
-    throw new Error(`Missing required environment variable ${key}`);
-  }
-
-  if (value.trim() === '') {
-    throw new Error(`Required environment variable ${key} must not be empty`);
-  }
-
-  return value;
-}
-
-function requiredArray(key: string): string[] {
-  const value = array(key);
-
-  if (value === undefined) {
-    throw new Error(`Missing required environment variable ${key}`);
-  }
-
-  if (!value.length || value.every((v) => v.trim() === '')) {
-    throw new Error(`Required environment variable ${key} must not be empty`);
-  }
-
-  return value;
-}
-
-const arrayWithRequired = Object.assign(array, { required: requiredArray });
-
 function date(key: string, defaultValue: Date): Date;
 function date(key: string, defaultValue?: Date | undefined): Date | undefined;
 function date(key: string, defaultValue?: Date): Date | undefined {
@@ -158,10 +128,9 @@ const utils = {
   float,
   bool,
   json,
-  array: arrayWithRequired,
+  array,
   date,
   oneOf,
-  required,
 };
 
 const env: Env = Object.assign(envFn, utils);
