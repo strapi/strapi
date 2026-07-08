@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useAIAvailability } from '../../../../hooks/useAiAvailability';
-import { useBulkDeleteAssetsMutation } from '../../../services/assets';
+import { useBulkDeleteItemsMutation } from '../../../services/assets';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
@@ -47,11 +47,11 @@ export const BulkActionsBar = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { isEnabled: isAiMetadataEnabled } = useAIAvailability();
-  const { selectedIds, clear } = useAssetSelection();
-  const [bulkDeleteAssets, { isLoading: isDeleting }] = useBulkDeleteAssetsMutation();
+  const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
+  const [bulkDeleteItems, { isLoading: isDeleting }] = useBulkDeleteItemsMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const count = selectedIds.size;
+  const count = selectedIds.size + selectedFolderIds.size;
 
   const showStubNotification = (translationKey: string, defaultMessage: string) => {
     toggleNotification({
@@ -74,7 +74,10 @@ export const BulkActionsBar = () => {
       return;
     }
 
-    const res = await bulkDeleteAssets(Array.from(selectedIds));
+    const res = await bulkDeleteItems({
+      fileIds: Array.from(selectedIds),
+      folderIds: Array.from(selectedFolderIds),
+    });
     setIsDeleteDialogOpen(false);
 
     if ('error' in res) {
@@ -200,7 +203,7 @@ export const BulkActionsBar = () => {
               {formatMessage({
                 id: getTranslationKey('list.bulk-actions.delete.confirm.description'),
                 defaultMessage:
-                  'These items cannot be recovered once deleted. If they are currently in use, linked content will break and image containers will be empty.',
+                  'These items cannot be recovered once deleted, and deleting a folder also deletes everything inside it. If they are currently in use, linked content will break and image containers will be empty.',
               })}
             </Dialog.Body>
             <Dialog.Footer>

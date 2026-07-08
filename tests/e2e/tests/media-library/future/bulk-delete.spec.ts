@@ -41,6 +41,26 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await expect(assetsPage.getBulkActionsBar()).not.toBeVisible();
     });
 
+    test('deletes a selected folder (and its contents) from the bulk action bar', async ({
+      page,
+    }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
+
+      await assetsPage.createFolder('Doomed');
+      await assetsPage.waitForUploadSuccess();
+
+      await assetsPage.switchToTableView();
+      await assetsPage.selectAsset('Doomed');
+
+      await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
+
+      await assetsPage.bulkDeleteSelection();
+
+      await expect(assetsPage.getFolderRow('Doomed')).not.toBeVisible();
+      await expect(assetsPage.getBulkActionsBar()).not.toBeVisible();
+    });
+
     test('cancelling the confirm dialog keeps the assets and the selection', async ({ page }) => {
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();

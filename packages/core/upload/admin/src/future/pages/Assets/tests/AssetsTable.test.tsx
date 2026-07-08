@@ -269,11 +269,19 @@ describe('AssetsTable', () => {
       expect(screen.getByRole('checkbox', { name: 'Select image3.png' })).toBeInTheDocument();
     });
 
-    it('renders a disabled checkbox on folder rows', () => {
-      setup({ folders: [createMockFolder(1, 'Photos')], assets: [] });
+    it('toggles folder selection via the folder checkbox and counts it in the bar', async () => {
+      const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 
       const folderCheckbox = screen.getByRole('checkbox', { name: 'Select Photos' });
-      expect(folderCheckbox).toBeDisabled();
+      expect(folderCheckbox).toBeEnabled();
+
+      await user.click(folderCheckbox);
+
+      expect(folderCheckbox).toBeChecked();
+      expect(screen.getByText('1 item selected')).toBeInTheDocument();
+
+      await user.click(folderCheckbox);
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
     it('selects an asset when its row body is clicked', async () => {
@@ -437,7 +445,7 @@ describe('AssetsTable', () => {
           message: '2 items have been deleted',
         })
       );
-      expect(requestBody).toEqual({ fileIds: [1, 2] });
+      expect(requestBody).toEqual({ fileIds: [1, 2], folderIds: [] });
       // Selection cleared → bar gone.
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
