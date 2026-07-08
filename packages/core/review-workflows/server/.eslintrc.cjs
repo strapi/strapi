@@ -9,6 +9,14 @@ const config = {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.eslint.json'],
   },
+  rules: {
+    '@typescript-eslint/no-unused-vars': 'warn',
+    'no-irregular-whitespace': 'warn',
+    'node/no-extraneous-import': 'off',
+    'import/no-extraneous-dependencies': 'warn',
+    '@typescript-eslint/ban-ts-comment': 'warn',
+    'import/order': 'warn',
+  },
 };
 
 module.exports = config;

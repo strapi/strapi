@@ -9,6 +9,12 @@ const config = {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.eslint.json'],
   },
+  rules: {
+    '@typescript-eslint/no-unused-vars': 'warn',
+    'no-unsafe-optional-chaining': 'warn',
+    'import/order': 'warn',
+    'import/first': 'warn',
+  },
 };
 
 module.exports = config;
