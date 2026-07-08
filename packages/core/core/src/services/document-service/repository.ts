@@ -584,12 +584,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
-    // Also pass the old published versions: independently publishing one side of a
-    // self-relation deletes those rows before the new version can reuse their order.
     const selfRelationsToSync = await selfReferentialRelations.load(
       uid,
       draftsToPublish,
-      oldPublishedVersions
+      'published'
     );
 
     // Delete old published versions
@@ -695,13 +693,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
-    // Also pass the old drafts so discardDraft can preserve rows attached to
-    // self-referential entries that are replaced but not part of the source side.
-    const selfRelationsToSync = await selfReferentialRelations.load(
-      uid,
-      versionsToDraft,
-      oldDrafts
-    );
+    const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft, 'draft');
 
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
