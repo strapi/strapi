@@ -2,7 +2,7 @@ import pipe from 'lodash/fp/pipe';
 // eslint-disable-next-line import/default
 import qs from 'qs';
 
-import { getCookieValue, setCookie } from './cookies';
+import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';
 
 import type { errors } from '@strapi/utils';
 
@@ -102,7 +102,7 @@ const storeToken = (token: string): void => {
   if (wasPersistedToLocalStorage) {
     localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
   } else {
-    setCookie(STORAGE_KEYS.TOKEN, token);
+    setCookie(AUTH_COOKIE_NAME, token);
   }
 
   // Notify the app to update its state (e.g., Redux)
@@ -232,7 +232,7 @@ const getToken = (): string | null => {
     return JSON.parse(fromLocalStorage);
   }
 
-  const fromCookie = getCookieValue(STORAGE_KEYS.TOKEN);
+  const fromCookie = getCookieValue(AUTH_COOKIE_NAME);
   return fromCookie ?? null;
 };
 
