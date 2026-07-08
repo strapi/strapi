@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "5.50.0",
+  "version": "5.50.1",
   "description": "Strapi's permission layer.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -36,7 +36,7 @@
     "build:code": "run -T  rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
@@ -46,16 +46,16 @@
   },
   "dependencies": {
     "@casl/ability": "6.7.5",
-    "@strapi/utils": "5.50.0",
+    "@strapi/utils": "5.50.1",
     "lodash": "4.18.1",
     "qs": "6.15.3",
     "sift": "16.0.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.50.0",
-    "tsconfig": "5.50.0",
+    "eslint-config-custom": "5.50.1",
+    "tsconfig": "5.50.1",
     "vitest": "catalog:",
-    "vitest-config": "5.50.0"
+    "vitest-config": "5.50.1"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
