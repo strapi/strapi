@@ -14,6 +14,24 @@ const REACT_PEER_DEPENDENCIES = new Set(['react', 'react-dom']);
  */
 const PINNED_OPTIMIZE_MODULES = new Set<string>(ADMIN_VITE_ALIAS_MODULES);
 
+type PackageExportEntry =
+  | string
+  | {
+      import?: string;
+      require?: string;
+      default?: string;
+    };
+
+const getRootPackageExport = (pkg: PackageJson): PackageExportEntry | undefined => {
+  const exportsField = pkg.exports as Record<string, PackageExportEntry> | string | undefined;
+
+  if (!exportsField || typeof exportsField === 'string') {
+    return undefined;
+  }
+
+  return exportsField['.'];
+};
+
 /**
  * @internal exported for tests
  */
@@ -22,7 +40,7 @@ export const isEsmPackage = (pkg: PackageJson): boolean => {
     return true;
   }
 
-  const rootExport = pkg.exports?.['.'];
+  const rootExport = getRootPackageExport(pkg);
 
   return (
     typeof rootExport === 'object' &&
@@ -45,7 +63,7 @@ export const hasReactPeerDependency = (pkg: PackageJson): boolean =>
  * @internal exported for tests
  */
 export const shipsPreBuiltDist = (pkg: PackageJson): boolean => {
-  const rootExport = pkg.exports?.['.'];
+  const rootExport = getRootPackageExport(pkg);
   const exportImport =
     typeof rootExport === 'object' && rootExport !== null && 'import' in rootExport
       ? rootExport.import
