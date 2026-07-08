@@ -54,6 +54,8 @@ class WebhookRunner {
 
   private reloadTimer?: NodeJS.Timeout;
 
+  private reloading = false;
+
   constructor({ eventHub, logger, configuration = {}, fetch }: ConstructorParameters) {
     debug('Initialized webhook runner');
     this.eventHub = eventHub;
@@ -172,6 +174,43 @@ class WebhookRunner {
   }
 
   /**
+   * Produce a stable fingerprint of a set of webhooks that captures every field
+   * that affects delivery (url, headers, events, enabled state). Two sets with
+   * the same fingerprint are equivalent for the runner, so a reload can be
+   * skipped. Field/collection ordering is normalised so that a reordering alone
+   * never counts as a change; if a fingerprint ever differs spuriously the only
+   * cost is a redundant (idempotent) reload, never a missed update.
+   */
+  private fingerprintWebhooks(webhooks: Webhook[]): string {
+    return JSON.stringify(
+      webhooks
+        .map((webhook) => ({
+          id: webhook.id,
+          name: webhook.name,
+          url: webhook.url,
+          headers: webhook.headers,
+          events: [...webhook.events].sort(),
+          isEnabled: webhook.isEnabled,
+        }))
+        .sort((a, b) => String(a.id).localeCompare(String(b.id)))
+    );
+  }
+
+  /**
+   * Fingerprint of the webhooks currently held in memory. The same webhook can
+   * live under several event keys, so it is de-duplicated by id first.
+   */
+  private fingerprintRegistry(): string {
+    const unique = new Map<Webhook['id'], Webhook>();
+    for (const webhooks of this.webhooksMap.values()) {
+      for (const webhook of webhooks) {
+        unique.set(webhook.id, webhook);
+      }
+    }
+    return this.fingerprintWebhooks([...unique.values()]);
+  }
+
+  /**
    * Replace the whole in-memory registry with a fresh set of webhooks.
    *
    * The registry is otherwise only mutated locally (via add/update/remove)
@@ -181,18 +220,42 @@ class WebhookRunner {
    * instance converge on the current configuration. See issue #22595.
    */
   reload(webhooks: Webhook[]) {
+    // Skip when the persisted set already matches memory — the common case for
+    // default-on polling, so a quiet cluster does no listener churn each tick.
+    if (this.fingerprintWebhooks(webhooks) === this.fingerprintRegistry()) {
+      debug('Skipping webhook registry reload (unchanged)');
+      return;
+    }
+
     debug(`Reloading webhook registry with ${webhooks.length} webhook(s)`);
 
-    // Runs synchronously: listeners are torn down and re-registered within the
-    // same tick, so no event can be missed in between.
-    for (const event of [...this.webhooksMap.keys()]) {
-      this.deleteListener(event);
-    }
-    this.webhooksMap.clear();
-
+    // Build the next registry, then swap it in. Listeners are keyed per event
+    // type and the map is read at execute time, so we only touch listeners for
+    // event types that appear or disappear — existing ones stay registered.
+    const nextMap = new Map<string, Webhook[]>();
     for (const webhook of webhooks) {
-      this.add(webhook);
+      for (const event of webhook.events) {
+        const existing = nextMap.get(event);
+        if (existing) {
+          existing.push(webhook);
+        } else {
+          nextMap.set(event, [webhook]);
+        }
+      }
     }
+
+    for (const event of nextMap.keys()) {
+      if (!this.webhooksMap.has(event)) {
+        this.createListener(event);
+      }
+    }
+    for (const event of this.webhooksMap.keys()) {
+      if (!nextMap.has(event)) {
+        this.deleteListener(event);
+      }
+    }
+
+    this.webhooksMap = nextMap;
   }
 
   /**
@@ -208,11 +271,22 @@ class WebhookRunner {
     this.stopReloadPolling();
 
     this.reloadTimer = setInterval(async () => {
+      // `setInterval` does not await the async callback, so a slow load could
+      // overlap with the next tick. Guard against it so an older result can
+      // never be applied over a newer one.
+      if (this.reloading) {
+        return;
+      }
+
+      this.reloading = true;
       try {
-        this.reload(await load());
+        const webhooks = await load();
+        this.reload(webhooks);
       } catch (error) {
         this.logger.error('Failed to reload the webhook registry from the database');
         this.logger.error(error);
+      } finally {
+        this.reloading = false;
       }
     }, interval);
 

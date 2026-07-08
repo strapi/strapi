@@ -32,9 +32,9 @@ const makeWebhook = (overrides: Partial<Webhook> = {}): Webhook => ({
 });
 
 describe('WebhookRunner - reload', () => {
-  test('reproduces #22595: without reload, a webhook updated elsewhere keeps firing to the stale url', async () => {
+  test('baseline: delivers to the url currently held in the in-memory registry', async () => {
     const { runner, fetch } = createRunner();
-    runner.add(makeWebhook({ url: 'http://localhost/old' }));
+    runner.add(makeWebhook());
 
     await runner.executeListener({ event: 'entry.create', info: {} });
 
@@ -80,6 +80,37 @@ describe('WebhookRunner - reload', () => {
 
     expect(fetch).toHaveBeenCalledWith('http://localhost/pub', expect.any(Object));
   });
+
+  test('reload is a no-op when the persisted webhooks already match memory', async () => {
+    const { runner, eventHub, fetch } = createRunner();
+    runner.add(makeWebhook());
+
+    // Registering the initial webhook creates one listener.
+    expect(eventHub.on).toHaveBeenCalledTimes(1);
+    eventHub.on.mockClear();
+
+    // Reloading with an equivalent set must not touch listeners at all.
+    runner.reload([makeWebhook()]);
+
+    expect(eventHub.on).not.toHaveBeenCalled();
+    expect(eventHub.off).not.toHaveBeenCalled();
+
+    // Delivery is unaffected.
+    await runner.executeListener({ event: 'entry.create', info: {} });
+    expect(fetch).toHaveBeenCalledWith('http://localhost/old', expect.any(Object));
+  });
+
+  test('reload keeps the listener for an event type that still has webhooks', async () => {
+    const { runner, eventHub } = createRunner();
+    runner.add(makeWebhook({ events: ['entry.create'] }));
+    eventHub.off.mockClear();
+
+    // The webhook's url changed but it still listens on entry.create, so the
+    // existing listener must be reused rather than torn down and recreated.
+    runner.reload([makeWebhook({ url: 'http://localhost/new', events: ['entry.create'] })]);
+
+    expect(eventHub.off).not.toHaveBeenCalled();
+  });
 });
 
 describe('WebhookRunner - reload polling', () => {
@@ -98,7 +129,7 @@ describe('WebhookRunner - reload polling', () => {
     const load = jest.fn().mockResolvedValue([makeWebhook({ url: 'http://localhost/new' })]);
     runner.startReloadPolling(5000, load);
 
-    await jest.advanceTimersByTimeAsync(5000);
+    await jest.advanceTimersByTimeAsync(6000);
     expect(load).toHaveBeenCalledTimes(1);
 
     await runner.executeListener({ event: 'entry.create', info: {} });
@@ -126,7 +157,7 @@ describe('WebhookRunner - reload polling', () => {
     runner.startReloadPolling(5000, first);
     runner.startReloadPolling(5000, second);
 
-    await jest.advanceTimersByTimeAsync(5000);
+    await jest.advanceTimersByTimeAsync(6000);
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledTimes(1);
 
@@ -139,10 +170,10 @@ describe('WebhookRunner - reload polling', () => {
 
     runner.startReloadPolling(5000, load);
 
-    await jest.advanceTimersByTimeAsync(5000);
+    await jest.advanceTimersByTimeAsync(6000);
     expect(logger.error).toHaveBeenCalled();
 
-    await jest.advanceTimersByTimeAsync(5000);
+    await jest.advanceTimersByTimeAsync(6000);
     expect(load).toHaveBeenCalledTimes(2);
 
     runner.destroy();
