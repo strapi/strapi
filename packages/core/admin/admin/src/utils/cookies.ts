@@ -1,10 +1,10 @@
-import { getAuthCookieName } from '../../../shared/utils/auth-cookie-name';
+import { resolveAuthCookieName } from '../../../shared/utils/auth-cookie-name';
 
 /**
- * Resolved once at module load: `STRAPI_ADMIN_AUTH_COOKIE_NAME` is inlined
- * into the admin bundle at build time.
+ * Resolved once at module load: the build inlines `admin.auth.cookie.name`
+ * into the bundle as `STRAPI_ADMIN_AUTH_COOKIE_NAME`.
  */
-export const AUTH_COOKIE_NAME = getAuthCookieName();
+export const AUTH_COOKIE_NAME = resolveAuthCookieName(process.env.STRAPI_ADMIN_AUTH_COOKIE_NAME);
 
 /**
  * Retrieves the value of a specified cookie.

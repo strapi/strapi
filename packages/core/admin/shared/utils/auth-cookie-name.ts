@@ -1,34 +1,33 @@
 /**
- * Name of the cookie holding the admin auth (access) token.
+ * Name of the cookie holding the admin auth (access) token, configurable
+ * through `admin.auth.cookie.name` so it cannot collide with a same-named
+ * cookie set by another application on a shared parent domain.
  *
- * Configurable through the `STRAPI_ADMIN_AUTH_COOKIE_NAME` environment
- * variable so the cookie cannot collide with a same-named cookie set by
- * another application on a shared parent domain.
- *
- * This module is browser-safe and is the single source of truth for both
- * sides of the SSO handoff: the admin panel inlines the variable at build
- * time, the server reads it at runtime. The variable must therefore be set
- * both when the admin panel is built and when the server runs, otherwise the
- * two sides disagree on the cookie name.
+ * Browser-safe single source for both sides of the SSO handoff: the admin
+ * panel cannot read server config, so the build transports the config value
+ * into the bundle through the internal `STRAPI_ADMIN_AUTH_COOKIE_NAME`
+ * variable (see create-build-context.ts in @strapi/strapi); the server
+ * resolves the same config at runtime. Renaming the cookie requires an admin
+ * rebuild, like any other admin config change.
  */
 export const DEFAULT_AUTH_COOKIE_NAME = 'jwtToken';
 
 // RFC 6265 cookie-name token characters.
 const VALID_COOKIE_NAME = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 
-export const getAuthCookieName = (): string => {
-  const configured = (process.env.STRAPI_ADMIN_AUTH_COOKIE_NAME || '').trim();
+export const resolveAuthCookieName = (configuredName?: string): string => {
+  const cookieName = (configuredName || '').trim();
 
-  if (!configured) {
+  if (!cookieName) {
     return DEFAULT_AUTH_COOKIE_NAME;
   }
 
-  if (!VALID_COOKIE_NAME.test(configured)) {
+  if (!VALID_COOKIE_NAME.test(cookieName)) {
     console.warn(
-      `Ignoring invalid STRAPI_ADMIN_AUTH_COOKIE_NAME "${configured}" (must only contain RFC 6265 cookie-name characters); using "${DEFAULT_AUTH_COOKIE_NAME}" instead.`
+      `Ignoring invalid admin auth cookie name "${cookieName}" (must only contain RFC 6265 cookie-name characters); using "${DEFAULT_AUTH_COOKIE_NAME}" instead.`
     );
     return DEFAULT_AUTH_COOKIE_NAME;
   }
 
-  return configured;
+  return cookieName;
 };
