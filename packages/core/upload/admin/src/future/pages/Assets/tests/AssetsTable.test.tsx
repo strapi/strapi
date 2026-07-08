@@ -1,5 +1,6 @@
 import { userEvent } from '@testing-library/user-event';
-import { render, screen } from '@tests/utils';
+import { render, screen, waitFor, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { AssetsTable } from '../components/AssetsTable';
 import { BulkActionsBar } from '../components/BulkActionsBar';
@@ -394,16 +395,77 @@ describe('AssetsTable', () => {
       });
     });
 
-    it('shows an info toast when Delete is clicked', async () => {
+    it('opens a confirm dialog when Delete is clicked and cancels without deleting', async () => {
       const { user } = setup();
 
       await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
       await user.click(screen.getByRole('button', { name: 'Delete' }));
 
-      expect(mockToggleNotification).toHaveBeenCalledWith({
-        type: 'info',
-        message: "Bulk delete isn't available yet",
-      });
+      expect(await screen.findByText('Delete 1 item?')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      expect(screen.queryByText('Delete 1 item?')).not.toBeInTheDocument();
+      // Selection untouched, nothing sent.
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+      expect(mockToggleNotification).not.toHaveBeenCalled();
+    });
+
+    it('deletes the selected assets on confirm, toasts, and clears the selection', async () => {
+      let requestBody: unknown;
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-delete',
+          async ({ request }) => {
+            requestBody = await request.json();
+            return HttpResponse.json({ data: { files: [], folders: [] } });
+          },
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'success',
+          message: '2 items have been deleted',
+        })
+      );
+      expect(requestBody).toEqual({ fileIds: [1, 2] });
+      // Selection cleared → bar gone.
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
+    it('keeps the selection and shows an error toast when the bulk delete fails', async () => {
+      server.use(
+        http.post(
+          '*/upload/actions/bulk-delete',
+          () => HttpResponse.json({ error: { message: 'boom' } }, { status: 500 }),
+          { once: true }
+        )
+      );
+
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('button', { name: 'Delete' }));
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() =>
+        expect(mockToggleNotification).toHaveBeenCalledWith({
+          type: 'danger',
+          message: 'An error occurred while deleting the items.',
+        })
+      );
+      // Selection kept for retry.
+      expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
     });
 
     it('hides Create metadata when AI metadata is unavailable', async () => {
