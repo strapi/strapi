@@ -67,7 +67,7 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       for (const release of releases) {
-        this.set(release.id, release.scheduledAt);
+        await this.set(release.id, release.scheduledAt);
       }
 
       return scheduledJobs;
