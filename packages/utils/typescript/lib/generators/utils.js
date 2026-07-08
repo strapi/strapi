@@ -114,7 +114,8 @@ const generateSharedExtensionDefinition = (registry, definitions) => {
                 ),
               ]
             : []
-        )
+        ),
+        ts.NodeFlags.Namespace
       ),
     ]),
     ts.NodeFlags.ExportContext

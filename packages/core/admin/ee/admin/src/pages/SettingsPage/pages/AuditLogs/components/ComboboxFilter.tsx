@@ -6,7 +6,7 @@ import { useField } from '../../../../../../../../admin/src/components/Form';
 
 export const ComboboxFilter = (props: Filters.ValueInputProps) => {
   const { formatMessage } = useIntl();
-  const field = useField(props.name);
+  const field = useField<string>(props.name);
   const ariaLabel = formatMessage({
     id: 'Settings.permissions.auditLogs.filter.aria-label',
     defaultMessage: 'Search and select an option to filter',

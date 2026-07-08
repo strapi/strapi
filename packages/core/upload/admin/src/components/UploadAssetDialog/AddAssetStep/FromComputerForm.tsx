@@ -153,15 +153,6 @@ export const FromComputerForm = ({
                   zIndex={1}
                   onChange={handleChange}
                 />
-
-                {/* <Box position="relative">
-                  <Button type="button" onClick={handleClick}>
-                    {formatMessage({
-                      id: getTrad('input.button.label'),
-                      defaultMessage: 'Browse files',
-                    })}
-                  </Button>
-                </Box> */}
               </Wrapper>
             </Flex>
           </MediaBox>

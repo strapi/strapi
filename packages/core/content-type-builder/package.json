@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.50.0",
+  "version": "5.50.1",
   "description": "Create and manage content types",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -75,9 +75,9 @@
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.2.1",
-    "@strapi/generators": "5.50.0",
+    "@strapi/generators": "5.50.1",
     "@strapi/icons": "2.2.1",
-    "@strapi/utils": "5.50.0",
+    "@strapi/utils": "5.50.1",
     "ai": "5.0.52",
     "date-fns": "2.30.0",
     "fs-extra": "11.3.4",
@@ -86,7 +86,7 @@
     "lodash": "4.18.1",
     "micromatch": "^4.0.8",
     "pluralize": "8.0.0",
-    "qs": "6.15.2",
+    "qs": "6.15.3",
     "react-dropzone": "14.3.8",
     "react-intl": "6.6.2",
     "react-markdown": "9.1.0",
@@ -95,8 +95,8 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.50.0",
-    "@strapi/types": "5.50.0",
+    "@strapi/admin": "5.50.1",
+    "@strapi/types": "5.50.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
@@ -111,7 +111,7 @@
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
     "vitest": "catalog:",
-    "vitest-config": "5.50.0"
+    "vitest-config": "5.50.1"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
