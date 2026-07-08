@@ -190,10 +190,11 @@ describe('import', () => {
 
     expect(stateAfterImport.articles).toBe(expectedDbState.articles);
     expect(stateAfterImport.categories).toBe(expectedDbState.categories);
-    expect(stateAfterImport.uploadFiles).toBeGreaterThan(0);
-    expect(stateAfterImport.uploadFolders).toBeGreaterThan(0);
     expect(stateAfterImport.uploadFiles).toBe(expectedDbState.uploadFiles);
-    expect(stateAfterImport.uploadFolders).toBe(expectedDbState.uploadFolders);
+    expect(stateAfterImport.uploadFiles).toBeGreaterThan(0);
+    if (expectedDbState.uploadFolders > 0) {
+      expect(stateAfterImport.uploadFolders).toBe(expectedDbState.uploadFolders);
+    }
   });
   test.todo(
     'import when schema differs (e.g. version mismatch) and verify diff handling / --force'

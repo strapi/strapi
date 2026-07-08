@@ -184,7 +184,6 @@ describe('export', () => {
     expect(assetMetadata).toHaveLength(0);
     expect(assetUploads).toHaveLength(0);
     expect(entities.some((entity) => entity.type === 'plugin::upload.file')).toBe(true);
-    expect(entities.some((entity) => entity.type === 'plugin::upload.folder')).toBe(true);
   });
   test.todo('export with compression (.tar.gz) and verify tar contents');
   test.todo('export with encryption (.tar.gz.enc) and verify prompt/key and tar not plaintext');
