@@ -34,7 +34,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test": "run -T jest",
     "test:watch": "run -T jest --watch"
   },

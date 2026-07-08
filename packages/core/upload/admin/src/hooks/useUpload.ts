@@ -21,7 +21,7 @@ const uploadAssets = (
   signal: AbortSignal,
   onProgress: (progress: number) => void,
   post: FetchClient['post']
-) => {
+): Promise<CreateFile.Response['data']> => {
   const assetsArray = Array.isArray(assets) ? assets : [assets];
   const formData = new FormData();
 
@@ -50,7 +50,7 @@ const uploadAssets = (
    * need to look into an alternative to make it work
    * perhaps using xhr like Axios does
    */
-  return post(endpoint, formData, {
+  return post<CreateFile.Response['data'], CreateFile.Request['body']>(endpoint, formData, {
     signal,
   }).then((res) => res.data);
 };

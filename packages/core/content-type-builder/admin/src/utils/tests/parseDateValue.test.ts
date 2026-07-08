@@ -37,6 +37,6 @@ describe('parseDateValue', () => {
   });
 
   it('should return undefined for unexpected types', () => {
-    expect(parseDateValue({} as any)).toBeUndefined();
+    expect(parseDateValue({})).toBeUndefined();
   });
 });
