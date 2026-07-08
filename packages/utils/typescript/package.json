@@ -59,8 +59,8 @@
     "@types/fs-extra": "11.0.4",
     "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
-    "eslint-config-custom": "5.50.0",
-    "tsconfig": "5.50.0"
+    "eslint-config-custom": "5.50.1",
+    "tsconfig": "5.50.1"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
