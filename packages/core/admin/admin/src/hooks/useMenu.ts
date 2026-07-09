@@ -6,6 +6,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { useTypedSelector } from '../core/store/hooks';
 import { useAuth, AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
+import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
 /* -------------------------------------------------------------------------------------------------
  * useMenu
@@ -28,7 +29,7 @@ export interface Menu {
   isLoading: boolean;
 }
 
-const useMenu = (shouldUpdateStrapi: boolean) => {
+const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
   const checkUserHasPermissions = useAuth('useMenu', (state) => state.checkUserHasPermissions);
   const rawMenu = useStrapiApp('useMenu', (state) => state.menu);
   const menu = React.useMemo(() => normalizeMenuLinks(rawMenu), [rawMenu]);
@@ -110,7 +111,10 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
       setMenuWithUserPermissions((state) => ({
         ...state,
         generalSectionLinks: authorizedGeneralSectionLinks,
-        pluginsSectionLinks: authorizedPluginSectionLinks,
+        pluginsSectionLinks: hideCloudDeployMenuLinkInProduction(
+          authorizedPluginSectionLinks,
+          currentEnvironment
+        ),
         isLoading: false,
       }));
     }
@@ -123,6 +127,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
     permissions,
     shouldUpdateStrapi,
     checkUserHasPermissions,
+    currentEnvironment,
   ]);
 
   return menuWithUserPermissions;

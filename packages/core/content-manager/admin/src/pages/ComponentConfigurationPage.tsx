@@ -18,7 +18,6 @@ import { setIn } from '../utils/objects';
 
 import { formatComponentConfigurationEditLayout } from './formatComponentConfigurationEditLayout';
 
-import type { Component } from '../../../shared/contracts/components';
 import type { Metadatas } from '../../../shared/contracts/content-types';
 
 /* -------------------------------------------------------------------------------------------------

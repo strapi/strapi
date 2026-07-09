@@ -52,10 +52,17 @@ type ContentTypeBuilderFormsAPI = {
     fields: typeof LOCALIZED_FIELDS,
     extension: {
       form: {
-        advanced: (args: any) => Array<Record<string, unknown>>;
+        advanced: (args: ContentTypeBuilderAdvancedFieldArgs) => Array<Record<string, unknown>>;
       };
     }
   ) => void;
+};
+
+type ContentTypeBuilderAdvancedFieldArgs = {
+  contentTypeSchema?: Record<string, unknown>;
+  forTarget: string;
+  step?: string;
+  type?: string;
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -172,7 +179,12 @@ export default {
 
       ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
         form: {
-          advanced({ contentTypeSchema, forTarget, type, step }: any) {
+          advanced({
+            contentTypeSchema,
+            forTarget,
+            type,
+            step,
+          }: ContentTypeBuilderAdvancedFieldArgs) {
             if (forTarget !== 'contentType') {
               return [];
             }

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/email",
-  "version": "5.49.0",
+  "version": "5.50.1",
   "description": "Easily configure your Strapi application to send emails.",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -52,7 +52,8 @@
     "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:unit": "run -T jest",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
@@ -63,8 +64,8 @@
   "dependencies": {
     "@strapi/design-system": "2.2.1",
     "@strapi/icons": "2.2.1",
-    "@strapi/provider-email-sendmail": "5.49.0",
-    "@strapi/utils": "5.49.0",
+    "@strapi/provider-email-sendmail": "5.50.1",
+    "@strapi/utils": "5.50.1",
     "koa2-ratelimit": "^1.1.3",
     "lodash": "4.18.1",
     "react-intl": "6.6.2",
@@ -73,8 +74,8 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.49.0",
-    "@strapi/types": "5.49.0",
+    "@strapi/admin": "5.50.1",
+    "@strapi/types": "5.50.1",
     "@testing-library/react": "16.3.2",
     "@types/koa": "2.15.2",
     "@types/lodash": "^4.14.191",

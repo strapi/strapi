@@ -51,7 +51,7 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
   >(
     [pluginId, 'assets', params],
     async () => {
-      const { data } = await get('/upload/files', { params });
+      const { data } = await get<GetFiles.Response['data']>('/upload/files', { params });
 
       return data;
     },
