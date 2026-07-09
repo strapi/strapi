@@ -70,7 +70,7 @@
     "stream-json": "1.9.1",
     "tar": "7.5.18",
     "tar-stream": "2.2.0",
-    "ws": "8.20.1"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@strapi/database": "5.50.1",

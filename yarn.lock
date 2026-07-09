@@ -8936,7 +8936,6 @@ __metadata:
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/react-window": "npm:1.8.8"
-    "@vitejs/plugin-react-swc": "npm:3.11.0"
     axios: "npm:1.18.1"
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
@@ -9339,7 +9338,7 @@ __metadata:
     typescript: "npm:5.9.3"
     vitest: "catalog:"
     vitest-config: "npm:5.50.1"
-    ws: "npm:8.20.1"
+    ws: "npm:8.21.0"
   languageName: unknown
   linkType: soft
 
@@ -10056,11 +10055,15 @@ __metadata:
   resolution: "@strapi/typescript-utils@workspace:packages/utils/typescript"
   dependencies:
     "@types/fs-extra": "npm:11.0.4"
+    "@types/lodash": "npm:^4.14.191"
+    "@types/node": "npm:20.19.41"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
+    eslint-config-custom: "npm:5.50.1"
     fs-extra: "npm:11.3.4"
     lodash: "npm:4.18.1"
     prettier: "npm:3.3.3"
+    tsconfig: "npm:5.50.1"
     typescript: "npm:5.9.3"
   languageName: unknown
   linkType: soft
@@ -32420,7 +32423,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.20.1, ws@npm:^8.19.0, ws@npm:^8.8.0":
+"ws@npm:8.21.0":
+  version: 8.21.0
+  resolution: "ws@npm:8.21.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 10c0/ef4a243476283fc49bc7550966c4af4aa0eef56273837211e700de3b664e08604a760cdddcb5ba43c049140e74ccfec5b0ee0bb439e08c2adf9138902fdde5f9
+  languageName: node
+  linkType: hard
+
+"ws@npm:^8.19.0, ws@npm:^8.8.0":
   version: 8.20.1
   resolution: "ws@npm:8.20.1"
   peerDependencies:
