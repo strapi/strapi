@@ -208,6 +208,78 @@ describe('import', () => {
     expect(stateAfterImport.uploadFiles).toBeGreaterThan(0);
   });
 
+  it('should import with --only-content-types and preserve other content types', async () => {
+    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'with-admin');
+    const stateBeforeImport = utils.getDbState(appPath);
+    if (stateBeforeImport.error) {
+      throw new Error(`Failed to read DB before import: ${stateBeforeImport.error}`);
+    }
+    expect(stateBeforeImport.articles).toBeGreaterThan(0);
+    expect(stateBeforeImport.uploadFiles).toBeGreaterThan(0);
+
+    const onlyArticlesFilename = 'output-only-articles-import-scope';
+    const exportResult = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '--no-encrypt',
+        '--no-compress',
+        '-f',
+        onlyArticlesFilename,
+        '--exclude',
+        'files',
+        '--only-content-types',
+        'api::article.article',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+    expect(exportResult.status).toBe(0);
+
+    const importTar = path.join(appPath, `${onlyArticlesFilename}.tar`);
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'import',
+        '-f',
+        importTar,
+        '--force',
+        '--exclude',
+        'files',
+        '--only-content-types',
+        'api::article.article',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+    const stateAfterImport = utils.getDbState(appPath);
+    if (stateAfterImport.error) {
+      throw new Error(`Failed to read DB after import: ${stateAfterImport.error}`);
+    }
+
+    expect(stateAfterImport.articles).toBe(stateBeforeImport.articles);
+    expect(stateAfterImport.categories).toBe(stateBeforeImport.categories);
+    expect(stateAfterImport.uploadFiles).toBe(stateBeforeImport.uploadFiles);
+    expect(stateAfterImport.uploadFolders).toBe(stateBeforeImport.uploadFolders);
+    expect(stateAfterImport.categoryIds).toEqual(stateBeforeImport.categoryIds);
+  });
+
   test.todo('import from .tar.gz (compressed) and verify DB state');
   test.todo('import from .tar.gz.enc (encrypted) with correct key and verify DB state');
   test.todo('import with wrong decryption key fails with clear error');
