@@ -84,12 +84,22 @@ describe('issue-template-check', () => {
     assert.match(result.missingItems[0], /template/i);
   });
 
-  it('rejects placeholder version fields', () => {
-    const body = VALID_ISSUE_BODY.replace('5.50.1', '-');
+  it('rejects unfilled required sections (_No response_)', () => {
+    const body = VALID_ISSUE_BODY.replace('5.50.1', '_No response_');
 
     const result = validateIssueTemplate(body);
     assert.equal(result.valid, false);
     assert.ok(result.missingItems.some((item) => item.includes('Strapi Version')));
+  });
+
+  it('allows intentional NA or N/A in required fields', () => {
+    const body = VALID_ISSUE_BODY.replace('5.50.1', 'N/A');
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+
+    const naBody = VALID_ISSUE_BODY.replace('yarn@1.22.22', 'NA');
+    assert.equal(validateIssueTemplate(naBody).valid, true);
   });
 
   it('rejects unchecked confirmation checkboxes', () => {

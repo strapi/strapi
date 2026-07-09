@@ -5,19 +5,11 @@
  * short but valid values (e.g. Node "20", yarn version "1") are accepted.
  */
 
-const PLACEHOLDER_VALUES = new Set([
-  '',
-  '-',
-  '—',
-  'n/a',
-  'na',
-  'none',
-  'no response',
-  'latest',
-  '?',
-  '...',
-  'tbd',
-]);
+/**
+ * Values GitHub issue forms insert when a field is left empty — not intentional answers.
+ * We do not reject NA/N/A, "-", etc.; content quality is for humans to triage.
+ */
+const EMPTY_FIELD_MARKERS = new Set(['', 'no response']);
 
 /** Required sections from .github/ISSUE_TEMPLATE/BUG_REPORT.yml (in template order). */
 export const REQUIRED_SECTIONS = [
@@ -111,8 +103,12 @@ export function normalizeSectionContent(content: string): string {
 }
 
 export function isPlaceholderContent(content: string): boolean {
+  if (!content.trim()) {
+    return true;
+  }
+
   const normalized = normalizeSectionContent(content);
-  return PLACEHOLDER_VALUES.has(normalized);
+  return EMPTY_FIELD_MARKERS.has(normalized);
 }
 
 export function hasRequiredSectionsInOrder(body: string): boolean {
