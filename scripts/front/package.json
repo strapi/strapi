@@ -1,8 +1,12 @@
 {
   "name": "scripts-front",
-  "version": "5.49.0",
+  "version": "5.50.1",
   "private": true,
   "scripts": {
     "test:front": "jest --config jest.config.front.js"
+  },
+  "devDependencies": {
+    "@types/jest": "29.5.2",
+    "jest": "29.6.0"
   }
 }

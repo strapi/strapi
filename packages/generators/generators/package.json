@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generators",
-  "version": "5.49.0",
+  "version": "5.50.1",
   "description": "Interactive API generator.",
   "keywords": [
     "strapi",
@@ -42,16 +42,16 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/typescript-utils": "5.49.0",
-    "@strapi/utils": "5.49.0",
+    "@strapi/typescript-utils": "5.50.1",
+    "@strapi/utils": "5.50.1",
     "chalk": "4.1.2",
     "fs-extra": "11.3.4",
     "handlebars": "4.7.9",
@@ -62,11 +62,14 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
+    "@types/jest": "29.5.2",
     "@types/jscodeshift": "17.3.0",
+    "@types/node": "20.19.41",
     "copyfiles": "2.4.1",
-    "eslint-config-custom": "5.49.0",
+    "eslint-config-custom": "5.50.1",
+    "jest": "29.6.0",
     "outdent": "^0.8.0",
-    "tsconfig": "5.49.0"
+    "tsconfig": "5.50.1"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

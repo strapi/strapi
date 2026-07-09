@@ -127,9 +127,18 @@ describe('UP Content API - Active Sessions', () => {
       expect(current).toBeDefined();
       expect(current.current).toBe(true);
       expect(typeof current.loginAt).toBe('string');
-      expect(typeof current.ip).toBe('string');
       expect(current.deviceName).toBe('Chrome on macOS');
       expect(current).not.toHaveProperty('userId');
+
+      for (const session of res.body.data) {
+        expect(session).not.toHaveProperty('ip');
+      }
+
+      const [storedSession] = await strapi.db.query('admin::session').findMany({
+        where: { sessionId: currentSessionId, origin: 'users-permissions', status: 'active' },
+      });
+      expect(storedSession?.metadata).toBeDefined();
+      expect(storedSession.metadata).not.toHaveProperty('ip');
 
       // Clean up sessions created here.
       await strapi.db

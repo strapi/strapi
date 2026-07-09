@@ -48,6 +48,12 @@ import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './Confirm
 import type { BulkActionComponent } from '../../../../content-manager';
 import type { Document } from '../../../../hooks/useDocument';
 
+type ContentManagerQueryPlugins = {
+  i18n?: {
+    locale?: string;
+  };
+} & Record<string, Record<string, unknown> | undefined>;
+
 const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;
 `;
@@ -411,7 +417,7 @@ const SelectedEntriesModalContent = ({
   const documentIds = listViewSelectedEntries.map(({ documentId }) => documentId);
 
   // We want to keep the selected entries order same as the list view
-  const [{ query }] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
+  const [{ query }] = useQueryParams<{ sort?: string; plugins?: ContentManagerQueryPlugins }>();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
   // Fetch via findOne (same as edit view) so we get the exact same data structure.
@@ -473,7 +479,7 @@ const SelectedEntriesModalContent = ({
   const { publishMany: bulkPublishAction, isLoading: isPublishing } = useDocumentActions();
   const [, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
 
-  const selectedRows = useTable('publishAction', (state) => state.selectedRows);
+  const selectedRows = useTable('publishAction', (state) => state.selectedRows) as Document[];
 
   // Filter selected entries from the updated modal table rows
   const selectedEntries = rows.filter((entry) =>
