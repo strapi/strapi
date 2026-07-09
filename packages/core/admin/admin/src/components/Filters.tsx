@@ -199,9 +199,7 @@ const isFilterMatch = (
     return true;
   }
 
-  const decoded =
-    typeof details.value === 'string' ? decodeURIComponent(details.value) : details.value;
-  return decoded === target.value;
+  return details.value === target.value;
 };
 
 interface RootProps
@@ -592,12 +590,13 @@ const AttributeTag = ({
   const { formatMessage, formatDate, formatTime, formatNumber } = useIntl();
   const setOpen = useFilters('AttributeTag', ({ setOpen }) => setOpen);
   const setEditingFilter = useFilters('AttributeTag', ({ setEditingFilter }) => setEditingFilter);
+  const parsedValue = FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : value;
 
   const handleEdit = () => {
     setEditingFilter({
       name,
       filter: operator,
-      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : decodeURIComponent(value),
+      value: parsedValue,
     });
     setOpen(true);
   };
@@ -605,14 +604,14 @@ const AttributeTag = ({
   const handleRemove = () => {
     onRemove({
       name,
-      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : decodeURIComponent(value),
+      value: parsedValue,
       filter: operator,
     });
   };
 
   const type = mainField?.type ?? filter.type;
 
-  const decodedValue = FILTERS_WITH_NO_VALUE.includes(operator) ? value : decodeURIComponent(value);
+  const decodedValue = parsedValue ?? value;
   let formattedValue: string = decodedValue;
 
   if (!FILTERS_WITH_NO_VALUE.includes(operator)) {
@@ -623,7 +622,7 @@ const AttributeTag = ({
       case 'datetime':
         formattedValue = formatDate(decodedValue, { dateStyle: 'full', timeStyle: 'short' });
         break;
-      case 'time':
+      case 'time': {
         const [hour, minute] = decodedValue.split(':');
         const date = new Date();
         date.setHours(Number(hour));
@@ -634,6 +633,7 @@ const AttributeTag = ({
           minute: 'numeric',
         });
         break;
+      }
       case 'float':
       case 'integer':
       case 'biginteger':

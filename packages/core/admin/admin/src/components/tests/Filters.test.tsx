@@ -145,6 +145,22 @@ describe('Filters', () => {
     await waitFor(() => expect(screen.queryByText('Name $eq Jimbob')).not.toBeInTheDocument());
   });
 
+  it('should remove parsed filter values that contain literal percent signs', async () => {
+    render({
+      initialEntries: [
+        {
+          pathname: '/',
+          search: `filters[$and][0][name][$eq]=${encodeURIComponent('100%')}&page=1`,
+        },
+      ],
+    });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Name $eq 100%' }));
+
+    await waitFor(() => expect(screen.queryByText('Name $eq 100%')).not.toBeInTheDocument());
+    expect(screen.getByTestId('location')).toHaveValue('?page=1');
+  });
+
   it('should display a list of the filter names when the combobox named Select field is pressed', async () => {
     const { user } = render();
 
@@ -251,7 +267,9 @@ describe('Filters', () => {
     await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
     await user.click(await screen.findByRole('option', { name: 'Updated At' }));
 
-    expect(await screen.findByRole('combobox', { name: 'Select filter' })).toHaveTextContent('is');
+    expect(await screen.findByRole('combobox', { name: 'Select filter' })).toHaveTextContent(
+      /^is$/
+    );
     expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument();
     expect(screen.getByLabelText('Updated At')).toBeInTheDocument();
 
