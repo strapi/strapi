@@ -140,7 +140,10 @@ const EditorDivider = styled(Divider)`
  * Why not use the entity id as the key, since it's unique for each locale?
  * Because it would not solve the problem when using the "fill in from other locale" feature
  */
-function useResetKey(value?: Schema.Attribute.BlocksValue): {
+function useResetKey(
+  editor: Editor,
+  value?: Schema.Attribute.BlocksValue
+): {
   key: number;
   incrementSlateUpdatesCount: () => void;
 } {
@@ -156,6 +159,10 @@ function useResetKey(value?: Schema.Attribute.BlocksValue): {
 
     // If the 2 refs are not equal, it means the value was updated from outside
     if (valueUpdatesCount.current !== slateUpdatesCount.current) {
+      if (editor.selection) {
+        Transforms.deselect(editor);
+      }
+
       // So we change the key to force a rerender of the Slate editor,
       // which will pick up the new value through its initialValue prop
       setKey((previousKey) => previousKey + 1);
@@ -163,7 +170,7 @@ function useResetKey(value?: Schema.Attribute.BlocksValue): {
       // Then bring the 2 refs back in sync
       slateUpdatesCount.current = valueUpdatesCount.current;
     }
-  }, [value]);
+  }, [editor, value]);
 
   const incrementSlateUpdatesCount = React.useCallback(() => {
     slateUpdatesCount.current += 1;
@@ -239,7 +246,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       [editor]
     );
 
-    const { key, incrementSlateUpdatesCount } = useResetKey(value);
+    const { key, incrementSlateUpdatesCount } = useResetKey(editor, value);
 
     const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
