@@ -1,5 +1,4 @@
 import type { InlineConfig, UserConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
 import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
@@ -15,6 +14,11 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
   const designSystemLinked = isDesignSystemLinked();
+
+  // Imported dynamically so this file's CJS build resolves Vite's ESM Node API instead of
+  // its CJS entry, which emits "The CJS build of Vite's Node API is deprecated".
+  // https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated
+  const { default: react } = await import('@vitejs/plugin-react-swc');
 
   return {
     root: ctx.cwd,
