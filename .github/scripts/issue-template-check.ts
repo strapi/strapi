@@ -11,7 +11,7 @@
  */
 const EMPTY_FIELD_MARKERS = new Set(['', 'no response']);
 
-/** Required sections from .github/ISSUE_TEMPLATE/BUG_REPORT.yml (in template order). */
+/** Required sections from .github/ISSUE_TEMPLATE/BUG_REPORT.yml. */
 export const REQUIRED_SECTIONS = [
   'Node Version',
   'Package Manager',
@@ -25,16 +25,42 @@ export const REQUIRED_SECTIONS = [
   'Expected Behavior',
 ] as const;
 
+/** Common alternate spellings beyond case differences. */
+const SECTION_HEADER_ALIASES: Record<string, (typeof REQUIRED_SECTIONS)[number]> = {
+  'js or ts': 'Javascript or Typescript',
+  'javascript/typescript': 'Javascript or Typescript',
+};
+
+const REQUIRED_SECTION_LOOKUP = new Map<string, (typeof REQUIRED_SECTIONS)[number]>(
+  REQUIRED_SECTIONS.map((title) => [normalizeHeader(title), title])
+);
+
+for (const [alias, canonical] of Object.entries(SECTION_HEADER_ALIASES)) {
+  REQUIRED_SECTION_LOOKUP.set(normalizeHeader(alias), canonical);
+}
+
+function normalizeHeader(header: string): string {
+  return header.trim().toLowerCase();
+}
+
+export function canonicalSectionTitle(header: string): string {
+  return REQUIRED_SECTION_LOOKUP.get(normalizeHeader(header)) ?? header.trim();
+}
+
+export function isRequiredSectionTitle(header: string): boolean {
+  return REQUIRED_SECTION_LOOKUP.has(normalizeHeader(header));
+}
+
 const REQUIRED_CHECKBOXES = [
   {
     id: 'duplicateCheck',
     label: 'Duplicate issues checkbox',
-    keywords: [/check/i, /duplicate/i],
+    keywordGroups: [[/check/i, /duplicate/i]],
   },
   {
     id: 'codeOfConduct',
     label: 'Code of Conduct checkbox',
-    keywords: [/code of conduct/i],
+    keywordGroups: [[/code of conduct/i], [/contributing guidelines/i]],
   },
 ] as const;
 
@@ -50,9 +76,20 @@ export function parseIssueSections(body: string): Map<string, string> {
   let currentContent: string[] = [];
 
   const flush = () => {
-    if (currentHeader !== null) {
-      sections.set(currentHeader, currentContent.join('\n').trim());
+    if (currentHeader === null) {
+      return;
     }
+
+    const key = canonicalSectionTitle(currentHeader);
+    const next = currentContent.join('\n').trim();
+    const existing = sections.get(key);
+
+    if (existing) {
+      sections.set(key, `${existing}\n\n${next}`.trim());
+      return;
+    }
+
+    sections.set(key, next);
   };
 
   for (const line of lines) {
@@ -76,7 +113,7 @@ export function getSectionHeadersInOrder(body: string): string[] {
   return body
     .split('\n')
     .filter((line) => line.startsWith('### '))
-    .map((line) => line.slice(4).trim());
+    .map((line) => canonicalSectionTitle(line.slice(4)));
 }
 
 export function normalizeSectionContent(content: string): string {
@@ -92,35 +129,19 @@ export function isPlaceholderContent(content: string): boolean {
   return EMPTY_FIELD_MARKERS.has(normalized);
 }
 
-export function hasRequiredSectionsInOrder(body: string): boolean {
-  const headers = getSectionHeadersInOrder(body);
-  let lastIndex = -1;
-
-  for (const required of REQUIRED_SECTIONS) {
-    const index = headers.indexOf(required);
-
-    if (index === -1) {
-      return false;
-    }
-
-    if (index < lastIndex) {
-      return false;
-    }
-
-    lastIndex = index;
-  }
-
-  return true;
-}
-
 export function getCheckedBoxLines(body: string): string[] {
-  return body.match(/-\s*\[x\][^\n]*/gi) ?? [];
+  return body.split('\n').filter((line) => /\[x\]/i.test(line) && !/^\s*```/.test(line));
 }
 
-function hasCheckedRequiredCheckbox(body: string, keywords: readonly RegExp[]): boolean {
+function hasCheckedRequiredCheckbox(
+  body: string,
+  keywordGroups: readonly (readonly RegExp[])[]
+): boolean {
   const checkedBoxLines = getCheckedBoxLines(body);
 
-  return checkedBoxLines.some((line) => keywords.every((keyword) => keyword.test(line)));
+  return checkedBoxLines.some((line) =>
+    keywordGroups.some((group) => group.every((keyword) => keyword.test(line)))
+  );
 }
 
 export function validateIssueTemplate(body: string): TemplateValidationResult {
@@ -137,33 +158,21 @@ export function validateIssueTemplate(body: string): TemplateValidationResult {
     return { valid: false, missingItems: ['Issue template (expected ### section headers)'] };
   }
 
-  const headers = getSectionHeadersInOrder(trimmedBody);
-
   for (const title of REQUIRED_SECTIONS) {
-    if (!headers.includes(title)) {
+    const content = sections.get(title);
+
+    if (content === undefined) {
+      missingItems.push(`Section: ${title}`);
+      continue;
+    }
+
+    if (isPlaceholderContent(content)) {
       missingItems.push(`Section: ${title}`);
     }
   }
 
-  const hasAllRequiredHeaders = REQUIRED_SECTIONS.every((title) => headers.includes(title));
-
-  if (hasAllRequiredHeaders && !hasRequiredSectionsInOrder(trimmedBody)) {
-    missingItems.push('Required sections appear out of template order');
-  }
-
-  for (const title of REQUIRED_SECTIONS) {
-    const content = sections.get(title);
-
-    if (!content || isPlaceholderContent(content)) {
-      const label = `Section: ${title}`;
-      if (!missingItems.includes(label)) {
-        missingItems.push(label);
-      }
-    }
-  }
-
   for (const checkbox of REQUIRED_CHECKBOXES) {
-    if (!hasCheckedRequiredCheckbox(trimmedBody, checkbox.keywords)) {
+    if (!hasCheckedRequiredCheckbox(trimmedBody, checkbox.keywordGroups)) {
       missingItems.push(checkbox.label);
     }
   }

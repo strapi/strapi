@@ -102,6 +102,28 @@ describe('issue-template-check', () => {
     assert.equal(validateIssueTemplate(naBody).valid, true);
   });
 
+  it('accepts sections regardless of order and header casing', () => {
+    const body = VALID_ISSUE_BODY.replaceAll('### Node Version', '### NODE VERSION')
+      .replace('### Javascript or Typescript', '### JavaScript or TypeScript')
+      .replace(
+        '### Expected Behavior\n\nNo error, and content item opens\n\n### Logs',
+        '### Logs\n\n```shell\nBrowser error\n```\n\n### Expected Behavior\n\nNo error, and content item opens'
+      );
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+  });
+
+  it('accepts asterisk-style checked boxes', () => {
+    const body = VALID_ISSUE_BODY.replace(
+      '- [x] I have checked the existing [issues](https://github.com/strapi/strapi/issues) for duplicates.',
+      '* [X] I have checked the existing issues for duplicates.'
+    );
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+  });
+
   it('accepts paraphrased confirmation checkboxes (issue #26813)', () => {
     const body = `${VALID_ISSUE_BODY.replace(
       `### Confirmation Checklist
