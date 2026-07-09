@@ -86,7 +86,11 @@ describe('parseRestoreFromOptions', () => {
 
   test('--only-content-types scopes restore deletion to listed types', () => {
     const restore = parseRestoreFromOptions(
-      { onlyContentTypes: ['api::article.article'] },
+      {
+        onlyContentTypes: ['api::article.article'],
+        exclude: ['files'],
+        filesAutoExcluded: true,
+      },
       mockStrapi
     );
 

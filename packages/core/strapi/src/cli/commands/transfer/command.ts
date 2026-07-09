@@ -10,6 +10,7 @@ import {
   throttleOption,
   validateExcludeOnly,
   validateContentTypeTransferOptions,
+  normalizeTransferFilterOptionsHook,
 } from '../../utils/data-transfer';
 
 import action from './action';
@@ -52,6 +53,7 @@ const command = () => {
       .addOption(excludeContentTypesOption)
       .addOption(onlyContentTypesOption)
       .addOption(throttleOption)
+      .hook('preAction', normalizeTransferFilterOptionsHook)
       .hook('preAction', validateExcludeOnly)
       .hook('preAction', validateContentTypeTransferOptions)
       .hook(

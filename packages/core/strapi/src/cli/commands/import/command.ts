@@ -9,6 +9,7 @@ import {
   throttleOption,
   validateExcludeOnly,
   validateContentTypeTransferOptions,
+  normalizeTransferFilterOptionsHook,
 } from '../../utils/data-transfer';
 import { getCommanderConfirmMessage, forceOption } from '../../utils/commander';
 import { exitWith } from '../../utils/helpers';
@@ -40,6 +41,7 @@ const command = () => {
       .addOption(excludeContentTypesOption)
       .addOption(onlyContentTypesOption)
       .addOption(throttleOption)
+      .hook('preAction', normalizeTransferFilterOptionsHook)
       .hook('preAction', validateExcludeOnly)
       .hook('preAction', validateContentTypeTransferOptions)
       .hook('preAction', async (thisCommand) => {

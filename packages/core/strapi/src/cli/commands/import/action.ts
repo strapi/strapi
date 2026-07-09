@@ -23,6 +23,7 @@ import {
   getDiffHandler,
   parseRestoreFromOptions,
   buildTransferTransforms,
+  normalizeTransferFilterOptions,
   validateContentTypeTransferOptionsForStrapi,
   logTransferFilterSummary,
 } from '../../utils/data-transfer';
@@ -51,6 +52,7 @@ interface CmdOptions {
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   excludeContentTypes?: string[];
   onlyContentTypes?: string[];
+  filesAutoExcluded?: boolean;
   throttle?: number;
 }
 
@@ -66,6 +68,8 @@ export default async (opts: CmdOptions) => {
   if (!isObject(opts)) {
     exitWith(1, 'Could not parse arguments');
   }
+
+  normalizeTransferFilterOptions(opts);
 
   const backupPath = opts.file ?? '';
   const source = (await fs.stat(backupPath)).isDirectory()
@@ -133,6 +137,7 @@ export default async (opts: CmdOptions) => {
       only: opts.only,
       excludeContentTypes: opts.excludeContentTypes,
       onlyContentTypes: opts.onlyContentTypes,
+      filesAutoExcluded: opts.filesAutoExcluded,
     });
     await strapiInstance.telemetry.send(
       'didDEITSProcessStart',

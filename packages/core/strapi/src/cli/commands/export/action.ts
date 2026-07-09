@@ -22,6 +22,7 @@ import {
   getTransferTelemetryPayload,
   setSignalHandler,
   buildTransferTransforms,
+  normalizeTransferFilterOptions,
   validateContentTypeTransferOptionsForStrapi,
   logTransferFilterSummary,
 } from '../../utils/data-transfer';
@@ -50,6 +51,7 @@ interface CmdOptions {
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   excludeContentTypes?: string[];
   onlyContentTypes?: string[];
+  filesAutoExcluded?: boolean;
   throttle?: number;
   maxSizeJsonl?: number;
 }
@@ -68,6 +70,7 @@ export default async (opts: CmdOptions) => {
   }
 
   normalizeExportDirFormatOpts(opts);
+  normalizeTransferFilterOptions(opts);
 
   const strapi = await createStrapiInstance();
   validateContentTypeTransferOptionsForStrapi(opts, strapi);
@@ -109,6 +112,7 @@ export default async (opts: CmdOptions) => {
       only: opts.only,
       excludeContentTypes: opts.excludeContentTypes,
       onlyContentTypes: opts.onlyContentTypes,
+      filesAutoExcluded: opts.filesAutoExcluded,
     });
 
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));

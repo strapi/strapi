@@ -29,6 +29,21 @@ describe('logTransferFilterSummary', () => {
     expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
   });
 
+  test('prints auto-skip message when files were excluded because upload types are out of scope', () => {
+    logTransferFilterSummary({
+      exclude: ['files'],
+      onlyContentTypes: ['api::article.article'],
+      filesAutoExcluded: true,
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Skipping files stage: upload content types are not in transfer scope'
+      )
+    );
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('rsync'));
+  });
+
   test('prints files note when assets stage is skipped via --exclude files', () => {
     logTransferFilterSummary({ exclude: ['files'] });
 

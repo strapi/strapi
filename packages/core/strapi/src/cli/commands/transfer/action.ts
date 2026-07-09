@@ -16,6 +16,7 @@ import {
   getAssetsBackupHandler,
   parseRestoreFromOptions,
   buildTransferTransforms,
+  normalizeTransferFilterOptions,
   validateContentTypeTransferOptionsForStrapi,
   logTransferFilterSummary,
 } from '../../utils/data-transfer';
@@ -56,6 +57,7 @@ interface CmdOptions {
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   excludeContentTypes?: string[];
   onlyContentTypes?: string[];
+  filesAutoExcluded?: boolean;
   throttle?: number;
   force?: boolean;
   checksums?: boolean;
@@ -78,6 +80,8 @@ export default async (opts: CmdOptions) => {
   if (!(opts.from || opts.to) || (opts.from && opts.to)) {
     exitWith(1, 'Exactly one source (from) or destination (to) option must be provided');
   }
+
+  normalizeTransferFilterOptions(opts);
 
   const strapi = await createStrapiInstance();
   validateContentTypeTransferOptionsForStrapi(opts, strapi);
@@ -267,6 +271,7 @@ export default async (opts: CmdOptions) => {
       only: opts.only,
       excludeContentTypes: opts.excludeContentTypes,
       onlyContentTypes: opts.onlyContentTypes,
+      filesAutoExcluded: opts.filesAutoExcluded,
     });
     startingSpinner = ora(formatPrepSpinnerLine()).start();
     startingElapsedInterval = setInterval(() => {
