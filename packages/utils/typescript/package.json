@@ -57,9 +57,11 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
+    "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.50.1",
+    "jest": "29.6.0",
     "tsconfig": "5.50.1"
   },
   "engines": {

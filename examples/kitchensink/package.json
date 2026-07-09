@@ -34,5 +34,8 @@
   },
   "strapi": {
     "uuid": "getstarted"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.41"
   }
 }
