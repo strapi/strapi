@@ -8806,7 +8806,6 @@ __metadata:
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/react-window": "npm:1.8.8"
-    "@types/sanitize-html": "npm:2.13.0"
     "@vitejs/plugin-react-swc": "npm:4.3.1"
     axios: "npm:1.18.1"
     bcryptjs: "npm:2.4.3"
@@ -11606,15 +11605,6 @@ __metadata:
   version: 0.12.5
   resolution: "@types/retry@npm:0.12.5"
   checksum: 10c0/eaaca483cc62f2f02c0b8486847ee70986ca7f97afd7363037247dbe3e98df8bd56a5b50d58b1e96768a5a1be0307010d86e9991bd458d72e8df88be471bd720
-  languageName: node
-  linkType: hard
-
-"@types/sanitize-html@npm:2.13.0":
-  version: 2.13.0
-  resolution: "@types/sanitize-html@npm:2.13.0"
-  dependencies:
-    htmlparser2: "npm:^8.0.0"
-  checksum: 10c0/c6614b38f67dd6fb3a94c9163a55fa43b9aa81a845fe9584d9ffbd5da0e00e0ac8162ede9f4bde095840b2ef9db12265f5fcc40b707f48a420405c6aa7c3ff51
   languageName: node
   linkType: hard
 
@@ -19936,18 +19926,6 @@ __metadata:
     domutils: "npm:^2.5.2"
     entities: "npm:^2.0.0"
   checksum: 10c0/3058499c95634f04dc66be8c2e0927cd86799413b2d6989d8ae542ca4dbf5fa948695d02c27d573acf44843af977aec6d9a7bdd0f6faa6b2d99e2a729b2a31b6
-  languageName: node
-  linkType: hard
-
-"htmlparser2@npm:^8.0.0":
-  version: 8.0.2
-  resolution: "htmlparser2@npm:8.0.2"
-  dependencies:
-    domelementtype: "npm:^2.3.0"
-    domhandler: "npm:^5.0.3"
-    domutils: "npm:^3.0.1"
-    entities: "npm:^4.4.0"
-  checksum: 10c0/609cca85886d0bf2c9a5db8c6926a89f3764596877492e2caa7a25a789af4065bc6ee2cdc81807fe6b1d03a87bf8a373b5a754528a4cc05146b713c20575aab4
   languageName: node
   linkType: hard
 
