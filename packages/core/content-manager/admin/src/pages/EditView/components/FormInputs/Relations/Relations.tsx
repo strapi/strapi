@@ -116,9 +116,11 @@ const EMPTY_RELATION_RESULTS: RelationResult[] = [];
 type RelationPosition =
   | (Pick<RelationResult, 'status' | 'locale'> & {
       before: string;
+      start?: never;
       end?: never;
     })
-  | { end: boolean; before?: never; status?: never; locale?: never };
+  | { start: boolean; before?: never; end?: never; status?: never; locale?: never }
+  | { end: boolean; before?: never; start?: never; status?: never; locale?: never };
 
 interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> {
   href: string;
@@ -926,16 +928,19 @@ const RelationsList = ({
           const relationInFront = array[currentIndex + 1];
 
           if (!relationOnServer || relationOnServer.__temp_key__ !== relation.__temp_key__) {
-            const position = relationInFront
-              ? {
-                  before: relationInFront.documentId,
-                  locale: relationInFront.locale,
-                  status:
-                    'publishedAt' in relationInFront && relationInFront.publishedAt
-                      ? ('published' as Relation['status'])
-                      : ('draft' as Relation['status']),
-                }
-              : { end: true };
+            const position =
+              currentIndex === 0
+                ? { start: true }
+                : relationInFront
+                  ? {
+                      before: relationInFront.documentId,
+                      locale: relationInFront.locale,
+                      status:
+                        'publishedAt' in relationInFront && relationInFront.publishedAt
+                          ? ('published' as Relation['status'])
+                          : ('draft' as Relation['status']),
+                    }
+                  : { end: true };
 
             const relationWithPosition: Relation = {
               ...relation,

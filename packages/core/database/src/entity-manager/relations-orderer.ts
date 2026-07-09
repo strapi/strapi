@@ -205,10 +205,11 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     if (r.position?.before) {
       const { idx: beforeIdx, relation } = findRelation(r.position.before);
       if (relation.init) {
-        // Interpolate between the target and the item before it
         const prevRelation = beforeIdx > 0 ? computedRelations[beforeIdx - 1] : null;
-        const prevOrder = prevRelation ? prevRelation.order : relation.order - 1;
-        r.order = (prevOrder + relation.order) / 2;
+        r.order =
+          prevRelation && prevRelation.order < relation.order
+            ? (prevRelation.order + relation.order) / 2
+            : relation.order - 0.5;
       } else {
         r.order = relation.order;
       }
@@ -216,11 +217,12 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     } else if (r.position?.after) {
       const { idx: afterIdx, relation } = findRelation(r.position.after);
       if (relation.init) {
-        // Interpolate between the target and the item after it
         const nextRelation =
           afterIdx < computedRelations.length - 1 ? computedRelations[afterIdx + 1] : null;
-        const nextOrder = nextRelation ? nextRelation.order : relation.order + 1;
-        r.order = (relation.order + nextOrder) / 2;
+        r.order =
+          nextRelation && nextRelation.order > relation.order
+            ? (relation.order + nextRelation.order) / 2
+            : relation.order + 0.5;
       } else {
         r.order = relation.order;
       }
