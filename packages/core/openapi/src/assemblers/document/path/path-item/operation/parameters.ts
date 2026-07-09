@@ -84,7 +84,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
           name,
           in: 'query',
           required,
-          schema: resolvedSchema,
+          schema: resolvedSchema as any,
           style: 'deepObject',
           explode: true,
         };
