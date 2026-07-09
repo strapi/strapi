@@ -34,6 +34,10 @@
   "pages.Releases.max-limit-reached.action": "Досліджуйте плани",
   "pages.PurchaseRelease.subTitle": "Керуйте оновленнями вмісту та релізами.",
   "pages.PurchaseRelease.not-available": "Релізи доступні лише в рамках платного плану. Оновіть план, щоб створювати та керувати релізами.",
+  "pages.PurchaseRelease.description": "Group content and publish updates together",
+  "pages.PurchaseRelease.perks1": "Add many entries to releases",
+  "pages.PurchaseRelease.perks2": "Quickly identify entries containing errors",
+  "pages.PurchaseRelease.perks3": "Schedule their publication, or publish them manually",
   "header.actions.add-release": "Новий реліз",
   "header.actions.refresh": "Оновити",
   "header.actions.publish": "Опублікувати",
@@ -84,9 +88,10 @@
   "pages.ReleaseDetails.groupBy.option.actions": "Дії",
   "pages.ReleaseDetails.header-subtitle.scheduled": "Заплановано на {date} о {time} ({offset})",
   "pages.ReleaseDetails.entry-validation.fields": "Поля",
-  "pages.Settings.releases.title": "Релізи",
   "pages.Settings.releases.description": "Створюйте та керуйте оновленнями вмісту",
+  "pages.Settings.releases.preferences.title": "Preferences",
   "pages.Settings.releases.timezone.label": "Часовий пояс за замовчуванням",
+  "pages.Settings.releases.timezone.hint": "The timezone of every release can still be changed individually.",
   "pages.Settings.releases.setting.default-timezone-notification-success": "Часовий пояс за замовчуванням оновлено.",
   "pages.ReleaseDetails.entry-validation.fields.error": "{errors} помилок у полях.",
   "pages.ReleaseDetails.entry-validation.fields.success": "Всі поля заповнені правильно.",
@@ -94,5 +99,8 @@
   "pages.ReleaseDetails.entry-validation.review-stage.not-enabled": "Цей запис не пов'язаний з жодним робочим процесом.",
   "pages.ReleaseDetails.entry-validation.review-stage.not-ready": "Цей запис не на необхідному етапі для публікації. ({stageName})",
   "pages.ReleaseDetails.entry-validation.review-stage.ready": "Цей запис на необхідному етапі для публікації. ({stageName})",
-  "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "Необхідний етап для публікації відсутній."
+  "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "Необхідний етап для публікації відсутній.",
+  "widget.upcoming-releases.link": "Open Releases",
+  "widget.upcoming-releases.title": "Upcoming releases",
+  "widget.upcoming-releases.no-data": "No releases"
 }

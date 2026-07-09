@@ -753,7 +753,6 @@
   "Settings.sessions.title": "アクティブなデバイス",
   "Settings.sessions.subtitle": "現在アカウントにサインインしているデバイスとセッションです。",
   "Settings.sessions.device": "デバイス",
-  "Settings.sessions.ip": "IP アドレス",
   "Settings.sessions.loginAt": "サインイン",
   "Settings.sessions.lastActiveAt": "最終使用",
   "Settings.sessions.actions": "操作",

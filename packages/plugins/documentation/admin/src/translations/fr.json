@@ -1,4 +1,5 @@
 {
+  "coming-soon": "This content is currently under construction and will be back in a few weeks!",
   "components.Row.open": "Ouvrir",
   "components.Row.regenerate": "Recréer",
   "containers.HomePage.Block.title": "Versions",
@@ -19,8 +20,23 @@
   "error.noVersion": "Une version de documentation est nécessaire",
   "error.regenerateDoc": "Une erreur est survenue en recréant la documentation",
   "error.regenerateDoc.versionMissing": "La version que vous essayez de créer n'existe pas.",
+  "notification.delete.success": "Doc deleted",
+  "notification.generate.success": "Doc generated",
   "notification.update.success": "Vos paramètres ont été enregistrés",
+  "pages.PluginPage.Button.open": "Open documentation",
+  "pages.PluginPage.header.description": "Configure the documentation plugin",
+  "pages.PluginPage.table.generated": "Last generated",
+  "pages.PluginPage.table.icon.regenerate": "Regenerate {target}",
+  "pages.PluginPage.table.icon.show": "Open {target}",
+  "pages.PluginPage.table.version": "Version",
+  "pages.SettingsPage.header.description": "Configure the documentation plugin",
+  "pages.SettingsPage.header.save": "Save",
+  "pages.SettingsPage.toggle.hint": "Make the documentation endpoint private",
+  "pages.SettingsPage.toggle.label": "Restricted Access",
   "plugin.description.long": "Créez un document OpenAPI et visualisez votre API avec Swagger UI.",
   "plugin.description.short": "Créez un document OpenAPI et visualisez votre API avec Swagger UI.",
-  "plugin.name": "Documentation"
+  "plugin.name": "Documentation",
+  "Input.error.contain.lowercase": "Password must contain at least one lowercase character",
+  "Input.error.contain.number": "Password must contain at least one number",
+  "Input.error.contain.uppercase": "Password must contain at least one uppercase character"
 }
