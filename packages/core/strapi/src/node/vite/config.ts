@@ -1,8 +1,8 @@
 import type { InlineConfig, UserConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
-import { getModulePath } from '../core/resolve-module';
+import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
+import { buildAdminViteResolveAliases } from '../core/admin-vite-aliases';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
@@ -14,6 +14,11 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
   const designSystemLinked = isDesignSystemLinked();
+
+  // Imported dynamically so this file's CJS build resolves Vite's ESM Node API instead of
+  // its CJS entry, which emits "The CJS build of Vite's Node API is deprecated".
+  // https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated
+  const { default: react } = await import('@vitejs/plugin-react-swc');
 
   return {
     root: ctx.cwd,
@@ -124,30 +129,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     resolve: {
       // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
       // Include design-system so plugin chunks use the same instance and inherit root context
-      dedupe: [
-        'react',
-        'react-dom',
-        'react-router-dom',
-        'styled-components',
-        'react-redux',
-        '@reduxjs/toolkit',
-        '@strapi/design-system',
-        '@radix-ui/react-tooltip',
-        'lodash',
-      ],
+      dedupe: [...ADMIN_VITE_DEDUPE_MODULES],
       // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
       // where packages imported by plugins may not be resolvable from plugin chunks
-      alias: {
-        react: getModulePath('react'),
-        'react-dom': getModulePath('react-dom'),
-        'react-router-dom': getModulePath('react-router-dom'),
-        'styled-components': getModulePath('styled-components'),
-        'react-redux': getModulePath('react-redux'),
-        '@reduxjs/toolkit': getModulePath('@reduxjs/toolkit'),
-        '@strapi/design-system': getModulePath('@strapi/design-system'),
-        '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
-        lodash: getModulePath('lodash'),
-      },
+      alias: buildAdminViteResolveAliases(),
     },
     plugins: [react(), buildFilesPlugin(ctx)],
   };

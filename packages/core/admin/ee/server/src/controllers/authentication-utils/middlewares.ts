@@ -5,6 +5,7 @@ import utils from './utils';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
+  getAccessCookieName,
   getSessionManager,
   generateDeviceId,
 } from '../../../../../shared/utils/session-auth';
@@ -136,7 +137,7 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
     const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
 
     const domain: string | undefined = strapi.config.get('admin.auth.domain');
-    ctx.cookies.set('jwtToken', accessToken, {
+    ctx.cookies.set(getAccessCookieName(), accessToken, {
       httpOnly: false,
       secure: isSecure,
       overwrite: true,

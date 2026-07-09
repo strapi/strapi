@@ -27,11 +27,12 @@ type BaseQueryError = ApiError | UnknownApiError;
 
 const isAuthPath = (url: string) => /^\/admin\/(login|logout|access-token)\b/.test(url);
 
-const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> = async (
-  query,
-  api
-) => {
-  const { signal } = api as { signal?: AbortSignal };
+const simpleQuery: BaseQueryFn<
+  string | QueryArguments,
+  unknown,
+  BaseQueryError | SerializedError
+> = async (query, api) => {
+  const { signal } = api;
 
   const executeQuery = async (queryToExecute: string | QueryArguments) => {
     const { get, post, del, put } = getFetchClient();
@@ -80,7 +81,7 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
         /**
          * This will most likely be ApiError
          */
-        return { data: undefined, error: err.response?.data.error as any };
+        return { data: undefined, error: err.response?.data.error as BaseQueryError };
       } else {
         return {
           data: undefined,
@@ -94,7 +95,7 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
       }
     }
 
-    const error = err as Error;
+    const error = err instanceof Error ? err : new Error('Unknown error');
     return {
       data: undefined,
       error: {

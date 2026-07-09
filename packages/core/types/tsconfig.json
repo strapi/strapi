@@ -1,8 +1,6 @@
 {
   "extends": "tsconfig/base.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "node",
     "noEmit": true
   },
   "include": ["src"],

@@ -15,6 +15,9 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
 
   ctx.logger.debug('Vite config', finalConfig);
 
+  // Imported dynamically so this file's CJS build resolves Vite's ESM Node API instead of
+  // its CJS entry, which emits "The CJS build of Vite's Node API is deprecated".
+  // https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated
   const { createServer } = await import('vite');
 
   const vite = await createServer(finalConfig);

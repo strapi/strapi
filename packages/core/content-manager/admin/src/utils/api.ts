@@ -4,7 +4,7 @@ import { ApiError, type UnknownApiError } from '@strapi/admin/strapi-admin';
 interface Query {
   plugins?: Record<string, unknown>;
   _q?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -12,7 +12,7 @@ interface Query {
  * and appends them to the root of the query
  */
 type TransformedQuery<TQuery extends Query> = Omit<TQuery, 'plugins'> & {
-  [key: string]: string;
+  [key: string]: unknown;
 };
 
 /**
@@ -26,10 +26,13 @@ const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery
   // Extract pluginOptions from the query, they shouldn't be part of the URL
   const { plugins: _, ...validQueryParams } = {
     ...query,
-    ...Object.values(query?.plugins ?? {}).reduce<Record<string, string>>(
-      (acc, current) => Object.assign(acc, current),
-      {}
-    ),
+    ...Object.values(query?.plugins ?? {}).reduce<Record<string, unknown>>((acc, current) => {
+      if (typeof current === 'object' && current !== null) {
+        return Object.assign(acc, current);
+      }
+
+      return acc;
+    }, {}),
   };
 
   return validQueryParams;

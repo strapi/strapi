@@ -9,7 +9,7 @@ import type { StringProps } from './types';
 
 const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
-    const field = useField(name);
+    const field = useField<string>(name);
     const fieldRef = useFocusInputField<HTMLTextAreaElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);

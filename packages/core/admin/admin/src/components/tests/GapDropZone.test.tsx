@@ -4,8 +4,8 @@ import type { WidgetWithUID } from '../../core/apis/Widgets';
 import type { WidgetRow } from '../../utils/widgetLayout';
 
 // Mock data
-const createMockWidget = (uid: string, title: string): WidgetWithUID => ({
-  uid: uid as any,
+const createMockWidget = (uid: WidgetWithUID['uid'], title: string): WidgetWithUID => ({
+  uid,
   title: { defaultMessage: title, id: `test.${uid}` },
   icon: undefined,
   component: () => Promise.resolve(() => null),
