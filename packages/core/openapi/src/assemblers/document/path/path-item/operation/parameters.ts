@@ -134,7 +134,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
         }
       }
 
-      return mergedSchema.properties ? mergedSchema : schema;
+      return hasExpandableObjectProperties(mergedSchema) ? mergedSchema : schema;
     }
 
     if (schema.anyOf && Array.isArray(schema.anyOf)) {
@@ -173,6 +173,10 @@ export class OperationParametersAssembler implements Assembler.Operation {
 
     if (!preserveRequired) {
       allRequired = [];
+    }
+
+    if (Object.keys(allProperties).length === 0) {
+      return schemas[0] as OpenAPIV3_1.SchemaObject;
     }
 
     return {

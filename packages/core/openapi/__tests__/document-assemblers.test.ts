@@ -46,6 +46,53 @@ describe('OpenAPI document assemblers', () => {
       expect(context.output.data.components?.securitySchemes?.bearerAuth).toBeDefined();
       expect(context.output.data.components?.schemas).toBeDefined();
     });
+
+    it('uses openapi.security schemes when configured', () => {
+      const assembler = new DocumentSecurityAssembler();
+      const factory = new DocumentContextFactory();
+      const customBearerAuth = {
+        type: 'http' as const,
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Project JWT',
+      };
+      const apiKey = {
+        type: 'apiKey' as const,
+        name: 'X-API-Key',
+        in: 'header' as const,
+        description: 'Service API key',
+      };
+      const context = factory.create({
+        strapi: createStrapiMock({
+          'openapi.security': {
+            bearerAuth: customBearerAuth,
+            apiKey,
+          },
+        }) as Core.Strapi,
+        routes: [],
+      });
+
+      assembler.assemble(context);
+
+      expect(context.output.data.components?.securitySchemes?.bearerAuth).toEqual(customBearerAuth);
+      expect(context.output.data.components?.securitySchemes?.apiKey).toEqual(apiKey);
+    });
+
+    it('uses openapi.globalSecurity when configured', () => {
+      const assembler = new DocumentSecurityAssembler();
+      const factory = new DocumentContextFactory();
+      const globalSecurity = [{ apiKey: [] }];
+      const context = factory.create({
+        strapi: createStrapiMock({
+          'openapi.globalSecurity': globalSecurity,
+        }) as Core.Strapi,
+        routes: [],
+      });
+
+      assembler.assemble(context);
+
+      expect(context.output.data.security).toEqual(globalSecurity);
+    });
   });
 
   describe('DocumentServerAssembler', () => {
