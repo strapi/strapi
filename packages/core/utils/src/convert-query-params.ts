@@ -158,18 +158,17 @@ export interface Query {
   pageSize?: number;
 }
 
-class InvalidOrderError extends Error {
+class InvalidOrderError extends ValidationError {
   constructor() {
-    super();
-    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+    super('Invalid order. order can only be one of asc|desc|ASC|DESC');
   }
 }
 
-class InvalidSortError extends Error {
+class InvalidSortError extends ValidationError {
   constructor() {
-    super();
-    this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
+    super(
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+    );
   }
 }
 
@@ -771,15 +770,26 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    const { _q, sort, filters, fields, populate, page, pageSize, start, limit, status, ...rest } =
-      params;
+    const {
+      _q: searchQuery,
+      sort,
+      filters,
+      fields,
+      populate,
+      page,
+      pageSize,
+      start,
+      limit,
+      status,
+      ...rest
+    } = params;
 
     if (!isNil(status)) {
       convertStatusParams(status, query);
     }
 
-    if (!isNil(_q)) {
-      query._q = _q;
+    if (!isNil(searchQuery)) {
+      query._q = searchQuery;
     }
 
     applySortToQuery(query, sort);

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/i18n",
-  "version": "5.50.0",
+  "version": "5.50.1",
   "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -52,7 +52,7 @@
     "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
@@ -63,7 +63,7 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.2.1",
     "@strapi/icons": "2.2.1",
-    "@strapi/utils": "5.50.0",
+    "@strapi/utils": "5.50.1",
     "lodash": "4.18.1",
     "qs": "6.15.3",
     "react-intl": "6.6.2",
@@ -72,11 +72,11 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.50.0",
-    "@strapi/admin-test-utils": "5.50.0",
-    "@strapi/content-manager": "5.50.0",
-    "@strapi/database": "5.50.0",
-    "@strapi/types": "5.50.0",
+    "@strapi/admin": "5.50.1",
+    "@strapi/admin-test-utils": "5.50.1",
+    "@strapi/content-manager": "5.50.1",
+    "@strapi/database": "5.50.1",
+    "@strapi/types": "5.50.1",
     "@testing-library/react": "16.3.2",
     "@testing-library/user-event": "14.6.1",
     "koa": "2.16.4",

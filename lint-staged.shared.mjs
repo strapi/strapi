@@ -10,7 +10,7 @@
  * @type {import('lint-staged').Configuration}
  */
 const config = {
-  '*.{js,ts,jsx,tsx}': ['eslint --cache --fix', 'prettier --cache --write'],
+  '*.{js,ts,jsx,tsx}': ['eslint --cache --fix --max-warnings=0', 'prettier --cache --write'],
   '!(*.js|*.ts|*.jsx|*.tsx)': ['prettier --cache --write --ignore-unknown'],
 };
 

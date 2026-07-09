@@ -1,8 +1,9 @@
 import type { Core } from '@strapi/types';
 
+import type { RegistriesFactory } from '../registries';
 import type { Timer } from '../utils';
 
-export interface ContextRegistries {}
+export type ContextRegistries = ReturnType<RegistriesFactory['createAll']>;
 
 export interface TimeStats {
   startTime: number;

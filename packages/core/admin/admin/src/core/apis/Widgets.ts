@@ -70,7 +70,7 @@ class Widgets {
 
   getAll = (): WidgetWithUID[] => {
     return this.widgets.map((widget) => {
-      const { id, pluginId, ...widgetBase } = widget;
+      const { id: _id, pluginId: _pluginId, ...widgetBase } = widget;
       return {
         ...widgetBase,
         uid: this.generateUid(widget),
