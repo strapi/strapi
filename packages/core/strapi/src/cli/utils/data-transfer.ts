@@ -639,9 +639,14 @@ const shouldSkipStage = (
   return false;
 };
 
-const logTransferFilterSummary = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => {
-  const { exclude, only } = opts;
-  if (!exclude?.length && !only?.length) {
+const logTransferFilterSummary = (opts: Partial<TransferCliFilterOptions>) => {
+  const { exclude, only, excludeContentTypes, onlyContentTypes } = opts;
+  if (
+    !exclude?.length &&
+    !only?.length &&
+    !excludeContentTypes?.length &&
+    !onlyContentTypes?.length
+  ) {
     return;
   }
 
@@ -653,7 +658,21 @@ const logTransferFilterSummary = (opts: Partial<engineDataTransfer.ITransferEngi
     parts.push(`only ${only.join(', ')}`);
   }
 
-  console.log(chalk.dim(`Transfer filters: ${parts.join('; ')}.`));
+  if (parts.length) {
+    console.log(chalk.dim(`Transfer filters: ${parts.join('; ')}.`));
+  }
+
+  const contentTypeParts: string[] = [];
+  if (excludeContentTypes?.length) {
+    contentTypeParts.push(`excluding ${excludeContentTypes.join(', ')}`);
+  }
+  if (onlyContentTypes?.length) {
+    contentTypeParts.push(`only ${onlyContentTypes.join(', ')}`);
+  }
+
+  if (contentTypeParts.length) {
+    console.log(chalk.dim(`Content type filters: ${contentTypeParts.join('; ')}.`));
+  }
 
   if (shouldSkipStage(opts, 'files') && !shouldSkipStage(opts, 'content')) {
     console.log(
@@ -698,10 +717,25 @@ const parseRestoreFromOptions = (opts: TransferCliFilterOptions, strapi: Core.St
     );
   }
 
+  const shouldRestoreAssets = () => {
+    if (shouldSkipStage(opts, 'files')) {
+      return false;
+    }
+
+    if (!opts.onlyContentTypes?.length) {
+      return true;
+    }
+
+    // With --only-content-types, only wipe/restore assets when upload types are in scope.
+    return opts.onlyContentTypes.some((uid) =>
+      (UPLOAD_CONTENT_TYPE_UIDS as readonly string[]).includes(uid)
+    );
+  };
+
   const restoreConfig: strapiDataTransfer.providers.ILocalStrapiDestinationProviderOptions['restore'] =
     {
       entities: entitiesOptions,
-      assets: !shouldSkipStage(opts, 'files'),
+      assets: shouldRestoreAssets(),
       configuration: {
         webhook: !shouldSkipStage(opts, 'config'),
         coreStore: !shouldSkipStage(opts, 'config'),

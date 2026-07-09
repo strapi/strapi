@@ -57,4 +57,42 @@ describe('logTransferFilterSummary', () => {
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('excluding files, content'));
     expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
   });
+
+  test('prints content type filters when exclude-content-types is set', () => {
+    logTransferFilterSummary({
+      excludeContentTypes: ['plugin::upload.file', 'plugin::upload.folder'],
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Content type filters: excluding plugin::upload.file, plugin::upload.folder'
+      )
+    );
+  });
+
+  test('prints content type filters when only-content-types is set', () => {
+    logTransferFilterSummary({
+      onlyContentTypes: ['api::article.article', 'api::category.category'],
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Content type filters: only api::article.article, api::category.category'
+      )
+    );
+  });
+
+  test('prints stage and content type filters on separate lines', () => {
+    logTransferFilterSummary({
+      exclude: ['files'],
+      onlyContentTypes: ['api::article.article'],
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Transfer filters: excluding files')
+    );
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Content type filters: only api::article.article')
+    );
+  });
 });

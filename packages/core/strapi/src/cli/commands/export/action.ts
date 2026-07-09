@@ -104,7 +104,12 @@ export default async (opts: CmdOptions) => {
 
   progress.on('transfer::start', async () => {
     console.log(`Starting export...`);
-    logTransferFilterSummary({ exclude: opts.exclude, only: opts.only });
+    logTransferFilterSummary({
+      exclude: opts.exclude,
+      only: opts.only,
+      excludeContentTypes: opts.excludeContentTypes,
+      onlyContentTypes: opts.onlyContentTypes,
+    });
 
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
   });

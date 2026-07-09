@@ -128,7 +128,12 @@ export default async (opts: CmdOptions) => {
 
   progress.on('transfer::start', async () => {
     console.log('Starting import...');
-    logTransferFilterSummary({ exclude: opts.exclude, only: opts.only });
+    logTransferFilterSummary({
+      exclude: opts.exclude,
+      only: opts.only,
+      excludeContentTypes: opts.excludeContentTypes,
+      onlyContentTypes: opts.onlyContentTypes,
+    });
     await strapiInstance.telemetry.send(
       'didDEITSProcessStart',
       getTransferTelemetryPayload(engine)

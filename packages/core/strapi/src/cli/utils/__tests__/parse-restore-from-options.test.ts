@@ -91,5 +91,29 @@ describe('parseRestoreFromOptions', () => {
     );
 
     expect(restore.entities?.include).toEqual(['api::article.article']);
+    expect(restore.assets).toBe(false);
+  });
+
+  test('--only-content-types including upload types still restores assets when files stage is active', () => {
+    const restore = parseRestoreFromOptions(
+      {
+        onlyContentTypes: ['plugin::upload.file', 'plugin::upload.folder'],
+      },
+      mockStrapi
+    );
+
+    expect(restore.assets).toBe(true);
+  });
+
+  test('--only-content-types with upload types does not restore assets when files stage is skipped', () => {
+    const restore = parseRestoreFromOptions(
+      {
+        onlyContentTypes: ['plugin::upload.file', 'plugin::upload.folder'],
+        exclude: ['files'],
+      },
+      mockStrapi
+    );
+
+    expect(restore.assets).toBe(false);
   });
 });

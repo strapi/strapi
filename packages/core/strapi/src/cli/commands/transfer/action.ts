@@ -262,7 +262,12 @@ export default async (opts: CmdOptions) => {
   progress.on('transfer::start', async () => {
     transferPrepStartedAt = Date.now();
     prepStepDetail = null;
-    logTransferFilterSummary({ exclude: opts.exclude, only: opts.only });
+    logTransferFilterSummary({
+      exclude: opts.exclude,
+      only: opts.only,
+      excludeContentTypes: opts.excludeContentTypes,
+      onlyContentTypes: opts.onlyContentTypes,
+    });
     startingSpinner = ora(formatPrepSpinnerLine()).start();
     startingElapsedInterval = setInterval(() => {
       if (startingSpinner && transferPrepStartedAt != null) {
