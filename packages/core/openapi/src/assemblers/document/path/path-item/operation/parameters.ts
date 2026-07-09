@@ -4,6 +4,10 @@ import type { Assembler } from '../../../..';
 
 import type { OperationContext } from '../../../../../types';
 import { createDebugger, zodToOpenAPI } from '../../../../../utils';
+import {
+  hasExpandableObjectProperties,
+  shouldUseDeepObjectStyle,
+} from '../../../query-param-styles';
 
 const debug = createDebugger('assembler:parameters');
 
@@ -60,8 +64,9 @@ export class OperationParametersAssembler implements Assembler.Operation {
       const schema = zodToOpenAPI(zodSchema) as any;
 
       const resolvedSchema = this._resolveSchema(schema);
-      if (resolvedSchema.type === 'object' && resolvedSchema.properties) {
-        for (const [propName, propSchema] of Object.entries(resolvedSchema.properties)) {
+
+      if (hasExpandableObjectProperties(resolvedSchema)) {
+        for (const [propName, propSchema] of Object.entries(resolvedSchema.properties!)) {
           const isRequired = resolvedSchema.required?.includes(propName) ?? false;
 
           const param: QueryParameterObject = {
@@ -74,6 +79,18 @@ export class OperationParametersAssembler implements Assembler.Operation {
           Object.assign(param, { 'x-strapi-serialize': 'querystring' });
           queryParams.push(param);
         }
+      } else if (shouldUseDeepObjectStyle(name, resolvedSchema)) {
+        const param: QueryParameterObject = {
+          name,
+          in: 'query',
+          required,
+          schema: resolvedSchema,
+          style: 'deepObject',
+          explode: true,
+        };
+
+        Object.assign(param, { 'x-strapi-serialize': 'querystring' });
+        queryParams.push(param);
       } else {
         const param: QueryParameterObject = { name, in: 'query', required, schema };
         Object.assign(param, { 'x-strapi-serialize': 'querystring' });

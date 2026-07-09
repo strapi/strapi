@@ -179,6 +179,34 @@ describe('OpenAPI operation assemblers – params added via addQueryParams / add
       expect(names).toContain('pagination[withCount]');
       expect(names).not.toContain('pagination');
     });
+
+    it('describes filters as a deepObject query param', () => {
+      const filtersSchema = z.record(z.string(), z.any()).optional();
+
+      const route = contentAPIRoute({
+        handler: 'api::article.article.findMany',
+        request: {
+          query: {
+            filters: filtersSchema,
+          },
+        },
+      });
+
+      const assembler = new OperationParametersAssembler();
+      const context = createOperationContext();
+      assembler.assemble(context, route);
+
+      const parameters = context.output.data.parameters ?? [];
+      const filtersParam = parameters.find(
+        (p): p is typeof p & { name: string } => p.name === 'filters' && p.in === 'query'
+      );
+
+      expect(filtersParam).toBeDefined();
+      expect(filtersParam?.style).toBe('deepObject');
+      expect(filtersParam?.explode).toBe(true);
+      expect(filtersParam?.schema).toMatchObject({ type: 'object' });
+      expect(parameters.some((p) => p.name.startsWith('filters['))).toBe(false);
+    });
   });
 
   describe('BodyAssembler', () => {

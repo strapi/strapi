@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { DocumentSecurityAssembler } from '../src/assemblers/document/security';
+import { DocumentServerAssembler } from '../src/assemblers/document/server';
 import { DocumentContextFactory } from '../src/context';
 import { ComponentsWriter } from '../src/post-processor/component-writer';
 
@@ -44,6 +45,52 @@ describe('OpenAPI document assemblers', () => {
 
       expect(context.output.data.components?.securitySchemes?.bearerAuth).toBeDefined();
       expect(context.output.data.components?.schemas).toBeDefined();
+    });
+  });
+
+  describe('DocumentServerAssembler', () => {
+    it('includes a default server from server.url', () => {
+      const assembler = new DocumentServerAssembler();
+      const factory = new DocumentContextFactory();
+      const context = factory.create({
+        strapi: createStrapiMock({ 'server.url': 'https://api.example.com' }) as Core.Strapi,
+        routes: [],
+      });
+
+      assembler.assemble(context);
+
+      expect(context.output.data.servers).toEqual([
+        { url: 'https://api.example.com', description: 'Default server' },
+      ]);
+    });
+
+    it('prefers openapi.servers over server.url', () => {
+      const assembler = new DocumentServerAssembler();
+      const factory = new DocumentContextFactory();
+      const context = factory.create({
+        strapi: createStrapiMock({
+          'openapi.servers': [{ url: 'https://staging.example.com', description: 'Staging' }],
+          'server.url': 'https://api.example.com',
+        }) as Core.Strapi,
+        routes: [],
+      });
+
+      assembler.assemble(context);
+
+      expect(context.output.data.servers).toEqual([
+        { url: 'https://staging.example.com', description: 'Staging' },
+      ]);
+    });
+
+    it('falls back to localhost when no server config is set', () => {
+      const assembler = new DocumentServerAssembler();
+      const context = createDocumentContext();
+
+      assembler.assemble(context);
+
+      expect(context.output.data.servers).toEqual([
+        { url: 'http://localhost:1337', description: 'Default server' },
+      ]);
     });
   });
 });

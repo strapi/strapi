@@ -6,12 +6,14 @@ import { DocumentInfoAssembler } from './info';
 import { DocumentMetadataAssembler } from './metadata';
 import { DocumentPathsAssembler, PathAssemblerFactory } from './path';
 import { DocumentSecurityAssembler } from './security';
+import { DocumentServerAssembler } from './server';
 
 export class DocumentAssemblerFactory {
   createAll(): Assembler.Document[] {
     return [
       this._createMetadataAssembler(),
       this._createInfoAssembler(),
+      this._createServerAssembler(),
       this._createSecurityAssembler(),
       this._createPathsAssembler(),
     ];
@@ -27,6 +29,10 @@ export class DocumentAssemblerFactory {
 
   private _createSecurityAssembler() {
     return new DocumentSecurityAssembler();
+  }
+
+  private _createServerAssembler() {
+    return new DocumentServerAssembler();
   }
 
   private _createPathsAssembler(
