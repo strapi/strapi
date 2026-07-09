@@ -8885,18 +8885,21 @@ __metadata:
   dependencies:
     "@juggle/resize-observer": "npm:3.4.0"
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     eslint-config-custom: "npm:5.50.1"
     jest-environment-jsdom: "npm:29.6.1"
     jest-styled-components: "npm:7.1.1"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
     react-query: "npm:3.39.3"
     styled-components: "npm:6.4.1"
     tsconfig: "npm:5.50.1"
     whatwg-fetch: "npm:3.6.2"
   peerDependencies:
     "@reduxjs/toolkit": ^1.9.7
-    "@testing-library/jest-dom": ^5.16.5
+    "@testing-library/jest-dom": ^6.0.0
     jest-environment-jsdom: ^29.0.0
     styled-components: ^6.0.0
   languageName: unknown
@@ -8920,11 +8923,13 @@ __metadata:
     "@strapi/typescript-utils": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
     "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15"
     "@types/fs-extra": "npm:11.0.4"
     "@types/invariant": "npm:2.2.37"
+    "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/jsonwebtoken": "npm:9.0.3"
     "@types/koa-passport": "npm:6.0.1"
@@ -8933,6 +8938,7 @@ __metadata:
     "@types/markdown-it-container": "npm:2.0.9"
     "@types/markdown-it-emoji": "npm:2.0.4"
     "@types/markdown-it-footnote": "npm:3.0.3"
+    "@types/node": "npm:20.19.41"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/react-window": "npm:1.8.8"
@@ -8953,6 +8959,7 @@ __metadata:
     inquirer: "npm:9.3.8"
     invariant: "npm:^2.2.4"
     is-localhost-ip: "npm:2.0.0"
+    jest: "npm:29.6.0"
     json-logic-js: "npm:2.0.5"
     jsonwebtoken: "npm:9.0.0"
     koa: "npm:2.16.4"
@@ -9018,7 +9025,9 @@ __metadata:
     "@strapi/utils": "npm:5.50.1"
     "@types/cli-progress": "npm:3.11.5"
     "@types/eventsource": "npm:1.1.15"
+    "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
+    "@types/node": "npm:20.19.41"
     axios: "npm:1.18.1"
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
@@ -9029,6 +9038,7 @@ __metadata:
     fast-safe-stringify: "npm:2.1.1"
     fs-extra: "npm:11.3.4"
     inquirer: "npm:9.3.8"
+    jest: "npm:29.6.0"
     jsonwebtoken: "npm:9.0.0"
     jwks-rsa: "npm:3.1.0"
     lodash: "npm:4.18.1"
@@ -9062,9 +9072,12 @@ __metadata:
     "@strapi/icons": "npm:2.2.1"
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
+    "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
+    "@types/node": "npm:20.19.41"
     "@types/prismjs": "npm:1.26.5"
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
@@ -9072,6 +9085,7 @@ __metadata:
     fractional-indexing: "npm:3.2.0"
     highlight.js: "npm:^10.4.1"
     immer: "npm:9.0.21"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
@@ -9127,12 +9141,16 @@ __metadata:
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
     "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
+    "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
     formik: "npm:2.4.5"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
@@ -9174,15 +9192,20 @@ __metadata:
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
     "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/micromatch": "npm:^4.0.9"
+    "@types/node": "npm:20.19.41"
     "@types/pluralize": "npm:0.0.32"
+    "@types/react": "npm:18.3.2"
     ai: "npm:5.0.52"
     date-fns: "npm:2.30.0"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
+    jest: "npm:29.6.0"
     jszip: "npm:^3.10.1"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
@@ -9267,6 +9290,7 @@ __metadata:
     http-errors: "npm:2.0.0"
     inquirer: "npm:9.3.8"
     is-docker: "npm:2.2.1"
+    jest: "npm:29.6.0"
     json-logic-js: "npm:2.0.5"
     jsonwebtoken: "npm:9.0.0"
     koa: "npm:2.16.4"
@@ -9323,6 +9347,7 @@ __metadata:
     commander: "npm:8.3.0"
     fs-extra: "npm:11.3.4"
     inquirer: "npm:9.3.8"
+    jest: "npm:29.6.0"
     knex: "npm:3.0.1"
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
@@ -9349,11 +9374,14 @@ __metadata:
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/utils": "npm:5.50.1"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     ajv: "npm:8.20.0"
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
     eslint-config-custom: "npm:5.50.1"
     fs-extra: "npm:11.3.4"
+    jest: "npm:29.6.0"
     knex: "npm:3.0.1"
     lodash: "npm:4.18.1"
     semver: "npm:7.7.4"
@@ -9412,9 +9440,14 @@ __metadata:
     "@strapi/provider-email-sendmail": "npm:5.50.1"
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
+    "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
+    "@types/node": "npm:20.19.41"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
     koa2-ratelimit: "npm:^1.1.3"
@@ -9476,12 +9509,15 @@ __metadata:
     "@strapi/typescript-utils": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/jscodeshift": "npm:17.3.0"
+    "@types/node": "npm:20.19.41"
     chalk: "npm:4.1.2"
     copyfiles: "npm:2.4.1"
     eslint-config-custom: "npm:5.50.1"
     fs-extra: "npm:11.3.4"
     handlebars: "npm:4.7.9"
+    jest: "npm:29.6.0"
     jscodeshift: "npm:17.3.0"
     lodash: "npm:4.18.1"
     outdent: "npm:^0.8.0"
@@ -9504,8 +9540,13 @@ __metadata:
     "@strapi/icons": "npm:2.2.1"
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
+    "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
@@ -9544,6 +9585,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
   dependencies:
+    "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.1"
     lodash: "npm:4.18.1"
     tsconfig: "npm:5.50.1"
@@ -9557,7 +9599,10 @@ __metadata:
   dependencies:
     "@strapi/types": "npm:5.50.1"
     "@types/debug": "npm:^4"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     debug: "npm:4.3.4"
+    jest: "npm:29.6.0"
     openapi-types: "npm:12.1.3"
     zod: "npm:3.25.67"
   languageName: unknown
@@ -9569,7 +9614,10 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.7.5"
     "@strapi/utils": "npm:5.50.1"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.1"
+    jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
     qs: "npm:6.15.3"
     sift: "npm:16.0.1"
@@ -9612,8 +9660,13 @@ __metadata:
     "@strapi/design-system": "npm:2.2.1"
     "@strapi/icons": "npm:2.2.1"
     "@strapi/strapi": "npm:5.50.1"
+    "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
+    jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-colorful: "npm:5.6.1"
     react-dom: "npm:18.3.1"
@@ -9645,16 +9698,21 @@ __metadata:
     "@strapi/strapi": "npm:5.50.1"
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
+    "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
+    "@types/node": "npm:20.19.41"
     "@types/swagger-ui-dist": "npm:3.30.4"
     bcryptjs: "npm:2.4.3"
     cheerio: "npm:^1.2.0"
     formik: "npm:2.4.5"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
     koa-session: "npm:7.0.2"
@@ -9695,14 +9753,17 @@ __metadata:
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
     "@types/graphql-depth-limit": "npm:1.1.5"
+    "@types/jest": "npm:29.5.2"
     "@types/koa-bodyparser": "npm:4.3.12"
     "@types/koa__cors": "npm:5.0.0"
+    "@types/node": "npm:20.19.41"
     cross-env: "npm:^7.0.3"
     eslint-config-custom: "npm:5.50.1"
     graphql: "npm:^16.8.1"
     graphql-depth-limit: "npm:^1.1.0"
     graphql-playground-middleware-koa: "npm:^1.6.21"
     graphql-scalars: "npm:1.22.2"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-bodyparser: "npm:4.4.1"
     koa-compose: "npm:^4.1.0"
@@ -9732,6 +9793,9 @@ __metadata:
     "@strapi/design-system": "npm:2.2.1"
     "@strapi/icons": "npm:2.2.1"
     "@strapi/strapi": "npm:5.50.1"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
+    jest: "npm:29.6.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
@@ -9754,12 +9818,15 @@ __metadata:
     "@strapi/strapi": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
     "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
+    "@types/jest": "npm:29.5.2"
     bcryptjs: "npm:2.4.3"
     formik: "npm:2.4.5"
     grant: "npm:5.4.24"
     immer: "npm:9.0.21"
+    jest: "npm:29.6.0"
     jsonwebtoken: "npm:9.0.0"
     jwk-to-pem: "npm:2.0.7"
     koa: "npm:2.16.4"
@@ -9793,6 +9860,7 @@ __metadata:
   dependencies:
     "@aws-sdk/client-ses": "npm:3.1023.0"
     "@strapi/utils": "npm:5.50.1"
+    "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.1"
     tsconfig: "npm:5.50.1"
     vitest: "catalog:"
@@ -9805,8 +9873,11 @@ __metadata:
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
     "@strapi/utils": "npm:5.50.1"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.1"
     form-data: "npm:4.0.6"
+    jest: "npm:29.6.0"
     mailgun.js: "npm:10.2.1"
     tsconfig: "npm:5.50.1"
   languageName: unknown
@@ -9816,8 +9887,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.50.1"
+    jest: "npm:29.6.0"
     nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.50.1"
   languageName: unknown
@@ -9829,6 +9903,7 @@ __metadata:
   dependencies:
     "@sendgrid/mail": "npm:8.1.3"
     "@strapi/utils": "npm:5.50.1"
+    "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.1"
     tsconfig: "npm:5.50.1"
   languageName: unknown
@@ -9838,8 +9913,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.50.1"
+    jest: "npm:29.6.0"
     nodemailer: "npm:9.0.1"
     tsconfig: "npm:5.50.1"
   languageName: unknown
@@ -9854,7 +9932,9 @@ __metadata:
     "@aws-sdk/s3-request-presigner": "npm:3.1023.0"
     "@aws-sdk/types": "npm:3.973.6"
     "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.1"
+    jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
     tsconfig: "npm:5.50.1"
   languageName: unknown
@@ -9865,6 +9945,7 @@ __metadata:
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
     "@strapi/utils": "npm:5.50.1"
+    "@types/node": "npm:20.19.41"
     cloudinary: "npm:^2.7.0"
     eslint-config-custom: "npm:5.50.1"
     into-stream: "npm:^5.1.0"
@@ -9880,8 +9961,10 @@ __metadata:
     "@strapi/utils": "npm:5.50.1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.50.1"
     fs-extra: "npm:11.3.4"
+    jest: "npm:29.6.0"
     memfs: "npm:4.6.0"
     tsconfig: "npm:5.50.1"
   languageName: unknown
@@ -9898,9 +9981,14 @@ __metadata:
     "@strapi/icons": "npm:2.2.1"
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
+    "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
+    "@types/jest": "npm:29.5.2"
+    "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
     fractional-indexing: "npm:3.2.0"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
@@ -10032,6 +10120,7 @@ __metadata:
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
     "@types/koa__router": "npm:12.0.0"
+    "@types/node": "npm:20.19.41"
     "@types/node-schedule": "npm:2.1.7"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:5.50.1"
@@ -10055,12 +10144,14 @@ __metadata:
   resolution: "@strapi/typescript-utils@workspace:packages/utils/typescript"
   dependencies:
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     eslint-config-custom: "npm:5.50.1"
     fs-extra: "npm:11.3.4"
+    jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
     prettier: "npm:3.3.3"
     tsconfig: "npm:5.50.1"
@@ -10107,7 +10198,9 @@ __metadata:
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/jscodeshift": "npm:17.3.0"
+    "@types/node": "npm:20.19.41"
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.5"
     commander: "npm:8.3.0"
@@ -10116,6 +10209,7 @@ __metadata:
     execa: "npm:5.1.1"
     fast-glob: "npm:3.3.2"
     fs-extra: "npm:11.3.4"
+    jest: "npm:29.6.0"
     jscodeshift: "npm:17.3.0"
     lodash: "npm:4.18.1"
     memfs: "npm:4.6.0"
@@ -10147,13 +10241,16 @@ __metadata:
     "@strapi/types": "npm:5.50.1"
     "@strapi/utils": "npm:5.50.1"
     "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/byte-size": "npm:8.1.2"
     "@types/fs-extra": "npm:11.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
     "@types/koa-range": "npm:0.3.5"
     "@types/koa-static": "npm:4.0.2"
+    "@types/node": "npm:20.19.41"
     byte-size: "npm:8.1.1"
     cropperjs: "npm:1.6.1"
     date-fns: "npm:2.30.0"
@@ -10162,6 +10259,7 @@ __metadata:
     formik: "npm:2.4.5"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
     koa-range: "npm:0.3.0"
@@ -10198,12 +10296,14 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
+    "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
     "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.50.1"
     execa: "npm:5.1.1"
     http-errors: "npm:2.0.0"
+    jest: "npm:29.6.0"
     koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
@@ -11690,16 +11790,6 @@ __metadata:
   dependencies:
     "@types/react": "npm:*"
   checksum: 10c0/2170a3957752603e8b994840c5d31b72ddf94c427c0f42b0175b343cc54f50fe66161d8871e11786ec7a59906bd33861945579a3a8f745455a3744268ec1069f
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:*, @types/react@npm:16 || 17 || 18, @types/react@npm:^18":
-  version: 18.3.23
-  resolution: "@types/react@npm:18.3.23"
-  dependencies:
-    "@types/prop-types": "npm:*"
-    csstype: "npm:^3.0.2"
-  checksum: 10c0/49331800b76572eb2992a5c44801dbf8c612a5f99c8f4e4200f06c7de6f3a6e9455c661784a6c5469df96fa45622cb4a9d0982c44e6a0d5719be5f2ef1f545ed
   languageName: node
   linkType: hard
 
@@ -14313,15 +14403,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bs-logger@npm:0.x":
-  version: 0.2.6
-  resolution: "bs-logger@npm:0.2.6"
-  dependencies:
-    fast-json-stable-stringify: "npm:2.x"
-  checksum: 10c0/80e89aaaed4b68e3374ce936f2eb097456a0dddbf11f75238dbd53140b1e39259f0d248a5089ed456f1158984f22191c3658d54a713982f676709fbe1a6fa5a0
-  languageName: node
-  linkType: hard
-
 "bser@npm:2.1.1":
   version: 2.1.1
   resolution: "bser@npm:2.1.1"
@@ -14710,7 +14791,9 @@ __metadata:
   dependencies:
     "@actions/core": "npm:1.11.1"
     "@actions/github": "npm:6.0.0"
+    "@types/jest": "npm:29.5.2"
     "@vercel/ncc": "npm:0.38.2"
+    jest: "npm:29.6.0"
   languageName: unknown
   linkType: soft
 
@@ -15602,6 +15685,7 @@ __metadata:
     "@types/async-retry": "npm:^1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/inquirer": "npm:9.0.9"
+    "@types/node": "npm:20.19.41"
     async-retry: "npm:1.3.3"
     chalk: "npm:4.1.2"
     commander: "npm:8.3.0"
@@ -18467,7 +18551,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-json-stable-stringify@npm:2.x, fast-json-stable-stringify@npm:^2.0.0, fast-json-stable-stringify@npm:^2.1.0":
+"fast-json-stable-stringify@npm:^2.0.0, fast-json-stable-stringify@npm:^2.1.0":
   version: 2.1.0
   resolution: "fast-json-stable-stringify@npm:2.1.0"
   checksum: 10c0/7f081eb0b8a64e0057b3bb03f974b3ef00135fbf36c1c710895cd9300f13c94ba809bb3a81cf4e1b03f6e5285610a61abbd7602d0652de423144dfee5a389c9b
@@ -19461,6 +19545,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": "workspace:*"
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
+    "@types/node": "npm:20.19.41"
     better-sqlite3: "npm:12.8.0"
     lodash: "npm:4.18.1"
     mysql2: "npm:3.20.0"
@@ -21544,7 +21629,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-circus@npm:29.6.0, jest-circus@npm:^29.6.0":
+"jest-circus@npm:^29.6.0":
   version: 29.6.0
   resolution: "jest-circus@npm:29.6.0"
   dependencies:
@@ -21938,7 +22023,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-util@npm:^29.0.0, jest-util@npm:^29.6.0, jest-util@npm:^29.6.1, jest-util@npm:^29.6.2":
+"jest-util@npm:^29.6.0, jest-util@npm:^29.6.1, jest-util@npm:^29.6.2":
   version: 29.6.2
   resolution: "jest-util@npm:29.6.2"
   dependencies:
@@ -22509,6 +22594,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": "workspace:*"
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
+    "@types/node": "npm:20.19.41"
     better-sqlite3: "npm:12.8.0"
     lodash: "npm:4.18.1"
     mysql2: "npm:3.20.0"
@@ -23210,13 +23296,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.memoize@npm:4.x":
-  version: 4.1.2
-  resolution: "lodash.memoize@npm:4.1.2"
-  checksum: 10c0/c8713e51eccc650422716a14cece1809cfe34bc5ab5e242b7f8b4e2241c2483697b971a604252807689b9dd69bfe3a98852e19a5b89d506b000b4187a1285df8
-  languageName: node
-  linkType: hard
-
 "lodash.merge@npm:^4.6.2":
   version: 4.6.2
   resolution: "lodash.merge@npm:4.6.2"
@@ -23520,13 +23599,6 @@ __metadata:
   dependencies:
     semver: "npm:^6.0.0"
   checksum: 10c0/56aaafefc49c2dfef02c5c95f9b196c4eb6988040cf2c712185c7fe5c99b4091591a7fc4d4eafaaefa70ff763a26f6ab8c3ff60b9e75ea19876f49b18667ecaa
-  languageName: node
-  linkType: hard
-
-"make-error@npm:1.x":
-  version: 1.3.6
-  resolution: "make-error@npm:1.3.6"
-  checksum: 10c0/171e458d86854c6b3fc46610cfacf0b45149ba043782558c6875d9f42f222124384ad0b468c92e996d815a8a2003817a710c0a160e49c1c394626f76fa45396f
   languageName: node
   linkType: hard
 
@@ -28450,6 +28522,9 @@ __metadata:
 "scripts-front@workspace:scripts/front":
   version: 0.0.0-use.local
   resolution: "scripts-front@workspace:scripts/front"
+  dependencies:
+    "@types/jest": "npm:29.5.2"
+    jest: "npm:29.6.0"
   languageName: unknown
   linkType: soft
 
@@ -28508,21 +28583,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.x, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.3":
-  version: 7.6.3
-  resolution: "semver@npm:7.6.3"
-  bin:
-    semver: bin/semver.js
-  checksum: 10c0/88f33e148b210c153873cb08cfe1e281d518aaa9a666d4d148add6560db5cd3c582f3a08ccb91f38d5f379ead256da9931234ed122057f40bb5766e65e58adaf
-  languageName: node
-  linkType: hard
-
 "semver@npm:^6.0.0, semver@npm:^6.1.0, semver@npm:^6.3.0, semver@npm:^6.3.1":
   version: 6.3.1
   resolution: "semver@npm:6.3.1"
   bin:
     semver: bin/semver.js
   checksum: 10c0/e3d79b609071caa78bcb6ce2ad81c7966a46a7431d9d58b8800cfa9cb6a63699b3899a0e4bcce36167a284578212d9ae6942b6929ba4aa5015c079a67751d42d
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.3":
+  version: 7.6.3
+  resolution: "semver@npm:7.6.3"
+  bin:
+    semver: bin/semver.js
+  checksum: 10c0/88f33e148b210c153873cb08cfe1e281d518aaa9a666d4d148add6560db5cd3c582f3a08ccb91f38d5f379ead256da9931234ed122057f40bb5766e65e58adaf
   languageName: node
   linkType: hard
 
@@ -29478,9 +29553,7 @@ __metadata:
     husky: "npm:9.1.7"
     inquirer: "npm:9.3.8"
     jest: "npm:29.6.0"
-    jest-circus: "npm:29.6.0"
     jest-cli: "npm:29.6.0"
-    jest-environment-jsdom: "npm:29.6.1"
     jest-watch-typeahead: "npm:2.2.2"
     lint-staged: "npm:16.4.0"
     lodash: "npm:4.18.1"
@@ -29500,7 +29573,6 @@ __metadata:
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.18"
-    ts-jest: "npm:29.1.0"
     tsx: "npm:4.22.4"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
@@ -30599,39 +30671,6 @@ __metadata:
   version: 0.1.13
   resolution: "ts-interface-checker@npm:0.1.13"
   checksum: 10c0/232509f1b84192d07b81d1e9b9677088e590ac1303436da1e92b296e9be8e31ea042e3e1fd3d29b1742ad2c959e95afe30f63117b8f1bc3a3850070a5142fea7
-  languageName: node
-  linkType: hard
-
-"ts-jest@npm:29.1.0":
-  version: 29.1.0
-  resolution: "ts-jest@npm:29.1.0"
-  dependencies:
-    bs-logger: "npm:0.x"
-    fast-json-stable-stringify: "npm:2.x"
-    jest-util: "npm:^29.0.0"
-    json5: "npm:^2.2.3"
-    lodash.memoize: "npm:4.x"
-    make-error: "npm:1.x"
-    semver: "npm:7.x"
-    yargs-parser: "npm:^21.0.1"
-  peerDependencies:
-    "@babel/core": ">=7.0.0-beta.0 <8"
-    "@jest/types": ^29.0.0
-    babel-jest: ^29.0.0
-    jest: ^29.0.0
-    typescript: ">=4.3 <6"
-  peerDependenciesMeta:
-    "@babel/core":
-      optional: true
-    "@jest/types":
-      optional: true
-    babel-jest:
-      optional: true
-    esbuild:
-      optional: true
-  bin:
-    ts-jest: cli.js
-  checksum: 10c0/504d77b13157a4d2f1eebbd0e0f21f2db65fc28039f107fd73453655c029adccba5b22bdd4de0efa58707c1bbd34a67a1a5cceb794e91c3c2c7be4f904c79f9f
   languageName: node
   linkType: hard
 
@@ -31863,6 +31902,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "vitest-config@workspace:packages/utils/vitest-config"
   dependencies:
+    "@types/node": "npm:20.19.41"
     vitest: "catalog:"
   peerDependencies:
     vitest: ^4.0.0
@@ -32588,7 +32628,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs-parser@npm:21.1.1, yargs-parser@npm:^21.0.1, yargs-parser@npm:^21.1.1":
+"yargs-parser@npm:21.1.1, yargs-parser@npm:^21.1.1":
   version: 21.1.1
   resolution: "yargs-parser@npm:21.1.1"
   checksum: 10c0/f84b5e48169479d2f402239c59f084cfd1c3acc197a05c59b98bab067452e6b3ea46d4dd8ba2985ba7b3d32a343d77df0debd6b343e5dae3da2aab2cdf5886b2
