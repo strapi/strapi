@@ -1,12 +1,12 @@
 import {
   OBJECT_INSPECT_SHIM,
   POSTCSS_BROWSER_FALSE_SHIM,
+  browserCompatShimsPlugin,
   isPostcssBrowserFalseImport,
-  objectInspectShimPlugin,
 } from './browser-compat-shims';
 
 describe('browser-compat shims (Vite admin)', () => {
-  const plugin = objectInspectShimPlugin() as unknown as {
+  const plugin = browserCompatShimsPlugin() as unknown as {
     resolveId: (id: string, importer?: string) => string | null;
     load: (id: string) => string | null;
   };
@@ -26,7 +26,7 @@ describe('browser-compat shims (Vite admin)', () => {
     });
   });
 
-  describe('objectInspectShimPlugin', () => {
+  describe('browserCompatShimsPlugin', () => {
     it('redirects object-inspect to the shim virtual module', () => {
       expect(plugin.resolveId('object-inspect')).toBe(OBJECT_INSPECT_SHIM);
     });

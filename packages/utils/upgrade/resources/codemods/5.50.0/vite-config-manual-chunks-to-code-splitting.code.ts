@@ -8,7 +8,7 @@ import type { Transform, ObjectExpression, ObjectProperty } from 'jscodeshift';
  * `manualChunks: { vendor: ['react'] }`). Function forms are left untouched
  * for manual review.
  */
-const VITE_ADMIN_CONFIG = /[\\/]src[\\/]admin[\\/]vite\.config\.(?:c|m)?[jt]sx?$/;
+const VITE_ADMIN_CONFIG = /[\\/]src[\\/]admin[\\/]vite\.config\.[cm]?[jt]sx?$/;
 
 const isObjectProperty = (node: unknown): node is ObjectProperty => {
   const type = (node as { type?: string } | null)?.type;
@@ -33,7 +33,7 @@ const getStaticKeyName = (node: unknown): string | undefined => {
   return undefined;
 };
 
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
 const moduleNamesToTestPattern = (moduleNames: string[]) => {
   const segments = moduleNames.map((moduleName) => {
@@ -41,13 +41,13 @@ const moduleNamesToTestPattern = (moduleNames: string[]) => {
       const [scope, ...rest] = moduleName.split('/');
       const name = rest.join('/');
 
-      return `${escapeRegExp(scope)}[\\\\/]${escapeRegExp(name)}`;
+      return String.raw`${escapeRegExp(scope)}[\\/]${escapeRegExp(name)}`;
     }
 
     return escapeRegExp(moduleName);
   });
 
-  return `node_modules[\\\\/](?:${segments.join('|')})([\\\\/]|$)`;
+  return String.raw`node_modules[\\/](?:${segments.join('|')})([\\/]|$)`;
 };
 
 const transform: Transform = (file, api) => {

@@ -123,10 +123,7 @@ export declare namespace CountDraftRelations {
   }
 
   export interface Response {
-    data: {
-      unpublishedRelations: number;
-      draftM2mLinks: number;
-    };
+    data: number;
     error?: errors.ApplicationError;
   }
 }

@@ -11,7 +11,7 @@ import type { Transform } from 'jscodeshift';
  * Note: depending on the use case `transformWithOxc` may behave differently from
  * `transformWithEsbuild`; review the migrated call sites.
  */
-const VITE_ADMIN_CONFIG = /[\\/]src[\\/]admin[\\/]vite\.config\.(?:c|m)?[jt]sx?$/;
+const VITE_ADMIN_CONFIG = /[\\/]src[\\/]admin[\\/]vite\.config\.[cm]?[jt]sx?$/;
 
 const OLD_NAME = 'transformWithEsbuild';
 const NEW_NAME = 'transformWithOxc';
@@ -37,18 +37,37 @@ const transform: Transform = (file, api) => {
 
         const isAliased = specifier.local != null && specifier.local.name !== OLD_NAME;
 
-        // Update the imported name
         specifier.imported.name = NEW_NAME;
         changed = true;
 
-        // For non-aliased imports the local binding is also `transformWithEsbuild`,
-        // so rename the local and every reference to keep call sites valid.
         if (!isAliased) {
           if (specifier.local) {
             specifier.local.name = NEW_NAME;
           }
 
           root.find(j.Identifier, { name: OLD_NAME }).forEach((idPath) => {
+            const parent = idPath.parent.node;
+
+            if (parent.type === 'ImportSpecifier') {
+              return;
+            }
+
+            if (
+              (parent.type === 'Property' || parent.type === 'ObjectProperty') &&
+              parent.key === idPath.node &&
+              parent.value !== idPath.node
+            ) {
+              return;
+            }
+
+            if (
+              parent.type === 'MemberExpression' &&
+              parent.property === idPath.node &&
+              !parent.computed
+            ) {
+              return;
+            }
+
             idPath.node.name = NEW_NAME;
           });
         }

@@ -1,5 +1,5 @@
 import type { errors } from '@strapi/utils';
-import type { Entity, Permission } from './shared';
+import { Entity, Permission } from './shared';
 
 export interface Action {
   actionId: string;
@@ -10,7 +10,6 @@ export interface Action {
 
 export interface SubjectProperty {
   children?: SubjectProperty[];
-  isDefault?: boolean;
   label: string;
   required?: boolean;
   value: string;

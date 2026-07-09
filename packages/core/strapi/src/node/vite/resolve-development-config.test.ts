@@ -87,4 +87,17 @@ describe('resolveDevelopmentConfig (Vite admin dev)', () => {
       mockHttpServer.close(() => resolve());
     });
   });
+
+  it('preserves legacy CJS interop for custom admin bundles', async () => {
+    const mockHttpServer = http.createServer();
+    const ctx = createCtx(mockHttpServer);
+
+    const config = await resolveDevelopmentConfig(ctx);
+
+    expect(config.legacy).toEqual({ inconsistentCjsInterop: true });
+
+    await new Promise<void>((resolve) => {
+      mockHttpServer.close(() => resolve());
+    });
+  });
 });

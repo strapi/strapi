@@ -13,7 +13,7 @@
  * Here's how `DocumentServicePluginParams` can be used to define parameters for a fictional plugin "Internationalization":
  * ```typescript
  * declare module '@strapi/types' {
- *   export namespace Public {
+ *   export module Shared {
  *     export interface DocumentServicePluginParams {
  *       'locale': string;
  *     }
@@ -38,7 +38,7 @@ export interface DocumentServicePluginParams {}
  * Here's how `EntityServicePluginParams` can be used to define parameters for a fictional plugin "Internationalization":
  * ```typescript
  * declare module '@strapi/types' {
- *   export namespace Public {
+ *   export module Shared {
  *     export interface EntityServicePluginParams {
  *       'locale': string;
  *     }

@@ -33,4 +33,9 @@ describe('buildAdminViteResolveAliases', () => {
       expect(pkg?.packageJson?.version).toBe(adminDeps[mod]);
     }
   );
+
+  it('resolves path-browserify from @strapi/admin closure for pnpm (#26541)', () => {
+    expect(adminDeps['path-browserify']).toBe('1.0.1');
+    expect(getModulePath('path-browserify')).toContain('path-browserify');
+  });
 });

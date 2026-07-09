@@ -124,6 +124,44 @@ describe('vite 8 config codemods', () => {
 
       expect(output).toBe(source);
     });
+
+    test('prepends review comments for Rolldown-unsupported output formats', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rollupOptions: {
+              output: { format: 'system' },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(renameDeprecatedOptions, source);
+
+      expect(output).toContain('manual review required');
+      expect(output).toContain("output.format: 'system'");
+      expect(output).toContain('rolldownOptions');
+    });
+
+    test('prepends review comments for removed hooks and watch.chokidar', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              watch: { chokidar: { usePolling: true } },
+              plugins: [{ renderDynamicImport() {} }],
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(renameDeprecatedOptions, source);
+
+      expect(output).toContain('watch.chokidar');
+      expect(output).toContain("plugin hook 'renderDynamicImport'");
+    });
   });
 
   describe('manualChunks object -> codeSplitting.groups', () => {
@@ -176,6 +214,51 @@ describe('vite 8 config codemods', () => {
 
       expect(output).toBe(source);
     });
+
+    test('migrates scoped package names in manualChunks', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks: {
+                  vendor: ['@strapi/design-system', 'lodash'],
+                },
+              },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source);
+
+      expect(output).toContain('codeSplitting');
+      expect(output).toContain('name: "vendor"');
+      expect(output).toContain('design-system');
+      expect(output).not.toContain('manualChunks');
+    });
+
+    test('ignores manualChunks groups with no string module names', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks: {
+                  vendor: [],
+                },
+              },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source);
+
+      expect(output).toBe(source);
+    });
   });
 
   describe('transformWithEsbuild -> transformWithOxc', () => {
@@ -210,6 +293,25 @@ describe('vite 8 config codemods', () => {
       expect(output).toContain('transformWithOxc as tfe');
       expect(output).toContain('tfe(');
       expect(output).not.toContain('transformWithEsbuild');
+    });
+
+    test('does not rename unrelated object keys that share the imported name', () => {
+      const source = `
+        import { transformWithEsbuild } from 'vite';
+
+        export default async (config) => {
+          const helpers = { transformWithEsbuild: true };
+          await transformWithEsbuild('code', 'id');
+          return helpers.transformWithEsbuild;
+        };
+      `;
+
+      const output = applyTransform(transformWithEsbuildToOxc, source);
+
+      expect(output).toContain('import { transformWithOxc }');
+      expect(output).toContain('await transformWithOxc(');
+      expect(output).toContain('{ transformWithEsbuild: true }');
+      expect(output).toContain('helpers.transformWithEsbuild');
     });
   });
 });

@@ -8,7 +8,7 @@ import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
 import type { BuildContext } from '../create-build-context';
-import { objectInspectShimPlugin } from './browser-compat-shims';
+import { browserCompatShimsPlugin } from './browser-compat-shims';
 import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
@@ -37,6 +37,12 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       'process.env': JSON.stringify(ctx.env),
     },
     envPrefix: 'STRAPI_ADMIN_',
+    // Vite 8 unified CJS default-import interop (dev and build). Preserve pre-Vite-8
+    // behavior for custom admin code and plugin chunks until users can migrate imports.
+    // See packages/utils/upgrade/resources/codemods/5.50.0/BREAKING_CHANGES.md.
+    legacy: {
+      inconsistentCjsInterop: true,
+    },
     optimizeDeps: {
       // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
       // so changes are reflected without clearing node_modules/.strapi/vite cache
@@ -141,7 +147,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'node:path': getModulePath('path-browserify'),
       },
     },
-    plugins: [react(), objectInspectShimPlugin(), buildFilesPlugin(ctx)],
+    plugins: [react(), browserCompatShimsPlugin(), buildFilesPlugin(ctx)],
   };
 };
 

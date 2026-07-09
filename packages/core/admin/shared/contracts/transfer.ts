@@ -1,4 +1,4 @@
-import type { errors } from '@strapi/utils';
+import { errors } from '@strapi/utils';
 
 export interface TransferTokenPermission {
   id: number | `${number}`;

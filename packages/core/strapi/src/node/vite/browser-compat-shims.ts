@@ -3,6 +3,15 @@ import type { PluginOption } from 'vite';
 const OBJECT_INSPECT_SHIM = '\0strapi-object-inspect';
 const POSTCSS_BROWSER_FALSE_SHIM = '\0strapi-postcss-browser-false';
 
+/**
+ * Vite 8 tightened `browser` / `module` field heuristics. Packages that relied on
+ * postcss's `browser: false` mappings (Node built-ins under postcss/lib) no longer
+ * get automatic stubs — we shim those imports here. `object-inspect` is replaced
+ * with a minimal stringifier so admin chunks that pull it transitively still bundle.
+ *
+ * Other plugin deps with the same `browser`-field pattern are not covered yet; add
+ * entries here or prefer a general resolve.conditions fix if more cases appear.
+ */
 const isPostcssBrowserFalseImport = (id: string, importer?: string) => {
   if (!importer || !/(^|[/\\])postcss[/\\]lib[/\\]/.test(importer)) {
     return false;
@@ -11,7 +20,7 @@ const isPostcssBrowserFalseImport = (id: string, importer?: string) => {
   return ['path', 'url', 'fs', 'source-map-js', './terminal-highlight'].includes(id);
 };
 
-const objectInspectShimPlugin = (): PluginOption => ({
+const browserCompatShimsPlugin = (): PluginOption => ({
   name: 'strapi:browser-compat-shims',
   enforce: 'pre',
   resolveId(id, importer) {
@@ -54,6 +63,6 @@ const objectInspectShimPlugin = (): PluginOption => ({
 export {
   OBJECT_INSPECT_SHIM,
   POSTCSS_BROWSER_FALSE_SHIM,
+  browserCompatShimsPlugin,
   isPostcssBrowserFalseImport,
-  objectInspectShimPlugin,
 };

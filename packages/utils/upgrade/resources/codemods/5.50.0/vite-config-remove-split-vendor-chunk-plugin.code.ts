@@ -8,7 +8,7 @@ import type { Transform } from 'jscodeshift';
  * imports and deletes any `splitVendorChunkPlugin()` call used as an element of
  * an array literal (e.g. the `plugins: [...]` array).
  */
-const VITE_ADMIN_CONFIG = /[\\/]src[\\/]admin[\\/]vite\.config\.(?:c|m)?[jt]sx?$/;
+const VITE_ADMIN_CONFIG = /[\\/]src[\\/]admin[\\/]vite\.config\.[cm]?[jt]sx?$/;
 
 const PLUGIN_NAME = 'splitVendorChunkPlugin';
 
@@ -56,8 +56,7 @@ const transform: Transform = (file, api) => {
     const filtered = elements.filter(
       (element) =>
         !(
-          element &&
-          element.type === 'CallExpression' &&
+          element?.type === 'CallExpression' &&
           element.callee.type === 'Identifier' &&
           element.callee.name === PLUGIN_NAME
         )

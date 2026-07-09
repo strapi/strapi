@@ -56,7 +56,7 @@ namespace GetStages {
 
   export interface Response {
     data: Stage[];
-    meta?: { workflowCount: number; stageCount?: number; canTransition?: boolean };
+    meta?: { workflowCount: number };
     error?: errors.ApplicationError;
   }
 }
