@@ -8936,7 +8936,6 @@ __metadata:
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/react-window": "npm:1.8.8"
-    "@vitejs/plugin-react-swc": "npm:3.11.0"
     axios: "npm:1.18.1"
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
