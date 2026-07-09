@@ -193,13 +193,13 @@ describe('DynamicZone', () => {
       expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
     });
 
-    it('should render a screenshot preview in the picker for a component whose info defines one', async () => {
+    it('should render a preview image in the picker for a component whose info defines one', async () => {
       useDocumentMock.mockReturnValue({
         isLoading: false,
         components: {
           'blog.test-comp': {
             category: 'blog',
-            info: { displayName: 'test comp', screenshot: '/_component-screenshots/test.png' },
+            info: { displayName: 'test comp', preview: '/_component-screenshots/test.png' },
             attributes: {
               name: { type: 'string', default: 'toto' },
             },
@@ -218,7 +218,7 @@ describe('DynamicZone', () => {
 
       await user.click(screen.getByRole('button', { name: /Add a component to/i }));
 
-      // info.screenshot must flow through Field -> ComponentCategory and render as an <img>.
+      // info.preview must flow through Field -> ComponentCategory and render as an <img>.
       const preview = screen.getByAltText('test comp');
       expect(preview).toHaveAttribute('src', '/_component-screenshots/test.png');
     });

@@ -124,7 +124,7 @@ const DynamicZone = ({
         uid: componentUid,
         displayName: info.displayName,
         icon: info.icon,
-        screenshot: info.screenshot,
+        preview: info.preview,
       };
 
       if (!acc[category]) {

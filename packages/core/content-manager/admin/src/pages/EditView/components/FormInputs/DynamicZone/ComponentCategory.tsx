@@ -14,6 +14,9 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
+import { resolvePreviewImageUrl } from '../../../../../utils/previewImage';
+
+import type { Struct } from '@strapi/types';
 
 interface ComponentCategoryProps {
   category: string;
@@ -21,7 +24,7 @@ interface ComponentCategoryProps {
     uid: string;
     displayName: string;
     icon?: string;
-    screenshot?: string;
+    preview?: Struct.PreviewImageValue;
   }>;
   onAddComponent: (
     componentUid: string
@@ -29,18 +32,18 @@ interface ComponentCategoryProps {
   variant?: Accordion.Variant;
 }
 
-interface ScreenshotPreviewProps {
+interface ComponentPreviewImageProps {
   src: string;
   alt: string;
 }
 
 /**
- * Renders a small screenshot thumbnail inside the component picker tile and, on hover,
+ * Renders a small preview thumbnail inside the component picker tile and, on hover,
  * a larger portaled preview so authors can read the component at a glance without picking it.
  * Uses a controlled Popover anchored to the thumbnail — the content is portaled, so it escapes
  * the accordion's overflow clipping.
  */
-const ScreenshotPreview = ({ src, alt }: ScreenshotPreviewProps) => {
+const ComponentPreviewImage = ({ src, alt }: ComponentPreviewImageProps) => {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -100,42 +103,46 @@ const ComponentCategory = ({
       </Accordion.Header>
       <ResponsiveAccordionContent>
         <Grid paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
-          {components.map(({ uid, displayName, icon, screenshot }) => (
-            <ComponentBox
-              key={uid}
-              tag="button"
-              type="button"
-              background="neutral100"
-              justifyContent="center"
-              onClick={onAddComponent(uid)}
-              hasRadius
-              height="8.4rem"
-              shrink={0}
-              borderColor="neutral200"
-            >
-              <Flex
-                direction="column"
-                gap={1}
-                alignItems="center"
-                justifyContent="center"
-                width="100%"
-                paddingLeft={2}
-                paddingRight={2}
-              >
-                {screenshot ? (
-                  <ScreenshotPreview src={screenshot} alt={displayName} />
-                ) : (
-                  <ComponentIcon color="currentColor" background="primary200" icon={icon} />
-                )}
+          {components.map(({ uid, displayName, icon, preview }) => {
+            const previewUrl = resolvePreviewImageUrl(preview);
 
-                <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
-                  <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
-                    {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
-                  </Typography>
-                </Tooltip>
-              </Flex>
-            </ComponentBox>
-          ))}
+            return (
+              <ComponentBox
+                key={uid}
+                tag="button"
+                type="button"
+                background="neutral100"
+                justifyContent="center"
+                onClick={onAddComponent(uid)}
+                hasRadius
+                height="8.4rem"
+                shrink={0}
+                borderColor="neutral200"
+              >
+                <Flex
+                  direction="column"
+                  gap={1}
+                  alignItems="center"
+                  justifyContent="center"
+                  width="100%"
+                  paddingLeft={2}
+                  paddingRight={2}
+                >
+                  {previewUrl ? (
+                    <ComponentPreviewImage src={previewUrl} alt={displayName} />
+                  ) : (
+                    <ComponentIcon color="currentColor" background="primary200" icon={icon} />
+                  )}
+
+                  <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
+                    <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
+                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
+                    </Typography>
+                  </Tooltip>
+                </Flex>
+              </ComponentBox>
+            );
+          })}
         </Grid>
       </ResponsiveAccordionContent>
     </Accordion.Item>

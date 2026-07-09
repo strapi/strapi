@@ -68,6 +68,25 @@ export interface BaseSchema {
 }
 
 /**
+ * Metadata for an image uploaded through the admin upload provider (same shape as admin logos).
+ */
+export interface PreviewImage {
+  url: string;
+  hash?: string;
+  provider?: string;
+  width?: number;
+  height?: number;
+  ext?: string;
+  size?: number;
+  name?: string;
+}
+
+/**
+ * Admin preview image reference: a git-portable static path/CDN URL, or an uploaded descriptor.
+ */
+export type PreviewImageValue = string | PreviewImage;
+
+/**
  * Comprises naming and display parameters to customize a Schema's representation.
  */
 export interface SchemaInfo {
@@ -93,12 +112,16 @@ export interface SchemaInfo {
   icon?: string;
 
   /**
-   * Optional URL or root-relative path to a screenshot shown in the dynamic zone component
-   * picker. Use `public/_component-screenshots/` for locally-hosted images (served by the
-   * built-in static middleware) or an absolute URL for CDN-hosted assets. When omitted, the
-   * picker falls back to rendering the `icon`.
+   * Optional preview image for admin UI surfaces (e.g. the dynamic zone component picker).
+   *
+   * - **String** — root-relative path or absolute CDN URL. Git-portable when the file is
+   *   committed with the app (e.g. `/_component-screenshots/hero.png`) or hosted externally.
+   * - **`PreviewImage`** — descriptor from a CTB upload; bytes live on the upload provider
+   *   (same metadata shape as admin logos). CTB upload UI is not implemented yet.
+   *
+   * When omitted, the picker falls back to the `icon`.
    */
-  screenshot?: string;
+  preview?: PreviewImageValue;
 }
 
 /**

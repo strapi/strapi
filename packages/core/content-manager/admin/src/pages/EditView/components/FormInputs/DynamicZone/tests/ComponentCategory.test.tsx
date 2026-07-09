@@ -56,14 +56,14 @@ describe('ComponentCategory', () => {
     expect(onAddComponent).toHaveBeenCalledWith('test.test');
   });
 
-  it('should render a screenshot thumbnail instead of the icon when a screenshot is provided', async () => {
+  it('should render a preview thumbnail instead of the icon when a static preview path is provided', async () => {
     const { user, getByRole, getByAltText } = render({
       components: [
         {
           uid: 'test.test',
           displayName: 'myComponent',
           icon: 'test',
-          screenshot: '/_component-screenshots/test.png',
+          preview: '/_component-screenshots/test.png',
         },
       ],
     });
@@ -75,7 +75,29 @@ describe('ComponentCategory', () => {
     expect(thumbnail).toHaveAttribute('src', '/_component-screenshots/test.png');
   });
 
-  it('should fall back to the component icon (no image) when no screenshot is provided', async () => {
+  it('should render a preview thumbnail when an uploaded preview descriptor is provided', async () => {
+    const { user, getByRole, getByAltText } = render({
+      components: [
+        {
+          uid: 'test.test',
+          displayName: 'myComponent',
+          icon: 'test',
+          preview: {
+            url: '/uploads/hero_preview_abc123.png',
+            hash: 'hero_preview_abc123',
+            provider: 'local',
+          },
+        },
+      ],
+    });
+
+    await user.click(getByRole('button', { name: /testing/i }));
+
+    const thumbnail = getByAltText('myComponent');
+    expect(thumbnail).toHaveAttribute('src', '/uploads/hero_preview_abc123.png');
+  });
+
+  it('should fall back to the component icon (no image) when no preview is provided', async () => {
     const { user, getByRole, queryByAltText } = render({
       components: [
         {
@@ -98,7 +120,7 @@ describe('ComponentCategory', () => {
           uid: 'test.test',
           displayName: 'myComponent',
           icon: 'test',
-          screenshot: '/_component-screenshots/test.png',
+          preview: '/_component-screenshots/test.png',
         },
       ],
     });
