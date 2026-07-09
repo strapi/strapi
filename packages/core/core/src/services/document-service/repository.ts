@@ -43,6 +43,46 @@ const MAX_LOCALE_LENGTH = 35;
 /** Treat as "param not provided": null, undefined, or empty string (e.g. from query/JSON). */
 const isParamEmpty = (v: unknown): boolean => v === undefined || v === null || v === '';
 
+const RELATION_OPERATIONS = ['connect', 'disconnect', 'set'] as const;
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+};
+
+const isRelationAttribute = (attribute: unknown): attribute is { type: 'relation' } => {
+  return isRecord(attribute) && attribute.type === 'relation';
+};
+
+const isRelationOperationPayload = (value: unknown): value is Record<string, unknown> => {
+  return (
+    isRecord(value) &&
+    RELATION_OPERATIONS.some((operation) => Object.prototype.hasOwnProperty.call(value, operation))
+  );
+};
+
+const mergeCloneData = (
+  originalData: Record<string, unknown>,
+  submittedData: Record<string, unknown> | undefined,
+  contentType: { attributes: Record<string, unknown> }
+) => {
+  const mergedData = merge(originalData, submittedData ?? {}) as Record<string, unknown>;
+
+  if (!submittedData) {
+    return mergedData;
+  }
+
+  for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
+    if (
+      isRelationAttribute(attribute) &&
+      isRelationOperationPayload(submittedData[attributeName])
+    ) {
+      mergedData[attributeName] = submittedData[attributeName];
+    }
+  }
+
+  return mergedData;
+};
+
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
   validator = entityValidator
@@ -454,7 +494,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         // assign new documentId
         assoc('documentId', createDocumentId()),
         // Merge new data into it
-        (data) => merge(data, queryParams.data),
+        (data) => mergeCloneData(data, queryParams.data, contentType),
         (data) => entries.create({ ...queryParams, data, status: 'draft' })
       )
     );

@@ -1,0 +1,167 @@
+/**
+ * Clone must treat user-submitted relation operation payloads as replacements for the
+ * original entry's populated relation data.
+ */
+import type { Core, UID } from '@strapi/types';
+
+import { testInTransaction } from '../../../../utils';
+
+const { createTestBuilder } = require('api-tests/builder');
+const { createStrapiInstance } = require('api-tests/strapi');
+
+let strapi: Core.Strapi;
+const builder = createTestBuilder();
+
+const PRODUCT_UID = 'api::product.product' as UID.ContentType;
+const TAG_UID = 'api::tag.tag' as UID.ContentType;
+
+type ProductWithTag = {
+  tag?: {
+    documentId?: string;
+  } | null;
+};
+
+const productModel = {
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    tag: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: TAG_UID,
+      targetAttribute: 'product',
+    },
+  },
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  draftAndPublish: true,
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
+  description: '',
+  collectionName: '',
+};
+
+const tagModel = {
+  attributes: {
+    name: { type: 'string' },
+  },
+  draftAndPublish: true,
+  displayName: 'Tag',
+  singularName: 'tag',
+  pluralName: 'tags',
+  description: '',
+  collectionName: '',
+};
+
+const createTag = (name: string) => strapi.documents(TAG_UID).create({ data: { name } });
+
+const tagDocumentId = (product?: ProductWithTag) => product?.tag?.documentId ?? null;
+
+const createTaggedProduct = async (productName: string, tagName: string) => {
+  const tag = await createTag(tagName);
+
+  const product = await strapi.documents(PRODUCT_UID).create({
+    locale: 'en',
+    data: {
+      name: productName,
+      tag: { documentId: tag.documentId },
+    },
+    populate: { tag: true },
+  });
+
+  expect((product as ProductWithTag).tag).toMatchObject({ documentId: tag.documentId });
+
+  return { product, tag };
+};
+
+const findProductWithTag = (documentId: string) =>
+  strapi.documents(PRODUCT_UID).findOne({
+    documentId,
+    locale: 'en',
+    populate: { tag: true },
+  });
+
+describe('Document Service clone relation operation payloads', () => {
+  beforeAll(async () => {
+    await builder.addContentTypes([tagModel, productModel]).build();
+
+    strapi = await createStrapiInstance();
+  });
+
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  testInTransaction(
+    'clone applies duplicate-form disconnect for a top-level oneToOne relation',
+    async () => {
+      const { product, tag } = await createTaggedProduct(
+        'CMS-557 Source Product',
+        'CMS-557 Original Tag'
+      );
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        data: {
+          name: 'CMS-557 Clone without tag',
+          tag: {
+            connect: [],
+            disconnect: [{ documentId: tag.documentId }],
+          },
+        },
+        populate: { tag: true },
+      });
+
+      const originalProduct = await findProductWithTag(product.documentId);
+
+      expect({
+        cloneTagDocumentId: tagDocumentId(result.entries[0] as ProductWithTag),
+        originalTagDocumentId: tagDocumentId(originalProduct as ProductWithTag),
+      }).toEqual({
+        cloneTagDocumentId: null,
+        originalTagDocumentId: tag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone applies duplicate-form selected target for a top-level oneToOne relation',
+    async () => {
+      const { product, tag: originalTag } = await createTaggedProduct(
+        'CMS-562 Source Product',
+        'CMS-562 Original Tag'
+      );
+      const selectedTag = await createTag('CMS-562 Selected Tag');
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        data: {
+          name: 'CMS-562 Clone with selected tag',
+          tag: {
+            connect: [{ documentId: selectedTag.documentId }],
+            disconnect: [{ documentId: originalTag.documentId }],
+          },
+        },
+        populate: { tag: true },
+      });
+
+      const originalProduct = await findProductWithTag(product.documentId);
+
+      expect({
+        cloneTagDocumentId: tagDocumentId(result.entries[0] as ProductWithTag),
+        originalTagDocumentId: tagDocumentId(originalProduct as ProductWithTag),
+      }).toEqual({
+        cloneTagDocumentId: selectedTag.documentId,
+        originalTagDocumentId: originalTag.documentId,
+      });
+    }
+  );
+});
