@@ -71,10 +71,10 @@ const getDateRange = (value: string): { start: string; end: string } | null => {
   }
 
   const start = new Date(date);
-  start.setHours(0, 0, 0, 0);
+  start.setUTCHours(0, 0, 0, 0);
 
   const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+  end.setUTCDate(end.getUTCDate() + 1);
 
   return { start: start.toISOString(), end: end.toISOString() };
 };
@@ -743,7 +743,7 @@ namespace Filters {
        * }
        * ```
        */
-      $and?: Array<Record<string, Record<string, string | Record<string, string>>>>;
+      $and?: Array<Record<string, unknown>>;
     };
     page?: number;
   }

@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { Filters } from '../Filters';
 import { useField } from '../Form';
 
-import type { InputProps } from '../FormInputs/types';
 import type { RenderOptions } from '@tests/utils';
 
 const DEFAULT_FILTERS = [
@@ -41,12 +40,12 @@ const LocationDisplay = () => {
   return <input aria-label="location" data-testid="location" readOnly value={location.search} />;
 };
 
-const DateTimeTextInput = ({ 'aria-label': ariaLabel, label, name }: InputProps) => {
+const DateTimeTextInput = ({ 'aria-label': ariaLabel, name }: Filters.ValueInputProps) => {
   const field = useField<string>(name);
 
   return (
     <input
-      aria-label={ariaLabel ?? label ?? name}
+      aria-label={ariaLabel}
       name={name}
       onChange={(event) => field.onChange(name, event.target.value)}
       value={field.value ?? ''}
@@ -78,10 +77,10 @@ describe('Filters', () => {
 
   const getDayRange = (value: string) => {
     const start = new Date(value);
-    start.setHours(0, 0, 0, 0);
+    start.setUTCHours(0, 0, 0, 0);
 
     const end = new Date(start);
-    end.setDate(end.getDate() + 1);
+    end.setUTCDate(end.getUTCDate() + 1);
 
     return { start: start.toISOString(), end: end.toISOString() };
   };
@@ -201,6 +200,10 @@ describe('Filters', () => {
     const { user } = renderWithTextDateTimeInput();
     const selectedDate = '2026-06-13T10:15:00.000Z';
     const { start, end } = getDayRange(selectedDate);
+    expect({ start, end }).toEqual({
+      start: '2026-06-13T00:00:00.000Z',
+      end: '2026-06-14T00:00:00.000Z',
+    });
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
     await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
@@ -217,8 +220,8 @@ describe('Filters', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
     await waitFor(() =>
-      expect(screen.getByTestId('location').getAttribute('value')).toEqual(
-        expect.stringContaining('filters[$and][0][updatedAt][$gte]')
+      expect((screen.getByTestId('location') as HTMLInputElement).value).toContain(
+        'filters[$and][0][updatedAt][$gte]'
       )
     );
 
@@ -245,8 +248,8 @@ describe('Filters', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
     await waitFor(() =>
-      expect(screen.getByTestId('location').getAttribute('value')).toEqual(
-        expect.stringContaining('filters[$and][0][$or][0][updatedAt][$lt]')
+      expect((screen.getByTestId('location') as HTMLInputElement).value).toContain(
+        'filters[$and][0][$or][0][updatedAt][$lt]'
       )
     );
 
