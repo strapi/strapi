@@ -16,7 +16,8 @@ const sortKeys = (keys) => keys.sort((a, b) => a.localeCompare(b));
  * This is not password storage or user-credential hashing (those use bcrypt).
  */
 const signRfc5849BaseString = (signatureBaseString, signingMaterial) => {
-  return crypto.createHmac('sha1', signingMaterial).update(signatureBaseString).digest('base64'); // lgtm[js/insufficient-password-hash]
+  // codeql[js/insufficient-password-hash] OAuth 1.0 signing material, not user password storage
+  return crypto.createHmac('sha1', signingMaterial).update(signatureBaseString).digest('base64');
 };
 
 const buildOAuth1Header = ({
