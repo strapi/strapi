@@ -25764,7 +25764,7 @@ __metadata:
   resolution: "oxlint-config@workspace:packages/utils/oxlint-config"
   dependencies:
     oxlint: "npm:1.72.0"
-    tsconfig: "npm:5.50.0"
+    tsconfig: "npm:5.50.1"
   languageName: unknown
   linkType: soft
 
