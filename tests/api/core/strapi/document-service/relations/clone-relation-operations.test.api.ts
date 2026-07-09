@@ -15,8 +15,11 @@ const builder = createTestBuilder();
 const PRODUCT_UID = 'api::product.product' as UID.ContentType;
 const TAG_UID = 'api::tag.tag' as UID.ContentType;
 
-type ProductWithTag = {
+type ProductWithTags = {
   tag?: {
+    documentId?: string;
+  } | null;
+  legacyTag?: {
     documentId?: string;
   } | null;
 };
@@ -31,6 +34,12 @@ const productModel = {
       relation: 'oneToOne',
       target: TAG_UID,
       targetAttribute: 'product',
+    },
+    legacyTag: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: TAG_UID,
+      useJoinTable: false,
     },
   },
   pluginOptions: {
@@ -60,7 +69,10 @@ const tagModel = {
 
 const createTag = (name: string) => strapi.documents(TAG_UID).create({ data: { name } });
 
-const tagDocumentId = (product?: ProductWithTag) => product?.tag?.documentId ?? null;
+const relationDocumentId = (
+  product: ProductWithTags | undefined,
+  attribute: keyof ProductWithTags
+) => product?.[attribute]?.documentId ?? null;
 
 const createTaggedProduct = async (productName: string, tagName: string) => {
   const tag = await createTag(tagName);
@@ -74,16 +86,33 @@ const createTaggedProduct = async (productName: string, tagName: string) => {
     populate: { tag: true },
   });
 
-  expect((product as ProductWithTag).tag).toMatchObject({ documentId: tag.documentId });
+  expect((product as ProductWithTags).tag).toMatchObject({ documentId: tag.documentId });
 
   return { product, tag };
 };
 
-const findProductWithTag = (documentId: string) =>
+const createLegacyTaggedProduct = async (productName: string, tagName: string) => {
+  const tag = await createTag(tagName);
+
+  const product = await strapi.documents(PRODUCT_UID).create({
+    locale: 'en',
+    data: {
+      name: productName,
+      legacyTag: tag.id,
+    },
+    populate: { legacyTag: true },
+  });
+
+  expect((product as ProductWithTags).legacyTag).toMatchObject({ documentId: tag.documentId });
+
+  return { product, tag };
+};
+
+const findProductWithTags = (documentId: string) =>
   strapi.documents(PRODUCT_UID).findOne({
     documentId,
     locale: 'en',
-    populate: { tag: true },
+    populate: { tag: true, legacyTag: true },
   });
 
 describe('Document Service clone relation operation payloads', () => {
@@ -119,11 +148,11 @@ describe('Document Service clone relation operation payloads', () => {
         populate: { tag: true },
       });
 
-      const originalProduct = await findProductWithTag(product.documentId);
+      const originalProduct = await findProductWithTags(product.documentId);
 
       expect({
-        cloneTagDocumentId: tagDocumentId(result.entries[0] as ProductWithTag),
-        originalTagDocumentId: tagDocumentId(originalProduct as ProductWithTag),
+        cloneTagDocumentId: relationDocumentId(result.entries[0] as ProductWithTags, 'tag'),
+        originalTagDocumentId: relationDocumentId(originalProduct as ProductWithTags, 'tag'),
       }).toEqual({
         cloneTagDocumentId: null,
         originalTagDocumentId: tag.documentId,
@@ -153,14 +182,53 @@ describe('Document Service clone relation operation payloads', () => {
         populate: { tag: true },
       });
 
-      const originalProduct = await findProductWithTag(product.documentId);
+      const originalProduct = await findProductWithTags(product.documentId);
 
       expect({
-        cloneTagDocumentId: tagDocumentId(result.entries[0] as ProductWithTag),
-        originalTagDocumentId: tagDocumentId(originalProduct as ProductWithTag),
+        cloneTagDocumentId: relationDocumentId(result.entries[0] as ProductWithTags, 'tag'),
+        originalTagDocumentId: relationDocumentId(originalProduct as ProductWithTags, 'tag'),
       }).toEqual({
         cloneTagDocumentId: selectedTag.documentId,
         originalTagDocumentId: originalTag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone preserves useJoinTable:false relation data when submitted operations are not transformable',
+    async () => {
+      const { product, tag } = await createLegacyTaggedProduct(
+        'Legacy Source Product',
+        'Legacy Original Tag'
+      );
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        data: {
+          name: 'Legacy Clone',
+          legacyTag: {
+            connect: [],
+            disconnect: [{ documentId: tag.documentId }],
+          },
+        },
+        populate: { legacyTag: true },
+      });
+
+      const originalProduct = await findProductWithTags(product.documentId);
+
+      expect({
+        cloneLegacyTagDocumentId: relationDocumentId(
+          result.entries[0] as ProductWithTags,
+          'legacyTag'
+        ),
+        originalLegacyTagDocumentId: relationDocumentId(
+          originalProduct as ProductWithTags,
+          'legacyTag'
+        ),
+      }).toEqual({
+        cloneLegacyTagDocumentId: tag.documentId,
+        originalLegacyTagDocumentId: tag.documentId,
       });
     }
   );

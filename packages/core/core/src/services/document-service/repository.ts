@@ -49,8 +49,16 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 };
 
-const isRelationAttribute = (attribute: unknown): attribute is { type: 'relation' } => {
-  return isRecord(attribute) && attribute.type === 'relation';
+type RelationAttribute = {
+  type: 'relation';
+  relation: string;
+  useJoinTable?: boolean;
+};
+
+const isRelationAttribute = (attribute: unknown): attribute is RelationAttribute => {
+  return (
+    isRecord(attribute) && attribute.type === 'relation' && typeof attribute.relation === 'string'
+  );
 };
 
 const isRelationOperationPayload = (value: unknown): value is Record<string, unknown> => {
@@ -58,6 +66,10 @@ const isRelationOperationPayload = (value: unknown): value is Record<string, unk
     isRecord(value) &&
     RELATION_OPERATIONS.some((operation) => Object.prototype.hasOwnProperty.call(value, operation))
   );
+};
+
+const canTransformRelationOperationPayload = (attribute: RelationAttribute) => {
+  return attribute.useJoinTable !== false && attribute.relation !== 'morphToOne';
 };
 
 const mergeCloneData = (
@@ -74,6 +86,7 @@ const mergeCloneData = (
   for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
     if (
       isRelationAttribute(attribute) &&
+      canTransformRelationOperationPayload(attribute) &&
       isRelationOperationPayload(submittedData[attributeName])
     ) {
       mergedData[attributeName] = submittedData[attributeName];
