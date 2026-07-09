@@ -1,0 +1,10 @@
+name: Strapi CodeQL configuration
+
+# OAuth 1.0 (RFC 5849) requires HMAC-SHA1 for request signatures. CodeQL's
+# js/insufficient-password-hash query treats OAuth client credentials flowing into
+# that HMAC as password hashing (false positive). User passwords use bcrypt elsewhere.
+query-filters:
+  - exclude:
+      id: js/insufficient-password-hash
+    paths:
+      - '**/oauth-connect/oauth1.js'

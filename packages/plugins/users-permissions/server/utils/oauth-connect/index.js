@@ -1,6 +1,6 @@
 'use strict';
 
-const oauthProviders = require('./providers');
+const builtinProviderEndpoints = require('./providers');
 const oauth1 = require('./oauth1');
 const oauth2 = require('./oauth2');
 
@@ -26,7 +26,7 @@ const parseConnectPath = (requestPath, apiPrefix) => {
 };
 
 const buildProviderConfig = (providerName, storedConfig, redirectUri) => {
-  const defaults = oauthProviders[providerName];
+  const defaults = builtinProviderEndpoints[providerName];
   if (!defaults) {
     return null;
   }
@@ -68,7 +68,7 @@ const startOAuth1Flow = async (ctx, provider, parsed, redirectUri) => {
     requestUrl: provider.request_url,
     redirectUri,
     consumerKey: provider.key,
-    consumerSecret: provider.secret,
+    clientCredential: provider.secret,
   });
 
   ctx.session.grant = {
@@ -110,10 +110,10 @@ const handleOAuth1Callback = async (ctx, provider, callbackUrl) => {
   const tokenResponse = await oauth1.accessToken({
     accessUrl: provider.access_url,
     consumerKey: provider.key,
-    consumerSecret: provider.secret,
+    clientCredential: provider.secret,
     oauthToken,
     oauthVerifier,
-    oauthTokenSecret: requestToken.oauth_token_secret,
+    oauthTokenCredential: requestToken.oauth_token_secret,
   });
 
   const payload = oauth2.tokensToQueryPayload(provider, tokenResponse);
