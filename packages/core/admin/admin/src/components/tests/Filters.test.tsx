@@ -217,7 +217,7 @@ describe('Filters', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
     await waitFor(() =>
-      expect(screen.getByTestId('location')).toHaveValue(
+      expect(screen.getByTestId('location').getAttribute('value')).toEqual(
         expect.stringContaining('filters[$and][0][updatedAt][$gte]')
       )
     );
@@ -245,7 +245,7 @@ describe('Filters', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
     await waitFor(() =>
-      expect(screen.getByTestId('location')).toHaveValue(
+      expect(screen.getByTestId('location').getAttribute('value')).toEqual(
         expect.stringContaining('filters[$and][0][$or][0][updatedAt][$lt]')
       )
     );
