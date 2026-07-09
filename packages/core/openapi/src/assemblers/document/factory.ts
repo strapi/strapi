@@ -5,12 +5,14 @@ import type { Assembler } from '..';
 import { DocumentInfoAssembler } from './info';
 import { DocumentMetadataAssembler } from './metadata';
 import { DocumentPathsAssembler, PathAssemblerFactory } from './path';
+import { DocumentSecurityAssembler } from './security';
 
 export class DocumentAssemblerFactory {
   createAll(): Assembler.Document[] {
     return [
       this._createMetadataAssembler(),
       this._createInfoAssembler(),
+      this._createSecurityAssembler(),
       this._createPathsAssembler(),
     ];
   }
@@ -21,6 +23,10 @@ export class DocumentAssemblerFactory {
 
   private _createMetadataAssembler() {
     return new DocumentMetadataAssembler();
+  }
+
+  private _createSecurityAssembler() {
+    return new DocumentSecurityAssembler();
   }
 
   private _createPathsAssembler(
