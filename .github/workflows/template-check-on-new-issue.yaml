@@ -15,47 +15,12 @@ jobs:
       - name: Checkout base branch
         uses: actions/checkout@v4
 
-      - name: Install and build scripts
-        run: cd .github/scripts && npm install && npx tsup issue-template-check.ts --format cjs --target node20 --out-dir dist --no-splitting
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install scripts
+        run: cd .github/scripts && npm install
 
       - name: Check issue uses template
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const {
-              buildInvalidTemplateComment,
-              validateIssueTemplate,
-            } = require('./.github/scripts/dist/issue-template-check.js');
-
-            const issueBody = context.payload.issue.body || '';
-            const issueNumber = context.payload.issue.number;
-            const { valid, missingItems } = validateIssueTemplate(issueBody);
-
-            if (!valid) {
-              console.log('Missing required items:', missingItems);
-
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                labels: ['flag: invalid template'],
-              });
-
-              const comment = buildInvalidTemplateComment(
-                context.payload.issue.user.login,
-                context.repo.owner,
-                context.repo.repo,
-                missingItems
-              );
-
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                body: comment,
-              });
-
-              console.log('Added "flag: invalid template" label and comment on issue #' + issueNumber);
-            } else {
-              console.log('Issue #' + issueNumber + ' follows the bug report template');
-            }
+        run: node --experimental-strip-types .github/scripts/issue-template-check-action.ts

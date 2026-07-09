@@ -6,7 +6,7 @@ import {
   isPlaceholderContent,
   parseIssueSections,
   validateIssueTemplate,
-} from './issue-template-check';
+} from './issue-template-check.ts';
 
 const VALID_ISSUE_BODY = `### Node Version
 
@@ -75,6 +75,15 @@ describe('issue-template-check', () => {
 
     const result = validateIssueTemplate(body);
     assert.equal(result.valid, true, result.missingItems.join(', '));
+  });
+
+  it('accepts semver-like package manager versions', () => {
+    for (const version of ['1.22.22', '1.22']) {
+      const body = VALID_ISSUE_BODY.replace('yarn@1.22.22', version);
+      const result = validateIssueTemplate(body);
+
+      assert.equal(result.valid, true, `${version}: ${result.missingItems.join(', ')}`);
+    }
   });
 
   it('rejects issues without template section headers', () => {

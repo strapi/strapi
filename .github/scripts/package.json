@@ -1,13 +1,11 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
-    "test": "node --import tsx --test issue-template-check.test.ts"
+    "test": "node --experimental-strip-types --test issue-template-check.test.ts"
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
-    "@actions/github": "6.0.1",
-    "tsup": "8.5.1",
-    "tsx": "4.20.3",
-    "typescript": "5.9.3"
+    "@actions/github": "6.0.1"
   }
 }
