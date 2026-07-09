@@ -78,10 +78,10 @@ export const BulkActionsBar = () => {
       fileIds: Array.from(selectedIds),
       folderIds: Array.from(selectedFolderIds),
     });
-    setIsDeleteDialogOpen(false);
 
     if ('error' in res) {
-      // Keep the selection so the user can retry.
+      // Keep the dialog open and the selection intact so the user can retry
+      // (Confirm again) or Cancel; only surface the error toast.
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -92,6 +92,7 @@ export const BulkActionsBar = () => {
       return;
     }
 
+    setIsDeleteDialogOpen(false);
     toggleNotification({
       type: 'success',
       message: formatMessage(
@@ -134,6 +135,7 @@ export const BulkActionsBar = () => {
           <Button
             size="S"
             startIcon={<Sparkle />}
+            disabled={isDeleting}
             onClick={() =>
               showStubNotification(
                 'list.bulk-actions.create-metadata-not-available',
@@ -150,6 +152,7 @@ export const BulkActionsBar = () => {
 
         <IconButton
           variant="ghost"
+          disabled={isDeleting}
           label={formatMessage({
             id: getTranslationKey('list.bulk-actions.move'),
             defaultMessage: 'Move',
@@ -178,6 +181,7 @@ export const BulkActionsBar = () => {
           <Dialog.Trigger>
             <IconButton
               variant="danger-light"
+              disabled={isDeleting}
               label={formatMessage({
                 id: getTranslationKey('list.bulk-actions.delete'),
                 defaultMessage: 'Delete',

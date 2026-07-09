@@ -450,7 +450,7 @@ describe('AssetsTable', () => {
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
-    it('keeps the selection and shows an error toast when the bulk delete fails', async () => {
+    it('keeps the dialog open and the selection on a failed bulk delete', async () => {
       server.use(
         http.post(
           '*/upload/actions/bulk-delete',
@@ -471,6 +471,13 @@ describe('AssetsTable', () => {
           message: 'An error occurred while deleting the items.',
         })
       );
+      // Dialog stays open for a direct retry (Confirm again) or Cancel. While
+      // the modal is open the page behind it is aria-hidden, so the bar can
+      // only be asserted after closing.
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
       // Selection kept for retry.
       expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
       expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
