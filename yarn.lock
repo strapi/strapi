@@ -25765,8 +25765,6 @@ __metadata:
   dependencies:
     oxlint: "npm:1.72.0"
     tsconfig: "npm:5.50.0"
-  peerDependencies:
-    oxlint: ^1.72.0
   languageName: unknown
   linkType: soft
 
