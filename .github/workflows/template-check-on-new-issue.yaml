@@ -19,36 +19,24 @@ jobs:
             const issueBody = context.payload.issue.body || '';
             const issueNumber = context.payload.issue.number;
 
-            // Define the required checkboxes
+            // Grab every checked checkbox line so we can test it against loose,
+            // wording-agnostic keyword sets instead of brittle exact-phrase regexes.
+            const checkedBoxLines = issueBody.match(/-\s*\[x\][^\n]*/gi) || [];
+
+            // Define the required checkboxes. A checkbox is considered satisfied when
+            // at least one checked line contains ALL of its keywords, regardless of the
+            // exact surrounding wording (e.g. singular vs. plural, with or without the
+            // markdown link, paraphrased sentences, etc.).
             const requiredCheckboxes = [
               {
                 id: 'duplicateCheck',
                 text: 'I have checked the existing issues for duplicates.',
-                patterns: [
-                  /- \[x\]\s*I have checked the existing \[issues\]\([^)]+\) for duplicates\./i,
-                  /- \[x\]\s*I have checked the existing \[issues\]\([^)]+\) for duplicates/i,
-                  /- \[x\]\s*I have checked.*\[issues\].*duplicates/i,
-                  /\[x\].*I have checked.*\[issues\].*duplicates/i,
-                  /- \[x\]\s*I have checked the existing issues for duplicates\./i,
-                  /- \[x\]\s*I have checked the existing issues for duplicates/i,
-                  /- \[x\]\s*I have checked.*duplicates/i,
-                  /\[x\].*I have checked.*duplicates/i
-                ]
+                keywords: [/check/i, /duplicate/i]
               },
               {
                 id: 'codeOfConduct',
                 text: 'I agree to follow this project\'s Code of Conduct.',
-                patterns: [
-                  /- \[x\]\s*I agree to follow this project's \[Code of Conduct\]\([^)]+\)\./i,
-                  /- \[x\]\s*I agree to follow this project's \[Code of Conduct\]\([^)]+\)/i,
-                  /- \[x\]\s*I agree.*\[Code of Conduct\].*\./i,
-                  /\[x\].*I agree.*\[Code of Conduct\].*\./i,
-                  /- \[x\]\s*I agree to follow this project's Code of Conduct\./i,
-                  /- \[x\]\s*I agree to follow this project's Code of Conduct/i,
-                  /- \[x\]\s*I agree.*Code of Conduct/i,
-                  /\[x\].*I agree.*Code of Conduct/i,
-                  /- \[x\]\s*I agree to follow.*Code of Conduct/i
-                ]
+                keywords: [/code of conduct/i]
               }
             ];
 
@@ -75,16 +63,10 @@ jobs:
 
             // Check each required checkbox
             for (const checkbox of requiredCheckboxes) {
-              let found = false;
-              
-              // Check if any of the patterns match
-              for (const pattern of checkbox.patterns) {
-                if (pattern.test(issueBody)) {
-                  found = true;
-                  break;
-                }
-              }
-              
+              const found = checkedBoxLines.some((line) =>
+                checkbox.keywords.every((keyword) => keyword.test(line))
+              );
+
               if (!found) {
                 missingItems.push(checkbox.text);
               }
@@ -108,12 +90,14 @@ jobs:
               // Clean up the content
               content = content.trim();
               
-              // Check if content is empty or just placeholder text
-              if (!content || 
-                  content === 'No response' || 
+              // Check if content is empty or just placeholder text.
+              // Note: no minimum length check here — legitimate answers like a bare
+              // Node major version ("22", "24", ...) can be as short as 2 characters,
+              // so length alone is not a reliable signal of a missing answer.
+              if (!content ||
+                  content === 'No response' ||
                   content === 'N/A' ||
-                  content === 'None' ||
-                  content.length < 3) {
+                  content === 'None') {
                 missingItems.push(field.label);
               }
             }
