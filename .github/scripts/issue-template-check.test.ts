@@ -102,6 +102,22 @@ describe('issue-template-check', () => {
     assert.equal(validateIssueTemplate(naBody).valid, true);
   });
 
+  it('accepts paraphrased confirmation checkboxes (issue #26813)', () => {
+    const body = `${VALID_ISSUE_BODY.replace(
+      `### Confirmation Checklist
+
+- [x] I have checked the existing [issues](https://github.com/strapi/strapi/issues) for duplicates.
+- [x] I agree to follow this project's [Code of Conduct](https://github.com/strapi/strapi/blob/develop/CODE_OF_CONDUCT.md).`,
+      `### Checklist
+
+- [x] I have checked the existing issues and this is not a duplicate.
+- [x] I have read the contributing guidelines and Code of Conduct.`
+    )}`;
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+  });
+
   it('rejects unchecked confirmation checkboxes', () => {
     const body = VALID_ISSUE_BODY.replace('[x]', '[ ]');
 

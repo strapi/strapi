@@ -29,31 +29,12 @@ const REQUIRED_CHECKBOXES = [
   {
     id: 'duplicateCheck',
     label: 'Duplicate issues checkbox',
-    patterns: [
-      /- \[x\]\s*I have checked the existing \[issues\]\([^)]+\) for duplicates\./i,
-      /- \[x\]\s*I have checked the existing \[issues\]\([^)]+\) for duplicates/i,
-      /- \[x\]\s*I have checked.*\[issues\].*duplicates/i,
-      /\[x\].*I have checked.*\[issues\].*duplicates/i,
-      /- \[x\]\s*I have checked the existing issues for duplicates\./i,
-      /- \[x\]\s*I have checked the existing issues for duplicates/i,
-      /- \[x\]\s*I have checked.*duplicates/i,
-      /\[x\].*I have checked.*duplicates/i,
-    ],
+    keywords: [/check/i, /duplicate/i],
   },
   {
     id: 'codeOfConduct',
     label: 'Code of Conduct checkbox',
-    patterns: [
-      /- \[x\]\s*I agree to follow this project's \[Code of Conduct\]\([^)]+\)\./i,
-      /- \[x\]\s*I agree to follow this project's \[Code of Conduct\]\([^)]+\)/i,
-      /- \[x\]\s*I agree.*\[Code of Conduct\].*\./i,
-      /\[x\].*I agree.*\[Code of Conduct\].*\./i,
-      /- \[x\]\s*I agree to follow this project's Code of Conduct\./i,
-      /- \[x\]\s*I agree to follow this project's Code of Conduct/i,
-      /- \[x\]\s*I agree.*Code of Conduct/i,
-      /\[x\].*I agree.*Code of Conduct/i,
-      /- \[x\]\s*I agree to follow.*Code of Conduct/i,
-    ],
+    keywords: [/code of conduct/i],
   },
 ] as const;
 
@@ -132,8 +113,14 @@ export function hasRequiredSectionsInOrder(body: string): boolean {
   return true;
 }
 
-function hasCheckedRequiredCheckbox(body: string, patterns: readonly RegExp[]): boolean {
-  return patterns.some((pattern) => pattern.test(body));
+export function getCheckedBoxLines(body: string): string[] {
+  return body.match(/-\s*\[x\][^\n]*/gi) ?? [];
+}
+
+function hasCheckedRequiredCheckbox(body: string, keywords: readonly RegExp[]): boolean {
+  const checkedBoxLines = getCheckedBoxLines(body);
+
+  return checkedBoxLines.some((line) => keywords.every((keyword) => keyword.test(line)));
 }
 
 export function validateIssueTemplate(body: string): TemplateValidationResult {
@@ -176,7 +163,7 @@ export function validateIssueTemplate(body: string): TemplateValidationResult {
   }
 
   for (const checkbox of REQUIRED_CHECKBOXES) {
-    if (!hasCheckedRequiredCheckbox(trimmedBody, checkbox.patterns)) {
+    if (!hasCheckedRequiredCheckbox(trimmedBody, checkbox.keywords)) {
       missingItems.push(checkbox.label);
     }
   }
