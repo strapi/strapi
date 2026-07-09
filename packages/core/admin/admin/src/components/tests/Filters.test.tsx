@@ -1,7 +1,10 @@
 import { fireEvent, render as renderRTL, screen, waitFor } from '@tests/utils';
+import { useLocation } from 'react-router-dom';
 
 import { Filters } from '../Filters';
+import { useField } from '../Form';
 
+import type { InputProps } from '../FormInputs/types';
 import type { RenderOptions } from '@tests/utils';
 
 const DEFAULT_FILTERS = [
@@ -32,16 +35,56 @@ const DEFAULT_FILTERS = [
   },
 ] satisfies Filters.Filter[];
 
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <input aria-label="location" data-testid="location" readOnly value={location.search} />;
+};
+
+const DateTimeTextInput = ({ 'aria-label': ariaLabel, label, name }: InputProps) => {
+  const field = useField<string>(name);
+
+  return (
+    <input
+      aria-label={ariaLabel ?? label ?? name}
+      name={name}
+      onChange={(event) => field.onChange(name, event.target.value)}
+      value={field.value ?? ''}
+    />
+  );
+};
+
 describe('Filters', () => {
   const render = ({ initialEntries, ...props }: Partial<Filters.Props> & RenderOptions = {}) =>
     renderRTL(
-      <Filters.Root options={DEFAULT_FILTERS} {...props}>
-        <Filters.Trigger />
-        <Filters.Popover />
-        <Filters.List />
-      </Filters.Root>,
+      <>
+        <Filters.Root options={DEFAULT_FILTERS} {...props}>
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+        </Filters.Root>
+        <LocationDisplay />
+      </>,
       { initialEntries }
     );
+
+  const renderWithTextDateTimeInput = (props: Partial<Filters.Props> & RenderOptions = {}) =>
+    render({
+      ...props,
+      options: DEFAULT_FILTERS.map((filter) =>
+        filter.name === 'updatedAt' ? { ...filter, input: DateTimeTextInput } : filter
+      ),
+    });
+
+  const getDayRange = (value: string) => {
+    const start = new Date(value);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+
+    return { start: start.toISOString(), end: end.toISOString() };
+  };
 
   it('should open the popover when the trigger is clicked', async () => {
     const { user } = render();
@@ -138,69 +181,106 @@ describe('Filters', () => {
     expect(await screen.findByRole('option', { name: 'Published' })).toBeInTheDocument();
   });
 
-  it('should not show exact equality operators for datetime filters', async () => {
-    const { user } = render();
+  it('should convert exact datetime equality filters to a day range', async () => {
+    const { user } = renderWithTextDateTimeInput();
+    const selectedDate = '2026-06-13T10:15:00.000Z';
+    const { start, end } = getDayRange(selectedDate);
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
     await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
     await user.click(await screen.findByRole('option', { name: 'Updated At' }));
     await user.click(await screen.findByRole('combobox', { name: 'Select filter' }));
 
-    expect(screen.queryByRole('option', { name: 'is' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('option', { name: 'is not' })).not.toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'is not' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'is null' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'is greater than' })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('option', { name: 'is null' }));
+    await user.click(screen.getByRole('option', { name: 'is' }));
+    await user.type(screen.getByRole('textbox', { name: 'Updated At' }), selectedDate);
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
-    await screen.findByText('Updated At $null');
-    expect(screen.queryByText(/Updated At \$eq/)).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId('location')).toHaveValue(
+        expect.stringContaining('filters[$and][0][updatedAt][$gte]')
+      )
+    );
+
+    const search = screen.getByTestId('location').getAttribute('value') ?? '';
+    const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+
+    expect(searchParams.get('filters[$and][0][updatedAt][$gte]')).toEqual(start);
+    expect(searchParams.get('filters[$and][0][updatedAt][$lt]')).toEqual(end);
+    expect(searchParams.has('filters[$and][0][updatedAt][$eq]')).toBe(false);
+    expect(await screen.findByText(/Updated At \$eq/)).toBeInTheDocument();
+  });
+
+  it('should convert exact datetime non-equality filters to an outside-day range', async () => {
+    const { user } = renderWithTextDateTimeInput();
+    const selectedDate = '2026-06-13T10:15:00.000Z';
+    const { start, end } = getDayRange(selectedDate);
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+    await user.click(await screen.findByRole('option', { name: 'Updated At' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select filter' }));
+    await user.click(await screen.findByRole('option', { name: 'is not' }));
+    await user.type(screen.getByRole('textbox', { name: 'Updated At' }), selectedDate);
+    fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('location')).toHaveValue(
+        expect.stringContaining('filters[$and][0][$or][0][updatedAt][$lt]')
+      )
+    );
+
+    const search = screen.getByTestId('location').getAttribute('value') ?? '';
+    const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+
+    expect(searchParams.get('filters[$and][0][$or][0][updatedAt][$lt]')).toEqual(start);
+    expect(searchParams.get('filters[$and][0][$or][1][updatedAt][$gte]')).toEqual(end);
+    expect(searchParams.has('filters[$and][0][updatedAt][$ne]')).toBe(false);
+    expect(await screen.findByText(/Updated At \$ne/)).toBeInTheDocument();
   });
 
   it('should reset the operator and value when changing fields', async () => {
-    const { user } = render();
+    const { user } = renderWithTextDateTimeInput();
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
     await user.type(await screen.findByRole('textbox', { name: 'Name' }), 'Jimbob');
     await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
     await user.click(await screen.findByRole('option', { name: 'Updated At' }));
 
-    expect(await screen.findByRole('combobox', { name: 'Select filter' })).toHaveTextContent(
-      'is null'
-    );
+    expect(await screen.findByRole('combobox', { name: 'Select filter' })).toHaveTextContent('is');
     expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Updated At')).toBeInTheDocument();
 
+    await user.type(screen.getByLabelText('Updated At'), '2026-06-13T10:15:00.000Z');
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
-    await screen.findByText('Updated At $null');
+    await screen.findByText(/Updated At \$eq/);
     expect(screen.queryByText(/Jimbob/)).not.toBeInTheDocument();
   });
 
-  it('should sanitize removed operators when editing existing datetime filters', async () => {
-    const { user } = render({
+  it('should remove a generated datetime range as one filter', async () => {
+    const selectedDate = '2026-06-13T10:15:00.000Z';
+    const { start, end } = getDayRange(selectedDate);
+    render({
       initialEntries: [
         {
           pathname: '/',
-          search: 'filters[$and][0][updatedAt][$eq]=2026-06-13T10:15:00.000Z&' + 'page=1',
+          search:
+            `filters[$and][0][updatedAt][$gte]=${encodeURIComponent(start)}&` +
+            `filters[$and][0][updatedAt][$lt]=${encodeURIComponent(end)}&` +
+            'page=1',
         },
       ],
     });
 
-    const filterTagWithExactOperator = await screen.findByText(/Updated At \$eq/);
-    await user.click(filterTagWithExactOperator);
+    fireEvent.click(await screen.findByRole('button', { name: /Updated At \$eq/ }));
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Update filter' })).toBeInTheDocument();
-    });
-
-    expect(screen.getByRole('combobox', { name: 'Select filter' })).toHaveTextContent('is null');
-    expect(screen.queryByLabelText('Updated At')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
-
-    await screen.findByText('Updated At $null');
-    expect(screen.queryByText(/Updated At \$eq/)).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText(/Updated At \$eq/)).not.toBeInTheDocument());
+    expect(screen.getByTestId('location')).toHaveValue('?page=1');
   });
 
   it('should replace existing filter when editing instead of adding a duplicate', async () => {

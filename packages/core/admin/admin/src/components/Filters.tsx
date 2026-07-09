@@ -43,28 +43,139 @@ interface FitlersContextValue {
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
 
-const DATETIME_FILTERS = [
-  ...BASE_FILTERS.filter(({ value }) => value === '$null' || value === '$notNull'),
-  ...NUMERIC_FILTERS,
-];
+const DATETIME_FILTERS = [...BASE_FILTERS, ...NUMERIC_FILTERS];
+
+const getFilterType = (filter?: Filters.Filter) => filter?.mainField?.type ?? filter?.type;
+
+const getOperatorObject = (
+  filterEntry: Record<string, unknown>,
+  option: Filters.Filter
+): Record<string, unknown> | null => {
+  const operatorObj =
+    option.type === 'relation'
+      ? (filterEntry[option.name] as Record<string, unknown>)?.[option.mainField?.name ?? 'id']
+      : filterEntry[option.name];
+
+  if (typeof operatorObj !== 'object' || operatorObj === null || Array.isArray(operatorObj)) {
+    return null;
+  }
+
+  return operatorObj as Record<string, unknown>;
+};
+
+const getDateRange = (value: string): { start: string; end: string } | null => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+
+  return { start: start.toISOString(), end: end.toISOString() };
+};
+
+const createFilterEntry = (
+  fieldOptions: Filters.Filter,
+  operatorValuePairing: Record<string, unknown>
+) => ({
+  [fieldOptions.name]:
+    fieldOptions.type === 'relation'
+      ? {
+          [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
+        }
+      : operatorValuePairing,
+});
+
+const createFilterEntries = (
+  fieldOptions: Filters.Filter,
+  data: FilterFormData,
+  value: string
+): Array<Record<string, unknown>> => {
+  if (
+    getFilterType(fieldOptions) === 'datetime' &&
+    (data.filter === '$eq' || data.filter === '$ne')
+  ) {
+    const range = getDateRange(data.value ?? '');
+
+    if (range) {
+      const start = encodeURIComponent(range.start);
+      const end = encodeURIComponent(range.end);
+
+      if (data.filter === '$eq') {
+        return [createFilterEntry(fieldOptions, { $gte: start, $lt: end })];
+      }
+
+      return [
+        {
+          $or: [
+            createFilterEntry(fieldOptions, { $lt: start }),
+            createFilterEntry(fieldOptions, { $gte: end }),
+          ],
+        },
+      ];
+    }
+  }
+
+  return [createFilterEntry(fieldOptions, { [data.filter]: value })];
+};
 
 const getFilterDetails = (
   filterEntry: Record<string, unknown>,
   options: Filters.Filter[]
 ): { name: string; operator: string; value: unknown } | null => {
+  const orEntries = Array.isArray(filterEntry.$or)
+    ? filterEntry.$or
+    : typeof filterEntry.$or === 'object' && filterEntry.$or !== null
+      ? Object.values(filterEntry.$or)
+      : null;
+
+  if (orEntries) {
+    for (const option of options) {
+      if (getFilterType(option) !== 'datetime') {
+        continue;
+      }
+
+      const rangeParts = orEntries
+        .map((entry) =>
+          typeof entry === 'object' && entry !== null
+            ? getOperatorObject(entry as Record<string, unknown>, option)
+            : null
+        )
+        .filter((entry): entry is Record<string, unknown> => entry !== null);
+
+      const lower = rangeParts.find((entry) => typeof entry.$lt === 'string')?.$lt;
+      const upper = rangeParts.find((entry) => typeof entry.$gte === 'string')?.$gte;
+
+      if (typeof lower === 'string' && typeof upper === 'string') {
+        return { name: option.name, operator: '$ne', value: lower };
+      }
+    }
+
+    return null;
+  }
+
   const [name] = Object.keys(filterEntry);
   const option = options.find((o) => o.name === name);
   if (!option) {
     return null;
   }
 
-  const operatorObj =
-    option.type === 'relation'
-      ? (filterEntry[name] as Record<string, unknown>)?.[option.mainField?.name ?? 'id']
-      : filterEntry[name];
-
-  if (typeof operatorObj !== 'object' || operatorObj === null) {
+  const operatorObj = getOperatorObject(filterEntry, option);
+  if (!operatorObj) {
     return null;
+  }
+
+  if (
+    getFilterType(option) === 'datetime' &&
+    typeof operatorObj.$gte === 'string' &&
+    typeof operatorObj.$lt === 'string'
+  ) {
+    return { name, operator: '$eq', value: operatorObj.$gte };
   }
 
   const [operator] = Object.keys(operatorObj as Record<string, unknown>);
@@ -231,41 +342,19 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
      */
     const fieldOptions = options.find((filter) => filter.name === data.name)!;
 
-    /**
-     * If the filter is a relation, we need to nest the filter object,
-     * we filter based on the mainField of the relation, if there is no mainField, we use the id.
-     * At the end, we pass the operator & value. This value _could_ look like:
-     * ```json
-     * {
-     *  "$eq": "1",
-     * }
-     * ```
-     */
-    const operatorValuePairing = {
-      [data.filter]: value,
-    };
-
-    const newFilterEntry = {
-      [data.name]:
-        fieldOptions.type === 'relation'
-          ? {
-              [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
-            }
-          : operatorValuePairing,
-    };
-
+    const newFilterEntries = createFilterEntries(fieldOptions, data, value);
     const existingFilters = query.filters?.$and ?? [];
 
     const newFilterQuery = editingFilter
       ? {
           ...query.filters,
           $and: existingFilters.map((filter) =>
-            isFilterMatch(filter, options, editingFilter) ? newFilterEntry : filter
+            isFilterMatch(filter, options, editingFilter) ? newFilterEntries[0] : filter
           ),
         }
       : {
           ...query.filters,
-          $and: [...existingFilters, newFilterEntry],
+          $and: [...existingFilters, ...newFilterEntries],
         };
 
     setQuery({ filters: newFilterQuery, page: 1 }, 'push', true);
@@ -381,7 +470,7 @@ const getFilterList = (filter?: Filters.Filter): FilterOption[] => {
     return [];
   }
 
-  const type = filter.mainField?.type ? filter.mainField.type : filter.type;
+  const type = getFilterType(filter);
 
   switch (type) {
     case 'email':
@@ -447,11 +536,7 @@ const List = () => {
         return true;
       }
 
-      return !(
-        details.name === data.name &&
-        details.operator === data.filter &&
-        details.value === data.value
-      );
+      return !isFilterMatch(filter, options, data);
     });
 
     setQuery({ filters: { $and: nextFilters }, page: 1 });
@@ -518,23 +603,28 @@ const AttributeTag = ({
   };
 
   const handleRemove = () => {
-    onRemove({ name, value, filter: operator });
+    onRemove({
+      name,
+      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : decodeURIComponent(value),
+      filter: operator,
+    });
   };
 
-  const type = mainField?.type ? mainField.type : filter.type;
+  const type = mainField?.type ?? filter.type;
 
-  let formattedValue: string = value;
+  const decodedValue = FILTERS_WITH_NO_VALUE.includes(operator) ? value : decodeURIComponent(value);
+  let formattedValue: string = decodedValue;
 
   if (!FILTERS_WITH_NO_VALUE.includes(operator)) {
     switch (type) {
       case 'date':
-        formattedValue = formatDate(value, { dateStyle: 'full' });
+        formattedValue = formatDate(decodedValue, { dateStyle: 'full' });
         break;
       case 'datetime':
-        formattedValue = formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
+        formattedValue = formatDate(decodedValue, { dateStyle: 'full', timeStyle: 'short' });
         break;
       case 'time':
-        const [hour, minute] = value.split(':');
+        const [hour, minute] = decodedValue.split(':');
         const date = new Date();
         date.setHours(Number(hour));
         date.setMinutes(Number(minute));
@@ -548,7 +638,7 @@ const AttributeTag = ({
       case 'integer':
       case 'biginteger':
       case 'decimal':
-        formattedValue = formatNumber(Number(value));
+        formattedValue = formatNumber(Number(decodedValue));
         break;
     }
   }
