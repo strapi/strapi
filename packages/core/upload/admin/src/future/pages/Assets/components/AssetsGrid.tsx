@@ -16,6 +16,7 @@ import { ASSET_TYPES } from '../../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
+import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
@@ -28,13 +29,21 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
 
-const StyledCard = styled(Card)<{ $isDragging?: boolean; $isMovePending?: boolean }>`
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+const StyledCard = styled(Card)<{
+  $isDragging?: boolean;
+  $isMovePending?: boolean;
+  $isSelected?: boolean;
+}>`
+  border: 1px solid
+    ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
   cursor: ${({ $isMovePending }) => ($isMovePending ? 'wait' : 'pointer')};
   opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
   pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
+  background: ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary100 : undefined)};
+  /* Shift+click range selection must not highlight card text. */
+  user-select: none;
 
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
@@ -59,14 +68,18 @@ const StyledFolderCard = styled(Flex)<{
   $isMovePending?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
+  $isSelected?: boolean;
 }>`
   width: 100%;
+  user-select: none;
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`}; // 8px 12px
   align-items: center;
   gap: ${({ theme }) => theme.spaces[2]}; // 8px
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+  border: 1px solid
+    ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: ${({ theme }) => theme.borderRadius};
-  background: ${({ theme }) => theme.colors.neutral0};
+  background: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.colors.primary100 : theme.colors.neutral0};
   cursor: ${({ $isMovePending, $isInvalidDropTarget }) => {
     if ($isMovePending) {
       return 'wait';
@@ -113,6 +126,7 @@ const FolderCard = ({ folder }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+  const { isFolderSelected, toggleFolder } = useAssetSelection();
   const {
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
     droppable: { setNodeRef: setDropRef },
@@ -125,10 +139,24 @@ const FolderCard = ({ folder }: FolderCardProps) => {
     setDropRef(node);
   };
 
+  // Grid folder cards have no checkbox: Cmd/Ctrl+click is the additive toggle
+  // (the grid counterpart of the table's folder checkbox). Plain click keeps
+  // navigating; folders stay out of range/select-all, same as the table.
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey) {
+      toggleFolder(folder.id);
+      return;
+    }
+    navigateToFolder(folder);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       navigateToFolder(folder);
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      toggleFolder(folder.id);
     }
   };
 
@@ -141,7 +169,8 @@ const FolderCard = ({ folder }: FolderCardProps) => {
       $isMovePending={isMovePending}
       $isValidDropTarget={showValidDropHighlight}
       $isInvalidDropTarget={showInvalidDropCursor}
-      onClick={() => navigateToFolder(folder)}
+      $isSelected={isFolderSelected(folder.id)}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="listitem"
       tabIndex={0}
@@ -261,22 +290,69 @@ const FileName = styled(Typography)`
   min-width: 0;
 `;
 
+// The asset filename is its own interactive element: clicking it opens the
+// details drawer instead of selecting the card (mirrors the table view).
+const NameButton = styled.button`
+  display: inline-flex;
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+`;
+
 interface AssetCardProps {
   asset: File;
+  orderedAssetIds: number[];
   onAssetItemClick: (assetId: number) => void;
 }
 
-const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
+const AssetCard = ({ asset, orderedAssetIds, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging } = useFileDraggable(asset);
+  const { isSelected, toggle, selectOnly, selectRange } = useAssetSelection();
 
+  const selected = isSelected(asset.id);
+
+  // OS file-manager click semantics (same as the table view): shift selects a
+  // range, cmd/ctrl toggles, plain click selects only this card.
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (e.shiftKey) {
+      selectRange(orderedAssetIds, asset.id);
+    } else if (e.metaKey || e.ctrlKey) {
+      toggle(asset.id);
+    } else {
+      selectOnly(asset.id);
+    }
+  };
+
+  // Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       onAssetItemClick(asset.id);
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      toggle(asset.id);
     }
+  };
+
+  const handleNameClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAssetItemClick(asset.id);
   };
 
   return (
@@ -286,10 +362,11 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
       {...listeners}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
+      $isSelected={selected}
       tabIndex={0}
       role="listitem"
       onDragStart={(e) => e.preventDefault()}
-      onClick={() => onAssetItemClick(asset.id)}
+      onClick={handleCardClick}
       onKeyDown={handleKeyDown}
     >
       <StyledCardHeader>
@@ -300,9 +377,11 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
           <FileTypeIcon>
             <TypeIcon width={20} height={20} />
           </FileTypeIcon>
-          <FileName textColor="primary800" ellipsis>
-            {asset.name}
-          </FileName>
+          <NameButton type="button" onClick={handleNameClick}>
+            <FileName textColor="primary800" ellipsis>
+              {asset.name}
+            </FileName>
+          </NameButton>
           <IconButton
             label={formatMessage({
               id: getTranslationKey('control-card.more-actions'),
@@ -333,6 +412,7 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
   const { formatMessage } = useIntl();
 
   const totalItems = folders.length + assets.length;
+  const orderedAssetIds = assets.map((asset) => asset.id);
 
   if (totalItems === 0) {
     return (
@@ -370,7 +450,11 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
           direction="column"
           alignItems="stretch"
         >
-          <AssetCard asset={asset} onAssetItemClick={onAssetItemClick} />
+          <AssetCard
+            asset={asset}
+            orderedAssetIds={orderedAssetIds}
+            onAssetItemClick={onAssetItemClick}
+          />
         </Grid.Item>
       ))}
     </Grid.Root>
