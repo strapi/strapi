@@ -4,50 +4,37 @@ on:
   issues:
     types: [labeled]
 
-permissions: {}
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+  statuses: read
 
 jobs:
-  invalid-template-label:
-    name: Re-validate invalid template label
-    if: "github.event.label.name == 'flag: invalid template'"
+  issue-labeled:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
     steps:
       - name: Checkout base branch
         uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
+      - name: Install and build scripts
+        run: cd .github/scripts && npm install --ignore-scripts && npx tsup issue-template-check.ts --format cjs --target node20 --out-dir dist --no-splitting
 
-      - name: Install scripts
-        run: cd .github/scripts && npm install --ignore-scripts
-
-      - name: Handle invalid template label
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node --experimental-strip-types .github/scripts/issue-template-label-action.ts
-
-  issue-labeled:
-    name: Handle issue label automation
-    if: "github.event.label.name != 'flag: invalid template'"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-      actions: read
-      checks: read
-      statuses: read
-    steps:
       - name: Handle issue label automation
         uses: actions/github-script@v9
         with:
           script: |
+            const {
+              INVALID_TEMPLATE_LABEL,
+              buildInvalidTemplateComment,
+              buildInvalidTemplateFixedComment,
+              validateIssueTemplate,
+            } = require('./.github/scripts/dist/issue-template-check.js');
+
             const { owner, repo } = context.repo;
             const issue_number = context.payload.issue.number;
             const login = context.payload.issue.user.login;
@@ -151,6 +138,39 @@ jobs:
             Thank you for your insight and have a good day.`
                 );
                 await close('completed');
+              },
+
+              'flag: invalid template': async () => {
+                const body = context.payload.issue.body || '';
+                const { valid, missingItems } = validateIssueTemplate(body);
+                const labelAddedBy = context.payload.sender?.login ?? '';
+
+                if (valid) {
+                  try {
+                    await github.rest.issues.removeLabel({
+                      owner,
+                      repo,
+                      issue_number,
+                      name: INVALID_TEMPLATE_LABEL,
+                    });
+                  } catch {
+                    // Label may have been removed concurrently — not fatal
+                  }
+
+                  await comment(buildInvalidTemplateFixedComment());
+                  return;
+                }
+
+                if (labelAddedBy === 'github-actions[bot]') {
+                  core.info(
+                    'Invalid template label added by template checker; grace comment already posted'
+                  );
+                  return;
+                }
+
+                await comment(
+                  buildInvalidTemplateComment(login, owner, repo, missingItems)
+                );
               },
 
               'flag: question': async () => {
