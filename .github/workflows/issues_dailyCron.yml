@@ -19,26 +19,17 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install and build scripts
-        run: cd .github/scripts && npm install --ignore-scripts && npx tsup issue-template-check.ts --format cjs --target node20 --out-dir dist --no-splitting
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install scripts
+        run: cd .github/scripts && npm install --ignore-scripts
 
       - name: Reconcile invalid template issues
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const { processInvalidTemplateIssues } = require('./.github/scripts/dist/issue-template-check.js');
-            const { owner, repo } = context.repo;
-
-            const { relabeled, closed, skipped } = await processInvalidTemplateIssues({
-              github,
-              owner,
-              repo,
-              log: (message) => core.info(message),
-            });
-
-            core.info(
-              `Invalid template sweep: ${relabeled} label(s) removed, ${closed} issue(s) closed, ${skipped} skipped (grace period)`
-            );
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --experimental-strip-types .github/scripts/issue-template-cron-action.ts
 
       - name: Close inactive "can not reproduce" issues
         uses: actions/github-script@v9
