@@ -133,7 +133,6 @@ const browserStrapi: Admin.BrowserStrapi = {
   },
 };
 
-// @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
 window.strapi = browserStrapi;
 
 /* -------------------------------------------------------------------------------------------------

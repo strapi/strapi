@@ -2,6 +2,6 @@
   "extends": "tsconfig/base.json",
   "include": ["src", "../shared"],
   "compilerOptions": {
-    "types": ["node", "jest"]
+    "types": ["node", "jest", "koa-body", "@strapi/types/globals-server"]
   }
 }

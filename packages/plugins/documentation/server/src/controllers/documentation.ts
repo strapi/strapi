@@ -6,7 +6,6 @@ import koaStatic from 'koa-static';
 import { yup, validateYupSchema } from '@strapi/utils';
 
 import type Koa from 'koa';
-import type {} from 'koa-body';
 
 import { getService } from '../utils';
 import type { Config } from '../types';
