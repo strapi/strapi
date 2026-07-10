@@ -159,16 +159,29 @@ function useResetKey(
 
     // If the 2 refs are not equal, it means the value was updated from outside
     if (valueUpdatesCount.current !== slateUpdatesCount.current) {
+      // Bring the 2 refs back in sync
+      slateUpdatesCount.current = valueUpdatesCount.current;
+
+      // The update may just be an echo of the editor's own content coming back through the form
+      // (e.g. the debounced sync, or a re-render while document queries settle). Remounting in
+      // that case is pointless and destructive: it wipes pending input and the DOM under the
+      // user's caret. Only force a remount when the content is actually different.
+      const externalState = value?.length ? normalizeBlocksState(editor, value) : null;
+      const editorState = normalizeBlocksState(editor, editor.children);
+      if (JSON.stringify(externalState) === JSON.stringify(editorState)) {
+        return;
+      }
+
+      // The remount reuses the same editor instance, so a selection pointing into the old
+      // content would survive it and crash slate-react's toDOMPoint when the new content is
+      // shorter. Drop the selection before swapping the children.
       if (editor.selection) {
         Transforms.deselect(editor);
       }
 
-      // So we change the key to force a rerender of the Slate editor,
+      // Change the key to force a rerender of the Slate editor,
       // which will pick up the new value through its initialValue prop
       setKey((previousKey) => previousKey + 1);
-
-      // Then bring the 2 refs back in sync
-      slateUpdatesCount.current = valueUpdatesCount.current;
     }
   }, [editor, value]);
 
