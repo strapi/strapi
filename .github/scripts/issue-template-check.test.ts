@@ -5,6 +5,8 @@ import {
   buildInvalidTemplateComment,
   isPlaceholderContent,
   parseIssueSections,
+  planInvalidTemplateProcessing,
+  resolveInvalidTemplateAction,
   validateIssueTemplate,
 } from './issue-template-check.ts';
 
@@ -175,5 +177,42 @@ describe('issue-template-check', () => {
     assert.match(comment, /Section: Node Version/);
     assert.match(comment, /Duplicate issues checkbox/);
     assert.match(comment, /BUG_REPORT\.yml/);
+    assert.match(comment, /1 day/);
+  });
+
+  it('removes label when an issue becomes valid before grace period ends', () => {
+    const now = new Date('2026-07-09T12:00:00Z');
+    const labelAppliedAt = new Date('2026-07-08T12:00:00Z');
+
+    assert.equal(resolveInvalidTemplateAction(true, labelAppliedAt, now), 'remove_label');
+  });
+
+  it('skips closing while grace period is active', () => {
+    const now = new Date('2026-07-09T12:00:00Z');
+    const labelAppliedAt = new Date('2026-07-09T06:00:00Z');
+
+    assert.equal(resolveInvalidTemplateAction(false, labelAppliedAt, now), 'skip');
+  });
+
+  it('closes issues that stay invalid beyond the grace period', () => {
+    const now = new Date('2026-07-09T12:00:00Z');
+    const labelAppliedAt = new Date('2026-06-20T12:00:00Z');
+
+    assert.equal(resolveInvalidTemplateAction(false, labelAppliedAt, now), 'close');
+  });
+
+  it('plans label removal when a flagged issue is fixed', () => {
+    const plans = planInvalidTemplateProcessing({
+      issues: [
+        {
+          number: 123,
+          body: VALID_ISSUE_BODY,
+          label_applied_at: '2026-07-01T00:00:00Z',
+        },
+      ],
+      now: new Date('2026-07-09T00:00:00Z'),
+    });
+
+    assert.deepEqual(plans, [{ number: 123, action: 'remove_label' }]);
   });
 });

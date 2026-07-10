@@ -2,7 +2,7 @@ name: Check Required Checkboxes
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 permissions:
   contents: read
