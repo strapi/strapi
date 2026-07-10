@@ -444,12 +444,10 @@ const copyFkColumnRelation = async (
     return;
   }
 
-  await strapi.db
-    .query(uid)
-    .update({
-      where: { id: targetEntryId },
-      data: { [joinColumnName]: sourceRow[joinColumnName] },
-    });
+  await strapi.db.query(uid).update({
+    where: { id: targetEntryId },
+    data: { [joinColumnName]: sourceRow[joinColumnName] },
+  });
 };
 
 const copyMorphToOneRelation = async (
