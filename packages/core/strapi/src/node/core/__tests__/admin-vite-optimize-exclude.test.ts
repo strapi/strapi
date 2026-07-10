@@ -1,5 +1,6 @@
 import {
   collectAdminOptimizeDepsExclude,
+  collectCandidateDependencyNames,
   getPluginPackageName,
   hasReactPeerDependency,
   isEsmPackage,
@@ -181,5 +182,73 @@ describe('collectAdminOptimizeDepsExclude', () => {
     });
 
     await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([]);
+  });
+
+  it('excludes pre-built React peer libraries reachable only transitively', async () => {
+    readPkgUp.mockResolvedValue({
+      packageJson: {
+        dependencies: {
+          '@org/my-plugin': '^1.0.0',
+        },
+      },
+    });
+
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === '@org/my-plugin') {
+        return {
+          dependencies: {
+            'plugin-ui-kit': '^2.0.0',
+          },
+        };
+      }
+
+      if (name === 'plugin-ui-kit') {
+        return {
+          dependencies: {
+            'strapi-design-extended': '^0.0.13',
+          },
+        };
+      }
+
+      if (name === 'strapi-design-extended') {
+        return strapiDesignExtendedLike;
+      }
+
+      return null;
+    });
+
+    await expect(collectAdminOptimizeDepsExclude('/app', [])).resolves.toEqual([
+      'strapi-design-extended',
+    ]);
+  });
+});
+
+describe('collectCandidateDependencyNames', () => {
+  const getModuleMock = getModule as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('walks transitive dependencies without revisiting packages', async () => {
+    getModuleMock.mockImplementation(async (name: string) => {
+      if (name === 'root') {
+        return { dependencies: { mid: '^1.0.0' } };
+      }
+
+      if (name === 'mid') {
+        return { dependencies: { leaf: '^1.0.0', root: '^1.0.0' } };
+      }
+
+      if (name === 'leaf') {
+        return { name: 'leaf' };
+      }
+
+      return null;
+    });
+
+    await expect(collectCandidateDependencyNames('/app', ['root'])).resolves.toEqual(
+      new Set(['root', 'mid', 'leaf'])
+    );
   });
 });

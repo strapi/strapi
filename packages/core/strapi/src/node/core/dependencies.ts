@@ -257,12 +257,23 @@ const reexecCurrentCommand = async (cwd: string) => {
 
 const getModule = async (name: string, cwd: string): Promise<PackageJson | null> => {
   const modulePackagePath = resolveFrom.silent(cwd, path.join(name, 'package.json'));
-  if (!modulePackagePath) {
-    return null;
-  }
-  const file = await fs.readFile(modulePackagePath, 'utf8').then((res) => JSON.parse(res));
 
-  return file;
+  if (modulePackagePath) {
+    const file = await fs.readFile(modulePackagePath, 'utf8').then((res) => JSON.parse(res));
+
+    return file;
+  }
+
+  // Restrictive `exports` maps may omit `./package.json`; resolve the package entry instead.
+  const entryPath = resolveFrom.silent(cwd, name);
+
+  if (entryPath) {
+    const result = await readPkgUp({ cwd: path.dirname(entryPath) });
+
+    return result?.packageJson ?? null;
+  }
+
+  return null;
 };
 
 const getModuleVersion = async (name: string, cwd: string): Promise<string | null> => {

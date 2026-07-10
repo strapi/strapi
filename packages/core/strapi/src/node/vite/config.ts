@@ -15,11 +15,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
   const designSystemLinked = isDesignSystemLinked();
-  const pluginOptimizeDepsExclude = await collectAdminOptimizeDepsExclude(ctx.cwd, ctx.plugins);
-  const optimizeDepsExclude = [
-    ...(designSystemLinked ? ['@strapi/design-system'] : []),
-    ...pluginOptimizeDepsExclude,
-  ];
 
   // Imported dynamically so this file's CJS build resolves Vite's ESM Node API instead of
   // its CJS entry, which emits "The CJS build of Vite's Node API is deprecated".
@@ -42,10 +37,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     },
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
-      // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
-      // so changes are reflected without clearing node_modules/.strapi/vite cache.
-      // Also skip pre-built ESM plugin UI libraries with React peers (see collectAdminOptimizeDepsExclude).
-      ...(optimizeDepsExclude.length > 0 && { exclude: optimizeDepsExclude }),
       include: [
         // pre-bundle React dependencies to avoid React duplicates,
         // even if React dependencies are not direct dependencies
@@ -173,10 +164,23 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
   const baseConfig = await resolveBaseConfig(ctx);
+  const designSystemLinked = isDesignSystemLinked();
+  const pluginOptimizeDepsExclude = await collectAdminOptimizeDepsExclude(ctx.cwd, ctx.plugins);
+  const optimizeDepsExclude = [
+    ...(designSystemLinked ? ['@strapi/design-system'] : []),
+    ...pluginOptimizeDepsExclude,
+  ];
 
   return {
     ...baseConfig,
     mode: 'development',
+    optimizeDeps: {
+      ...baseConfig.optimizeDeps,
+      // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
+      // so changes are reflected without clearing node_modules/.strapi/vite cache.
+      // Also skip pre-built ESM plugin UI libraries with React peers (see collectAdminOptimizeDepsExclude).
+      ...(optimizeDepsExclude.length > 0 && { exclude: optimizeDepsExclude }),
+    },
     resolve: {
       ...baseConfig.resolve,
       alias: {

@@ -121,6 +121,53 @@ const collectDependencyNames = (pkg: PackageJson): string[] => {
   return [...names];
 };
 
+/**
+ * Walk direct and transitive dependency names from app/plugin roots.
+ *
+ * @internal exported for tests
+ */
+export const collectCandidateDependencyNames = async (
+  cwd: string,
+  rootNames: Iterable<string>
+): Promise<Set<string>> => {
+  const packages = await collectCandidatePackages(cwd, rootNames);
+
+  return new Set(packages.keys());
+};
+
+const collectCandidatePackages = async (
+  cwd: string,
+  rootNames: Iterable<string>
+): Promise<Map<string, PackageJson>> => {
+  const packages = new Map<string, PackageJson>();
+  const queue = [...rootNames];
+  const visited = new Set<string>();
+
+  while (queue.length > 0) {
+    const name = queue.shift()!;
+
+    if (visited.has(name)) {
+      continue;
+    }
+
+    visited.add(name);
+
+    const pkg = await getModule(name, cwd);
+
+    if (pkg) {
+      packages.set(name, pkg);
+
+      for (const dep of collectDependencyNames(pkg)) {
+        if (!visited.has(dep)) {
+          queue.push(dep);
+        }
+      }
+    }
+  }
+
+  return packages;
+};
+
 const getPluginPackageJson = async (
   plugin: PluginMeta,
   cwd: string
@@ -155,12 +202,12 @@ export const collectAdminOptimizeDepsExclude = async (
   cwd: string,
   plugins: PluginMeta[]
 ): Promise<string[]> => {
-  const candidateNames = new Set<string>();
+  const rootNames = new Set<string>();
   const appPkg = await loadAppPackageJson(cwd);
 
   if (appPkg) {
     for (const name of collectDependencyNames(appPkg)) {
-      candidateNames.add(name);
+      rootNames.add(name);
     }
   }
 
@@ -169,21 +216,20 @@ export const collectAdminOptimizeDepsExclude = async (
 
     if (pluginPkg) {
       for (const name of collectDependencyNames(pluginPkg)) {
-        candidateNames.add(name);
+        rootNames.add(name);
       }
     }
   }
 
+  const candidatePackages = await collectCandidatePackages(cwd, rootNames);
   const exclude: string[] = [];
 
-  for (const name of candidateNames) {
+  for (const [name, pkg] of candidatePackages) {
     if (PINNED_OPTIMIZE_MODULES.has(name)) {
       continue;
     }
 
-    const pkg = await getModule(name, cwd);
-
-    if (pkg && shouldExcludeFromOptimizeDeps(pkg)) {
+    if (shouldExcludeFromOptimizeDeps(pkg)) {
       exclude.push(name);
     }
   }

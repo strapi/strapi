@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import {
   findUndeclaredAdminPeerDeps,
   getInstallCommandHint,
+  getModule,
   installAdminPeerDeps,
   reexecCurrentCommand,
   reportMissingAdminPeerDeps,
@@ -196,6 +197,32 @@ describe('admin peer dependency checks', () => {
         ['/path/to/strapi', 'build'],
         expect.objectContaining({ cwd, stdio: 'inherit' })
       );
+    });
+  });
+
+  describe('getModule', () => {
+    it('falls back to package entry when exports omit ./package.json', async () => {
+      resolveFromSilentMock.mockImplementation((_, modulePath: string) => {
+        if (modulePath === 'restricted-ui-lib/package.json') {
+          return undefined;
+        }
+
+        if (modulePath === 'restricted-ui-lib') {
+          return '/tmp/strapi-app/node_modules/restricted-ui-lib/dist/index.js';
+        }
+
+        return undefined;
+      });
+
+      readPkgUpMock.mockResolvedValue({
+        path: '/tmp/strapi-app/node_modules/restricted-ui-lib/package.json',
+        packageJson: { name: 'restricted-ui-lib', version: '1.0.0' },
+      } as Awaited<ReturnType<typeof readPkgUp>>);
+
+      await expect(getModule('restricted-ui-lib', cwd)).resolves.toEqual({
+        name: 'restricted-ui-lib',
+        version: '1.0.0',
+      });
     });
   });
 
