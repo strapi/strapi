@@ -9,7 +9,6 @@ const config = {
     'rollup.config.mjs',
     'coverage/',
     'lint-staged.config.mjs',
-    'shared/**/*',
   ],
   overrides: [
     {
