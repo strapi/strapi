@@ -1,4 +1,4 @@
-import type { errors } from '@strapi/utils';
+import { errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
 export type ApiTokenBase = {
