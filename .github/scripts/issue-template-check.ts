@@ -43,12 +43,8 @@ function normalizeHeader(header: string): string {
   return header.trim().toLowerCase();
 }
 
-export function canonicalSectionTitle(header: string): string {
+function canonicalSectionTitle(header: string): string {
   return REQUIRED_SECTION_LOOKUP.get(normalizeHeader(header)) ?? header.trim();
-}
-
-export function isRequiredSectionTitle(header: string): boolean {
-  return REQUIRED_SECTION_LOOKUP.has(normalizeHeader(header));
 }
 
 const REQUIRED_CHECKBOXES = [
@@ -107,13 +103,6 @@ export function parseIssueSections(body: string): Map<string, string> {
 
   flush();
   return sections;
-}
-
-export function getSectionHeadersInOrder(body: string): string[] {
-  return body
-    .split('\n')
-    .filter((line) => line.startsWith('### '))
-    .map((line) => canonicalSectionTitle(line.slice(4)));
 }
 
 export function normalizeSectionContent(content: string): string {
