@@ -4,10 +4,13 @@ TypeScript helpers used by workflows under `.github/workflows/`.
 
 ## Scripts
 
-| File                        | Workflow                                                                             | Description                                                     |
-| --------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| `community-pr-lifecycle.ts` | `community-pr-lifecycle.yml`                                                         | Syncs community PR "waiting on author" → stale → closed         |
-| `issue-template-check.ts`   | `template-check-on-new-issue.yaml`, `issues_handleLabel.yml`, `issues_dailyCron.yml` | Validates bug reports and manages invalid-template grace period |
+| File                             | Workflow                           | Description                                                 |
+| -------------------------------- | ---------------------------------- | ----------------------------------------------------------- |
+| `community-pr-lifecycle.ts`      | `community-pr-lifecycle.yml`       | Syncs community PR "waiting on author" → stale → closed     |
+| `issue-template-check.ts`        | (library)                          | Template validation and invalid-template grace-period logic |
+| `issue-template-check-action.ts` | `template-check-on-new-issue.yaml` | Open/edit issue template check                              |
+| `issue-template-label-action.ts` | `issues_handleLabel.yml`           | Re-validate when `flag: invalid template` is labeled        |
+| `issue-template-cron-action.ts`  | `issues_dailyCron.yml`             | Daily sweep of flagged invalid-template issues              |
 
 ## Tests
 
