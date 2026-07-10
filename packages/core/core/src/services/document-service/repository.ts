@@ -1,4 +1,4 @@
-import { omit, assoc, merge, curry, isEmpty, pick } from 'lodash/fp';
+import { omit, assoc, curry, isEmpty, pick } from 'lodash/fp';
 
 import {
   async,
@@ -28,6 +28,7 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
+import { copyCloneRelationRows, prepareCloneData } from './utils/clone-relations';
 
 const { validators } = validate;
 
@@ -42,59 +43,6 @@ const MAX_LOCALE_LENGTH = 35;
 
 /** Treat as "param not provided": null, undefined, or empty string (e.g. from query/JSON). */
 const isParamEmpty = (v: unknown): boolean => v === undefined || v === null || v === '';
-
-const RELATION_OPERATIONS = ['connect', 'disconnect', 'set'] as const;
-
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-};
-
-type RelationAttribute = {
-  type: 'relation';
-  relation: string;
-  useJoinTable?: boolean;
-};
-
-const isRelationAttribute = (attribute: unknown): attribute is RelationAttribute => {
-  return (
-    isRecord(attribute) && attribute.type === 'relation' && typeof attribute.relation === 'string'
-  );
-};
-
-const isRelationOperationPayload = (value: unknown): value is Record<string, unknown> => {
-  return (
-    isRecord(value) &&
-    RELATION_OPERATIONS.some((operation) => Object.prototype.hasOwnProperty.call(value, operation))
-  );
-};
-
-const canTransformRelationOperationPayload = (attribute: RelationAttribute) => {
-  return attribute.useJoinTable !== false && attribute.relation !== 'morphToOne';
-};
-
-const mergeCloneData = (
-  originalData: Record<string, unknown>,
-  submittedData: Record<string, unknown> | undefined,
-  contentType: { attributes: Record<string, unknown> }
-) => {
-  const mergedData = merge(originalData, submittedData ?? {}) as Record<string, unknown>;
-
-  if (!submittedData) {
-    return mergedData;
-  }
-
-  for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
-    if (
-      isRelationAttribute(attribute) &&
-      canTransformRelationOperationPayload(attribute) &&
-      isRelationOperationPayload(submittedData[attributeName])
-    ) {
-      mergedData[attributeName] = submittedData[attributeName];
-    }
-  }
-
-  return mergedData;
-};
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
@@ -500,16 +448,41 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
     });
 
+    const newDocumentId = createDocumentId();
+
     const clonedEntries = await async.map(
       entriesToClone,
-      async.pipe(
-        omit(['id', 'createdAt', 'updatedAt']),
-        // assign new documentId
-        assoc('documentId', createDocumentId()),
-        // Merge new data into it
-        (data) => mergeCloneData(data, queryParams.data, contentType),
-        (data) => entries.create({ ...queryParams, data, status: 'draft' })
-      )
+      async (entryToClone: Record<string, unknown>) => {
+        const sourceEntryId = entryToClone.id as number;
+        const originalData = omit(['id', 'createdAt', 'updatedAt'], entryToClone) as Record<
+          string,
+          unknown
+        >;
+        const { data, relationsToCopy } = prepareCloneData(
+          originalData,
+          queryParams.data,
+          contentType
+        );
+        const dataWithDocumentId = assoc('documentId', newDocumentId, data);
+        const doc = await entries.create({
+          ...queryParams,
+          data: dataWithDocumentId,
+          status: 'draft',
+        });
+
+        await copyCloneRelationRows(strapi, uid, sourceEntryId, doc.id, relationsToCopy);
+
+        if (relationsToCopy.length === 0) {
+          return doc;
+        }
+
+        const selectionQuery = transformParamsToQuery(
+          uid,
+          pickSelectionParams({ ...queryParams, status: 'draft' }) as any
+        );
+
+        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+      }
     );
 
     clonedEntries.forEach(emitEvent('entry.create'));

@@ -195,6 +195,144 @@ describe('Document Service clone relation operation payloads', () => {
   );
 
   testInTransaction(
+    'clone preserves a top-level oneToOne relation for empty duplicate-form operations',
+    async () => {
+      const { product, tag } = await createTaggedProduct(
+        'Empty Operations Source Product',
+        'Empty Operations Original Tag'
+      );
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        data: {
+          name: 'Empty Operations Clone',
+          tag: {
+            connect: [],
+            disconnect: [],
+          },
+        },
+        populate: { tag: true },
+      });
+
+      const originalProduct = await findProductWithTags(product.documentId);
+
+      expect({
+        cloneTagDocumentId: relationDocumentId(result.entries[0] as ProductWithTags, 'tag'),
+        originalTagDocumentId: relationDocumentId(originalProduct as ProductWithTags, 'tag'),
+      }).toEqual({
+        cloneTagDocumentId: tag.documentId,
+        originalTagDocumentId: tag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone preserves an omitted top-level oneToOne relation when changing scalar data',
+    async () => {
+      const { product, tag } = await createTaggedProduct(
+        'Omitted Relation Source Product',
+        'Omitted Relation Original Tag'
+      );
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        data: {
+          name: 'Omitted Relation Clone',
+        },
+        populate: { tag: true },
+      });
+
+      const originalProduct = await findProductWithTags(product.documentId);
+
+      expect({
+        cloneTagDocumentId: relationDocumentId(result.entries[0] as ProductWithTags, 'tag'),
+        originalTagDocumentId: relationDocumentId(originalProduct as ProductWithTags, 'tag'),
+      }).toEqual({
+        cloneTagDocumentId: tag.documentId,
+        originalTagDocumentId: tag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone returns the draft with an unchanged oneToOne relation when status is published',
+    async () => {
+      const { product, tag } = await createTaggedProduct(
+        'Published Status Source Product',
+        'Published Status Original Tag'
+      );
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        status: 'published',
+        data: {
+          name: 'Published Status Clone',
+        },
+        populate: { tag: true },
+      });
+
+      const clonedProduct = result.entries[0] as ProductWithTags | null;
+      const persistedDraft = result.documentId
+        ? await strapi.documents(PRODUCT_UID).findOne({
+            documentId: result.documentId,
+            locale: 'en',
+            status: 'draft',
+            populate: { tag: true },
+          })
+        : undefined;
+      const originalProduct = await findProductWithTags(product.documentId);
+
+      expect({
+        cloneDocumentId: result.documentId ?? null,
+        cloneTagDocumentId: relationDocumentId(clonedProduct ?? undefined, 'tag'),
+        persistedDraftTagDocumentId: relationDocumentId(persistedDraft as ProductWithTags, 'tag'),
+        originalTagDocumentId: relationDocumentId(originalProduct as ProductWithTags, 'tag'),
+      }).toEqual({
+        cloneDocumentId: expect.any(String),
+        cloneTagDocumentId: tag.documentId,
+        persistedDraftTagDocumentId: tag.documentId,
+        originalTagDocumentId: tag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone applies set for a top-level oneToOne relation without changing the original',
+    async () => {
+      const { product, tag: originalTag } = await createTaggedProduct(
+        'Set Operation Source Product',
+        'Set Operation Original Tag'
+      );
+      const selectedTag = await createTag('Set Operation Selected Tag');
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        locale: 'en',
+        data: {
+          name: 'Set Operation Clone',
+          tag: {
+            set: [{ documentId: selectedTag.documentId }],
+          },
+        },
+        populate: { tag: true },
+      });
+
+      const originalProduct = await findProductWithTags(product.documentId);
+
+      expect({
+        cloneTagDocumentId: relationDocumentId(result.entries[0] as ProductWithTags, 'tag'),
+        originalTagDocumentId: relationDocumentId(originalProduct as ProductWithTags, 'tag'),
+      }).toEqual({
+        cloneTagDocumentId: selectedTag.documentId,
+        originalTagDocumentId: originalTag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
     'clone preserves useJoinTable:false relation data when submitted operations are not transformable',
     async () => {
       const { product, tag } = await createLegacyTaggedProduct(
