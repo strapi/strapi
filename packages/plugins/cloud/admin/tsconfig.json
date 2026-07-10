@@ -1,7 +1,7 @@
 {
   "extends": "tsconfig/client.json",
-  "include": ["./src", "*.d.ts"],
+  "include": ["./src"],
   "compilerOptions": {
-    "types": []
+    "types": ["vite/client", "@strapi/types/globals-admin"]
   }
 }
