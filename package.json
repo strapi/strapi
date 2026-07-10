@@ -89,7 +89,6 @@
     "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",
     "test:unit": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit:update": "nx run-many --target=test:unit --nx-ignore-cycles -- -u",
-    "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit:watch": "run test:unit --watch",
     "test:unit:coverage": "nx run-many --target=test:unit --nx-ignore-cycles -- --coverage",
     "test:front:coverage": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles -- --runInBand --coverage",
