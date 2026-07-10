@@ -141,7 +141,6 @@ export class Package implements PackageInterface {
     const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
 
     const response = await fetch(packageURL, {
-      // @ts-expect-error Node.js fetch supports dispatcher (undici extension)
       dispatcher: agent,
     });
 
