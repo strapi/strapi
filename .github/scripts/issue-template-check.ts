@@ -210,7 +210,7 @@ export function buildInvalidTemplateComment(
 
 export function resolveInvalidTemplateAction(
   valid: boolean,
-  updatedAt: Date,
+  labelAppliedAt: Date,
   now: Date = new Date(),
   graceDays: number = INVALID_TEMPLATE_GRACE_DAYS
 ): InvalidTemplateAction {
@@ -220,7 +220,7 @@ export function resolveInvalidTemplateAction(
 
   const cutoff = new Date(now.getTime() - graceDays * 24 * 60 * 60 * 1000);
 
-  if (updatedAt > cutoff) {
+  if (labelAppliedAt > cutoff) {
     return 'skip';
   }
 
@@ -248,7 +248,7 @@ export function buildInvalidTemplateFixedComment() {
 interface IssueSummary {
   number: number;
   body: string | null;
-  updated_at: string;
+  label_applied_at: string;
 }
 
 interface ProcessInvalidTemplateOptions {
@@ -269,7 +269,12 @@ export function planInvalidTemplateProcessing({
 }: ProcessInvalidTemplateOptions): InvalidTemplateProcessPlan[] {
   return issues.map((issue) => {
     const { valid } = validateIssueTemplate(issue.body ?? '');
-    const action = resolveInvalidTemplateAction(valid, new Date(issue.updated_at), now, graceDays);
+    const action = resolveInvalidTemplateAction(
+      valid,
+      new Date(issue.label_applied_at),
+      now,
+      graceDays
+    );
 
     return { number: issue.number, action };
   });
@@ -282,6 +287,30 @@ interface ProcessInvalidTemplateIssuesArgs {
   graceDays?: number;
   dryRun?: boolean;
   log?: (message: string) => void;
+}
+
+export async function getInvalidTemplateLabelAppliedAt(
+  github: Octokit,
+  owner: string,
+  repo: string,
+  issueNumber: number
+): Promise<Date | null> {
+  let latest: Date | null = null;
+
+  for await (const response of github.paginate.iterator(github.rest.issues.listEventsForRepo, {
+    owner,
+    repo,
+    issue_number: issueNumber,
+    per_page: 100,
+  })) {
+    for (const event of response.data) {
+      if (event.event === 'labeled' && event.label?.name === INVALID_TEMPLATE_LABEL) {
+        latest = new Date(event.created_at);
+      }
+    }
+  }
+
+  return latest;
 }
 
 export async function processInvalidTemplateIssues({
@@ -309,12 +338,31 @@ export async function processInvalidTemplateIssues({
     per_page: 100,
   })) {
     const openIssues = response.data.filter((issue) => !issue.pull_request);
-    const plans = planInvalidTemplateProcessing({
-      issues: openIssues.map((issue) => ({
+    const issueSummaries = [];
+
+    for (const issue of openIssues) {
+      const labelAppliedAt = await getInvalidTemplateLabelAppliedAt(
+        github,
+        owner,
+        repo,
+        issue.number
+      );
+
+      if (!labelAppliedAt) {
+        log(`Issue #${issue.number}: missing label event, skipping`);
+        skipped += 1;
+        continue;
+      }
+
+      issueSummaries.push({
         number: issue.number,
         body: issue.body,
-        updated_at: issue.updated_at,
-      })),
+        label_applied_at: labelAppliedAt.toISOString(),
+      });
+    }
+
+    const plans = planInvalidTemplateProcessing({
+      issues: issueSummaries,
       now,
       graceDays,
     });

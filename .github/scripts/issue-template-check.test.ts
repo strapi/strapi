@@ -182,23 +182,23 @@ describe('issue-template-check', () => {
 
   it('removes label when an issue becomes valid before grace period ends', () => {
     const now = new Date('2026-07-09T12:00:00Z');
-    const updatedAt = new Date('2026-07-08T12:00:00Z');
+    const labelAppliedAt = new Date('2026-07-08T12:00:00Z');
 
-    assert.equal(resolveInvalidTemplateAction(true, updatedAt, now), 'remove_label');
+    assert.equal(resolveInvalidTemplateAction(true, labelAppliedAt, now), 'remove_label');
   });
 
   it('skips closing while grace period is active', () => {
     const now = new Date('2026-07-09T12:00:00Z');
-    const updatedAt = new Date('2026-07-09T06:00:00Z');
+    const labelAppliedAt = new Date('2026-07-09T06:00:00Z');
 
-    assert.equal(resolveInvalidTemplateAction(false, updatedAt, now), 'skip');
+    assert.equal(resolveInvalidTemplateAction(false, labelAppliedAt, now), 'skip');
   });
 
   it('closes issues that stay invalid beyond the grace period', () => {
     const now = new Date('2026-07-09T12:00:00Z');
-    const updatedAt = new Date('2026-06-20T12:00:00Z');
+    const labelAppliedAt = new Date('2026-06-20T12:00:00Z');
 
-    assert.equal(resolveInvalidTemplateAction(false, updatedAt, now), 'close');
+    assert.equal(resolveInvalidTemplateAction(false, labelAppliedAt, now), 'close');
   });
 
   it('plans label removal when a flagged issue is fixed', () => {
@@ -207,7 +207,7 @@ describe('issue-template-check', () => {
         {
           number: 123,
           body: VALID_ISSUE_BODY,
-          updated_at: '2026-07-01T00:00:00Z',
+          label_applied_at: '2026-07-01T00:00:00Z',
         },
       ],
       now: new Date('2026-07-09T00:00:00Z'),
