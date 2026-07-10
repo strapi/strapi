@@ -2,7 +2,7 @@ name: Check Required Checkboxes
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 permissions:
   contents: read
@@ -23,4 +23,6 @@ jobs:
         run: cd .github/scripts && npm install --ignore-scripts
 
       - name: Check issue uses template
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node --experimental-strip-types .github/scripts/issue-template-check-action.ts

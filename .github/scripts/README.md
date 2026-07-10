@@ -4,10 +4,10 @@ TypeScript helpers used by workflows under `.github/workflows/`.
 
 ## Scripts
 
-| File                        | Workflow                           | Description                                             |
-| --------------------------- | ---------------------------------- | ------------------------------------------------------- |
-| `community-pr-lifecycle.ts` | `community-pr-lifecycle.yml`       | Syncs community PR "waiting on author" → stale → closed |
-| `issue-template-check.ts`   | `template-check-on-new-issue.yaml` | Validates new bug reports against `BUG_REPORT.yml`      |
+| File                        | Workflow                                                                             | Description                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| `community-pr-lifecycle.ts` | `community-pr-lifecycle.yml`                                                         | Syncs community PR "waiting on author" → stale → closed         |
+| `issue-template-check.ts`   | `template-check-on-new-issue.yaml`, `issues_handleLabel.yml`, `issues_dailyCron.yml` | Validates bug reports and manages invalid-template grace period |
 
 ## Tests
 

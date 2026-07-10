@@ -5,21 +5,34 @@ on:
     types: [labeled]
 
 permissions:
+  contents: read
   issues: write
   pull-requests: write
   actions: read
   checks: read
-  contents: read
   statuses: read
 
 jobs:
   issue-labeled:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+
+      - name: Install and build scripts
+        run: cd .github/scripts && npm install --ignore-scripts && npx tsup issue-template-check.ts --format cjs --target node20 --out-dir dist --no-splitting
+
       - name: Handle issue label automation
         uses: actions/github-script@v9
         with:
           script: |
+            const {
+              INVALID_TEMPLATE_LABEL,
+              buildInvalidTemplateComment,
+              buildInvalidTemplateFixedComment,
+              validateIssueTemplate,
+            } = require('./.github/scripts/dist/issue-template-check.js');
+
             const { owner, repo } = context.repo;
             const issue_number = context.payload.issue.number;
             const login = context.payload.issue.user.login;
@@ -126,19 +139,28 @@ jobs:
               },
 
               'flag: invalid template': async () => {
+                const body = context.payload.issue.body || '';
+                const { valid, missingItems } = validateIssueTemplate(body);
+
+                if (valid) {
+                  try {
+                    await github.rest.issues.removeLabel({
+                      owner,
+                      repo,
+                      issue_number,
+                      name: INVALID_TEMPLATE_LABEL,
+                    });
+                  } catch {
+                    // Label may have been removed concurrently — not fatal
+                  }
+
+                  await comment(buildInvalidTemplateFixedComment());
+                  return;
+                }
+
                 await comment(
-                  `> This is a templated message
-
-            Hello @${login},
-
-            We ask that you please follow the issue template.
-            A proper issue submission let's us better understand the origin of your bug and therefore help you. You can see the template guidelines for bug reports [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
-
-            Please create a new issue and completely fill out the issue template, you can [open a new issue here](https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.yml).
-
-            Thank you.`
+                  buildInvalidTemplateComment(login, owner, repo, missingItems)
                 );
-                await close('not_planned');
               },
 
               'flag: question': async () => {
