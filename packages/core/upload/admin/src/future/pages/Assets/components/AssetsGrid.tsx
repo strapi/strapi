@@ -3,6 +3,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Checkbox,
   Flex,
   Grid,
   IconButton,
@@ -28,6 +29,15 @@ import type { Folder } from '../../../../../../shared/contracts/folders';
 /* -------------------------------------------------------------------------------------------------
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
+
+// Top-left selection checkbox overlaid on the asset preview, always visible.
+const CheckboxOverlay = styled(Flex)`
+  position: absolute;
+  top: ${({ theme }) => theme.spaces[2]};
+  left: ${({ theme }) => theme.spaces[2]};
+  z-index: 1;
+  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+`;
 
 const StyledCard = styled(Card)<{
   $isDragging?: boolean;
@@ -272,6 +282,7 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const StyledCardHeader = styled(CardHeader)`
+  position: relative;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
@@ -355,6 +366,17 @@ const AssetCard = ({ asset, orderedAssetIds, onAssetItemClick }: AssetCardProps)
     onAssetItemClick(asset.id);
   };
 
+  // Same semantics as the table's row checkbox: Shift extends the range,
+  // otherwise a plain additive toggle. Never bubbles into the card click.
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (e.shiftKey) {
+      selectRange(orderedAssetIds, asset.id);
+    } else {
+      toggle(asset.id);
+    }
+  };
+
   return (
     <StyledCard
       ref={setNodeRef}
@@ -370,6 +392,19 @@ const AssetCard = ({ asset, orderedAssetIds, onAssetItemClick }: AssetCardProps)
       onKeyDown={handleKeyDown}
     >
       <StyledCardHeader>
+        <CheckboxOverlay onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
+          <Checkbox
+            checked={selected}
+            onClick={handleCheckboxClick}
+            aria-label={formatMessage(
+              {
+                id: getTranslationKey('list.table.row.select'),
+                defaultMessage: 'Select {name}',
+              },
+              { name: asset.name }
+            )}
+          />
+        </CheckboxOverlay>
         <AssetPreview asset={asset} />
       </StyledCardHeader>
       <CardBody>

@@ -366,6 +366,28 @@ describe('AssetsGrid', () => {
       expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
     });
 
+    it('toggles selection additively via the corner checkbox', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select image2.png' }));
+
+      // Checkbox is additive (unlike plain card click, which replaces).
+      expect(screen.getByText('2 items selected')).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
+    });
+
+    it('extends the selection range with Shift+click on the corner checkbox', async () => {
+      const { user } = setup();
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select image1.png' }));
+      await user.keyboard('{Shift>}');
+      await user.click(screen.getByRole('checkbox', { name: 'Select image3.png' }));
+      await user.keyboard('{/Shift}');
+
+      expect(screen.getByText('3 items selected')).toBeInTheDocument();
+    });
+
     it('toggles folder selection with Cmd/Ctrl+click without navigating', async () => {
       const folders = [createMockFolder(1, 'Photos')];
       const { user } = setup({ folders, assets: mockAssets });
