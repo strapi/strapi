@@ -5,7 +5,6 @@ import { getService } from '../utils';
 import { expiresInToSeconds } from './token';
 import { AUDITED_EVENTS, toAdminUserEvent } from '../audit-logs/admin-users';
 import type { AdminUser } from '../../../shared/contracts/shared';
-import '@strapi/types';
 
 const { ApplicationError } = errors;
 

@@ -46,6 +46,10 @@
       "types": "./dist/_internal/globals-admin.d.ts",
       "source": "./src/_internal/globals-admin.ts"
     },
+    "./_internal/globals-server": {
+      "types": "./dist/_internal/globals-server.d.ts",
+      "source": "./src/_internal/globals-server.ts"
+    },
     "./package.json": "./package.json",
     "./*": "./*"
   },

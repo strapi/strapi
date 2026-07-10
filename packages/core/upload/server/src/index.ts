@@ -1,6 +1,3 @@
-import type {} from 'koa-body';
-import type {} from '@strapi/types';
-
 import { register } from './register';
 import { bootstrap } from './bootstrap';
 import { contentTypes } from './content-types';
