@@ -22,7 +22,7 @@ jobs:
           node-version: 24
 
       - name: Install scripts
-        run: cd .github/scripts && npm ci --ignore-scripts
+        run: cd .github/scripts && npm install --ignore-scripts
 
       - name: Check issue uses template
         env:

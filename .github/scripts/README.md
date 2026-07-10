@@ -13,7 +13,7 @@ TypeScript helpers used by workflows under `.github/workflows/`.
 
 ```bash
 cd .github/scripts
-npm ci --ignore-scripts
+npm install --ignore-scripts
 npm test
 ```
 

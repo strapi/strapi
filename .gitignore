@@ -91,7 +91,6 @@ node_modules
 package-lock.json
 **/package-lock.json
 !docs/package-lock.json
-!.github/scripts/package-lock.json
 *.heapsnapshot
 
 ############################
