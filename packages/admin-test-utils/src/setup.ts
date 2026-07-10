@@ -1,5 +1,6 @@
 import { format } from 'util';
 import { ResizeObserver } from '@juggle/resize-observer';
+import type { Admin } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * IntersectionObserver
@@ -108,11 +109,17 @@ globalThis.console = patchedConsole as any;
  * Strapi
  * -----------------------------------------------------------------------------------------------*/
 
-window.strapi = {
+const browserStrapi: Admin.BrowserStrapi = {
   backendURL: 'http://localhost:1337',
   isEE: false,
+  isTrial: false,
+  ai: {
+    enabled: false,
+  },
   features: {
     SSO: 'sso',
+    REVIEW_WORKFLOWS: 'review-workflows',
+    AUDIT_LOGS: 'audit-logs',
     isEnabled: () => false,
   },
   future: {
@@ -125,6 +132,9 @@ window.strapi = {
     promoteEE: true,
   },
 };
+
+// @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
+window.strapi = browserStrapi;
 
 /* -------------------------------------------------------------------------------------------------
  * matchMedia
