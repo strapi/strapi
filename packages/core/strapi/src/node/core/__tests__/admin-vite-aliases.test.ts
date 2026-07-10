@@ -5,6 +5,7 @@ import {
   ADMIN_PINNED_ALIAS_MODULES,
   ADMIN_VITE_ALIAS_MODULES,
   ADMIN_VITE_DEDUPE_MODULES,
+  ADMIN_VITE_SINGLETON_MODULES,
 } from '../admin-vite-alias-modules';
 import { buildAdminViteResolveAliases } from '../admin-vite-aliases';
 import { getModulePath } from '../resolve-module';
@@ -20,8 +21,16 @@ describe('buildAdminViteResolveAliases', () => {
     }
   });
 
-  it('uses the same module list for aliases and vite resolve.dedupe', () => {
-    expect(ADMIN_VITE_DEDUPE_MODULES).toBe(ADMIN_VITE_ALIAS_MODULES);
+  it('includes all alias modules in vite resolve.dedupe', () => {
+    expect(ADMIN_VITE_DEDUPE_MODULES).toEqual(
+      expect.arrayContaining([...ADMIN_VITE_ALIAS_MODULES])
+    );
+  });
+
+  it('includes singleton modules in vite resolve.dedupe', () => {
+    expect(ADMIN_VITE_DEDUPE_MODULES).toEqual(
+      expect.arrayContaining([...ADMIN_VITE_SINGLETON_MODULES])
+    );
   });
 
   it.each(ADMIN_PINNED_ALIAS_MODULES)(

@@ -1,7 +1,10 @@
 import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
-import { ADMIN_VITE_DEDUPE_MODULES } from '../core/admin-vite-alias-modules';
+import {
+  ADMIN_VITE_DEDUPE_MODULES,
+  ADMIN_VITE_SINGLETON_MODULES,
+} from '../core/admin-vite-alias-modules';
 import { buildAdminViteResolveAliases } from '../core/admin-vite-aliases';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
@@ -64,6 +67,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Pre-bundle prismjs so plugin chunks get a valid ESM namespace (prismjs is UMD and can
         // otherwise expose an empty object when bundled, causing "Prism is not defined" in admin).
         'prismjs',
+        // CodeMirror singletons — design-system JSONInput must share one @codemirror/state instance.
+        ...ADMIN_VITE_SINGLETON_MODULES,
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why

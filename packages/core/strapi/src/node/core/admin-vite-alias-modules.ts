@@ -4,6 +4,8 @@
  *
  * @internal
  */
+import { ADMIN_VITE_SINGLETON_MODULES } from './admin-vite-singleton-modules';
+
 export const ADMIN_VITE_ALIAS_MODULES = [
   'react',
   'react-dom',
@@ -18,8 +20,13 @@ export const ADMIN_VITE_ALIAS_MODULES = [
 
 export type AdminViteAliasModule = (typeof ADMIN_VITE_ALIAS_MODULES)[number];
 
-/** Same modules passed to Vite resolve.dedupe */
-export const ADMIN_VITE_DEDUPE_MODULES = ADMIN_VITE_ALIAS_MODULES;
+/** Alias modules plus singleton deps that must not be duplicated in the admin graph */
+export const ADMIN_VITE_DEDUPE_MODULES = [
+  ...ADMIN_VITE_ALIAS_MODULES,
+  ...ADMIN_VITE_SINGLETON_MODULES,
+] as const;
+
+export { ADMIN_VITE_SINGLETON_MODULES };
 
 /**
  * Alias modules with exact versions declared in @strapi/admin dependencies (not peers).
