@@ -28,7 +28,11 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
-import { copyCloneRelationRows, prepareCloneData } from './utils/clone-relations';
+import {
+  applyDeferredCloneRelationCopies,
+  applyPostCloneRelationUpdates,
+  prepareCloneData,
+} from './utils/clone-relations';
 
 const { validators } = validate;
 
@@ -458,7 +462,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           string,
           unknown
         >;
-        const { data, relationsToCopy } = await prepareCloneData(
+        const { data, deferredCopies, postCloneUpdates } = await prepareCloneData(
           originalData,
           queryParams.data,
           contentType,
@@ -471,16 +475,48 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           status: 'draft',
         });
 
-        await copyCloneRelationRows(strapi, uid, sourceEntryId, doc.id, relationsToCopy);
-
-        if (relationsToCopy.length === 0) {
-          return doc;
-        }
+        const needsRelationFollowUp = deferredCopies.length > 0 || postCloneUpdates.length > 0;
 
         const selectionQuery = transformParamsToQuery(
           uid,
           pickSelectionParams({ ...queryParams, status: 'draft' }) as any
         );
+
+        const clonedEntry = needsRelationFollowUp
+          ? await strapi.db.query(uid).findOne({
+              ...selectionQuery,
+              where: { id: doc.id },
+              populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
+            })
+          : doc;
+
+        if (clonedEntry) {
+          await applyDeferredCloneRelationCopies(
+            strapi,
+            uid,
+            sourceEntryId,
+            doc.id,
+            originalData,
+            clonedEntry as Record<string, unknown>,
+            deferredCopies
+          );
+
+          await applyPostCloneRelationUpdates(
+            strapi,
+            uid,
+            doc.id,
+            {
+              ...(clonedEntry as Record<string, unknown>),
+              documentId: doc.documentId,
+              locale: entryToClone.locale ?? queryParams.locale ?? queryParams.data?.locale,
+            },
+            postCloneUpdates
+          );
+        }
+
+        if (!needsRelationFollowUp) {
+          return doc;
+        }
 
         return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
       }
