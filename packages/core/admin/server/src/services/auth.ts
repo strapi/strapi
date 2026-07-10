@@ -4,7 +4,6 @@ import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { expiresInToSeconds } from './token';
 import type { AdminUser } from '../../../shared/contracts/shared';
-import '@strapi/types';
 
 const { ApplicationError } = errors;
 

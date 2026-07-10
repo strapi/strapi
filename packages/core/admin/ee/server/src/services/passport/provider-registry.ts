@@ -1,5 +1,3 @@
-import '@strapi/types';
-
 export default () => {
   const registry = new Map();
 

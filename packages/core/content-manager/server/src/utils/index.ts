@@ -1,5 +1,3 @@
-import '@strapi/types';
-
 import type { DocumentManagerService } from '../services/document-manager';
 import type DocumentMetadata from '../services/document-metadata';
 
