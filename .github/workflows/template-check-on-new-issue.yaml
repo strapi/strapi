@@ -14,13 +14,15 @@ jobs:
     steps:
       - name: Checkout base branch
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v6
         with:
           node-version: 24
 
       - name: Install scripts
-        run: cd .github/scripts && npm install --ignore-scripts
+        run: cd .github/scripts && npm ci --ignore-scripts
 
       - name: Check issue uses template
         env:

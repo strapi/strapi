@@ -18,9 +18,11 @@ jobs:
     steps:
       - name: Checkout base branch
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install and build scripts
-        run: cd .github/scripts && npm install --ignore-scripts && npx tsup issue-template-check.ts --format cjs --target node20 --out-dir dist --no-splitting
+        run: cd .github/scripts && npm ci --ignore-scripts && npx tsup issue-template-check.ts --format cjs --target node20 --out-dir dist --no-splitting
 
       - name: Handle issue label automation
         uses: actions/github-script@v9
@@ -141,6 +143,7 @@ jobs:
               'flag: invalid template': async () => {
                 const body = context.payload.issue.body || '';
                 const { valid, missingItems } = validateIssueTemplate(body);
+                const labelAddedBy = context.payload.sender?.login ?? '';
 
                 if (valid) {
                   try {
@@ -155,6 +158,13 @@ jobs:
                   }
 
                   await comment(buildInvalidTemplateFixedComment());
+                  return;
+                }
+
+                if (labelAddedBy === 'github-actions[bot]') {
+                  core.info(
+                    'Invalid template label added by template checker; grace comment already posted'
+                  );
                   return;
                 }
 

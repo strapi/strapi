@@ -74,6 +74,7 @@ export function parseIssueSections(body: string): Map<string, string> {
   const lines = body.split('\n');
   let currentHeader: string | null = null;
   let currentContent: string[] = [];
+  let inFence = false;
 
   const flush = () => {
     if (currentHeader === null) {
@@ -81,19 +82,19 @@ export function parseIssueSections(body: string): Map<string, string> {
     }
 
     const key = canonicalSectionTitle(currentHeader);
-    const next = currentContent.join('\n').trim();
-    const existing = sections.get(key);
-
-    if (existing) {
-      sections.set(key, `${existing}\n\n${next}`.trim());
-      return;
-    }
-
-    sections.set(key, next);
+    sections.set(key, currentContent.join('\n').trim());
   };
 
   for (const line of lines) {
-    if (line.startsWith('### ')) {
+    if (line.trim().startsWith('```')) {
+      inFence = !inFence;
+      if (currentHeader !== null) {
+        currentContent.push(line);
+      }
+      continue;
+    }
+
+    if (!inFence && line.startsWith('### ')) {
       flush();
       currentHeader = line.slice(4).trim();
       currentContent = [];
@@ -123,7 +124,27 @@ export function isPlaceholderContent(content: string): boolean {
 }
 
 export function getCheckedBoxLines(body: string): string[] {
-  return body.split('\n').filter((line) => /\[x\]/i.test(line) && !/^\s*```/.test(line));
+  const checkedLines: string[] = [];
+  let inFence = false;
+
+  for (const line of body.split('\n')) {
+    if (line.trim().startsWith('```')) {
+      inFence = !inFence;
+      continue;
+    }
+
+    if (!inFence && /\[x\]/i.test(line)) {
+      checkedLines.push(line);
+    }
+  }
+
+  return checkedLines;
+}
+
+export function assertGithubToken(token: string | undefined): asserts token is string {
+  if (!token) {
+    throw new Error('Parameter token or opts.auth is required');
+  }
 }
 
 function hasCheckedRequiredCheckbox(

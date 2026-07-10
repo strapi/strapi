@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  assertGithubToken,
   buildInvalidTemplateComment,
+  getCheckedBoxLines,
   isPlaceholderContent,
   parseIssueSections,
   planInvalidTemplateProcessing,
@@ -214,5 +216,104 @@ describe('issue-template-check', () => {
     });
 
     assert.deepEqual(plans, [{ number: 123, action: 'remove_label' }]);
+  });
+
+  it('ignores ### headers and [x] checkboxes inside fenced code blocks', () => {
+    const body = `${VALID_ISSUE_BODY}
+
+\`\`\`markdown
+### Fake Section
+- [x] I have checked the existing issues for duplicates.
+- [x] I agree to follow this project's Code of Conduct.
+\`\`\``;
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+    assert.deepEqual(getCheckedBoxLines(body), [
+      '- [x] I have checked the existing [issues](https://github.com/strapi/strapi/issues) for duplicates.',
+      "- [x] I agree to follow this project's [Code of Conduct](https://github.com/strapi/strapi/blob/develop/CODE_OF_CONDUCT.md).",
+    ]);
+  });
+
+  it('uses the last duplicate section instead of merging content', () => {
+    const body = VALID_ISSUE_BODY.replace(
+      '### Strapi Version\n\n5.50.1',
+      '### Strapi Version\n\n_No response_\n\n### Strapi Version\n\n5.50.1'
+    );
+
+    const sections = parseIssueSections(body);
+    assert.equal(sections.get('Strapi Version'), '5.50.1');
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+  });
+
+  it('rejects issues that only satisfy checkboxes via fenced-code bypass', () => {
+    const body = `### Node Version
+
+22
+
+### Package Manager
+
+yarn
+
+### Package Manager Version
+
+1
+
+### Strapi Version
+
+5.50.1
+
+### Operating System
+
+Strapi Cloud
+
+### Database
+
+Strapi Cloud
+
+### Javascript or Typescript
+
+Typescript
+
+### Reproduction URL
+
+_No response_
+
+### Bug Description
+
+Something broke
+
+### Steps to Reproduce
+
+Do the thing
+
+### Expected Behavior
+
+It works
+
+### Logs
+
+_No response_
+
+### Confirmation Checklist
+
+- [ ] I have checked the existing issues for duplicates.
+- [ ] I agree to follow this project's Code of Conduct.
+
+\`\`\`markdown
+- [x] I have checked the existing issues for duplicates.
+- [x] I agree to follow this project's Code of Conduct.
+\`\`\``;
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, false);
+    assert.ok(result.missingItems.some((item) => item.includes('checkbox')));
+  });
+
+  it('throws when GITHUB_TOKEN is missing', () => {
+    assert.throws(() => assertGithubToken(undefined), /token or opts\.auth is required/i);
+    assert.doesNotThrow(() => assertGithubToken('ghs_test'));
   });
 });

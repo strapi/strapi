@@ -16,9 +16,11 @@ jobs:
     steps:
       - name: Checkout base branch
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install and build scripts
-        run: cd .github/scripts && npm install --ignore-scripts && npx tsup issue-template-check.ts --format cjs --target node20 --out-dir dist --no-splitting
+        run: cd .github/scripts && npm ci --ignore-scripts && npx tsup issue-template-check.ts --format cjs --target node20 --out-dir dist --no-splitting
 
       - name: Reconcile invalid template issues
         uses: actions/github-script@v9

@@ -3,6 +3,7 @@ import * as github from '@actions/github';
 
 import {
   INVALID_TEMPLATE_LABEL,
+  assertGithubToken,
   buildInvalidTemplateComment,
   buildInvalidTemplateFixedComment,
   validateIssueTemplate,
@@ -16,7 +17,9 @@ async function run() {
     return;
   }
 
-  const octokit = github.getOctokit(process.env.GITHUB_TOKEN!);
+  const token = process.env.GITHUB_TOKEN;
+  assertGithubToken(token);
+  const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
   const issueBody = issue.body || '';
   const issueNumber = issue.number;
