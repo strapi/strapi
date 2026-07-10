@@ -1,8 +1,11 @@
-import { merge } from 'lodash/fp';
+import { merge, set } from 'lodash/fp';
 
 import type { Core, Schema, UID } from '@strapi/types';
+import type { traverseEntity } from '@strapi/utils';
+import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
 
 const RELATION_OPERATIONS = ['connect', 'disconnect', 'set'] as const;
+type TraversableData = Parameters<typeof traverseEntity>[2];
 
 type CloneRelationAttribute = Schema.Attribute.Relation & {
   targetAttribute?: string;
@@ -53,13 +56,41 @@ const hasPopulatedRelation = (value: unknown) => {
   return isRecord(value) && ('id' in value || 'documentId' in value);
 };
 
-export const prepareCloneData = (
+const collectRelationOperationOverrides = async (
+  submittedData: Record<string, unknown>,
+  contentType: Schema.ContentType,
+  getModel: (uid: string) => Schema.Schema
+) => {
+  const overrides = new Map<string, Record<string, unknown>>();
+
+  await traverseEntityRelations(
+    ({ path, value }) => {
+      if (isRelationOperationPayload(value) && hasMeaningfulRelationOperations(value)) {
+        overrides.set(path.rawWithIndices!, value);
+      }
+    },
+    { schema: contentType, getModel },
+    submittedData as TraversableData
+  );
+
+  return [...overrides.entries()].sort(([leftPath], [rightPath]) =>
+    leftPath.localeCompare(rightPath)
+  );
+};
+
+export const prepareCloneData = async (
   originalData: Record<string, unknown>,
   submittedData: Record<string, unknown> | undefined,
-  contentType: Schema.ContentType
+  contentType: Schema.ContentType,
+  getModel: (uid: string) => Schema.Schema
 ) => {
   const submitted = submittedData ?? {};
-  const data = merge(originalData, submitted) as Record<string, unknown>;
+  const relationOperationOverrides = await collectRelationOperationOverrides(
+    submitted,
+    contentType,
+    getModel
+  );
+  let data = merge(originalData, submitted) as Record<string, unknown>;
   const relationsToCopy: string[] = [];
 
   for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
@@ -72,10 +103,6 @@ export const prepareCloneData = (
     const isOperationPayload = isRelationOperationPayload(submittedValue);
     const hasMeaningfulOperations =
       isOperationPayload && hasMeaningfulRelationOperations(submittedValue);
-
-    if (hasMeaningfulOperations) {
-      data[attributeName] = submittedValue;
-    }
 
     const relationIsUnchanged =
       !relationWasSubmitted || (isOperationPayload && !hasMeaningfulOperations);
@@ -90,6 +117,10 @@ export const prepareCloneData = (
       delete data[attributeName];
       relationsToCopy.push(attributeName);
     }
+  }
+
+  for (const [path, value] of relationOperationOverrides) {
+    data = set(path, value, data) as Record<string, unknown>;
   }
 
   return { data, relationsToCopy };

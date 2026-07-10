@@ -458,10 +458,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           string,
           unknown
         >;
-        const { data, relationsToCopy } = prepareCloneData(
+        const { data, relationsToCopy } = await prepareCloneData(
           originalData,
           queryParams.data,
-          contentType
+          contentType,
+          (modelUid) => strapi.getModel(modelUid as UID.Schema)
         );
         const dataWithDocumentId = assoc('documentId', newDocumentId, data);
         const doc = await entries.create({
