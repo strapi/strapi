@@ -51,15 +51,37 @@ const ADMIN_UI_PATTERNS =
 const API_REPRO_PATTERNS =
   /\b(curl|rest api|graphql|\/api\/|fetch\(|http request|endpoint|postman|axios|got\(|supertest|status code|401|403|404|500)\b/i;
 
+function removeHtmlComments(input) {
+  let sanitized = input;
+  let previous;
+
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '');
+  } while (sanitized !== previous);
+
+  return sanitized.replace(/<!--/g, '').replace(/-->/g, '');
+}
+
+function removeHtmlTags(input) {
+  let sanitized = input;
+  let previous;
+
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/<[^>]+>/g, '');
+  } while (sanitized !== previous);
+
+  return sanitized;
+}
+
 function sanitize(text) {
   if (!text) {
     return '';
   }
 
-  return text
-    .replace(/<!--[\s\S]*?-->/g, '')
+  return removeHtmlTags(removeHtmlComments(text))
     .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E\u2066-\u2069]/g, '')
-    .replace(/<[^>]+>/g, '')
     .trim()
     .slice(0, MAX_FIELD);
 }
