@@ -318,7 +318,7 @@ export async function getInvalidTemplateLabelAppliedAt(
 ): Promise<Date | null> {
   let latest: Date | null = null;
 
-  for await (const response of github.paginate.iterator(github.rest.issues.listEventsForRepo, {
+  for await (const response of github.paginate.iterator(github.rest.issues.listEvents, {
     owner,
     repo,
     issue_number: issueNumber,

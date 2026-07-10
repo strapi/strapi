@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  INVALID_TEMPLATE_LABEL,
   assertGithubToken,
   buildInvalidTemplateComment,
   getCheckedBoxLines,
+  getInvalidTemplateLabelAppliedAt,
   isPlaceholderContent,
   parseIssueSections,
   planInvalidTemplateProcessing,
@@ -315,5 +317,121 @@ _No response_
   it('throws when GITHUB_TOKEN is missing', () => {
     assert.throws(() => assertGithubToken(undefined), /token or opts\.auth is required/i);
     assert.doesNotThrow(() => assertGithubToken('ghs_test'));
+  });
+
+  it('reads label-applied time from per-issue events, not repo-wide events', async () => {
+    const issueOneLabelAt = '2026-07-01T10:00:00Z';
+    const issueTwoLabelAt = '2026-07-08T15:00:00Z';
+    const listEventsCalls: number[] = [];
+
+    const github = {
+      rest: {
+        issues: {
+          listEvents: async ({
+            issue_number,
+          }: {
+            owner: string;
+            repo: string;
+            issue_number: number;
+            per_page: number;
+          }) => {
+            listEventsCalls.push(issue_number);
+
+            const eventsByIssue: Record<
+              number,
+              Array<{ event: string; label?: { name: string }; created_at: string }>
+            > = {
+              1: [
+                {
+                  event: 'labeled',
+                  label: { name: INVALID_TEMPLATE_LABEL },
+                  created_at: issueOneLabelAt,
+                },
+              ],
+              2: [
+                {
+                  event: 'labeled',
+                  label: { name: INVALID_TEMPLATE_LABEL },
+                  created_at: issueTwoLabelAt,
+                },
+              ],
+            };
+
+            return { data: eventsByIssue[issue_number] ?? [] };
+          },
+        },
+      },
+      paginate: {
+        iterator(method: typeof github.rest.issues.listEvents, params: { issue_number: number }) {
+          return (async function* () {
+            yield { data: (await method(params)).data };
+          })();
+        },
+      },
+    };
+
+    const issueOneAppliedAt = await getInvalidTemplateLabelAppliedAt(
+      github as never,
+      'strapi',
+      'strapi',
+      1
+    );
+    const issueTwoAppliedAt = await getInvalidTemplateLabelAppliedAt(
+      github as never,
+      'strapi',
+      'strapi',
+      2
+    );
+
+    assert.deepEqual(listEventsCalls, [1, 2]);
+    assert.equal(issueOneAppliedAt?.getTime(), new Date(issueOneLabelAt).getTime());
+    assert.equal(issueTwoAppliedAt?.getTime(), new Date(issueTwoLabelAt).getTime());
+  });
+
+  it('returns the latest label-applied time when the label was re-applied', async () => {
+    const firstLabelAt = '2026-07-01T10:00:00Z';
+    const secondLabelAt = '2026-07-05T12:00:00Z';
+
+    const github = {
+      rest: {
+        issues: {
+          listEvents: async () => ({
+            data: [
+              {
+                event: 'labeled',
+                label: { name: INVALID_TEMPLATE_LABEL },
+                created_at: firstLabelAt,
+              },
+              {
+                event: 'labeled',
+                label: { name: 'status: needs triage' },
+                created_at: '2026-07-03T12:00:00Z',
+              },
+              {
+                event: 'labeled',
+                label: { name: INVALID_TEMPLATE_LABEL },
+                created_at: secondLabelAt,
+              },
+            ],
+          }),
+        },
+      },
+      paginate: {
+        iterator(method: typeof github.rest.issues.listEvents, params: Record<string, unknown>) {
+          return (async function* () {
+            yield { data: (await method(params)).data };
+          })();
+        },
+      },
+    };
+
+    const appliedAt = await getInvalidTemplateLabelAppliedAt(
+      github as never,
+      'strapi',
+      'strapi',
+      99
+    );
+
+    assert.equal(appliedAt?.getTime(), new Date(secondLabelAt).getTime());
   });
 });
