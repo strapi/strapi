@@ -143,7 +143,7 @@
     "concurrently": "8.2.2",
     "css-loader": "6.11.0",
     "dotenv": "16.6.1",
-    "esbuild-loader": "4.4.3",
+    "esbuild-loader": "4.5.0",
     "esbuild-register": "3.6.0",
     "execa": "5.1.1",
     "fork-ts-checker-webpack-plugin": "8.0.0",
