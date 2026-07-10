@@ -1,3 +1,6 @@
+// NOTE: preload before content-manager so Blocks code-editor prism language plugins see global Prism.
+import 'prismjs';
+
 import { CheckCircle, Feather, Pencil, PuzzlePiece } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
@@ -9,9 +12,6 @@ import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
 import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
-
-// NOTE: we have to preload it to ensure chunks will have it available as global
-import 'prismjs';
 
 // eslint-disable-next-line import/no-default-export
 export default {
