@@ -1,4 +1,23 @@
-# Community PR Lifecycle
+# GitHub Actions scripts
+
+TypeScript helpers used by workflows under `.github/workflows/`.
+
+## Scripts
+
+| File                        | Workflow                           | Description                                             |
+| --------------------------- | ---------------------------------- | ------------------------------------------------------- |
+| `community-pr-lifecycle.ts` | `community-pr-lifecycle.yml`       | Syncs community PR "waiting on author" → stale → closed |
+| `issue-template-check.ts`   | `template-check-on-new-issue.yaml` | Validates new bug reports against `BUG_REPORT.yml`      |
+
+## Tests
+
+```bash
+cd .github/scripts
+npm install
+npm test
+```
+
+## Community PR lifecycle
 
 Automates the lifecycle of community PRs after a team review, from "waiting on author" through to automatic closure.
 
