@@ -171,7 +171,6 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-testing-library": "6.5.0",
     "execa": "5.1.1",
-    "find-up": "5.0.0",
     "fs-extra": "11.3.4",
     "get-port": "5.1.1",
     "glob": "13.0.6",
