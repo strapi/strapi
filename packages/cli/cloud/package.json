@@ -73,7 +73,9 @@
   "devDependencies": {
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
+    "@types/inquirer": "9.0.9",
     "@types/jest": "29.5.2",
+    "@types/jsonwebtoken": "9.0.3",
     "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.50.1",

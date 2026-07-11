@@ -11,8 +11,7 @@ import { Provider } from 'react-redux';
 
 import { useRemoveAsset } from '../useRemoveAsset';
 
-import type { AnyAction } from '@reduxjs/toolkit';
-import type { Middleware } from 'redux';
+import type { AnyAction, Middleware } from '@reduxjs/toolkit';
 
 const ASSET_FIXTURE = {
   id: 1,

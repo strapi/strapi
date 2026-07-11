@@ -88,16 +88,22 @@
     "@testing-library/user-event": "14.6.1",
     "@types/jest": "29.5.2",
     "@types/koa": "2.15.2",
+    "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
+    "@types/qs": "6.15.1",
+    "eslint-config-custom": "5.50.1",
     "jest": "29.6.0",
     "koa": "2.16.4",
+    "koa-body": "6.0.1",
     "msw": "2.13.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
     "react-router-dom": "6.30.3",
     "styled-components": "6.4.1",
-    "typescript": "5.9.3"
+    "tsconfig": "5.50.1",
+    "typescript": "5.9.3",
+    "vite": "5.4.21"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

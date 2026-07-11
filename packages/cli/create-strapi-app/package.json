@@ -70,7 +70,9 @@
     "@types/async-retry": "^1",
     "@types/fs-extra": "11.0.4",
     "@types/inquirer": "9.0.9",
+    "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
+    "@types/semver": "7.5.0",
     "eslint-config-custom": "5.50.1",
     "tsconfig": "5.50.1"
   },

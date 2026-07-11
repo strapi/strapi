@@ -94,6 +94,8 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
 
     // NOTE: internal plugins should be resolved from the strapi package
     const packageModulePath = require.resolve(packagePath, {
+      // @strapi/strapi is the host package, resolved at runtime — not a declared dependency of core
+      // eslint-disable-next-line node/no-missing-require
       paths: [require.resolve('@strapi/strapi/package.json'), process.cwd()],
     });
 

@@ -16,6 +16,7 @@
   "devDependencies": {
     "@types/jest": "29.5.2",
     "@vercel/ncc": "0.38.2",
+    "eslint-config-custom": "5.50.1",
     "jest": "29.6.0"
   }
 }
