@@ -4,7 +4,7 @@ import {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default';
-import { koaMiddleware } from '@as-integrations/koa';
+import { koaMiddleware, type KoaContextFunctionArgument } from '@as-integrations/koa';
 import depthLimit from 'graphql-depth-limit';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
@@ -250,7 +250,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   handler.push(
     koaMiddleware<DefaultStateExtends, DefaultContextExtends>(server, {
       // Initialize loaders for this request.
-      context: async ({ ctx }) => ({
+      context: async ({ ctx }: KoaContextFunctionArgument) => ({
         state: ctx.state,
         koaContext: ctx,
       }),

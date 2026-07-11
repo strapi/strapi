@@ -38,6 +38,18 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./globals-admin": {
+      "types": "./dist/globals-admin.d.ts",
+      "source": "./src/globals-admin.ts",
+      "require": "./dist/globals-admin.js",
+      "default": "./dist/globals-admin.js"
+    },
+    "./globals-server": {
+      "types": "./dist/globals-server.d.ts",
+      "source": "./src/globals-server.ts",
+      "require": "./dist/globals-server.js",
+      "default": "./dist/globals-server.js"
+    },
     "./package.json": "./package.json",
     "./*": "./*"
   },
@@ -67,7 +79,6 @@
     "commander": "8.3.0",
     "json-logic-js": "2.0.5",
     "koa": "2.16.4",
-    "koa-body": "6.0.1",
     "node-schedule": "2.1.1",
     "typedoc": "0.28.19",
     "typedoc-github-wiki-theme": "2.1.0",
@@ -79,6 +90,7 @@
     "@types/json-logic-js": "2.0.8",
     "@types/koa": "2.15.2",
     "@types/koa__router": "12.0.0",
+    "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
     "@types/node-schedule": "2.1.7",
     "eslint-config-custom": "5.50.1",

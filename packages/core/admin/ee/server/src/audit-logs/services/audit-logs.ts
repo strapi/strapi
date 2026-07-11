@@ -61,7 +61,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
 
       return {
         results: sanitizedResults,
-        pagination,
+        pagination: pagination as unknown,
       };
     },
 
@@ -83,7 +83,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       };
     },
 
-    deleteExpiredEvents(expirationDate: Date) {
+    deleteExpiredEvents(expirationDate: Date): Promise<unknown> | undefined {
       return strapi.db?.query('admin::audit-log').deleteMany({
         where: {
           date: {

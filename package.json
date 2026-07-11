@@ -125,6 +125,7 @@
     "@commitlint/cli": "19.2.0",
     "@commitlint/config-conventional": "19.1.0",
     "@commitlint/prompt-cli": "19.2.0",
+    "@commitlint/types": "19.0.3",
     "@nx/js": "20.8.4",
     "@playwright/test": "1.56.1",
     "@rollup/plugin-commonjs": "28.0.9",

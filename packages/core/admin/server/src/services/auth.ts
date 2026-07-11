@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import type { AdminUser } from '../../../shared/contracts/shared';
-import '@strapi/types';
 
 const { ApplicationError } = errors;
 

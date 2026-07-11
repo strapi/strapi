@@ -8,19 +8,17 @@ import type { Schema } from '@strapi/types';
  * mutateCTBContentTypeSchema
  * -----------------------------------------------------------------------------------------------*/
 
+type CTBContentTypeSchema = {
+  pluginOptions: Schema.ContentType['pluginOptions'];
+  attributes: Schema.Attribute.AnyAttribute[];
+  uid?: string;
+};
+
 // TODO: refactor for CTB refactors
 const mutateCTBContentTypeSchema = (
-  nextSchema: {
-    pluginOptions: Schema.ContentType['pluginOptions'];
-    attributes: Schema.Attribute.AnyAttribute[];
-    uid?: string;
-  },
-  prevSchema?: {
-    pluginOptions: Schema.ContentType['pluginOptions'];
-    attributes: Schema.Attribute.AnyAttribute[];
-    uid?: string;
-  }
-) => {
+  nextSchema: CTBContentTypeSchema,
+  prevSchema?: CTBContentTypeSchema
+): Record<string, unknown> => {
   if (!prevSchema) {
     return nextSchema;
   }

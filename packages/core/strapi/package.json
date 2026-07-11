@@ -173,11 +173,13 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@types/cli-progress": "3.11.5",
     "@types/fs-extra": "11.0.4",
     "@types/inquirer": "9.0.9",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
+    "@types/semver": "7.5.0",
     "@types/webpack-bundle-analyzer": "4.7.0",
     "@types/webpack-hot-middleware": "2.25.12",
     "eslint-config-custom": "5.50.1",
