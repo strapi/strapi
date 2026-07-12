@@ -406,6 +406,38 @@ describe('Query builder pagination order stability (GH #26030)', () => {
     await dbWithStatus.destroy();
   });
 
+  it('includes status CASE in SELECT and id tie-break when paginated with a join (DISTINCT)', async () => {
+    const dbWithStatus = new Database(paginationQueryBuilderConfig);
+    await dbWithStatus.init({ models: [articleWithStatusSortModel] });
+
+    const qb = createQueryBuilder(articleWithStatusSortModel.uid, dbWithStatus)
+      .join({
+        alias: 't1',
+        referencedTable: 'articles_authors_lnk',
+        referencedColumn: 'article_id',
+        rootColumn: 'id',
+        rootTable: 't0',
+      })
+      .init({
+        limit: 5,
+        offset: 0,
+        orderBy: { status: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+    const orderIdx = lower.indexOf(' order by ');
+    const beforeOrder = orderIdx >= 0 ? lower.slice(0, orderIdx) : lower;
+
+    expect(lower).toContain('distinct');
+    expect(beforeOrder).toContain('case when');
+    expect(lower).toContain('`t0`.`id` asc');
+    expect(lower.indexOf('case when')).toBeLessThan(lower.indexOf('`t0`.`id` asc'));
+
+    await dbWithStatus.destroy();
+  });
+
   it('does not append id tie-break when the model has no id attribute', async () => {
     const dbNoId = new Database(paginationQueryBuilderConfig);
     await dbNoId.init({ models: [modelWithoutIdAttribute] });

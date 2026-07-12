@@ -44,7 +44,7 @@
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "develop": "strapi-plugin watch",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "watch": "run -T rollup -c -w"
   },

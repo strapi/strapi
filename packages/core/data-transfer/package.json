@@ -45,7 +45,8 @@
     "build:code": "run -T rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "test:unit:vitest": "vitest run",
@@ -70,7 +71,7 @@
     "stream-json": "1.9.1",
     "tar": "7.5.18",
     "tar-stream": "2.2.0",
-    "ws": "8.20.1"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@strapi/database": "5.50.1",
@@ -85,6 +86,7 @@
     "@types/stream-json": "1.7.8",
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
+    "jest": "29.6.0",
     "knex": "3.0.1",
     "koa": "2.16.4",
     "rimraf": "6.1.3",

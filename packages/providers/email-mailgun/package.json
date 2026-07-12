@@ -41,7 +41,8 @@
     "build:code": "run -T  rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc -p tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"
@@ -52,7 +53,10 @@
     "mailgun.js": "10.2.1"
   },
   "devDependencies": {
+    "@types/jest": "29.5.2",
+    "@types/node": "20.19.41",
     "eslint-config-custom": "5.50.1",
+    "jest": "29.6.0",
     "tsconfig": "5.50.1"
   },
   "engines": {

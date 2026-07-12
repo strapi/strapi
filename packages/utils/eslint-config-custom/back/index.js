@@ -25,6 +25,7 @@ const config = {
           '**/__tests__/**/*.ts',
           '**/__mocks__/**/*.js',
           '**/__mocks__/**/*.ts',
+          '**/vitest.config.ts',
         ],
       },
     ],
