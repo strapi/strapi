@@ -4498,6 +4498,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@internationalized/date@npm:3.12.1":
+  version: 3.12.1
+  resolution: "@internationalized/date@npm:3.12.1"
+  dependencies:
+    "@swc/helpers": "npm:^0.5.0"
+  checksum: 10c0/e06efa10bab7fcd88cdac1268d21f2e0fcdd6a4b5c2c9a6fdf381c94a166f3188ebb7a92b3405f3b689577bc18f98447433bedddc8885aab6a169bf0943b3875
+  languageName: node
+  linkType: hard
+
 "@internationalized/date@npm:3.5.4":
   version: 3.5.4
   resolution: "@internationalized/date@npm:3.5.4"
@@ -8876,7 +8885,7 @@ __metadata:
   resolution: "@strapi/admin@workspace:packages/core/admin"
   dependencies:
     "@casl/ability": "npm:6.7.5"
-    "@internationalized/date": "npm:3.5.4"
+    "@internationalized/date": "npm:3.12.1"
     "@radix-ui/react-context": "npm:1.0.1"
     "@radix-ui/react-toolbar": "npm:1.0.4"
     "@reduxjs/toolkit": "npm:1.9.7"
