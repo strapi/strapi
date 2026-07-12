@@ -78,8 +78,9 @@ export const buildFieldsSchema = (
  *   - object    — `{ <attr>: true | { fields?, populate?, filters?, sort? } }` for
  *                 finer-grained control per attribute.
  *
- * Only relations named directly on this content type are inlined as full (RBAC-sanitized)
- * entries; deeper/nested relations are returned as `{ documentId }` identity stubs.
+ * Relations are inlined as full (RBAC-sanitized) entries as deep as the populate spec
+ * asks — e.g. `{ author: { populate: ["avatar"] } }` inlines `author` and `author.avatar`.
+ * Relations not covered by the spec are returned as `{ documentId }` identity stubs.
  * Returns `z.never()` when the model has no populatable attributes.
  */
 export const buildPopulateSchema = (
@@ -96,8 +97,8 @@ export const buildPopulateSchema = (
   const keyEnum = z.enum(populatableKeys as [string, ...string[]]);
 
   // Nested populate spec for a single attribute. Kept loose so callers can pass the
-  // standard Strapi nested query shape ({ fields, populate, filters, sort }) — nested
-  // values beyond the first relation level are still reduced to identity stubs at output.
+  // standard Strapi nested query shape ({ fields, populate, filters, sort }); a nested
+  // `populate` drives inlining of that deeper relation (see buildInlinePathMatcher).
   const nestedSpec = z
     .object({
       fields: z.union([z.literal('*'), z.array(z.string())]).optional(),
@@ -127,53 +128,84 @@ export const buildPopulateSchema = (
     .describe(
       `Relations/components/media to populate. "*" for all one level deep, a subset ` +
         `[${populatableKeys.join(', ')}], or an object { <attr>: true | { fields, populate, filters, sort } }. ` +
-        `Relations named directly on this type are inlined as full entries (sanitized against ` +
-        `the related type's own read permissions); deeper relations are returned as { documentId } stubs. ` +
-        `When omitted, relations are returned as { documentId } stubs.`
+        `Relations are inlined as full entries (each sanitized against the related type's own read ` +
+        `permissions) as deep as the spec asks — e.g. { author: { populate: ["avatar"] } } inlines ` +
+        `author and author.avatar. Relations not covered by the spec are returned as { documentId } stubs.`
     );
 };
 
+/** Predicate + presence flag for opt-in, request-driven relation inlining. */
+export type InlinePathMatcher = {
+  /** True when the relation at this dotted attribute path (e.g. "author.avatar") should be inlined. */
+  shouldInline: (attributePath: string | null | undefined) => boolean;
+  /** True when the populate spec requested any inlining at all. */
+  hasAny: boolean;
+};
+
+const joinPath = (prefix: string, key: string): string =>
+  prefix === '' ? key : `${prefix}.${key}`;
+
+const parentPath = (path: string): string => {
+  const index = path.lastIndexOf('.');
+  return index === -1 ? '' : path.slice(0, index);
+};
+
 /**
- * Derives the set of top-level relation attribute keys that an incoming `populate`
- * value requests inlining for. Only relation attributes (not components/media/dynamic
- * zones) are eligible — those are the entries reduced to `{ documentId }` stubs by
- * default. Returns an empty set when `populate` is absent, so default behavior (all
- * relations stubbed) is preserved and inlining is strictly opt-in.
+ * Builds a matcher describing which relation paths an incoming `populate` value opts into
+ * inlining — driven by the populate spec itself, so inline depth follows the request:
+ *
+ *   - `["author"]`                         → inline `author` (one level)
+ *   - `{ author: { populate: ["avatar"] }}`→ inline `author` AND `author.avatar`
+ *   - `{ seo: { populate: "*" } }`         → inline any relation directly under `seo`
+ *   - `"*"`                                → inline any relation one level under the root
+ *
+ * Matching is by dotted attribute path; whether a matched path is actually a relation (vs a
+ * component/media) is decided at shaping time. Returns `hasAny: false` when `populate` is
+ * absent, so default behavior (all relations stubbed) is preserved and inlining stays opt-in.
  */
-export const extractInlineRelationKeys = (
-  populate: unknown,
-  attributes: Struct.SchemaAttributes | undefined
-): Set<string> => {
-  if (populate === undefined || populate === null || attributes === undefined) {
-    return new Set();
-  }
+export const buildInlinePathMatcher = (populate: unknown): InlinePathMatcher => {
+  const exact = new Set<string>();
+  const wildcard = new Set<string>();
 
-  const relationKeys = new Set(
-    Object.entries(attributes)
-      .filter(
-        ([, attr]) => attr.type === 'relation' && (attr as { private?: boolean }).private !== true
-      )
-      .map(([key]) => key)
-  );
+  const collect = (node: unknown, prefix: string): void => {
+    if (node === undefined || node === null || node === false) {
+      return;
+    }
+    if (node === '*') {
+      wildcard.add(prefix);
+      return;
+    }
+    if (Array.isArray(node)) {
+      for (const key of node) {
+        if (typeof key === 'string') exact.add(joinPath(prefix, key));
+      }
+      return;
+    }
+    if (typeof node === 'object') {
+      for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+        if (value === false || value === undefined || value === null) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+        const path = joinPath(prefix, key);
+        exact.add(path);
+        if (typeof value === 'object' && !Array.isArray(value) && 'populate' in value) {
+          collect((value as { populate?: unknown }).populate, path);
+        }
+      }
+    }
+  };
 
-  if (populate === '*') {
-    return relationKeys;
-  }
+  collect(populate, '');
 
-  if (Array.isArray(populate)) {
-    return new Set(
-      populate.filter((key): key is string => typeof key === 'string' && relationKeys.has(key))
-    );
-  }
+  const shouldInline = (attributePath: string | null | undefined): boolean => {
+    if (attributePath === null || attributePath === undefined || attributePath === '') {
+      return false;
+    }
+    return exact.has(attributePath) === true || wildcard.has(parentPath(attributePath)) === true;
+  };
 
-  if (typeof populate === 'object') {
-    const requested = Object.entries(populate as Record<string, unknown>)
-      .filter(([key, value]) => relationKeys.has(key) && value !== false && value !== undefined)
-      .map(([key]) => key);
-    return new Set(requested);
-  }
-
-  return new Set();
+  return { shouldInline, hasAny: exact.size > 0 || wildcard.size > 0 };
 };
 
 /**

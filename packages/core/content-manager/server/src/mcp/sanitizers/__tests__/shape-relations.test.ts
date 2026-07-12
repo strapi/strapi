@@ -421,7 +421,7 @@ describe('shapeRelationsForMcp (real traverseEntity)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// shapeRelationsForMcp — opt-in relation inlining (RBAC-safe, one level deep)
+// shapeRelationsForMcp — opt-in relation inlining (RBAC-safe, request-driven depth)
 // ---------------------------------------------------------------------------
 
 describe('shapeRelationsForMcp with opt-in inlining', () => {
@@ -479,7 +479,7 @@ describe('shapeRelationsForMcp with opt-in inlining', () => {
           logo: { documentId: 'm1', url: 'LEAKED-media-url' },
         },
       },
-      { inlineRelationKeys: new Set(['header']), inlineRelation }
+      { shouldInline: (p) => p === 'header', inlineRelation }
     );
 
     const header = result.header as Record<string, unknown>;
@@ -501,7 +501,7 @@ describe('shapeRelationsForMcp with opt-in inlining', () => {
           { documentId: 'b2', text: 'Stop', secret: 'y' },
         ],
       },
-      { inlineRelationKeys: new Set(['buttons']), inlineRelation }
+      { shouldInline: (p) => p === 'buttons', inlineRelation }
     );
 
     expect(result.buttons).toEqual([
@@ -510,7 +510,7 @@ describe('shapeRelationsForMcp with opt-in inlining', () => {
     ]);
   });
 
-  it('leaves relations NOT named in inlineRelationKeys as identity stubs', async () => {
+  it('leaves relations whose path is not opted in as identity stubs', async () => {
     useModels(models);
 
     const result = await shapeRelationsForMcp(
@@ -519,7 +519,7 @@ describe('shapeRelationsForMcp with opt-in inlining', () => {
         header: { documentId: 'h1', label: 'Welcome', secret: 'x' },
         buttons: [{ documentId: 'b1', text: 'Go' }],
       },
-      { inlineRelationKeys: new Set(['header']), inlineRelation }
+      { shouldInline: (p) => p === 'header', inlineRelation }
     );
 
     // header inlined, buttons stubbed
@@ -534,7 +534,7 @@ describe('shapeRelationsForMcp with opt-in inlining', () => {
     const result = await shapeRelationsForMcp(
       'api::page.page' as never,
       { header: { documentId: 'h1', label: 'Welcome' } },
-      { inlineRelationKeys: new Set(['header']), inlineRelation: denyResolver }
+      { shouldInline: (p) => p === 'header', inlineRelation: denyResolver }
     );
 
     expect(result.header).toEqual({ documentId: 'h1' });
@@ -546,7 +546,7 @@ describe('shapeRelationsForMcp with opt-in inlining', () => {
     const result = await shapeRelationsForMcp(
       'api::page.page' as never,
       { header: null },
-      { inlineRelationKeys: new Set(['header']), inlineRelation }
+      { shouldInline: (p) => p === 'header', inlineRelation }
     );
 
     expect(result.header).toBeNull();
@@ -595,7 +595,7 @@ describe('shapeRelationsForMcp — opt-in inlining', () => {
     const result = await shapeRelationsForMcp(
       'api::article.article' as never,
       { author: { documentId: 'auth1', name: 'Ada', email: 'SECRET' } },
-      { inlineRelationKeys: new Set(['author']), inlineRelation }
+      { shouldInline: (p) => p === 'author', inlineRelation }
     );
 
     expect(inlineRelation).toHaveBeenCalledWith('api::author.author', expect.any(Object));
@@ -618,7 +618,7 @@ describe('shapeRelationsForMcp — opt-in inlining', () => {
     const result = await shapeRelationsForMcp(
       'api::article.article' as never,
       { author: { documentId: 'auth1', name: 'Ada', email: 'SECRET' } },
-      { inlineRelationKeys: new Set(['author']), inlineRelation }
+      { shouldInline: (p) => p === 'author', inlineRelation }
     );
 
     expect(result.author).toEqual({ documentId: 'auth1' });
@@ -653,7 +653,7 @@ describe('shapeRelationsForMcp — opt-in inlining', () => {
           { documentId: 'tag2', label: 'B', owner: null },
         ],
       },
-      { inlineRelationKeys: new Set(['tags']), inlineRelation }
+      { shouldInline: (p) => p === 'tags', inlineRelation }
     );
 
     expect(result.tags).toEqual([
@@ -682,14 +682,14 @@ describe('shapeRelationsForMcp — opt-in inlining', () => {
         author: { documentId: 'auth1', name: 'Ada' },
         editor: { documentId: 'auth2', name: 'Grace' },
       },
-      { inlineRelationKeys: new Set(['author']), inlineRelation }
+      { shouldInline: (p) => p === 'author', inlineRelation }
     );
 
     expect(result.author).toEqual({ documentId: 'auth1', name: 'Ada' });
     expect(result.editor).toEqual({ documentId: 'auth2' });
   });
 
-  it('does NOT inline a relation nested inside a component (top-level only)', async () => {
+  it('does NOT inline a component-nested relation when only the bare key is opted in', async () => {
     useModels({
       'api::article.article': {
         uid: 'api::article.article',
@@ -709,11 +709,119 @@ describe('shapeRelationsForMcp — opt-in inlining', () => {
     const result = await shapeRelationsForMcp(
       'api::article.article' as never,
       { seo: { author: { documentId: 'auth1', name: 'LEAK' } } },
-      // Even though "author" is in the set, it is not a TOP-LEVEL attribute here.
-      { inlineRelationKeys: new Set(['author']), inlineRelation }
+      // The nested relation's path is "seo.author", not "author" — so it is not inlined.
+      { shouldInline: (p) => p === 'author', inlineRelation }
     );
 
     expect(inlineRelation).not.toHaveBeenCalled();
     expect((result.seo as Record<string, unknown>).author).toEqual({ documentId: 'auth1' });
+  });
+
+  // ── request-driven depth: inline follows the populate spec ────────────────
+
+  it('inlines a nested relation-of-relation when its dotted path is opted in', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': {
+        uid: 'api::author.author',
+        attributes: {
+          name: { type: 'string' },
+          avatar: { type: 'relation', relation: 'oneToOne', target: 'api::media.media' },
+        },
+      },
+      'api::media.media': { uid: 'api::media.media', attributes: { url: { type: 'string' } } },
+    });
+
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => entry);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      {
+        author: {
+          documentId: 'auth1',
+          name: 'Ada',
+          avatar: { documentId: 'm1', url: 'https://x/y.png' },
+        },
+      },
+      // populate: { author: { populate: ["avatar"] } } → paths "author" and "author.avatar"
+      { shouldInline: (p) => p === 'author' || p === 'author.avatar', inlineRelation }
+    );
+
+    const author = result.author as Record<string, unknown>;
+    expect(author.name).toBe('Ada');
+    // author.avatar was opted in → inlined (full), not reduced to a stub
+    expect(author.avatar).toEqual({ documentId: 'm1', url: 'https://x/y.png' });
+    expect(inlineRelation).toHaveBeenCalledWith('api::author.author', expect.any(Object));
+    expect(inlineRelation).toHaveBeenCalledWith('api::media.media', expect.any(Object));
+  });
+
+  it('stubs a nested relation-of-relation when only the parent path is opted in', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': {
+        uid: 'api::author.author',
+        attributes: {
+          name: { type: 'string' },
+          avatar: { type: 'relation', relation: 'oneToOne', target: 'api::media.media' },
+        },
+      },
+      'api::media.media': { uid: 'api::media.media', attributes: { url: { type: 'string' } } },
+    });
+
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => entry);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      { author: { documentId: 'auth1', name: 'Ada', avatar: { documentId: 'm1', url: 'x' } } },
+      // Only "author" opted in — the deeper "author.avatar" stays a stub.
+      { shouldInline: (p) => p === 'author', inlineRelation }
+    );
+
+    const author = result.author as Record<string, unknown>;
+    expect(author.name).toBe('Ada');
+    expect(author.avatar).toEqual({ documentId: 'm1' });
+    expect(inlineRelation).toHaveBeenCalledTimes(1);
+    expect(inlineRelation).toHaveBeenCalledWith('api::author.author', expect.any(Object));
+  });
+
+  it('inlines a component-nested relation when its dotted path IS opted in', async () => {
+    useModels({
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: { seo: { type: 'component', component: 'shared.seo' } },
+      },
+      'shared.seo': {
+        uid: 'shared.seo',
+        attributes: {
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        },
+      },
+      'api::author.author': { uid: 'api::author.author', attributes: { name: { type: 'string' } } },
+    });
+
+    const inlineRelation = jest.fn(async (_uid: string, entry: Record<string, unknown>) => entry);
+
+    const result = await shapeRelationsForMcp(
+      'api::article.article' as never,
+      { seo: { author: { documentId: 'auth1', name: 'Ada' } } },
+      // populate: { seo: { populate: ["author"] } } → path "seo.author"
+      { shouldInline: (p) => p === 'seo.author', inlineRelation }
+    );
+
+    expect(inlineRelation).toHaveBeenCalledWith('api::author.author', expect.any(Object));
+    expect((result.seo as Record<string, unknown>).author).toEqual({
+      documentId: 'auth1',
+      name: 'Ada',
+    });
   });
 });

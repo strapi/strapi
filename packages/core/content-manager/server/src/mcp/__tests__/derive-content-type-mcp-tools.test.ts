@@ -2920,9 +2920,7 @@ describe('read tools: fields / populate / maxDepth wiring', () => {
   const model = baseModel({ uid, attributes: relationAttributes });
   const context = { userAbility: makeUserAbility(), user: mockUser };
 
-  // strapi whose getModel returns the relation attributes so extractInlineRelationKeys works.
   const strapiForTest = makeMinimalGlobalStrapi();
-  (strapiForTest.getModel as jest.Mock).mockReturnValue({ attributes: relationAttributes });
 
   const { getService } = jest.requireMock('../../utils') as { getService: jest.Mock };
   const { shapeRelationsForMcp: mockShapeRelations } = jest.requireMock(
@@ -2930,10 +2928,7 @@ describe('read tools: fields / populate / maxDepth wiring', () => {
   ) as { shapeRelationsForMcp: jest.Mock };
   const getBuilder = () => getService('populate-builder')();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (strapiForTest.getModel as jest.Mock).mockReturnValue({ attributes: relationAttributes });
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   it('list_ forwards fields and populate into the sanitized read query', async () => {
     const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [model]);
@@ -2983,7 +2978,8 @@ describe('read tools: fields / populate / maxDepth wiring', () => {
     // sanitizeFormatShape → shapeRelationsForMcp(uid, data, inlineOptions)
     const inlineOptions = mockShapeRelations.mock.calls.at(-1)?.[2];
     expect(inlineOptions).toBeDefined();
-    expect([...inlineOptions.inlineRelationKeys]).toContain('author');
+    expect(inlineOptions.shouldInline('author')).toBe(true);
+    expect(inlineOptions.shouldInline('editor')).toBe(false);
   });
 
   it('get_ passes NO inline options when populate is omitted (default stub behavior)', async () => {

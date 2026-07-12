@@ -13,7 +13,7 @@ import {
 } from './constants';
 import { isContentTypeLocalized } from '../permissions';
 import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
-import { extractInlineRelationKeys } from '../schemas/query-schema';
+import { buildInlinePathMatcher } from '../schemas/query-schema';
 import {
   ok,
   sanitizeFormatShape,
@@ -130,11 +130,10 @@ export const createCollectionListHandler =
       .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 
-    const inlineKeys = extractInlineRelationKeys(
-      (permissionQuery as { populate?: unknown }).populate ?? populateArg,
-      strapi.getModel(uid).attributes
+    const inlineMatcher = buildInlinePathMatcher(
+      (permissionQuery as { populate?: unknown }).populate ?? populateArg
     );
-    const inlineOptions = buildInlineOptions(inlineKeys, context);
+    const inlineOptions = buildInlineOptions(inlineMatcher, context);
 
     const { locale: resolvedLocale, status: resolvedStatus } = await getDocumentLocaleAndStatus(
       { locale, status },
@@ -229,11 +228,10 @@ export const createCollectionGetHandler =
       .withPopulateOverride(getPopulateForLocalizations(uid))
       .build();
 
-    const inlineKeys = extractInlineRelationKeys(
-      (permissionQuery as { populate?: unknown }).populate ?? populateArg,
-      strapi.getModel(uid).attributes
+    const inlineMatcher = buildInlinePathMatcher(
+      (permissionQuery as { populate?: unknown }).populate ?? populateArg
     );
-    const inlineOptions = buildInlineOptions(inlineKeys, context);
+    const inlineOptions = buildInlineOptions(inlineMatcher, context);
 
     const { locale: resolvedLocale, status: resolvedStatus } = await getDocumentLocaleAndStatus(
       { locale, status },

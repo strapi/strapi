@@ -101,8 +101,8 @@ const reduceToIdentity = (
  * Callback that inlines a single related entry, sanitized against the RELATED type's
  * own read permissions. Returns the sanitized entry to inline, or `null`/`undefined`
  * to fall back to an identity stub (e.g. when the caller may not read the target type).
- * Relations on the returned entry are still reduced to identity stubs by the outer
- * traversal, so inlining stays one level deep.
+ * Relations on the returned entry are shaped by the outer traversal — inlined further
+ * only when their own path is opted in, so inline depth follows the populate spec.
  */
 export type InlineRelationResolver = (
   targetUid: string,
@@ -110,8 +110,12 @@ export type InlineRelationResolver = (
 ) => Promise<Record<string, unknown> | null | undefined>;
 
 export type ShapeRelationsOptions = {
-  /** Top-level relation attribute keys the caller opted into inlining (via `populate`). */
-  inlineRelationKeys: Set<string>;
+  /**
+   * Predicate over a relation's dotted attribute path (e.g. "author" or "author.avatar").
+   * Returns true for relations the caller opted into inlining via `populate` — driven by
+   * the populate spec, so inline depth matches the request.
+   */
+  shouldInline: (attributePath: string | null | undefined) => boolean;
   /** Resolver that sanitizes an inlined entry against the related type's read permissions. */
   inlineRelation: InlineRelationResolver;
 };
@@ -130,10 +134,11 @@ const resolveTargetUid = (
 /**
  * Post-sanitize shaping visitor factory.
  * Reduces every relation attribute to identity-only (documentId + locale? + __type?),
- * EXCEPT top-level relations the caller opted into inlining — those are replaced with a
- * `permissionChecker`-sanitized full entry (RBAC of the related type applied). The outer
- * traversal then stubs the inlined entry's own relations, keeping inlining one level deep.
- * Skips admin::user relations — those are out of scope and preserved as-is.
+ * EXCEPT relations whose attribute path the caller opted into inlining — those are
+ * replaced with a `permissionChecker`-sanitized full entry (RBAC of the related type
+ * applied). The outer traversal then re-visits the inlined entry's own relations, so a
+ * nested relation is inlined only when its own path is opted in — inline depth follows
+ * the populate spec. Skips admin::user relations — those are out of scope, preserved as-is.
  */
 const createShapeVisitor =
   (options?: ShapeRelationsOptions): Parameters<typeof traverseEntity>[0] =>
@@ -149,15 +154,13 @@ const createShapeVisitor =
       return;
     }
 
-    // Inline only top-level relations (path.attribute === key means no parent prefix)
-    // that the caller explicitly opted into. Everything else is reduced to a stub.
-    const isTopLevel = path.attribute === key;
+    // Inline relations whose attribute path the caller opted into (nested paths included);
+    // everything else is reduced to an identity stub.
     if (
       options !== undefined &&
-      isTopLevel === true &&
-      options.inlineRelationKeys.has(key) === true &&
       value !== null &&
-      value !== undefined
+      value !== undefined &&
+      options.shouldInline(path.attribute) === true
     ) {
       const inlineEntry = async (entry: unknown): Promise<unknown> => {
         if (entry === null || typeof entry !== 'object') {
@@ -201,10 +204,11 @@ const createShapeVisitor =
  * This covers leak family #1 (relation targets) and #2 (localizations full draft rows)
  * with the same single mechanism.
  *
- * When `options` is provided, top-level relations named in `options.inlineRelationKeys`
- * are inlined as full entries — each sanitized against the related type's own read
- * permissions via `options.inlineRelation` — instead of being reduced to a stub. Their
- * own relations are still stubbed, so inlining is strictly one level deep.
+ * When `options` is provided, relations whose attribute path satisfies
+ * `options.shouldInline` are inlined as full entries — each sanitized against the related
+ * type's own read permissions via `options.inlineRelation` — instead of being reduced to a
+ * stub. Nested relations are inlined only when their own path is opted in, so inline depth
+ * follows the populate spec.
  */
 export const shapeRelationsForMcp = async (
   uid: UID.Schema,

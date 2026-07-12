@@ -8,7 +8,7 @@ import { getPopulateForLocalizations } from '../../services/utils/populate';
 import { MCP_NOT_FOUND_DOCUMENT } from './constants';
 import { isContentTypeLocalized } from '../permissions';
 import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
-import { extractInlineRelationKeys } from '../schemas/query-schema';
+import { buildInlinePathMatcher } from '../schemas/query-schema';
 import {
   ok,
   sanitizeFormatShape,
@@ -187,11 +187,10 @@ export const createSingleGetHandler =
       .withPopulateOverride(getPopulateForLocalizations(typedUid))
       .build();
 
-    const inlineKeys = extractInlineRelationKeys(
-      (permissionQuery as { populate?: unknown }).populate ?? populateArg,
-      strapi.getModel(typedUid).attributes
+    const inlineMatcher = buildInlinePathMatcher(
+      (permissionQuery as { populate?: unknown }).populate ?? populateArg
     );
-    const inlineOptions = buildInlineOptions(inlineKeys, context);
+    const inlineOptions = buildInlineOptions(inlineMatcher, context);
 
     const versionFindQuery: McpDocumentQuery = {
       ...permissionQuery,

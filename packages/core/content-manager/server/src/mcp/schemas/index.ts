@@ -14,7 +14,7 @@ export {
   buildPopulateSchema,
   buildMaxDepthSchema,
   getPopulatableAttributeKeys,
-  extractInlineRelationKeys,
+  buildInlinePathMatcher,
   POPULATABLE_ATTRIBUTE_TYPES,
 } from './query-schema';
 export {

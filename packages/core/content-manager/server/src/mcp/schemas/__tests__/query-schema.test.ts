@@ -10,7 +10,7 @@ import {
   buildPopulateSchema,
   buildMaxDepthSchema,
   getPopulatableAttributeKeys,
-  extractInlineRelationKeys,
+  buildInlinePathMatcher,
 } from '../query-schema';
 
 const attributes = {
@@ -127,36 +127,62 @@ describe('buildMaxDepthSchema', () => {
   });
 });
 
-describe('extractInlineRelationKeys', () => {
-  it('returns an empty set when populate is absent (default = all relations stubbed)', () => {
-    expect(extractInlineRelationKeys(undefined, attributes).size).toBe(0);
-    expect(extractInlineRelationKeys(null, attributes).size).toBe(0);
+describe('buildInlinePathMatcher', () => {
+  it('opts nothing in when populate is absent (default = all relations stubbed)', () => {
+    expect(buildInlinePathMatcher(undefined).hasAny).toBe(false);
+    expect(buildInlinePathMatcher(null).hasAny).toBe(false);
+    expect(buildInlinePathMatcher(undefined).shouldInline('author')).toBe(false);
   });
 
-  it('returns an empty set when attributes are unavailable', () => {
-    expect(extractInlineRelationKeys('*', undefined).size).toBe(0);
+  it('array form matches only the named top-level paths (one level)', () => {
+    const m = buildInlinePathMatcher(['author', 'tags']);
+    expect(m.hasAny).toBe(true);
+    expect(m.shouldInline('author')).toBe(true);
+    expect(m.shouldInline('tags')).toBe(true);
+    expect(m.shouldInline('editor')).toBe(false);
+    // no deeper paths opted in
+    expect(m.shouldInline('author.avatar')).toBe(false);
   });
 
-  it('"*" selects every non-private relation (not components/media)', () => {
-    expect([...extractInlineRelationKeys('*', attributes)].sort()).toEqual(['author', 'tags']);
+  it('object form matches truthy keys, skips false/undefined', () => {
+    const m = buildInlinePathMatcher({ author: true, tags: false });
+    expect(m.shouldInline('author')).toBe(true);
+    expect(m.shouldInline('tags')).toBe(false);
   });
 
-  it('array form selects only the named relations', () => {
-    expect([...extractInlineRelationKeys(['author', 'seo', 'cover'], attributes)]).toEqual([
-      'author',
-    ]);
+  it('follows nested populate to inline deeper paths', () => {
+    const m = buildInlinePathMatcher({ author: { populate: ['avatar'] } });
+    expect(m.shouldInline('author')).toBe(true);
+    expect(m.shouldInline('author.avatar')).toBe(true);
+    expect(m.shouldInline('author.company')).toBe(false);
   });
 
-  it('object form selects relations with a truthy value', () => {
-    const keys = extractInlineRelationKeys({ author: true, tags: false, seo: true }, attributes);
-    expect([...keys]).toEqual(['author']);
+  it('supports arbitrarily deep nested populate objects', () => {
+    const m = buildInlinePathMatcher({ author: { populate: { company: { populate: ['ceo'] } } } });
+    expect(m.shouldInline('author')).toBe(true);
+    expect(m.shouldInline('author.company')).toBe(true);
+    expect(m.shouldInline('author.company.ceo')).toBe(true);
+    expect(m.shouldInline('author.company.founder')).toBe(false);
   });
 
-  it('never includes components, media, or private relations', () => {
-    const keys = extractInlineRelationKeys(
-      { seo: true, cover: true, blocks: true, privateRel: true },
-      attributes
-    );
-    expect(keys.size).toBe(0);
+  it('"*" at root inlines any relation one level under the root only', () => {
+    const m = buildInlinePathMatcher('*');
+    expect(m.shouldInline('author')).toBe(true);
+    expect(m.shouldInline('tags')).toBe(true);
+    expect(m.shouldInline('author.avatar')).toBe(false);
+  });
+
+  it('nested "*" inlines any relation one level under the nested prefix', () => {
+    const m = buildInlinePathMatcher({ author: { populate: '*' } });
+    expect(m.shouldInline('author')).toBe(true);
+    expect(m.shouldInline('author.avatar')).toBe(true);
+    expect(m.shouldInline('author.avatar.thumbnail')).toBe(false);
+  });
+
+  it('empty attribute path never matches', () => {
+    const m = buildInlinePathMatcher('*');
+    expect(m.shouldInline('')).toBe(false);
+    expect(m.shouldInline(null)).toBe(false);
+    expect(m.shouldInline(undefined)).toBe(false);
   });
 });

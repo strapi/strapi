@@ -5,6 +5,7 @@ import { formatDocumentWithMetadata } from '../controllers/utils/metadata';
 import type { GetMetadataOptions } from '../services/document-metadata';
 import { shapeRelationsForMcp } from './sanitizers/shape-relations';
 import type { ShapeRelationsOptions, InlineRelationResolver } from './sanitizers/shape-relations';
+import type { InlinePathMatcher } from './schemas/query-schema';
 
 /**
  * Converts a Strapi content-type UID into a safe MCP tool-name segment.
@@ -116,18 +117,19 @@ export const createInlineRelationResolver = (
 };
 
 /**
- * Builds the {@link ShapeRelationsOptions} for a read handler, or `undefined` when no
- * relations were opted into inlining (preserving the default identity-stub behavior).
+ * Builds the {@link ShapeRelationsOptions} for a read handler from a populate-derived
+ * inline-path matcher, or `undefined` when nothing was opted into inlining (preserving the
+ * default identity-stub behavior).
  */
 export const buildInlineOptions = (
-  inlineRelationKeys: Set<string>,
+  matcher: InlinePathMatcher,
   context: Modules.MCP.McpHandlerContext
 ): ShapeRelationsOptions | undefined => {
-  if (inlineRelationKeys.size === 0) {
+  if (matcher.hasAny === false) {
     return undefined;
   }
   return {
-    inlineRelationKeys,
+    shouldInline: matcher.shouldInline,
     inlineRelation: createInlineRelationResolver(context),
   };
 };
@@ -192,13 +194,15 @@ export const describeTool = (params: {
     list:
       ' Relations are returned as { documentId } stubs by default; nested sub-fields inside' +
       ' components/relations may be omitted (absent, not null) at the shallow default depth.' +
-      ' Use "fields" to pick scalar fields, "populate" to inline directly-related entries' +
-      ' (RBAC-checked against the related type), and "maxDepth" to control auto-populate depth.' +
-      ' "filters" supports logical/field operators and one-level-deep relation/component fields.',
+      ' Use "fields" to pick scalar fields, "populate" to inline related entries as deep as the' +
+      ' spec asks (each RBAC-checked against its related type), and "maxDepth" to control' +
+      ' auto-populate depth. "filters" supports logical/field operators and one-level-deep' +
+      ' relation/component fields.',
     get:
       ' Relations are returned as { documentId } stubs by default. Use "populate" to inline' +
-      ' directly-related entries (RBAC-checked against the related type), "fields" to pick' +
-      ' scalar fields, and "maxDepth" to bound auto-populate depth on large nested documents.',
+      ' related entries as deep as the spec asks (e.g. { author: { populate: ["avatar"] } }' +
+      ' inlines author and author.avatar; each RBAC-checked against its related type), "fields"' +
+      ' to pick scalar fields, and "maxDepth" to bound auto-populate depth on large nested documents.',
     write:
       ' Creates or updates the single-type document. If no document exists, creates one; otherwise updates the existing draft.',
     publish:

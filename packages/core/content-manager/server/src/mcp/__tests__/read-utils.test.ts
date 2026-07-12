@@ -125,13 +125,20 @@ describe('createInlineRelationResolver', () => {
 });
 
 describe('buildInlineOptions', () => {
-  it('returns undefined when no relations are opted in (preserves default stubbing)', () => {
-    expect(buildInlineOptions(new Set(), makeContext())).toBeUndefined();
+  const noMatch = { shouldInline: () => false, hasAny: false };
+  const matchHeader = {
+    shouldInline: (p: string | null | undefined) => p === 'header',
+    hasAny: true,
+  };
+
+  it('returns undefined when the matcher opted nothing in (preserves default stubbing)', () => {
+    expect(buildInlineOptions(noMatch, makeContext())).toBeUndefined();
   });
 
-  it('returns options carrying the keys and a resolver when relations are opted in', () => {
-    const options = buildInlineOptions(new Set(['header']), makeContext());
-    expect(options?.inlineRelationKeys.has('header')).toBe(true);
+  it('returns options carrying the predicate and a resolver when relations are opted in', () => {
+    const options = buildInlineOptions(matchHeader, makeContext());
+    expect(options?.shouldInline('header')).toBe(true);
+    expect(options?.shouldInline('footer')).toBe(false);
     expect(typeof options?.inlineRelation).toBe('function');
   });
 });
